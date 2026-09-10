@@ -17,5 +17,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Run lossless-source spike tests
         run: python3 -m unittest discover -s spikes/lossless-source/tests -v
+      - name: Run SDK boundary spike tests
+        run: python3 -m unittest discover -s spikes/renpy-sdk/tests -v
       - name: Validate Phase 0 artifacts and scan for secrets
         run: python3 scripts/validate.py

@@ -46,6 +46,9 @@ venv/
 # Downloaded SDKs and generated Ren'Py files
 sdks/
 renpy-sdk*/
+!spikes/renpy-sdk/
+!spikes/renpy-sdk/**
+spikes/renpy-sdk/**/__pycache__/
 *.rpyc
 *.rpymc
 saves/
