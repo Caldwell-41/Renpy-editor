@@ -24,7 +24,12 @@ REQUIRED = (
     "docs/status/CURRENT.md",
     "docs/research/STACK_AND_SPIKES.md",
     "docs/research/PARSER_ROUND_TRIP.md",
+    "docs/research/PARSER_SPIKE_RESULTS.md",
+    "docs/adr/0001-lossless-source-model.md",
     "docs/fixtures/REPRESENTATIVE_GAME.md",
+    "tests/fixtures/crossroads-at-sundown/manifest.json",
+    "spikes/lossless-source/source_model.py",
+    "spikes/lossless-source/tests/test_source_model.py",
 )
 TEXT_SUFFIXES = {".md", ".py", ".yml", ".yaml", ".toml", ".json", ".txt", ".example"}
 SKIP_PARTS = {".git", "__pycache__", "node_modules", "target", "dist", "build", "out"}

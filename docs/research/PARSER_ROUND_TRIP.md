@@ -99,3 +99,11 @@ passes, not the parser with the largest claimed grammar.
 
 The result becomes an accepted ADR and a versioned source-service interface before
 production authoring code is built.
+
+## Result
+
+The first corpus and isolated source-slice implementation have been executed. See
+[PARSER_SPIKE_RESULTS.md](PARSER_SPIKE_RESULTS.md) and
+[ADR 0001](../adr/0001-lossless-source-model.md). The architectural direction is
+accepted; the disposable tokenizer is not production code, and SDK/cross-platform
+gates remain open.

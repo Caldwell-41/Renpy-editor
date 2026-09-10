@@ -34,6 +34,8 @@ Phase 0 has no application dependencies or build command yet.
 
 ```bash
 python3 scripts/validate.py  # structure, links, privacy, secret patterns
+python3 -m unittest discover -s spikes/lossless-source/tests -v
+python3 spikes/lossless-source/benchmark.py
 git diff --check            # whitespace and conflict-marker sanity
 ```
 

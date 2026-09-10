@@ -103,8 +103,9 @@ test state.
 - All assets/content are synthetic, licence-safe, and pass the repository privacy scan.
 - Fixture complexity stays small enough to diagnose a failed construct independently.
 
-## Implementation timing
+## Implementation status
 
-Build the microfixtures first during the parser spike, then assemble the integrated
-game once syntax and file-order assumptions have official SDK evidence. Do not create
-large binary assets during Phase 0.
+The Phase 0 parser corpus and integrated source skeleton now exist under
+`tests/fixtures/crossroads-at-sundown/`, with SHA-256/byte metadata and encoded BOM/
+CRLF cases. No binary assets were added. Official 8.5.3 compile/lint validation and
+any syntax corrections remain the next SDK-adapter task.
