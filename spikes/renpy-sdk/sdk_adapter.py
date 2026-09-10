@@ -37,7 +37,14 @@ class Command(str, Enum):
     DISTRIBUTE_HELP = "distribute-help"
 
 
-PROJECT_CODE_COMMANDS = {Command.COMPILE, Command.LINT, Command.TEST, Command.RUN, Command.WARP}
+PROJECT_CODE_COMMANDS = {
+    Command.COMPILE,
+    Command.LINT,
+    Command.TEST,
+    Command.RUN,
+    Command.WARP,
+    Command.DISTRIBUTE_HELP,
+}
 
 
 @dataclass(frozen=True)
@@ -109,7 +116,8 @@ def command_argv(
             raise AdapterError("warp target must be a relative .rpy filename and line")
         return (*prefix, project_arg, "run", "--warp", warp_target)
     if command is Command.DISTRIBUTE_HELP:
-        args = (*prefix, "launcher", "distribute", project_arg, "--help")
+        launcher_project = str((sdk_root.resolve() / "launcher").resolve())
+        args = (*prefix, launcher_project, "distribute", project_arg, "--help")
         if output_dir:
             args += ("--destination", str(output_dir.resolve()))
         return args

@@ -103,7 +103,11 @@ def main() -> int:
         expected_success = {"version", "help", "compile", "lint", "test", "distribute-help"}
         failures = [record["name"] for record in records if record["name"] in expected_success and record["exit_code"] != 0]
         launches = [record for record in records if record["name"] in {"run", "warp"}]
-        if failures or any(not record["timed_out"] for record in launches):
+        unsafe_launches = [
+            record for record in launches
+            if not record["timed_out"] or record["diagnostics"]
+        ]
+        if failures or unsafe_launches:
             return 1
     return 0
 

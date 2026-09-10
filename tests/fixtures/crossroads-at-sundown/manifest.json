@@ -44,8 +44,8 @@
     },
     {
       "path": "game/definitions/characters.rpy",
-      "sha256": "9f43f43ebb186c03f6867b29a20a92e08c1eda131a95a14fc79b1225b73aa3d6",
-      "bytes": 169,
+      "sha256": "90e00d9e0a22ba7e1e98917d172e968059347486f64ac10818f5dcadcbe63e5d",
+      "bytes": 199,
       "encoding": "utf-8",
       "line_endings": "lf",
       "disposition": "sdk-validation-pending"
@@ -91,9 +91,17 @@
       "disposition": "sdk-validation-pending"
     },
     {
+      "path": "game/testcases.rpy",
+      "sha256": "5f3b21a4adccbfda21be4273e5a6042498518aa9fbcfbc7401ce5a5ad8c64e93",
+      "bytes": 207,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
       "path": "game/tl/es/fixture_strings.rpy",
-      "sha256": "cb74b7ee882b0be962686a534f22bd31b6b3dcc98478ef7752d244dbec822d3b",
-      "bytes": 161,
+      "sha256": "80d0bcda088dff0dfb2e9050df56c42024cabb37e78db2d1c2a5604c076aec87",
+      "bytes": 157,
       "encoding": "utf-8",
       "line_endings": "lf",
       "disposition": "sdk-validation-pending"

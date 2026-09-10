@@ -30,6 +30,19 @@ class AdapterTests(unittest.TestCase):
         argv = command_argv(self.sdk, Command.LINT, self.project, allow_project_execution=True)
         self.assertEqual(argv[-3:], (str(self.project), "lint", "--error-code"))
 
+    def test_distribute_uses_absolute_launcher_project(self) -> None:
+        (self.sdk / "launcher").mkdir()
+        argv = command_argv(
+            self.sdk,
+            Command.DISTRIBUTE_HELP,
+            self.project,
+            allow_project_execution=True,
+        )
+        self.assertEqual(
+            argv[-4:],
+            (str(self.sdk / "launcher"), "distribute", str(self.project), "--help"),
+        )
+
     def test_project_commands_require_explicit_trust(self) -> None:
         with self.assertRaisesRegex(AdapterError, "explicit trust"):
             command_argv(self.sdk, Command.COMPILE, self.project)
