@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "sdk_validation": "pending-renpy-8.5.3-adapter-spike",
+  "sdk_validation": "renpy-8.5.3-linux-pass",
   "files": [
     {
       "path": "encoded/bom_dialogue.rpy.b64",
@@ -24,7 +24,7 @@
       "bytes": 333,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/chapters/chapter_01/scene_020.rpy",
@@ -32,7 +32,7 @@
       "bytes": 222,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/chapters/chapter_01/scene_030.rpy",
@@ -40,7 +40,7 @@
       "bytes": 464,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/definitions/characters.rpy",
@@ -48,7 +48,7 @@
       "bytes": 199,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/definitions/images.rpy",
@@ -56,7 +56,7 @@
       "bytes": 529,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/definitions/transforms.rpy",
@@ -64,7 +64,7 @@
       "bytes": 148,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/definitions/variables.rpy",
@@ -72,7 +72,7 @@
       "bytes": 170,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/screens/route_status.rpy",
@@ -80,7 +80,7 @@
       "bytes": 276,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/options.rpy",
@@ -88,7 +88,7 @@
       "bytes": 272,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/script.rpy",
@@ -96,7 +96,7 @@
       "bytes": 674,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/systems/custom_code.rpy",
@@ -104,7 +104,7 @@
       "bytes": 387,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/testcases.rpy",
@@ -112,7 +112,7 @@
       "bytes": 207,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "game/tl/es/fixture_strings.rpy",
@@ -120,7 +120,7 @@
       "bytes": 157,
       "encoding": "utf-8",
       "line_endings": "lf",
-      "disposition": "sdk-validation-pending"
+      "disposition": "renpy-8.5.3-linux-pass"
     },
     {
       "path": "micro/recovery/incomplete_block.rpy",

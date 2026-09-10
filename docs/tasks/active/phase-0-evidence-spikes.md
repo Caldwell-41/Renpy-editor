@@ -23,10 +23,12 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    matrix and record the source-model direction in ADR 0001.
 3. Build functionally equivalent Tauri and Electron shells with a source editor,
    watched atomic file edit, narrow privileged command, and mocked SDK process.
-4. Test Ren'Py 8.5.3 version, compile, lint `--error-code`, run, test, diagnostic
-   parsing, and development warp through a versioned adapter on Windows and macOS.
+4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
+   lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
+   build through a versioned adapter.
 5. Measure a 10,000-node synthetic branch graph with filtering and viewport culling.
-6. Exercise official download, checksum, archive traversal, symlink, collision, and
+6. **Linux/synthetic coverage complete; platform validation pending:** Exercise
+   official download, checksum, archive traversal, symlink, collision, limits, and
    interrupted-install cases in a disposable directory.
 
 ## Acceptance criteria

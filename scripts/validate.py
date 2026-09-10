@@ -26,10 +26,15 @@ REQUIRED = (
     "docs/research/PARSER_ROUND_TRIP.md",
     "docs/research/PARSER_SPIKE_RESULTS.md",
     "docs/adr/0001-lossless-source-model.md",
+    "docs/adr/0002-versioned-renpy-sdk-adapter.md",
     "docs/fixtures/REPRESENTATIVE_GAME.md",
     "tests/fixtures/crossroads-at-sundown/manifest.json",
     "spikes/lossless-source/source_model.py",
     "spikes/lossless-source/tests/test_source_model.py",
+    "spikes/renpy-sdk/archive_safety.py",
+    "spikes/renpy-sdk/sdk_adapter.py",
+    "spikes/renpy-sdk/tests/test_archive_safety.py",
+    "spikes/renpy-sdk/tests/test_sdk_adapter.py",
 )
 TEXT_SUFFIXES = {".md", ".py", ".yml", ".yaml", ".toml", ".json", ".txt", ".example"}
 SKIP_PARTS = {".git", "__pycache__", "node_modules", "target", "dist", "build", "out"}

@@ -12,5 +12,7 @@ downloaded media, or private game material.
 - `manifest.json` records SHA-256, encoding, line endings, purpose, and expected SDK
   disposition for each source fixture.
 
-The current spike proves byte preservation and minimal patching. Official Ren'Py
-8.5.3 compile/lint validation is deliberately pending the separate SDK-adapter spike.
+The source spike proves byte preservation and minimal patching. The integrated `game/`
+fixture also passes Ren'Py 8.5.3 compile, strict lint, automated test, normal-run,
+development-warp, and PC-distribution gates on Linux. Parser-only and intentionally
+invalid microfixtures remain outside the runnable project.

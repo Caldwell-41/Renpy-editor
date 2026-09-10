@@ -7,6 +7,7 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -105,6 +106,18 @@ class ArchiveSafetyTests(unittest.TestCase):
             existing.mkdir()
             with self.assertRaisesRegex(ArchiveSafetyError, "already exists"):
                 install_verified_tar(archive, digest, existing)
+
+    def test_interrupted_extraction_never_promotes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive = root / "sdk.tar.bz2"
+            digest = make_tar(archive, [("renpy/file", b"ok", "file")])
+            destination = root / "installed"
+            with patch("archive_safety._extract_validated", side_effect=RuntimeError("interrupted")):
+                with self.assertRaisesRegex(RuntimeError, "interrupted"):
+                    install_verified_tar(archive, digest, destination)
+            self.assertFalse(destination.exists())
+            self.assertFalse(any(root.glob(".installed.stage-*")))
 
 
 if __name__ == "__main__":

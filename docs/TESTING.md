@@ -5,14 +5,17 @@
 ```bash
 python3 scripts/validate.py
 python3 -m unittest discover -s spikes/lossless-source/tests -v
+python3 -m unittest discover -s spikes/renpy-sdk/tests -v
 python3 spikes/lossless-source/benchmark.py
 git diff --check
 ```
 
 The validator checks the required document structure, UTF-8/final newlines, internal
 Markdown links, common secret patterns, personal email domains, and user-home paths.
-The isolated source spike adds 12 dependency-free unit/golden tests. There is no
-production application build or cross-platform suite yet.
+The isolated source spike adds 12 dependency-free unit/golden tests; the SDK boundary
+adds 19 dependency-free security/adapter tests. The manually dispatched
+`.github/workflows/sdk-spike.yml` performs the pinned official Linux integration run.
+There is no production application build or cross-platform suite yet.
 
 ## Planned layers
 

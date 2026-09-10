@@ -59,6 +59,16 @@ class AdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(AdapterError, "explicit trust"):
             command_argv(self.sdk, Command.COMPILE, self.project)
 
+    def test_missing_sdk_is_rejected(self) -> None:
+        with self.assertRaisesRegex(AdapterError, "launcher is missing"):
+            command_argv(self.root / "missing-sdk", Command.VERSION)
+
+    def test_long_project_path_remains_one_argument(self) -> None:
+        project = self.root.joinpath(*(f"long-segment-{index:02d}" for index in range(12)))
+        project.mkdir(parents=True)
+        argv = command_argv(self.sdk, Command.COMPILE, project, allow_project_execution=True)
+        self.assertEqual(argv[-2], str(project))
+
     def test_warp_target_is_constrained(self) -> None:
         with self.assertRaises(AdapterError):
             command_argv(

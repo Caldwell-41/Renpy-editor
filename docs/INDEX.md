@@ -15,6 +15,7 @@ Start with [current status](status/CURRENT.md) and the relevant brief in
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Parser spike and acceptance tests | [research/PARSER_ROUND_TRIP.md](research/PARSER_ROUND_TRIP.md) |
 | Parser spike evidence | [research/PARSER_SPIKE_RESULTS.md](research/PARSER_SPIKE_RESULTS.md) |
+| SDK adapter evidence | [research/RENPY_SDK_SPIKE_RESULTS.md](research/RENPY_SDK_SPIKE_RESULTS.md) |
 | Representative fixture proposal | [fixtures/REPRESENTATIVE_GAME.md](fixtures/REPRESENTATIVE_GAME.md) |
 | Repository/privacy audit | [audits/2026-09-10-repository-and-privacy.md](audits/2026-09-10-repository-and-privacy.md) |
 | Decision records | [`adr/`](adr/) |
