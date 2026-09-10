@@ -1,0 +1,57 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs, diagnostics, and local state
+*.log
+logs/
+diagnostics/
+crash-reports/
+.cache/
+.tmp/
+tmp/
+
+# JavaScript and desktop build output (reserved for stack spike)
+node_modules/
+dist/
+build/
+out/
+coverage/
+.vite/
+
+# Rust/Tauri build output (reserved for stack spike)
+target/
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Downloaded SDKs and generated Ren'Py files
+sdks/
+renpy-sdk*/
+*.rpyc
+*.rpymc
+saves/
+game/cache/
+
+# Packaging and signing output
+artifacts/
+release/
+*.app/
