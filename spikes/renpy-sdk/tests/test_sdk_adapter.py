@@ -43,6 +43,18 @@ class AdapterTests(unittest.TestCase):
             (str(self.sdk / "launcher"), "distribute", str(self.project), "--help"),
         )
 
+    def test_distribution_is_bounded_to_pc_output(self) -> None:
+        (self.sdk / "launcher").mkdir()
+        output = self.root / "distribution output"
+        argv = command_argv(
+            self.sdk,
+            Command.DISTRIBUTE,
+            self.project,
+            output_dir=output,
+            allow_project_execution=True,
+        )
+        self.assertEqual(argv[-5:], ("--destination", str(output), "--package", "pc", "--no-update"))
+
     def test_project_commands_require_explicit_trust(self) -> None:
         with self.assertRaisesRegex(AdapterError, "explicit trust"):
             command_argv(self.sdk, Command.COMPILE, self.project)

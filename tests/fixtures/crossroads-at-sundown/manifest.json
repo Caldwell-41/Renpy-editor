@@ -51,6 +51,14 @@
       "disposition": "sdk-validation-pending"
     },
     {
+      "path": "game/definitions/images.rpy",
+      "sha256": "40a26b923caebf3a0c802d095be765e1dced87b119c16cbc9911e986757752ee",
+      "bytes": 529,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
       "path": "game/definitions/transforms.rpy",
       "sha256": "1a9cbbcacd6e27f554b3f2a33c5f18823db72ee87dfbbb1e6b49c4e9d7d59b59",
       "bytes": 148,
@@ -70,6 +78,14 @@
       "path": "game/screens/route_status.rpy",
       "sha256": "599d903bada0e9e919b1dfd4fe2c4e69106c37560112855ef9ae783d5cdbd6a4",
       "bytes": 276,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
+      "path": "game/options.rpy",
+      "sha256": "1e15fe6a75c843d7f257f9c9fb06133e0ffc75c7494fe83dce91e45258c15bda",
+      "bytes": 272,
       "encoding": "utf-8",
       "line_endings": "lf",
       "disposition": "sdk-validation-pending"

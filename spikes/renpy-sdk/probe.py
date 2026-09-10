@@ -76,6 +76,7 @@ def main() -> int:
             ("run", Command.RUN, 8, {}),
             ("warp", Command.WARP, 8, {"warp_target": "script.rpy:4"}),
             ("distribute-help", Command.DISTRIBUTE_HELP, 60, {}),
+            ("distribute", Command.DISTRIBUTE, 240, {"output_dir": scratch / "distributions"}),
         ):
             argv = command_argv(
                 sdk_root,
@@ -100,7 +101,9 @@ def main() -> int:
             args.output.write_text(output, encoding="utf-8")
         print(output, end="")
 
-        expected_success = {"version", "help", "compile", "lint", "test", "distribute-help"}
+        expected_success = {
+            "version", "help", "compile", "lint", "test", "distribute-help", "distribute"
+        }
         failures = [record["name"] for record in records if record["name"] in expected_success and record["exit_code"] != 0]
         launches = [record for record in records if record["name"] in {"run", "warp"}]
         unsafe_launches = [

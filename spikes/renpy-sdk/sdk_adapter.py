@@ -34,6 +34,7 @@ class Command(str, Enum):
     TEST = "test"
     RUN = "run"
     WARP = "warp"
+    DISTRIBUTE = "distribute"
     DISTRIBUTE_HELP = "distribute-help"
 
 
@@ -43,6 +44,7 @@ PROJECT_CODE_COMMANDS = {
     Command.TEST,
     Command.RUN,
     Command.WARP,
+    Command.DISTRIBUTE,
     Command.DISTRIBUTE_HELP,
 }
 
@@ -115,11 +117,18 @@ def command_argv(
         if not warp_target or not re.fullmatch(r"[^:\r\n]+\.rpy:\d+", warp_target):
             raise AdapterError("warp target must be a relative .rpy filename and line")
         return (*prefix, project_arg, "run", "--warp", warp_target)
-    if command is Command.DISTRIBUTE_HELP:
+    if command in {Command.DISTRIBUTE, Command.DISTRIBUTE_HELP}:
         launcher_project = str((sdk_root.resolve() / "launcher").resolve())
-        args = (*prefix, launcher_project, "distribute", project_arg, "--help")
-        if output_dir:
-            args += ("--destination", str(output_dir.resolve()))
+        args = (*prefix, launcher_project, "distribute", project_arg)
+        if command is Command.DISTRIBUTE_HELP:
+            return (*args, "--help")
+        if output_dir is None:
+            raise AdapterError("distribution output directory is required")
+        args += (
+            "--destination", str(output_dir.resolve()),
+            "--package", "pc",
+            "--no-update",
+        )
         return args
     raise AdapterError(f"command is not allowlisted: {command!r}")
 
