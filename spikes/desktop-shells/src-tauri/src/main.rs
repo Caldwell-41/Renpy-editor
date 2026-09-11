@@ -7,7 +7,7 @@ use std::{
     fs::{self, OpenOptions},
     io::{Read, Write},
     path::{Component, Path, PathBuf},
-    process::{Command, Stdio},
+    process::{Child, Command, Stdio},
     sync::{atomic::{AtomicU64, Ordering}, mpsc, Arc, Mutex},
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -204,19 +204,16 @@ fn redact(text: &str, secrets: &[String]) -> String {
     }).collect()
 }
 
-fn start_mock_sdk(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
-    let (command, args, timeout_ms) = validate_mock_request(request)?;
-    let current = std::env::current_exe().map_err(|_| "current executable unavailable")?;
-    let mut child = Command::new(current).arg("--mock-sdk").arg(command).args(args)
-        .env_clear().stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
-        .spawn().map_err(|_| "mock SDK could not start")?;
-    let run_id = format!("run-{}-{}", std::process::id(), NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed));
-    let (cancel_tx, cancel_rx) = mpsc::channel();
-    state.runs.lock().map_err(|_| "run state unavailable")?.insert(run_id.clone(), cancel_tx);
-    let stdout = child.stdout.take().ok_or("mock SDK stdout unavailable")?;
-    let stderr = child.stderr.take().ok_or("mock SDK stderr unavailable")?;
+fn supervise_child<F, G>(mut child: Child, run_id: String, cancel_rx: mpsc::Receiver<()>, timeout_ms: u64, secrets: Vec<String>, emit: F, done: G)
+where
+    F: Fn(ProcessEvent) + Send + 'static,
+    G: FnOnce() + Send + 'static,
+{
+    let stdout = child.stdout.take();
+    let stderr = child.stderr.take();
     let (output_tx, output_rx) = mpsc::channel::<(&'static str, Vec<u8>)>();
-    for (channel, mut reader) in [("stdout", Box::new(stdout) as Box<dyn Read + Send>), ("stderr", Box::new(stderr) as Box<dyn Read + Send>)] {
+    for (channel, reader) in [("stdout", stdout.map(|value| Box::new(value) as Box<dyn Read + Send>)), ("stderr", stderr.map(|value| Box::new(value) as Box<dyn Read + Send>))] {
+        let Some(mut reader) = reader else { continue };
         let tx = output_tx.clone();
         thread::spawn(move || {
             let mut buffer = [0_u8; 4096];
@@ -227,40 +224,50 @@ fn start_mock_sdk(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopR
         });
     }
     drop(output_tx);
+    let deadline = Instant::now() + Duration::from_millis(timeout_ms);
+    let mut bytes = 0_usize;
+    let mut reason: Option<&str> = None;
+    loop {
+        if cancel_rx.try_recv().is_ok() { reason = Some("cancelled"); let _ = child.kill(); }
+        if reason.is_none() && Instant::now() >= deadline { reason = Some("timeout"); let _ = child.kill(); }
+        while let Ok((channel, chunk)) = output_rx.try_recv() {
+            if reason.is_some() { continue; }
+            let remaining = MAX_PROCESS_BYTES.saturating_sub(bytes);
+            let accepted = &chunk[..chunk.len().min(remaining)];
+            bytes += accepted.len();
+            let text = redact(&String::from_utf8_lossy(accepted), &secrets);
+            if !text.is_empty() {
+                emit(if channel == "stdout" { ProcessEvent::Stdout { run_id: run_id.clone(), text } } else { ProcessEvent::Stderr { run_id: run_id.clone(), text } });
+            }
+            if chunk.len() > remaining || bytes >= MAX_PROCESS_BYTES { reason = Some("truncated"); let _ = child.kill(); }
+        }
+        match child.try_wait() {
+            Ok(Some(status)) => { emit(ProcessEvent::Terminal { run_id: run_id.clone(), reason: reason.unwrap_or("exit").into(), code: status.code(), signal: None }); break; }
+            Ok(None) => thread::sleep(Duration::from_millis(5)),
+            Err(_) => { let _ = child.kill(); let _ = child.wait(); emit(ProcessEvent::Terminal { run_id: run_id.clone(), reason: "startError".into(), code: None, signal: None }); break; }
+        }
+    }
+    done();
+}
+
+fn start_mock_sdk(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
+    let (command, args, timeout_ms) = validate_mock_request(request)?;
+    let current = std::env::current_exe().map_err(|_| "current executable unavailable")?;
+    let mut child = Command::new(current).arg("--mock-sdk").arg(command).args(args)
+        .env_clear().stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
+        .spawn().map_err(|_| "mock SDK could not start")?;
+    let run_id = format!("run-{}-{}", std::process::id(), NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed));
+    let (cancel_tx, cancel_rx) = mpsc::channel();
+    state.runs.lock().map_err(|_| "run state unavailable")?.insert(run_id.clone(), cancel_tx);
     let app = app.clone();
     let run_for_thread = run_id.clone();
+    let run_for_cleanup = run_id.clone();
     let runs = Arc::clone(&state.runs);
     let secrets: Vec<String> = std::env::vars().map(|(_, value)| value).collect();
-    thread::spawn(move || {
-        let deadline = Instant::now() + Duration::from_millis(timeout_ms);
-        let mut bytes = 0_usize;
-        let mut reason: Option<&str> = None;
-        loop {
-            if cancel_rx.try_recv().is_ok() { reason = Some("cancelled"); let _ = child.kill(); }
-            if reason.is_none() && Instant::now() >= deadline { reason = Some("timeout"); let _ = child.kill(); }
-            while let Ok((channel, chunk)) = output_rx.try_recv() {
-                if reason.is_some() { continue; }
-                let remaining = MAX_PROCESS_BYTES.saturating_sub(bytes);
-                let accepted = &chunk[..chunk.len().min(remaining)];
-                bytes += accepted.len();
-                let text = redact(&String::from_utf8_lossy(accepted), &secrets);
-                if !text.is_empty() {
-                    let event = if channel == "stdout" { ProcessEvent::Stdout { run_id: run_for_thread.clone(), text } } else { ProcessEvent::Stderr { run_id: run_for_thread.clone(), text } };
-                    let _ = app.emit("loomlight:event", event);
-                }
-                if chunk.len() > remaining || bytes >= MAX_PROCESS_BYTES { reason = Some("truncated"); let _ = child.kill(); }
-            }
-            match child.try_wait() {
-                Ok(Some(status)) => {
-                    let _ = app.emit("loomlight:event", ProcessEvent::Terminal { run_id: run_for_thread.clone(), reason: reason.unwrap_or("exit").into(), code: status.code(), signal: None });
-                    if let Ok(mut active) = runs.lock() { active.remove(&run_for_thread); }
-                    break;
-                }
-                Ok(None) => thread::sleep(Duration::from_millis(5)),
-                Err(_) => { let _ = child.kill(); let _ = child.wait(); let _ = app.emit("loomlight:event", ProcessEvent::Terminal { run_id: run_for_thread.clone(), reason: "startError".into(), code: None, signal: None }); if let Ok(mut active) = runs.lock() { active.remove(&run_for_thread); } break; }
-            }
-        }
-    });
+    thread::spawn(move || supervise_child(child, run_for_thread.clone(), cancel_rx, timeout_ms, secrets,
+        move |event| { let _ = app.emit("loomlight:event", event); },
+        move || { if let Ok(mut active) = runs.lock() { active.remove(&run_for_cleanup); } },
+    ));
     Ok(json!({ "runId": run_id }))
 }
 
@@ -334,5 +341,42 @@ mod tests {
         let clean = redact("/private/project token-secret-value", &["token-secret-value".into()]);
         assert!(!clean.contains("/private/project"));
         assert!(!clean.contains("token-secret-value"));
+    }
+
+    #[test]
+    fn mock_child() {
+        match std::env::var("LOOMLIGHT_TEST_CHILD").as_deref() {
+            Ok("delay") => thread::sleep(Duration::from_secs(2)),
+            Ok("flood") => print!("{}", "x".repeat(131_072)),
+            Ok("stderr") => eprintln!("/private/project token-secret-value"),
+            _ => return,
+        }
+    }
+
+    fn supervised(mode: &str, timeout_ms: u64, cancel: bool) -> Vec<ProcessEvent> {
+        let child = Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "tests::mock_child", "--nocapture"])
+            .env("LOOMLIGHT_TEST_CHILD", mode)
+            .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
+        let (cancel_tx, cancel_rx) = mpsc::channel();
+        let (event_tx, event_rx) = mpsc::channel();
+        let handle = thread::spawn(move || supervise_child(child, "run-test".into(), cancel_rx, timeout_ms, vec!["token-secret-value".into()], move |event| { event_tx.send(event).unwrap(); }, || {}));
+        if cancel { cancel_tx.send(()).unwrap(); }
+        handle.join().unwrap();
+        event_rx.try_iter().collect()
+    }
+
+    fn terminal_reason(events: &[ProcessEvent]) -> Option<&str> {
+        events.iter().find_map(|event| if let ProcessEvent::Terminal { reason, .. } = event { Some(reason.as_str()) } else { None })
+    }
+
+    #[test]
+    fn supervises_cancellation_timeout_truncation_and_redaction() {
+        assert_eq!(terminal_reason(&supervised("delay", 3_000, true)), Some("cancelled"));
+        assert_eq!(terminal_reason(&supervised("delay", 20, false)), Some("timeout"));
+        assert_eq!(terminal_reason(&supervised("flood", 3_000, false)), Some("truncated"));
+        let stderr = supervised("stderr", 3_000, false).into_iter().find_map(|event| if let ProcessEvent::Stderr { text, .. } = event { Some(text) } else { None }).unwrap();
+        assert!(!stderr.contains("/private/project"));
+        assert!(!stderr.contains("token-secret-value"));
     }
 }
