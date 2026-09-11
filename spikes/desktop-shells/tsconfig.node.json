@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "types": ["node"]
+  },
+  "include": ["src/shared/**/*.ts", "src/electron/**/*.ts", "src/electron/**/*.cts", "tests/**/*.ts"]
+}

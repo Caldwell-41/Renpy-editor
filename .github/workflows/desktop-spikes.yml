@@ -1,0 +1,71 @@
+name: Phase 0 desktop-shell evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/desktop-spikes.yml
+      - spikes/desktop-shells/**
+
+permissions:
+  contents: read
+
+jobs:
+  platform-spike:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: spikes/desktop-shells
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record runner and toolchain
+        shell: bash
+        run: |
+          uname -a || true
+          node --version
+          npm --version
+          rustc --version
+          cargo --version
+      - name: Install pinned JavaScript dependencies
+        run: npm ci
+      - name: Test shared contract and filesystem adapter
+        run: npm test
+      - name: Package Electron spike
+        run: npm run package:electron
+      - name: Launch packaged Electron spike
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_SMOKE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+          else
+            ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+          fi
+      - name: Test Tauri privileged adapter
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Package Tauri spike
+        run: npm run tauri:build
+      - name: Upload private unsigned evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-shells-${{ matrix.runner }}
+          path: |
+            spikes/desktop-shells/artifacts/electron/**
+            spikes/desktop-shells/src-tauri/target/release/bundle/**
+          if-no-files-found: warn
+          retention-days: 7

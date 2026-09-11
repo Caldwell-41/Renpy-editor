@@ -15,6 +15,8 @@ Markdown links, common secret patterns, personal email domains, and user-home pa
 The isolated source spike adds 12 dependency-free unit/golden tests; the SDK boundary
 adds 19 dependency-free security/adapter tests. The manually dispatched
 `.github/workflows/sdk-spike.yml` performs the pinned official Linux integration run.
+`.github/workflows/desktop-spikes.yml` packages disposable Electron and Tauri shells
+on Windows x64 and macOS ARM64; these jobs are Phase 0 evidence, not release builds.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

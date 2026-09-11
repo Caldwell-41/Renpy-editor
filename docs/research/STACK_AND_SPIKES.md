@@ -25,6 +25,9 @@ and all bundled dependencies.
 
 ## Desktop candidates
 
+The confirmed CPU targets are Windows x86-64 and macOS ARM64. Intel macOS is not a
+compatibility or packaging target.
+
 ### Evidence-based comparison before spikes
 
 | Criterion | Electron | Tauri 2 | Spike question |
@@ -78,8 +81,9 @@ scaffold or dependency choice should precede the spike ADR.
 
 ## Equivalent desktop-stack spike
 
-Build disposable `spikes/desktop-tauri` and `spikes/desktop-electron` variants around
-the same TypeScript UI and operation schemas. Each must demonstrate:
+Build disposable Electron and Tauri variants around the same TypeScript UI and
+operation schemas. The implementation may colocate shared assets under a clearly
+disposable parent directory. Each must demonstrate:
 
 1. Monaco editing of a representative `.rpy` file and bidirectional mock source range.
 2. Dock/resize, drag/drop, image/audio/video preview, keyboard focus, and screen-reader

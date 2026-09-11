@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Loomlight Desktop Spike",
+  "version": "0.0.0",
+  "identifier": "dev.loomlight.desktop-spike",
+  "build": {
+    "beforeBuildCommand": "npm run build:ui",
+    "frontendDist": "../dist/ui"
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "Loomlight desktop spike",
+        "width": 1180,
+        "height": 760
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  }
+}

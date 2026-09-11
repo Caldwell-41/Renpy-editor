@@ -2,8 +2,9 @@
 
 ## Product
 
-Project Loomlight is a single-user desktop authoring environment for Windows and
-macOS. It should feel like a narrative-design tool first and an IDE second while
+Project Loomlight is a single-user desktop authoring environment for 64-bit Windows
+on x86-64 and macOS on Apple Silicon. Intel macOS is out of scope. It should feel like
+a narrative-design tool first and an IDE second while
 producing ordinary, modular Ren'Py projects that remain usable in other editors.
 
 The content hierarchy is:

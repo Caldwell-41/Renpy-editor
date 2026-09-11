@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>Loomlight desktop spike</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <strong>Loomlight desktop spike</strong>
+      <span id="runtime" aria-live="polite"></span>
+    </header>
+    <main>
+      <section class="controls" aria-label="Project controls">
+        <label>Project root <input id="root" autocomplete="off" /></label>
+        <label>Project file <input id="file" value="game/script.rpy" autocomplete="off" /></label>
+        <button id="open">Open and watch</button>
+        <button id="save">Save if unchanged</button>
+        <button id="sdk">Mock SDK version</button>
+        <label>Source line <input id="line" type="number" min="1" value="1" /></label>
+        <button id="reveal">Reveal range</button>
+      </section>
+      <section id="editor" aria-label="Ren'Py source editor"></section>
+      <aside aria-label="Operation log"><pre id="log" aria-live="polite"></pre></aside>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

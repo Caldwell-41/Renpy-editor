@@ -1,0 +1,13 @@
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #171923; color: #edf2f7; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+header { padding: .7rem 1rem; display: flex; justify-content: space-between; background: #24283b; }
+main { min-height: 0; display: grid; grid-template-columns: 15rem 1fr 20rem; }
+.controls { padding: 1rem; display: flex; flex-direction: column; gap: .75rem; background: #1f2335; }
+label { display: grid; gap: .25rem; font-size: .85rem; }
+input, button { min-height: 2.25rem; border: 1px solid #59617a; border-radius: .25rem; background: #151824; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 3px solid #7aa2f7; outline-offset: 2px; }
+#editor { min-width: 20rem; }
+aside { overflow: auto; border-left: 1px solid #3b4261; padding: .75rem; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 800px) { main { grid-template-columns: 12rem 1fr; } aside { display: none; } }

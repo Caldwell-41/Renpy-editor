@@ -21,8 +21,10 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
 1. **Complete:** Create the neutral golden `.rpy` corpus and byte-for-byte baselines.
 2. **Complete:** Compare lossless parse/edit candidates against the parser acceptance
    matrix and record the source-model direction in ADR 0001.
-3. Build functionally equivalent Tauri and Electron shells with a source editor,
-   watched atomic file edit, narrow privileged command, and mocked SDK process.
+3. **In progress:** Build functionally equivalent Tauri and Electron shells with a
+   shared source editor/contract, watched atomic file edit, narrow privileged command,
+   and mocked SDK process. Initial shared contract and Node boundary tests pass on
+   Linux; Windows x64/macOS ARM64 packaging and behavior remain unproven.
 4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.
