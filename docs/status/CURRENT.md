@@ -33,3 +33,6 @@ Make the Tauri mock-SDK boundary equivalent to Electron for bounded streaming,
 cancellation, timeout, and redacted events. Add packaged denial tests on both target
 runners, then proceed to media/accessibility, credentials, graph-scale measurements,
 and official SDK platform evidence.
+
+The exact continuation state and implementation checklist are recorded in the
+[Phase 0 continuation handover](HANDOVER.md).

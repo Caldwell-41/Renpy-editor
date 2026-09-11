@@ -1,6 +1,7 @@
 # Documentation index
 
-Start with [current status](status/CURRENT.md) and the relevant brief in
+Start with [current status](status/CURRENT.md), the
+[continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
 | Concern | Canonical document |
@@ -12,6 +13,7 @@ Start with [current status](status/CURRENT.md) and the relevant brief in
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
+| Continuation handover | [status/HANDOVER.md](status/HANDOVER.md) |
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |
 | Parser spike and acceptance tests | [research/PARSER_ROUND_TRIP.md](research/PARSER_ROUND_TRIP.md) |
