@@ -1,7 +1,7 @@
 # Desktop-shell spike results
 
-**Status:** Implementation started; target-platform evidence pending  
-**Targets:** Windows x86-64 and macOS ARM64  
+**Status:** Initial shell/package checkpoint complete; behavior parity pending<br>
+**Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
 ## Fair-comparison structure
@@ -15,17 +15,23 @@ The initial surface is deliberately narrow:
 
 | Operation | Electron | Tauri | Initial evidence |
 | --- | --- | --- | --- |
-| Project-relative UTF-8 read | Implemented | Implemented | Node tests pass on Linux |
-| SHA-guarded same-directory replacement | Implemented | Implemented | Node stale-base test passes on Linux |
-| External file watch | Implemented | Implemented | Target-platform evidence pending |
-| Allowlisted mock SDK process | Stream/cancel boundary | Bounded synchronous process | Target-platform evidence pending |
-| Unknown operation/path traversal | Denied | Denied | Contract denial tests pass on Linux |
-| Local CSP/navigation boundary | Implemented | Implemented | Packaged test pending |
+| Project-relative UTF-8 read | Implemented | Implemented | Shared tests pass on both targets |
+| SHA-guarded same-directory replacement | Implemented | Implemented | Node and Rust tests pass on both targets |
+| External file watch | Implemented | Implemented | Compiles/packages on both targets; latency tests pending |
+| Allowlisted mock SDK process | Stream/cancel boundary | Bounded synchronous process | Rust tests pass; parity remains open |
+| Unknown operation/path traversal | Denied | Denied | Shared and Rust denial tests pass on both targets |
+| Local CSP/navigation boundary | Implemented | Implemented | Package/launch smoke passes; denial E2E pending |
 
-The Electron shell also packaged successfully as an unsigned Linux x64 application;
-that is a build-pipeline sanity check only and does not count as target-platform
-evidence. Its graphical launch was not exercised because this worker has no virtual
-display service.
+The final initial matrix, [GitHub Actions run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329),
+passed on Windows x64 and macOS ARM64. Both jobs ran the shared tests, packaged and
+launch-smoked Electron, ran the Tauri Rust tests, and packaged Tauri. These are
+unsigned research artifacts, not release candidates.
+
+The retained compressed evidence bundles are 186,125,274 bytes for Windows and
+416,183,152 bytes for macOS. Each bundle combines both candidates, so these figures
+must not be used as a per-framework size comparison. GitHub retains them privately
+for seven days, through 2026-09-18. The same shell also packaged successfully as an
+unsigned Linux x64 application locally, but that is only a build-pipeline sanity check.
 
 The synchronous Tauri process path is not parity-complete. Streaming, cancellation,
 timeout behavior, and bounded redacted events must be made equivalent before scoring
@@ -78,4 +84,6 @@ resolution is committed as `Cargo.lock` and later tests use `--locked`.
 With the icon present, the Windows-only `ReplaceFileW` branch compiled far enough to
 expose two handle parameters that require explicit null pointers in `windows-sys`
 rather than integer zeroes. This is corrected without weakening atomic replacement;
-the branch remains target-tested because it cannot be compiled on this Linux worker.
+the final Windows job compiled, tested, and packaged that branch. The final matrix
+passed only after these portability defects were fixed; the failed runs remain useful
+integration evidence rather than being hidden by retries.

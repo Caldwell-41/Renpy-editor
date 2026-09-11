@@ -18,8 +18,10 @@
   pass. The SDK and generated artifacts remain outside Git.
 - The SDK boundary has 19 dependency-free security/adapter tests. Windows and macOS
   SDK, filesystem, package install/launch, signing, and quarantine behavior are open.
-- No desktop stack is accepted. A shared-contract Electron/Tauri spike now implements
-  the first file/process/security boundary, with target-platform evidence pending.
+- No desktop stack is accepted. A shared-contract Electron/Tauri spike implements
+  the first file/process/security boundary. Its initial Windows x64/macOS ARM64 matrix
+  passes shared tests, Electron package/launch smoke, Tauri Rust tests, and Tauri
+  packaging; process parity and the broader behavioral measurements remain open.
 - Confirmed targets are Windows x86-64 and macOS ARM64. Intel macOS is out of scope.
 - No production application or package manifest exists.
 - There are no blocking product questions. Remaining uncertainties are empirical
@@ -27,7 +29,7 @@
 
 ## Next action
 
-Run and harden the equivalent Electron/Tauri prototypes on Windows x64 and macOS ARM64.
-Close process-stream/cancellation parity, packaged launch and denial tests, then add
-media/accessibility, credentials, and graph-scale measurements. Run official SDK
-platform evidence on the same runners.
+Make the Tauri mock-SDK boundary equivalent to Electron for bounded streaming,
+cancellation, timeout, and redacted events. Add packaged denial tests on both target
+runners, then proceed to media/accessibility, credentials, graph-scale measurements,
+and official SDK platform evidence.
