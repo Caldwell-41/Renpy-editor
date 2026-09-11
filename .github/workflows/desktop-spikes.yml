@@ -56,7 +56,7 @@ jobs:
             ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
           fi
       - name: Test Tauri privileged adapter
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - name: Package Tauri spike
         run: npm run tauri:build
       - name: Upload generated Rust lockfile

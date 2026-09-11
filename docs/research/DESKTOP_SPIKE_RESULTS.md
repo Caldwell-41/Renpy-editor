@@ -68,3 +68,9 @@ successfully packaged and launched Electron, then Tauri compilation correctly fa
 because its required application icon was absent. A minimal non-product spike icon is
 now explicit. Neither finding changes the product design, but both inform the eventual
 build boundary.
+
+The corrected run then packaged and launch-smoked Electron on both targets. Tauri's
+Rust tests and packaging passed on macOS ARM64. Windows reached the Tauri build script
+and required an ICO resource distinct from the PNG accepted on macOS; both formats are
+now generated from the same disposable vector mark. The runner-generated dependency
+resolution is committed as `Cargo.lock` and later tests use `--locked`.
