@@ -92,7 +92,16 @@ fn replace_file(temporary: &Path, target: &Path) -> Result<(), String> {
     use windows_sys::Win32::Storage::FileSystem::ReplaceFileW;
     let target_wide: Vec<u16> = target.as_os_str().encode_wide().chain(Some(0)).collect();
     let temporary_wide: Vec<u16> = temporary.as_os_str().encode_wide().chain(Some(0)).collect();
-    let result = unsafe { ReplaceFileW(target_wide.as_ptr(), temporary_wide.as_ptr(), std::ptr::null(), 0, 0, 0) };
+    let result = unsafe {
+        ReplaceFileW(
+            target_wide.as_ptr(),
+            temporary_wide.as_ptr(),
+            std::ptr::null(),
+            0,
+            std::ptr::null(),
+            std::ptr::null(),
+        )
+    };
     if result == 0 { Err("atomic replacement failed".into()) } else { Ok(()) }
 }
 

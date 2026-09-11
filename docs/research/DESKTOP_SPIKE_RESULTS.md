@@ -74,3 +74,8 @@ Rust tests and packaging passed on macOS ARM64. Windows reached the Tauri build 
 and required an ICO resource distinct from the PNG accepted on macOS; both formats are
 now generated from the same disposable vector mark. The runner-generated dependency
 resolution is committed as `Cargo.lock` and later tests use `--locked`.
+
+With the icon present, the Windows-only `ReplaceFileW` branch compiled far enough to
+expose two handle parameters that require explicit null pointers in `windows-sys`
+rather than integer zeroes. This is corrected without weakening atomic replacement;
+the branch remains target-tested because it cannot be compiled on this Linux worker.
