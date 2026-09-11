@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Initial shell/package checkpoint complete; behavior parity pending<br>
+**Status:** Process-parity checkpoint complete; broader behavior evidence pending<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -18,7 +18,7 @@ The initial surface is deliberately narrow:
 | Project-relative UTF-8 read | Implemented | Implemented | Shared tests pass on both targets |
 | SHA-guarded same-directory replacement | Implemented | Implemented | Node and Rust tests pass on both targets |
 | External file watch | Implemented | Implemented | Compiles/packages on both targets; latency tests pending |
-| Allowlisted mock SDK process | Stream/cancel boundary | Bounded synchronous process | Rust tests pass; parity remains open |
+| Allowlisted mock SDK process | Bounded stream/cancel/timeout events | Equivalent threaded supervisor | Shared and Rust lifecycle tests pass on both targets |
 | Unknown operation/path traversal | Denied | Denied | Shared and Rust denial tests pass on both targets |
 | Local CSP/navigation boundary | Implemented | Implemented | Package/launch smoke passes; denial E2E pending |
 
@@ -33,9 +33,20 @@ must not be used as a per-framework size comparison. GitHub retains them private
 for seven days, through 2026-09-18. The same shell also packaged successfully as an
 unsigned Linux x64 application locally, but that is only a build-pipeline sanity check.
 
-The synchronous Tauri process path is not parity-complete. Streaming, cancellation,
-timeout behavior, and bounded redacted events must be made equivalent before scoring
-subprocess reliability.
+The process-parity matrix, [GitHub Actions run 34577431423](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431423),
+passed on Windows x64 and macOS ARM64. Both boundaries use validated run identifiers,
+10–30,000 ms timeouts, direct argument arrays, an allowlisted internal executable,
+incremental stdout/stderr, one 65,536-byte combined cap, redaction, real child
+cancellation, and terminal reasons for exit, cancellation, timeout, truncation, and
+start failure. Deterministic version, diagnostics, stderr, delay, and flood modes drive
+the tests. Unknown/stale cancellation is non-destructive and completed runs are
+removed from the active registry.
+
+The shared Node suite directly covers normal exit, denial, direct arguments, stderr,
+redaction, cancellation, timeout, truncation, stale identifiers, and cleanup. Rust
+tests exercise the Tauri supervisor's cancellation, timeout, truncation, redaction,
+allowlist, and timeout validation with real child processes. Both packaged candidates
+remain unsigned research outputs, and this result does not select a desktop stack.
 
 ## Reproduction
 

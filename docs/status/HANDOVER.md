@@ -54,55 +54,50 @@ decisions unless repository evidence presents a material conflict.
   Electron preload isolation, and Tauri capabilities.
 - The initial target matrix passed on Windows x64 and macOS ARM64: shared tests,
   Electron package and launch smoke, Tauri Rust tests, and Tauri packaging.
+- Mock-SDK process parity now passes on both targets: typed bounded timeouts,
+  allowlisted direct arguments, incremental bounded/redacted events, real
+  cancellation, deterministic output modes, terminal reasons, stale-ID handling,
+  and active-run cleanup.
 - Repository quality CI passed after the latest evidence documentation update.
 
 Evidence links:
 
 - [Green desktop target matrix](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329)
 - [Green repository quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34568130411)
+- [Green process-parity target matrix](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431423)
+- [Green process-parity quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431448)
 
 The retained target artifacts are unsigned research outputs, not a product release.
 
 ## Exact next bounded task
 
-Bring the mock-SDK process boundary to equivalent, testable behavior before doing any
-other desktop work.
+Add packaged security-denial E2E and target filesystem/watch/atomicity/path evidence
+before doing any other desktop work.
 
-Current implementation facts:
+Implement and prove on Windows x64 and macOS ARM64:
 
-- `src/shared/node-adapter.ts` streams Electron child output, caps combined output,
-  and supports cancellation, but does not yet expose a tested timeout or complete
-  path/event redaction contract.
-- `src-tauri/src/main.rs` currently calls `Command::output()` synchronously, returns a
-  fixed completed run identifier, and cannot cancel an active child.
-- `src/shared/contracts.ts` has start/cancel operations but no explicit validated
-  timeout field or shared process-event schema.
+1. Packaged Electron and Tauri probes deny unlisted IPC/capabilities, arbitrary
+   process commands, navigation, network access, and filesystem escape.
+2. Selected-root reads, file watching, external-change notification, SHA-stale write
+   rejection, and same-directory atomic replacement behave equivalently.
+3. Spaces, Unicode, target-appropriate long paths, missing files, symlinks, and path
+   traversal are exercised without exposing absolute machine paths in UI or logs.
+4. Watch latency and duplicate/coalesced event behavior are recorded rather than
+   assumed identical between operating systems.
+5. Tests execute against packaged candidates where the boundary depends on packaging;
+   unit-only evidence is labelled separately.
+6. The Windows x64/macOS ARM64 workflow remains green and the desktop evidence file
+   records commands, failures, platform differences, and retained artifacts.
 
-Implement and prove:
-
-1. One shared typed start/cancel/event contract with validated run identifiers and a
-   bounded timeout.
-2. Direct argument arrays only; no shell invocation and no arbitrary executable or
-   command names.
-3. Incremental stdout/stderr events with one combined byte cap and a terminal event
-   that distinguishes exit, cancellation, timeout, and truncation.
-4. Redaction of project/machine paths and environment values from events and errors.
-5. Real cancellation of an active child in Electron and Tauri without orphaning it.
-6. Deterministic mock modes for ordinary output, stderr, delay, and output flooding.
-7. Unit tests for normal exit, denial, cancellation, timeout, truncation, direct
-   arguments, redaction, unknown/stale run IDs, and cleanup.
-8. The existing Windows x64/macOS ARM64 workflow remains green for both packaged
-   candidates. Record commands, failures, and results in the desktop evidence file.
-
-Keep this work disposable and stack-neutral. Do not accept a stack solely because
-process parity passes.
+Keep the work disposable and stack-neutral. Do not begin media/accessibility work or
+accept a stack in this task.
 
 ## Remaining Phase 0 sequence
 
 After process parity, complete these evidence gates in this order unless new evidence
 shows a dependency conflict:
 
-1. Packaged security-denial E2E and target filesystem/watch/atomicity/path cases.
+1. **Next:** Packaged security-denial E2E and target filesystem/watch/atomicity/path cases.
 2. Shared UI behavior for docking, drag/drop, media, keyboard, screen readers, focus,
    resizing, reduced motion, and current OS WebView differences.
 3. Native credential-store prototypes with UI/log/project leak tests.
@@ -144,12 +139,12 @@ as evidence to diagnose, not as a reason to infer behavior from the other platfo
 
 ## Git and publishing state
 
-- The working tree was clean when this handover was prepared; no process-parity code
-  change was started.
+- Process parity was implemented in commits `f7e62e1` and `144c0fe`; its target
+  matrix and repository-quality run are green. No packaged-denial work has started.
 - The local and remote commit identifiers can differ because this environment lacked
   a shell HTTPS credential helper and published through the authenticated GitHub Git
   Data API. The implementation/evidence checkpoint had identical local and remote
-  tree SHA `345a86f414b176b08d4204310bd7f69e61935af4` before this handover commit.
+  tree SHA `bae8df4f546f9217c7fb79eec8cad2d5b24e616e` before this evidence-doc update.
 - Before publishing more work, fetch the current private `main` ref, create a commit
   with that remote commit as its parent, and update `main` without force. Verify the
   resulting remote tree exactly matches the intended local tree.

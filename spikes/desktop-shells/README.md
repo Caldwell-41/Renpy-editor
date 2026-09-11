@@ -11,9 +11,9 @@ out of scope.
 - Monaco edits a representative project-relative `.rpy` file.
 - Reads and writes stay inside an explicitly supplied project root.
 - Writes require the expected SHA-256 and use a same-directory atomic replacement.
-- The Electron adapter watches external changes; the Tauri watch adapter is the next
-  platform task.
-- Mock SDK work accepts only named operations and direct argument arrays.
+- Both adapters watch external changes; packaged target behavior remains to be measured.
+- Mock SDK work accepts only named operations and direct argument arrays, and emits
+  bounded/redacted streaming and terminal events with cancellation and timeout.
 - Electron exposes only a frozen preload API; Tauri registers only named commands.
 - The local UI has a restrictive content-security policy and no remote content.
 
@@ -33,6 +33,6 @@ summary is intentionally committed.
 
 ## Deliberate limitations
 
-The shells are disposable. Packaged UI E2E, Tauri file watching, streamed process
-events/cancellation, native credential-store checks, media/drag-drop accessibility,
-and graph-scale measurement remain required before the stack ADR can be accepted.
+The shells are disposable. Packaged security-denial and filesystem/watch E2E, native
+credential-store checks, media/drag-drop accessibility, and graph-scale measurement
+remain required before the stack ADR can be accepted.
