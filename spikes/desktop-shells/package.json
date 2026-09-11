@@ -9,7 +9,7 @@
     "build:node": "tsc -p tsconfig.node.json",
     "build:ui": "vite build --config vite.config.mjs",
     "build:electron": "npm run build",
-    "package:electron": "npm run build && electron-packager . LoomlightSpike --out=artifacts/electron --overwrite --prune=true --ignore='^/(src|tests|fixtures|src-tauri|artifacts)($|/)'",
+    "package:electron": "npm run build && node scripts/package-electron.mjs",
     "start:electron": "npm run build && electron dist/electron/main.js",
     "test": "npm run build:node && node --test dist/tests/*.test.js",
     "tauri:check": "cargo check --manifest-path src-tauri/Cargo.toml --locked",

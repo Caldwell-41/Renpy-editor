@@ -58,3 +58,13 @@ from the other operating system.
 - Dependency/licence inventory and developer-complexity comparison.
 
 No desktop stack is accepted by this partial result.
+
+## Integration findings
+
+The first target-platform run was intentionally retained as failed evidence. Windows
+showed that shell-quoted regular expressions in an npm packaging command are not
+portable to `cmd.exe`; packaging now uses the packager's JavaScript API. Apple Silicon
+successfully packaged and launched Electron, then Tauri compilation correctly failed
+because its required application icon was absent. A minimal non-product spike icon is
+now explicit. Neither finding changes the product design, but both inform the eventual
+build boundary.

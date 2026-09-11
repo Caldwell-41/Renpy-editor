@@ -11,7 +11,7 @@ use std::{
     sync::Mutex,
     time::{SystemTime, UNIX_EPOCH},
 };
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 
 const MAX_TEXT_BYTES: usize = 2_000_000;
 

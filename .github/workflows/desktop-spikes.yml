@@ -59,6 +59,14 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: Package Tauri spike
         run: npm run tauri:build
+      - name: Upload generated Rust lockfile
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-cargo-lock-${{ matrix.runner }}
+          path: spikes/desktop-shells/src-tauri/Cargo.lock
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload private unsigned evidence artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
