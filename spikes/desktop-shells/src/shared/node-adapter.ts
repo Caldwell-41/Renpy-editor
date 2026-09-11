@@ -2,8 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants, promises as fs, watch, type FSWatcher } from "node:fs";
 import path from "node:path";
 import { spawn, type ChildProcess } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
-import type { FileVersion, MockSdkRequest } from "./contracts.js";
+import type { FileVersion, MockSdkEvent, MockSdkRequest, MockSdkTerminalReason } from "./contracts.js";
 import { validateRelativePath } from "./contracts.js";
 
 const MAX_OUTPUT = 65_536;
@@ -80,9 +81,18 @@ export async function watchText(root: string, relativePath: string, changed: () 
 }
 
 export class MockSdkRuns {
-  readonly #runs = new Map<string, ChildProcess>();
+  readonly #runs = new Map<string, { child: ChildProcess; cancel: () => void }>();
 
-  start(request: MockSdkRequest, emit: (event: object) => void): string {
+  get activeCount(): number { return this.#runs.size; }
+
+  #redact(text: string): string {
+    let clean = text.replace(/(?:[A-Za-z]:\\|\/)(?:[^\s"']+[\\/])*[^\s"']*/gu, "[REDACTED_PATH]");
+    const values = Object.values(process.env).filter((value): value is string => typeof value === "string" && value.length >= 8);
+    for (const value of values) clean = clean.split(value).join("[REDACTED_ENV]");
+    return clean;
+  }
+
+  start(request: MockSdkRequest, emit: (event: MockSdkEvent) => void): string {
     const runId = randomUUID();
     const script = fileURLToPath(new URL("../electron/mock-sdk.js", import.meta.url));
     const child = spawn(process.execPath, [script, request.command, ...request.args], {
@@ -91,25 +101,40 @@ export class MockSdkRuns {
       env: { PATH: process.env.PATH ?? "" },
       stdio: ["ignore", "pipe", "pipe"],
     });
-    this.#runs.set(runId, child);
     let bytes = 0;
+    let terminal: MockSdkTerminalReason | undefined;
+    const decoders = { stdout: new StringDecoder("utf8"), stderr: new StringDecoder("utf8") };
+    const stop = (reason: MockSdkTerminalReason) => {
+      if (terminal) return;
+      terminal = reason;
+      child.kill();
+    };
+    this.#runs.set(runId, { child, cancel: () => stop("cancelled") });
+    const timer = setTimeout(() => stop("timeout"), request.timeoutMs);
     const stream = (channel: "stdout" | "stderr", chunk: Buffer) => {
-      if (bytes >= MAX_OUTPUT) return;
-      const text = chunk.subarray(0, MAX_OUTPUT - bytes).toString("utf8");
-      bytes += Buffer.byteLength(text);
-      emit({ runId, type: channel, text });
-      if (bytes >= MAX_OUTPUT) child.kill();
+      if (terminal) return;
+      const remaining = MAX_OUTPUT - bytes;
+      const accepted = chunk.subarray(0, Math.max(0, remaining));
+      bytes += accepted.length;
+      const output = this.#redact(decoders[channel].write(accepted));
+      if (output) emit({ runId, type: channel, text: output });
+      if (chunk.length > remaining || bytes >= MAX_OUTPUT) stop("truncated");
     };
     child.stdout.on("data", (chunk: Buffer) => stream("stdout", chunk));
     child.stderr.on("data", (chunk: Buffer) => stream("stderr", chunk));
-    child.on("close", (code, signal) => {
+    child.once("error", () => stop("startError"));
+    child.once("close", (code, signal) => {
+      clearTimeout(timer);
       this.#runs.delete(runId);
-      emit({ runId, type: "exit", code, signal, truncated: bytes >= MAX_OUTPUT });
+      emit({ runId, type: "terminal", reason: terminal ?? "exit", code, signal });
     });
     return runId;
   }
 
   cancel(runId: string): boolean {
-    return this.#runs.get(runId)?.kill() ?? false;
+    const run = this.#runs.get(runId);
+    if (!run) return false;
+    run.cancel();
+    return true;
   }
 }

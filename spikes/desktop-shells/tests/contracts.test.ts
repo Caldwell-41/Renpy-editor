@@ -10,7 +10,7 @@ test("accepts a narrow normalized read request", () => {
 
 test("denies unknown operations and commands", () => {
   assert.throws(() => validateRequest({ operation: "shell", command: "rm" }), /allowlisted/);
-  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "arbitrary", args: [] }), /allowlisted/);
+  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "arbitrary", args: [], timeoutMs: 1000 }), /allowlisted/);
 });
 
 test("denies traversal and machine-native path spellings", () => {
@@ -21,6 +21,8 @@ test("denies traversal and machine-native path spellings", () => {
 
 test("bounds write content, hashes, arguments, and run identifiers", () => {
   assert.throws(() => validateRequest({ operation: "writeTextAtomic", root: "/p", relativePath: "game/a.rpy", expectedSha256: "bad", contents: "x" }));
-  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "version", args: new Array(17).fill("x") }));
+  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "version", args: new Array(17).fill("x"), timeoutMs: 1000 }));
+  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "version", args: [], timeoutMs: 0 }));
+  assert.throws(() => validateRequest({ operation: "startMockSdk", command: "version", args: [], timeoutMs: 30_001 }));
   assert.throws(() => validateRequest({ operation: "cancelMockSdk", runId: "../../pid" }));
 });

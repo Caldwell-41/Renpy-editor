@@ -12,7 +12,16 @@ async function bridge() {
   if (window.loomlight) return { name: "Electron", ...window.loomlight };
   if (window.__TAURI_INTERNALS__) {
     const { invoke } = await import("@tauri-apps/api/core");
-    return { name: "Tauri", invoke: (request: DesktopRequest) => invoke("desktop_operation", { request }), subscribe: () => () => {} };
+    const { listen } = await import("@tauri-apps/api/event");
+    return {
+      name: "Tauri",
+      invoke: (request: DesktopRequest) => invoke("desktop_operation", { request }),
+      subscribe: (listener: (event: unknown) => void) => {
+        let unlisten: (() => void) | undefined;
+        void listen("loomlight:event", (event) => listener(event.payload)).then((stop) => { unlisten = stop; });
+        return () => unlisten?.();
+      },
+    };
   }
   throw new Error("No privileged desktop bridge is present");
 }
@@ -48,7 +57,7 @@ document.querySelector("#save")!.addEventListener("click", async () => {
   current = await desktop.invoke({ ...requestBase("readText"), operation: "writeTextAtomic", expectedSha256: current.sha256, contents: editor.getValue() }) as FileVersion;
   report({ saved: current.relativePath, sha256: current.sha256 });
 });
-document.querySelector("#sdk")!.addEventListener("click", async () => report(await desktop.invoke({ operation: "startMockSdk", command: "version", args: [] })));
+document.querySelector("#sdk")!.addEventListener("click", async () => report(await desktop.invoke({ operation: "startMockSdk", command: "version", args: [], timeoutMs: 5_000 })));
 document.querySelector("#reveal")!.addEventListener("click", () => {
   const target = Math.max(1, Number(line.value));
   editor.revealLineInCenter(target);

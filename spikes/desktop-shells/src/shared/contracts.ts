@@ -37,9 +37,17 @@ export interface WatchTextRequest {
 
 export interface MockSdkRequest {
   operation: "startMockSdk";
-  command: "version" | "diagnostics";
+  command: MockSdkCommand;
   args: string[];
+  timeoutMs: number;
 }
+
+export type MockSdkCommand = "version" | "diagnostics" | "stderr" | "delay" | "flood";
+export type MockSdkTerminalReason = "exit" | "cancelled" | "timeout" | "truncated" | "startError";
+
+export type MockSdkEvent =
+  | { runId: string; type: "stdout" | "stderr"; text: string }
+  | { runId: string; type: "terminal"; reason: MockSdkTerminalReason; code: number | null; signal: string | null };
 
 export interface CancelMockSdkRequest {
   operation: "cancelMockSdk";
@@ -55,6 +63,9 @@ export type DesktopRequest =
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const RUN_ID = /^[a-f0-9-]{1,80}$/u;
+const MOCK_COMMANDS: readonly MockSdkCommand[] = ["version", "diagnostics", "stderr", "delay", "flood"];
+export const MIN_MOCK_TIMEOUT_MS = 10;
+export const MAX_MOCK_TIMEOUT_MS = 30_000;
 
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -112,7 +123,7 @@ export function validateRequest(value: unknown): DesktopRequest {
     return { operation, ...projectPath(input), contents, expectedSha256 };
   }
   if (operation === "startMockSdk") {
-    if (input.command !== "version" && input.command !== "diagnostics") {
+    if (typeof input.command !== "string" || !MOCK_COMMANDS.includes(input.command as MockSdkCommand)) {
       throw new TypeError("mock SDK command is not allowlisted");
     }
     if (
@@ -122,7 +133,10 @@ export function validateRequest(value: unknown): DesktopRequest {
     ) {
       throw new TypeError("mock SDK arguments are invalid");
     }
-    return { operation, command: input.command, args: input.args as string[] };
+    if (!Number.isInteger(input.timeoutMs) || (input.timeoutMs as number) < MIN_MOCK_TIMEOUT_MS || (input.timeoutMs as number) > MAX_MOCK_TIMEOUT_MS) {
+      throw new TypeError("timeoutMs is invalid");
+    }
+    return { operation, command: input.command as MockSdkCommand, args: input.args as string[], timeoutMs: input.timeoutMs as number };
   }
 
   const runId = textField(input, "runId", 80);

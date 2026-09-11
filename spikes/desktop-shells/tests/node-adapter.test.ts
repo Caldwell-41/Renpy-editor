@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import type { MockSdkEvent, MockSdkRequest } from "../src/shared/contracts.js";
 import { MockSdkRuns, readText, StaleFileError, watchText, writeTextAtomic } from "../src/shared/node-adapter.js";
 
 async function fixture() {
@@ -43,12 +44,12 @@ test("refuses a symlink that escapes the project root", async (context) => {
 
 test("runs only the internal mock SDK executable with direct arguments", async () => {
   const runner = new MockSdkRuns();
-  const events: object[] = [];
+  const events: MockSdkEvent[] = [];
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error("mock SDK timed out")), 5_000);
-    runner.start({ operation: "startMockSdk", command: "diagnostics", args: ["argument with spaces", ";ignored"] }, (event) => {
+    runner.start({ operation: "startMockSdk", command: "diagnostics", args: ["argument with spaces", ";ignored"], timeoutMs: 1_000 }, (event) => {
       events.push(event);
-      if ((event as { type?: string }).type === "exit") {
+      if (event.type === "terminal") {
         clearTimeout(timeout);
         resolve();
       }
@@ -57,5 +58,52 @@ test("runs only the internal mock SDK executable with direct arguments", async (
   const output = events.map((event) => (event as { text?: string }).text ?? "").join("");
   assert.match(output, /argument with spaces/);
   assert.match(output, /;ignored/);
-  assert.ok(events.some((event) => (event as { type?: string }).type === "exit"));
+  assert.deepEqual(events.find((event) => event.type === "terminal"), { runId: events[0]!.runId, type: "terminal", reason: "exit", code: 0, signal: null });
+});
+
+async function run(request: Omit<MockSdkRequest, "operation">, action?: (runner: MockSdkRuns, runId: string) => void) {
+  const runner = new MockSdkRuns();
+  const events: MockSdkEvent[] = [];
+  await new Promise<void>((resolve, reject) => {
+    const guard = setTimeout(() => reject(new Error("test runner timed out")), 5_000);
+    const runId = runner.start({ operation: "startMockSdk", ...request }, (event) => {
+      events.push(event);
+      if (event.type === "terminal") { clearTimeout(guard); resolve(); }
+    });
+    action?.(runner, runId);
+  });
+  assert.equal(runner.activeCount, 0);
+  return events;
+}
+
+test("streams stderr and redacts paths and environment values", async () => {
+  const secret = process.env.PATH ?? "missing-environment-value";
+  const events = await run({ command: "stderr", args: ["/private/project/game", secret], timeoutMs: 1_000 });
+  const output = events.flatMap((event) => event.type === "stderr" ? [event.text] : []).join("");
+  assert.match(output, /REDACTED_PATH/);
+  assert.doesNotMatch(output, /\/private\/project/);
+  if (secret.length >= 8) assert.doesNotMatch(output, new RegExp(secret.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
+test("cancels a live child and rejects stale cancellation", async () => {
+  const events = await run({ command: "delay", args: [], timeoutMs: 3_000 }, (runner, runId) => {
+    assert.equal(runner.cancel(runId), true);
+    assert.equal(runner.cancel("stale-run"), false);
+  });
+  const terminal = events.at(-1);
+  assert.equal(terminal?.type === "terminal" ? terminal.reason : undefined, "cancelled");
+});
+
+test("times out a live child", async () => {
+  const events = await run({ command: "delay", args: [], timeoutMs: 20 });
+  const terminal = events.at(-1);
+  assert.equal(terminal?.type === "terminal" ? terminal.reason : undefined, "timeout");
+});
+
+test("caps combined output and reports truncation", async () => {
+  const events = await run({ command: "flood", args: [], timeoutMs: 1_000 });
+  const bytes = events.reduce((total, event) => total + (event.type === "stdout" || event.type === "stderr" ? Buffer.byteLength(event.text) : 0), 0);
+  assert.ok(bytes <= 65_536);
+  const terminal = events.at(-1);
+  assert.equal(terminal?.type === "terminal" ? terminal.reason : undefined, "truncated");
 });
