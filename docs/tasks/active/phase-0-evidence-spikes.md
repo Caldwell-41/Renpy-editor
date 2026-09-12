@@ -21,14 +21,14 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
 1. **Complete:** Create the neutral golden `.rpy` corpus and byte-for-byte baselines.
 2. **Complete:** Compare lossless parse/edit candidates against the parser acceptance
    matrix and record the source-model direction in ADR 0001.
-3. **In progress; corrective packaged checkpoint active:** Build functionally
+3. **In progress; packaged boundary checkpoint complete:** Build functionally
    equivalent Tauri and Electron shells with a shared source editor/contract, watched
    atomic file edit, narrow privileged command, and mocked SDK process. Windows x64
    and macOS ARM64 pass shared lifecycle tests and packaging. Packaged probes cover
-   most denial and Tauri core filesystem cases, but run 34691607349 exposed Electron
-   absolute-path stack logging and an unenforced Tauri Windows navigation failure.
-   Equivalent packaged Electron filesystem evidence and the corrective target run are
-   the active checkpoint; the rest of the behavior matrix remains open.
+   denial, filesystem, watch, symlink, stale-write, complex-path, and redaction behavior
+   equivalently in green run 34700476448. Earlier corrective failures remain documented.
+   Shared UI/WebView behavior is the active checkpoint; credentials, graph, preview,
+   SDK target integration, and comparative measurements remain open.
 4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.

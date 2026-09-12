@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process parity complete; corrective packaged security/filesystem checkpoint in progress<br>
+**Status:** Process parity and packaged security/filesystem checkpoints complete; broader behavior evidence pending<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -17,10 +17,10 @@ The initial surface is deliberately narrow:
 | --- | --- | --- | --- |
 | Project-relative UTF-8 read | Implemented | Implemented | Shared tests pass on both targets |
 | SHA-guarded same-directory replacement | Implemented | Implemented | Node and Rust tests pass on both targets |
-| External file watch | Implemented | Implemented | Compiles/packages on both targets; latency tests pending |
+| External file watch | Implemented | Implemented | Packaged target latency/event counts recorded |
 | Allowlisted mock SDK process | Bounded stream/cancel/timeout events | Equivalent threaded supervisor | Shared and Rust lifecycle tests pass on both targets |
 | Unknown operation/path traversal | Denied | Denied | Shared and Rust denial tests pass on both targets |
-| Local CSP/navigation boundary | Implemented | Implemented | Packaged E2E partial; Tauri Windows navigation correction pending target verification |
+| Local CSP/navigation boundary | Implemented | Implemented | Packaged E2E passes on both targets |
 
 ## Packaged security/filesystem checkpoint
 
@@ -74,7 +74,30 @@ macOS does not reliably execute the JavaScript child without explicitly setting
 `ELECTRON_RUN_AS_NODE=1`. The next correction sets that flag only in the allowlisted
 child's minimal environment, adds exact redaction of known absolute process arguments
 containing spaces in both adapters, and lengthens the Electron path beyond the legacy
-Windows 260-character boundary. This follow-up still requires one target matrix.
+Windows 260-character boundary.
+
+Final corrective run
+[34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448)
+passed every shared, Rust, packaging, and packaged probe step on both targets. The
+allowlisted Electron child uses its packaged executable with `ELECTRON_RUN_AS_NODE=1`
+in a minimal environment; no arbitrary executable or shell surface was added. Expected
+IPC denials are returned as typed envelopes, so the final application probe output did
+not contain Electron handler stack traces or absolute packaged-runner paths.
+
+| Target/candidate | Complex path | First watch event | Observation window/events | Result |
+| --- | ---: | ---: | ---: | --- |
+| Windows / Electron | 287 characters | 9 ms | 200 ms / 2 | All assertions true |
+| Windows / Tauri | 265 characters | 0 ms | 100 ms / 2 | All assertions true |
+| macOS / Electron | 299 characters | 4 ms | 200 ms / 2 | All assertions true |
+| macOS / Tauri | 277 characters | 8 ms | 100 ms / 3 | All assertions true |
+
+Counts are observations, not a promise of one notification per write. Consumers must
+debounce/coalesce events and confirm file hashes. Both Windows candidates crossed the
+legacy 260-character boundary. Symlink creation succeeded and escape reads were denied
+on both hosted targets. Same-directory replacement left no temporary sibling, stale
+hashes were rejected, missing errors were redacted, and synthetic sensitive values plus
+known absolute arguments containing spaces did not reach renderer-visible process
+output. Unit/shared evidence remains distinct from these packaged executable probes.
 
 The final initial matrix, [GitHub Actions run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329),
 passed on Windows x64 and macOS ARM64. Both jobs ran the shared tests, packaged and
@@ -154,8 +177,6 @@ cancelled. Existing path filters remain limited to this workflow and
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- Verified corrective target results for packaged filesystem equivalence, WebView
-  navigation denial, application-log redaction, watch counts/latency, and complex paths.
 - Keyboard/screen-reader, drag/drop, and image/audio/video behavior.
 - Native credential-store prototype with log/UI/project leak checks.
 - 10,000-node graph interaction without blocking Monaco.

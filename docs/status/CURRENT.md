@@ -18,20 +18,14 @@
   pass. The SDK and generated artifacts remain outside Git.
 - The SDK boundary has 19 dependency-free security/adapter tests. Windows and macOS
   SDK, filesystem, package install/launch, signing, and quarantine behavior are open.
-- No desktop stack is accepted. A shared-contract Electron/Tauri spike implements
-  the first file/process/security boundary. Its Windows x64/macOS ARM64 matrix passes
-  shared process lifecycle tests, packaging, and most packaged denial probes. Run
-  34691607349 proved Electron IPC/network/popup/navigation denial and Tauri core
-  filesystem/process denial on both targets, but also exposed two unresolved defects:
-  Electron expected-denial logs contained packaged runner paths, and the Tauri Windows
-  WebView reported `navigationDenied: false` without failing its workflow step.
-- Corrective run 34699898544 then passed the complete Windows job, including explicit
-  Tauri navigation denial and equivalent packaged filesystem/redaction probes. macOS
-  correctly failed only the Electron synthetic-sensitive-output assertion, exposing a
-  packaged-child output failure. Run 34700215108 reproduced it despite a fixture delay,
-  ruling out a simple race. The follow-up explicitly runs only the allowlisted mock
-  child with `ELECTRON_RUN_AS_NODE=1`, retains the minimal environment, and awaits
-  target verification alongside exact spaced-path redaction.
+- No desktop stack is accepted. The shared-contract Electron/Tauri spike now has green
+  Windows x64/macOS ARM64 packaged evidence for narrow IPC/capabilities, arbitrary-
+  process denial, network/popup/navigation denial, selected-root containment,
+  SHA-stale rejection, same-directory replacement, external watching, symlinks,
+  missing files, complex paths beyond 260 characters, and path/synthetic-sensitive-
+  value redaction. Corrective run 34700476448 closes this checkpoint; preceding runs
+  34691607349, 34699898544, and 34700215108 retain the discovered Windows navigation-
+  gate, Electron log-path, and packaged macOS child-mode failures.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -45,11 +39,10 @@
 
 ## Next action
 
-Complete and verify the corrective packaged security/filesystem checkpoint: exercise
-Electron filesystem behavior through its packaged renderer bridge, keep denial errors
-out of privileged-process stack logs, enforce Tauri navigation policy explicitly, and
-make a false packaged assertion fail the process on both targets. Record the resulting
-path/watch measurements before proceeding to shared UI/WebView behavior.
+Complete shared UI/WebView evidence using the existing Monaco surface: docking and
+resizing, keyboard/focus, screen-reader/accessibility behavior, reduced motion,
+synthetic drag/drop, image/audio/video handling, and explicit Windows WebView2 versus
+macOS WKWebView observations. Keep this as stack-neutral disposable research code.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).

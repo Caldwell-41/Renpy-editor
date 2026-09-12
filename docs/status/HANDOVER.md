@@ -74,7 +74,8 @@ decisions unless repository evidence presents a material conflict.
   follow-up reproduced the macOS failure, identifying packaged Electron child mode—not
   a simple event race—as the remaining difference. The allowlisted mock child now sets
   `ELECTRON_RUN_AS_NODE=1` in its otherwise minimal environment; target verification is
-  pending together with the exact spaced-path redaction follow-up.
+  recorded in green run 34700476448. That run closes equivalent packaged denial,
+  filesystem, watch, symlink, long-path, and redaction evidence on both targets.
 - Repository quality CI passed after the latest evidence documentation update.
 
 Evidence links:
@@ -88,22 +89,22 @@ The retained target artifacts are unsigned research outputs, not a product relea
 
 ## Exact next bounded task
 
-Finish the corrective packaged security/filesystem checkpoint before doing any other
-desktop work.
+Complete the shared UI/WebView behavior checkpoint using the existing shared Monaco
+surface before credential-store or graph work.
 
 Implement and prove on Windows x64 and macOS ARM64:
 
-1. Exercise selected-root read, watched external edit, SHA-stale rejection,
-   same-directory replacement, missing files, symlinks, and complex paths through the
-   packaged Electron renderer bridge, matching the existing packaged Tauri core probe.
-2. Return expected Electron denials as typed data so Electron does not print privileged
-   stack traces containing absolute packaged paths.
-3. Explicitly deny external Tauri navigation and ensure a false WebView assertion exits
-   non-zero on Windows as well as macOS.
-4. Require rather than tolerate unavailable symlink evidence on both hosted targets;
-   record path lengths, watch latency, and duplicate/coalesced event counts.
-5. Keep unit and packaged E2E evidence labelled separately, run the changed-path target
-   matrix once, and record both failures and verified results.
+1. Use one shared deterministic UI fixture and the same assertions in Electron and
+   Tauri; do not create separate product-like interfaces.
+2. Exercise dock/panel resizing, native-window resize response, keyboard shortcuts,
+   tab/focus order, focus return, and Monaco responsiveness.
+3. Record automated accessibility semantics plus target screen-reader limitations;
+   verify reduced-motion behavior without claiming a full manual assistive-tech pass.
+4. Use synthetic files for drag/drop and local image/audio/video behavior. Record
+   unsupported codecs or autoplay/platform policy differences explicitly.
+5. Distinguish DOM/component evidence from packaged WebView2/WKWebView E2E, retain
+   relevant measurements, and run the changed-path matrix only for the final coherent
+   checkpoint.
 
 Keep the work disposable and stack-neutral. Do not begin media/accessibility work or
 accept a stack in this task.
@@ -113,9 +114,9 @@ accept a stack in this task.
 After process parity, complete these evidence gates in this order unless new evidence
 shows a dependency conflict:
 
-1. **In progress:** Correct and close packaged security-denial and equivalent target
-   filesystem/watch/atomicity/path evidence.
-2. Shared UI behavior for docking, drag/drop, media, keyboard, screen readers, focus,
+1. **Complete:** Packaged security-denial and equivalent target filesystem/watch/
+   atomicity/path evidence.
+2. **Next:** Shared UI behavior for docking, drag/drop, media, keyboard, screen readers, focus,
    resizing, reduced motion, and current OS WebView differences.
 3. Native credential-store prototypes with UI/log/project leak tests.
 4. Deterministic 1k/10k/50k branch-graph measurements without blocking Monaco.

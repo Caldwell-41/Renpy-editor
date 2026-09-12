@@ -22,8 +22,11 @@ The initial full matrix passed in
 Later packaged-denial probes ran in 34691607349, but the recorded job conclusion is not
 sufficient evidence: Windows printed `navigationDenied: false` for Tauri while the step
 still passed, and expected Electron denial exceptions exposed absolute packaged paths.
-The corrective packaged checkpoint must make each assertion enforce the process result.
-Broader UI and performance measurements remain future gates.
+Corrective runs then proved those failure paths were enforced. The final
+[packaged security/filesystem run 34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448)
+passed every explicit assertion on Windows x64 and macOS ARM64, including long paths,
+symlinks, watch events, redaction, and Tauri navigation denial. Broader UI and
+performance measurements remain future gates.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

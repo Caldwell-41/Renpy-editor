@@ -11,7 +11,8 @@ out of scope.
 - Monaco edits a representative project-relative `.rpy` file.
 - Reads and writes stay inside an explicitly supplied project root.
 - Writes require the expected SHA-256 and use a same-directory atomic replacement.
-- Both adapters watch external changes; packaged target behavior remains to be measured.
+- Both adapters watch external changes; packaged target latency and coalescing are
+  recorded for Windows x64 and macOS ARM64.
 - Mock SDK work accepts only named operations and direct argument arrays, and emits
   bounded/redacted streaming and terminal events with cancellation and timeout.
 - Electron exposes only a frozen preload API; Tauri registers only named commands.
@@ -33,6 +34,7 @@ summary is intentionally committed.
 
 ## Deliberate limitations
 
-The shells are disposable. Packaged security-denial and filesystem/watch E2E, native
-credential-store checks, media/drag-drop accessibility, and graph-scale measurement
-remain required before the stack ADR can be accepted.
+The shells are disposable. Packaged security-denial and filesystem/watch E2E are
+complete. Native credential-store checks, media/drag-drop accessibility, graph-scale
+measurement, preview/source mapping, official target SDK integration, and comparative
+runtime/maintenance evidence remain required before the stack ADR can be accepted.
