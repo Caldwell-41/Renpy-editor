@@ -26,7 +26,12 @@ Corrective runs then proved those failure paths were enforced. The final
 [packaged security/filesystem run 34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448)
 passed every explicit assertion on Windows x64 and macOS ARM64, including long paths,
 symlinks, watch events, redaction, and Tauri navigation denial. Broader UI and
-performance measurements remain future gates.
+performance measurements remain future gates. The corrected shared UI/WebView
+[run 34701370897](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
+passes identical packaged wide/narrow assertions in Electron and Tauri on Windows
+x64 and macOS ARM64. It covers DOM accessibility semantics, docks/resizing,
+keyboard/focus, reduced motion, synthetic media drag/drop, codec observations, and a
+loose Monaco edit guard; it does not claim a manual NVDA or VoiceOver pass.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

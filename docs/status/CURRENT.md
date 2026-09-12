@@ -26,6 +26,12 @@
   value redaction. Corrective run 34700476448 closes this checkpoint; preceding runs
   34691607349, 34699898544, and 34700215108 retain the discovered Windows navigation-
   gate, Electron log-path, and packaged macOS child-mode failures.
+- The shared Monaco surface passes the same packaged wide/narrow UI behavior probe in
+  Electron Chromium and Tauri WebView2/WKWebView on both targets. Run 34701370897
+  covers docks/resizing, keyboard/focus, accessibility semantics, reduced motion,
+  synthetic media drag/drop, codec observations, responsive layout, and a loose
+  Monaco edit-latency guard. Manual NVDA/VoiceOver interaction and real media quality
+  remain physical-device limitations, not inferred successes.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -39,10 +45,10 @@
 
 ## Next action
 
-Complete shared UI/WebView evidence using the existing Monaco surface: docking and
-resizing, keyboard/focus, screen-reader/accessibility behavior, reduced motion,
-synthetic drag/drop, image/audio/video handling, and explicit Windows WebView2 versus
-macOS WKWebView observations. Keep this as stack-neutral disposable research code.
+Complete equivalent native credential-store prototypes in both packaged candidates.
+Prove that synthetic credentials stay out of the renderer/UI, logs, project files,
+retained artifacts, and source control; record Windows and macOS behavior separately.
+Keep the work stack-neutral and disposable.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).

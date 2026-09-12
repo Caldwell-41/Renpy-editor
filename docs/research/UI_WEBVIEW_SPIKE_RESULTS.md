@@ -1,6 +1,6 @@
 # Shared UI and WebView spike results
 
-**Status:** In progress<br>
+**Status:** Complete automated packaged checkpoint; manual assistive-technology checks remain a later physical-device task<br>
 **Targets:** Windows x86-64 WebView2 and bundled Chromium; macOS ARM64 WKWebView and bundled Chromium
 
 ## Question
@@ -44,19 +44,40 @@ command is accepted only while the explicit evidence environment mode is present
 
 ## Results
 
-Initial target run 34701229006 passed repository quality and the macOS Electron wide
-probe. Bundled Chromium reported an actual 1024×645 inner viewport for the requested
-wide window, active reduced-motion preference, all semantic/dock/keyboard/drag/media
-assertions, 2.6 ms Monaco edit time, and `maybe` for WAV plus `probably` for MP3,
-H.264 MP4, and VP9/Opus WebM. The narrow probe correctly failed only `focusReturned`:
-the test attempted to focus the inspector after responsive CSS had already hidden it.
-The follow-up tests focus return on the visible left dock in narrow mode and the right
-inspector in wide mode. Remaining target/engine results are pending.
+Initial target run
+[34701229006](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701229006)
+passed repository quality and each Electron wide probe, then failed both narrow
+Electron probes only because the test focused the inspector after responsive CSS had
+hidden it. Windows wide was 1008×655 with a 6.3 ms Monaco edit; macOS wide was
+1024×645 with a 2.6 ms edit. Both jobs stopped before Tauri as required by the failed
+gate. This was a test-fixture defect, not evidence that focus return worked.
 
-Windows Electron produced the same focused result: wide passed at 1008×655 with a
-6.3 ms Monaco edit, while narrow at 704×535 failed only the hidden-inspector focus
-assertion. Its codec strings and active reduced-motion observation matched macOS
-bundled Chromium. Both jobs stopped before Tauri as required by the failed gate.
+The correction selects the visible left project dock in narrow mode and the right
+inspector in wide mode. Final run
+[34701370897](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
+passed the shared tests, both packaged candidates, and both viewport modes on each
+supported target. Every row passed dock positions, keyboard resize, shortcut,
+focus-return, accessible-name/separator/live-region, reduced-motion, three-file
+synthetic drag/drop, labelled image and controlled audio/video preview, responsive
+layout, and Monaco's 250 ms edit guard.
+
+| Target / packaged engine | Mode | Inner viewport | Monaco edit | WAV | MP3 | H.264 MP4 | VP9/Opus WebM |
+| --- | --- | ---: | ---: | --- | --- | --- | --- |
+| Windows / Electron Chromium | Wide | 1008×655 | 6.8 ms | `maybe` | `probably` | `probably` | `probably` |
+| Windows / Electron Chromium | Narrow | 704×535 | 7.5 ms | `maybe` | `probably` | `probably` | `probably` |
+| Windows / Tauri WebView2 | Wide | 1028×749 | 7.4 ms | `maybe` | `probably` | `probably` | `probably` |
+| Windows / Tauri WebView2 | Narrow | 720×600 | 8.3 ms | `maybe` | `probably` | `probably` | `probably` |
+| macOS / Electron Chromium | Wide | 1024×645 | 2.9 ms | `maybe` | `probably` | `probably` | `probably` |
+| macOS / Electron Chromium | Narrow | 720×568 | 2.6 ms | `maybe` | `probably` | `probably` | `probably` |
+| macOS / Tauri WKWebView | Wide | 1024×645 | 4.0 ms | `maybe` | `maybe` | `probably` | `probably` |
+| macOS / Tauri WKWebView | Narrow | 720×568 | 3.0 ms | `maybe` | `maybe` | `probably` | `probably` |
+
+Windows WebView2 matched bundled Chromium's recorded codec strings. On macOS,
+WKWebView reported MP3 as `maybe` where bundled Chromium reported `probably`; this is
+an engine observation rather than a playback guarantee. Native window decorations
+also produced different actual content dimensions from the same requested size,
+especially for wide Windows Tauri. The responsive assertions therefore use observed
+content dimensions rather than assuming cross-shell pixel identity.
 
 ## Known limitations
 

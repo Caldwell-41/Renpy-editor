@@ -77,6 +77,12 @@ decisions unless repository evidence presents a material conflict.
   recorded in green run 34700476448. That run closes equivalent packaged denial,
   filesystem, watch, symlink, long-path, and redaction evidence on both targets.
 - Repository quality CI passed after the latest evidence documentation update.
+- Shared UI/WebView run 34701370897 passes the same wide/narrow packaged assertions
+  in Electron Chromium and Tauri WebView2/WKWebView on Windows x64 and macOS ARM64.
+  Docks/resizing, keyboard/focus, accessibility semantics, reduced motion, synthetic
+  image/audio/video drag/drop, codec observations, responsive layout, and Monaco edit
+  guards pass. Earlier run 34701229006 correctly exposed a hidden-panel focus-fixture
+  defect. Manual NVDA/VoiceOver and subjective playback remain physical-device work.
 
 Evidence links:
 
@@ -89,25 +95,24 @@ The retained target artifacts are unsigned research outputs, not a product relea
 
 ## Exact next bounded task
 
-Complete the shared UI/WebView behavior checkpoint using the existing shared Monaco
-surface before credential-store or graph work.
+Complete equivalent native credential-store prototypes in the two packaged candidates
+before graph work.
 
 Implement and prove on Windows x64 and macOS ARM64:
 
-1. Use one shared deterministic UI fixture and the same assertions in Electron and
-   Tauri; do not create separate product-like interfaces.
-2. Exercise dock/panel resizing, native-window resize response, keyboard shortcuts,
-   tab/focus order, focus return, and Monaco responsiveness.
-3. Record automated accessibility semantics plus target screen-reader limitations;
-   verify reduced-motion behavior without claiming a full manual assistive-tech pass.
-4. Use synthetic files for drag/drop and local image/audio/video behavior. Record
-   unsupported codecs or autoplay/platform policy differences explicitly.
-5. Distinguish DOM/component evidence from packaged WebView2/WKWebView E2E, retain
-   relevant measurements, and run the changed-path matrix only for the final coherent
-   checkpoint.
+1. State the exact credential-store question and leak-denial success criteria before
+   implementation; use only synthetic sentinel values.
+2. Exercise the OS-native store from packaged Electron and Tauri processes without
+   exposing a general credential or arbitrary key/value IPC API to the shared UI.
+3. Return only typed success/availability metadata to any renderer probe. Scan UI
+   output, process logs, project files, packaged/retained artifacts, and tracked source
+   for the plaintext sentinel and machine-specific paths.
+4. Record Windows Credential/DPAPI behavior and macOS Keychain behavior separately,
+   including denial, prompt, headless-runner, cleanup, and persistence limitations.
+5. Fail the packaged step on a leak or false assertion, clean up the synthetic entry,
+   and retain no credentials or signing material.
 
-Keep the work disposable and stack-neutral. Do not begin media/accessibility work or
-accept a stack in this task.
+Keep the work disposable and stack-neutral. Do not accept a stack in this task.
 
 ## Remaining Phase 0 sequence
 
@@ -116,9 +121,10 @@ shows a dependency conflict:
 
 1. **Complete:** Packaged security-denial and equivalent target filesystem/watch/
    atomicity/path evidence.
-2. **Next:** Shared UI behavior for docking, drag/drop, media, keyboard, screen readers, focus,
-   resizing, reduced motion, and current OS WebView differences.
-3. Native credential-store prototypes with UI/log/project leak tests.
+2. **Complete automated checkpoint:** Shared UI behavior for docking, drag/drop,
+   media, keyboard, accessibility semantics, focus, resizing, reduced motion, and
+   current OS WebView differences. Manual assistive-tech checks remain explicit.
+3. **Next:** Native credential-store prototypes with UI/log/project leak tests.
 4. Deterministic 1k/10k/50k branch-graph measurements without blocking Monaco.
 5. Preview/source-mapping fidelity experiment with faithful, approximate, and
    runtime-only behavior recorded explicitly.

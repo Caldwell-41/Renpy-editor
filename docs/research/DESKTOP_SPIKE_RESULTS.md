@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process parity and packaged security/filesystem checkpoints complete; broader behavior evidence pending<br>
+**Status:** Process parity, packaged security/filesystem, and shared UI/WebView checkpoints complete; broader behavior evidence pending<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -177,10 +177,15 @@ cancelled. Existing path filters remain limited to this workflow and
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- Keyboard/screen-reader, drag/drop, and image/audio/video behavior.
 - Native credential-store prototype with log/UI/project leak checks.
 - 10,000-node graph interaction without blocking Monaco.
 - Dependency/licence inventory and developer-complexity comparison.
+
+Shared packaged UI/WebView behavior is recorded separately in
+[UI_WEBVIEW_SPIKE_RESULTS.md](UI_WEBVIEW_SPIKE_RESULTS.md). Automated semantics,
+docking/resizing, keyboard/focus, reduced motion, synthetic drag/drop, media elements,
+codec observations, and Monaco edit guards pass in run 34701370897; manual
+screen-reader and physical media-quality checks remain explicit limitations.
 
 No desktop stack is accepted by this partial result.
 

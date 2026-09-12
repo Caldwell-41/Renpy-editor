@@ -27,8 +27,9 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    and macOS ARM64 pass shared lifecycle tests and packaging. Packaged probes cover
    denial, filesystem, watch, symlink, stale-write, complex-path, and redaction behavior
    equivalently in green run 34700476448. Earlier corrective failures remain documented.
-   Shared UI/WebView behavior is the active checkpoint; credentials, graph, preview,
-   SDK target integration, and comparative measurements remain open.
+   Shared UI/WebView behavior also passes equivalent packaged wide/narrow probes in
+   run 34701370897. Native credential storage is the active checkpoint; graph,
+   preview, SDK target integration, and comparative measurements remain open.
 4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.
