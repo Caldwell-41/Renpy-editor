@@ -406,6 +406,40 @@ fn finish_ui_probe(request: &DesktopRequest) -> Result<Value, String> {
     std::process::exit(if passed { 0 } else { 1 });
 }
 
+fn packaged_credential_probe() -> Result<Value, String> {
+    let secret = std::env::var("LOOMLIGHT_SPIKE_CREDENTIAL_SECRET")
+        .map_err(|_| "synthetic credential unavailable")?;
+    let account = std::env::var("LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT")
+        .map_err(|_| "synthetic credential account unavailable")?;
+    if secret.len() < 24 || account.len() < 12 || account.len() > 120 {
+        return Err("synthetic credential input is invalid".into());
+    }
+    let entry = keyring::Entry::new("org.loomlight.phase0-spike", &account)
+        .map_err(|_| "native credential store unavailable")?;
+    let mut stored = false;
+    let operation = (|| {
+        entry.set_password(&secret).map_err(|_| "native credential write failed")?;
+        stored = true;
+        let recovered = entry.get_password().map_err(|_| "native credential read failed")?;
+        if recovered != secret { return Err("native credential mismatch".into()); }
+        entry.delete_credential().map_err(|_| "native credential cleanup failed")?;
+        stored = false;
+        Ok(())
+    })();
+    if stored { let _ = entry.delete_credential(); }
+    operation?;
+    let cleaned = matches!(entry.get_password(), Err(keyring::Error::NoEntry));
+    if !cleaned { let _ = entry.delete_credential(); return Err("native credential cleanup failed".into()); }
+    Ok(json!({
+        "evidence": "tauri-packaged-credential",
+        "passed": true,
+        "provider": if cfg!(target_os = "macos") { "keychain-entry" } else { "credential-manager-entry" },
+        "roundTrip": true,
+        "cleaned": true,
+        "rendererCreated": false
+    }))
+}
+
 #[tauri::command]
 fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, request: DesktopRequest) -> Result<Value, String> {
     match request.operation.as_str() {
@@ -422,6 +456,15 @@ fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, req
 }
 
 fn main() {
+    if std::env::var("LOOMLIGHT_SPIKE_CREDENTIAL_PROBE").as_deref() == Ok("1") {
+        let result = packaged_credential_probe();
+        std::env::remove_var("LOOMLIGHT_SPIKE_CREDENTIAL_SECRET");
+        std::env::remove_var("LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT");
+        match result {
+            Ok(value) => { println!("{value}"); return; }
+            Err(_) => { eprintln!("{}", r#"{"evidence":"tauri-packaged-credential","passed":false,"error":"native credential probe failed"}"#); std::process::exit(1); }
+        }
+    }
     if std::env::var("LOOMLIGHT_SPIKE_SECURITY_PROBE").as_deref() == Ok("1") {
         match packaged_security_probe() {
             Ok(result) => { println!("{result}"); return; }

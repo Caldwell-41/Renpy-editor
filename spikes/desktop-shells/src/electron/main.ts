@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
-import { mkdtemp, mkdir, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { app, BrowserWindow, ipcMain, safeStorage, type IpcMainInvokeEvent } from "electron";
+import { access, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -10,6 +10,53 @@ import type { FSWatcher } from "node:fs";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const runs = new MockSdkRuns();
 const watchers = new Map<string, FSWatcher>();
+
+async function packagedCredentialProbe(): Promise<void> {
+  const secret = process.env.LOOMLIGHT_SPIKE_CREDENTIAL_SECRET;
+  let directory: string | undefined;
+  let passed = false;
+  let result: Record<string, unknown> = {
+    evidence: "electron-packaged-credential",
+    passed: false,
+    provider: process.platform === "darwin" ? "keychain-key" : "dpapi-key",
+    rendererCreated: false,
+  };
+  try {
+    if (!secret || secret.length < 24) throw new Error("synthetic credential unavailable");
+    const encryptionAvailable = await safeStorage.isAsyncEncryptionAvailable();
+    if (!encryptionAvailable) throw new Error("native encryption unavailable");
+    directory = await mkdtemp(path.join(tmpdir(), "loomlight-credential-probe-"));
+    const encryptedPath = path.join(directory, "credential.bin");
+    const encrypted = await safeStorage.encryptStringAsync(secret);
+    const ciphertextOpaque = !encrypted.includes(Buffer.from(secret, "utf8"));
+    await writeFile(encryptedPath, encrypted);
+    const persisted = await readFile(encryptedPath);
+    const decrypted = await safeStorage.decryptStringAsync(persisted);
+    const roundTrip = decrypted.result === secret;
+    encrypted.fill(0);
+    persisted.fill(0);
+    await rm(directory, { recursive: true, force: true });
+    const cleaned = await access(directory).then(() => false, () => true);
+    passed = encryptionAvailable && ciphertextOpaque && roundTrip && cleaned;
+    result = {
+      evidence: "electron-packaged-credential",
+      passed,
+      provider: process.platform === "darwin" ? "keychain-key" : "dpapi-key",
+      encryptionAvailable,
+      ciphertextOpaque,
+      roundTrip,
+      shouldReEncrypt: decrypted.shouldReEncrypt,
+      cleaned,
+      rendererCreated: false,
+    };
+  } catch {
+    result = { ...result, error: "native credential probe failed" };
+  } finally {
+    if (directory) await rm(directory, { recursive: true, force: true });
+    delete process.env.LOOMLIGHT_SPIKE_CREDENTIAL_SECRET;
+  }
+  process.stdout.write(`${JSON.stringify(result)}\n`, () => app.exit(passed ? 0 : 1));
+}
 
 function trusted(event: IpcMainInvokeEvent): void {
   const expected = pathToFileURL(path.resolve(here, "../../ui/index.html")).href;
@@ -183,6 +230,12 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.env.LOOMLIGHT_SPIKE_CREDENTIAL_PROBE === "1") {
+    void packagedCredentialProbe();
+  } else {
+    createWindow();
+  }
+});
 app.on("window-all-closed", () => app.quit());
 app.on("before-quit", () => watchers.forEach((watcher) => watcher.close()));

@@ -17,6 +17,7 @@ Start with [current status](status/CURRENT.md), the
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |
 | Shared UI/WebView evidence | [research/UI_WEBVIEW_SPIKE_RESULTS.md](research/UI_WEBVIEW_SPIKE_RESULTS.md) |
+| Native credential-store evidence | [research/CREDENTIAL_STORE_SPIKE_RESULTS.md](research/CREDENTIAL_STORE_SPIKE_RESULTS.md) |
 | Parser spike and acceptance tests | [research/PARSER_ROUND_TRIP.md](research/PARSER_ROUND_TRIP.md) |
 | Parser spike evidence | [research/PARSER_SPIKE_RESULTS.md](research/PARSER_SPIKE_RESULTS.md) |
 | SDK adapter evidence | [research/RENPY_SDK_SPIKE_RESULTS.md](research/RENPY_SDK_SPIKE_RESULTS.md) |

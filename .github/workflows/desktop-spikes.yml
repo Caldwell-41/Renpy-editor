@@ -115,6 +115,23 @@ jobs:
               LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike
             fi
           done
+      - name: Probe packaged native credential storage and plaintext leaks
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          export LOOMLIGHT_SPIKE_CREDENTIAL_PROBE="1"
+          export LOOMLIGHT_SPIKE_CREDENTIAL_SECRET="loomlight-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${RANDOM}-${RANDOM}-sentinel"
+          export LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT="probe-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${RANDOM}"
+          node scripts/run-credential-probe.mjs electron
+          node scripts/run-credential-probe.mjs tauri
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            tauri_executable="src-tauri/target/release/loomlight-desktop-tauri-spike.exe"
+          else
+            tauri_executable="src-tauri/target/release/loomlight-desktop-tauri-spike"
+          fi
+          node scripts/scan-credential-leaks.mjs --tracked fixtures/project artifacts/electron src-tauri/target/release/bundle "$tauri_executable"
+          unset LOOMLIGHT_SPIKE_CREDENTIAL_SECRET LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT LOOMLIGHT_SPIKE_CREDENTIAL_PROBE
       - name: Upload generated Rust lockfile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

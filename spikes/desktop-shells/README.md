@@ -35,6 +35,7 @@ summary is intentionally committed.
 ## Deliberate limitations
 
 The shells are disposable. Packaged security-denial and filesystem/watch E2E are
-complete. Native credential-store checks, media/drag-drop accessibility, graph-scale
-measurement, preview/source mapping, official target SDK integration, and comparative
-runtime/maintenance evidence remain required before the stack ADR can be accepted.
+complete. Shared packaged UI/WebView behavior is also complete. Native credential-
+store evidence is the active checkpoint; graph-scale measurement, preview/source
+mapping, official target SDK integration, and comparative runtime/maintenance evidence
+remain required before the stack ADR can be accepted.
