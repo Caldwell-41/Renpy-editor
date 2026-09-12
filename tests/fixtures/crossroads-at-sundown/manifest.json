@@ -108,8 +108,8 @@
     },
     {
       "path": "game/testcases.rpy",
-      "sha256": "5f3b21a4adccbfda21be4273e5a6042498518aa9fbcfbc7401ce5a5ad8c64e93",
-      "bytes": 207,
+      "sha256": "6dd732fea793973e59f75ddd0165b1b9804d0160e8beca4e722f913da9d18298",
+      "bytes": 958,
       "encoding": "utf-8",
       "line_endings": "lf",
       "disposition": "renpy-8.5.3-linux-pass"
