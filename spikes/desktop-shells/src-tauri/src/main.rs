@@ -262,7 +262,7 @@ where
 fn start_mock_sdk(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
     let (command, args, timeout_ms) = validate_mock_request(request)?;
     let current = std::env::current_exe().map_err(|_| "current executable unavailable")?;
-    let mut child = Command::new(current).arg("--mock-sdk").arg(command).args(args)
+    let child = Command::new(current).arg("--mock-sdk").arg(command).args(args)
         .env_clear().stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
         .spawn().map_err(|_| "mock SDK could not start")?;
     let run_id = format!("run-{}-{}", std::process::id(), NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed));
@@ -296,14 +296,22 @@ fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRe
     }
 }
 
+#[cfg(unix)]
+fn create_file_symlink(original: &Path, link: &Path) -> std::io::Result<()> { std::os::unix::fs::symlink(original, link) }
+
+#[cfg(windows)]
+fn create_file_symlink(original: &Path, link: &Path) -> std::io::Result<()> { std::os::windows::fs::symlink_file(original, link) }
+
 fn packaged_security_probe() -> Result<Value, String> {
     let nonce = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_| "clock unavailable")?.as_nanos();
     let root = std::env::temp_dir().join(format!("loomlight-probe-{nonce}")).join("project space ü");
     let deep = (0..20).map(|index| format!("deep-{index}")).collect::<Vec<_>>().join("/");
     let relative = format!("game space/日本語/{deep}/scene ü.rpy");
     let target = root.join(Path::new(&relative));
+    let outside = std::env::temp_dir().join(format!("loomlight-outside-{nonce}.rpy"));
     fs::create_dir_all(target.parent().ok_or("probe parent unavailable")?).map_err(|_| "probe setup failed")?;
     fs::write(&target, b"label start:\n    return\n").map_err(|_| "probe setup failed")?;
+    fs::write(&outside, b"private fixture\n").map_err(|_| "probe setup failed")?;
     let result = (|| {
         let read_request = probe_request("readText", &root, &relative);
         let before = read_text(&read_request)?;
@@ -320,20 +328,31 @@ fn packaged_security_probe() -> Result<Value, String> {
         let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
         let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000) };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
+        let link = root.join("game space").join("escape-link.rpy");
+        let symlink_escape = match create_file_symlink(&outside, &link) {
+            Ok(()) if read_text(&probe_request("readText", &root, "game space/escape-link.rpy")).is_err() => "denied",
+            Ok(()) => "allowed",
+            Err(_) => "unavailable",
+        };
         let (watch_tx, watch_rx) = mpsc::channel();
         let started = Instant::now();
         let _watcher = watch_path(&target, move || { let _ = watch_tx.send(()); })?;
         fs::write(&target, after.contents.as_bytes()).map_err(|_| "probe external edit failed")?;
         watch_rx.recv_timeout(Duration::from_secs(5)).map_err(|_| "probe watch timed out")?;
+        let latency_ms = started.elapsed().as_millis();
+        let mut watch_events = 1_u64;
+        while watch_rx.recv_timeout(Duration::from_millis(100)).is_ok() { watch_events += 1; }
         Ok(json!({
             "evidence": "tauri-packaged-core-denial", "read": true, "atomicReplace": true,
             "staleDenied": stale_denied, "traversalDenied": traversal_denied,
             "missingErrorRedacted": missing_redacted, "arbitraryProcessDenied": arbitrary_process_denied,
-            "watchLatencyMs": started.elapsed().as_millis(), "pathLengthChars": target.to_string_lossy().chars().count(),
+            "symlinkEscape": symlink_escape, "watchLatencyMs": latency_ms, "watchEvents": watch_events,
+            "pathLengthChars": target.to_string_lossy().chars().count(),
             "pathCases": ["spaces", "unicode", "long", "deep"]
         }))
     })();
     let _ = fs::remove_dir_all(root.parent().unwrap_or(&root));
+    let _ = fs::remove_file(outside);
     result
 }
 
@@ -452,6 +471,7 @@ mod tests {
         assert_eq!(result["traversalDenied"], true);
         assert_eq!(result["missingErrorRedacted"], true);
         assert_eq!(result["arbitraryProcessDenied"], true);
+        assert_ne!(result["symlinkEscape"], "allowed");
     }
 
     #[test]

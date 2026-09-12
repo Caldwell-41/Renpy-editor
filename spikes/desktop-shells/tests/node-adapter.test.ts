@@ -62,20 +62,20 @@ test("handles spaces, Unicode, and deep target paths without leaking paths in er
 test("reports target watch latency and cleans up the watcher", async () => {
   const root = await fixture();
   const started = performance.now();
-  let events = 0;
-  const latency = await new Promise<number>(async (resolve, reject) => {
+  const observations = await new Promise<{ latency: number; events: number }>(async (resolve, reject) => {
     const guard = setTimeout(() => reject(new Error("watch event timed out")), 5_000);
+    let first: number | undefined;
+    let events = 0;
     const watcher = await watchText(root, "game/script.rpy", () => {
       events += 1;
-      clearTimeout(guard);
-      watcher.close();
-      resolve(performance.now() - started);
+      first ??= performance.now() - started;
+      if (events === 1) setTimeout(() => { clearTimeout(guard); watcher.close(); resolve({ latency: first!, events }); }, 100);
     });
     await writeFile(path.join(root, "game", "script.rpy"), "external edit\n", "utf8");
   });
-  assert.ok(latency < 5_000);
-  assert.ok(events >= 1);
-  console.log(JSON.stringify({ evidence: "node-watch", platform: process.platform, latencyMs: Math.round(latency), events }));
+  assert.ok(observations.latency < 5_000);
+  assert.ok(observations.events >= 1);
+  console.log(JSON.stringify({ evidence: "node-watch", platform: process.platform, latencyMs: Math.round(observations.latency), events: observations.events }));
 });
 
 test("does not leave temporary files after stale or successful replacement", async () => {
