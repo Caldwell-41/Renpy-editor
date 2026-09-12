@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process-parity checkpoint complete; broader behavior evidence pending<br>
+**Status:** Process parity complete; corrective packaged security/filesystem checkpoint in progress<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -20,7 +20,47 @@ The initial surface is deliberately narrow:
 | External file watch | Implemented | Implemented | Compiles/packages on both targets; latency tests pending |
 | Allowlisted mock SDK process | Bounded stream/cancel/timeout events | Equivalent threaded supervisor | Shared and Rust lifecycle tests pass on both targets |
 | Unknown operation/path traversal | Denied | Denied | Shared and Rust denial tests pass on both targets |
-| Local CSP/navigation boundary | Implemented | Implemented | Package/launch smoke passes; denial E2E pending |
+| Local CSP/navigation boundary | Implemented | Implemented | Packaged E2E partial; Tauri Windows navigation correction pending target verification |
+
+## Packaged security/filesystem checkpoint
+
+Question: can both packaged candidates enforce the same narrow renderer-to-core,
+process, and project-filesystem boundary on Windows x64 and macOS ARM64, while a failed
+assertion reliably fails CI?
+
+Success requires packaged denial of unlisted operations, arbitrary processes, external
+network/navigation/popups, traversal, and symlink escape; successful contained read,
+SHA-guarded same-directory replacement, external watch, missing-file, and complex-path
+behavior; redacted absolute paths and synthetic sensitive values; recorded watch/path
+measurements; and non-zero process status for any false assertion.
+
+Run 34691607349 is partial and includes failed evidence despite both jobs concluding
+success. Its shared Node suite recorded Windows watch latency 2 ms with two events and
+macOS latency 1 ms with two events. The packaged Tauri core probe recorded:
+
+| Target | Path length | First watch event | Events in 100 ms | Symlink |
+| --- | ---: | ---: | ---: | --- |
+| Windows x64 | 265 characters | 0 ms | 2 | Denied |
+| macOS ARM64 | 277 characters | 12 ms | 3 | Denied |
+
+Both packaged Electron WebViews reported renderer Node globals absent, a frozen narrow
+bridge, and denial of unknown IPC, traversal, network, popup, and navigation attempts.
+However, expected rejected IPC calls made Electron print stack traces containing the
+absolute hosted-runner application path. This fails the log-redaction criterion.
+
+The packaged Tauri core probe passed contained read, replacement, stale-hash,
+traversal, missing-file redaction, arbitrary-process, symlink, watch, and spaces/
+Unicode/deep-path cases. Its WebView probe passed unknown IPC, traversal, network, and
+popup denial on both targets and navigation denial on macOS. Windows explicitly logged
+`navigationDenied: false`, but `AppHandle::exit(1)` did not produce a failed shell step.
+Therefore Tauri Windows external-navigation denial and the workflow gate were not
+proven by that run.
+
+The corrective implementation keeps expected Electron denials out of privileged stack
+logs, drives Electron file behavior through its packaged renderer bridge, makes Tauri
+navigation allowlisting explicit, requires symlink creation/denial, and uses a hard
+non-zero process exit after flushing probe output. These changes remain unverified on
+the two target runners until their changed-path matrix completes.
 
 The final initial matrix, [GitHub Actions run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329),
 passed on Windows x64 and macOS ARM64. Both jobs ran the shared tests, packaged and
@@ -100,8 +140,8 @@ cancelled. Existing path filters remain limited to this workflow and
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- Watch latency, replacement semantics, long/Unicode paths, cancellation, and output cap.
-- Renderer/webview denial probes for IPC, network, navigation, and filesystem escape.
+- Verified corrective target results for packaged filesystem equivalence, WebView
+  navigation denial, application-log redaction, watch counts/latency, and complex paths.
 - Keyboard/screen-reader, drag/drop, and image/audio/video behavior.
 - Native credential-store prototype with log/UI/project leak checks.
 - 10,000-node graph interaction without blocking Monaco.

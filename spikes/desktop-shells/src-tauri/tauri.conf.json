@@ -14,6 +14,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "Loomlight desktop spike",
         "width": 1180,
         "height": 760

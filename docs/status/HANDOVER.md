@@ -1,6 +1,6 @@
 # Phase 0 continuation handover
 
-**Prepared:** 2026-09-11<br>
+**Prepared:** 2026-09-12<br>
 **Phase:** 0 — Foundation and proof<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
@@ -58,6 +58,16 @@ decisions unless repository evidence presents a material conflict.
   allowlisted direct arguments, incremental bounded/redacted events, real
   cancellation, deterministic output modes, terminal reasons, stale-ID handling,
   and active-run cleanup.
+- Packaged probes now cover Electron renderer isolation, bridge shape, unlisted IPC,
+  traversal, network, popup, and navigation denial, plus Tauri core read/replace,
+  stale-hash, traversal, missing-file, process, symlink, watch, and complex-path cases.
+  Run 34691607349 also revealed that expected Electron denials logged absolute packaged
+  paths and that Tauri on Windows reported `navigationDenied: false` without returning
+  a failing process status. Those are active evidence defects, not successful gates.
+- Dependency caching and per-workflow/ref concurrency are implemented and measured.
+  Warm run 34691607349 reduced Windows desktop time from 15:23 to 5:42 and macOS from
+  2:34 to 1:57. SDK archive caching preserves checksum verification but did not
+  materially improve the approximately 1:10 SDK probe.
 - Repository quality CI passed after the latest evidence documentation update.
 
 Evidence links:
@@ -71,23 +81,22 @@ The retained target artifacts are unsigned research outputs, not a product relea
 
 ## Exact next bounded task
 
-Add packaged security-denial E2E and target filesystem/watch/atomicity/path evidence
-before doing any other desktop work.
+Finish the corrective packaged security/filesystem checkpoint before doing any other
+desktop work.
 
 Implement and prove on Windows x64 and macOS ARM64:
 
-1. Packaged Electron and Tauri probes deny unlisted IPC/capabilities, arbitrary
-   process commands, navigation, network access, and filesystem escape.
-2. Selected-root reads, file watching, external-change notification, SHA-stale write
-   rejection, and same-directory atomic replacement behave equivalently.
-3. Spaces, Unicode, target-appropriate long paths, missing files, symlinks, and path
-   traversal are exercised without exposing absolute machine paths in UI or logs.
-4. Watch latency and duplicate/coalesced event behavior are recorded rather than
-   assumed identical between operating systems.
-5. Tests execute against packaged candidates where the boundary depends on packaging;
-   unit-only evidence is labelled separately.
-6. The Windows x64/macOS ARM64 workflow remains green and the desktop evidence file
-   records commands, failures, platform differences, and retained artifacts.
+1. Exercise selected-root read, watched external edit, SHA-stale rejection,
+   same-directory replacement, missing files, symlinks, and complex paths through the
+   packaged Electron renderer bridge, matching the existing packaged Tauri core probe.
+2. Return expected Electron denials as typed data so Electron does not print privileged
+   stack traces containing absolute packaged paths.
+3. Explicitly deny external Tauri navigation and ensure a false WebView assertion exits
+   non-zero on Windows as well as macOS.
+4. Require rather than tolerate unavailable symlink evidence on both hosted targets;
+   record path lengths, watch latency, and duplicate/coalesced event counts.
+5. Keep unit and packaged E2E evidence labelled separately, run the changed-path target
+   matrix once, and record both failures and verified results.
 
 Keep the work disposable and stack-neutral. Do not begin media/accessibility work or
 accept a stack in this task.
@@ -97,7 +106,8 @@ accept a stack in this task.
 After process parity, complete these evidence gates in this order unless new evidence
 shows a dependency conflict:
 
-1. **Next:** Packaged security-denial E2E and target filesystem/watch/atomicity/path cases.
+1. **In progress:** Correct and close packaged security-denial and equivalent target
+   filesystem/watch/atomicity/path evidence.
 2. Shared UI behavior for docking, drag/drop, media, keyboard, screen readers, focus,
    resizing, reduced motion, and current OS WebView differences.
 3. Native credential-store prototypes with UI/log/project leak tests.
@@ -139,12 +149,11 @@ as evidence to diagnose, not as a reason to infer behavior from the other platfo
 
 ## Git and publishing state
 
-- Process parity was implemented in commits `f7e62e1` and `144c0fe`; its target
-  matrix and repository-quality run are green. No packaged-denial work has started.
-- The local and remote commit identifiers can differ because this environment lacked
-  a shell HTTPS credential helper and published through the authenticated GitHub Git
-  Data API. The implementation/evidence checkpoint had identical local and remote
-  tree SHA `bae8df4f546f9217c7fb79eec8cad2d5b24e616e` before this evidence-doc update.
+- Remote `main` was `b59a6f6496f6c50c4ef42d9be710ded68235b624` when this handover was reconciled.
+  Commits `93647a7`, `69035da`, and `a6b4e58` contain the packaged denial, filesystem,
+  watch, symlink, and Tauri WebView probes; later commits add the accepted cache work.
+- The local and remote commit identifiers can differ when an environment lacks a shell
+  HTTPS credential helper and publishes through the authenticated GitHub Git Data API.
 - Before publishing more work, fetch the current private `main` ref, create a commit
   with that remote commit as its parent, and update `main` without force. Verify the
   resulting remote tree exactly matches the intended local tree.

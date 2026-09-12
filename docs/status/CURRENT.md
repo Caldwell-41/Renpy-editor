@@ -20,9 +20,11 @@
   SDK, filesystem, package install/launch, signing, and quarantine behavior are open.
 - No desktop stack is accepted. A shared-contract Electron/Tauri spike implements
   the first file/process/security boundary. Its Windows x64/macOS ARM64 matrix passes
-  shared process lifecycle tests, Electron package/launch smoke, Tauri process
-  supervisor tests, and Tauri packaging. Packaged denial and broader behavioral
-  measurements remain open.
+  shared process lifecycle tests, packaging, and most packaged denial probes. Run
+  34691607349 proved Electron IPC/network/popup/navigation denial and Tauri core
+  filesystem/process denial on both targets, but also exposed two unresolved defects:
+  Electron expected-denial logs contained packaged runner paths, and the Tauri Windows
+  WebView reported `navigationDenied: false` without failing its workflow step.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -36,9 +38,11 @@
 
 ## Next action
 
-Add packaged security-denial E2E plus target filesystem, watch, atomic replacement,
-and path-behavior tests on both target runners. Then proceed to media/accessibility,
-credentials, graph-scale measurements, and official SDK platform evidence.
+Complete and verify the corrective packaged security/filesystem checkpoint: exercise
+Electron filesystem behavior through its packaged renderer bridge, keep denial errors
+out of privileged-process stack logs, enforce Tauri navigation policy explicitly, and
+make a false packaged assertion fail the process on both targets. Record the resulting
+path/watch measurements before proceeding to shared UI/WebView behavior.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).

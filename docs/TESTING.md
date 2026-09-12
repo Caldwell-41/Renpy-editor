@@ -18,8 +18,12 @@ adds 19 dependency-free security/adapter tests. The manually dispatched
 `.github/workflows/desktop-spikes.yml` packages disposable Electron and Tauri shells
 on Windows x64 and macOS ARM64; these jobs are Phase 0 evidence, not release builds.
 The initial full matrix passed in
-[run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329);
-packaged denial E2E and performance measurements remain future gates.
+[run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329).
+Later packaged-denial probes ran in 34691607349, but the recorded job conclusion is not
+sufficient evidence: Windows printed `navigationDenied: false` for Tauri while the step
+still passed, and expected Electron denial exceptions exposed absolute packaged paths.
+The corrective packaged checkpoint must make each assertion enforce the process result.
+Broader UI and performance measurements remain future gates.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

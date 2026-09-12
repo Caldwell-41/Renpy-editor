@@ -330,11 +330,9 @@ fn packaged_security_probe() -> Result<Value, String> {
         let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
         let link = root.join("game space").join("escape-link.rpy");
-        let symlink_escape = match create_file_symlink(&outside, &link) {
-            Ok(()) if read_text(&probe_request("readText", &root, "game space/escape-link.rpy")).is_err() => "denied",
-            Ok(()) => "allowed",
-            Err(_) => "unavailable",
-        };
+        create_file_symlink(&outside, &link).map_err(|_| "probe symlink unavailable")?;
+        let symlink_denied = read_text(&probe_request("readText", &root, "game space/escape-link.rpy")).is_err();
+        if !symlink_denied { return Err("symlink escape unexpectedly allowed".into()); }
         let (watch_tx, watch_rx) = mpsc::channel();
         let started = Instant::now();
         let _watcher = watch_path(&target, move || { let _ = watch_tx.send(()); })?;
@@ -343,11 +341,20 @@ fn packaged_security_probe() -> Result<Value, String> {
         let latency_ms = started.elapsed().as_millis();
         let mut watch_events = 1_u64;
         while watch_rx.recv_timeout(Duration::from_millis(100)).is_ok() { watch_events += 1; }
+        let entries = fs::read_dir(target.parent().ok_or("probe parent unavailable")?)
+            .map_err(|_| "probe directory unavailable")?
+            .filter_map(Result::ok).map(|entry| entry.file_name()).collect::<Vec<_>>();
+        let same_directory_replacement = entries.iter().all(|entry| !entry.to_string_lossy().ends_with(".tmp"));
+        let synthetic_secret = "loomlight-synthetic-secret-value".to_owned();
+        let redacted = redact(&format!("{} {}", target.display(), synthetic_secret), std::slice::from_ref(&synthetic_secret));
+        let sensitive_redacted = !redacted.contains(&root.to_string_lossy().to_string()) && !redacted.contains(&synthetic_secret);
         Ok(json!({
             "evidence": "tauri-packaged-core-denial", "read": true, "atomicReplace": true,
+            "sameDirectoryReplacement": same_directory_replacement,
             "staleDenied": stale_denied, "traversalDenied": traversal_denied,
             "missingErrorRedacted": missing_redacted, "arbitraryProcessDenied": arbitrary_process_denied,
-            "symlinkEscape": symlink_escape, "watchLatencyMs": latency_ms, "watchEvents": watch_events,
+            "symlinkDenied": symlink_denied, "sensitiveRedacted": sensitive_redacted,
+            "watchLatencyMs": latency_ms, "watchEvents": watch_events,
             "pathLengthChars": target.to_string_lossy().chars().count(),
             "pathCases": ["spaces", "unicode", "long", "deep"]
         }))
@@ -369,7 +376,6 @@ fn finish_webview_security_probe(app: &tauri::AppHandle, request: &DesktopReques
     let window = app.get_webview_window("main").ok_or("probe window unavailable")?;
     let before = window.url().map_err(|_| "probe URL unavailable")?;
     window.eval("location.href = 'https://example.invalid/loomlight-navigation'").map_err(|_| "navigation probe unavailable")?;
-    let app_handle = app.clone();
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(300));
         let navigation_denied = window.url().is_ok_and(|url| url == before);
@@ -377,7 +383,8 @@ fn finish_webview_security_probe(app: &tauri::AppHandle, request: &DesktopReques
         completed["navigationDenied"] = json!(navigation_denied);
         completed["evidence"] = json!("tauri-packaged-webview-denial");
         println!("{completed}");
-        app_handle.exit(if navigation_denied { 0 } else { 1 });
+        let _ = std::io::stdout().flush();
+        std::process::exit(if navigation_denied { 0 } else { 1 });
     });
     Ok(json!({ "checkingNavigation": true }))
 }
@@ -416,6 +423,18 @@ fn main() {
     }
     tauri::Builder::default()
         .manage(SpikeState::default())
+        .setup(|app| {
+            let config = app.config().app.windows.first().expect("main window config is required");
+            tauri::WebviewWindowBuilder::from_config(app, config)
+                .expect("main window config must be valid")
+                .on_navigation(|url| {
+                    url.scheme() == "tauri"
+                        || (matches!(url.scheme(), "http" | "https") && url.host_str() == Some("tauri.localhost"))
+                })
+                .build()
+                .expect("main window must be created");
+            Ok(())
+        })
         .on_page_load(|webview, _| {
             if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
                 webview.eval(include_str!("security_probe.js")).expect("security probe injection failed");
@@ -503,7 +522,9 @@ mod tests {
         assert_eq!(result["traversalDenied"], true);
         assert_eq!(result["missingErrorRedacted"], true);
         assert_eq!(result["arbitraryProcessDenied"], true);
-        assert_ne!(result["symlinkEscape"], "allowed");
+        assert_eq!(result["symlinkDenied"], true);
+        assert_eq!(result["sameDirectoryReplacement"], true);
+        assert_eq!(result["sensitiveRedacted"], true);
     }
 
     #[test]
