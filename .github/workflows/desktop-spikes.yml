@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   platform-spike:
     name: ${{ matrix.name }}
@@ -38,6 +42,12 @@ jobs:
           npm --version
           rustc --version
           cargo --version
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: ${{ matrix.runner }}
+          workspaces: spikes/desktop-shells/src-tauri -> target
+          cache-bin: "false"
       - name: Install pinned JavaScript dependencies
         run: npm ci
       - name: Test shared contract and filesystem adapter
@@ -55,8 +65,8 @@ jobs:
           else
             ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
           fi
-      - name: Test Tauri privileged adapter
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - name: Test Tauri privileged adapter in release profile
+        run: cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Package Tauri spike
         run: npm run tauri:build
       - name: Probe packaged Tauri core denial and filesystem boundary
