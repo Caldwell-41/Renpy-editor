@@ -1,6 +1,6 @@
 # Native credential-store spike results
 
-**Status:** In progress<br>
+**Status:** Complete automated packaged checkpoint; signed-upgrade and locked-store behavior remain physical-device limitations<br>
 **Targets:** Windows x86-64 Credential Manager/DPAPI and macOS ARM64 Keychain
 
 ## Question
@@ -50,7 +50,50 @@ behavior, not production signing/persistence behavior.
 
 ## Results
 
-Target evidence is pending.
+Initial run
+[34722141300](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722141300)
+passed Electron packaging and the preceding Electron probes on both targets, then
+stopped at `cargo test --release --locked`: the hand-prepared lock omitted indirect
+Apple target entries. No Tauri package or credential result was claimed. Diagnostic
+run
+[34722270752](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722270752)
+resolved and printed the exact lock delta, then exposed a Rust closure error requiring
+an explicit `Result<(), String>` annotation on both targets. Again, the workflow
+stopped before credential operations.
+
+The exact resolved dependency graph and type correction are committed, and the
+temporary resolver step is removed. Final run
+[34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
+passed `cargo test --release --locked`, both packages, all preceding probes, both
+credential candidates, and the plaintext scan on Windows x64 and macOS ARM64.
+Repository quality run 34722411459 also passed.
+
+| Target / candidate | Native mechanism | Availability / round trip | Cleanup | Renderer created |
+| --- | --- | --- | --- | --- |
+| Windows / Electron 44.3.0 | DPAPI-protected `safeStorage` key | Available; opaque ciphertext; pass | Temporary ciphertext removed | No |
+| Windows / Tauri | Credential Manager entry via `keyring` 3.6.3 | Pass | Deleted; subsequent read returned no entry | No |
+| macOS / Electron 44.3.0 | Keychain-backed `safeStorage` key | Available; opaque ciphertext; pass | Temporary ciphertext removed | No |
+| macOS / Tauri | Keychain entry via `keyring` 3.6.3 | Pass | Deleted; subsequent read returned no entry | No |
+
+Both Electron results reported `shouldReEncrypt: false`. The final runners used Rust
+1.98.1/Cargo 1.98.1; Windows used Node 22.23.2/npm 10.9.8 and macOS used Node
+24.20.0/npm 11.19.0. Those runner Node versions do not change the packaged Electron
+44.3.0 runtime under test.
+
+The runner generated the sentinel and account identifiers at runtime. The probe
+wrapper enforced a 30-second timeout and 65,536-byte output cap, rejected the secret,
+account, working directory, home directory, or runner-temp path in captured output,
+then emitted only the validated JSON above. The follow-on streaming scan covered
+tracked source, the synthetic project, both Electron packages, the Tauri executable
+and bundles, and therefore the files supplied to retained artifacts. It found zero
+matches across 177 files on Windows and 370 on macOS. Different counts reflect the
+platform package layouts, not different scan scopes.
+
+No credential command was added to the renderer contract, Electron preload, or Tauri
+invoke handler. The Tauri dependency enables only its Apple-native and Windows-native
+features and is pinned in `Cargo.lock`. The Electron ciphertext and Tauri credential
+entry are removed before successful exit; the workflow retains neither the runtime
+sentinel nor account identifier.
 
 ## Known limitations
 

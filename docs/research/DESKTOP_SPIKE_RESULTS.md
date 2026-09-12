@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process parity, packaged security/filesystem, and shared UI/WebView checkpoints complete; broader behavior evidence pending<br>
+**Status:** Process parity, packaged security/filesystem, shared UI/WebView, and credential checkpoints complete; broader behavior evidence pending<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -177,7 +177,6 @@ cancelled. Existing path filters remain limited to this workflow and
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- Native credential-store prototype with log/UI/project leak checks.
 - 10,000-node graph interaction without blocking Monaco.
 - Dependency/licence inventory and developer-complexity comparison.
 
@@ -186,6 +185,13 @@ Shared packaged UI/WebView behavior is recorded separately in
 docking/resizing, keyboard/focus, reduced motion, synthetic drag/drop, media elements,
 codec observations, and Monaco edit guards pass in run 34701370897; manual
 screen-reader and physical media-quality checks remain explicit limitations.
+
+Packaged native-store behavior is recorded in
+[CREDENTIAL_STORE_SPIKE_RESULTS.md](CREDENTIAL_STORE_SPIKE_RESULTS.md). Run
+34722411465 passed Electron's DPAPI/Keychain-backed `safeStorage`, Tauri's direct
+Credential Manager/Keychain entries, cleanup, no-renderer/no-IPC assertions, and a
+zero-match plaintext scan of source, project, logs, packages, and retained-artifact
+inputs on both supported targets.
 
 No desktop stack is accepted by this partial result.
 

@@ -83,6 +83,13 @@ decisions unless repository evidence presents a material conflict.
   image/audio/video drag/drop, codec observations, responsive layout, and Monaco edit
   guards pass. Earlier run 34701229006 correctly exposed a hidden-panel focus-fixture
   defect. Manual NVDA/VoiceOver and subjective playback remain physical-device work.
+- Native credential run 34722411465 passes packaged Electron and Tauri on both
+  targets. Electron uses Keychain-backed/DPAPI-backed `safeStorage` with only temporary
+  opaque ciphertext; Tauri uses direct Keychain/Credential Manager entries. Both
+  round-trip and clean up without creating a renderer or adding credential IPC. The
+  runtime sentinel scan found zero leaks in output, project/source, packages, or
+  retained-artifact inputs. Runs 34722141300 and 34722270752 retain the lock-resolution
+  and Rust type-inference failures that were corrected before the green run.
 
 Evidence links:
 
@@ -95,22 +102,25 @@ The retained target artifacts are unsigned research outputs, not a product relea
 
 ## Exact next bounded task
 
-Complete equivalent native credential-store prototypes in the two packaged candidates
-before graph work.
+Complete deterministic branch-graph scale evidence using the shared Monaco surface
+before preview/source-mapping work.
 
 Implement and prove on Windows x64 and macOS ARM64:
 
-1. State the exact credential-store question and leak-denial success criteria before
-   implementation; use only synthetic sentinel values.
-2. Exercise the OS-native store from packaged Electron and Tauri processes without
-   exposing a general credential or arbitrary key/value IPC API to the shared UI.
-3. Return only typed success/availability metadata to any renderer probe. Scan UI
-   output, process logs, project files, packaged/retained artifacts, and tracked source
-   for the plaintext sentinel and machine-specific paths.
-4. Record Windows Credential/DPAPI behavior and macOS Keychain behavior separately,
-   including denial, prompt, headless-runner, cleanup, and persistence limitations.
-5. Fail the packaged step on a leak or false assertion, clean up the synthetic entry,
-   and retain no credentials or signing material.
+1. State deterministic graph generation and success criteria before implementation.
+   Cover 1,000, 10,000, and 50,000 nodes with choices, calls, route filters, cycles,
+   and reconvergence; use the 10,000-node case as the required usability target.
+2. Use one stack-neutral disposable graph fixture and measurement function in both
+   packaged candidates. Do not build the production graph editor.
+3. Measure generation/layout, filter/search, path highlight, viewport culling,
+   pan/zoom or equivalent interaction, stable relayout, and memory where the runtime
+   exposes a defensible measure.
+4. Schedule graph work so a timed Monaco edit probe can establish whether computation
+   blocks editor input. Record long tasks, interaction latency, frame/culling counts,
+   failures, and loose predeclared thresholds rather than reporting only averages.
+5. Record Windows WebView2, macOS WKWebView, and bundled Chromium separately. Keep the
+   50,000-node case a stress result; do not weaken the 10,000-node usability gate if it
+   fails.
 
 Keep the work disposable and stack-neutral. Do not accept a stack in this task.
 
@@ -124,8 +134,10 @@ shows a dependency conflict:
 2. **Complete automated checkpoint:** Shared UI behavior for docking, drag/drop,
    media, keyboard, accessibility semantics, focus, resizing, reduced motion, and
    current OS WebView differences. Manual assistive-tech checks remain explicit.
-3. **Next:** Native credential-store prototypes with UI/log/project leak tests.
-4. Deterministic 1k/10k/50k branch-graph measurements without blocking Monaco.
+3. **Complete:** Native credential-store prototypes with UI/log/project/package leak
+   tests.
+4. **Next:** Deterministic 1k/10k/50k branch-graph measurements without blocking
+   Monaco; 10k is the usability target.
 5. Preview/source-mapping fidelity experiment with faithful, approximate, and
    runtime-only behavior recorded explicitly.
 6. Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and macOS,

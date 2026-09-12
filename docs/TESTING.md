@@ -32,6 +32,11 @@ passes identical packaged wide/narrow assertions in Electron and Tauri on Window
 x64 and macOS ARM64. It covers DOM accessibility semantics, docks/resizing,
 keyboard/focus, reduced motion, synthetic media drag/drop, codec observations, and a
 loose Monaco edit guard; it does not claim a manual NVDA or VoiceOver pass.
+The packaged credential-store
+[run 34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
+passes on both targets: no renderer/credential IPC, OS-native round trip and cleanup,
+bounded/redacted probe output, and zero plaintext sentinel matches in tracked source,
+the project fixture, packages, executables/bundles, or retained-artifact inputs.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

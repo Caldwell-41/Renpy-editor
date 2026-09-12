@@ -32,6 +32,13 @@
   synthetic media drag/drop, codec observations, responsive layout, and a loose
   Monaco edit-latency guard. Manual NVDA/VoiceOver interaction and real media quality
   remain physical-device limitations, not inferred successes.
+- Native credential evidence passes in packaged Electron and Tauri on both targets in
+  run 34722411465. Electron round-tripped opaque temporary ciphertext using its
+  Keychain-backed macOS and DPAPI-backed Windows `safeStorage` keys; Tauri created,
+  read, deleted, and confirmed absence of native Keychain/Credential Manager entries.
+  No renderer was created or credential IPC added, and runtime sentinel scans found
+  zero plaintext leaks across logs, project/source, packages, and retained-artifact
+  inputs. Signed macOS upgrades and locked/prompting stores remain physical checks.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -45,10 +52,10 @@
 
 ## Next action
 
-Complete equivalent native credential-store prototypes in both packaged candidates.
-Prove that synthetic credentials stay out of the renderer/UI, logs, project files,
-retained artifacts, and source control; record Windows and macOS behavior separately.
-Keep the work stack-neutral and disposable.
+Complete deterministic 1,000-, 10,000-, and 50,000-node graph measurements with the
+shared Monaco surface. Measure generation/layout, filtering, viewport culling,
+interaction latency, memory where available, stable relayout, and whether graph work
+blocks editor input. The 10,000-node case is the required usability target.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).
