@@ -168,6 +168,15 @@ fn watch_text(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopReque
     Ok(json!({ "watching": true }))
 }
 
+fn watch_path<F>(target: &Path, mut changed: F) -> Result<RecommendedWatcher, String>
+where F: FnMut() + Send + 'static {
+    let mut watcher = notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
+        if event.is_ok() { changed(); }
+    }).map_err(|_| "watcher could not be created")?;
+    watcher.watch(target, RecursiveMode::NonRecursive).map_err(|_| "file could not be watched")?;
+    Ok(watcher)
+}
+
 fn unwatch_text(state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
     let (_, relative_path) = request_path(request, true)?;
     let key = format!("{}\0{}", request.root.as_deref().unwrap_or_default(), relative_path);
@@ -280,6 +289,54 @@ fn cancel_mock_sdk(state: &SpikeState, request: &DesktopRequest) -> Result<Value
     Ok(json!({ "cancelled": sender.is_some_and(|sender| sender.send(()).is_ok()) }))
 }
 
+fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRequest {
+    DesktopRequest {
+        operation: operation.into(), root: Some(root.to_string_lossy().into_owned()), relative_path: Some(relative_path.into()),
+        expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None,
+    }
+}
+
+fn packaged_security_probe() -> Result<Value, String> {
+    let nonce = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_| "clock unavailable")?.as_nanos();
+    let root = std::env::temp_dir().join(format!("loomlight-probe-{nonce}")).join("project space ü");
+    let deep = (0..20).map(|index| format!("deep-{index}")).collect::<Vec<_>>().join("/");
+    let relative = format!("game space/日本語/{deep}/scene ü.rpy");
+    let target = root.join(Path::new(&relative));
+    fs::create_dir_all(target.parent().ok_or("probe parent unavailable")?).map_err(|_| "probe setup failed")?;
+    fs::write(&target, b"label start:\n    return\n").map_err(|_| "probe setup failed")?;
+    let result = (|| {
+        let read_request = probe_request("readText", &root, &relative);
+        let before = read_text(&read_request)?;
+        let mut write_request = probe_request("writeTextAtomic", &root, &relative);
+        write_request.expected_sha256 = Some(before.sha256.clone());
+        write_request.contents = Some(format!("{}# updated\n", before.contents));
+        let after = write_text(&write_request)?;
+        let stale_denied = write_text(&write_request).is_err();
+        let traversal_denied = request_path(&probe_request("readText", &root, "../secret"), true).is_err();
+        let missing_error = match read_text(&probe_request("readText", &root, "game space/missing.rpy")) {
+            Ok(_) => return Err("missing file unexpectedly opened".into()),
+            Err(error) => error,
+        };
+        let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
+        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000) };
+        let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
+        let (watch_tx, watch_rx) = mpsc::channel();
+        let started = Instant::now();
+        let _watcher = watch_path(&target, move || { let _ = watch_tx.send(()); })?;
+        fs::write(&target, after.contents.as_bytes()).map_err(|_| "probe external edit failed")?;
+        watch_rx.recv_timeout(Duration::from_secs(5)).map_err(|_| "probe watch timed out")?;
+        Ok(json!({
+            "evidence": "tauri-packaged-core-denial", "read": true, "atomicReplace": true,
+            "staleDenied": stale_denied, "traversalDenied": traversal_denied,
+            "missingErrorRedacted": missing_redacted, "arbitraryProcessDenied": arbitrary_process_denied,
+            "watchLatencyMs": started.elapsed().as_millis(), "pathLengthChars": target.to_string_lossy().chars().count(),
+            "pathCases": ["spaces", "unicode", "long", "deep"]
+        }))
+    })();
+    let _ = fs::remove_dir_all(root.parent().unwrap_or(&root));
+    result
+}
+
 #[tauri::command]
 fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, request: DesktopRequest) -> Result<Value, String> {
     match request.operation.as_str() {
@@ -294,6 +351,12 @@ fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, req
 }
 
 fn main() {
+    if std::env::var("LOOMLIGHT_SPIKE_SECURITY_PROBE").as_deref() == Ok("1") {
+        match packaged_security_probe() {
+            Ok(result) => { println!("{result}"); return; }
+            Err(error) => { eprintln!("packaged security probe failed: {error}"); std::process::exit(1); }
+        }
+    }
     if std::env::args().nth(1).as_deref() == Some("--mock-sdk") {
         match std::env::args().nth(2).as_deref() {
             Some("version") => println!("mock-renpy 0.0"),
@@ -378,5 +441,30 @@ mod tests {
         let stderr = supervised("stderr", 3_000, false).into_iter().find_map(|event| if let ProcessEvent::Stderr { text, .. } = event { Some(text) } else { None }).unwrap();
         assert!(!stderr.contains("/private/project"));
         assert!(!stderr.contains("token-secret-value"));
+    }
+
+    #[test]
+    fn packaged_probe_covers_target_filesystem_boundary() {
+        let result = packaged_security_probe().unwrap();
+        assert_eq!(result["read"], true);
+        assert_eq!(result["atomicReplace"], true);
+        assert_eq!(result["staleDenied"], true);
+        assert_eq!(result["traversalDenied"], true);
+        assert_eq!(result["missingErrorRedacted"], true);
+        assert_eq!(result["arbitraryProcessDenied"], true);
+    }
+
+    #[test]
+    fn tauri_configuration_is_deny_by_default() {
+        let config = include_str!("../tauri.conf.json");
+        let capability = include_str!("../capabilities/default.json");
+        assert!(config.contains("connect-src ipc: http://ipc.localhost"));
+        assert!(!config.contains("connect-src *"));
+        assert!(config.contains("frame-src 'none'"));
+        assert!(config.contains("object-src 'none'"));
+        assert!(capability.contains("\"permissions\": [\"core:default\"]"));
+        assert!(!capability.contains("shell:"));
+        assert!(!capability.contains("fs:"));
+        assert!(!capability.contains("http:"));
     }
 }

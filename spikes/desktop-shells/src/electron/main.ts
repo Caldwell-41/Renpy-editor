@@ -45,6 +45,7 @@ ipcMain.handle("loomlight:invoke", async (event, raw: unknown) => {
 });
 
 function createWindow() {
+  let deniedNavigations = 0;
   const win = new BrowserWindow({
     width: 1180,
     height: 760,
@@ -56,12 +57,26 @@ function createWindow() {
       sandbox: true,
     },
   });
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  win.webContents.on("will-navigate", (event) => event.preventDefault());
+  win.webContents.setWindowOpenHandler(() => { deniedNavigations += 1; return { action: "deny" }; });
+  win.webContents.on("will-navigate", (event) => { deniedNavigations += 1; event.preventDefault(); });
   void win.loadFile(path.resolve(here, "../../ui/index.html"));
   win.once("ready-to-show", () => win.show());
-  win.webContents.once("did-finish-load", () => {
-    if (process.env.LOOMLIGHT_SPIKE_SMOKE === "1") app.quit();
+  win.webContents.once("did-finish-load", async () => {
+    if (process.env.LOOMLIGHT_SPIKE_SMOKE !== "1") return;
+    const result = await win.webContents.executeJavaScript(`(async () => ({
+      nodeGlobalsDenied: typeof process === "undefined" && typeof require === "undefined",
+      bridgeFrozen: Object.isFrozen(window.loomlight) && Object.keys(window.loomlight).sort().join(",") === "invoke,subscribe",
+      unknownIpcDenied: await window.loomlight.invoke({ operation: "shell", command: "arbitrary" }).then(() => false, () => true),
+      traversalDenied: await window.loomlight.invoke({ operation: "readText", root: "/", relativePath: "../secret" }).then(() => false, () => true),
+      networkDenied: await fetch("https://example.invalid/loomlight-probe").then(() => false, () => true),
+      popupDenied: window.open("https://example.invalid/loomlight-popup") === null,
+    }))()`);
+    win.webContents.executeJavaScript(`location.href = "https://example.invalid/loomlight-navigation"`);
+    setTimeout(() => {
+      const passed = Object.values(result).every(Boolean) && deniedNavigations >= 2 && win.webContents.getURL().startsWith("file:");
+      console.log(JSON.stringify({ evidence: "electron-packaged-denial", ...result, navigationDenied: deniedNavigations >= 2 }));
+      app.exit(passed ? 0 : 1);
+    }, 250);
   });
 }
 

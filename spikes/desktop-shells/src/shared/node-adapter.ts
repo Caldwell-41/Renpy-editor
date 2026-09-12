@@ -17,15 +17,15 @@ export function sha256(contents: string | Buffer): string {
 
 async function containedPath(rootInput: string, relativeInput: string, mustExist: boolean) {
   const relativePath = validateRelativePath(relativeInput);
-  const root = await fs.realpath(rootInput);
+  const root = await fs.realpath(rootInput).catch(() => { throw new Error("project root is unavailable"); });
   const candidate = path.resolve(root, ...relativePath.split("/"));
-  const parent = await fs.realpath(path.dirname(candidate));
+  const parent = await fs.realpath(path.dirname(candidate)).catch(() => { throw new Error("file parent is unavailable"); });
   const relativeParent = path.relative(root, parent);
   if (relativeParent.startsWith("..") || path.isAbsolute(relativeParent)) {
     throw new Error("path escapes project root");
   }
   if (mustExist) {
-    const resolved = await fs.realpath(candidate);
+    const resolved = await fs.realpath(candidate).catch(() => { throw new Error("file is unavailable"); });
     const relativeResolved = path.relative(root, resolved);
     if (relativeResolved.startsWith("..") || path.isAbsolute(relativeResolved)) {
       throw new Error("path escapes project root");
@@ -43,7 +43,7 @@ async function containedPath(rootInput: string, relativeInput: string, mustExist
 
 export async function readText(root: string, relativePath: string): Promise<FileVersion> {
   const safe = await containedPath(root, relativePath, true);
-  const contents = await fs.readFile(safe.target, "utf8");
+  const contents = await fs.readFile(safe.target, "utf8").catch(() => { throw new Error("file could not be read"); });
   return { relativePath: safe.relativePath, contents, sha256: sha256(contents) };
 }
 
@@ -54,7 +54,7 @@ export async function writeTextAtomic(
   contents: string,
 ): Promise<FileVersion> {
   const safe = await containedPath(root, relativePath, false);
-  const current = await fs.readFile(safe.target);
+  const current = await fs.readFile(safe.target).catch(() => { throw new Error("file could not be read"); });
   if (sha256(current) !== expectedSha256) {
     throw new StaleFileError("source changed since it was read");
   }
@@ -70,14 +70,18 @@ export async function writeTextAtomic(
     await fs.rename(temporary, safe.target);
   } catch (error) {
     await fs.rm(temporary, { force: true });
-    throw error;
+    throw new Error("atomic replacement failed");
   }
   return { relativePath: safe.relativePath, contents, sha256: sha256(contents) };
 }
 
 export async function watchText(root: string, relativePath: string, changed: () => void): Promise<FSWatcher> {
   const safe = await containedPath(root, relativePath, true);
-  return watch(safe.target, { persistent: false }, () => changed());
+  try {
+    return watch(safe.target, { persistent: false }, () => changed());
+  } catch {
+    throw new Error("file could not be watched");
+  }
 }
 
 export class MockSdkRuns {

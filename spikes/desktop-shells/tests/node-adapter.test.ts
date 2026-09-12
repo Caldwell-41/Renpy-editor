@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -40,6 +40,51 @@ test("refuses a symlink that escapes the project root", async (context) => {
   }
   await assert.rejects(() => readText(root, "game/linked.rpy"), /escapes/);
   await assert.rejects(() => watchText(root, "game/linked.rpy", () => {}), /escapes/);
+});
+
+test("handles spaces, Unicode, and deep target paths without leaking paths in errors", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "loomlight target ü "));
+  const segments = Array.from({ length: 20 }, (_, index) => `deep-${index}`);
+  const directory = path.join(root, "game space", "日本語", ...segments);
+  await mkdir(directory, { recursive: true });
+  const relative = ["game space", "日本語", ...segments, "scene ü.rpy"].join("/");
+  await writeFile(path.join(root, ...relative.split("/")), "label start:\n    return\n", "utf8");
+  const before = await readText(root, relative);
+  const after = await writeTextAtomic(root, relative, before.sha256, `${before.contents}# updated\n`);
+  assert.match(after.contents, /updated/);
+  await assert.rejects(() => readText(root, "game space/missing.rpy"), (error: Error) => {
+    assert.equal(error.message, "file is unavailable");
+    assert.equal(error.message.includes(root), false);
+    return true;
+  });
+});
+
+test("reports target watch latency and cleans up the watcher", async () => {
+  const root = await fixture();
+  const started = performance.now();
+  let events = 0;
+  const latency = await new Promise<number>(async (resolve, reject) => {
+    const guard = setTimeout(() => reject(new Error("watch event timed out")), 5_000);
+    const watcher = await watchText(root, "game/script.rpy", () => {
+      events += 1;
+      clearTimeout(guard);
+      watcher.close();
+      resolve(performance.now() - started);
+    });
+    await writeFile(path.join(root, "game", "script.rpy"), "external edit\n", "utf8");
+  });
+  assert.ok(latency < 5_000);
+  assert.ok(events >= 1);
+  console.log(JSON.stringify({ evidence: "node-watch", platform: process.platform, latencyMs: Math.round(latency), events }));
+});
+
+test("does not leave temporary files after stale or successful replacement", async () => {
+  const root = await fixture();
+  const before = await readText(root, "game/script.rpy");
+  await writeTextAtomic(root, before.relativePath, before.sha256, `${before.contents}# safe\n`);
+  const entries = await import("node:fs/promises").then(({ readdir }) => readdir(path.join(root, "game")));
+  assert.deepEqual(entries, ["script.rpy"]);
+  await rm(root, { recursive: true, force: true });
 });
 
 test("runs only the internal mock SDK executable with direct arguments", async () => {

@@ -44,7 +44,7 @@ jobs:
         run: npm test
       - name: Package Electron spike
         run: npm run package:electron
-      - name: Launch packaged Electron spike
+      - name: Probe packaged Electron denial boundary
         shell: bash
         env:
           LOOMLIGHT_SPIKE_SMOKE: "1"
@@ -59,6 +59,17 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - name: Package Tauri spike
         run: npm run tauri:build
+      - name: Probe packaged Tauri core denial and filesystem boundary
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_SECURITY_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
       - name: Upload generated Rust lockfile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
