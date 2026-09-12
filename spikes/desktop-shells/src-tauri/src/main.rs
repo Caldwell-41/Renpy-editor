@@ -417,7 +417,7 @@ fn packaged_credential_probe() -> Result<Value, String> {
     let entry = keyring::Entry::new("org.loomlight.phase0-spike", &account)
         .map_err(|_| "native credential store unavailable")?;
     let mut stored = false;
-    let operation = (|| {
+    let operation: Result<(), String> = (|| {
         entry.set_password(&secret).map_err(|_| "native credential write failed")?;
         stored = true;
         let recovered = entry.get_password().map_err(|_| "native credential read failed")?;
