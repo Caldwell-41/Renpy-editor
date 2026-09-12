@@ -55,7 +55,7 @@ ipcMain.handle("loomlight:invoke", async (event, raw: unknown) => {
 async function packagedFixture() {
   const root = await mkdtemp(path.join(tmpdir(), "loomlight-electron-project space ü-"));
   const outside = await mkdtemp(path.join(tmpdir(), "loomlight-electron-outside-"));
-  const deep = Array.from({ length: 20 }, (_, index) => `deep-${index}`);
+  const deep = Array.from({ length: 24 }, (_, index) => `deep-${index}`);
   const relativePath = ["game space", "日本語", ...deep, "scene ü.rpy"].join("/");
   const target = path.join(root, ...relativePath.split("/"));
   const outsideFile = path.join(outside, "private.rpy");

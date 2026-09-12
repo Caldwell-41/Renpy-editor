@@ -5,7 +5,7 @@ if (command === "version") {
 } else if (command === "diagnostics") {
   process.stdout.write(JSON.stringify({ severity: "warning", line: 4, args }) + "\n");
 } else if (command === "stderr") {
-  process.stderr.write(`mock warning ${args.join(" ")}\n`);
+  setTimeout(() => process.stderr.write(`mock warning ${args.join(" ")}\n`), 50);
 } else if (command === "delay") {
   setTimeout(() => process.stdout.write("delayed\n"), 2_000);
 } else if (command === "flood") {

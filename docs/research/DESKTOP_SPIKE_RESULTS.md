@@ -59,8 +59,19 @@ proven by that run.
 The corrective implementation keeps expected Electron denials out of privileged stack
 logs, drives Electron file behavior through its packaged renderer bridge, makes Tauri
 navigation allowlisting explicit, requires symlink creation/denial, and uses a hard
-non-zero process exit after flushing probe output. These changes remain unverified on
-the two target runners until their changed-path matrix completes.
+non-zero process exit after flushing probe output.
+
+Corrective run 34699898544 passed quality and the complete Windows x64 job. Windows
+recorded Electron watch latency 13 ms/two events at 255 path characters, Tauri watch
+latency 0 ms/two events at 265 characters, and successful packaged denial/filesystem/
+redaction assertions for both candidates. Crucially, the explicit Tauri policy now
+reported `navigationDenied: true` on Windows. The macOS Electron probe passed every
+assertion except `sensitiveRedacted`, then correctly exited non-zero; later steps were
+skipped. That fast-exiting stderr child exposed an observation race specific to the
+packaged macOS run. The follow-up delays only the disposable stderr fixture by 50 ms,
+adds exact redaction of known absolute process arguments containing spaces in both
+adapters, and lengthens the Electron Windows path beyond the legacy 260-character
+boundary. This follow-up still requires one target matrix.
 
 The final initial matrix, [GitHub Actions run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329),
 passed on Windows x64 and macOS ARM64. Both jobs ran the shared tests, packaged and

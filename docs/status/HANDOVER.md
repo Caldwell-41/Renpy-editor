@@ -68,6 +68,10 @@ decisions unless repository evidence presents a material conflict.
   Warm run 34691607349 reduced Windows desktop time from 15:23 to 5:42 and macOS from
   2:34 to 1:57. SDK archive caching preserves checksum verification but did not
   materially improve the approximately 1:10 SDK probe.
+- Corrective run 34699898544 passed the complete Windows packaged checkpoint, including
+  explicit Tauri navigation denial. macOS passed every Electron assertion except the
+  synthetic-sensitive-output observation and exited non-zero as intended; a minimal
+  fast-child race and spaced-path redaction follow-up is awaiting its target matrix.
 - Repository quality CI passed after the latest evidence documentation update.
 
 Evidence links:

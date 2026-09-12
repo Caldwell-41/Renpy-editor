@@ -123,10 +123,12 @@ async function run(request: Omit<MockSdkRequest, "operation">, action?: (runner:
 
 test("streams stderr and redacts paths and environment values", async () => {
   const secret = process.env.PATH ?? "missing-environment-value";
-  const events = await run({ command: "stderr", args: ["/private/project/game", secret], timeoutMs: 1_000 });
+  const privatePath = path.resolve("private project with spaces", "game");
+  const events = await run({ command: "stderr", args: [privatePath, secret], timeoutMs: 1_000 });
   const output = events.flatMap((event) => event.type === "stderr" ? [event.text] : []).join("");
   assert.match(output, /REDACTED_PATH/);
-  assert.doesNotMatch(output, /\/private\/project/);
+  assert.equal(output.includes(privatePath), false);
+  assert.doesNotMatch(output, /private project with spaces/);
   if (secret.length >= 8) assert.doesNotMatch(output, new RegExp(secret.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 

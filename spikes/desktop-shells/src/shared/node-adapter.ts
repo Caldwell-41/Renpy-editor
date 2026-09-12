@@ -89,8 +89,10 @@ export class MockSdkRuns {
 
   get activeCount(): number { return this.#runs.size; }
 
-  #redact(text: string): string {
-    let clean = text.replace(/(?:[A-Za-z]:\\|\/)(?:[^\s"']+[\\/])*[^\s"']*/gu, "[REDACTED_PATH]");
+  #redact(text: string, knownPaths: readonly string[] = []): string {
+    let clean = text;
+    for (const value of knownPaths) clean = clean.split(value).join("[REDACTED_PATH]");
+    clean = clean.replace(/(?:[A-Za-z]:\\|\/)(?:[^\s"']+[\\/])*[^\s"']*/gu, "[REDACTED_PATH]");
     const values = Object.values(process.env).filter((value): value is string => typeof value === "string" && value.length >= 8);
     for (const value of values) clean = clean.split(value).join("[REDACTED_ENV]");
     return clean;
@@ -105,6 +107,7 @@ export class MockSdkRuns {
       env: { PATH: process.env.PATH ?? "" },
       stdio: ["ignore", "pipe", "pipe"],
     });
+    const knownPaths = request.args.filter((argument) => path.isAbsolute(argument));
     let bytes = 0;
     let terminal: MockSdkTerminalReason | undefined;
     const decoders = { stdout: new StringDecoder("utf8"), stderr: new StringDecoder("utf8") };
@@ -120,7 +123,7 @@ export class MockSdkRuns {
       const remaining = MAX_OUTPUT - bytes;
       const accepted = chunk.subarray(0, Math.max(0, remaining));
       bytes += accepted.length;
-      const output = this.#redact(decoders[channel].write(accepted));
+      const output = this.#redact(decoders[channel].write(accepted), knownPaths);
       if (output) emit({ runId, type: channel, text: output });
       if (chunk.length > remaining || bytes >= MAX_OUTPUT) stop("truncated");
     };

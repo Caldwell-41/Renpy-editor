@@ -273,7 +273,8 @@ fn start_mock_sdk(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopR
     let run_for_thread = run_id.clone();
     let run_for_cleanup = run_id.clone();
     let runs = Arc::clone(&state.runs);
-    let secrets: Vec<String> = std::env::vars().map(|(_, value)| value).collect();
+    let mut secrets: Vec<String> = std::env::vars().map(|(_, value)| value).collect();
+    secrets.extend(args.iter().filter(|arg| Path::new(arg).is_absolute()).cloned());
     thread::spawn(move || supervise_child(child, run_for_thread.clone(), cancel_rx, timeout_ms, secrets,
         move |event| { let _ = app.emit("loomlight:event", event); },
         move || { if let Ok(mut active) = runs.lock() { active.remove(&run_for_cleanup); } },
@@ -346,7 +347,8 @@ fn packaged_security_probe() -> Result<Value, String> {
             .filter_map(Result::ok).map(|entry| entry.file_name()).collect::<Vec<_>>();
         let same_directory_replacement = entries.iter().all(|entry| !entry.to_string_lossy().ends_with(".tmp"));
         let synthetic_secret = "loomlight-synthetic-secret-value".to_owned();
-        let redacted = redact(&format!("{} {}", target.display(), synthetic_secret), std::slice::from_ref(&synthetic_secret));
+        let redactions = vec![target.to_string_lossy().into_owned(), synthetic_secret.clone()];
+        let redacted = redact(&format!("{} {}", target.display(), synthetic_secret), &redactions);
         let sensitive_redacted = !redacted.contains(&root.to_string_lossy().to_string()) && !redacted.contains(&synthetic_secret);
         Ok(json!({
             "evidence": "tauri-packaged-core-denial", "read": true, "atomicReplace": true,
@@ -471,8 +473,10 @@ mod tests {
 
     #[test]
     fn redacts_paths_and_environment_values() {
-        let clean = redact("/private/project token-secret-value", &["token-secret-value".into()]);
-        assert!(!clean.contains("/private/project"));
+        let private_path = "/private/project with spaces";
+        let clean = redact(&format!("{private_path} token-secret-value"), &[private_path.into(), "token-secret-value".into()]);
+        assert!(!clean.contains(private_path));
+        assert!(!clean.contains("project with spaces"));
         assert!(!clean.contains("token-secret-value"));
     }
 

@@ -25,6 +25,11 @@
   filesystem/process denial on both targets, but also exposed two unresolved defects:
   Electron expected-denial logs contained packaged runner paths, and the Tauri Windows
   WebView reported `navigationDenied: false` without failing its workflow step.
+- Corrective run 34699898544 then passed the complete Windows job, including explicit
+  Tauri navigation denial and equivalent packaged filesystem/redaction probes. macOS
+  correctly failed only the Electron synthetic-sensitive-output assertion, exposing a
+  fast-child event race; its 50 ms disposable fixture delay and exact spaced-path
+  redaction follow-up await target verification.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
