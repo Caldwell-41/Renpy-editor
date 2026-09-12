@@ -12,8 +12,9 @@ git diff --check
 
 The validator checks the required document structure, UTF-8/final newlines, internal
 Markdown links, common secret patterns, personal email domains, and user-home paths.
-The isolated source spike adds 12 dependency-free unit/golden tests; the SDK boundary
-adds 19 dependency-free security/adapter tests. The manually dispatched
+The isolated source/preview spike adds 19 dependency-free unit/golden tests (12 core
+source tests and seven fidelity-mapping tests); the SDK boundary adds 19 dependency-free
+security/adapter tests. The manually dispatched
 `.github/workflows/sdk-spike.yml` performs the pinned official Linux integration run.
 `.github/workflows/desktop-spikes.yml` packages disposable Electron and Tauri shells
 on Windows x64 and macOS ARM64; these jobs are Phase 0 evidence, not release builds.
@@ -43,6 +44,11 @@ passes the same deterministic 1,000-, 10,000-, and 50,000-node workload in Elect
 Chromium and Tauri WebView2/WKWebView on both targets. It asserts the predeclared 10k
 usability budget, viewport culling, stable relayout, interaction p95, and scheduled
 Monaco delay/edit bounds; the 50k case remains a separate stress result.
+The preview/source-mapping follow-up
+[run 34723797776](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)
+also passed the trusted Ren'Py 8.5.3 Linux runtime case for the mapped transition,
+named transform, screen presence, literal dialogue, and Python-dependent state. Static
+and Linux evidence do not substitute for the pending Windows/macOS SDK matrix.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

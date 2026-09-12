@@ -42,7 +42,7 @@ decisions unless repository evidence presents a material conflict.
 - Repository foundation, agent guidance, product/architecture/data/UI/security/test
   documentation, roadmap, task tracking, audit, and low-fidelity UI checkpoint.
 - Synthetic Crossroads at Sundown fixture corpus with byte/hash baselines, BOM/CRLF
-  cases, and 12 passing lossless-source tests.
+  cases, 12 passing core source tests, and seven passing preview-mapping tests.
 - Linux Ren'Py 8.5.3 SDK evidence for version, compile, lint, tests, normal run,
   development warp, diagnostics, and PC distribution.
 - Nineteen dependency-free SDK installer/security tests covering checksums, archive
@@ -96,6 +96,11 @@ decisions unless repository evidence presents a material conflict.
   scheduled Monaco delay/edit observations remain below 100 ms. WKWebView provides
   neither Long Tasks nor `performance.memory`, and Chromium's zero heap deltas are not
   treated as proof of zero allocation.
+- Five-beat preview/source-mapping evidence classifies literal declarations and exact
+  navigation as faithful, engine-dependent staging as approximate, and Python,
+  screen, media-decode, translation/generated behavior as runtime-only. Trusted SDK
+  run 34723797776 passed the mapped transition/ATL/screen/Python-state case on Linux;
+  target runtime behavior remains for the Windows/macOS SDK checkpoint.
 
 Evidence links:
 
@@ -106,27 +111,31 @@ Evidence links:
 - [Green shared UI/WebView run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
 - [Green native credential run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
 - [Green packaged graph-scale run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
+- [Green preview/source-mapping runtime run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)
 
 The retained target artifacts are unsigned research outputs, not a product release.
 
 ## Exact next bounded task
 
-Complete the preview/source-mapping fidelity experiment.
+Complete official Ren'Py 8.5.3 SDK and checksum-first secure-install evidence on
+Windows x64 and macOS ARM64.
 
-Implement the smallest stack-neutral disposable experiment that can classify:
+Extend the existing versioned SDK adapter and secure installer only as needed to prove:
 
-1. Faithful mappings derived from exact source/CST ranges without evaluating project
-   Python or silently changing source.
-2. Approximate editor previews whose limitations are visible and testable.
-3. Runtime-only behavior that requires the pinned Ren'Py SDK and must not be presented
-   as a faithful static preview.
-4. Diagnostics and navigation from preview/runtime observations back to exact source,
-   including ambiguous, dynamic, translated, or generated cases.
-5. Deterministic fixtures, commands, fidelity labels, failures, and retained artifacts
-   sufficient to reproduce the conclusion before target SDK integration begins.
+1. Exact version detection, per-project pinning, checksum-first download, staged
+   installation, and refusal of mismatched/corrupt input on each target.
+2. Compile, strict lint, automated tests, normal run, development warp, structured
+   diagnostics, and bounded distribution through direct argument arrays.
+3. Cancellation, process-tree cleanup, bounded/redacted output, platform paths,
+   filesystem behavior, package installation, and launch.
+4. Windows security observations and macOS signing/quarantine observations, clearly
+   separating hosted unsigned evidence from physical/signed checks that cannot run.
+5. Exact runner/SDK versions, commands, timings, failures, retained artifacts, and
+   target-specific limitations without committing SDKs or generated packages.
 
-Keep `.rpy` authoritative, the work disposable and stack-neutral, and project parsing
-non-executing. Do not accept a stack or build the production preview in this task.
+Keep the existing trust gate: inspection never launches project code, while every SDK
+project command requires explicit trust. Do not bundle the SDK, accept a desktop stack,
+or start a production installer in this task.
 
 ## Remaining Phase 0 sequence
 
@@ -142,9 +151,9 @@ shows a dependency conflict:
    tests.
 4. **Complete:** Deterministic 1k/10k/50k branch-graph measurements without blocking
    Monaco; the 10k usability target passes in run 34722954424.
-5. **Next:** Preview/source-mapping fidelity experiment with faithful, approximate, and
-   runtime-only behavior recorded explicitly.
-6. Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and macOS,
+5. **Complete:** Preview/source-mapping fidelity experiment with faithful, approximate,
+   and runtime-only behavior recorded explicitly; Linux runtime pass 34723797776.
+6. **Next:** Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and macOS,
    including paths, cancellation, package install/launch, signing, and quarantine
    observations.
 7. Cold start, memory, artifact size by candidate, latency, flakiness, dependency and
@@ -179,9 +188,9 @@ as evidence to diagnose, not as a reason to infer behavior from the other platfo
 
 ## Git and publishing state
 
-- Remote `main` was `e8479e399bf75821ff5d69a42993ee1737111b86` when this handover was reconciled.
-  That commit adds the packaged graph-scale probe; preceding commits retain the
-  packaged denial/filesystem, shared UI, caching, and credential checkpoints.
+- Remote `main` was `6cc8090b198b796785b533bf0fe0776080de36d5` when this handover was reconciled.
+  That commit adds the preview/source-mapping probe and runtime fixture; preceding
+  commits retain the graph, credential, UI, caching, and packaged-boundary checkpoints.
 - The local and remote commit identifiers can differ when an environment lacks a shell
   HTTPS credential helper and publishes through the authenticated GitHub Git Data API.
 - Before publishing more work, fetch the current private `main` ref, create a commit

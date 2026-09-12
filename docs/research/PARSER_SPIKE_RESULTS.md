@@ -53,7 +53,9 @@ Command:
 python3 -m unittest discover -s spikes/lossless-source/tests -v
 ```
 
-Result: **12/12 tests passed**. Covered byte-identical no-op round trips, manifest
+Result at source-model acceptance: **12/12 core tests passed**. The same command now
+runs **19/19** after adding seven isolated preview/source-mapping tests. Core coverage
+includes byte-identical no-op round trips, manifest
 integrity, encoded CRLF/BOM, minimal dialogue patch boundaries, opaque Python
 preservation, incomplete input, stale-base rejection, overlapping-change rejection,
 non-overlapping patches, expected-byte mismatches, escaped quotes, and source mapping.

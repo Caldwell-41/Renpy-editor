@@ -2,7 +2,8 @@
 
 **Status:** Linux evidence complete; Windows and macOS pending<br>
 **Evidence date:** 2026-09-10<br>
-**Successful run:** [GitHub Actions 34503653755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34503653755)
+**Latest successful run:** [GitHub Actions 34723797776](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)<br>
+**Original successful baseline:** [GitHub Actions 34503653755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34503653755)
 
 ## Result
 
@@ -17,19 +18,25 @@ loading required the explicit `--allow-project-execution` flag.
 
 | Operation | Result | Duration |
 | --- | --- | ---: |
-| Version capability probe | Exit 0 | 0.111 s |
-| CLI help capability probe | Exit 0 | 1.458 s |
-| Compile | Exit 0 | 1.426 s |
-| Lint `--error-code` | Exit 0, no diagnostics | 0.474 s |
-| Automated testcase | Exit 0, one assertion passed | 5.111 s |
-| Normal run | Alive until intentional process-group timeout; no diagnostics | 8.013 s |
-| Development warp `script.rpy:4` | Alive until intentional process-group timeout; no diagnostics | 8.013 s |
-| Distribution help | Exit 0 | 0.969 s |
-| PC distribution | Exit 0, all packages built | 6.813 s |
+| Version capability probe | Exit 0 | 0.075 s |
+| CLI help capability probe | Exit 0 | 0.941 s |
+| Compile | Exit 0 | 1.149 s |
+| Lint `--error-code` | Exit 0, no diagnostics | 0.287 s |
+| Automated testcases | Exit 0, 2 cases/6 assertions passed | 6.347 s |
+| Normal run | Alive until intentional process-group timeout; no diagnostics | 8.006 s |
+| Development warp `script.rpy:4` | Alive until intentional process-group timeout; no diagnostics | 8.007 s |
+| Distribution help | Exit 0 | 0.623 s |
+| PC distribution | Exit 0, all packages built | 4.387 s |
 
 Environment: GitHub-hosted x86_64 Linux, kernel 6.17.0-1022-azure, glibc 2.39,
 probe Python 3.12.3, SDK Python 3.12.8, and Xvfb. ALSA emitted expected no-device
 warnings in the headless runner; they were not Ren'Py diagnostics.
+
+The follow-up runtime testcase took 0.147 s and exercised the preview-mapping fixture's
+scene/dissolve, named transform, screen presence, literal dialogue, and Python-driven
+state transition. It supports the faithful/approximate/runtime-only boundary recorded
+in [the preview/source-mapping result](PREVIEW_SOURCE_MAPPING_SPIKE_RESULTS.md); it is
+still Linux-only evidence.
 
 ## Security and adapter evidence
 

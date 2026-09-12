@@ -13,8 +13,8 @@
   range patches as the source architecture. The Phase 0 Python tokenizer is disposable.
 - ADR 0002 accepts an exact-version, allowlisted SDK adapter and checksum-first staged
   installation boundary; only Linux integration evidence exists so far.
-- The Crossroads at Sundown corpus has byte/hash baselines, BOM/CRLF cases, 12
-  lossless-source tests, and a Linux Ren'Py 8.5.3 compile/lint/test/run/warp/PC-build
+- The Crossroads at Sundown corpus has byte/hash baselines, BOM/CRLF cases, 12 core
+  lossless-source tests plus seven preview-mapping tests, and a Linux Ren'Py 8.5.3 compile/lint/test/run/warp/PC-build
   pass. The SDK and generated artifacts remain outside Git.
 - The SDK boundary has 19 dependency-free security/adapter tests. Windows and macOS
   SDK, filesystem, package install/launch, signing, and quarantine behavior are open.
@@ -45,6 +45,12 @@
   culled to at most 461 drawn nodes, and kept scheduled Monaco delay/edit observations
   below 100 ms. WKWebView exposed neither Long Tasks nor `performance.memory`; the
   Chromium heap surface returned zero deltas, so only typed-array bytes are comparable.
+- Preview/source-mapping fidelity is classified by five exact synthetic beats and
+  19 passing combined source/preview tests. Literal declarations and navigation can
+  be faithful; engine layout/timing staging is approximate; Python-dependent screens,
+  media decode, and generated behavior remain runtime-only. Trusted SDK run
+  34723797776 passed the mapped transition/ATL/screen/Python-state runtime case on
+  Linux; Windows/macOS runtime behavior is not inferred.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -58,10 +64,11 @@
 
 ## Next action
 
-Complete the preview/source-mapping fidelity experiment. Use synthetic constructs to
-record what can be mapped faithfully, what is an editor approximation, and what is
-available only from the Ren'Py runtime; preserve exact `.rpy` source as authoritative
-and do not turn the disposable preview spike into production architecture.
+Complete official Ren'Py 8.5.3 SDK and checksum-first secure-install evidence on
+Windows x64 and macOS ARM64. Cover version detection and per-project pinning; compile,
+lint, tests, run, warp, diagnostics and build; cancellation/bounded output; platform
+paths; package installation/launch; Windows security observations; and macOS signing
+and quarantine observations. Do not infer either platform from Linux.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).
