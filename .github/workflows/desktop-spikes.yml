@@ -77,6 +77,11 @@ jobs:
               LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
             fi
           done
+      - name: Resolve credential-adapter lock evidence
+        shell: bash
+        run: |
+          cargo metadata --manifest-path src-tauri/Cargo.toml --format-version 1 > /dev/null
+          git diff -- src-tauri/Cargo.lock
       - name: Test Tauri privileged adapter in release profile
         run: cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Package Tauri spike
