@@ -5,6 +5,7 @@ declare global {
   interface Window {
     loomlight?: { invoke(request: DesktopRequest): Promise<unknown>; subscribe(listener: (event: unknown) => void): () => void };
     __TAURI_INTERNALS__?: unknown;
+    __loomlightRunUiEvidence?: (mode: "wide" | "narrow") => Promise<Record<string, unknown>>;
   }
 }
 
@@ -64,3 +65,166 @@ document.querySelector("#reveal")!.addEventListener("click", () => {
   editor.setSelection({ startLineNumber: target, startColumn: 1, endLineNumber: target, endColumn: 1 });
   editor.focus();
 });
+
+const workspace = document.querySelector<HTMLElement>("#workspace")!;
+const layoutStatus = document.querySelector<HTMLElement>("#layout-status")!;
+const panelDefinitions = {
+  controls: { panel: document.querySelector<HTMLElement>("#controls")!, toggle: document.querySelector<HTMLButtonElement>("#toggle-controls")!, owner: workspace },
+  inspector: { panel: document.querySelector<HTMLElement>("#inspector")!, toggle: document.querySelector<HTMLButtonElement>("#toggle-inspector")!, owner: workspace },
+  bottom: { panel: document.querySelector<HTMLElement>("#bottom-panel")!, toggle: document.querySelector<HTMLButtonElement>("#toggle-bottom")!, owner: document.body },
+} as const;
+
+function setPanel(name: keyof typeof panelDefinitions, expanded: boolean) {
+  const definition = panelDefinitions[name];
+  if (!expanded && definition.panel.contains(document.activeElement)) definition.toggle.focus();
+  definition.owner.classList.toggle(`${name}-collapsed`, !expanded);
+  definition.toggle.setAttribute("aria-expanded", String(expanded));
+  layoutStatus.textContent = `${name} panel ${expanded ? "expanded" : "collapsed"}`;
+  editor.layout();
+}
+
+for (const [name, definition] of Object.entries(panelDefinitions)) {
+  definition.toggle.addEventListener("click", () => setPanel(name as keyof typeof panelDefinitions, definition.toggle.getAttribute("aria-expanded") !== "true"));
+}
+
+function keyboardResize(element: HTMLElement, property: "--controls-width" | "--inspector-width", initial: number, minimum: number, maximum: number) {
+  let value = initial;
+  element.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    value = Math.min(maximum, Math.max(minimum, value + (event.key === "ArrowRight" ? 16 : -16)));
+    document.documentElement.style.setProperty(property, `${value}px`);
+    element.setAttribute("aria-valuenow", String(value));
+    editor.layout();
+  });
+}
+
+keyboardResize(document.querySelector("#controls-resizer")!, "--controls-width", 240, 180, 420);
+keyboardResize(document.querySelector("#inspector-resizer")!, "--inspector-width", 320, 220, 480);
+
+document.addEventListener("keydown", (event) => {
+  if (!(event.ctrlKey || event.metaKey)) return;
+  if (event.key.toLowerCase() === "j") {
+    event.preventDefault();
+    panelDefinitions.bottom.toggle.click();
+  }
+  if (event.shiftKey && event.key.toLowerCase() === "i") {
+    event.preventDefault();
+    panelDefinitions.inspector.toggle.click();
+  }
+});
+
+const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+function applyMotionPreference() { document.documentElement.dataset.reducedMotion = String(motionQuery.matches); }
+applyMotionPreference();
+motionQuery.addEventListener("change", applyMotionPreference);
+
+const dropZone = document.querySelector<HTMLElement>("#drop-zone")!;
+const previews = document.querySelector<HTMLElement>("#media-previews")!;
+function previewFiles(files: readonly File[]) {
+  previews.replaceChildren();
+  for (const file of files) {
+    const url = URL.createObjectURL(file);
+    let element: HTMLImageElement | HTMLAudioElement | HTMLVideoElement | undefined;
+    if (file.type.startsWith("image/")) {
+      element = document.createElement("img");
+      element.alt = `Local preview of ${file.name}`;
+    } else if (file.type.startsWith("audio/")) {
+      element = document.createElement("audio");
+      element.controls = true;
+      element.setAttribute("aria-label", `Local audio preview of ${file.name}`);
+    } else if (file.type.startsWith("video/")) {
+      element = document.createElement("video");
+      element.controls = true;
+      element.muted = true;
+      element.setAttribute("aria-label", `Local video preview of ${file.name}`);
+    }
+    if (!element) { URL.revokeObjectURL(url); continue; }
+    element.src = url;
+    element.dataset.objectUrl = url;
+    previews.append(element);
+  }
+}
+
+dropZone.addEventListener("dragover", (event) => { event.preventDefault(); });
+dropZone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  previewFiles(Array.from(event.dataTransfer?.files ?? []));
+});
+dropZone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") layoutStatus.textContent = "Choose local media with drag and drop";
+});
+
+function stylesheetContains(text: string): boolean {
+  try {
+    return Array.from(document.styleSheets).some((sheet) => Array.from(sheet.cssRules).some((rule) => rule.cssText.includes(text)));
+  } catch { return false; }
+}
+
+window.__loomlightRunUiEvidence = async (mode) => {
+  setPanel("controls", true); setPanel("inspector", true); setPanel("bottom", true);
+  const inspectorAction = document.querySelector<HTMLButtonElement>("#inspector-action")!;
+  inspectorAction.focus();
+  panelDefinitions.inspector.toggle.click();
+  const focusReturned = document.activeElement === panelDefinitions.inspector.toggle;
+  panelDefinitions.inspector.toggle.click();
+
+  const resizer = document.querySelector<HTMLElement>("#controls-resizer")!;
+  const widthBefore = Number(resizer.getAttribute("aria-valuenow"));
+  resizer.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  const widthAfter = Number(resizer.getAttribute("aria-valuenow"));
+
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "j", ctrlKey: true, bubbles: true }));
+  const shortcutCollapsed = panelDefinitions.bottom.toggle.getAttribute("aria-expanded") === "false";
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "j", ctrlKey: true, bubbles: true }));
+
+  const transfer = new DataTransfer();
+  transfer.items.add(new File(["<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'></svg>"], "synthetic.svg", { type: "image/svg+xml" }));
+  transfer.items.add(new File([new Uint8Array(44)], "synthetic.wav", { type: "audio/wav" }));
+  transfer.items.add(new File([new Uint8Array(4)], "synthetic.webm", { type: "video/webm" }));
+  dropZone.dispatchEvent(new DragEvent("drop", { dataTransfer: transfer, bubbles: true, cancelable: true }));
+  await new Promise((resolve) => setTimeout(resolve, 20));
+
+  const image = previews.querySelector("img");
+  const audio = previews.querySelector("audio");
+  const video = previews.querySelector("video");
+  const editStarted = performance.now();
+  editor.setValue(`${editor.getValue()}# ui evidence\n`);
+  editor.focus();
+  const editLatencyMs = Math.round((performance.now() - editStarted) * 100) / 100;
+  const buttonsNamed = Array.from(document.querySelectorAll("button")).every((button) => Boolean(button.textContent?.trim() || button.getAttribute("aria-label")));
+  const narrow = window.innerWidth < 800;
+  const responsive = mode === "narrow" ? narrow && getComputedStyle(panelDefinitions.inspector.panel).display === "none" : !narrow && getComputedStyle(panelDefinitions.inspector.panel).display !== "none";
+  const result = {
+    mode,
+    passed: focusReturned && widthAfter === widthBefore + 16 && shortcutCollapsed && previews.children.length === 3
+      && Boolean(image?.alt) && Boolean(audio?.controls) && Boolean(video?.controls) && buttonsNamed
+      && stylesheetContains("prefers-reduced-motion") && document.documentElement.dataset.reducedMotion === String(motionQuery.matches)
+      && responsive && editLatencyMs < 250,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    dockPositions: Array.from(document.querySelectorAll<HTMLElement>("[data-dock]")).map((element) => element.dataset.dock),
+    keyboardResize: widthAfter === widthBefore + 16,
+    shortcutCollapsed,
+    focusReturned,
+    labelledButtons: buttonsNamed,
+    separators: document.querySelectorAll('[role="separator"][tabindex="0"]').length,
+    liveRegions: document.querySelectorAll('[aria-live], [role="status"]').length,
+    reducedMotionQuery: motionQuery.matches,
+    reducedMotionApplied: document.documentElement.dataset.reducedMotion === String(motionQuery.matches),
+    reducedMotionRule: stylesheetContains("prefers-reduced-motion"),
+    syntheticFilesHandled: previews.children.length,
+    imagePreviewLabelled: Boolean(image?.alt),
+    audioPreviewControlled: Boolean(audio?.controls),
+    videoPreviewControlled: Boolean(video?.controls),
+    audioWav: audio?.canPlayType("audio/wav") ?? "",
+    audioMpeg: audio?.canPlayType("audio/mpeg") ?? "",
+    videoMp4: video?.canPlayType('video/mp4; codecs="avc1.42E01E"') ?? "",
+    videoWebm: video?.canPlayType('video/webm; codecs="vp9, opus"') ?? "",
+    responsive,
+    editorEditLatencyMs: editLatencyMs,
+    screenReaderManualRequired: true,
+  };
+  for (const element of Array.from(previews.querySelectorAll<HTMLElement>("[data-object-url]"))) URL.revokeObjectURL(element.dataset.objectUrl!);
+  return result;
+};

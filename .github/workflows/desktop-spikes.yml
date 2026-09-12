@@ -65,6 +65,18 @@ jobs:
           else
             ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
           fi
+      - name: Probe packaged Electron shared UI behavior
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          for mode in wide narrow; do
+            if [ "$SPIKE_OS" = "Windows" ]; then
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+            else
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+            fi
+          done
       - name: Test Tauri privileged adapter in release profile
         run: cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Package Tauri spike
@@ -91,6 +103,18 @@ jobs:
           else
             ./src-tauri/target/release/loomlight-desktop-tauri-spike
           fi
+      - name: Probe packaged Tauri shared UI behavior
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          for mode in wide narrow; do
+            if [ "$SPIKE_OS" = "Windows" ]; then
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+            else
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike
+            fi
+          done
       - name: Upload generated Rust lockfile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

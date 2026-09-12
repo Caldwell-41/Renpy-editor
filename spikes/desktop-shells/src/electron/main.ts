@@ -68,9 +68,11 @@ async function packagedFixture() {
 
 function createWindow() {
   let deniedNavigations = 0;
+  const uiProbeMode = process.env.LOOMLIGHT_SPIKE_UI_PROBE;
+  const uiProbeNarrow = uiProbeMode === "narrow";
   const win = new BrowserWindow({
-    width: 1180,
-    height: 760,
+    width: uiProbeNarrow ? 720 : 1180,
+    height: uiProbeNarrow ? 600 : 760,
     show: false,
     webPreferences: {
       preload: path.join(here, "preload.cjs"),
@@ -84,6 +86,24 @@ function createWindow() {
   void win.loadFile(path.resolve(here, "../../ui/index.html"));
   win.once("ready-to-show", () => win.show());
   win.webContents.once("did-finish-load", async () => {
+    if (uiProbeMode === "wide" || uiProbeMode === "narrow") {
+      try {
+        const mode = JSON.stringify(uiProbeMode);
+        const result = await win.webContents.executeJavaScript(`(async () => {
+          for (let attempt = 0; attempt < 100 && !window.__loomlightRunUiEvidence; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (!window.__loomlightRunUiEvidence) throw new Error("UI probe unavailable");
+          return window.__loomlightRunUiEvidence(${mode});
+        })()`);
+        console.log(JSON.stringify({ evidence: "electron-packaged-ui", ...result }));
+        app.exit(result.passed ? 0 : 1);
+      } catch {
+        console.error(JSON.stringify({ evidence: "electron-packaged-ui", mode: uiProbeMode, passed: false, error: "probe failed" }));
+        app.exit(1);
+      }
+      return;
+    }
     if (process.env.LOOMLIGHT_SPIKE_SMOKE !== "1") return;
     let fixture: Awaited<ReturnType<typeof packagedFixture>> | undefined;
     try {
