@@ -116,6 +116,7 @@ async function packagedFixture() {
 function createWindow() {
   let deniedNavigations = 0;
   const uiProbeMode = process.env.LOOMLIGHT_SPIKE_UI_PROBE;
+  const graphProbe = process.env.LOOMLIGHT_SPIKE_GRAPH_PROBE === "1";
   const uiProbeNarrow = uiProbeMode === "narrow";
   const win = new BrowserWindow({
     width: uiProbeNarrow ? 720 : 1180,
@@ -133,6 +134,23 @@ function createWindow() {
   void win.loadFile(path.resolve(here, "../../ui/index.html"));
   win.once("ready-to-show", () => win.show());
   win.webContents.once("did-finish-load", async () => {
+    if (graphProbe) {
+      try {
+        const result = await win.webContents.executeJavaScript(`(async () => {
+          for (let attempt = 0; attempt < 100 && !window.__loomlightRunGraphEvidence; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (!window.__loomlightRunGraphEvidence) throw new Error("graph probe unavailable");
+          return window.__loomlightRunGraphEvidence();
+        })()`);
+        console.log(JSON.stringify({ evidence: "electron-packaged-graph", ...result }));
+        app.exit(result.passed ? 0 : 1);
+      } catch {
+        console.error(JSON.stringify({ evidence: "electron-packaged-graph", passed: false, error: "probe failed" }));
+        app.exit(1);
+      }
+      return;
+    }
     if (uiProbeMode === "wide" || uiProbeMode === "narrow") {
       try {
         const mode = JSON.stringify(uiProbeMode);

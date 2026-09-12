@@ -40,6 +40,7 @@ struct DesktopRequest {
     timeout_ms: Option<u64>,
     security_results: Option<Value>,
     ui_results: Option<Value>,
+    graph_results: Option<Value>,
 }
 
 #[derive(Clone, Serialize)]
@@ -296,7 +297,7 @@ fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRe
     DesktopRequest {
         operation: operation.into(), root: Some(root.to_string_lossy().into_owned()), relative_path: Some(relative_path.into()),
         expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None, security_results: None,
-        ui_results: None,
+        ui_results: None, graph_results: None,
     }
 }
 
@@ -330,7 +331,7 @@ fn packaged_security_probe() -> Result<Value, String> {
             Err(error) => error,
         };
         let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
-        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None };
+        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None, graph_results: None };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
         let link = root.join("game space").join("escape-link.rpy");
         create_file_symlink(&outside, &link).map_err(|_| "probe symlink unavailable")?;
@@ -406,6 +407,21 @@ fn finish_ui_probe(request: &DesktopRequest) -> Result<Value, String> {
     std::process::exit(if passed { 0 } else { 1 });
 }
 
+fn finish_graph_probe(request: &DesktopRequest) -> Result<Value, String> {
+    if std::env::var("LOOMLIGHT_SPIKE_GRAPH_PROBE").as_deref() != Ok("1") {
+        return Err("operation is not allowlisted".into());
+    }
+    let results = request.graph_results.clone().ok_or("graphResults are required")?;
+    let passed = results.get("passed").and_then(Value::as_bool) == Some(true)
+        && results.get("usability10kPassed").and_then(Value::as_bool) == Some(true)
+        && results.get("cases").and_then(Value::as_array).is_some_and(|cases| cases.len() == 3);
+    let mut completed = results;
+    completed["evidence"] = json!("tauri-packaged-graph");
+    println!("{completed}");
+    let _ = std::io::stdout().flush();
+    std::process::exit(if passed { 0 } else { 1 });
+}
+
 fn packaged_credential_probe() -> Result<Value, String> {
     let secret = std::env::var("LOOMLIGHT_SPIKE_CREDENTIAL_SECRET")
         .map_err(|_| "synthetic credential unavailable")?;
@@ -451,6 +467,7 @@ fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, req
         "cancelMockSdk" => cancel_mock_sdk(&state, &request),
         "securityProbeResult" => finish_webview_security_probe(&app, &request),
         "uiProbeResult" => finish_ui_probe(&request),
+        "graphProbeResult" => finish_graph_probe(&request),
         _ => Err("operation is not allowlisted".into()),
     }
 }
@@ -509,6 +526,9 @@ fn main() {
                     let mode = serde_json::to_string(&mode).expect("UI probe mode must serialize");
                     webview.eval(&format!("window.__loomlightUiProbeMode={mode};{}", include_str!("ui_probe.js"))).expect("UI probe injection failed");
                 }
+            }
+            if std::env::var("LOOMLIGHT_SPIKE_GRAPH_PROBE").as_deref() == Ok("1") {
+                webview.eval(include_str!("graph_probe.js")).expect("graph probe injection failed");
             }
         })
         .invoke_handler(tauri::generate_handler![desktop_operation])

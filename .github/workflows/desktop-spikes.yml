@@ -77,6 +77,17 @@ jobs:
               LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
             fi
           done
+      - name: Probe packaged Electron branch-graph scale
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_GRAPH_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+          else
+            ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+          fi
       - name: Test Tauri privileged adapter in release profile
         run: cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Package Tauri spike
@@ -115,6 +126,17 @@ jobs:
               LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike
             fi
           done
+      - name: Probe packaged Tauri branch-graph scale
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_GRAPH_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
       - name: Probe packaged native credential storage and plaintext leaks
         shell: bash
         env:

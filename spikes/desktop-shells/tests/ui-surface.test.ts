@@ -29,3 +29,21 @@ test("shared UI has reduced-motion and local object-URL policy", async () => {
   assert.match(html, /connect-src 'none'/);
   assert.doesNotMatch(html, /https?:\/\//);
 });
+
+test("graph evidence covers deterministic scale, virtualization, and Monaco coexistence", async () => {
+  const [surface, graph, electron, tauri] = await Promise.all([
+    readFile(path.join(uiRoot, "main.ts"), "utf8"),
+    readFile(path.join(uiRoot, "graph-evidence.ts"), "utf8"),
+    readFile(path.resolve("src/electron/main.ts"), "utf8"),
+    readFile(path.resolve("src-tauri/src/main.rs"), "utf8"),
+  ]);
+  assert.match(graph, /\[1_000, 10_000, 50_000\]/);
+  assert.match(graph, /new (?:Uint8|Int32|Float32)Array/);
+  assert.match(graph, /viewportCullMs/);
+  assert.match(graph, /editorEditDelayMs/);
+  assert.match(graph, /stableRelayout/);
+  assert.match(graph, /PerformanceObserver/);
+  assert.match(surface, /__loomlightRunGraphEvidence/);
+  assert.match(electron, /electron-packaged-graph/);
+  assert.match(tauri, /tauri-packaged-graph/);
+});

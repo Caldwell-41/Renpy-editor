@@ -1,11 +1,13 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import type { DesktopRequest, FileVersion } from "../shared/contracts";
+import { runGraphEvidence } from "./graph-evidence";
 
 declare global {
   interface Window {
     loomlight?: { invoke(request: DesktopRequest): Promise<unknown>; subscribe(listener: (event: unknown) => void): () => void };
     __TAURI_INTERNALS__?: unknown;
     __loomlightRunUiEvidence?: (mode: "wide" | "narrow") => Promise<Record<string, unknown>>;
+    __loomlightRunGraphEvidence?: () => Promise<Record<string, unknown>>;
   }
 }
 
@@ -229,3 +231,12 @@ window.__loomlightRunUiEvidence = async (mode) => {
   for (const element of Array.from(previews.querySelectorAll<HTMLElement>("[data-object-url]"))) URL.revokeObjectURL(element.dataset.objectUrl!);
   return result;
 };
+
+window.__loomlightRunGraphEvidence = () => runGraphEvidence(() => {
+  const started = performance.now();
+  const model = editor.getModel();
+  if (!model) throw new Error("Monaco model unavailable");
+  model.applyEdits([{ range: new monaco.Range(1, 1, 1, 1), text: "# graph evidence\n" }]);
+  editor.layout();
+  return Math.round((performance.now() - started) * 100) / 100;
+});
