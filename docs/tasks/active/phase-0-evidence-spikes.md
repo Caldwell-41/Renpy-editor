@@ -35,6 +35,48 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    official download, checksum, archive traversal, symlink, collision, limits, and
    interrupted-install cases in a disposable directory.
 
+## CI efficiency checkpoint
+
+The evidence workflows remain automatic on `main` only when their own workflow,
+spike implementation, or relevant fixture changes, with manual dispatch retained.
+Those existing path filters are already appropriately narrow for the remainder of
+Phase 0. Superseded push runs are now cancelled within the same workflow and branch;
+manual evidence runs have unique concurrency groups and independent branches and
+workflows cannot cancel one another.
+
+The desktop matrix caches Cargo registry/archive data, git dependencies, and compiled
+dependency outputs for `spikes/desktop-shells/src-tauri`. Cache identity includes the
+matrix runner, Rust release/host, Cargo manifests and lockfiles, root toolchain/Cargo
+configuration, and compiler-related environment. Windows x64 and macOS ARM64 therefore
+do not share incompatible outputs. Workspace source outputs, incremental artifacts,
+pre-existing Cargo binaries, secrets, and repository content are not retained. Rust
+tests now use `--release --locked`, allowing the following release package build to
+reuse dependency compilation while preserving both the test and packaged-app checks.
+
+The SDK workflow caches only the official immutable 8.5.3 archive, keyed by runner OS,
+archive/version name, and pinned SHA-256. Official checksum metadata is still fetched
+on every run. Both the pinned checksum step and the adapter's official-metadata check
+run after cache restoration, so a hit is never trusted before verification; misses
+still download from `renpy.org`, and no SDK is committed.
+
+Measured desktop evidence:
+
+| Run | Windows x64 | macOS ARM64 | Notes |
+| --- | ---: | ---: | --- |
+| [Pre-change baseline 34677919432](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34677919432) | 15:23 | 2:34 | Windows `cargo test` 4:36; Tauri package 9:24 |
+| [Cold cache 34691004337](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691004337) | 13:20 | 2:38 | Windows release test 6:30; package 3:04; initial cache save 1:32 |
+| [Warm cache 34691607349](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691607349) | 5:42 | 1:57 | Full cache hits; Windows release test 0:45 and package 2:49 |
+
+The SDK cold and warm runs both remained about 1:10 because the prior official SDK
+download was already roughly two seconds; caching removes the repeated transfer but
+does not materially accelerate the minute-long integration probe. Cache storage and
+restore are best-effort optimisations, so a miss must remain a supported path.
+
+No evidence workflow is ready for retirement. The desktop comparison should remain
+until the desktop-stack ADR is accepted; that decision can then retire or replace the
+non-selected spike explicitly. The SDK workflow remains relevant until target-platform
+SDK/install evidence is complete and a later reviewed validation path supersedes it.
+
 ## Acceptance criteria
 
 - Each result records commands, platform, dependency versions, fixtures, timings,

@@ -64,6 +64,39 @@ packaging on `windows-2025` (x64) and `macos-26` (ARM64), then retains private u
 artifacts for seven days. A failed job is evidence, not permission to infer behavior
 from the other operating system.
 
+## CI efficiency evidence
+
+The matrix restores a pinned `Swatinem/rust-cache` action after recording the runner
+toolchain. It caches Cargo registry/archive data, git dependencies, and dependency
+build outputs for the actual `src-tauri` workspace. The action keys by job, Rust
+release/host, Cargo manifests and lockfile, root Rust/Cargo configuration, compiler
+environment, and an explicit matrix-runner key. This isolates Windows x64 from macOS
+ARM64 and invalidates dependency outputs when relevant Rust inputs change. It excludes
+workspace source outputs and incremental artifacts, and does not retain pre-existing
+Cargo binaries, secrets, or private project content.
+
+`cargo test --release --locked` retains the privileged-adapter test gate while sharing
+the release dependency profile with the subsequent `tauri build`. A separate test
+binary and packaged application are still built because they prove different things;
+only their common release dependencies are reused. The package step, Electron evidence,
+packaged denial probes, target matrix, and locked dependency behavior are unchanged.
+
+| Run | Windows job | Windows Rust test | Windows Tauri package | macOS job | macOS Rust test | macOS Tauri package |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| [Pre-change 34677919432](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34677919432) | 15:23 | 4:36 | 9:24 | 2:34 | 0:34 | 1:20 |
+| [Cold cache 34691004337](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691004337) | 13:20 | 6:30 | 3:04 | 2:38 | 0:54 | 0:53 |
+| [Warm cache 34691607349](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691607349) | 5:42 | 0:45 | 2:49 | 1:57 | 0:23 | 0:50 |
+
+The warm run reported full matches for separate 392 MB Windows and 340 MB macOS
+caches. The cold Windows run included a 1:32 initial cache save. Timings are hosted-
+runner observations, not guarantees; cache eviction or a toolchain/dependency change
+returns the workflow to the supported cold path.
+
+Push runs now cancel only an older run of this workflow on the same ref. Manual runs
+use their run ID as the concurrency group, so independent evidence requests are not
+cancelled. Existing path filters remain limited to this workflow and
+`spikes/desktop-shells/**`; broad Phase 0 documentation changes do not rebuild packages.
+
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.

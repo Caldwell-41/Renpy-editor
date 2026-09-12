@@ -56,6 +56,22 @@ The workflow downloads only the exact official release URL, independently checks
 pinned digest, then has the spike parse the official checksum file and verify again
 before safe extraction. Its JSON evidence artifact is retained for seven days.
 
+The immutable SDK archive is now cached outside the repository under a key containing
+the runner OS, `renpy-8.5.3-sdk.tar.bz2`, and the complete pinned SHA-256. A cache miss
+still downloads from `renpy.org`. Every run fetches the official checksum metadata,
+then verifies the restored or downloaded archive against the pinned digest before the
+adapter independently checks the official metadata and extracts it. Cached bytes are
+therefore treated as untrusted input, and changing the version or expected digest
+creates a new cache key.
+
+[Cold cache run 34691004407](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691004407)
+and [warm cache run 34691154758](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34691154758)
+both passed in about 1:10. The warm run recorded a full cache hit, skipped the SDK
+download, fetched official metadata, and reported the pinned archive checksum as OK.
+The previous download step took only about two seconds, so this removes redundant
+transfer without a demonstrated end-to-end speedup; the integration probe remains the
+dominant cost.
+
 ## Failures that improved the fixture
 
 The first run proved compile and tests but exposed an orphan translation, runtime

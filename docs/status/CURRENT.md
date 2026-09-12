@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-09-11<br>
+**Updated:** 2026-09-12<br>
 **Phase:** 0 — Foundation and proof<br>
 **Working codename:** Project Loomlight (temporary)
 
@@ -23,6 +23,12 @@
   shared process lifecycle tests, Electron package/launch smoke, Tauri process
   supervisor tests, and Tauri packaging. Packaged denial and broader behavioral
   measurements remain open.
+- Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
+  workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
+  Cargo inputs and dependency outputs; a verified warm run reduced Windows from
+  15:23 to 5:42. The pinned SDK archive is cached by version and digest but is still
+  checksum-verified before every extraction; its warm run remained about 1:10 because
+  the probe, not the download, dominates.
 - Confirmed targets are Windows x86-64 and macOS ARM64. Intel macOS is out of scope.
 - No production application or package manifest exists.
 - There are no blocking product questions. Remaining uncertainties are empirical
