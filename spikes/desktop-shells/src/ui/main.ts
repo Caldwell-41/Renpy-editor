@@ -163,11 +163,12 @@ function stylesheetContains(text: string): boolean {
 
 window.__loomlightRunUiEvidence = async (mode) => {
   setPanel("controls", true); setPanel("inspector", true); setPanel("bottom", true);
-  const inspectorAction = document.querySelector<HTMLButtonElement>("#inspector-action")!;
-  inspectorAction.focus();
-  panelDefinitions.inspector.toggle.click();
-  const focusReturned = document.activeElement === panelDefinitions.inspector.toggle;
-  panelDefinitions.inspector.toggle.click();
+  const focusPanel = mode === "narrow" ? panelDefinitions.controls : panelDefinitions.inspector;
+  const focusAction = document.querySelector<HTMLButtonElement>(mode === "narrow" ? "#open" : "#inspector-action")!;
+  focusAction.focus();
+  focusPanel.toggle.click();
+  const focusReturned = document.activeElement === focusPanel.toggle;
+  focusPanel.toggle.click();
 
   const resizer = document.querySelector<HTMLElement>("#controls-resizer")!;
   const widthBefore = Number(resizer.getAttribute("aria-valuenow"));

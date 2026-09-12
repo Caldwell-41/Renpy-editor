@@ -44,8 +44,19 @@ command is accepted only while the explicit evidence environment mode is present
 
 ## Results
 
-Target evidence is pending. Local TypeScript compilation, shared Node tests, and the
-Vite UI build must pass before the changed-path matrix is published.
+Initial target run 34701229006 passed repository quality and the macOS Electron wide
+probe. Bundled Chromium reported an actual 1024×645 inner viewport for the requested
+wide window, active reduced-motion preference, all semantic/dock/keyboard/drag/media
+assertions, 2.6 ms Monaco edit time, and `maybe` for WAV plus `probably` for MP3,
+H.264 MP4, and VP9/Opus WebM. The narrow probe correctly failed only `focusReturned`:
+the test attempted to focus the inspector after responsive CSS had already hidden it.
+The follow-up tests focus return on the visible left dock in narrow mode and the right
+inspector in wide mode. Remaining target/engine results are pending.
+
+Windows Electron produced the same focused result: wide passed at 1008×655 with a
+6.3 ms Monaco edit, while narrow at 704×535 failed only the hidden-inspector focus
+assertion. Its codec strings and active reduced-motion observation matched macOS
+bundled Chromium. Both jobs stopped before Tauri as required by the failed gate.
 
 ## Known limitations
 
