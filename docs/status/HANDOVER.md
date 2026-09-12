@@ -90,6 +90,12 @@ decisions unless repository evidence presents a material conflict.
   runtime sentinel scan found zero leaks in output, project/source, packages, or
   retained-artifact inputs. Runs 34722141300 and 34722270752 retain the lock-resolution
   and Rust type-inference failures that were corrected before the green run.
+- Branch-graph run 34722954424 passes the identical packaged 1k/10k/50k workload in
+  Electron Chromium and Tauri WebView2/WKWebView on both targets. The 10k usability
+  target and 50k stress bounds pass; virtualization draws no more than 461 nodes and
+  scheduled Monaco delay/edit observations remain below 100 ms. WKWebView provides
+  neither Long Tasks nor `performance.memory`, and Chromium's zero heap deltas are not
+  treated as proof of zero allocation.
 
 Evidence links:
 
@@ -97,32 +103,30 @@ Evidence links:
 - [Green repository quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34568130411)
 - [Green process-parity target matrix](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431423)
 - [Green process-parity quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431448)
+- [Green shared UI/WebView run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
+- [Green native credential run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
+- [Green packaged graph-scale run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
 
 The retained target artifacts are unsigned research outputs, not a product release.
 
 ## Exact next bounded task
 
-Complete deterministic branch-graph scale evidence using the shared Monaco surface
-before preview/source-mapping work.
+Complete the preview/source-mapping fidelity experiment.
 
-Implement and prove on Windows x64 and macOS ARM64:
+Implement the smallest stack-neutral disposable experiment that can classify:
 
-1. State deterministic graph generation and success criteria before implementation.
-   Cover 1,000, 10,000, and 50,000 nodes with choices, calls, route filters, cycles,
-   and reconvergence; use the 10,000-node case as the required usability target.
-2. Use one stack-neutral disposable graph fixture and measurement function in both
-   packaged candidates. Do not build the production graph editor.
-3. Measure generation/layout, filter/search, path highlight, viewport culling,
-   pan/zoom or equivalent interaction, stable relayout, and memory where the runtime
-   exposes a defensible measure.
-4. Schedule graph work so a timed Monaco edit probe can establish whether computation
-   blocks editor input. Record long tasks, interaction latency, frame/culling counts,
-   failures, and loose predeclared thresholds rather than reporting only averages.
-5. Record Windows WebView2, macOS WKWebView, and bundled Chromium separately. Keep the
-   50,000-node case a stress result; do not weaken the 10,000-node usability gate if it
-   fails.
+1. Faithful mappings derived from exact source/CST ranges without evaluating project
+   Python or silently changing source.
+2. Approximate editor previews whose limitations are visible and testable.
+3. Runtime-only behavior that requires the pinned Ren'Py SDK and must not be presented
+   as a faithful static preview.
+4. Diagnostics and navigation from preview/runtime observations back to exact source,
+   including ambiguous, dynamic, translated, or generated cases.
+5. Deterministic fixtures, commands, fidelity labels, failures, and retained artifacts
+   sufficient to reproduce the conclusion before target SDK integration begins.
 
-Keep the work disposable and stack-neutral. Do not accept a stack in this task.
+Keep `.rpy` authoritative, the work disposable and stack-neutral, and project parsing
+non-executing. Do not accept a stack or build the production preview in this task.
 
 ## Remaining Phase 0 sequence
 
@@ -136,9 +140,9 @@ shows a dependency conflict:
    current OS WebView differences. Manual assistive-tech checks remain explicit.
 3. **Complete:** Native credential-store prototypes with UI/log/project/package leak
    tests.
-4. **Next:** Deterministic 1k/10k/50k branch-graph measurements without blocking
-   Monaco; 10k is the usability target.
-5. Preview/source-mapping fidelity experiment with faithful, approximate, and
+4. **Complete:** Deterministic 1k/10k/50k branch-graph measurements without blocking
+   Monaco; the 10k usability target passes in run 34722954424.
+5. **Next:** Preview/source-mapping fidelity experiment with faithful, approximate, and
    runtime-only behavior recorded explicitly.
 6. Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and macOS,
    including paths, cancellation, package install/launch, signing, and quarantine
@@ -175,9 +179,9 @@ as evidence to diagnose, not as a reason to infer behavior from the other platfo
 
 ## Git and publishing state
 
-- Remote `main` was `b59a6f6496f6c50c4ef42d9be710ded68235b624` when this handover was reconciled.
-  Commits `93647a7`, `69035da`, and `a6b4e58` contain the packaged denial, filesystem,
-  watch, symlink, and Tauri WebView probes; later commits add the accepted cache work.
+- Remote `main` was `e8479e399bf75821ff5d69a42993ee1737111b86` when this handover was reconciled.
+  That commit adds the packaged graph-scale probe; preceding commits retain the
+  packaged denial/filesystem, shared UI, caching, and credential checkpoints.
 - The local and remote commit identifiers can differ when an environment lacks a shell
   HTTPS credential helper and publishes through the authenticated GitHub Git Data API.
 - Before publishing more work, fetch the current private `main` ref, create a commit

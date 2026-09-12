@@ -39,6 +39,12 @@
   No renderer was created or credential IPC added, and runtime sentinel scans found
   zero plaintext leaks across logs, project/source, packages, and retained-artifact
   inputs. Signed macOS upgrades and locked/prompting stores remain physical checks.
+- Deterministic branch-graph evidence passes in all four packaged candidate/engine
+  combinations in run 34722954424. The shared typed-array/canvas workload met the
+  predeclared 10,000-node usability gate, completed the 50,000-node stress case,
+  culled to at most 461 drawn nodes, and kept scheduled Monaco delay/edit observations
+  below 100 ms. WKWebView exposed neither Long Tasks nor `performance.memory`; the
+  Chromium heap surface returned zero deltas, so only typed-array bytes are comparable.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -52,10 +58,10 @@
 
 ## Next action
 
-Complete deterministic 1,000-, 10,000-, and 50,000-node graph measurements with the
-shared Monaco surface. Measure generation/layout, filtering, viewport culling,
-interaction latency, memory where available, stable relayout, and whether graph work
-blocks editor input. The 10,000-node case is the required usability target.
+Complete the preview/source-mapping fidelity experiment. Use synthetic constructs to
+record what can be mapped faithfully, what is an editor approximation, and what is
+available only from the Ren'Py runtime; preserve exact `.rpy` source as authoritative
+and do not turn the disposable preview spike into production architecture.
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).

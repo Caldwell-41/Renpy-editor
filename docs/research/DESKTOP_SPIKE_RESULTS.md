@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process parity, packaged security/filesystem, shared UI/WebView, and credential checkpoints complete; broader behavior evidence pending<br>
+**Status:** Process parity, packaged security/filesystem, shared UI/WebView, credential, and graph-scale checkpoints complete; broader behavior evidence pending<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -177,7 +177,6 @@ cancelled. Existing path filters remain limited to this workflow and
 ## Measurements still required
 
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- 10,000-node graph interaction without blocking Monaco.
 - Dependency/licence inventory and developer-complexity comparison.
 
 Shared packaged UI/WebView behavior is recorded separately in
@@ -192,6 +191,14 @@ Packaged native-store behavior is recorded in
 Credential Manager/Keychain entries, cleanup, no-renderer/no-IPC assertions, and a
 zero-match plaintext scan of source, project, logs, packages, and retained-artifact
 inputs on both supported targets.
+
+Packaged branch-graph scale is recorded in
+[GRAPH_SCALE_SPIKE_RESULTS.md](GRAPH_SCALE_SPIKE_RESULTS.md). Run 34722954424 passed
+the identical deterministic 1,000-, 10,000-, and 50,000-node workload in Electron
+Chromium and Tauri WebView2/WKWebView on both targets. The required 10,000-node case
+met every predeclared timing, culling, stable-layout, and Monaco-coexistence bound;
+the 50,000-node stress case also passed. Engine memory surfaces remain too limited
+for a comparative heap conclusion.
 
 No desktop stack is accepted by this partial result.
 

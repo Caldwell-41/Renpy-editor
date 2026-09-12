@@ -1,6 +1,6 @@
 # Branch-graph scale spike results
 
-**Status:** In progress<br>
+**Status:** Complete automated packaged checkpoint<br>
 **Targets:** Windows x86-64 WebView2 and bundled Chromium; macOS ARM64 WKWebView and bundled Chromium
 
 ## Question
@@ -39,7 +39,77 @@ drawing, event-loop yielding, and editor coexistence without selecting a graph l
 
 ## Results
 
-Target evidence is pending.
+[Desktop evidence run 34722954424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
+passed every assertion on Windows x64 and macOS ARM64. The packaged Electron and
+Tauri applications called the same shared measurement function. The 10,000-node
+usability target passed in bundled Chromium, Windows WebView2, and macOS WKWebView;
+the 50,000-node stress case also completed within its separate 15-second bound.
+
+The deterministic topology was identical in all four packaged executions:
+
+| Nodes | Choices | Calls | Backward cycles | Reconvergences | Filter matches | Path visited | Typed arrays |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1,000 | 91 | 53 | 9 | 144 | 31 | 963 | 22,000 B |
+| 10,000 | 910 | 535 | 99 | 1,445 | 300 | 9,958 | 220,000 B |
+| 50,000 | 4,546 | 2,674 | 495 | 7,220 | 1,502 | 49,957 | 1,100,000 B |
+
+Core timings in milliseconds:
+
+| Target / engine | Nodes | Generate | Layout | Filter | Path | Stable relayout | Total | Pass |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Windows Electron / Chromium | 1,000 | 13.1 | 0.3 | 0.1 | 0.5 | 9.5 | 88.8 | yes |
+| Windows Electron / Chromium | 10,000 | 97.3 | 84.1 | 82.1 | 39.4 | 87.9 | 459.6 | yes |
+| Windows Electron / Chromium | 50,000 | 410.5 | 401.3 | 397.4 | 199.3 | 403.1 | 1,879.8 | yes |
+| Windows Tauri / WebView2 | 1,000 | 9.9 | 0.2 | 4.6 | 0.6 | 10.0 | 95.4 | yes |
+| Windows Tauri / WebView2 | 10,000 | 94.2 | 87.2 | 100.7 | 40.1 | 91.2 | 479.2 | yes |
+| Windows Tauri / WebView2 | 50,000 | 436.6 | 403.4 | 403.3 | 198.1 | 428.1 | 1,935.1 | yes |
+| macOS Electron / Chromium | 1,000 | 6.7 | 0.3 | 0.1 | 0.2 | 66.8 | 268.3 | yes |
+| macOS Electron / Chromium | 10,000 | 266.0 | 372.8 | 493.2 | 267.6 | 445.1 | 2,089.2 | yes |
+| macOS Electron / Chromium | 50,000 | 2,382.4 | 2,366.8 | 2,598.2 | 1,341.5 | 2,471.3 | 11,324.4 | yes |
+| macOS Tauri / WKWebView | 1,000 | 7 | 1 | 0 | 0 | 17 | 104 | yes |
+| macOS Tauri / WKWebView | 10,000 | 164 | 168 | 171 | 81 | 159 | 856 | yes |
+| macOS Tauri / WKWebView | 50,000 | 816 | 784 | 783 | 385 | 785 | 3,657 | yes |
+
+Virtualization and editor-coexistence observations:
+
+| Target / engine | Nodes | Cull | Drawn initial/max | Pan/draw p95 | Editor delay/edit | Long tasks | Heap observation |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| Windows Electron / Chromium | 1k / 10k / 50k | 1.0 / 0.8 / 0.2 | 443/444; 443/444; 440/461 | 0.4 / 0.3 / 0.3 | 0.5/11.0; 4.6/2.8; 4.4/2.8 | 0 (supported) | 0 B delta (available) |
+| Windows Tauri / WebView2 | 1k / 10k / 50k | 1.1 / 0.1 / 0.2 | 443/444; 443/444; 440/461 | 1.1 / 0.2 / 0.3 | 1.0/8.7; 4.4/3.1; 4.3/2.7 | 0 (supported) | 0 B delta (available) |
+| macOS Electron / Chromium | 1k / 10k / 50k | 0.3 / 0.5 / 0.3 | 443/444; 443/444; 440/461 | 0.3 / 0.2 / 0.3 | 0.2/6.5; 6.8/2.3; 36.2/1.8 | 0 (supported) | 0 B delta (available) |
+| macOS Tauri / WKWebView | 1k / 10k / 50k | 1 / 1 / 0 | 443/444; 443/444; 440/461 | 1 / 1 / 1 | 0/7; 8/2; 12/16 | unavailable | unavailable |
+
+All timing cells are milliseconds. Every stable-relayout checksum matched. At most
+461 nodes were drawn, below the predeclared 600-node culling limit. The worst observed
+timer delay was 36.2 ms and the worst Monaco edit was 16 ms, both below 100 ms. The
+Chromium Long Tasks API reported no qualifying long task; WKWebView did not expose
+that observer type, so the result is recorded as unavailable rather than a zero.
+
+The Chromium `performance.memory` surface was present but reported a zero heap delta
+at all three measurement boundaries. That is an engine observation, not proof that
+the workload allocated no memory. WKWebView did not expose the surface. The explicit
+typed-array footprint is therefore the only comparable deterministic memory measure.
+
+### Reproduction
+
+Run 34722954424 used Windows Server 2025 x64 image
+`windows-2025-vs2026/20260907.229` and macOS 26 ARM64 image
+`macos-26-arm64/20260907.0351`, Rust/Cargo 1.98.1, Node 22.23.2 on Windows and
+Node 24.20.0 on macOS. Dependency inputs pin Electron 44.3.0, Tauri CLI 2.11.4,
+Tauri API 2.11.1, and Monaco 0.52.2.
+
+After `npm ci`, `npm test`, and candidate packaging, CI invoked each packaged binary
+with `LOOMLIGHT_SPIKE_GRAPH_PROBE=1`. A failed assertion makes the application exit
+non-zero. The run retained the usual unsigned, private candidate packages for seven
+days; it did not retain a graph-data artifact because the complete structured results
+are in the job logs and the fixture is deterministically regenerated from source.
+
+## Conclusion
+
+This checkpoint supports a shared virtualized graph surface for either desktop
+candidate and closes the required 10,000-node usability question for this synthetic
+workload. It does not distinguish Electron from Tauri strongly enough to select a
+stack. Preview/source-mapping fidelity is the next bounded Phase 0 checkpoint.
 
 ## Known limitations
 

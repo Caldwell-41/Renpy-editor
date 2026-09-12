@@ -29,18 +29,24 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    equivalently in green run 34700476448. Earlier corrective failures remain documented.
    Shared UI/WebView behavior also passes equivalent packaged wide/narrow probes in
    run 34701370897. Packaged native credential storage and plaintext-leak checks pass
-   both targets in run 34722411465. Deterministic graph scale is the active checkpoint;
-   preview, SDK target integration, and comparative measurements remain open.
+   both targets in run 34722411465. Deterministic packaged graph scale passes in run
+   34722954424. Preview/source mapping is the active checkpoint; SDK target integration
+   and comparative measurements remain open.
 4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.
-5. **In progress:** Measure deterministic 1,000-, 10,000-, and 50,000-node synthetic
-   branch graphs with filtering, viewport culling, interaction latency, stable
+5. **Complete automated packaged checkpoint:** Measure deterministic 1,000-, 10,000-,
+   and 50,000-node synthetic branch graphs with filtering, viewport culling,
+   interaction latency, stable
    relayout, and Monaco non-blocking behavior. The 10,000-node case is the usability
-   target.
+   target. All four candidate/engine combinations pass in run 34722954424.
 6. **Linux/synthetic coverage complete; platform validation pending:** Exercise
    official download, checksum, archive traversal, symlink, collision, limits, and
    interrupted-install cases in a disposable directory.
+7. **In progress:** Classify preview/source-mapping behavior as faithful, approximate,
+   or runtime-only using deterministic synthetic constructs and exact source ranges.
+   Do not execute project Python during static mapping or treat preview output as
+   authoritative source.
 
 ## CI efficiency checkpoint
 

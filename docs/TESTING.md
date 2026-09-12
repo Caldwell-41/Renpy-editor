@@ -37,6 +37,12 @@ The packaged credential-store
 passes on both targets: no renderer/credential IPC, OS-native round trip and cleanup,
 bounded/redacted probe output, and zero plaintext sentinel matches in tracked source,
 the project fixture, packages, executables/bundles, or retained-artifact inputs.
+The packaged branch-graph
+[run 34722954424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
+passes the same deterministic 1,000-, 10,000-, and 50,000-node workload in Electron
+Chromium and Tauri WebView2/WKWebView on both targets. It asserts the predeclared 10k
+usability budget, viewport culling, stable relayout, interaction p95, and scheduled
+Monaco delay/edit bounds; the 50k case remains a separate stress result.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers
