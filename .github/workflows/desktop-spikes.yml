@@ -70,6 +70,17 @@ jobs:
           else
             ./src-tauri/target/release/loomlight-desktop-tauri-spike
           fi
+      - name: Probe packaged Tauri WebView denial boundary
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_WEBVIEW_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
       - name: Upload generated Rust lockfile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

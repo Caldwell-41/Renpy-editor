@@ -12,7 +12,7 @@ use std::{
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 
 const MAX_TEXT_BYTES: usize = 2_000_000;
 const MAX_PROCESS_BYTES: usize = 65_536;
@@ -38,6 +38,7 @@ struct DesktopRequest {
     args: Option<Vec<String>>,
     run_id: Option<String>,
     timeout_ms: Option<u64>,
+    security_results: Option<Value>,
 }
 
 #[derive(Clone, Serialize)]
@@ -292,7 +293,7 @@ fn cancel_mock_sdk(state: &SpikeState, request: &DesktopRequest) -> Result<Value
 fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRequest {
     DesktopRequest {
         operation: operation.into(), root: Some(root.to_string_lossy().into_owned()), relative_path: Some(relative_path.into()),
-        expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None,
+        expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None, security_results: None,
     }
 }
 
@@ -326,7 +327,7 @@ fn packaged_security_probe() -> Result<Value, String> {
             Err(error) => error,
         };
         let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
-        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000) };
+        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
         let link = root.join("game space").join("escape-link.rpy");
         let symlink_escape = match create_file_symlink(&outside, &link) {
@@ -356,6 +357,31 @@ fn packaged_security_probe() -> Result<Value, String> {
     result
 }
 
+fn finish_webview_security_probe(app: &tauri::AppHandle, request: &DesktopRequest) -> Result<Value, String> {
+    if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() != Ok("1") {
+        return Err("operation is not allowlisted".into());
+    }
+    let results = request.security_results.clone().ok_or("securityResults are required")?;
+    let required = ["nodeGlobalsDenied", "unknownIpcDenied", "traversalDenied", "networkDenied", "popupDenied"];
+    if !required.iter().all(|key| results.get(key).and_then(Value::as_bool) == Some(true)) {
+        return Err("webview security probe failed".into());
+    }
+    let window = app.get_webview_window("main").ok_or("probe window unavailable")?;
+    let before = window.url().map_err(|_| "probe URL unavailable")?;
+    window.eval("location.href = 'https://example.invalid/loomlight-navigation'").map_err(|_| "navigation probe unavailable")?;
+    let app_handle = app.clone();
+    thread::spawn(move || {
+        thread::sleep(Duration::from_millis(300));
+        let navigation_denied = window.url().is_ok_and(|url| url == before);
+        let mut completed = results;
+        completed["navigationDenied"] = json!(navigation_denied);
+        completed["evidence"] = json!("tauri-packaged-webview-denial");
+        println!("{completed}");
+        app_handle.exit(if navigation_denied { 0 } else { 1 });
+    });
+    Ok(json!({ "checkingNavigation": true }))
+}
+
 #[tauri::command]
 fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, request: DesktopRequest) -> Result<Value, String> {
     match request.operation.as_str() {
@@ -365,6 +391,7 @@ fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, req
         "unwatchText" => unwatch_text(&state, &request),
         "startMockSdk" => start_mock_sdk(&app, &state, &request),
         "cancelMockSdk" => cancel_mock_sdk(&state, &request),
+        "securityProbeResult" => finish_webview_security_probe(&app, &request),
         _ => Err("operation is not allowlisted".into()),
     }
 }
@@ -389,6 +416,11 @@ fn main() {
     }
     tauri::Builder::default()
         .manage(SpikeState::default())
+        .on_page_load(|webview, _| {
+            if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
+                webview.eval(include_str!("security_probe.js")).expect("security probe injection failed");
+            }
+        })
         .invoke_handler(tauri::generate_handler![desktop_operation])
         .run(tauri::generate_context!())
         .expect("Tauri desktop spike failed");
