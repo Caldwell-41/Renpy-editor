@@ -104,7 +104,7 @@ export class MockSdkRuns {
     const child = spawn(process.execPath, [script, request.command, ...request.args], {
       shell: false,
       windowsHide: true,
-      env: { PATH: process.env.PATH ?? "" },
+      env: { PATH: process.env.PATH ?? "", ELECTRON_RUN_AS_NODE: "1" },
       stdio: ["ignore", "pipe", "pipe"],
     });
     const knownPaths = request.args.filter((argument) => path.isAbsolute(argument));

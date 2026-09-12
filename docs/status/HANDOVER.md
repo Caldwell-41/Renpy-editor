@@ -70,8 +70,11 @@ decisions unless repository evidence presents a material conflict.
   materially improve the approximately 1:10 SDK probe.
 - Corrective run 34699898544 passed the complete Windows packaged checkpoint, including
   explicit Tauri navigation denial. macOS passed every Electron assertion except the
-  synthetic-sensitive-output observation and exited non-zero as intended; a minimal
-  fast-child race and spaced-path redaction follow-up is awaiting its target matrix.
+  synthetic-sensitive-output observation and exited non-zero as intended. A delay-only
+  follow-up reproduced the macOS failure, identifying packaged Electron child mode—not
+  a simple event race—as the remaining difference. The allowlisted mock child now sets
+  `ELECTRON_RUN_AS_NODE=1` in its otherwise minimal environment; target verification is
+  pending together with the exact spaced-path redaction follow-up.
 - Repository quality CI passed after the latest evidence documentation update.
 
 Evidence links:

@@ -67,11 +67,14 @@ latency 0 ms/two events at 265 characters, and successful packaged denial/filesy
 redaction assertions for both candidates. Crucially, the explicit Tauri policy now
 reported `navigationDenied: true` on Windows. The macOS Electron probe passed every
 assertion except `sensitiveRedacted`, then correctly exited non-zero; later steps were
-skipped. That fast-exiting stderr child exposed an observation race specific to the
-packaged macOS run. The follow-up delays only the disposable stderr fixture by 50 ms,
-adds exact redaction of known absolute process arguments containing spaces in both
-adapters, and lengthens the Electron Windows path beyond the legacy 260-character
-boundary. This follow-up still requires one target matrix.
+skipped. Follow-up run 34700215108 reproduced the same isolated macOS failure despite a
+50 ms fixture delay, ruling out a simple fast-child event race. The remaining platform
+difference is the packaged Electron executable used as the internal mock runtime:
+macOS does not reliably execute the JavaScript child without explicitly setting
+`ELECTRON_RUN_AS_NODE=1`. The next correction sets that flag only in the allowlisted
+child's minimal environment, adds exact redaction of known absolute process arguments
+containing spaces in both adapters, and lengthens the Electron path beyond the legacy
+Windows 260-character boundary. This follow-up still requires one target matrix.
 
 The final initial matrix, [GitHub Actions run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329),
 passed on Windows x64 and macOS ARM64. Both jobs ran the shared tests, packaged and

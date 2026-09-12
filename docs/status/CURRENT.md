@@ -28,8 +28,10 @@
 - Corrective run 34699898544 then passed the complete Windows job, including explicit
   Tauri navigation denial and equivalent packaged filesystem/redaction probes. macOS
   correctly failed only the Electron synthetic-sensitive-output assertion, exposing a
-  fast-child event race; its 50 ms disposable fixture delay and exact spaced-path
-  redaction follow-up await target verification.
+  packaged-child output failure. Run 34700215108 reproduced it despite a fixture delay,
+  ruling out a simple race. The follow-up explicitly runs only the allowlisted mock
+  child with `ELECTRON_RUN_AS_NODE=1`, retains the minimal environment, and awaits
+  target verification alongside exact spaced-path redaction.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
