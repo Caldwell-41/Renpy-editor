@@ -1,167 +1,90 @@
-# Phase 0 continuation handover
+# Phase 0 completion handover
 
 **Prepared:** 2026-09-13<br>
-**Phase:** 0 — Foundation and proof<br>
+**Phase:** 0 complete; Phase 1 awaiting explicit approval<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
 ## Read first
 
-Read, in order:
+1. [`AGENTS.md`](../../AGENTS.md)
+2. [Current status](CURRENT.md)
+3. [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
+4. [Desktop evidence](../research/DESKTOP_SPIKE_RESULTS.md)
+5. [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md)
 
-1. [`AGENTS.md`](../../AGENTS.md) for repository rules and validation expectations.
-2. [Current status](CURRENT.md) for the short source of truth.
-3. [Active Phase 0 evidence task](../tasks/active/phase-0-evidence-spikes.md).
-4. [Desktop evidence](../research/DESKTOP_SPIKE_RESULTS.md) and the
-   [stack/spike plan](../research/STACK_AND_SPIKES.md).
-5. [Roadmap](../ROADMAP.md), [security baseline](../SECURITY.md), and
-   [testing strategy](../TESTING.md) before changing scope.
+The approved product brief remains authoritative. Phase 1 requires a separate explicit
+approval; this handover is not that approval.
 
-The approved product brief remains authoritative. Do not reopen its settled product
-decisions unless repository evidence presents a material conflict.
+## Accepted boundaries
 
-## Confirmed decisions and boundaries
+- Windows x86-64 and macOS Apple Silicon ARM64 are the only supported targets. Intel
+  macOS is out of scope.
+- `.rpy` files remain authoritative and losslessly preserved. ADR 0001 accepts exact
+  bytes, a conservative partial CST, and verified minimal range patches.
+- ADR 0002 accepts the exact-version Ren'Py adapter and checksum-first staged install.
+  Ren'Py 8.5.3 is the verified compatibility baseline and is not bundled.
+- ADR 0003 selects Tauri 2 with an unprivileged shared UI and a narrow Rust privileged
+  core. Electron remains the explicit fallback under the ADR's reconsideration
+  conditions.
+- Projects, generated content, IPC payloads, archives, and LLM output remain
+  untrusted. Opening source never executes project Python; trusted SDK operations use
+  direct arguments, bounded/redacted output, cancellation, and a minimal environment.
+- Phase 0 code under `spikes/` is disposable evidence. Do not silently promote it
+  into the production architecture.
 
-- Support only Windows x86-64 and macOS Apple Silicon ARM64. Intel macOS is out of
-  scope.
-- Stay within Phase 0 until its evidence gates are complete. Do not start the full
-  production application yet.
-- `.rpy` source is authoritative and must be preserved losslessly. ADR 0001 accepts
-  exact source bytes, a conservative partial CST, and verified range patches.
-- SDK work uses an exact-version allowlist and checksum-first staged installation.
-  ADR 0002 records the accepted boundary; the SDK is not bundled.
-- No desktop stack has been accepted. Tauri 2 is the leading hypothesis and Electron
-  is the explicit fallback, subject to equivalent measured evidence.
-- Use only repository-local Git identity with the configured GitHub noreply address.
-  Never change global Git configuration.
-- Keep fixtures synthetic. Do not commit SDKs, generated packages, signing material,
-  credentials, private game content, or machine-specific paths.
+## Evidence closure
 
-## Completed evidence
+- Source-model golden/token/CST evidence: 12 core tests, ADR 0001 accepted.
+- Preview/source mapping: seven mapping tests and trusted runtime evidence classify
+  behavior as faithful, approximate, or runtime-only.
+- SDK/install: 24 tests plus final run
+  [34731460283](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283)
+  on Windows x64, macOS ARM64, and the Linux regression baseline.
+- Packaged denial/filesystem/process:
+  [34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448).
+- Shared Monaco UI/WebView:
+  [34701370897](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897).
+- Native credential storage and leak scan:
+  [34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465).
+- Deterministic 1k/10k/50k graph:
+  [34722954424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424).
+- Final equivalent comparison:
+  [34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868).
+  Both target jobs and all twelve candidate launches passed. Tauri packages were about
+  98% smaller; Electron started faster; Tauri used much less observed macOS memory but
+  more Windows WebView2 process-tree memory. Interaction and Monaco guards passed for
+  both.
 
-- Repository foundation, agent guidance, product/architecture/data/UI/security/test
-  documentation, roadmap, task tracking, audit, and low-fidelity UI checkpoint.
-- Synthetic Crossroads at Sundown fixture corpus with byte/hash baselines, BOM/CRLF
-  cases, 12 passing core source tests, and seven passing preview-mapping tests.
-- Ren'Py 8.5.3 SDK evidence on Windows x64, macOS ARM64, and the Linux regression
-  baseline for version, compile, lint, tests, normal run, development warp,
-  diagnostics, target distribution, containment-checked install, and package launch.
-- Twenty-four dependency-free SDK installer/security/reporting tests covering checksums, archive
-  containment, links, collisions, limits, interruption, command allowlisting,
-  timeouts, output limits, version matching, trust, and diagnostic parsing.
-- Disposable shared-contract Electron and Tauri shells under
-  `spikes/desktop-shells/`, including Monaco, contained file access, SHA-guarded
-  same-directory replacement, file watching, a mock SDK boundary, restrictive CSP,
-  Electron preload isolation, and Tauri capabilities.
-- The initial target matrix passed on Windows x64 and macOS ARM64: shared tests,
-  Electron package and launch smoke, Tauri Rust tests, and Tauri packaging.
-- Mock-SDK process parity now passes on both targets: typed bounded timeouts,
-  allowlisted direct arguments, incremental bounded/redacted events, real
-  cancellation, deterministic output modes, terminal reasons, stale-ID handling,
-  and active-run cleanup.
-- Packaged probes now cover Electron renderer isolation, bridge shape, unlisted IPC,
-  traversal, network, popup, and navigation denial, plus Tauri core read/replace,
-  stale-hash, traversal, missing-file, process, symlink, watch, and complex-path cases.
-  Run 34691607349 also revealed that expected Electron denials logged absolute packaged
-  paths and that Tauri on Windows reported `navigationDenied: false` without returning
-  a failing process status. Those are active evidence defects, not successful gates.
-- Dependency caching and per-workflow/ref concurrency are implemented and measured.
-  Warm run 34691607349 reduced Windows desktop time from 15:23 to 5:42 and macOS from
-  2:34 to 1:57. SDK archive caching preserves checksum verification but did not
-  materially improve the approximately 1:10 SDK probe.
-- Corrective run 34699898544 passed the complete Windows packaged checkpoint, including
-  explicit Tauri navigation denial. macOS passed every Electron assertion except the
-  synthetic-sensitive-output observation and exited non-zero as intended. A delay-only
-  follow-up reproduced the macOS failure, identifying packaged Electron child mode—not
-  a simple event race—as the remaining difference. The allowlisted mock child now sets
-  `ELECTRON_RUN_AS_NODE=1` in its otherwise minimal environment; target verification is
-  recorded in green run 34700476448. That run closes equivalent packaged denial,
-  filesystem, watch, symlink, long-path, and redaction evidence on both targets.
-- Repository quality CI passed after the latest evidence documentation update.
-- Shared UI/WebView run 34701370897 passes the same wide/narrow packaged assertions
-  in Electron Chromium and Tauri WebView2/WKWebView on Windows x64 and macOS ARM64.
-  Docks/resizing, keyboard/focus, accessibility semantics, reduced motion, synthetic
-  image/audio/video drag/drop, codec observations, responsive layout, and Monaco edit
-  guards pass. Earlier run 34701229006 correctly exposed a hidden-panel focus-fixture
-  defect. Manual NVDA/VoiceOver and subjective playback remain physical-device work.
-- Native credential run 34722411465 passes packaged Electron and Tauri on both
-  targets. Electron uses Keychain-backed/DPAPI-backed `safeStorage` with only temporary
-  opaque ciphertext; Tauri uses direct Keychain/Credential Manager entries. Both
-  round-trip and clean up without creating a renderer or adding credential IPC. The
-  runtime sentinel scan found zero leaks in output, project/source, packages, or
-  retained-artifact inputs. Runs 34722141300 and 34722270752 retain the lock-resolution
-  and Rust type-inference failures that were corrected before the green run.
-- Branch-graph run 34722954424 passes the identical packaged 1k/10k/50k workload in
-  Electron Chromium and Tauri WebView2/WKWebView on both targets. The 10k usability
-  target and 50k stress bounds pass; virtualization draws no more than 461 nodes and
-  scheduled Monaco delay/edit observations remain below 100 ms. WKWebView provides
-  neither Long Tasks nor `performance.memory`, and Chromium's zero heap deltas are not
-  treated as proof of zero allocation.
-- Five-beat preview/source-mapping evidence classifies literal declarations and exact
-  navigation as faithful, engine-dependent staging as approximate, and Python,
-  screen, media-decode, translation/generated behavior as runtime-only. Trusted SDK
-  run 34723797776 passed the mapped transition/ATL/screen/Python-state case on Linux;
-  final target SDK run 34731460283 passed the same automated fixture cases on Windows
-  and macOS.
-- Final SDK/install run 34731460283 passes both supported targets and the Linux
-  regression baseline. It records direct-argument commands and timings, process-tree
-  cancellation, redacted Unicode-path artifacts, a 45,756,995-byte Windows PC ZIP and
-  39,922,539-byte macOS ZIP, staged package installation, and target launch. The
-  Windows executable is `NotSigned`; the macOS app is unsigned, rejected by
-  Gatekeeper, and has no CI-origin quarantine xattr. SmartScreen UI, browser-origin
-  quarantine, Developer ID signing, notarisation, and signed upgrades remain explicit
-  physical/release checks.
+Failed runs remain evidence. Runs 34732252587 and 34732654915 exposed measurement
+sampling/exit defects. Run 34733107607 exposed a 506.2 ms macOS Electron filter result
+against the fixed 500 ms graph limit; a narrower chunking correction retained the
+limit and the final run passed. Earlier packaged-denial, UI, credential, and SDK
+failures are catalogued in their research documents.
 
-Evidence links:
+## Known limitations
 
-- [Green desktop target matrix](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329)
-- [Green repository quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34568130411)
-- [Green process-parity target matrix](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431423)
-- [Green process-parity quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34577431448)
-- [Green shared UI/WebView run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
-- [Green native credential run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
-- [Green packaged graph-scale run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
-- [Green preview/source-mapping runtime run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)
-- [Green target SDK/install run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283)
-
-The retained target artifacts are unsigned research outputs, not a product release.
+Manual NVDA/VoiceOver interaction, subjective real-media quality, physical Windows
+SmartScreen, browser-origin macOS quarantine, Developer ID signing/notarisation,
+signed upgrades, complete accounting of launchd-owned WKWebView services, and
+production automatic-layout performance remain later validation work. They are not
+inferred successes and did not distinguish the Phase 0 candidates enough to block the
+decision.
 
 ## Exact next bounded task
 
-Complete the equivalent Electron/Tauri comparison measurements already required by
-the stack plan: cold start, idle and stress memory, per-candidate artifact size,
-interaction latency, repeated-run flakiness, dependency/licence inventory,
-maintainability, and developer complexity. Use identical shared fixtures and distinguish
-packaged target measurements from static inventory. Do not invent new selection
-criteria after measurement, accept a stack early, bundle the SDK, or begin Phase 1.
+Wait for explicit Phase 1 approval. Once approved, follow
+[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md): create the minimal
+production Tauri workspace and CI skeleton, preserve the accepted source/security/SDK
+ports, and prove the initial command/capability boundary on both targets. Do not add
+authoring features, LLM/Git integrations, SDK bundling, release signing, or copy the
+spike wholesale during that scaffold checkpoint.
 
-## Remaining Phase 0 sequence
+## Validation
 
-After process parity, complete these evidence gates in this order unless new evidence
-shows a dependency conflict:
-
-1. **Complete:** Packaged security-denial and equivalent target filesystem/watch/
-   atomicity/path evidence.
-2. **Complete automated checkpoint:** Shared UI behavior for docking, drag/drop,
-   media, keyboard, accessibility semantics, focus, resizing, reduced motion, and
-   current OS WebView differences. Manual assistive-tech checks remain explicit.
-3. **Complete:** Native credential-store prototypes with UI/log/project/package leak
-   tests.
-4. **Complete:** Deterministic 1k/10k/50k branch-graph measurements without blocking
-   Monaco; the 10k usability target passes in run 34722954424.
-5. **Complete:** Preview/source-mapping fidelity experiment with faithful, approximate,
-   and runtime-only behavior recorded explicitly; Linux runtime pass 34723797776.
-6. **Complete:** Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and
-   macOS, including paths, cancellation, target package install/launch, and unsigned
-   security observations; final run 34731460283.
-7. **Next:** Cold start, memory, artifact size by candidate, latency, flakiness, dependency and
-   licence inventory, and developer-complexity comparison.
-8. Select the desktop stack in a new ADR, revise the threat model and architecture for
-   it, close the active spike task, and only then plan the Phase 1 production scaffold.
-
-## Validation commands
-
-From the repository root:
+The final implementation checkpoint passed 21 desktop shared tests, the UI production
+build, repository validation, quality run 34733246871, and both target jobs in desktop
+run 34733246868. The Phase 0 documentation closure must pass:
 
 ```bash
 python3 scripts/validate.py
@@ -171,34 +94,9 @@ python3 spikes/lossless-source/benchmark.py
 git diff --check
 ```
 
-For the desktop spike:
+## Publishing rules
 
-```bash
-cd spikes/desktop-shells
-npm ci
-npm test
-npm run build:ui
-```
-
-Rust tests and both packages must run through
-`.github/workflows/desktop-spikes.yml` on the two target runners. Treat a failed job
-as evidence to diagnose, not as a reason to infer behavior from the other platform.
-
-## Git and publishing state
-
-- Remote `main` was `89072d478c505d427684f8a3b964712f0f7cb75c` when this handover was reconciled.
-  That implementation head closes the target SDK/package probe; preceding commits
-  retain the preview, graph, credential, UI, caching, and packaged-boundary checkpoints.
-- The local and remote commit identifiers can differ when an environment lacks a shell
-  HTTPS credential helper and publishes through the authenticated GitHub Git Data API.
-- Before publishing more work, fetch the current private `main` ref, create a commit
-  with that remote commit as its parent, and update `main` without force. Verify the
-  resulting remote tree exactly matches the intended local tree.
-- Do not change visibility, create another repository, force-push, or rewrite history.
-
-## User dependencies
-
-There is no current product decision blocking Phase 0. Hosted CI covers the confirmed
-architectures. Later physical install/launch and UX checks can use one dedicated,
-low-privilege Windows x64 machine and one Apple Silicon Mac. Do not ask the user to
-share runner registration tokens, signing keys, or credentials in chat.
+Confirm remote `main` before every write, commit coherently, and update it only by
+fast-forward. Do not change visibility, force-push, rewrite history, commit generated
+packages/SDKs/credentials/logs, or trigger expensive evidence workflows for
+documentation-only closure.

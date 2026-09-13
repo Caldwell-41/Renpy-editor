@@ -108,8 +108,8 @@ are in the job logs and the fixture is deterministically regenerated from source
 
 This checkpoint supports a shared virtualized graph surface for either desktop
 candidate and closes the required 10,000-node usability question for this synthetic
-workload. It does not distinguish Electron from Tauri strongly enough to select a
-stack. Preview/source-mapping fidelity is the next bounded Phase 0 checkpoint.
+workload. It did not distinguish Electron from Tauri alone; the later complete
+comparison is recorded in DESKTOP_SPIKE_RESULTS.md and supports ADR 0003.
 
 ## Known limitations
 

@@ -70,14 +70,15 @@ libraries. Adding a third implementation before Electron/Tauri evidence would ex
 the spike without testing a distinct product risk. Reconsider only if both web-shell
 candidates fail a recorded gate.
 
-## Provisional recommendation
+## Decision outcome
 
-Use **Tauri 2 as the leading hypothesis** because its capability-scoped privileged
-surface aligns with least privilege and SDK/file adapters can live in a typed Rust
-core. **Electron is the explicit fallback** and may win if system-WebView differences,
-Monaco/canvas behavior, desktop E2E, media preview, or Rust integration materially
-reduce reliability or delivery speed. This is not an accepted decision; no production
-scaffold or dependency choice should precede the spike ADR.
+ADR 0003 accepts **Tauri 2** because equivalent evidence passed every security and
+reliability gate while Tauri's package-size and macOS-memory advantages outweighed its
+slower startup, Windows WebView2 memory, and Rust/toolchain cost. **Electron remains
+the explicit fallback** if system-WebView differences, Monaco/canvas/media/
+accessibility behavior, packaged E2E, or Rust integration materially reduce
+reliability or delivery speed. The evidence code remains disposable; the decision
+does not authorize Phase 1 implementation.
 
 ## Equivalent desktop-stack spike
 

@@ -40,19 +40,17 @@ does not stop Python from changing files, so it is not an application sandbox.
 
 ## Desktop-shell baseline
 
-If Electron is selected: keep `nodeIntegration` disabled, context isolation and
-sandboxing enabled, expose a narrow preload API, validate IPC senders, deny unexpected
-navigation/windows, avoid `file://` for privileged content, and set a restrictive CSP.
-These align with Electron's official
-[security checklist](https://www.electronjs.org/docs/latest/tutorial/security).
-
-If Tauri is selected: explicitly enable only named capabilities; scope commands,
-filesystem, shell/process, and HTTP access by window and path. Capability files that
+ADR 0003 selects Tauri 2. Explicitly enable only named capabilities; scope application
+commands by window and validate every payload in the Rust core. Do not grant general
+filesystem, shell/process, or HTTP plugin access to the webview. Capability files that
 are auto-discovered must not accidentally widen authority. See Tauri's official
 [capability model](https://v2.tauri.app/security/capabilities/).
 
-In either stack, project media and generated HTML/text are untrusted data, never UI
-code. Remote content does not share a privileged renderer/webview.
+Project media and generated HTML/text are untrusted data, never UI code. Remote
+content does not share a privileged webview. WebView2 and WKWebView denial tests remain
+separate target gates. If Electron is reconsidered through a superseding ADR, its
+`nodeIntegration`-off, context-isolated, sandboxed preload and sender/navigation/CSP
+baseline remains documented in the Phase 0 evidence.
 
 ## Credential and network rules
 
@@ -92,10 +90,14 @@ diagnostic record.
 
 ## Security gates before Phase 1
 
-- Stack spike demonstrates narrow IPC/capabilities, CSP, path scopes, and safe child
-  process arguments on both target operating systems.
-- SDK spike rejects traversal, symlink, collision, checksum, partial-download, and
-  overwrite cases.
-- Source transactions pass external-conflict, atomicity, recovery, and path tests.
-- Credential-store prototype confirms secrets do not enter renderer state/logs.
-- Threat model is revised against selected framework and dependencies.
+- **Complete:** Packaged Tauri and fallback Electron spikes demonstrate narrow
+  IPC/capabilities, CSP, path scopes, and safe child-process arguments on both targets.
+- **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
+  partial-download, limits, and unsafe overwrite/promotion cases.
+- **Complete at boundary level:** Source writes pass stale-hash, atomicity, watcher,
+  symlink, path, and redaction tests. Phase 1 must implement recovery/conflict UX.
+- **Complete:** Native credential prototypes do not create a renderer or leak into
+  logs, source, projects, packages, or retained evidence inputs.
+- **Complete:** This threat model reflects the selected Tauri capability boundary and
+  locked dependency evidence. Release signing and physical OS reputation UX remain
+  later gates.

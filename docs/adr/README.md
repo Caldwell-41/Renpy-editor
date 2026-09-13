@@ -9,6 +9,6 @@ supersede them with a later ADR rather than editing history.
 | --- | --- | --- |
 | [0001](0001-lossless-source-model.md) | Accepted | Exact source bytes, conservative partial CST, verified range patches |
 | [0002](0002-versioned-renpy-sdk-adapter.md) | Accepted | Exact-version SDK adapter and verified staged installation |
+| [0003](0003-tauri-desktop-runtime.md) | Accepted | Tauri 2 desktop runtime with a narrow Rust privileged core |
 
-The next expected material record selects the desktop stack after the equivalent
-Phase 0 prototypes.
+Future changes to an accepted decision require a superseding ADR.

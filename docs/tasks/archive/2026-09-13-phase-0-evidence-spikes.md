@@ -1,7 +1,7 @@
 # Task: Phase 0 evidence spikes
 
-**Status:** In progress<br>
-**Scope:** Research-only prototypes; no production architecture commitment
+**Status:** Complete 2026-09-13<br>
+**Scope:** Completed research prototypes and accepted Phase 0 architecture decisions
 
 ## Outcome sought
 
@@ -21,7 +21,7 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
 1. **Complete:** Create the neutral golden `.rpy` corpus and byte-for-byte baselines.
 2. **Complete:** Compare lossless parse/edit candidates against the parser acceptance
    matrix and record the source-model direction in ADR 0001.
-3. **In progress; packaged boundary checkpoint complete:** Build functionally
+3. **Complete:** Build functionally
    equivalent Tauri and Electron shells with a shared source editor/contract, watched
    atomic file edit, narrow privileged command, and mocked SDK process. Windows x64
    and macOS ARM64 pass shared lifecycle tests and packaging. Packaged probes cover
@@ -31,8 +31,8 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    run 34701370897. Packaged native credential storage and plaintext-leak checks pass
    both targets in run 34722411465. Deterministic packaged graph scale passes in run
    34722954424. Preview/source mapping is classified and runtime-checked on Linux in
-   run 34723797776. Target SDK integration passes in run 34731460283; comparative
-   measurements remain open.
+   run 34723797776. Target SDK integration passes in run 34731460283. Equivalent
+   comparative measurements pass in run 34733246868 and support ADR 0003.
 4. **Complete:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.
@@ -88,11 +88,10 @@ download was already roughly two seconds; caching removes the repeated transfer 
 does not materially accelerate the minute-long integration probe. Cache storage and
 restore are best-effort optimisations, so a miss must remain a supported path.
 
-No evidence workflow is ready for retirement. The desktop comparison should remain
-until the desktop-stack ADR is accepted; that decision can then retire or replace the
-non-selected spike explicitly. The SDK workflow remains the regression record for its
-now-complete target-platform checkpoint until a later reviewed validation path
-supersedes it.
+The evidence workflows remain reproducible regression records until reviewed Phase 1
+validation replaces them. Documentation-only closure does not trigger them. The
+non-selected Electron candidate stays clearly disposable and is not a second
+production implementation.
 
 ## Acceptance criteria
 
@@ -115,3 +114,12 @@ supersedes it.
 Run the repository validator plus spike-specific test commands. Report platform
 coverage explicitly; do not infer macOS behavior from a Windows-only run or the
 reverse.
+
+## Completion
+
+All acceptance criteria are satisfied. ADR 0001 records the source model, ADR 0002
+records the SDK/install boundary, and ADR 0003 selects Tauri 2 from equivalent
+Windows x64/macOS ARM64 evidence. Final comparison run 34733246868 passed every
+candidate launch and preceding packaged gate. Canonical architecture, security,
+testing, roadmap, status, and handover documents were reconciled. Phase 1 remains
+unimplemented and separately approval-gated.

@@ -1,6 +1,6 @@
 # Desktop-shell spike results
 
-**Status:** Process parity, packaged security/filesystem, shared UI/WebView, credential, and graph-scale checkpoints complete; broader behavior evidence pending<br>
+**Status:** Complete; equivalent candidate evidence supports ADR 0003<br>
 **Targets:** Windows x86-64 and macOS ARM64<br>
 **Intel macOS:** Out of scope by confirmed product decision
 
@@ -174,9 +174,9 @@ use their run ID as the concurrency group, so independent evidence requests are 
 cancelled. Existing path filters remain limited to this workflow and
 `spikes/desktop-shells/**`; broad Phase 0 documentation changes do not rebuild packages.
 
-## Measurements still required
+## Comparative measurements
 
-### Comparative measurement question and success criteria
+### Question and success criteria
 
 Question: with the security and functional gates already equivalent, what measurable
 runtime, packaging, dependency, and maintenance costs distinguish Electron from Tauri
@@ -192,8 +192,53 @@ runner/tool versions, limitations, and discovered failures must be retained. Sec
 and reliability remain gates; size, startup, memory, language/toolchain breadth, and
 maintenance cost are weighted criteria rather than post-hoc pass thresholds.
 
-- Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
-- Dependency/licence inventory and developer-complexity comparison.
+Final run
+[34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868)
+passed every preceding packaged boundary and behavior check plus three fresh
+measurement launches for each candidate on both targets. Values below are medians
+except stress memory, which is the maximum observed process-tree working set.
+Private `desktop-comparison-windows-2025` and `desktop-comparison-macos-26` artifacts
+retain the two raw candidate reports and static inventory for seven days, through
+2026-09-20; complete structured summaries also remain in the job logs.
+
+| Target / candidate | Installed bytes/files | Cold start | Idle working set | Stress peak | 10k total | 10k interaction p95 | Monaco delay/edit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Windows / Electron | 487,381,445 / 73 | 638.85 ms | 335,519,744 B | 350,429,184 B | 422.4 ms | 0.4 ms | 4.2 / 4.2 ms |
+| Windows / Tauri | 9,548,800 / 1 | 1,150.16 ms | 368,054,272 B | 401,563,648 B | 436.6 ms | 0.3 ms | 5.0 / 4.3 ms |
+| macOS / Electron | 401,156,591 / 257 | 408.21 ms | 451,018,752 B | 460,423,168 B | 2,395.6 ms | 0.8 ms | 33.1 / 10.6 ms |
+| macOS / Tauri | 10,787,643 / 3 | 1,628.86 ms | 105,299,968 B | 105,447,424 B | 740 ms | 1 ms | 8 / 4 ms |
+
+Each displayed 10k timing is the median of the three runs. All twelve launches exited
+zero, every 10k interaction and Monaco observation stayed below 100 ms, and every 50k
+case completed below 15 seconds. Electron started about 511 ms faster on Windows and
+1,221 ms faster on macOS. Tauri's artifact was about 98% smaller on each target and
+its observed macOS working set was about 77% lower. Windows WebView2 erased that
+memory advantage: Tauri was about 10% higher at idle and 15% higher under stress.
+
+The Windows Electron first idle/stress sample saw only the root process (100,876,288
+bytes) before its descendants were visible; the other two runs saw four processes and
+the reported median therefore retains the process tree. The macOS sampler can follow
+only descendants of the launched process and reported one Tauri process; launchd-
+owned WKWebView/XPC services may not be descendants, so the macOS Tauri number is a
+useful hosted-runner observation, not a complete system-accounting claim.
+
+The committed locks contain 128 npm packages across shared UI/build tooling and both
+candidates, and 454 transitive Cargo registry packages for the Tauri target/build
+graph. Recorded licence identifiers are permissive/MPL families with no Phase 0
+conflict, but redistribution still requires the planned release review. Candidate-
+specific disposable code measured 458 nonblank lines in five Electron files versus
+707 lines in eight Tauri files; shared UI was 637 lines in five files. Tauri therefore
+adds Rust/toolchain and a larger privileged-adapter dependency surface, while Electron
+keeps one language but ships the much larger ambient Chromium/Node runtime.
+
+Runs 34732252587 and 34732654915 are retained failed evidence. They exposed an
+asynchronous memory-stage attribution defect and then observer interference with the
+graph spike's internal generation/layout bit. Commit `f5c42a6` made the comparison
+exit on its predeclared interaction/Monaco/50k criteria while preserving the full
+diagnostic graph result. Run 34733107607 then caught a standalone macOS Electron
+filter result of 506.2 ms against the fixed 500 ms limit. The filter's 512-node chunks
+caused twenty timer yields; increasing only that chunk to 1,024 retained chunking and
+sub-100-ms edit responsiveness, and the final run passed without changing a limit.
 
 Shared packaged UI/WebView behavior is recorded separately in
 [UI_WEBVIEW_SPIKE_RESULTS.md](UI_WEBVIEW_SPIKE_RESULTS.md). Automated semantics,
@@ -216,7 +261,11 @@ met every predeclared timing, culling, stable-layout, and Monaco-coexistence bou
 the 50,000-node stress case also passed. Engine memory surfaces remain too limited
 for a comparative heap conclusion.
 
-No desktop stack is accepted by this partial result.
+These measurements complete the stack comparison. Together with the earlier
+security, filesystem/process, UI/WebView, credential, and graph gates, they support
+selecting Tauri 2 in ADR 0003. Electron remains the explicit fallback if system-
+WebView differences, packaged E2E reliability, or Rust maintenance cost becomes a
+material delivery blocker.
 
 ## Integration findings
 

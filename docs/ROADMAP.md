@@ -3,7 +3,7 @@
 Each phase is gated by measurable outcomes, not elapsed time. Later work may refine
 implementation detail but must preserve this dependency order and approved scope.
 
-## Phase 0 — Foundation and proof (current)
+## Phase 0 — Foundation and proof (complete)
 
 **Scope:** governance, canonical docs, privacy/security baseline, UI/architecture
 checkpoint, representative fixtures, and high-risk spikes.
@@ -24,7 +24,14 @@ checkpoint, representative fixtures, and high-risk spikes.
 - Architecture, data, UI, security, test, fixture, and first-slice documents reflect
   evidence; no blocking question remains hidden.
 
+Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selects the
+versioned SDK/install boundary, and ADR 0003 selects Tauri 2 after equivalent packaged
+Windows x64/macOS ARM64 evidence. Remaining manual assistive-tech and OS signing/
+reputation checks are recorded later-phase limitations, not inferred Phase 0 passes.
+
 ## Phase 1 — Complete authoring vertical slice
+
+**Status:** Awaiting explicit approval; no implementation has begun.
 
 **Outcome:** create a project; pin SDK/resolution; add two characters/assets; author a
 modular staged scene and two-way choice; inspect graph/source; preserve an external

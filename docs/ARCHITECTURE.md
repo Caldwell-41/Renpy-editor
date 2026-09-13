@@ -2,9 +2,10 @@
 
 ## Status
 
-This is a stack-neutral target architecture for the Phase 0 checkpoint. Desktop
-framework and parser choices remain proposed until their spikes meet acceptance
-criteria. Component boundaries are intended to survive either Tauri or Electron.
+This is the accepted Phase 0 target architecture. ADR 0001 selects exact source bytes
+plus a conservative partial CST, ADR 0002 selects the versioned SDK boundary, and
+[ADR 0003](adr/0003-tauri-desktop-runtime.md) selects Tauri 2. The boundaries remain
+framework-light even though the production shell is now explicit.
 
 ## System boundaries
 
@@ -21,6 +22,18 @@ flowchart TD
 The UI never receives general filesystem or process access. Core business logic is
 UI-framework-independent and invokes external effects through interfaces. Adapters
 return typed results, structured diagnostics, and redacted logs.
+
+## Desktop runtime
+
+Tauri 2 hosts the local shared UI. Its Rust core owns validation and privileged
+adapters; the main webview receives only named, schema-validated application commands
+through an explicit capability. General shell, filesystem, and HTTP plugin authority
+is not granted to the webview. Windows WebView2 and macOS WKWebView are separate test
+targets, and engine-specific behavior is recorded rather than normalized away.
+
+Electron remains the ADR-defined fallback, not a second production implementation.
+The disposable candidates under `spikes/desktop-shells/` are evidence only and must
+not be imported as the Phase 1 production architecture.
 
 ## Proposed components
 
@@ -110,15 +123,11 @@ SDK is the fidelity authority. Unsupported displayables, Python-driven state, sc
 ATL, and platform behavior require launching Ren'Py. Development warp or generated
 harnesses must be version-tested and excluded from release distributions.
 
-## Open architecture uncertainties
+## Resolved Phase 0 boundaries and implementation risks
 
-These are evidence tasks, not user decisions:
-
-- Tauri versus Electron under identical editor, watcher, IPC, packaging, and E2E work.
-- Lossless grammar/CST strategy and safe fallback for unsupported constructs.
-- Fidelity/performance boundary between embedded preview and runtime preview.
-- Ren'Py diagnostic formats and CLI behavior across pinned versions/platforms.
-- Cross-platform atomic-replace and file-watcher edge behavior.
-
-Plans and gates are in [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md)
-and [research/PARSER_ROUND_TRIP.md](research/PARSER_ROUND_TRIP.md).
+Phase 0 resolved the desktop runtime, source model, SDK adapter/install boundary,
+preview fidelity classes, and target atomic/watch behavior. Phase 1 still has to turn
+those decisions into production services and recovery UX. Manual assistive-technology,
+physical signing/quarantine/SmartScreen, system-WebView variance, and full automatic
+graph-layout performance remain explicit later validation risks; they do not reopen
+the completed Phase 0 decision without contradictory evidence.

@@ -27,8 +27,7 @@ still passed, and expected Electron denial exceptions exposed absolute packaged 
 Corrective runs then proved those failure paths were enforced. The final
 [packaged security/filesystem run 34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448)
 passed every explicit assertion on Windows x64 and macOS ARM64, including long paths,
-symlinks, watch events, redaction, and Tauri navigation denial. Broader UI and
-performance measurements remain future gates. The corrected shared UI/WebView
+symlinks, watch events, redaction, and Tauri navigation denial. The corrected shared UI/WebView
 [run 34701370897](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897)
 passes identical packaged wide/narrow assertions in Electron and Tauri on Windows
 x64 and macOS ARM64. It covers DOM accessibility semantics, docks/resizing,
@@ -55,7 +54,15 @@ That matrix passed exact version, compile/lint/test/run/warp, bounded target
 distribution, containment-checked package installation and launch, plus unsigned
 Authenticode and macOS codesign/Gatekeeper/quarantine observations. Physical
 SmartScreen, quarantine-origin, signing, and notarisation UX remain release checks.
-There is no production application build or cross-platform suite yet.
+The final equivalent desktop comparison
+[run 34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868)
+passed all three fresh launches per candidate and target, recorded cold start,
+process-tree idle/stress memory, exact artifact size, 10k interaction/Monaco and 50k
+stress behavior, dependency/licence locks, and source complexity. Runs 34732252587,
+34732654915, and 34733107607 remain failed evidence for sampler attribution,
+comparison-vs-diagnostic exit criteria, and macOS filter-yield flakiness. ADR 0003
+selects Tauri 2 from the complete gate set. There is no production application build
+or Phase 1 cross-platform suite yet.
 
 ## Planned layers
 

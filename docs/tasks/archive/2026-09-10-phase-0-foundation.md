@@ -9,4 +9,4 @@ and no production code was introduced.
 
 Validation: `python3 scripts/validate.py` and `git diff --check`.
 
-Next task: [Phase 0 evidence spikes](../active/phase-0-evidence-spikes.md).
+Next task (completed): [Phase 0 evidence spikes](2026-09-13-phase-0-evidence-spikes.md).

@@ -89,4 +89,5 @@ paths. Migrations are deterministic, previewable, reversible when practical, and
 backed up transactionally. Unknown fields are preserved. Metadata corruption cannot
 trigger rewriting of authoritative `.rpy` source.
 
-Exact JSON schemas will be introduced with tests after the source-model spike.
+Exact production JSON schemas will be introduced with tests during the approved
+Phase 1 vertical slice; the Phase 0 source-model decision is recorded in ADR 0001.

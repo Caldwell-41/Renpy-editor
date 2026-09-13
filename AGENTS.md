@@ -2,9 +2,9 @@
 
 ## Mission and current scope
 
-Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. The current
-scope is Phase 0 only: validate architecture, source round-tripping, Ren'Py SDK
-integration, security boundaries, and UI feasibility before choosing a stack.
+Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 is
+complete and ADR 0003 selects Tauri 2. Phase 1 remains blocked until explicit
+approval; its active brief is planning authority, not permission to implement.
 
 ## Invariants
 

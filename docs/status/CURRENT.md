@@ -1,81 +1,53 @@
 # Current status
 
 **Updated:** 2026-09-13<br>
-**Phase:** 0 — Foundation and proof<br>
+**Phase:** 0 complete; Phase 1 awaiting explicit approval<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The repository foundation, canonical document set, security baseline, CI
-  validation, fixture proposal, UI checkpoint, and bounded spike plans exist.
-- Ren'Py 8.5.3 remains the verified stable compatibility baseline as of this date.
-- ADR 0001 accepts exact source bytes plus a conservative partial CST and verified
-  range patches as the source architecture. The Phase 0 Python tokenizer is disposable.
-- ADR 0002 accepts an exact-version, allowlisted SDK adapter and checksum-first staged
-  installation boundary; final run 34731460283 passes it on both supported targets
-  plus the Linux regression baseline.
-- The Crossroads at Sundown corpus has byte/hash baselines, BOM/CRLF cases, 12 core
-  lossless-source tests plus seven preview-mapping tests, and a Linux Ren'Py 8.5.3 compile/lint/test/run/warp/PC-build
-  pass. The SDK and generated artifacts remain outside Git.
-- The SDK boundary has 24 dependency-free security/adapter/reporting tests. Windows
-  x64 and macOS ARM64 pass exact version, compile, lint, tests, run, warp, bounded
-  distribution, containment-checked package install, and launch. Windows records an
-  unsigned Authenticode result; macOS records unsigned codesign, Gatekeeper rejection,
-  and no CI-origin quarantine xattr. Physical SmartScreen/quarantine/signing flows are
-  explicit release limitations rather than inferred successes.
-- No desktop stack is accepted. The shared-contract Electron/Tauri spike now has green
-  Windows x64/macOS ARM64 packaged evidence for narrow IPC/capabilities, arbitrary-
-  process denial, network/popup/navigation denial, selected-root containment,
-  SHA-stale rejection, same-directory replacement, external watching, symlinks,
-  missing files, complex paths beyond 260 characters, and path/synthetic-sensitive-
-  value redaction. Corrective run 34700476448 closes this checkpoint; preceding runs
-  34691607349, 34699898544, and 34700215108 retain the discovered Windows navigation-
-  gate, Electron log-path, and packaged macOS child-mode failures.
-- The shared Monaco surface passes the same packaged wide/narrow UI behavior probe in
-  Electron Chromium and Tauri WebView2/WKWebView on both targets. Run 34701370897
-  covers docks/resizing, keyboard/focus, accessibility semantics, reduced motion,
-  synthetic media drag/drop, codec observations, responsive layout, and a loose
-  Monaco edit-latency guard. Manual NVDA/VoiceOver interaction and real media quality
-  remain physical-device limitations, not inferred successes.
-- Native credential evidence passes in packaged Electron and Tauri on both targets in
-  run 34722411465. Electron round-tripped opaque temporary ciphertext using its
-  Keychain-backed macOS and DPAPI-backed Windows `safeStorage` keys; Tauri created,
-  read, deleted, and confirmed absence of native Keychain/Credential Manager entries.
-  No renderer was created or credential IPC added, and runtime sentinel scans found
-  zero plaintext leaks across logs, project/source, packages, and retained-artifact
-  inputs. Signed macOS upgrades and locked/prompting stores remain physical checks.
-- Deterministic branch-graph evidence passes in all four packaged candidate/engine
-  combinations in run 34722954424. The shared typed-array/canvas workload met the
-  predeclared 10,000-node usability gate, completed the 50,000-node stress case,
-  culled to at most 461 drawn nodes, and kept scheduled Monaco delay/edit observations
-  below 100 ms. WKWebView exposed neither Long Tasks nor `performance.memory`; the
-  Chromium heap surface returned zero deltas, so only typed-array bytes are comparable.
-- Preview/source-mapping fidelity is classified by five exact synthetic beats and
-  19 passing combined source/preview tests. Literal declarations and navigation can
-  be faithful; engine layout/timing staging is approximate; Python-dependent screens,
-  media decode, and generated behavior remain runtime-only. Trusted SDK run
-  34723797776 passed the mapped transition/ATL/screen/Python-state runtime case on
-  Linux; the same fixture test, run, and warp now also pass in target SDK run
-  34731460283.
-- Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
-  workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
-  Cargo inputs and dependency outputs; a verified warm run reduced Windows from
-  15:23 to 5:42. The pinned SDK archive is cached by version and digest but is still
-  checksum-verified before every extraction; its warm run remained about 1:10 because
-  the probe, not the download, dominates.
-- Confirmed targets are Windows x86-64 and macOS ARM64. Intel macOS is out of scope.
-- No production application or package manifest exists.
-- There are no blocking product questions. Remaining uncertainties are empirical
-  and are captured in the active spike brief.
+- Phase 0 is complete. No production application has been created and Phase 1 has not
+  begun.
+- ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
+  minimal range patches. Authoritative source, formatting, comments, custom syntax,
+  embedded Python, and unsupported regions remain losslessly preserved.
+- ADR 0002 accepts the exact-version Ren'Py adapter and checksum-first staged install.
+  Ren'Py 8.5.3 passes version, compile, lint, test, run, warp, diagnostics,
+  distribution, containment-checked install, and package launch on Windows x64 and
+  macOS ARM64 in run 34731460283, plus the Linux regression baseline.
+- ADR 0003 accepts Tauri 2 as the desktop runtime: an unprivileged shared web UI over
+  named schema-validated commands in a Rust privileged core. Electron is the explicit
+  fallback under ADR-defined reconsideration conditions.
+- Both disposable candidates pass equivalent packaged security/filesystem/process,
+  shared UI/WebView, native credential, and deterministic 1k/10k/50k graph gates on
+  Windows x64 and macOS ARM64. The final comparative run 34733246868 passed all twelve
+  measurement launches and every preceding target check.
+- Tauri measured about 98% smaller packages on both targets and about 77% lower
+  process-tree working set on macOS. Electron started about 0.5 seconds faster on
+  Windows and 1.2 seconds faster on macOS; Tauri's Windows WebView2 process tree used
+  about 10–15% more memory. Both met the fixed interaction and Monaco responsiveness
+  criteria. Rust/toolchain and dependency breadth are accepted Tauri costs.
+- Preview/source mapping is explicitly classified: literal declarations and exact
+  navigation can be faithful; engine-dependent staging is approximate; Python-driven
+  screens, media decode, translations/generated behavior remain runtime-only.
+- CI evidence is path-scoped, cache-safe, checksum-preserving, and green. Failed runs
+  and limitations remain documented rather than hidden by retries.
+- Confirmed targets are Windows x86-64 and macOS Apple Silicon ARM64 only. Intel macOS
+  is out of scope.
+- Manual NVDA/VoiceOver behavior, subjective media quality, physical SmartScreen and
+  browser-origin quarantine, signing/notarisation, complete system accounting of
+  WKWebView services, and production automatic-layout performance are later physical
+  or implementation gates. They are not inferred successes and do not block the
+  evidence-based Phase 0 decision.
 
 ## Next action
 
-Complete the equivalent Electron/Tauri comparison measurements: cold start, idle and
-stress memory, per-candidate artifact size, interaction latency, repeated-run
-flakiness, dependency/licence inventory, maintainability, and developer complexity.
-Use the criteria already fixed in the stack plan; do not select a stack until this
-comparison is complete. The green target SDK/install run is
-[34731460283](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283).
+Do not implement Phase 1 without explicit approval. The exact bounded entry plan is
+the [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md). Its first approved
+work would create only the production Tauri workspace, narrow capability/command
+boundary, shared validation fixtures, and CI skeleton needed for the vertical slice;
+the Phase 0 spike remains disposable and must not be promoted wholesale.
 
-The exact continuation state and implementation checklist are recorded in the
-[Phase 0 continuation handover](HANDOVER.md).
+The completed evidence task is archived at
+[2026-09-13-phase-0-evidence-spikes.md](../tasks/archive/2026-09-13-phase-0-evidence-spikes.md),
+and the exact completion handover is in [HANDOVER.md](HANDOVER.md).
