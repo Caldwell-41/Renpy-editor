@@ -29,6 +29,10 @@ platforms?
 - Each engine records `canPlayType` observations for WAV, MP3, H.264 MP4, and VP9/
   Opus WebM. Capability strings are observations, not proof that every real asset
   decodes or plays correctly.
+- Repository-controlled Ogg Vorbis audio and VP9 WebM video must reach `loadeddata`,
+  accept `play()`, and advance playback time in each packaged engine. These two small
+  fixtures are the automated MVP baseline; capability strings for other formats do
+  not promote them to decoded/playable support.
 - A trivial Monaco edit completes within the deliberately loose 250 ms spike guard;
   detailed interaction/startup/memory measurements remain a later comparison gate.
 - Any false assertion exits the packaged process non-zero. Results record engine,
@@ -38,9 +42,10 @@ platforms?
 ## Implementation boundary
 
 The shared surface remains under `spikes/desktop-shells/` and is disposable. It adds
-no production framework or Phase 1 architecture. Synthetic media is constructed in
-memory and is neither committed as binary content nor uploaded. Tauri's UI result
-command is accepted only while the explicit evidence environment mode is present.
+no production framework or Phase 1 architecture. Synthetic drag inputs remain in
+memory. Two small valid media fixtures are repository-controlled and served only from
+the packaged local UI. Tauri's UI result command is accepted only while the explicit
+evidence environment mode is present.
 
 ## Results
 
@@ -83,7 +88,9 @@ content dimensions rather than assuming cross-shell pixel identity.
 
 - GitHub-hosted runners can validate DOM semantics and packaged WebView behavior but
   not a human screen-reader workflow, subjective keyboard comfort, or media quality.
-- `canPlayType` depends on runtime/OS codec support and does not guarantee decode.
+- The old run's `canPlayType` results do not prove decode. Fresh packaged corrective
+  results for Ogg Vorbis and VP9 WebM are pending; MP3/H.264/WAV remain capability
+  observations unless separately backed by valid fixtures and playback assertions.
 - Synthetic drag/drop proves Web API and application handling; native shell/file-
   manager drag gestures still require a later physical-device UX check.
 - Wide/narrow launches prove responsive behavior at two native window sizes, not all

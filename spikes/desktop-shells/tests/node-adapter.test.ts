@@ -1,35 +1,37 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import type { MockSdkEvent, MockSdkRequest } from "../src/shared/contracts.js";
-import { MockSdkRuns, readText, StaleFileError, watchText, writeTextAtomic } from "../src/shared/node-adapter.js";
+import { ApprovedProjectRegistry, MockSdkRuns, readText, StaleFileError, watchText, writeTextAtomic } from "../src/shared/node-adapter.js";
 
 async function fixture() {
   const root = await mkdtemp(path.join(tmpdir(), "loomlight-desktop-spike-"));
   await mkdir(path.join(root, "game"));
   await writeFile(path.join(root, "game", "script.rpy"), "label start:\n    return\n", "utf8");
-  return root;
+  const registry = new ApprovedProjectRegistry();
+  const projectId = await registry.approveFromTrustedBackend(root);
+  return { root, registry, projectId };
 }
 
 test("reads and atomically replaces a project file with a matching base", async () => {
-  const root = await fixture();
-  const before = await readText(root, "game/script.rpy");
-  const after = await writeTextAtomic(root, before.relativePath, before.sha256, `${before.contents}# safe\n`);
+  const { root, registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
+  const after = await writeTextAtomic(registry, projectId, before.relativePath, before.sha256, `${before.contents}# safe\n`);
   assert.equal(await readFile(path.join(root, "game", "script.rpy"), "utf8"), after.contents);
   assert.notEqual(after.sha256, before.sha256);
 });
 
 test("refuses a stale-base write", async () => {
-  const root = await fixture();
-  const before = await readText(root, "game/script.rpy");
+  const { root, registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
   await writeFile(path.join(root, "game", "script.rpy"), "external edit\n", "utf8");
-  await assert.rejects(() => writeTextAtomic(root, before.relativePath, before.sha256, "overwrite\n"), StaleFileError);
+  await assert.rejects(() => writeTextAtomic(registry, projectId, before.relativePath, before.sha256, "overwrite\n"), StaleFileError);
 });
 
 test("refuses a symlink that escapes the project root", async (context) => {
-  const root = await fixture();
+  const { root, registry, projectId } = await fixture();
   const outside = await mkdtemp(path.join(tmpdir(), "loomlight-outside-"));
   await writeFile(path.join(outside, "private.rpy"), "secret\n", "utf8");
   try {
@@ -38,21 +40,23 @@ test("refuses a symlink that escapes the project root", async (context) => {
     if ((error as NodeJS.ErrnoException).code === "EPERM") context.skip("symlinks unavailable");
     throw error;
   }
-  await assert.rejects(() => readText(root, "game/linked.rpy"), /escapes/);
-  await assert.rejects(() => watchText(root, "game/linked.rpy", () => {}), /escapes/);
+  await assert.rejects(() => readText(registry, projectId, "game/linked.rpy"), /symbolic-link|escapes/);
+  await assert.rejects(() => watchText(registry, projectId, "game/linked.rpy", () => {}), /symbolic-link|escapes/);
 });
 
 test("handles spaces, Unicode, and deep target paths without leaking paths in errors", async () => {
   const root = await mkdtemp(path.join(tmpdir(), "loomlight target ü "));
+  const registry = new ApprovedProjectRegistry();
+  const projectId = await registry.approveFromTrustedBackend(root);
   const segments = Array.from({ length: 20 }, (_, index) => `deep-${index}`);
   const directory = path.join(root, "game space", "日本語", ...segments);
   await mkdir(directory, { recursive: true });
   const relative = ["game space", "日本語", ...segments, "scene ü.rpy"].join("/");
   await writeFile(path.join(root, ...relative.split("/")), "label start:\n    return\n", "utf8");
-  const before = await readText(root, relative);
-  const after = await writeTextAtomic(root, relative, before.sha256, `${before.contents}# updated\n`);
+  const before = await readText(registry, projectId, relative);
+  const after = await writeTextAtomic(registry, projectId, relative, before.sha256, `${before.contents}# updated\n`);
   assert.match(after.contents, /updated/);
-  await assert.rejects(() => readText(root, "game space/missing.rpy"), (error: Error) => {
+  await assert.rejects(() => readText(registry, projectId, "game space/missing.rpy"), (error: Error) => {
     assert.equal(error.message, "file is unavailable");
     assert.equal(error.message.includes(root), false);
     return true;
@@ -60,13 +64,13 @@ test("handles spaces, Unicode, and deep target paths without leaking paths in er
 });
 
 test("reports target watch latency and cleans up the watcher", async () => {
-  const root = await fixture();
+  const { root, registry, projectId } = await fixture();
   const started = performance.now();
   const observations = await new Promise<{ latency: number; events: number }>(async (resolve, reject) => {
     const guard = setTimeout(() => reject(new Error("watch event timed out")), 5_000);
     let first: number | undefined;
     let events = 0;
-    const watcher = await watchText(root, "game/script.rpy", () => {
+    const watcher = await watchText(registry, projectId, "game/script.rpy", () => {
       events += 1;
       first ??= performance.now() - started;
       if (events === 1) setTimeout(() => { clearTimeout(guard); watcher.close(); resolve({ latency: first!, events }); }, 100);
@@ -79,12 +83,79 @@ test("reports target watch latency and cleans up the watcher", async () => {
 });
 
 test("does not leave temporary files after stale or successful replacement", async () => {
-  const root = await fixture();
-  const before = await readText(root, "game/script.rpy");
-  await writeTextAtomic(root, before.relativePath, before.sha256, `${before.contents}# safe\n`);
-  const entries = await import("node:fs/promises").then(({ readdir }) => readdir(path.join(root, "game")));
+  const { root, registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
+  await writeTextAtomic(registry, projectId, before.relativePath, before.sha256, `${before.contents}# safe\n`);
+  const entries = await readdir(path.join(root, "game"));
   assert.deepEqual(entries, ["script.rpy"]);
   await rm(root, { recursive: true, force: true });
+});
+
+test("denies unknown project identifiers and changed approved-root identity", async () => {
+  const { root, registry, projectId } = await fixture();
+  await assert.rejects(() => readText(registry, "00000000-0000-4000-8000-000000000000", "game/script.rpy"), /not approved/);
+  const displaced = `${root}-displaced`;
+  await rename(root, displaced);
+  await mkdir(root);
+  await assert.rejects(() => readText(registry, projectId, "game/script.rpy"), /identity changed/);
+  await rm(root, { recursive: true, force: true });
+  await rm(displaced, { recursive: true, force: true });
+});
+
+test("detects a deterministic external edit during save and retains recovery", async () => {
+  const { root, registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
+  let release!: () => void;
+  let reached!: () => void;
+  const atHook = new Promise<void>((resolve) => { reached = resolve; });
+  const continueSave = new Promise<void>((resolve) => { release = resolve; });
+  const saving = writeTextAtomic(registry, projectId, before.relativePath, before.sha256, "proposed edit\n", {
+    afterTemporarySync: async () => { reached(); await continueSave; },
+  });
+  await atHook;
+  await writeFile(path.join(root, "game", "script.rpy"), "external edit\n", "utf8");
+  release();
+  await assert.rejects(saving, (error: StaleFileError) => {
+    assert.match(error.message, /during save/);
+    assert.ok(error.recoveryRelativePath);
+    return true;
+  });
+  assert.equal(await readFile(path.join(root, "game", "script.rpy"), "utf8"), "external edit\n");
+  const recovery = (await readdir(path.join(root, "game"))).find((entry) => entry.endsWith(".recovery"));
+  assert.ok(recovery);
+  assert.equal(await readFile(path.join(root, "game", recovery!), "utf8"), "proposed edit\n");
+});
+
+test("serializes internal saves and rejects the second stale transaction", async () => {
+  const { registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
+  let release!: () => void;
+  let reached!: () => void;
+  const atHook = new Promise<void>((resolve) => { reached = resolve; });
+  const continueSave = new Promise<void>((resolve) => { release = resolve; });
+  const first = writeTextAtomic(registry, projectId, before.relativePath, before.sha256, "first\n", {
+    afterTemporarySync: async () => { reached(); await continueSave; },
+  });
+  await atHook;
+  const second = writeTextAtomic(registry, projectId, before.relativePath, before.sha256, "second\n");
+  release();
+  await first;
+  await assert.rejects(second, StaleFileError);
+});
+
+test("retains a recovery file when atomic replacement fails", async () => {
+  const { root, registry, projectId } = await fixture();
+  const before = await readText(registry, projectId, "game/script.rpy");
+  await assert.rejects(
+    () => writeTextAtomic(registry, projectId, before.relativePath, before.sha256, "recover me\n", {
+      replace: async () => { throw new Error("injected replacement failure"); },
+    }),
+    /recovery retained/,
+  );
+  const recovery = (await readdir(path.join(root, "game"))).find((entry) => entry.endsWith(".recovery"));
+  assert.ok(recovery);
+  assert.equal(await readFile(path.join(root, "game", recovery!), "utf8"), "recover me\n");
+  assert.equal(await readFile(path.join(root, "game", "script.rpy"), "utf8"), before.contents);
 });
 
 test("runs only the internal mock SDK executable with direct arguments", async () => {

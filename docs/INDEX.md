@@ -4,6 +4,10 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
+The current checkpoint is the
+[Phase 0 corrective review](tasks/active/phase-0-corrective-review.md); Phase 1 remains
+blocked.
+
 | Concern | Canonical document |
 | --- | --- |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |

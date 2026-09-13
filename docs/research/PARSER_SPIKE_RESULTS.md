@@ -40,7 +40,8 @@ The isolated `spikes/lossless-source` implementation:
 - rejects stale revisions, overlapping patches, unexpected bytes, and unsafe ranges;
 - never executes or imports Ren'Py project code.
 
-The synthetic corpus contains 15 `.rpy` files plus encoded CRLF and UTF-8-BOM cases.
+The synthetic corpus now contains a trusted corrective dialogue fixture in addition
+to the original `.rpy` corpus and encoded CRLF and UTF-8-BOM cases.
 It includes modular project source, dialogue, menus, state, calls/jumps, screens, ATL,
 media statements, translation, embedded Python, unsupported neighbours, Unicode, and
 incomplete editor buffers. `manifest.json` pins tracked bytes and SHA-256 values.
@@ -53,12 +54,12 @@ Command:
 python3 -m unittest discover -s spikes/lossless-source/tests -v
 ```
 
-Result at source-model acceptance: **12/12 core tests passed**. The same command now
-runs **19/19** after adding seven isolated preview/source-mapping tests. Core coverage
-includes byte-identical no-op round trips, manifest
-integrity, encoded CRLF/BOM, minimal dialogue patch boundaries, opaque Python
-preservation, incomplete input, stale-base rejection, overlapping-change rejection,
-non-overlapping patches, expected-byte mismatches, escaped quotes, and source mapping.
+Corrective result: **26/26 tests passed**: 19 source-model tests and seven isolated
+preview/source-mapping tests. Coverage includes semantic targeting of narrator,
+character, and literal-speaker dialogue; safe quote/backslash encoding; priority
+`init` Python opacity; byte-identical no-op round trips; CRLF/BOM and unrelated-byte
+preservation; safe refusal of ambiguous/multiline syntax; conflicts; and source
+mapping.
 
 Command:
 
@@ -76,10 +77,10 @@ cross-platform performance guarantee.
 | Gate | Result | Qualification |
 | --- | --- | --- |
 | A — no-op fidelity | Pass for corpus | Serialization returns original bytes; broader syntax corpus will continue growing |
-| B — minimal edits | Partial pass | Dialogue edit proven; other Phase 1 semantic edit builders remain future work; SDK validation pending |
+| B — minimal edits | Partial pass | Corrected supported dialogue edit proven and trusted fixture added for SDK compile/lint; other semantic builders remain future work |
 | C — partial visual fallback | Direction passes | Opaque Python/unknown nodes preserve location/bytes; grouped nested CST and UI badge remain unimplemented |
 | D — live editing/mapping | Partial pass | Exact physical-line/source offsets and incomplete preservation proven; incremental reparse and stable-ID remap pending |
-| E — external transactions | Partial pass | Base hash, expected bytes and overlap detection proven; three-way merge, watcher and atomic disk recovery pending |
+| E — external transactions | Blocking for production writes | Source patches detect expected-byte conflicts; desktop spike adds bounded atomic/recovery behavior, but portable final-window exclusion and production recovery remain open |
 
 ## Limitations and next evidence
 
@@ -87,8 +88,9 @@ cross-platform performance guarantee.
   Ren'Py grammar, Python expressions, multiline strings, or semantic references.
 - It ran only on Linux. Windows/macOS line, path, watcher and atomic-write behavior is
   unproven.
-- The integrated fixture has not yet been compiled or linted by Ren'Py 8.5.3; media
-  microfixtures intentionally reference absent synthetic files and require isolation.
+- The corrective integrated fixture awaits a fresh Ren'Py 8.5.3 compile/lint run;
+  old green runs do not validate it. Media microfixtures intentionally reference
+  absent synthetic files and require isolation.
 - Stable editor IDs, incremental parsing, CST recovery quality, semantic patch builders,
   and three-way reconciliation require production-oriented spikes after SDK validation.
 

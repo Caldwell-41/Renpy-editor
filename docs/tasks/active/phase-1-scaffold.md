@@ -5,8 +5,9 @@
 
 ## Entry condition
 
-Do not begin this task until the user explicitly approves Phase 1. Phase 0 is complete
-and its accepted decisions are dependencies, not permission to implement.
+Do not begin this task until the Phase 0 corrective checkpoint is closed and the user
+explicitly approves Phase 1. Accepted Phase 0 architecture decisions are dependencies,
+not permission to implement.
 
 ## Outcome sought
 

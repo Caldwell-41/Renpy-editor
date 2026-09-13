@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-desktop-operations"
+description = "Allows only the validated Loomlight spike command envelope and permission probe."
+commands.allow = ["desktop_operation", "privileged_ping"]

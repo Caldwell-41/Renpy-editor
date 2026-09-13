@@ -58,6 +58,80 @@ class LosslessSourceTests(unittest.TestCase):
             b'Escaped quote: \\"yes\\" and interpolation: [sample_text!q]',
         )
 
+    def test_dialogue_patch_targets_what_not_literal_speaker(self) -> None:
+        source = b'label start:\n    "Alice" "Original dialogue"\n'
+        document = SOURCE_MODEL.parse(source)
+        node = document.nodes[1]
+        self.assertEqual(node.kind, "dialogue")
+        patch = SOURCE_MODEL.make_quoted_patch(document, node, "Replacement dialogue")
+        result = SOURCE_MODEL.apply_patches(document, [patch], document.revision)
+        self.assertEqual(result, b'label start:\n    "Alice" "Replacement dialogue"\n')
+
+    def test_dialogue_replacement_escapes_delimiter_and_backslashes(self) -> None:
+        cases = [
+            (b'    e "Original"\n', 'He said "hello" at C:\\tram.', b'    e "He said \\"hello\\" at C:\\\\tram."\n'),
+            (b"    'Original'\n", "It's \\safe", b"    'It\\'s \\\\safe'\n"),
+        ]
+        for source, replacement, expected in cases:
+            with self.subTest(source=source):
+                document = SOURCE_MODEL.parse(source)
+                patch = SOURCE_MODEL.make_quoted_patch(document, document.nodes[0], replacement)
+                self.assertEqual(SOURCE_MODEL.apply_patches(document, [patch], document.revision), expected)
+
+    def test_supported_character_narrator_and_mixed_quote_speakers(self) -> None:
+        source = b'    "Narration"\n    e happy "Character"\n    \'Alice\' "Literal speaker" # keep\n'
+        document = SOURCE_MODEL.parse(source)
+        self.assertEqual([node.kind for node in document.nodes], ["narration", "dialogue", "dialogue"])
+        literal = document.nodes[2]
+        patch = SOURCE_MODEL.make_quoted_patch(document, literal, "Changed")
+        self.assertEqual(
+            SOURCE_MODEL.apply_patches(document, [patch], document.revision),
+            b'    "Narration"\n    e happy "Character"\n    \'Alice\' "Changed" # keep\n',
+        )
+
+    def test_init_priority_python_strings_are_opaque(self) -> None:
+        source = b'init -10 python:\n    greeting = "not dialogue"\n\nlabel start:\n    e "Dialogue"\n'
+        document = SOURCE_MODEL.parse(source)
+        self.assertEqual(document.nodes[0].kind, "opaque_python_header")
+        self.assertEqual(document.nodes[1].kind, "opaque_python_body")
+        with self.assertRaises(SOURCE_MODEL.SourceError):
+            SOURCE_MODEL.make_quoted_patch(document, document.nodes[1], "unsafe")
+
+        variants = SOURCE_MODEL.parse(
+            b'python hide:\n    secret = "hidden"\npython in mystore:\n    other = "hidden"\n'
+        )
+        self.assertEqual(
+            [node.kind for node in variants.nodes],
+            ["opaque_python_header", "opaque_python_body", "opaque_python_header", "opaque_python_body"],
+        )
+
+    def test_unsupported_and_multiline_syntax_refuses_visual_edit(self) -> None:
+        for source in [
+            b'    e "first" + "second"\n',
+            b'    e "unterminated\n',
+            b'    e "line one\nline two"\n',
+            b'    python:\n        value = \'quoted\'\n',
+        ]:
+            with self.subTest(source=source):
+                document = SOURCE_MODEL.parse(source)
+                for node in document.nodes:
+                    if node.kind not in {"blank", "opaque_python_header"}:
+                        self.assertNotIn(node.kind, {"dialogue", "narration"})
+
+    def test_dialogue_patch_preserves_crlf_and_unrelated_bytes(self) -> None:
+        source = b'# before\r\nlabel start:\r\n    e "Original"\r\n    $ untouched = "yes"\r\n'
+        document = SOURCE_MODEL.parse(source)
+        node = next(node for node in document.nodes if node.kind == "dialogue")
+        patch = SOURCE_MODEL.make_quoted_patch(document, node, "Changed")
+        result = SOURCE_MODEL.apply_patches(document, [patch], document.revision)
+        self.assertEqual(result, b'# before\r\nlabel start:\r\n    e "Changed"\r\n    $ untouched = "yes"\r\n')
+        self.assertEqual(result.count(b"\r\n"), source.count(b"\r\n"))
+
+    def test_replacement_with_physical_newline_is_refused(self) -> None:
+        document = SOURCE_MODEL.parse(b'    e "Original"\n')
+        with self.assertRaisesRegex(SOURCE_MODEL.SourceError, "single-line"):
+            SOURCE_MODEL.make_quoted_patch(document, document.nodes[0], "line one\nline two")
+
     def test_source_offset_maps_back_to_physical_node(self) -> None:
         source = b'label start:\n    "Mapped."\n'
         document = SOURCE_MODEL.parse(source)

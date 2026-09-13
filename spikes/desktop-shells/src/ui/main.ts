@@ -31,7 +31,7 @@ async function bridge() {
 
 const runtime = document.querySelector<HTMLElement>("#runtime")!;
 const log = document.querySelector<HTMLElement>("#log")!;
-const root = document.querySelector<HTMLInputElement>("#root")!;
+const projectId = document.querySelector<HTMLInputElement>("#project-id")!;
 const file = document.querySelector<HTMLInputElement>("#file")!;
 const line = document.querySelector<HTMLInputElement>("#line")!;
 const editor = monaco.editor.create(document.querySelector<HTMLElement>("#editor")!, {
@@ -43,7 +43,7 @@ const editor = monaco.editor.create(document.querySelector<HTMLElement>("#editor
 let current: FileVersion | undefined;
 
 function report(value: unknown) { log.textContent = `${JSON.stringify(value, null, 2)}\n${log.textContent}`; }
-function requestBase(operation: "readText" | "watchText") { return { operation, root: root.value, relativePath: file.value } as const; }
+function requestBase(operation: "readText" | "watchText") { return { operation, projectId: projectId.value, relativePath: file.value } as const; }
 
 const desktop = await bridge();
 runtime.textContent = desktop.name;
@@ -163,6 +163,35 @@ function stylesheetContains(text: string): boolean {
   } catch { return false; }
 }
 
+async function verifyPlayback(kind: "audio" | "video", source: string) {
+  const element = document.createElement(kind);
+  element.preload = "auto";
+  element.muted = true;
+  element.src = source;
+  const decoded = await new Promise<boolean>((resolve) => {
+    const timer = setTimeout(() => resolve(false), 3_000);
+    element.addEventListener("loadeddata", () => { clearTimeout(timer); resolve(true); }, { once: true });
+    element.addEventListener("error", () => { clearTimeout(timer); resolve(false); }, { once: true });
+    element.load();
+  });
+  if (!decoded) return { decoded: false, played: false, duration: null };
+  let played = false;
+  try {
+    await element.play();
+    played = await new Promise<boolean>((resolve) => {
+      const timer = setTimeout(() => resolve(element.currentTime > 0 || element.ended), 2_000);
+      const advanced = () => { clearTimeout(timer); resolve(element.currentTime > 0 || element.ended); };
+      element.addEventListener("timeupdate", advanced, { once: true });
+      element.addEventListener("ended", advanced, { once: true });
+    });
+  } catch { played = false; }
+  const duration = Number.isFinite(element.duration) ? element.duration : null;
+  element.pause();
+  element.removeAttribute("src");
+  element.load();
+  return { decoded, played, duration };
+}
+
 window.__loomlightRunUiEvidence = async (mode) => {
   setPanel("controls", true); setPanel("inspector", true); setPanel("bottom", true);
   const focusPanel = mode === "narrow" ? panelDefinitions.controls : panelDefinitions.inspector;
@@ -191,6 +220,10 @@ window.__loomlightRunUiEvidence = async (mode) => {
   const image = previews.querySelector("img");
   const audio = previews.querySelector("audio");
   const video = previews.querySelector("video");
+  const [oggEvidence, webmEvidence] = await Promise.all([
+    verifyPlayback("audio", "./fixtures/media/tone.ogg"),
+    verifyPlayback("video", "./fixtures/media/pixel.webm"),
+  ]);
   const editStarted = performance.now();
   editor.setValue(`${editor.getValue()}# ui evidence\n`);
   editor.focus();
@@ -203,6 +236,7 @@ window.__loomlightRunUiEvidence = async (mode) => {
     passed: focusReturned && widthAfter === widthBefore + 16 && shortcutCollapsed && previews.children.length === 3
       && Boolean(image?.alt) && Boolean(audio?.controls) && Boolean(video?.controls) && buttonsNamed
       && stylesheetContains("prefers-reduced-motion") && document.documentElement.dataset.reducedMotion === String(motionQuery.matches)
+      && oggEvidence.decoded && oggEvidence.played && webmEvidence.decoded && webmEvidence.played
       && responsive && editLatencyMs < 250,
     innerWidth: window.innerWidth,
     innerHeight: window.innerHeight,
@@ -224,6 +258,8 @@ window.__loomlightRunUiEvidence = async (mode) => {
     audioMpeg: audio?.canPlayType("audio/mpeg") ?? "",
     videoMp4: video?.canPlayType('video/mp4; codecs="avc1.42E01E"') ?? "",
     videoWebm: video?.canPlayType('video/webm; codecs="vp9, opus"') ?? "",
+    oggEvidence,
+    webmEvidence,
     responsive,
     editorEditLatencyMs: editLatencyMs,
     screenReaderManualRequired: true,

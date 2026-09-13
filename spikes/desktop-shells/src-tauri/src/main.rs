@@ -8,7 +8,7 @@ use std::{
     io::{Read, Write},
     path::{Component, Path, PathBuf},
     process::{Child, Command, Stdio},
-    sync::{atomic::{AtomicU64, Ordering}, mpsc, Arc, Mutex},
+    sync::{atomic::{AtomicBool, AtomicU64, Ordering}, mpsc, Arc, Mutex},
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
@@ -24,13 +24,24 @@ static NEXT_RUN_ID: AtomicU64 = AtomicU64::new(1);
 struct SpikeState {
     watchers: Mutex<HashMap<String, RecommendedWatcher>>,
     runs: Arc<Mutex<HashMap<String, mpsc::Sender<()>>>>,
+    projects: Mutex<HashMap<String, ApprovedProject>>,
+    transactions: Mutex<()>,
+    security_probe_project: Mutex<Option<(String, String)>>,
+    unauthorised_command_denied: Arc<AtomicBool>,
+}
+
+#[derive(Clone)]
+struct ApprovedProject {
+    root: PathBuf,
+    identity: String,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde(deny_unknown_fields)]
 struct DesktopRequest {
     operation: String,
-    root: Option<String>,
+    project_id: Option<String>,
     relative_path: Option<String>,
     expected_sha256: Option<String>,
     contents: Option<String>,
@@ -56,7 +67,7 @@ enum ProcessEvent {
     Terminal { run_id: String, reason: String, code: Option<i32>, signal: Option<String> },
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct FileVersion {
     relative_path: String,
@@ -68,8 +79,57 @@ fn sha256(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
 
-fn request_path(request: &DesktopRequest, must_exist: bool) -> Result<(PathBuf, String), String> {
-    let root_input = request.root.as_deref().ok_or("root is required")?;
+#[cfg(unix)]
+fn path_identity(path: &Path) -> Result<String, String> {
+    use std::os::unix::fs::MetadataExt;
+    let metadata = fs::metadata(path).map_err(|_| "file identity is unavailable")?;
+    Ok(format!("{}:{}:{}", metadata.dev(), metadata.ino(), metadata.mode()))
+}
+
+#[cfg(windows)]
+fn path_identity(path: &Path) -> Result<String, String> {
+    use std::mem::zeroed;
+    use std::os::windows::{fs::OpenOptionsExt, io::AsRawHandle};
+    use windows_sys::Win32::Storage::FileSystem::{
+        GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION, FILE_FLAG_BACKUP_SEMANTICS,
+    };
+    let file = OpenOptions::new().read(true).custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+        .open(path).map_err(|_| "file identity is unavailable")?;
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { zeroed() };
+    if unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut info) } == 0 {
+        return Err("file identity is unavailable".into());
+    }
+    Ok(format!("{}:{}:{}:{}", info.dwVolumeSerialNumber, info.nFileIndexHigh, info.nFileIndexLow, info.dwFileAttributes))
+}
+
+fn approve_project_from_trusted_backend(state: &SpikeState, root_input: &Path) -> Result<String, String> {
+    let root = fs::canonicalize(root_input).map_err(|_| "project root is unavailable")?;
+    let metadata = fs::metadata(&root).map_err(|_| "project root is unavailable")?;
+    if !metadata.is_dir() { return Err("project root is unavailable".into()); }
+    let nonce = NEXT_RUN_ID.fetch_add(1, Ordering::Relaxed);
+    let project_id = format!("project-{}-{nonce}", std::process::id());
+    state.projects.lock().map_err(|_| "project registry unavailable")?.insert(
+        project_id.clone(),
+        ApprovedProject { identity: path_identity(&root)?, root },
+    );
+    Ok(project_id)
+}
+
+fn approved_root(state: &SpikeState, project_id: &str) -> Result<PathBuf, String> {
+    if project_id.len() > 80 || !project_id.bytes().all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-') {
+        return Err("projectId is invalid".into());
+    }
+    let project = state.projects.lock().map_err(|_| "project registry unavailable")?
+        .get(project_id).cloned().ok_or("project is not approved")?;
+    let canonical = fs::canonicalize(&project.root).map_err(|_| "approved project is unavailable")?;
+    if canonical != project.root || path_identity(&canonical)? != project.identity {
+        return Err("approved project identity changed".into());
+    }
+    Ok(project.root)
+}
+
+fn request_path(state: &SpikeState, request: &DesktopRequest, must_exist: bool) -> Result<(PathBuf, String), String> {
+    let project_id = request.project_id.as_deref().ok_or("projectId is required")?;
     let relative = request.relative_path.as_deref().ok_or("relativePath is required")?;
     if relative.contains('\\') || Path::new(relative).is_absolute() {
         return Err("relativePath must use project-relative forward slashes".into());
@@ -77,7 +137,7 @@ fn request_path(request: &DesktopRequest, must_exist: bool) -> Result<(PathBuf, 
     if Path::new(relative).components().any(|part| !matches!(part, Component::Normal(_))) {
         return Err("relativePath is not normalized".into());
     }
-    let root = fs::canonicalize(root_input).map_err(|_| "project root is unavailable")?;
+    let root = approved_root(state, project_id)?;
     let candidate = root.join(relative);
     let parent = fs::canonicalize(candidate.parent().ok_or("file has no parent")?)
         .map_err(|_| "file parent is unavailable")?;
@@ -85,6 +145,9 @@ fn request_path(request: &DesktopRequest, must_exist: bool) -> Result<(PathBuf, 
         return Err("path escapes project root".into());
     }
     if must_exist {
+        if fs::symlink_metadata(&candidate).is_ok_and(|meta| meta.file_type().is_symlink()) {
+            return Err("symbolic-link targets are denied".into());
+        }
         let target = fs::canonicalize(&candidate).map_err(|_| "file is unavailable")?;
         if !target.starts_with(&root) {
             return Err("path escapes project root".into());
@@ -97,8 +160,8 @@ fn request_path(request: &DesktopRequest, must_exist: bool) -> Result<(PathBuf, 
     Ok((candidate, relative.to_owned()))
 }
 
-fn read_text(request: &DesktopRequest) -> Result<FileVersion, String> {
-    let (target, relative_path) = request_path(request, true)?;
+fn read_text(state: &SpikeState, request: &DesktopRequest) -> Result<FileVersion, String> {
+    let (target, relative_path) = request_path(state, request, true)?;
     let bytes = fs::read(target).map_err(|_| "file could not be read")?;
     let contents = String::from_utf8(bytes.clone()).map_err(|_| "file is not UTF-8")?;
     Ok(FileVersion { relative_path, contents, sha256: sha256(&bytes) })
@@ -128,8 +191,29 @@ fn replace_file(temporary: &Path, target: &Path) -> Result<(), String> {
     if result == 0 { Err("atomic replacement failed".into()) } else { Ok(()) }
 }
 
-fn write_text(request: &DesktopRequest) -> Result<FileVersion, String> {
-    let (target, relative_path) = request_path(request, false)?;
+#[cfg(unix)]
+fn sync_parent_directory(target: &Path) -> Result<(), String> {
+    let directory = OpenOptions::new().read(true).open(target.parent().ok_or("file has no parent")?)
+        .map_err(|_| "directory could not be opened for durability sync")?;
+    directory.sync_all().map_err(|_| "directory durability sync failed")
+}
+
+#[cfg(windows)]
+fn sync_parent_directory(_target: &Path) -> Result<(), String> { Ok(()) }
+
+fn preserve_recovery(temporary: &Path, recovery: &Path, reason: &str) -> String {
+    let retained = fs::rename(temporary, recovery).is_ok();
+    let name = recovery.file_name().unwrap_or_default().to_string_lossy();
+    if retained { format!("{reason}; recovery retained as {name}") } else { format!("{reason}; temporary recovery could not be renamed") }
+}
+
+fn write_text_with_hooks<F, R>(state: &SpikeState, request: &DesktopRequest, after_temporary_sync: F, replace: R) -> Result<FileVersion, String>
+where
+    F: FnOnce() -> Result<(), String>,
+    R: FnOnce(&Path, &Path) -> Result<(), String>,
+{
+    let _transaction = state.transactions.lock().map_err(|_| "transaction state unavailable")?;
+    let (target, relative_path) = request_path(state, request, false)?;
     let contents = request.contents.as_deref().ok_or("contents is required")?;
     if contents.len() > MAX_TEXT_BYTES {
         return Err("contents exceeds the spike limit".into());
@@ -139,6 +223,7 @@ fn write_text(request: &DesktopRequest) -> Result<FileVersion, String> {
         return Err("expectedSha256 is invalid".into());
     }
     let current = fs::read(&target).map_err(|_| "file could not be read")?;
+    let initial_identity = path_identity(&target).map_err(|_| "file could not be read")?;
     if sha256(&current) != expected {
         return Err("source changed since it was read".into());
     }
@@ -151,16 +236,33 @@ fn write_text(request: &DesktopRequest) -> Result<FileVersion, String> {
         return Err(format!("temporary write failed: {error}"));
     }
     drop(file);
-    if let Err(error) = replace_file(&temporary, &target) {
-        let _ = fs::remove_file(&temporary);
-        return Err(error);
+    let recovery = target.with_file_name(format!(".{}.{}.recovery", target.file_name().unwrap_or_default().to_string_lossy(), nonce));
+    if let Err(error) = after_temporary_sync() {
+        return Err(preserve_recovery(&temporary, &recovery, &error));
     }
+    let checked = request_path(state, request, false)
+        .map_err(|_| preserve_recovery(&temporary, &recovery, "project path changed during save"))?;
+    let latest = fs::read(&target)
+        .map_err(|_| preserve_recovery(&temporary, &recovery, "source changed during save"))?;
+    let latest_identity = path_identity(&target)
+        .map_err(|_| preserve_recovery(&temporary, &recovery, "source changed during save"))?;
+    if checked.0 != target || sha256(&latest) != expected || latest_identity != initial_identity {
+        return Err(preserve_recovery(&temporary, &recovery, "source changed during save"));
+    }
+    if let Err(error) = replace(&temporary, &target) {
+        return Err(preserve_recovery(&temporary, &recovery, &error));
+    }
+    sync_parent_directory(&target)?;
     Ok(FileVersion { relative_path, contents: contents.to_owned(), sha256: sha256(contents.as_bytes()) })
 }
 
+fn write_text(state: &SpikeState, request: &DesktopRequest) -> Result<FileVersion, String> {
+    write_text_with_hooks(state, request, || Ok(()), replace_file)
+}
+
 fn watch_text(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
-    let (target, relative_path) = request_path(request, true)?;
-    let key = format!("{}\0{}", request.root.as_deref().unwrap_or_default(), relative_path);
+    let (target, relative_path) = request_path(state, request, true)?;
+    let key = format!("{}\0{}", request.project_id.as_deref().unwrap_or_default(), relative_path);
     let app_handle = app.clone();
     let event_path = relative_path.clone();
     let mut watcher = notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
@@ -183,8 +285,8 @@ where F: FnMut() + Send + 'static {
 }
 
 fn unwatch_text(state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
-    let (_, relative_path) = request_path(request, true)?;
-    let key = format!("{}\0{}", request.root.as_deref().unwrap_or_default(), relative_path);
+    let (_, relative_path) = request_path(state, request, true)?;
+    let key = format!("{}\0{}", request.project_id.as_deref().unwrap_or_default(), relative_path);
     state.watchers.lock().map_err(|_| "watcher state unavailable")?.remove(&key);
     Ok(json!({ "watching": false }))
 }
@@ -295,9 +397,9 @@ fn cancel_mock_sdk(state: &SpikeState, request: &DesktopRequest) -> Result<Value
     Ok(json!({ "cancelled": sender.is_some_and(|sender| sender.send(()).is_ok()) }))
 }
 
-fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRequest {
+fn probe_request(operation: &str, project_id: &str, relative_path: &str) -> DesktopRequest {
     DesktopRequest {
-        operation: operation.into(), root: Some(root.to_string_lossy().into_owned()), relative_path: Some(relative_path.into()),
+        operation: operation.into(), project_id: Some(project_id.into()), relative_path: Some(relative_path.into()),
         expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None, security_results: None,
         ui_results: None, graph_results: None, measurement_stage: None, measurement_results: None,
     }
@@ -319,25 +421,28 @@ fn packaged_security_probe() -> Result<Value, String> {
     fs::create_dir_all(target.parent().ok_or("probe parent unavailable")?).map_err(|_| "probe setup failed")?;
     fs::write(&target, b"label start:\n    return\n").map_err(|_| "probe setup failed")?;
     fs::write(&outside, b"private fixture\n").map_err(|_| "probe setup failed")?;
+    let state = SpikeState::default();
+    let project_id = approve_project_from_trusted_backend(&state, &root)?;
     let result = (|| {
-        let read_request = probe_request("readText", &root, &relative);
-        let before = read_text(&read_request)?;
-        let mut write_request = probe_request("writeTextAtomic", &root, &relative);
+        let read_request = probe_request("readText", &project_id, &relative);
+        let before = read_text(&state, &read_request)?;
+        let mut write_request = probe_request("writeTextAtomic", &project_id, &relative);
         write_request.expected_sha256 = Some(before.sha256.clone());
         write_request.contents = Some(format!("{}# updated\n", before.contents));
-        let after = write_text(&write_request)?;
-        let stale_denied = write_text(&write_request).is_err();
-        let traversal_denied = request_path(&probe_request("readText", &root, "../secret"), true).is_err();
-        let missing_error = match read_text(&probe_request("readText", &root, "game space/missing.rpy")) {
+        let after = write_text(&state, &write_request)?;
+        let stale_denied = write_text(&state, &write_request).is_err();
+        let traversal_denied = request_path(&state, &probe_request("readText", &project_id, "../secret"), true).is_err();
+        let forged_project_denied = read_text(&state, &probe_request("readText", "project-forged", &relative)).is_err();
+        let missing_error = match read_text(&state, &probe_request("readText", &project_id, "game space/missing.rpy")) {
             Ok(_) => return Err("missing file unexpectedly opened".into()),
             Err(error) => error,
         };
         let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
-        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None, graph_results: None, measurement_stage: None, measurement_results: None };
+        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), project_id: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None, graph_results: None, measurement_stage: None, measurement_results: None };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
         let link = root.join("game space").join("escape-link.rpy");
         create_file_symlink(&outside, &link).map_err(|_| "probe symlink unavailable")?;
-        let symlink_denied = read_text(&probe_request("readText", &root, "game space/escape-link.rpy")).is_err();
+        let symlink_denied = read_text(&state, &probe_request("readText", &project_id, "game space/escape-link.rpy")).is_err();
         if !symlink_denied { return Err("symlink escape unexpectedly allowed".into()); }
         let (watch_tx, watch_rx) = mpsc::channel();
         let started = Instant::now();
@@ -359,6 +464,7 @@ fn packaged_security_probe() -> Result<Value, String> {
             "evidence": "tauri-packaged-core-denial", "read": true, "atomicReplace": true,
             "sameDirectoryReplacement": same_directory_replacement,
             "staleDenied": stale_denied, "traversalDenied": traversal_denied,
+            "forgedProjectDenied": forged_project_denied,
             "missingErrorRedacted": missing_redacted, "arbitraryProcessDenied": arbitrary_process_denied,
             "symlinkDenied": symlink_denied, "sensitiveRedacted": sensitive_redacted,
             "watchLatencyMs": latency_ms, "watchEvents": watch_events,
@@ -371,27 +477,44 @@ fn packaged_security_probe() -> Result<Value, String> {
     result
 }
 
-fn finish_webview_security_probe(app: &tauri::AppHandle, request: &DesktopRequest) -> Result<Value, String> {
+fn prepare_webview_security_fixture(state: &SpikeState) -> Result<(String, String), String> {
+    let nonce = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_| "clock unavailable")?.as_nanos();
+    let root = std::env::temp_dir().join(format!("loomlight-webview-project-{nonce}"));
+    let relative = "game/script.rpy".to_owned();
+    let target = root.join(&relative);
+    fs::create_dir_all(target.parent().ok_or("probe parent unavailable")?).map_err(|_| "probe setup failed")?;
+    fs::write(&target, b"label start:\n    return\n").map_err(|_| "probe setup failed")?;
+    let outside = std::env::temp_dir().join(format!("loomlight-webview-outside-{nonce}.rpy"));
+    fs::write(&outside, b"private fixture\n").map_err(|_| "probe setup failed")?;
+    create_file_symlink(&outside, &root.join("game/escape-link.rpy")).map_err(|_| "probe symlink unavailable")?;
+    let project_id = approve_project_from_trusted_backend(state, &root)?;
+    Ok((project_id, relative))
+}
+
+fn finish_webview_security_probe(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
     if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() != Ok("1") {
         return Err("operation is not allowlisted".into());
     }
     let results = request.security_results.clone().ok_or("securityResults are required")?;
-    let required = ["nodeGlobalsDenied", "unknownIpcDenied", "traversalDenied", "networkDenied", "popupDenied"];
+    let required = ["nodeGlobalsDenied", "knownCommandAllowed", "approvedAccess", "unknownIpcDenied", "traversalDenied", "forgedProjectDenied", "rendererRootDenied", "symlinkDenied", "networkDenied", "popupDenied"];
     if !required.iter().all(|key| results.get(key).and_then(Value::as_bool) == Some(true)) {
         return Err("webview security probe failed".into());
     }
     let window = app.get_webview_window("main").ok_or("probe window unavailable")?;
     let before = window.url().map_err(|_| "probe URL unavailable")?;
+    let unauthorised_probe = Arc::clone(&state.unauthorised_command_denied);
     window.eval("location.href = 'https://example.invalid/loomlight-navigation'").map_err(|_| "navigation probe unavailable")?;
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(300));
         let navigation_denied = window.url().is_ok_and(|url| url == before);
+        let unauthorised_denied = unauthorised_probe.load(Ordering::SeqCst);
         let mut completed = results;
+        completed["unauthorisedKnownCommandDenied"] = json!(unauthorised_denied);
         completed["navigationDenied"] = json!(navigation_denied);
         completed["evidence"] = json!("tauri-packaged-webview-denial");
         println!("{completed}");
         let _ = std::io::stdout().flush();
-        std::process::exit(if navigation_denied { 0 } else { 1 });
+        std::process::exit(if navigation_denied && unauthorised_denied { 0 } else { 1 });
     });
     Ok(json!({ "checkingNavigation": true }))
 }
@@ -492,15 +615,18 @@ fn packaged_credential_probe() -> Result<Value, String> {
 }
 
 #[tauri::command]
+fn privileged_ping() -> Value { json!({ "pong": true }) }
+
+#[tauri::command]
 fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, request: DesktopRequest) -> Result<Value, String> {
     match request.operation.as_str() {
-        "readText" => serde_json::to_value(read_text(&request)?).map_err(|_| "serialization failed".into()),
-        "writeTextAtomic" => serde_json::to_value(write_text(&request)?).map_err(|_| "serialization failed".into()),
+        "readText" => serde_json::to_value(read_text(&state, &request)?).map_err(|_| "serialization failed".into()),
+        "writeTextAtomic" => serde_json::to_value(write_text(&state, &request)?).map_err(|_| "serialization failed".into()),
         "watchText" => watch_text(&app, &state, &request),
         "unwatchText" => unwatch_text(&state, &request),
         "startMockSdk" => start_mock_sdk(&app, &state, &request),
         "cancelMockSdk" => cancel_mock_sdk(&state, &request),
-        "securityProbeResult" => finish_webview_security_probe(&app, &request),
+        "securityProbeResult" => finish_webview_security_probe(&app, &state, &request),
         "uiProbeResult" => finish_ui_probe(&request),
         "graphProbeResult" => finish_graph_probe(&request),
         "measurementProbeResult" => finish_measurement_probe(&request),
@@ -538,6 +664,11 @@ fn main() {
     tauri::Builder::default()
         .manage(SpikeState::default())
         .setup(|app| {
+            if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
+                let state = app.state::<SpikeState>();
+                let fixture = prepare_webview_security_fixture(&state).expect("security probe fixture must be created");
+                *state.security_probe_project.lock().expect("probe state available") = Some(fixture);
+            }
             let mut config = app.config().app.windows.first().expect("main window config is required").clone();
             if std::env::var("LOOMLIGHT_SPIKE_UI_PROBE").as_deref() == Ok("narrow") {
                 config.width = 720.0;
@@ -551,11 +682,34 @@ fn main() {
                 })
                 .build()
                 .expect("main window must be created");
+            if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
+                let state = app.state::<SpikeState>();
+                let denied = Arc::clone(&state.unauthorised_command_denied);
+                tauri::WebviewWindowBuilder::new(app, "unauthorised-probe", tauri::WebviewUrl::App("index.html".into()))
+                    .visible(false)
+                    .on_navigation(move |url| {
+                        if url.query() == Some("permission-denied=1") {
+                            denied.store(true, Ordering::SeqCst);
+                            return false;
+                        }
+                        url.scheme() == "tauri"
+                    })
+                    .build()
+                    .expect("unauthorised probe window must be created");
+            }
             Ok(())
         })
         .on_page_load(|webview, _| {
             if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
-                webview.eval(include_str!("security_probe.js")).expect("security probe injection failed");
+                if webview.label() == "main" {
+                    let state = webview.state::<SpikeState>();
+                    let fixture = state.security_probe_project.lock().expect("probe state available").clone().expect("probe fixture available");
+                    let project_id = serde_json::to_string(&fixture.0).expect("project id serializes");
+                    let relative_path = serde_json::to_string(&fixture.1).expect("relative path serializes");
+                    webview.eval(&format!("window.__loomlightSecurityProjectId={project_id};window.__loomlightSecurityRelativePath={relative_path};{}", include_str!("security_probe.js"))).expect("security probe injection failed");
+                } else if webview.label() == "unauthorised-probe" {
+                    webview.eval(include_str!("unauthorised_permission_probe.js")).expect("permission probe injection failed");
+                }
             }
             if let Ok(mode) = std::env::var("LOOMLIGHT_SPIKE_UI_PROBE") {
                 if matches!(mode.as_str(), "wide" | "narrow") {
@@ -570,7 +724,7 @@ fn main() {
                 webview.eval(include_str!("measurement_probe.js")).expect("measurement probe injection failed");
             }
         })
-        .invoke_handler(tauri::generate_handler![desktop_operation])
+        .invoke_handler(tauri::generate_handler![desktop_operation, privileged_ping])
         .run(tauri::generate_context!())
         .expect("Tauri desktop spike failed");
 }
@@ -652,6 +806,7 @@ mod tests {
         assert_eq!(result["atomicReplace"], true);
         assert_eq!(result["staleDenied"], true);
         assert_eq!(result["traversalDenied"], true);
+        assert_eq!(result["forgedProjectDenied"], true);
         assert_eq!(result["missingErrorRedacted"], true);
         assert_eq!(result["arbitraryProcessDenied"], true);
         assert_eq!(result["symlinkDenied"], true);
@@ -663,13 +818,90 @@ mod tests {
     fn tauri_configuration_is_deny_by_default() {
         let config = include_str!("../tauri.conf.json");
         let capability = include_str!("../capabilities/default.json");
+        let permission = include_str!("../permissions/desktop-operations.toml");
+        let build = include_str!("../build.rs");
         assert!(config.contains("connect-src ipc: http://ipc.localhost"));
         assert!(!config.contains("connect-src *"));
         assert!(config.contains("frame-src 'none'"));
         assert!(config.contains("object-src 'none'"));
-        assert!(capability.contains("\"permissions\": [\"core:default\"]"));
+        assert!(config.contains("\"capabilities\": [\"main-local-only\"]"));
+        assert!(config.contains("\"type\": \"downloadBootstrapper\""));
+        assert!(capability.contains("\"windows\": [\"main\"]"));
+        assert!(capability.contains("allow-desktop-operations"));
+        assert!(permission.contains("desktop_operation"));
+        assert!(permission.contains("privileged_ping"));
+        assert!(build.contains("AppManifest::new().commands"));
         assert!(!capability.contains("shell:"));
         assert!(!capability.contains("fs:"));
         assert!(!capability.contains("http:"));
+    }
+
+    #[test]
+    fn renderer_supplied_root_is_rejected_by_ipc_schema() {
+        let request = json!({
+            "operation": "readText",
+            "projectId": "project-approved",
+            "relativePath": "game/script.rpy",
+            "root": "/renderer-selected"
+        });
+        assert!(serde_json::from_value::<DesktopRequest>(request).is_err());
+    }
+
+    fn save_fixture() -> (SpikeState, PathBuf, String, DesktopRequest) {
+        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let root = std::env::temp_dir().join(format!("loomlight-save-test-{nonce}"));
+        fs::create_dir_all(root.join("game")).unwrap();
+        fs::write(root.join("game/script.rpy"), b"original\n").unwrap();
+        let state = SpikeState::default();
+        let project_id = approve_project_from_trusted_backend(&state, &root).unwrap();
+        let request = DesktopRequest {
+            operation: "writeTextAtomic".into(), project_id: Some(project_id.clone()), relative_path: Some("game/script.rpy".into()),
+            expected_sha256: Some(sha256(b"original\n")), contents: Some("proposed\n".into()), command: None, args: None,
+            run_id: None, timeout_ms: None, security_results: None, ui_results: None, graph_results: None,
+            measurement_stage: None, measurement_results: None,
+        };
+        (state, root, project_id, request)
+    }
+
+    #[test]
+    fn approved_registry_denies_unknown_and_changed_root_identity() {
+        let (state, root, project_id, _) = save_fixture();
+        assert!(approved_root(&state, "project-forged").is_err());
+        let displaced = root.with_extension("displaced");
+        fs::rename(&root, &displaced).unwrap();
+        fs::create_dir(&root).unwrap();
+        assert!(approved_root(&state, &project_id).is_err());
+        let _ = fs::remove_dir_all(root);
+        let _ = fs::remove_dir_all(displaced);
+    }
+
+    #[test]
+    fn detects_external_edit_during_save_and_retains_recovery() {
+        let (state, root, _, request) = save_fixture();
+        let target = root.join("game/script.rpy");
+        let error = write_text_with_hooks(
+            &state,
+            &request,
+            || { fs::write(&target, b"external\n").map_err(|_| "injected edit failed".to_owned()) },
+            replace_file,
+        ).unwrap_err();
+        assert!(error.contains("source changed during save"));
+        assert_eq!(fs::read(&target).unwrap(), b"external\n");
+        let recovery = fs::read_dir(root.join("game")).unwrap().filter_map(Result::ok)
+            .find(|entry| entry.file_name().to_string_lossy().ends_with(".recovery")).unwrap();
+        assert_eq!(fs::read(recovery.path()).unwrap(), b"proposed\n");
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn retains_recovery_when_atomic_replace_fails() {
+        let (state, root, _, request) = save_fixture();
+        let error = write_text_with_hooks(&state, &request, || Ok(()), |_, _| Err("injected atomic replacement failed".into())).unwrap_err();
+        assert!(error.contains("recovery retained"));
+        assert_eq!(fs::read(root.join("game/script.rpy")).unwrap(), b"original\n");
+        let recovery = fs::read_dir(root.join("game")).unwrap().filter_map(Result::ok)
+            .find(|entry| entry.file_name().to_string_lossy().ends_with(".recovery")).unwrap();
+        assert_eq!(fs::read(recovery.path()).unwrap(), b"proposed\n");
+        let _ = fs::remove_dir_all(root);
     }
 }

@@ -43,6 +43,14 @@
       "disposition": "renpy-8.5.3-linux-pass"
     },
     {
+      "path": "game/corrective_dialogue.rpy",
+      "sha256": "bd224cf8869022199db8697b7debf39297c704ae1bc52789345d641b7ea501d3",
+      "bytes": 214,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
       "path": "game/definitions/characters.rpy",
       "sha256": "90e00d9e0a22ba7e1e98917d172e968059347486f64ac10818f5dcadcbe63e5d",
       "bytes": 199,

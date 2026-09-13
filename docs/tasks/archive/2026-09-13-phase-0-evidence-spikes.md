@@ -3,6 +3,12 @@
 **Status:** Complete 2026-09-13<br>
 **Scope:** Completed research prototypes and accepted Phase 0 architecture decisions
 
+> Corrective note: the later Phase 0 review reproduced gaps in dialogue targeting,
+> project approval, Tauri command permissioning, concurrent-save claims, and media
+> playback evidence. This document records the original checkpoint; current truth is
+> the active corrective task and status/handover, and old green runs do not validate
+> the corrected implementation.
+
 ## Outcome sought
 
 Produce reproducible evidence for the desktop stack, lossless source model,

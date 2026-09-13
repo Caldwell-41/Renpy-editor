@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from hashlib import sha256
+import re
 from typing import Iterable
 
 
@@ -124,7 +125,81 @@ def _indent_width(content: bytes) -> int:
     return width
 
 
-def _classify(stripped: str, inside_python: bool) -> str:
+PYTHON_HEADER = re.compile(
+    r"^(?:python\b|init(?:\s+[+-]?\d+)?\s+python\b).*:\s*(?:#.*)?$"
+)
+IDENTIFIER = re.compile(r"^[A-Za-z_]\w*$")
+
+
+def _quoted_spans(data: bytes) -> list[tuple[int, int, int]]:
+    """Return complete quote spans as (opening, content-end, delimiter)."""
+
+    spans: list[tuple[int, int, int]] = []
+    index = 0
+    while index < len(data):
+        quote = data[index]
+        if quote not in (0x22, 0x27):
+            index += 1
+            continue
+        escaped = False
+        end = index + 1
+        while end < len(data):
+            current = data[end]
+            if current == quote and not escaped:
+                spans.append((index, end, quote))
+                index = end + 1
+                break
+            if current == 0x5C and not escaped:
+                escaped = True
+            else:
+                escaped = False
+            end += 1
+        else:
+            return []
+    return spans
+
+
+def _dialogue_span(data: bytes) -> tuple[int, int, int] | None:
+    """Recognise the deliberately small, single-line editable say subset."""
+
+    line = data.rstrip(b"\r\n")
+    leading = len(line) - len(line.lstrip(b" \t"))
+    statement = line[leading:]
+    try:
+        statement.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+    spans = _quoted_spans(statement)
+    if not spans:
+        return None
+    last_end = spans[-1][1] + 1
+    trailing = statement[last_end:].strip()
+    if trailing and not trailing.startswith(b"#"):
+        return None
+
+    if spans[0][0] == 0:
+        if len(spans) == 1:
+            chosen = spans[0]  # narrator dialogue
+        elif len(spans) == 2:
+            between = statement[spans[0][1] + 1 : spans[1][0]]
+            if not between or not between.isspace():
+                return None
+            chosen = spans[1]  # literal speaker followed by dialogue
+        else:
+            return None
+    else:
+        if len(spans) != 1:
+            return None
+        prefix = statement[: spans[0][0]].strip().decode("utf-8")
+        if not prefix or not all(IDENTIFIER.fullmatch(token) for token in prefix.split()):
+            return None
+        chosen = spans[0]  # character plus optional image attributes
+
+    return leading + chosen[0] + 1, leading + chosen[1], chosen[2]
+
+
+def _classify(stripped: str, inside_python: bool, raw: bytes | None = None) -> str:
     if not stripped:
         return "blank"
     if stripped.startswith("#"):
@@ -133,12 +208,13 @@ def _classify(stripped: str, inside_python: bool) -> str:
         return "opaque_python_body"
     if stripped.startswith("$"):
         return "opaque_python_line"
-    if stripped == "python:" or stripped.startswith("python early:"):
+    if PYTHON_HEADER.fullmatch(stripped):
         return "opaque_python_header"
-    if stripped.startswith("init python") and stripped.endswith(":"):
-        return "opaque_python_header"
-    if stripped.startswith('"') or stripped.startswith("'"):
-        return "narration"
+
+    if raw is not None:
+        span = _dialogue_span(raw)
+        if span is not None:
+            return "narration" if stripped.startswith(('"', "'")) and len(_quoted_spans(raw.lstrip(b" \t").rstrip(b"\r\n"))) == 1 else "dialogue"
 
     head = stripped.split(None, 1)[0].rstrip(":")
     if head in SUPPORTED_HEADS:
@@ -146,10 +222,6 @@ def _classify(stripped: str, inside_python: bool) -> str:
     if head in SCREEN_ATL_HEADS:
         return f"visual_property:{head}"
 
-    # Character dialogue is conservatively recognized only when a quoted string
-    # follows an identifier/attribute prefix on the same physical line.
-    if ('"' in stripped or "'" in stripped) and head.isidentifier():
-        return "dialogue"
     return "opaque_unknown"
 
 
@@ -170,7 +242,7 @@ def parse(source: bytes) -> SourceDocument:
             while python_indents and indent <= python_indents[-1]:
                 python_indents.pop()
         inside_python = bool(python_indents and indent > python_indents[-1])
-        kind = _classify(stripped, inside_python)
+        kind = _classify(stripped, inside_python, raw)
 
         nodes.append(SourceNode(kind, offset, offset + len(raw), line_number, indent, raw))
         if kind == "opaque_python_header":
@@ -181,7 +253,7 @@ def parse(source: bytes) -> SourceDocument:
         raw = source[offset:]
         decoded = raw.decode("utf-8", "replace")
         indent = _indent_width(raw)
-        kind = _classify(decoded.lstrip(" \t"), bool(python_indents))
+        kind = _classify(decoded.lstrip(" \t"), bool(python_indents), raw)
         nodes.append(SourceNode(kind, offset, len(source), len(nodes) + 1, indent, raw))
 
     return SourceDocument(source, tuple(nodes))
@@ -222,8 +294,16 @@ def quoted_content_span(node: SourceNode, occurrence: int = 0) -> tuple[int, int
 def make_quoted_patch(document: SourceDocument, node: SourceNode, replacement: str) -> Patch:
     if node.kind not in {"dialogue", "narration"}:
         raise SourceError(f"{node.kind} is not an editable dialogue node")
-    start, end = quoted_content_span(node)
-    return Patch(start, end, replacement.encode("utf-8"), document.source[start:end])
+    span = _dialogue_span(node.raw)
+    if span is None:
+        raise SourceError(f"line {node.line} is outside the supported dialogue subset")
+    if "\n" in replacement or "\r" in replacement or any(ord(char) < 0x20 and char != "\t" for char in replacement):
+        raise SourceError("replacement must be single-line dialogue text")
+    relative_start, relative_end, delimiter = span
+    start, end = node.start + relative_start, node.start + relative_end
+    escaped = replacement.replace("\\", "\\\\")
+    escaped = escaped.replace(chr(delimiter), "\\" + chr(delimiter))
+    return Patch(start, end, escaped.encode("utf-8"), document.source[start:end])
 
 
 def apply_patches(document: SourceDocument, patches: Iterable[Patch], base_revision: str) -> bytes:

@@ -12,10 +12,13 @@ Electron 44.3.0 and Tauri 2.11.x packages around the same UI, operation contract
 synthetic fixtures. Security and reliability were gates; artifact size, startup,
 memory, dependency surface, and maintenance cost were weighted criteria.
 
-Both candidates passed packaged denial, contained filesystem/atomic/watch, bounded
-process, shared UI/WebView, native credential, and 1k/10k/50k graph evidence on both
-targets. The complete results, commands, failures, and limitations are recorded in
-the [desktop-shell evidence](../research/DESKTOP_SPIKE_RESULTS.md).
+Both candidates passed the original packaged checks. Corrective review found that the
+caller-selected filesystem root, default application-command exposure, and save-race
+claims did not establish the intended guarantees. The spike now uses a core-owned
+approved-project registry, explicit application-command permissions, packaged
+authorised/unauthorised-window checks, and deterministic concurrent-save tests. The
+complete results, commands, failures, and limitations are recorded in the
+[desktop-shell evidence](../research/DESKTOP_SPIKE_RESULTS.md).
 
 ## Decision
 
@@ -31,21 +34,26 @@ implicit architecture.
 
 ## Evidence and rationale
 
-- Security, process, filesystem, credential, packaging, UI, and graph gates pass
-  equivalently in both candidates on Windows x64 and macOS ARM64.
-- Tauri packages measured 9,548,800 bytes on Windows and 10,787,643 bytes on macOS,
-  about 98% smaller than the equivalent Electron packages.
-- Tauri's observed macOS idle/stress working set was about 77% lower. Windows WebView2
-  process-tree memory was 10–15% higher than Electron, so memory is not claimed as a
-  universal Tauri advantage.
+- The corrected security, process, filesystem, media, packaging, UI, and graph checks
+  must pass equivalently on Windows x64 and macOS ARM64 before this corrective
+  checkpoint closes.
+- The measured Tauri application payloads were 9,548,800 bytes on Windows and
+  10,787,643 bytes on macOS, about 98% smaller than the unpacked Electron application
+  payloads. These are not installer-download or first-install footprint measurements.
+  On Windows they exclude the shared WebView2 runtime.
+- The macOS sampler saw one Tauri descendant and could omit launchd-owned WKWebView/XPC
+  services. The approximately 77% difference is therefore removed as evidence of
+  total application memory savings. Windows descendant-tree observations remain
+  useful but do not establish a universal memory advantage.
 - Electron cold start was about 0.5 seconds faster on Windows and 1.2 seconds faster on
   macOS. Both candidates nevertheless kept the required 10k interaction and Monaco
   observations below 100 ms; Tauri was substantially faster for the synthetic macOS
   graph workload.
 - Tauri adds Rust expertise, 454 transitive Cargo registry packages, and more
   candidate-specific spike code. That cost is acceptable because the typed core and
-  explicit capability model align with the least-privilege architecture, while the
-  size reduction is material for private desktop distribution.
+  explicit capability model align with the least-privilege architecture. The decision
+  rests on that fit plus source correctness and delivery feasibility, not payload size
+  or incomplete macOS memory attribution alone.
 
 ## Consequences
 
@@ -54,6 +62,10 @@ updates, WebView2 coverage on current supported Windows, and WKWebView coverage 
 current Apple Silicon macOS. Platform WebView behavior must remain explicit; a pass on
 one engine never implies a pass on the other. Release work must add installer/package
 content review, signing/notarisation, SBOM/provenance planning, and licence review.
+The selected Windows strategy is Tauri's `downloadBootstrapper`: use the evergreen
+system WebView2 where present and download/install it otherwise. This keeps the
+runtime patched by Windows/Microsoft but requires network access when it is absent.
+Offline installation and actual installed footprint remain release-validation gates.
 
 The initial Tauri production capability set contains only the main local window and
 named application commands. Credentials remain core-only in Keychain/Credential
@@ -70,11 +82,12 @@ not by themselves reasons to change the decision.
 
 ## Alternatives considered
 
-- **Electron:** functionally and securely viable, with faster measured startup and a
-  single TypeScript/JavaScript language surface. Rejected for now because its packages
-  were roughly 37–51 times larger, its macOS memory observation was much higher, and
-  its broader bundled runtime did not produce a reliability advantage in the tested
-  gates.
+- **Electron:** functionally viable, with faster measured startup and a single
+  TypeScript/JavaScript language surface. Rejected for now because its broader bundled
+  runtime did not produce a reliability advantage, while Tauri's typed privileged
+  core and explicit capabilities better fit the intended boundary. Its larger
+  application payload is supporting evidence only; incomplete macOS memory attribution
+  is not used to choose between them.
 - **A third native framework:** not tested after both retained candidates passed. It
   would expand scope without answering a remaining Phase 0 risk.
 - **Continue stack-neutral indefinitely:** rejected because all predeclared decision

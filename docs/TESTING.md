@@ -12,8 +12,8 @@ git diff --check
 
 The validator checks the required document structure, UTF-8/final newlines, internal
 Markdown links, common secret patterns, personal email domains, and user-home paths.
-The isolated source/preview spike adds 19 dependency-free unit/golden tests (12 core
-source tests and seven fidelity-mapping tests); the SDK boundary adds 24 dependency-free
+The isolated source/preview spike has 26 dependency-free unit/golden tests (19 source
+tests and seven fidelity-mapping tests); the SDK boundary adds 24 dependency-free
 security/adapter/reporting tests. The path-scoped
 `.github/workflows/sdk-spike.yml` performs the pinned official Windows x64, macOS ARM64,
 and Linux-regression integration matrix.
@@ -33,6 +33,9 @@ passes identical packaged wide/narrow assertions in Electron and Tauri on Window
 x64 and macOS ARM64. It covers DOM accessibility semantics, docks/resizing,
 keyboard/focus, reduced motion, synthetic media drag/drop, codec observations, and a
 loose Monaco edit guard; it does not claim a manual NVDA or VoiceOver pass.
+That old run recorded only synthetic elements and codec capability strings. The
+corrective target run must additionally decode and advance valid repository-controlled
+Ogg Vorbis and VP9 WebM fixtures; until then, media playback is pending.
 The packaged credential-store
 [run 34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
 passes on both targets: no renderer/credential IPC, OS-native round trip and cleanup,
@@ -57,12 +60,13 @@ SmartScreen, quarantine-origin, signing, and notarisation UX remain release chec
 The final equivalent desktop comparison
 [run 34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868)
 passed all three fresh launches per candidate and target, recorded cold start,
-process-tree idle/stress memory, exact artifact size, 10k interaction/Monaco and 50k
+descendant-tree idle/stress observations, unpacked application payload size, 10k interaction/Monaco and 50k
 stress behavior, dependency/licence locks, and source complexity. Runs 34732252587,
 34732654915, and 34733107607 remain failed evidence for sampler attribution,
 comparison-vs-diagnostic exit criteria, and macOS filter-yield flakiness. ADR 0003
-selects Tauri 2 from the complete gate set. There is no production application build
-or Phase 1 cross-platform suite yet.
+supports Tauri 2 from the bounded gate set. The macOS observation may omit
+launchd-owned WKWebView/XPC services and cannot support total-memory savings. There is
+no production application build or Phase 1 cross-platform suite yet.
 
 ## Planned layers
 

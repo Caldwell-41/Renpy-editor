@@ -92,10 +92,12 @@ spaces, Unicode, case differences, and long paths.
 
 ## Selection rule
 
-No candidate can be accepted unless Gates A, C, and E pass fully. Gate B may begin
-with the Phase 1 supported subset only if unsupported constructs satisfy Gate C and
-the roadmap names their expansion. Prefer the simplest maintainable approach that
-passes, not the parser with the largest claimed grammar.
+No production source service can be accepted unless Gates A, C, and E pass fully.
+Phase 0 may select a source-authority direction from bounded evidence, but that does
+not mark the unimplemented portions of those gates complete. Gate B may begin with the
+Phase 1 supported subset only if unsupported constructs satisfy Gate C and the roadmap
+names their expansion. Prefer the simplest maintainable approach that passes, not the
+parser with the largest claimed grammar.
 
 The result becomes an accepted ADR and a versioned source-service interface before
 production authoring code is built.
@@ -105,5 +107,6 @@ production authoring code is built.
 The first corpus and isolated source-slice implementation have been executed. See
 [PARSER_SPIKE_RESULTS.md](PARSER_SPIKE_RESULTS.md) and
 [ADR 0001](../adr/0001-lossless-source-model.md). The architectural direction is
-accepted; the disposable tokenizer is not production code, and SDK/cross-platform
-gates remain open.
+accepted; the disposable tokenizer is not production code. Gate A is corpus-bounded,
+Gate C still needs partial-visual UI behavior, and Gate E still blocks a production
+writer pending platform transaction/recovery work.

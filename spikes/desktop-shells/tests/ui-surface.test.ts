@@ -30,6 +30,20 @@ test("shared UI has reduced-motion and local object-URL policy", async () => {
   assert.doesNotMatch(html, /https?:\/\//);
 });
 
+test("packaged UI decodes and advances repository-controlled MVP media", async () => {
+  const [surface, ogg, webm] = await Promise.all([
+    readFile(path.join(uiRoot, "main.ts"), "utf8"),
+    readFile(path.join(uiRoot, "public/fixtures/media/tone.ogg")),
+    readFile(path.join(uiRoot, "public/fixtures/media/pixel.webm")),
+  ]);
+  assert.ok(ogg.length > 1_000);
+  assert.ok(webm.length > 500);
+  assert.match(surface, /loadeddata/);
+  assert.match(surface, /element\.play\(\)/);
+  assert.match(surface, /oggEvidence\.decoded && oggEvidence\.played/);
+  assert.match(surface, /webmEvidence\.decoded && webmEvidence\.played/);
+});
+
 test("graph evidence covers deterministic scale, virtualization, and Monaco coexistence", async () => {
   const [surface, graph, electron, tauri] = await Promise.all([
     readFile(path.join(uiRoot, "main.ts"), "utf8"),

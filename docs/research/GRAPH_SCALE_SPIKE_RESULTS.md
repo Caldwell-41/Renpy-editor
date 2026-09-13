@@ -107,9 +107,12 @@ are in the job logs and the fixture is deterministically regenerated from source
 ## Conclusion
 
 This checkpoint supports a shared virtualized graph surface for either desktop
-candidate and closes the required 10,000-node usability question for this synthetic
-workload. It did not distinguish Electron from Tauri alone; the later complete
-comparison is recorded in DESKTOP_SPIKE_RESULTS.md and supports ADR 0003.
+candidate and closes only the 10,000-node question for this seeded grid/canvas
+workload. It does not validate an automatic-layout engine, authored graph mutations,
+selection/dragging, route recomputation after edits, or production data/model costs.
+Those remain a blocking production graph-performance gate after a layout engine and
+interactive authoring workload are selected. This synthetic result did not distinguish
+Electron from Tauri alone; the comparison is recorded in DESKTOP_SPIKE_RESULTS.md.
 
 ## Known limitations
 

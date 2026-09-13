@@ -46,6 +46,19 @@ filesystem, shell/process, or HTTP plugin access to the webview. Capability file
 are auto-discovered must not accidentally widen authority. See Tauri's official
 [capability model](https://v2.tauri.app/security/capabilities/).
 
+The privileged core, not a renderer request, owns the approved-project registry. A
+trusted project-picker/backend action canonicalizes the selected root, records its
+identity, and returns an opaque project ID. Later requests contain only that ID and a
+normalized relative path. Unknown IDs, renderer-supplied roots, traversal, changed
+root identity, and symlink escapes are denied. Approval/registration is not exposed as
+an unrestricted application command.
+
+Application commands must be declared in Tauri's build `AppManifest`, included by a
+named application permission, and granted only to the local `main` window capability.
+`core:default` alone is not authorization for a custom command. Packaged probes must
+show a valid privileged command succeeds from `main` and is denied from an otherwise
+local unauthorised webview; direct Rust helper tests are not a substitute.
+
 Project media and generated HTML/text are untrusted data, never UI code. Remote
 content does not share a privileged webview. WebView2 and WKWebView denial tests remain
 separate target gates. If Electron is reconsidered through a superseding ADR, its
@@ -88,14 +101,21 @@ history remediation rather than silently rewriting. If source loss/corruption is
 suspected: stop writes, preserve recovery data and Git state, and produce a redacted
 diagnostic record.
 
-## Security gates before Phase 1
+## Corrective security gates before Phase 1
 
-- **Complete:** Packaged Tauri and fallback Electron spikes demonstrate narrow
-  IPC/capabilities, CSP, path scopes, and safe child-process arguments on both targets.
+- **Pending fresh packaged validation:** Corrected Tauri and fallback Electron spikes
+  implement core-owned project approval, explicit Tauri application-command
+  permission, CSP/path scopes, and safe child-process arguments. Old green runs do not
+  validate these changes.
 - **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
   partial-download, limits, and unsafe overwrite/promotion cases.
-- **Complete at boundary level:** Source writes pass stale-hash, atomicity, watcher,
-  symlink, path, and redaction tests. Phase 1 must implement recovery/conflict UX.
+- **Bounded spike evidence, production writer blocked:** Internal transactions are
+  serialized; expected hash, file/path identity, and approval are rechecked after the
+  durable temporary write; known conflicts retain recovery data. Atomic replacement
+  prevents a truncated hybrid. A non-cooperating writer can still change the target
+  in the final check-to-replace window, and Windows directory-entry durability is not
+  proven. Phase 1 may scaffold the port, but production writing cannot pass Gate E
+  until the platform transaction/recovery design closes these limits.
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.
 - **Complete:** This threat model reflects the selected Tauri capability boundary and

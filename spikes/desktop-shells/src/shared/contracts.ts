@@ -1,4 +1,5 @@
 export const operations = [
+  "privilegedPing",
   "readText",
   "writeTextAtomic",
   "watchText",
@@ -17,13 +18,13 @@ export interface FileVersion {
 
 export interface ReadTextRequest {
   operation: "readText";
-  root: string;
+  projectId: string;
   relativePath: string;
 }
 
 export interface WriteTextRequest {
   operation: "writeTextAtomic";
-  root: string;
+  projectId: string;
   relativePath: string;
   expectedSha256: string;
   contents: string;
@@ -31,7 +32,7 @@ export interface WriteTextRequest {
 
 export interface WatchTextRequest {
   operation: "watchText" | "unwatchText";
-  root: string;
+  projectId: string;
   relativePath: string;
 }
 
@@ -54,7 +55,12 @@ export interface CancelMockSdkRequest {
   runId: string;
 }
 
+export interface PrivilegedPingRequest {
+  operation: "privilegedPing";
+}
+
 export type DesktopRequest =
+  | PrivilegedPingRequest
   | ReadTextRequest
   | WriteTextRequest
   | WatchTextRequest
@@ -63,6 +69,7 @@ export type DesktopRequest =
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const RUN_ID = /^[a-f0-9-]{1,80}$/u;
+const PROJECT_ID = /^[a-f0-9-]{1,80}$/u;
 const MOCK_COMMANDS: readonly MockSdkCommand[] = ["version", "diagnostics", "stderr", "delay", "flood"];
 export const MIN_MOCK_TIMEOUT_MS = 10;
 export const MAX_MOCK_TIMEOUT_MS = 30_000;
@@ -83,8 +90,11 @@ function textField(input: Record<string, unknown>, name: string, limit: number):
 }
 
 function projectPath(input: Record<string, unknown>) {
+  if ("root" in input) throw new TypeError("renderer-supplied roots are denied");
+  const projectId = textField(input, "projectId", 80);
+  if (!PROJECT_ID.test(projectId)) throw new TypeError("projectId is invalid");
   return {
-    root: textField(input, "root", 4096),
+    projectId,
     relativePath: validateRelativePath(textField(input, "relativePath", 4096)),
   };
 }
@@ -107,6 +117,8 @@ export function validateRequest(value: unknown): DesktopRequest {
   if (typeof operation !== "string" || !operations.includes(operation as Operation)) {
     throw new TypeError("operation is not allowlisted");
   }
+
+  if (operation === "privilegedPing") return { operation };
 
   if (operation === "readText" || operation === "watchText" || operation === "unwatchText") {
     return { operation, ...projectPath(input) };

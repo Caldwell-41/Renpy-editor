@@ -26,7 +26,7 @@ const licenses = (packages, field) => {
 const groups = {
   shared: ["src/shared/contracts.ts", "src/ui/main.ts", "src/ui/graph-evidence.ts", "src/ui/index.html", "src/ui/style.css"],
   electron: ["src/electron/main.ts", "src/electron/preload.cts", "src/electron/mock-sdk.ts", "src/shared/node-adapter.ts", "scripts/package-electron.mjs"],
-  tauri: ["src-tauri/src/main.rs", "src-tauri/src/security_probe.js", "src-tauri/src/ui_probe.js", "src-tauri/src/graph_probe.js", "src-tauri/src/measurement_probe.js", "src-tauri/build.rs", "src-tauri/tauri.conf.json", "src-tauri/capabilities/default.json"],
+  tauri: ["src-tauri/src/main.rs", "src-tauri/src/security_probe.js", "src-tauri/src/unauthorised_permission_probe.js", "src-tauri/src/ui_probe.js", "src-tauri/src/graph_probe.js", "src-tauri/src/measurement_probe.js", "src-tauri/build.rs", "src-tauri/tauri.conf.json", "src-tauri/capabilities/default.json", "src-tauri/permissions/desktop-operations.toml"],
 };
 const complexity = {};
 for (const [name, files] of Object.entries(groups)) {

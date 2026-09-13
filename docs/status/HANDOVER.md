@@ -1,7 +1,7 @@
-# Phase 0 completion handover
+# Phase 0 corrective handover
 
 **Prepared:** 2026-09-13<br>
-**Phase:** 0 complete; Phase 1 awaiting explicit approval<br>
+**Phase:** 0 corrective checkpoint in progress; Phase 1 blocked<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
@@ -13,8 +13,8 @@
 4. [Desktop evidence](../research/DESKTOP_SPIKE_RESULTS.md)
 5. [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md)
 
-The approved product brief remains authoritative. Phase 1 requires a separate explicit
-approval; this handover is not that approval.
+The approved product brief remains authoritative. Corrective validation must close and
+Phase 1 still requires separate explicit approval; this handover is not that approval.
 
 ## Accepted boundaries
 
@@ -35,7 +35,8 @@ approval; this handover is not that approval.
 
 ## Evidence closure
 
-- Source-model golden/token/CST evidence: 12 core tests, ADR 0001 accepted.
+- Historical source-model golden/token/CST evidence: 12 core tests, ADR 0001 accepted;
+  the corrective local suite now has 19 source tests pending fresh CI.
 - Preview/source mapping: seven mapping tests and trusted runtime evidence classify
   behavior as faithful, approximate, or runtime-only.
 - SDK/install: 24 tests plus final run
@@ -51,10 +52,10 @@ approval; this handover is not that approval.
   [34722954424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424).
 - Final equivalent comparison:
   [34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868).
-  Both target jobs and all twelve candidate launches passed. Tauri packages were about
-  98% smaller; Electron started faster; Tauri used much less observed macOS memory but
-  more Windows WebView2 process-tree memory. Interaction and Monaco guards passed for
-  both.
+  Both target jobs and all twelve candidate launches passed. Tauri's unpacked
+  application payloads were about 98% smaller; Electron started faster; Windows
+  descendant-tree memory was higher for Tauri. The macOS Tauri sampler was incomplete,
+  so no total-memory percentage is retained. Interaction and Monaco guards passed.
 
 Failed runs remain evidence. Runs 34732252587 and 34732654915 exposed measurement
 sampling/exit defects. Run 34733107607 exposed a 506.2 ms macOS Electron filter result
@@ -71,14 +72,29 @@ production automatic-layout performance remain later validation work. They are n
 inferred successes and did not distinguish the Phase 0 candidates enough to block the
 decision.
 
-## Exact next bounded task
+Production file writing remains blocked by parser Gate E: the spike detects known
+races and preserves recovery data, but cannot make a portable compare-and-swap promise
+against non-cooperating external writers in the final validation-to-rename interval.
+The attached review reproducer was not present in the checked-out workspace; every
+reported case was independently reproduced against remote `main` at `831c9e3`.
 
-Wait for explicit Phase 1 approval. Once approved, follow
-[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md): create the minimal
-production Tauri workspace and CI skeleton, preserve the accepted source/security/SDK
-ports, and prove the initial command/capability boundary on both targets. Do not add
-authoring features, LLM/Git integrations, SDK bundling, release signing, or copy the
-spike wholesale during that scaffold checkpoint.
+## Corrective work awaiting target evidence
+
+- Semantic dialogue targeting/escaping and conservative Python/unsupported refusal.
+- Core-owned project approval in both retained adapters; no renderer registration.
+- Explicit Tauri app-command manifest/permission scoped to `main`, plus a packaged
+  unauthorised-webview denial probe.
+- Deterministic save-race/recovery tests and exact guarantee documentation.
+- Valid Ogg Vorbis and VP9 WebM decode/playback fixtures in packaged UI probes.
+- Corrected payload/memory interpretation and explicit WebView2
+  `downloadBootstrapper` strategy.
+
+Fresh commit SHA and CI run links must replace this pending section before closure.
+
+## Exact stopping point
+
+Complete only the corrective validation and documentation reconciliation. Do not start
+[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md) or add authoring features.
 
 ## Validation
 

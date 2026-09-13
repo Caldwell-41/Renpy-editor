@@ -15,8 +15,8 @@ The initial surface is deliberately narrow:
 
 | Operation | Electron | Tauri | Initial evidence |
 | --- | --- | --- | --- |
-| Project-relative UTF-8 read | Implemented | Implemented | Shared tests pass on both targets |
-| SHA-guarded same-directory replacement | Implemented | Implemented | Node and Rust tests pass on both targets |
+| Approved-project-relative UTF-8 read | Implemented | Implemented | Core-owned registry; opaque ID and relative path only |
+| SHA-guarded same-directory replacement | Implemented | Implemented | Serialized, rechecked, atomic; bounded recovery policy |
 | External file watch | Implemented | Implemented | Packaged target latency/event counts recorded |
 | Allowlisted mock SDK process | Bounded stream/cancel/timeout events | Equivalent threaded supervisor | Shared and Rust lifecycle tests pass on both targets |
 | Unknown operation/path traversal | Denied | Denied | Shared and Rust denial tests pass on both targets |
@@ -48,7 +48,7 @@ bridge, and denial of unknown IPC, traversal, network, popup, and navigation att
 However, expected rejected IPC calls made Electron print stack traces containing the
 absolute hosted-runner application path. This fails the log-redaction criterion.
 
-The packaged Tauri core probe passed contained read, replacement, stale-hash,
+The original packaged Tauri core probe passed contained read, replacement, stale-hash,
 traversal, missing-file redaction, arbitrary-process, symlink, watch, and spaces/
 Unicode/deep-path cases. Its WebView probe passed unknown IPC, traversal, network, and
 popup denial on both targets and navigation denial on macOS. Windows explicitly logged
@@ -212,15 +212,24 @@ Each displayed 10k timing is the median of the three runs. All twelve launches e
 zero, every 10k interaction and Monaco observation stayed below 100 ms, and every 50k
 case completed below 15 seconds. Electron started about 511 ms faster on Windows and
 1,221 ms faster on macOS. Tauri's artifact was about 98% smaller on each target and
-its observed macOS working set was about 77% lower. Windows WebView2 erased that
-memory advantage: Tauri was about 10% higher at idle and 15% higher under stress.
+the incomplete sampler reported a much lower macOS descendant total. Windows WebView2
+was about 10% higher at idle and 15% higher under stress.
 
 The Windows Electron first idle/stress sample saw only the root process (100,876,288
 bytes) before its descendants were visible; the other two runs saw four processes and
 the reported median therefore retains the process tree. The macOS sampler can follow
 only descendants of the launched process and reported one Tauri process; launchd-
-owned WKWebView/XPC services may not be descendants, so the macOS Tauri number is a
-useful hosted-runner observation, not a complete system-accounting claim.
+owned WKWebView/XPC services may not be descendants. It is therefore an incomplete
+root-process observation and cannot support a percentage claim about total application
+memory or serve as framework-selection evidence.
+
+The `Installed bytes/files` heading above describes the unpacked application payload
+that the comparison script found, not an installer download, first-install footprint,
+or total runtime prerequisite. The Windows Tauri value excludes the evergreen
+WebView2 runtime. The chosen production direction is the explicit
+`downloadBootstrapper` strategy: use the system runtime when present and download it
+when absent. It adds a network prerequisite on such machines; an offline installer
+and actual installed-footprint measurement remain release gates.
 
 The committed locks contain 128 npm packages across shared UI/build tooling and both
 candidates, and 454 transitive Cargo registry packages for the Tauri target/build
@@ -261,11 +270,37 @@ met every predeclared timing, culling, stable-layout, and Monaco-coexistence bou
 the 50,000-node stress case also passed. Engine memory surfaces remain too limited
 for a comparative heap conclusion.
 
-These measurements complete the stack comparison. Together with the earlier
-security, filesystem/process, UI/WebView, credential, and graph gates, they support
-selecting Tauri 2 in ADR 0003. Electron remains the explicit fallback if system-
+These measurements complete the bounded stack comparison, subject to the corrective
+validation below. Tauri remains selected because the typed core and explicit
+capability model fit the source-safety/security architecture and the maintenance and
+delivery costs remain acceptable. Payload size supports but does not determine the
+choice; incomplete macOS memory attribution is excluded. Electron remains the
+explicit fallback if system-
 WebView differences, packaged E2E reliability, or Rust maintenance cost becomes a
 material delivery blocker.
+
+## 2026-09-13 corrective checkpoint
+
+Review against commit `831c9e3` reproduced three overstated boundaries: renderers
+could nominate their own root, application commands were not explicitly permissioned,
+and the one-time expected-hash check did not cover an external edit during temp-file
+creation. Both adapters now keep canonical approved roots in a privileged registry;
+renderer requests use only an opaque project ID and normalized relative path. Tauri's
+commands are declared in the build `AppManifest`, named in a custom permission, and
+granted only to `main`; the packaged probe exercises both an authorised main window
+and an unauthorised local webview.
+
+Saves serialize application transactions, validate expected content and file/path
+identity before and after the synced temporary write, atomically replace the target,
+and preserve the proposed bytes as a recovery sibling on a detected conflict or
+replacement failure. Atomicity means readers see the old or complete new file; it does
+not mean compare-and-swap. A non-cooperating external writer can still write in the
+last check-to-replace interval. Unix directory metadata is synced after rename;
+equivalent Windows directory-entry durability is not claimed. These limits keep the
+production-writing portion of parser Gate E blocked even if the spike tests pass.
+
+Fresh target run IDs for the corrected revision are pending. Earlier green runs are
+historical evidence only and do not validate this section.
 
 ## Integration findings
 

@@ -28,7 +28,10 @@ but they cannot become the persistence authority or require whole-file regenerat
 The selected official Ren'Py SDK remains the compile/lint authority.
 
 This ADR selects the architectural source model, not the disposable Python tokenizer
-or a final grammar implementation.
+or a final grammar implementation. Acceptance of the direction is not a claim that
+parser Gates A, C, or E are implemented for production. Gate A is demonstrated only
+for the pinned corpus; the partial-visual UI required by Gate C and the complete
+external transaction/recovery behavior required by Gate E remain production gates.
 
 ## Consequences
 

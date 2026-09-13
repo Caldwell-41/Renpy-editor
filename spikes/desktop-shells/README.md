@@ -9,7 +9,8 @@ out of scope.
 ## Demonstrated boundary
 
 - Monaco edits a representative project-relative `.rpy` file.
-- Reads and writes stay inside an explicitly supplied project root.
+- A trusted backend action approves a canonical project root; renderers use only an
+  opaque project ID plus normalized relative paths.
 - Writes require the expected SHA-256 and use a same-directory atomic replacement.
 - Both adapters watch external changes; packaged target latency and coalescing are
   recorded for Windows x64 and macOS ARM64.
