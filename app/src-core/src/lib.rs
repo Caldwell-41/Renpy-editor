@@ -289,7 +289,8 @@ mod tests {
         assert!(config.contains("base-uri 'none'"));
         assert!(config.contains("form-action 'none'"));
         assert!(config.contains("\"capabilities\": [\"main-local-only\"]"));
-        assert!(capability.contains("\"windows\": [\"main\"]"));
+        assert!(capability.contains("\"webviews\": [\"main\"]"));
+        assert!(!capability.contains("\"windows\""));
         assert!(capability.contains("allow-loomlight-core"));
         assert!(permission.contains("commands.allow = [\"core_request\"]"));
         assert!(build.contains("commands(&[\"core_request\"])"));

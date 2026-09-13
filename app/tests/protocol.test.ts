@@ -69,7 +69,8 @@ test("desktop manifest grants one local capability and no ambient plugins", asyn
   assert.equal(config.app.security.csp.includes("'unsafe-inline'"), false);
   assert.equal(config.app.security.csp.includes("connect-src ipc: http://ipc.localhost"), true);
   assert.equal(capability.local, true);
-  assert.deepEqual(capability.windows, ["main"]);
+  assert.deepEqual(capability.webviews, ["main"]);
+  assert.equal("windows" in capability, false);
   assert.deepEqual(capability.permissions, ["allow-loomlight-core"]);
   assert.match(permission, /commands\.allow = \["core_request"\]/);
   assert.match(host, /window\.label\(\) != "main"/);

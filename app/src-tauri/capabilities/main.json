@@ -3,6 +3,6 @@
   "identifier": "main-local-only",
   "description": "Only Loomlight's local main window may call the versioned core envelope.",
   "local": true,
-  "windows": ["main"],
+  "webviews": ["main"],
   "permissions": ["allow-loomlight-core"]
 }
