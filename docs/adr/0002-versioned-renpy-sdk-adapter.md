@@ -1,15 +1,16 @@
 # ADR 0002: Versioned Ren'Py SDK adapter and verified installation
 
 **Status:** Accepted<br>
-**Date:** 2026-09-10
+**Date:** 2026-09-10<br>
+**Evidence updated:** 2026-09-13
 
 ## Context
 
 Ren'Py's command-line interface is not a stable API, its commands load project code,
 and an SDK is a large executable dependency obtained as an archive. The editor needs
 repeatable version behavior without treating untrusted projects or archives as data
-only. Linux evidence for 8.5.3 is recorded in the
-[SDK spike results](../research/RENPY_SDK_SPIKE_RESULTS.md).
+only. Initial Linux evidence for 8.5.3 and the later cross-platform results are
+recorded in the [SDK spike results](../research/RENPY_SDK_SPIKE_RESULTS.md).
 
 ## Decision
 
@@ -37,10 +38,15 @@ fixture compile/lint/test/run/warp/build evidence, and an adapter compatibility 
 A user can inspect and revoke project trust independently of opening source as text.
 Failures are explicit rather than silently retried with different commands.
 
-The accepted boundary is platform-neutral, but only Linux has integration evidence.
-Windows and macOS launcher, filesystem, cancellation, packaging, signing, quarantine,
-and install/launch behavior remain Phase 0 gates before the adapter can be considered
-cross-platform.
+The accepted boundary is platform-neutral and now has integration evidence on all
+supported targets. Phase 0 run 34731460283 passed the original Windows x64, macOS
+ARM64, and Linux regression matrix, and corrective run 34742452653 revalidated the
+trusted fixture on the same targets after the safety fixes. Version, compile, lint,
+test, run, warp, diagnostics, bounded distribution, containment-checked installation,
+and package launch are therefore established for the Ren'Py 8.5.3 adapter baseline.
+Physical SmartScreen behavior, browser-origin macOS quarantine, signing/notarisation,
+and wider release UX remain later release-validation gates rather than unresolved
+Phase 0 adapter gates.
 
 ## Alternatives considered
 
