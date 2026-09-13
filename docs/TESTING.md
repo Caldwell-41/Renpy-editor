@@ -33,9 +33,10 @@ passes identical packaged wide/narrow assertions in Electron and Tauri on Window
 x64 and macOS ARM64. It covers DOM accessibility semantics, docks/resizing,
 keyboard/focus, reduced motion, synthetic media drag/drop, codec observations, and a
 loose Monaco edit guard; it does not claim a manual NVDA or VoiceOver pass.
-That old run recorded only synthetic elements and codec capability strings. The
-corrective target run must additionally decode and advance valid repository-controlled
-Ogg Vorbis and VP9 WebM fixtures; until then, media playback is pending.
+That old run recorded only synthetic elements and codec capability strings. Corrective
+[run 34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
+additionally decoded and advanced valid repository-controlled Ogg Vorbis and VP9 WebM
+fixtures in both candidates on both supported targets.
 The packaged credential-store
 [run 34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
 passes on both targets: no renderer/credential IPC, OS-native round trip and cleanup,

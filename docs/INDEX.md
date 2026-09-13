@@ -4,9 +4,8 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
-The current checkpoint is the
-[Phase 0 corrective review](tasks/active/phase-0-corrective-review.md); Phase 1 remains
-blocked.
+The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
+is archived. Phase 1 remains separately approval-gated.
 
 | Concern | Canonical document |
 | --- | --- |

@@ -299,8 +299,28 @@ last check-to-replace interval. Unix directory metadata is synced after rename;
 equivalent Windows directory-entry durability is not claimed. These limits keep the
 production-writing portion of parser Gate E blocked even if the spike tests pass.
 
-Fresh target run IDs for the corrected revision are pending. Earlier green runs are
-historical evidence only and do not validate this section.
+Final corrective desktop run
+[34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
+passed both complete target jobs at commit `08de1e4`. Each packaged Tauri main window
+successfully invoked the known privileged command and read its backend-approved
+fixture; an otherwise local unpermissioned webview was denied the same command.
+Unknown/forged project IDs, renderer-supplied roots, traversal, symlinks, network,
+popup, and external navigation were denied. Electron's equivalent sender and project
+boundary passed. Both Rust/Node deterministic race and recovery suites passed.
+
+The corrective comparison repeated the full existing measurement rather than using an
+old green run. Unpacked application payloads were 9,613,312 bytes (Windows Tauri),
+10,869,835 bytes (macOS Tauri), 487,399,803 bytes (Windows Electron), and 401,174,949
+bytes (macOS Electron). The Windows Tauri descendant tree contained eight measured
+processes. The macOS Tauri sample still contained only one process, so its apparent
+memory difference remains incomplete and is not used as total-memory evidence.
+
+Retained corrective failures show why a fresh target gate mattered. Run 34742452515
+was cancelled after exposing an owned-error compile mismatch. Run 34742542992 failed
+because a hard-coded `tauri://` probe signal did not work on Windows WebView2. Run
+34742865491 was superseded after proving that native window-title observation was not
+portable. The final probe derives its signal from the actual local page origin and
+adds no permission or production capability.
 
 ## Integration findings
 

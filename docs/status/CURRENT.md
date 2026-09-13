@@ -1,13 +1,13 @@
 # Current status
 
 **Updated:** 2026-09-13<br>
-**Phase:** 0 corrective checkpoint in progress; Phase 1 blocked<br>
+**Phase:** 0 corrective checkpoint complete; ready for Phase 1 planning<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- Phase 0's architecture decisions remain in force, but corrective target validation
-  is pending. No production application has been created and Phase 1 has not begun.
+- The Phase 0 corrective checkpoint is complete. No production application has been
+  created and Phase 1 has not begun.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -21,8 +21,8 @@
 - Corrective source tests now refuse priority-init Python, target literal-speaker
   dialogue correctly, encode quotes/backslashes, and preserve unrelated bytes.
 - Desktop adapters now use core-owned approved-project registries, explicit Tauri
-  application permissions, and a bounded serialized save/recovery policy. Fresh
-  Windows x64/macOS ARM64 packaged checks are required; old green runs are historical.
+  application permissions, and a bounded serialized save/recovery policy. Desktop run
+  34743055306 passes both complete target jobs at implementation commit `08de1e4`.
 - Tauri's measured application payload was about 98% smaller, but this excludes
   installer/first-install footprint and Windows WebView2. The macOS sampler could omit
   WKWebView/XPC services, so the old 77% figure is not total-memory evidence. Tauri
@@ -30,8 +30,9 @@
 - Preview/source mapping is explicitly classified: literal declarations and exact
   navigation can be faithful; engine-dependent staging is approximate; Python-driven
   screens, media decode, translations/generated behavior remain runtime-only.
-- Existing CI remains path-scoped and cache-safe. Corrective runs are not yet green;
-  old runs do not validate the changed code or permissions.
+- Corrective SDK run 34742452653 passes the trusted fixture on Linux, Windows x64, and
+  macOS ARM64; final quality run 34743055274 is green. The existing path scopes and
+  runtime caches were retained.
 - Confirmed targets are Windows x86-64 and macOS Apple Silicon ARM64 only. Intel macOS
   is out of scope.
 - Manual NVDA/VoiceOver behavior, subjective media quality, physical SmartScreen and
@@ -42,13 +43,15 @@
 
 ## Next action
 
-Do not implement Phase 1 while the corrective checkpoint remains open or without
-explicit approval. The later bounded entry plan is
+Phase 1 may now be planned, but do not implement it without explicit approval. The
+bounded entry plan is
 the [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md). Its first approved
 work would create only the production Tauri workspace, narrow capability/command
 boundary, shared validation fixtures, and CI skeleton needed for the vertical slice;
 the Phase 0 spike remains disposable and must not be promoted wholesale.
 
-The completed evidence task is archived at
+The corrective task and original evidence task are archived at
+[2026-09-13-phase-0-corrective-review.md](../tasks/archive/2026-09-13-phase-0-corrective-review.md)
+and
 [2026-09-13-phase-0-evidence-spikes.md](../tasks/archive/2026-09-13-phase-0-evidence-spikes.md),
 and the exact completion handover is in [HANDOVER.md](HANDOVER.md).

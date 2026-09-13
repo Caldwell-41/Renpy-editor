@@ -34,12 +34,12 @@ implicit architecture.
 
 ## Evidence and rationale
 
-- The corrected security, process, filesystem, media, packaging, UI, and graph checks
-  must pass equivalently on Windows x64 and macOS ARM64 before this corrective
-  checkpoint closes.
-- The measured Tauri application payloads were 9,548,800 bytes on Windows and
-  10,787,643 bytes on macOS, about 98% smaller than the unpacked Electron application
-  payloads. These are not installer-download or first-install footprint measurements.
+- Corrective run 34743055306 passes the security, process, filesystem, media,
+  packaging, UI, and graph checks on Windows x64 and macOS ARM64.
+- The final corrective run measured Tauri application payloads of 9,613,312 bytes on
+  Windows and 10,869,835 bytes on macOS, about 98% smaller than the unpacked Electron
+  application payloads in that run. These are not installer-download or first-install
+  footprint measurements.
   On Windows they exclude the shared WebView2 runtime.
 - The macOS sampler saw one Tauri descendant and could omit launchd-owned WKWebView/XPC
   services. The approximately 77% difference is therefore removed as evidence of

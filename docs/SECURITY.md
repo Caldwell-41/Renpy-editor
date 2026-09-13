@@ -103,10 +103,11 @@ diagnostic record.
 
 ## Corrective security gates before Phase 1
 
-- **Pending fresh packaged validation:** Corrected Tauri and fallback Electron spikes
-  implement core-owned project approval, explicit Tauri application-command
-  permission, CSP/path scopes, and safe child-process arguments. Old green runs do not
-  validate these changes.
+- **Complete for the bounded spike:** Corrective desktop run
+  [34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
+  proves core-owned project approval, explicit Tauri application-command permission,
+  authorised/unauthorised webviews, CSP/path scopes, and safe child-process arguments
+  on Windows x64 and macOS ARM64.
 - **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
   partial-download, limits, and unsafe overwrite/promotion cases.
 - **Bounded spike evidence, production writer blocked:** Internal transactions are

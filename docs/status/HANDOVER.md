@@ -1,7 +1,7 @@
 # Phase 0 corrective handover
 
 **Prepared:** 2026-09-13<br>
-**Phase:** 0 corrective checkpoint in progress; Phase 1 blocked<br>
+**Phase:** 0 corrective checkpoint complete; ready for Phase 1 planning<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
@@ -13,8 +13,8 @@
 4. [Desktop evidence](../research/DESKTOP_SPIKE_RESULTS.md)
 5. [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md)
 
-The approved product brief remains authoritative. Corrective validation must close and
-Phase 1 still requires separate explicit approval; this handover is not that approval.
+The approved product brief remains authoritative. Phase 1 still requires separate
+explicit approval; this handover is not that approval.
 
 ## Accepted boundaries
 
@@ -35,8 +35,8 @@ Phase 1 still requires separate explicit approval; this handover is not that app
 
 ## Evidence closure
 
-- Historical source-model golden/token/CST evidence: 12 core tests, ADR 0001 accepted;
-  the corrective local suite now has 19 source tests pending fresh CI.
+- Corrective source/preview suite: 19 source tests plus seven mapping tests; final
+  quality run 34743055274 is green.
 - Preview/source mapping: seven mapping tests and trusted runtime evidence classify
   behavior as faithful, approximate, or runtime-only.
 - SDK/install: 24 tests plus final run
@@ -78,29 +78,32 @@ against non-cooperating external writers in the final validation-to-rename inter
 The attached review reproducer was not present in the checked-out workspace; every
 reported case was independently reproduced against remote `main` at `831c9e3`.
 
-## Corrective work awaiting target evidence
+## Corrective closure
 
-- Semantic dialogue targeting/escaping and conservative Python/unsupported refusal.
-- Core-owned project approval in both retained adapters; no renderer registration.
-- Explicit Tauri app-command manifest/permission scoped to `main`, plus a packaged
-  unauthorised-webview denial probe.
-- Deterministic save-race/recovery tests and exact guarantee documentation.
-- Valid Ogg Vorbis and VP9 WebM decode/playback fixtures in packaged UI probes.
-- Corrected payload/memory interpretation and explicit WebView2
-  `downloadBootstrapper` strategy.
-
-Fresh commit SHA and CI run links must replace this pending section before closure.
+- Implementation commits: `2b78d067`, `96ca1cd3`, `d11f9dd2`, and `08de1e4e`.
+- [SDK run 34742452653](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34742452653)
+  passes the trusted fixture on Linux, Windows x64, and macOS ARM64 at `2b78d067`;
+  later commits changed only the desktop probe.
+- [Desktop run 34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
+  passes both complete target jobs at `08de1e4e`, including explicit Tauri command
+  permissions, authorised/unauthorised webviews, approved/forged projects,
+  deterministic save regressions, and valid media playback.
+- [Quality run 34743055274](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055274)
+  passes at `08de1e4e`.
+- Failed/cancelled corrective runs 34742452515, 34742542992, and 34742865491 remain
+  evidence of the compile type mismatch and two non-portable probe observations.
 
 ## Exact stopping point
 
-Complete only the corrective validation and documentation reconciliation. Do not start
-[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md) or add authoring features.
+Stop here. Phase 1 may be planned but must not begin without explicit approval. Follow
+[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md) only after that approval.
 
 ## Validation
 
-The final implementation checkpoint passed 21 desktop shared tests, the UI production
-build, repository validation, quality run 34733246871, and both target jobs in desktop
-run 34733246868. The Phase 0 documentation closure must pass:
+The corrective implementation passed 27 desktop shared tests, 26 source/mapping tests,
+24 SDK tests, the UI production build, repository validation, quality run 34743055274,
+SDK run 34742452653, and both target jobs in desktop run 34743055306. The
+documentation-only closure must pass:
 
 ```bash
 python3 scripts/validate.py

@@ -84,13 +84,21 @@ also produced different actual content dimensions from the same requested size,
 especially for wide Windows Tauri. The responsive assertions therefore use observed
 content dimensions rather than assuming cross-shell pixel identity.
 
+Corrective desktop run
+[34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
+added valid repository-controlled 0.5-second Ogg Vorbis audio and 0.6-second VP9 WebM
+video. Both decoded, accepted `play()`, and advanced playback in wide and narrow
+packaged Electron and Tauri windows on Windows x64 and macOS ARM64. This is automated
+decode/playback evidence for those exact fixtures, not subjective quality evidence or
+support for every capability string in the table.
+
 ## Known limitations
 
 - GitHub-hosted runners can validate DOM semantics and packaged WebView behavior but
   not a human screen-reader workflow, subjective keyboard comfort, or media quality.
-- The old run's `canPlayType` results do not prove decode. Fresh packaged corrective
-  results for Ogg Vorbis and VP9 WebM are pending; MP3/H.264/WAV remain capability
-  observations unless separately backed by valid fixtures and playback assertions.
+- The old run's `canPlayType` results do not prove decode. Ogg Vorbis and VP9 WebM now
+  have exact-fixture playback evidence; MP3/H.264/WAV remain capability observations
+  unless separately backed by valid fixtures and playback assertions.
 - Synthetic drag/drop proves Web API and application handling; native shell/file-
   manager drag gestures still require a later physical-device UX check.
 - Wide/narrow launches prove responsive behavior at two native window sizes, not all

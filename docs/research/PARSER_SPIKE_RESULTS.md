@@ -86,14 +86,16 @@ cross-platform performance guarantee.
 
 - This tokenizer is intentionally not production code and does not parse full nested
   Ren'Py grammar, Python expressions, multiline strings, or semantic references.
-- It ran only on Linux. Windows/macOS line, path, watcher and atomic-write behavior is
-  unproven.
-- The corrective integrated fixture awaits a fresh Ren'Py 8.5.3 compile/lint run;
-  old green runs do not validate it. Media microfixtures intentionally reference
+- The tokenizer suite ran on Linux; platform filesystem transaction behavior is
+  separately bounded by the desktop target spike and remains subject to Gate E.
+- Corrective SDK run
+  [34742452653](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34742452653)
+  compiled/linted and exercised the trusted integrated fixture with Ren'Py 8.5.3 on
+  Windows x64, macOS ARM64, and Linux. Media microfixtures intentionally reference
   absent synthetic files and require isolation.
 - Stable editor IDs, incremental parsing, CST recovery quality, semantic patch builders,
   and three-way reconciliation require production-oriented spikes after SDK validation.
 
-The next bounded task should run the official Ren'Py 8.5.3 SDK adapter against the
-integrated fixture, correct any syntax/order assumptions, and record structured
-compile/lint diagnostics before desktop-stack implementation begins.
+Production work must reimplement the accepted source direction rather than promote
+this tokenizer, retain safe refusal outside its declared subset, and keep file writing
+blocked until the production Gate E transaction/recovery requirements pass.
