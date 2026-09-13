@@ -5,6 +5,23 @@
 **Latest successful run:** [GitHub Actions 34723797776](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)<br>
 **Original successful baseline:** [GitHub Actions 34503653755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34503653755)
 
+## Target-platform question and success criteria
+
+Can the accepted checksum-first installer and exact-version adapter operate against
+the same official Ren'Py 8.5.3 archive on Windows x64 and macOS ARM64 without weakening
+the Linux boundary?
+
+Success requires each target to fetch official checksum metadata on every run, verify
+the complete pinned SHA-256 before extraction, promote only a validated staged install,
+detect exactly 8.5.3, and run compile, strict lint, both automated testcases, normal
+launch, development warp, diagnostics, and bounded distribution through direct
+argument arrays. GUI launches must be cancellable with process-tree cleanup and bounded
+output. Results must record platform paths, archive/link behavior, package contents and
+launch observations, Windows security signals, and macOS signature/quarantine signals.
+Unsigned hosted-runner observations must remain distinct from physical signed install
+checks. A failed target is retained as discovery evidence; Linux success is not a
+substitute, and no SDK/package/signing material is committed.
+
 ## Result
 
 The Linux probe passed against the official `renpy-8.5.3-sdk.tar.bz2` archive.

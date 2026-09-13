@@ -168,6 +168,7 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
         stderr=subprocess.STDOUT,
         shell=False,
         start_new_session=(os.name != "nt"),
+        creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0),
     )
     chunks: queue.Queue[bytes | None] = queue.Queue(maxsize=8)
 
@@ -176,7 +177,16 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
             return
         try:
             if os.name == "nt":
-                process.kill()
+                subprocess.run(
+                    ("taskkill", "/PID", str(process.pid), "/T", "/F"),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                    shell=False,
+                )
+                if process.poll() is None:
+                    process.kill()
             else:
                 os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError:

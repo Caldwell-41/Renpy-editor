@@ -6,10 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import re
 import shutil
 import tempfile
 from dataclasses import asdict
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from archive_safety import expected_sha256, install_verified_tar
 from sdk_adapter import Command, command_argv, parse_version, run_bounded
@@ -23,11 +24,35 @@ def sdk_root_inside(installed: Path) -> Path:
     return matches[0]
 
 
-def result_record(name: str, result: object) -> dict[str, object]:
+def _redact_text(value: str, redactions: tuple[Path, ...]) -> str:
+    redacted = value
+    candidates = {
+        variant
+        for path in redactions
+        for variant in (str(path), str(path).replace("\\", "/"), str(path).replace("/", "\\"))
+        if variant
+    }
+    for candidate in sorted(candidates, key=len, reverse=True):
+        redacted = re.sub(re.escape(candidate), "<redacted-path>", redacted, flags=re.IGNORECASE)
+    return redacted
+
+
+def _redact_argument(value: str) -> str:
+    if Path(value).is_absolute() or PureWindowsPath(value).is_absolute():
+        return PureWindowsPath(value).name if PureWindowsPath(value).is_absolute() else Path(value).name
+    return value
+
+
+def result_record(
+    name: str, result: object, redactions: tuple[Path, ...] = ()
+) -> dict[str, object]:
     record = asdict(result)  # type: ignore[arg-type]
     record["name"] = name
-    record["argv"] = [Path(arg).name if arg.startswith("/") else arg for arg in record["argv"]]
-    record["output"] = str(record["output"])[-8_000:]
+    record["argv"] = [_redact_argument(arg) for arg in record["argv"]]
+    record["output"] = _redact_text(str(record["output"])[-8_000:], redactions)
+    for diagnostic in record["diagnostics"]:
+        diagnostic["file"] = _redact_text(str(diagnostic["file"]), redactions)
+        diagnostic["message"] = _redact_text(str(diagnostic["message"]), redactions)
     return record
 
 
@@ -61,13 +86,14 @@ def main() -> int:
 
         project = scratch / "fixture project — unicode"
         shutil.copytree(args.fixture.resolve(), project)
+        redactions = (scratch, sdk_root, project, args.archive.resolve() if args.archive else sdk_root)
         records: list[dict[str, object]] = []
 
         version = run_bounded(command_argv(sdk_root, Command.VERSION), timeout_seconds=30)
         parsed_version = parse_version(version.output)
-        records.append(result_record("version", version))
+        records.append(result_record("version", version, redactions))
         help_result = run_bounded(command_argv(sdk_root, Command.HELP), timeout_seconds=30)
-        records.append(result_record("help", help_result))
+        records.append(result_record("help", help_result, redactions))
 
         for name, command, timeout, kwargs in (
             ("compile", Command.COMPILE, 120, {}),
@@ -85,7 +111,7 @@ def main() -> int:
                 allow_project_execution=True,
                 **kwargs,
             )
-            records.append(result_record(name, run_bounded(argv, timeout_seconds=timeout)))
+            records.append(result_record(name, run_bounded(argv, timeout_seconds=timeout), redactions))
 
         report = {
             "schema_version": 1,

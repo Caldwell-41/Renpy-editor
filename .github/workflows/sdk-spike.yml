@@ -17,9 +17,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux-probe:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  target-probe:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64 baseline
+            runner: ubuntu-latest
+            slug: linux-x64
+          - name: Windows x64
+            runner: windows-2025
+            slug: windows-x64
+          - name: macOS ARM64
+            runner: macos-26
+            slug: macos-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
     env:
       SDK_ARCHIVE: renpy-8.5.3-sdk.tar.bz2
       SDK_SHA256: eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
@@ -47,18 +61,24 @@ jobs:
       - name: Verify pinned SDK checksum
         run: printf '%s  %s\n' "$SDK_SHA256" "$RUNNER_TEMP/$SDK_ARCHIVE" | sha256sum --check
       - name: Probe SDK adapter with explicit fixture trust
+        shell: bash
         run: |
-          xvfb-run -a python3 spikes/renpy-sdk/probe.py \
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            probe_prefix=(xvfb-run -a python3)
+          else
+            probe_prefix=(python)
+          fi
+          "${probe_prefix[@]}" spikes/renpy-sdk/probe.py \
             --archive "$RUNNER_TEMP/$SDK_ARCHIVE" \
             --checksums "$RUNNER_TEMP/checksums.txt" \
             --fixture tests/fixtures/crossroads-at-sundown \
             --allow-project-execution \
-            --output "$RUNNER_TEMP/sdk-probe.json"
+            --output "$RUNNER_TEMP/sdk-probe-${{ matrix.slug }}.json"
       - name: Upload evidence on success or failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: renpy-8.5.3-linux-probe
-          path: ${{ runner.temp }}/sdk-probe.json
+          name: renpy-8.5.3-${{ matrix.slug }}-probe
+          path: ${{ runner.temp }}/sdk-probe-${{ matrix.slug }}.json
           if-no-files-found: warn
           retention-days: 7
