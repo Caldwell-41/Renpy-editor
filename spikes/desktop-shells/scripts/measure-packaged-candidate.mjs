@@ -95,12 +95,17 @@ async function oneRun(executable, index) {
   let stage = "starting"; let coldStartMs = null; let processStartupMs = null; let complete = null; let buffer = ""; let stderr = "";
   const samples = [];
   const pending = new Set();
+  const samplingStages = new Set();
   const sample = () => {
-    if (stage === "starting") return;
-    const promise = sampleMemory(child.pid).then((memory) => samples.push({ stage, ...memory })).catch(() => {}).finally(() => pending.delete(promise));
+    if (stage === "starting" || samplingStages.has(stage)) return;
+    const sampleStage = stage;
+    samplingStages.add(sampleStage);
+    const promise = sampleMemory(child.pid).then((memory) => samples.push({ stage: sampleStage, ...memory })).catch(() => {}).finally(() => {
+      pending.delete(promise); samplingStages.delete(sampleStage);
+    });
     pending.add(promise);
   };
-  const timer = setInterval(sample, 250);
+  const timer = setInterval(sample, 1_000);
   const timeout = setTimeout(() => {
     if (process.platform === "win32") spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
     else { try { process.kill(-child.pid, "SIGKILL"); } catch {} }
@@ -139,6 +144,16 @@ async function oneRun(executable, index) {
     monacoEditDelay10kMs: case10k?.editorEditDelayMs ?? null,
     monacoEditLatency10kMs: case10k?.editorEditLatencyMs ?? null,
     graph10kTotalMs: case10k?.totalMs ?? null,
+    graphPassed: complete?.passed ?? false,
+    graphCases: complete?.cases?.map((item) => ({
+      size: item.size,
+      passed: item.passed,
+      totalMs: item.totalMs,
+      interactionP95Ms: item.interactionP95Ms,
+      editorEditDelayMs: item.editorEditDelayMs,
+      editorEditLatencyMs: item.editorEditLatencyMs,
+      longTaskMaxMs: item.longTaskMaxMs,
+    })) ?? [],
     stderr: exitCode === 0 ? "" : stderr.replaceAll(root, "<redacted-path>"),
   };
 }
