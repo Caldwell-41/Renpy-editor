@@ -47,26 +47,48 @@ jobs:
           path: ${{ runner.temp }}/${{ env.SDK_ARCHIVE }}
           key: renpy-sdk-${{ runner.os }}-${{ env.SDK_ARCHIVE }}-${{ env.SDK_SHA256 }}
       - name: Download official checksum metadata
+        shell: bash
         run: |
           curl --proto '=https' --tlsv1.2 --location --fail --show-error \
             --output "$RUNNER_TEMP/checksums.txt" \
             https://www.renpy.org/dl/8.5.3/checksums.txt
       - name: Download official SDK on cache miss
         if: steps.sdk-cache.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           curl --proto '=https' --tlsv1.2 --location --fail --show-error \
             --output "$RUNNER_TEMP/$SDK_ARCHIVE.partial" \
             "https://www.renpy.org/dl/8.5.3/$SDK_ARCHIVE"
           mv "$RUNNER_TEMP/$SDK_ARCHIVE.partial" "$RUNNER_TEMP/$SDK_ARCHIVE"
       - name: Verify pinned SDK checksum
-        run: printf '%s  %s\n' "$SDK_SHA256" "$RUNNER_TEMP/$SDK_ARCHIVE" | sha256sum --check
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            probe_python=python
+          else
+            probe_python=python3
+          fi
+          "$probe_python" -c '
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "spikes/renpy-sdk")
+          from archive_safety import verify_sha256
+
+          archive = Path(os.environ["RUNNER_TEMP"]) / os.environ["SDK_ARCHIVE"]
+          verify_sha256(archive, os.environ["SDK_SHA256"])
+          print(f"{archive.name}: OK")
+          '
       - name: Probe SDK adapter with explicit fixture trust
         shell: bash
         run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            probe_prefix=(python)
+          elif [ "$RUNNER_OS" = "Linux" ]; then
             probe_prefix=(xvfb-run -a python3)
           else
-            probe_prefix=(python)
+            probe_prefix=(python3)
           fi
           "${probe_prefix[@]}" spikes/renpy-sdk/probe.py \
             --archive "$RUNNER_TEMP/$SDK_ARCHIVE" \
