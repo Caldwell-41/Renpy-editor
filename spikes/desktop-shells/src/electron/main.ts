@@ -149,8 +149,15 @@ function createWindow() {
           if (!window.__loomlightRunGraphEvidence) throw new Error("graph probe unavailable");
           return window.__loomlightRunGraphEvidence();
         })()`);
-        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "complete", ...result }));
-        app.exit(result.passed ? 0 : 1);
+        const case10k = result.cases?.find((item: { size?: number }) => item.size === 10_000);
+        const case50k = result.cases?.find((item: { size?: number }) => item.size === 50_000);
+        const measurementPassed = result.cases?.length === 3
+          && case10k?.interactionP95Ms < 100
+          && case10k?.editorEditDelayMs < 100
+          && case10k?.editorEditLatencyMs < 100
+          && case50k?.totalMs < 15_000;
+        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "complete", ...result, measurementPassed }));
+        app.exit(measurementPassed ? 0 : 1);
       } catch {
         console.error(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "complete", passed: false, error: "probe failed" }));
         app.exit(1);

@@ -435,13 +435,25 @@ fn finish_measurement_probe(request: &DesktopRequest) -> Result<Value, String> {
     let mut completed = request.measurement_results.clone().unwrap_or_else(|| json!({}));
     completed["evidence"] = json!("tauri-packaged-measurement");
     completed["stage"] = json!(stage);
+    if stage == "complete" {
+        let cases = completed.get("cases").and_then(Value::as_array);
+        let case10k = cases.and_then(|items| items.iter().find(|item| item.get("size").and_then(Value::as_u64) == Some(10_000)));
+        let case50k = cases.and_then(|items| items.iter().find(|item| item.get("size").and_then(Value::as_u64) == Some(50_000)));
+        let below = |item: Option<&Value>, key: &str, limit: f64| {
+            item.and_then(|value| value.get(key)).and_then(Value::as_f64).is_some_and(|value| value < limit)
+        };
+        let measurement_passed = cases.is_some_and(|items| items.len() == 3)
+            && below(case10k, "interactionP95Ms", 100.0)
+            && below(case10k, "editorEditDelayMs", 100.0)
+            && below(case10k, "editorEditLatencyMs", 100.0)
+            && below(case50k, "totalMs", 15_000.0);
+        completed["measurementPassed"] = json!(measurement_passed);
+        println!("{completed}");
+        let _ = std::io::stdout().flush();
+        std::process::exit(if measurement_passed { 0 } else { 1 });
+    }
     println!("{completed}");
     let _ = std::io::stdout().flush();
-    if stage == "complete" {
-        let passed = completed.get("passed").and_then(Value::as_bool) == Some(true)
-            && completed.get("usability10kPassed").and_then(Value::as_bool) == Some(true);
-        std::process::exit(if passed { 0 } else { 1 });
-    }
     Ok(json!({ "recorded": stage }))
 }
 

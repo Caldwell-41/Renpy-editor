@@ -132,7 +132,7 @@ async function oneRun(executable, index) {
   const stress = samples.filter((item) => item.stage === "stress");
   const case10k = complete?.cases?.find((item) => item.size === 10_000);
   return {
-    index, passed: exitCode === 0 && complete?.passed === true && coldStartMs !== null && idle.length > 0 && stress.length > 0,
+    index, passed: exitCode === 0 && complete?.measurementPassed === true && coldStartMs !== null && idle.length > 0 && stress.length > 0,
     exitCode, coldStartMs: round(coldStartMs ?? 0), processStartupMs,
     idleWorkingSetBytes: median(idle.map((item) => item.workingSetBytes)),
     idlePrivateBytes: median(idle.map((item) => item.privateBytes).filter((value) => value !== null)),
@@ -144,6 +144,7 @@ async function oneRun(executable, index) {
     monacoEditDelay10kMs: case10k?.editorEditDelayMs ?? null,
     monacoEditLatency10kMs: case10k?.editorEditLatencyMs ?? null,
     graph10kTotalMs: case10k?.totalMs ?? null,
+    measurementPassed: complete?.measurementPassed ?? false,
     graphPassed: complete?.passed ?? false,
     graphCases: complete?.cases?.map((item) => ({
       size: item.size,

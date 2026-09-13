@@ -60,9 +60,12 @@ test("packaged comparison repeats equivalent startup, memory, and graph measurem
   assert.match(runner, /idleWorkingSetBytes/);
   assert.match(runner, /stressPeakWorkingSetBytes/);
   assert.match(runner, /interaction10kP95Ms/);
+  assert.match(runner, /measurementPassed/);
   assert.match(inventory, /licenses/);
   assert.match(inventory, /nonblankLines/);
   assert.match(electron, /electron-packaged-measurement/);
+  assert.match(electron, /case50k\?\.totalMs < 15_000/);
   assert.match(tauri, /tauri-packaged-measurement/);
+  assert.match(tauri, /measurement_passed/);
   assert.match(tauri, /LOOMLIGHT_SPIKE_MEASUREMENT_PROBE/);
 });
