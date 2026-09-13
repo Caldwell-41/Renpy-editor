@@ -69,7 +69,7 @@ def _package_launch_target(installed: Path) -> tuple[Path, Path]:
         matches = sorted(root.glob("*.exe"))
         subject = matches[0] if len(matches) == 1 else None
     elif system == "Darwin":
-        apps = sorted(root.glob("*.app"))
+        apps = sorted(root.rglob("*.app"))
         binaries = sorted((apps[0] / "Contents" / "MacOS").iterdir()) if len(apps) == 1 else []
         matches = [candidate for candidate in binaries if candidate.is_file()]
         subject = apps[0] if len(apps) == 1 else None
@@ -83,9 +83,14 @@ def _package_launch_target(installed: Path) -> tuple[Path, Path]:
 
 def _security_observations(subject: Path, redactions: tuple[Path, ...]) -> list[dict[str, object]]:
     if platform.system() == "Windows":
+        script = redactions[0] / "authenticode-status.ps1"
+        script.write_text(
+            "param([Parameter(Mandatory=$true)][string]$Target)\n"
+            "(Get-AuthenticodeSignature -LiteralPath $Target).Status\n",
+            encoding="utf-8",
+        )
         commands = (("authenticode", (
-            "powershell", "-NoProfile", "-NonInteractive", "-Command",
-            "(Get-AuthenticodeSignature -LiteralPath $args[0]).Status", str(subject),
+            "powershell", "-NoProfile", "-NonInteractive", "-File", str(script), str(subject),
         )),)
     elif platform.system() == "Darwin":
         commands = (
@@ -145,7 +150,10 @@ def main() -> int:
             ("run", Command.RUN, 8, {}),
             ("warp", Command.WARP, 8, {"warp_target": "script.rpy:4"}),
             ("distribute-help", Command.DISTRIBUTE_HELP, 60, {}),
-            ("distribute", Command.DISTRIBUTE, 240, {"output_dir": distribution_dir}),
+            ("distribute", Command.DISTRIBUTE, 240, {
+                "output_dir": distribution_dir,
+                "package_name": "mac" if platform.system() == "Darwin" else "pc",
+            }),
         ):
             argv = command_argv(
                 sdk_root,

@@ -90,6 +90,7 @@ def command_argv(
     warp_target: str | None = None,
     output_dir: Path | None = None,
     testcase: str | None = None,
+    package_name: str = "pc",
     allow_project_execution: bool = False,
     platform: str = os.name,
 ) -> tuple[str, ...]:
@@ -118,6 +119,8 @@ def command_argv(
             raise AdapterError("warp target must be a relative .rpy filename and line")
         return (*prefix, project_arg, "run", "--warp", warp_target)
     if command in {Command.DISTRIBUTE, Command.DISTRIBUTE_HELP}:
+        if package_name not in {"pc", "mac"}:
+            raise AdapterError("distribution package is not allowlisted")
         launcher_project = str((sdk_root.resolve() / "launcher").resolve())
         args = (*prefix, launcher_project, "distribute", project_arg)
         if command is Command.DISTRIBUTE_HELP:
@@ -126,7 +129,7 @@ def command_argv(
             raise AdapterError("distribution output directory is required")
         args += (
             "--destination", str(output_dir.resolve()),
-            "--package", "pc",
+            "--package", package_name,
             "--no-update",
         )
         return args

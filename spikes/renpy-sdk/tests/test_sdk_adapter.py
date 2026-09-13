@@ -55,6 +55,28 @@ class AdapterTests(unittest.TestCase):
         )
         self.assertEqual(argv[-5:], ("--destination", str(output), "--package", "pc", "--no-update"))
 
+    def test_distribution_allows_only_known_target_packages(self) -> None:
+        (self.sdk / "launcher").mkdir()
+        output = self.root / "distribution output"
+        argv = command_argv(
+            self.sdk,
+            Command.DISTRIBUTE,
+            self.project,
+            output_dir=output,
+            package_name="mac",
+            allow_project_execution=True,
+        )
+        self.assertEqual(argv[-3:], ("--package", "mac", "--no-update"))
+        with self.assertRaisesRegex(AdapterError, "not allowlisted"):
+            command_argv(
+                self.sdk,
+                Command.DISTRIBUTE,
+                self.project,
+                output_dir=output,
+                package_name="web",
+                allow_project_execution=True,
+            )
+
     def test_project_commands_require_explicit_trust(self) -> None:
         with self.assertRaisesRegex(AdapterError, "explicit trust"):
             command_argv(self.sdk, Command.COMPILE, self.project)
