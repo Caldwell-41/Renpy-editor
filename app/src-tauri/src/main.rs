@@ -13,6 +13,7 @@ use tauri::{Manager, WebviewUrl};
 
 static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
+static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
 fn core_request(
@@ -113,6 +114,10 @@ fn main() {
                         denied.store(true, Ordering::SeqCst);
                         return false;
                     }
+                    if url.host_str() == Some("permission-allowed.invalid") {
+                        UNAUTHORISED_ALLOW_OBSERVED.store(true, Ordering::SeqCst);
+                        return false;
+                    }
                     url.scheme() == "tauri"
                         || (matches!(url.scheme(), "http" | "https")
                             && url.host_str() == Some("tauri.localhost"))
@@ -127,7 +132,14 @@ fn main() {
                     .expect("main probe window must exist");
                 let denied_for_probe = Arc::clone(&unauthorised_denied);
                 thread::spawn(move || {
-                    thread::sleep(Duration::from_millis(650));
+                    for _ in 0..50 {
+                        if denied_for_probe.load(Ordering::SeqCst)
+                            || UNAUTHORISED_ALLOW_OBSERVED.load(Ordering::SeqCst)
+                        {
+                            break;
+                        }
+                        thread::sleep(Duration::from_millis(100));
+                    }
                     main.eval(&format!(
                         "window.__loomlightUnauthorisedDenied = {};",
                         denied_for_probe.load(Ordering::SeqCst)
