@@ -2,9 +2,11 @@
 
 ## Mission and current scope
 
-Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 is
-complete and ADR 0003 selects Tauri 2. Phase 1 remains blocked until explicit
-approval; its active brief is planning authority, not permission to implement.
+Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 is complete,
+ADR 0003 selects Tauri 2, and the Phase 1 product/UX plan is defined. Phase 1
+implementation remains blocked until explicit approval. If approval is given, begin
+only with `docs/tasks/active/phase-1-scaffold.md`; the broader vertical-slice plan is a
+milestone roadmap, not permission for an open-ended implementation run.
 
 ## Invariants
 
@@ -30,7 +32,8 @@ approval; its active brief is planning authority, not permission to implement.
 
 ## Commands
 
-Phase 0 has no application dependencies or build command yet.
+There is no production application build command until the approved Phase 1 scaffold
+creates it. Current Phase 0 regression commands remain:
 
 ```bash
 python3 scripts/validate.py  # structure, links, privacy, secret patterns
@@ -54,11 +57,14 @@ Do not present a spike as the production application.
 
 ## Canonical documentation
 
-Use [docs/INDEX.md](docs/INDEX.md) as the router. Material decisions require an
-ADR. Keep `AGENTS.md`, the index, and current status concise; link rather than copy.
+Use [docs/INDEX.md](docs/INDEX.md) as the router. Material decisions require an ADR.
+Phase 1 scope/UX lives in the canonical product/architecture/data/UI/roadmap docs; the
+ordered implementation milestones live in
+`docs/tasks/active/phase-1-vertical-slice.md`. Keep `AGENTS.md`, the index, and current
+status concise; link rather than copy where practical.
 
 ## Handoff
 
-Each completed task updates its brief and `docs/status/CURRENT.md`, archives the
-brief when complete, and reports: outcome, changed areas, ADRs, exact validation
-results, limitations/risks, and the next bounded task.
+Each completed task updates its brief and `docs/status/CURRENT.md`, archives the brief
+when complete, and reports: outcome, changed areas, ADRs, exact validation results,
+limitations/risks, and the next bounded task.

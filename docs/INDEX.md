@@ -4,18 +4,23 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
-The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
-is archived. Phase 1 remains separately approval-gated.
+Phase 0 is complete. Phase 1 product/UX planning is defined but implementation remains
+separately approval-gated. Read the
+[Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
+sequence and the [Phase 1 scaffold](tasks/active/phase-1-scaffold.md) for the first
+implementation gate.
 
 | Concern | Canonical document |
 | --- | --- |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
-| Boundaries and data flow | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| Source, metadata, story, lore, and state | [DATA_MODEL.md](DATA_MODEL.md) |
+| Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Source, project, character appearance, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
 | Workspaces and interaction | [UI.md](UI.md) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
+| Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
+| Phase 1 first implementation gate | [tasks/active/phase-1-scaffold.md](tasks/active/phase-1-scaffold.md) |
 | Continuation handover | [status/HANDOVER.md](status/HANDOVER.md) |
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |
@@ -30,5 +35,7 @@ is archived. Phase 1 remains separately approval-gated.
 | Repository/privacy audit | [audits/2026-09-10-repository-and-privacy.md](audits/2026-09-10-repository-and-privacy.md) |
 | Decision records | [`adr/`](adr/) |
 
-Completed task briefs move to [`tasks/archive`](tasks/archive/); they are not
-canonical product documentation.
+The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
+and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md) remain
+historical evidence. Completed task briefs move to [`tasks/archive`](tasks/archive/);
+they are not canonical product documentation.

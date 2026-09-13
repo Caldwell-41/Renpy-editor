@@ -1,7 +1,7 @@
-# Phase 0 corrective handover
+# Phase 1 planning handover
 
-**Prepared:** 2026-09-13<br>
-**Phase:** 0 corrective checkpoint complete; ready for Phase 1 planning<br>
+**Prepared:** 2026-09-14<br>
+**Phase:** Phase 0 complete; Phase 1 product/UX plan defined; implementation not yet approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
@@ -9,113 +9,113 @@
 
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
-3. [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
-4. [Desktop evidence](../research/DESKTOP_SPIKE_RESULTS.md)
-5. [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md)
+3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
+4. [Phase 1 production scaffold](../tasks/active/phase-1-scaffold.md)
+5. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+6. [ADR 0001](../adr/0001-lossless-source-model.md),
+   [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
+   [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
 
-The approved product brief remains authoritative. Phase 1 still requires separate
-explicit approval; this handover is not that approval.
+The approved product brief remains authoritative. Planning is substantially defined,
+but **do not implement Phase 1 without explicit user approval**. When approval is
+given, begin only with the bounded scaffold task; do not treat the vertical-slice plan
+as permission for an open-ended implementation run.
 
-## Accepted boundaries
+## Accepted Phase 0 boundaries
 
-- Windows x86-64 and macOS Apple Silicon ARM64 are the only supported targets. Intel
-  macOS is out of scope.
-- `.rpy` files remain authoritative and losslessly preserved. ADR 0001 accepts exact
-  bytes, a conservative partial CST, and verified minimal range patches.
-- ADR 0002 accepts the exact-version Ren'Py adapter and checksum-first staged install.
-  Ren'Py 8.5.3 is the verified compatibility baseline and is not bundled.
-- ADR 0003 selects Tauri 2 with an unprivileged shared UI and a narrow Rust privileged
-  core. Electron remains the explicit fallback under the ADR's reconsideration
-  conditions.
-- Projects, generated content, IPC payloads, archives, and LLM output remain
-  untrusted. Opening source never executes project Python; trusted SDK operations use
-  direct arguments, bounded/redacted output, cancellation, and a minimal environment.
-- Phase 0 code under `spikes/` is disposable evidence. Do not silently promote it
-  into the production architecture.
+- Windows x86-64 and macOS Apple Silicon ARM64 are the only supported targets.
+- `.rpy` files are authoritative and losslessly preserved; unsupported/ambiguous source
+  stays opaque and visible rather than being normalised away.
+- Ren'Py 8.5.3 is the verified initial SDK compatibility baseline behind an exact-
+  version adapter and checksum-first staged installer.
+- Tauri 2 is the selected desktop runtime with an unprivileged UI and narrow Rust core;
+  Electron remains the ADR-defined fallback.
+- Projects, generated content, IPC payloads, archives, and later LLM output are
+  untrusted. Opening source never executes project Python; runtime/SDK operations cross
+  an explicit trust boundary.
+- Phase 0 code under `spikes/` is disposable evidence and must not become the production
+  application by copying it wholesale.
 
-## Evidence closure
+## Phase 1 product decisions now fixed
 
-- Corrective source/preview suite: 19 source tests plus seven mapping tests; final
-  quality run 34743055274 is green.
-- Preview/source mapping: seven mapping tests and trusted runtime evidence classify
-  behavior as faithful, approximate, or runtime-only.
-- SDK/install: 24 tests plus final run
-  [34731460283](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283)
-  on Windows x64, macOS ARM64, and the Linux regression baseline.
-- Packaged denial/filesystem/process:
-  [34700476448](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34700476448).
-- Shared Monaco UI/WebView:
-  [34701370897](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34701370897).
-- Native credential storage and leak scan:
-  [34722411465](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465).
-- Deterministic 1k/10k/50k graph:
-  [34722954424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424).
-- Final equivalent comparison:
-  [34733246868](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34733246868).
-  Both target jobs and all twelve candidate launches passed. Tauri's unpacked
-  application payloads were about 98% smaller; Electron started faster; Windows
-  descendant-tree memory was higher for Tauri. The macOS Tauri sampler was incomplete,
-  so no total-memory percentage is retained. Interaction and Monaco guards passed.
+- New Loomlight project creation only; arbitrary existing-project import is deferred.
+- Project wizard: title + editable folder name + parent location; compatible detected
+  SDK / verified supported SDK install / browse existing SDK; resolution preset/custom;
+  review screen with local Git initialisation enabled by default; staged creation and
+  SDK validation before finalisation.
+- Projects can be transactionally persisted, explicitly flushed/saved, closed, shown in
+  Recent Projects, and loaded/reopened. The game still runs if `.renpy-editor/` is
+  absent, but Phase 1 does not reconstruct deliberately deleted metadata.
+- Project hierarchy is Project → Chapter → Scene → Beat. Chapters map naturally to
+  organisational folders. Each Loomlight Scene normally has its own `.rpy` file and a
+  stable globally unique technical label; display names are separate.
+- Functional major workspaces are Scene, Source, and Branches. Supporting surfaces are
+  Characters, Assets, Variables, Diagnostics/Runtime, Git, and project setup.
+- Scene uses a resizable ~52/48 Editor Preview/Beats split; Beats are the primary
+  authoring surface with compact/expanded inline rows. `Ctrl/Cmd+Enter` creates the next
+  Dialogue beat while normal Enter remains newline.
+- Editor Preview reconstructs supported scene-local state through the selected beat.
+  Unsupported/Python/runtime-dependent state is visibly partial. Clicking a persistent
+  preview Character distinguishes editing its contributing beat from adding a new
+  change at the current point.
+- Appearance/staging changes remain explicit beats. Characters use extensible appearance
+  attributes; Phase 1 exposes expression while outfit/pose are implicit defaults.
+  Future outfits, poses, layered images, animation, or extra appearance dimensions must
+  extend this model rather than replace it.
+- Assets are copied into the project. Phase 1 variables are `bool`, `int`, and `string`
+  with simple assignment. Placement, transition, and audio are extensible references;
+  the initial UI exposes Left/Centre/Right, a tiny transition set, music play/stop, and
+  SFX.
+- Choices are first-class beats and support an arbitrary list of unconditional options;
+  destination selection may create a new Scene. Scene and Branches use the same edge
+  model.
+- Custom/unsupported source appears in place, navigates to Source, and is protected from
+  unsafe movement. Supported direct source edits synchronize back to Scene.
+- Automatic persistence and `Ctrl/Cmd+S` share one transaction/recovery path. Save
+  status is explicit; undo/redo does not cross an external-revision safety boundary by
+  overwriting newer work.
+- Phase 1 provides Validate and normal Run Game. Run From Here is deferred until state
+  simulation can supply correct prior state.
 
-Failed runs remain evidence. Runs 34732252587 and 34732654915 exposed measurement
-sampling/exit defects. Run 34733107607 exposed a 506.2 ms macOS Electron filter result
-against the fixed 500 ms graph limit; a narrower chunking correction retained the
-limit and the final run passed. Earlier packaged-denial, UI, credential, and SDK
-failures are catalogued in their research documents.
+## Required implementation sequence
 
-## Known limitations
+1. **1A production scaffold** — clean production Tauri workspace/boundary/CI only.
+2. **1B transaction/recovery** — close production Gate E before visual authoring writes.
+3. **1C project lifecycle/SDK** — New Project, generated scaffold, save/close/reopen.
+4. **1D Characters/Assets/Variables** — extensible supporting authoring models.
+5. **1E Scene authoring** — agreed bounded Beat set and Scene UX.
+6. **1F Source synchronisation** — production partial CST/minimal patches/custom code.
+7. **1G Branches/Validate/Run/Diagnostics/Git** — complete the functional slice.
+8. **1H cross-platform acceptance** — fresh end-to-end Windows/macOS vertical slice.
 
-Manual NVDA/VoiceOver interaction, subjective real-media quality, physical Windows
-SmartScreen, browser-origin macOS quarantine, Developer ID signing/notarisation,
-signed upgrades, complete accounting of launchd-owned WKWebView services, and
-production automatic-layout performance remain later validation work. They are not
-inferred successes and did not distinguish the Phase 0 candidates enough to block the
-decision.
+Each milestone must receive its own bounded active task and pass its gate before the
+next begins.
 
-Production file writing remains blocked by parser Gate E: the spike detects known
-races and preserves recovery data, but cannot make a portable compare-and-swap promise
-against non-cooperating external writers in the final validation-to-rename interval.
-The attached review reproducer was not present in the checked-out workspace; every
-reported case was independently reproduced against remote `main` at `831c9e3`.
+## Highest retained engineering risk
 
-## Corrective closure
+Production file writing is still blocked by parser/file Gate E. Phase 0 proved useful
+race detection and recovery behavior but did not establish portable compare-and-swap
+against a non-cooperating external writer in the final validation-to-replace interval,
+and equivalent Windows directory-entry durability was not proven. Milestone 1B must
+resolve this using reviewed platform transaction/recovery semantics and tests before
+production authoring writes are trusted.
 
-- Implementation commits: `2b78d067`, `96ca1cd3`, `d11f9dd2`, and `08de1e4e`.
-- [SDK run 34742452653](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34742452653)
-  passes the trusted fixture on Linux, Windows x64, and macOS ARM64 at `2b78d067`;
-  later commits changed only the desktop probe.
-- [Desktop run 34743055306](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055306)
-  passes both complete target jobs at `08de1e4e`, including explicit Tauri command
-  permissions, authorised/unauthorised webviews, approved/forged projects,
-  deterministic save regressions, and valid media playback.
-- [Quality run 34743055274](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34743055274)
-  passes at `08de1e4e`.
-- Failed/cancelled corrective runs 34742452515, 34742542992, and 34742865491 remain
-  evidence of the compile type mismatch and two non-portable probe observations.
+## Deferred beyond Phase 1
 
-## Exact stopping point
+General Ren'Py project import/reconstruction, UI Designer, Timeline, advanced ATL/
+transform authoring, advanced state simulation and Run From Here, LLM assistance,
+GitHub remote workflows, mature graph/reachability analysis, release signing/
+notarisation, and broader release/distribution work.
 
-Stop here. Phase 1 may be planned but must not begin without explicit approval. Follow
-[`phase-1-scaffold.md`](../tasks/active/phase-1-scaffold.md) only after that approval.
+## Phase 0 evidence closure
 
-## Validation
-
-The corrective implementation passed 27 desktop shared tests, 26 source/mapping tests,
-24 SDK tests, the UI production build, repository validation, quality run 34743055274,
-SDK run 34742452653, and both target jobs in desktop run 34743055306. The
-documentation-only closure must pass:
-
-```bash
-python3 scripts/validate.py
-python3 -m unittest discover -s spikes/lossless-source/tests -v
-python3 -m unittest discover -s spikes/renpy-sdk/tests -v
-python3 spikes/lossless-source/benchmark.py
-git diff --check
-```
+Final corrective quality, SDK, and desktop evidence remains recorded in the archived
+Phase 0 tasks and research documents. The Phase 0 corrective implementation passed the
+source/mapping, SDK, packaged Tauri/Electron, security, UI, media, graph, credential,
+and target platform gates used to select the current architecture.
 
 ## Publishing rules
 
 Confirm remote `main` before every write, commit coherently, and update it only by
-fast-forward. Do not change visibility, force-push, rewrite history, commit generated
-packages/SDKs/credentials/logs, or trigger expensive evidence workflows for
-documentation-only closure.
+fast-forward. Do not change visibility, force-push, rewrite history, discard unrelated
+work, or commit generated packages/SDKs/credentials/logs/private content.

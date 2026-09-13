@@ -1,57 +1,61 @@
 # Current status
 
-**Updated:** 2026-09-13<br>
-**Phase:** 0 corrective checkpoint complete; ready for Phase 1 planning<br>
+**Updated:** 2026-09-14<br>
+**Phase:** Phase 0 complete; Phase 1 product/UX plan defined; implementation not yet approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
 - The Phase 0 corrective checkpoint is complete. No production application has been
-  created and Phase 1 has not begun.
+  created and no Phase 1 implementation has begun.
+- Phase 1 product scope and core UX are now defined in
+  [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
+  [ARCHITECTURE.md](../ARCHITECTURE.md), and the
+  [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md).
+- The first Phase 1 implementation gate remains the bounded
+  [production scaffold](../tasks/active/phase-1-scaffold.md). Planning documents are
+  not implementation approval.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
 - ADR 0002 accepts the exact-version Ren'Py adapter and checksum-first staged install.
-  Ren'Py 8.5.3 passes version, compile, lint, test, run, warp, diagnostics,
-  distribution, containment-checked install, and package launch on Windows x64 and
-  macOS ARM64 in run 34731460283, plus the Linux regression baseline.
+  Ren'Py 8.5.3 is evidenced on Windows x64, macOS ARM64, and the Linux regression
+  baseline; physical SmartScreen/quarantine/signing UX remains later release work.
 - ADR 0003 accepts Tauri 2 as the desktop runtime: an unprivileged shared web UI over
   named schema-validated commands in a Rust privileged core. Electron is the explicit
   fallback under ADR-defined reconsideration conditions.
-- Corrective source tests now refuse priority-init Python, target literal-speaker
-  dialogue correctly, encode quotes/backslashes, and preserve unrelated bytes.
-- Desktop adapters now use core-owned approved-project registries, explicit Tauri
-  application permissions, and a bounded serialized save/recovery policy. Desktop run
-  34743055306 passes both complete target jobs at implementation commit `08de1e4`.
-- Tauri's measured application payload was about 98% smaller, but this excludes
-  installer/first-install footprint and Windows WebView2. The macOS sampler could omit
-  WKWebView/XPC services, so the old 77% figure is not total-memory evidence. Tauri
-  remains selected for architectural fit with accepted maintenance/delivery costs.
-- Preview/source mapping is explicitly classified: literal declarations and exact
-  navigation can be faithful; engine-dependent staging is approximate; Python-driven
-  screens, media decode, translations/generated behavior remain runtime-only.
-- Corrective SDK run 34742452653 passes the trusted fixture on Linux, Windows x64, and
-  macOS ARM64; final quality run 34743055274 is green. The existing path scopes and
-  runtime caches were retained.
 - Confirmed targets are Windows x86-64 and macOS Apple Silicon ARM64 only. Intel macOS
   is out of scope.
-- Manual NVDA/VoiceOver behavior, subjective media quality, physical SmartScreen and
-  browser-origin quarantine, signing/notarisation, complete system accounting of
-  WKWebView services, and production automatic-layout performance are later physical
-  or implementation gates. They are not inferred successes and do not block the
-  evidence-based Phase 0 decision.
+
+## Agreed Phase 1 shape
+
+- Create new Loomlight projects only; general arbitrary Ren'Py import remains deferred.
+- Project lifecycle includes create, transactional persistence, explicit save/flush,
+  close, Recent Projects, load/reopen, and continuation.
+- Generated hierarchy is Project → Chapter → Scene → Beat; each Loomlight Scene normally
+  owns one `.rpy` file and one globally unique technical label.
+- Functional major workspaces are Scene, Source, and Branches. Characters, Assets,
+  Variables, Diagnostics/Runtime, Git, and project setup are supporting surfaces.
+- Scene uses an approximately 52/48 resizable Editor Preview/Beats split, inline beat
+  editing, scene-local supported preview reconstruction, protected Custom Code regions,
+  and explicit staging mutations.
+- Characters use extensible appearance attributes. Phase 1 exposes expression with
+  implicit default outfit/pose; future outfit/pose/layered-image support extends rather
+  than replaces this model.
+- Phase 1 assets are copied into the project; variables are `bool`, `int`, and `string`
+  with simple assignment; basic placement/transitions/music/SFX use extensible models.
+- Normal Run Game is Phase 1; correct Run From Here remains deferred with state
+  simulation.
+- Production authoring writes remain blocked until Phase 1 closes parser/file Gate E
+  with a platform transaction/recovery design that prevents silent loss of accepted or
+  competing external edits.
 
 ## Next action
 
-Phase 1 may now be planned, but do not implement it without explicit approval. The
-bounded entry plan is
-the [Phase 1 scaffold task](../tasks/active/phase-1-scaffold.md). Its first approved
-work would create only the production Tauri workspace, narrow capability/command
-boundary, shared validation fixtures, and CI skeleton needed for the vertical slice;
-the Phase 0 spike remains disposable and must not be promoted wholesale.
+Do not begin Phase 1 implementation without explicit approval. When approved, start
+only with [phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md). After its gate
+passes, create and execute one bounded task at a time following the milestone sequence
+in [phase-1-vertical-slice.md](../tasks/active/phase-1-vertical-slice.md).
 
-The corrective task and original evidence task are archived at
-[2026-09-13-phase-0-corrective-review.md](../tasks/archive/2026-09-13-phase-0-corrective-review.md)
-and
-[2026-09-13-phase-0-evidence-spikes.md](../tasks/archive/2026-09-13-phase-0-evidence-spikes.md),
-and the exact completion handover is in [HANDOVER.md](HANDOVER.md).
+Phase 0 evidence and corrective closure remain authoritative historical records; the
+Phase 0 spike must not be promoted wholesale into the production application.
