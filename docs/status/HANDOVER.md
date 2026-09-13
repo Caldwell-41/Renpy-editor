@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1 product/UX plan defined; implementation not yet approved<br>
+**Phase:** Phase 0 complete; Phase 1A production scaffold in progress<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
@@ -16,10 +16,24 @@
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
 
-The approved product brief remains authoritative. Planning is substantially defined,
-but **do not implement Phase 1 without explicit user approval**. When approval is
-given, begin only with the bounded scaffold task; do not treat the vertical-slice plan
-as permission for an open-ended implementation run.
+The approved product brief remains authoritative. The user explicitly approved Phase
+1A on 2026-09-14. Complete only the bounded scaffold task and its target evidence; do
+not begin Phase 1B or treat the vertical-slice plan as an open-ended implementation run.
+
+## Active Phase 1A implementation
+
+- Production workspace: `app/`, separate from `spikes/`.
+- Runtime boundary: one custom AppManifest command, `core_request`, granted by one
+  local capability to window `main` only.
+- Protocol: exact version 1 request/result envelopes; only health/version and synthetic
+  denial/smoke operations; fixed redacted errors.
+- Empty future ports: source transactions, project filesystem, Ren'Py, Git,
+  credentials, and network providers. None has methods or an implementation.
+- UI foundation: semantic dark and provisional light tokens, system/Source typography,
+  restrained radius/elevation, visible focus, and reduced-motion behavior. The shell
+  is boundary evidence, not an authoring screen.
+- Local state: npm install/typecheck/unit/build and independent Rust core tests pass.
+  Full supported-target Rust tests, package, and WebView smoke remain pending CI.
 
 ## Accepted Phase 0 boundaries
 

@@ -31,7 +31,8 @@ reputation checks are recorded later-phase limitations, not inferred Phase 0 pas
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Product/UX planning defined; implementation awaits explicit approval.
+**Status:** Phase 1A production scaffold approved and in progress; later milestones
+await separate explicit approval.
 
 **Outcome:** deliver a small but genuinely usable Loomlight-created Ren'Py project from
 creation through authoring, validation, run, local Git checkpoint, close, and reopen.

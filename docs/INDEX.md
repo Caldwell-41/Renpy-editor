@@ -33,6 +33,7 @@ implementation gate.
 | SDK adapter evidence | [research/RENPY_SDK_SPIKE_RESULTS.md](research/RENPY_SDK_SPIKE_RESULTS.md) |
 | Representative fixture proposal | [fixtures/REPRESENTATIVE_GAME.md](fixtures/REPRESENTATIVE_GAME.md) |
 | Repository/privacy audit | [audits/2026-09-10-repository-and-privacy.md](audits/2026-09-10-repository-and-privacy.md) |
+| Phase 1A dependency/licence review | [dependencies/phase-1a.md](dependencies/phase-1a.md) |
 | Decision records | [`adr/`](adr/) |
 
 The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)

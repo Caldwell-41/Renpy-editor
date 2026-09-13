@@ -1,13 +1,20 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1 product/UX plan defined; implementation not yet approved<br>
+**Phase:** Phase 0 complete; Phase 1A production scaffold in progress<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The Phase 0 corrective checkpoint is complete. No production application has been
-  created and no Phase 1 implementation has begun.
+- The Phase 0 corrective checkpoint is complete. The user explicitly approved the
+  bounded Phase 1A production scaffold on 2026-09-14; no later milestone is approved.
+- Production code now lives separately under `app/`: a Cargo core/desktop workspace,
+  vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
+  main-window capability, empty future ports, locked dependencies, and semantic Quiet
+  Studio Dark/light-ready tokens.
+- Local TypeScript build/tests and framework-independent Rust core tests pass. The
+  Windows x64 and macOS ARM64 packaged gates are pending the first remote CI run, so
+  Phase 1A is not yet complete.
 - Phase 1 product scope and core UX are now defined in
   [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
   [ARCHITECTURE.md](../ARCHITECTURE.md), and the
@@ -52,10 +59,10 @@
 
 ## Next action
 
-Do not begin Phase 1 implementation without explicit approval. When approved, start
-only with [phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md). After its gate
-passes, create and execute one bounded task at a time following the milestone sequence
-in [phase-1-vertical-slice.md](../tasks/active/phase-1-vertical-slice.md).
+Complete and evidence only [phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md).
+Do not begin Phase 1B or any authoring implementation in this goal. After the scaffold
+gate passes, create only the bounded Phase 1B planning/handoff artifact and await a new
+explicit instruction.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

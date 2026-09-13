@@ -1,6 +1,6 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Status:** Planned; implementation requires explicit user approval<br>
+**Status:** Planned; Phase 1A approved, later milestones require explicit user approval<br>
 **Scope:** Production vertical slice after the scaffold gate; no Phase 2+ features
 
 ## Purpose

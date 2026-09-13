@@ -1,6 +1,6 @@
 # Task: Phase 1 production scaffold
 
-**Status:** Blocked pending explicit Phase 1 approval<br>
+**Status:** In progress; explicitly approved 2026-09-14<br>
 **Scope:** Minimal production foundation only; no authoring feature implementation
 
 ## Entry condition
@@ -102,3 +102,17 @@ primitives, validation results, retained limitations, and the next bounded verti
 slice task. After this gate passes, the next planned milestone is 1B transaction/file
 coordination and recovery; do not jump directly to Scene authoring. Phase 1 work beyond
 this scaffold requires the scaffold gate to pass.
+
+## Implementation checkpoint — 2026-09-14
+
+The first production implementation is under `app/` and remains separate from Phase 0
+spikes. It includes the Cargo core/desktop split, one schema-validated version 1 command
+envelope, main-window-only capability, denial probes, empty future ports, locked npm and
+Cargo graphs, the semantic Quiet Studio theme foundation, static/unit/Rust core tests,
+artifact privacy/licence scripts, and the path-scoped two-target production workflow.
+
+Local npm checks/build and the independent Rust core suite pass. The executor lacks the
+system WebKit/GTK development packages needed for a full host Tauri build, and its
+package manager cannot acquire them due container identity restrictions. This is not a
+target exception: Windows x64 and macOS ARM64 desktop tests, packaging, and injected
+WebView smoke must pass in CI before this task can close.

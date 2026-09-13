@@ -69,6 +69,14 @@ Light-theme tokens and component assumptions should exist from the start, but Ph
 polishes the dark theme first. The implementation must avoid assumptions such as
 literal white text on literal `#222` backgrounds.
 
+The Phase 1A implementation defines these semantics as CSS custom properties under an
+explicit `data-theme` selector. Both dark and provisional light value sets exist;
+components consume semantic variables only. Shared primitives also define the system UI
+stack, `SFMono-Regular`/Consolas/Liberation Mono/Menlo Source stack, 4 px and 6 px
+radii, one restrained preview elevation, visible focus, and a reduced-motion override.
+The minimal boundary-status shell is scaffold evidence, not the Scene workspace or a
+visual-polish milestone.
+
 ### Typography
 
 Use the platform/system UI font stack for application and narrative authoring surfaces,

@@ -65,6 +65,23 @@ separate target gates. If Electron is reconsidered through a superseding ADR, it
 `nodeIntegration`-off, context-isolated, sandboxed preload and sender/navigation/CSP
 baseline remains documented in the Phase 0 evidence.
 
+### Phase 1A implemented surface
+
+The production scaffold exposes one AppManifest command, `core_request`, through one
+local capability scoped to the `main` window. The Rust core checks an exact versioned
+envelope, per-operation payload keys and types, request ID syntax, and a closed harmless
+operation list. Errors use stable codes and fixed public messages; synthetic sensitive
+input is never reflected. The application creates its main webview with explicit
+local-only navigation and new-window denial handlers in addition to a restrictive CSP.
+
+There are no production filesystem, shell/process, HTTP, opener, credential, SDK, Git,
+or project plugins/adapters in Phase 1A. The similarly named future ports are empty
+interfaces with no methods, handles, paths, roots, URLs, or implementations. The
+packaged target probe exercises main-window success, unauthorised-window rejection,
+unknown command rejection, malformed payload rejection, ambient plugin denial, Node
+global absence, direct network denial, popup denial, external navigation denial, and
+renderer-secret absence.
+
 ## Credential and network rules
 
 - Store secrets in Keychain on macOS and Credential Manager/DPAPI-backed storage on

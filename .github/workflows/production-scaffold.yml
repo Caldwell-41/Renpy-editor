@@ -1,0 +1,134 @@
+name: Phase 1A production scaffold
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/production-scaffold.yml
+      - app/**
+      - scripts/validate.py
+      - docs/ARCHITECTURE.md
+      - docs/SECURITY.md
+      - docs/TESTING.md
+      - docs/UI.md
+      - docs/dependencies/**
+      - docs/status/**
+      - docs/tasks/**
+  pull_request:
+    paths:
+      - .github/workflows/production-scaffold.yml
+      - app/**
+      - scripts/validate.py
+      - docs/ARCHITECTURE.md
+      - docs/SECURITY.md
+      - docs/TESTING.md
+      - docs/UI.md
+      - docs/dependencies/**
+      - docs/status/**
+      - docs/tasks/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  packaged-boundary:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Select locked Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Record runner and toolchain
+        shell: bash
+        run: |
+          uname -a || true
+          node --version
+          npm --version
+          rustc --version --verbose
+          cargo --version --verbose
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1a-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: "false"
+      - name: Install locked JavaScript dependencies
+        run: npm ci --ignore-scripts
+      - name: Validate frontend and protocol
+        run: npm run check
+      - name: Build frontend
+        run: npm run build
+      - name: Check Rust formatting
+        run: cargo fmt --check --all
+      - name: Test independent Rust core
+        run: cargo test -p loomlight-core --release --locked
+      - name: Test desktop Rust boundary
+        run: cargo test -p loomlight-desktop --release --locked
+      - name: Package production scaffold
+        run: npm exec tauri build -- --locked
+      - name: Run packaged WebView boundary smoke
+        shell: bash
+        env:
+          LOOMLIGHT_SCAFFOLD_SMOKE: "1"
+          LOOMLIGHT_SMOKE_SECRET: loomlight-${{ github.run_id }}-${{ github.run_attempt }}-sentinel
+          TARGET_OS: ${{ runner.os }}
+        run: |
+          set -o pipefail
+          if [ "$TARGET_OS" = "Windows" ]; then
+            ./target/release/loomlight.exe | tee "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          else
+            ./target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight | tee "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          fi
+          grep '"navigationDenied":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+      - name: Scan production artifacts for secrets
+        shell: bash
+        env:
+          LOOMLIGHT_SMOKE_SECRET: loomlight-${{ github.run_id }}-${{ github.run_attempt }}-sentinel
+          TARGET_OS: ${{ runner.os }}
+        run: |
+          if [ "$TARGET_OS" = "Windows" ]; then
+            node scripts/scan-artifacts.mjs dist target/release/loomlight.exe target/release/bundle
+          else
+            node scripts/scan-artifacts.mjs dist target/release/bundle/macos/Loomlight.app
+          fi
+      - name: Record dependency and licence inventory
+        shell: bash
+        run: |
+          cargo metadata --locked --format-version 1 > "$RUNNER_TEMP/cargo-metadata.json"
+          node scripts/dependency-inventory.mjs \
+            --cargo-metadata "$RUNNER_TEMP/cargo-metadata.json" \
+            --output "$RUNNER_TEMP/dependency-inventory.json"
+      - name: Upload private scaffold evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phase-1a-scaffold-${{ matrix.runner }}
+          path: |
+            ${{ runner.temp }}/loomlight-scaffold-smoke.json
+            ${{ runner.temp }}/dependency-inventory.json
+            app/target/release/bundle/**
+          if-no-files-found: warn
+          retention-days: 7

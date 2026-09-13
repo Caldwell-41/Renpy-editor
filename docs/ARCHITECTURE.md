@@ -3,12 +3,28 @@
 ## Status
 
 This is the accepted Phase 0 target architecture plus the approved Phase 1 planning
-constraints. ADR 0001 selects exact source bytes plus a conservative partial CST,
+constraints and the Phase 1A production scaffold now under implementation. ADR 0001
+selects exact source bytes plus a conservative partial CST,
 ADR 0002 selects the versioned SDK boundary, and
 [ADR 0003](adr/0003-tauri-desktop-runtime.md) selects Tauri 2. The boundaries remain
-framework-light even though the production shell is now explicit. Phase 1
-implementation still requires explicit approval and begins with the bounded production
-scaffold rather than promotion of a spike.
+framework-light even though the production shell is now explicit. The approved bounded
+production scaffold lives in `app/`; later Phase 1 milestones remain separately gated.
+
+## Production scaffold boundary
+
+The production workspace is a small Cargo workspace plus a vanilla TypeScript/Vite UI.
+`loomlight-core` owns the framework-independent versioned protocol and can be tested
+without a desktop/WebView dependency. `loomlight-desktop` contains the Tauri host and
+the single custom command `core_request`. That command accepts an untyped JSON value so
+the core can reject malformed envelopes itself and always return the same redacted
+result shape.
+
+Protocol version 1 requires exactly `protocolVersion`, `requestId`, `operation`, and
+`payload`. Phase 1A allowlists only health/version and synthetic denial/smoke probes.
+The capability is local, scoped to window label `main`, and names only
+`allow-loomlight-core`; no general Tauri filesystem, shell/process, HTTP, opener, or
+credential plugin is present. Source transactions, project files, Ren'Py, Git,
+credentials, and network providers exist only as authority-free empty port markers.
 
 ## System boundaries
 

@@ -1,9 +1,25 @@
 # Testing strategy
 
-## Current Phase 0 regression commands
+## Current production scaffold and Phase 0 regression commands
 
-Until the Phase 1 scaffold creates the production build/test commands, retain the Phase
-0 regression suite:
+From `app/`, the Phase 1A production checks are:
+
+```bash
+npm ci --ignore-scripts
+npm run check
+npm run build
+cargo fmt --check --all
+cargo test -p loomlight-core --locked
+cargo test -p loomlight-desktop --locked
+npm exec tauri build -- --locked
+```
+
+The full desktop Rust test, package, and injected packaged-WebView probe run separately
+on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
+also runnable where a complete Tauri desktop build environment is unavailable. This is
+not a substitute for either target gate.
+
+Retain the Phase 0 regression suite:
 
 ```bash
 python3 scripts/validate.py
@@ -69,7 +85,10 @@ complexity. Runs 34732252587, 34732654915, and 34733107607 remain failed evidenc
 sampler attribution, comparison-vs-diagnostic exit criteria, and macOS filter-yield
 flakiness. ADR 0003 supports Tauri 2 from the bounded gate set. The macOS observation
 may omit launchd-owned WKWebView/XPC services and cannot support total-memory savings.
-There is no production application build or Phase 1 cross-platform suite yet.
+The Phase 1A production workflow is path-scoped to production code, its workflow, and
+canonical scaffold documentation. It uses locked npm/Cargo dependencies and
+commit-pinned checkout, Node setup, Rust cache, and artifact-upload Actions. Target run
+IDs and results remain pending until the first scaffold commit reaches remote `main`.
 
 ## Planned layers
 

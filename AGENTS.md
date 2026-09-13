@@ -3,10 +3,9 @@
 ## Mission and current scope
 
 Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 is complete,
-ADR 0003 selects Tauri 2, and the Phase 1 product/UX plan is defined. Phase 1
-implementation remains blocked until explicit approval. If approval is given, begin
-only with `docs/tasks/active/phase-1-scaffold.md`; the broader vertical-slice plan is a
-milestone roadmap, not permission for an open-ended implementation run.
+ADR 0003 selects Tauri 2, and the bounded Phase 1A production scaffold is in progress.
+Do not begin Phase 1B or authoring work until the Phase 1A gate is closed and the user
+provides a new explicit instruction.
 
 ## Invariants
 
@@ -32,8 +31,19 @@ milestone roadmap, not permission for an open-ended implementation run.
 
 ## Commands
 
-There is no production application build command until the approved Phase 1 scaffold
-creates it. Current Phase 0 regression commands remain:
+Production scaffold commands run from `app/`:
+
+```bash
+npm ci --ignore-scripts
+npm run check
+npm run build
+cargo fmt --check --all
+cargo test -p loomlight-core --locked
+cargo test -p loomlight-desktop --locked  # supported desktop build environment
+npm exec tauri build -- --locked
+```
+
+Retain the Phase 0 regression commands:
 
 ```bash
 python3 scripts/validate.py  # structure, links, privacy, secret patterns
