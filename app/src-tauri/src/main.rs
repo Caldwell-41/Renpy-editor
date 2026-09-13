@@ -107,9 +107,7 @@ fn main() {
                     WebviewUrl::App("index.html".into()),
                 )
                 .visible(false)
-                .on_page_load(|window, _| {
-                    let _ = window.eval(include_str!("unauthorised_probe.js"));
-                })
+                .initialization_script(include_str!("unauthorised_probe.js"))
                 .on_navigation(move |url| {
                     if url.host_str() == Some("permission-denied.invalid") {
                         denied.store(true, Ordering::SeqCst);
