@@ -20,8 +20,10 @@ Source, and Branches, validate and run it with Ren'Py, create a local Git checkp
 and continue editing after restart.
 
 The generated game remains conventional Ren'Py and runs when `.renpy-editor/` is
-absent. General import/reconstruction of arbitrary existing Ren'Py projects is not part
-of Phase 1.
+absent. It retains the normal Ren'Py starter GUI/runtime infrastructure needed for a
+working main menu, save/load, preferences, and related standard screens without
+requiring Phase 1's deferred visual UI Designer. General import/reconstruction of
+arbitrary existing Ren'Py projects is not part of Phase 1.
 
 ## Fixed Phase 1 product decisions
 
@@ -33,6 +35,9 @@ of Phase 1.
   primary technical label. Chapters are organisational folders, not Ren'Py runtime
   semantics.
 - `script.rpy` stays small and routes the normal entry point into authored scenes.
+- The generated scaffold preserves conventional Ren'Py starter GUI/screens so a newly
+  created game has standard menu/save/load/preferences behavior before Loomlight gains
+  visual screen authoring.
 - Project creation is staged and SDK-validated before finalisation.
 - Project lifecycle explicitly includes create, automatic transactional persistence,
   explicit save/flush, close, Recent Projects, load/reopen, and continuation.
@@ -118,12 +123,16 @@ Implement Welcome/Recent Projects and the New Project workflow:
 5. staged generation, metadata creation, optional Git init, SDK validation, finalise;
 6. open `Chapter 1 → Scene 1`.
 
-Generate the documented conventional project paths and metadata contract. Support
-close/reopen from Recent Projects and Open Loomlight Project. Metadata deletion must
-not break the game, but Phase 1 does not reconstruct deleted metadata.
+Generate the documented conventional project paths and metadata contract. Preserve the
+normal Ren'Py starter GUI/runtime files needed for standard main-menu, save/load,
+preferences, history/rollback behavior where provided by the supported SDK template;
+Phase 1 does not visually author those screens. Support close/reopen from Recent
+Projects and Open Loomlight Project. Metadata deletion must not break the game, but
+Phase 1 does not reconstruct deleted metadata.
 
-**Gate:** create → validate → close → reopen works on both targets; generated game runs
-without `.renpy-editor/`.
+**Gate:** create → validate → close → reopen works on both targets; the generated game
+runs with its standard Ren'Py menu/save/load infrastructure and also runs without
+`.renpy-editor/`.
 
 ### 1D — Supporting authoring models: Characters, Assets, Variables
 
@@ -183,21 +192,23 @@ and local checkpoint work end-to-end on both targets.
 Exercise a real workflow from a fresh checkout on both supported platforms:
 
 1. create a project and initialise Git;
-2. create two Characters and appearances;
-3. import a background, two character images, music, and SFX;
-4. define at least one simple variable;
-5. author several dialogue/staging/audio beats;
-6. change an appearance/placement explicitly;
-7. set the variable;
-8. add a Choice and create/link two destination Scenes;
-9. reorder a beat, undo, and redo;
-10. edit supported dialogue directly in Source and observe Scene synchronisation;
-11. introduce unsupported/external source and verify protected Custom Code behavior;
-12. validate and navigate diagnostics;
-13. run the game through the pinned SDK;
-14. create a local Git checkpoint;
-15. close Loomlight, reopen the project, and continue with appropriate editor state;
-16. confirm the game still runs with `.renpy-editor/` removed from a copy.
+2. confirm the untouched generated game launches with standard Ren'Py menu/save/load
+   behavior;
+3. create two Characters and appearances;
+4. import a background, two character images, music, and SFX;
+5. define at least one simple variable;
+6. author several dialogue/staging/audio beats;
+7. change an appearance/placement explicitly;
+8. set the variable;
+9. add a Choice and create/link two destination Scenes;
+10. reorder a beat, undo, and redo;
+11. edit supported dialogue directly in Source and observe Scene synchronisation;
+12. introduce unsupported/external source and verify protected Custom Code behavior;
+13. validate and navigate diagnostics;
+14. run the game through the pinned SDK;
+15. create a local Git checkpoint;
+16. close Loomlight, reopen the project, and continue with appropriate editor state;
+17. confirm the game still runs with `.renpy-editor/` removed from a copy.
 
 **Phase 1 closes only when** Windows x64 and macOS ARM64 pass this workflow plus the
 transaction/recovery, golden-source, privacy/security, and packaged application gates.
