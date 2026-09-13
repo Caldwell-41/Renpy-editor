@@ -195,7 +195,7 @@ fn replace_file(temporary: &Path, target: &Path) -> Result<(), String> {
 fn sync_parent_directory(target: &Path) -> Result<(), String> {
     let directory = OpenOptions::new().read(true).open(target.parent().ok_or("file has no parent")?)
         .map_err(|_| "directory could not be opened for durability sync")?;
-    directory.sync_all().map_err(|_| "directory durability sync failed")
+    directory.sync_all().map_err(|_| "directory durability sync failed".to_owned())
 }
 
 #[cfg(windows)]
