@@ -25,6 +25,13 @@
   was already reporting quota exhaustion. No Windows result exists for the corrected
   secret probe, so Phase 1A remains open rather than treating infrastructure failure as
   a target pass.
+- Routine CI has been cost-scoped without weakening the Phase 1A gate: the production
+  Windows/macOS package matrix runs on relevant `app/**` or workflow changes pushed to
+  `main`, plus explicit manual dispatch, rather than running once for a pull request and
+  again after merge. Documentation-only changes do not trigger it. Normal runs retain
+  only lightweight smoke/licence evidence; full packaged bundles are uploaded only for
+  manual production runs. Legacy Phase 0 desktop and SDK evidence matrices are manual-
+  only, while routine Ubuntu repository validation remains automatic.
 - Phase 1 product scope and core UX are now defined in
   [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
   [ARCHITECTURE.md](../ARCHITECTURE.md), and the
@@ -69,9 +76,9 @@
 
 ## Next action
 
-Restore GitHub-hosted Actions capacity, then run the production scaffold at or after
-`c4f2bd188bf33290204446b3aaf9d33c8fd15acb` and require both target jobs to pass.
-Complete and evidence only
+Restore or explicitly fund enough GitHub-hosted Actions capacity for one fresh production
+scaffold run at or after `c4f2bd188bf33290204446b3aaf9d33c8fd15acb`, then require
+both Windows x64 and macOS ARM64 target jobs to pass. Complete and evidence only
 [phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md). Do not begin Phase 1B,
 archive the scaffold task, or claim the target gate while this remains blocked.
 
