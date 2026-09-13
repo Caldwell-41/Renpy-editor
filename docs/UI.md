@@ -14,6 +14,158 @@ Assets, Variables, project setup, Diagnostics/Runtime, and Git are supporting su
 UI Designer and Timeline are later major workspaces and must not appear as functional
 Phase 1 features; they may be omitted or clearly labelled as future work.
 
+## Visual design language — Quiet Studio Dark
+
+Loomlight should look like a carefully designed native creative application, not a
+web dashboard, generic IDE skin, or stylised AI-product mockup. The working visual
+direction is **Quiet Studio Dark**: neutral charcoal surfaces, restrained muted indigo
+accent, medium density, strong typography, subtle separation between regions, and very
+little decorative chrome. Narrative content, the game preview, and the selected Beat
+must dominate attention; branding and shell furniture recede once a project is open.
+
+Phase 1A establishes the design-system foundation. Phase 1E is the first full visual
+polish pass when the real Scene authoring interactions exist. Source, Branches,
+Diagnostics, Git, and later workspaces extend the same system rather than introducing
+independent styling.
+
+### Design tokens and theme architecture
+
+Do not hard-code dark-theme colours directly into components. Use semantic tokens from
+the production scaffold so a later light theme can be implemented without rewriting
+components. The initial system should cover at least:
+
+```text
+surface.app
+surface.panel
+surface.raised
+surface.hover
+surface.selected
+
+text.primary
+text.secondary
+text.muted
+text.disabled
+
+border.normal
+border.strong
+
+accent.primary
+accent.hover
+accent.subtle
+
+status.success
+status.warning
+status.error
+status.info
+status.partial
+```
+
+The initial accent is a muted indigo/blue-violet used sparingly for focus, selection,
+active tabs, links, and rare primary actions. Semantic status colours are reserved for
+meaning such as saved/success, warning/partial state, error/conflict, and information;
+every status also has text and/or an icon so colour is never the sole signal.
+
+Light-theme tokens and component assumptions should exist from the start, but Phase 1
+polishes the dark theme first. The implementation must avoid assumptions such as
+literal white text on literal `#222` backgrounds.
+
+### Typography
+
+Use the platform/system UI font stack for application and narrative authoring surfaces,
+for example `system-ui`, `-apple-system`, and `Segoe UI`; do not bundle a decorative
+brand font merely to create visual identity. Source uses a reviewed monospace stack.
+Dialogue, Beat text, story hierarchy, and Character/Asset surfaces use the normal UI
+font so Loomlight continues to feel like a writing application outside Source.
+
+Typography and spacing, not colour or effects, carry hierarchy. Secondary text must
+remain readable and must not be reduced to tiny low-contrast copy simply to make the
+interface look dense or premium.
+
+### Density and spacing
+
+Use medium density overall, with two deliberate density zones:
+
+- **Narrative/content surfaces** such as Beats, choices, Character appearances, and
+  visual asset selection have slightly more vertical breathing room for scanning and
+  writing.
+- **Technical surfaces** such as Source navigation, Diagnostics, Git, compact
+  inspectors, and property grids may be denser.
+
+Dialogue Beats should never be compressed into file-tree-height rows. Staging Beats can
+be more compact, producing a visual rhythm where story content receives more space and
+structural commands recede.
+
+### Surfaces, borders, radius, and elevation
+
+Prefer subtle surface differences, spacing, and thin dividers to a collection of
+floating cards. Avoid boxing every section. Use modest corner radii, approximately the
+visual equivalent of 4–6 px, and minimal shadows. Stronger framing is appropriate for
+the Editor Preview so it reads as a game monitor embedded in the tool rather than just
+another panel.
+
+The Welcome/New Project experience may carry slightly more product identity than the
+working editor, but it must remain restrained. Once a project is open, large logos,
+marketing taglines, and ornamental brand elements should largely disappear.
+
+### Beat visual identity
+
+Beats are Loomlight's most distinctive recurring component. Do not render every Beat
+as a large independent rounded card. Use compact rows with a restrained type/status
+rail or icon, generous enough line height for dialogue, and stronger expansion only for
+the selected Beat. A selected Beat may use the primary indigo rail/focus treatment;
+inactive Beats remain neutral.
+
+Different Beat types use consistent line icons and textual labels rather than a rainbow
+of category colours. Dialogue/narration receive more vertical space than structural
+staging commands. The visual treatment must reinforce the mental model `Scene → ordered
+Beats → resulting state` rather than resembling a generic task list.
+
+### Icons and controls
+
+Use one reviewed, coherent line-icon family at normal desktop scale (roughly 16–18 px
+for common controls). Icons supplement labels; important or unfamiliar actions must not
+be reduced to unexplained glyphs. Do not mix multiple icon families or use colourful
+illustrative icons simply to decorate navigation.
+
+Primary-button styling is intentionally rare. Creation, Run/Validate where appropriate,
+and conflict-resolution confirmation may receive stronger emphasis; ordinary editing
+controls remain neutral. Avoid making every toolbar action a bright accent button.
+
+### Motion
+
+Motion is functional and restrained: Beat expand/collapse, panel transitions, focus
+movement, and short save-state feedback may animate subtly. Do not use bouncing,
+decorative parallax, animated gradients, or attention-seeking easing. Respect reduced
+motion and ensure disabling animation does not remove information.
+
+### Explicit visual anti-patterns
+
+The following are design failures unless a later reviewed requirement provides a
+specific functional reason:
+
+- glowing purple/blue or multicolour gradients;
+- gradient primary buttons or decorative gradient borders;
+- glassmorphism/frosted translucent working panels;
+- large soft-radius cards for every row, panel, or setting;
+- rounded rectangles nested repeatedly inside rounded rectangles;
+- excessive pills/chips for ordinary labels, state, or navigation;
+- arbitrary category colours for every icon/Beat type;
+- decorative sparkles, stars, "AI" motifs, or visual cues that imply intelligence
+  without communicating product state;
+- dashboard-style metric tiles on authoring surfaces;
+- heavy drop shadows or floating-card elevation throughout the desktop app;
+- huge empty marketing headers inside functional views;
+- every panel receiving an icon + title + bordered card treatment regardless of need;
+- microscopic low-contrast secondary text used as visual decoration;
+- over-branding the working editor or making Loomlight resemble a SaaS landing page;
+- copying VS Code, Unity, Godot, or the Ren'Py launcher closely enough that Loomlight
+  loses its narrative-authoring identity.
+
+Borrow established desktop conventions for tabs, command/navigation behavior,
+keyboard access, inspectors, and Source editing, but let Loomlight's identity come from
+story hierarchy, Beat presentation, preview treatment, typography, and interaction
+quality rather than decoration.
+
 ## Phase 1 application shell
 
 | Region | Phase 1 contents |
