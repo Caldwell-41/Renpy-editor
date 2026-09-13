@@ -39,6 +39,7 @@ test("graph evidence covers deterministic scale, virtualization, and Monaco coex
   ]);
   assert.match(graph, /\[1_000, 10_000, 50_000\]/);
   assert.match(graph, /new (?:Uint8|Int32|Float32)Array/);
+  assert.match(graph, /FILTER_CHUNK = 1_024/);
   assert.match(graph, /viewportCullMs/);
   assert.match(graph, /editorEditDelayMs/);
   assert.match(graph, /stableRelayout/);

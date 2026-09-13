@@ -12,6 +12,7 @@ type GraphArrays = {
 
 const CASES = [1_000, 10_000, 50_000] as const;
 const CHUNK = 512;
+const FILTER_CHUNK = 1_024;
 const round = (value: number) => Math.round(value * 100) / 100;
 const yieldToUi = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
@@ -55,8 +56,8 @@ async function layout(graph: GraphArrays): Promise<number> {
 
 async function filterGraph(graph: GraphArrays): Promise<number> {
   let matches = 0;
-  for (let start = 0; start < graph.kind.length; start += CHUNK) {
-    const end = Math.min(graph.kind.length, start + CHUNK);
+  for (let start = 0; start < graph.kind.length; start += FILTER_CHUNK) {
+    const end = Math.min(graph.kind.length, start + FILTER_CHUNK);
     for (let index = start; index < end; index += 1) {
       if (graph.route[index] === 3 && (graph.kind[index] !== 0 || index % 13 === 0)) matches += 1;
     }
