@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free structural, privacy, and documentation checks for Phase 0."""
+"""Dependency-free structural, privacy, and documentation checks for the repository."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = (
     "AGENTS.md",
     "README.md",
+    "SECURITY.md",
     "docs/INDEX.md",
     "docs/PRODUCT.md",
     "docs/ARCHITECTURE.md",
@@ -46,7 +47,34 @@ REQUIRED = (
     "app/src-tauri/permissions/core-request.toml",
     "app/src-core/src/lib.rs",
 )
-TEXT_SUFFIXES = {".md", ".py", ".yml", ".yaml", ".toml", ".json", ".txt", ".example"}
+TEXT_SUFFIXES = {
+    ".cjs",
+    ".css",
+    ".example",
+    ".html",
+    ".js",
+    ".json",
+    ".md",
+    ".mjs",
+    ".ps1",
+    ".py",
+    ".rpy",
+    ".rs",
+    ".sh",
+    ".toml",
+    ".ts",
+    ".tsx",
+    ".txt",
+    ".yaml",
+    ".yml",
+}
+TEXT_FILENAMES = {
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    "Dockerfile",
+    "Makefile",
+}
 SKIP_PARTS = {
     ".git",
     ".toolchains",
@@ -62,9 +90,15 @@ SKIP_PARTS = {
 
 SECRET_PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-    "GitHub token": re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b"),
-    "OpenAI-style key": re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b"),
+    "GitHub token": re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{20,}\b"),
+    "OpenAI-style key": re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b"),
+    "Anthropic-style key": re.compile(r"\bsk-ant-[A-Za-z0-9_-]{20,}\b"),
     "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    "Google API key": re.compile(r"\bAIza[0-9A-Za-z_-]{30,}\b"),
+    "GitLab token": re.compile(r"\bglpat-[0-9A-Za-z_-]{20,}\b"),
+    "npm token": re.compile(r"\bnpm_[0-9A-Za-z]{20,}\b"),
+    "Slack token": re.compile(r"\bxox[baprs]-[0-9A-Za-z-]{20,}\b"),
+    "Stripe live secret": re.compile(r"\bsk_live_[0-9A-Za-z]{16,}\b"),
 }
 MACHINE_PATHS = {
     "Windows user path": re.compile(r"[A-Za-z]:\\Users\\[^\\\s]+", re.IGNORECASE),
@@ -92,9 +126,7 @@ def check_required(errors: list[str]) -> None:
 
 def check_text(files: list[Path], errors: list[str]) -> None:
     for path in files:
-        if path.suffix.lower() not in TEXT_SUFFIXES and path.name not in {
-            ".editorconfig", ".gitattributes", ".gitignore"
-        }:
+        if path.suffix.lower() not in TEXT_SUFFIXES and path.name not in TEXT_FILENAMES:
             continue
         relative = path.relative_to(ROOT)
         try:
