@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import plistlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,6 +21,8 @@ class ProbeRedactionTests(unittest.TestCase):
             executable = installed / "Crossroads.app" / "Contents" / "MacOS" / "Crossroads"
             executable.parent.mkdir(parents=True)
             executable.write_bytes(b"binary")
+            with (installed / "Crossroads.app" / "Contents" / "Info.plist").open("wb") as stream:
+                plistlib.dump({"CFBundleExecutable": "Crossroads"}, stream)
             with patch("probe.platform.system", return_value="Darwin"):
                 launcher, subject = _package_launch_target(installed)
             self.assertEqual(launcher, executable)

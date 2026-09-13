@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import plistlib
 import re
 import shutil
 import sys
@@ -70,8 +71,13 @@ def _package_launch_target(installed: Path) -> tuple[Path, Path]:
         subject = matches[0] if len(matches) == 1 else None
     elif system == "Darwin":
         apps = [root] if root.suffix == ".app" else sorted(root.rglob("*.app"))
-        binaries = sorted((apps[0] / "Contents" / "MacOS").iterdir()) if len(apps) == 1 else []
-        matches = [candidate for candidate in binaries if candidate.is_file()]
+        if len(apps) == 1:
+            with (apps[0] / "Contents" / "Info.plist").open("rb") as stream:
+                executable_name = plistlib.load(stream).get("CFBundleExecutable")
+            candidate = apps[0] / "Contents" / "MacOS" / str(executable_name)
+            matches = [candidate] if executable_name and candidate.is_file() else []
+        else:
+            matches = []
         subject = apps[0] if len(apps) == 1 else None
     else:
         matches = sorted(root.glob("*.sh"))
