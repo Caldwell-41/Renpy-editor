@@ -3,126 +3,328 @@
 ## Design intent
 
 Project Loomlight is a restrained, professional writing and game-authoring tool.
-The game preview stays visually dominant. The initial theme is dark with a planned
-light theme; meaning never depends on colour alone. Panels are keyboard reachable,
-resizable, collapsible, and compatible with screen-reader semantics where the chosen
-desktop/webview stack permits them.
+Routine VN authoring should be faster in the Scene workspace than by opening modal
+property forms, while the generated source remains visible and ordinary. The initial
+theme is dark with a planned light theme; meaning never depends on colour alone.
+Panels are keyboard reachable, resizable, collapsible, and compatible with
+screen-reader semantics where the chosen desktop/webview stack permits them.
 
-## Application shell wireframe
+Phase 1 makes Scene, Source, and Branches the functional centre workspaces. Characters,
+Assets, Variables, project setup, Diagnostics/Runtime, and Git are supporting surfaces.
+UI Designer and Timeline are later major workspaces and must not appear as functional
+Phase 1 features; they may be omitted or clearly labelled as future work.
 
-| Region | Low-fidelity contents |
+## Phase 1 application shell
+
+| Region | Phase 1 contents |
 | --- | --- |
-| Top toolbar | Project · save state · undo/redo · validate · preview · run from here · LLM locality/model · Git state |
-| Left sidebar | Story · routes/chapters · scenes · characters · variables · assets · lore · screens |
-| Centre tabs | Scene · Source · Branches · UI Designer · Timeline |
-| Right inspector | Selection properties, validation, contextual character/lore tools |
-| Bottom panel | Diagnostics · runtime · simulated state · Git changes · LLM operations |
+| Top toolbar | Project · persistence state · undo/redo · validate · run game · Git state |
+| Left sidebar | Story (chapters/scenes) · Characters · Variables · Assets |
+| Centre tabs | Scene · Source · Branches |
+| Right inspector | Selected-beat/staging properties and contextual asset/character information |
+| Bottom panel | Diagnostics · runtime · Git changes |
 
-The centre owns flexible space. Side and bottom panels collapse; a focused writing
-preset keeps the beat list and dialogue broad, while staging and debugging presets
-restore preview/inspector and diagnostics respectively. Advanced saved layouts wait.
+The centre owns flexible space. Side and bottom panels collapse. When room becomes
+constrained, preserve a usable Beats editor first: collapse/shorten bottom diagnostics,
+shrink the aspect-ratio preview, then collapse inspector/sidebar before reducing Beats
+below its preferred minimum.
+
+The top toolbar always shows persistence truth such as `Saved`, `Saving`,
+`Pending validation`, `Conflict`, or `Recovery required`. `Ctrl/Cmd+S` explicitly
+flushes pending accepted work and confirms durability, while normal accepted edits are
+also persisted transactionally.
+
+## Welcome and project lifecycle
+
+The startup surface contains Recent Projects plus `New Project` and
+`Open Loomlight Project`. Recent entries show enough title/path context to identify a
+moved or missing project rather than silently disappearing. `Open Loomlight Project`
+selects a directory containing valid `.renpy-editor/project.json`; general import of an
+arbitrary Ren'Py project is not a Phase 1 flow.
+
+The New Project workflow is:
+
+1. **Project details:** game title, auto-generated but editable project folder name,
+   parent directory, and exact final-path preview. Refuse unsafe overwrite/non-empty
+   destinations.
+2. **Ren'Py SDK:** choose a detected compatible installation, securely install the
+   supported Ren'Py 8.5.3 baseline, or browse for an existing SDK. Show incompatible
+   installations with an explanation rather than silently hiding them.
+3. **Game configuration:** default `1920×1080`, common resolution presets, or custom
+   width/height. Advanced GUI/theme configuration is not part of Phase 1.
+4. **Review & create:** show title/path, exact SDK/version, resolution, and an
+   `Initialize Git repository` checkbox enabled by default. An expandable section may
+   preview files/directories to be created.
+5. **Transactional creation:** generate the runnable scaffold and `.renpy-editor/`
+   metadata in staging, optionally initialise local Git, validate through the pinned
+   SDK, then finalise. Failure must not present a half-created project as successful.
+6. Open directly into `Chapter 1 → Scene 1`.
+
+A created project can be persisted, closed, reopened from Recent Projects or Open
+Loomlight Project, and continued. If `.renpy-editor/` is deliberately deleted, the
+Ren'Py game still runs but Phase 1 does not reconstruct the metadata; that is future
+existing-project import.
+
+## Story hierarchy
+
+The Phase 1 Story tree is `Project → Chapter → Scene`. Chapters are organisational and
+map naturally to directories; each Loomlight-created Scene normally owns one `.rpy`
+file and a globally unique technical label. The sidebar supports create/rename/reorder
+chapters and scenes, move a Scene between chapters, and safe deletion with incoming
+reference checks.
+
+Display names are separate from stable technical names. Renaming `Trivia Night` does
+not silently rename `chapter_01_scene_002` or `scene_002.rpy`. A technical rename is a
+separate future/reference-aware operation.
 
 ## Scene workspace — default and first polished surface
 
-| Left centre (compact) | Main centre (largest) | Right |
-| --- | --- | --- |
-| Ordered beats; add/reorder; type/icon plus text label; current beat | Live preview above; fast inline dialogue editor below; visual/split/source mode toggle | Selected beat properties; expression/assets; relevant character and lore context |
+The Scene workspace is built around the mental model:
 
-The beat list supports background/scene, show/hide/staging, dialogue/narration,
-choice/control flow, state, audio/transition/animation, and custom code. Dialogue is
-edited inline with character and expression shortcuts; routine lines do not open a
-modal. Selecting a beat highlights its preview state, source range, graph position,
-and timeline cursor. A partially visual badge names the unsupported source region.
+`Scene → ordered Beats → resulting supported visual state`
 
-```mermaid
-flowchart LR
-    A["Select or add beat"] --> B["Edit inline or stage visually"]
-    B --> C["Preview semantic + source diff"]
-    C --> D{"Valid and no disk conflict?"}
-    D -->|Yes| E["Apply transaction"]
-    D -->|No| F["Show diagnostics or reconcile"]
-```
+The preview is a projection of explicit beats, never a hidden parallel document.
+
+### Layout
+
+The centre column uses a resizable vertical split between Editor Preview and Beats.
+The default is approximately **52% preview / 48% Beats**. Preserve the project's aspect
+ratio inside the preview allocation rather than allowing a 16:9 canvas to consume all
+available height. The default layout should keep both areas immediately useful;
+approximate Phase 1 minimums are 280–320 px for preview and about 300 px for Beats,
+subject to implementation/accessibility testing. Persist the split per project/
+workspace.
+
+| Area | Responsibility |
+| --- | --- |
+| Editor Preview | Scene-local supported state through the selected beat; selection and staging context |
+| Beats | Primary high-frequency authoring surface; ordered compact/expanded beat rows |
+| Inspector | Less-frequent beat/staging properties; never the only way to write normal dialogue |
+
+Writing- and staging-focused presets may be added later; the Phase 1 requirement is the
+resizable split and sensible sizing behavior.
+
+### Beats as the primary editor
+
+Unselected beats are compact. Selecting a beat expands it in place into the editor
+needed for its common properties. Normal dialogue/narration editing stays in the Beats
+area rather than opening a modal or forcing constant use of the right inspector.
+
+The bounded Phase 1 visual beat set is:
+
+- Background/scene
+- Show character
+- Hide character
+- Change character appearance
+- Placement/transform reference
+- Dialogue
+- Narration
+- Play music
+- Stop music
+- Play sound
+- Transition reference on the relevant visual change
+- Set simple variable
+- Choice
+- Jump
+- Return/end
+- Custom/unsupported source region
+
+Hovering between safe beats exposes a subtle insertion affordance; a permanent
+`Add Beat` action opens a grouped picker such as Write, Stage, Flow, State, and Audio.
+Normal supported beats have drag handles plus keyboard-accessible Move Up/Move Down.
+Moving across an opaque custom-code boundary is refused unless safety can be proven.
+
+### Dialogue workflow
+
+Dialogue is the highest-frequency action and must be efficient:
+
+- speaker is searchable/keyboard accessible;
+- narration is an explicit mode rather than a fake Character;
+- normal `Enter` creates a newline;
+- `Ctrl/Cmd+Enter` commits the current natural edit burst and creates the next Dialogue
+  beat;
+- the current speaker may carry forward as a convenience and remains immediately
+  changeable;
+- typing is grouped into a short-lived edit buffer so one natural typing burst becomes
+  one semantic transaction/undo step rather than a disk write per character.
+
+Appearance/staging changes remain explicit beats. A Dialogue shortcut such as
+`Change appearance…` may insert a visible Change Appearance beat immediately before the
+dialogue; it must not secretly generate a `show`/appearance mutation as an invisible
+side effect of the line.
+
+### Editor Preview
+
+Selecting Beat N reconstructs deterministically supported scene-local state from the
+start of that Scene through Beat N. Phase 1 reconstruction includes current background,
+visible character appearances, placements, simple variable assignments, basic music
+state, and selected dialogue/menu where known. It does not attempt arbitrary
+branch-global state reconstruction.
+
+If Python, unsupported source, or runtime-only behavior makes the state uncertain, the
+preview retains known safe state and displays an explicit `Partial preview` /
+`Runtime-dependent state required` indicator rather than guessing.
+
+Selecting a visible Character in the preview must distinguish current state from the
+beat that contributed it. Offer actions such as `Edit Beat 2` and `Add change here`;
+do not silently edit an earlier beat merely because the Character remains visible at
+the current playhead. `Add change here` inserts a new explicit staging beat before the
+current beat.
+
+Phase 1 placement exposes Left, Centre, and Right preset references. Do not offer
+arbitrary drag positioning that implies a freeform transform editor. Preview navigation
+does not repeatedly start/stop audio; audio beats have explicit audition controls.
+
+### Backgrounds, appearances, placement, audio, and transitions
+
+Asset pickers should be visual where useful, including background/appearance thumbnails
+and an Import action. Character appearance and placement are references to extensible
+models, not raw filenames or hard-coded coordinates. Phase 1 appearance UI exposes
+expression with implicit default outfit/pose; future outfit/pose/layered-image support
+extends the same model.
+
+Initial placement presets are Left/Centre/Right. Initial transitions may be None,
+Dissolve, and Fade. Initial audio controls cover play/stop music and play SFX plus
+explicit audition. These are narrow Phase 1 UIs over extensible transform, transition,
+and audio references intended for later Timeline/advanced staging work.
+
+### Choices
+
+Choice is visually first-class in Beats. Each option has text and a destination Scene.
+The acceptance fixture uses two options, but the data/UI should support an arbitrary
+list of unconditional options rather than hard-code exactly two. Conditions are later
+work.
+
+The destination picker lists Scenes and includes `Create New Scene`; creating a Scene
+from a Choice both creates the destination and establishes the same semantic edge used
+by Branches. Scene and Branches must not maintain separate branch truths.
+
+### Variables
+
+Phase 1 visually supports `bool`, `int`, and `string` definitions and simple assignment.
+The Set Variable beat accepts values the editor can represent. Arbitrary expressions
+such as computed Python assignments remain Source/custom code rather than being
+misrepresented visually.
+
+### Custom/unsupported source
+
+Unsupported source appears in sequence as a protected Custom Code beat with a reason/
+warning and `View in Source`. It can be selected and inspected, but Phase 1 does not
+freely drag/reorder it or allow safe-looking operations to cross its boundary unless
+the source transaction layer can prove the operation.
+
+### New Scene state
+
+A new Scene is immediately valid and explicit, normally ending with a visible
+Return/End beat. Empty-state helpers offer Background, Character, Dialogue, Narration,
+and other supported additions before the end. The generated first project is runnable
+before the user adds content.
 
 ## Source workspace
 
-| Navigation | Editor | Inspector/bottom |
-| --- | --- | --- |
-| Files, symbols, scene/beat anchors | Syntax-aware source with mapped-range highlights and custom-code boundaries | Visual counterpart, diagnostics, staged patch, external-change conflict |
+Source is a proper centre tab rather than an embedded `Visual/Split/Source` toggle in
+the Scene workspace. It provides syntax-aware source, scene/beat anchors, mapped-range
+highlights, custom-code boundaries, staged/conflict information, and diagnostics.
 
-Source and visual selection are bidirectional. Source-only mode never hides whether
-a range is supported. External edits are parsed against the last revision; supported
-changes update visual views and overlapping changes enter explicit reconciliation.
+Selection is bidirectional: `View in Source` opens the exact mapped range; supported
+direct source edits update the Scene representation after the shared transaction/source
+path succeeds; Source can navigate back to the owning Scene/Beat. Source-only mode never
+hides whether a range is supported. External edits are parsed against the last
+revision; supported changes update visual views and overlapping/unsafe changes enter
+explicit reconciliation.
 
-## Branching workspace
+## Branches workspace
 
-| Controls | Graph canvas | Inspector |
-| --- | --- | --- |
-| Route/chapter/character filters; search; path mode; minimap toggle | Virtualized scene/label/choice nodes; expandable detail; conditioned edges | Reads/writes, reachability, incoming/outgoing paths, test-from-node |
+Phase 1 Branches shows the basic Scene/label/choice graph using the same semantic edges
+created in Scene. Individual dialogue lines are excluded from the default graph. A
+Choice edge navigates back to its originating Choice beat and destination Scene.
 
-The default graph excludes individual dialogue lines. Nodes expand on demand.
-Diagnostics distinguish unreachable scenes, missing targets, non-returning call paths,
-and contradictory/manual states with icon, text, and colour. Large-story requirements:
-stable layout, progressive disclosure, scoped subgraphs, viewport rendering, search,
-minimap, and highlighted reachable paths.
+Large-story virtualization, stable layout, search, minimap, scoped subgraphs, advanced
+reachability/state diagnostics, and test/run-from-node remain architectural requirements
+for later maturity but must not be falsely presented as Phase 1-complete features.
 
-## Screen/UI designer
+## Character supporting surface
+
+Phase 1 Character fields are deliberately small:
+
+- technical variable/ID;
+- display name;
+- dialogue colour;
+- default appearance;
+- internal stable UUID/source definition mapping.
+
+The user-facing visual list is named **Appearances**, not Expressions/Sprites. In
+Phase 1 `Add Appearance` imports/copies an image and asks for an expression name; outfit
+and pose are implicit defaults. Underlying appearance attributes are extensible so
+future outfit, pose, hairstyle/accessory, layered-image, animated, or other rendering
+support extends the model rather than replacing it.
+
+## Asset supporting surface
+
+Phase 1 imports by copying files into the project. Assets are grouped sufficiently for
+backgrounds, Character appearances, audio, and project/UI files, with visual pickers
+where useful. Missing/duplicate checks are required; external absolute asset references,
+advanced tagging/search, conversion/optimisation, and bulk management are later work.
+
+## Variable supporting surface
+
+The Phase 1 Variable surface creates/edits `bool`, `int`, and `string` variables with a
+default value and source definition mapping. Reads/writes can be surfaced where already
+known, but advanced state simulation, constraint systems, and computed-expression
+builders are deferred.
+
+## Validation, run, Git, and persistence
+
+Loomlight performs cheap continuous checks it can know confidently, such as missing
+assets, invalid generated labels, missing choice destinations, and references to
+removed Characters/Variables. Explicit `Validate` invokes the pinned SDK for
+authoritative compile/lint diagnostics and navigation.
+
+Phase 1 provides normal `Run Game` from the project's standard entry point. Correct
+`Run From Here` is deferred until state simulation can establish effective prior state.
+A local Git repository may be initialised during project creation (checked by default),
+and Phase 1 exposes basic status/diff/checkpoint without GitHub remote integration.
+
+If an external change affects one Scene file, block unsafe writes/reconciliation for
+that file/Scene rather than freezing unrelated project files when they can remain safe.
+Undo/redo spans the shared transaction stream across visual/source edits but stops at
+external revision boundaries rather than overwriting newer work.
+
+## Later workspaces
+
+### Screen/UI designer
 
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |
 | Frames, containers, text, images, buttons, bars, grids, viewports, components | Selected resolution/aspect preview with layout guides and interaction state | Layout/style/action fields; synchronized screen language; protected custom regions |
 
-This is a hybrid hierarchy-and-constraint editor, not a freeform drawing canvas.
-Preview states include normal, hover, selected, disabled, keyboard focus, long text,
-missing assets, and configured window sizes. Standard VN screens start from editable
-templates. Unsupported code stays at its source location and marks only the affected
-screen region partially visual.
+This remains a hybrid hierarchy-and-constraint editor, not a freeform drawing canvas.
+Unsupported code stays at its source location and marks only the affected screen region
+partially visual.
 
-## Animation/audio timeline
+### Animation/audio timeline
 
 | Track list | Time canvas | Inspector/transport |
 | --- | --- | --- |
 | Background; character layers; camera/transforms; effects; music; ambience; SFX; voice; dialogue; movie | Clips/events, keyframes, transitions, synchronized selected beat | Time/value/easing/media; play, scrub, loop; generated Ren'Py preview |
 
-The timeline authors VN staging, not arbitrary video compositing. It emits supported
-ATL, transitions, audio statements, and movie displayables. Original media is never
-modified; conversion or optimization is explicit, previewed, and non-destructive.
+The Timeline authors VN staging, not arbitrary video compositing. Phase 1's appearance,
+placement, transition, audio, and Beat abstractions are intentionally designed to feed
+this workspace later.
 
-## Character, lore, and variables
+### State simulation and run from here
 
-- **Character:** technical definition, sprites/expressions/voice, narrative profile,
-  relationships, knowledge, arc/status, outfits/locations, and example dialogue.
-  Scene-relevant details appear beside dialogue without leaving the scene.
-- **Lore:** branch/time applicability, knowledge, contradictions, source provenance,
-  proposal review, and exact LLM-context inclusion with token estimate.
-- **Variables:** type/default/definition, descriptions, reads/writes, constraints,
-  persistence, semantic category, and graph/state usage.
+Reachable, saved, synthetic, and contradictory states will use distinct labels/icons.
+Before a later run-from-here launch the user sees effective variables, decisions,
+day/time, and known facts. Development harness content is visibly non-release and
+cannot be packed into a game distribution.
 
-## State simulation and run from here
+### LLM operation flow
 
-```mermaid
-flowchart TD
-    T["Choose target scene"] --> P{"State source"}
-    P -->|Reachable path| R["Choose prior route"]
-    P -->|Snapshot| S["Load saved state"]
-    P -->|Manual| M["Construct synthetic state"]
-    R --> I["Inspect decisions, variables, time, facts"]
-    S --> I
-    M --> I
-    I --> V["Validate and launch trusted project"]
-```
-
-Reachable, saved, synthetic, and contradictory states use distinct text labels and
-icons. Before launch the user sees effective variables, decisions, day/time, and
-known facts. Development harness content is visibly non-release and cannot be packed
-into a game distribution.
-
-## LLM operation flow
-
-LLM is an action surface, not a permanent dominant chat. Before send, show provider,
-endpoint class, model, local/remote status, selected context and exclusions, estimated
-size, and a warning for private/adult content leaving the machine. After response,
-show schema/validation status, semantic changes, file diffs, and independent accept,
-reject, or partial-accept controls. No content is sent or applied automatically.
+LLM remains an action surface rather than a dominant permanent chat. Before send, show
+provider, endpoint class, model, local/remote status, selected context/exclusions,
+estimated size, and private/adult remote-send warning. Output remains untrusted
+structured data reviewed through semantic/file diffs.
 
 ## Resolution and accessibility checks
 
@@ -130,14 +332,8 @@ reject, or partial-accept controls. No content is sent or applied automatically.
   window sizes/aspects without changing canonical project settings.
 - Full keyboard traversal, visible focus, labelled controls, logical reading order,
   resizable text/panels, and reduced-motion behavior are acceptance requirements.
-- Beat/status colour has an accompanying icon and label. Contrast is tested in both
-  themes. Canvas-only information has an equivalent hierarchy/list representation.
-- Narrow windows collapse peripheral panels before constraining dialogue readability.
-
-## First vertical-slice UI
-
-Phase 1 focuses on project setup, two characters/assets, modular scene beats, inline
-dialogue and staging, one choice with two destinations, a basic branch graph,
-synchronized source, external/custom-code preservation, SDK diagnostics/preview, and
-a Git checkpoint. Designer/timeline tabs may initially communicate planned scope but
-must not pretend to be functional.
+- Beat/status colour has an accompanying icon and label. Canvas-only information has
+  an equivalent hierarchy/list representation.
+- Beat reordering has keyboard alternatives to drag handles; asset/Scene/choice
+  selection remains keyboard searchable.
+- Narrow windows protect dialogue/Beats readability before preview size.

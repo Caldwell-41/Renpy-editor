@@ -31,15 +31,61 @@ reputation checks are recorded later-phase limitations, not inferred Phase 0 pas
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Awaiting explicit approval; no implementation has begun.
+**Status:** Product/UX planning defined; implementation awaits explicit approval.
 
-**Outcome:** create a project; pin SDK/resolution; add two characters/assets; author a
-modular staged scene and two-way choice; inspect graph/source; preserve an external
-edit and unsupported block; compile/lint/preview; navigate diagnostics; Git checkpoint.
+**Outcome:** deliver a small but genuinely usable Loomlight-created Ren'Py project from
+creation through authoring, validation, run, local Git checkpoint, close, and reopen.
+The bounded implementation sequence is defined in
+[the Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md); the
+[production scaffold](tasks/active/phase-1-scaffold.md) remains the first implementation
+gate and must not be skipped.
 
-**Exit criteria:** end-to-end Windows/macOS tests pass against the pinned SDK; golden
-round-trips show no collateral source changes; crash recovery/external conflict tests
-lose no accepted edits; created game opens and runs without editor metadata.
+Phase 1 includes:
+
+- create a conventional project with separate display title/folder name, selected
+  parent directory, pinned compatible Ren'Py SDK, configurable resolution, and optional
+  local Git initialisation enabled by default;
+- generate a runnable modular scaffold with a small `script.rpy`, chapter folders, one
+  Loomlight Scene per `.rpy` file, globally unique technical labels, and editor metadata
+  that is not required to run the game;
+- save/persist, close, list as recent, and load/reopen Loomlight-created projects;
+  arbitrary existing-project import or reconstruction after `.renpy-editor/` deletion
+  remains deferred;
+- create characters with extensible appearance references, copy project-owned assets,
+  and define basic `bool`, `int`, and `string` variables;
+- visually author Scene beats for backgrounds, character show/hide/appearance,
+  left/centre/right placement presets, dialogue, narration, simple variable assignment,
+  unconditional choices/jumps/return, basic music/SFX, and basic transitions;
+- provide the functional Scene, Source, and Branches workspaces, with Characters,
+  Assets, Variables, Diagnostics/Runtime, Git, and project setup as supporting surfaces;
+- provide scene-local Editor Preview reconstruction with explicit partial/unknown state,
+  while the pinned official Ren'Py SDK remains the fidelity authority;
+- preserve unsupported/custom source visibly, synchronize supported direct source edits,
+  and block unsafe visual movement across opaque regions;
+- use one transactional persistence path for visual and source edits, automatic
+  persistence of accepted transactions, explicit `Ctrl/Cmd+S` flush/durability,
+  coherent undo/redo, recovery journaling, and external-change conflict protection;
+- validate through the pinned SDK, navigate diagnostics, run the game from its normal
+  entry point, and create a local Git checkpoint.
+
+**Exit criteria:**
+
+- the production file transaction/recovery design closes Gate E before authoring writes
+  are accepted as production-safe;
+- fresh-checkout Windows x64 and macOS ARM64 tests complete the full create → author →
+  save → close → reopen → edit → validate → run → Git-checkpoint workflow against the
+  pinned SDK;
+- generated projects run with `.renpy-editor/` absent and remain ordinary editable
+  Ren'Py source;
+- golden round-trips and minimal patches show no collateral source changes, including
+  supported direct source edits and preserved unsupported regions;
+- crash recovery and external-conflict tests lose no accepted edits and never silently
+  overwrite an external revision;
+- Scene, Source, and Branches remain synchronized through the shared transaction/domain
+  model; no authoring surface maintains a competing runnable truth;
+- Phase 1 deliberately excludes general existing-project import, UI Designer, Timeline,
+  advanced state simulation/run-from-here, LLM assistance, GitHub remote workflows,
+  advanced animation/ATL authoring, and release signing/notarisation.
 
 ## Phase 2 — Initial LLM assistance
 

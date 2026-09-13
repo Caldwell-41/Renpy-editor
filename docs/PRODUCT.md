@@ -4,23 +4,26 @@
 
 Project Loomlight is a single-user desktop authoring environment for 64-bit Windows
 on x86-64 and macOS on Apple Silicon. Intel macOS is out of scope. It should feel like
-a narrative-design tool first and an IDE second while
-producing ordinary, modular Ren'Py projects that remain usable in other editors.
+a narrative-design tool first and an IDE second while producing ordinary, modular
+Ren'Py projects that remain usable in other editors.
 
-The content hierarchy is:
+For Loomlight-created projects the authoring hierarchy is:
 
-`project → route/chapter → scene → narrative beat → Ren'Py statement`
+`project → chapter → scene → narrative beat → Ren'Py statement`
 
-The scene is the primary authoring unit. `.rpy` files remain authoritative for
-runnable content; `.renpy-editor/` holds documented, editor-only metadata such as
-stable IDs, graph layout, approved lore, and state snapshots. A game must run and
-remain editable when that metadata or this editor is absent.
+Branching connects scenes through explicit choice/jump/call edges; chapters are
+organisational containers rather than Ren'Py runtime semantics. The scene is the
+primary authoring unit. `.rpy` files remain authoritative for runnable content;
+`.renpy-editor/` holds documented, editor-only metadata such as stable IDs, mappings,
+graph layout, approved lore, and state snapshots. A game must run and remain editable
+when that metadata or this editor is absent.
 
 ## Primary user and jobs
 
 The initial user is one visual-novel creator managing multiple games. They need to:
 
 - create a conventional project against a discovered or securely installed SDK;
+- save/persist it safely, close it, and load/reopen it without losing accepted work;
 - author dialogue, staging, choices, state, media, screens, and custom code without
   routine manual scripting;
 - move between visual, graph, timeline, and source views without losing intent;
@@ -34,12 +37,16 @@ The initial user is one visual-novel creator managing multiple games. They need 
 ### Initial authoring release
 
 1. Select or install a checksum-verified SDK and pin it to a new project.
-2. Set project resolution (default `1920×1080`) and generate modular source.
-3. Define characters and variables; import assets with duplicate/missing checks.
-4. Build scenes from ordered beats, choices, conditions, calls, jumps, and endings.
-5. Inspect branching, UI screens, and animation/audio timing at appropriate scale.
-6. Edit synchronized source; represent unsupported constructs as custom-code blocks.
-7. Validate, preview, run from an inspectable state, and create a Git checkpoint.
+2. Set project resolution (default `1920×1080`) and generate modular conventional
+   source that remains runnable without `.renpy-editor/`.
+3. Save/persist, close, list, and reopen projects while protecting accepted edits from
+   crashes and external file changes.
+4. Define characters and variables; import project-owned assets with duplicate/missing
+   checks.
+5. Build scenes from ordered beats, choices, conditions, calls, jumps, and endings.
+6. Inspect branching, UI screens, and animation/audio timing at appropriate scale.
+7. Edit synchronized source; represent unsupported constructs as custom-code blocks.
+8. Validate, preview/run from an inspectable state, and create a Git checkpoint.
 
 ### LLM-assisted authoring
 
@@ -64,6 +71,8 @@ proposed until approved.
 
 - Routine authoring should not require code, but code remains visible and editable.
 - External edits must never be silently overwritten or discarded.
+- Automatic persistence and explicit save/flush use the same transactional source
+  boundary; Loomlight must not maintain a long-lived competing runnable document.
 - The official selected Ren'Py SDK is the compile/lint/runtime authority.
 - Running a project is a deliberate trust action because embedded Python executes.
 - Adult content is supported without an application-level moral filter; content
@@ -88,8 +97,8 @@ and location-aware LLM context on top of the general graph/state model.
 
 ## Initial-release acceptance summary
 
-The release is complete only when the user can create multiple projects, visually
-author all five major workspaces, preserve and inspect source/custom code, validate
-and run via a pinned SDK, use reviewable LLM proposals, checkpoint with Git, and
-recover from crashes/external conflicts without silent data loss. Measurable phase
-criteria are in [ROADMAP.md](ROADMAP.md).
+The release is complete only when the user can create multiple projects, save and
+reopen them safely, visually author all five major workspaces, preserve and inspect
+source/custom code, validate and run via a pinned SDK, use reviewable LLM proposals,
+checkpoint with Git, and recover from crashes/external conflicts without silent data
+loss. Measurable phase criteria are in [ROADMAP.md](ROADMAP.md).
