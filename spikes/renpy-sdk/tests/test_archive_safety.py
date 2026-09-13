@@ -6,12 +6,19 @@ import sys
 import tarfile
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from archive_safety import ArchiveLimits, ArchiveSafetyError, expected_sha256, install_verified_tar
+from archive_safety import (
+    ArchiveLimits,
+    ArchiveSafetyError,
+    expected_sha256,
+    install_validated_zip,
+    install_verified_tar,
+)
 
 
 def make_tar(path: Path, entries: list[tuple[str, bytes | str, str]]) -> str:
@@ -118,6 +125,24 @@ class ArchiveSafetyTests(unittest.TestCase):
                     install_verified_tar(archive, digest, destination)
             self.assertFalse(destination.exists())
             self.assertFalse(any(root.glob(".installed.stage-*")))
+
+    def test_validated_zip_preserves_executable_and_rejects_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package = root / "package.zip"
+            info = zipfile.ZipInfo("game/launch.sh")
+            info.external_attr = 0o100755 << 16
+            with zipfile.ZipFile(package, "w") as archive:
+                archive.writestr(info, b"#!/bin/sh\n")
+            destination = root / "installed"
+            install_validated_zip(package, destination)
+            self.assertTrue((destination / "game/launch.sh").stat().st_mode & 0o100)
+
+            bad = root / "bad.zip"
+            with zipfile.ZipFile(bad, "w") as archive:
+                archive.writestr("../escape", b"bad")
+            with self.assertRaises(ArchiveSafetyError):
+                install_validated_zip(bad, root / "bad-install")
 
 
 if __name__ == "__main__":

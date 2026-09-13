@@ -10,6 +10,7 @@ import shutil
 import stat
 import tarfile
 import tempfile
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -197,3 +198,64 @@ def install_verified_tar(
     else:
         stage.rmdir()
     return digest
+
+
+def install_validated_zip(
+    archive_path: Path,
+    destination: Path,
+    limits: ArchiveLimits = ArchiveLimits(),
+) -> str:
+    """Containment-check a locally built package, stage it, and atomically promote it."""
+    destination = destination.resolve()
+    if destination.exists():
+        raise ArchiveSafetyError(f"destination already exists: {destination.name}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix=f".{destination.name}.stage-", dir=destination.parent))
+    payload = stage / "payload"
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            members = archive.infolist()
+            if len(members) > limits.max_members:
+                raise ArchiveSafetyError("archive has too many members")
+            seen: set[str] = set()
+            portable_seen: set[str] = set()
+            total = 0
+            validated: list[tuple[zipfile.ZipInfo, PurePosixPath]] = []
+            for member in members:
+                path = _safe_name(member.filename, limits)
+                key = path.as_posix()
+                if key in seen:
+                    raise ArchiveSafetyError(f"duplicate archive entry: {key}")
+                if key.casefold() in portable_seen:
+                    raise ArchiveSafetyError(f"case-colliding archive entry: {key}")
+                seen.add(key)
+                portable_seen.add(key.casefold())
+                mode = member.external_attr >> 16
+                if stat.S_ISLNK(mode):
+                    raise ArchiveSafetyError(f"package symlink is unsupported: {key}")
+                if not member.is_dir():
+                    if member.file_size < 0 or member.file_size > limits.max_file_bytes:
+                        raise ArchiveSafetyError(f"archive member is too large: {key}")
+                    total += member.file_size
+                    if total > limits.max_total_bytes:
+                        raise ArchiveSafetyError("archive expands beyond the total size limit")
+                validated.append((member, path))
+
+            payload.mkdir(mode=0o700)
+            for member, path in validated:
+                target = payload.joinpath(*path.parts)
+                if member.is_dir():
+                    target.mkdir(parents=True, exist_ok=True)
+                    continue
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with archive.open(member) as source, target.open("xb") as output:
+                    shutil.copyfileobj(source, output, length=1024 * 1024)
+                mode = member.external_attr >> 16
+                target.chmod(0o755 if mode & stat.S_IXUSR else 0o644)
+        os.replace(payload, destination)
+    except Exception:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    else:
+        stage.rmdir()
+    return sha256_file(archive_path)
