@@ -10,6 +10,7 @@ import type { FSWatcher } from "node:fs";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const runs = new MockSdkRuns();
 const watchers = new Map<string, FSWatcher>();
+const processStarted = performance.now();
 
 async function packagedCredentialProbe(): Promise<void> {
   const secret = process.env.LOOMLIGHT_SPIKE_CREDENTIAL_SECRET;
@@ -134,6 +135,28 @@ function createWindow() {
   void win.loadFile(path.resolve(here, "../../ui/index.html"));
   win.once("ready-to-show", () => win.show());
   win.webContents.once("did-finish-load", async () => {
+    if (process.env.LOOMLIGHT_SPIKE_MEASUREMENT_PROBE === "1") {
+      try {
+        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "ready", processStartupMs: Math.round((performance.now() - processStarted) * 100) / 100 }));
+        await new Promise((resolve) => setTimeout(resolve, 1_500));
+        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "idle" }));
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "stress-start" }));
+        const result = await win.webContents.executeJavaScript(`(async () => {
+          for (let attempt = 0; attempt < 100 && !window.__loomlightRunGraphEvidence; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (!window.__loomlightRunGraphEvidence) throw new Error("graph probe unavailable");
+          return window.__loomlightRunGraphEvidence();
+        })()`);
+        console.log(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "complete", ...result }));
+        app.exit(result.passed ? 0 : 1);
+      } catch {
+        console.error(JSON.stringify({ evidence: "electron-packaged-measurement", stage: "complete", passed: false, error: "probe failed" }));
+        app.exit(1);
+      }
+      return;
+    }
     if (graphProbe) {
       try {
         const result = await win.webContents.executeJavaScript(`(async () => {

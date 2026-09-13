@@ -41,6 +41,8 @@ struct DesktopRequest {
     security_results: Option<Value>,
     ui_results: Option<Value>,
     graph_results: Option<Value>,
+    measurement_stage: Option<String>,
+    measurement_results: Option<Value>,
 }
 
 #[derive(Clone, Serialize)]
@@ -297,7 +299,7 @@ fn probe_request(operation: &str, root: &Path, relative_path: &str) -> DesktopRe
     DesktopRequest {
         operation: operation.into(), root: Some(root.to_string_lossy().into_owned()), relative_path: Some(relative_path.into()),
         expected_sha256: None, contents: None, command: None, args: None, run_id: None, timeout_ms: None, security_results: None,
-        ui_results: None, graph_results: None,
+        ui_results: None, graph_results: None, measurement_stage: None, measurement_results: None,
     }
 }
 
@@ -331,7 +333,7 @@ fn packaged_security_probe() -> Result<Value, String> {
             Err(error) => error,
         };
         let missing_redacted = !missing_error.contains(&root.to_string_lossy().to_string());
-        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None, graph_results: None };
+        let arbitrary = DesktopRequest { operation: "startMockSdk".into(), root: None, relative_path: None, expected_sha256: None, contents: None, command: Some("shell".into()), args: Some(vec![]), run_id: None, timeout_ms: Some(1_000), security_results: None, ui_results: None, graph_results: None, measurement_stage: None, measurement_results: None };
         let arbitrary_process_denied = validate_mock_request(&arbitrary).is_err();
         let link = root.join("game space").join("escape-link.rpy");
         create_file_symlink(&outside, &link).map_err(|_| "probe symlink unavailable")?;
@@ -422,6 +424,27 @@ fn finish_graph_probe(request: &DesktopRequest) -> Result<Value, String> {
     std::process::exit(if passed { 0 } else { 1 });
 }
 
+fn finish_measurement_probe(request: &DesktopRequest) -> Result<Value, String> {
+    if std::env::var("LOOMLIGHT_SPIKE_MEASUREMENT_PROBE").as_deref() != Ok("1") {
+        return Err("operation is not allowlisted".into());
+    }
+    let stage = request.measurement_stage.as_deref().ok_or("measurementStage is required")?;
+    if !matches!(stage, "ready" | "idle" | "stress-start" | "complete") {
+        return Err("measurement stage is invalid".into());
+    }
+    let mut completed = request.measurement_results.clone().unwrap_or_else(|| json!({}));
+    completed["evidence"] = json!("tauri-packaged-measurement");
+    completed["stage"] = json!(stage);
+    println!("{completed}");
+    let _ = std::io::stdout().flush();
+    if stage == "complete" {
+        let passed = completed.get("passed").and_then(Value::as_bool) == Some(true)
+            && completed.get("usability10kPassed").and_then(Value::as_bool) == Some(true);
+        std::process::exit(if passed { 0 } else { 1 });
+    }
+    Ok(json!({ "recorded": stage }))
+}
+
 fn packaged_credential_probe() -> Result<Value, String> {
     let secret = std::env::var("LOOMLIGHT_SPIKE_CREDENTIAL_SECRET")
         .map_err(|_| "synthetic credential unavailable")?;
@@ -468,6 +491,7 @@ fn desktop_operation(app: tauri::AppHandle, state: tauri::State<SpikeState>, req
         "securityProbeResult" => finish_webview_security_probe(&app, &request),
         "uiProbeResult" => finish_ui_probe(&request),
         "graphProbeResult" => finish_graph_probe(&request),
+        "measurementProbeResult" => finish_measurement_probe(&request),
         _ => Err("operation is not allowlisted".into()),
     }
 }
@@ -529,6 +553,9 @@ fn main() {
             }
             if std::env::var("LOOMLIGHT_SPIKE_GRAPH_PROBE").as_deref() == Ok("1") {
                 webview.eval(include_str!("graph_probe.js")).expect("graph probe injection failed");
+            }
+            if std::env::var("LOOMLIGHT_SPIKE_MEASUREMENT_PROBE").as_deref() == Ok("1") {
+                webview.eval(include_str!("measurement_probe.js")).expect("measurement probe injection failed");
             }
         })
         .invoke_handler(tauri::generate_handler![desktop_operation])

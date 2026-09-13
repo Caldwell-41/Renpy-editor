@@ -47,3 +47,22 @@ test("graph evidence covers deterministic scale, virtualization, and Monaco coex
   assert.match(electron, /electron-packaged-graph/);
   assert.match(tauri, /tauri-packaged-graph/);
 });
+
+test("packaged comparison repeats equivalent startup, memory, and graph measurements", async () => {
+  const [runner, inventory, electron, tauri] = await Promise.all([
+    readFile(path.resolve("scripts/measure-packaged-candidate.mjs"), "utf8"),
+    readFile(path.resolve("scripts/report-static-comparison.mjs"), "utf8"),
+    readFile(path.resolve("src/electron/main.ts"), "utf8"),
+    readFile(path.resolve("src-tauri/src/main.rs"), "utf8"),
+  ]);
+  assert.match(runner, /index <= 3/);
+  assert.match(runner, /coldStartMs/);
+  assert.match(runner, /idleWorkingSetBytes/);
+  assert.match(runner, /stressPeakWorkingSetBytes/);
+  assert.match(runner, /interaction10kP95Ms/);
+  assert.match(inventory, /licenses/);
+  assert.match(inventory, /nonblankLines/);
+  assert.match(electron, /electron-packaged-measurement/);
+  assert.match(tauri, /tauri-packaged-measurement/);
+  assert.match(tauri, /LOOMLIGHT_SPIKE_MEASUREMENT_PROBE/);
+});

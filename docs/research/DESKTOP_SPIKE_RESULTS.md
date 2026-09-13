@@ -176,6 +176,22 @@ cancelled. Existing path filters remain limited to this workflow and
 
 ## Measurements still required
 
+### Comparative measurement question and success criteria
+
+Question: with the security and functional gates already equivalent, what measurable
+runtime, packaging, dependency, and maintenance costs distinguish Electron from Tauri
+on each supported target?
+
+Success requires three fresh packaged launches per candidate and target with zero
+probe failures; spawn-to-ready cold-start time; process-tree idle working set and
+stress peak while the identical 1k/10k/50k graph workload runs; existing 10k
+interaction/Monaco guards; exact installed artifact bytes/files; dependency and
+licence counts from the committed JavaScript and Rust locks; and a source/toolchain
+complexity inventory that separates shared UI from candidate-specific code. Raw JSON,
+runner/tool versions, limitations, and discovered failures must be retained. Security
+and reliability remain gates; size, startup, memory, language/toolchain breadth, and
+maintenance cost are weighted criteria rather than post-hoc pass thresholds.
+
 - Packaged launch/E2E, cold start, idle/stress memory, artifact size, and flakiness.
 - Dependency/licence inventory and developer-complexity comparison.
 
