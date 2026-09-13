@@ -87,7 +87,7 @@ jobs:
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold
-        run: npm exec tauri build -- --locked
+        run: npm exec -- tauri build -- --locked
       - name: Run packaged WebView boundary smoke
         shell: bash
         env:
