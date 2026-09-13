@@ -11,7 +11,8 @@ setTimeout(async () => {
   const ambientProcessDenied = await invoke("plugin:shell|execute", { program: "synthetic-denied" }).then(() => false, () => true);
   const ambientHttpDenied = await invoke("plugin:http|fetch", { url: "https://example.invalid" }).then(() => false, () => true);
   const networkDenied = await fetch("https://example.invalid/loomlight-probe").then(() => false, () => true);
-  const popupDenied = window.open("https://example.invalid/loomlight-popup") === null;
+  window.open("https://example.invalid/loomlight-popup");
+  const popupRequestIssued = true;
   const nodeGlobalsDenied = typeof process === "undefined" && typeof require === "undefined";
   const rendererSecretsAbsent = !Object.keys(window).some((key) => /api.?key|credential|secret|token/i.test(key));
   await invoke("core_request", {
@@ -26,7 +27,7 @@ setTimeout(async () => {
         malformedPayloadDenied,
         networkDenied,
         nodeGlobalsDenied,
-        popupDenied,
+        popupRequestIssued,
         rendererSecretsAbsent,
         unauthorisedWindowDenied: known && window.__loomlightUnauthorisedDenied === true,
         unknownCommandDenied,

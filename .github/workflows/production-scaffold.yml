@@ -123,6 +123,7 @@ jobs:
             --output "$RUNNER_TEMP/dependency-inventory.json"
       - name: Upload private scaffold evidence
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: phase-1a-scaffold-${{ matrix.runner }}

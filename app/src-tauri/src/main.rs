@@ -12,12 +12,16 @@ use std::{
 use tauri::{Manager, WebviewUrl};
 
 static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
+static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
 fn core_request(app: tauri::AppHandle, request: Value) -> loomlight_core::CoreResponse {
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
     let is_smoke_report =
         request.get("operation").and_then(Value::as_str) == Some("probe.smokeReport");
+    let smoke_payload = is_smoke_report
+        .then(|| request.get("payload").cloned())
+        .flatten();
     let response = handle_request(request, smoke_enabled);
     if smoke_enabled && is_smoke_report && response.is_success() {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
@@ -28,20 +32,31 @@ fn core_request(app: tauri::AppHandle, request: Value) -> loomlight_core::CoreRe
                 thread::sleep(Duration::from_millis(500));
                 let navigation_denied =
                     original_url.is_some_and(|url| window.url().ok().as_ref() == Some(&url));
+                let popup_denied = POPUP_DENIAL_OBSERVED.load(Ordering::SeqCst);
                 println!(
                     "{}",
                     json!({
                         "evidence": "production-packaged-boundary",
                         "navigationDenied": navigation_denied,
-                        "webviewRestrictionsPassed": true,
+                        "popupDenied": popup_denied,
+                        "webviewRestrictionsPassed": popup_denied,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
                     })
                 );
                 let _ = std::io::stdout().flush();
-                std::process::exit(if navigation_denied { 0 } else { 1 });
+                std::process::exit(if navigation_denied && popup_denied {
+                    0
+                } else {
+                    1
+                });
             });
         }
+    } else if smoke_enabled && is_smoke_report {
+        eprintln!(
+            "packaged boundary smoke report rejected: {}",
+            smoke_payload.unwrap_or(Value::Null)
+        );
     }
     response
 }
@@ -64,7 +79,10 @@ fn main() {
                         || (matches!(url.scheme(), "http" | "https")
                             && url.host_str() == Some("tauri.localhost"))
                 })
-                .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
+                .on_new_window(|_, _| {
+                    POPUP_DENIAL_OBSERVED.store(true, Ordering::SeqCst);
+                    tauri::webview::NewWindowResponse::Deny
+                })
                 .build()
                 .expect("main window must be created");
 

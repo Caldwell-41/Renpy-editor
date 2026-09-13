@@ -97,7 +97,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "malformedPayloadDenied",
         "networkDenied",
         "nodeGlobalsDenied",
-        "popupDenied",
+        "popupRequestIssued",
         "rendererSecretsAbsent",
         "unknownCommandDenied",
         "unauthorisedWindowDenied",
@@ -259,7 +259,7 @@ mod tests {
             "malformedPayloadDenied": true,
             "networkDenied": true,
             "nodeGlobalsDenied": true,
-            "popupDenied": true,
+            "popupRequestIssued": true,
             "rendererSecretsAbsent": true,
             "unknownCommandDenied": true,
             "unauthorisedWindowDenied": true
