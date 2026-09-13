@@ -1,17 +1,30 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SPIKE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SPIKE_ROOT))
 
-from probe import _redact_argument, _redact_text, result_record  # noqa: E402
+from probe import _package_launch_target, _redact_argument, _redact_text, result_record  # noqa: E402
 from sdk_adapter import CommandResult, Diagnostic  # noqa: E402
 
 
 class ProbeRedactionTests(unittest.TestCase):
+    def test_single_mac_app_is_accepted_as_package_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            installed = Path(temporary) / "installed"
+            executable = installed / "Crossroads.app" / "Contents" / "MacOS" / "Crossroads"
+            executable.parent.mkdir(parents=True)
+            executable.write_bytes(b"binary")
+            with patch("probe.platform.system", return_value="Darwin"):
+                launcher, subject = _package_launch_target(installed)
+            self.assertEqual(launcher, executable)
+            self.assertEqual(subject, installed / "Crossroads.app")
+
     def test_absolute_arguments_are_reduced_to_basename_on_both_path_styles(self) -> None:
         self.assertEqual(_redact_argument("/private/sdk/renpy.sh"), "renpy.sh")
         self.assertEqual(

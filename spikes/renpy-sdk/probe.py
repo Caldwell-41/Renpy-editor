@@ -69,7 +69,7 @@ def _package_launch_target(installed: Path) -> tuple[Path, Path]:
         matches = sorted(root.glob("*.exe"))
         subject = matches[0] if len(matches) == 1 else None
     elif system == "Darwin":
-        apps = sorted(root.rglob("*.app"))
+        apps = [root] if root.suffix == ".app" else sorted(root.rglob("*.app"))
         binaries = sorted((apps[0] / "Contents" / "MacOS").iterdir()) if len(apps) == 1 else []
         matches = [candidate for candidate in binaries if candidate.is_file()]
         subject = apps[0] if len(apps) == 1 else None
