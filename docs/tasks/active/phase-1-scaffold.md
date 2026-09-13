@@ -9,6 +9,11 @@ Do not begin this task until the Phase 0 corrective checkpoint is closed and the
 explicitly approves Phase 1. Accepted Phase 0 architecture decisions are dependencies,
 not permission to implement.
 
+The broader ordered Phase 1 milestones and fixed product/UX decisions are recorded in
+[phase-1-vertical-slice.md](phase-1-vertical-slice.md). That plan does not expand this
+scaffold task: this remains the first bounded implementation gate and must complete
+before later authoring milestones begin.
+
 ## Outcome sought
 
 Create a clean production Tauri 2 workspace and validation skeleton that proves the
@@ -24,6 +29,7 @@ spike code or prematurely implementing the vertical slice.
 - [Security baseline](../../SECURITY.md)
 - [Testing strategy](../../TESTING.md)
 - [Phase 1 roadmap outcome](../../ROADMAP.md)
+- [Phase 1 vertical-slice plan](phase-1-vertical-slice.md)
 
 ## Bounded implementation
 
@@ -79,4 +85,6 @@ fix.
 
 Report the exact commits, target runs, dependency versions, privilege surface,
 validation results, retained limitations, and the next bounded vertical-slice task.
-Phase 1 work beyond this scaffold requires the scaffold gate to pass.
+After this gate passes, the next planned milestone is 1B transaction/file coordination
+and recovery; do not jump directly to Scene authoring. Phase 1 work beyond this
+scaffold requires the scaffold gate to pass.
