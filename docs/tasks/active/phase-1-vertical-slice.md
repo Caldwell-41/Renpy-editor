@@ -46,6 +46,11 @@ arbitrary existing Ren'Py projects is not part of Phase 1.
   references are deferred.
 - Functional major workspaces are Scene, Source, and Branches. Characters, Assets,
   Variables, Diagnostics/Runtime, Git, and project setup are supporting surfaces.
+- The visual direction is **Quiet Studio Dark** as specified in `docs/UI.md`: neutral
+  charcoal surfaces, restrained muted indigo, medium density, strong typography,
+  subtle dividers/elevation, minimal decoration, and narrative content given priority
+  over chrome. Phase 1A establishes semantic design tokens/theme infrastructure;
+  Phase 1E performs the first full visual polish pass on the real Scene workspace.
 - Character visuals use extensible appearance attributes. Phase 1 exposes expression;
   outfit and pose are implicit defaults. The model must later admit outfits, poses,
   layered images, animation, and additional appearance dimensions without replacement.
@@ -95,7 +100,16 @@ Follow [phase-1-scaffold.md](phase-1-scaffold.md) exactly. Create only the produ
 Tauri workspace, command/capability boundary, empty production ports, locked
 build/test setup, and cross-platform packaged smoke. Do not implement authoring.
 
-**Gate:** scaffold acceptance criteria are green on both supported platforms.
+Establish the visual-system foundation without prematurely polishing feature screens:
+semantic surface/text/border/accent/status tokens, system UI typography, reviewed
+monospace Source typography, modest radius/elevation primitives, reduced-motion
+support, and theme plumbing that can later admit light mode. Do not hard-code the dark
+palette into feature components and do not introduce gradients/glass/card-heavy styling
+that conflicts with the canonical Quiet Studio Dark guidance.
+
+**Gate:** scaffold acceptance criteria are green on both supported platforms and the
+UI foundation exposes reviewed semantic design tokens without widening desktop
+privileges or adding authoring functionality.
 
 ### 1B — Transaction, file coordination, and recovery foundation
 
@@ -162,8 +176,18 @@ Implement the agreed Preview/Beats sizing, inline dialogue flow, beat insertion/
 scene-local preview reconstruction, partial-preview indication, visual asset pickers,
 choice destination/create-scene flow, and continuous lightweight diagnostics.
 
+This milestone performs the first full product visual-design pass using Quiet Studio
+Dark. Beat presentation, story hierarchy, preview surround, inspector controls, asset
+pickers, persistence/conflict states, hover/focus/selection, empty states, spacing, and
+responsive collapse behavior must follow the canonical `UI.md` guidance. Explicitly
+review the result against the UI anti-pattern list so it does not drift toward generic
+AI/SaaS dashboard aesthetics, excessive cards/pills, gradients, glassmorphism, or
+accent-colour overuse.
+
 **Gate:** the representative Phase 1 mini-game can be authored without routine manual
-Ren'Py scripting and produces clean conventional source.
+Ren'Py scripting, produces clean conventional source, and the Scene surface passes the
+functional/accessibility requirements plus a visual-conformance review against the
+Quiet Studio Dark system.
 
 ### 1F — Source synchronisation and partial-visual handling
 
@@ -180,6 +204,10 @@ region preservation, and external conflict cases pass without collateral byte ch
 Implement the basic Scene/label/choice graph from the same semantic edges used by
 Scene; do not create a parallel graph truth. Add authoritative SDK Validate and
 normal-entry Run Game, diagnostics navigation, and local Git status/diff/checkpoint.
+
+Extend the established Quiet Studio Dark design system into Source, Branches,
+Diagnostics/Runtime, and Git without inventing separate visual languages for technical
+surfaces.
 
 Advanced graph reachability/state analysis, minimap/search maturity, Run From Here,
 and GitHub remotes remain later work.
@@ -211,15 +239,20 @@ Exercise a real workflow from a fresh checkout on both supported platforms:
 17. confirm the game still runs with `.renpy-editor/` removed from a copy.
 
 **Phase 1 closes only when** Windows x64 and macOS ARM64 pass this workflow plus the
-transaction/recovery, golden-source, privacy/security, and packaged application gates.
+transaction/recovery, golden-source, privacy/security, packaged application, and visual
+system/accessibility gates.
 
 ## Deferred implementation details
 
 The milestone implementing each area should resolve and test details such as exact JSON
 schemas, technical-ID generation/collision rules, duplicate asset naming policy,
 precise recovery/conflict dialog copy, deletion/reference semantics, and exact locked
-dependency versions. These are implementation details, not reasons to broaden Phase 1
-product scope before work begins.
+dependency versions. Exact dark/light token values and the final reviewed icon package
+are also implementation details, but their choices must conform to `docs/UI.md` rather
+than redefining the visual direction.
+
+These are implementation details, not reasons to broaden Phase 1 product scope before
+work begins.
 
 ## Documentation discipline
 
