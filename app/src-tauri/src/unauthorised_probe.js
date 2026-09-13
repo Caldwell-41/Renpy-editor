@@ -7,7 +7,7 @@ setTimeout(async () => {
       payload: {},
     },
   }).then(() => false, () => true);
-  const signal = new URL(location.href);
-  signal.search = denied ? "?permission-denied=1" : "?permission-allowed=1";
-  location.href = signal.href;
+  location.href = denied
+    ? "https://permission-denied.invalid/loomlight-capability-probe"
+    : "https://permission-allowed.invalid/loomlight-capability-probe";
 }, 100);

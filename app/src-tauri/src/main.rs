@@ -104,7 +104,7 @@ fn main() {
                     let _ = window.eval(include_str!("unauthorised_probe.js"));
                 })
                 .on_navigation(move |url| {
-                    if url.query() == Some("permission-denied=1") {
+                    if url.host_str() == Some("permission-denied.invalid") {
                         denied.store(true, Ordering::SeqCst);
                         return false;
                     }
