@@ -53,10 +53,16 @@ fn core_request(app: tauri::AppHandle, request: Value) -> loomlight_core::CoreRe
             });
         }
     } else if smoke_enabled && is_smoke_report {
+        SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         eprintln!(
             "packaged boundary smoke report rejected: {}",
             smoke_payload.unwrap_or(Value::Null)
         );
+        let _ = std::io::stderr().flush();
+        thread::spawn(|| {
+            thread::sleep(Duration::from_millis(100));
+            std::process::exit(1);
+        });
     }
     response
 }
@@ -94,6 +100,9 @@ fn main() {
                     WebviewUrl::App("index.html".into()),
                 )
                 .visible(false)
+                .on_page_load(|window, _| {
+                    let _ = window.eval(include_str!("unauthorised_probe.js"));
+                })
                 .on_navigation(move |url| {
                     if url.query() == Some("permission-denied=1") {
                         denied.store(true, Ordering::SeqCst);
@@ -106,9 +115,7 @@ fn main() {
                 .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
                 .build()
                 .expect("unauthorised probe window must be created");
-                unauthorised
-                    .eval(include_str!("unauthorised_probe.js"))
-                    .expect("unauthorised probe injection must succeed");
+                drop(unauthorised);
 
                 let main = app
                     .get_webview_window("main")
