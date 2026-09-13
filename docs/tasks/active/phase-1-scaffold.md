@@ -18,7 +18,9 @@ before later authoring milestones begin.
 
 Create a clean production Tauri 2 workspace and validation skeleton that proves the
 accepted desktop boundary on Windows x64 and macOS ARM64 without promoting disposable
-spike code or prematurely implementing the vertical slice.
+spike code or prematurely implementing the vertical slice. Establish only the shared
+visual-design primitives needed to prevent later feature components from hard-coding a
+dark palette; do not polish authoring screens in this task.
 
 ## Dependencies
 
@@ -28,6 +30,7 @@ spike code or prematurely implementing the vertical slice.
 - [Architecture](../../ARCHITECTURE.md)
 - [Security baseline](../../SECURITY.md)
 - [Testing strategy](../../TESTING.md)
+- [UI/design system](../../UI.md)
 - [Phase 1 roadmap outcome](../../ROADMAP.md)
 - [Phase 1 vertical-slice plan](phase-1-vertical-slice.md)
 
@@ -47,14 +50,22 @@ spike code or prematurely implementing the vertical slice.
 6. Add path-scoped quality and packaged smoke jobs for Windows x64 and macOS ARM64,
    using locked dependencies and commit-pinned third-party Actions. Reuse Phase 0
    evidence workflow lessons without copying its disposable application.
-7. Record exact versions, commands, packages, target results, failures, and retained
-   artifacts; update canonical status and handover.
+7. Establish the Quiet Studio Dark design-system foundation only: semantic
+   surface/text/border/accent/status tokens, system UI typography, a reviewed
+   monospace Source stack, modest radius/elevation primitives, reduced-motion support,
+   and theme plumbing that can admit a later light theme. Feature components must use
+   semantic tokens rather than hard-coded dark colours. Do not implement polished
+   Scene/Source/Branches styling here.
+8. Record exact versions, commands, packages, target results, failures, retained
+   artifacts, and reviewed visual primitives; update canonical status and handover.
 
 ## Non-goals
 
 - No project creation, source parser/patch implementation, authoring workspaces,
   branch graph, preview, asset pipeline, Git/GitHub, LLM, credential UI, or SDK
   download/run workflow.
+- No polished feature screens, dashboard/card system, UI Designer, Timeline, or other
+  authoring UI beyond the minimal local shell/probes required to validate the boundary.
 - No SDK bundling, updater, signing/notarisation, public release, telemetry, or
   production migration of Electron.
 - No copying the Phase 0 shells as the application architecture. Small algorithms or
@@ -68,6 +79,9 @@ spike code or prematurely implementing the vertical slice.
   filesystem/process access, and renderer secrets.
 - The Rust core exposes only the documented command envelope and capability; all
   future adapters are interfaces with no hidden authority.
+- Semantic visual tokens/theme primitives exist, are used by the minimal shell rather
+  than literal palette values, respect reduced motion, and leave a viable light-theme
+  path without adding authoring functionality or widening privileges.
 - Repository validation, dependency/licence inventory, privacy scan, unit/static
   tests, Rust tests, and target package smoke are green or an exact unavoidable
   exception is documented.
@@ -75,16 +89,16 @@ spike code or prematurely implementing the vertical slice.
 
 ## Expected touched areas
 
-Production workspace/manifests, a new production UI/core boundary, target-scoped CI,
-tests, dependency locks, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`,
-`docs/TESTING.md`, `docs/status/CURRENT.md`, and this task. Avoid changes to
-disposable evidence unless a discovered regression requires a separately documented
-fix.
+Production workspace/manifests, a new production UI/core boundary, shared visual-token
+primitives, target-scoped CI, tests, dependency locks, `docs/ARCHITECTURE.md`,
+`docs/SECURITY.md`, `docs/UI.md`, `docs/TESTING.md`, `docs/status/CURRENT.md`, and this
+task. Avoid changes to disposable evidence unless a discovered regression requires a
+separately documented fix.
 
 ## Completion handoff
 
-Report the exact commits, target runs, dependency versions, privilege surface,
-validation results, retained limitations, and the next bounded vertical-slice task.
-After this gate passes, the next planned milestone is 1B transaction/file coordination
-and recovery; do not jump directly to Scene authoring. Phase 1 work beyond this
-scaffold requires the scaffold gate to pass.
+Report the exact commits, target runs, dependency versions, privilege surface, visual
+primitives, validation results, retained limitations, and the next bounded vertical-
+slice task. After this gate passes, the next planned milestone is 1B transaction/file
+coordination and recovery; do not jump directly to Scene authoring. Phase 1 work beyond
+this scaffold requires the scaffold gate to pass.

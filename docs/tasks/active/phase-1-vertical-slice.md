@@ -35,9 +35,9 @@ arbitrary existing Ren'Py projects is not part of Phase 1.
   primary technical label. Chapters are organisational folders, not Ren'Py runtime
   semantics.
 - `script.rpy` stays small and routes the normal entry point into authored scenes.
-- The generated scaffold preserves conventional Ren'Py starter GUI/screens so a newly
-  created game has standard menu/save/load/preferences behavior before Loomlight gains
-  visual screen authoring.
+- The generated scaffold preserves conventional Ren'Py starter GUI/screens and uses
+  normal Ren'Py physical asset locations: `game/images/`, `game/audio/`, and `game/gui/`.
+  Loomlight's Assets surface is an editor abstraction, not a `game/assets/` directory.
 - Project creation is staged and SDK-validated before finalisation.
 - Project lifecycle explicitly includes create, automatic transactional persistence,
   explicit save/flush, close, Recent Projects, load/reopen, and continuation.
@@ -70,6 +70,10 @@ arbitrary existing Ren'Py projects is not part of Phase 1.
   revision.
 - Unsupported/custom source remains exact, visible in sequence, and protected from
   unsafe visual relocation.
+- Generated `.rpyc` files are derivative. If a supported Scene/source-file move,
+  rename, or delete removes an `.rpy` path, Loomlight must remove the obsolete `.rpyc`
+  at the old path in the same approved file transaction so Ren'Py cannot execute an
+  orphaned ghost script.
 - Phase 1 does not include general existing-project import, UI Designer, Timeline,
   LLM assistance, GitHub remotes, advanced state simulation, arbitrary transform/ATL
   authoring, or signing/notarisation.
@@ -138,15 +142,17 @@ Implement Welcome/Recent Projects and the New Project workflow:
 6. open `Chapter 1 → Scene 1`.
 
 Generate the documented conventional project paths and metadata contract. Preserve the
-normal Ren'Py starter GUI/runtime files needed for standard main-menu, save/load,
+normal Ren'Py template files such as `options.rpy`, `gui.rpy`, `screens.rpy`,
+`game/gui/`, and the standard `game/images/` and `game/audio/` locations while adding
+Loomlight's definitions/chapters structure. Preserve standard main-menu, save/load,
 preferences, history/rollback behavior where provided by the supported SDK template;
 Phase 1 does not visually author those screens. Support close/reopen from Recent
 Projects and Open Loomlight Project. Metadata deletion must not break the game, but
 Phase 1 does not reconstruct deleted metadata.
 
 **Gate:** create → validate → close → reopen works on both targets; the generated game
-runs with its standard Ren'Py menu/save/load infrastructure and also runs without
-`.renpy-editor/`.
+uses the documented conventional paths, runs with its standard Ren'Py menu/save/load
+infrastructure, and also runs without `.renpy-editor/`.
 
 ### 1D — Supporting authoring models: Characters, Assets, Variables
 
@@ -155,15 +161,17 @@ Implement bounded supporting surfaces and source definitions:
 - Character: technical variable, display name, dialogue colour, default appearance;
 - Appearance: stable ID, extensible attributes, Phase 1 expression + implicit default
   outfit/pose, static imported asset render source;
-- Assets: copied project-owned backgrounds, character images, music/SFX and required
-  basic project/UI asset references with missing/duplicate checks;
+- Assets: copied project-owned backgrounds/character images under `game/images/`,
+  music/SFX under `game/audio/`, plus required standard GUI/project asset references;
+  apply missing/duplicate checks and a deterministic naming/collision policy compatible
+  with Ren'Py automatic discovery;
 - Variables: `bool`, `int`, `string` definitions/defaults and simple assignment model.
 
 Keep IDs separate from paths and display names. Do not make expression-only or raw-file
 references architectural assumptions.
 
-**Gate:** supporting definitions round-trip through ordinary Ren'Py source and reload
-with stable editor identity.
+**Gate:** supporting definitions round-trip through ordinary Ren'Py source, reload with
+stable editor identity, and produce unambiguous discovered image/audio names.
 
 ### 1E — Scene authoring
 
@@ -174,7 +182,10 @@ unconditional choice, jump, return/end, and Custom Code representation.
 
 Implement the agreed Preview/Beats sizing, inline dialogue flow, beat insertion/reorder,
 scene-local preview reconstruction, partial-preview indication, visual asset pickers,
-choice destination/create-scene flow, and continuous lightweight diagnostics.
+choice destination/create-scene flow, Story tree Scene create/rename/reorder/move/delete,
+and continuous lightweight diagnostics. Any supported file move/rename/delete that
+removes an old Scene `.rpy` path also removes its stale `.rpyc` derivative through the
+approved transaction layer.
 
 This milestone performs the first full product visual-design pass using Quiet Studio
 Dark. Beat presentation, story hierarchy, preview surround, inspector controls, asset
@@ -185,7 +196,8 @@ AI/SaaS dashboard aesthetics, excessive cards/pills, gradients, glassmorphism, o
 accent-colour overuse.
 
 **Gate:** the representative Phase 1 mini-game can be authored without routine manual
-Ren'Py scripting, produces clean conventional source, and the Scene surface passes the
+Ren'Py scripting, produces clean conventional source, Scene lifecycle operations leave
+no orphan executable `.rpyc`/duplicate-label behavior, and the Scene surface passes the
 functional/accessibility requirements plus a visual-conformance review against the
 Quiet Studio Dark system.
 
@@ -221,7 +233,7 @@ Exercise a real workflow from a fresh checkout on both supported platforms:
 
 1. create a project and initialise Git;
 2. confirm the untouched generated game launches with standard Ren'Py menu/save/load
-   behavior;
+   behavior and conventional image/audio/gui paths;
 3. create two Characters and appearances;
 4. import a background, two character images, music, and SFX;
 5. define at least one simple variable;
@@ -230,13 +242,15 @@ Exercise a real workflow from a fresh checkout on both supported platforms:
 8. set the variable;
 9. add a Choice and create/link two destination Scenes;
 10. reorder a beat, undo, and redo;
-11. edit supported dialogue directly in Source and observe Scene synchronisation;
-12. introduce unsupported/external source and verify protected Custom Code behavior;
-13. validate and navigate diagnostics;
-14. run the game through the pinned SDK;
-15. create a local Git checkpoint;
-16. close Loomlight, reopen the project, and continue with appropriate editor state;
-17. confirm the game still runs with `.renpy-editor/` removed from a copy.
+11. after a Ren'Py compile/run has produced bytecode, move or delete a disposable Scene
+   and prove no stale `.rpyc` ghost script/duplicate label remains;
+12. edit supported dialogue directly in Source and observe Scene synchronisation;
+13. introduce unsupported/external source and verify protected Custom Code behavior;
+14. validate and navigate diagnostics;
+15. run the game through the pinned SDK;
+16. create a local Git checkpoint;
+17. close Loomlight, reopen the project, and continue with appropriate editor state;
+18. confirm the game still runs with `.renpy-editor/` removed from a copy.
 
 **Phase 1 closes only when** Windows x64 and macOS ARM64 pass this workflow plus the
 transaction/recovery, golden-source, privacy/security, packaged application, and visual
@@ -245,11 +259,11 @@ system/accessibility gates.
 ## Deferred implementation details
 
 The milestone implementing each area should resolve and test details such as exact JSON
-schemas, technical-ID generation/collision rules, duplicate asset naming policy,
-precise recovery/conflict dialog copy, deletion/reference semantics, and exact locked
-dependency versions. Exact dark/light token values and the final reviewed icon package
-are also implementation details, but their choices must conform to `docs/UI.md` rather
-than redefining the visual direction.
+schemas, technical-ID generation/collision rules, exact automatic-discovery-compatible
+asset naming/collision rules, precise recovery/conflict dialog copy, deletion/reference
+semantics, and exact locked dependency versions. Exact dark/light token values and the
+final reviewed icon package are also implementation details, but their choices must
+conform to `docs/UI.md` rather than redefining the visual direction.
 
 These are implementation details, not reasons to broaden Phase 1 product scope before
 work begins.

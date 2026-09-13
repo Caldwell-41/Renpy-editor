@@ -43,12 +43,19 @@ as permission for an open-ended implementation run.
   SDK / verified supported SDK install / browse existing SDK; resolution preset/custom;
   review screen with local Git initialisation enabled by default; staged creation and
   SDK validation before finalisation.
+- Generated projects preserve the supported Ren'Py template's standard GUI/runtime
+  files and conventional physical locations: visual assets under `game/images/`, audio
+  under `game/audio/`, and GUI resources under `game/gui/`. Loomlight's Assets surface
+  is an editor abstraction, not a `game/assets/` directory.
 - Projects can be transactionally persisted, explicitly flushed/saved, closed, shown in
   Recent Projects, and loaded/reopened. The game still runs if `.renpy-editor/` is
   absent, but Phase 1 does not reconstruct deliberately deleted metadata.
 - Project hierarchy is Project → Chapter → Scene → Beat. Chapters map naturally to
   organisational folders. Each Loomlight Scene normally has its own `.rpy` file and a
   stable globally unique technical label; display names are separate.
+- Ren'Py-generated `.rpyc` files are derivative. Supported Scene/source file
+  move/rename/delete operations must remove the obsolete `.rpyc` at the old path so an
+  orphan compiled script cannot continue executing.
 - Functional major workspaces are Scene, Source, and Branches. Supporting surfaces are
   Characters, Assets, Variables, Diagnostics/Runtime, Git, and project setup.
 - Scene uses a resizable ~52/48 Editor Preview/Beats split; Beats are the primary
@@ -76,14 +83,17 @@ as permission for an open-ended implementation run.
   overwriting newer work.
 - Phase 1 provides Validate and normal Run Game. Run From Here is deferred until state
   simulation can supply correct prior state.
+- Quiet Studio Dark is the Phase 1 visual direction. Phase 1A establishes semantic
+  theme tokens/primitives; Phase 1E performs the first full Scene visual-polish pass;
+  later technical surfaces extend the same design system.
 
 ## Required implementation sequence
 
-1. **1A production scaffold** — clean production Tauri workspace/boundary/CI only.
+1. **1A production scaffold** — clean production Tauri workspace/boundary/CI and visual-token foundation only.
 2. **1B transaction/recovery** — close production Gate E before visual authoring writes.
-3. **1C project lifecycle/SDK** — New Project, generated scaffold, save/close/reopen.
+3. **1C project lifecycle/SDK** — New Project, conventional generated scaffold, save/close/reopen.
 4. **1D Characters/Assets/Variables** — extensible supporting authoring models.
-5. **1E Scene authoring** — agreed bounded Beat set and Scene UX.
+5. **1E Scene authoring** — agreed bounded Beat set, Scene UX, Story tree and safe Scene-file lifecycle.
 6. **1F Source synchronisation** — production partial CST/minimal patches/custom code.
 7. **1G Branches/Validate/Run/Diagnostics/Git** — complete the functional slice.
 8. **1H cross-platform acceptance** — fresh end-to-end Windows/macOS vertical slice.

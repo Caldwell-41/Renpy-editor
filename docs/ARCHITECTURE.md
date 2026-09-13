@@ -118,12 +118,15 @@ See [SECURITY.md](SECURITY.md) for mitigations and consent boundaries.
 
 Phase 1 creates new Loomlight projects only; general import of arbitrary existing
 Ren'Py projects remains deferred. The generated project is conventional Ren'Py and
-uses a maintainable authoring convention rather than a runtime dependency on editor
-metadata:
+preserves the supported SDK template's normal GUI/runtime files while adding Loomlight's
+modular story structure:
 
 ```text
 game/
   script.rpy
+  options.rpy
+  gui.rpy
+  screens.rpy
   definitions/
     characters.rpy
     variables.rpy
@@ -131,16 +134,24 @@ game/
   chapters/
     chapter_01/
       scene_001.rpy
-  assets/
+  images/
     backgrounds/
     characters/
-    audio/
-    ui/
+  audio/
+  gui/
 .renpy-editor/
   project.json
   source-map.json
   recovery/
 ```
+
+`images/`, `audio/`, `gui/`, `gui.rpy`, `options.rpy`, and `screens.rpy` follow normal
+Ren'Py project conventions. Loomlight's **Assets** surface is a product abstraction,
+not a requirement for a physical `game/assets/` directory. Image/appearance imports go
+under `game/images/`; audio goes under `game/audio/`; standard GUI resources remain
+under `game/gui/`. Exact safe naming and collision rules are defined and tested in the
+implementing milestone so automatic Ren'Py discovery does not create ambiguous image
+or audio names.
 
 `script.rpy` remains deliberately small and routes the normal game entry point into
 the first scene. Each Loomlight-created Scene normally owns one `.rpy` file and one
@@ -148,6 +159,14 @@ primary globally unique technical label such as `chapter_01_scene_001`. Chapter 
 and Scene display names are editor-facing organisation; changing a display name does
 not implicitly rename the technical label or source file. Story flow uses explicit
 Ren'Py labels/jumps/calls and never depends on filesystem parse order.
+
+Ren'Py-generated `.rpyc` files are derivative runtime/cache artifacts, never
+Loomlight's source authority. Ren'Py will execute an orphan `.rpyc` when its `.rpy` is
+removed, moved, or renamed, so every supported Scene/source-file lifecycle transaction
+that removes the old `.rpy` path must also remove the obsolete corresponding `.rpyc`
+within the approved project root. The next Ren'Py validation/run may regenerate the
+compiled file at the new path. This cleanup is part of the same reviewed file
+transaction and must be covered by ghost-script/duplicate-label regression tests.
 
 The generated project must run when `.renpy-editor/` is absent. Phase 1 opening/recent
 project flows require valid Loomlight metadata; deleting that metadata and asking the

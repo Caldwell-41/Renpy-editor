@@ -31,7 +31,7 @@ does not stop Python from changing files, so it is not an application sandbox.
 | Archive → SDK root | Zip-slip, symlink/hardlink escape, overwrite, decompression bomb | Validate every entry/type/size/path before extraction; stage privately; atomic promote; no overwrite |
 | Core → child process | Script/filename becomes shell syntax or environment leak | Direct executable plus argument array, minimal environment, bounded output/time, no shell strings |
 | Project → Ren'Py runtime | Embedded Python executes with user privileges | Inspection never runs; explicit trust/run boundary; redacted preview; future sandbox research not implied protection |
-| Watcher → transaction | TOCTOU or external edit lost during save | Base hashes, same-directory temp write, flush/replace, recheck, conflict UI, recovery journal |
+| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Base revisions plus a reviewed platform transaction/recovery protocol; revalidate approved root/path/file identity at the latest safe point; preserve competing data/recovery state; explicit conflict UI; never claim portable CAS from check-then-replace alone |
 | Network → SDK/update | Tampered binary or downgrade | Official HTTPS origin allowlist, published checksum, version pin, staged verification, explicit upgrade |
 | LLM provider | Private/adult content exfiltration or malicious structured output | User-initiated send, locality disclosure/warning, minimal context, TLS, schema/path/identifier validation, reviewed diff |
 | Git/GitHub | Credential leak, destructive restore/push | OS credential flow, no token logs, safe defaults, recoverable restore, no force push, private repo default |

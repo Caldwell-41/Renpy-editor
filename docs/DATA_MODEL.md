@@ -46,6 +46,11 @@ embedded Python, screen language, ATL, translations, and unknown syntax. Source
 ranges are invalidated and remapped after each accepted revision. Unsupported or
 ambiguous source remains in place and must not be coerced into a visual beat model.
 
+Compiled `.rpyc` files are generated derivatives rather than authoritative source. A
+supported transaction that removes, moves, or renames an `.rpy` path must remove the
+obsolete corresponding `.rpyc` at the old path so Ren'Py cannot continue executing an
+orphaned compiled script.
+
 ## Project and narrative layer
 
 | Entity | Essential fields |
@@ -97,20 +102,24 @@ prefill the name but is never authoritative.
 
 Phase 1 imports assets by copying them into the project so a Loomlight-created project
 is portable and self-contained. Assets use project-relative paths and stable IDs;
-external absolute references are not a Phase 1 authoring feature. Initial categories
-include backgrounds, character appearance images, audio, and UI/project assets.
-Duplicate/missing checks are required, while advanced tagging, conversion,
-optimisation, search, and bulk management remain later work.
+external absolute references are not a Phase 1 authoring feature. Loomlight's Assets
+surface is independent of the physical directory name and follows conventional Ren'Py
+locations: visual image assets under `game/images/`, audio under `game/audio/`, and
+standard GUI resources under `game/gui/`. Duplicate/missing checks are required, while
+advanced tagging, conversion, optimisation, search, and bulk management remain later
+work.
 
-A conventional character layout may be:
+A conventional Character layout may be:
 
 ```text
-game/assets/characters/alice/neutral.png
-game/assets/characters/alice/happy.png
-game/assets/characters/alice/annoyed.png
+game/images/characters/alice/alice neutral.png
+game/images/characters/alice/alice happy.png
+game/images/characters/alice/alice annoyed.png
 ```
 
-The path is organisation, not identity.
+The path is organisation, not identity. Exact import naming/collision rules must be
+reviewed against Ren'Py automatic image/audio discovery so the resulting names are
+predictable and unambiguous.
 
 ## Variables and state
 
