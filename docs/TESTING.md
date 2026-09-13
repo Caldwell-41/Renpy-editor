@@ -33,11 +33,15 @@ The validator checks the required document structure, UTF-8/final newlines, inte
 Markdown links, common secret patterns, personal email domains, and user-home paths.
 The isolated source/preview spike has 26 dependency-free unit/golden tests (19 source
 tests and seven fidelity-mapping tests); the SDK boundary adds 24 dependency-free
-security/adapter/reporting tests. The path-scoped
+security/adapter/reporting tests. The Phase 0 SDK and desktop evidence workflows remain
+available by explicit `workflow_dispatch`, but no longer run automatically on routine
+pushes. This keeps the historical regression/evidence machinery reproducible without
+spending Windows/macOS runner capacity during current production development.
 `.github/workflows/sdk-spike.yml` performs the pinned official Windows x64, macOS ARM64,
-and Linux-regression integration matrix.
+and Linux-regression integration matrix when manually requested.
 `.github/workflows/desktop-spikes.yml` packages disposable Electron and Tauri shells
-on Windows x64 and macOS ARM64; these jobs are Phase 0 evidence, not release builds.
+on Windows x64 and macOS ARM64 when manually requested; these jobs are Phase 0 evidence,
+not release builds.
 The initial full matrix passed in
 [run 34547542329](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34547542329).
 Later packaged-denial probes ran in 34691607349, but the recorded job conclusion is not
@@ -85,10 +89,14 @@ complexity. Runs 34732252587, 34732654915, and 34733107607 remain failed evidenc
 sampler attribution, comparison-vs-diagnostic exit criteria, and macOS filter-yield
 flakiness. ADR 0003 supports Tauri 2 from the bounded gate set. The macOS observation
 may omit launchd-owned WKWebView/XPC services and cannot support total-memory savings.
-The Phase 1A production workflow is path-scoped to production code, its workflow, and
-canonical architecture/security/testing/UI/dependency documentation; status-only task
-handoffs do not spend a target matrix. It uses locked npm/Cargo dependencies and
-commit-pinned checkout, Node setup, Rust cache, and artifact-upload Actions.
+The Phase 1A production workflow runs the full Windows x64/macOS ARM64 package matrix
+for relevant production changes pushed to `main` and by explicit manual dispatch. It
+does not run on pull requests, so a reviewed change is not charged once before merge
+and again after merge, and documentation-only changes do not launch desktop packaging.
+Routine runs retain lightweight packaged smoke and dependency/licence evidence only;
+full application bundles are uploaded only for manual production runs. The workflow
+continues to use locked npm/Cargo dependencies and commit-pinned checkout, Node setup,
+Rust cache, and artifact-upload Actions.
 [Run 34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
 passed the complete macOS ARM64 gate and packaged Windows x64, where one subsequently
 corrected renderer-secret false positive remained. Runs 34782646465 and 34782646499
