@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-09-12<br>
+**Updated:** 2026-09-13<br>
 **Phase:** 0 — Foundation and proof<br>
 **Working codename:** Project Loomlight (temporary)
 
@@ -12,12 +12,17 @@
 - ADR 0001 accepts exact source bytes plus a conservative partial CST and verified
   range patches as the source architecture. The Phase 0 Python tokenizer is disposable.
 - ADR 0002 accepts an exact-version, allowlisted SDK adapter and checksum-first staged
-  installation boundary; only Linux integration evidence exists so far.
+  installation boundary; final run 34731460283 passes it on both supported targets
+  plus the Linux regression baseline.
 - The Crossroads at Sundown corpus has byte/hash baselines, BOM/CRLF cases, 12 core
   lossless-source tests plus seven preview-mapping tests, and a Linux Ren'Py 8.5.3 compile/lint/test/run/warp/PC-build
   pass. The SDK and generated artifacts remain outside Git.
-- The SDK boundary has 19 dependency-free security/adapter tests. Windows and macOS
-  SDK, filesystem, package install/launch, signing, and quarantine behavior are open.
+- The SDK boundary has 24 dependency-free security/adapter/reporting tests. Windows
+  x64 and macOS ARM64 pass exact version, compile, lint, tests, run, warp, bounded
+  distribution, containment-checked package install, and launch. Windows records an
+  unsigned Authenticode result; macOS records unsigned codesign, Gatekeeper rejection,
+  and no CI-origin quarantine xattr. Physical SmartScreen/quarantine/signing flows are
+  explicit release limitations rather than inferred successes.
 - No desktop stack is accepted. The shared-contract Electron/Tauri spike now has green
   Windows x64/macOS ARM64 packaged evidence for narrow IPC/capabilities, arbitrary-
   process denial, network/popup/navigation denial, selected-root containment,
@@ -50,7 +55,8 @@
   be faithful; engine layout/timing staging is approximate; Python-dependent screens,
   media decode, and generated behavior remain runtime-only. Trusted SDK run
   34723797776 passed the mapped transition/ATL/screen/Python-state runtime case on
-  Linux; Windows/macOS runtime behavior is not inferred.
+  Linux; the same fixture test, run, and warp now also pass in target SDK run
+  34731460283.
 - Phase 0 evidence CI remains path-scoped and now cancels superseded push runs per
   workflow and branch. Desktop jobs cache platform/toolchain/dependency-specific
   Cargo inputs and dependency outputs; a verified warm run reduced Windows from
@@ -64,11 +70,12 @@
 
 ## Next action
 
-Complete official Ren'Py 8.5.3 SDK and checksum-first secure-install evidence on
-Windows x64 and macOS ARM64. Cover version detection and per-project pinning; compile,
-lint, tests, run, warp, diagnostics and build; cancellation/bounded output; platform
-paths; package installation/launch; Windows security observations; and macOS signing
-and quarantine observations. Do not infer either platform from Linux.
+Complete the equivalent Electron/Tauri comparison measurements: cold start, idle and
+stress memory, per-candidate artifact size, interaction latency, repeated-run
+flakiness, dependency/licence inventory, maintainability, and developer complexity.
+Use the criteria already fixed in the stack plan; do not select a stack until this
+comparison is complete. The green target SDK/install run is
+[34731460283](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283).
 
 The exact continuation state and implementation checklist are recorded in the
 [Phase 0 continuation handover](HANDOVER.md).

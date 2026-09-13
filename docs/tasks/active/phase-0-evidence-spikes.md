@@ -31,8 +31,9 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    run 34701370897. Packaged native credential storage and plaintext-leak checks pass
    both targets in run 34722411465. Deterministic packaged graph scale passes in run
    34722954424. Preview/source mapping is classified and runtime-checked on Linux in
-   run 34723797776. Target SDK integration and comparative measurements remain open.
-4. **Linux complete; Windows/macOS pending:** Test Ren'Py 8.5.3 version, compile,
+   run 34723797776. Target SDK integration passes in run 34731460283; comparative
+   measurements remain open.
+4. **Complete:** Test Ren'Py 8.5.3 version, compile,
    lint `--error-code`, run, test, diagnostic parsing, development warp, and a PC
    build through a versioned adapter.
 5. **Complete automated packaged checkpoint:** Measure deterministic 1,000-, 10,000-,
@@ -40,7 +41,7 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    interaction latency, stable
    relayout, and Monaco non-blocking behavior. The 10,000-node case is the usability
    target. All four candidate/engine combinations pass in run 34722954424.
-6. **Linux/synthetic coverage complete; platform validation pending:** Exercise
+6. **Complete automated target checkpoint:** Exercise
    official download, checksum, archive traversal, symlink, collision, limits, and
    interrupted-install cases in a disposable directory.
 7. **Complete bounded checkpoint:** Classify preview/source-mapping behavior as
@@ -48,7 +49,7 @@ installation. Convert accepted conclusions into ADRs and archive disposable code
    or runtime-only using deterministic synthetic constructs and exact source ranges.
    Do not execute project Python during static mapping or treat preview output as
    authoritative source. Nineteen static/source tests and the trusted Linux runtime
-   pass in run 34723797776 retain Windows/macOS runtime checks for package 4/6.
+   pass in run 34723797776 is supplemented by the target SDK pass in run 34731460283.
 
 ## CI efficiency checkpoint
 
@@ -89,8 +90,9 @@ restore are best-effort optimisations, so a miss must remain a supported path.
 
 No evidence workflow is ready for retirement. The desktop comparison should remain
 until the desktop-stack ADR is accepted; that decision can then retire or replace the
-non-selected spike explicitly. The SDK workflow remains relevant until target-platform
-SDK/install evidence is complete and a later reviewed validation path supersedes it.
+non-selected spike explicitly. The SDK workflow remains the regression record for its
+now-complete target-platform checkpoint until a later reviewed validation path
+supersedes it.
 
 ## Acceptance criteria
 

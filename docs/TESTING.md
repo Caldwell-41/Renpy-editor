@@ -13,9 +13,10 @@ git diff --check
 The validator checks the required document structure, UTF-8/final newlines, internal
 Markdown links, common secret patterns, personal email domains, and user-home paths.
 The isolated source/preview spike adds 19 dependency-free unit/golden tests (12 core
-source tests and seven fidelity-mapping tests); the SDK boundary adds 19 dependency-free
-security/adapter tests. The manually dispatched
-`.github/workflows/sdk-spike.yml` performs the pinned official Linux integration run.
+source tests and seven fidelity-mapping tests); the SDK boundary adds 24 dependency-free
+security/adapter/reporting tests. The path-scoped
+`.github/workflows/sdk-spike.yml` performs the pinned official Windows x64, macOS ARM64,
+and Linux-regression integration matrix.
 `.github/workflows/desktop-spikes.yml` packages disposable Electron and Tauri shells
 on Windows x64 and macOS ARM64; these jobs are Phase 0 evidence, not release builds.
 The initial full matrix passed in
@@ -48,7 +49,12 @@ The preview/source-mapping follow-up
 [run 34723797776](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)
 also passed the trusted Ren'Py 8.5.3 Linux runtime case for the mapped transition,
 named transform, screen presence, literal dialogue, and Python-dependent state. Static
-and Linux evidence do not substitute for the pending Windows/macOS SDK matrix.
+and Linux evidence are supplemented by the final target SDK/install
+[run 34731460283](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283).
+That matrix passed exact version, compile/lint/test/run/warp, bounded target
+distribution, containment-checked package installation and launch, plus unsigned
+Authenticode and macOS codesign/Gatekeeper/quarantine observations. Physical
+SmartScreen, quarantine-origin, signing, and notarisation UX remain release checks.
 There is no production application build or cross-platform suite yet.
 
 ## Planned layers

@@ -109,4 +109,4 @@ The Phase 0 parser corpus and integrated source skeleton now exist under
 `tests/fixtures/crossroads-at-sundown/`, with SHA-256/byte metadata and encoded BOM/
 CRLF cases. No binary assets were added. The integrated game passes official Ren'Py
 8.5.3 compile, strict lint, automated test, normal-run, development-warp, and PC-build
-gates on Linux. Windows and macOS SDK validation remain open.
+gates on Linux, Windows x64, and macOS ARM64 in final target run 34731460283.

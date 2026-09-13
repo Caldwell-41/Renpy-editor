@@ -1,6 +1,6 @@
 # Phase 0 continuation handover
 
-**Prepared:** 2026-09-12<br>
+**Prepared:** 2026-09-13<br>
 **Phase:** 0 — Foundation and proof<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
@@ -43,9 +43,10 @@ decisions unless repository evidence presents a material conflict.
   documentation, roadmap, task tracking, audit, and low-fidelity UI checkpoint.
 - Synthetic Crossroads at Sundown fixture corpus with byte/hash baselines, BOM/CRLF
   cases, 12 passing core source tests, and seven passing preview-mapping tests.
-- Linux Ren'Py 8.5.3 SDK evidence for version, compile, lint, tests, normal run,
-  development warp, diagnostics, and PC distribution.
-- Nineteen dependency-free SDK installer/security tests covering checksums, archive
+- Ren'Py 8.5.3 SDK evidence on Windows x64, macOS ARM64, and the Linux regression
+  baseline for version, compile, lint, tests, normal run, development warp,
+  diagnostics, target distribution, containment-checked install, and package launch.
+- Twenty-four dependency-free SDK installer/security/reporting tests covering checksums, archive
   containment, links, collisions, limits, interruption, command allowlisting,
   timeouts, output limits, version matching, trust, and diagnostic parsing.
 - Disposable shared-contract Electron and Tauri shells under
@@ -100,7 +101,16 @@ decisions unless repository evidence presents a material conflict.
   navigation as faithful, engine-dependent staging as approximate, and Python,
   screen, media-decode, translation/generated behavior as runtime-only. Trusted SDK
   run 34723797776 passed the mapped transition/ATL/screen/Python-state case on Linux;
-  target runtime behavior remains for the Windows/macOS SDK checkpoint.
+  final target SDK run 34731460283 passed the same automated fixture cases on Windows
+  and macOS.
+- Final SDK/install run 34731460283 passes both supported targets and the Linux
+  regression baseline. It records direct-argument commands and timings, process-tree
+  cancellation, redacted Unicode-path artifacts, a 45,756,995-byte Windows PC ZIP and
+  39,922,539-byte macOS ZIP, staged package installation, and target launch. The
+  Windows executable is `NotSigned`; the macOS app is unsigned, rejected by
+  Gatekeeper, and has no CI-origin quarantine xattr. SmartScreen UI, browser-origin
+  quarantine, Developer ID signing, notarisation, and signed upgrades remain explicit
+  physical/release checks.
 
 Evidence links:
 
@@ -112,30 +122,18 @@ Evidence links:
 - [Green native credential run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722411465)
 - [Green packaged graph-scale run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34722954424)
 - [Green preview/source-mapping runtime run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34723797776)
+- [Green target SDK/install run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34731460283)
 
 The retained target artifacts are unsigned research outputs, not a product release.
 
 ## Exact next bounded task
 
-Complete official Ren'Py 8.5.3 SDK and checksum-first secure-install evidence on
-Windows x64 and macOS ARM64.
-
-Extend the existing versioned SDK adapter and secure installer only as needed to prove:
-
-1. Exact version detection, per-project pinning, checksum-first download, staged
-   installation, and refusal of mismatched/corrupt input on each target.
-2. Compile, strict lint, automated tests, normal run, development warp, structured
-   diagnostics, and bounded distribution through direct argument arrays.
-3. Cancellation, process-tree cleanup, bounded/redacted output, platform paths,
-   filesystem behavior, package installation, and launch.
-4. Windows security observations and macOS signing/quarantine observations, clearly
-   separating hosted unsigned evidence from physical/signed checks that cannot run.
-5. Exact runner/SDK versions, commands, timings, failures, retained artifacts, and
-   target-specific limitations without committing SDKs or generated packages.
-
-Keep the existing trust gate: inspection never launches project code, while every SDK
-project command requires explicit trust. Do not bundle the SDK, accept a desktop stack,
-or start a production installer in this task.
+Complete the equivalent Electron/Tauri comparison measurements already required by
+the stack plan: cold start, idle and stress memory, per-candidate artifact size,
+interaction latency, repeated-run flakiness, dependency/licence inventory,
+maintainability, and developer complexity. Use identical shared fixtures and distinguish
+packaged target measurements from static inventory. Do not invent new selection
+criteria after measurement, accept a stack early, bundle the SDK, or begin Phase 1.
 
 ## Remaining Phase 0 sequence
 
@@ -153,10 +151,10 @@ shows a dependency conflict:
    Monaco; the 10k usability target passes in run 34722954424.
 5. **Complete:** Preview/source-mapping fidelity experiment with faithful, approximate,
    and runtime-only behavior recorded explicitly; Linux runtime pass 34723797776.
-6. **Next:** Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and macOS,
-   including paths, cancellation, package install/launch, signing, and quarantine
-   observations.
-7. Cold start, memory, artifact size by candidate, latency, flakiness, dependency and
+6. **Complete:** Official Ren'Py 8.5.3 SDK and secure-install evidence on Windows and
+   macOS, including paths, cancellation, target package install/launch, and unsigned
+   security observations; final run 34731460283.
+7. **Next:** Cold start, memory, artifact size by candidate, latency, flakiness, dependency and
    licence inventory, and developer-complexity comparison.
 8. Select the desktop stack in a new ADR, revise the threat model and architecture for
    it, close the active spike task, and only then plan the Phase 1 production scaffold.
@@ -188,9 +186,9 @@ as evidence to diagnose, not as a reason to infer behavior from the other platfo
 
 ## Git and publishing state
 
-- Remote `main` was `6cc8090b198b796785b533bf0fe0776080de36d5` when this handover was reconciled.
-  That commit adds the preview/source-mapping probe and runtime fixture; preceding
-  commits retain the graph, credential, UI, caching, and packaged-boundary checkpoints.
+- Remote `main` was `89072d478c505d427684f8a3b964712f0f7cb75c` when this handover was reconciled.
+  That implementation head closes the target SDK/package probe; preceding commits
+  retain the preview, graph, credential, UI, caching, and packaged-boundary checkpoints.
 - The local and remote commit identifiers can differ when an environment lacks a shell
   HTTPS credential helper and publishes through the authenticated GitHub Git Data API.
 - Before publishing more work, fetch the current private `main` ref, create a commit
