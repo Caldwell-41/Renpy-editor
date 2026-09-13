@@ -8,7 +8,7 @@ use std::{
     io::{Read, Write},
     path::{Component, Path, PathBuf},
     process::{Child, Command, Stdio},
-    sync::{atomic::{AtomicU64, Ordering}, mpsc, Arc, Mutex},
+    sync::{atomic::{AtomicBool, AtomicU64, Ordering}, mpsc, Arc, Mutex},
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
@@ -27,6 +27,7 @@ struct SpikeState {
     projects: Mutex<HashMap<String, ApprovedProject>>,
     transactions: Mutex<()>,
     security_probe_project: Mutex<Option<(String, String)>>,
+    unauthorised_command_denied: Arc<AtomicBool>,
 }
 
 #[derive(Clone)]
@@ -490,7 +491,7 @@ fn prepare_webview_security_fixture(state: &SpikeState) -> Result<(String, Strin
     Ok((project_id, relative))
 }
 
-fn finish_webview_security_probe(app: &tauri::AppHandle, _state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
+fn finish_webview_security_probe(app: &tauri::AppHandle, state: &SpikeState, request: &DesktopRequest) -> Result<Value, String> {
     if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() != Ok("1") {
         return Err("operation is not allowlisted".into());
     }
@@ -501,12 +502,12 @@ fn finish_webview_security_probe(app: &tauri::AppHandle, _state: &SpikeState, re
     }
     let window = app.get_webview_window("main").ok_or("probe window unavailable")?;
     let before = window.url().map_err(|_| "probe URL unavailable")?;
-    let unauthorised_probe = app.get_webview_window("unauthorised-probe").ok_or("unauthorised probe window unavailable")?;
+    let unauthorised_probe = Arc::clone(&state.unauthorised_command_denied);
     window.eval("location.href = 'https://example.invalid/loomlight-navigation'").map_err(|_| "navigation probe unavailable")?;
     thread::spawn(move || {
         thread::sleep(Duration::from_millis(300));
         let navigation_denied = window.url().is_ok_and(|url| url == before);
-        let unauthorised_denied = unauthorised_probe.title().is_ok_and(|title| title == "permission-denied");
+        let unauthorised_denied = unauthorised_probe.load(Ordering::SeqCst);
         let mut completed = results;
         completed["unauthorisedKnownCommandDenied"] = json!(unauthorised_denied);
         completed["navigationDenied"] = json!(navigation_denied);
@@ -682,9 +683,18 @@ fn main() {
                 .build()
                 .expect("main window must be created");
             if std::env::var("LOOMLIGHT_SPIKE_WEBVIEW_PROBE").as_deref() == Ok("1") {
+                let state = app.state::<SpikeState>();
+                let denied = Arc::clone(&state.unauthorised_command_denied);
                 tauri::WebviewWindowBuilder::new(app, "unauthorised-probe", tauri::WebviewUrl::App("index.html".into()))
                     .visible(false)
-                    .on_navigation(|url| {
+                    .on_navigation(move |url| {
+                        if url.query() == Some("permission-denied=1") {
+                            denied.store(true, Ordering::SeqCst);
+                            return false;
+                        }
+                        if url.query() == Some("permission-allowed=1") {
+                            return false;
+                        }
                         url.scheme() == "tauri"
                             || (matches!(url.scheme(), "http" | "https") && url.host_str() == Some("tauri.localhost"))
                     })
@@ -827,7 +837,7 @@ mod tests {
         assert!(permission.contains("privileged_ping"));
         assert!(build.contains("AppManifest::new().commands"));
         assert!(unauthorised_probe.contains("privileged_ping"));
-        assert!(unauthorised_probe.contains("document.title"));
+        assert!(unauthorised_probe.contains("new URL(location.href)"));
         assert!(!capability.contains("shell:"));
         assert!(!capability.contains("fs:"));
         assert!(!capability.contains("http:"));
