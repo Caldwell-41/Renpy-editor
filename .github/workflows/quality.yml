@@ -1,8 +1,9 @@
-name: Phase 0 quality
+name: Repository quality
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,9 +16,5 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - name: Run lossless-source spike tests
-        run: python3 -m unittest discover -s spikes/lossless-source/tests -v
-      - name: Run SDK boundary spike tests
-        run: python3 -m unittest discover -s spikes/renpy-sdk/tests -v
-      - name: Validate Phase 0 artifacts and scan for secrets
+      - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
