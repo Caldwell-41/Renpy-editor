@@ -2,17 +2,12 @@ name: Phase 0 desktop-shell evidence
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/desktop-spikes.yml
-      - spikes/desktop-shells/**
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  group: ${{ github.workflow }}-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -133,9 +128,9 @@ jobs:
           SPIKE_OS: ${{ runner.os }}
         run: |
           if [ "$SPIKE_OS" = "Windows" ]; then
-            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+            LOOMLIGHT_SPIKE_GRAPH_PROBE="1" ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
           else
-            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+            LOOMLIGHT_SPIKE_GRAPH_PROBE="1" ./src-tauri/target/release/loomlight-desktop-tauri-spike
           fi
       - name: Probe packaged native credential storage and plaintext leaks
         shell: bash
