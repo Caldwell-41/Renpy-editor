@@ -2,18 +2,12 @@ name: Ren'Py 8.5.3 SDK evidence spike
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/sdk-spike.yml
-      - spikes/renpy-sdk/**
-      - tests/fixtures/crossroads-at-sundown/**
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  group: ${{ github.workflow }}-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
