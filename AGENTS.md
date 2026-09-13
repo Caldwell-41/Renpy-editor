@@ -40,7 +40,7 @@ npm run build
 cargo fmt --check --all
 cargo test -p loomlight-core --locked
 cargo test -p loomlight-desktop --locked  # supported desktop build environment
-npm exec tauri build -- --locked
+npm exec -- tauri build -- --locked
 ```
 
 Retain the Phase 0 regression commands:

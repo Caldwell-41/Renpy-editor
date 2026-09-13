@@ -21,7 +21,7 @@ result shape.
 
 Protocol version 1 requires exactly `protocolVersion`, `requestId`, `operation`, and
 `payload`. Phase 1A allowlists only health/version and synthetic denial/smoke probes.
-The capability is local, scoped to window label `main`, and names only
+The capability is local, scoped to WebView label `main`, and names only
 `allow-loomlight-core`; no general Tauri filesystem, shell/process, HTTP, opener, or
 credential plugin is present. Source transactions, project files, Ren'Py, Git,
 credentials, and network providers exist only as authority-free empty port markers.

@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1A production scaffold in progress<br>
+**Phase:** Phase 0 complete; Phase 1A target gate blocked on GitHub-hosted runner capacity<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
 **Branch:** `main`
 
@@ -24,7 +24,8 @@ not begin Phase 1B or treat the vertical-slice plan as an open-ended implementat
 
 - Production workspace: `app/`, separate from `spikes/`.
 - Runtime boundary: one custom AppManifest command, `core_request`, granted by one
-  local capability to window `main` only.
+  local capability to WebView `main` only and guarded again by the caller label in
+  Rust.
 - Protocol: exact version 1 request/result envelopes; only health/version and synthetic
   denial/smoke operations; fixed redacted errors.
 - Empty future ports: source transactions, project filesystem, Ren'Py, Git,
@@ -32,8 +33,19 @@ not begin Phase 1B or treat the vertical-slice plan as an open-ended implementat
 - UI foundation: semantic dark and provisional light tokens, system/Source typography,
   restrained radius/elevation, visible focus, and reduced-motion behavior. The shell
   is boundary evidence, not an authoring screen.
-- Local state: npm install/typecheck/unit/build and independent Rust core tests pass.
-  Full supported-target Rust tests, package, and WebView smoke remain pending CI.
+- Local state: npm install/typecheck/unit/build, repository validation, and independent
+  Rust core tests pass.
+- [Production run 34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
+  at `ae447584` packaged Windows x64 and macOS ARM64. The macOS job passed the full
+  smoke/privacy/licence sequence. Windows passed package and all denial probes except
+  the renderer-secret heuristic, which incorrectly matched a WebView2 platform global.
+- `c4f2bd188bf33290204446b3aaf9d33c8fd15acb` corrects that heuristic without
+  removing the exact runtime-sentinel artifact scan. Its production run 34782646465
+  and quality run 34782646499 both failed at runner setup with zero steps. Artifact
+  uploads in the preceding jobs also reported exhausted repository storage quota.
+  These are recorded infrastructure failures, not passes.
+- Resume only by restoring Actions capacity and requiring a fresh two-target run at or
+  after `c4f2bd18`. Do not archive 1A or create/start 1B before both targets pass.
 
 ## Accepted Phase 0 boundaries
 

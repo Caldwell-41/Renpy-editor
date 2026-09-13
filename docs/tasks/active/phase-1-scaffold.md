@@ -111,8 +111,47 @@ envelope, main-window-only capability, denial probes, empty future ports, locked
 Cargo graphs, the semantic Quiet Studio theme foundation, static/unit/Rust core tests,
 artifact privacy/licence scripts, and the path-scoped two-target production workflow.
 
-Local npm checks/build and the independent Rust core suite pass. The executor lacks the
-system WebKit/GTK development packages needed for a full host Tauri build, and its
-package manager cannot acquire them due container identity restrictions. This is not a
-target exception: Windows x64 and macOS ARM64 desktop tests, packaging, and injected
-WebView smoke must pass in CI before this task can close.
+Local npm checks/build, the seven-test independent Rust core suite, repository
+validator, artifact scan, npm audit, Phase 0 regressions, and whitespace/privacy checks
+pass. The executor lacks the system WebKit/GTK development packages needed for a full
+host Tauri build, and its package manager cannot acquire them due container identity
+restrictions. A Windows MSVC target compile check passed before the executor toolchain
+cache was recycled; this is compile evidence only, not a target package/smoke pass.
+
+## Target evidence and current blocker — 2026-09-14
+
+- Commits from `f9b43880` through `c4f2bd18` preserve the bounded scaffold scope.
+  The follow-ups corrected npm argument forwarding, made popup/capability probes
+  native-observed and timing-safe, added a main-WebView handler guard, and removed a
+  WebView2-global false positive from the secret probe.
+- [Quality run 34782008928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008928)
+  passed at `ae447584`.
+- [Production run 34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
+  used Node 24.19.0, npm 11.17.0 supplied by that runner image, and Rust/Cargo 1.90.0.
+  macOS 26.6.2 ARM64 passed frontend tests, Rust core/desktop tests, packaging,
+  injected WebView boundary smoke, privacy scan, and dependency/licence inventory.
+  It produced `Loomlight.app` and `Loomlight_0.1.0_aarch64.dmg`; the smoke emitted
+  `navigationDenied: true`, `popupDenied: true`, and
+  `webviewRestrictionsPassed: true`.
+- The same run's Windows Server 2025 x64 job passed frontend and Rust tests and
+  produced `loomlight.exe`, `Loomlight_0.1.0_x64_en-US.msi`, and
+  `Loomlight_0.1.0_x64-setup.exe`. Its smoke passed command/payload, capability,
+  filesystem/process/HTTP/network, Node-global, popup, and navigation denials, but a
+  generic WebView2 global containing “token” made `rendererSecretsAbsent` false.
+  Commit `c4f2bd18` corrects the heuristic while retaining empty-storage/Node checks,
+  Loomlight-specific secret-global checks, sentinel-text denial, and the separate
+  exact-sentinel artifact scan.
+- Runs 34780357847, 34780490758, 34780802995, 34781085182, 34781283266,
+  34781484402, and 34781840747 retain the cancelled or failed command-forwarding and
+  packaged-probe evidence that led to those corrections. Skipped steps are not passes.
+- Repository artifact uploads reported exhausted GitHub storage quota. The workflow
+  still attempts private seven-day evidence upload but does not let quota failure mask
+  the package/security result.
+- Replacement production run 34782646465 and quality run 34782646499 at
+  `c4f2bd18` failed during runner setup with zero steps. The workflow now installs
+  exact npm 11.9.0 after selecting Node 24.19.0, but this change also remains target-
+  unexecuted while hosted capacity is unavailable.
+
+Phase 1A remains in progress. Restore GitHub-hosted Actions capacity and require a
+fresh Windows x64 plus macOS ARM64 production run at or after `c4f2bd18` before
+closing or archiving this task. Do not begin Phase 1B.

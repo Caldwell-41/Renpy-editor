@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1A production scaffold in progress<br>
+**Phase:** Phase 0 complete; Phase 1A target gate blocked on GitHub-hosted runner capacity<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -10,11 +10,21 @@
   bounded Phase 1A production scaffold on 2026-09-14; no later milestone is approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
-  main-window capability, empty future ports, locked dependencies, and semantic Quiet
-  Studio Dark/light-ready tokens.
-- Local TypeScript build/tests and framework-independent Rust core tests pass. The
-  Windows x64 and macOS ARM64 packaged gates are pending the first remote CI run, so
-  Phase 1A is not yet complete.
+  main-WebView capability plus matching handler guard, empty future ports, locked
+  dependencies, and semantic Quiet Studio Dark/light-ready tokens.
+- Local TypeScript build/tests and framework-independent Rust core tests pass.
+  Production run
+  [34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
+  at `ae447584` packaged on both targets. macOS ARM64 passed its complete packaged
+  boundary/privacy/licence gate; Windows x64 passed package and every boundary boolean
+  except a false-positive renderer-secret heuristic. Commit `c4f2bd18` narrows that
+  heuristic to Loomlight secret surfaces, storage, Node bridges, sentinel text, and the
+  separate exact-sentinel artifact scan.
+- The replacement production and quality runs at `c4f2bd18` (34782646465 and
+  34782646499) failed during runner setup with zero steps. Repository artifact storage
+  was already reporting quota exhaustion. No Windows result exists for the corrected
+  secret probe, so Phase 1A remains open rather than treating infrastructure failure as
+  a target pass.
 - Phase 1 product scope and core UX are now defined in
   [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
   [ARCHITECTURE.md](../ARCHITECTURE.md), and the
@@ -59,10 +69,11 @@
 
 ## Next action
 
-Complete and evidence only [phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md).
-Do not begin Phase 1B or any authoring implementation in this goal. After the scaffold
-gate passes, create only the bounded Phase 1B planning/handoff artifact and await a new
-explicit instruction.
+Restore GitHub-hosted Actions capacity, then run the production scaffold at or after
+`c4f2bd188bf33290204446b3aaf9d33c8fd15acb` and require both target jobs to pass.
+Complete and evidence only
+[phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md). Do not begin Phase 1B,
+archive the scaffold task, or claim the target gate while this remains blocked.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

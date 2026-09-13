@@ -18,10 +18,11 @@ Silicon development environment:
 
 ```bash
 cargo test -p loomlight-desktop --locked
-npm exec tauri build -- --locked
+npm exec -- tauri build -- --locked
 ```
 
 The production webview has no general filesystem, process, shell, HTTP, or credential
 authority. Its only custom Tauri command is `core_request`, granted through the explicit
-`allow-loomlight-core` permission only to the local `main` window. Future adapter traits
+`allow-loomlight-core` permission only to the local `main` WebView, with a matching
+Rust handler guard. Future adapter traits
 are empty markers until their own approved milestones.

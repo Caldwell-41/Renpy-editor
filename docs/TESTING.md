@@ -11,7 +11,7 @@ npm run build
 cargo fmt --check --all
 cargo test -p loomlight-core --locked
 cargo test -p loomlight-desktop --locked
-npm exec tauri build -- --locked
+npm exec -- tauri build -- --locked
 ```
 
 The full desktop Rust test, package, and injected packaged-WebView probe run separately
@@ -86,9 +86,15 @@ sampler attribution, comparison-vs-diagnostic exit criteria, and macOS filter-yi
 flakiness. ADR 0003 supports Tauri 2 from the bounded gate set. The macOS observation
 may omit launchd-owned WKWebView/XPC services and cannot support total-memory savings.
 The Phase 1A production workflow is path-scoped to production code, its workflow, and
-canonical scaffold documentation. It uses locked npm/Cargo dependencies and
-commit-pinned checkout, Node setup, Rust cache, and artifact-upload Actions. Target run
-IDs and results remain pending until the first scaffold commit reaches remote `main`.
+canonical architecture/security/testing/UI/dependency documentation; status-only task
+handoffs do not spend a target matrix. It uses locked npm/Cargo dependencies and
+commit-pinned checkout, Node setup, Rust cache, and artifact-upload Actions.
+[Run 34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
+passed the complete macOS ARM64 gate and packaged Windows x64, where one subsequently
+corrected renderer-secret false positive remained. Runs 34782646465 and 34782646499
+then failed at hosted-runner setup with zero steps after repository artifact storage
+reported quota exhaustion. Phase 1A remains open until the corrected scaffold receives
+a fresh passing two-target run.
 
 ## Planned layers
 

@@ -5,7 +5,7 @@
 
 ## Locked toolchains
 
-- Node.js 24.19.0 and npm 11.9.0 (`package.json` engines and CI setup)
+- Node.js 24.19.0 and npm 11.9.0 (`package.json` engines and explicit CI install)
 - Rust 1.90.0 with `rustfmt` (`rust-toolchain.toml`)
 - TypeScript 7.0.2 and Vite 8.3.0
 - Tauri JavaScript API 2.11.1, CLI 2.11.4, Rust crate 2.11.5, and build crate 2.6.3

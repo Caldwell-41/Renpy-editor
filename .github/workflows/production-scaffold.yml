@@ -13,8 +13,6 @@ on:
       - docs/TESTING.md
       - docs/UI.md
       - docs/dependencies/**
-      - docs/status/**
-      - docs/tasks/**
   pull_request:
     paths:
       - .github/workflows/production-scaffold.yml
@@ -25,8 +23,6 @@ on:
       - docs/TESTING.md
       - docs/UI.md
       - docs/dependencies/**
-      - docs/status/**
-      - docs/tasks/**
 
 permissions:
   contents: read
@@ -60,6 +56,8 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
+      - name: Select locked npm toolchain
+        run: npm install --global npm@11.9.0
       - name: Record runner and toolchain
         shell: bash
         run: |
