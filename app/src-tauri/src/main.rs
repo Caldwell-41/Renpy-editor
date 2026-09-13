@@ -15,7 +15,14 @@ static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
-fn core_request(app: tauri::AppHandle, request: Value) -> loomlight_core::CoreResponse {
+fn core_request(
+    window: tauri::WebviewWindow,
+    app: tauri::AppHandle,
+    request: Value,
+) -> Result<loomlight_core::CoreResponse, &'static str> {
+    if window.label() != "main" {
+        return Err("Command is not authorised for this window.");
+    }
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
     let is_smoke_report =
         request.get("operation").and_then(Value::as_str) == Some("probe.smokeReport");
@@ -64,7 +71,7 @@ fn core_request(app: tauri::AppHandle, request: Value) -> loomlight_core::CoreRe
             std::process::exit(1);
         });
     }
-    response
+    Ok(response)
 }
 
 fn main() {

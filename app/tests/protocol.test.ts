@@ -55,12 +55,13 @@ test("theme exposes all required semantics and reduced motion", async () => {
 });
 
 test("desktop manifest grants one local capability and no ambient plugins", async () => {
-  const [configText, capabilityText, permission, manifest, backend] = await Promise.all([
+  const [configText, capabilityText, permission, manifest, backend, host] = await Promise.all([
     readFile(new URL("src-tauri/tauri.conf.json", sourceRoot), "utf8"),
     readFile(new URL("src-tauri/capabilities/main.json", sourceRoot), "utf8"),
     readFile(new URL("src-tauri/permissions/core-request.toml", sourceRoot), "utf8"),
     readFile(new URL("src-tauri/Cargo.toml", sourceRoot), "utf8"),
     readFile(new URL("src-core/src/lib.rs", sourceRoot), "utf8"),
+    readFile(new URL("src-tauri/src/main.rs", sourceRoot), "utf8"),
   ]);
   const config = JSON.parse(configText);
   const capability = JSON.parse(capabilityText);
@@ -71,6 +72,7 @@ test("desktop manifest grants one local capability and no ambient plugins", asyn
   assert.deepEqual(capability.windows, ["main"]);
   assert.deepEqual(capability.permissions, ["allow-loomlight-core"]);
   assert.match(permission, /commands\.allow = \["core_request"\]/);
+  assert.match(host, /window\.label\(\) != "main"/);
   assert.doesNotMatch(`${manifest}\n${capabilityText}`, /tauri-plugin|shell:|fs:|http:|opener:|process:/);
   for (const operation of CORE_OPERATIONS) assert.equal(backend.includes(`"${operation}"`), true);
 });
