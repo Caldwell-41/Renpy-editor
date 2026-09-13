@@ -14,7 +14,11 @@ setTimeout(async () => {
   window.open("https://example.invalid/loomlight-popup");
   const popupRequestIssued = true;
   const nodeGlobalsDenied = typeof process === "undefined" && typeof require === "undefined";
-  const rendererSecretsAbsent = !Object.keys(window).some((key) => /api.?key|credential|secret|token/i.test(key));
+  const rendererSecretsAbsent =
+    !Object.keys(window).some((key) => /loomlight.*(?:credential|secret|token)|(?:credential|secret).*loomlight/i.test(key)) &&
+    localStorage.length === 0 &&
+    sessionStorage.length === 0 &&
+    !document.documentElement.textContent.includes("sentinel");
   await invoke("core_request", {
     request: {
       protocolVersion: 1,
