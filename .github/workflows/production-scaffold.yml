@@ -7,22 +7,6 @@ on:
     paths:
       - .github/workflows/production-scaffold.yml
       - app/**
-      - scripts/validate.py
-      - docs/ARCHITECTURE.md
-      - docs/SECURITY.md
-      - docs/TESTING.md
-      - docs/UI.md
-      - docs/dependencies/**
-  pull_request:
-    paths:
-      - .github/workflows/production-scaffold.yml
-      - app/**
-      - scripts/validate.py
-      - docs/ARCHITECTURE.md
-      - docs/SECURITY.md
-      - docs/TESTING.md
-      - docs/UI.md
-      - docs/dependencies/**
 
 permissions:
   contents: read
@@ -119,15 +103,23 @@ jobs:
           node scripts/dependency-inventory.mjs \
             --cargo-metadata "$RUNNER_TEMP/cargo-metadata.json" \
             --output "$RUNNER_TEMP/dependency-inventory.json"
-      - name: Upload private scaffold evidence
+      - name: Upload lightweight scaffold evidence
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: phase-1a-scaffold-${{ matrix.runner }}
+          name: phase-1a-scaffold-evidence-${{ matrix.runner }}
           path: |
             ${{ runner.temp }}/loomlight-scaffold-smoke.json
             ${{ runner.temp }}/dependency-inventory.json
-            app/target/release/bundle/**
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload packaged scaffold for manual runs
+        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phase-1a-scaffold-package-${{ matrix.runner }}
+          path: app/target/release/bundle/**
           if-no-files-found: warn
           retention-days: 7
