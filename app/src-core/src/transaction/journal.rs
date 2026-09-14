@@ -1,10 +1,11 @@
 use super::{
-    identity::identity_for_file,
     path::{self, ArtifactPaths, RelativePath},
     platform::{flush_open_file, DirectoryAnchor},
     ErrorCode, MutationKind, RecoveryItem, RecoveryMutationState, RecoveryReport, Revision,
     TransactionIntent,
 };
+#[cfg(unix)]
+use super::identity::identity_for_file;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
