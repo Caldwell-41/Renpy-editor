@@ -43,7 +43,22 @@ jobs:
           old = 'Err(LifecycleError::GenerationFailed)'
           if block.count(old) != 1:
               raise SystemExit('expected failure assertion not found exactly once')
-          lifecycle.write_text(text[:start] + block.replace(old, 'Err(LifecycleError::UnsupportedSdk)') + text[end:])
+          text = text[:start] + block.replace(old, 'Err(LifecycleError::UnsupportedSdk)') + text[end:]
+          old = '''    if !path
+              .file_name()
+              .is_some_and(|value| value.to_string_lossy() == name)
+              || name != format!(".loomlight-stage-{token}")
+          {
+'''
+          new = '''    if path
+              .file_name()
+              .is_none_or(|value| value.to_string_lossy() != name)
+              || name != format!(".loomlight-stage-{token}")
+          {
+'''
+          if text.count(old) != 1:
+              raise SystemExit('stage filename predicate not found exactly once')
+          lifecycle.write_text(text.replace(old, new))
 
           renpy = Path('app/src-core/src/renpy.rs')
           text = renpy.read_text()
