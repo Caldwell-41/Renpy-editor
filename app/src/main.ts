@@ -18,6 +18,7 @@ const wizard = {
   parent: undefined as ParentChoice | undefined,
   destination: undefined as DestinationPreview | undefined,
   sdk: undefined as SdkInfo | undefined,
+  browsedSdk: undefined as SdkInfo | undefined,
   resolution: { width: 1920, height: 1080 }, initializeGit: true,
 };
 
@@ -64,7 +65,7 @@ function recentRow(recent: RecentProject): HTMLElement {
   row.append(open, detail, remove); return row;
 }
 
-function resetWizard(): void { Object.assign(wizard, { step: 1, title: "", folderName: "", folderEdited: false, parent: undefined, destination: undefined, sdk: undefined, resolution: { width: 1920, height: 1080 }, initializeGit: true }); }
+function resetWizard(): void { Object.assign(wizard, { step: 1, title: "", folderName: "", folderEdited: false, parent: undefined, destination: undefined, sdk: undefined, browsedSdk: undefined, resolution: { width: 1920, height: 1080 }, initializeGit: true }); }
 function showWizard(): void {
   const layout = document.createElement("section"); layout.className = "wizard-layout";
   const rail = document.createElement("nav"); rail.className = "step-rail"; rail.ariaLabel = "New Project steps";
@@ -104,11 +105,11 @@ async function renderSdk(panel: HTMLElement): Promise<void> {
   wizardHeading(panel, "New Project · 2 of 4", "Ren'Py SDK", "Loomlight supports exactly Ren'Py 8.5.3 for this project.");
   const list = document.createElement("div"); list.className = "sdk-list"; panel.append(list);
   const addSdk = (sdk: SdkInfo): void => { const row = document.createElement("label"); row.className = "sdk-row"; const radio = input("radio"); radio.name = "sdk"; radio.disabled = !sdk.compatible; radio.checked = wizard.sdk?.id === sdk.id; radio.addEventListener("change", () => { wizard.sdk = sdk; showWizard(); }); const copy = document.createElement("span"); const strong = document.createElement("strong"); strong.textContent = sdk.displayName; const detail = document.createElement("small"); detail.textContent = `${sdk.source} · ${sdk.explanation}`; copy.append(strong, detail); row.append(radio, copy); list.append(row); };
-  try { (await value<SdkInfo[]>("sdk.discover")).forEach(addSdk); } catch { setStatus("SDK discovery could not be completed", "error"); }
+  try { const discovered = await value<SdkInfo[]>("sdk.discover"); discovered.forEach(addSdk); if (wizard.browsedSdk && !discovered.some((sdk) => sdk.id === wizard.browsedSdk?.id)) addSdk(wizard.browsedSdk); } catch { if (wizard.browsedSdk) addSdk(wizard.browsedSdk); setStatus("SDK discovery could not be completed", "error"); }
   if (!list.children.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No compatible managed SDK detected."; list.append(empty); }
   const actions = document.createElement("div"); actions.className = "actions";
   const install = button("Install verified 8.5.3", "button primary"); install.addEventListener("click", async () => { install.disabled = true; setStatus("Downloading and verifying Ren'Py 8.5.3…"); try { wizard.sdk = await value<SdkInfo>("sdk.install"); showWizard(); } catch (error) { setStatus(message(error, "SDK installation failed"), "error"); install.disabled = false; } });
-  const browse = button("Browse existing SDK"); browse.addEventListener("click", async () => { try { const sdk = await value<SdkInfo>("sdk.browse"); if (!sdk.cancelled && sdk.compatible) wizard.sdk = sdk; showWizard(); } catch (error) { setStatus(message(error, "SDK is incompatible"), "error"); } }); actions.append(install, browse); panel.append(actions); navigation(panel, () => { if (wizard.sdk?.compatible) { wizard.step = 3; showWizard(); } }, !wizard.sdk?.compatible);
+  const browse = button("Browse existing SDK"); browse.addEventListener("click", async () => { try { const sdk = await value<SdkInfo>("sdk.browse"); if (!sdk.cancelled) { wizard.browsedSdk = sdk; wizard.sdk = sdk.compatible ? sdk : undefined; } showWizard(); } catch (error) { setStatus(message(error, "SDK is incompatible"), "error"); } }); actions.append(install, browse); panel.append(actions); navigation(panel, () => { if (wizard.sdk?.compatible) { wizard.step = 3; showWizard(); } }, !wizard.sdk?.compatible);
 }
 
 function renderConfiguration(panel: HTMLElement): void {

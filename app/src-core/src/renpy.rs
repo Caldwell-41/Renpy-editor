@@ -94,9 +94,6 @@ pub struct RenpyAdapter;
 
 impl RenpyAdapter {
     pub fn validate_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
-        if has_symlink_component(path) {
-            return Err(RenpyError::InvalidSdk);
-        }
         let root = fs::canonicalize(path).map_err(|_| RenpyError::InvalidSdk)?;
         if !root.is_dir() || has_symlink_component(&root) {
             return Err(RenpyError::InvalidSdk);

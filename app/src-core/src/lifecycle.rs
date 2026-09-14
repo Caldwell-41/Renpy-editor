@@ -702,11 +702,8 @@ fn write_replace(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
 }
 
 fn canonical_safe_directory(path: &Path) -> Result<PathBuf, LifecycleError> {
-    if has_symlink_component(path) {
-        return Err(LifecycleError::UnsafePath);
-    }
     let root = fs::canonicalize(path).map_err(|_| LifecycleError::InvalidParent)?;
-    if !root.is_dir() {
+    if !root.is_dir() || has_symlink_component(&root) {
         return Err(LifecycleError::InvalidParent);
     }
     Ok(root)
@@ -725,7 +722,7 @@ fn has_symlink_component(path: &Path) -> bool {
 fn open_parent(path: &Path) -> Result<ParentAnchor, LifecycleError> {
     let path = canonical_safe_directory(path)?;
     let file = open_directory(&path).map_err(|_| LifecycleError::InvalidParent)?;
-    let identity = identity(&file.metadata().map_err(|_| LifecycleError::InvalidParent)?);
+    let identity = identity(&file).map_err(|_| LifecycleError::InvalidParent)?;
     Ok(ParentAnchor {
         path,
         file,
@@ -734,13 +731,9 @@ fn open_parent(path: &Path) -> Result<ParentAnchor, LifecycleError> {
 }
 
 fn validate_parent(parent: &ParentAnchor) -> Result<(), LifecycleError> {
-    let held = identity(
-        &parent
-            .file
-            .metadata()
-            .map_err(|_| LifecycleError::UnsafePath)?,
-    );
-    let live = identity(&fs::metadata(&parent.path).map_err(|_| LifecycleError::UnsafePath)?);
+    let held = identity(&parent.file).map_err(|_| LifecycleError::UnsafePath)?;
+    let live_file = open_directory(&parent.path).map_err(|_| LifecycleError::UnsafePath)?;
+    let live = identity(&live_file).map_err(|_| LifecycleError::UnsafePath)?;
     if held != parent.identity || live != parent.identity || has_symlink_component(&parent.path) {
         Err(LifecycleError::UnsafePath)
     } else {
@@ -749,20 +742,28 @@ fn validate_parent(parent: &ParentAnchor) -> Result<(), LifecycleError> {
 }
 
 #[cfg(unix)]
-fn identity(meta: &fs::Metadata) -> FileIdentity {
+fn identity(file: &File) -> io::Result<FileIdentity> {
     use std::os::unix::fs::MetadataExt;
-    FileIdentity {
+    let meta = file.metadata()?;
+    Ok(FileIdentity {
         a: meta.dev(),
         b: meta.ino(),
-    }
+    })
 }
 #[cfg(windows)]
-fn identity(meta: &fs::Metadata) -> FileIdentity {
-    use std::os::windows::fs::MetadataExt;
-    FileIdentity {
-        a: meta.volume_serial_number().unwrap_or(0) as u64,
-        b: meta.file_index().unwrap_or(0),
+fn identity(file: &File) -> io::Result<FileIdentity> {
+    use std::{mem::zeroed, os::windows::io::AsRawHandle};
+    use windows_sys::Win32::Storage::FileSystem::{
+        GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION,
+    };
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { zeroed() };
+    if unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut info) } == 0 {
+        return Err(io::Error::last_os_error());
     }
+    Ok(FileIdentity {
+        a: u64::from(info.dwVolumeSerialNumber),
+        b: (u64::from(info.nFileIndexHigh) << 32) | u64::from(info.nFileIndexLow),
+    })
 }
 
 #[cfg(unix)]
