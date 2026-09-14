@@ -88,7 +88,7 @@ jobs:
         run: |
           set -o pipefail
           cargo test -p loomlight-core --release --locked \
-            lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture \
+            lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Test desktop Rust boundary

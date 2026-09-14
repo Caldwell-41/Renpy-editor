@@ -281,7 +281,7 @@ fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyE
         {
             return Err(RenpyError::InvalidSdk);
         }
-        let mut value = vec![executable.into_os_string(), script.into_os_string()];
+        let mut value = vec![command_path(&executable), command_path(&script)];
         value.extend_from_slice(args);
         Ok(value)
     }
@@ -367,7 +367,7 @@ fn run_bounded(
     apply_minimal_environment(&mut command);
     command
         .args(args)
-        .current_dir(cwd)
+        .current_dir(command_path(cwd))
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
