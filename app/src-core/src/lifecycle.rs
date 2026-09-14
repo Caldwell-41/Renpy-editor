@@ -525,12 +525,16 @@ fn apply_overlay(
         fs::create_dir_all(game.join(directory)).map_err(|_| LifecycleError::Io)?;
     }
     fs::create_dir_all(stage.join(".renpy-editor/recovery")).map_err(|_| LifecycleError::Io)?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: directories");
     let project_id = uuid::Uuid::new_v4().to_string();
     let chapter_id = uuid::Uuid::new_v4().to_string();
     let scene_id = uuid::Uuid::new_v4().to_string();
     let technical_label = format!("loomlight_scene_{}", scene_id.replace('-', ""));
     let script = format!("# Loomlight entry point. Runnable source remains authoritative.\n\nlabel start:\n    jump {technical_label}\n");
     write_replace(&game.join("script.rpy"), script.as_bytes())?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: script");
     let options = game.join("options.rpy");
     let options_text = fs::read_to_string(&options).map_err(|_| LifecycleError::Io)?;
     let safe_title = title
@@ -548,6 +552,8 @@ fn apply_overlay(
         &format!("define build.name = \"{folder_name}\""),
     )?;
     write_replace(&options, options_text.as_bytes())?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: options");
     write_new(
         &game.join("definitions/characters.rpy"),
         b"# Character definitions are added by Loomlight.\n",
@@ -566,6 +572,8 @@ fn apply_overlay(
         &game.join("chapters/chapter_01/scene_001.rpy"),
         scene_source.as_bytes(),
     )?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: source");
     let metadata = ProjectMetadata {
         schema_version: PROJECT_SCHEMA_VERSION,
         project_id: project_id.clone(),
@@ -612,6 +620,8 @@ fn apply_overlay(
     }
     .write(stage)
     .map_err(|_| LifecycleError::InvalidMetadata)?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: metadata");
     Ok(metadata)
 }
 

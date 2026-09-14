@@ -176,6 +176,20 @@ impl RenpyAdapter {
 }
 
 fn require_success(result: ProcessResult) -> Result<(), RenpyError> {
+    #[cfg(test)]
+    if result.exit_code != Some(0) || result.timed_out || result.output_limited {
+        for line in result
+            .output
+            .lines()
+            .rev()
+            .take(20)
+            .collect::<Vec<_>>()
+            .iter()
+            .rev()
+        {
+            eprintln!("renpy-test-diagnostic: {}", redact_line(line));
+        }
+    }
     if result.timed_out {
         Err(RenpyError::TimedOut)
     } else if result.output_limited {
