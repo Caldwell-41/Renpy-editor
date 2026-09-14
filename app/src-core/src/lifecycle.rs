@@ -1888,9 +1888,13 @@ mod tests {
         assert!(embedded_provenance.is_file());
         assert!(!legacy_provenance.exists());
         fs::rename(&embedded_provenance, &legacy_provenance).unwrap();
+        // Simulate interruption after an embedded migration file has been created but
+        // before it became complete/durable. The still-valid legacy provenance must
+        // make the migration safely retryable rather than wedging SDK discovery.
+        fs::write(&embedded_provenance, b"truncated-migration").unwrap();
         let migrated = crate::renpy::discover_managed_sdk(&managed_state)
             .unwrap()
-            .expect("legacy provenance should migrate into the managed SDK");
+            .expect("legacy provenance should repair an interrupted embedded migration");
         assert!(sdk.same_identity(&migrated));
         assert!(embedded_provenance.is_file());
         let discovered = crate::renpy::discover_managed_sdk(&managed_state)

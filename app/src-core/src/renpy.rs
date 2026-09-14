@@ -683,6 +683,19 @@ fn write_managed_provenance(path: &Path, sdk: &ValidatedSdk) -> Result<(), Renpy
         .map_err(|_| RenpyError::Io)
 }
 
+fn remove_repairable_embedded_provenance(path: &Path) -> Result<(), RenpyError> {
+    match fs::symlink_metadata(path) {
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
+        Err(_) => Err(RenpyError::InvalidSdk),
+        Ok(metadata)
+            if metadata.is_file() && !crate::transaction::is_link_or_reparse(&metadata) =>
+        {
+            fs::remove_file(path).map_err(|_| RenpyError::Io)
+        }
+        Ok(_) => Err(RenpyError::InvalidSdk),
+    }
+}
+
 pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, RenpyError> {
     let (destination, embedded, legacy) = managed_sdk_paths(data_root);
     let destination_meta = match fs::symlink_metadata(&destination) {
@@ -698,6 +711,10 @@ pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, Re
         return Ok(Some(sdk));
     }
     if provenance_matches(&legacy, &sdk)? {
+        // Keep the valid legacy sidecar authoritative until the replacement embedded
+        // provenance has been fully written and the SDK directory has been flushed.
+        // A crash during migration can therefore be retried on the next launch.
+        remove_repairable_embedded_provenance(&embedded)?;
         write_managed_provenance(&embedded, &sdk)?;
         sync_directory(&destination).map_err(|_| RenpyError::Io)?;
         let _ = fs::remove_file(&legacy);
