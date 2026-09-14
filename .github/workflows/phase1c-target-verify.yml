@@ -5,6 +5,7 @@ on:
     branches: [phase1c-corrective-targets]
     paths:
       - app/src-core/**
+      - .github/workflows/phase1c-target-verify.yml
 
 permissions:
   contents: read
