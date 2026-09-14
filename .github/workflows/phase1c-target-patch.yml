@@ -27,99 +27,52 @@ jobs:
 
           lifecycle = Path('app/src-core/src/lifecycle.rs')
           text = lifecycle.read_text()
-          old = '''        let parent = open_parent(&parent_path).unwrap();
-        let token = uuid::Uuid::new_v4().to_string();
-'''
-          new = '''        let parent = open_parent(&parent_path).unwrap();
-        let parent_path = parent.path.clone();
-        let token = uuid::Uuid::new_v4().to_string();
-'''
+          old = "        let parent = open_parent(&parent_path).unwrap();\n        let token = uuid::Uuid::new_v4().to_string();\n"
+          new = "        let parent = open_parent(&parent_path).unwrap();\n        let parent_path = parent.path.clone();\n        let token = uuid::Uuid::new_v4().to_string();\n"
           if text.count(old) != 1:
               raise SystemExit('stage test setup not found exactly once')
           lifecycle.write_text(text.replace(old, new))
 
           renpy = Path('app/src-core/src/renpy.rs')
           text = renpy.read_text()
-          old = '''    for key in [
-        "PATH",
-        "HOME",
-        "USERPROFILE",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "SYSTEMROOT",
-        "WINDIR",
-        "COMSPEC",
-        "PATHEXT",
-        "TMPDIR",
-        "TEMP",
-        "TMP",
-        "LANG",
-        "LC_ALL",
-        "LC_CTYPE",
-    ] {
-        if let Some(value) = std::env::var_os(key) {
-            command.env(key, value);
-        }
-    }
-}
-'''
-          new = '''    for key in [
-        "PATH",
-        "HOME",
-        "USERPROFILE",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "SYSTEMROOT",
-        "WINDIR",
-        "COMSPEC",
-        "PATHEXT",
-        "TMPDIR",
-        "TEMP",
-        "TMP",
-        "LANG",
-        "LC_ALL",
-        "LC_CTYPE",
-    ] {
-        if let Some(value) = std::env::var_os(key) {
-            command.env(key, value);
-        }
-    }
-    #[cfg(windows)]
-    for key in [
-        "ALLUSERSPROFILE",
-        "COMMONPROGRAMFILES",
-        "COMMONPROGRAMFILES(X86)",
-        "COMMONPROGRAMW6432",
-        "COMPUTERNAME",
-        "DRIVERDATA",
-        "HOMEDRIVE",
-        "HOMEPATH",
-        "NUMBER_OF_PROCESSORS",
-        "OS",
-        "PROCESSOR_ARCHITECTURE",
-        "PROCESSOR_IDENTIFIER",
-        "PROCESSOR_LEVEL",
-        "PROCESSOR_REVISION",
-        "PROGRAMDATA",
-        "PROGRAMFILES",
-        "PROGRAMFILES(X86)",
-        "PROGRAMW6432",
-        "PUBLIC",
-        "SESSIONNAME",
-        "SYSTEMDRIVE",
-        "USERDOMAIN",
-        "USERDOMAIN_ROAMINGPROFILE",
-        "USERNAME",
-    ] {
-        if let Some(value) = std::env::var_os(key) {
-            command.env(key, value);
-        }
-    }
-}
-'''
-          if text.count(old) != 1:
-              raise SystemExit('minimal RenPy environment helper not found exactly once')
-          renpy.write_text(text.replace(old, new))
+          marker = "    }\n}\n\nfn run_bounded("
+          if text.count(marker) != 1:
+              raise SystemExit('RenPy environment insertion point not found exactly once')
+          windows = "\n".join([
+              "    #[cfg(windows)]",
+              "    for key in [",
+              "        \"ALLUSERSPROFILE\",",
+              "        \"COMMONPROGRAMFILES\",",
+              "        \"COMMONPROGRAMFILES(X86)\",",
+              "        \"COMMONPROGRAMW6432\",",
+              "        \"COMPUTERNAME\",",
+              "        \"DRIVERDATA\",",
+              "        \"HOMEDRIVE\",",
+              "        \"HOMEPATH\",",
+              "        \"NUMBER_OF_PROCESSORS\",",
+              "        \"OS\",",
+              "        \"PROCESSOR_ARCHITECTURE\",",
+              "        \"PROCESSOR_IDENTIFIER\",",
+              "        \"PROCESSOR_LEVEL\",",
+              "        \"PROCESSOR_REVISION\",",
+              "        \"PROGRAMDATA\",",
+              "        \"PROGRAMFILES\",",
+              "        \"PROGRAMFILES(X86)\",",
+              "        \"PROGRAMW6432\",",
+              "        \"PUBLIC\",",
+              "        \"SESSIONNAME\",",
+              "        \"SYSTEMDRIVE\",",
+              "        \"USERDOMAIN\",",
+              "        \"USERDOMAIN_ROAMINGPROFILE\",",
+              "        \"USERNAME\",",
+              "    ] {",
+              "        if let Some(value) = std::env::var_os(key) {",
+              "            command.env(key, value);",
+              "        }",
+              "    }",
+          ])
+          replacement = "    }\n" + windows + "\n}\n\nfn run_bounded("
+          renpy.write_text(text.replace(marker, replacement))
           PY
       - name: Format
         working-directory: app
