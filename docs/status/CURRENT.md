@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C project lifecycle/SDK implementation in progress; Phase 1D not approved<br>
+**Phase:** Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -9,13 +9,20 @@
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
   are complete. The correction and subsequent recovery-enumeration follow-up re-closed
-  Gate E. Phase 1C is now explicitly approved and active; no later milestone is approved.
-- The bounded [Phase 1C task](../tasks/active/phase-1c-project-lifecycle.md) and ADR
-  0005 are active. Production implementation now includes versioned metadata/Recent
-  Projects, trusted picker-mediated opaque path choices, staged/no-replace project
+  Gate E. Phase 1C was separately approved and is now complete; no later milestone is
+  approved.
+- The bounded [Phase 1C task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+  is archived and ADR 0005 is accepted. Production implementation includes versioned
+  metadata/Recent Projects, trusted picker-mediated opaque path choices, staged/no-replace project
   creation, the exact Ren'Py 8.5.3 adapter/verified installer, optional `git init`, and
-  Welcome/New Project/Open/minimal Chapter 1 → Scene 1 UI. Local gates pass; actual
-  Windows/macOS lifecycle evidence is still required before closure.
+  Welcome/New Project/Open/minimal Chapter 1 → Scene 1 UI.
+- [Production run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
+  at `1b241954e936f943d558f267a86f5e3592ab99cb` passed the complete Phase 1C gate:
+  Windows x64 job `103883726104` and macOS ARM64 job `103883726218` both created,
+  validated, ran, closed, and reopened the generated game; checked standard Ren'Py
+  screens and stable Chapter 1 / Scene 1 identity; ran a metadata-free copy; rejected
+  arbitrary Ren'Py opening; and passed desktop/package/security evidence. Artifacts are
+  `10335964464` (Windows) and `10335279104` (macOS). Quality run `34814995493` passed.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, capability-specific ports, locked
@@ -99,9 +106,8 @@
 
 ## Next action
 
-Finish Phase 1C local validation and the complete actual Windows x64/macOS ARM64 target
-gate, reconcile any failures, record exact evidence, and close/archive only when both
-targets pass. Do not begin Phase 1D.
+Stop. Phase 1D Characters/Assets/Variables remains separately approval-gated and has
+not started. Await a new explicit instruction before beginning it or any later work.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

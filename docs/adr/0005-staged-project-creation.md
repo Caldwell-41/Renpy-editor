@@ -22,11 +22,14 @@ argument array:
 
 ```text
 <renpy launcher> launcher generate_gui <private stage>
-  --width <width> --height <height> --start
+  --width <width> --height <height>
+  --template <exact-sdk>/gui --start
 ```
 
-Loomlight invokes this only for its new private, empty staging project. It then
-replaces the generated sample entry script with a small deterministic router and adds
+Loomlight invokes this only for its new private staging project. Because the private
+ownership marker means the target already exists, Loomlight first creates the empty
+`game/` directory required by the generator's documented existing-target check. It then
+creates or replaces the entry script with a small deterministic router and adds
 Loomlight definitions, Chapter 1 / Scene 1 source, and versioned metadata. The same
 8.5.3 adapter compiles and strictly lints the resulting staged scaffold before
 finalisation.

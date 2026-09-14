@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1C project lifecycle/SDK implementation in progress; Phase 1D not approved<br>
+**Phase:** Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -10,21 +10,24 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-5. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-6. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-7. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-8. [ADR 0001](../adr/0001-lossless-source-model.md),
+4. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+5. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+6. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+7. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+8. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+9. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
-   [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
+   [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
+   [ADR 0005](../adr/0005-staged-project-creation.md)
 
 The approved product brief remains authoritative. The user explicitly approved Phase
 1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
 instruction.
 
-## Active Phase 1C checkpoint
+## Completed Phase 1C checkpoint
 
-- The bounded [Phase 1C task](../tasks/active/phase-1c-project-lifecycle.md) is active.
+- The bounded [Phase 1C task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+  is complete and archived.
 - ADR 0005 selects Ren'Py 8.5.3's documented `generate_gui ... --start` mechanism,
   followed by a deterministic Loomlight overlay, compile/lint, and same-parent
   no-replace promotion.
@@ -34,8 +37,15 @@ instruction.
   process-tree execution, optional `git init`, open/close/reopen, and the minimal
   Chapter 1 / Scene 1 shell.
 - Local frontend/core gates pass. The Linux host cannot compile the desktop crate due
-  to its already-recorded missing `pkg-config`/GLib environment. Actual Windows x64
-  and macOS ARM64 Phase 1C lifecycle evidence remains required before closure.
+  to its already-recorded missing `pkg-config`/GLib environment. This is not target
+  evidence.
+- [Production run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
+  at `1b241954e936f943d558f267a86f5e3592ab99cb` passed Windows x64 job
+  `103883726104` and macOS ARM64 job `103883726218`, including the complete lifecycle,
+  metadata-free game, arbitrary-project rejection, desktop tests, packages, denial
+  smoke, secret scan, and dependency inventory. Evidence artifacts are `10335964464`
+  and `10335279104`; quality run `34814995493` passed. The archived task records every
+  preceding failed or superseded run and its diagnosis.
 
 ## Completed Phase 1B correction
 
@@ -68,7 +78,8 @@ instruction.
   jobs stopped at `cargo fmt --check --all`; core and later steps were skipped. The
   exact formatting diff was corrected in `dc2efdf`. No functional failure was retried
   away.
-- Phase 1C remains unapproved and was not started.
+- At that Phase 1B checkpoint, Phase 1C was unapproved and had not started; the
+  separately approved Phase 1C work above is now complete.
 
 ## Original Phase 1B foundation and evidence
 

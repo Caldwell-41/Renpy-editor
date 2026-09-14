@@ -137,14 +137,15 @@ specified race/recovery suite on Windows x64 and macOS ARM64.
 
 The original closure by run 34797222616 was reopened after material pathname-race and
 terminal-state findings. The handle-anchored correction passed actual Windows x64 and
-macOS ARM64 runtime evidence in run 34801268319, re-closing Gate E. Phase 1C remains
-blocked and separately approval-gated.
+macOS ARM64 runtime evidence in run 34801268319, re-closing Gate E. Phase 1C was later
+separately approved and completed without changing that replacement-only boundary.
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** In progress under the bounded
-[Phase 1C task](phase-1c-project-lifecycle.md). ADR 0005 records the approved starter
-generation and no-replace finalisation design.
+**Status:** Complete under the archived
+[Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md). ADR 0005 records
+the starter-generation and no-replace finalisation design; production run 34814995559
+passed the complete Windows x64/macOS ARM64 gate.
 
 Implement Welcome/Recent Projects and the New Project workflow:
 
