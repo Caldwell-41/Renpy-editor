@@ -52,7 +52,29 @@ Before publication, verify that the GitHub account's public profile does not exp
 personal email unless that is intentional, and keep repository commit identity on the
 GitHub noreply address.
 
-### 5. Public repository controls
+### 5. Licence and contribution model
+
+The selected public model is source-available rather than OSI-approved open source.
+`LICENSE` applies the Apache License, Version 2.0 subject to the "Commons Clause"
+License Condition v1.0. The Commons Clause removes the right to Sell the Software as
+that term is defined in the condition while retaining the underlying Apache use,
+modification, redistribution, patent, and attribution framework subject to the combined
+terms.
+
+`NOTICE` identifies Caldwell-41 as the original project author/copyright holder for the
+current repository and supplies the attribution that downstream redistributions must
+preserve as required by the licence. `CONTRIBUTING.md` adds an explicit inbound grant
+allowing Caldwell-41 and a successor project copyright holder to sublicense, relicense,
+and commercially exploit accepted contributions while contributors retain ownership of
+their own contributions. This is intended to preserve the ability to offer separately
+licensed commercial versions.
+
+Before material commercial distribution or substantial outside contribution activity,
+a qualified lawyer should review the commercial licensing and contribution terms. A
+dedicated CLA workflow can replace the submission-by-contribution mechanism later if
+needed.
+
+### 6. Public repository controls
 
 After changing visibility to public:
 
@@ -74,9 +96,10 @@ After changing visibility to public:
 - [ ] Historical Actions logs have been reviewed for private information.
 - [ ] Experimental package artifacts have expired or been removed.
 - [ ] GitHub public-profile email exposure is intentional or disabled.
-- [ ] Repository licence choice is explicit; lack of an open-source licence is
-      intentional if source is only being made publicly visible.
-- [ ] Root `SECURITY.md` is present and private vulnerability reporting is enabled.
+- [x] Source-available licence model selected: Apache License 2.0 subject to Commons
+      Clause v1.0, with `LICENSE`, `NOTICE`, and contribution terms present.
+- [ ] Root `SECURITY.md` is present on the exact public commit and private vulnerability
+      reporting is enabled.
 - [ ] Secret scanning and push protection are enabled after publication.
 - [ ] `main` force-push/deletion protection is configured.
 - [ ] No public workflow executes untrusted pull-request code on a personal/self-hosted
