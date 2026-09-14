@@ -1842,21 +1842,32 @@ mod tests {
             .write_recent(&recent_store("Committed", &temp.path().join("project")))
             .unwrap();
         let original = temp.path().join("original-state");
-        fs::rename(&state, &original).unwrap();
-        fs::create_dir(&state).unwrap();
-        assert!(service
-            .write_recent(&recent_store("Blocked", &temp.path().join("project")))
-            .is_err());
-        assert!(!state.join("recent-projects.json").exists());
-        assert_eq!(
-            serde_json::from_slice::<RecentStore>(
-                &fs::read(original.join("recent-projects.json")).unwrap()
-            )
-            .unwrap()
-            .entries[0]
-                .title,
-            "Committed"
-        );
+        #[cfg(unix)]
+        {
+            fs::rename(&state, &original).unwrap();
+            fs::create_dir(&state).unwrap();
+            assert!(service
+                .write_recent(&recent_store("Blocked", &temp.path().join("project")))
+                .is_err());
+            assert!(!state.join("recent-projects.json").exists());
+            assert_eq!(
+                serde_json::from_slice::<RecentStore>(
+                    &fs::read(original.join("recent-projects.json")).unwrap()
+                )
+                .unwrap()
+                .entries[0]
+                    .title,
+                "Committed"
+            );
+        }
+        #[cfg(windows)]
+        {
+            assert!(fs::rename(&state, &original).is_err());
+            service
+                .write_recent(&recent_store("Pinned", &temp.path().join("project")))
+                .unwrap();
+            assert_eq!(service.read_recent().entries[0].title, "Pinned");
+        }
     }
 
     #[test]
