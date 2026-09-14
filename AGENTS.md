@@ -4,8 +4,8 @@
 
 Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and the
 bounded Phase 1A production scaffold are complete, and ADR 0003 selects Tauri 2.
-Phase 1B is planned but not approved. Do not begin it or any authoring work until the
-user provides a new explicit instruction.
+Phase 1B transaction/recovery implementation is active under explicit approval. Do
+not begin Phase 1C or any authoring work.
 
 ## Invariants
 
@@ -42,6 +42,10 @@ cargo test -p loomlight-core --locked
 cargo test -p loomlight-desktop --locked  # supported desktop build environment
 npm exec -- tauri build -- --locked
 ```
+
+The core test command includes the Phase 1B hostile-race and real
+process-termination recovery suite. See docs/TRANSACTIONS.md for its platform
+contract.
 
 Retain the Phase 0 regression commands:
 

@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 0 and Phase 1A complete; Phase 1B planned but not approved<br>
+**Phase:** Phase 0 and Phase 1A complete; Phase 1B implementation active<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -17,9 +17,25 @@
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
 
-The approved product brief remains authoritative. The user explicitly approved and
-Phase 1A completed on 2026-09-14. Phase 1B and every later milestone require a new
-explicit instruction; do not treat this handover or the vertical-slice plan as approval.
+The approved product brief remains authoritative. The user explicitly approved Phase
+1B on 2026-09-14. Phase 1C and every later milestone still require a new explicit
+instruction.
+
+## Active Phase 1B checkpoint
+
+- app/src-core/src/transaction contains the production multi-path transaction,
+  identity/path checks, platform replacement adapters, alternating journal/recovery
+  model, explicit flush semantics, and revision-guarded history foundation.
+- ADR 0004 and docs/TRANSACTIONS.md are the canonical design/durability contract.
+- Local locked core tests and strict Clippy pass. The suite includes deterministic
+  external-writer/path races and real child-process termination at all seven
+  persistent boundaries.
+- The renderer protocol, command allowlist, Tauri capability, CSP, navigation policy,
+  and ambient-authority denials remain unchanged.
+- The existing single production matrix now retains the Phase 1B test log as well as
+  packaged-boundary and dependency evidence, avoiding a duplicate expensive matrix.
+- Windows x64 and macOS ARM64 evidence has not yet been recorded. Phase 1B remains
+  open until both pass and the final evidence is documented.
 
 ## Completed Phase 1A implementation
 

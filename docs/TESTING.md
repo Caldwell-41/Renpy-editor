@@ -145,6 +145,14 @@ quality-gated rather than one large feature branch:
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
 
+The Phase 1B core suite also launches a child copy of the Rust test process and exits
+it at prepared, staged, commit-intent, exchanged, verified, committed, and durable
+journal boundaries. A fresh service then classifies the retained state. In-process
+hooks deterministically race external content/identity/path changes before and after
+the platform operation. The production Windows/macOS matrix runs this same suite in
+release mode and retains its log with the existing packaged-boundary and dependency
+evidence; it is not duplicated in a second expensive matrix.
+
 ## Representative source coverage
 
 Fixtures cover comments/formatting, dialogue/narration, labels, menus and conditions,

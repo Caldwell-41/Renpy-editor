@@ -127,13 +127,13 @@ diagnostic record.
   on Windows x64 and macOS ARM64.
 - **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
   partial-download, limits, and unsafe overwrite/promotion cases.
-- **Bounded spike evidence, production writer blocked:** Internal transactions are
-  serialized; expected hash, file/path identity, and approval are rechecked after the
-  durable temporary write; known conflicts retain recovery data. Atomic replacement
-  prevents a truncated hybrid. A non-cooperating writer can still change the target
-  in the final check-to-replace window, and Windows directory-entry durability is not
-  proven. Phase 1 may scaffold the port, but production writing cannot pass Gate E
-  until the platform transaction/recovery design closes these limits.
+- **Phase 1B production implementation:** Transactions are serialized and validate
+  approved root, path components, parent/target identity, exact expected bytes, and
+  SHA-256. Proposed bytes are separately retained. macOS exchange and Windows
+  replacement preserve the displaced target, which is checked after the operation;
+  final-window writers therefore become explicit conflicts. Alternating journals and
+  retained artifacts bound partial commits. Windows directory-entry power-loss
+  durability is still not claimed. See [TRANSACTIONS.md](TRANSACTIONS.md).
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.
 - **Complete:** This threat model reflects the selected Tauri capability boundary and

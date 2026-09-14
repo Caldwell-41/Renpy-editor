@@ -172,6 +172,14 @@ Persistence state is surfaced to the user as Saved/Saving/Pending validation/Con
 Recovery required. External revisions stop stale undo/redo and writes rather than being
 silently overwritten.
 
+Phase 1B makes the transaction envelope a non-empty vector of project-relative
+mutations. Each replacement carries exact expected bytes, SHA-256, platform file
+identity, an extensible mutation kind, and proposed bytes. Alternating checksummed
+journal slots record per-mutation staged/commit/exchange/verification progress.
+Accepted and displaced bytes remain separate recovery artifacts. See
+[TRANSACTIONS.md](TRANSACTIONS.md); source semantic operations and patches remain
+Phase 1E/1F work.
+
 ## Project lifecycle metadata
 
 `.renpy-editor/` uses explicit schema versions and project-relative forward-slash

@@ -1,4 +1,5 @@
 pub mod ports;
+pub mod transaction;
 
 use serde::Serialize;
 use serde_json::{json, Map, Value};
@@ -300,10 +301,21 @@ mod tests {
     }
 
     #[test]
-    fn future_ports_are_authority_free_markers() {
+    fn only_transaction_port_has_new_authority() {
         let ports = include_str!("ports.rs");
-        assert!(!ports.contains("fn "));
-        assert!(!ports.contains("Path"));
+        assert!(ports.contains("trait SourceTransactionPort"));
+        assert!(ports.contains("fn commit("));
+        assert!(ports.contains("fn flush("));
+        assert!(ports.contains("fn recover("));
+        for marker in [
+            "pub trait ProjectFilesystemPort {}",
+            "pub trait RenpyPort {}",
+            "pub trait GitPort {}",
+            "pub trait CredentialPort {}",
+            "pub trait NetworkProviderPort {}",
+        ] {
+            assert!(ports.contains(marker));
+        }
         assert!(!ports.contains("Command"));
         assert!(!ports.contains("Url"));
     }

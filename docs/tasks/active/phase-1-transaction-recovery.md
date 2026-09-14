@@ -1,12 +1,12 @@
 # Task: Phase 1B transaction and recovery foundation
 
-**Status:** Planned; not approved for implementation<br>
+**Status:** Active; explicitly approved 2026-09-14<br>
 **Scope:** Production transaction, file coordination, and recovery boundary only
 
 ## Entry condition
 
-Phase 1A is complete. Do not implement this task until the user gives a new explicit
-instruction approving Phase 1B. This brief is a handoff artifact, not approval.
+Phase 1A is complete. The user explicitly approved this bounded Phase 1B goal on
+2026-09-14. Do not proceed into Phase 1C.
 
 Read the completed
 [Phase 1A scaffold task](../archive/2026-09-14-phase-1-production-scaffold.md), the
@@ -83,3 +83,15 @@ toolchains, fixtures, crash/race results, CI run/job IDs, retained artifacts, fa
 cancelled evidence, and limitations. Update canonical architecture/data/security/test
 documents, current status, and handover; archive this brief. Do not begin Phase 1C
 without another explicit instruction.
+
+## Implementation checkpoint
+
+- Production code is isolated in app/src-core/src/transaction and does not copy the
+  Phase 0 spike.
+- ADR 0004 and docs/TRANSACTIONS.md define the retained-displacement protocol,
+  multi-mutation state machine, recovery inspection, and platform durability limits.
+- The local locked core suite passes 24 tests with one intentionally ignored
+  subprocess worker. The parent test invokes that worker seven times and verifies
+  actual process termination recovery at every persistent transition.
+- The renderer operation/capability allowlist is unchanged.
+- Equivalent Windows x64/macOS ARM64 evidence is still required before closure.

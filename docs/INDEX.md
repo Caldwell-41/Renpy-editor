@@ -9,7 +9,8 @@ separately approval-gated. Read the
 [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
 sequence, the archived
 [Phase 1 scaffold](tasks/archive/2026-09-14-phase-1-production-scaffold.md), and the
-unapproved [Phase 1B transaction/recovery brief](tasks/active/phase-1-transaction-recovery.md).
+approved [Phase 1B transaction/recovery brief](tasks/active/phase-1-transaction-recovery.md)
+and its [production transaction contract](TRANSACTIONS.md).
 
 | Concern | Canonical document |
 | --- | --- |
@@ -22,10 +23,11 @@ unapproved [Phase 1B transaction/recovery brief](tasks/active/phase-1-transactio
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
 | Contribution and inbound licensing terms | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
+| Transaction, durability, and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
 | Completed Phase 1A implementation gate | [tasks/archive/2026-09-14-phase-1-production-scaffold.md](tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
-| Planned Phase 1B gate (not approved) | [tasks/active/phase-1-transaction-recovery.md](tasks/active/phase-1-transaction-recovery.md) |
+| Active Phase 1B gate | [tasks/active/phase-1-transaction-recovery.md](tasks/active/phase-1-transaction-recovery.md) |
 | Continuation handover | [status/HANDOVER.md](status/HANDOVER.md) |
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |

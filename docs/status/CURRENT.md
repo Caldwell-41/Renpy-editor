@@ -1,13 +1,14 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0 and Phase 1A complete; Phase 1B planned but not approved<br>
+**Phase:** Phase 0 and Phase 1A complete; Phase 1B implementation active<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
 - The Phase 0 corrective checkpoint and bounded Phase 1A production scaffold are
-  complete. No later Phase 1 milestone is approved.
+  complete. Phase 1B is explicitly approved and active; no later milestone is
+  approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, empty future ports, locked
@@ -39,7 +40,13 @@
 - The first Phase 1 implementation gate is the completed
   [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
   The bounded [Phase 1B transaction/recovery brief](../tasks/active/phase-1-transaction-recovery.md)
-  is planning only and is not implementation approval.
+  is now active.
+- Phase 1B production code implements a core-only multi-mutation transaction set,
+  retained accepted/displaced bytes, alternating checksummed journals, deterministic
+  recovery inspection, exact revision/path/root checks, revision-guarded history, and
+  macOS/Windows platform adapters. The local core suite passes; equivalent hosted
+  target evidence is still required before closure. See
+  [TRANSACTIONS.md](../TRANSACTIONS.md) and ADR 0004.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -77,11 +84,11 @@
 
 ## Next action
 
-Stop at the Phase 1A boundary. The next possible milestone is the planned
-[Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md),
-which must receive new explicit user approval before implementation. Production
-authoring writes remain blocked until that future gate resolves the retained
-transaction/recovery risks.
+Continue only the active
+[Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md).
+Obtain equivalent Windows x64 and macOS ARM64 production-matrix evidence and resolve
+any failures. Do not begin Phase 1C. Production authoring remains blocked until Phase
+1B is truthfully closed.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.
