@@ -515,18 +515,22 @@ fn apply_overlay(
     let script = format!("# Loomlight entry point. Runnable source remains authoritative.\n\nlabel start:\n    jump {technical_label}\n");
     write_replace(&game.join("script.rpy"), script.as_bytes())?;
     let options = game.join("options.rpy");
-    let mut options_bytes = fs::read(&options).map_err(|_| LifecycleError::Io)?;
+    let options_text = fs::read_to_string(&options).map_err(|_| LifecycleError::Io)?;
     let safe_title = title
         .replace('\\', "\\\\")
         .replace('"', "\\\"")
         .replace('[', "[[");
-    options_bytes.extend_from_slice(
-        format!(
-            "\n# Loomlight project identity.\ndefine config.name = _(\"{safe_title}\")\ndefine build.name = \"{folder_name}\"\n"
-        )
-        .as_bytes(),
-    );
-    write_replace(&options, &options_bytes)?;
+    let options_text = replace_template_define(
+        &options_text,
+        "define config.name =",
+        &format!("define config.name = _(\"{safe_title}\")"),
+    )?;
+    let options_text = replace_template_define(
+        &options_text,
+        "define build.name =",
+        &format!("define build.name = \"{folder_name}\""),
+    )?;
+    write_replace(&options, options_text.as_bytes())?;
     write_new(
         &game.join("definitions/characters.rpy"),
         b"# Character definitions are added by Loomlight.\n",
@@ -592,6 +596,34 @@ fn apply_overlay(
     .write(stage)
     .map_err(|_| LifecycleError::InvalidMetadata)?;
     Ok(metadata)
+}
+
+fn replace_template_define(
+    source: &str,
+    prefix: &str,
+    replacement: &str,
+) -> Result<String, LifecycleError> {
+    let mut matches = 0;
+    let mut output = String::with_capacity(source.len());
+    for line in source.split_inclusive('\n') {
+        let (body, ending) = line
+            .strip_suffix("\r\n")
+            .map(|body| (body, "\r\n"))
+            .or_else(|| line.strip_suffix('\n').map(|body| (body, "\n")))
+            .unwrap_or((line, ""));
+        if body.trim_start().starts_with(prefix) {
+            matches += 1;
+            output.push_str(replacement);
+            output.push_str(ending);
+        } else {
+            output.push_str(line);
+        }
+    }
+    if matches == 1 {
+        Ok(output)
+    } else {
+        Err(LifecycleError::GenerationFailed)
+    }
 }
 
 fn open_valid_project(root: &Path) -> Result<OpenProject, LifecycleError> {
@@ -1067,15 +1099,13 @@ mod tests {
         ));
         assert!(!projects.join("failure-evidence").exists());
         assert_eq!(fs::read(unrelated.join("keep")).unwrap(), b"keep");
-        assert!(fs::read_dir(&projects)
-            .unwrap()
-            .all(|entry| {
-                !entry
-                    .unwrap()
-                    .file_name()
-                    .to_string_lossy()
-                    .starts_with(".loomlight-stage-")
-            }));
+        assert!(fs::read_dir(&projects).unwrap().all(|entry| {
+            !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".loomlight-stage-")
+        }));
         assert!(service.list_recent().is_empty());
     }
 
