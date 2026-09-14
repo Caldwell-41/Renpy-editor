@@ -1,4 +1,5 @@
 use super::{
+    identity::identity_for_file,
     path::{self, ArtifactPaths, RelativePath},
     platform::{flush_open_file, DirectoryAnchor},
     ErrorCode, MutationKind, RecoveryItem, RecoveryMutationState, RecoveryReport, Revision,
@@ -7,7 +8,7 @@ use super::{
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-    ffi::OsStr,
+    ffi::{OsStr, OsString},
     fs,
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -226,10 +227,9 @@ impl JournalStore {
             Err(code) => return Err(code),
         };
         let mut items = Vec::new();
-        for entry in fs::read_dir(recovery.path()).map_err(|_| ErrorCode::RecoveryRequired)? {
-            let entry = entry.map_err(|_| ErrorCode::RecoveryRequired)?;
-            let txid = entry.file_name().to_string_lossy().into_owned();
-            let directory = match recovery.open_child(&entry.file_name(), false) {
+        for entry_name in recovery_entry_names(&recovery)? {
+            let txid = entry_name.to_string_lossy().into_owned();
+            let directory = match recovery.open_child(&entry_name, false) {
                 Ok(value) => value,
                 Err(_) => {
                     items.push(RecoveryItem {
@@ -264,6 +264,103 @@ impl JournalStore {
         items.sort_by(|a, b| a.transaction_id.cmp(&b.transaction_id));
         Ok(RecoveryReport { items })
     }
+}
+
+#[cfg(unix)]
+fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, ErrorCode> {
+    use std::{
+        ffi::{CStr, CString},
+        os::{
+            fd::{AsRawFd, FromRawFd},
+            unix::ffi::{OsStrExt, OsStringExt},
+        },
+    };
+
+    recovery.validate_chain()?;
+    let path = CString::new(recovery.path().as_os_str().as_bytes())
+        .map_err(|_| ErrorCode::UnsafePath)?;
+    let fd = unsafe {
+        libc::open(
+            path.as_ptr(),
+            libc::O_RDONLY | libc::O_DIRECTORY | libc::O_NOFOLLOW | libc::O_CLOEXEC,
+        )
+    };
+    if fd < 0 {
+        return Err(ErrorCode::RecoveryRequired);
+    }
+    let file = unsafe { fs::File::from_raw_fd(fd) };
+    let opened_identity = identity_for_file(&file).map_err(|_| ErrorCode::RecoveryRequired)?;
+    if &opened_identity != recovery.identity() {
+        return Err(ErrorCode::ParentIdentityChanged);
+    }
+
+    let duplicate = unsafe { libc::dup(file.as_raw_fd()) };
+    if duplicate < 0 {
+        return Err(ErrorCode::RecoveryRequired);
+    }
+    let directory = unsafe { libc::fdopendir(duplicate) };
+    if directory.is_null() {
+        unsafe { libc::close(duplicate) };
+        return Err(ErrorCode::RecoveryRequired);
+    }
+
+    let mut names = Vec::new();
+    loop {
+        clear_errno();
+        let entry = unsafe { libc::readdir(directory) };
+        if entry.is_null() {
+            if current_errno() != 0 {
+                unsafe { libc::closedir(directory) };
+                return Err(ErrorCode::RecoveryRequired);
+            }
+            break;
+        }
+        let bytes = unsafe { CStr::from_ptr((*entry).d_name.as_ptr()) }.to_bytes();
+        if bytes != b"." && bytes != b".." {
+            names.push(OsString::from_vec(bytes.to_vec()));
+        }
+    }
+    if unsafe { libc::closedir(directory) } != 0 {
+        return Err(ErrorCode::RecoveryRequired);
+    }
+
+    recovery.validate_chain()?;
+    Ok(names)
+}
+
+#[cfg(target_os = "macos")]
+fn clear_errno() {
+    unsafe { *libc::__error() = 0 };
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn clear_errno() {
+    unsafe { *libc::__errno_location() = 0 };
+}
+
+#[cfg(target_os = "macos")]
+fn current_errno() -> i32 {
+    unsafe { *libc::__error() }
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn current_errno() -> i32 {
+    unsafe { *libc::__errno_location() }
+}
+
+#[cfg(windows)]
+fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, ErrorCode> {
+    recovery.validate_chain()?;
+    let names = fs::read_dir(recovery.path())
+        .map_err(|_| ErrorCode::RecoveryRequired)?
+        .map(|entry| {
+            entry
+                .map(|entry| entry.file_name())
+                .map_err(|_| ErrorCode::RecoveryRequired)
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    recovery.validate_chain()?;
+    Ok(names)
 }
 
 fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
@@ -355,4 +452,33 @@ fn inspect_mutation(
 
 fn artifact_revision(store: &JournalStore, name: &Path) -> Option<Revision> {
     super::read_revision_file(store.open_artifact(name).ok()?).ok()
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn anchored_recovery_enumeration_rejects_path_substitution() {
+        let temporary = tempfile::tempdir().unwrap();
+        let root_path = fs::canonicalize(temporary.path()).unwrap();
+        let root = DirectoryAnchor::open_root(&root_path).unwrap();
+        let metadata = root.open_child(OsStr::new(".renpy-editor"), true).unwrap();
+        let recovery = metadata.open_child(OsStr::new("recovery"), true).unwrap();
+        recovery
+            .open_child(OsStr::new("tx-visible-unresolved"), true)
+            .unwrap();
+
+        let moved = root_path.join("recovery-moved");
+        fs::rename(recovery.path(), &moved).unwrap();
+        fs::create_dir(recovery.path()).unwrap();
+
+        assert_eq!(
+            recovery_entry_names(&recovery),
+            Err(ErrorCode::ParentIdentityChanged)
+        );
+        assert!(moved.join("tx-visible-unresolved").is_dir());
+        assert!(fs::read_dir(recovery.path()).unwrap().next().is_none());
+    }
 }
