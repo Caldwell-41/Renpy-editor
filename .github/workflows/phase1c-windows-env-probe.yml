@@ -1,0 +1,147 @@
+name: Phase 1C Windows Ren'Py environment probe
+
+on:
+  push:
+    branches: [phase1c-corrective-targets]
+    paths:
+      - .github/workflows/phase1c-windows-env-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - name: Check out corrective branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: phase1c-corrective-targets
+      - name: Restore pinned Ren'Py SDK archive
+        id: sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Download pinned official Ren'Py SDK on cache miss
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
+            --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" \
+            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+          mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+      - name: Compare inherited and sanitized environments
+        shell: pwsh
+        env:
+          SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          PROBE_ROOT: ${{ runner.temp }}/renpy-env-probe
+        run: |
+          @'
+          import os
+          import pathlib
+          import shutil
+          import subprocess
+          import tarfile
+          import sys
+
+          archive = pathlib.Path(os.environ["SDK_ARCHIVE"])
+          probe = pathlib.Path(os.environ["PROBE_ROOT"])
+          shutil.rmtree(probe, ignore_errors=True)
+          payload = probe / "payload"
+          payload.mkdir(parents=True)
+          with tarfile.open(archive, "r:bz2") as tf:
+              tf.extractall(payload)
+          roots = [p for p in payload.iterdir() if p.is_dir() and (p / "renpy.py").is_file()]
+          if len(roots) != 1:
+              raise SystemExit(f"unexpected SDK root count: {len(roots)}")
+          sdk = roots[0]
+          py = sdk / "lib" / "py3-windows-x86_64" / "python.exe"
+          script = sdk / "renpy.py"
+          template = sdk / "gui"
+
+          environment_txt = sdk / "environment.txt"
+          print("environment.txt present:", environment_txt.is_file())
+          if environment_txt.is_file():
+              print("--- environment.txt ---")
+              print(environment_txt.read_text(encoding="utf-8", errors="replace"))
+              print("--- end environment.txt ---")
+
+          safe_common = {
+              "PATH", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "SYSTEMROOT",
+              "WINDIR", "COMSPEC", "PATHEXT", "TMPDIR", "TEMP", "TMP", "LANG",
+              "LC_ALL", "LC_CTYPE",
+          }
+          safe_windows = {
+              "ALLUSERSPROFILE", "COMMONPROGRAMFILES", "COMMONPROGRAMFILES(X86)",
+              "COMMONPROGRAMW6432", "COMPUTERNAME", "DRIVERDATA", "HOMEDRIVE",
+              "HOMEPATH", "NUMBER_OF_PROCESSORS", "OS", "PROCESSOR_ARCHITECTURE",
+              "PROCESSOR_IDENTIFIER", "PROCESSOR_LEVEL", "PROCESSOR_REVISION",
+              "PROGRAMDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432",
+              "PUBLIC", "SESSIONNAME", "SYSTEMDRIVE", "USERDOMAIN",
+              "USERDOMAIN_ROAMINGPROFILE", "USERNAME",
+          }
+          allowed = safe_common | safe_windows
+          inherited_names = sorted(os.environ)
+          interesting = [k for k in inherited_names if k.upper().startswith(("RENPY", "PYTHON", "SDL"))]
+          print("Ren'Py/Python/SDL variable names:", interesting)
+          extra_names = [k for k in inherited_names if k not in allowed]
+          print("Non-allowlisted variable names:", extra_names)
+
+          def command(stage):
+              stage.mkdir(parents=True)
+              (stage / "game").mkdir()
+              return [str(py), str(script), "launcher", "generate_gui", str(stage),
+                      "--width", "1920", "--height", "1080", "--template", str(template), "--start"]
+
+          def execute(label, env):
+              stage = probe / label
+              shutil.rmtree(stage, ignore_errors=True)
+              result = subprocess.run(command(stage), cwd=sdk, env=env, text=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=180)
+              print(f"{label}: exit={result.returncode}")
+              if result.returncode != 0:
+                  print("\n".join(result.stdout.splitlines()[-40:]))
+              return result.returncode == 0
+
+          inherited_ok = execute("inherited", dict(os.environ))
+          sanitized = {k: v for k, v in os.environ.items() if k in allowed}
+          sanitized_ok = execute("sanitized", sanitized)
+          print(f"summary inherited_ok={inherited_ok} sanitized_ok={sanitized_ok}")
+          if not inherited_ok:
+              raise SystemExit("inherited environment unexpectedly failed")
+          if sanitized_ok:
+              raise SystemExit(0)
+
+          candidates = [k for k in extra_names if not any(marker in k.upper() for marker in
+              ("TOKEN", "SECRET", "PASSWORD", "KEY", "CREDENTIAL"))]
+          current = candidates[:]
+          print("Candidate names for delta probe:", current)
+
+          def passes(keys, index):
+              env = dict(sanitized)
+              for key in keys:
+                  env[key] = os.environ[key]
+              return execute(f"delta-{index}", env)
+
+          if not passes(current, 0):
+              raise SystemExit("sanitized + all non-secret candidates still failed")
+
+          index = 1
+          changed = True
+          while changed and len(current) > 1:
+              changed = False
+              midpoint = len(current) // 2
+              for subset in (current[:midpoint], current[midpoint:]):
+                  trial = [k for k in current if k not in subset]
+                  if trial and passes(trial, index):
+                      index += 1
+                      current = trial
+                      changed = True
+                      break
+                  index += 1
+          print("Minimal retained candidate names:", current)
+          if not passes(current, index):
+              raise SystemExit("delta probe result was not reproducible")
+          '@ | python -
