@@ -128,13 +128,13 @@ impl RenpyAdapter {
         let args = [
             OsString::from("launcher"),
             OsString::from("generate_gui"),
-            stage.as_os_str().to_owned(),
+            command_path(stage),
             OsString::from("--width"),
             OsString::from(width.to_string()),
             OsString::from("--height"),
             OsString::from(height.to_string()),
             OsString::from("--template"),
-            sdk.root.join("gui").into_os_string(),
+            command_path(&sdk.root.join("gui")),
             OsString::from("--start"),
         ];
         require_success(run_bounded(
@@ -146,9 +146,9 @@ impl RenpyAdapter {
 
     pub fn validate_generated(sdk: &ValidatedSdk, stage: &Path) -> Result<(), RenpyError> {
         for command in [
-            vec![stage.as_os_str().to_owned(), OsString::from("compile")],
+            vec![command_path(stage), OsString::from("compile")],
             vec![
-                stage.as_os_str().to_owned(),
+                command_path(stage),
                 OsString::from("lint"),
                 OsString::from("--error-code"),
             ],
@@ -163,7 +163,7 @@ impl RenpyAdapter {
     }
 
     pub fn smoke_run(sdk: &ValidatedSdk, project: &Path) -> Result<(), RenpyError> {
-        let args = [project.as_os_str().to_owned(), OsString::from("run")];
+        let args = [command_path(project), OsString::from("run")];
         let result = run_bounded(
             &sdk.root,
             launcher_args(&sdk.root, &args)?,
@@ -224,6 +224,30 @@ fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyE
         let mut value = vec![executable.into_os_string()];
         value.extend_from_slice(args);
         Ok(value)
+    }
+}
+
+#[cfg(not(windows))]
+fn command_path(path: &Path) -> OsString {
+    path.as_os_str().to_owned()
+}
+
+#[cfg(windows)]
+fn command_path(path: &Path) -> OsString {
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    let wide = path.as_os_str().encode_wide().collect::<Vec<_>>();
+    let verbatim = ['\\' as u16, '\\' as u16, '?' as u16, '\\' as u16];
+    let unc = ['U' as u16, 'N' as u16, 'C' as u16, '\\' as u16];
+    if wide.starts_with(&verbatim) {
+        if wide[verbatim.len()..].starts_with(&unc) {
+            let mut normal = vec!['\\' as u16, '\\' as u16];
+            normal.extend_from_slice(&wide[verbatim.len() + unc.len()..]);
+            OsString::from_wide(&normal)
+        } else {
+            OsString::from_wide(&wide[verbatim.len()..])
+        }
+    } else {
+        path.as_os_str().to_owned()
     }
 }
 
@@ -792,6 +816,16 @@ mod tests {
             validate_archive(&path, ArchiveLimits::default()),
             Err(RenpyError::UnsafeArchive)
         ));
+        for (member, target, hardlink) in [
+            ("root/link", "../../escape", false),
+            ("root/link", "/absolute", false),
+            ("root/link", "../escape", true),
+        ] {
+            assert!(matches!(
+                safe_link_target(Path::new(member), Path::new(target), hardlink),
+                Err(RenpyError::UnsafeArchive)
+            ));
+        }
     }
 
     #[test]
@@ -845,5 +879,18 @@ mod tests {
                 .to_string_lossy()
                 .starts_with(".loomlight-sdk-stage-")
         }));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn command_paths_remove_only_windows_verbatim_prefixes() {
+        assert_eq!(
+            command_path(Path::new(r"\\?\C:\projects\story")),
+            OsString::from(r"C:\projects\story")
+        );
+        assert_eq!(
+            command_path(Path::new(r"\\?\UNC\server\share\story")),
+            OsString::from(r"\\server\share\story")
+        );
     }
 }
