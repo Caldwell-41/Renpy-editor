@@ -6,6 +6,7 @@ on:
     paths:
       - scripts/apply_phase1c_remediation.py
       - scripts/apply_phase1c_fixups.py
+      - scripts/apply_phase1c_target_fixups.py
       - .github/workflows/phase-1c-remediation-check.yml
   workflow_dispatch:
 
@@ -33,6 +34,7 @@ jobs:
         run: |
           python3 scripts/apply_phase1c_remediation.py
           python3 scripts/apply_phase1c_fixups.py
+          python3 scripts/apply_phase1c_target_fixups.py
       - name: Format transformed Rust
         shell: bash
         working-directory: app
