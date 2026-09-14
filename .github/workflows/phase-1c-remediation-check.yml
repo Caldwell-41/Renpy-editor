@@ -10,6 +10,8 @@ on:
       - scripts/apply_phase1c_overlay_fixups.py
       - scripts/apply_phase1c_overlay_crossplatform_fixups.py
       - scripts/apply_phase1c_finalization_fixups.py
+      - scripts/apply_phase1c_renpy_fd_fixups.py
+      - scripts/apply_phase1c_cleanup_fixups.py
       - .github/workflows/phase-1c-remediation-check.yml
   workflow_dispatch:
 
@@ -41,6 +43,8 @@ jobs:
           python3 scripts/apply_phase1c_overlay_fixups.py
           python3 scripts/apply_phase1c_overlay_crossplatform_fixups.py
           python3 scripts/apply_phase1c_finalization_fixups.py
+          python3 scripts/apply_phase1c_renpy_fd_fixups.py
+          python3 scripts/apply_phase1c_cleanup_fixups.py
       - name: Format transformed Rust
         shell: bash
         working-directory: app
