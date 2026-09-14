@@ -48,6 +48,15 @@ retains every directory handle without `FILE_SHARE_DELETE`, preventing its renam
 deletion while pathname-only `ReplaceFileW` runs. Chains and identities are checked at
 each externally interruptible boundary.
 
+Recovery discovery uses the same anchored model. On macOS/Unix, Loomlight validates
+that the current recovery pathname still names the retained recovery directory,
+duplicates the validated directory descriptor, and enumerates transaction entries with
+`fdopendir`/`readdir`; it revalidates the chain after enumeration. A rename/replacement
+of the recovery pathname therefore produces recovery-required/identity failure rather
+than an empty report. On Windows, recovery enumeration runs while the retained recovery
+chain remains pinned against rename/delete and is validated before and after the
+pathname enumeration.
+
 Symlinks are denied; Windows also denies every reparse-point component. Absolute paths,
 backslashes, traversal, non-normal components, duplicate paths, unsafe device names,
 and unapproved project IDs are rejected.
@@ -79,7 +88,8 @@ valid slot produces `RECOVERY_REQUIRED`.
 Recovery classifies each mutation as prepared-without-stage, staged-with-base-intact,
 exchange-complete-expected, exchange-complete-conflict,
 external-revision-with-accepted-copy, durable, or ambiguous. It follows neither
-symlinks nor journal-provided paths.
+symlinks nor journal-provided paths. Recovery-directory namespace substitution fails
+closed instead of allowing unresolved transactions to disappear from Save/Flush.
 
 ## Platform primitives and durability
 
@@ -89,6 +99,9 @@ symlinks nor journal-provided paths.
   `openat` plus `O_NOFOLLOW`; creation uses
   `openat(O_CREAT|O_EXCL|O_NOFOLLOW)`, while cleanup/rename uses `unlinkat` and
   `renameat`.
+- Recovery discovery validates the pathname-to-anchor identity, duplicates the
+  validated directory descriptor, enumerates entries through `fdopendir`/`readdir`,
+  and validates the anchor chain again before accepting the report.
 - Existing-file commit uses `renameatx_np(RENAME_SWAP)` between the anchored recovery
   directory's stage entry and anchored target parent. The displaced target lands at
   the stage entry and is renamed to the backup inside recovery.
@@ -116,6 +129,9 @@ symlinks nor journal-provided paths.
 - `FILE_FLAG_OPEN_REPARSE_POINT` and handle metadata deny target/directory reparse
   points. A competing regular target replacement is retained by `ReplaceFileW` and
   classified after the operation.
+- Recovery directory enumeration remains pathname-based only while the already-open
+  recovery chain is pinned against rename/delete; the chain is revalidated before and
+  after enumeration.
 - Stage, accepted, installed, displaced, and journal files use file-buffer flushes.
   `REPLACEFILE_WRITE_THROUGH` is unsupported. Loomlight does not claim ordinary-user
   directory-entry power-loss durability; journal/accepted/backup evidence bounds
@@ -146,7 +162,9 @@ Automatic persistence and explicit save/flush use the same service. `durable`,
 `cleaned`, and pre-mutation `rejected` are non-blocking. `prepared` blocks until
 anchored inspection proves safe abandon and explicit finalisation records `cleaned`.
 Staged through committed, conflict, recovery-required, ambiguous, corrupt, and partial
-states block.
+states block. If recovery enumeration cannot prove that the pathname still names the
+anchored recovery directory, scan returns recovery-required and Save/Flush remains
+blocked rather than accepting an apparently empty replacement directory.
 
 History retains exact before/after bytes and revisions. Undo/redo requires current
 revisions to match the recorded boundary and returns `HISTORY_BOUNDARY` before
@@ -162,21 +180,37 @@ Phase 1B adds no renderer operation or ambient filesystem/process/network author
 
 ## Phase 1B corrective gate evidence
 
-[Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
-at `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed actual Windows x64 job
-103844270268 (31 passed, 0 failed, 1 ignored child-process worker) and macOS ARM64 job
-103844270072 (32 passed, 0 failed, 1 ignored worker). Both jobs also passed desktop
-tests, production packaging, packaged WebView denial smoke, artifact secret scanning,
-and dependency/licence inventory. Evidence artifacts are 10331303970 (Windows,
-SHA-256 `6ae436a4befc0949f97b4299e0c4d79483d26026cb8ab23a8b7b9a701bf8e3c3`)
-and 10331433193 (macOS, SHA-256
-`8622d55bc4b5403a8b5843b3af1eafcee02213c470554457ea77c5b5d7a72347`). Quality
-run 34801268255 passed. This actual target evidence re-closes Gate E; Phase 1C remains
-separately approval-gated.
+The latest recovery-enumeration correction is evidenced by
+[production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
+at `dc2efdf845fd014c57e850f2c96683fd487da592`:
 
-The original Phase 1B run 34797222616 remains historical evidence. Corrective run
-34800849992 is retained failed evidence: macOS passed, while Windows exposed a
-writable-handle requirement in post-replacement flushing and a test that incorrectly
-expected a pinned root rename to succeed. Both were corrected before the successful
-run; no skipped step is counted as passing. See the archived corrective task for exact
-failed job and artifact identifiers.
+- Windows x64 job 103854628315 on Windows Server 2025 passed the independent core
+  suite with 31 passed, 0 failed, and 1 ignored child-process worker, then passed the
+  desktop boundary, packaging, packaged WebView denial smoke, artifact secret scan,
+  and dependency/licence inventory. Evidence artifact 10332572412 has SHA-256
+  `5195042e24796f21f814e1e1e9049785eaf7441aa48a1d4b6d99011d7e0738bc`.
+- macOS ARM64 job 103854628300 on macOS 26.6.2 / Darwin 25.6.0 passed the independent
+  core suite with 33 passed, 0 failed, and 1 ignored worker. This includes
+  `anchored_recovery_enumeration_rejects_path_substitution`, which replaces the live
+  recovery pathname with an empty directory and proves identity failure rather than an
+  empty recovery result. Desktop boundary, packaging, packaged WebView denial smoke,
+  artifact secret scan, and dependency/licence inventory also passed. Evidence artifact
+  10333101940 has SHA-256
+  `a055f22550acd0f0c166ce288a09ed3537ba72cfe78e0f52b0f289f3332309a5`.
+
+Both jobs used Node 24.19.0, npm 11.9.0, rustc 1.90.0, and Cargo 1.90.0. Quality run
+34804861410 passed at the same commit. Full package upload was intentionally skipped on
+this routine push; the lightweight transaction/smoke/dependency evidence uploads
+succeeded. This run supersedes the earlier corrective closure evidence for Gate E.
+Phase 1C remains separately approval-gated.
+
+Production run 34804735119 at `c0d881a480b0c64f1cd5d43dc22895f75edf889a`
+is retained failed evidence: both target jobs passed setup, frontend validation, and
+frontend build but stopped at `cargo fmt --check --all`; Rust core tests and all later
+steps were skipped. The exact rustfmt diff was applied in `dc2efdf`; this was a
+formatting defect, not a retried functional failure.
+
+Production run 34801268319 remains historical evidence for the preceding parent/path,
+`Prepared`, and terminal-`Rejected` correction. The original Phase 1B run 34797222616
+and corrective run 34800849992 also remain historical/failed evidence as documented in
+the archived corrective task; no skipped step is reclassified as passing.

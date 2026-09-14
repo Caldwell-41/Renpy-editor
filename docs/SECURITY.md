@@ -27,11 +27,11 @@ does not stop Python from changing files, so it is not an application sandbox.
 | Boundary/threat | Example | Required mitigation |
 | --- | --- | --- |
 | UI → privileged core | Injected/untrusted content invokes filesystem or shell | Typed allowlisted commands, schema validation, deny-by-default capabilities, sender/origin checks, CSP |
-| Project → filesystem | `../`, absolute paths, parent/target substitution, symlink/reparse swaps, case collisions | Canonicalize and retain an approved-root/component handle chain; use no-follow descriptor-relative I/O on macOS; pin Windows directory handles without delete sharing; keep artifacts in anchored recovery; fail closed on identity/path change |
+| Project → filesystem | `../`, absolute paths, parent/target/recovery substitution, symlink/reparse swaps, case collisions | Canonicalize and retain approved-root/component/recovery handle chains; use no-follow descriptor-relative I/O and anchored recovery enumeration on macOS; pin Windows directory handles without delete sharing; keep artifacts in anchored recovery; fail closed on identity/path change |
 | Archive → SDK root | Zip-slip, symlink/hardlink escape, overwrite, decompression bomb | Validate every entry/type/size/path before extraction; stage privately; atomic promote; no overwrite |
 | Core → child process | Script/filename becomes shell syntax or environment leak | Direct executable plus argument array, minimal environment, bounded output/time, no shell strings |
 | Project → Ren'Py runtime | Embedded Python executes with user privileges | Inspection never runs; explicit trust/run boundary; redacted preview; future sandbox research not implied protection |
-| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Base revisions plus a reviewed platform transaction/recovery protocol; revalidate approved root/path/file identity at the latest safe point; preserve competing data/recovery state; explicit conflict UI; never claim portable CAS from check-then-replace alone |
+| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Base revisions plus a reviewed platform transaction/recovery protocol; revalidate approved root/path/file/recovery identity at the latest safe point; preserve competing data/recovery state; explicit conflict UI; never claim portable CAS from check-then-replace alone |
 | Network → SDK/update | Tampered binary or downgrade | Official HTTPS origin allowlist, published checksum, version pin, staged verification, explicit upgrade |
 | LLM provider | Private/adult content exfiltration or malicious structured output | User-initiated send, locality disclosure/warning, minimal context, TLS, schema/path/identifier validation, reviewed diff |
 | Git/GitHub | Credential leak, destructive restore/push | OS credential flow, no token logs, safe defaults, recoverable restore, no force push, private repo default |
@@ -130,12 +130,15 @@ diagnostic record.
 - **Complete — Phase 1B corrective implementation:** Transactions retain
   approved root/component handles and validate parent/target identity, exact bytes,
   and SHA-256. Transaction evidence exists only under anchored recovery. macOS uses
-  no-follow descriptor-relative creation/inspection/rename/exchange; Windows pins
-  directory components against rename/delete while `ReplaceFileW` preserves the
-  displaced target. Prepared safe-abandon requires proved absence; terminal rejected
-  journals do not block flush. Windows directory-entry power-loss durability is still
-  not claimed. Production run 34801268319 passed the corrected hostile-boundary suite
-  on actual Windows x64 and macOS ARM64, re-closing Gate E. See
+  no-follow descriptor-relative creation/inspection/rename/exchange and recovery
+  discovery validates the live pathname identity before descriptor enumeration;
+  replacement of the recovery pathname therefore fails closed instead of hiding
+  unresolved journals. Windows pins directory components against rename/delete while
+  `ReplaceFileW` and recovery enumeration use the pinned namespace. Prepared safe-
+  abandon requires proved absence; terminal rejected journals do not block flush.
+  Windows directory-entry power-loss durability is still not claimed. Production run
+  34804861387 passed the latest hostile-boundary suite on actual Windows x64 and macOS
+  ARM64, re-closing Gate E after the recovery-enumeration follow-up. See
   [TRANSACTIONS.md](TRANSACTIONS.md).
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.

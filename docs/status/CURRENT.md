@@ -8,7 +8,8 @@
 
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-  are complete. The correction re-closed Gate E; no later milestone is approved.
+  are complete. The correction and subsequent recovery-enumeration follow-up re-closed
+  Gate E; no later milestone is approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, empty future ports, locked
@@ -41,17 +42,21 @@
   [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
   The bounded [Phase 1B transaction/recovery brief](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
   is complete.
-- The corrective implementation now keeps transaction artifacts in anchored recovery,
+- The corrective implementation keeps transaction artifacts in anchored recovery,
   carries validated directory-handle chains through sensitive operations, uses no-
   follow descriptor-relative macOS/Unix I/O, and pins Windows directory namespaces
   against rename/delete during `ReplaceFileW`. It adds proved-empty `Prepared`
-  abandonment and terminal/non-blocking pre-mutation `Rejected` semantics.
-- [Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
-  at `302a2b2a` passed the corrected transaction/recovery suite on actual Windows x64
-  and macOS ARM64, plus desktop tests, packaging, packaged denial smoke, secret scan,
-  and dependency/licence inventory. Quality run 34801268255 passed. The archived
-  corrective task retains exact job/artifact identifiers and the preceding failed
-  attempt. See [TRANSACTIONS.md](../TRANSACTIONS.md) and amended ADR 0004.
+  abandonment, terminal/non-blocking pre-mutation `Rejected` semantics, and anchored
+  recovery discovery so replacement of the recovery pathname cannot hide unresolved
+  transactions from Save/Flush.
+- [Production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
+  at `dc2efdf` passed the latest transaction/recovery suite on actual Windows x64 and
+  macOS ARM64, plus desktop tests, packaging, packaged denial smoke, secret scan, and
+  dependency/licence inventory. macOS exercised the new recovery-path substitution
+  regression; Windows retained its pinned-namespace coverage. Evidence artifacts are
+  10332572412 (Windows) and 10333101940 (macOS). Quality run 34804861410 passed. The
+  archived corrective task records the preceding formatting-only failed attempt and all
+  earlier evidence. See [TRANSACTIONS.md](../TRANSACTIONS.md) and amended ADR 0004.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -83,8 +88,8 @@
   with simple assignment; basic placement/transitions/music/SFX use extensible models.
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
-- Production file Gate E is re-closed by corrective Windows/macOS runtime evidence.
-  Authoring remains absent and Phase 1C remains approval-blocked.
+- Production file Gate E is re-closed by the latest corrective Windows/macOS runtime
+  evidence. Authoring remains absent and Phase 1C remains approval-blocked.
 
 ## Next action
 

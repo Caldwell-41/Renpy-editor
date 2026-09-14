@@ -91,8 +91,9 @@ at `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed on both required targets:
 Both jobs used Node 24.19.0, npm 11.9.0, rustc 1.90.0, and Cargo 1.90.0. Quality run
 34801268255 passed at the same commit. The manual-only packaged-application upload was
 skipped by policy on both routine jobs and is not required or classified as passing.
-The lightweight evidence uploads succeeded. Gate E is re-closed; Phase 1C remains
-unapproved and was not started.
+The lightweight evidence uploads succeeded. Gate E was re-closed at this point; the
+post-closure recovery-enumeration follow-up below supersedes this run for the current
+Gate E evidence.
 
 ### Failed target attempt retained
 
@@ -116,4 +117,61 @@ Retained artifacts are 10331432380 (Windows failure log, SHA-256
 `fe094769f6f8ec596dc60aeb9bd0c74fb9de5899bc549e6ceb757c3e17b8090b`) and
 10331042824 (successful macOS evidence, SHA-256
 `00068706749c61d541bb9fa287dc4167ce45f2877378d0e47f9a743eac15aed9`). Quality run
-34800849989 passed. A new target run is required; this attempt does not close Gate E.
+34800849989 passed. This attempt does not close Gate E.
+
+## Post-closure recovery-enumeration follow-up
+
+A later review found one remaining recovery-side TOCTOU: `JournalStore::scan()` opened
+an anchored `.renpy-editor/recovery` directory but enumerated it with
+`fs::read_dir(recovery.path())`. On macOS/Unix another same-user process can rename an
+open directory and install an empty replacement at its old pathname. That could have
+made an unresolved transaction invisible to recovery discovery and allowed `flush()`
+to observe an apparently empty report.
+
+The follow-up keeps the original transaction guarantees and changes only recovery
+enumeration:
+
+- macOS/Unix validates that the live pathname still resolves to the retained recovery
+  directory identity, duplicates that validated directory descriptor, enumerates the
+  descriptor with `fdopendir`/`readdir`, and revalidates the anchor chain afterward;
+- any recovery-path rename/replacement before or during enumeration fails closed as an
+  identity/recovery error rather than returning an empty report;
+- Windows retains pathname enumeration because the already-open recovery chain omits
+  delete sharing and therefore pins the namespace against rename/delete; it is still
+  validated before and after enumeration;
+- the Unix/macOS regression
+  `anchored_recovery_enumeration_rejects_path_substitution` renames the anchored
+  recovery directory, installs an empty replacement at the old pathname, and proves
+  the replacement cannot be accepted as an empty recovery set.
+
+Implementation commits are `ab445301a63795037553e6a0ec3870dbbc860915`,
+`c0d881a480b0c64f1cd5d43dc22895f75edf889a`, and final formatted code
+`dc2efdf845fd014c57e850f2c96683fd487da592`.
+
+### Final target evidence after recovery-enumeration correction
+
+[Production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
+at `dc2efdf845fd014c57e850f2c96683fd487da592` passed both supported targets:
+
+- Windows x64 job 103854628315, Windows Server 2025: 31 core tests passed, 0 failed,
+  1 child-process worker ignored by the harness; desktop boundary, packaging, packaged
+  WebView denial smoke, privacy scan, and dependency/licence inventory all passed.
+  Evidence artifact 10332572412 has SHA-256
+  `5195042e24796f21f814e1e1e9049785eaf7441aa48a1d4b6d99011d7e0738bc`.
+- macOS ARM64 job 103854628300, macOS 26.6.2 / Darwin 25.6.0: 33 core tests passed,
+  0 failed, 1 worker ignored; this includes the new anchored recovery-enumeration
+  substitution regression. Desktop boundary, packaging, packaged WebView denial smoke,
+  privacy scan, and dependency/licence inventory all passed. Evidence artifact
+  10333101940 has SHA-256
+  `a055f22550acd0f0c166ce288a09ed3537ba72cfe78e0f52b0f289f3332309a5`.
+
+Both jobs used Node 24.19.0, npm 11.9.0, rustc 1.90.0, and Cargo 1.90.0. Quality run
+34804861410 passed at the same commit. Routine full-package upload was intentionally
+skipped; lightweight evidence uploads succeeded. This run is the current Gate E
+closure evidence. Phase 1C remains unapproved and was not started.
+
+Production run 34804735119 at `c0d881a480b0c64f1cd5d43dc22895f75edf889a`
+is retained failed evidence. Both target jobs passed setup, frontend validation, and
+frontend build, then failed `cargo fmt --check --all`. Rust core tests and all later
+steps were skipped. The exact formatting diff was applied in `dc2efdf`; no functional
+failure was retried or reclassified as passing.

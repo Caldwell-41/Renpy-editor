@@ -131,17 +131,35 @@ matrix. This was a diagnosed committed-input defect, not a flaky target result.
 
 A subsequent corrective review reopened Gate E: the successful historical suite did
 not close pathname substitution after parent validation, and did not prove safe
-`Prepared` abandonment or non-blocking terminal `Rejected` handling. The active
-corrective suite relocates evidence to anchored recovery and exercises parent
-replacement after preparation and at the platform boundary, target symlink/reparse
-substitution, recovery-directory redirection, same-path delete/recreate, no out-of-root
-writes, actual killed-process `Prepared` finalisation, a later commit, terminal
-rejection, and continued conflict/recovery blocking. Cross-compilation was not counted
-as target runtime evidence. Production run 34801268319 passed the corrected suite on
-actual Windows x64 (31 passed, 1 ignored worker) and macOS ARM64 (32 passed, 1 ignored
-worker), re-closing Gate E. The preceding corrective run 34800849992 remains failed
-evidence; its macOS job passed and its Windows job failed before the diagnosed
-writable-flush-handle correction.
+`Prepared` abandonment or non-blocking terminal `Rejected` handling. The correction
+relocated evidence to anchored recovery and added parent/recovery/target substitution,
+same-path delete/recreate, no-out-of-root-write, actual killed-process `Prepared`
+finalisation, later-commit, terminal-rejection, and conflict/recovery-blocking coverage.
+Production run 34801268319 passed that suite on actual Windows x64 and macOS ARM64.
+
+A final follow-up review then found that recovery discovery still used
+`fs::read_dir(recovery.path())` after opening an anchored recovery directory. On
+macOS/Unix, a same-user rename plus empty pathname replacement could therefore have
+hidden unresolved journals from Save/Flush. The regression now validates that the live
+pathname still names the retained recovery object, enumerates a duplicated descriptor
+with `fdopendir`/`readdir`, and revalidates the chain; Windows keeps pathname enumeration
+only while the recovery namespace is pinned against rename/delete.
+[Production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
+at `dc2efdf845fd014c57e850f2c96683fd487da592` passed the latest suite on Windows
+x64 (31 passed, 0 failed, 1 ignored worker) and macOS ARM64 (33 passed, 0 failed,
+1 ignored worker). The macOS suite includes
+`anchored_recovery_enumeration_rejects_path_substitution`. Both targets then passed
+desktop boundary tests, packaging, packaged WebView denial smoke, artifact privacy
+scan, and dependency/licence inventory. Quality run 34804861410 passed. Evidence
+artifacts are 10332572412 (Windows) and 10333101940 (macOS). This is the current Gate E
+closure evidence.
+
+Run 34804735119 at `c0d881a4` is retained failed evidence for this final follow-up: both
+target jobs passed frontend validation/build and then stopped at `cargo fmt --check
+--all`; core and later steps were skipped. The formatting diff was fixed in `dc2efdf`.
+The earlier corrective run 34800849992 also remains failed evidence for the diagnosed
+Windows writable-flush-handle defect; no failed or skipped step is reclassified as a
+pass.
 
 ## Planned layers
 
@@ -168,7 +186,7 @@ quality-gated rather than one large feature branch:
 | Milestone | Minimum evidence before proceeding |
 | --- | --- |
 | 1A scaffold | Locked fresh install/build/test; command/capability denial; CSP/navigation/network/ambient host denial; privacy/licence checks; packaged Windows x64/macOS ARM64 smoke; semantic theme tokens/reduced-motion foundation |
-| 1B transactions | External-writer races, stale revisions, path/file identity and symlink substitution, crash-point recovery, durability semantics, undo/redo conflict boundaries on both targets |
+| 1B transactions | External-writer races, stale revisions, path/file/recovery identity and symlink substitution, crash-point recovery, durability semantics, undo/redo conflict boundaries on both targets |
 | 1C project lifecycle | New-project staging/failure cleanup; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
@@ -179,13 +197,15 @@ quality-gated rather than one large feature branch:
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
 
-The Phase 1B core suite also launches a child copy of the Rust test process and exits
-it at prepared, staged, commit-intent, exchanged, verified, committed, and durable
-journal boundaries. A fresh service then classifies the retained state. In-process
-hooks deterministically race external content/identity/path changes before and after
-the platform operation. The production Windows/macOS matrix runs this same suite in
-release mode and retains its log with the existing packaged-boundary and dependency
-evidence; it is not duplicated in a second expensive matrix.
+The Phase 1B core suite launches a child copy of the Rust test process and exits it at
+prepared, staged, commit-intent, exchanged, verified, committed, and durable journal
+boundaries. A fresh service then classifies the retained state. In-process hooks
+deterministically race external content/identity/path changes before and after the
+platform operation. The latest suite also proves recovery-directory namespace
+substitution cannot convert unresolved recovery into an empty successful scan. The
+production Windows/macOS matrix runs the same platform-appropriate suite in release
+mode and retains its log with the existing packaged-boundary and dependency evidence;
+it is not duplicated in a second expensive matrix.
 
 ## Representative source coverage
 

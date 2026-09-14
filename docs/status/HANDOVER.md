@@ -25,21 +25,34 @@ instruction.
 ## Completed Phase 1B correction
 
 - The original Phase 1B implementation and run 34797222616 remain historical evidence,
-  but the Gate E closure was reopened after review found parent/path substitution
-  windows, no safe `Prepared` cleanup path, and blocking terminal `Rejected` journals.
-- The completed correction relocates all stage/accepted/backup evidence under
-  anchored transaction recovery, persists relative artifact names, retains validated
-  directory-handle chains, uses descriptor-relative no-follow operations on macOS/
-  Unix, and pins Windows directory handles against rename/delete during `ReplaceFileW`.
+  but Gate E was reopened after review found parent/path substitution windows, no safe
+  `Prepared` cleanup path, and blocking terminal `Rejected` journals.
+- The completed correction relocates all stage/accepted/backup evidence under anchored
+  transaction recovery, persists relative artifact names, retains validated directory-
+  handle chains, uses descriptor-relative no-follow operations on macOS/Unix, and pins
+  Windows directory handles against rename/delete during `ReplaceFileW`.
 - `Prepared` can be explicitly finalised only after flags and anchored entry checks
   prove no accepted/staged boundary was crossed. Pre-mutation `Rejected` is terminal
   and non-blocking; conflict and ambiguous recovery remain blocking.
-- The expanded local suite passes, including actual killed-process safe abandonment,
-  parent/recovery/target substitution, no out-of-root artifact creation, terminal
-  rejection, and retained conflict evidence. Production run 34801268319 at
-  `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed Windows x64 job 103844270268
-  and macOS ARM64 job 103844270072, re-closing Gate E. Evidence artifacts are
-  10331303970 (Windows) and 10331433193 (macOS); quality run 34801268255 passed.
+- A later review found that recovery discovery still enumerated the anchored recovery
+  directory through its pathname on Unix/macOS. That final gap is now closed: recovery
+  discovery validates pathname identity against the retained recovery anchor, enumerates
+  a duplicated directory descriptor with `fdopendir`/`readdir`, and revalidates the
+  anchor afterward. A replaced/empty recovery pathname therefore fails closed instead
+  of hiding unresolved transactions from Save/Flush. Windows continues pathname
+  enumeration only while the recovery namespace is pinned by no-delete-share handles.
+- [Production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
+  at `dc2efdf845fd014c57e850f2c96683fd487da592` passed Windows x64 job
+  103854628315 (31 passed, 0 failed, 1 ignored worker) and macOS ARM64 job
+  103854628300 (33 passed, 0 failed, 1 ignored worker), including the new macOS/Unix
+  recovery-path substitution regression. Both jobs also passed desktop tests,
+  packaging, packaged denial smoke, secret scanning, and dependency/licence inventory.
+  Evidence artifacts are 10332572412 (Windows) and 10333101940 (macOS); quality run
+  34804861410 passed.
+- Production run 34804735119 at `c0d881a4` is retained failed evidence: both target
+  jobs stopped at `cargo fmt --check --all`; core and later steps were skipped. The
+  exact formatting diff was corrected in `dc2efdf`. No functional failure was retried
+  away.
 - Phase 1C remains unapproved and was not started.
 
 ## Original Phase 1B foundation and evidence
@@ -53,19 +66,20 @@ instruction.
   persistent boundaries.
 - The renderer protocol, command allowlist, Tauri capability, CSP, navigation policy,
   and ambient-authority denials remain unchanged.
-- The existing single production matrix now retains the Phase 1B test log as well as
+- The existing single production matrix retains the Phase 1B test log as well as
   packaged-boundary and dependency evidence, avoiding a duplicate expensive matrix.
+- [Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
+  at `302a2b2a` remains historical evidence for the first corrective pass. The later
+  recovery-enumeration correction and run 34804861387 supersede it for Gate E closure.
 - [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
-  at `85690bd4` passed Windows x64 job 103832559663 and macOS ARM64 job
-  103832559907, including the transaction suite, desktop tests, packaging, packaged
-  denial smoke, secrets, and dependency/licence inventory. Evidence artifacts are
-  10330271852 (Windows) and 10329987775 (macOS).
+  at `85690bd4` remains the original Phase 1B target evidence before the corrective
+  reviews.
 - Run 34796513503 passed at the prior implementation commit, then contract review found
   its pre-commit macOS evidence files used ordinary `sync_all`. Commit `85690bd4`
   corrected them to use the required platform flush before the final target run.
-- The preceding run 34796369255 remains failed evidence. Its pushed `Cargo.lock` was
-  truncated by the repository-write transport, so both jobs correctly failed the core
-  step. Commit `ecc369a7` restored the validated lockfile before the successful run.
+- Run 34796369255 remains failed evidence. Its pushed `Cargo.lock` was truncated by the
+  repository-write transport, so both jobs correctly failed the core step. Commit
+  `ecc369a7` restored the validated lockfile before the successful matrix.
 - The original task is archived and its first Gate E closure is superseded by the
   completed corrective evidence. No Phase 1C project lifecycle, SDK, parser, authoring,
   or renderer filesystem authority was implemented.
@@ -187,7 +201,8 @@ next begins.
 Gate E is closed with journalled recoverable semantics, not a portable compare-and-swap
 claim. Multi-path transactions are recoverable sequences, Windows ordinary-user
 directory-entry power-loss durability is not claimed, and macOS requires
-`F_FULLFSYNC`. Future lifecycle and authoring work must use this boundary.
+`F_FULLFSYNC`. Recovery discovery also deliberately fails closed if namespace identity
+cannot be proved. Future lifecycle and authoring work must use this boundary.
 
 ## Deferred beyond Phase 1
 
