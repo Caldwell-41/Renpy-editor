@@ -14,6 +14,9 @@ REQUIRED = (
     "AGENTS.md",
     "README.md",
     "SECURITY.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "NOTICE",
     "docs/INDEX.md",
     "docs/PRODUCT.md",
     "docs/ARCHITECTURE.md",
@@ -73,7 +76,9 @@ TEXT_FILENAMES = {
     ".gitattributes",
     ".gitignore",
     "Dockerfile",
+    "LICENSE",
     "Makefile",
+    "NOTICE",
 }
 SKIP_PARTS = {
     ".git",
