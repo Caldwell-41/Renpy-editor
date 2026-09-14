@@ -136,8 +136,12 @@ corrective suite relocates evidence to anchored recovery and exercises parent
 replacement after preparation and at the platform boundary, target symlink/reparse
 substitution, recovery-directory redirection, same-path delete/recreate, no out-of-root
 writes, actual killed-process `Prepared` finalisation, a later commit, terminal
-rejection, and continued conflict/recovery blocking. Cross-compilation is not target
-runtime evidence; new Windows x64 and macOS ARM64 execution is pending.
+rejection, and continued conflict/recovery blocking. Cross-compilation was not counted
+as target runtime evidence. Production run 34801268319 passed the corrected suite on
+actual Windows x64 (31 passed, 1 ignored worker) and macOS ARM64 (32 passed, 1 ignored
+worker), re-closing Gate E. The preceding corrective run 34800849992 remains failed
+evidence; its macOS job passed and its Windows job failed before the diagnosed
+writable-flush-handle correction.
 
 ## Planned layers
 

@@ -127,14 +127,15 @@ diagnostic record.
   on Windows x64 and macOS ARM64.
 - **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
   partial-download, limits, and unsafe overwrite/promotion cases.
-- **Phase 1B corrective implementation pending target evidence:** Transactions retain
+- **Complete — Phase 1B corrective implementation:** Transactions retain
   approved root/component handles and validate parent/target identity, exact bytes,
   and SHA-256. Transaction evidence exists only under anchored recovery. macOS uses
   no-follow descriptor-relative creation/inspection/rename/exchange; Windows pins
   directory components against rename/delete while `ReplaceFileW` preserves the
   displaced target. Prepared safe-abandon requires proved absence; terminal rejected
   journals do not block flush. Windows directory-entry power-loss durability is still
-  not claimed. Gate E remains reopened until both target suites pass. See
+  not claimed. Production run 34801268319 passed the corrected hostile-boundary suite
+  on actual Windows x64 and macOS ARM64, re-closing Gate E. See
   [TRANSACTIONS.md](TRANSACTIONS.md).
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.

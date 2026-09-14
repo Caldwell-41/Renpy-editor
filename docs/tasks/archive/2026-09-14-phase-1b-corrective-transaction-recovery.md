@@ -1,6 +1,6 @@
 # Task: Phase 1B corrective transaction and recovery remediation
 
-**Status:** In progress 2026-09-14  
+**Status:** Complete 2026-09-14<br>
 **Scope:** Corrective production transaction/recovery work only; Phase 1C remains unapproved
 
 ## Entry condition
@@ -67,12 +67,32 @@ Implementation-tree local validation:
 - `python3 -m unittest discover -s spikes/lossless-source/tests -v` (26 passed).
 - `python3 -m unittest discover -s spikes/renpy-sdk/tests -v` (24 passed).
 - `python3 spikes/lossless-source/benchmark.py` (620,000 bytes; 40,000 nodes;
-  133.07 ms median over 7 samples).
+  123.79 ms median over 7 final-validation samples).
 - `git diff --check`.
 
-Cross-compilation is recorded only as compilation evidence. Exact Windows/macOS
-runtime workflow/job/artifact results, including any failed or superseded attempts,
-remain pending before this task can be archived and Gate E re-closed.
+Cross-compilation is recorded only as compilation evidence. Actual target execution is
+recorded below.
+
+### Successful target evidence
+
+[Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
+at `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed on both required targets:
+
+- Windows x64 job 103844270268, Windows Server 2025: corrected independent core
+  transaction/recovery suite 31 passed, 0 failed, 1 ignored child-process worker;
+  desktop boundary, packaging, packaged WebView denial smoke, secret scan, and
+  dependency/licence inventory also passed. Evidence artifact 10331303970 has SHA-256
+  `6ae436a4befc0949f97b4299e0c4d79483d26026cb8ab23a8b7b9a701bf8e3c3`.
+- macOS ARM64 job 103844270072, Darwin 25.6.0 ARM64: corrected independent core suite
+  32 passed, 0 failed, 1 ignored worker; the same remaining production checks passed.
+  Evidence artifact 10331433193 has SHA-256
+  `8622d55bc4b5403a8b5843b3af1eafcee02213c470554457ea77c5b5d7a72347`.
+
+Both jobs used Node 24.19.0, npm 11.9.0, rustc 1.90.0, and Cargo 1.90.0. Quality run
+34801268255 passed at the same commit. The manual-only packaged-application upload was
+skipped by policy on both routine jobs and is not required or classified as passing.
+The lightweight evidence uploads succeeded. Gate E is re-closed; Phase 1C remains
+unapproved and was not started.
 
 ### Failed target attempt retained
 

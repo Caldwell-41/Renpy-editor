@@ -162,11 +162,21 @@ Phase 1B adds no renderer operation or ambient filesystem/process/network author
 
 ## Phase 1B corrective gate evidence
 
-Corrective target evidence is pending. Gate E remains reopened, and Phase 1C remains
-blocked, until the handle-anchored implementation and new hostile-boundary cases pass
-actual Windows x64 and macOS ARM64 runtime execution.
+[Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
+at `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed actual Windows x64 job
+103844270268 (31 passed, 0 failed, 1 ignored child-process worker) and macOS ARM64 job
+103844270072 (32 passed, 0 failed, 1 ignored worker). Both jobs also passed desktop
+tests, production packaging, packaged WebView denial smoke, artifact secret scanning,
+and dependency/licence inventory. Evidence artifacts are 10331303970 (Windows,
+SHA-256 `6ae436a4befc0949f97b4299e0c4d79483d26026cb8ab23a8b7b9a701bf8e3c3`)
+and 10331433193 (macOS, SHA-256
+`8622d55bc4b5403a8b5843b3af1eafcee02213c470554457ea77c5b5d7a72347`). Quality
+run 34801268255 passed. This actual target evidence re-closes Gate E; Phase 1C remains
+separately approval-gated.
 
-The original Phase 1B run 34797222616 at `85690bd4` remains historical evidence but is
-superseded for Gate E closure by this correction. Exact corrective workflow/job/
-artifact evidence and any failed attempts will be recorded here and in the corrective
-task after execution.
+The original Phase 1B run 34797222616 remains historical evidence. Corrective run
+34800849992 is retained failed evidence: macOS passed, while Windows exposed a
+writable-handle requirement in post-replacement flushing and a test that incorrectly
+expected a pinned root rename to succeed. Both were corrected before the successful
+run; no skipped step is counted as passing. See the archived corrective task for exact
+failed job and artifact identifiers.

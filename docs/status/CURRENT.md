@@ -1,16 +1,14 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1B corrective remediation active; Gate E reopened; Phase 1C not approved<br>
+**Phase:** Phase 1B corrective remediation complete; Gate E re-closed; Phase 1C not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The Phase 0 corrective checkpoint and bounded Phase 1A production scaffold are
-  complete. Phase 1B was previously closed, but Gate E is reopened while the approved
-  [corrective transaction/recovery task](../tasks/active/phase-1b-corrective-transaction-recovery.md)
-  resolves material pathname-race and terminal-state findings. No later milestone is
-  approved.
+- The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
+  1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+  are complete. The correction re-closed Gate E; no later milestone is approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, empty future ports, locked
@@ -47,13 +45,13 @@
   carries validated directory-handle chains through sensitive operations, uses no-
   follow descriptor-relative macOS/Unix I/O, and pins Windows directory namespaces
   against rename/delete during `ReplaceFileW`. It adds proved-empty `Prepared`
-  abandonment and terminal/non-blocking pre-mutation `Rejected` semantics. Local core
-  tests, strict Clippy, and Windows/macOS cross-compilation pass; actual target runtime
-  evidence is still pending, so these statements are not yet Gate E closure evidence.
-- [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
-  at `85690bd4` remains historical Phase 1B evidence but is superseded for closure by
-  this correction. See [TRANSACTIONS.md](../TRANSACTIONS.md), amended ADR 0004, and the
-  active corrective task.
+  abandonment and terminal/non-blocking pre-mutation `Rejected` semantics.
+- [Production run 34801268319](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34801268319)
+  at `302a2b2a` passed the corrected transaction/recovery suite on actual Windows x64
+  and macOS ARM64, plus desktop tests, packaging, packaged denial smoke, secret scan,
+  and dependency/licence inventory. Quality run 34801268255 passed. The archived
+  corrective task retains exact job/artifact identifiers and the preceding failed
+  attempt. See [TRANSACTIONS.md](../TRANSACTIONS.md) and amended ADR 0004.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -85,14 +83,14 @@
   with simple assignment; basic placement/transitions/music/SFX use extensible models.
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
-- Production file Gate E is reopened pending corrective Windows/macOS runtime evidence.
-  Authoring remains absent and blocked.
+- Production file Gate E is re-closed by corrective Windows/macOS runtime evidence.
+  Authoring remains absent and Phase 1C remains approval-blocked.
 
 ## Next action
 
-Complete only the active Phase 1B corrective validation/evidence and closure. Phase 1C
-project lifecycle/SDK work is not approved. Do not implement New Project, project
-generation/import, SDK workflow, or any authoring surface.
+Phase 1B correction is complete. Phase 1C project lifecycle/SDK work is not approved.
+Do not implement New Project, project generation/import, SDK workflow, or any authoring
+surface without a new explicit instruction.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

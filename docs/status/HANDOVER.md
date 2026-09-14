@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1B corrective remediation active; Gate E reopened; Phase 1C not approved<br>
+**Phase:** Phase 1B corrective remediation complete; Gate E re-closed; Phase 1C not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -11,7 +11,7 @@
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
 4. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-5. [Active Phase 1B corrective remediation](../tasks/active/phase-1b-corrective-transaction-recovery.md)
+5. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
 6. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
 7. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
 8. [ADR 0001](../adr/0001-lossless-source-model.md),
@@ -22,12 +22,12 @@ The approved product brief remains authoritative. The user explicitly approved P
 1B on 2026-09-14. Phase 1C and every later milestone still require a new explicit
 instruction.
 
-## Active Phase 1B correction
+## Completed Phase 1B correction
 
 - The original Phase 1B implementation and run 34797222616 remain historical evidence,
   but the Gate E closure was reopened after review found parent/path substitution
   windows, no safe `Prepared` cleanup path, and blocking terminal `Rejected` journals.
-- The current working correction relocates all stage/accepted/backup evidence under
+- The completed correction relocates all stage/accepted/backup evidence under
   anchored transaction recovery, persists relative artifact names, retains validated
   directory-handle chains, uses descriptor-relative no-follow operations on macOS/
   Unix, and pins Windows directory handles against rename/delete during `ReplaceFileW`.
@@ -36,8 +36,10 @@ instruction.
   and non-blocking; conflict and ambiguous recovery remain blocking.
 - The expanded local suite passes, including actual killed-process safe abandonment,
   parent/recovery/target substitution, no out-of-root artifact creation, terminal
-  rejection, and retained conflict evidence. Cross-compilation passes. Actual Windows
-  x64 and macOS ARM64 runtime evidence is still required before re-closure.
+  rejection, and retained conflict evidence. Production run 34801268319 at
+  `302a2b2ab9b043b19e231b921493824ac9c8ad68` passed Windows x64 job 103844270268
+  and macOS ARM64 job 103844270072, re-closing Gate E. Evidence artifacts are
+  10331303970 (Windows) and 10331433193 (macOS); quality run 34801268255 passed.
 - Phase 1C remains unapproved and was not started.
 
 ## Original Phase 1B foundation and evidence
@@ -64,9 +66,9 @@ instruction.
 - The preceding run 34796369255 remains failed evidence. Its pushed `Cargo.lock` was
   truncated by the repository-write transport, so both jobs correctly failed the core
   step. Commit `ecc369a7` restored the validated lockfile before the successful run.
-- The original task is archived, but its Gate E closure is superseded pending the
-  active correction. No Phase 1C project lifecycle, SDK, parser, authoring, or renderer
-  filesystem authority was implemented.
+- The original task is archived and its first Gate E closure is superseded by the
+  completed corrective evidence. No Phase 1C project lifecycle, SDK, parser, authoring,
+  or renderer filesystem authority was implemented.
 
 ## Completed Phase 1A implementation
 
