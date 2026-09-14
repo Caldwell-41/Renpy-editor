@@ -798,7 +798,7 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
             return Err(RenpyError::Download);
         }
         output.sync_all().map_err(|_| RenpyError::Io)?;
-        install_supported_sdk_from_archive(data_root, &archive)
+        install_supported_sdk_from_archive_prepared(data_root, &archive, false)
     })();
     let _ = fs::remove_file(&archive);
     result
@@ -833,6 +833,14 @@ fn install_supported_sdk_from_archive_inner(
     if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
         return Ok(sdk);
     }
+    install_supported_sdk_from_archive_prepared(data_root, archive, interrupt_after_promotion)
+}
+
+fn install_supported_sdk_from_archive_prepared(
+    data_root: &Path,
+    archive: &Path,
+    interrupt_after_promotion: bool,
+) -> Result<ValidatedSdk, RenpyError> {
     let sdk_dir = data_root.join("sdks");
     fs::create_dir_all(&sdk_dir).map_err(|_| RenpyError::Io)?;
     let (destination, _, _) = managed_sdk_paths(data_root);
@@ -1465,6 +1473,32 @@ mod tests {
                 .file_name()
                 .to_string_lossy()
                 .starts_with(".loomlight-sdk-stage-")
+        }));
+    }
+
+    #[test]
+    fn active_download_is_not_quarantined_by_prepared_install() {
+        let temp = tempfile::tempdir().unwrap();
+        let data_root = temp.path().join("state");
+        let sdk_dir = data_root.join("sdks");
+        fs::create_dir_all(&sdk_dir).unwrap();
+        let archive = sdk_dir.join(format!(
+            ".{SDK_ARCHIVE_NAME}.{}.partial",
+            uuid::Uuid::new_v4()
+        ));
+        fs::write(&archive, b"not-the-official-sdk").unwrap();
+
+        assert!(matches!(
+            install_supported_sdk_from_archive_prepared(&data_root, &archive, false),
+            Err(RenpyError::Checksum)
+        ));
+        assert!(archive.is_file());
+        assert!(fs::read_dir(&sdk_dir).unwrap().all(|entry| {
+            !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(SDK_QUARANTINE_PREFIX)
         }));
     }
 
