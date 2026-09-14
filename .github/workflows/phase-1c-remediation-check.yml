@@ -1,0 +1,37 @@
+name: Phase 1C remediation check
+
+on:
+  push:
+    branches: [phase-1c-crash-consistency]
+    paths:
+      - .github/phase-1c-remediate.patch
+      - .github/phase-1c-fixup.patch
+      - .github/workflows/phase-1c-remediation-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out remediation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Apply candidate remediation
+        run: |
+          git apply --check .github/phase-1c-remediate.patch
+          git apply .github/phase-1c-remediate.patch
+          if [ -f .github/phase-1c-fixup.patch ]; then
+            git apply --check .github/phase-1c-fixup.patch
+            git apply .github/phase-1c-fixup.patch
+          fi
+      - name: Check formatting and compile core tests
+        working-directory: app
+        run: |
+          cargo fmt --check --all
+          cargo check -p loomlight-core --tests --locked
+      - name: Run core tests
+        working-directory: app
+        run: cargo test -p loomlight-core --locked
