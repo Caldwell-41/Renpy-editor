@@ -1,30 +1,30 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1A target gate blocked on GitHub-hosted runner capacity<br>
+**Phase:** Phase 0 and Phase 1A complete; Phase 1B planned but not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The Phase 0 corrective checkpoint is complete. The user explicitly approved the
-  bounded Phase 1A production scaffold on 2026-09-14; no later milestone is approved.
+- The Phase 0 corrective checkpoint and bounded Phase 1A production scaffold are
+  complete. No later Phase 1 milestone is approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, empty future ports, locked
   dependencies, and semantic Quiet Studio Dark/light-ready tokens.
-- Local TypeScript build/tests and framework-independent Rust core tests pass.
-  Production run
-  [34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
-  at `ae447584` packaged on both targets. macOS ARM64 passed its complete packaged
-  boundary/privacy/licence gate; Windows x64 passed package and every boundary boolean
-  except a false-positive renderer-secret heuristic. Commit `c4f2bd18` narrows that
-  heuristic to Loomlight secret surfaces, storage, Node bridges, sentinel text, and the
-  separate exact-sentinel artifact scan.
-- The replacement production and quality runs at `c4f2bd18` (34782646465 and
-  34782646499) failed during runner setup with zero steps. Repository artifact storage
-  was already reporting quota exhaustion. No Windows result exists for the corrected
-  secret probe, so Phase 1A remains open rather than treating infrastructure failure as
-  a target pass.
+- Local TypeScript build/tests, framework-independent Rust core tests, repository
+  validation, Phase 0 regressions, privacy scans, and dependency audit pass.
+  [Production run 34792368716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368716)
+  at `0a6a6c5d` passed the corrected complete gate on Windows x64 and macOS ARM64:
+  frontend/Rust tests, packaging, packaged-WebView denial smoke, artifact secret scan,
+  and dependency/licence inventory. The smoke reported navigation, popup, and aggregate
+  WebView restrictions true on both targets. Quality run 34792368711 passed at the same
+  commit.
+- The successful run produced the Windows executable/MSI/NSIS installer and macOS
+  application/DMG. Under the routine-run retention policy it uploaded lightweight
+  evidence artifacts 10328234722 (Windows) and 10328548641 (macOS), not full packages.
+  Earlier failed/cancelled runs and the hosted-runner interruption remain documented in
+  the archived Phase 1A task; skipped steps are not reclassified as passes.
 - Routine CI has been cost-scoped without weakening the Phase 1A gate: the production
   Windows/macOS package matrix runs on relevant `app/**` or workflow changes pushed to
   `main`, plus explicit manual dispatch, rather than running once for a pull request and
@@ -36,9 +36,10 @@
   [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
   [ARCHITECTURE.md](../ARCHITECTURE.md), and the
   [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md).
-- The first Phase 1 implementation gate remains the bounded
-  [production scaffold](../tasks/active/phase-1-scaffold.md). Planning documents are
-  not implementation approval.
+- The first Phase 1 implementation gate is the completed
+  [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
+  The bounded [Phase 1B transaction/recovery brief](../tasks/active/phase-1-transaction-recovery.md)
+  is planning only and is not implementation approval.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -76,11 +77,11 @@
 
 ## Next action
 
-Restore or explicitly fund enough GitHub-hosted Actions capacity for one fresh production
-scaffold run at or after `c4f2bd188bf33290204446b3aaf9d33c8fd15acb`, then require
-both Windows x64 and macOS ARM64 target jobs to pass. Complete and evidence only
-[phase-1-scaffold.md](../tasks/active/phase-1-scaffold.md). Do not begin Phase 1B,
-archive the scaffold task, or claim the target gate while this remains blocked.
+Stop at the Phase 1A boundary. The next possible milestone is the planned
+[Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md),
+which must receive new explicit user approval before implementation. Production
+authoring writes remain blocked until that future gate resolves the retained
+transaction/recovery risks.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

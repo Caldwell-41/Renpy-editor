@@ -1,8 +1,8 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 0 complete; Phase 1A target gate blocked on GitHub-hosted runner capacity<br>
-**Repository:** `Caldwell-41/Renpy-editor` (confirmed private)<br>
+**Phase:** Phase 0 and Phase 1A complete; Phase 1B planned but not approved<br>
+**Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
 ## Read first
@@ -10,17 +10,18 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Phase 1 production scaffold](../tasks/active/phase-1-scaffold.md)
-5. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-6. [ADR 0001](../adr/0001-lossless-source-model.md),
+4. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+5. [Planned Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md)
+6. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+7. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
 
-The approved product brief remains authoritative. The user explicitly approved Phase
-1A on 2026-09-14. Complete only the bounded scaffold task and its target evidence; do
-not begin Phase 1B or treat the vertical-slice plan as an open-ended implementation run.
+The approved product brief remains authoritative. The user explicitly approved and
+Phase 1A completed on 2026-09-14. Phase 1B and every later milestone require a new
+explicit instruction; do not treat this handover or the vertical-slice plan as approval.
 
-## Active Phase 1A implementation
+## Completed Phase 1A implementation
 
 - Production workspace: `app/`, separate from `spikes/`.
 - Runtime boundary: one custom AppManifest command, `core_request`, granted by one
@@ -33,19 +34,24 @@ not begin Phase 1B or treat the vertical-slice plan as an open-ended implementat
 - UI foundation: semantic dark and provisional light tokens, system/Source typography,
   restrained radius/elevation, visible focus, and reduced-motion behavior. The shell
   is boundary evidence, not an authoring screen.
-- Local state: npm install/typecheck/unit/build, repository validation, and independent
-  Rust core tests pass.
-- [Production run 34782008915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34782008915)
-  at `ae447584` packaged Windows x64 and macOS ARM64. The macOS job passed the full
-  smoke/privacy/licence sequence. Windows passed package and all denial probes except
-  the renderer-secret heuristic, which incorrectly matched a WebView2 platform global.
-- `c4f2bd188bf33290204446b3aaf9d33c8fd15acb` corrects that heuristic without
-  removing the exact runtime-sentinel artifact scan. Its production run 34782646465
-  and quality run 34782646499 both failed at runner setup with zero steps. Artifact
-  uploads in the preceding jobs also reported exhausted repository storage quota.
-  These are recorded infrastructure failures, not passes.
-- Resume only by restoring Actions capacity and requiring a fresh two-target run at or
-  after `c4f2bd18`. Do not archive 1A or create/start 1B before both targets pass.
+- Local locked install/typecheck/unit/build, repository validation, privacy checks,
+  dependency audit, Phase 0 regressions, and independent Rust core tests pass.
+- `c4f2bd188bf33290204446b3aaf9d33c8fd15acb` corrected the Windows WebView2
+  secret-probe false positive without weakening empty-storage/Node/Loomlight-global,
+  sentinel-text, or exact-sentinel artifact checks.
+- [Production run 34792368716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368716)
+  at `0a6a6c5d1ee30fc0626d4edeca0f23db611490bb` passed Windows x64 job
+  103818859749 and macOS ARM64 job 103818859932. Both used Node 24.19.0, npm 11.9.0,
+  Rust/Cargo 1.90.0 and passed frontend/Rust tests, packaging, injected packaged
+  boundary smoke, artifact secret scan, and dependency/licence inventory.
+- Windows produced `loomlight.exe`, MSI, and NSIS packages; macOS produced
+  `Loomlight.app` and an ARM64 DMG. Routine retention kept lightweight evidence
+  artifacts 10328234722 and 10328548641 for seven days; full package upload was
+  intentionally skipped. Quality run 34792368711 passed at the same commit.
+- Earlier command/probe failures, the renderer false positive, runner-setup failures,
+  and artifact quota reports remain recorded in the archived task as evidence. They
+  were not treated as passes.
+- Phase 1A is archived and complete. Stop: the active Phase 1B brief is planning only.
 
 ## Accepted Phase 0 boundaries
 

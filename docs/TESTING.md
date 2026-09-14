@@ -101,8 +101,13 @@ Rust cache, and artifact-upload Actions.
 passed the complete macOS ARM64 gate and packaged Windows x64, where one subsequently
 corrected renderer-secret false positive remained. Runs 34782646465 and 34782646499
 then failed at hosted-runner setup with zero steps after repository artifact storage
-reported quota exhaustion. Phase 1A remains open until the corrected scaffold receives
-a fresh passing two-target run.
+reported quota exhaustion; they remain failure evidence, not passes.
+[Run 34792368716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368716)
+at `0a6a6c5d` closes the corrected gate: Windows x64 job 103818859749 and macOS ARM64
+job 103818859932 each passed locked install, frontend and Rust tests, packaging,
+injected packaged-WebView denial smoke, artifact privacy scan, and dependency/licence
+inventory. Lightweight evidence artifacts 10328234722 and 10328548641 were retained;
+full packages were intentionally not uploaded on this routine push.
 
 ## Planned layers
 

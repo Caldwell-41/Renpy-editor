@@ -3,11 +3,11 @@
 ## Status
 
 This is the accepted Phase 0 target architecture plus the approved Phase 1 planning
-constraints and the Phase 1A production scaffold now under implementation. ADR 0001
+constraints and the completed Phase 1A production scaffold. ADR 0001
 selects exact source bytes plus a conservative partial CST,
 ADR 0002 selects the versioned SDK boundary, and
 [ADR 0003](adr/0003-tauri-desktop-runtime.md) selects Tauri 2. The boundaries remain
-framework-light even though the production shell is now explicit. The approved bounded
+framework-light even though the production shell is now explicit. The bounded
 production scaffold lives in `app/`; later Phase 1 milestones remain separately gated.
 
 ## Production scaffold boundary

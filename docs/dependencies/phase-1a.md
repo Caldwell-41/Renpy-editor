@@ -34,7 +34,8 @@ The locked dependency graph currently contains 76 npm package entries and 433 Ca
 package entries across all target/platform conditionals, including the two local
 workspace crates. All third-party entries report a licence expression. CI recreates a
 machine-readable, versioned inventory from both lockfiles on each supported target and
-retains it with the private build evidence for seven days.
+retains it with lightweight build evidence for seven days. Full packages are retained
+only for explicitly requested manual workflow runs.
 
 Cargo's cross-platform graph includes target-conditional packages that are not shipped
 on both production targets. The inventory records them rather than treating a host-only

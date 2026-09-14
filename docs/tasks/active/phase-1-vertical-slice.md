@@ -1,6 +1,6 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Status:** Planned; Phase 1A approved, later milestones require explicit user approval<br>
+**Status:** Planned; Phase 1A complete, later milestones require explicit user approval<br>
 **Scope:** Production vertical slice after the scaffold gate; no Phase 2+ features
 
 ## Purpose
@@ -8,7 +8,7 @@
 Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight
 workflow without collapsing the whole initial product into one implementation task.
 The first implementation task remains the bounded
-[production scaffold](phase-1-scaffold.md). This plan governs the milestones that
+[production scaffold](../archive/2026-09-14-phase-1-production-scaffold.md). This plan governs the milestones that
 follow once each prior gate passes.
 
 ## Product target
@@ -100,7 +100,8 @@ arbitrary existing Ren'Py projects is not part of Phase 1.
 
 ### 1A — Production scaffold
 
-Follow [phase-1-scaffold.md](phase-1-scaffold.md) exactly. Create only the production
+The completed
+[Phase 1A task](../archive/2026-09-14-phase-1-production-scaffold.md) created only the production
 Tauri workspace, command/capability boundary, empty production ports, locked
 build/test setup, and cross-platform packaged smoke. Do not implement authoring.
 
@@ -116,6 +117,10 @@ UI foundation exposes reviewed semantic design tokens without widening desktop
 privileges or adding authoring functionality.
 
 ### 1B — Transaction, file coordination, and recovery foundation
+
+Follow the bounded
+[Phase 1B planning brief](phase-1-transaction-recovery.md) only after new explicit
+user approval.
 
 Implement the production source/file transaction boundary before any visual authoring
 is permitted to write project source. Close Phase 0 Gate E rather than assuming the

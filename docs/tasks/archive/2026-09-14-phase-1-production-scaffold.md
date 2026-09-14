@@ -1,6 +1,6 @@
 # Task: Phase 1 production scaffold
 
-**Status:** In progress; explicitly approved 2026-09-14<br>
+**Status:** Complete 2026-09-14<br>
 **Scope:** Minimal production foundation only; no authoring feature implementation
 
 ## Entry condition
@@ -10,7 +10,7 @@ explicitly approves Phase 1. Accepted Phase 0 architecture decisions are depende
 not permission to implement.
 
 The broader ordered Phase 1 milestones and fixed product/UX decisions are recorded in
-[phase-1-vertical-slice.md](phase-1-vertical-slice.md). That plan does not expand this
+[phase-1-vertical-slice.md](../active/phase-1-vertical-slice.md). That plan does not expand this
 scaffold task: this remains the first bounded implementation gate and must complete
 before later authoring milestones begin.
 
@@ -32,7 +32,7 @@ dark palette; do not polish authoring screens in this task.
 - [Testing strategy](../../TESTING.md)
 - [UI/design system](../../UI.md)
 - [Phase 1 roadmap outcome](../../ROADMAP.md)
-- [Phase 1 vertical-slice plan](phase-1-vertical-slice.md)
+- [Phase 1 vertical-slice plan](../active/phase-1-vertical-slice.md)
 
 ## Bounded implementation
 
@@ -118,7 +118,7 @@ host Tauri build, and its package manager cannot acquire them due container iden
 restrictions. A Windows MSVC target compile check passed before the executor toolchain
 cache was recycled; this is compile evidence only, not a target package/smoke pass.
 
-## Target evidence and current blocker — 2026-09-14
+## Target evidence and resolved blocker — 2026-09-14
 
 - Commits from `f9b43880` through `c4f2bd18` preserve the bounded scaffold scope.
   The follow-ups corrected npm argument forwarding, made popup/capability probes
@@ -152,6 +152,29 @@ cache was recycled; this is compile evidence only, not a target package/smoke pa
   exact npm 11.9.0 after selecting Node 24.19.0, but this change also remains target-
   unexecuted while hosted capacity is unavailable.
 
-Phase 1A remains in progress. Restore GitHub-hosted Actions capacity and require a
-fresh Windows x64 plus macOS ARM64 production run at or after `c4f2bd18` before
-closing or archiving this task. Do not begin Phase 1B.
+The hosted-runner interruption was resolved without weakening the gate.
+[Production run 34792368716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368716)
+at `0a6a6c5d1ee30fc0626d4edeca0f23db611490bb` passed both supported targets with
+Node 24.19.0, npm 11.9.0, and Rust/Cargo 1.90.0:
+
+- Windows x64 job 103818859749 built `loomlight.exe`,
+  `Loomlight_0.1.0_x64_en-US.msi`, and `Loomlight_0.1.0_x64-setup.exe`; its packaged
+  smoke reported x86_64 Windows with navigation, popup, and aggregate WebView
+  restrictions true.
+- macOS ARM64 job 103818859932 built `Loomlight.app` and
+  `Loomlight_0.1.0_aarch64.dmg`; its packaged smoke reported aarch64 macOS with the
+  same restrictions true.
+- Both jobs passed frontend checks/build, the core and desktop Rust suites, artifact
+  secret scans over six production files, and inventories of 76 npm plus 433 Cargo
+  entries. Lightweight evidence artifacts 10328234722 (Windows) and 10328548641
+  (macOS) were retained for seven days. Full packages were intentionally skipped on
+  this routine push under the documented cost-control policy, not reported as retained
+  artifacts.
+- [Quality run 34792368711](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368711)
+  passed at the same commit.
+
+All Phase 1A acceptance criteria are satisfied. The production privilege surface
+remains one versioned `core_request` command for health/version and synthetic denial
+probes, granted only to the local `main` WebView and guarded by its Rust caller label.
+Future adapters remain empty markers. Phase 1B is a separately approval-gated planning
+artifact; no Phase 1B or authoring implementation is part of this closure.
