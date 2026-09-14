@@ -1,0 +1,1120 @@
+diff --git a/app/src-core/src/renpy.rs b/app/src-core/src/renpy.rs
+index 76ccce7..0000000 100644
+--- a/app/src-core/src/renpy.rs
++++ b/app/src-core/src/renpy.rs
+@@ -17,7 +17,10 @@ pub const SDK_ARCHIVE_NAME: &str = "renpy-8.5.3-sdk.tar.bz2";
+ pub const SDK_URL: &str = "https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2";
+ pub const SDK_SHA256: &str = "eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45";
+ const MANAGED_SDK_DIR_NAME: &str = "renpy-8.5.3-sdk-verified-v1";
+-const MANAGED_PROVENANCE_NAME: &str = "renpy-8.5.3-sdk-verified-v1.provenance";
++const MANAGED_PROVENANCE_NAME: &str = ".loomlight-managed-sdk-provenance-v2";
++const LEGACY_MANAGED_PROVENANCE_NAME: &str = "renpy-8.5.3-sdk-verified-v1.provenance";
++const SDK_STAGE_MARKER: &str = ".loomlight-sdk-stage-owner";
++const SDK_QUARANTINE_PREFIX: &str = ".loomlight-sdk-quarantine-";
+ const OUTPUT_LIMIT: usize = 2_000_000;
+ const MAX_ARCHIVE_BYTES: u64 = 1024 * 1024 * 1024;
+ 
+@@ -180,6 +183,40 @@ impl RenpyAdapter {
+         result
+     }
+ 
++    pub fn generate_starter_anchored(
++        sdk: &ValidatedSdk,
++        stage: &Path,
++        stage_anchor: &File,
++        width: u32,
++        height: u32,
++    ) -> Result<(), RenpyError> {
++        #[cfg(windows)]
++        {
++            let _ = stage_anchor;
++            return Self::generate_starter(sdk, stage, width, height);
++        }
++        #[cfg(unix)]
++        {
++            let _ = stage;
++            let args = [
++                OsString::from("launcher"),
++                OsString::from("generate_gui"),
++                OsString::from("."),
++                OsString::from("--width"),
++                OsString::from(width.to_string()),
++                OsString::from("--height"),
++                OsString::from(height.to_string()),
++                OsString::from("--template"),
++                sdk.root.join("gui").into_os_string(),
++                OsString::from("--start"),
++            ];
++            sdk.revalidate(true)?;
++            let result = require_success(run_bounded_anchored(
++                &sdk.root,
++                stage_anchor,
++                launcher_args(&sdk.root, &args)?,
++                Duration::from_secs(180),
++            )?);
++            sdk.revalidate(true)?;
++            result
++        }
++    }
++
+     pub fn validate_generated(sdk: &ValidatedSdk, stage: &Path) -> Result<(), RenpyError> {
+         for command in [
+             vec![command_path(stage), OsString::from("compile")],
+@@ -199,6 +236,34 @@ impl RenpyAdapter {
+         Ok(())
+     }
+ 
++    pub fn validate_generated_anchored(
++        sdk: &ValidatedSdk,
++        stage: &Path,
++        stage_anchor: &File,
++    ) -> Result<(), RenpyError> {
++        #[cfg(windows)]
++        {
++            let _ = stage_anchor;
++            return Self::validate_generated(sdk, stage);
++        }
++        #[cfg(unix)]
++        {
++            let _ = stage;
++            for command in [
++                vec![OsString::from("."), OsString::from("compile")],
++                vec![
++                    OsString::from("."),
++                    OsString::from("lint"),
++                    OsString::from("--error-code"),
++                ],
++            ] {
++                sdk.revalidate(false)?;
++                let result = require_success(run_bounded_anchored(
++                    &sdk.root,
++                    stage_anchor,
++                    launcher_args(&sdk.root, &command)?,
++                    Duration::from_secs(180),
++                )?);
++                sdk.revalidate(false)?;
++                result?;
++            }
++            Ok(())
++        }
++    }
++
+     pub fn smoke_run(sdk: &ValidatedSdk, project: &Path) -> Result<(), RenpyError> {
+         sdk.revalidate(false)?;
+         let args = [command_path(project), OsString::from("run")];
+@@ -350,10 +415,29 @@ fn apply_minimal_environment(command: &mut Command) {
+     }
+ }
+ 
+ fn run_bounded(
++    cwd: &Path,
++    argv: Vec<OsString>,
++    timeout: Duration,
++) -> Result<ProcessResult, RenpyError> {
++    run_bounded_inner(cwd, argv, timeout, None)
++}
++
++#[cfg(unix)]
++fn run_bounded_anchored(
++    cwd: &Path,
++    directory: &File,
++    argv: Vec<OsString>,
++    timeout: Duration,
++) -> Result<ProcessResult, RenpyError> {
++    use std::os::fd::AsRawFd;
++    run_bounded_inner(cwd, argv, timeout, Some(directory.as_raw_fd()))
++}
++
++fn run_bounded_inner(
+     cwd: &Path,
+     argv: Vec<OsString>,
+     timeout: Duration,
++    anchored_cwd_fd: Option<i32>,
+ ) -> Result<ProcessResult, RenpyError> {
+     let (program, args) = argv.split_first().ok_or(RenpyError::ProcessFailed)?;
+     let mut command = Command::new(program);
+@@ -370,11 +454,18 @@ fn run_bounded(
+         // SAFETY: pre_exec calls only async-signal-safe setpgid before exec.
+         unsafe {
+-            command.pre_exec(|| {
+-                if libc::setpgid(0, 0) == 0 {
+-                    Ok(())
+-                } else {
+-                    Err(io::Error::last_os_error())
++            command.pre_exec(move || {
++                if libc::setpgid(0, 0) != 0 {
++                    return Err(io::Error::last_os_error());
+                 }
++                if let Some(fd) = anchored_cwd_fd {
++                    if libc::fchdir(fd) != 0 {
++                        return Err(io::Error::last_os_error());
++                    }
++                }
++                Ok(())
+             });
+         }
+     }
+     #[cfg(windows)]
+     {
+         use std::os::windows::process::CommandExt;
++        let _ = anchored_cwd_fd;
+         command.creation_flags(0x0000_0200); // CREATE_NEW_PROCESS_GROUP
+     }
+@@ -502,15 +593,21 @@ fn redact_line(line: &str) -> String {
+         .to_owned()
+ }
+ 
+-fn managed_sdk_paths(data_root: &Path) -> (PathBuf, PathBuf) {
++fn managed_sdk_paths(data_root: &Path) -> (PathBuf, PathBuf, PathBuf) {
+     let sdk_dir = data_root.join("sdks");
+-    (
+-        sdk_dir.join(MANAGED_SDK_DIR_NAME),
+-        sdk_dir.join(MANAGED_PROVENANCE_NAME),
+-    )
++    let destination = sdk_dir.join(MANAGED_SDK_DIR_NAME);
++    let embedded = destination.join(MANAGED_PROVENANCE_NAME);
++    let legacy = sdk_dir.join(LEGACY_MANAGED_PROVENANCE_NAME);
++    (destination, embedded, legacy)
+ }
+ 
+ fn managed_provenance(sdk: &ValidatedSdk) -> String {
+@@ -524,28 +621,163 @@ fn managed_provenance(sdk: &ValidatedSdk) -> String {
+     )
+ }
+ 
++fn provenance_matches(path: &Path, sdk: &ValidatedSdk) -> Result<bool, RenpyError> {
++    let metadata = match fs::symlink_metadata(path) {
++        Ok(value) => value,
++        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(false),
++        Err(_) => return Err(RenpyError::InvalidSdk),
++    };
++    if !metadata.is_file() || crate::transaction::is_link_or_reparse(&metadata) {
++        return Err(RenpyError::InvalidSdk);
++    }
++    let recorded = fs::read_to_string(path).map_err(|_| RenpyError::InvalidSdk)?;
++    Ok(recorded.len() <= 4096 && recorded == managed_provenance(sdk))
++}
++
++fn write_managed_provenance(path: &Path, sdk: &ValidatedSdk) -> Result<(), RenpyError> {
++    let mut file = OpenOptions::new()
++        .create_new(true)
++        .write(true)
++        .open(path)
++        .map_err(|_| RenpyError::Io)?;
++    file.write_all(managed_provenance(sdk).as_bytes())
++        .and_then(|_| file.sync_all())
++        .map_err(|_| RenpyError::Io)
++}
++
+ pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, RenpyError> {
+-    let (destination, provenance) = managed_sdk_paths(data_root);
+-    if !destination.exists() {
+-        return Ok(None);
+-    }
+-    let destination_meta =
+-        fs::symlink_metadata(&destination).map_err(|_| RenpyError::InvalidSdk)?;
++    let (destination, embedded, legacy) = managed_sdk_paths(data_root);
++    let destination_meta = match fs::symlink_metadata(&destination) {
++        Ok(value) => value,
++        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
++        Err(_) => return Err(RenpyError::InvalidSdk),
++    };
+     if !destination_meta.is_dir() || crate::transaction::is_link_or_reparse(&destination_meta) {
+         return Err(RenpyError::InvalidSdk);
+     }
+-    let provenance_meta = fs::symlink_metadata(&provenance).map_err(|_| RenpyError::InvalidSdk)?;
+-    if !provenance_meta.is_file() || crate::transaction::is_link_or_reparse(&provenance_meta) {
+-        return Err(RenpyError::InvalidSdk);
+-    }
+     let sdk = RenpyAdapter::validate_sdk(&destination)?;
+-    let recorded = fs::read_to_string(&provenance).map_err(|_| RenpyError::InvalidSdk)?;
+-    if recorded.len() > 4096 || recorded != managed_provenance(&sdk) {
+-        return Err(RenpyError::InvalidSdk);
++    if provenance_matches(&embedded, &sdk)? {
++        return Ok(Some(sdk));
+     }
+-    Ok(Some(sdk))
++    if provenance_matches(&legacy, &sdk)? {
++        write_managed_provenance(&embedded, &sdk)?;
++        sync_directory(&destination).map_err(|_| RenpyError::Io)?;
++        let _ = fs::remove_file(&legacy);
++        let _ = sync_directory(destination.parent().ok_or(RenpyError::Io)?);
++        return Ok(Some(sdk));
++    }
++    Err(RenpyError::InvalidSdk)
++}
++
++fn entry_exists(path: &Path) -> Result<bool, RenpyError> {
++    match fs::symlink_metadata(path) {
++        Ok(_) => Ok(true),
++        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(false),
++        Err(_) => Err(RenpyError::Io),
++    }
++}
++
++fn quarantine_managed_entry(path: &Path, parent: &Path) -> Result<(), RenpyError> {
++    if path.parent() != Some(parent) {
++        return Err(RenpyError::Io);
++    }
++    let quarantine = parent.join(format!(
++        "{SDK_QUARANTINE_PREFIX}{}",
++        uuid::Uuid::new_v4()
++    ));
++    promote_path_no_replace(path, &quarantine)?;
++    sync_directory(parent).map_err(|_| RenpyError::Io)
++}
++
++fn cleanup_managed_debris(sdk_dir: &Path) -> Result<(), RenpyError> {
++    let partial_prefix = format!(".{SDK_ARCHIVE_NAME}.");
++    for entry in fs::read_dir(sdk_dir).map_err(|_| RenpyError::Io)? {
++        let entry = entry.map_err(|_| RenpyError::Io)?;
++        let name = entry.file_name().to_string_lossy().into_owned();
++        let path = entry.path();
++        if let Some(token) = name
++            .strip_prefix(&partial_prefix)
++            .and_then(|value| value.strip_suffix(".partial"))
++        {
++            let metadata = fs::symlink_metadata(&path).map_err(|_| RenpyError::Io)?;
++            if uuid::Uuid::parse_str(token).is_ok()
++                && metadata.is_file()
++                && !crate::transaction::is_link_or_reparse(&metadata)
++            {
++                fs::remove_file(path).map_err(|_| RenpyError::Io)?;
++            }
++        } else if name.starts_with(".loomlight-sdk-stage-") {
++            let _ = remove_owned_tree(&path, &path);
++        }
++    }
++    Ok(())
++}
++
++fn prepare_managed_sdk_install(data_root: &Path) -> Result<Option<ValidatedSdk>, RenpyError> {
++    match discover_managed_sdk(data_root) {
++        Ok(Some(sdk)) => return Ok(Some(sdk)),
++        Ok(None) | Err(RenpyError::InvalidSdk) => {}
++        Err(error) => return Err(error),
++    }
++    let sdk_dir = data_root.join("sdks");
++    fs::create_dir_all(&sdk_dir).map_err(|_| RenpyError::Io)?;
++    let (destination, _, legacy) = managed_sdk_paths(data_root);
++    if entry_exists(&destination)? {
++        quarantine_managed_entry(&destination, &sdk_dir)?;
++    }
++    if entry_exists(&legacy)? {
++        quarantine_managed_entry(&legacy, &sdk_dir)?;
++    }
++    cleanup_managed_debris(&sdk_dir)?;
++    Ok(None)
+ }
+ 
+ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyError> {
+-    if let Some(sdk) = discover_managed_sdk(data_root)? {
++    if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
+         return Ok(sdk);
+     }
+     let sdk_dir = data_root.join("sdks");
+@@ -583,38 +815,88 @@ pub fn install_supported_sdk_from_archive(
+     data_root: &Path,
+     archive: &Path,
+ ) -> Result<ValidatedSdk, RenpyError> {
+-    if let Some(sdk) = discover_managed_sdk(data_root)? {
++    install_supported_sdk_from_archive_inner(data_root, archive, false)
++}
++
++#[cfg(test)]
++pub(crate) fn install_supported_sdk_from_archive_interrupted_for_test(
++    data_root: &Path,
++    archive: &Path,
++) -> Result<ValidatedSdk, RenpyError> {
++    install_supported_sdk_from_archive_inner(data_root, archive, true)
++}
++
++#[cfg(test)]
++pub(crate) fn managed_provenance_paths_for_test(data_root: &Path) -> (PathBuf, PathBuf) {
++    let (_, embedded, legacy) = managed_sdk_paths(data_root);
++    (embedded, legacy)
++}
++
++fn install_supported_sdk_from_archive_inner(
++    data_root: &Path,
++    archive: &Path,
++    interrupt_after_promotion: bool,
++) -> Result<ValidatedSdk, RenpyError> {
++    if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
+         return Ok(sdk);
+     }
+     let sdk_dir = data_root.join("sdks");
+     fs::create_dir_all(&sdk_dir).map_err(|_| RenpyError::Io)?;
+-    let (destination, provenance) = managed_sdk_paths(data_root);
+-    if destination.exists() || provenance.exists() {
++    let (destination, _, _) = managed_sdk_paths(data_root);
++    if entry_exists(&destination)? {
+         return Err(RenpyError::ExistingDestination);
+     }
+-    install_verified_archive(archive, SDK_SHA256, &destination, ArchiveLimits::default())?;
+-    let sdk = match RenpyAdapter::validate_sdk(&destination) {
+-        Ok(sdk) => sdk,
+-        Err(error) => {
+-            let _ = fs::remove_dir_all(&destination);
+-            return Err(error);
+-        }
+-    };
+-    let write_result = (|| {
+-        let mut file = OpenOptions::new()
+-            .create_new(true)
+-            .write(true)
+-            .open(&provenance)
+-            .map_err(|_| RenpyError::Io)?;
+-        file.write_all(managed_provenance(&sdk).as_bytes())
+-            .and_then(|_| file.sync_all())
+-            .map_err(|_| RenpyError::Io)
+-    })();
+-    if let Err(error) = write_result {
+-        let _ = fs::remove_file(&provenance);
+-        let _ = fs::remove_dir_all(&destination);
+-        return Err(error);
++    install_managed_verified_archive(
++        data_root,
++        archive,
++        &destination,
++        ArchiveLimits::default(),
++        interrupt_after_promotion,
++    )
++}
++
++fn install_managed_verified_archive(
++    data_root: &Path,
++    archive: &Path,
++    destination: &Path,
++    limits: ArchiveLimits,
++    interrupt_after_promotion: bool,
++) -> Result<ValidatedSdk, RenpyError> {
++    if sha256_file(archive)? != SDK_SHA256 {
++        return Err(RenpyError::Checksum);
+     }
+-    Ok(sdk)
++    validate_archive(archive, limits)?;
++    let parent = destination.parent().ok_or(RenpyError::Io)?;
++    let stage = create_sdk_stage(parent)?;
++    let payload = stage.join("payload");
++    fs::create_dir(&payload).map_err(|_| RenpyError::Io)?;
++    let result = (|| {
++        let file = File::open(archive).map_err(|_| RenpyError::Io)?;
++        let decoder = BzDecoder::new(file);
++        let mut tar = Archive::new(decoder);
++        tar.unpack(&payload)
++            .map_err(|_| RenpyError::UnsafeArchive)?;
++        let root = find_sdk_root(&payload)?;
++        let staged_sdk = RenpyAdapter::validate_sdk(&root)?;
++        write_managed_provenance(&root.join(MANAGED_PROVENANCE_NAME), &staged_sdk)?;
++        sync_directory(&root).map_err(|_| RenpyError::Io)?;
++        promote_path_no_replace(&root, destination)?;
++        sync_directory(parent).map_err(|_| RenpyError::Io)?;
++        if interrupt_after_promotion {
++            return Err(RenpyError::Io);
++        }
++        discover_managed_sdk(data_root)?.ok_or(RenpyError::InvalidSdk)
++    })();
++    let _ = remove_owned_tree(&stage, &stage);
++    result
+ }
+ 
+ pub fn install_verified_archive(
+@@ -632,15 +914,7 @@ pub fn install_verified_archive(
+     validate_archive(archive, limits)?;
+     let parent = destination.parent().ok_or(RenpyError::Io)?;
+-    let stage = parent.join(format!(".loomlight-sdk-stage-{}", uuid::Uuid::new_v4()));
+-    fs::create_dir(&stage).map_err(|_| RenpyError::Io)?;
+-    #[cfg(unix)]
+-    {
+-        use std::os::unix::fs::PermissionsExt;
+-        fs::set_permissions(&stage, fs::Permissions::from_mode(0o700))
+-            .map_err(|_| RenpyError::Io)?;
+-    }
++    let stage = create_sdk_stage(parent)?;
+     let payload = stage.join("payload");
+     fs::create_dir(&payload).map_err(|_| RenpyError::Io)?;
+@@ -656,7 +930,54 @@ pub fn install_verified_archive(
+         promote_path_no_replace(&root, destination)?;
+         Ok(())
+     })();
+-    let _ = remove_owned_tree(&stage, &parent.join(stage.file_name().unwrap()));
++    let _ = remove_owned_tree(&stage, &stage);
+     result
+ }
++
++fn create_sdk_stage(parent: &Path) -> Result<PathBuf, RenpyError> {
++    let token = uuid::Uuid::new_v4();
++    let stage = parent.join(format!(".loomlight-sdk-stage-{token}"));
++    fs::create_dir(&stage).map_err(|_| RenpyError::Io)?;
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(&stage, fs::Permissions::from_mode(0o700))
++            .map_err(|_| RenpyError::Io)?;
++    }
++    let marker = stage.join(SDK_STAGE_MARKER);
++    let mut file = OpenOptions::new()
++        .create_new(true)
++        .write(true)
++        .open(marker)
++        .map_err(|_| RenpyError::Io)?;
++    file.write_all(format!("loomlight-sdk-stage-v1\n{token}\n").as_bytes())
++        .and_then(|_| file.sync_all())
++        .map_err(|_| RenpyError::Io)?;
++    sync_directory(&stage).map_err(|_| RenpyError::Io)?;
++    Ok(stage)
++}
++
++#[cfg(unix)]
++fn sync_directory(path: &Path) -> io::Result<()> {
++    use std::os::unix::fs::OpenOptionsExt;
++    OpenOptions::new()
++        .read(true)
++        .custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW)
++        .open(path)?
++        .sync_all()
++}
++
++#[cfg(windows)]
++fn sync_directory(_path: &Path) -> io::Result<()> {
++    Ok(())
++}
+@@ -1001,12 +1322,26 @@ fn has_symlink_component(path: &Path) -> bool {
+ }
+ 
+ fn remove_owned_tree(stage: &Path, expected: &Path) -> io::Result<()> {
+-    if stage == expected
+-        && stage
+-            .file_name()
+-            .is_some_and(|name| name.to_string_lossy().starts_with(".loomlight-sdk-stage-"))
+-    {
+-        fs::remove_dir_all(stage)
+-    } else {
+-        Err(io::Error::new(
++    if stage != expected {
++        return Err(io::Error::new(
+             io::ErrorKind::PermissionDenied,
+             "not an owned stage",
+-        ))
++        ));
+     }
++    let name = stage
++        .file_name()
++        .and_then(|value| value.to_str())
++        .and_then(|value| value.strip_prefix(".loomlight-sdk-stage-"))
++        .ok_or_else(|| io::Error::new(io::ErrorKind::PermissionDenied, "not an owned stage"))?;
++    let token = uuid::Uuid::parse_str(name)
++        .map_err(|_| io::Error::new(io::ErrorKind::PermissionDenied, "not an owned stage"))?;
++    let metadata = fs::symlink_metadata(stage)?;
++    if !metadata.is_dir() || crate::transaction::is_link_or_reparse(&metadata) {
++        return Err(io::Error::new(io::ErrorKind::PermissionDenied, "not an owned stage"));
++    }
++    let marker = fs::read_to_string(stage.join(SDK_STAGE_MARKER))?;
++    if marker != format!("loomlight-sdk-stage-v1\n{token}\n") {
++        return Err(io::Error::new(io::ErrorKind::PermissionDenied, "not an owned stage"));
++    }
++    fs::remove_dir_all(stage)
+ }
+@@ -1067,8 +1402,8 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
+ #[cfg(windows)]
+ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
+     use std::os::windows::ffi::OsStrExt;
+-    use windows_sys::Win32::Storage::FileSystem::MoveFileExW;
++    use windows_sys::Win32::Storage::FileSystem::{MoveFileExW, MOVEFILE_WRITE_THROUGH};
+     let wide = |path: &Path| {
+         path.as_os_str()
+             .encode_wide()
+@@ -1078,7 +1413,7 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
+     };
+     let from = wide(from);
+     let to = wide(to);
+-    let result = unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), 0) };
++    let result = unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), MOVEFILE_WRITE_THROUGH) };
+     if result != 0 {
+         Ok(())
+@@ -1178,6 +1513,48 @@ mod tests {
+         }));
+     }
+ 
++    #[test]
++    fn interrupted_managed_state_is_quarantined_and_owned_debris_is_cleaned() {
++        let temp = tempfile::tempdir().unwrap();
++        let data_root = temp.path().join("state");
++        let sdk_dir = data_root.join("sdks");
++        fs::create_dir_all(&sdk_dir).unwrap();
++        let destination = sdk_dir.join(MANAGED_SDK_DIR_NAME);
++        fs::create_dir(&destination).unwrap();
++        fs::write(destination.join("keep"), b"preserved").unwrap();
++        let legacy = sdk_dir.join(LEGACY_MANAGED_PROVENANCE_NAME);
++        fs::write(&legacy, b"incomplete").unwrap();
++        let partial = sdk_dir.join(format!(
++            ".{SDK_ARCHIVE_NAME}.{}.partial",
++            uuid::Uuid::new_v4()
++        ));
++        fs::write(&partial, b"partial").unwrap();
++        let stale_stage = create_sdk_stage(&sdk_dir).unwrap();
++        fs::create_dir(stale_stage.join("payload")).unwrap();
++
++        assert!(prepare_managed_sdk_install(&data_root).unwrap().is_none());
++        assert!(!destination.exists());
++        assert!(!legacy.exists());
++        assert!(!partial.exists());
++        assert!(!stale_stage.exists());
++
++        let quarantined = fs::read_dir(&sdk_dir)
++            .unwrap()
++            .filter_map(Result::ok)
++            .map(|entry| entry.path())
++            .filter(|path| {
++                path.file_name()
++                    .is_some_and(|name| name.to_string_lossy().starts_with(SDK_QUARANTINE_PREFIX))
++            })
++            .collect::<Vec<_>>();
++        assert_eq!(quarantined.len(), 2);
++        assert!(quarantined
++            .iter()
++            .any(|path| path.is_dir() && fs::read(path.join("keep")).ok().as_deref() == Some(b"preserved")));
++    }
++
+     #[cfg(windows)]
+     #[test]
+     fn command_paths_remove_only_windows_verbatim_prefixes() {
+diff --git a/app/src-core/src/lifecycle.rs b/app/src-core/src/lifecycle.rs
+index fc11213..0000000 100644
+--- a/app/src-core/src/lifecycle.rs
++++ b/app/src-core/src/lifecycle.rs
+@@ -117,11 +117,13 @@ impl crate::ports::RenpyPort for LifecycleService {
+     }
+ }
+ 
+-struct LocalGit;
++struct LocalGit<'a> {
++    stage_anchor: &'a File,
++}
+ 
+-impl crate::ports::GitPort for LocalGit {
++impl crate::ports::GitPort for LocalGit<'_> {
+     fn initialise_new_repository(&self, stage: &Path) -> Result<(), LifecycleError> {
+-        initialise_git(stage)
++        initialise_git_anchored(stage, self.stage_anchor)
+     }
+ }
+@@ -261,13 +263,15 @@ impl LifecycleService {
+         let stage_name = format!(".loomlight-stage-{token}");
+         let stage = parent.path.join(&stage_name);
+         fs::create_dir(&stage).map_err(|_| LifecycleError::Io)?;
+         restrict_directory(&stage)?;
++        let stage = open_stage_anchor(stage, stage_name, token)?;
+         let marker = format!("loomlight-project-stage-v1\n{token}\n");
+-        write_new(&stage.join(STAGE_MARKER), marker.as_bytes())?;
++        write_new(&stage.path.join(STAGE_MARKER), marker.as_bytes())?;
+         // Ren'Py's documented generate_gui command accepts a new project when the
+         // target is absent, or an existing target whose game directory is present.
+         // The private ownership marker makes our target intentionally existing.
+-        fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
+-        let stage = open_stage_anchor(stage, stage_name, token)?;
++        fs::create_dir(stage.path.join("game")).map_err(|_| LifecycleError::Io)?;
++        validate_stage_identity(&stage)?;
+         let prepared = (|| {
+             validate_stage_identity(&stage)?;
+             sdk.revalidate(true)
+                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+-            RenpyAdapter::generate_starter(&sdk, &stage.path, resolution.width, resolution.height)
+-                .map_err(|_| LifecycleError::GenerationFailed)?;
++            RenpyAdapter::generate_starter_anchored(
++                &sdk,
++                &stage.path,
++                &stage.file,
++                resolution.width,
++                resolution.height,
++            )
++            .map_err(|_| LifecycleError::GenerationFailed)?;
+@@ -286,7 +290,10 @@ impl LifecycleService {
+             eprintln!("phase-1c-create-checkpoint: overlay");
+             if request.initialize_git {
+                 validate_stage_identity(&stage)?;
+-                crate::ports::GitPort::initialise_new_repository(&LocalGit, &stage.path)?;
++                crate::ports::GitPort::initialise_new_repository(
++                    &LocalGit { stage_anchor: &stage.file },
++                    &stage.path,
++                )?;
+                 validate_stage_identity(&stage)?;
+             }
+@@ -297,8 +304,8 @@ impl LifecycleService {
+             validate_stage_identity(&stage)?;
+             sdk.revalidate(false)
+                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+-            RenpyAdapter::validate_generated(&sdk, &stage.path)
+-                .map_err(|_| LifecycleError::GenerationFailed)?;
++            RenpyAdapter::validate_generated_anchored(&sdk, &stage.path, &stage.file)
++                .map_err(|_| LifecycleError::GenerationFailed)?;
+@@ -401,15 +408,24 @@ impl LifecycleService {
+     fn write_recent(&self, store: &RecentStore) -> Result<(), LifecycleError> {
+         let bytes = serde_json::to_vec_pretty(store).map_err(|_| LifecycleError::Io)?;
+         let path = self.data_root.join("recent-projects.json");
++        let temporary = self.data_root.join(format!(
++            ".recent-projects-{}.tmp",
++            uuid::Uuid::new_v4()
++        ));
+         let mut file = OpenOptions::new()
+-            .create(true)
+-            .truncate(true)
++            .create_new(true)
+             .write(true)
+-            .open(path)
++            .open(&temporary)
+             .map_err(|_| LifecycleError::Io)?;
+-        file.write_all(&bytes)
++        let result = file
++            .write_all(&bytes)
+             .and_then(|_| file.sync_all())
+-            .map_err(|_| LifecycleError::Io)
++            .map_err(|_| LifecycleError::Io)
++            .and_then(|_| replace_file_atomically(&temporary, &path));
++        if result.is_err() {
++            let _ = fs::remove_file(&temporary);
++        }
++        result
+     }
+ }
+@@ -587,11 +603,22 @@ fn open_stage_anchor(
+         return Err(LifecycleError::UnsafePath);
+     }
+-    let file = open_stage_directory(&path).map_err(|_| LifecycleError::UnsafePath)?;
++    let file = open_stage_pin(&path).map_err(|_| LifecycleError::UnsafePath)?;
+     let identity = identity(&file).map_err(|_| LifecycleError::UnsafePath)?;
+     let stage = StageAnchor {
+         path,
+@@ -601,16 +628,23 @@ fn open_stage_anchor(
+         file,
+         identity,
+     };
+-    validate_stage_identity(&stage)?;
++    validate_stage_path_identity(&stage)?;
+     Ok(stage)
+ }
+ 
+-fn validate_stage_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
++fn validate_stage_path_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
+     let held = identity(&stage.file).map_err(|_| LifecycleError::UnsafePath)?;
+     let live_file = open_stage_directory(&stage.path).map_err(|_| LifecycleError::UnsafePath)?;
+     let live = identity(&live_file).map_err(|_| LifecycleError::UnsafePath)?;
+-    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
+     if held != stage.identity
+         || live != stage.identity
+         || has_symlink_component(&stage.path)
+-        || fs::read_to_string(stage.path.join(STAGE_MARKER))
++    {
++        Err(LifecycleError::UnsafePath)
++    } else {
++        Ok(())
++    }
++}
++
++fn validate_stage_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
++    validate_stage_path_identity(stage)?;
++    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
++    if fs::read_to_string(stage.path.join(STAGE_MARKER))
+             .ok()
+             .as_deref()
+             != Some(marker.as_str())
+@@ -625,6 +659,18 @@ fn promote_anchored_stage(
+     parent: &ParentAnchor,
+     stage: &StageAnchor,
+     final_name: &str,
+ ) -> Result<(), LifecycleError> {
++    promote_anchored_stage_with_hook(parent, stage, final_name, || Ok(()))
++}
++
++fn promote_anchored_stage_with_hook<F>(
++    parent: &ParentAnchor,
++    stage: &StageAnchor,
++    final_name: &str,
++    hook: F,
++) -> Result<(), LifecycleError>
++where
++    F: FnOnce() -> Result<(), LifecycleError>,
++{
+     validate_stage_identity(stage)?;
+     validate_parent(parent)?;
+     let final_path = parent.path.join(final_name);
+     ensure_absent(&final_path)?;
+-    promote_no_replace(parent, &stage.name, final_name).map_err(|error| {
++    hook()?;
++    promote_pinned_stage_no_replace(parent, stage, final_name).map_err(|error| {
+         if matches!(error, LifecycleError::Io) {
+             LifecycleError::PromotionFailed
+@@ -641,9 +687,13 @@ fn promote_anchored_stage(
+             .ok()
+             .as_deref()
+             != Some(marker.as_str())
+     {
++        let quarantine = format!(".loomlight-rejected-final-{}", uuid::Uuid::new_v4());
++        let _ = promote_no_replace(parent, final_name, &quarantine);
+         return Err(LifecycleError::PromotionFailed);
+     }
+     Ok(())
+ }
+@@ -681,17 +731,33 @@ fn open_stage_directory(path: &Path) -> io::Result<File> {
+ #[cfg(windows)]
+ fn open_stage_directory(path: &Path) -> io::Result<File> {
+     use std::os::windows::fs::OpenOptionsExt;
+     const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+     const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+     OpenOptions::new()
+         .read(true)
+-        .share_mode(0x1 | 0x2 | 0x4)
++        .share_mode(0x1 | 0x2)
+         .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+         .open(path)
+ }
++
++#[cfg(unix)]
++fn open_stage_pin(path: &Path) -> io::Result<File> {
++    open_directory(path)
++}
++
++#[cfg(windows)]
++fn open_stage_pin(path: &Path) -> io::Result<File> {
++    use std::os::windows::fs::OpenOptionsExt;
++    use windows_sys::Win32::Storage::FileSystem::{DELETE, FILE_READ_ATTRIBUTES};
++    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
++    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
++    OpenOptions::new()
++        .read(true)
++        .access_mode(DELETE | FILE_READ_ATTRIBUTES)
++        .share_mode(0x1 | 0x2)
++        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
++        .open(path)
++}
+@@ -707,6 +773,71 @@ fn restrict_directory(_path: &Path) -> Result<(), LifecycleError> {
+     Ok(())
+ }
++
++#[cfg(unix)]
++fn promote_pinned_stage_no_replace(
++    parent: &ParentAnchor,
++    stage: &StageAnchor,
++    final_name: &str,
++) -> Result<(), LifecycleError> {
++    promote_no_replace(parent, &stage.name, final_name)
++}
++
++#[cfg(windows)]
++fn promote_pinned_stage_no_replace(
++    parent: &ParentAnchor,
++    stage: &StageAnchor,
++    final_name: &str,
++) -> Result<(), LifecycleError> {
++    use std::{mem::size_of, os::windows::{ffi::OsStrExt, io::AsRawHandle}, ptr};
++    use windows_sys::Win32::Storage::FileSystem::{
++        FileRenameInfo, SetFileInformationByHandle, FILE_RENAME_INFO, FILE_RENAME_INFO_0,
++    };
++
++    let final_path = parent.path.join(final_name);
++    let wide = final_path.as_os_str().encode_wide().collect::<Vec<_>>();
++    let bytes = size_of::<FILE_RENAME_INFO>() + wide.len() * size_of::<u16>();
++    let words = bytes.div_ceil(size_of::<usize>());
++    let mut storage = vec![0_usize; words];
++    let info = storage.as_mut_ptr().cast::<FILE_RENAME_INFO>();
++    unsafe {
++        (*info).Anonymous = FILE_RENAME_INFO_0 {
++            ReplaceIfExists: false,
++        };
++        (*info).RootDirectory = ptr::null_mut();
++        (*info).FileNameLength = (wide.len() * size_of::<u16>())
++            .try_into()
++            .map_err(|_| LifecycleError::InvalidName)?;
++        ptr::copy_nonoverlapping(wide.as_ptr(), (*info).FileName.as_mut_ptr(), wide.len());
++        let result = SetFileInformationByHandle(
++            stage.file.as_raw_handle(),
++            FileRenameInfo,
++            info.cast(),
++            bytes
++                .try_into()
++                .map_err(|_| LifecycleError::InvalidName)?,
++        );
++        if result != 0 {
++            Ok(())
++        } else if io::Error::last_os_error().kind() == io::ErrorKind::AlreadyExists {
++            Err(LifecycleError::ExistingDestination)
++        } else {
++            Err(LifecycleError::Io)
++        }
++    }
++}
++
++fn replace_file_atomically(temporary: &Path, destination: &Path) -> Result<(), LifecycleError> {
++    replace_file_platform(temporary, destination).map_err(|_| LifecycleError::Io)?;
++    let parent = destination.parent().ok_or(LifecycleError::Io)?;
++    sync_parent_directory(parent).map_err(|_| LifecycleError::Io)
++}
++
++#[cfg(unix)]
++fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
++    fs::rename(temporary, destination)
++}
++
++#[cfg(windows)]
++fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
++    use std::os::windows::ffi::OsStrExt;
++    use windows_sys::Win32::Storage::FileSystem::{
++        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
++    };
++    let wide = |path: &Path| path.as_os_str().encode_wide().chain(Some(0)).collect::<Vec<_>>();
++    let from = wide(temporary);
++    let to = wide(destination);
++    if unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) } != 0 {
++        Ok(())
++    } else {
++        Err(io::Error::last_os_error())
++    }
++}
++
++#[cfg(unix)]
++fn sync_parent_directory(path: &Path) -> io::Result<()> {
++    open_directory(path)?.sync_all()
++}
++
++#[cfg(windows)]
++fn sync_parent_directory(_path: &Path) -> io::Result<()> {
++    Ok(())
++}
+@@ -814,8 +945,39 @@ fn apply_git_environment(command: &mut Command) {
+     }
+ }
++
++fn initialise_git_anchored(stage: &Path, stage_anchor: &File) -> Result<(), LifecycleError> {
++    initialise_git_with_anchor("git", stage, Some(stage_anchor))
++}
++
++fn initialise_git_with_anchor(
++    program: &str,
++    stage: &Path,
++    stage_anchor: Option<&File>,
++) -> Result<(), LifecycleError> {
++    let template = stage.join(format!(".loomlight-git-template-{}", uuid::Uuid::new_v4()));
++    fs::create_dir(&template).map_err(|_| LifecycleError::GitUnavailable)?;
++    restrict_directory(&template)?;
++    let mut command = Command::new(program);
++    apply_git_environment(&mut command);
++    command
++        .env("GIT_CONFIG_NOSYSTEM", "1")
++        .env("GIT_CONFIG_COUNT", "0")
++        .env("GIT_TERMINAL_PROMPT", "0")
++        .env("GIT_TEMPLATE_DIR", &template);
++    #[cfg(windows)]
++    command.env("GIT_CONFIG_GLOBAL", "NUL");
++    #[cfg(not(windows))]
++    command.env("GIT_CONFIG_GLOBAL", "/dev/null");
++    #[cfg(unix)]
++    if let Some(anchor) = stage_anchor {
++        use std::os::{fd::AsRawFd, unix::process::CommandExt};
++        let fd = anchor.as_raw_fd();
++        unsafe {
++            command.pre_exec(move || {
++                if libc::fchdir(fd) == 0 { Ok(()) } else { Err(io::Error::last_os_error()) }
++            });
++        }
++    }
++    let status = command
++        .arg("init")
++        .arg("--quiet")
++        .current_dir(stage)
++        .stdin(Stdio::null())
++        .stdout(Stdio::null())
++        .stderr(Stdio::null())
++        .status();
++    let _ = fs::remove_dir(&template);
++    let status = status.map_err(|_| LifecycleError::GitUnavailable)?;
++    if !status.success() {
++        return Err(LifecycleError::GitUnavailable);
++    }
++    let git_dir = stage.join(".git");
++    let metadata = fs::symlink_metadata(&git_dir).map_err(|_| LifecycleError::GitUnavailable)?;
++    if !metadata.is_dir() || crate::transaction::is_link_or_reparse(&metadata) {
++        return Err(LifecycleError::GitUnavailable);
++    }
++    let canonical = git_dir.canonicalize().map_err(|_| LifecycleError::GitUnavailable)?;
++    let stage_root = stage.canonicalize().map_err(|_| LifecycleError::GitUnavailable)?;
++    if !canonical.starts_with(&stage_root) {
++        return Err(LifecycleError::GitUnavailable);
++    }
++    Ok(())
++}
+@@ -825,6 +987,7 @@ fn initialise_git_with(program: &str, stage: &Path) -> Result<(), LifecycleError> {
+-    let template = stage.join(format!(".loomlight-git-template-{}", uuid::Uuid::new_v4()));
++    return initialise_git_with_anchor(program, stage, None);
++    let template = stage.join(format!(".loomlight-git-template-{}", uuid::Uuid::new_v4()));
+@@ -1011,6 +1174,29 @@ mod tests {
+         assert_eq!(service.list_recent()[0].status, "missing");
+     }
++
++    #[test]
++    fn recent_store_uses_atomic_replacement_without_leaking_temporaries() {
++        let temp = tempfile::tempdir().unwrap();
++        let service = LifecycleService::new(temp.path().join("state")).unwrap();
++        let mut record = RecentStore {
++            schema_version: 1,
++            entries: vec![RecentRecord {
++                id: "first".into(),
++                project_id: "project".into(),
++                title: "First".into(),
++                path: temp.path().join("project"),
++                last_opened_unix_ms: 1,
++            }],
++        };
++        service.write_recent(&record).unwrap();
++        record.entries[0].title = "Second".into();
++        service.write_recent(&record).unwrap();
++        assert_eq!(service.read_recent().entries[0].title, "Second");
++        assert!(fs::read_dir(temp.path().join("state")).unwrap().all(|entry| {
++            !entry
++                .unwrap()
++                .file_name()
++                .to_string_lossy()
++                .starts_with(".recent-projects-")
++        }));
++    }
+ 
++    #[cfg(unix)]
+     #[test]
+     fn stage_identity_rejects_same_name_replacement_before_promotion() {
+@@ -1049,6 +1235,79 @@ mod tests {
+         assert!(moved.exists());
+     }
++
++    #[cfg(windows)]
++    #[test]
++    fn stage_pin_prevents_windows_namespace_substitution() {
++        let temp = tempfile::tempdir().unwrap();
++        let parent_path = temp.path().join("projects");
++        fs::create_dir(&parent_path).unwrap();
++        let token = uuid::Uuid::new_v4().to_string();
++        let name = format!(".loomlight-stage-{token}");
++        let stage_path = parent_path.join(&name);
++        fs::create_dir(&stage_path).unwrap();
++        let stage = open_stage_anchor(stage_path.clone(), name, token.clone()).unwrap();
++        fs::write(
++            stage_path.join(STAGE_MARKER),
++            format!("loomlight-project-stage-v1\n{token}\n"),
++        )
++        .unwrap();
++        assert!(fs::rename(&stage_path, parent_path.join("moved")).is_err());
++        validate_stage_identity(&stage).unwrap();
++    }
++
++    #[cfg(unix)]
++    #[test]
++    fn substitution_after_validation_is_quarantined_instead_of_becoming_final() {
++        let temp = tempfile::tempdir().unwrap();
++        let parent_path = temp.path().join("projects");
++        fs::create_dir(&parent_path).unwrap();
++        let parent = open_parent(&parent_path).unwrap();
++        let token = uuid::Uuid::new_v4().to_string();
++        let name = format!(".loomlight-stage-{token}");
++        let stage_path = parent_path.join(&name);
++        fs::create_dir(&stage_path).unwrap();
++        restrict_directory(&stage_path).unwrap();
++        fs::write(
++            stage_path.join(STAGE_MARKER),
++            format!("loomlight-project-stage-v1\n{token}\n"),
++        )
++        .unwrap();
++        let stage = open_stage_anchor(stage_path.clone(), name, token.clone()).unwrap();
++        let moved = parent_path.join("moved-original-stage");
++        let result = promote_anchored_stage_with_hook(&parent, &stage, "final", || {
++            fs::rename(&stage_path, &moved).map_err(|_| LifecycleError::Io)?;
++            fs::create_dir(&stage_path).map_err(|_| LifecycleError::Io)?;
++            fs::write(
++                stage_path.join(STAGE_MARKER),
++                format!("loomlight-project-stage-v1\n{token}\n"),
++            )
++            .map_err(|_| LifecycleError::Io)?;
++            fs::write(stage_path.join("replacement"), b"replacement")
++                .map_err(|_| LifecycleError::Io)?;
++            Ok(())
++        });
++        assert!(matches!(result, Err(LifecycleError::PromotionFailed)));
++        assert!(!parent_path.join("final").exists());
++        assert!(moved.exists());
++        assert!(fs::read_dir(&parent_path).unwrap().any(|entry| {
++            let path = entry.unwrap().path();
++            path.file_name().is_some_and(|name| {
++                name.to_string_lossy().starts_with(".loomlight-rejected-final-")
++            }) && path.join("replacement").is_file()
++        }));
++    }
+@@ -1090,10 +1349,33 @@ mod tests {
+         let temp = tempfile::tempdir().unwrap();
+         let managed_state = temp.path().join("managed-state");
+-        let sdk =
+-            crate::renpy::install_supported_sdk_from_archive(&managed_state, Path::new(&archive))
+-                .unwrap();
++        assert!(matches!(
++            crate::renpy::install_supported_sdk_from_archive_interrupted_for_test(
++                &managed_state,
++                Path::new(&archive)
++            ),
++            Err(RenpyError::Io)
++        ));
++        let sdk = crate::renpy::install_supported_sdk_from_archive(
++            &managed_state,
++            Path::new(&archive),
++        )
++        .unwrap();
+         assert_eq!(sdk.version, SUPPORTED_VERSION);
++        let (embedded_provenance, legacy_provenance) =
++            crate::renpy::managed_provenance_paths_for_test(&managed_state);
++        assert!(embedded_provenance.is_file());
++        assert!(!legacy_provenance.exists());
++        fs::rename(&embedded_provenance, &legacy_provenance).unwrap();
++        let migrated = crate::renpy::discover_managed_sdk(&managed_state)
++            .unwrap()
++            .expect("legacy managed provenance should migrate in place");
++        assert!(sdk.same_identity(&migrated));
++        assert!(embedded_provenance.is_file());
++
+         let discovered = crate::renpy::discover_managed_sdk(&managed_state)
+             .unwrap()
+             .expect("managed SDK should retain verified provenance");
+@@ -1111,6 +1393,42 @@ mod tests {
+         fs::rename(&moved_sdk, &sdk_root).unwrap();
+         sdk.revalidate(true).unwrap();
++
++        let stage_parent = temp.path().join("anchored-child-test");
++        fs::create_dir(&stage_parent).unwrap();
++        let token = uuid::Uuid::new_v4().to_string();
++        let stage_name = format!(".loomlight-stage-{token}");
++        let stage_path = stage_parent.join(&stage_name);
++        fs::create_dir(&stage_path).unwrap();
++        restrict_directory(&stage_path).unwrap();
++        fs::write(
++            stage_path.join(STAGE_MARKER),
++            format!("loomlight-project-stage-v1\n{token}\n"),
++        )
++        .unwrap();
++        fs::create_dir(stage_path.join("game")).unwrap();
++        let stage = open_stage_anchor(stage_path.clone(), stage_name, token.clone()).unwrap();
++        #[cfg(unix)]
++        {
++            let moved = stage_parent.join("moved-anchored-child-stage");
++            fs::rename(&stage_path, &moved).unwrap();
++            fs::create_dir(&stage_path).unwrap();
++            fs::write(
++                stage_path.join(STAGE_MARKER),
++                format!("loomlight-project-stage-v1\n{token}\n"),
++            )
++            .unwrap();
++            fs::create_dir(stage_path.join("game")).unwrap();
++            RenpyAdapter::generate_starter_anchored(&sdk, &stage_path, &stage.file, 1280, 720)
++                .unwrap();
++            assert!(moved.join("game/screens.rpy").is_file());
++            assert!(!stage_path.join("game/screens.rpy").exists());
++            assert!(matches!(validate_stage_identity(&stage), Err(LifecycleError::UnsafePath)));
++        }
++        #[cfg(windows)]
++        assert!(fs::rename(&stage_path, stage_parent.join("moved-anchored-child-stage")).is_err());
+ 
+         let projects = temp.path().join("projects");
