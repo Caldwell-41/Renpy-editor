@@ -33,6 +33,7 @@ jobs:
           cargo fmt --all
           cargo fmt --check --all
           cargo test -p loomlight-core --locked
+          rustup component add clippy
           cargo clippy -p loomlight-core --all-targets --locked -- -D warnings
           cd ..
           git diff --check
