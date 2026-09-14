@@ -10,12 +10,13 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
-5. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-6. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-7. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-8. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-9. [ADR 0001](../adr/0001-lossless-source-model.md),
+4. [Completed Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+5. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+6. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+7. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+8. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+9. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+10. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
    [ADR 0005](../adr/0005-staged-project-creation.md)
@@ -46,6 +47,14 @@ instruction.
   smoke, secret scan, and dependency inventory. Evidence artifacts are `10335964464`
   and `10335279104`; quality run `34814995493` passed. The archived task records every
   preceding failed or superseded run and its diagnosis.
+- The post-closure review and
+  [corrective task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+  are also complete. Corrective production run `34832555392` at `08daf385` passed
+  Windows x64 job `103939004703` and macOS ARM64 job `103939004630`, including the
+  hostile stage/SDK/Git regressions, official lifecycle gate, desktop/package boundary,
+  packaged lifecycle UI smoke, secret scan, and dependency inventory. Evidence artifacts
+  are `10343096571` (Windows) and `10342841434` (macOS); quality run `34832555407`
+  passed. Phase 1D has not started.
 
 ## Completed Phase 1B correction
 
