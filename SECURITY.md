@@ -38,3 +38,10 @@ execute project-controlled code require an explicit trust boundary.
 Never submit real API keys, GitHub tokens, signing identities, personal credentials,
 private project content, absolute user-home paths, or unredacted diagnostic bundles in
 issues, pull requests, fixtures, or vulnerability reports.
+
+## Licence and contributions
+
+The repository's public source-available terms are in [`LICENSE`](LICENSE), required
+attribution is in [`NOTICE`](NOTICE), and contribution licensing terms are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Security reporting or coordinated disclosure does
+not grant additional rights to use, distribute, or sell the Software.
