@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C corrective lifecycle/SDK remediation in progress; Phase 1D not approved<br>
+**Phase:** Corrected Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -23,6 +23,25 @@
   screens and stable Chapter 1 / Scene 1 identity; ran a metadata-free copy; rejected
   arbitrary Ren'Py opening; and passed desktop/package/security evidence. Artifacts are
   `10335964464` (Windows) and `10335279104` (macOS). Quality run `34814995493` passed.
+- A post-closure review reopened Phase 1C and the bounded
+  [corrective lifecycle/SDK task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+  is now complete. The correction pins private stage identity through privileged execution
+  and promotion, binds SDK capabilities to filesystem identity plus launcher/template
+  fingerprints, requires checksum-derived provenance for managed SDK reuse, sanitizes
+  Ren'Py/Git child environments, neutralizes hostile Git redirection/configuration,
+  deduplicates SDK registration, refuses SDK redirects, dispatches lifecycle work off the
+  Tauri UI thread, and exercises the actual Welcome/New Project DOM in packaged smoke.
+- [Corrective production run 34832555392](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34832555392)
+  at `08daf385246c345f53f46f9dedc43762a1c060e9` passed the complete production gate:
+  Windows x64 job `103939004703` and macOS ARM64 job `103939004630` both passed the
+  full core suite, official Ren'Py 8.5.3 lifecycle gate, desktop tests, packaging,
+  packaged WebView/lifecycle UI smoke, artifact secret scan, and dependency/licence
+  inventory. Evidence artifacts are `10343096571` (Windows, SHA-256
+  `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`) and
+  `10342841434` (macOS, SHA-256
+  `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`). Quality run
+  `34832555407` passed at the same commit. Failed/superseded corrective runs remain
+  recorded in the archived corrective brief and are not reclassified as passes.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, capability-specific ports, locked
@@ -106,10 +125,8 @@
 
 ## Next action
 
-Complete the bounded Phase 1C corrective target gate for stage/SDK identity, sanitized
-child processes, async desktop dispatch, stable SDK registration, and packaged lifecycle
-UI smoke. Do not begin Phase 1D until Windows x64 and macOS ARM64 pass and this correction
-is explicitly re-closed.
+Stop. Phase 1D Characters/Assets/Variables remains separately approval-gated and has not
+started. Await a new explicit instruction before beginning it or any later work.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

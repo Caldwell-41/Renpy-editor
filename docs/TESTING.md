@@ -44,8 +44,26 @@ fingerprints are checked around execution, managed SDK reuse requires checksum-d
 provenance, child environments are allowlisted, Git configuration/path redirection is
 neutralized, Tauri dispatches lifecycle work off the UI thread, repeated SDK selection
 is deduplicated, redirects are refused, and packaged smoke checks the actual
-Welcome/New Project DOM. The original run remains historical evidence; a new
-Windows/macOS production run is required before the gate is re-closed.
+Welcome/New Project DOM.
+
+The corrected gate is [run 34832555392](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34832555392)
+at `08daf385246c345f53f46f9dedc43762a1c060e9`: Windows x64 job `103939004703`
+and macOS ARM64 job `103939004630` both passed the complete core suite, official
+Ren'Py 8.5.3 lifecycle test, desktop tests, packaging, packaged WebView/lifecycle UI
+smoke, secret scan, and dependency/licence inventory. Evidence artifacts are
+`10343096571` (Windows; SHA-256 `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`)
+and `10342841434` (macOS; SHA-256 `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`).
+Quality run `34832555407` passed at the same commit.
+
+Failed evidence remains explicit: first corrective production run `34829660277` at
+`60406825` failed the macOS hostile-stage test because the test used the `/var` alias
+instead of the canonical retained parent path, while Windows exposed verbatim canonical
+SDK process paths that Ren'Py rejected. Its Windows/macOS evidence artifacts are
+`10341193070` and `10340778911`. Dedicated target run `34830668266` then passed both
+supported targets after canonical test setup and Windows process-path normalization;
+diagnostic runs `34831041290`, `34831227053`, and `34831382649` isolated the Windows
+failure without weakening the minimal child environment. No failed/skipped step is
+reclassified as a pass.
 
 Retain the Phase 0 regression suite:
 
