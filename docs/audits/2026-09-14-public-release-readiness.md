@@ -63,11 +63,11 @@ terms.
 
 `NOTICE` identifies Caldwell-41 as the original project author/copyright holder for the
 current repository and supplies the attribution that downstream redistributions must
-preserve as required by the licence. `CONTRIBUTING.md` adds an explicit inbound grant
-allowing Caldwell-41 and a successor project copyright holder to sublicense, relicense,
-and commercially exploit accepted contributions while contributors retain ownership of
-their own contributions. This is intended to preserve the ability to offer separately
-licensed commercial versions.
+preserve in the forms required by the licence. `CONTRIBUTING.md` adds an explicit
+inbound grant allowing Caldwell-41 and a successor project copyright holder to
+sublicense, relicense, and commercially exploit accepted contributions while
+contributors retain ownership of their own contributions. This is intended to preserve
+the ability to offer separately licensed commercial versions.
 
 Before material commercial distribution or substantial outside contribution activity,
 a qualified lawyer should review the commercial licensing and contribution terms. A
