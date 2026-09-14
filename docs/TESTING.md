@@ -19,6 +19,15 @@ on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo
 also runnable where a complete Tauri desktop build environment is unavailable. This is
 not a substitute for either target gate.
 
+The packaged probe also starts a primary Loomlight process, waits for its explicit
+post-setup readiness marker, and launches the same packaged executable again. The
+primary must receive the maintained Tauri single-instance callback, find the existing
+main window, and remain functional through the lifecycle/UI/WebView checks. The losing
+process must exit and its isolated log must not contain the readiness marker emitted
+after `LifecycleService` construction. This is deterministic evidence that the second
+launch does not reach writable lifecycle initialization; arbitrary delays alone are not
+accepted as the assertion.
+
 Phase 1C extends that same cost-scoped production matrix rather than adding a duplicate
 Windows/macOS workflow. Each target restores/downloads the exact official 8.5.3 SDK
 archive, then production code verifies/extracts it and exercises staged create, Git

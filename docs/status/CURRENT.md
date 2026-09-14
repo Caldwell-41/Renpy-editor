@@ -1,10 +1,17 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
+**Phase:** Phase 1C single-instance micro-remediation in progress; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
+
+- Phase 1C is temporarily reopened only for the bounded
+  [single-instance lifecycle micro-remediation](../tasks/active/2026-09-14-phase-1c-single-instance.md).
+  The implementation registers the maintained Tauri single-instance boundary before
+  desktop setup and tests the packaged primary/secondary process behavior. Re-closure
+  awaits passing Windows x64 and macOS ARM64 production evidence. Phase 1D remains
+  unapproved and unstarted.
 
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)

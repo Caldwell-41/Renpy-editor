@@ -6,7 +6,7 @@ use std::{
     io::Write,
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc, Mutex,
+        Arc, Condvar, Mutex, OnceLock,
     },
     thread,
     time::Duration,
@@ -18,6 +18,47 @@ struct DesktopState(Mutex<Option<LifecycleService>>);
 static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
 static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
+static SECOND_INSTANCE_RECEIVED: AtomicBool = AtomicBool::new(false);
+static SECOND_INSTANCE_WINDOW_FOUND: AtomicBool = AtomicBool::new(false);
+static SECOND_INSTANCE_SIGNAL: OnceLock<(Mutex<bool>, Condvar)> = OnceLock::new();
+
+fn single_instance_smoke_enabled() -> bool {
+    std::env::var("LOOMLIGHT_SINGLE_INSTANCE_SMOKE").as_deref() == Ok("1")
+}
+
+fn second_instance_signal() -> &'static (Mutex<bool>, Condvar) {
+    SECOND_INSTANCE_SIGNAL.get_or_init(|| (Mutex::new(false), Condvar::new()))
+}
+
+fn activate_primary(app: &tauri::AppHandle) -> bool {
+    let Some(window) = app.get_webview_window("main") else {
+        return false;
+    };
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    true
+}
+
+fn handle_second_instance(app: &tauri::AppHandle) {
+    SECOND_INSTANCE_RECEIVED.store(true, Ordering::SeqCst);
+    SECOND_INSTANCE_WINDOW_FOUND.store(activate_primary(app), Ordering::SeqCst);
+    let (received, ready) = second_instance_signal();
+    if let Ok(mut received) = received.lock() {
+        *received = true;
+        ready.notify_all();
+    }
+    if single_instance_smoke_enabled() {
+        println!(
+            "{}",
+            json!({
+                "evidence": "single-instance-secondary-rejected",
+                "primaryWindowFound": SECOND_INSTANCE_WINDOW_FOUND.load(Ordering::SeqCst)
+            })
+        );
+        let _ = std::io::stdout().flush();
+    }
+}
 
 #[tauri::command(async)]
 fn core_request(
@@ -120,6 +161,21 @@ fn core_request(
                 let navigation_denied =
                     original_url.is_some_and(|url| window.url().ok().as_ref() == Some(&url));
                 let popup_denied = POPUP_DENIAL_OBSERVED.load(Ordering::SeqCst);
+                let single_instance_required = single_instance_smoke_enabled();
+                let single_instance_received = if single_instance_required {
+                    let (received, ready) = second_instance_signal();
+                    received.lock().ok().and_then(|received| {
+                        ready
+                            .wait_timeout_while(received, Duration::from_secs(10), |value| !*value)
+                            .ok()
+                            .map(|(value, _)| *value)
+                    }) == Some(true)
+                } else {
+                    true
+                };
+                let primary_window_found = SECOND_INSTANCE_WINDOW_FOUND.load(Ordering::SeqCst);
+                let single_instance_passed =
+                    !single_instance_required || (single_instance_received && primary_window_found);
                 println!(
                     "{}",
                     json!({
@@ -128,16 +184,19 @@ fn core_request(
                         "popupDenied": popup_denied,
                         "webviewRestrictionsPassed": popup_denied,
                         "lifecycleUiPassed": true,
+                        "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
                     })
                 );
                 let _ = std::io::stdout().flush();
-                std::process::exit(if navigation_denied && popup_denied {
-                    0
-                } else {
-                    1
-                });
+                std::process::exit(
+                    if navigation_denied && popup_denied && single_instance_passed {
+                        0
+                    } else {
+                        1
+                    },
+                );
             });
         }
     } else if smoke_enabled && is_smoke_report {
@@ -158,6 +217,11 @@ fn core_request(
 fn main() {
     let unauthorised_denied = Arc::new(AtomicBool::new(false));
     tauri::Builder::default()
+        // This must remain the first plugin: it rejects a losing process before
+        // `setup` can construct the sole writable `LifecycleService`.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            handle_second_instance(app);
+        }))
         .manage(DesktopState(Mutex::new(None)))
         .setup(move |app| {
             let data_root = app
@@ -190,6 +254,21 @@ fn main() {
                 })
                 .build()
                 .expect("main window must be created");
+
+            if SECOND_INSTANCE_RECEIVED.load(Ordering::SeqCst) {
+                SECOND_INSTANCE_WINDOW_FOUND
+                    .store(activate_primary(app.handle()), Ordering::SeqCst);
+            }
+            if single_instance_smoke_enabled() {
+                println!(
+                    "{}",
+                    json!({
+                        "evidence": "single-instance-primary-ready",
+                        "lifecycleOwnerPid": std::process::id()
+                    })
+                );
+                let _ = std::io::stdout().flush();
+            }
 
             if std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1") {
                 let denied = Arc::clone(&unauthorised_denied);

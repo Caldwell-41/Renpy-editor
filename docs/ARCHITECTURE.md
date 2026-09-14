@@ -55,6 +55,15 @@ parent/SDK/recent IDs. The core owns application-local Recent Projects, approved
 parent handles, project metadata, SDK download/extraction, allowlisted subprocesses,
 and current open-project lifecycle state.
 
+Loomlight is a single-instance desktop application. The maintained Tauri
+single-instance plugin is registered before desktop `setup`, so a losing launch is
+rejected before it can construct `LifecycleService`. The primary process is therefore
+the sole owner and coordinator of mutable application lifecycle state, including
+Recent Projects and the current project. A second launch only asks the primary main
+window to restore, show, and focus; it does not add argument forwarding or project-open
+semantics. Independent concurrent Loomlight processes and multi-process editing are not
+supported.
+
 Recent Projects uses a retained application-state directory anchor. Updates are fully
 serialized into a private create-new sibling, platform-flushed (`F_FULLFSYNC` for the
 file on macOS), atomically replace the live regular file, flush the directory where

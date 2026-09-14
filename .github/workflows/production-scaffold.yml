@@ -111,18 +111,58 @@ jobs:
         shell: bash
         env:
           LOOMLIGHT_SCAFFOLD_SMOKE: "1"
+          LOOMLIGHT_SINGLE_INSTANCE_SMOKE: "1"
           LOOMLIGHT_SMOKE_SECRET: loomlight-${{ github.run_id }}-${{ github.run_attempt }}-sentinel
           TARGET_OS: ${{ runner.os }}
         run: |
           set -o pipefail
           if [ "$TARGET_OS" = "Windows" ]; then
-            ./target/release/loomlight.exe | tee "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+            LOOMLIGHT_EXECUTABLE=./target/release/loomlight.exe
           else
-            ./target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight | tee "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+            LOOMLIGHT_EXECUTABLE=./target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight
           fi
+
+          PRIMARY_LOG="$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          SECONDARY_LOG="$RUNNER_TEMP/loomlight-single-instance-secondary.log"
+          "$LOOMLIGHT_EXECUTABLE" > "$PRIMARY_LOG" 2>&1 &
+          PRIMARY_PID=$!
+          trap 'kill "$PRIMARY_PID" 2>/dev/null || true' EXIT
+
+          PRIMARY_READY=false
+          for _ in {1..200}; do
+            if grep -q '"evidence":"single-instance-primary-ready"' "$PRIMARY_LOG" 2>/dev/null; then
+              PRIMARY_READY=true
+              break
+            fi
+            if ! kill -0 "$PRIMARY_PID" 2>/dev/null; then
+              cat "$PRIMARY_LOG"
+              echo "Primary Loomlight process exited before its deterministic readiness marker." >&2
+              exit 1
+            fi
+            sleep 0.1
+          done
+          if [ "$PRIMARY_READY" != "true" ]; then
+            cat "$PRIMARY_LOG"
+            echo "Primary Loomlight process did not publish its deterministic readiness marker." >&2
+            exit 1
+          fi
+
+          "$LOOMLIGHT_EXECUTABLE" > "$SECONDARY_LOG" 2>&1
+          wait "$PRIMARY_PID"
+          trap - EXIT
+          cat "$PRIMARY_LOG"
+          cat "$SECONDARY_LOG"
+
+          grep '"evidence":"single-instance-secondary-rejected"' "$PRIMARY_LOG"
+          grep '"primaryWindowFound":true' "$PRIMARY_LOG"
           grep '"navigationDenied":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
+            echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2
+            exit 1
+          fi
       - name: Scan production artifacts for secrets
         shell: bash
         env:
@@ -149,6 +189,7 @@ jobs:
           name: phase-1-production-evidence-${{ matrix.runner }}
           path: |
             ${{ runner.temp }}/loomlight-scaffold-smoke.json
+            ${{ runner.temp }}/loomlight-single-instance-secondary.log
             ${{ runner.temp }}/phase-1b-transactions.log
             ${{ runner.temp }}/phase-1c-project-lifecycle.log
             ${{ runner.temp }}/dependency-inventory.json

@@ -1,7 +1,7 @@
 # Phase 1 production dependency and licence inventory
 
-**Reviewed:** 2026-09-14 after the Phase 1B target gate<br>
-**Scope:** Phase 1A scaffold plus Phase 1B transaction foundation
+**Reviewed:** 2026-09-14 during the Phase 1C single-instance correction<br>
+**Scope:** Phase 1A scaffold through the bounded Phase 1C lifecycle corrections
 
 ## Locked toolchains
 
@@ -20,6 +20,7 @@ committed. Install/build commands use `npm ci` and Cargo `--locked`.
 | --- | --- | --- |
 | `@tauri-apps/api` 2.11.1 | Invoke the single desktop command | Apache-2.0 OR MIT |
 | `tauri` 2.11.5 | Desktop runtime and WebView boundary | Apache-2.0 OR MIT |
+| `tauri-plugin-single-instance` 2.4.4 | Reject secondary desktop processes before lifecycle setup | Apache-2.0 OR MIT |
 | `serde` 1.0.229 | Typed result serialization | Apache-2.0 OR MIT |
 | `serde_json` 1.0.151 | JSON envelope validation/serialization | Apache-2.0 OR MIT |
 | `hex` 0.4.3 | Encode SHA-256 revisions and journal checksums | Apache-2.0 OR MIT |
@@ -30,12 +31,13 @@ committed. Install/build commands use `npm ci` and Cargo `--locked`.
 Build/development dependencies are `@tauri-apps/cli` 2.11.4 (Apache-2.0 OR MIT),
 `tauri-build` 2.6.3 (Apache-2.0 OR MIT), TypeScript 7.0.2 (Apache-2.0), Vite 8.3.0
 (MIT), `@types/node` 24.7.0 (MIT), and `tempfile` 3.27.0 (Apache-2.0 OR MIT)
-for isolated transaction fixtures. No runtime plugin package is installed for
-filesystem, shell/process, HTTP, opener, credentials, updates, or persistence.
+for isolated transaction fixtures. The single-instance plugin has no JavaScript API
+or capability permission. No runtime plugin package is installed for filesystem,
+shell/process, HTTP, opener, credentials, updates, or persistence.
 
 ## Transitive inventory
 
-The locked dependency graph currently contains 76 npm package entries and 437 Cargo
+The locked dependency graph currently contains 76 npm package entries and 519 Cargo
 package entries across all target/platform conditionals, including the two local
 workspace crates. All third-party entries report a licence expression. CI recreates a
 machine-readable, versioned inventory from both lockfiles on each supported target and

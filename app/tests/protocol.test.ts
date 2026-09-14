@@ -91,7 +91,7 @@ test("Phase 1C UI source exposes the bounded lifecycle flow", async () => {
   ]) assert.equal(source.includes(operation), true, operation);
 });
 
-test("desktop manifest grants one local capability and no ambient plugins", async () => {
+test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {
   const [configText, capabilityText, permission, manifest, backend, host] = await Promise.all([
     readFile(new URL("src-tauri/tauri.conf.json", sourceRoot), "utf8"),
     readFile(new URL("src-tauri/capabilities/main.json", sourceRoot), "utf8"),
@@ -112,6 +112,23 @@ test("desktop manifest grants one local capability and no ambient plugins", asyn
   assert.match(permission, /commands\.allow = \["core_request"\]/);
   assert.match(host, /#\[tauri::command\(async\)\]/);
   assert.match(host, /window\.label\(\) != "main"/);
-  assert.doesNotMatch(`${manifest}\n${capabilityText}`, /tauri-plugin|shell:|fs:|http:|opener:|process:/);
+  assert.match(manifest, /^tauri-plugin-single-instance = "=2\.4\.4"$/m);
+  const manifestWithoutSingleInstance = manifest.replace(
+    /^tauri-plugin-single-instance = "=2\.4\.4"$/m,
+    "",
+  );
+  assert.doesNotMatch(
+    `${manifestWithoutSingleInstance}\n${capabilityText}`,
+    /tauri-plugin|shell:|fs:|http:|opener:|process:/,
+  );
+  assert.equal(capabilityText.includes("single-instance"), false);
+  const singleInstanceRegistration = host.indexOf(
+    ".plugin(tauri_plugin_single_instance::init",
+  );
+  const desktopSetup = host.indexOf(".setup(move |app|");
+  const lifecycleInitialization = host.indexOf("LifecycleService::new(data_root)");
+  assert.equal(singleInstanceRegistration >= 0, true);
+  assert.equal(singleInstanceRegistration < desktopSetup, true);
+  assert.equal(desktopSetup < lifecycleInitialization, true);
   for (const operation of CORE_OPERATIONS) assert.equal(backend.includes(`"${operation}"`), true);
 });

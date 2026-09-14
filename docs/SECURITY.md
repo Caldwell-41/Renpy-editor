@@ -98,6 +98,12 @@ unknown command rejection, malformed payload rejection, ambient plugin denial, N
 global absence, direct network denial, popup denial, external navigation denial, and
 renderer-secret absence.
 
+The desktop host registers Tauri's maintained single-instance plugin before `setup`
+and before `LifecycleService` construction. A secondary process is rejected at that
+boundary and cannot become another Recent Projects or project-lifecycle writer. The
+plugin has no JavaScript API and grants no WebView permission; its callback only makes
+best-effort native restore/show/focus requests for the existing `main` window.
+
 Application-local Recent Projects and the managed SDK root also retain directory
 authority and use no-follow file operations. Recent writes stage, platform-flush,
 atomically replace, directory-flush where supported, and verify. Managed SDK promotion
