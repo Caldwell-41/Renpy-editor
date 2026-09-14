@@ -33,10 +33,14 @@ covers products or services offered for consideration whose value derives entire
 substantially from the Software's functionality. The licence text, rather than this
 summary, controls.
 
-Redistributions and derivative works must retain the applicable copyright and
-attribution notices, including [`NOTICE`](NOTICE). Commercial licences may be granted
-separately by Caldwell-41. The copyright holder remains free to distribute and sell
-official or separately licensed versions of the project.
+Redistributions and derivative works must preserve the applicable copyright and
+attribution notices. [`NOTICE`](NOTICE) identifies Caldwell-41 as the original project
+author/copyright holder for the current repository and must be retained in the forms
+required by the licence.
+
+Commercial licences may be granted separately by Caldwell-41. The copyright holder
+remains free to distribute and sell official or separately licensed versions of the
+project.
 
 Contributions are subject to the additional inbound licence grant described in
 [`CONTRIBUTING.md`](CONTRIBUTING.md), which preserves the project's ability to offer
