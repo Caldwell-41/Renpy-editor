@@ -363,6 +363,10 @@ fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreResponse 
             "PROJECT_GENERATION_FAILED",
             "Ren'Py could not validate the generated project.",
         ),
+        LifecycleError::PromotionFailed => (
+            "PROJECT_FINALISATION_FAILED",
+            "The completed project could not be finalised safely.",
+        ),
         LifecycleError::CreatedNotOpened => (
             "CREATED_NOT_OPENED",
             "The project was created but could not be opened automatically.",

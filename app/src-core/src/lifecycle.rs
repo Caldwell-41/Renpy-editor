@@ -108,6 +108,7 @@ pub enum LifecycleError {
     UnsupportedSdk,
     GitUnavailable,
     GenerationFailed,
+    PromotionFailed,
     CreatedNotOpened,
     Io,
 }
@@ -287,6 +288,8 @@ impl LifecycleService {
         let prepared = (|| {
             RenpyAdapter::generate_starter(&sdk, &stage, resolution.width, resolution.height)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
+            #[cfg(test)]
+            eprintln!("phase-1c-create-checkpoint: generated");
             validate_stage_identity(&stage, &token)?;
             let metadata = apply_overlay(
                 &stage,
@@ -294,15 +297,29 @@ impl LifecycleService {
                 &request.folder_name,
                 resolution.clone(),
             )?;
+            #[cfg(test)]
+            eprintln!("phase-1c-create-checkpoint: overlay");
             if request.initialize_git {
                 crate::ports::GitPort::initialise_new_repository(&LocalGit, &stage)?;
             }
+            #[cfg(test)]
+            eprintln!("phase-1c-create-checkpoint: git");
             RenpyAdapter::validate_generated(&sdk, &stage)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
+            #[cfg(test)]
+            eprintln!("phase-1c-create-checkpoint: validated");
             validate_stage_identity(&stage, &token)?;
             validate_parent(parent)?;
             ensure_absent(&final_path)?;
-            promote_no_replace(parent, &stage_name, &request.folder_name)?;
+            promote_no_replace(parent, &stage_name, &request.folder_name).map_err(|error| {
+                if matches!(error, LifecycleError::Io) {
+                    LifecycleError::PromotionFailed
+                } else {
+                    error
+                }
+            })?;
+            #[cfg(test)]
+            eprintln!("phase-1c-create-checkpoint: promoted");
             fs::remove_file(final_path.join(STAGE_MARKER))
                 .map_err(|_| LifecycleError::CreatedNotOpened)?;
             let opened = open_valid_project(&final_path)?;
@@ -1052,6 +1069,22 @@ mod tests {
             assert!(parent_path.join("stage/accepted").is_file());
             assert!(outside.read_dir().unwrap().next().is_none());
         }
+    }
+
+    #[test]
+    fn no_replace_promotion_moves_one_stage_when_destination_is_absent() {
+        let temp = tempfile::tempdir().unwrap();
+        let parent_path = temp.path().join("projects");
+        fs::create_dir(&parent_path).unwrap();
+        let parent = open_parent(&parent_path).unwrap();
+        fs::create_dir(parent_path.join("stage")).unwrap();
+        fs::write(parent_path.join("stage/accepted"), b"accepted").unwrap();
+        promote_no_replace(&parent, "stage", "final").unwrap();
+        assert!(!parent_path.join("stage").exists());
+        assert_eq!(
+            fs::read(parent_path.join("final/accepted")).unwrap(),
+            b"accepted"
+        );
     }
 
     #[test]
