@@ -30,6 +30,8 @@ const SDK_CANDIDATE_PREFIX: &str = ".loomlight-managed-sdk-candidate-";
 const PROVENANCE_QUARANTINE_PREFIX: &str = ".loomlight-sdk-provenance-rejected-";
 const OUTPUT_LIMIT: usize = 2_000_000;
 const MAX_ARCHIVE_BYTES: u64 = 1024 * 1024 * 1024;
+#[cfg(test)]
+static PROCESS_SPAWN_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -142,20 +144,10 @@ pub struct RenpyAdapter;
 
 impl RenpyAdapter {
     pub fn validate_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
-        let selected = fs::symlink_metadata(path).map_err(|_| RenpyError::InvalidSdk)?;
-        if !selected.is_dir() || crate::transaction::is_link_or_reparse(&selected) {
-            return Err(RenpyError::InvalidSdk);
-        }
-        let root = fs::canonicalize(path).map_err(|_| RenpyError::InvalidSdk)?;
-        if !root.is_dir() || has_symlink_component(&root) {
-            return Err(RenpyError::InvalidSdk);
-        }
-        let identity = sdk_directory_identity(&root)?;
-        let launcher_fingerprint = launcher_fingerprint(&root)?;
-        let template_fingerprint = template_fingerprint(&root)?;
+        let mut sdk = inspect_sdk(path)?;
         let result = run_bounded(
-            &root,
-            launcher_args(&root, &[OsString::from("--version")])?,
+            &sdk.root,
+            launcher_args(&sdk.root, &[OsString::from("--version")])?,
             Duration::from_secs(30),
         )?;
         if result.timed_out {
@@ -171,13 +163,7 @@ impl RenpyAdapter {
         if version != SUPPORTED_VERSION {
             return Err(RenpyError::UnsupportedVersion(version));
         }
-        let sdk = ValidatedSdk {
-            root,
-            version,
-            identity,
-            launcher_fingerprint,
-            template_fingerprint,
-        };
+        sdk.version = version;
         sdk.revalidate(true)?;
         Ok(sdk)
     }
@@ -365,6 +351,32 @@ impl RenpyAdapter {
             Err(RenpyError::ProcessFailed)
         }
     }
+}
+
+fn inspect_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
+    let selected = fs::symlink_metadata(path).map_err(|_| RenpyError::InvalidSdk)?;
+    if !selected.is_dir() || crate::transaction::is_link_or_reparse(&selected) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    let root = fs::canonicalize(path).map_err(|_| RenpyError::InvalidSdk)?;
+    if !root.is_dir() || has_symlink_component(&root) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    let identity = sdk_directory_identity(&root)?;
+    let launcher_fingerprint = launcher_fingerprint(&root)?;
+    let template_fingerprint = template_fingerprint(&root)?;
+    Ok(ValidatedSdk {
+        root,
+        version: SUPPORTED_VERSION.into(),
+        identity,
+        launcher_fingerprint,
+        template_fingerprint,
+    })
+}
+
+#[cfg(test)]
+pub(crate) fn process_spawn_count_for_test() -> usize {
+    PROCESS_SPAWN_COUNT.load(Ordering::SeqCst)
 }
 
 fn require_success(result: ProcessResult) -> Result<(), RenpyError> {
@@ -561,6 +573,8 @@ fn run_bounded_inner(
         let _ = anchored_cwd_fd;
         command.creation_flags(0x0000_0200); // CREATE_NEW_PROCESS_GROUP
     }
+    #[cfg(test)]
+    PROCESS_SPAWN_COUNT.fetch_add(1, Ordering::SeqCst);
     let mut child = command.spawn().map_err(|_| RenpyError::ProcessFailed)?;
     if let Some(hook) = after_spawn.as_mut() {
         if let Err(error) = hook() {
@@ -840,11 +854,27 @@ pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, Re
     if !destination_meta.is_dir() || crate::transaction::is_link_or_reparse(&destination_meta) {
         return Err(RenpyError::InvalidSdk);
     }
+    // Managed SDK provenance is the executable trust boundary. Inspect identity
+    // and immutable fingerprints without spawning the SDK, require one of the
+    // application-owned records to match, and only then execute --version.
+    let inspected = inspect_sdk(&destination)?;
+    let embedded_matches = provenance_matches(&embedded, &inspected)?;
+    let legacy_matches = if embedded_matches {
+        false
+    } else {
+        provenance_matches(&legacy, &inspected)?
+    };
+    if !embedded_matches && !legacy_matches {
+        return Err(RenpyError::InvalidSdk);
+    }
     let sdk = RenpyAdapter::validate_sdk(&destination)?;
-    if provenance_matches(&embedded, &sdk)? {
+    if !sdk.same_identity(&inspected) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    if embedded_matches {
         return Ok(Some(sdk));
     }
-    if provenance_matches(&legacy, &sdk)? {
+    if legacy_matches {
         if entry_exists(&embedded)? {
             let metadata = fs::symlink_metadata(&embedded).map_err(|_| RenpyError::InvalidSdk)?;
             if !metadata.is_file() || crate::transaction::is_link_or_reparse(&metadata) {
@@ -863,7 +893,7 @@ pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, Re
         let _ = sync_directory(destination.parent().ok_or(RenpyError::Io)?);
         return Ok(Some(sdk));
     }
-    Err(RenpyError::InvalidSdk)
+    unreachable!("managed provenance match was established above")
 }
 
 fn entry_exists(path: &Path) -> Result<bool, RenpyError> {

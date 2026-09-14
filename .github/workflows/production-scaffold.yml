@@ -101,6 +101,7 @@ jobs:
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-sdk-recovery: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-stage-races: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked

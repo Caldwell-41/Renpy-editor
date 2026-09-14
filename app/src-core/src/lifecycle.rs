@@ -2243,6 +2243,16 @@ mod tests {
             crate::renpy::managed_provenance_paths_for_test(&managed_state);
         assert!(embedded_provenance.is_file());
         assert!(!legacy_provenance.exists());
+        let withheld_provenance = temp.path().join("withheld-managed-provenance");
+        fs::rename(&embedded_provenance, &withheld_provenance).unwrap();
+        let spawn_count = crate::renpy::process_spawn_count_for_test();
+        assert!(matches!(
+            crate::renpy::discover_managed_sdk(&managed_state),
+            Err(RenpyError::InvalidSdk)
+        ));
+        assert_eq!(crate::renpy::process_spawn_count_for_test(), spawn_count);
+        fs::rename(&withheld_provenance, &embedded_provenance).unwrap();
+        println!("phase-1c-remediation-sdk-trust-order: passed");
         fs::rename(&embedded_provenance, &legacy_provenance).unwrap();
         fs::write(&embedded_provenance, b"truncated migration record").unwrap();
         let migrated = crate::renpy::discover_managed_sdk(&managed_state)
