@@ -99,11 +99,8 @@ jobs:
         working-directory: app
         run: cargo clippy -p loomlight-core --all-targets --locked -- -D warnings
 
-      - name: Remove temporary corrective workflows
-        run: |
-          git rm .github/workflows/phase1c-corrective-bootstrap.yml
-          git rm .github/workflows/phase1c-corrective-followup.yml
-          git rm .github/workflows/phase1c-corrective-finalize.yml
+      - name: Keep workflow changes outside the Actions-token commit
+        run: git checkout HEAD -- .github/workflows/production-scaffold.yml
 
       - name: Run repository validator
         run: python3 scripts/validate.py
@@ -116,7 +113,7 @@ jobs:
         run: |
           git config user.name Caldwell-41
           git config user.email 255503715+Caldwell-41@users.noreply.github.com
-          git add -A
+          git add AGENTS.md app docs
           git status --short
           git commit -m "fix: harden Phase 1C lifecycle boundaries"
           git push origin HEAD:phase1c-corrective
