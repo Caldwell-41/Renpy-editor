@@ -919,11 +919,39 @@ fn replace_template_define(
 }
 
 fn open_valid_project(root: &Path) -> Result<OpenProject, LifecycleError> {
-    let metadata_path = root.join(".renpy-editor/project.json");
-    if has_symlink_component(&metadata_path) {
-        return Err(LifecycleError::UnsafePath);
+    open_valid_project_with_hook(root, || Ok(()))
+}
+
+fn open_valid_project_with_hook<F>(root: &Path, hook: F) -> Result<OpenProject, LifecycleError>
+where
+    F: FnOnce() -> Result<(), LifecycleError>,
+{
+    let anchor = crate::transaction::DirectoryAnchor::open_root(root)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let editor = anchor
+        .open_child(OsStr::new(".renpy-editor"), false)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    hook()?;
+    let mut metadata_file = editor
+        .open_file(OsStr::new("project.json"))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    if metadata_file
+        .metadata()
+        .map_err(|_| LifecycleError::InvalidMetadata)?
+        .len()
+        > 1_000_000
+    {
+        return Err(LifecycleError::InvalidMetadata);
     }
-    let metadata = ProjectMetadata::read(root).map_err(|_| LifecycleError::InvalidMetadata)?;
+    let mut metadata_bytes = Vec::new();
+    metadata_file
+        .read_to_end(&mut metadata_bytes)
+        .map_err(|_| LifecycleError::InvalidMetadata)?;
+    let metadata = ProjectMetadata::read_bytes(
+        &metadata_bytes,
+        root.file_name().and_then(|name| name.to_str()),
+    )
+    .map_err(|_| LifecycleError::InvalidMetadata)?;
     let chapter = &metadata.chapters[0];
     let scene = &metadata.scenes[0];
     for required in [
@@ -933,16 +961,7 @@ fn open_valid_project(root: &Path) -> Result<OpenProject, LifecycleError> {
         "game/screens.rpy",
         scene.source_path.as_str(),
     ] {
-        let path = root.join(required);
-        if has_symlink_component(&path) {
-            return Err(LifecycleError::UnsafePath);
-        }
-        let canonical = path
-            .canonicalize()
-            .map_err(|_| LifecycleError::InvalidMetadata)?;
-        if !canonical.starts_with(root) || !canonical.is_file() {
-            return Err(LifecycleError::UnsafePath);
-        }
+        open_project_file(&anchor, required)?;
     }
     Ok(OpenProject {
         project_id: metadata.project_id,
@@ -955,6 +974,27 @@ fn open_valid_project(root: &Path) -> Result<OpenProject, LifecycleError> {
         sdk_version: metadata.sdk.version,
         resolution: metadata.resolution,
     })
+}
+
+fn open_project_file(
+    root: &crate::transaction::DirectoryAnchor,
+    relative: &str,
+) -> Result<File, LifecycleError> {
+    crate::metadata::validate_relative_path(relative)
+        .map_err(|_| LifecycleError::InvalidMetadata)?;
+    let mut components = relative.split('/').peekable();
+    let mut directory = root.clone();
+    while let Some(component) = components.next() {
+        if components.peek().is_none() {
+            return directory
+                .open_file(OsStr::new(component))
+                .map_err(|_| LifecycleError::UnsafePath);
+        }
+        directory = directory
+            .open_child(OsStr::new(component), false)
+            .map_err(|_| LifecycleError::UnsafePath)?;
+    }
+    Err(LifecycleError::InvalidMetadata)
 }
 
 #[cfg(test)]
@@ -2132,6 +2172,48 @@ mod tests {
             let mut stage = result.unwrap();
             cleanup_stage(&parent, &mut stage).unwrap();
         }
+    }
+
+    #[test]
+    fn project_open_metadata_substitution_is_never_followed() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("project");
+        let editor = root.join(".renpy-editor");
+        let moved = root.join("moved-editor");
+        fs::create_dir(&root).unwrap();
+        fs::create_dir(&editor).unwrap();
+        fs::write(editor.join("project.json"), b"original").unwrap();
+        let result = open_valid_project_with_hook(&root, || {
+            #[cfg(unix)]
+            {
+                fs::rename(&editor, &moved).map_err(|_| LifecycleError::Io)?;
+                fs::create_dir(&editor).map_err(|_| LifecycleError::Io)?;
+                fs::write(editor.join("project.json"), b"replacement")
+                    .map_err(|_| LifecycleError::Io)?;
+                Ok(())
+            }
+            #[cfg(windows)]
+            {
+                assert!(fs::rename(&editor, &moved).is_err());
+                Err(LifecycleError::Io)
+            }
+        });
+        #[cfg(unix)]
+        assert!(matches!(result, Err(LifecycleError::UnsafePath)));
+        #[cfg(windows)]
+        assert!(matches!(result, Err(LifecycleError::Io)));
+        assert_eq!(fs::read(editor.join("project.json")).unwrap(), {
+            #[cfg(unix)]
+            {
+                b"replacement".as_slice()
+            }
+            #[cfg(windows)]
+            {
+                b"original".as_slice()
+            }
+        });
+        #[cfg(unix)]
+        assert_eq!(fs::read(moved.join("project.json")).unwrap(), b"original");
     }
 
     #[test]

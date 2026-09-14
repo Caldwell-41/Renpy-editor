@@ -162,12 +162,21 @@ impl ProjectMetadata {
     pub fn read(project_root: &Path) -> Result<Self, MetadataError> {
         let path = project_root.join(".renpy-editor/project.json");
         let bytes = fs::read(path).map_err(|_| MetadataError::Io)?;
+        Self::read_bytes(
+            &bytes,
+            project_root.file_name().and_then(|name| name.to_str()),
+        )
+    }
+
+    pub(crate) fn read_bytes(
+        bytes: &[u8],
+        expected_folder: Option<&str>,
+    ) -> Result<Self, MetadataError> {
         if bytes.len() > 1_000_000 {
             return Err(MetadataError::Corrupt);
         }
-        let value: Self = serde_json::from_slice(&bytes).map_err(|_| MetadataError::Corrupt)?;
-        let folder = project_root.file_name().and_then(|name| name.to_str());
-        value.validate(folder)?;
+        let value: Self = serde_json::from_slice(bytes).map_err(|_| MetadataError::Corrupt)?;
+        value.validate(expected_folder)?;
         Ok(value)
     }
 
