@@ -4,8 +4,7 @@ on:
   push:
     branches: [phase-1c-crash-consistency]
     paths:
-      - .github/phase-1c-remediate.patch
-      - .github/phase-1c-fixup.patch
+      - scripts/apply_phase1c_remediation.py
       - .github/workflows/phase-1c-remediation-check.yml
   workflow_dispatch:
 
@@ -20,18 +19,18 @@ jobs:
       - name: Check out remediation branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Apply candidate remediation
-        run: |
-          git apply --check .github/phase-1c-remediate.patch
-          git apply .github/phase-1c-remediate.patch
-          if [ -f .github/phase-1c-fixup.patch ]; then
-            git apply --check .github/phase-1c-fixup.patch
-            git apply .github/phase-1c-fixup.patch
-          fi
-      - name: Check formatting and compile core tests
+        run: python3 scripts/apply_phase1c_remediation.py
+      - name: Format transformed Rust
         working-directory: app
-        run: |
-          cargo fmt --check --all
-          cargo check -p loomlight-core --tests --locked
+        run: cargo fmt --all
+      - name: Compile core tests
+        working-directory: app
+        run: cargo check -p loomlight-core --tests --locked
       - name: Run core tests
         working-directory: app
         run: cargo test -p loomlight-core --locked
+      - name: Verify transformer changed only bounded files
+        run: |
+          git diff --check
+          git diff --name-only
+          test "$(git diff --name-only | sort)" = $'app/src-core/src/lifecycle.rs\napp/src-core/src/renpy.rs'
