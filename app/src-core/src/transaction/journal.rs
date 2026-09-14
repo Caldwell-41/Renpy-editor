@@ -182,10 +182,9 @@ impl JournalStore {
             .write(true)
             .open(&temporary)
             .map_err(|_| ErrorCode::IoFailure)?;
-        file.write_all(&bytes)
-            .and_then(|_| file.sync_all())
-            .map_err(|_| ErrorCode::IoFailure)?;
+        file.write_all(&bytes).map_err(|_| ErrorCode::IoFailure)?;
         drop(file);
+        super::platform::flush_file(&temporary)?;
         #[cfg(windows)]
         if final_path.exists() {
             fs::remove_file(&final_path).map_err(|_| ErrorCode::RecoveryRequired)?;

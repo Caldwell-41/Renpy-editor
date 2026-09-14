@@ -662,9 +662,9 @@ fn write_new_synced(path: &Path, bytes: &[u8]) -> Result<(), ErrorCode> {
         .write(true)
         .open(path)
         .map_err(|_| ErrorCode::IoFailure)?;
-    file.write_all(bytes)
-        .and_then(|_| file.sync_all())
-        .map_err(|_| ErrorCode::IoFailure)
+    file.write_all(bytes).map_err(|_| ErrorCode::IoFailure)?;
+    drop(file);
+    flush_file(path)
 }
 
 fn sha256(bytes: &[u8]) -> String {
