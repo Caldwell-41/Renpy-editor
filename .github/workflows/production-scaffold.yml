@@ -110,6 +110,7 @@ jobs:
           fi
           grep '"navigationDenied":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
       - name: Scan production artifacts for secrets
         shell: bash
         env:
