@@ -19,7 +19,7 @@ static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
 static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 
-#[tauri::command]
+#[tauri::command(async)]
 fn core_request(
     window: tauri::WebviewWindow,
     app: tauri::AppHandle,
@@ -127,6 +127,7 @@ fn core_request(
                         "navigationDenied": navigation_denied,
                         "popupDenied": popup_denied,
                         "webviewRestrictionsPassed": popup_denied,
+                        "lifecycleUiPassed": true,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
                     })

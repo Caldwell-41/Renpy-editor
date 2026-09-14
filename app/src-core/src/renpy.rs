@@ -4,8 +4,8 @@ use sha2::{Digest, Sha256};
 use std::{
     collections::{HashMap, HashSet},
     ffi::OsString,
-    fs::{self, File},
-    io::{self, Read},
+    fs::{self, File, OpenOptions},
+    io::{self, Read, Write},
     path::{Component, Path, PathBuf},
     process::{Child, Command, Stdio},
     sync::{
@@ -21,6 +21,8 @@ pub const SUPPORTED_VERSION: &str = "8.5.3";
 pub const SDK_ARCHIVE_NAME: &str = "renpy-8.5.3-sdk.tar.bz2";
 pub const SDK_URL: &str = "https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2";
 pub const SDK_SHA256: &str = "eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45";
+const MANAGED_SDK_DIR_NAME: &str = "renpy-8.5.3-sdk-verified-v1";
+const MANAGED_PROVENANCE_NAME: &str = "renpy-8.5.3-sdk-verified-v1.provenance";
 const OUTPUT_LIMIT: usize = 2_000_000;
 const MAX_ARCHIVE_BYTES: u64 = 1024 * 1024 * 1024;
 
@@ -35,10 +37,51 @@ pub struct SdkInfo {
     pub explanation: String,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SdkFileIdentity {
+    a: u64,
+    b: u64,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct ValidatedSdk {
     pub root: PathBuf,
     pub version: String,
+    identity: SdkFileIdentity,
+    launcher_fingerprint: String,
+    template_fingerprint: String,
+}
+
+impl ValidatedSdk {
+    pub(crate) fn same_identity(&self, other: &Self) -> bool {
+        self.root == other.root
+            && self.identity == other.identity
+            && self.launcher_fingerprint == other.launcher_fingerprint
+            && self.template_fingerprint == other.template_fingerprint
+    }
+
+    pub(crate) fn revalidate(&self, include_template: bool) -> Result<(), RenpyError> {
+        let identity = sdk_directory_identity(&self.root)?;
+        let launcher = launcher_fingerprint(&self.root)?;
+        if identity != self.identity || launcher != self.launcher_fingerprint {
+            return Err(RenpyError::InvalidSdk);
+        }
+        if include_template && template_fingerprint(&self.root)? != self.template_fingerprint {
+            return Err(RenpyError::InvalidSdk);
+        }
+        Ok(())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn invalid_for_test(root: PathBuf) -> Self {
+        Self {
+            root,
+            version: SUPPORTED_VERSION.into(),
+            identity: SdkFileIdentity { a: 0, b: 0 },
+            launcher_fingerprint: String::new(),
+            template_fingerprint: String::new(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -94,10 +137,17 @@ pub struct RenpyAdapter;
 
 impl RenpyAdapter {
     pub fn validate_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
+        let selected = fs::symlink_metadata(path).map_err(|_| RenpyError::InvalidSdk)?;
+        if !selected.is_dir() || crate::transaction::is_link_or_reparse(&selected) {
+            return Err(RenpyError::InvalidSdk);
+        }
         let root = fs::canonicalize(path).map_err(|_| RenpyError::InvalidSdk)?;
         if !root.is_dir() || has_symlink_component(&root) {
             return Err(RenpyError::InvalidSdk);
         }
+        let identity = sdk_directory_identity(&root)?;
+        let launcher_fingerprint = launcher_fingerprint(&root)?;
+        let template_fingerprint = template_fingerprint(&root)?;
         let result = run_bounded(
             &root,
             launcher_args(&root, &[OsString::from("--version")])?,
@@ -116,7 +166,15 @@ impl RenpyAdapter {
         if version != SUPPORTED_VERSION {
             return Err(RenpyError::UnsupportedVersion(version));
         }
-        Ok(ValidatedSdk { root, version })
+        let sdk = ValidatedSdk {
+            root,
+            version,
+            identity,
+            launcher_fingerprint,
+            template_fingerprint,
+        };
+        sdk.revalidate(true)?;
+        Ok(sdk)
     }
 
     pub fn generate_starter(
@@ -137,11 +195,14 @@ impl RenpyAdapter {
             command_path(&sdk.root.join("gui")),
             OsString::from("--start"),
         ];
-        require_success(run_bounded(
+        sdk.revalidate(true)?;
+        let result = require_success(run_bounded(
             &sdk.root,
             launcher_args(&sdk.root, &args)?,
             Duration::from_secs(180),
-        )?)
+        )?);
+        sdk.revalidate(true)?;
+        result
     }
 
     pub fn validate_generated(sdk: &ValidatedSdk, stage: &Path) -> Result<(), RenpyError> {
@@ -153,22 +214,27 @@ impl RenpyAdapter {
                 OsString::from("--error-code"),
             ],
         ] {
-            require_success(run_bounded(
+            sdk.revalidate(false)?;
+            let result = require_success(run_bounded(
                 &sdk.root,
                 launcher_args(&sdk.root, &command)?,
                 Duration::from_secs(180),
-            )?)?;
+            )?);
+            sdk.revalidate(false)?;
+            result?;
         }
         Ok(())
     }
 
     pub fn smoke_run(sdk: &ValidatedSdk, project: &Path) -> Result<(), RenpyError> {
+        sdk.revalidate(false)?;
         let args = [command_path(project), OsString::from("run")];
         let result = run_bounded(
             &sdk.root,
             launcher_args(&sdk.root, &args)?,
             Duration::from_secs(8),
         )?;
+        sdk.revalidate(false)?;
         if result.timed_out && result.diagnostics.is_empty() {
             Ok(())
         } else {
@@ -208,7 +274,11 @@ fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyE
     {
         let executable = root.join("lib/py3-windows-x86_64/python.exe");
         let script = root.join("renpy.py");
-        if !executable.is_file() || !script.is_file() {
+        if !executable.is_file()
+            || !script.is_file()
+            || has_symlink_component(&executable)
+            || has_symlink_component(&script)
+        {
             return Err(RenpyError::InvalidSdk);
         }
         let mut value = vec![executable.into_os_string(), script.into_os_string()];
@@ -218,7 +288,7 @@ fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyE
     #[cfg(not(windows))]
     {
         let executable = root.join("renpy.sh");
-        if !executable.is_file() {
+        if !executable.is_file() || has_symlink_component(&executable) {
             return Err(RenpyError::InvalidSdk);
         }
         let mut value = vec![executable.into_os_string()];
@@ -262,6 +332,31 @@ fn parse_version(output: &str) -> Option<String> {
     (!value.is_empty()).then_some(value)
 }
 
+fn apply_minimal_environment(command: &mut Command) {
+    command.env_clear();
+    for key in [
+        "PATH",
+        "HOME",
+        "USERPROFILE",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "TMPDIR",
+        "TEMP",
+        "TMP",
+        "LANG",
+        "LC_ALL",
+        "LC_CTYPE",
+    ] {
+        if let Some(value) = std::env::var_os(key) {
+            command.env(key, value);
+        }
+    }
+}
+
 fn run_bounded(
     cwd: &Path,
     argv: Vec<OsString>,
@@ -269,6 +364,7 @@ fn run_bounded(
 ) -> Result<ProcessResult, RenpyError> {
     let (program, args) = argv.split_first().ok_or(RenpyError::ProcessFailed)?;
     let mut command = Command::new(program);
+    apply_minimal_environment(&mut command);
     command
         .args(args)
         .current_dir(cwd)
@@ -396,7 +492,9 @@ fn kill_tree(child: &mut Child) {
     }
     #[cfg(windows)]
     {
-        let _ = Command::new("taskkill")
+        let mut taskkill = Command::new("taskkill");
+        apply_minimal_environment(&mut taskkill);
+        let _ = taskkill
             .args(["/PID", &child.id().to_string(), "/T", "/F"])
             .stdin(Stdio::null())
             .stdout(Stdio::null())
@@ -417,13 +515,54 @@ fn redact_line(line: &str) -> String {
         .to_owned()
 }
 
+fn managed_sdk_paths(data_root: &Path) -> (PathBuf, PathBuf) {
+    let sdk_dir = data_root.join("sdks");
+    (
+        sdk_dir.join(MANAGED_SDK_DIR_NAME),
+        sdk_dir.join(MANAGED_PROVENANCE_NAME),
+    )
+}
+
+fn managed_provenance(sdk: &ValidatedSdk) -> String {
+    format!(
+        "loomlight-managed-sdk-v1\nversion={}\narchive-sha256={}\nidentity={}:{}\nlauncher={}\ntemplate={}\n",
+        sdk.version,
+        SDK_SHA256,
+        sdk.identity.a,
+        sdk.identity.b,
+        sdk.launcher_fingerprint,
+        sdk.template_fingerprint
+    )
+}
+
+pub fn discover_managed_sdk(data_root: &Path) -> Result<Option<ValidatedSdk>, RenpyError> {
+    let (destination, provenance) = managed_sdk_paths(data_root);
+    if !destination.exists() {
+        return Ok(None);
+    }
+    let destination_meta =
+        fs::symlink_metadata(&destination).map_err(|_| RenpyError::InvalidSdk)?;
+    if !destination_meta.is_dir() || crate::transaction::is_link_or_reparse(&destination_meta) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    let provenance_meta = fs::symlink_metadata(&provenance).map_err(|_| RenpyError::InvalidSdk)?;
+    if !provenance_meta.is_file() || crate::transaction::is_link_or_reparse(&provenance_meta) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    let sdk = RenpyAdapter::validate_sdk(&destination)?;
+    let recorded = fs::read_to_string(&provenance).map_err(|_| RenpyError::InvalidSdk)?;
+    if recorded.len() > 4096 || recorded != managed_provenance(&sdk) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    Ok(Some(sdk))
+}
+
 pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyError> {
+    if let Some(sdk) = discover_managed_sdk(data_root)? {
+        return Ok(sdk);
+    }
     let sdk_dir = data_root.join("sdks");
     fs::create_dir_all(&sdk_dir).map_err(|_| RenpyError::Io)?;
-    let destination = sdk_dir.join("renpy-8.5.3-sdk");
-    if destination.exists() {
-        return RenpyAdapter::validate_sdk(&destination);
-    }
     let archive = sdk_dir.join(format!(
         ".{SDK_ARCHIVE_NAME}.{}.partial",
         uuid::Uuid::new_v4()
@@ -431,6 +570,7 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
     let result = (|| {
         let agent = ureq::Agent::config_builder()
             .https_only(true)
+            .max_redirects(0)
             .timeout_global(Some(Duration::from_secs(600)))
             .build()
             .new_agent();
@@ -438,9 +578,12 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
             .get(SDK_URL)
             .call()
             .map_err(|_| RenpyError::Download)?;
+        if response.status().is_redirection() {
+            return Err(RenpyError::Download);
+        }
         let source = response.into_body().into_reader();
         let mut source = source.take(MAX_ARCHIVE_BYTES + 1);
-        let mut output = fs::OpenOptions::new()
+        let mut output = OpenOptions::new()
             .create_new(true)
             .write(true)
             .open(&archive)
@@ -450,11 +593,49 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
             return Err(RenpyError::Download);
         }
         output.sync_all().map_err(|_| RenpyError::Io)?;
-        install_verified_archive(&archive, SDK_SHA256, &destination, ArchiveLimits::default())?;
-        RenpyAdapter::validate_sdk(&destination)
+        install_supported_sdk_from_archive(data_root, &archive)
     })();
     let _ = fs::remove_file(&archive);
     result
+}
+
+pub fn install_supported_sdk_from_archive(
+    data_root: &Path,
+    archive: &Path,
+) -> Result<ValidatedSdk, RenpyError> {
+    if let Some(sdk) = discover_managed_sdk(data_root)? {
+        return Ok(sdk);
+    }
+    let sdk_dir = data_root.join("sdks");
+    fs::create_dir_all(&sdk_dir).map_err(|_| RenpyError::Io)?;
+    let (destination, provenance) = managed_sdk_paths(data_root);
+    if destination.exists() || provenance.exists() {
+        return Err(RenpyError::ExistingDestination);
+    }
+    install_verified_archive(archive, SDK_SHA256, &destination, ArchiveLimits::default())?;
+    let sdk = match RenpyAdapter::validate_sdk(&destination) {
+        Ok(sdk) => sdk,
+        Err(error) => {
+            let _ = fs::remove_dir_all(&destination);
+            return Err(error);
+        }
+    };
+    let write_result = (|| {
+        let mut file = OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .open(&provenance)
+            .map_err(|_| RenpyError::Io)?;
+        file.write_all(managed_provenance(&sdk).as_bytes())
+            .and_then(|_| file.sync_all())
+            .map_err(|_| RenpyError::Io)
+    })();
+    if let Err(error) = write_result {
+        let _ = fs::remove_file(&provenance);
+        let _ = fs::remove_dir_all(&destination);
+        return Err(error);
+    }
+    Ok(sdk)
 }
 
 pub fn install_verified_archive(
@@ -670,6 +851,134 @@ fn sha256_file(path: &Path) -> Result<String, RenpyError> {
     Ok(hex::encode(digest.finalize()))
 }
 
+#[cfg(unix)]
+fn sdk_directory_identity(path: &Path) -> Result<SdkFileIdentity, RenpyError> {
+    use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+    let file = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW)
+        .open(path)
+        .map_err(|_| RenpyError::InvalidSdk)?;
+    let metadata = file.metadata().map_err(|_| RenpyError::InvalidSdk)?;
+    Ok(SdkFileIdentity {
+        a: metadata.dev(),
+        b: metadata.ino(),
+    })
+}
+
+#[cfg(windows)]
+fn sdk_directory_identity(path: &Path) -> Result<SdkFileIdentity, RenpyError> {
+    use std::{
+        mem::zeroed,
+        os::windows::{fs::OpenOptionsExt, io::AsRawHandle},
+    };
+    use windows_sys::Win32::Storage::FileSystem::{
+        GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION,
+    };
+    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    let file = OpenOptions::new()
+        .read(true)
+        .share_mode(0x1 | 0x2 | 0x4)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+        .map_err(|_| RenpyError::InvalidSdk)?;
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { zeroed() };
+    if unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut info) } == 0 {
+        return Err(RenpyError::InvalidSdk);
+    }
+    Ok(SdkFileIdentity {
+        a: u64::from(info.dwVolumeSerialNumber),
+        b: (u64::from(info.nFileIndexHigh) << 32) | u64::from(info.nFileIndexLow),
+    })
+}
+
+fn launcher_fingerprint(root: &Path) -> Result<String, RenpyError> {
+    let mut digest = Sha256::new();
+    let script = root.join("renpy.py");
+    if !script.is_file() || has_symlink_component(&script) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    digest.update(b"renpy.py\0");
+    digest.update(sha256_file(&script)?.as_bytes());
+    #[cfg(windows)]
+    let launcher = root.join("lib/py3-windows-x86_64/python.exe");
+    #[cfg(not(windows))]
+    let launcher = root.join("renpy.sh");
+    if !launcher.is_file() || has_symlink_component(&launcher) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    digest.update(b"launcher\0");
+    digest.update(sha256_file(&launcher)?.as_bytes());
+    Ok(hex::encode(digest.finalize()))
+}
+
+fn template_fingerprint(root: &Path) -> Result<String, RenpyError> {
+    let template = root.join("gui");
+    if !template.is_dir() || has_symlink_component(&template) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    hash_regular_tree(&template)
+}
+
+fn hash_regular_tree(root: &Path) -> Result<String, RenpyError> {
+    let mut pending = vec![root.to_path_buf()];
+    let mut files = Vec::new();
+    let mut members = 0_usize;
+    let mut total = 0_u64;
+    while let Some(directory) = pending.pop() {
+        let mut entries = fs::read_dir(&directory)
+            .map_err(|_| RenpyError::InvalidSdk)?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|_| RenpyError::InvalidSdk)?;
+        entries.sort_by_key(|entry| entry.file_name());
+        for entry in entries {
+            members += 1;
+            if members > 100_000 {
+                return Err(RenpyError::InvalidSdk);
+            }
+            let path = entry.path();
+            let metadata = fs::symlink_metadata(&path).map_err(|_| RenpyError::InvalidSdk)?;
+            if crate::transaction::is_link_or_reparse(&metadata) {
+                return Err(RenpyError::InvalidSdk);
+            }
+            if metadata.is_dir() {
+                pending.push(path);
+            } else if metadata.is_file() {
+                total = total
+                    .checked_add(metadata.len())
+                    .ok_or(RenpyError::InvalidSdk)?;
+                if total > 1024 * 1024 * 1024 {
+                    return Err(RenpyError::InvalidSdk);
+                }
+                files.push(path);
+            } else {
+                return Err(RenpyError::InvalidSdk);
+            }
+        }
+    }
+    files.sort();
+    let mut digest = Sha256::new();
+    for path in files {
+        let relative = path
+            .strip_prefix(root)
+            .map_err(|_| RenpyError::InvalidSdk)?;
+        digest.update(relative.to_string_lossy().as_bytes());
+        digest.update([0]);
+        let mut file = File::open(&path).map_err(|_| RenpyError::InvalidSdk)?;
+        let mut buffer = [0_u8; 1024 * 1024];
+        loop {
+            let count = file.read(&mut buffer).map_err(|_| RenpyError::InvalidSdk)?;
+            if count == 0 {
+                break;
+            }
+            digest.update(&buffer[..count]);
+        }
+        digest.update([0xff]);
+    }
+    Ok(hex::encode(digest.finalize()))
+}
+
 fn has_symlink_component(path: &Path) -> bool {
     let mut current = PathBuf::new();
     for component in path.components() {
@@ -796,6 +1105,21 @@ mod tests {
             parse_version("Ren'Py 8.5.4"),
             Some(SUPPORTED_VERSION.into())
         );
+    }
+
+    #[test]
+    fn child_environment_allowlist_excludes_injection_variables() {
+        let mut command = Command::new("synthetic");
+        apply_minimal_environment(&mut command);
+        let debug = format!("{command:?}");
+        for forbidden in [
+            "PYTHONPATH",
+            "PYTHONHOME",
+            "GIT_DIR",
+            "GIT_OBJECT_DIRECTORY",
+        ] {
+            assert!(!debug.contains(forbidden), "{forbidden}");
+        }
     }
 
     #[test]

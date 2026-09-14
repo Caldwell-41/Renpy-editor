@@ -19,6 +19,18 @@ setTimeout(async () => {
     localStorage.length === 0 &&
     sessionStorage.length === 0 &&
     !document.documentElement.textContent.includes("sentinel");
+  const buttons = [...document.querySelectorAll("button")];
+  const newProject = buttons.find((button) => button.textContent === "New Project");
+  const openProject = buttons.find((button) => button.textContent === "Open Loomlight Project");
+  const welcomeLifecycleVisible = Boolean(newProject && openProject);
+  newProject?.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const pageText = document.body.textContent ?? "";
+  const newProjectWizardVisible =
+    pageText.includes("Project details") &&
+    pageText.includes("Ren'Py SDK") &&
+    pageText.includes("Game configuration") &&
+    pageText.includes("Review & Create");
   await invoke("core_request", {
     request: {
       protocolVersion: 1,
@@ -33,6 +45,8 @@ setTimeout(async () => {
         nodeGlobalsDenied,
         popupRequestIssued,
         rendererSecretsAbsent,
+        welcomeLifecycleVisible,
+        newProjectWizardVisible,
         unauthorisedWindowDenied: known && window.__loomlightUnauthorisedDenied === true,
         unknownCommandDenied,
       },

@@ -4,7 +4,8 @@ use crate::{
         SourceMapMetadata, PROJECT_SCHEMA_VERSION, SOURCE_MAP_SCHEMA_VERSION,
     },
     renpy::{
-        install_supported_sdk, RenpyAdapter, RenpyError, SdkInfo, ValidatedSdk, SUPPORTED_VERSION,
+        discover_managed_sdk, install_supported_sdk, RenpyAdapter, RenpyError, SdkInfo,
+        ValidatedSdk, SUPPORTED_VERSION,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -119,6 +120,14 @@ struct ParentAnchor {
     identity: FileIdentity,
 }
 
+struct StageAnchor {
+    path: PathBuf,
+    name: String,
+    token: String,
+    file: File,
+    identity: FileIdentity,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct FileIdentity {
     a: u64,
@@ -218,35 +227,37 @@ impl LifecycleService {
         source: &str,
     ) -> Result<SdkInfo, LifecycleError> {
         match RenpyAdapter::validate_sdk(selected) {
-            Ok(sdk) => {
-                let id = uuid::Uuid::new_v4().to_string();
-                let info = sdk_info(&id, &sdk, source);
-                self.sdks.insert(id, sdk);
-                Ok(info)
-            }
+            Ok(sdk) => Ok(self.remember_sdk(sdk, source)),
             Err(RenpyError::UnsupportedVersion(version)) => Ok(SdkInfo { id: String::new(), version: version.clone(), display_name: format!("Ren'Py {version}"), source: source.into(), compatible: false, explanation: format!("Ren'Py {version} is not supported. Loomlight currently requires {SUPPORTED_VERSION}.") }),
             Err(_) => Err(LifecycleError::UnsupportedSdk),
         }
     }
 
     pub fn discover_sdks(&mut self) -> Vec<SdkInfo> {
-        let mut results = Vec::new();
-        let managed = self.data_root.join("sdks/renpy-8.5.3-sdk");
-        if managed.is_dir() {
-            if let Ok(info) = self.register_sdk(&managed, "managed") {
-                results.push(info);
-            }
+        match discover_managed_sdk(&self.data_root) {
+            Ok(Some(sdk)) => vec![self.remember_sdk(sdk, "managed")],
+            Ok(None) | Err(_) => Vec::new(),
         }
-        results
     }
 
     pub fn install_sdk(&mut self) -> Result<SdkInfo, LifecycleError> {
         let sdk =
             install_supported_sdk(&self.data_root).map_err(|_| LifecycleError::UnsupportedSdk)?;
+        Ok(self.remember_sdk(sdk, "managed"))
+    }
+
+    fn remember_sdk(&mut self, sdk: ValidatedSdk, source: &str) -> SdkInfo {
+        if let Some((id, existing)) = self
+            .sdks
+            .iter()
+            .find(|(_, existing)| existing.same_identity(&sdk))
+        {
+            return sdk_info(id, existing, source);
+        }
         let id = uuid::Uuid::new_v4().to_string();
-        let info = sdk_info(&id, &sdk, "managed");
+        let info = sdk_info(&id, &sdk, source);
         self.sdks.insert(id, sdk);
-        Ok(info)
+        info
     }
 
     pub fn create_project(
@@ -285,39 +296,41 @@ impl LifecycleService {
         // target is absent, or an existing target whose game directory is present.
         // The private ownership marker makes our target intentionally existing.
         fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
+        let stage = open_stage_anchor(stage, stage_name, token)?;
         let prepared = (|| {
-            RenpyAdapter::generate_starter(&sdk, &stage, resolution.width, resolution.height)
+            validate_stage_identity(&stage)?;
+            sdk.revalidate(true)
+                .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            RenpyAdapter::generate_starter(&sdk, &stage.path, resolution.width, resolution.height)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: generated");
-            validate_stage_identity(&stage, &token)?;
+            validate_stage_identity(&stage)?;
             let metadata = apply_overlay(
-                &stage,
+                &stage.path,
                 &request.title,
                 &request.folder_name,
                 resolution.clone(),
             )?;
+            validate_stage_identity(&stage)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: overlay");
             if request.initialize_git {
-                crate::ports::GitPort::initialise_new_repository(&LocalGit, &stage)?;
+                validate_stage_identity(&stage)?;
+                crate::ports::GitPort::initialise_new_repository(&LocalGit, &stage.path)?;
+                validate_stage_identity(&stage)?;
             }
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: git");
-            RenpyAdapter::validate_generated(&sdk, &stage)
+            validate_stage_identity(&stage)?;
+            sdk.revalidate(false)
+                .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            RenpyAdapter::validate_generated(&sdk, &stage.path)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: validated");
-            validate_stage_identity(&stage, &token)?;
-            validate_parent(parent)?;
-            ensure_absent(&final_path)?;
-            promote_no_replace(parent, &stage_name, &request.folder_name).map_err(|error| {
-                if matches!(error, LifecycleError::Io) {
-                    LifecycleError::PromotionFailed
-                } else {
-                    error
-                }
-            })?;
+            validate_stage_identity(&stage)?;
+            promote_anchored_stage(parent, &stage, &request.folder_name)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: promoted");
             fs::remove_file(final_path.join(STAGE_MARKER))
@@ -328,8 +341,8 @@ impl LifecycleService {
             }
             Ok(opened)
         })();
-        if prepared.is_err() && stage.exists() {
-            let _ = cleanup_stage(&stage, &token);
+        if prepared.is_err() && stage.path.exists() {
+            let _ = cleanup_stage(&stage);
         }
         let opened = prepared?;
         if self.update_recent(&final_path, &opened).is_err() {
@@ -697,19 +710,68 @@ fn initialise_git(stage: &Path) -> Result<(), LifecycleError> {
 }
 
 fn initialise_git_with(program: &str, stage: &Path) -> Result<(), LifecycleError> {
-    let status = Command::new(program)
+    let template = stage.join(format!(".loomlight-git-template-{}", uuid::Uuid::new_v4()));
+    fs::create_dir(&template).map_err(|_| LifecycleError::GitUnavailable)?;
+    restrict_directory(&template)?;
+    let mut command = Command::new(program);
+    apply_git_environment(&mut command);
+    command
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .env("GIT_CONFIG_COUNT", "0")
+        .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GIT_TEMPLATE_DIR", &template);
+    #[cfg(windows)]
+    command.env("GIT_CONFIG_GLOBAL", "NUL");
+    #[cfg(not(windows))]
+    command.env("GIT_CONFIG_GLOBAL", "/dev/null");
+    let status = command
         .arg("init")
         .arg("--quiet")
         .current_dir(stage)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .status()
+        .status();
+    let _ = fs::remove_dir(&template);
+    let status = status.map_err(|_| LifecycleError::GitUnavailable)?;
+    if !status.success() {
+        return Err(LifecycleError::GitUnavailable);
+    }
+    let git_dir = stage.join(".git");
+    let metadata = fs::symlink_metadata(&git_dir).map_err(|_| LifecycleError::GitUnavailable)?;
+    if !metadata.is_dir() || crate::transaction::is_link_or_reparse(&metadata) {
+        return Err(LifecycleError::GitUnavailable);
+    }
+    let canonical = git_dir
+        .canonicalize()
         .map_err(|_| LifecycleError::GitUnavailable)?;
-    if status.success() {
-        Ok(())
-    } else {
-        Err(LifecycleError::GitUnavailable)
+    let stage_root = stage
+        .canonicalize()
+        .map_err(|_| LifecycleError::GitUnavailable)?;
+    if !canonical.starts_with(&stage_root) {
+        return Err(LifecycleError::GitUnavailable);
+    }
+    Ok(())
+}
+
+fn apply_git_environment(command: &mut Command) {
+    command.env_clear();
+    for key in [
+        "PATH",
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "TMPDIR",
+        "TEMP",
+        "TMP",
+        "LANG",
+        "LC_ALL",
+        "LC_CTYPE",
+    ] {
+        if let Some(value) = std::env::var_os(key) {
+            command.env(key, value);
+        }
     }
 }
 
@@ -859,25 +921,102 @@ fn open_directory(path: &Path) -> io::Result<File> {
         .open(path)
 }
 
-fn validate_stage_identity(stage: &Path, token: &str) -> Result<(), LifecycleError> {
-    if has_symlink_component(stage)
-        || fs::read_to_string(stage.join(STAGE_MARKER)).ok().as_deref()
-            != Some(&format!("loomlight-project-stage-v1\n{token}\n"))
+#[cfg(unix)]
+fn open_stage_directory(path: &Path) -> io::Result<File> {
+    open_directory(path)
+}
+
+#[cfg(windows)]
+fn open_stage_directory(path: &Path) -> io::Result<File> {
+    use std::os::windows::fs::OpenOptionsExt;
+    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    OpenOptions::new()
+        .read(true)
+        .share_mode(0x1 | 0x2 | 0x4)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+}
+
+fn open_stage_anchor(
+    path: PathBuf,
+    name: String,
+    token: String,
+) -> Result<StageAnchor, LifecycleError> {
+    if path
+        .file_name()
+        .is_none_or(|value| value.to_string_lossy() != name)
+        || name != format!(".loomlight-stage-{token}")
+    {
+        return Err(LifecycleError::UnsafePath);
+    }
+    let file = open_stage_directory(&path).map_err(|_| LifecycleError::UnsafePath)?;
+    let identity = identity(&file).map_err(|_| LifecycleError::UnsafePath)?;
+    let stage = StageAnchor {
+        path,
+        name,
+        token,
+        file,
+        identity,
+    };
+    validate_stage_identity(&stage)?;
+    Ok(stage)
+}
+
+fn validate_stage_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
+    let held = identity(&stage.file).map_err(|_| LifecycleError::UnsafePath)?;
+    let live_file = open_stage_directory(&stage.path).map_err(|_| LifecycleError::UnsafePath)?;
+    let live = identity(&live_file).map_err(|_| LifecycleError::UnsafePath)?;
+    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
+    if held != stage.identity
+        || live != stage.identity
+        || has_symlink_component(&stage.path)
+        || fs::read_to_string(stage.path.join(STAGE_MARKER))
+            .ok()
+            .as_deref()
+            != Some(marker.as_str())
     {
         Err(LifecycleError::UnsafePath)
     } else {
         Ok(())
     }
 }
-fn cleanup_stage(stage: &Path, token: &str) -> Result<(), LifecycleError> {
-    validate_stage_identity(stage, token)?;
-    if !stage
-        .file_name()
-        .is_some_and(|name| name.to_string_lossy() == format!(".loomlight-stage-{token}"))
+
+fn promote_anchored_stage(
+    parent: &ParentAnchor,
+    stage: &StageAnchor,
+    final_name: &str,
+) -> Result<(), LifecycleError> {
+    validate_stage_identity(stage)?;
+    validate_parent(parent)?;
+    let final_path = parent.path.join(final_name);
+    ensure_absent(&final_path)?;
+    promote_no_replace(parent, &stage.name, final_name).map_err(|error| {
+        if matches!(error, LifecycleError::Io) {
+            LifecycleError::PromotionFailed
+        } else {
+            error
+        }
+    })?;
+    let promoted =
+        open_stage_directory(&final_path).map_err(|_| LifecycleError::PromotionFailed)?;
+    let promoted_identity = identity(&promoted).map_err(|_| LifecycleError::PromotionFailed)?;
+    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
+    if promoted_identity != stage.identity
+        || has_symlink_component(&final_path)
+        || fs::read_to_string(final_path.join(STAGE_MARKER))
+            .ok()
+            .as_deref()
+            != Some(marker.as_str())
     {
-        return Err(LifecycleError::UnsafePath);
+        return Err(LifecycleError::PromotionFailed);
     }
-    fs::remove_dir_all(stage).map_err(|_| LifecycleError::Io)
+    Ok(())
+}
+
+fn cleanup_stage(stage: &StageAnchor) -> Result<(), LifecycleError> {
+    validate_stage_identity(stage)?;
+    fs::remove_dir_all(&stage.path).map_err(|_| LifecycleError::Io)
 }
 
 #[cfg(unix)]
@@ -1111,7 +1250,7 @@ mod tests {
         let unrelated = temp.path().join("unrelated");
         fs::create_dir(&unrelated).unwrap();
         fs::write(unrelated.join(STAGE_MARKER), b"not a valid marker").unwrap();
-        assert!(cleanup_stage(&unrelated, "token").is_err());
+        assert!(open_stage_anchor(unrelated.clone(), "unrelated".into(), "token".into()).is_err());
         assert!(unrelated.exists());
         assert!(matches!(
             initialise_git_with("loomlight-command-that-does-not-exist", temp.path()),
@@ -1131,10 +1270,7 @@ mod tests {
         let parent = service.register_parent(&projects).unwrap();
         service.sdks.insert(
             "invalid-sdk".into(),
-            ValidatedSdk {
-                root: temp.path().join("invalid-sdk"),
-                version: SUPPORTED_VERSION.into(),
-            },
+            ValidatedSdk::invalid_for_test(temp.path().join("invalid-sdk")),
         );
         assert!(matches!(
             service.create_project(CreateProjectRequest {
@@ -1146,7 +1282,7 @@ mod tests {
                 height: 1080,
                 initialize_git: false,
             }),
-            Err(LifecycleError::GenerationFailed)
+            Err(LifecycleError::UnsupportedSdk)
         ));
         assert!(!projects.join("failure-evidence").exists());
         assert_eq!(fs::read(unrelated.join("keep")).unwrap(), b"keep");
@@ -1195,6 +1331,43 @@ mod tests {
         assert_eq!(service.list_recent()[0].status, "missing");
     }
 
+    #[test]
+    fn stage_identity_rejects_same_name_replacement_before_promotion() {
+        let temp = tempfile::tempdir().unwrap();
+        let parent_path = temp.path().join("projects");
+        fs::create_dir(&parent_path).unwrap();
+        let parent = open_parent(&parent_path).unwrap();
+        let token = uuid::Uuid::new_v4().to_string();
+        let name = format!(".loomlight-stage-{token}");
+        let stage_path = parent_path.join(&name);
+        fs::create_dir(&stage_path).unwrap();
+        restrict_directory(&stage_path).unwrap();
+        fs::write(
+            stage_path.join(STAGE_MARKER),
+            format!("loomlight-project-stage-v1\n{token}\n"),
+        )
+        .unwrap();
+        let stage = open_stage_anchor(stage_path.clone(), name.clone(), token.clone()).unwrap();
+        let moved = parent_path.join("moved-original-stage");
+        fs::rename(&stage_path, &moved).unwrap();
+        fs::create_dir(&stage_path).unwrap();
+        fs::write(
+            stage_path.join(STAGE_MARKER),
+            format!("loomlight-project-stage-v1\n{token}\n"),
+        )
+        .unwrap();
+        assert!(matches!(
+            validate_stage_identity(&stage),
+            Err(LifecycleError::UnsafePath)
+        ));
+        assert!(matches!(
+            promote_anchored_stage(&parent, &stage, "final"),
+            Err(LifecycleError::UnsafePath)
+        ));
+        assert!(!parent_path.join("final").exists());
+        assert!(moved.exists());
+    }
+
     #[cfg(unix)]
     #[test]
     fn parent_symlink_substitution_fails_closed() {
@@ -1225,22 +1398,35 @@ mod tests {
             return;
         };
         let temp = tempfile::tempdir().unwrap();
-        let sdk_root = temp.path().join("sdk");
-        crate::renpy::install_verified_archive(
-            Path::new(&archive),
-            crate::renpy::SDK_SHA256,
-            &sdk_root,
-            crate::renpy::ArchiveLimits::default(),
-        )
-        .unwrap();
-        let sdk = RenpyAdapter::validate_sdk(&sdk_root).unwrap();
+        let managed_state = temp.path().join("managed-state");
+        let sdk =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, Path::new(&archive))
+                .unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
+        let discovered = crate::renpy::discover_managed_sdk(&managed_state)
+            .unwrap()
+            .expect("managed SDK should retain verified provenance");
+        assert!(sdk.same_identity(&discovered));
+        let sdk_root = sdk.root.clone();
+        let moved_sdk = temp.path().join("moved-managed-sdk");
+        fs::rename(&sdk_root, &moved_sdk).unwrap();
+        fs::create_dir(&sdk_root).unwrap();
+        assert!(sdk.revalidate(false).is_err());
+        fs::remove_dir(&sdk_root).unwrap();
+        fs::rename(&moved_sdk, &sdk_root).unwrap();
+        sdk.revalidate(true).unwrap();
 
         let projects = temp.path().join("projects");
         fs::create_dir(&projects).unwrap();
         let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
         let parent = service.register_parent(&projects).unwrap();
         let selected = service.register_sdk(&sdk_root, "target-test").unwrap();
+        let selected_again = service.register_sdk(&sdk_root, "target-test").unwrap();
+        assert_eq!(selected.id, selected_again.id);
+        let hostile_git_dir = temp.path().join("hostile-git-dir");
+        let hostile_object_dir = temp.path().join("hostile-git-objects");
+        std::env::set_var("GIT_DIR", &hostile_git_dir);
+        std::env::set_var("GIT_OBJECT_DIRECTORY", &hostile_object_dir);
         let created = service
             .create_project(CreateProjectRequest {
                 parent_id: parent.id,
@@ -1252,9 +1438,13 @@ mod tests {
                 initialize_git: true,
             })
             .unwrap();
+        std::env::remove_var("GIT_DIR");
+        std::env::remove_var("GIT_OBJECT_DIRECTORY");
         let project = created.project.unwrap();
         let final_root = projects.join("target-gate-story");
         assert!(final_root.join(".git").is_dir());
+        assert!(!hostile_git_dir.exists());
+        assert!(!hostile_object_dir.exists());
         assert!(!final_root.join(STAGE_MARKER).exists());
         for path in [
             "game/script.rpy",

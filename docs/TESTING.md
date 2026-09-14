@@ -28,7 +28,7 @@ lifecycle log joins the existing lightweight evidence artifact. Without
 `LOOMLIGHT_PHASE1C_SDK_ARCHIVE`, the target-only SDK test records a local skip and does
 not count as target evidence.
 
-The completed Phase 1C gate is
+The original Phase 1C gate was
 [run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
 at `1b241954e936f943d558f267a86f5e3592ab99cb`: Windows x64 job `103883726104`
 and macOS ARM64 job `103883726218` both passed the production lifecycle test, desktop
@@ -36,6 +36,16 @@ tests, packaging, packaged denial smoke, secret scan, and dependency/licence inv
 Evidence artifacts are `10335964464` (Windows) and `10335279104` (macOS). The archived
 [Phase 1C task](tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) retains all
 failed/superseded attempts and their diagnoses.
+
+
+A post-closure review reopened Phase 1C for a bounded correction: private stage and SDK
+capabilities now retain/revalidate filesystem identity, approved SDK launch/template
+fingerprints are checked around execution, managed SDK reuse requires checksum-derived
+provenance, child environments are allowlisted, Git configuration/path redirection is
+neutralized, Tauri dispatches lifecycle work off the UI thread, repeated SDK selection
+is deduplicated, redirects are refused, and packaged smoke checks the actual
+Welcome/New Project DOM. The original run remains historical evidence; a new
+Windows/macOS production run is required before the gate is re-closed.
 
 Retain the Phase 0 regression suite:
 

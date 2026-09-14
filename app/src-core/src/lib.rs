@@ -174,6 +174,8 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "nodeGlobalsDenied",
         "popupRequestIssued",
         "rendererSecretsAbsent",
+        "welcomeLifecycleVisible",
+        "newProjectWizardVisible",
         "unknownCommandDenied",
         "unauthorisedWindowDenied",
     ];
@@ -459,6 +461,8 @@ mod tests {
             "nodeGlobalsDenied": true,
             "popupRequestIssued": true,
             "rendererSecretsAbsent": true,
+            "welcomeLifecycleVisible": true,
+            "newProjectWizardVisible": true,
             "unknownCommandDenied": true,
             "unauthorisedWindowDenied": true
         });
