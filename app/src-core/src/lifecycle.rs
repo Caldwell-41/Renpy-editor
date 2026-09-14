@@ -280,6 +280,10 @@ impl LifecycleService {
         restrict_directory(&stage)?;
         let marker = format!("loomlight-project-stage-v1\n{token}\n");
         write_new(&stage.join(STAGE_MARKER), marker.as_bytes())?;
+        // Ren'Py's documented generate_gui command accepts a new project when the
+        // target is absent, or an existing target whose game directory is present.
+        // The private ownership marker makes our target intentionally existing.
+        fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
         let prepared = (|| {
             RenpyAdapter::generate_starter(&sdk, &stage, resolution.width, resolution.height)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
@@ -712,7 +716,9 @@ fn has_symlink_component(path: &Path) -> bool {
     let mut current = PathBuf::new();
     for component in path.components() {
         current.push(component.as_os_str());
-        if fs::symlink_metadata(&current).is_ok_and(|meta| meta.file_type().is_symlink()) {
+        if fs::symlink_metadata(&current)
+            .is_ok_and(|meta| crate::transaction::is_link_or_reparse(&meta))
+        {
             return true;
         }
     }
@@ -998,6 +1004,22 @@ mod tests {
             assert!(parent_path.join("stage/accepted").is_file());
             assert!(outside.read_dir().unwrap().next().is_none());
         }
+
+        #[cfg(windows)]
+        {
+            use std::os::windows::fs::symlink_dir;
+            fs::remove_dir(parent_path.join("final")).unwrap();
+            let outside = temp.path().join("outside");
+            fs::create_dir(&outside).unwrap();
+            symlink_dir(&outside, parent_path.join("final"))
+                .expect("runner must support Windows reparse-point evidence");
+            assert!(matches!(
+                promote_no_replace(&parent, "stage", "final"),
+                Err(LifecycleError::ExistingDestination)
+            ));
+            assert!(parent_path.join("stage/accepted").is_file());
+            assert!(outside.read_dir().unwrap().next().is_none());
+        }
     }
 
     #[test]
@@ -1012,6 +1034,49 @@ mod tests {
             initialise_git_with("loomlight-command-that-does-not-exist", temp.path()),
             Err(LifecycleError::GitUnavailable)
         ));
+    }
+
+    #[test]
+    fn failed_generation_cleans_only_its_stage_and_never_adds_recent() {
+        let temp = tempfile::tempdir().unwrap();
+        let projects = temp.path().join("projects");
+        fs::create_dir(&projects).unwrap();
+        let unrelated = projects.join("unrelated");
+        fs::create_dir(&unrelated).unwrap();
+        fs::write(unrelated.join("keep"), b"keep").unwrap();
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let parent = service.register_parent(&projects).unwrap();
+        service.sdks.insert(
+            "invalid-sdk".into(),
+            ValidatedSdk {
+                root: temp.path().join("invalid-sdk"),
+                version: SUPPORTED_VERSION.into(),
+            },
+        );
+        assert!(matches!(
+            service.create_project(CreateProjectRequest {
+                parent_id: parent.id,
+                title: "Failure evidence".into(),
+                folder_name: "failure-evidence".into(),
+                sdk_id: "invalid-sdk".into(),
+                width: 1920,
+                height: 1080,
+                initialize_git: false,
+            }),
+            Err(LifecycleError::GenerationFailed)
+        ));
+        assert!(!projects.join("failure-evidence").exists());
+        assert_eq!(fs::read(unrelated.join("keep")).unwrap(), b"keep");
+        assert!(fs::read_dir(&projects)
+            .unwrap()
+            .all(|entry| {
+                !entry
+                    .unwrap()
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".loomlight-stage-")
+            }));
+        assert!(service.list_recent().is_empty());
     }
 
     #[test]

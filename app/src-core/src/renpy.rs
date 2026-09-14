@@ -634,7 +634,9 @@ fn has_symlink_component(path: &Path) -> bool {
     let mut current = PathBuf::new();
     for component in path.components() {
         current.push(component.as_os_str());
-        if fs::symlink_metadata(&current).is_ok_and(|meta| meta.file_type().is_symlink()) {
+        if fs::symlink_metadata(&current)
+            .is_ok_and(|meta| crate::transaction::is_link_or_reparse(&meta))
+        {
             return true;
         }
     }
@@ -802,5 +804,30 @@ mod tests {
             Err(RenpyError::ExistingDestination)
         ));
         assert_eq!(fs::read(temp.path().join("sdk/keep")).unwrap(), b"keep");
+    }
+
+    #[test]
+    fn invalid_extracted_payload_is_cleaned_without_promotion() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path().join("sdk.tar.bz2");
+        archive(&path, &[("root/not-an-sdk", b"data")]);
+        let destination = temp.path().join("sdk");
+        assert!(matches!(
+            install_verified_archive(
+                &path,
+                &sha256_file(&path).unwrap(),
+                &destination,
+                ArchiveLimits::default()
+            ),
+            Err(RenpyError::InvalidSdk)
+        ));
+        assert!(!destination.exists());
+        assert!(fs::read_dir(temp.path()).unwrap().all(|entry| {
+            !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".loomlight-sdk-stage-")
+        }));
     }
 }

@@ -11,6 +11,8 @@ mod journal;
 mod path;
 mod platform;
 
+pub(crate) use path::is_link_or_reparse;
+
 pub use history::{HistoryEntry, HistoryMutation, HistoryStack};
 use identity::identity_for_file;
 pub use identity::FileIdentity;
