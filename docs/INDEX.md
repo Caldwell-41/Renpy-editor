@@ -17,6 +17,9 @@ implementation gate.
 | Source, project, character appearance, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
 | Workspaces and interaction | [UI.md](UI.md) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
+| Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
+| Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
+| Contribution and inbound licensing terms | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
@@ -33,6 +36,7 @@ implementation gate.
 | SDK adapter evidence | [research/RENPY_SDK_SPIKE_RESULTS.md](research/RENPY_SDK_SPIKE_RESULTS.md) |
 | Representative fixture proposal | [fixtures/REPRESENTATIVE_GAME.md](fixtures/REPRESENTATIVE_GAME.md) |
 | Repository/privacy audit | [audits/2026-09-10-repository-and-privacy.md](audits/2026-09-10-repository-and-privacy.md) |
+| Public-release readiness audit | [audits/2026-09-14-public-release-readiness.md](audits/2026-09-14-public-release-readiness.md) |
 | Phase 1A dependency/licence review | [dependencies/phase-1a.md](dependencies/phase-1a.md) |
 | Decision records | [`adr/`](adr/) |
 
