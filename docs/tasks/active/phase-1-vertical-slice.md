@@ -142,10 +142,11 @@ separately approved and completed without changing that replacement-only boundar
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** Complete under the archived
-[Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md). ADR 0005 records
-the starter-generation and no-replace finalisation design; production run 34814995559
-passed the complete Windows x64/macOS ARM64 gate.
+**Status:** Corrective remediation in progress under
+[the active Phase 1C corrective task](phase-1c-corrective-lifecycle.md). The original
+implementation remains archived in
+[the Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md), and production
+run 34814995559 remains historical evidence rather than current closure evidence.
 
 Implement Welcome/Recent Projects and the New Project workflow:
 

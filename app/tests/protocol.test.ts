@@ -68,6 +68,29 @@ test("theme exposes all required semantics and reduced motion", async () => {
   }
 });
 
+test("Phase 1C UI source exposes the bounded lifecycle flow", async () => {
+  const source = await readFile(new URL("src/main.ts", sourceRoot), "utf8");
+  for (const label of [
+    "New Project",
+    "Open Loomlight Project",
+    "Recent Projects",
+    "Project details",
+    "Ren'Py SDK",
+    "Game configuration",
+    "Review & Create",
+  ]) assert.equal(source.includes(label), true, label);
+  for (const operation of [
+    "project.chooseParent",
+    "project.validateDestination",
+    "sdk.discover",
+    "sdk.install",
+    "sdk.browse",
+    "project.create",
+    "project.openRecent",
+    "project.openPicker",
+  ]) assert.equal(source.includes(operation), true, operation);
+});
+
 test("desktop manifest grants one local capability and no ambient plugins", async () => {
   const [configText, capabilityText, permission, manifest, backend, host] = await Promise.all([
     readFile(new URL("src-tauri/tauri.conf.json", sourceRoot), "utf8"),
@@ -87,6 +110,7 @@ test("desktop manifest grants one local capability and no ambient plugins", asyn
   assert.equal("windows" in capability, false);
   assert.deepEqual(capability.permissions, ["allow-loomlight-core"]);
   assert.match(permission, /commands\.allow = \["core_request"\]/);
+  assert.match(host, /#\[tauri::command\(async\)\]/);
   assert.match(host, /window\.label\(\) != "main"/);
   assert.doesNotMatch(`${manifest}\n${capabilityText}`, /tauri-plugin|shell:|fs:|http:|opener:|process:/);
   for (const operation of CORE_OPERATIONS) assert.equal(backend.includes(`"${operation}"`), true);

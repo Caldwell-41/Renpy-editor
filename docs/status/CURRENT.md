@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
+**Phase:** Phase 1C corrective lifecycle/SDK remediation in progress; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -106,8 +106,10 @@
 
 ## Next action
 
-Stop. Phase 1D Characters/Assets/Variables remains separately approval-gated and has
-not started. Await a new explicit instruction before beginning it or any later work.
+Complete the bounded Phase 1C corrective target gate for stage/SDK identity, sanitized
+child processes, async desktop dispatch, stable SDK registration, and packaged lifecycle
+UI smoke. Do not begin Phase 1D until Windows x64 and macOS ARM64 pass and this correction
+is explicitly re-closed.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

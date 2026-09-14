@@ -51,3 +51,7 @@ The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corre
 and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md) remain
 historical evidence. Completed task briefs move to [`tasks/archive`](tasks/archive/);
 they are not canonical product documentation.
+
+## Active corrective task
+
+- [Phase 1C corrective lifecycle and SDK remediation](tasks/active/phase-1c-corrective-lifecycle.md)

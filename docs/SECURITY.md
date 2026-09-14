@@ -80,8 +80,13 @@ use opaque IDs. The core retains approved parent directory identity, rejects uns
 names/symlinks/reparse changes and existing destinations, stages privately, and uses a
 platform no-replace promotion. SDK networking is limited to the explicit supported
 8.5.3 install operation and pinned official URL/checksum. Subprocesses are exact
-allowlisted argument arrays with bounded output/time and process-tree cancellation.
-Git authority is only direct `git init` in the owned stage. No general Tauri filesystem,
+allowlisted argument arrays with bounded output/time, process-tree cancellation, and an
+explicit minimal environment. Git additionally clears ambient `GIT_*` redirects and
+configuration and uses a private empty template. Approved SDK records are revalidated
+against filesystem identity and launcher/template fingerprints; app-managed reuse also
+requires checksum-derived provenance. The private project stage retains filesystem
+identity through finalisation and fails closed on same-name substitution. Git authority
+is only direct `git init` in the owned stage. No general Tauri filesystem,
 shell, HTTP, opener, or process plugin is granted. The
 packaged target probe exercises main-window success, unauthorised-window rejection,
 unknown command rejection, malformed payload rejection, ambient plugin denial, Node
