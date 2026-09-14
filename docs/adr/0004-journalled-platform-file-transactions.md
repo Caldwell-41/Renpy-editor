@@ -38,6 +38,31 @@ filesystems fail closed.
 The renderer receives no new authority in Phase 1B. Trusted project registration
 remains an internal/test seam until Phase 1C.
 
+### Corrective amendment — handle-anchored namespace operations
+
+The initial implementation revalidated parent identity but still created sibling
+artifacts and invoked platform replacement through later pathname resolution. That
+left a material substitution interval, so its original Gate E closure is superseded.
+
+Transaction stage, accepted, and displaced-backup entries now live inside the
+transaction's recovery directory and journal version 2 persists only their relative
+names. The core opens and retains the approved root plus every traversed directory
+component. macOS/Unix creation, inspection, journal rename/cleanup, and exchange are
+descriptor-relative and no-follow. macOS swaps the recovery stage entry with the
+target entry using `renameatx_np(RENAME_SWAP)` across the two anchored directory
+descriptors, then renames the displaced entry inside recovery.
+
+Windows retains each directory handle without `FILE_SHARE_DELETE`, so a process cannot
+rename/delete/replace the validated directory chain while the pathname-only
+`ReplaceFileW` call runs. Handles use open-reparse-point semantics and the chain is
+revalidated at the platform boundary. A final-window regular-file writer remains
+supported and preserved as the backup rather than being excluded by a file lock.
+
+The amendment also defines a proved-empty `prepared` transaction as explicitly safe
+to abandon and makes pre-mutation `rejected` terminal/non-blocking. Accepted/staged,
+conflict, corrupt, and ambiguous states remain blocking. Exact state and residual
+platform limits are canonical in [TRANSACTIONS.md](../TRANSACTIONS.md).
+
 ## Consequences
 
 - Accepted Loomlight bytes and displaced external bytes survive detected races.
@@ -47,6 +72,8 @@ remains an internal/test seam until Phase 1C.
 - Explicit save/flush and revision-guarded undo/redo use the same boundary.
 - Successful transactions retain before/after evidence; pruning and recovery UX are
   later work.
+- Transaction evidence no longer appears beside an authoring target or stores absolute
+  project paths in its journal.
 - Filesystems lacking required identity/exchange/flush behavior may be refused.
 
 ## Alternatives rejected
@@ -64,9 +91,10 @@ remains an internal/test seam until Phase 1C.
 
 The production core suite injects external writes before and after exchange, stale
 hashes, exact-byte mismatches, same-content identity replacement, deletion/recreation,
-root/parent/symlink or reparse substitution, partial journal slots, cleanup, explicit
-flush, history boundaries, two-path commits, and actual child-process termination at
-every persistent transition. Target-platform CI evidence is recorded in the archived
-Phase 1B task when the gate closes.
+root/parent/recovery-directory/target symlink or reparse substitution, partial journal
+slots, safe `prepared` abandonment, terminal rejection, cleanup, explicit flush,
+history boundaries, two-path commits, and actual child-process termination at every
+persistent transition. Target-platform corrective evidence is recorded in the Phase
+1B remediation task when the gate re-closes.
 
 See [the transaction contract](../TRANSACTIONS.md).

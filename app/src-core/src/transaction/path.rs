@@ -1,11 +1,8 @@
-use super::{
-    identity::{identity_for_path, FileIdentity},
-    ErrorCode,
-};
+use super::{identity::FileIdentity, platform::DirectoryAnchor, ErrorCode};
 use serde::{Deserialize, Serialize};
 use std::{
-    ffi::OsStr,
-    fs::{self, Metadata},
+    ffi::{OsStr, OsString},
+    fs::Metadata,
     path::{Component, Path, PathBuf},
 };
 
@@ -103,56 +100,39 @@ pub fn is_link_or_reparse(metadata: &Metadata) -> bool {
 
 #[derive(Clone, Debug)]
 pub struct ResolvedTarget {
-    pub path: PathBuf,
-    pub parent: PathBuf,
     pub parent_identity: FileIdentity,
+    pub parent_anchor: DirectoryAnchor,
+    pub name: OsString,
 }
 
 pub fn resolve_target(
-    root: &Path,
+    root: &DirectoryAnchor,
     relative: &RelativePath,
     must_exist: bool,
 ) -> Result<ResolvedTarget, ErrorCode> {
-    let mut current = root.to_path_buf();
+    root.validate_chain()?;
+    let mut current = root.clone();
     let components: Vec<_> = relative.as_path().components().collect();
     for component in components.iter().take(components.len().saturating_sub(1)) {
         let Component::Normal(name) = component else {
             return Err(ErrorCode::UnsafePath);
         };
-        current.push(name);
-        let metadata = fs::symlink_metadata(&current).map_err(|_| ErrorCode::UnsafePath)?;
-        if !metadata.is_dir() || is_link_or_reparse(&metadata) {
-            return Err(ErrorCode::UnsafePath);
-        }
-    }
-    let parent = fs::canonicalize(&current).map_err(|_| ErrorCode::UnsafePath)?;
-    if !parent.starts_with(root) {
-        return Err(ErrorCode::UnsafePath);
+        current = current.open_child(name, false)?;
     }
     let name = relative
         .as_path()
         .file_name()
         .filter(|name| !name.is_empty())
-        .ok_or(ErrorCode::UnsafePath)?;
-    let target = parent.join(name);
-    if let Ok(metadata) = fs::symlink_metadata(&target) {
-        if is_link_or_reparse(&metadata) || !metadata.is_file() {
-            return Err(ErrorCode::UnsafePath);
-        }
-    } else if must_exist {
-        return Err(ErrorCode::IoFailure);
-    }
+        .ok_or(ErrorCode::UnsafePath)?
+        .to_os_string();
     if must_exist {
-        let canonical = fs::canonicalize(&target).map_err(|_| ErrorCode::IoFailure)?;
-        if !canonical.starts_with(root) || canonical != target {
-            return Err(ErrorCode::UnsafePath);
-        }
+        current.open_file(&name)?;
     }
-    let parent_identity = identity_for_path(&parent).map_err(|_| ErrorCode::IoFailure)?;
+    let parent_identity = current.identity().clone();
     Ok(ResolvedTarget {
-        path: target,
-        parent,
         parent_identity,
+        parent_anchor: current,
+        name,
     })
 }
 
@@ -165,18 +145,20 @@ pub struct ArtifactPaths {
     pub parent_identity: FileIdentity,
 }
 
-pub fn artifact_paths(target: &Path, txid: &str, index: usize) -> Result<ArtifactPaths, ErrorCode> {
-    let parent = target.parent().ok_or(ErrorCode::UnsafePath)?;
-    let parent_identity = identity_for_path(parent).map_err(|_| ErrorCode::IoFailure)?;
-    let filename = target
-        .file_name()
-        .and_then(OsStr::to_str)
-        .ok_or(ErrorCode::UnsafePath)?;
+pub fn artifact_paths(
+    directory: &DirectoryAnchor,
+    target_name: &OsStr,
+    target_parent_identity: &FileIdentity,
+    txid: &str,
+    index: usize,
+) -> Result<ArtifactPaths, ErrorCode> {
+    directory.validate_chain()?;
+    let filename = target_name.to_str().ok_or(ErrorCode::UnsafePath)?;
     let prefix = format!(".loomlight-{txid}-{index}-{filename}");
     Ok(ArtifactPaths {
-        stage: parent.join(format!("{prefix}.stage")),
-        accepted: parent.join(format!("{prefix}.accepted")),
-        backup: parent.join(format!("{prefix}.backup")),
-        parent_identity,
+        stage: PathBuf::from(format!("{prefix}.stage")),
+        accepted: PathBuf::from(format!("{prefix}.accepted")),
+        backup: PathBuf::from(format!("{prefix}.backup")),
+        parent_identity: target_parent_identity.clone(),
     })
 }

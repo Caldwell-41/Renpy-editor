@@ -1,17 +1,19 @@
 use super::{
     path::{self, ArtifactPaths, RelativePath},
+    platform::{flush_open_file, DirectoryAnchor},
     ErrorCode, MutationKind, RecoveryItem, RecoveryMutationState, RecoveryReport, Revision,
     TransactionIntent,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-    fs::{self, File, OpenOptions},
+    ffi::OsStr,
+    fs,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
 
-const JOURNAL_VERSION: u32 = 1;
+const JOURNAL_VERSION: u32 = 2;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "name")]
@@ -37,6 +39,8 @@ pub struct JournalMutation {
     pub kind: MutationKind,
     pub base: Revision,
     pub proposed_sha256: String,
+    /// Names relative to this transaction's anchored recovery directory. Version 2
+    /// deliberately never persists absolute artifact paths.
     pub stage: PathBuf,
     pub accepted: PathBuf,
     pub backup: PathBuf,
@@ -100,6 +104,7 @@ impl Journal {
             mutations: Vec::new(),
         }
     }
+
     pub fn current_mutation(&self) -> usize {
         match self.state {
             JournalState::Staged { mutation }
@@ -120,49 +125,66 @@ struct Envelope {
 }
 
 pub struct JournalStore {
-    directory: PathBuf,
+    directory: DirectoryAnchor,
 }
 
 impl JournalStore {
-    pub fn create(root: &Path, txid: &str) -> Result<Self, ErrorCode> {
-        let metadata = root.join(".renpy-editor");
-        ensure_safe_directory(&metadata)?;
-        let recovery = metadata.join("recovery");
-        ensure_safe_directory(&recovery)?;
-        let directory = recovery.join(txid);
-        fs::create_dir(&directory).map_err(|_| ErrorCode::IoFailure)?;
-        super::platform::flush_directory(&recovery)?;
+    pub fn create(root: &DirectoryAnchor, txid: &str) -> Result<Self, ErrorCode> {
+        let metadata = root.open_child(OsStr::new(".renpy-editor"), true)?;
+        let recovery = metadata.open_child(OsStr::new("recovery"), true)?;
+        let directory = recovery.open_child(OsStr::new(txid), true)?;
+        recovery.flush()?;
         Ok(Self { directory })
     }
 
-    pub fn open(root: &Path, txid: &str) -> Result<Self, ErrorCode> {
-        let directory = root.join(".renpy-editor").join("recovery").join(txid);
-        let metadata = fs::symlink_metadata(&directory).map_err(|_| ErrorCode::RecoveryRequired)?;
-        if !metadata.is_dir() || path::is_link_or_reparse(&metadata) {
-            return Err(ErrorCode::UnsafePath);
-        }
+    pub fn open(root: &DirectoryAnchor, txid: &str) -> Result<Self, ErrorCode> {
+        let metadata = root.open_child(OsStr::new(".renpy-editor"), false)?;
+        let recovery = metadata.open_child(OsStr::new("recovery"), false)?;
+        let directory = recovery.open_child(OsStr::new(txid), false)?;
         Ok(Self { directory })
+    }
+
+    pub fn directory(&self) -> &DirectoryAnchor {
+        &self.directory
+    }
+
+    pub fn open_artifact(&self, name: &Path) -> Result<fs::File, ErrorCode> {
+        self.directory.open_file(file_name(name)?)
     }
 
     pub fn load(&self) -> Result<Journal, ErrorCode> {
         ["journal.0.json", "journal.1.json"]
             .iter()
-            .filter_map(|name| read_valid(&self.directory.join(name)).ok())
+            .filter_map(|name| read_valid(&self.directory, OsStr::new(name)).ok())
             .max_by_key(|journal| journal.sequence)
             .ok_or(ErrorCode::RecoveryRequired)
     }
 
     pub fn cleanup_partial_slots(&self) -> Result<(), ErrorCode> {
         for name in ["journal.0.tmp", "journal.1.tmp"] {
-            let path = self.directory.join(name);
-            if path.exists() {
-                fs::remove_file(path).map_err(|_| ErrorCode::RecoveryRequired)?;
-            }
+            self.directory.remove_file_if_exists(OsStr::new(name))?;
         }
-        super::platform::flush_directory(&self.directory)
+        self.directory.flush()
+    }
+
+    pub fn prepared_is_safe_to_abandon(&self, journal: &Journal) -> bool {
+        matches!(journal.state, JournalState::Prepared)
+            && journal.mutations.iter().all(|mutation| {
+                !mutation.staged
+                    && !mutation.commit_intent
+                    && !mutation.exchanged
+                    && !mutation.verified
+                    && [&mutation.stage, &mutation.accepted, &mutation.backup]
+                        .iter()
+                        .all(|name| {
+                            file_name(name).and_then(|name| self.directory.entry_absent(name))
+                                == Ok(true)
+                        })
+            })
     }
 
     pub fn persist(&self, journal: &mut Journal, state: JournalState) -> Result<(), ErrorCode> {
+        self.directory.validate_chain()?;
         journal.sequence += 1;
         journal.state = state;
         let journal_bytes = serde_json::to_vec(journal).map_err(|_| ErrorCode::IoFailure)?;
@@ -172,68 +194,66 @@ impl JournalStore {
         };
         let bytes = serde_json::to_vec_pretty(&envelope).map_err(|_| ErrorCode::IoFailure)?;
         let slot = journal.sequence % 2;
-        let temporary = self.directory.join(format!("journal.{slot}.tmp"));
-        let final_path = self.directory.join(format!("journal.{slot}.json"));
-        if temporary.exists() {
-            fs::remove_file(&temporary).map_err(|_| ErrorCode::RecoveryRequired)?;
-        }
-        let mut file = OpenOptions::new()
-            .create_new(true)
-            .write(true)
-            .open(&temporary)
-            .map_err(|_| ErrorCode::IoFailure)?;
+        let temporary = format!("journal.{slot}.tmp");
+        let final_name = format!("journal.{slot}.json");
+        self.directory
+            .remove_file_if_exists(OsStr::new(&temporary))?;
+        let mut file = self.directory.create_new_file(OsStr::new(&temporary))?;
         file.write_all(&bytes).map_err(|_| ErrorCode::IoFailure)?;
+        flush_open_file(&file)?;
         drop(file);
-        super::platform::flush_file(&temporary)?;
         #[cfg(windows)]
-        if final_path.exists() {
-            fs::remove_file(&final_path).map_err(|_| ErrorCode::RecoveryRequired)?;
-        }
-        fs::rename(&temporary, &final_path).map_err(|_| ErrorCode::RecoveryRequired)?;
-        super::platform::flush_directory(&self.directory)
+        self.directory
+            .remove_file_if_exists(OsStr::new(&final_name))?;
+        self.directory
+            .rename_within(OsStr::new(&temporary), OsStr::new(&final_name))?;
+        self.directory.flush()
     }
 
-    pub fn scan(root: &Path) -> Result<RecoveryReport, ErrorCode> {
-        let recovery = root.join(".renpy-editor").join("recovery");
-        if !recovery.exists() {
-            return Ok(RecoveryReport::default());
-        }
-        let metadata = fs::symlink_metadata(&recovery).map_err(|_| ErrorCode::RecoveryRequired)?;
-        if !metadata.is_dir() || path::is_link_or_reparse(&metadata) {
-            return Err(ErrorCode::UnsafePath);
-        }
-        let mut items = Vec::new();
-        for entry in fs::read_dir(&recovery).map_err(|_| ErrorCode::RecoveryRequired)? {
-            let entry = entry.map_err(|_| ErrorCode::RecoveryRequired)?;
-            let metadata = entry.file_type().map_err(|_| ErrorCode::RecoveryRequired)?;
-            if !metadata.is_dir()
-                || path::is_link_or_reparse(
-                    &fs::symlink_metadata(entry.path()).map_err(|_| ErrorCode::RecoveryRequired)?,
-                )
-            {
-                continue;
+    pub fn scan(root: &DirectoryAnchor) -> Result<RecoveryReport, ErrorCode> {
+        let metadata = match root.open_child(OsStr::new(".renpy-editor"), false) {
+            Ok(value) => value,
+            Err(_) if root.entry_absent(OsStr::new(".renpy-editor")) == Ok(true) => {
+                return Ok(RecoveryReport::default())
             }
+            Err(code) => return Err(code),
+        };
+        let recovery = match metadata.open_child(OsStr::new("recovery"), false) {
+            Ok(value) => value,
+            Err(_) if metadata.entry_absent(OsStr::new("recovery")) == Ok(true) => {
+                return Ok(RecoveryReport::default())
+            }
+            Err(code) => return Err(code),
+        };
+        let mut items = Vec::new();
+        for entry in fs::read_dir(recovery.path()).map_err(|_| ErrorCode::RecoveryRequired)? {
+            let entry = entry.map_err(|_| ErrorCode::RecoveryRequired)?;
             let txid = entry.file_name().to_string_lossy().into_owned();
-            let candidates = [
-                entry.path().join("journal.0.json"),
-                entry.path().join("journal.1.json"),
-            ];
-            let best = candidates
-                .iter()
-                .filter_map(|path| read_valid(path).ok())
-                .max_by_key(|journal| journal.sequence);
-            match best {
-                Some(journal) => items.push(RecoveryItem {
+            let directory = match recovery.open_child(&entry.file_name(), false) {
+                Ok(value) => value,
+                Err(_) => {
+                    items.push(RecoveryItem {
+                        transaction_id: txid,
+                        code: Some(ErrorCode::RecoveryRequired),
+                        state: JournalState::RecoveryRequired,
+                        mutations: Vec::new(),
+                    });
+                    continue;
+                }
+            };
+            let store = Self { directory };
+            match store.load() {
+                Ok(journal) => items.push(RecoveryItem {
                     transaction_id: journal.transaction_id.clone(),
                     code: code_for(&journal.state),
                     mutations: journal
                         .mutations
                         .iter()
-                        .map(|mutation| inspect_mutation(root, mutation, &journal.state))
+                        .map(|mutation| inspect_mutation(root, &store, mutation, &journal.state))
                         .collect(),
                     state: journal.state,
                 }),
-                None => items.push(RecoveryItem {
+                Err(_) => items.push(RecoveryItem {
                     transaction_id: txid,
                     code: Some(ErrorCode::RecoveryRequired),
                     state: JournalState::RecoveryRequired,
@@ -246,25 +266,18 @@ impl JournalStore {
     }
 }
 
-fn ensure_safe_directory(path: &Path) -> Result<(), ErrorCode> {
-    match fs::symlink_metadata(path) {
-        Ok(metadata) if metadata.is_dir() && !path::is_link_or_reparse(&metadata) => Ok(()),
-        Ok(_) => Err(ErrorCode::UnsafePath),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            fs::create_dir(path).map_err(|_| ErrorCode::IoFailure)?;
-            if let Some(parent) = path.parent() {
-                super::platform::flush_directory(parent)?;
-            }
-            Ok(())
-        }
-        Err(_) => Err(ErrorCode::IoFailure),
+fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
+    if path.components().count() != 1 {
+        return Err(ErrorCode::UnsafePath);
     }
+    path.file_name().ok_or(ErrorCode::UnsafePath)
 }
 
-fn read_valid(path: &Path) -> Result<Journal, ErrorCode> {
+fn read_valid(directory: &DirectoryAnchor, name: &OsStr) -> Result<Journal, ErrorCode> {
     let mut bytes = Vec::new();
-    File::open(path)
-        .and_then(|mut file| file.read_to_end(&mut bytes))
+    directory
+        .open_file(name)?
+        .read_to_end(&mut bytes)
         .map_err(|_| ErrorCode::RecoveryRequired)?;
     let envelope: Envelope =
         serde_json::from_slice(&bytes).map_err(|_| ErrorCode::RecoveryRequired)?;
@@ -280,24 +293,26 @@ fn read_valid(path: &Path) -> Result<Journal, ErrorCode> {
 
 fn code_for(state: &JournalState) -> Option<ErrorCode> {
     match state {
-        JournalState::Durable | JournalState::Cleaned => None,
+        JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned => None,
         JournalState::Conflict { .. } => Some(ErrorCode::Conflict),
-        JournalState::Rejected { code } => Some(*code),
         _ => Some(ErrorCode::RecoveryRequired),
     }
 }
 
 fn inspect_mutation(
-    root: &Path,
+    root: &DirectoryAnchor,
+    store: &JournalStore,
     mutation: &JournalMutation,
     state: &JournalState,
 ) -> RecoveryMutationState {
     let target = path::resolve_target(root, &mutation.path, true)
         .ok()
-        .and_then(|resolved| super::read_revision(&resolved.path).ok());
-    let accepted = safe_revision(root, &mutation.accepted);
-    let stage = safe_revision(root, &mutation.stage);
-    let backup = safe_revision(root, &mutation.backup);
+        .and_then(|resolved| {
+            super::read_revision_file(resolved.parent_anchor.open_file(&resolved.name).ok()?).ok()
+        });
+    let accepted = artifact_revision(store, &mutation.accepted);
+    let stage = artifact_revision(store, &mutation.stage);
+    let backup = artifact_revision(store, &mutation.backup);
     if matches!(state, JournalState::Durable | JournalState::Cleaned)
         && target
             .as_ref()
@@ -331,21 +346,13 @@ fn inspect_mutation(
     {
         return RecoveryMutationState::ExternalRevisionWithAcceptedCopy;
     }
-    if !mutation.staged && stage.is_none() {
+    if !mutation.staged && stage.is_none() && accepted.is_none() && backup.is_none() {
         RecoveryMutationState::PreparedWithoutStage
     } else {
         RecoveryMutationState::Ambiguous
     }
 }
 
-fn safe_revision(root: &Path, candidate: &Path) -> Option<Revision> {
-    let parent = fs::canonicalize(candidate.parent()?).ok()?;
-    if !parent.starts_with(root) {
-        return None;
-    }
-    let metadata = fs::symlink_metadata(candidate).ok()?;
-    if !metadata.is_file() || path::is_link_or_reparse(&metadata) {
-        return None;
-    }
-    super::read_revision(candidate).ok()
+fn artifact_revision(store: &JournalStore, name: &Path) -> Option<Revision> {
+    super::read_revision_file(store.open_artifact(name).ok()?).ok()
 }

@@ -27,7 +27,7 @@ does not stop Python from changing files, so it is not an application sandbox.
 | Boundary/threat | Example | Required mitigation |
 | --- | --- | --- |
 | UI → privileged core | Injected/untrusted content invokes filesystem or shell | Typed allowlisted commands, schema validation, deny-by-default capabilities, sender/origin checks, CSP |
-| Project → filesystem | `../`, absolute paths, symlink swaps, case collisions | Canonicalize, enforce allowed roots, refuse unsafe symlinks/reparse points, open safely, recheck before commit |
+| Project → filesystem | `../`, absolute paths, parent/target substitution, symlink/reparse swaps, case collisions | Canonicalize and retain an approved-root/component handle chain; use no-follow descriptor-relative I/O on macOS; pin Windows directory handles without delete sharing; keep artifacts in anchored recovery; fail closed on identity/path change |
 | Archive → SDK root | Zip-slip, symlink/hardlink escape, overwrite, decompression bomb | Validate every entry/type/size/path before extraction; stage privately; atomic promote; no overwrite |
 | Core → child process | Script/filename becomes shell syntax or environment leak | Direct executable plus argument array, minimal environment, bounded output/time, no shell strings |
 | Project → Ren'Py runtime | Embedded Python executes with user privileges | Inspection never runs; explicit trust/run boundary; redacted preview; future sandbox research not implied protection |
@@ -127,13 +127,15 @@ diagnostic record.
   on Windows x64 and macOS ARM64.
 - **Complete:** The SDK installer rejects traversal, symlink, collision, checksum,
   partial-download, limits, and unsafe overwrite/promotion cases.
-- **Phase 1B production implementation:** Transactions are serialized and validate
-  approved root, path components, parent/target identity, exact expected bytes, and
-  SHA-256. Proposed bytes are separately retained. macOS exchange and Windows
-  replacement preserve the displaced target, which is checked after the operation;
-  final-window writers therefore become explicit conflicts. Alternating journals and
-  retained artifacts bound partial commits. Windows directory-entry power-loss
-  durability is still not claimed. See [TRANSACTIONS.md](TRANSACTIONS.md).
+- **Phase 1B corrective implementation pending target evidence:** Transactions retain
+  approved root/component handles and validate parent/target identity, exact bytes,
+  and SHA-256. Transaction evidence exists only under anchored recovery. macOS uses
+  no-follow descriptor-relative creation/inspection/rename/exchange; Windows pins
+  directory components against rename/delete while `ReplaceFileW` preserves the
+  displaced target. Prepared safe-abandon requires proved absence; terminal rejected
+  journals do not block flush. Windows directory-entry power-loss durability is still
+  not claimed. Gate E remains reopened until both target suites pass. See
+  [TRANSACTIONS.md](TRANSACTIONS.md).
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.
 - **Complete:** This threat model reflects the selected Tauri capability boundary and

@@ -1,13 +1,15 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0, Phase 1A, and Phase 1B complete; Phase 1C not approved<br>
+**Phase:** Phase 1B corrective remediation active; Gate E reopened; Phase 1C not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and bounded
-  Phase 1B transaction/recovery foundation are complete. No later milestone is
+- The Phase 0 corrective checkpoint and bounded Phase 1A production scaffold are
+  complete. Phase 1B was previously closed, but Gate E is reopened while the approved
+  [corrective transaction/recovery task](../tasks/active/phase-1b-corrective-transaction-recovery.md)
+  resolves material pathname-race and terminal-state findings. No later milestone is
   approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
@@ -41,13 +43,17 @@
   [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
   The bounded [Phase 1B transaction/recovery brief](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
   is complete.
-- Phase 1B production code implements a core-only multi-mutation transaction set,
-  retained accepted/displaced bytes, alternating checksummed journals, deterministic
-  recovery inspection, exact revision/path/root checks, revision-guarded history, and
-  macOS/Windows platform adapters. [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
-  passed the complete Windows x64 and macOS ARM64 gate at `85690bd4`; quality run
-  34797222651 also passed. See [TRANSACTIONS.md](../TRANSACTIONS.md), ADR 0004, and
-  the archived task for exact evidence and limitations.
+- The corrective implementation now keeps transaction artifacts in anchored recovery,
+  carries validated directory-handle chains through sensitive operations, uses no-
+  follow descriptor-relative macOS/Unix I/O, and pins Windows directory namespaces
+  against rename/delete during `ReplaceFileW`. It adds proved-empty `Prepared`
+  abandonment and terminal/non-blocking pre-mutation `Rejected` semantics. Local core
+  tests, strict Clippy, and Windows/macOS cross-compilation pass; actual target runtime
+  evidence is still pending, so these statements are not yet Gate E closure evidence.
+- [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
+  at `85690bd4` remains historical Phase 1B evidence but is superseded for closure by
+  this correction. See [TRANSACTIONS.md](../TRANSACTIONS.md), amended ADR 0004, and the
+  active corrective task.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -79,15 +85,14 @@
   with simple assignment; basic placement/transitions/music/SFX use extensible models.
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
-- Production file Gate E is closed by Phase 1B. Authoring remains absent and blocked
-  until separately approved milestones implement parser/source and product workflows
-  through this transaction boundary.
+- Production file Gate E is reopened pending corrective Windows/macOS runtime evidence.
+  Authoring remains absent and blocked.
 
 ## Next action
 
-Stop. Phase 1C project lifecycle/SDK work is the next planned milestone but is not
-approved. Do not implement New Project, project generation/import, SDK workflow, or
-any authoring surface without a new explicit instruction.
+Complete only the active Phase 1B corrective validation/evidence and closure. Phase 1C
+project lifecycle/SDK work is not approved. Do not implement New Project, project
+generation/import, SDK workflow, or any authoring surface.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

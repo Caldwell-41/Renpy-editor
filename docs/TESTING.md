@@ -109,7 +109,7 @@ injected packaged-WebView denial smoke, artifact privacy scan, and dependency/li
 inventory. Lightweight evidence artifacts 10328234722 and 10328548641 were retained;
 full packages were intentionally not uploaded on this routine push.
 
-Phase 1B closed on
+The original Phase 1B closure ran on
 [run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
 at `85690bd4ebde95f9ee707175e54336bfd83af0f8`. Windows x64 job 103832559663
 and macOS ARM64 job 103832559907 each passed the same 24-test transaction suite (plus
@@ -128,6 +128,16 @@ Run 34796369255 at `cc1ea6b8` is retained failed evidence. Both targets stopped 
 core step because the repository-write transport had truncated `Cargo.lock`; the
 complete locally validated lockfile was restored in `ecc369a7` before the passing
 matrix. This was a diagnosed committed-input defect, not a flaky target result.
+
+A subsequent corrective review reopened Gate E: the successful historical suite did
+not close pathname substitution after parent validation, and did not prove safe
+`Prepared` abandonment or non-blocking terminal `Rejected` handling. The active
+corrective suite relocates evidence to anchored recovery and exercises parent
+replacement after preparation and at the platform boundary, target symlink/reparse
+substitution, recovery-directory redirection, same-path delete/recreate, no out-of-root
+writes, actual killed-process `Prepared` finalisation, a later commit, terminal
+rejection, and continued conflict/recovery blocking. Cross-compilation is not target
+runtime evidence; new Windows x64 and macOS ARM64 execution is pending.
 
 ## Planned layers
 

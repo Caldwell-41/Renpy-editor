@@ -112,12 +112,14 @@ External filesystem revisions are safety boundaries: undo/redo must not silently
 replace a newer external revision. Conflicts should block writes to the affected
 file/scene while allowing unrelated scenes to remain editable when safe.
 
-Phase 1B implements Gate E as a multi-mutation journalled recovery protocol. macOS
-uses same-directory rename exchange; Windows uses replacement with a same-volume
-backup. Both retain the displaced target and verify it after the namespace operation,
-so a writer in the final check-to-replace window becomes a preserved conflict instead
-of silent loss. The sequence is not described as portable compare-and-swap or
-multi-file atomicity. Exact state, durability, and filesystem limits are in
+Phase 1B implements Gate E as a multi-mutation journalled recovery protocol. Recovery
+artifacts live only in an anchored transaction directory. macOS uses descriptor-
+relative rename exchange between that directory and an anchored target parent;
+Windows pins the validated directory chain against rename/delete while performing
+replacement with a same-volume recovery backup. Both retain the displaced target and
+verify it after the namespace operation, so a final-window writer becomes a preserved
+conflict instead of silent loss. The sequence is not described as portable compare-
+and-swap or multi-file atomicity. Exact state, durability, and filesystem limits are in
 [TRANSACTIONS.md](TRANSACTIONS.md).
 
 ## Process and trust boundaries

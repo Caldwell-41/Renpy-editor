@@ -3,6 +3,11 @@
 **Status:** Complete 2026-09-14<br>
 **Scope:** Production transaction, file coordination, and recovery boundary only
 
+> **Superseded Gate E closure:** A later review found parent/path substitution and
+> terminal-state gaps. The original implementation/evidence remains historical, but
+> Gate E is reopened pending the
+> [active corrective remediation](../active/phase-1b-corrective-transaction-recovery.md).
+
 ## Entry condition
 
 Phase 1A is complete. The user explicitly approved this bounded Phase 1B goal on

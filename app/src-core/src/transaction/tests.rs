@@ -66,12 +66,31 @@ fn outcome_code(outcome: &CommitOutcome) -> Option<ErrorCode> {
 }
 
 fn artifact(root: &Path, suffix: &str) -> PathBuf {
-    fs::read_dir(root.join("game"))
+    fs::read_dir(root.join(".renpy-editor/recovery"))
         .unwrap()
+        .filter_map(Result::ok)
+        .flat_map(|entry| fs::read_dir(entry.path()).into_iter().flatten())
         .filter_map(Result::ok)
         .find(|entry| entry.file_name().to_string_lossy().ends_with(suffix))
         .expect("owned artifact exists")
         .path()
+}
+
+fn transaction_directory(root: &Path) -> PathBuf {
+    fs::read_dir(root.join(".renpy-editor/recovery"))
+        .unwrap()
+        .filter_map(Result::ok)
+        .find(|entry| entry.file_type().is_ok_and(|kind| kind.is_dir()))
+        .expect("transaction directory exists")
+        .path()
+}
+
+fn contains_artifact(directory: &Path, suffix: &str) -> bool {
+    fs::read_dir(directory).is_ok_and(|entries| {
+        entries
+            .filter_map(Result::ok)
+            .any(|entry| entry.file_name().to_string_lossy().ends_with(suffix))
+    })
 }
 
 #[test]
@@ -281,6 +300,262 @@ fn changed_parent_identity_fails_closed() {
     );
 }
 
+#[test]
+fn parent_delete_recreate_after_prepared_keeps_artifacts_inside_root() {
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::Prepared {
+            fs::rename(root.join("game"), root.join("old-game")).unwrap();
+            fs::create_dir(root.join("game")).unwrap();
+            fs::write(root.join("game/one.rpy"), b"substitute\n").unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert_eq!(
+        outcome_code(&outcome),
+        Some(ErrorCode::ParentIdentityChanged)
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"substitute\n"
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("old-game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+    assert!(!contains_artifact(&fixture.root.join("game"), ".stage"));
+    assert!(!contains_artifact(&fixture.root.join("old-game"), ".stage"));
+    assert!(contains_artifact(
+        &transaction_directory(&fixture.root),
+        ".accepted"
+    ));
+}
+
+#[cfg(unix)]
+#[test]
+fn parent_replaced_after_prepared_cannot_redirect_artifact_creation() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    let moved = outside.path().join("moved-approved-parent");
+    let redirect = outside.path().join("redirect");
+    fs::create_dir(&redirect).unwrap();
+    fs::write(redirect.join("unrelated.rpy"), b"outside unchanged\n").unwrap();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::Prepared {
+            fs::rename(root.join("game"), &moved).unwrap();
+            symlink(&redirect, root.join("game")).unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert_eq!(outcome_code(&outcome), Some(ErrorCode::UnsafePath));
+    assert_eq!(
+        fs::read(redirect.join("unrelated.rpy")).unwrap(),
+        b"outside unchanged\n"
+    );
+    assert!(!contains_artifact(&redirect, ".stage"));
+    assert!(!contains_artifact(&redirect, ".accepted"));
+    assert!(contains_artifact(
+        &transaction_directory(&fixture.root),
+        ".stage"
+    ));
+    assert!(contains_artifact(
+        &transaction_directory(&fixture.root),
+        ".accepted"
+    ));
+}
+
+#[cfg(unix)]
+#[test]
+fn recovery_directory_substitution_cannot_redirect_artifact_creation() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    let moved = outside.path().join("moved-transaction");
+    let redirect = outside.path().join("redirect");
+    fs::create_dir(&redirect).unwrap();
+    fs::write(redirect.join("unrelated"), b"outside unchanged\n").unwrap();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::Prepared {
+            let directory = transaction_directory(root);
+            fs::rename(&directory, &moved).unwrap();
+            symlink(&redirect, directory).unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert_eq!(
+        fs::read(redirect.join("unrelated")).unwrap(),
+        b"outside unchanged\n"
+    );
+    assert!(!contains_artifact(&redirect, ".stage"));
+    assert!(!contains_artifact(&redirect, ".accepted"));
+    assert!(!contains_artifact(&moved, ".stage"));
+    assert!(!contains_artifact(&moved, ".accepted"));
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_recovery_directory_is_pinned_before_artifact_creation() {
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    let moved = outside.path().join("moved-transaction");
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut attempted = false;
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::Prepared {
+            attempted = true;
+            assert!(fs::rename(transaction_directory(root), &moved).is_err());
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    drop(hook);
+    assert!(attempted);
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+    assert!(!moved.exists());
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"accepted\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn parent_replaced_at_exchange_boundary_is_rejected_before_exchange() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    let moved = outside.path().join("moved-approved-parent");
+    let redirect = outside.path().join("redirect");
+    fs::create_dir(&redirect).unwrap();
+    fs::write(redirect.join("one.rpy"), b"outside unchanged\n").unwrap();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::BeforeExchange(0) {
+            fs::rename(root.join("game"), &moved).unwrap();
+            symlink(&redirect, root.join("game")).unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert_eq!(
+        fs::read(moved.join("one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+    assert_eq!(
+        fs::read(redirect.join("one.rpy")).unwrap(),
+        b"outside unchanged\n"
+    );
+    assert_eq!(
+        fs::read(artifact(&fixture.root, ".accepted")).unwrap(),
+        b"accepted\n"
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_parent_namespace_is_pinned_at_exchange_boundary() {
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    let moved = outside.path().join("moved-approved-parent");
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut attempted = false;
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::BeforeExchange(0) {
+            attempted = true;
+            assert!(fs::rename(root.join("game"), &moved).is_err());
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(attempted);
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"accepted\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn target_symlink_substitution_at_exchange_never_changes_external_bytes() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::NamedTempFile::new().unwrap();
+    fs::write(outside.path(), b"outside unchanged\n").unwrap();
+    let outside_path = outside.path().to_path_buf();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::BeforeExchange(0) {
+            fs::remove_file(root.join("game/one.rpy")).unwrap();
+            symlink(&outside_path, root.join("game/one.rpy")).unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert_eq!(fs::read(outside.path()).unwrap(), b"outside unchanged\n");
+    assert_eq!(
+        fs::read(artifact(&fixture.root, ".accepted")).unwrap(),
+        b"accepted\n"
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_target_symlink_substitution_at_exchange_never_changes_external_bytes() {
+    use std::os::windows::fs::symlink_file;
+    let fixture = Fixture::new();
+    let outside = tempfile::NamedTempFile::new().unwrap();
+    fs::write(outside.path(), b"outside unchanged\n").unwrap();
+    let outside_path = outside.path().to_path_buf();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::BeforeExchange(0) {
+            fs::remove_file(root.join("game/one.rpy")).unwrap();
+            symlink_file(&outside_path, root.join("game/one.rpy"))
+                .expect("runner must support symlink evidence");
+        }
+        Ok(())
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(
+        outcome,
+        CommitOutcome::RecoveryRequired { .. } | CommitOutcome::Conflict { .. }
+    ));
+    assert_eq!(fs::read(outside.path()).unwrap(), b"outside unchanged\n");
+    assert_eq!(
+        fs::read(artifact(&fixture.root, ".accepted")).unwrap(),
+        b"accepted\n"
+    );
+}
+
 #[cfg(unix)]
 #[test]
 fn symlink_substitution_is_denied_without_touching_outside() {
@@ -404,6 +679,126 @@ fn process_termination_at_each_persistent_boundary_is_recoverable() {
         assert_eq!(report.items.len(), 1, "{point}");
         assert!(!matches!(report.items[0].state, JournalState::Proposed));
     }
+}
+
+#[test]
+fn prepared_process_termination_can_be_safely_abandoned() {
+    let fixture = Fixture::new();
+    let status = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--ignored", "--exact", "transaction::tests::crash_worker"])
+        .env("LOOMLIGHT_CRASH_ROOT", &fixture.root)
+        .env("LOOMLIGHT_CRASH_POINT", "prepared")
+        .status()
+        .unwrap();
+    assert_eq!(status.code(), Some(86));
+
+    let unrelated = fixture.root.join("game/unrelated.rpy");
+    fs::write(&unrelated, b"unrelated\n").unwrap();
+    let service = TransactionService::default();
+    let project = service.register_trusted_project(&fixture.root).unwrap();
+    let report = service.recover(&project);
+    assert_eq!(report.items.len(), 1);
+    assert_eq!(report.items[0].state, JournalState::Prepared);
+    assert_eq!(
+        report.items[0].mutations,
+        vec![RecoveryMutationState::PreparedWithoutStage]
+    );
+    service
+        .finalize_recovery(&project, &report.items[0].transaction_id)
+        .unwrap();
+    assert_eq!(service.flush(&project), FlushOutcome::Flushed);
+    assert_eq!(fs::read(&unrelated).unwrap(), b"unrelated\n");
+
+    let relative = RelativePath::new("game/one.rpy").unwrap();
+    let (expected_bytes, base) = service.snapshot(&project, relative.clone()).unwrap();
+    let outcome = service.commit(
+        &project,
+        TransactionProposal {
+            mutations: vec![FileMutation {
+                path: relative,
+                kind: MutationKind::ReplaceExisting,
+                base,
+                expected_bytes,
+                proposed: b"after prepared recovery\n".to_vec(),
+            }],
+            intent: TransactionIntent::Edit,
+        },
+    );
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+}
+
+#[test]
+fn prepared_abandon_refuses_any_persisted_proposal_evidence() {
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::Prepared {
+            Err(ErrorCode::RecoveryRequired)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    let CommitOutcome::RecoveryRequired { diagnostic } = outcome else {
+        panic!()
+    };
+    let txid = diagnostic.transaction_id.unwrap();
+    let directory = fixture.root.join(".renpy-editor/recovery").join(&txid);
+    fs::write(
+        directory.join(format!(".loomlight-{txid}-0-one.rpy.accepted")),
+        b"accepted evidence\n",
+    )
+    .unwrap();
+    assert_eq!(
+        fixture
+            .service
+            .finalize_recovery(&fixture.project, &txid)
+            .unwrap_err()
+            .code,
+        ErrorCode::RecoveryRequired
+    );
+    assert!(matches!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::RecoveryRequired { .. }
+    ));
+}
+
+#[test]
+fn terminal_rejected_journal_does_not_block_flush_or_later_commit() {
+    let fixture = Fixture::new();
+    let stale = fixture.mutation("game/one.rpy", b"stale proposal\n");
+    fs::write(fixture.root.join("game/one.rpy"), b"newer external\n").unwrap();
+    let rejected = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![stale]));
+    assert_eq!(outcome_code(&rejected), Some(ErrorCode::StaleRevision));
+    let report = fixture.service.recover(&fixture.project);
+    assert!(matches!(
+        report.items[0].state,
+        JournalState::Rejected {
+            code: ErrorCode::StaleRevision
+        }
+    ));
+    assert_eq!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::Flushed
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"newer external\n"
+    );
+
+    let valid = fixture.mutation("game/one.rpy", b"later valid\n");
+    let committed = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![valid]));
+    assert!(matches!(committed, CommitOutcome::Committed { .. }));
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"later valid\n"
+    );
 }
 
 #[test]

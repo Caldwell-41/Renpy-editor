@@ -17,17 +17,17 @@ pub use identity::FileIdentity;
 use journal::{Journal, JournalMutation, JournalState, JournalStore};
 use path::resolve_target;
 pub use path::RelativePath;
-use platform::{exchange_preserving_target, flush_directory, flush_file, PlatformCapability};
+use platform::{exchange_preserving_target, flush_directory, PlatformCapability};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{HashMap, HashSet},
-    fs::{self, File, OpenOptions},
+    fs::{self, File},
     io::Write,
     path::{Path, PathBuf},
     sync::{
         atomic::{AtomicU64, Ordering},
-        Mutex,
+        Arc, Mutex,
     },
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -194,6 +194,7 @@ pub struct RecoveryReport {
 struct ApprovedProject {
     root: PathBuf,
     identity: FileIdentity,
+    anchor: Arc<platform::DirectoryAnchor>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -237,6 +238,8 @@ impl TransactionService {
         }
         let identity = identity::identity_for_path(&canonical)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let anchor = platform::DirectoryAnchor::open_root(&canonical)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
         let id = ProjectId(new_id("project"));
         self.projects
             .lock()
@@ -246,6 +249,7 @@ impl TransactionService {
                 ApprovedProject {
                     root: canonical,
                     identity,
+                    anchor: Arc::new(anchor),
                 },
             );
         Ok(id)
@@ -258,10 +262,12 @@ impl TransactionService {
     ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
-        let target = resolve_target(&approved.root, &path, true)
+        let target = resolve_target(&approved.anchor, &path, true)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
-        let mut file = File::open(&target.path)
-            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let mut file = target
+            .parent_anchor
+            .open_file(&target.name)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
         let identity = identity_for_file(&file)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
         let mut bytes = Vec::new();
@@ -306,7 +312,7 @@ impl TransactionService {
             return rejected(ErrorCode::InvalidProposal);
         }
         let txid = new_id("tx");
-        let store = match JournalStore::create(&approved.root, &txid) {
+        let store = match JournalStore::create(&approved.anchor, &txid) {
             Ok(value) => value,
             Err(code) => return outcome_for(code, Some(txid)),
         };
@@ -316,11 +322,15 @@ impl TransactionService {
             if sha256(&mutation.expected_bytes) != mutation.base.sha256 {
                 return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
             }
-            let resolved = match resolve_target(&approved.root, &mutation.path, true) {
+            let resolved = match resolve_target(&approved.anchor, &mutation.path, true) {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
             };
-            let current = match read_revision(&resolved.path) {
+            let current = match resolved
+                .parent_anchor
+                .open_file(&resolved.name)
+                .and_then(read_revision_file)
+            {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
             };
@@ -330,11 +340,21 @@ impl TransactionService {
             if current.sha256 != mutation.base.sha256 {
                 return fail_journal(&store, &mut journal, ErrorCode::StaleRevision);
             }
-            if fs::read(&resolved.path).ok().as_deref() != Some(mutation.expected_bytes.as_slice())
-            {
+            let exact = resolved
+                .parent_anchor
+                .open_file(&resolved.name)
+                .and_then(read_bytes_file)
+                .ok();
+            if exact.as_deref() != Some(mutation.expected_bytes.as_slice()) {
                 return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
             }
-            let names = match path::artifact_paths(&resolved.path, &txid, index) {
+            let names = match path::artifact_paths(
+                store.directory(),
+                &resolved.name,
+                &resolved.parent_identity,
+                &txid,
+                index,
+            ) {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
             };
@@ -358,8 +378,8 @@ impl TransactionService {
 
         for (index, mutation) in proposal.mutations.iter().enumerate() {
             let item = &journal.mutations[index];
-            if write_new_synced(&item.stage, &mutation.proposed).is_err()
-                || write_new_synced(&item.accepted, &mutation.proposed).is_err()
+            if write_new_synced(&store, &item.stage, &mutation.proposed).is_err()
+                || write_new_synced(&store, &item.accepted, &mutation.proposed).is_err()
             {
                 return fail_journal(&store, &mut journal, ErrorCode::IoFailure);
             }
@@ -383,14 +403,18 @@ impl TransactionService {
                 return fail_journal(&store, &mut journal, code.code);
             }
             let mutation = &proposal.mutations[index];
-            let resolved = match resolve_target(&approved.root, &mutation.path, true) {
+            let resolved = match resolve_target(&approved.anchor, &mutation.path, true) {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
             };
             if resolved.parent_identity != journal.mutations[index].artifacts.parent_identity {
                 return fail_journal(&store, &mut journal, ErrorCode::ParentIdentityChanged);
             }
-            let latest = match read_revision(&resolved.path) {
+            let latest = match resolved
+                .parent_anchor
+                .open_file(&resolved.name)
+                .and_then(read_revision_file)
+            {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
             };
@@ -400,8 +424,12 @@ impl TransactionService {
             if latest.sha256 != mutation.base.sha256 {
                 return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
             }
-            if fs::read(&resolved.path).ok().as_deref() != Some(mutation.expected_bytes.as_slice())
-            {
+            let exact = resolved
+                .parent_anchor
+                .open_file(&resolved.name)
+                .and_then(read_bytes_file)
+                .ok();
+            if exact.as_deref() != Some(mutation.expected_bytes.as_slice()) {
                 return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
             }
             journal.mutations[index].commit_intent = true;
@@ -418,9 +446,11 @@ impl TransactionService {
                 return recovery(&txid);
             }
             if exchange_preserving_target(
-                &resolved,
-                &journal.mutations[index].stage,
-                &journal.mutations[index].backup,
+                &resolved.parent_anchor,
+                &resolved.name,
+                store.directory(),
+                artifact_name(&journal.mutations[index].stage),
+                artifact_name(&journal.mutations[index].backup),
             )
             .is_err()
             {
@@ -443,18 +473,25 @@ impl TransactionService {
             if self.validate_root(&approved).is_err() {
                 return fail_journal(&store, &mut journal, ErrorCode::RootIdentityChanged);
             }
-            match resolve_target(&approved.root, &mutation.path, true) {
+            match resolve_target(&approved.anchor, &mutation.path, true) {
                 Ok(target)
                     if target.parent_identity
                         == journal.mutations[index].artifacts.parent_identity => {}
                 _ => return fail_journal(&store, &mut journal, ErrorCode::ParentIdentityChanged),
             }
 
-            let displaced = match read_revision(&journal.mutations[index].backup) {
+            let displaced = match store
+                .open_artifact(&journal.mutations[index].backup)
+                .and_then(read_revision_file)
+            {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
-            let installed = match read_revision(&resolved.path) {
+            let installed = match resolved
+                .parent_anchor
+                .open_file(&resolved.name)
+                .and_then(read_revision_file)
+            {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
@@ -493,13 +530,20 @@ impl TransactionService {
         }
         let mut revisions = Vec::new();
         for item in &journal.mutations {
-            let target = approved.root.join(item.path.as_path());
-            if flush_file(&target).is_err()
-                || flush_directory(target.parent().unwrap_or(&approved.root)).is_err()
+            let resolved = match resolve_target(&approved.anchor, &item.path, true) {
+                Ok(value) => value,
+                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+            };
+            let target_file = match resolved.parent_anchor.open_file(&resolved.name) {
+                Ok(value) => value,
+                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+            };
+            if platform::flush_open_file(&target_file).is_err()
+                || resolved.parent_anchor.flush().is_err()
             {
                 return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
             }
-            let revision = match read_revision(&target) {
+            let revision = match read_revision_file(target_file) {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
@@ -535,7 +579,7 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return RecoveryReport::default(),
         };
-        JournalStore::scan(&approved.root).unwrap_or_else(|code| RecoveryReport {
+        JournalStore::scan(&approved.anchor).unwrap_or_else(|code| RecoveryReport {
             items: vec![RecoveryItem {
                 transaction_id: "recovery-scan".to_owned(),
                 state: JournalState::RecoveryRequired,
@@ -558,16 +602,15 @@ impl TransactionService {
         }
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
-        let store = JournalStore::open(&approved.root, transaction_id)
+        let store = JournalStore::open(&approved.anchor, transaction_id)
             .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
         let mut journal = store
             .load()
             .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
         if journal.transaction_id != transaction_id
-            || matches!(
-                journal.state,
-                JournalState::Proposed | JournalState::Prepared
-            )
+            || matches!(journal.state, JournalState::Proposed)
+            || (matches!(journal.state, JournalState::Prepared)
+                && !store.prepared_is_safe_to_abandon(&journal))
         {
             return Err(PublicDiagnostic::new(
                 ErrorCode::RecoveryRequired,
@@ -586,11 +629,12 @@ impl TransactionService {
             Err(error) => return FlushOutcome::Rejected { diagnostic: error },
         };
         let report = self.recover(project);
-        if let Some(item) = report
-            .items
-            .iter()
-            .find(|item| !matches!(item.state, JournalState::Durable | JournalState::Cleaned))
-        {
+        if let Some(item) = report.items.iter().find(|item| {
+            !matches!(
+                item.state,
+                JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
+            )
+        }) {
             let code = item.code.unwrap_or(ErrorCode::RecoveryRequired);
             let diagnostic = PublicDiagnostic::new(code, Some(item.transaction_id.clone()));
             return if code == ErrorCode::Conflict {
@@ -626,6 +670,7 @@ impl TransactionService {
         if canonical != approved.root
             || path::is_link_or_reparse(&meta)
             || identity != approved.identity
+            || approved.anchor.validate_chain().is_err()
         {
             return Err(PublicDiagnostic::new(ErrorCode::RootIdentityChanged, None));
         }
@@ -645,8 +690,7 @@ impl crate::ports::SourceTransactionPort for TransactionService {
     }
 }
 
-pub(super) fn read_revision(path: &Path) -> Result<Revision, ErrorCode> {
-    let mut file = File::open(path).map_err(|_| ErrorCode::IoFailure)?;
+pub(super) fn read_revision_file(mut file: File) -> Result<Revision, ErrorCode> {
     let identity = identity_for_file(&file).map_err(|_| ErrorCode::IoFailure)?;
     let mut bytes = Vec::new();
     std::io::Read::read_to_end(&mut file, &mut bytes).map_err(|_| ErrorCode::IoFailure)?;
@@ -656,15 +700,20 @@ pub(super) fn read_revision(path: &Path) -> Result<Revision, ErrorCode> {
     })
 }
 
-fn write_new_synced(path: &Path, bytes: &[u8]) -> Result<(), ErrorCode> {
-    let mut file = OpenOptions::new()
-        .create_new(true)
-        .write(true)
-        .open(path)
-        .map_err(|_| ErrorCode::IoFailure)?;
+fn read_bytes_file(mut file: File) -> Result<Vec<u8>, ErrorCode> {
+    let mut bytes = Vec::new();
+    std::io::Read::read_to_end(&mut file, &mut bytes).map_err(|_| ErrorCode::IoFailure)?;
+    Ok(bytes)
+}
+
+fn artifact_name(path: &Path) -> &std::ffi::OsStr {
+    path.file_name().expect("validated artifact name")
+}
+
+fn write_new_synced(store: &JournalStore, name: &Path, bytes: &[u8]) -> Result<(), ErrorCode> {
+    let mut file = store.directory().create_new_file(artifact_name(name))?;
     file.write_all(bytes).map_err(|_| ErrorCode::IoFailure)?;
-    drop(file);
-    flush_file(path)
+    platform::flush_open_file(&file)
 }
 
 fn sha256(bytes: &[u8]) -> String {
@@ -738,9 +787,15 @@ fn fail_journal(store: &JournalStore, journal: &mut Journal, code: ErrorCode) ->
     } else {
         JournalState::Rejected { code }
     };
-    let _ = store.persist(journal, state);
+    if store.persist(journal, state.clone()).is_err() {
+        return recovery(&journal.transaction_id);
+    }
     if persistent_mutation_exists && code != ErrorCode::Conflict {
         CommitOutcome::RecoveryRequired {
+            diagnostic: PublicDiagnostic::new(code, Some(journal.transaction_id.clone())),
+        }
+    } else if matches!(state, JournalState::Rejected { .. }) {
+        CommitOutcome::Rejected {
             diagnostic: PublicDiagnostic::new(code, Some(journal.transaction_id.clone())),
         }
     } else {

@@ -176,7 +176,10 @@ Phase 1B makes the transaction envelope a non-empty vector of project-relative
 mutations. Each replacement carries exact expected bytes, SHA-256, platform file
 identity, an extensible mutation kind, and proposed bytes. Alternating checksummed
 journal slots record per-mutation staged/commit/exchange/verification progress.
-Accepted and displaced bytes remain separate recovery artifacts. See
+Journal version 2 stores only relative evidence names; stage, accepted, and displaced
+bytes remain separate artifacts inside the anchored transaction recovery directory.
+`prepared` is safely abandonable only when evidence absence is proved, while a pre-
+mutation `rejected` record is terminal and does not poison later flush. See
 [TRANSACTIONS.md](TRANSACTIONS.md); source semantic operations and patches remain
 Phase 1E/1F work.
 

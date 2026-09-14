@@ -119,7 +119,8 @@ privileges or adding authoring functionality.
 ### 1B — Transaction, file coordination, and recovery foundation
 
 Follow the bounded
-[completed Phase 1B brief](../archive/2026-09-14-phase-1-transaction-recovery.md).
+[completed Phase 1B brief](../archive/2026-09-14-phase-1-transaction-recovery.md) and
+[active corrective remediation](phase-1b-corrective-transaction-recovery.md).
 
 Implement the production source/file transaction boundary before any visual authoring
 is permitted to write project source. Close Phase 0 Gate E rather than assuming the
@@ -134,8 +135,10 @@ data instead of making an unprovable compare-and-swap claim.
 **Gate:** no accepted edit is silently lost or overwrites an external revision in the
 specified race/recovery suite on Windows x64 and macOS ARM64.
 
-Completed 2026-09-14 by production run 34797222616. Phase 1C remains separately
-approval-gated.
+The original closure by run 34797222616 was reopened after material pathname-race and
+terminal-state findings. The handle-anchored correction must pass actual Windows x64
+and macOS ARM64 runtime evidence before Gate E is re-closed. Phase 1C remains blocked
+and separately approval-gated.
 
 ### 1C — Project lifecycle and SDK foundation
 
