@@ -289,16 +289,7 @@ impl LifecycleService {
         ensure_absent(&final_path)?;
         let token = uuid::Uuid::new_v4().to_string();
         let stage_name = format!(".loomlight-stage-{token}");
-        let stage = parent.path.join(&stage_name);
-        fs::create_dir(&stage).map_err(|_| LifecycleError::Io)?;
-        restrict_directory(&stage)?;
-        let marker = format!("loomlight-project-stage-v1\n{token}\n");
-        write_new(&stage.join(STAGE_MARKER), marker.as_bytes())?;
-        // Ren'Py's documented generate_gui command accepts a new project when the
-        // target is absent, or an existing target whose game directory is present.
-        // The private ownership marker makes our target intentionally existing.
-        fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
-        let mut stage = open_stage_anchor(stage, stage_name, token)?;
+        let mut stage = create_private_stage(parent, stage_name, token)?;
         let prepared = (|| {
             validate_stage_identity(&stage)?;
             sdk.revalidate(true)
@@ -958,16 +949,6 @@ fn ensure_absent(path: &Path) -> Result<(), LifecycleError> {
     }
 }
 
-fn write_new(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
-    let mut file = OpenOptions::new()
-        .create_new(true)
-        .write(true)
-        .open(path)
-        .map_err(|_| LifecycleError::Io)?;
-    file.write_all(bytes)
-        .and_then(|_| file.sync_all())
-        .map_err(|_| LifecycleError::Io)
-}
 fn canonical_safe_directory(path: &Path) -> Result<PathBuf, LifecycleError> {
     let root = fs::canonicalize(path).map_err(|_| LifecycleError::InvalidParent)?;
     if !root.is_dir() || has_symlink_component(&root) {
@@ -1074,6 +1055,75 @@ fn open_stage_directory(path: &Path) -> io::Result<File> {
         .open(path)
 }
 
+fn create_private_stage(
+    parent: &ParentAnchor,
+    name: String,
+    token: String,
+) -> Result<StageAnchor, LifecycleError> {
+    use std::ffi::OsStr;
+
+    validate_parent(parent)?;
+    if name != format!(".loomlight-stage-{token}") {
+        return Err(LifecycleError::UnsafePath);
+    }
+    let parent_anchor = crate::transaction::DirectoryAnchor::open_root(&parent.path)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    if parent_anchor.identity().volume != parent.identity.a
+        || parent_anchor.identity().file != parent.identity.b
+    {
+        return Err(LifecycleError::UnsafePath);
+    }
+    let directory = parent_anchor
+        .create_new_child(OsStr::new(&name))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let path = directory.path().to_path_buf();
+    let file = open_stage_directory(&path).map_err(|_| LifecycleError::UnsafePath)?;
+    let identity = identity(&file).map_err(|_| LifecycleError::UnsafePath)?;
+    if directory.identity().volume != identity.a || directory.identity().file != identity.b {
+        return Err(LifecycleError::UnsafePath);
+    }
+    restrict_directory_handle(&file)?;
+    let stage = StageAnchor {
+        path,
+        name,
+        token,
+        file: Some(file),
+        identity,
+    };
+
+    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
+    let mut marker_file = directory
+        .create_new_file(OsStr::new(STAGE_MARKER))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    marker_file
+        .write_all(marker.as_bytes())
+        .and_then(|_| marker_file.sync_all())
+        .map_err(|_| LifecycleError::Io)?;
+    // Ren'Py generate_gui accepts an existing target when its game directory exists.
+    directory
+        .create_new_child(OsStr::new("game"))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    directory.flush().map_err(|_| LifecycleError::Io)?;
+    validate_stage_identity(&stage)?;
+    Ok(stage)
+}
+
+#[cfg(unix)]
+fn restrict_directory_handle(file: &File) -> Result<(), LifecycleError> {
+    use std::os::fd::AsRawFd;
+    if unsafe { libc::fchmod(file.as_raw_fd(), 0o700) } == 0 {
+        Ok(())
+    } else {
+        Err(LifecycleError::Io)
+    }
+}
+
+#[cfg(windows)]
+fn restrict_directory_handle(_file: &File) -> Result<(), LifecycleError> {
+    Ok(())
+}
+
+#[cfg(test)]
 fn open_stage_anchor(
     path: PathBuf,
     name: String,
@@ -1277,12 +1327,12 @@ fn sync_parent_directory(_path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(all(test, unix))]
 fn restrict_directory(path: &Path) -> Result<(), LifecycleError> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(0o700)).map_err(|_| LifecycleError::Io)
 }
-#[cfg(windows)]
+#[cfg(all(test, windows))]
 fn restrict_directory(_path: &Path) -> Result<(), LifecycleError> {
     Ok(())
 }
@@ -1417,6 +1467,26 @@ mod tests {
         for name in ["../escape", "a/b", "C:drive", "CON", "name.", ""] {
             assert!(validate_folder_name(name).is_err(), "{name}");
         }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn private_stage_creation_cannot_follow_parent_path_substitution() {
+        let temp = tempfile::tempdir().unwrap();
+        let requested = temp.path().join("projects");
+        fs::create_dir(&requested).unwrap();
+        let parent = open_parent(&requested).unwrap();
+        let approved = parent.path.clone();
+        let moved = temp.path().join("moved-approved-parent");
+        fs::rename(&approved, &moved).unwrap();
+        fs::create_dir(&approved).unwrap();
+        let token = uuid::Uuid::new_v4().to_string();
+        let name = format!(".loomlight-stage-{token}");
+        assert!(matches!(
+            create_private_stage(&parent, name, token),
+            Err(LifecycleError::UnsafePath)
+        ));
+        assert!(fs::read_dir(&approved).unwrap().next().is_none());
     }
 
     #[test]

@@ -71,6 +71,36 @@ impl DirectoryAnchor {
         })
     }
 
+    pub fn create_new_child(&self, name: &OsStr) -> Result<Self, ErrorCode> {
+        validate_name(name)?;
+        self.validate_chain()?;
+        create_directory_at(self.handle(), &self.path().join(name), name).map_err(|error| {
+            if error.kind() == io::ErrorKind::AlreadyExists {
+                ErrorCode::UnsafePath
+            } else {
+                ErrorCode::IoFailure
+            }
+        })?;
+        self.flush()?;
+        let path = self.path().join(name);
+        let handle =
+            open_directory_at(self.handle(), &path, name).map_err(|_| ErrorCode::UnsafePath)?;
+        let metadata = fs::symlink_metadata(&path).map_err(|_| ErrorCode::UnsafePath)?;
+        if !metadata.is_dir() || is_link_or_reparse(&metadata) {
+            return Err(ErrorCode::UnsafePath);
+        }
+        let identity = identity_for_file(&handle).map_err(|_| ErrorCode::IoFailure)?;
+        let mut chain = self.chain.clone();
+        chain.push(DirectoryGuard {
+            path,
+            identity,
+            handle: Arc::new(handle),
+        });
+        let result = Self { chain };
+        result.validate_chain()?;
+        Ok(result)
+    }
+
     pub fn open_child(&self, name: &OsStr, create: bool) -> Result<Self, ErrorCode> {
         validate_name(name)?;
         self.validate_chain()?;
