@@ -18,6 +18,8 @@ implementation gate.
 | Workspaces and interaction | [UI.md](UI.md) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
+| Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
+| Contribution and inbound licensing terms | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
