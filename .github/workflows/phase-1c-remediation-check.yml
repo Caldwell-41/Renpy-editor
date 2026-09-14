@@ -5,6 +5,7 @@ on:
     branches: [phase-1c-crash-consistency]
     paths:
       - scripts/apply_phase1c_remediation.py
+      - scripts/apply_phase1c_fixups.py
       - .github/workflows/phase-1c-remediation-check.yml
   workflow_dispatch:
 
@@ -29,7 +30,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Apply candidate remediation
         shell: bash
-        run: python3 scripts/apply_phase1c_remediation.py
+        run: |
+          python3 scripts/apply_phase1c_remediation.py
+          python3 scripts/apply_phase1c_fixups.py
       - name: Format transformed Rust
         shell: bash
         working-directory: app
