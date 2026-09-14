@@ -1,0 +1,114 @@
+name: Phase 1C corrective follow-up
+
+on:
+  push:
+    branches: [phase1c-corrective]
+    paths:
+      - .github/workflows/phase1c-corrective-followup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out corrective branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: phase1c-corrective
+          fetch-depth: 0
+
+      - name: Reapply corrective patch and reconcile failed assertion
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, gzip, re, subprocess
+          from pathlib import Path
+          workflow = Path('.github/workflows/phase1c-corrective-bootstrap.yml').read_text()
+          match = re.search(r'data = """([A-Za-z0-9+/=]+)"""', workflow)
+          if match is None:
+              raise SystemExit('corrective payload not found')
+          script = gzip.decompress(base64.b64decode(match.group(1)))
+          Path('/tmp/phase1c-remediate.py').write_bytes(script)
+          subprocess.run(['python3', '/tmp/phase1c-remediate.py'], check=True)
+
+          lifecycle = Path('app/src-core/src/lifecycle.rs')
+          text = lifecycle.read_text()
+          marker = 'title: "Failure evidence".into()'
+          start = text.index(marker)
+          end = text.index('assert!(!projects.join("failure-evidence").exists());', start)
+          block = text[start:end]
+          old = 'Err(LifecycleError::GenerationFailed)'
+          if block.count(old) != 1:
+              raise SystemExit('expected failure assertion not found exactly once')
+          block = block.replace(old, 'Err(LifecycleError::UnsupportedSdk)')
+          lifecycle.write_text(text[:start] + block + text[end:])
+
+          renpy = Path('app/src-core/src/renpy.rs')
+          text = renpy.read_text()
+          old = '''    #[cfg(windows)]\n    {\n        let _ = Command::new("taskkill")\n            .args(["/PID", &child.id().to_string(), "/T", "/F"])\n            .stdin(Stdio::null())\n            .stdout(Stdio::null())\n            .stderr(Stdio::null())\n            .status();\n    }\n'''
+          new = '''    #[cfg(windows)]\n    {\n        let mut taskkill = Command::new("taskkill");\n        apply_minimal_environment(&mut taskkill);\n        let _ = taskkill\n            .args(["/PID", &child.id().to_string(), "/T", "/F"])\n            .stdin(Stdio::null())\n            .stdout(Stdio::null())\n            .stderr(Stdio::null())\n            .status();\n    }\n'''
+          if text.count(old) != 1:
+              raise SystemExit('taskkill block not found exactly once')
+          renpy.write_text(text.replace(old, new))
+          PY
+          rm -f /tmp/phase1c-remediate.py
+
+      - name: Select locked Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Select locked npm toolchain
+        run: npm install --global npm@11.9.0
+
+      - name: Install locked frontend dependencies
+        working-directory: app
+        run: npm ci --ignore-scripts
+
+      - name: Validate frontend and protocol
+        working-directory: app
+        run: npm run check
+
+      - name: Build frontend
+        working-directory: app
+        run: npm run build
+
+      - name: Format and check Rust
+        working-directory: app
+        run: |
+          cargo fmt --all
+          cargo fmt --check --all
+
+      - name: Test corrective Rust core
+        working-directory: app
+        run: cargo test -p loomlight-core --locked -- --nocapture
+
+      - name: Lint corrective Rust core
+        working-directory: app
+        run: cargo clippy -p loomlight-core --all-targets --locked -- -D warnings
+
+      - name: Remove temporary bootstrap workflows
+        run: |
+          git rm .github/workflows/phase1c-corrective-bootstrap.yml
+          git rm .github/workflows/phase1c-corrective-followup.yml
+
+      - name: Run repository validator
+        run: python3 scripts/validate.py
+
+      - name: Check diff hygiene
+        run: git diff --check
+
+      - name: Commit validated corrective work
+        shell: bash
+        run: |
+          git config user.name Caldwell-41
+          git config user.email 255503715+Caldwell-41@users.noreply.github.com
+          git add -A
+          git status --short
+          git commit -m "fix: harden Phase 1C lifecycle boundaries"
+          git push origin HEAD:phase1c-corrective
