@@ -124,7 +124,7 @@ struct StageAnchor {
     path: PathBuf,
     name: String,
     token: String,
-    file: File,
+    file: Option<File>,
     identity: FileIdentity,
 }
 
@@ -166,11 +166,13 @@ impl crate::ports::RenpyPort for LifecycleService {
     }
 }
 
-struct LocalGit;
+struct LocalGit<'a> {
+    stage_anchor: &'a File,
+}
 
-impl crate::ports::GitPort for LocalGit {
+impl crate::ports::GitPort for LocalGit<'_> {
     fn initialise_new_repository(&self, stage: &Path) -> Result<(), LifecycleError> {
-        initialise_git(stage)
+        initialise_git_with_anchor("git", stage, Some(self.stage_anchor))
     }
 }
 
@@ -296,18 +298,24 @@ impl LifecycleService {
         // target is absent, or an existing target whose game directory is present.
         // The private ownership marker makes our target intentionally existing.
         fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
-        let stage = open_stage_anchor(stage, stage_name, token)?;
+        let mut stage = open_stage_anchor(stage, stage_name, token)?;
         let prepared = (|| {
             validate_stage_identity(&stage)?;
             sdk.revalidate(true)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
-            RenpyAdapter::generate_starter(&sdk, &stage.path, resolution.width, resolution.height)
-                .map_err(|_| LifecycleError::GenerationFailed)?;
+            RenpyAdapter::generate_starter_anchored(
+                &sdk,
+                &stage.path,
+                stage_file(&stage)?,
+                resolution.width,
+                resolution.height,
+            )
+            .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: generated");
             validate_stage_identity(&stage)?;
             let metadata = apply_overlay(
-                &stage.path,
+                &stage,
                 &request.title,
                 &request.folder_name,
                 resolution.clone(),
@@ -317,7 +325,12 @@ impl LifecycleService {
             eprintln!("phase-1c-create-checkpoint: overlay");
             if request.initialize_git {
                 validate_stage_identity(&stage)?;
-                crate::ports::GitPort::initialise_new_repository(&LocalGit, &stage.path)?;
+                crate::ports::GitPort::initialise_new_repository(
+                    &LocalGit {
+                        stage_anchor: stage_file(&stage)?,
+                    },
+                    &stage.path,
+                )?;
                 validate_stage_identity(&stage)?;
             }
             #[cfg(test)]
@@ -325,16 +338,14 @@ impl LifecycleService {
             validate_stage_identity(&stage)?;
             sdk.revalidate(false)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
-            RenpyAdapter::validate_generated(&sdk, &stage.path)
+            RenpyAdapter::validate_generated_anchored(&sdk, &stage.path, stage_file(&stage)?)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: validated");
             validate_stage_identity(&stage)?;
-            promote_anchored_stage(parent, &stage, &request.folder_name)?;
+            promote_anchored_stage(parent, &mut stage, &request.folder_name)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: promoted");
-            fs::remove_file(final_path.join(STAGE_MARKER))
-                .map_err(|_| LifecycleError::CreatedNotOpened)?;
             let opened = open_valid_project(&final_path)?;
             if opened.project_id != metadata.project_id {
                 return Err(LifecycleError::CreatedNotOpened);
@@ -342,7 +353,7 @@ impl LifecycleService {
             Ok(opened)
         })();
         if prepared.is_err() && stage.path.exists() {
-            let _ = cleanup_stage(&stage);
+            let _ = cleanup_stage(parent, &mut stage);
         }
         let opened = prepared?;
         if self.update_recent(&final_path, &opened).is_err() {
@@ -452,15 +463,23 @@ impl LifecycleService {
     fn write_recent(&self, store: &RecentStore) -> Result<(), LifecycleError> {
         let bytes = serde_json::to_vec_pretty(store).map_err(|_| LifecycleError::Io)?;
         let path = self.data_root.join("recent-projects.json");
+        let temporary = self
+            .data_root
+            .join(format!(".recent-projects-{}.tmp", uuid::Uuid::new_v4()));
         let mut file = OpenOptions::new()
-            .create(true)
-            .truncate(true)
+            .create_new(true)
             .write(true)
-            .open(path)
+            .open(&temporary)
             .map_err(|_| LifecycleError::Io)?;
-        file.write_all(&bytes)
+        let result = file
+            .write_all(&bytes)
             .and_then(|_| file.sync_all())
             .map_err(|_| LifecycleError::Io)
+            .and_then(|_| replace_file_atomically(&temporary, &path));
+        if result.is_err() {
+            let _ = fs::remove_file(&temporary);
+        }
+        result
     }
 }
 
@@ -527,66 +546,18 @@ fn windows_reserved(value: &str) -> bool {
             && matches!(stem.as_bytes()[3], b'1'..=b'9'))
 }
 
-fn apply_overlay(
-    stage: &Path,
+fn build_overlay_model(
     title: &str,
     folder_name: &str,
     resolution: Resolution,
-) -> Result<ProjectMetadata, LifecycleError> {
-    let game = stage.join("game");
-    for directory in ["definitions", "chapters/chapter_01", "images", "audio"] {
-        fs::create_dir_all(game.join(directory)).map_err(|_| LifecycleError::Io)?;
-    }
-    fs::create_dir_all(stage.join(".renpy-editor/recovery")).map_err(|_| LifecycleError::Io)?;
-    #[cfg(test)]
-    eprintln!("phase-1c-overlay-checkpoint: directories");
+) -> (ProjectMetadata, SourceMapMetadata, String, String) {
     let project_id = uuid::Uuid::new_v4().to_string();
     let chapter_id = uuid::Uuid::new_v4().to_string();
     let scene_id = uuid::Uuid::new_v4().to_string();
     let technical_label = format!("loomlight_scene_{}", scene_id.replace('-', ""));
     let script = format!("# Loomlight entry point. Runnable source remains authoritative.\n\nlabel start:\n    jump {technical_label}\n");
-    write_new_or_replace(&game.join("script.rpy"), script.as_bytes())?;
-    #[cfg(test)]
-    eprintln!("phase-1c-overlay-checkpoint: script");
-    let options = game.join("options.rpy");
-    let options_text = fs::read_to_string(&options).map_err(|_| LifecycleError::Io)?;
-    let safe_title = title
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('[', "[[");
-    let options_text = replace_template_define(
-        &options_text,
-        "define config.name =",
-        &format!("define config.name = _(\"{safe_title}\")"),
-    )?;
-    let options_text = replace_template_define(
-        &options_text,
-        "define build.name =",
-        &format!("define build.name = \"{folder_name}\""),
-    )?;
-    write_replace(&options, options_text.as_bytes())?;
-    #[cfg(test)]
-    eprintln!("phase-1c-overlay-checkpoint: options");
-    write_new(
-        &game.join("definitions/characters.rpy"),
-        b"# Character definitions are added by Loomlight.\n",
-    )?;
-    write_new(
-        &game.join("definitions/variables.rpy"),
-        b"# Variable definitions are added by Loomlight.\n",
-    )?;
-    write_new(
-        &game.join("definitions/transforms.rpy"),
-        b"# Transform definitions are added by Loomlight.\n",
-    )?;
     let scene_source =
         format!("label {technical_label}:\n    \"Your story begins here.\"\n    return\n");
-    write_new(
-        &game.join("chapters/chapter_01/scene_001.rpy"),
-        scene_source.as_bytes(),
-    )?;
-    #[cfg(test)]
-    eprintln!("phase-1c-overlay-checkpoint: source");
     let metadata = ProjectMetadata {
         schema_version: PROJECT_SCHEMA_VERSION,
         project_id: project_id.clone(),
@@ -619,10 +590,7 @@ fn apply_overlay(
         },
         extra: Map::new(),
     };
-    metadata
-        .write_for_folder(stage, Some(folder_name))
-        .map_err(|_| LifecycleError::InvalidMetadata)?;
-    SourceMapMetadata {
+    let source_map = SourceMapMetadata {
         schema_version: SOURCE_MAP_SCHEMA_VERSION,
         project_id,
         sources: vec![
@@ -630,12 +598,184 @@ fn apply_overlay(
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
         extra: Map::new(),
+    };
+    (metadata, source_map, script, scene_source)
+}
+
+fn overlay_options(
+    title: &str,
+    folder_name: &str,
+    options_text: &str,
+) -> Result<String, LifecycleError> {
+    let safe_title = title
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('[', "[[");
+    let options_text = replace_template_define(
+        options_text,
+        "define config.name =",
+        &format!("define config.name = _(\"{safe_title}\")"),
+    )?;
+    replace_template_define(
+        &options_text,
+        "define build.name =",
+        &format!("define build.name = \"{folder_name}\""),
+    )
+}
+
+fn apply_overlay(
+    stage: &StageAnchor,
+    title: &str,
+    folder_name: &str,
+    resolution: Resolution,
+) -> Result<ProjectMetadata, LifecycleError> {
+    apply_overlay_with_hook(stage, title, folder_name, resolution, || Ok(()))
+}
+
+fn apply_overlay_with_hook<F>(
+    stage: &StageAnchor,
+    title: &str,
+    folder_name: &str,
+    resolution: Resolution,
+    hook: F,
+) -> Result<ProjectMetadata, LifecycleError>
+where
+    F: FnOnce() -> Result<(), LifecycleError>,
+{
+    use std::ffi::OsStr;
+    use std::io::{Read, Seek, SeekFrom};
+
+    let root = crate::transaction::DirectoryAnchor::open_root(&stage.path)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    if root.identity().volume != stage.identity.a || root.identity().file != stage.identity.b {
+        return Err(LifecycleError::UnsafePath);
     }
-    .write(stage)
-    .map_err(|_| LifecycleError::InvalidMetadata)?;
+    hook()?;
+
+    let game = root
+        .open_child(OsStr::new("game"), false)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let definitions = game
+        .open_child(OsStr::new("definitions"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let chapters = game
+        .open_child(OsStr::new("chapters"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let chapter = chapters
+        .open_child(OsStr::new("chapter_01"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    game.open_child(OsStr::new("images"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    game.open_child(OsStr::new("audio"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let editor = root
+        .open_child(OsStr::new(".renpy-editor"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    editor
+        .open_child(OsStr::new("recovery"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: directories");
+
+    let (metadata, source_map, script, scene_source) =
+        build_overlay_model(title, folder_name, resolution);
+    write_new_or_replace_anchored(&game, "script.rpy", script.as_bytes())?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: script");
+
+    let mut options = game
+        .open_file_for_flush(OsStr::new("options.rpy"))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let mut options_text = String::new();
+    options
+        .read_to_string(&mut options_text)
+        .map_err(|_| LifecycleError::Io)?;
+    let options_text = overlay_options(title, folder_name, &options_text)?;
+    options.set_len(0).map_err(|_| LifecycleError::Io)?;
+    options
+        .seek(SeekFrom::Start(0))
+        .and_then(|_| options.write_all(options_text.as_bytes()))
+        .and_then(|_| options.sync_all())
+        .map_err(|_| LifecycleError::Io)?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: options");
+
+    write_new_anchored(
+        &definitions,
+        "characters.rpy",
+        b"# Character definitions are added by Loomlight.\n",
+    )?;
+    write_new_anchored(
+        &definitions,
+        "variables.rpy",
+        b"# Variable definitions are added by Loomlight.\n",
+    )?;
+    write_new_anchored(
+        &definitions,
+        "transforms.rpy",
+        b"# Transform definitions are added by Loomlight.\n",
+    )?;
+    write_new_anchored(&chapter, "scene_001.rpy", scene_source.as_bytes())?;
+    #[cfg(test)]
+    eprintln!("phase-1c-overlay-checkpoint: source");
+
+    metadata
+        .validate(Some(folder_name))
+        .map_err(|_| LifecycleError::InvalidMetadata)?;
+    let metadata_bytes =
+        serde_json::to_vec_pretty(&metadata).map_err(|_| LifecycleError::InvalidMetadata)?;
+    let source_map_bytes =
+        serde_json::to_vec_pretty(&source_map).map_err(|_| LifecycleError::InvalidMetadata)?;
+    write_new_anchored(&editor, "project.json", &metadata_bytes)?;
+    write_new_anchored(&editor, "source-map.json", &source_map_bytes)?;
+    editor.flush().map_err(|_| LifecycleError::Io)?;
+    root.flush().map_err(|_| LifecycleError::Io)?;
     #[cfg(test)]
     eprintln!("phase-1c-overlay-checkpoint: metadata");
     Ok(metadata)
+}
+
+fn write_new_anchored(
+    directory: &crate::transaction::DirectoryAnchor,
+    name: &str,
+    bytes: &[u8],
+) -> Result<(), LifecycleError> {
+    use std::ffi::OsStr;
+    let mut file = directory
+        .create_new_file(OsStr::new(name))
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    file.write_all(bytes)
+        .and_then(|_| file.sync_all())
+        .map_err(|_| LifecycleError::Io)?;
+    directory.flush().map_err(|_| LifecycleError::Io)
+}
+
+fn write_new_or_replace_anchored(
+    directory: &crate::transaction::DirectoryAnchor,
+    name: &str,
+    bytes: &[u8],
+) -> Result<(), LifecycleError> {
+    use std::ffi::OsStr;
+    use std::io::{Seek, SeekFrom};
+    let os_name = OsStr::new(name);
+    let mut file = if directory
+        .entry_absent(os_name)
+        .map_err(|_| LifecycleError::UnsafePath)?
+    {
+        directory
+            .create_new_file(os_name)
+            .map_err(|_| LifecycleError::UnsafePath)?
+    } else {
+        directory
+            .open_file_for_flush(os_name)
+            .map_err(|_| LifecycleError::UnsafePath)?
+    };
+    file.set_len(0).map_err(|_| LifecycleError::Io)?;
+    file.seek(SeekFrom::Start(0))
+        .and_then(|_| file.write_all(bytes))
+        .and_then(|_| file.sync_all())
+        .map_err(|_| LifecycleError::Io)?;
+    directory.flush().map_err(|_| LifecycleError::Io)
 }
 
 fn replace_template_define(
@@ -705,35 +845,52 @@ fn open_valid_project(root: &Path) -> Result<OpenProject, LifecycleError> {
     })
 }
 
-fn initialise_git(stage: &Path) -> Result<(), LifecycleError> {
-    initialise_git_with("git", stage)
+#[cfg(test)]
+fn initialise_git_with(program: &str, stage: &Path) -> Result<(), LifecycleError> {
+    initialise_git_with_anchor(program, stage, None)
 }
 
-fn initialise_git_with(program: &str, stage: &Path) -> Result<(), LifecycleError> {
-    let template = stage.join(format!(".loomlight-git-template-{}", uuid::Uuid::new_v4()));
-    fs::create_dir(&template).map_err(|_| LifecycleError::GitUnavailable)?;
-    restrict_directory(&template)?;
+fn initialise_git_with_anchor(
+    program: &str,
+    stage: &Path,
+    stage_anchor: Option<&File>,
+) -> Result<(), LifecycleError> {
     let mut command = Command::new(program);
     apply_git_environment(&mut command);
     command
         .env("GIT_CONFIG_NOSYSTEM", "1")
         .env("GIT_CONFIG_COUNT", "0")
-        .env("GIT_TERMINAL_PROMPT", "0")
-        .env("GIT_TEMPLATE_DIR", &template);
+        .env("GIT_TERMINAL_PROMPT", "0");
     #[cfg(windows)]
     command.env("GIT_CONFIG_GLOBAL", "NUL");
     #[cfg(not(windows))]
     command.env("GIT_CONFIG_GLOBAL", "/dev/null");
+    #[cfg(unix)]
+    if let Some(anchor) = stage_anchor {
+        use std::os::{fd::AsRawFd, unix::process::CommandExt};
+        let fd = anchor.as_raw_fd();
+        unsafe {
+            command.pre_exec(move || {
+                if libc::fchdir(fd) == 0 {
+                    Ok(())
+                } else {
+                    Err(io::Error::last_os_error())
+                }
+            });
+        }
+    }
+    #[cfg(windows)]
+    let _ = stage_anchor;
     let status = command
         .arg("init")
         .arg("--quiet")
+        .arg("--template=")
         .current_dir(stage)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .status();
-    let _ = fs::remove_dir(&template);
-    let status = status.map_err(|_| LifecycleError::GitUnavailable)?;
+        .status()
+        .map_err(|_| LifecycleError::GitUnavailable)?;
     if !status.success() {
         return Err(LifecycleError::GitUnavailable);
     }
@@ -811,29 +968,6 @@ fn write_new(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
         .and_then(|_| file.sync_all())
         .map_err(|_| LifecycleError::Io)
 }
-fn write_replace(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
-    let meta = fs::symlink_metadata(path).map_err(|_| LifecycleError::Io)?;
-    if !meta.is_file() || meta.file_type().is_symlink() {
-        return Err(LifecycleError::UnsafePath);
-    }
-    let mut file = OpenOptions::new()
-        .truncate(true)
-        .write(true)
-        .open(path)
-        .map_err(|_| LifecycleError::Io)?;
-    file.write_all(bytes)
-        .and_then(|_| file.sync_all())
-        .map_err(|_| LifecycleError::Io)
-}
-
-fn write_new_or_replace(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
-    match fs::symlink_metadata(path) {
-        Ok(_) => write_replace(path, bytes),
-        Err(error) if error.kind() == io::ErrorKind::NotFound => write_new(path, bytes),
-        Err(_) => Err(LifecycleError::Io),
-    }
-}
-
 fn canonical_safe_directory(path: &Path) -> Result<PathBuf, LifecycleError> {
     let root = fs::canonicalize(path).map_err(|_| LifecycleError::InvalidParent)?;
     if !root.is_dir() || has_symlink_component(&root) {
@@ -933,7 +1067,9 @@ fn open_stage_directory(path: &Path) -> io::Result<File> {
     const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
     OpenOptions::new()
         .read(true)
-        .share_mode(0x1 | 0x2 | 0x4)
+        // Keep the stage namespace pinned against rename/delete while privileged
+        // Ren'Py/Git work is in flight. The pin is released only for final promotion.
+        .share_mode(0x1 | 0x2)
         .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
         .open(path)
 }
@@ -956,15 +1092,19 @@ fn open_stage_anchor(
         path,
         name,
         token,
-        file,
+        file: Some(file),
         identity,
     };
     validate_stage_identity(&stage)?;
     Ok(stage)
 }
 
+fn stage_file(stage: &StageAnchor) -> Result<&File, LifecycleError> {
+    stage.file.as_ref().ok_or(LifecycleError::UnsafePath)
+}
+
 fn validate_stage_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
-    let held = identity(&stage.file).map_err(|_| LifecycleError::UnsafePath)?;
+    let held = identity(stage_file(stage)?).map_err(|_| LifecycleError::UnsafePath)?;
     let live_file = open_stage_directory(&stage.path).map_err(|_| LifecycleError::UnsafePath)?;
     let live = identity(&live_file).map_err(|_| LifecycleError::UnsafePath)?;
     let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
@@ -984,13 +1124,30 @@ fn validate_stage_identity(stage: &StageAnchor) -> Result<(), LifecycleError> {
 
 fn promote_anchored_stage(
     parent: &ParentAnchor,
-    stage: &StageAnchor,
+    stage: &mut StageAnchor,
     final_name: &str,
 ) -> Result<(), LifecycleError> {
+    promote_anchored_stage_with_hook(parent, stage, final_name, || Ok(()))
+}
+
+fn promote_anchored_stage_with_hook<F>(
+    parent: &ParentAnchor,
+    stage: &mut StageAnchor,
+    final_name: &str,
+    hook: F,
+) -> Result<(), LifecycleError>
+where
+    F: FnOnce() -> Result<(), LifecycleError>,
+{
     validate_stage_identity(stage)?;
     validate_parent(parent)?;
     let final_path = parent.path.join(final_name);
     ensure_absent(&final_path)?;
+
+    #[cfg(windows)]
+    drop(stage.file.take());
+
+    hook()?;
     promote_no_replace(parent, &stage.name, final_name).map_err(|error| {
         if matches!(error, LifecycleError::Io) {
             LifecycleError::PromotionFailed
@@ -1009,14 +1166,115 @@ fn promote_anchored_stage(
             .as_deref()
             != Some(marker.as_str())
     {
+        drop(promoted);
+        let quarantine = format!(".loomlight-rejected-final-{}", uuid::Uuid::new_v4());
+        let _ = promote_no_replace(parent, final_name, &quarantine);
         return Err(LifecycleError::PromotionFailed);
     }
+    drop(promoted);
+
+    let final_anchor = crate::transaction::DirectoryAnchor::open_root(&final_path)
+        .map_err(|_| LifecycleError::CreatedNotOpened)?;
+    if final_anchor.identity().volume != stage.identity.a
+        || final_anchor.identity().file != stage.identity.b
+    {
+        drop(final_anchor);
+        let quarantine = format!(".loomlight-rejected-final-{}", uuid::Uuid::new_v4());
+        let _ = promote_no_replace(parent, final_name, &quarantine);
+        return Err(LifecycleError::PromotionFailed);
+    }
+    final_anchor
+        .remove_file_if_exists(std::ffi::OsStr::new(STAGE_MARKER))
+        .map_err(|_| LifecycleError::CreatedNotOpened)?;
+    final_anchor
+        .flush()
+        .map_err(|_| LifecycleError::CreatedNotOpened)?;
     Ok(())
 }
 
-fn cleanup_stage(stage: &StageAnchor) -> Result<(), LifecycleError> {
-    validate_stage_identity(stage)?;
-    fs::remove_dir_all(&stage.path).map_err(|_| LifecycleError::Io)
+fn cleanup_stage(parent: &ParentAnchor, stage: &mut StageAnchor) -> Result<(), LifecycleError> {
+    let marker = format!("loomlight-project-stage-v1\n{}\n", stage.token);
+    if stage.file.is_some() {
+        validate_stage_identity(stage)?;
+    } else {
+        let live = open_stage_directory(&stage.path).map_err(|_| LifecycleError::UnsafePath)?;
+        if identity(&live).map_err(|_| LifecycleError::UnsafePath)? != stage.identity
+            || fs::read_to_string(stage.path.join(STAGE_MARKER))
+                .ok()
+                .as_deref()
+                != Some(marker.as_str())
+        {
+            return Err(LifecycleError::UnsafePath);
+        }
+    }
+
+    drop(stage.file.take());
+    let quarantine_name = format!(".loomlight-abandoned-stage-{}", uuid::Uuid::new_v4());
+    promote_no_replace(parent, &stage.name, &quarantine_name)?;
+    let quarantine_path = parent.path.join(&quarantine_name);
+    let quarantined =
+        open_stage_directory(&quarantine_path).map_err(|_| LifecycleError::UnsafePath)?;
+    let quarantined_identity = identity(&quarantined).map_err(|_| LifecycleError::UnsafePath)?;
+    if quarantined_identity != stage.identity
+        || has_symlink_component(&quarantine_path)
+        || fs::read_to_string(quarantine_path.join(STAGE_MARKER))
+            .ok()
+            .as_deref()
+            != Some(marker.as_str())
+    {
+        return Err(LifecycleError::UnsafePath);
+    }
+    drop(quarantined);
+    fs::remove_dir_all(quarantine_path).map_err(|_| LifecycleError::Io)
+}
+
+fn replace_file_atomically(temporary: &Path, destination: &Path) -> Result<(), LifecycleError> {
+    replace_file_platform(temporary, destination).map_err(|_| LifecycleError::Io)?;
+    let parent = destination.parent().ok_or(LifecycleError::Io)?;
+    sync_parent_directory(parent).map_err(|_| LifecycleError::Io)
+}
+
+#[cfg(unix)]
+fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
+    fs::rename(temporary, destination)
+}
+
+#[cfg(windows)]
+fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+    };
+    let wide = |path: &Path| {
+        path.as_os_str()
+            .encode_wide()
+            .chain(Some(0))
+            .collect::<Vec<_>>()
+    };
+    let from = wide(temporary);
+    let to = wide(destination);
+    let result = unsafe {
+        MoveFileExW(
+            from.as_ptr(),
+            to.as_ptr(),
+            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        )
+    };
+    if result != 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(unix)]
+fn sync_parent_directory(path: &Path) -> io::Result<()> {
+    open_directory(path)?.sync_all()
+}
+
+#[cfg(windows)]
+fn sync_parent_directory(_path: &Path) -> io::Result<()> {
+    Ok(())
 }
 
 #[cfg(unix)]
@@ -1332,6 +1590,36 @@ mod tests {
     }
 
     #[test]
+    fn recent_store_replaces_atomically_without_normal_temp_leaks() {
+        let temp = tempfile::tempdir().unwrap();
+        let service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let mut record = RecentStore {
+            schema_version: 1,
+            entries: vec![RecentRecord {
+                id: "recent".into(),
+                project_id: "project".into(),
+                title: "First".into(),
+                path: temp.path().join("project"),
+                last_opened_unix_ms: 1,
+            }],
+        };
+        service.write_recent(&record).unwrap();
+        record.entries[0].title = "Second".into();
+        service.write_recent(&record).unwrap();
+        assert_eq!(service.read_recent().entries[0].title, "Second");
+        assert!(fs::read_dir(temp.path().join("state"))
+            .unwrap()
+            .all(|entry| {
+                !entry
+                    .unwrap()
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".recent-projects-")
+            }));
+    }
+
+    #[cfg(unix)]
+    #[test]
     fn stage_identity_rejects_same_name_replacement_before_promotion() {
         let temp = tempfile::tempdir().unwrap();
         let parent_path = temp.path().join("projects");
@@ -1348,7 +1636,7 @@ mod tests {
             format!("loomlight-project-stage-v1\n{token}\n"),
         )
         .unwrap();
-        let stage = open_stage_anchor(stage_path.clone(), name.clone(), token.clone()).unwrap();
+        let mut stage = open_stage_anchor(stage_path.clone(), name.clone(), token.clone()).unwrap();
         let moved = parent_path.join("moved-original-stage");
         fs::rename(&stage_path, &moved).unwrap();
         fs::create_dir(&stage_path).unwrap();
@@ -1362,11 +1650,125 @@ mod tests {
             Err(LifecycleError::UnsafePath)
         ));
         assert!(matches!(
-            promote_anchored_stage(&parent, &stage, "final"),
+            promote_anchored_stage(&parent, &mut stage, "final"),
             Err(LifecycleError::UnsafePath)
         ));
         assert!(!parent_path.join("final").exists());
         assert!(moved.exists());
+    }
+
+    #[test]
+    fn substitution_after_final_validation_never_survives_as_final() {
+        let temp = tempfile::tempdir().unwrap();
+        let requested_parent = temp.path().join("projects");
+        fs::create_dir(&requested_parent).unwrap();
+        let parent = open_parent(&requested_parent).unwrap();
+        let parent_path = parent.path.clone();
+        let token = uuid::Uuid::new_v4().to_string();
+        let name = format!(".loomlight-stage-{token}");
+        let stage_path = parent_path.join(&name);
+        fs::create_dir(&stage_path).unwrap();
+        restrict_directory(&stage_path).unwrap();
+        fs::write(
+            stage_path.join(STAGE_MARKER),
+            format!("loomlight-project-stage-v1\n{token}\n"),
+        )
+        .unwrap();
+        let mut stage = open_stage_anchor(stage_path.clone(), name, token.clone()).unwrap();
+        let moved = parent_path.join("moved-original-stage");
+        let result = promote_anchored_stage_with_hook(&parent, &mut stage, "final", || {
+            fs::rename(&stage_path, &moved).map_err(|_| LifecycleError::Io)?;
+            fs::create_dir(&stage_path).map_err(|_| LifecycleError::Io)?;
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .map_err(|_| LifecycleError::Io)?;
+            fs::write(stage_path.join("replacement"), b"replacement")
+                .map_err(|_| LifecycleError::Io)?;
+            Ok(())
+        });
+        assert!(matches!(result, Err(LifecycleError::PromotionFailed)));
+        assert!(!parent_path.join("final").exists());
+        assert!(moved.exists());
+        assert!(fs::read_dir(&parent_path).unwrap().any(|entry| {
+            let path = entry.unwrap().path();
+            path.file_name().is_some_and(|name| {
+                name.to_string_lossy()
+                    .starts_with(".loomlight-rejected-final-")
+            }) && path.join("replacement").is_file()
+        }));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn overlay_writes_cannot_follow_stage_path_substitution() {
+        let temp = tempfile::tempdir().unwrap();
+        let requested_parent = temp.path().join("projects");
+        fs::create_dir(&requested_parent).unwrap();
+        let parent_path = requested_parent.canonicalize().unwrap();
+        let token = uuid::Uuid::new_v4().to_string();
+        let name = format!(".loomlight-stage-{token}");
+        let stage_path = parent_path.join(&name);
+        fs::create_dir(&stage_path).unwrap();
+        restrict_directory(&stage_path).unwrap();
+        fs::write(
+            stage_path.join(STAGE_MARKER),
+            format!("loomlight-project-stage-v1\n{token}\n"),
+        )
+        .unwrap();
+        fs::create_dir(stage_path.join("game")).unwrap();
+        fs::write(
+            stage_path.join("game/options.rpy"),
+            b"define config.name = _(\"Template\")\ndefine build.name = \"template\"\n",
+        )
+        .unwrap();
+        let stage = open_stage_anchor(stage_path.clone(), name, token).unwrap();
+        let moved = parent_path.join("moved-overlay-stage");
+        let replacement = stage_path.clone();
+        let result = apply_overlay_with_hook(
+            &stage,
+            "Overlay Race",
+            "overlay-race",
+            Resolution {
+                width: 1280,
+                height: 720,
+            },
+            || {
+                fs::rename(&stage_path, &moved).map_err(|_| LifecycleError::Io)?;
+                fs::create_dir(&replacement).map_err(|_| LifecycleError::Io)?;
+                fs::write(replacement.join("sentinel"), b"replacement")
+                    .map_err(|_| LifecycleError::Io)?;
+                Ok(())
+            },
+        );
+        assert!(matches!(result, Err(LifecycleError::UnsafePath)));
+        assert_eq!(
+            fs::read(replacement.join("sentinel")).unwrap(),
+            b"replacement"
+        );
+        assert!(!replacement.join(".renpy-editor").exists());
+        assert!(moved.join("game/options.rpy").is_file());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn stage_pin_blocks_substitution_during_privileged_work() {
+        let temp = tempfile::tempdir().unwrap();
+        let parent_path = temp.path().join("projects");
+        fs::create_dir(&parent_path).unwrap();
+        let token = uuid::Uuid::new_v4().to_string();
+        let name = format!(".loomlight-stage-{token}");
+        let stage_path = parent_path.join(&name);
+        fs::create_dir(&stage_path).unwrap();
+        fs::write(
+            stage_path.join(STAGE_MARKER),
+            format!("loomlight-project-stage-v1\n{token}\n"),
+        )
+        .unwrap();
+        let stage = open_stage_anchor(stage_path.clone(), name, token).unwrap();
+        assert!(fs::rename(&stage_path, parent_path.join("moved")).is_err());
+        validate_stage_identity(&stage).unwrap();
     }
 
     #[cfg(unix)]
@@ -1400,10 +1802,27 @@ mod tests {
         };
         let temp = tempfile::tempdir().unwrap();
         let managed_state = temp.path().join("managed-state");
+        assert!(matches!(
+            crate::renpy::install_supported_sdk_from_archive_interrupted_for_test(
+                &managed_state,
+                Path::new(&archive),
+            ),
+            Err(RenpyError::Io)
+        ));
         let sdk =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, Path::new(&archive))
                 .unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
+        let (embedded_provenance, legacy_provenance) =
+            crate::renpy::managed_provenance_paths_for_test(&managed_state);
+        assert!(embedded_provenance.is_file());
+        assert!(!legacy_provenance.exists());
+        fs::rename(&embedded_provenance, &legacy_provenance).unwrap();
+        let migrated = crate::renpy::discover_managed_sdk(&managed_state)
+            .unwrap()
+            .expect("legacy provenance should migrate into the managed SDK");
+        assert!(sdk.same_identity(&migrated));
+        assert!(embedded_provenance.is_file());
         let discovered = crate::renpy::discover_managed_sdk(&managed_state)
             .unwrap()
             .expect("managed SDK should retain verified provenance");
@@ -1416,6 +1835,39 @@ mod tests {
         fs::remove_dir(&sdk_root).unwrap();
         fs::rename(&moved_sdk, &sdk_root).unwrap();
         sdk.revalidate(true).unwrap();
+
+        #[cfg(unix)]
+        {
+            let requested_stage_parent = temp.path().join("anchored-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-anchored-child-stage");
+            fs::rename(&stage_path, &moved).unwrap();
+            fs::create_dir(&stage_path).unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            RenpyAdapter::generate_starter_anchored(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+            )
+            .unwrap();
+            assert!(moved.join("game/screens.rpy").is_file());
+            assert!(!stage_path.join("game/screens.rpy").exists());
+        }
 
         let projects = temp.path().join("projects");
         fs::create_dir(&projects).unwrap();
