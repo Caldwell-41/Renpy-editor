@@ -73,6 +73,7 @@ jobs:
           grep 'recent_crash_checkpoints_restart_from_a_complete_store' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'substitution_after_final_validation_never_survives_as_final' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'parent_substitution_after_validation_cannot_redirect_stage_creation' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
       - name: Restore pinned Ren'Py SDK archive
         id: phase-1c-sdk-cache

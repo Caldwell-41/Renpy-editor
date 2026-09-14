@@ -295,15 +295,7 @@ impl LifecycleService {
         ensure_absent(&final_path)?;
         let token = uuid::Uuid::new_v4().to_string();
         let stage_name = format!(".loomlight-stage-{token}");
-        let stage = parent.path.join(&stage_name);
-        create_private_directory(&stage)?;
-        let marker = format!("loomlight-project-stage-v1\n{token}\n");
-        write_new(&stage.join(STAGE_MARKER), marker.as_bytes())?;
-        // Ren'Py's documented generate_gui command accepts a new project when the
-        // target is absent, or an existing target whose game directory is present.
-        // The private ownership marker makes our target intentionally existing.
-        fs::create_dir(stage.join("game")).map_err(|_| LifecycleError::Io)?;
-        let mut stage = open_stage_anchor(stage, stage_name, token)?;
+        let mut stage = create_project_stage(parent, stage_name, token, || Ok(()))?;
         let prepared = (|| {
             validate_stage_identity(&stage)?;
             sdk.revalidate(true)
@@ -517,6 +509,40 @@ impl LifecycleService {
         }
         result
     }
+}
+
+fn create_project_stage<F>(
+    parent: &ParentAnchor,
+    stage_name: String,
+    token: String,
+    hook: F,
+) -> Result<StageAnchor, LifecycleError>
+where
+    F: FnOnce() -> Result<(), LifecycleError>,
+{
+    let stage = parent.path.join(&stage_name);
+    let parent_directory = crate::transaction::DirectoryAnchor::open_root(&parent.path)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    if parent_directory.identity().volume != parent.identity.a
+        || parent_directory.identity().file != parent.identity.b
+    {
+        return Err(LifecycleError::UnsafePath);
+    }
+    hook()?;
+    let stage_directory = parent_directory
+        .open_child(OsStr::new(&stage_name), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let marker = format!("loomlight-project-stage-v1\n{token}\n");
+    write_new_anchored(&stage_directory, STAGE_MARKER, marker.as_bytes())?;
+    // Ren'Py's documented generate_gui command accepts a new project when the target
+    // is absent, or an existing target whose game directory is present. The private
+    // ownership marker makes our target intentionally existing.
+    stage_directory
+        .open_child(OsStr::new("game"), true)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    stage_directory.flush().map_err(|_| LifecycleError::Io)?;
+    parent_directory.flush().map_err(|_| LifecycleError::Io)?;
+    open_stage_anchor(stage, stage_name, token)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1044,16 +1070,6 @@ fn ensure_absent(path: &Path) -> Result<(), LifecycleError> {
     }
 }
 
-fn write_new(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
-    let mut file = OpenOptions::new()
-        .create_new(true)
-        .write(true)
-        .open(path)
-        .map_err(|_| LifecycleError::Io)?;
-    file.write_all(bytes)
-        .and_then(|_| file.sync_all())
-        .map_err(|_| LifecycleError::Io)
-}
 fn canonical_safe_directory(path: &Path) -> Result<PathBuf, LifecycleError> {
     let root = fs::canonicalize(path).map_err(|_| LifecycleError::InvalidParent)?;
     if !root.is_dir() || has_symlink_component(&root) {
@@ -1326,19 +1342,6 @@ fn flush_parent_anchor(_parent: &ParentAnchor) -> io::Result<()> {
     // Project promotion uses MOVEFILE_WRITE_THROUGH. Windows provides no supported
     // ordinary-user directory fsync equivalent.
     Ok(())
-}
-
-#[cfg(unix)]
-fn create_private_directory(path: &Path) -> Result<(), LifecycleError> {
-    use std::os::unix::fs::DirBuilderExt;
-    fs::DirBuilder::new()
-        .mode(0o700)
-        .create(path)
-        .map_err(|_| LifecycleError::Io)
-}
-#[cfg(windows)]
-fn create_private_directory(path: &Path) -> Result<(), LifecycleError> {
-    fs::create_dir(path).map_err(|_| LifecycleError::Io)
 }
 
 #[cfg(test)]
@@ -2086,6 +2089,38 @@ mod tests {
             service.validate_destination(&choice.id, "project"),
             Err(LifecycleError::UnsafePath)
         ));
+    }
+
+    #[test]
+    fn parent_substitution_after_validation_cannot_redirect_stage_creation() {
+        let temp = tempfile::tempdir().unwrap();
+        let requested = temp.path().join("projects");
+        fs::create_dir(&requested).unwrap();
+        let parent = open_parent(&requested).unwrap();
+        let token = uuid::Uuid::new_v4().to_string();
+        let stage_name = format!(".loomlight-stage-{token}");
+        let moved = temp.path().join("moved-projects");
+        let result = create_project_stage(&parent, stage_name.clone(), token, || {
+            #[cfg(unix)]
+            {
+                fs::rename(&requested, &moved).map_err(|_| LifecycleError::Io)?;
+                fs::create_dir(&requested).map_err(|_| LifecycleError::Io)?;
+            }
+            #[cfg(windows)]
+            assert!(fs::rename(&requested, &moved).is_err());
+            Ok(())
+        });
+        #[cfg(unix)]
+        {
+            assert!(matches!(result, Err(LifecycleError::UnsafePath)));
+            assert!(!requested.join(&stage_name).exists());
+            assert!(!moved.join(&stage_name).exists());
+        }
+        #[cfg(windows)]
+        {
+            let mut stage = result.unwrap();
+            cleanup_stage(&parent, &mut stage).unwrap();
+        }
     }
 
     #[test]
