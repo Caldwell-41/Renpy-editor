@@ -53,7 +53,25 @@ Ren'Py 8.5.3 lifecycle test, desktop tests, packaging, packaged WebView/lifecycl
 smoke, secret scan, and dependency/licence inventory. Evidence artifacts are
 `10343096571` (Windows; SHA-256 `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`)
 and `10342841434` (macOS; SHA-256 `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`).
-Quality run `34832555407` passed at the same commit.
+
+The Phase 1C durability/race correction adds
+real subprocess termination before/after managed-SDK final promotion and at partial,
+durable-staged, and committed Recent Projects boundaries. Deterministic tests cover
+missing/corrupt/mismatched provenance, abandoned SDK stages/downloads, app-state and
+SDK symlink/reparse refusal, parent substitution during stage creation, child use
+immediately after final validation and while in flight, and substitution immediately
+before promotion. The production workflow requires explicit remediation markers from
+the official 8.5.3 lifecycle test—including proof that discovery does not spawn an
+unproven managed SDK—in addition to the complete core-suite test names.
+Earlier production runs do not evidence these additions. Production run
+`34849801157` at `bdc7ad60` passed Windows x64 job `103994559964` and macOS ARM64 job
+`103994559633`, including the platform core suites, official SDK lifecycle/remediation
+markers, desktop tests, packages, packaged smoke, scans, and inventories. Evidence
+artifacts are `10350511403` (Windows, SHA-256
+`30fd5e2a8479513eace75856aa9747a63cafe70be2cbf6124cc1be1e8566d675`) and
+`10351240446` (macOS, SHA-256
+`cf3e7dc9a913ca1b84ca5b8377e1af0422b880ed66d16e93e8d7fe684a17e9d5`). Quality run
+`34849801200` passed.
 
 Failed evidence remains explicit: first corrective production run `34829660277` at
 `60406825` failed the macOS hostile-stage test because the test used the `/var` alias
@@ -233,7 +251,7 @@ quality-gated rather than one large feature branch:
 | --- | --- |
 | 1A scaffold | Locked fresh install/build/test; command/capability denial; CSP/navigation/network/ambient host denial; privacy/licence checks; packaged Windows x64/macOS ARM64 smoke; semantic theme tokens/reduced-motion foundation |
 | 1B transactions | External-writer races, stale revisions, path/file/recovery identity and symlink substitution, crash-point recovery, durability semantics, undo/redo conflict boundaries on both targets |
-| 1C project lifecycle | New-project staging/failure cleanup; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
+| 1C project lifecycle | New-project staging/failure cleanup; parent/stage child-process and promotion races; restart-safe verified SDK installation/provenance; crash-safe Recent Projects; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
 | 1F Source | Partial CST/range mapping, no-op/minimal-patch golden tests, direct source→Scene sync, exact custom-code preservation, external conflicts |

@@ -55,6 +55,24 @@ parent/SDK/recent IDs. The core owns application-local Recent Projects, approved
 parent handles, project metadata, SDK download/extraction, allowlisted subprocesses,
 and current open-project lifecycle state.
 
+Recent Projects uses a retained application-state directory anchor. Updates are fully
+serialized into a private create-new sibling, platform-flushed (`F_FULLFSYNC` for the
+file on macOS), atomically replace the live regular file, flush the directory where
+supported, and verify the committed bytes. Pre-commit failure leaves the preceding
+store intact; a crash after replacement exposes the complete new store. Stale files
+from prior processes are ignored rather than broadly enumerated or deleted.
+
+Managed SDK installation checksum-validates and safely extracts the official pinned
+archive into a private unit, recursively flushes the extracted tree, validates the
+launcher/template, writes checksum-derived provenance inside that unit, flushes it,
+then performs one retained-parent no-replace promotion. Interrupted owned candidates,
+stages, and partial downloads are moved into uniquely named quarantine entries; they
+cannot wedge retry and are not recursively deleted during recovery. The prior external
+provenance layout migrates only when it exactly matches the inspected SDK. Managed
+discovery establishes directory identity and launcher/template fingerprints without
+executing the SDK, requires embedded or legacy checksum-derived provenance to match,
+and only then performs the exact-version probe; post-probe identity is checked again.
+
 Electron remains the ADR-defined fallback, not a second production implementation.
 The disposable candidates under `spikes/desktop-shells/` are evidence only and must
 not be imported as the Phase 1 production architecture.

@@ -35,11 +35,23 @@ Loomlight definitions, Chapter 1 / Scene 1 source, and versioned metadata. The s
 finalisation.
 
 Staging uses a private, uniquely named sibling directory on the destination
-filesystem. The lifecycle service retains the approved parent identity, revalidates
-it and destination absence immediately before promotion, and uses a platform
+filesystem. Stage creation itself is descriptor-relative to retained parent authority
+on Unix/macOS and occurs while the Windows parent namespace is pinned. Privileged
+Unix/macOS Ren'Py/Git children enter the retained stage descriptor; Windows retains a
+no-delete-share stage handle through child creation. The lifecycle service revalidates
+the approved parent/stage and destination absence immediately before promotion, and uses a platform
 no-replace directory rename. It never treats an existing empty directory as an
 available destination. Recent Projects is updated only after promotion succeeds.
 Cleanup requires a matching ownership marker and may remove only that private stage.
+
+Portable promotion by an open directory handle is not available on both supported
+platforms. A substitution in the final validation-to-rename interval can therefore
+make the rename operate on a replacement name, but identity and ownership-marker checks
+run on the promoted object before marker removal/open. A replacement is moved to a
+unique rejected-final quarantine name and reported as failure; it cannot survive at the
+requested final path, and neither it nor the retained approved stage is silently
+destroyed. This narrower guarantee replaces any interpretation that same-name
+substitution itself is impossible.
 
 Opening a Loomlight project validates metadata and source paths as data. It never
 runs Ren'Py. Executing the freshly generated stage during creation is a separate,

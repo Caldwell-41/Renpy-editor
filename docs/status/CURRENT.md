@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C durability/race remediation in progress; Phase 1D not approved<br>
+**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -9,8 +9,8 @@
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
   are complete. The correction and subsequent recovery-enumeration follow-up re-closed
-  Gate E. Phase 1C was separately approved, completed, and has now been reopened for
-  the bounded [durability/race remediation](../tasks/active/phase-1c-durability-race-remediation.md).
+  Gate E. Phase 1C was separately approved, completed, and re-closed by the bounded
+  [durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md).
   No later milestone is approved.
 - The bounded [Phase 1C task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
   is archived and ADR 0005 is accepted. Production implementation includes versioned
@@ -43,6 +43,20 @@
   `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`). Quality run
   `34832555407` passed at the same commit. Failed/superseded corrective runs remain
   recorded in the archived corrective brief and are not reclassified as passes.
+- The final Phase 1C durability/race correction makes managed SDK payload/provenance
+  one durable promotion unit with bounded quarantine/retry, atomically replaces Recent
+  Projects through retained application-state authority, anchors project stage child
+  work and project-open inspection, and detects/quarantines final-promotion
+  substitution. Managed provenance is now checked before SDK execution.
+- [Production run 34849801157](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34849801157)
+  at `bdc7ad60a64bfa51fd9c5380b33fd7fda6d92131` passed Windows x64 job
+  `103994559964` and macOS ARM64 job `103994559633`: platform core suites, official
+  Ren'Py 8.5.3 lifecycle/remediation markers, desktop tests, packaging, packaged smoke,
+  scans, and inventories. Evidence artifacts are `10350511403` (Windows, SHA-256
+  `30fd5e2a8479513eace75856aa9747a63cafe70be2cbf6124cc1be1e8566d675`) and
+  `10351240446` (macOS, SHA-256
+  `cf3e7dc9a913ca1b84ca5b8377e1af0422b880ed66d16e93e8d7fe684a17e9d5`). Quality run
+  `34849801200` passed. Failed/superseded attempts remain in the archived brief.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
   main-WebView capability plus matching handler guard, capability-specific ports, locked
@@ -126,8 +140,8 @@
 
 ## Next action
 
-Complete the active Phase 1C durability/race remediation's Windows/macOS target gate,
-fresh lifecycle review, and evidence reconciliation. Do not begin Phase 1D.
+Await explicit approval for a new bounded Phase 1D task. Do not begin Phase 1D from
+this checkpoint.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

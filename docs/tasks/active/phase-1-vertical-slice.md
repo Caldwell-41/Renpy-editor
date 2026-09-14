@@ -142,14 +142,16 @@ separately approved and completed without changing that replacement-only boundar
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** Reopened for the active
-[Phase 1C durability/race remediation](phase-1c-durability-race-remediation.md).
+**Status:** Complete and re-closed by the archived
+[Phase 1C durability/race remediation](../archive/2026-09-14-phase-1c-durability-race-remediation.md).
 The earlier archived
 [Phase 1C corrective remediation](../archive/2026-09-14-phase-1c-corrective-lifecycle.md)
 remains historical evidence.
 The original [Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md)
 remains historical implementation evidence; corrective production run `34832555392`
 passed the complete Windows x64/macOS ARM64 production gate at `08daf385`.
+Corrective production run `34849801157` passed the strengthened lifecycle gate at
+`bdc7ad60` on both supported targets.
 
 Implement Welcome/Recent Projects and the New Project workflow:
 
@@ -171,7 +173,9 @@ Phase 1 does not reconstruct deleted metadata.
 
 **Gate:** create → validate → close → reopen works on both targets; the generated game
 uses the documented conventional paths, runs with its standard Ren'Py menu/save/load
-infrastructure, and also runs without `.renpy-editor/`.
+infrastructure, and also runs without `.renpy-editor/`. Corrective closure additionally
+requires managed-SDK and Recent Projects crash recovery plus deterministic
+parent/stage/child/promotion race evidence on both supported targets.
 
 ### 1D — Supporting authoring models: Characters, Assets, Variables
 

@@ -85,13 +85,28 @@ explicit minimal environment. Git additionally clears ambient `GIT_*` redirects 
 configuration and uses a private empty template. Approved SDK records are revalidated
 against filesystem identity and launcher/template fingerprints; app-managed reuse also
 requires checksum-derived provenance. The private project stage retains filesystem
-identity through finalisation and fails closed on same-name substitution. Git authority
+identity through finalisation. Stage creation is anchored to the approved parent;
+Unix/macOS child processes enter the retained stage descriptor and Windows pins the
+stage namespace through process creation. A final-promotion pathname substitution is
+not claimed impossible on every supported filesystem: post-promotion identity/marker
+verification rejects and quarantines a replacement, so it never becomes the final
+project and neither the approved stage nor replacement is silently deleted. Git authority
 is only direct `git init` in the owned stage. No general Tauri filesystem,
 shell, HTTP, opener, or process plugin is granted. The
 packaged target probe exercises main-window success, unauthorised-window rejection,
 unknown command rejection, malformed payload rejection, ambient plugin denial, Node
 global absence, direct network denial, popup denial, external navigation denial, and
 renderer-secret absence.
+
+Application-local Recent Projects and the managed SDK root also retain directory
+authority and use no-follow file operations. Recent writes stage, platform-flush,
+atomically replace, directory-flush where supported, and verify. Managed SDK promotion
+exposes provenance and payload together only after recursive staged-tree durability;
+legacy/incomplete states are rejected or moved aside without recursive recovery-time
+deletion. Managed discovery checks the non-executing identity and launcher/template
+fingerprints against checksum-derived provenance before the first version-probe spawn,
+then rechecks identity after the probe. A selected browsed SDK remains an explicit user-approved executable trust
+boundary and is fingerprint-revalidated around each bounded operation.
 
 ## Credential and network rules
 

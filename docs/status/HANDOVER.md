@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1C durability/race remediation in progress; Phase 1D not approved<br>
+**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -10,7 +10,7 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Active Phase 1C durability/race remediation](../tasks/active/phase-1c-durability-race-remediation.md)
+4. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
 5. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
 6. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
 7. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
@@ -26,13 +26,16 @@ The approved product brief remains authoritative. The user explicitly approved P
 1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
 instruction.
 
-## Active Phase 1C correction
+## Completed Phase 1C durability/race correction
 
-Phase 1C is reopened for managed-SDK restart durability, crash-safe Recent Projects,
-and deterministic post-validation/in-flight project-stage race evidence. The active
-brief is authoritative until supported-target validation and the fresh Phase 1C review
-complete. Earlier Phase 1C runs remain historical evidence and are not evidence for
-the new regressions.
+Phase 1C is re-closed. Managed SDK install/recovery, Recent Projects replacement,
+project-stage child use/promotion, and anchored project opening now carry the corrected
+durability and race contracts. Fresh review also moved the managed provenance check
+before SDK execution. Production run `34849801157` at `bdc7ad60` passed Windows x64
+job `103994559964` and macOS ARM64 job `103994559633`, with evidence artifacts
+`10350511403` and `10351240446`; quality run `34849801200` passed. The archived brief
+records exact designs, commits, hashes, failed/superseded evidence, and limitations.
+No Phase 1D work was started.
 
 ## Completed Phase 1C checkpoint
 

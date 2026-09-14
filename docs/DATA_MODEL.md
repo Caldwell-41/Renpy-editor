@@ -204,4 +204,8 @@ SDK adapter/version, even bounded resolution, lifecycle capability, one Chapter 
 Scene record, the Scene's globally unique technical label and source path, and the
 last-open Chapter/Scene selection. IDs are UUIDs and paths are relative forward-slash
 paths. Unknown fields are preserved on schema round trips. Machine-local absolute
-paths exist only in the application-local versioned Recent Projects store.
+paths exist only in the application-local versioned Recent Projects store. That store
+is one atomically replaced JSON object: an interrupted pre-commit update retains the
+previous complete schema version, while a committed replacement is verified before
+the lifecycle operation reports success. Stale sibling temporaries are not data-model
+inputs and are never broadly deleted during an unrelated update.
