@@ -31,17 +31,17 @@ reputation checks are recorded later-phase limitations, not inferred Phase 0 pas
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A production scaffold complete; Phase 1B and later milestones await
-separate explicit approval.
+**Status:** Phase 1A scaffold and Phase 1B transaction/recovery foundation complete;
+Phase 1C and later milestones await separate explicit approval.
 
 **Outcome:** deliver a small but genuinely usable Loomlight-created Ren'Py project from
 creation through authoring, validation, run, local Git checkpoint, close, and reopen.
 The bounded implementation sequence is defined in
 [the Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md). The completed
 [production scaffold](tasks/archive/2026-09-14-phase-1-production-scaffold.md) is the
-first implementation gate; the planned
-[transaction/recovery milestone](tasks/active/phase-1-transaction-recovery.md) remains
-unapproved.
+first implementation gate; the completed
+[transaction/recovery milestone](tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+closes the production file Gate E before authoring work.
 
 Phase 1 includes:
 

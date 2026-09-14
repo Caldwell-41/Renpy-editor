@@ -4,12 +4,12 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
-Phase 0 is complete. Phase 1 product/UX planning is defined but implementation remains
+Phase 0, Phase 1A, and Phase 1B are complete. Later Phase 1 implementation remains
 separately approval-gated. Read the
 [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
 sequence, the archived
 [Phase 1 scaffold](tasks/archive/2026-09-14-phase-1-production-scaffold.md), and the
-approved [Phase 1B transaction/recovery brief](tasks/active/phase-1-transaction-recovery.md)
+completed [Phase 1B transaction/recovery brief](tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
 and its [production transaction contract](TRANSACTIONS.md).
 
 | Concern | Canonical document |
@@ -27,7 +27,7 @@ and its [production transaction contract](TRANSACTIONS.md).
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
 | Completed Phase 1A implementation gate | [tasks/archive/2026-09-14-phase-1-production-scaffold.md](tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
-| Active Phase 1B gate | [tasks/active/phase-1-transaction-recovery.md](tasks/active/phase-1-transaction-recovery.md) |
+| Completed Phase 1B gate | [tasks/archive/2026-09-14-phase-1-transaction-recovery.md](tasks/archive/2026-09-14-phase-1-transaction-recovery.md) |
 | Continuation handover | [status/HANDOVER.md](status/HANDOVER.md) |
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |

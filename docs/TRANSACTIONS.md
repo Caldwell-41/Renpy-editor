@@ -149,3 +149,12 @@ later milestones.
 Phase 1B adds no renderer operation. The only desktop IPC remains the Phase 1A
 versioned core_request allowlist, scoped to local WebView main. No Tauri filesystem,
 shell, process, HTTP, opener, root-picker, or credential permission is added.
+
+## Phase 1B gate evidence
+
+[Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
+at `85690bd4ebde95f9ee707175e54336bfd83af0f8` passed this contract on Windows x64
+job 103832559663 and macOS ARM64 job 103832559907 with locked Node 24.19.0, npm
+11.9.0, and Rust/Cargo 1.90.0 toolchains. The complete fixture and crash-point list,
+local commands, retained artifacts, and failed-run resolution are recorded in the
+[archived Phase 1B task](tasks/archive/2026-09-14-phase-1-transaction-recovery.md).

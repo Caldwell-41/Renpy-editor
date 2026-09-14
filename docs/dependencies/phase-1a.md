@@ -1,6 +1,6 @@
 # Phase 1 production dependency and licence inventory
 
-**Reviewed:** 2026-09-14<br>
+**Reviewed:** 2026-09-14 after the Phase 1B target gate<br>
 **Scope:** Phase 1A scaffold plus Phase 1B transaction foundation
 
 ## Locked toolchains

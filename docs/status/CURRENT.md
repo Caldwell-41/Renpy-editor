@@ -1,13 +1,13 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 0 and Phase 1A complete; Phase 1B implementation active<br>
+**Phase:** Phase 0, Phase 1A, and Phase 1B complete; Phase 1C not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- The Phase 0 corrective checkpoint and bounded Phase 1A production scaffold are
-  complete. Phase 1B is explicitly approved and active; no later milestone is
+- The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and bounded
+  Phase 1B transaction/recovery foundation are complete. No later milestone is
   approved.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
@@ -39,14 +39,15 @@
   [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md).
 - The first Phase 1 implementation gate is the completed
   [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
-  The bounded [Phase 1B transaction/recovery brief](../tasks/active/phase-1-transaction-recovery.md)
-  is now active.
+  The bounded [Phase 1B transaction/recovery brief](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+  is complete.
 - Phase 1B production code implements a core-only multi-mutation transaction set,
   retained accepted/displaced bytes, alternating checksummed journals, deterministic
   recovery inspection, exact revision/path/root checks, revision-guarded history, and
-  macOS/Windows platform adapters. The local core suite passes; equivalent hosted
-  target evidence is still required before closure. See
-  [TRANSACTIONS.md](../TRANSACTIONS.md) and ADR 0004.
+  macOS/Windows platform adapters. [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
+  passed the complete Windows x64 and macOS ARM64 gate at `85690bd4`; quality run
+  34797222651 also passed. See [TRANSACTIONS.md](../TRANSACTIONS.md), ADR 0004, and
+  the archived task for exact evidence and limitations.
 - ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
   minimal range patches. Authoritative source, formatting, comments, custom syntax,
   embedded Python, and unsupported regions remain losslessly preserved.
@@ -78,17 +79,15 @@
   with simple assignment; basic placement/transitions/music/SFX use extensible models.
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
-- Production authoring writes remain blocked until Phase 1 closes parser/file Gate E
-  with a platform transaction/recovery design that prevents silent loss of accepted or
-  competing external edits.
+- Production file Gate E is closed by Phase 1B. Authoring remains absent and blocked
+  until separately approved milestones implement parser/source and product workflows
+  through this transaction boundary.
 
 ## Next action
 
-Continue only the active
-[Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md).
-Obtain equivalent Windows x64 and macOS ARM64 production-matrix evidence and resolve
-any failures. Do not begin Phase 1C. Production authoring remains blocked until Phase
-1B is truthfully closed.
+Stop. Phase 1C project lifecycle/SDK work is the next planned milestone but is not
+approved. Do not implement New Project, project generation/import, SDK workflow, or
+any authoring surface without a new explicit instruction.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

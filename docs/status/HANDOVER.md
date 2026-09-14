@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 0 and Phase 1A complete; Phase 1B implementation active<br>
+**Phase:** Phase 0, Phase 1A, and Phase 1B complete; Phase 1C not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -11,7 +11,7 @@
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
 4. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-5. [Planned Phase 1B transaction/recovery gate](../tasks/active/phase-1-transaction-recovery.md)
+5. [Completed Phase 1B transaction/recovery gate](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
 6. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
 7. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
@@ -21,7 +21,7 @@ The approved product brief remains authoritative. The user explicitly approved P
 1B on 2026-09-14. Phase 1C and every later milestone still require a new explicit
 instruction.
 
-## Active Phase 1B checkpoint
+## Completed Phase 1B foundation
 
 - app/src-core/src/transaction contains the production multi-path transaction,
   identity/path checks, platform replacement adapters, alternating journal/recovery
@@ -34,8 +34,19 @@ instruction.
   and ambient-authority denials remain unchanged.
 - The existing single production matrix now retains the Phase 1B test log as well as
   packaged-boundary and dependency evidence, avoiding a duplicate expensive matrix.
-- Windows x64 and macOS ARM64 evidence has not yet been recorded. Phase 1B remains
-  open until both pass and the final evidence is documented.
+- [Production run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
+  at `85690bd4` passed Windows x64 job 103832559663 and macOS ARM64 job
+  103832559907, including the transaction suite, desktop tests, packaging, packaged
+  denial smoke, secrets, and dependency/licence inventory. Evidence artifacts are
+  10330271852 (Windows) and 10329987775 (macOS).
+- Run 34796513503 passed at the prior implementation commit, then contract review found
+  its pre-commit macOS evidence files used ordinary `sync_all`. Commit `85690bd4`
+  corrected them to use the required platform flush before the final target run.
+- The preceding run 34796369255 remains failed evidence. Its pushed `Cargo.lock` was
+  truncated by the repository-write transport, so both jobs correctly failed the core
+  step. Commit `ecc369a7` restored the validated lockfile before the successful run.
+- Phase 1B is archived and complete. No Phase 1C project lifecycle, SDK, parser,
+  authoring, or renderer filesystem authority was implemented.
 
 ## Completed Phase 1A implementation
 
@@ -67,7 +78,7 @@ instruction.
 - Earlier command/probe failures, the renderer false positive, runner-setup failures,
   and artifact quota reports remain recorded in the archived task as evidence. They
   were not treated as passes.
-- Phase 1A is archived and complete. Stop: the active Phase 1B brief is planning only.
+- Phase 1A is archived and complete.
 
 ## Accepted Phase 0 boundaries
 
@@ -151,12 +162,10 @@ next begins.
 
 ## Highest retained engineering risk
 
-Production file writing is still blocked by parser/file Gate E. Phase 0 proved useful
-race detection and recovery behavior but did not establish portable compare-and-swap
-against a non-cooperating external writer in the final validation-to-replace interval,
-and equivalent Windows directory-entry durability was not proven. Milestone 1B must
-resolve this using reviewed platform transaction/recovery semantics and tests before
-production authoring writes are trusted.
+Gate E is closed with journalled recoverable semantics, not a portable compare-and-swap
+claim. Multi-path transactions are recoverable sequences, Windows ordinary-user
+directory-entry power-loss durability is not claimed, and macOS requires
+`F_FULLFSYNC`. Future lifecycle and authoring work must use this boundary.
 
 ## Deferred beyond Phase 1
 

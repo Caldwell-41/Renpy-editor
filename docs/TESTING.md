@@ -109,6 +109,26 @@ injected packaged-WebView denial smoke, artifact privacy scan, and dependency/li
 inventory. Lightweight evidence artifacts 10328234722 and 10328548641 were retained;
 full packages were intentionally not uploaded on this routine push.
 
+Phase 1B closed on
+[run 34797222616](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34797222616)
+at `85690bd4ebde95f9ee707175e54336bfd83af0f8`. Windows x64 job 103832559663
+and macOS ARM64 job 103832559907 each passed the same 24-test transaction suite (plus
+the ignored worker invoked by its parent at seven real termination boundaries),
+desktop tests, packaging, packaged denial smoke, artifact secret scan, and the 76 npm /
+437 Cargo dependency inventory. Both used Node 24.19.0, npm 11.9.0, and Rust/Cargo
+1.90.0. Retained lightweight artifacts are 10330271852 (Windows) and 10329987775
+(macOS); routine full-package upload was intentionally skipped.
+
+Run 34796513503 passed at the preceding implementation commit. Contract reconciliation
+then found that pre-commit stage/accepted copies and journal temporaries used ordinary
+`sync_all` on macOS; `85690bd4` routes them through the required platform flush, and
+the final matrix above exercises that correction.
+
+Run 34796369255 at `cc1ea6b8` is retained failed evidence. Both targets stopped at the
+core step because the repository-write transport had truncated `Cargo.lock`; the
+complete locally validated lockfile was restored in `ecc369a7` before the passing
+matrix. This was a diagnosed committed-input defect, not a flaky target result.
+
 ## Planned layers
 
 | Layer | Deterministic coverage |

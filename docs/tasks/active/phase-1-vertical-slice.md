@@ -1,6 +1,6 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Status:** Planned; Phase 1A complete, later milestones require explicit user approval<br>
+**Status:** Planned; Phase 1A and 1B complete, later milestones require explicit user approval<br>
 **Scope:** Production vertical slice after the scaffold gate; no Phase 2+ features
 
 ## Purpose
@@ -119,8 +119,7 @@ privileges or adding authoring functionality.
 ### 1B — Transaction, file coordination, and recovery foundation
 
 Follow the bounded
-[Phase 1B planning brief](phase-1-transaction-recovery.md) only after new explicit
-user approval.
+[completed Phase 1B brief](../archive/2026-09-14-phase-1-transaction-recovery.md).
 
 Implement the production source/file transaction boundary before any visual authoring
 is permitted to write project source. Close Phase 0 Gate E rather than assuming the
@@ -134,6 +133,9 @@ data instead of making an unprovable compare-and-swap claim.
 
 **Gate:** no accepted edit is silently lost or overwrites an external revision in the
 specified race/recovery suite on Windows x64 and macOS ARM64.
+
+Completed 2026-09-14 by production run 34797222616. Phase 1C remains separately
+approval-gated.
 
 ### 1C — Project lifecycle and SDK foundation
 
