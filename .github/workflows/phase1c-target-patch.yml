@@ -19,60 +19,23 @@ jobs:
         with:
           ref: phase1c-corrective-targets
           fetch-depth: 0
-      - name: Apply target-specific corrections
+      - name: Normalize paths passed to Ren'Py
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          lifecycle = Path('app/src-core/src/lifecycle.rs')
-          text = lifecycle.read_text()
-          old = "        let parent = open_parent(&parent_path).unwrap();\n        let token = uuid::Uuid::new_v4().to_string();\n"
-          new = "        let parent = open_parent(&parent_path).unwrap();\n        let parent_path = parent.path.clone();\n        let token = uuid::Uuid::new_v4().to_string();\n"
-          if text.count(old) != 1:
-              raise SystemExit('stage test setup not found exactly once')
-          lifecycle.write_text(text.replace(old, new))
-
           renpy = Path('app/src-core/src/renpy.rs')
           text = renpy.read_text()
-          marker = "    }\n}\n\nfn run_bounded("
-          if text.count(marker) != 1:
-              raise SystemExit('RenPy environment insertion point not found exactly once')
-          windows = "\n".join([
-              "    #[cfg(windows)]",
-              "    for key in [",
-              "        \"ALLUSERSPROFILE\",",
-              "        \"COMMONPROGRAMFILES\",",
-              "        \"COMMONPROGRAMFILES(X86)\",",
-              "        \"COMMONPROGRAMW6432\",",
-              "        \"COMPUTERNAME\",",
-              "        \"DRIVERDATA\",",
-              "        \"HOMEDRIVE\",",
-              "        \"HOMEPATH\",",
-              "        \"NUMBER_OF_PROCESSORS\",",
-              "        \"OS\",",
-              "        \"PROCESSOR_ARCHITECTURE\",",
-              "        \"PROCESSOR_IDENTIFIER\",",
-              "        \"PROCESSOR_LEVEL\",",
-              "        \"PROCESSOR_REVISION\",",
-              "        \"PROGRAMDATA\",",
-              "        \"PROGRAMFILES\",",
-              "        \"PROGRAMFILES(X86)\",",
-              "        \"PROGRAMW6432\",",
-              "        \"PUBLIC\",",
-              "        \"SESSIONNAME\",",
-              "        \"SYSTEMDRIVE\",",
-              "        \"USERDOMAIN\",",
-              "        \"USERDOMAIN_ROAMINGPROFILE\",",
-              "        \"USERNAME\",",
-              "    ] {",
-              "        if let Some(value) = std::env::var_os(key) {",
-              "            command.env(key, value);",
-              "        }",
-              "    }",
-          ])
-          replacement = "    }\n" + windows + "\n}\n\nfn run_bounded("
-          renpy.write_text(text.replace(marker, replacement))
+          old = '        let mut value = vec![executable.into_os_string(), script.into_os_string()];\n'
+          new = '        let mut value = vec![command_path(&executable), command_path(&script)];\n'
+          if text.count(old) != 1:
+              raise SystemExit('Windows launcher vector not found exactly once')
+          text = text.replace(old, new)
+          old = '        .args(args)\n        .current_dir(cwd)\n'
+          new = '        .args(args)\n        .current_dir(command_path(cwd))\n'
+          if text.count(old) != 1:
+              raise SystemExit('process cwd not found exactly once')
+          renpy.write_text(text.replace(old, new))
           PY
       - name: Format
         working-directory: app
@@ -80,12 +43,12 @@ jobs:
       - name: Run local core suite
         working-directory: app
         run: cargo test -p loomlight-core --locked
-      - name: Commit source corrections
+      - name: Commit source correction
         shell: bash
         run: |
           git config user.name Caldwell-41
           git config user.email 255503715+Caldwell-41@users.noreply.github.com
-          git add app/src-core/src/lifecycle.rs app/src-core/src/renpy.rs
+          git add app/src-core/src/renpy.rs
           git diff --cached --check
-          git commit -m "fix: reconcile Phase 1C target behavior"
+          git commit -m "fix: normalize Windows Ren'Py process paths"
           git push origin HEAD:phase1c-corrective-targets
