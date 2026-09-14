@@ -142,6 +142,10 @@ blocked and separately approval-gated.
 
 ### 1C — Project lifecycle and SDK foundation
 
+**Status:** In progress under the bounded
+[Phase 1C task](phase-1c-project-lifecycle.md). ADR 0005 records the approved starter
+generation and no-replace finalisation design.
+
 Implement Welcome/Recent Projects and the New Project workflow:
 
 1. title, editable folder name, parent directory, final path preview;

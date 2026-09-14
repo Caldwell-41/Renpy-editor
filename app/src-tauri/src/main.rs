@@ -1,15 +1,19 @@
-use loomlight_core::handle_request;
+use loomlight_core::{
+    handle_application_request, lifecycle::LifecycleService, validate_request, CoreResponse,
+};
 use serde_json::{json, Value};
 use std::{
     io::Write,
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc,
+        Arc, Mutex,
     },
     thread,
     time::Duration,
 };
 use tauri::{Manager, WebviewUrl};
+
+struct DesktopState(Mutex<Option<LifecycleService>>);
 
 static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
@@ -19,6 +23,7 @@ static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 fn core_request(
     window: tauri::WebviewWindow,
     app: tauri::AppHandle,
+    state: tauri::State<'_, DesktopState>,
     request: Value,
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
@@ -30,7 +35,81 @@ fn core_request(
     let smoke_payload = is_smoke_report
         .then(|| request.get("payload").cloned())
         .flatten();
-    let response = handle_request(request, smoke_enabled);
+    let response = {
+        let validated = match validate_request(&request) {
+            Ok(value) => value,
+            Err(response) => return Ok(response),
+        };
+        let request_id = validated.request_id.clone();
+        let operation = validated.operation.to_owned();
+        let payload_empty = validated.payload.is_empty();
+        let mut guard = state
+            .0
+            .lock()
+            .map_err(|_| "Desktop lifecycle state is unavailable.")?;
+        let lifecycle = guard
+            .as_mut()
+            .ok_or("Desktop lifecycle state is unavailable.")?;
+        match operation.as_str() {
+            "project.chooseParent" if payload_empty => match rfd::FileDialog::new()
+                .set_title("Choose project location")
+                .pick_folder()
+            {
+                Some(path) => match lifecycle.register_parent(&path) {
+                    Ok(choice) => CoreResponse::success(
+                        request_id,
+                        serde_json::to_value(choice).unwrap_or(Value::Null),
+                    ),
+                    Err(_) => CoreResponse::failure(
+                        request_id,
+                        "INVALID_PARENT",
+                        "Choose an existing safe parent folder.",
+                    ),
+                },
+                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+            },
+            "sdk.browse" if payload_empty => match rfd::FileDialog::new()
+                .set_title("Choose Ren'Py 8.5.3 SDK")
+                .pick_folder()
+            {
+                Some(path) => match lifecycle.register_sdk(&path, "browsed") {
+                    Ok(sdk) => CoreResponse::success(
+                        request_id,
+                        serde_json::to_value(sdk).unwrap_or(Value::Null),
+                    ),
+                    Err(_) => CoreResponse::failure(
+                        request_id,
+                        "UNSUPPORTED_SDK",
+                        "The selected folder is not a supported Ren'Py SDK.",
+                    ),
+                },
+                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+            },
+            "project.openPicker" if payload_empty => match rfd::FileDialog::new()
+                .set_title("Open Loomlight project")
+                .pick_folder()
+            {
+                Some(path) => match lifecycle.open_path(&path) {
+                    Ok(project) => CoreResponse::success(
+                        request_id,
+                        serde_json::to_value(project).unwrap_or(Value::Null),
+                    ),
+                    Err(_) => CoreResponse::failure(
+                        request_id,
+                        "INVALID_LOOMLIGHT_PROJECT",
+                        "This is not a valid supported Loomlight project.",
+                    ),
+                },
+                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+            },
+            "project.chooseParent" | "sdk.browse" | "project.openPicker" => CoreResponse::failure(
+                request_id,
+                "INVALID_PAYLOAD",
+                "Payload does not match the operation schema.",
+            ),
+            _ => handle_application_request(request, smoke_enabled, lifecycle),
+        }
+    };
     if smoke_enabled && is_smoke_report && response.is_success() {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         if let Some(window) = app.get_webview_window("main") {
@@ -78,7 +157,18 @@ fn core_request(
 fn main() {
     let unauthorised_denied = Arc::new(AtomicBool::new(false));
     tauri::Builder::default()
+        .manage(DesktopState(Mutex::new(None)))
         .setup(move |app| {
+            let data_root = app
+                .path()
+                .app_data_dir()
+                .map_err(|_| "application data path is unavailable")?;
+            let lifecycle = LifecycleService::new(data_root)
+                .map_err(|_| "project lifecycle service could not start")?;
+            *app.state::<DesktopState>()
+                .0
+                .lock()
+                .map_err(|_| "project lifecycle state is unavailable")? = Some(lifecycle);
             let config = app
                 .config()
                 .app

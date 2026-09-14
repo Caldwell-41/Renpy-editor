@@ -65,7 +65,7 @@ separate target gates. If Electron is reconsidered through a superseding ADR, it
 `nodeIntegration`-off, context-isolated, sandboxed preload and sender/navigation/CSP
 baseline remains documented in the Phase 0 evidence.
 
-### Phase 1A implemented surface
+### Production renderer and Phase 1C lifecycle surface
 
 The production scaffold exposes one AppManifest command, `core_request`, through one
 local capability scoped to the `main` window. The Rust core checks an exact versioned
@@ -74,9 +74,15 @@ operation list. Errors use stable codes and fixed public messages; synthetic sen
 input is never reflected. The application creates its main webview with explicit
 local-only navigation and new-window denial handlers in addition to a restrictive CSP.
 
-There are no production filesystem, shell/process, HTTP, opener, credential, SDK, Git,
-or project plugins/adapters in Phase 1A. The similarly named future ports are empty
-interfaces with no methods, handles, paths, roots, URLs, or implementations. The
+Phase 1C adds only typed lifecycle operations behind the same command and main-window
+guard. Native pickers mediate parent, SDK, and project selection; renderer follow-ups
+use opaque IDs. The core retains approved parent directory identity, rejects unsafe
+names/symlinks/reparse changes and existing destinations, stages privately, and uses a
+platform no-replace promotion. SDK networking is limited to the explicit supported
+8.5.3 install operation and pinned official URL/checksum. Subprocesses are exact
+allowlisted argument arrays with bounded output/time and process-tree cancellation.
+Git authority is only direct `git init` in the owned stage. No general Tauri filesystem,
+shell, HTTP, opener, or process plugin is granted. The
 packaged target probe exercises main-window success, unauthorised-window rejection,
 unknown command rejection, malformed payload rejection, ambient plugin denial, Node
 global absence, direct network denial, popup denial, external navigation denial, and

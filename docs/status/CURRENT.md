@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1B corrective remediation complete; Gate E re-closed; Phase 1C not approved<br>
+**Phase:** Phase 1C project lifecycle/SDK implementation in progress; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -9,10 +9,16 @@
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
   are complete. The correction and subsequent recovery-enumeration follow-up re-closed
-  Gate E; no later milestone is approved.
+  Gate E. Phase 1C is now explicitly approved and active; no later milestone is approved.
+- The bounded [Phase 1C task](../tasks/active/phase-1c-project-lifecycle.md) and ADR
+  0005 are active. Production implementation now includes versioned metadata/Recent
+  Projects, trusted picker-mediated opaque path choices, staged/no-replace project
+  creation, the exact Ren'Py 8.5.3 adapter/verified installer, optional `git init`, and
+  Welcome/New Project/Open/minimal Chapter 1 → Scene 1 UI. Local gates pass; actual
+  Windows/macOS lifecycle evidence is still required before closure.
 - Production code now lives separately under `app/`: a Cargo core/desktop workspace,
   vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
-  main-WebView capability plus matching handler guard, empty future ports, locked
+  main-WebView capability plus matching handler guard, capability-specific ports, locked
   dependencies, and semantic Quiet Studio Dark/light-ready tokens.
 - Local TypeScript build/tests, framework-independent Rust core tests, repository
   validation, Phase 0 regressions, privacy scans, and dependency audit pass.
@@ -89,13 +95,13 @@
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
 - Production file Gate E is re-closed by the latest corrective Windows/macOS runtime
-  evidence. Authoring remains absent and Phase 1C remains approval-blocked.
+  evidence. Authoring remains absent; Phase 1D remains approval-blocked.
 
 ## Next action
 
-Phase 1B correction is complete. Phase 1C project lifecycle/SDK work is not approved.
-Do not implement New Project, project generation/import, SDK workflow, or any authoring
-surface without a new explicit instruction.
+Finish Phase 1C local validation and the complete actual Windows x64/macOS ARM64 target
+gate, reconcile any failures, record exact evidence, and close/archive only when both
+targets pass. Do not begin Phase 1D.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

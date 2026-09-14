@@ -13,15 +13,29 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
 });
 
-test("frontend operation list contains only harmless scaffold operations", () => {
+test("frontend operation list contains only bounded Phase 1C operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
+    "system.folderName",
+    "project.chooseParent",
+    "project.validateDestination",
+    "project.create",
+    "project.listRecent",
+    "project.openPicker",
+    "project.openRecent",
+    "project.removeRecent",
+    "project.close",
+    "project.current",
+    "sdk.discover",
+    "sdk.browse",
+    "sdk.install",
   ]);
-  assert.equal(CORE_OPERATIONS.some((operation) => /file|shell|process|http|network|git|renpy|credential/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {

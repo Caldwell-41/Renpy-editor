@@ -225,6 +225,14 @@ Loomlight Project, and continued. If `.renpy-editor/` is deliberately deleted, t
 Ren'Py game still runs but Phase 1 does not reconstruct the metadata; that is future
 existing-project import.
 
+Phase 1C implements this lifecycle surface using the existing semantic tokens: a
+restrained two-column Welcome/Recent layout, a four-step wizard with native trusted
+folder selection and exact path preview, bounded creation progress, and a minimal
+Story shell with Chapter 1 / Scene 1 selected. Missing and invalid recent entries stay
+visible; removing one changes only application-local history. No Scene authoring,
+Preview, Beats, inspector, dashboard metrics, gradients, or card-heavy layout is
+introduced.
+
 ## Story hierarchy
 
 The Phase 1 Story tree is `Project → Chapter → Scene`. Chapters are organisational and

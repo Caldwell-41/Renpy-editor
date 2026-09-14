@@ -1,6 +1,10 @@
+pub mod lifecycle;
+pub mod metadata;
 pub mod ports;
+pub mod renpy;
 pub mod transaction;
 
+use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
 
@@ -11,6 +15,19 @@ pub const OPERATIONS: &[&str] = &[
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
+    "system.folderName",
+    "project.chooseParent",
+    "project.validateDestination",
+    "project.create",
+    "project.listRecent",
+    "project.openPicker",
+    "project.openRecent",
+    "project.removeRecent",
+    "project.close",
+    "project.current",
+    "sdk.discover",
+    "sdk.browse",
+    "sdk.install",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -36,7 +53,7 @@ pub struct CoreResponse {
 }
 
 impl CoreResponse {
-    fn success(request_id: String, value: Value) -> Self {
+    pub fn success(request_id: String, value: Value) -> Self {
         Self {
             protocol_version: PROTOCOL_VERSION,
             request_id,
@@ -46,7 +63,7 @@ impl CoreResponse {
         }
     }
 
-    fn failure(request_id: String, code: &'static str, message: &'static str) -> Self {
+    pub fn failure(request_id: String, code: &'static str, message: &'static str) -> Self {
         Self {
             protocol_version: PROTOCOL_VERSION,
             request_id,
@@ -86,6 +103,63 @@ fn request_id_or_placeholder(request: &Value) -> String {
         .to_owned()
 }
 
+pub struct ValidatedRequest<'a> {
+    pub request_id: String,
+    pub operation: &'a str,
+    pub payload: &'a Map<String, Value>,
+}
+
+pub fn validate_request(request: &Value) -> Result<ValidatedRequest<'_>, CoreResponse> {
+    let request_id = request_id_or_placeholder(request);
+    let Some(root) = object(request) else {
+        return Err(CoreResponse::failure(
+            request_id,
+            "INVALID_REQUEST",
+            "Request must be an object.",
+        ));
+    };
+    if !has_exact_keys(
+        root,
+        &["protocolVersion", "requestId", "operation", "payload"],
+    ) || root.get("protocolVersion").and_then(Value::as_u64) != Some(PROTOCOL_VERSION)
+        || root
+            .get("requestId")
+            .and_then(Value::as_str)
+            .is_none_or(|value| !valid_request_id(value))
+    {
+        return Err(CoreResponse::failure(
+            request_id,
+            "INVALID_REQUEST",
+            "Request envelope is invalid.",
+        ));
+    }
+    let operation = root
+        .get("operation")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            CoreResponse::failure(
+                request_id.clone(),
+                "INVALID_REQUEST",
+                "Request envelope is invalid.",
+            )
+        })?;
+    let payload = root
+        .get("payload")
+        .and_then(Value::as_object)
+        .ok_or_else(|| {
+            CoreResponse::failure(
+                request_id.clone(),
+                "INVALID_PAYLOAD",
+                "Payload must be an object.",
+            )
+        })?;
+    Ok(ValidatedRequest {
+        request_id,
+        operation,
+        payload,
+    })
+}
+
 fn empty_payload(payload: &Map<String, Value>) -> bool {
     payload.is_empty()
 }
@@ -110,35 +184,13 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
 }
 
 pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
-    let request_id = request_id_or_placeholder(&request);
-    let Some(root) = object(&request) else {
-        return CoreResponse::failure(request_id, "INVALID_REQUEST", "Request must be an object.");
+    let validated = match validate_request(&request) {
+        Ok(value) => value,
+        Err(response) => return response,
     };
-    if !has_exact_keys(
-        root,
-        &["protocolVersion", "requestId", "operation", "payload"],
-    ) || root.get("protocolVersion").and_then(Value::as_u64) != Some(PROTOCOL_VERSION)
-        || root
-            .get("requestId")
-            .and_then(Value::as_str)
-            .is_none_or(|value| !valid_request_id(value))
-    {
-        return CoreResponse::failure(
-            request_id,
-            "INVALID_REQUEST",
-            "Request envelope is invalid.",
-        );
-    }
-    let Some(operation) = root.get("operation").and_then(Value::as_str) else {
-        return CoreResponse::failure(
-            request_id,
-            "INVALID_REQUEST",
-            "Request envelope is invalid.",
-        );
-    };
-    let Some(payload) = root.get("payload").and_then(Value::as_object) else {
-        return CoreResponse::failure(request_id, "INVALID_PAYLOAD", "Payload must be an object.");
-    };
+    let request_id = validated.request_id;
+    let operation = validated.operation;
+    let payload = validated.payload;
 
     match operation {
         "system.health" if empty_payload(payload) => CoreResponse::success(
@@ -177,6 +229,147 @@ pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
             "Operation is not allowlisted.",
         ),
     }
+}
+
+pub fn handle_application_request(
+    request: Value,
+    smoke_enabled: bool,
+    lifecycle: &mut LifecycleService,
+) -> CoreResponse {
+    let validated = match validate_request(&request) {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+    let request_id = validated.request_id.clone();
+    let response = match validated.operation {
+        "system.folderName"
+            if has_exact_keys(validated.payload, &["title"])
+                && validated
+                    .payload
+                    .get("title")
+                    .and_then(Value::as_str)
+                    .is_some() =>
+        {
+            Ok(
+                json!({ "folderName": lifecycle::folder_name_from_title(validated.payload["title"].as_str().unwrap()) }),
+            )
+        }
+        "project.validateDestination"
+            if has_exact_keys(validated.payload, &["parentId", "folderName"]) =>
+        {
+            let parent = validated.payload.get("parentId").and_then(Value::as_str);
+            let folder = validated.payload.get("folderName").and_then(Value::as_str);
+            match (parent, folder) {
+                (Some(parent), Some(folder)) => lifecycle
+                    .validate_destination(parent, folder)
+                    .and_then(to_value),
+                _ => return invalid_payload(request_id),
+            }
+        }
+        "project.create" => {
+            serde_json::from_value::<CreateProjectRequest>(Value::Object(validated.payload.clone()))
+                .map_err(|_| LifecycleError::InvalidName)
+                .and_then(|payload| lifecycle.create_project(payload))
+                .and_then(to_value)
+        }
+        "project.listRecent" if empty_payload(validated.payload) => {
+            to_value(lifecycle.list_recent())
+        }
+        "project.openRecent" if has_exact_keys(validated.payload, &["recentId"]) => validated
+            .payload
+            .get("recentId")
+            .and_then(Value::as_str)
+            .ok_or(LifecycleError::InvalidMetadata)
+            .and_then(|id| lifecycle.open_recent(id))
+            .and_then(to_value),
+        "project.removeRecent" if has_exact_keys(validated.payload, &["recentId"]) => validated
+            .payload
+            .get("recentId")
+            .and_then(Value::as_str)
+            .ok_or(LifecycleError::InvalidMetadata)
+            .and_then(|id| lifecycle.remove_recent(id))
+            .map(|_| json!({ "removed": true })),
+        "project.close" if empty_payload(validated.payload) => {
+            lifecycle.close();
+            Ok(json!({ "closed": true }))
+        }
+        "project.current" if empty_payload(validated.payload) => to_value(lifecycle.current()),
+        "sdk.discover" if empty_payload(validated.payload) => to_value(lifecycle.discover_sdks()),
+        "sdk.install" if empty_payload(validated.payload) => {
+            lifecycle.install_sdk().and_then(to_value)
+        }
+        "project.chooseParent" | "project.openPicker" | "sdk.browse" => {
+            return CoreResponse::failure(
+                request_id,
+                "DESKTOP_MEDIATION_REQUIRED",
+                "This operation requires the trusted desktop picker.",
+            )
+        }
+        operation if OPERATIONS.contains(&operation) => {
+            return handle_request(request, smoke_enabled)
+        }
+        _ => {
+            return CoreResponse::failure(
+                request_id,
+                "OPERATION_NOT_ALLOWED",
+                "Operation is not allowlisted.",
+            )
+        }
+    };
+    match response {
+        Ok(value) => CoreResponse::success(request_id, value),
+        Err(error) => lifecycle_failure(request_id, error),
+    }
+}
+
+fn to_value<T: Serialize>(value: T) -> Result<Value, LifecycleError> {
+    serde_json::to_value(value).map_err(|_| LifecycleError::Io)
+}
+
+fn invalid_payload(request_id: String) -> CoreResponse {
+    CoreResponse::failure(
+        request_id,
+        "INVALID_PAYLOAD",
+        "Payload does not match the operation schema.",
+    )
+}
+
+fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreResponse {
+    let (code, message) = match error {
+        LifecycleError::InvalidParent => {
+            ("INVALID_PARENT", "Choose an existing safe parent folder.")
+        }
+        LifecycleError::InvalidName => ("INVALID_PROJECT_DETAILS", "Project details are invalid."),
+        LifecycleError::ExistingDestination => {
+            ("DESTINATION_EXISTS", "The destination already exists.")
+        }
+        LifecycleError::UnsafePath => ("UNSAFE_PATH", "The selected path changed or is unsafe."),
+        LifecycleError::UnknownAuthority => (
+            "UNKNOWN_SELECTION",
+            "The approved selection is no longer available.",
+        ),
+        LifecycleError::InvalidMetadata => (
+            "INVALID_LOOMLIGHT_PROJECT",
+            "This is not a valid supported Loomlight project.",
+        ),
+        LifecycleError::UnsupportedSdk => {
+            ("UNSUPPORTED_SDK", "A valid Ren'Py 8.5.3 SDK is required.")
+        }
+        LifecycleError::GitUnavailable => (
+            "GIT_UNAVAILABLE",
+            "Git initialization failed. Install Git or create without Git.",
+        ),
+        LifecycleError::GenerationFailed => (
+            "PROJECT_GENERATION_FAILED",
+            "Ren'Py could not validate the generated project.",
+        ),
+        LifecycleError::CreatedNotOpened => (
+            "CREATED_NOT_OPENED",
+            "The project was created but could not be opened automatically.",
+        ),
+        LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
+    };
+    CoreResponse::failure(request_id, code, message)
 }
 
 #[cfg(test)]
@@ -301,21 +494,23 @@ mod tests {
     }
 
     #[test]
-    fn only_transaction_port_has_new_authority() {
+    fn ports_expose_only_phase_specific_authority() {
         let ports = include_str!("ports.rs");
         assert!(ports.contains("trait SourceTransactionPort"));
         assert!(ports.contains("fn commit("));
         assert!(ports.contains("fn flush("));
         assert!(ports.contains("fn recover("));
         for marker in [
-            "pub trait ProjectFilesystemPort {}",
-            "pub trait RenpyPort {}",
-            "pub trait GitPort {}",
             "pub trait CredentialPort {}",
             "pub trait NetworkProviderPort {}",
         ] {
             assert!(ports.contains(marker));
         }
+        assert!(ports.contains("fn validate_destination("));
+        assert!(ports.contains("fn install_supported("));
+        assert!(ports.contains("fn initialise_new_repository("));
+        assert!(!ports.contains("status("));
+        assert!(!ports.contains("diff("));
         assert!(!ports.contains("Command"));
         assert!(!ports.contains("Url"));
     }

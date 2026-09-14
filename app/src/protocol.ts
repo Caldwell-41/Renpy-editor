@@ -6,6 +6,19 @@ export const CORE_OPERATIONS = [
   "probe.denied",
   "probe.redactedError",
   "probe.smokeReport",
+  "system.folderName",
+  "project.chooseParent",
+  "project.validateDestination",
+  "project.create",
+  "project.listRecent",
+  "project.openPicker",
+  "project.openRecent",
+  "project.removeRecent",
+  "project.close",
+  "project.current",
+  "sdk.discover",
+  "sdk.browse",
+  "sdk.install",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

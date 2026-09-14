@@ -32,7 +32,8 @@ reputation checks are recorded later-phase limitations, not inferred Phase 0 pas
 ## Phase 1 — Complete authoring vertical slice
 
 **Status:** Phase 1A scaffold and Phase 1B transaction/recovery foundation complete;
-Phase 1C and later milestones await separate explicit approval.
+Phase 1C project lifecycle/SDK implementation is in progress; Phase 1D and later await
+separate explicit approval.
 
 **Outcome:** deliver a small but genuinely usable Loomlight-created Ren'Py project from
 creation through authoring, validation, run, local Git checkpoint, close, and reopen.

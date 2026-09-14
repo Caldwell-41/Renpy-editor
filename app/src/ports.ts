@@ -1,11 +1,20 @@
-/**
- * Authority-free markers for future core adapters. Phase 1A intentionally gives
- * these ports no operations, implementations, handles, paths, or credentials.
- */
+/** Renderer-side capability shapes. Implementations are the narrow core bridge;
+ * none expose raw filesystem, process, shell, network, or credential operations. */
 export interface SourceTransactionPort {}
-export interface ProjectFilesystemPort {}
-export interface RenpyPort {}
-export interface GitPort {}
+export interface ProjectFilesystemPort {
+  listRecent(): Promise<unknown>;
+  createProject(request: Readonly<Record<string, unknown>>): Promise<unknown>;
+  openRecent(recentId: string): Promise<unknown>;
+  closeProject(): Promise<unknown>;
+}
+export interface RenpyPort {
+  discover(): Promise<unknown>;
+  installSupported(): Promise<unknown>;
+}
+export interface GitPort {
+  /** Git authority is limited to the create-project initializeGit choice. */
+  readonly initializationOnly: true;
+}
 export interface CredentialPort {}
 export interface NetworkProviderPort {}
 

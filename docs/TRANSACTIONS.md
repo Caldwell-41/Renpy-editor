@@ -158,6 +158,11 @@ Authoritative references:
 
 ## Save, history, cleanup, and renderer authority
 
+Phase 1C project directory creation is deliberately not routed through this
+replacement-only protocol. ADR 0005 defines a separate capability-specific sibling
+stage and no-replace directory promotion. Once later authoring edits existing project
+files, this Phase 1B transaction service remains their sole production write boundary.
+
 Automatic persistence and explicit save/flush use the same service. `durable`,
 `cleaned`, and pre-mutation `rejected` are non-blocking. `prepared` blocks until
 anchored inspection proves safe abandon and explicit finalisation records `cleaned`.

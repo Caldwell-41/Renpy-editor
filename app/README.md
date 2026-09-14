@@ -1,7 +1,8 @@
 # Loomlight production scaffold
 
-This directory contains the Phase 1A production workspace. It is intentionally separate
-from the disposable Phase 0 evidence under `spikes/`.
+This directory contains the Phase 1 production workspace, including the completed 1A
+scaffold and 1B transaction foundation plus the active bounded 1C project lifecycle.
+It remains separate from disposable Phase 0 evidence under `spikes/`.
 
 ## Local checks
 
@@ -24,5 +25,6 @@ npm exec -- tauri build -- --locked
 The production webview has no general filesystem, process, shell, HTTP, or credential
 authority. Its only custom Tauri command is `core_request`, granted through the explicit
 `allow-loomlight-core` permission only to the local `main` WebView, with a matching
-Rust handler guard. Future adapter traits
-are empty markers until their own approved milestones.
+Rust handler guard. Phase 1C's project/SDK/Git-init capabilities are core-owned,
+picker-mediated, typed operations; credentials and general network-provider ports
+remain authority-free.

@@ -15,3 +15,4 @@ tauri-build = { version = "=2.6.3", features = [] }
 loomlight-core = { path = "../src-core" }
 serde_json = "=1.0.151"
 tauri = { version = "=2.11.5", features = [] }
+rfd = "=0.15.4"

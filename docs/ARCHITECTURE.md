@@ -50,6 +50,11 @@ through an explicit capability. General shell, filesystem, and HTTP plugin autho
 is not granted to the webview. Windows WebView2 and macOS WKWebView are separate test
 targets, and engine-specific behavior is recorded rather than normalized away.
 
+Phase 1C keeps native folder pickers in the trusted desktop host and returns opaque
+parent/SDK/recent IDs. The core owns application-local Recent Projects, approved
+parent handles, project metadata, SDK download/extraction, allowlisted subprocesses,
+and current open-project lifecycle state.
+
 Electron remains the ADR-defined fallback, not a second production implementation.
 The disposable candidates under `spikes/desktop-shells/` are evidence only and must
 not be imported as the Phase 1 production architecture.
@@ -196,6 +201,15 @@ Project creation itself is staged: validate destination safety, generate the sca
 and metadata in a private staging location, optionally initialise local Git, validate
 through the pinned SDK, then finalise the project. A failed creation must not leave a
 half-created directory presented as a successful Loomlight project.
+
+ADR 0005 implements that flow using Ren'Py 8.5.3's documented launcher
+`generate_gui <stage> --width ... --height ... --start` command. Loomlight applies its
+deterministic modular overlay, optionally calls direct `git init`, compiles/lints the
+freshly controlled stage, then revalidates the retained parent identity and performs a
+same-parent no-replace rename (`renameatx_np(RENAME_EXCL)` on macOS and `MoveFileExW`
+without replacement on Windows; Linux uses `renameat2(RENAME_NOREPLACE)` for local
+regression). An existing destination, including an empty directory or link, is
+refused. This service is separate from Phase 1B's existing-file replacement boundary.
 
 ## Extensible authoring references
 

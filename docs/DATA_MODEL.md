@@ -198,5 +198,10 @@ rewriting of authoritative `.rpy` source. Deleting `.renpy-editor/` must not sto
 game from running, but Phase 1 does not reconstruct missing metadata as a substitute
 for the deferred arbitrary-project importer.
 
-Exact production JSON schemas are introduced with tests during the approved Phase 1
-vertical slice; the architectural source decision remains ADR 0001.
+Phase 1C implements schema version 1 for `project.json` and `source-map.json`.
+`project.json` contains the stable project ID, distinct title/folder identity, exact
+SDK adapter/version, even bounded resolution, lifecycle capability, one Chapter and
+Scene record, the Scene's globally unique technical label and source path, and the
+last-open Chapter/Scene selection. IDs are UUIDs and paths are relative forward-slash
+paths. Unknown fields are preserved on schema round trips. Machine-local absolute
+paths exist only in the application-local versioned Recent Projects store.

@@ -19,6 +19,15 @@ on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo
 also runnable where a complete Tauri desktop build environment is unavailable. This is
 not a substitute for either target gate.
 
+Phase 1C extends that same cost-scoped production matrix rather than adding a duplicate
+Windows/macOS workflow. Each target restores/downloads the exact official 8.5.3 SDK
+archive, then production code verifies/extracts it and exercises staged create, Git
+init, compile/lint, bounded run, close/recent/open, stable selection, metadata-free
+copy compile/run, standard screen presence, and arbitrary-project rejection. The
+lifecycle log joins the existing lightweight evidence artifact. Without
+`LOOMLIGHT_PHASE1C_SDK_ARCHIVE`, the target-only SDK test records a local skip and does
+not count as target evidence.
+
 Retain the Phase 0 regression suite:
 
 ```bash

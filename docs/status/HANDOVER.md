@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1B corrective remediation complete; Gate E re-closed; Phase 1C not approved<br>
+**Phase:** Phase 1C project lifecycle/SDK implementation in progress; Phase 1D not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -19,8 +19,23 @@
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md)
 
 The approved product brief remains authoritative. The user explicitly approved Phase
-1B on 2026-09-14. Phase 1C and every later milestone still require a new explicit
+1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
 instruction.
+
+## Active Phase 1C checkpoint
+
+- The bounded [Phase 1C task](../tasks/active/phase-1c-project-lifecycle.md) is active.
+- ADR 0005 selects Ren'Py 8.5.3's documented `generate_gui ... --start` mechanism,
+  followed by a deterministic Loomlight overlay, compile/lint, and same-parent
+  no-replace promotion.
+- Production core implementation includes versioned project/source-map metadata,
+  app-local Recent Projects, opaque picker-mediated parent/SDK identities, strict
+  path/name checks, exact-version SDK validation and verified installation, bounded
+  process-tree execution, optional `git init`, open/close/reopen, and the minimal
+  Chapter 1 / Scene 1 shell.
+- Local frontend/core gates pass. The Linux host cannot compile the desktop crate due
+  to its already-recorded missing `pkg-config`/GLib environment. Actual Windows x64
+  and macOS ARM64 Phase 1C lifecycle evidence remains required before closure.
 
 ## Completed Phase 1B correction
 
