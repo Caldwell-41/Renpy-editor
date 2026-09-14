@@ -1337,6 +1337,7 @@ mod tests {
         let parent_path = temp.path().join("projects");
         fs::create_dir(&parent_path).unwrap();
         let parent = open_parent(&parent_path).unwrap();
+        let parent_path = parent.path.clone();
         let token = uuid::Uuid::new_v4().to_string();
         let name = format!(".loomlight-stage-{token}");
         let stage_path = parent_path.join(&name);
