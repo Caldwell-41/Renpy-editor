@@ -1,0 +1,300 @@
+name: Phase 1C corrective documentation closure
+
+on:
+  push:
+    branches: [phase1c-corrective-closure]
+    paths:
+      - .github/workflows/phase1c-docs-closure.yml
+
+permissions:
+  contents: write
+
+jobs:
+  close-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out closure branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: phase1c-corrective-closure
+          fetch-depth: 0
+
+      - name: Archive corrective brief
+        run: git mv docs/tasks/active/phase-1c-corrective-lifecycle.md docs/tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md
+
+      - name: Reconcile canonical Phase 1C status
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected 1 occurrence, found {count}: {old[:80]!r}")
+              p.write_text(text.replace(old, new))
+
+          replace_once(
+              'AGENTS.md',
+              """Phase 1A and corrected Phase 1B are complete; Phase 1C project lifecycle/SDK work is
+          under bounded corrective remediation after post-closure review. Gate E remains closed. ADR
+          0003 selects Tauri 2 and ADR 0005 defines version-pinned staged project creation. Phase
+          1D is not approved; do not begin authoring.
+          """.replace('          ', ''),
+              """Phase 1A, corrected Phase 1B, and corrected Phase 1C project lifecycle/SDK work are
+          complete; Gate E remains closed. ADR 0003 selects Tauri 2 and ADR 0005 defines
+          version-pinned staged project creation. Phase 1D is not approved; do not begin authoring.
+          """.replace('          ', ''),
+          )
+
+          replace_once(
+              'docs/ROADMAP.md',
+              """**Status:** Phase 1A scaffold and Phase 1B transaction/recovery foundation are complete.
+          Phase 1C project lifecycle/SDK foundation is under bounded corrective remediation after
+          post-closure review; Phase 1D and later await separate explicit approval.
+          """.replace('          ', ''),
+              """**Status:** Phase 1A scaffold, Phase 1B transaction/recovery foundation, and corrected
+          Phase 1C project lifecycle/SDK foundation are complete; Phase 1D and later await separate
+          explicit approval.
+          """.replace('          ', ''),
+          )
+
+          replace_once(
+              'docs/status/CURRENT.md',
+              '**Phase:** Phase 1C corrective lifecycle/SDK remediation in progress; Phase 1D not approved<br>',
+              '**Phase:** Corrected Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>',
+          )
+
+          current_anchor = """- [Production run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
+            at `1b241954e936f943d558f267a86f5e3592ab99cb` passed the complete Phase 1C gate:
+            Windows x64 job `103883726104` and macOS ARM64 job `103883726218` both created,
+            validated, ran, closed, and reopened the generated game; checked standard Ren'Py
+            screens and stable Chapter 1 / Scene 1 identity; ran a metadata-free copy; rejected
+            arbitrary Ren'Py opening; and passed desktop/package/security evidence. Artifacts are
+            `10335964464` (Windows) and `10335279104` (macOS). Quality run `34814995493` passed.
+          """.replace('          ', '')
+          current_extra = current_anchor + """- A post-closure review reopened Phase 1C and the bounded
+            [corrective lifecycle/SDK task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+            is now complete. The correction pins private stage identity through privileged execution
+            and promotion, binds SDK capabilities to filesystem identity plus launcher/template
+            fingerprints, requires checksum-derived provenance for managed SDK reuse, sanitizes
+            Ren'Py/Git child environments, neutralizes hostile Git redirection/configuration,
+            deduplicates SDK registration, refuses SDK redirects, dispatches lifecycle work off the
+            Tauri UI thread, and exercises the actual Welcome/New Project DOM in packaged smoke.
+          - [Corrective production run 34832555392](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34832555392)
+            at `08daf385246c345f53f46f9dedc43762a1c060e9` passed the complete production gate:
+            Windows x64 job `103939004703` and macOS ARM64 job `103939004630` both passed the
+            full core suite, official Ren'Py 8.5.3 lifecycle gate, desktop tests, packaging,
+            packaged WebView/lifecycle UI smoke, artifact secret scan, and dependency/licence
+            inventory. Evidence artifacts are `10343096571` (Windows, SHA-256
+            `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`) and
+            `10342841434` (macOS, SHA-256
+            `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`). Quality run
+            `34832555407` passed at the same commit. Failed/superseded corrective runs remain
+            recorded in the archived corrective brief and are not reclassified as passes.
+          """.replace('          ', '')
+          replace_once('docs/status/CURRENT.md', current_anchor, current_extra)
+
+          replace_once(
+              'docs/status/CURRENT.md',
+              """## Next action
+
+          Complete the bounded Phase 1C corrective target gate for stage/SDK identity, sanitized
+          child processes, async desktop dispatch, stable SDK registration, and packaged lifecycle
+          UI smoke. Do not begin Phase 1D until Windows x64 and macOS ARM64 pass and this correction
+          is explicitly re-closed.
+          """.replace('          ', ''),
+              """## Next action
+
+          Stop. Phase 1D Characters/Assets/Variables remains separately approval-gated and has not
+          started. Await a new explicit instruction before beginning it or any later work.
+          """.replace('          ', ''),
+          )
+
+          replace_once(
+              'docs/status/HANDOVER.md',
+              """4. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+          5. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+          6. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+          7. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+          8. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+          9. [ADR 0001](../adr/0001-lossless-source-model.md),
+          """.replace('          ', ''),
+              """4. [Completed Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+          5. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+          6. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+          7. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+          8. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+          9. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+          10. [ADR 0001](../adr/0001-lossless-source-model.md),
+          """.replace('          ', ''),
+          )
+
+          handover_anchor = """- [Production run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
+            at `1b241954e936f943d558f267a86f5e3592ab99cb` passed Windows x64 job
+            `103883726104` and macOS ARM64 job `103883726218`, including the complete lifecycle,
+            metadata-free game, arbitrary-project rejection, desktop tests, packages, denial
+            smoke, secret scan, and dependency inventory. Evidence artifacts are `10335964464`
+            and `10335279104`; quality run `34814995493` passed. The archived task records every
+            preceding failed or superseded run and its diagnosis.
+          """.replace('          ', '')
+          handover_extra = handover_anchor + """- The post-closure review and
+            [corrective task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+            are also complete. Corrective production run `34832555392` at `08daf385` passed
+            Windows x64 job `103939004703` and macOS ARM64 job `103939004630`, including the
+            hostile stage/SDK/Git regressions, official lifecycle gate, desktop/package boundary,
+            packaged lifecycle UI smoke, secret scan, and dependency inventory. Evidence artifacts
+            are `10343096571` (Windows) and `10342841434` (macOS); quality run `34832555407`
+            passed. Phase 1D has not started.
+          """.replace('          ', '')
+          replace_once('docs/status/HANDOVER.md', handover_anchor, handover_extra)
+
+          replace_once(
+              'docs/tasks/active/phase-1-vertical-slice.md',
+              """**Status:** Corrective remediation in progress under
+          [the active Phase 1C corrective task](phase-1c-corrective-lifecycle.md). The original
+          implementation remains archived in
+          [the Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md), and production
+          run 34814995559 remains historical evidence rather than current closure evidence.
+          """.replace('          ', ''),
+              """**Status:** Complete after the archived
+          [Phase 1C corrective remediation](../archive/2026-09-14-phase-1c-corrective-lifecycle.md).
+          The original [Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md)
+          remains historical implementation evidence; corrective production run `34832555392`
+          passed the complete Windows x64/macOS ARM64 production gate at `08daf385`.
+          """.replace('          ', ''),
+          )
+
+          replace_once(
+              'docs/INDEX.md',
+              """Phase 0, Phase 1A, and the bounded Phase 1B corrective transaction/recovery remediation
+          are complete; Gate E is re-closed and later Phase 1 implementation remains separately
+          approval-gated. Read the
+          """.replace('          ', ''),
+              """Phase 0, Phase 1A, corrected Phase 1B, and corrected Phase 1C are complete; Gate E
+          remains closed and Phase 1D/later implementation remains separately approval-gated. Read the
+          """.replace('          ', ''),
+          )
+          replace_once(
+              'docs/INDEX.md',
+              """| Completed Phase 1B corrective remediation | [tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md](tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
+          """.replace('          ', ''),
+              """| Completed Phase 1C corrective remediation | [tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md](tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
+          | Completed Phase 1C lifecycle gate | [tasks/archive/2026-09-14-phase-1c-project-lifecycle.md](tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
+          | Completed Phase 1B corrective remediation | [tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md](tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
+          """.replace('          ', ''),
+          )
+          replace_once(
+              'docs/INDEX.md',
+              """
+          ## Active corrective task
+
+          - [Phase 1C corrective lifecycle and SDK remediation](tasks/active/phase-1c-corrective-lifecycle.md)
+          """.replace('          ', ''),
+              "\n",
+          )
+
+          replace_once(
+              'docs/TESTING.md',
+              """A post-closure review reopened Phase 1C for a bounded correction: private stage and SDK
+          capabilities now retain/revalidate filesystem identity, approved SDK launch/template
+          fingerprints are checked around execution, managed SDK reuse requires checksum-derived
+          provenance, child environments are allowlisted, Git configuration/path redirection is
+          neutralized, Tauri dispatches lifecycle work off the UI thread, repeated SDK selection
+          is deduplicated, redirects are refused, and packaged smoke checks the actual
+          Welcome/New Project DOM. The original run remains historical evidence; a new
+          Windows/macOS production run is required before the gate is re-closed.
+          """.replace('          ', ''),
+              """A post-closure review reopened Phase 1C for a bounded correction: private stage and SDK
+          capabilities now retain/revalidate filesystem identity, approved SDK launch/template
+          fingerprints are checked around execution, managed SDK reuse requires checksum-derived
+          provenance, child environments are allowlisted, Git configuration/path redirection is
+          neutralized, Tauri dispatches lifecycle work off the UI thread, repeated SDK selection
+          is deduplicated, redirects are refused, and packaged smoke checks the actual
+          Welcome/New Project DOM.
+
+          The corrected gate is [run 34832555392](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34832555392)
+          at `08daf385246c345f53f46f9dedc43762a1c060e9`: Windows x64 job `103939004703`
+          and macOS ARM64 job `103939004630` both passed the complete core suite, official
+          Ren'Py 8.5.3 lifecycle test, desktop tests, packaging, packaged WebView/lifecycle UI
+          smoke, secret scan, and dependency/licence inventory. Evidence artifacts are
+          `10343096571` (Windows; SHA-256 `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`)
+          and `10342841434` (macOS; SHA-256 `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`).
+          Quality run `34832555407` passed at the same commit.
+
+          Failed evidence remains explicit: first corrective production run `34829660277` at
+          `60406825` failed the macOS hostile-stage test because the test used the `/var` alias
+          instead of the canonical retained parent path, while Windows exposed verbatim canonical
+          SDK process paths that Ren'Py rejected. Its Windows/macOS evidence artifacts are
+          `10341193070` and `10340778911`. Dedicated target run `34830668266` then passed both
+          supported targets after canonical test setup and Windows process-path normalization;
+          diagnostic runs `34831041290`, `34831227053`, and `34831382649` isolated the Windows
+          failure without weakening the minimal child environment. No failed/skipped step is
+          reclassified as a pass.
+          """.replace('          ', ''),
+          )
+
+          archive = Path('docs/tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md')
+          text = archive.read_text()
+          text = text.replace('**Status:** In progress 2026-09-14', '**Status:** Complete 2026-09-14', 1)
+          text += """
+
+          ## Outcome and closure evidence
+
+          The remediation is complete. Private project stages retain and revalidate filesystem
+          identity across privileged Ren'Py/Git operations and no-replace promotion. SDK
+          capabilities retain filesystem identity plus launcher/template fingerprints; managed SDK
+          reuse additionally requires checksum-derived provenance. Ren'Py and Git subprocesses use
+          allowlisted environments, Git ambient redirects/configuration are neutralized, SDK
+          redirects are refused, repeated SDK registration is stable, long lifecycle dispatch runs
+          off the Tauri UI thread, and packaged smoke exercises the real Welcome/New Project DOM.
+
+          Corrective production run `34832555392` at
+          `08daf385246c345f53f46f9dedc43762a1c060e9` passed Windows x64 job
+          `103939004703` and macOS ARM64 job `103939004630`. Both passed the full core suite,
+          exact official Ren'Py 8.5.3 lifecycle gate, desktop tests, packaging, packaged
+          WebView/lifecycle UI smoke, secret scan, and dependency/licence inventory. Lightweight
+          artifacts are `10343096571` (Windows, SHA-256
+          `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`) and
+          `10342841434` (macOS, SHA-256
+          `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`). Repository
+          quality run `34832555407` passed at the same commit.
+
+          ## Failed and diagnostic evidence retained
+
+          - Production run `34829660277` at `60406825` failed: macOS exposed a regression-test
+            `/var` canonical-alias setup defect; Windows exposed verbatim canonical SDK process
+            paths rejected by Ren'Py. Evidence artifacts are `10341193070` (Windows) and
+            `10340778911` (macOS). Neither failure is classified as a pass.
+          - Dedicated target run `34830668266` was used to verify the supported-target correction.
+            The final macOS and Windows attempts passed the complete core + official lifecycle
+            gates; preceding Windows attempts remain failed evidence.
+          - Diagnostic runs `34831041290` and `34831227053` proved the sanitized environment,
+            SDK rename/restore sequence, and stage marker were not the Windows cause. Run
+            `34831382649` isolated the failure to Rust process-facing verbatim Windows paths.
+            The fix normalizes only paths handed to the child process; internal filesystem
+            identity remains canonical and the minimal child environment remains in force.
+
+          Phase 1D Characters/Assets/Variables was not started and remains separately
+          approval-gated.
+          """.replace('          ', '')
+          archive.write_text(text)
+          PY
+
+      - name: Validate documentation
+        run: |
+          python3 scripts/validate.py
+          git diff --check
+
+      - name: Commit closure documentation
+        shell: bash
+        run: |
+          git config user.name Caldwell-41
+          git config user.email 255503715+Caldwell-41@users.noreply.github.com
+          git add AGENTS.md docs
+          git status --short
+          git commit -m "docs: re-close Phase 1C corrective gate"
+          git push origin HEAD:phase1c-corrective-closure
