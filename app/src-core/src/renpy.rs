@@ -133,6 +133,8 @@ impl RenpyAdapter {
             OsString::from(width.to_string()),
             OsString::from("--height"),
             OsString::from(height.to_string()),
+            OsString::from("--template"),
+            sdk.root.join("gui").into_os_string(),
             OsString::from("--start"),
         ];
         require_success(run_bounded(

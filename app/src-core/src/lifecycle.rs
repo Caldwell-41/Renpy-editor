@@ -532,7 +532,7 @@ fn apply_overlay(
     let scene_id = uuid::Uuid::new_v4().to_string();
     let technical_label = format!("loomlight_scene_{}", scene_id.replace('-', ""));
     let script = format!("# Loomlight entry point. Runnable source remains authoritative.\n\nlabel start:\n    jump {technical_label}\n");
-    write_replace(&game.join("script.rpy"), script.as_bytes())?;
+    write_new_or_replace(&game.join("script.rpy"), script.as_bytes())?;
     #[cfg(test)]
     eprintln!("phase-1c-overlay-checkpoint: script");
     let options = game.join("options.rpy");
@@ -762,6 +762,14 @@ fn write_replace(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
     file.write_all(bytes)
         .and_then(|_| file.sync_all())
         .map_err(|_| LifecycleError::Io)
+}
+
+fn write_new_or_replace(path: &Path, bytes: &[u8]) -> Result<(), LifecycleError> {
+    match fs::symlink_metadata(path) {
+        Ok(_) => write_replace(path, bytes),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => write_new(path, bytes),
+        Err(_) => Err(LifecycleError::Io),
+    }
 }
 
 fn canonical_safe_directory(path: &Path) -> Result<PathBuf, LifecycleError> {
