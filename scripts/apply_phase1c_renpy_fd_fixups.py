@@ -12,68 +12,54 @@ def replace_once(old: str, new: str) -> None:
     text = text.replace(old, new, 1)
 
 
-# Use a process-inherited descriptor path for the project, not the child's cwd.
+# The normal Unix adapter uses renpy.sh from the SDK root. For an operation that must
+# remain bound to an already-open project directory, execute Ren'Py's native runtime
+# directly and fchdir to that directory in the child before exec. This avoids both
+# pathname re-resolution and the shell wrapper's SDK-cwd assumption.
 replace_once(
-    '''                OsString::from("generate_gui"),
-                OsString::from("."),
-                OsString::from("--width"),''',
-    '''                OsString::from("generate_gui"),
-                anchored_directory_argument(stage_anchor)?,
-                OsString::from("--width"),''',
+    '''                launcher_args(&sdk.root, &args)?,
+                Duration::from_secs(180),
+            )?);''',
+    '''                anchored_launcher_args(&sdk.root, &args)?,
+                Duration::from_secs(180),
+            )?);''',
 )
 replace_once(
-    '''                vec![OsString::from("."), OsString::from("compile")],
-                vec![
-                    OsString::from("."),
-                    OsString::from("lint"),''',
-    '''                vec![anchored_directory_argument(stage_anchor)?, OsString::from("compile")],
-                vec![
-                    anchored_directory_argument(stage_anchor)?,
-                    OsString::from("lint"),''',
-)
-
-# Replace the pre-exec fchdir with descriptor inheritance. fcntl is async-signal-safe;
-# the SDK cwd remains unchanged so renpy.sh can locate its own runtime.
-replace_once(
-    '''                if let Some(fd) = anchored_cwd_fd {
-                    if libc::fchdir(fd) != 0 {
-                        return Err(io::Error::last_os_error());
-                    }
-                }
-                Ok(())''',
-    '''                if let Some(fd) = anchored_cwd_fd {
-                    let flags = libc::fcntl(fd, libc::F_GETFD);
-                    if flags < 0 || libc::fcntl(fd, libc::F_SETFD, flags & !libc::FD_CLOEXEC) != 0 {
-                        return Err(io::Error::last_os_error());
-                    }
-                }
-                Ok(())''',
+    '''                    launcher_args(&sdk.root, &command)?,
+                    Duration::from_secs(180),
+                )?);''',
+    '''                    anchored_launcher_args(&sdk.root, &command)?,
+                    Duration::from_secs(180),
+                )?);''',
 )
 
-needle = '''#[cfg(not(windows))]
-fn command_path(path: &Path) -> OsString {
-    path.as_os_str().to_owned()
-}
+needle = '''fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyError> {
 '''
-addition = '''#[cfg(target_os = "macos")]
-fn anchored_directory_argument(directory: &File) -> Result<OsString, RenpyError> {
-    use std::os::fd::AsRawFd;
-    Ok(OsString::from(format!("/dev/fd/{}", directory.as_raw_fd())))
-}
+addition = '''#[cfg(unix)]
+fn anchored_launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyError> {
+    #[cfg(target_os = "macos")]
+    let executable = root.join("lib/py3-mac-universal/renpy");
+    #[cfg(target_os = "linux")]
+    let executable = match std::env::consts::ARCH {
+        "x86_64" => root.join("lib/py3-linux-x86_64/renpy"),
+        "aarch64" => root.join("lib/py3-linux-aarch64/renpy"),
+        _ => return Err(RenpyError::InvalidSdk),
+    };
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    return Err(RenpyError::InvalidSdk);
 
-#[cfg(all(unix, not(target_os = "macos")))]
-fn anchored_directory_argument(directory: &File) -> Result<OsString, RenpyError> {
-    use std::os::fd::AsRawFd;
-    Ok(OsString::from(format!(
-        "/proc/self/fd/{}",
-        directory.as_raw_fd()
-    )))
+    if !executable.is_file() || has_symlink_component(&executable) {
+        return Err(RenpyError::InvalidSdk);
+    }
+    let mut value = vec![executable.into_os_string()];
+    value.extend_from_slice(args);
+    Ok(value)
 }
 
 '''
 if text.count(needle) != 1:
-    raise SystemExit("command_path insertion point mismatch")
+    raise SystemExit("launcher_args insertion point mismatch")
 text = text.replace(needle, addition + needle, 1)
 
 path.write_text(text, encoding="utf-8")
-print("Phase 1C Ren'Py anchored project argument fixed")
+print("Phase 1C anchored Ren'Py invocation uses the native SDK runtime")
