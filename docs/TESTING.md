@@ -28,6 +28,18 @@ after `LifecycleService` construction. This is deterministic evidence that the s
 launch does not reach writable lifecycle initialization; arbitrary delays alone are not
 accepted as the assertion.
 
+The completed single-instance correction is evidenced by production run
+`34906232240` at `e1e8dac`: Windows x64 job `104183422740` and macOS ARM64 job
+`104183422612` both passed the full core/lifecycle suites, desktop tests, packaging,
+dual-launch smoke, existing WebView restrictions, secret scan, and dependency/licence
+inventory. Their secondary logs are empty while each primary log records readiness,
+secondary rejection with `primaryWindowFound: true`, and `singleInstancePassed: true`.
+Evidence artifacts are `10372748134` (Windows, SHA-256
+`949213ab719c6d8c895cae933839459d97670f89dbdb37281f62a0b483af38e7`) and
+`10373200561` (macOS, SHA-256
+`75fc9d2b01dcdcce046b4f1a838e5496129989a1fad1031ea28cb2c06515bb03`).
+Quality run `34906232244` passed.
+
 Phase 1C extends that same cost-scoped production matrix rather than adding a duplicate
 Windows/macOS workflow. Each target restores/downloads the exact official 8.5.3 SDK
 archive, then production code verifies/extracts it and exercises staged create, Git

@@ -1,17 +1,26 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C single-instance micro-remediation in progress; Phase 1D not approved<br>
+**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- Phase 1C is temporarily reopened only for the bounded
-  [single-instance lifecycle micro-remediation](../tasks/active/2026-09-14-phase-1c-single-instance.md).
-  The implementation registers the maintained Tauri single-instance boundary before
-  desktop setup and tests the packaged primary/secondary process behavior. Re-closure
-  awaits passing Windows x64 and macOS ARM64 production evidence. Phase 1D remains
-  unapproved and unstarted.
+- The bounded
+  [single-instance lifecycle micro-remediation](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
+  is complete. The maintained Tauri single-instance boundary is the first registered
+  plugin and rejects a secondary process before desktop setup can construct
+  `LifecycleService`; the primary best-effort restores, shows, and focuses `main`.
+- [Production run 34906232240](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34906232240)
+  at `e1e8dac27b5d98ceca58e7a14a4361c93854b7ff` passed Windows x64 job
+  `104183422740` and macOS ARM64 job `104183422612`. Both packaged dual-launch probes
+  proved the secondary never reached lifecycle setup, the primary received activation
+  and retained a usable main window, and the existing lifecycle/UI/WebView restrictions
+  remained green. Evidence artifacts are `10372748134` (Windows, SHA-256
+  `949213ab719c6d8c895cae933839459d97670f89dbdb37281f62a0b483af38e7`) and
+  `10373200561` (macOS, SHA-256
+  `75fc9d2b01dcdcce046b4f1a838e5496129989a1fad1031ea28cb2c06515bb03`). Quality run
+  `34906232244` passed. Phase 1C is re-closed; Phase 1D remains unapproved and unstarted.
 
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)

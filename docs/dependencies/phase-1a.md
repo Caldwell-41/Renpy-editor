@@ -1,6 +1,6 @@
 # Phase 1 production dependency and licence inventory
 
-**Reviewed:** 2026-09-14 during the Phase 1C single-instance correction<br>
+**Reviewed:** 2026-09-14 after the Phase 1C single-instance target gate<br>
 **Scope:** Phase 1A scaffold through the bounded Phase 1C lifecycle corrections
 
 ## Locked toolchains

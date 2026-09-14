@@ -142,8 +142,8 @@ separately approved and completed without changing that replacement-only boundar
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** Complete except for the currently active bounded
-[single-instance lifecycle micro-remediation](2026-09-14-phase-1c-single-instance.md).
+**Status:** Complete and re-closed by the archived
+[single-instance lifecycle micro-remediation](../archive/2026-09-14-phase-1c-single-instance.md).
 The prior gate was re-closed by the archived
 [Phase 1C durability/race remediation](../archive/2026-09-14-phase-1c-durability-race-remediation.md).
 The earlier archived
@@ -154,6 +154,8 @@ remains historical implementation evidence; corrective production run `348325553
 passed the complete Windows x64/macOS ARM64 production gate at `08daf385`.
 Corrective production run `34849801157` passed the strengthened lifecycle gate at
 `bdc7ad60` on both supported targets.
+Single-instance correction run `34906232240` passed the packaged Windows x64/macOS
+ARM64 dual-launch gate at `e1e8dac`.
 
 Loomlight's desktop runtime is single-instance: the primary process is the sole owner
 of mutable application lifecycle state, and a losing launch must be rejected before it

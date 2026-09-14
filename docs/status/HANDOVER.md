@@ -10,14 +10,15 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
-5. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
-6. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
-7. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-8. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-9. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-10. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-11. [ADR 0001](../adr/0001-lossless-source-model.md),
+4. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
+5. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
+6. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+7. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+8. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+9. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+10. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+11. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+12. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
    [ADR 0005](../adr/0005-staged-project-creation.md)
@@ -25,6 +26,17 @@
 The approved product brief remains authoritative. The user explicitly approved Phase
 1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
 instruction.
+
+## Completed Phase 1C single-instance correction
+
+Loomlight now registers the maintained Tauri single-instance plugin before desktop
+setup, making the primary process the sole mutable lifecycle-state owner. A second
+launch cannot construct `LifecycleService`; it only asks the primary `main` window to
+restore, show, and focus. Production run `34906232240` at `e1e8dac` passed the full
+Windows x64 job `104183422740` and macOS ARM64 job `104183422612`, including packaged
+dual-launch evidence and all retained lifecycle/security gates. Evidence artifacts are
+`10372748134` and `10373200561`; quality run `34906232244` passed. Phase 1D remains
+unstarted.
 
 ## Completed Phase 1C durability/race correction
 

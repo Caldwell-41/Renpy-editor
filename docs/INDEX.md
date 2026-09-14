@@ -4,9 +4,9 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
-Phase 0, Phase 1A, corrected Phase 1B, and the main Phase 1C implementation are
-complete; a bounded Phase 1C single-instance correction is active. Phase 1D/later
-implementation remains separately approval-gated. Read the
+Phase 0, Phase 1A, corrected Phase 1B, and corrected Phase 1C are complete; Gate E
+remains closed. Phase 1D/later implementation remains separately approval-gated. Read
+the
 [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
 sequence, the archived
 [Phase 1 scaffold](tasks/archive/2026-09-14-phase-1-production-scaffold.md), and the
@@ -28,7 +28,7 @@ plus [production transaction contract](TRANSACTIONS.md).
 | Transaction, durability, and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
-| Active Phase 1C single-instance correction | [tasks/active/2026-09-14-phase-1c-single-instance.md](tasks/active/2026-09-14-phase-1c-single-instance.md) |
+| Completed Phase 1C single-instance correction | [tasks/archive/2026-09-14-phase-1c-single-instance.md](tasks/archive/2026-09-14-phase-1c-single-instance.md) |
 | Completed Phase 1C durability/race remediation | [tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md](tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
 | Completed Phase 1C corrective remediation | [tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md](tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
 | Completed Phase 1C lifecycle gate | [tasks/archive/2026-09-14-phase-1c-project-lifecycle.md](tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
