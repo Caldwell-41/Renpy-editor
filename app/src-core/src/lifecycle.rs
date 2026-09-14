@@ -928,10 +928,22 @@ where
 {
     let anchor = crate::transaction::DirectoryAnchor::open_root(root)
         .map_err(|_| LifecycleError::UnsafePath)?;
+    if anchor
+        .entry_absent(OsStr::new(".renpy-editor"))
+        .map_err(|_| LifecycleError::UnsafePath)?
+    {
+        return Err(LifecycleError::InvalidMetadata);
+    }
     let editor = anchor
         .open_child(OsStr::new(".renpy-editor"), false)
         .map_err(|_| LifecycleError::UnsafePath)?;
     hook()?;
+    if editor
+        .entry_absent(OsStr::new("project.json"))
+        .map_err(|_| LifecycleError::UnsafePath)?
+    {
+        return Err(LifecycleError::InvalidMetadata);
+    }
     let mut metadata_file = editor
         .open_file(OsStr::new("project.json"))
         .map_err(|_| LifecycleError::UnsafePath)?;
@@ -985,13 +997,20 @@ fn open_project_file(
     let mut components = relative.split('/').peekable();
     let mut directory = root.clone();
     while let Some(component) = components.next() {
+        let name = OsStr::new(component);
+        if directory
+            .entry_absent(name)
+            .map_err(|_| LifecycleError::UnsafePath)?
+        {
+            return Err(LifecycleError::InvalidMetadata);
+        }
         if components.peek().is_none() {
             return directory
-                .open_file(OsStr::new(component))
+                .open_file(name)
                 .map_err(|_| LifecycleError::UnsafePath);
         }
         directory = directory
-            .open_child(OsStr::new(component), false)
+            .open_child(name, false)
             .map_err(|_| LifecycleError::UnsafePath)?;
     }
     Err(LifecycleError::InvalidMetadata)
@@ -2214,6 +2233,24 @@ mod tests {
         });
         #[cfg(unix)]
         assert_eq!(fs::read(moved.join("project.json")).unwrap(), b"original");
+    }
+
+    #[test]
+    fn arbitrary_renpy_project_without_metadata_is_rejected_as_invalid_metadata() {
+        let temp = tempfile::tempdir().unwrap();
+        let project = temp.path().join("arbitrary");
+        fs::create_dir(&project).unwrap();
+        fs::create_dir(project.join("game")).unwrap();
+        fs::write(
+            project.join("game/script.rpy"),
+            b"label start:\n    return\n",
+        )
+        .unwrap();
+
+        assert!(matches!(
+            open_valid_project(&project),
+            Err(LifecycleError::InvalidMetadata)
+        ));
     }
 
     #[test]
