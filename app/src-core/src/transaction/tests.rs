@@ -260,6 +260,7 @@ fn delete_and_recreate_race_is_preserved() {
     );
 }
 
+#[cfg(unix)]
 #[test]
 fn changed_root_identity_fails_closed() {
     let fixture = Fixture::new();
@@ -272,6 +273,20 @@ fn changed_root_identity_fails_closed() {
     assert_eq!(outcome_code(&outcome), Some(ErrorCode::RootIdentityChanged));
     fs::remove_dir(&root).unwrap();
     fs::rename(&moved, &root).unwrap();
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_approved_root_namespace_is_pinned() {
+    let fixture = Fixture::new();
+    let root = fixture.root.clone();
+    let moved = root.with_extension("moved-root");
+    assert!(fs::rename(&root, &moved).is_err());
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    assert!(matches!(
+        fixture.service.commit(&fixture.project, proposal),
+        CommitOutcome::Committed { .. }
+    ));
 }
 
 #[test]

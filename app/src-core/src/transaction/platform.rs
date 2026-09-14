@@ -126,6 +126,14 @@ impl DirectoryAnchor {
     }
 
     pub fn open_file(&self, name: &OsStr) -> Result<File, ErrorCode> {
+        self.open_file_with_access(name, false)
+    }
+
+    pub fn open_file_for_flush(&self, name: &OsStr) -> Result<File, ErrorCode> {
+        self.open_file_with_access(name, true)
+    }
+
+    fn open_file_with_access(&self, name: &OsStr, write: bool) -> Result<File, ErrorCode> {
         validate_name(name)?;
         self.validate_chain()?;
         let path = self.path().join(name);
@@ -133,8 +141,8 @@ impl DirectoryAnchor {
         if !path_metadata.is_file() || is_link_or_reparse(&path_metadata) {
             return Err(ErrorCode::UnsafePath);
         }
-        let file =
-            open_file_at(self.handle(), &path, name, false).map_err(|_| ErrorCode::IoFailure)?;
+        let file = open_file_at(self.handle(), &path, name, false, write)
+            .map_err(|_| ErrorCode::IoFailure)?;
         let metadata = file.metadata().map_err(|_| ErrorCode::IoFailure)?;
         if !metadata.is_file() || is_link_or_reparse(&metadata) {
             return Err(ErrorCode::UnsafePath);
@@ -145,7 +153,7 @@ impl DirectoryAnchor {
     pub fn create_new_file(&self, name: &OsStr) -> Result<File, ErrorCode> {
         validate_name(name)?;
         self.validate_chain()?;
-        open_file_at(self.handle(), &self.path().join(name), name, true)
+        open_file_at(self.handle(), &self.path().join(name), name, true, true)
             .map_err(|_| ErrorCode::IoFailure)
     }
 
@@ -282,11 +290,19 @@ fn create_directory_at(_parent: &File, path: &Path, _name: &OsStr) -> io::Result
 }
 
 #[cfg(unix)]
-fn open_file_at(parent: &File, _path: &Path, name: &OsStr, create: bool) -> io::Result<File> {
+fn open_file_at(
+    parent: &File,
+    _path: &Path,
+    name: &OsStr,
+    create: bool,
+    write: bool,
+) -> io::Result<File> {
     use std::os::fd::{AsRawFd, FromRawFd};
     let name = c_name(name).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
     let flags = if create {
         libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL
+    } else if write {
+        libc::O_RDWR
     } else {
         libc::O_RDONLY
     };
@@ -306,15 +322,21 @@ fn open_file_at(parent: &File, _path: &Path, name: &OsStr, create: bool) -> io::
 }
 
 #[cfg(windows)]
-fn open_file_at(_parent: &File, path: &Path, _name: &OsStr, create: bool) -> io::Result<File> {
+fn open_file_at(
+    _parent: &File,
+    path: &Path,
+    _name: &OsStr,
+    create: bool,
+    write: bool,
+) -> io::Result<File> {
     use std::os::windows::fs::OpenOptionsExt;
     use windows_sys::Win32::Storage::FileSystem::{
         FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
     };
     let mut options = OpenOptions::new();
     options
-        .read(!create)
-        .write(create)
+        .read(!create || write)
+        .write(create || write)
         .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
         .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT);
     if create {
@@ -473,8 +495,8 @@ pub fn exchange_preserving_target(
     {
         return Err(ErrorCode::RecoveryRequired);
     }
-    let installed = target_parent.open_file(target_name)?;
-    let displaced = artifacts.open_file(backup_name)?;
+    let installed = target_parent.open_file_for_flush(target_name)?;
+    let displaced = artifacts.open_file_for_flush(backup_name)?;
     platform_sync(&installed)?;
     platform_sync(&displaced)?;
     target_parent.flush()?;
@@ -515,8 +537,8 @@ pub fn exchange_preserving_target(
     if result == 0 {
         return Err(ErrorCode::RecoveryRequired);
     }
-    let installed = target_parent.open_file(target_name)?;
-    let displaced = artifacts.open_file(backup_name)?;
+    let installed = target_parent.open_file_for_flush(target_name)?;
+    let displaced = artifacts.open_file_for_flush(backup_name)?;
     platform_sync(&installed)?;
     platform_sync(&displaced)
 }
@@ -560,8 +582,8 @@ pub fn exchange_preserving_target(
         );
         return Err(ErrorCode::RecoveryRequired);
     }
-    let installed = target_parent.open_file(target_name)?;
-    let displaced = artifacts.open_file(backup_name)?;
+    let installed = target_parent.open_file_for_flush(target_name)?;
+    let displaced = artifacts.open_file_for_flush(backup_name)?;
     platform_sync(&installed)?;
     platform_sync(&displaced)?;
     target_parent.flush()?;

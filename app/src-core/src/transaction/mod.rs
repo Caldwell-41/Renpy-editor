@@ -534,7 +534,7 @@ impl TransactionService {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
-            let target_file = match resolved.parent_anchor.open_file(&resolved.name) {
+            let target_file = match resolved.parent_anchor.open_file_for_flush(&resolved.name) {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };

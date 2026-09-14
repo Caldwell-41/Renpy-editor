@@ -73,3 +73,27 @@ Implementation-tree local validation:
 Cross-compilation is recorded only as compilation evidence. Exact Windows/macOS
 runtime workflow/job/artifact results, including any failed or superseded attempts,
 remain pending before this task can be archived and Gate E re-closed.
+
+### Failed target attempt retained
+
+[Production run 34800849992](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34800849992)
+at `188510d672de9ce42d7b4ec864dc01d6a8c19895` is failed evidence. macOS ARM64 job
+103843060005 passed the 32-test corrected core suite (plus one ignored worker invoked
+by parent tests), desktop tests, packaging, packaged denial smoke, secret scan, and
+dependency/licence inventory. Windows x64 job 103843059894 passed setup, frontend,
+build, and formatting, then failed the core step: 18 passed, 13 failed, 1 ignored.
+
+The Windows root cause was deterministic, not flaky: post-`ReplaceFileW` and final
+durability checks reopened installed/backup files read-only before requesting the
+Windows file-buffer flush, which requires writable handles. Successful exchanges were
+therefore conservatively reported recovery-required. The Windows root-substitution
+test also expected a rename that the new no-delete-sharing root handle correctly
+denied. The implementation now opens explicit writable no-follow/reparse-safe handles
+for flush and tests the denied Windows root rename as the security outcome. Later
+Windows package/smoke/inventory steps were skipped and are not counted as passes.
+
+Retained artifacts are 10331432380 (Windows failure log, SHA-256
+`fe094769f6f8ec596dc60aeb9bd0c74fb9de5899bc549e6ceb757c3e17b8090b`) and
+10331042824 (successful macOS evidence, SHA-256
+`00068706749c61d541bb9fa287dc4167ce45f2877378d0e47f9a743eac15aed9`). Quality run
+34800849989 passed. A new target run is required; this attempt does not close Gate E.
