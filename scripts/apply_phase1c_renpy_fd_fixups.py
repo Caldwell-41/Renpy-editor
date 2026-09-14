@@ -17,6 +17,16 @@ def replace_once(old: str, new: str) -> None:
 # directly and fchdir to that directory in the child before exec. This avoids both
 # pathname re-resolution and the shell wrapper's SDK-cwd assumption.
 replace_once(
+    '''            let args = [
+                OsString::from("launcher"),
+                OsString::from("generate_gui"),
+                OsString::from("."),''',
+    '''            let args = [
+                sdk.root.join("launcher").into_os_string(),
+                OsString::from("generate_gui"),
+                OsString::from("."),''',
+)
+replace_once(
     '''                launcher_args(&sdk.root, &args)?,
                 Duration::from_secs(180),
             )?);''',
