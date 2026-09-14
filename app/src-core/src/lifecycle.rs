@@ -12,8 +12,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Map;
 use std::{
     collections::HashMap,
+    ffi::OsStr,
     fs::{self, File, OpenOptions},
-    io::{self, Write},
+    io::{self, Read, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
     time::{SystemTime, UNIX_EPOCH},
@@ -136,6 +137,7 @@ struct FileIdentity {
 
 pub struct LifecycleService {
     data_root: PathBuf,
+    data_anchor: crate::transaction::DirectoryAnchor,
     parents: HashMap<String, ParentAnchor>,
     sdks: HashMap<String, ValidatedSdk>,
     current: Option<(PathBuf, OpenProject)>,
@@ -179,8 +181,12 @@ impl crate::ports::GitPort for LocalGit<'_> {
 impl LifecycleService {
     pub fn new(data_root: PathBuf) -> Result<Self, LifecycleError> {
         fs::create_dir_all(&data_root).map_err(|_| LifecycleError::Io)?;
+        let data_root = fs::canonicalize(data_root).map_err(|_| LifecycleError::Io)?;
+        let data_anchor = crate::transaction::DirectoryAnchor::open_root(&data_root)
+            .map_err(|_| LifecycleError::UnsafePath)?;
         Ok(Self {
             data_root,
+            data_anchor,
             parents: HashMap::new(),
             sdks: HashMap::new(),
             current: None,
@@ -290,8 +296,7 @@ impl LifecycleService {
         let token = uuid::Uuid::new_v4().to_string();
         let stage_name = format!(".loomlight-stage-{token}");
         let stage = parent.path.join(&stage_name);
-        fs::create_dir(&stage).map_err(|_| LifecycleError::Io)?;
-        restrict_directory(&stage)?;
+        create_private_directory(&stage)?;
         let marker = format!("loomlight-project-stage-v1\n{token}\n");
         write_new(&stage.join(STAGE_MARKER), marker.as_bytes())?;
         // Ren'Py's documented generate_gui command accepts a new project when the
@@ -448,10 +453,20 @@ impl LifecycleService {
     }
 
     fn read_recent(&self) -> RecentStore {
-        let path = self.data_root.join("recent-projects.json");
-        fs::read(&path)
-            .ok()
-            .filter(|bytes| bytes.len() <= 1_000_000)
+        let name = OsStr::new("recent-projects.json");
+        let bytes = (|| {
+            if self.data_anchor.entry_absent(name).ok()? {
+                return None;
+            }
+            let mut file = self.data_anchor.open_file(name).ok()?;
+            if file.metadata().ok()?.len() > 1_000_000 {
+                return None;
+            }
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes).ok()?;
+            Some(bytes)
+        })();
+        bytes
             .and_then(|bytes| serde_json::from_slice::<RecentStore>(&bytes).ok())
             .filter(|store| store.schema_version == RECENT_SCHEMA_VERSION)
             .unwrap_or(RecentStore {
@@ -461,26 +476,97 @@ impl LifecycleService {
     }
 
     fn write_recent(&self, store: &RecentStore) -> Result<(), LifecycleError> {
+        self.write_recent_with_hook(store, |_| Ok(()))
+    }
+
+    fn write_recent_with_hook<F>(
+        &self,
+        store: &RecentStore,
+        mut hook: F,
+    ) -> Result<(), LifecycleError>
+    where
+        F: FnMut(RecentWriteCheckpoint) -> Result<(), LifecycleError>,
+    {
         let bytes = serde_json::to_vec_pretty(store).map_err(|_| LifecycleError::Io)?;
-        let path = self.data_root.join("recent-projects.json");
-        let temporary = self
-            .data_root
-            .join(format!(".recent-projects-{}.tmp", uuid::Uuid::new_v4()));
-        let mut file = OpenOptions::new()
-            .create_new(true)
-            .write(true)
-            .open(&temporary)
-            .map_err(|_| LifecycleError::Io)?;
-        let result = file
-            .write_all(&bytes)
-            .and_then(|_| file.sync_all())
-            .map_err(|_| LifecycleError::Io)
-            .and_then(|_| replace_file_atomically(&temporary, &path));
+        let temporary_name = format!(".recent-projects-{}.tmp", uuid::Uuid::new_v4());
+        let temporary = OsStr::new(&temporary_name);
+        let destination = OsStr::new("recent-projects.json");
+        let mut file = self
+            .data_anchor
+            .create_new_file(temporary)
+            .map_err(|_| LifecycleError::UnsafePath)?;
+        let split = bytes.len() / 2;
+        let result = (|| {
+            file.write_all(&bytes[..split])
+                .map_err(|_| LifecycleError::Io)?;
+            hook(RecentWriteCheckpoint::StagePartiallyWritten)?;
+            file.write_all(&bytes[split..])
+                .map_err(|_| LifecycleError::Io)?;
+            crate::transaction::flush_open_file(&file).map_err(|_| LifecycleError::Io)?;
+            drop(file);
+            self.data_anchor.flush().map_err(|_| LifecycleError::Io)?;
+            hook(RecentWriteCheckpoint::StageDurable)?;
+            replace_recent_file(&self.data_anchor, temporary, destination)?;
+            hook(RecentWriteCheckpoint::ReplacementCommitted)?;
+            verify_recent_commit(&self.data_anchor, destination, &bytes)
+        })();
         if result.is_err() {
-            let _ = fs::remove_file(&temporary);
+            // Remove only this invocation's unpredictable, create-new temporary. If it
+            // was already promoted, this is a no-op and the committed store remains.
+            let _ = self.data_anchor.remove_file_if_exists(temporary);
         }
         result
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum RecentWriteCheckpoint {
+    StagePartiallyWritten,
+    StageDurable,
+    ReplacementCommitted,
+}
+
+fn replace_recent_file(
+    data: &crate::transaction::DirectoryAnchor,
+    temporary: &OsStr,
+    destination: &OsStr,
+) -> Result<(), LifecycleError> {
+    data.validate_chain()
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    if !data
+        .entry_absent(destination)
+        .map_err(|_| LifecycleError::UnsafePath)?
+    {
+        // This no-follow open rejects directories, symlinks, and Windows reparse
+        // points before replacement. The platform rename replaces a final pathname
+        // component rather than following it.
+        drop(
+            data.open_file(destination)
+                .map_err(|_| LifecycleError::UnsafePath)?,
+        );
+    }
+    data.replace_file_within(temporary, destination)
+        .map_err(|_| LifecycleError::Io)?;
+    data.flush().map_err(|_| LifecycleError::Io)
+}
+
+fn verify_recent_commit(
+    data: &crate::transaction::DirectoryAnchor,
+    destination: &OsStr,
+    expected: &[u8],
+) -> Result<(), LifecycleError> {
+    let mut committed = data
+        .open_file(destination)
+        .map_err(|_| LifecycleError::UnsafePath)?;
+    let mut bytes = Vec::new();
+    committed
+        .read_to_end(&mut bytes)
+        .map_err(|_| LifecycleError::Io)?;
+    if bytes != expected {
+        return Err(LifecycleError::UnsafePath);
+    }
+    data.validate_chain()
+        .map_err(|_| LifecycleError::UnsafePath)
 }
 
 pub fn folder_name_from_title(title: &str) -> String {
@@ -1155,6 +1241,7 @@ where
             error
         }
     })?;
+    flush_parent_anchor(parent).map_err(|_| LifecycleError::PromotionFailed)?;
     let promoted =
         open_stage_directory(&final_path).map_err(|_| LifecycleError::PromotionFailed)?;
     let promoted_identity = identity(&promoted).map_err(|_| LifecycleError::PromotionFailed)?;
@@ -1225,66 +1312,47 @@ fn cleanup_stage(parent: &ParentAnchor, stage: &mut StageAnchor) -> Result<(), L
         return Err(LifecycleError::UnsafePath);
     }
     drop(quarantined);
-    fs::remove_dir_all(quarantine_path).map_err(|_| LifecycleError::Io)
-}
-
-fn replace_file_atomically(temporary: &Path, destination: &Path) -> Result<(), LifecycleError> {
-    replace_file_platform(temporary, destination).map_err(|_| LifecycleError::Io)?;
-    let parent = destination.parent().ok_or(LifecycleError::Io)?;
-    sync_parent_directory(parent).map_err(|_| LifecycleError::Io)
+    fs::remove_dir_all(quarantine_path).map_err(|_| LifecycleError::Io)?;
+    flush_parent_anchor(parent).map_err(|_| LifecycleError::Io)
 }
 
 #[cfg(unix)]
-fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
-    fs::rename(temporary, destination)
+fn flush_parent_anchor(parent: &ParentAnchor) -> io::Result<()> {
+    parent.file.sync_all()
 }
 
 #[cfg(windows)]
-fn replace_file_platform(temporary: &Path, destination: &Path) -> io::Result<()> {
-    use std::os::windows::ffi::OsStrExt;
-    use windows_sys::Win32::Storage::FileSystem::{
-        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
-    };
-    let wide = |path: &Path| {
-        path.as_os_str()
-            .encode_wide()
-            .chain(Some(0))
-            .collect::<Vec<_>>()
-    };
-    let from = wide(temporary);
-    let to = wide(destination);
-    let result = unsafe {
-        MoveFileExW(
-            from.as_ptr(),
-            to.as_ptr(),
-            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-        )
-    };
-    if result != 0 {
-        Ok(())
-    } else {
-        Err(io::Error::last_os_error())
-    }
-}
-
-#[cfg(unix)]
-fn sync_parent_directory(path: &Path) -> io::Result<()> {
-    open_directory(path)?.sync_all()
-}
-
-#[cfg(windows)]
-fn sync_parent_directory(_path: &Path) -> io::Result<()> {
+fn flush_parent_anchor(_parent: &ParentAnchor) -> io::Result<()> {
+    // Project promotion uses MOVEFILE_WRITE_THROUGH. Windows provides no supported
+    // ordinary-user directory fsync equivalent.
     Ok(())
 }
 
 #[cfg(unix)]
+fn create_private_directory(path: &Path) -> Result<(), LifecycleError> {
+    use std::os::unix::fs::DirBuilderExt;
+    fs::DirBuilder::new()
+        .mode(0o700)
+        .create(path)
+        .map_err(|_| LifecycleError::Io)
+}
+#[cfg(windows)]
+fn create_private_directory(path: &Path) -> Result<(), LifecycleError> {
+    fs::create_dir(path).map_err(|_| LifecycleError::Io)
+}
+
+#[cfg(test)]
 fn restrict_directory(path: &Path) -> Result<(), LifecycleError> {
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(path, fs::Permissions::from_mode(0o700)).map_err(|_| LifecycleError::Io)
-}
-#[cfg(windows)]
-fn restrict_directory(_path: &Path) -> Result<(), LifecycleError> {
-    Ok(())
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(path, fs::Permissions::from_mode(0o700)).map_err(|_| LifecycleError::Io)
+    }
+    #[cfg(windows)]
+    {
+        let _ = path;
+        Ok(())
+    }
 }
 
 #[cfg(target_os = "linux")]
@@ -1359,7 +1427,7 @@ fn promote_no_replace(
     final_name: &str,
 ) -> Result<(), LifecycleError> {
     use std::os::windows::ffi::OsStrExt;
-    use windows_sys::Win32::Storage::FileSystem::MoveFileExW;
+    use windows_sys::Win32::Storage::FileSystem::{MoveFileExW, MOVEFILE_WRITE_THROUGH};
     let wide = |path: &Path| {
         path.as_os_str()
             .encode_wide()
@@ -1368,7 +1436,7 @@ fn promote_no_replace(
     };
     let from = wide(&parent.path.join(stage));
     let to = wide(&parent.path.join(final_name));
-    let result = unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), 0) };
+    let result = unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), MOVEFILE_WRITE_THROUGH) };
     if result != 0 {
         Ok(())
     } else if io::Error::last_os_error().kind() == io::ErrorKind::AlreadyExists {
@@ -1391,6 +1459,19 @@ fn promote_no_replace(
 mod tests {
     use super::*;
 
+    fn recent_store(title: &str, project: &Path) -> RecentStore {
+        RecentStore {
+            schema_version: RECENT_SCHEMA_VERSION,
+            entries: vec![RecentRecord {
+                id: "recent".into(),
+                project_id: "project".into(),
+                title: title.into(),
+                path: project.to_path_buf(),
+                last_opened_unix_ms: 1,
+            }],
+        }
+    }
+
     fn copy_tree(source: &Path, destination: &Path) {
         fs::create_dir(destination).unwrap();
         for entry in fs::read_dir(source).unwrap() {
@@ -1405,6 +1486,22 @@ mod tests {
                 panic!("target fixture unexpectedly contains a link");
             }
         }
+    }
+
+    fn crash_managed_sdk_install(data_root: &Path, archive: &Path, checkpoint: &str) {
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--ignored",
+                "--exact",
+                "renpy::tests::managed_install_crash_worker",
+                "--nocapture",
+            ])
+            .env("LOOMLIGHT_SDK_CRASH_ROOT", data_root)
+            .env("LOOMLIGHT_SDK_CRASH_ARCHIVE", archive)
+            .env("LOOMLIGHT_SDK_CRASH_POINT", checkpoint)
+            .status()
+            .unwrap();
+        assert_eq!(status.code(), Some(88), "SDK checkpoint {checkpoint}");
     }
 
     #[test]
@@ -1618,6 +1715,203 @@ mod tests {
             }));
     }
 
+    #[test]
+    fn recent_precommit_failures_preserve_last_committed_store() {
+        for checkpoint in [
+            RecentWriteCheckpoint::StagePartiallyWritten,
+            RecentWriteCheckpoint::StageDurable,
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let service = LifecycleService::new(temp.path().join("state")).unwrap();
+            service
+                .write_recent(&recent_store("Committed", &temp.path().join("project")))
+                .unwrap();
+            let result = service.write_recent_with_hook(
+                &recent_store("Uncommitted", &temp.path().join("project")),
+                |point| {
+                    if point == checkpoint {
+                        Err(LifecycleError::Io)
+                    } else {
+                        Ok(())
+                    }
+                },
+            );
+            assert!(matches!(result, Err(LifecycleError::Io)));
+            assert_eq!(service.read_recent().entries[0].title, "Committed");
+            assert!(fs::read_dir(temp.path().join("state"))
+                .unwrap()
+                .all(|entry| {
+                    !entry
+                        .unwrap()
+                        .file_name()
+                        .to_string_lossy()
+                        .starts_with(".recent-projects-")
+                }));
+        }
+    }
+
+    #[test]
+    fn recent_postcommit_failure_restarts_at_new_committed_store() {
+        let temp = tempfile::tempdir().unwrap();
+        let state = temp.path().join("state");
+        let service = LifecycleService::new(state.clone()).unwrap();
+        service
+            .write_recent(&recent_store("Old", &temp.path().join("project")))
+            .unwrap();
+        let result = service.write_recent_with_hook(
+            &recent_store("New", &temp.path().join("project")),
+            |point| {
+                if point == RecentWriteCheckpoint::ReplacementCommitted {
+                    Err(LifecycleError::Io)
+                } else {
+                    Ok(())
+                }
+            },
+        );
+        assert!(matches!(result, Err(LifecycleError::Io)));
+        drop(service);
+        let restarted = LifecycleService::new(state).unwrap();
+        assert_eq!(restarted.read_recent().entries[0].title, "New");
+    }
+
+    #[test]
+    fn stale_recent_temporary_is_ignored_and_never_deleted_as_cleanup() {
+        let temp = tempfile::tempdir().unwrap();
+        let state = temp.path().join("state");
+        let service = LifecycleService::new(state.clone()).unwrap();
+        service
+            .write_recent(&recent_store("Committed", &temp.path().join("project")))
+            .unwrap();
+        let stale = state.join(format!(".recent-projects-{}.tmp", uuid::Uuid::new_v4()));
+        fs::write(&stale, b"{truncated").unwrap();
+        assert_eq!(service.read_recent().entries[0].title, "Committed");
+        service
+            .write_recent(&recent_store("Updated", &temp.path().join("project")))
+            .unwrap();
+        assert_eq!(service.read_recent().entries[0].title, "Updated");
+        assert_eq!(fs::read(&stale).unwrap(), b"{truncated");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn recent_symlink_substitution_fails_closed_without_touching_target() {
+        use std::os::unix::fs::symlink;
+        let temp = tempfile::tempdir().unwrap();
+        let state = temp.path().join("state");
+        let service = LifecycleService::new(state.clone()).unwrap();
+        let outside = temp.path().join("outside.json");
+        fs::write(&outside, b"outside").unwrap();
+        symlink(&outside, state.join("recent-projects.json")).unwrap();
+        assert!(matches!(
+            service.write_recent(&recent_store("Blocked", &temp.path().join("project"))),
+            Err(LifecycleError::UnsafePath)
+        ));
+        assert_eq!(fs::read(&outside).unwrap(), b"outside");
+        assert!(fs::symlink_metadata(state.join("recent-projects.json"))
+            .unwrap()
+            .file_type()
+            .is_symlink());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn recent_reparse_substitution_fails_closed_without_touching_target() {
+        use std::os::windows::fs::symlink_file;
+        let temp = tempfile::tempdir().unwrap();
+        let state = temp.path().join("state");
+        let service = LifecycleService::new(state.clone()).unwrap();
+        let outside = temp.path().join("outside.json");
+        fs::write(&outside, b"outside").unwrap();
+        symlink_file(&outside, state.join("recent-projects.json")).unwrap();
+        assert!(matches!(
+            service.write_recent(&recent_store("Blocked", &temp.path().join("project"))),
+            Err(LifecycleError::UnsafePath)
+        ));
+        assert_eq!(fs::read(&outside).unwrap(), b"outside");
+    }
+
+    #[test]
+    fn recent_data_root_substitution_fails_closed() {
+        let temp = tempfile::tempdir().unwrap();
+        let state = temp.path().join("state");
+        let service = LifecycleService::new(state.clone()).unwrap();
+        service
+            .write_recent(&recent_store("Committed", &temp.path().join("project")))
+            .unwrap();
+        let original = temp.path().join("original-state");
+        fs::rename(&state, &original).unwrap();
+        fs::create_dir(&state).unwrap();
+        assert!(service
+            .write_recent(&recent_store("Blocked", &temp.path().join("project")))
+            .is_err());
+        assert!(!state.join("recent-projects.json").exists());
+        assert_eq!(
+            serde_json::from_slice::<RecentStore>(
+                &fs::read(original.join("recent-projects.json")).unwrap()
+            )
+            .unwrap()
+            .entries[0]
+                .title,
+            "Committed"
+        );
+    }
+
+    #[test]
+    fn recent_crash_checkpoints_restart_from_a_complete_store() {
+        for checkpoint in ["partial", "durable", "committed"] {
+            let temp = tempfile::tempdir().unwrap();
+            let state = temp.path().join("state");
+            let service = LifecycleService::new(state.clone()).unwrap();
+            service
+                .write_recent(&recent_store("Old", &temp.path().join("project")))
+                .unwrap();
+            drop(service);
+            let status = std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--ignored",
+                    "--exact",
+                    "lifecycle::tests::recent_write_crash_worker",
+                    "--nocapture",
+                ])
+                .env("LOOMLIGHT_RECENT_CRASH_ROOT", &state)
+                .env("LOOMLIGHT_RECENT_CRASH_POINT", checkpoint)
+                .status()
+                .unwrap();
+            assert_eq!(status.code(), Some(87), "checkpoint {checkpoint}");
+            let restarted = LifecycleService::new(state).unwrap();
+            let expected = if checkpoint == "committed" {
+                "New"
+            } else {
+                "Old"
+            };
+            assert_eq!(restarted.read_recent().entries[0].title, expected);
+        }
+    }
+
+    #[test]
+    #[ignore = "subprocess worker invoked by the Recent Projects crash test"]
+    fn recent_write_crash_worker() {
+        let Some(root) = std::env::var_os("LOOMLIGHT_RECENT_CRASH_ROOT") else {
+            return;
+        };
+        let point = std::env::var("LOOMLIGHT_RECENT_CRASH_POINT").unwrap();
+        let service = LifecycleService::new(PathBuf::from(root)).unwrap();
+        let store = recent_store("New", Path::new("project"));
+        let _ = service.write_recent_with_hook(&store, |checkpoint| {
+            let should_crash = matches!(
+                (point.as_str(), checkpoint),
+                ("partial", RecentWriteCheckpoint::StagePartiallyWritten)
+                    | ("durable", RecentWriteCheckpoint::StageDurable)
+                    | ("committed", RecentWriteCheckpoint::ReplacementCommitted)
+            );
+            if should_crash {
+                std::process::exit(87);
+            }
+            Ok(())
+        });
+        panic!("worker did not reach requested crash checkpoint");
+    }
+
     #[cfg(unix)]
     #[test]
     fn stage_identity_rejects_same_name_replacement_before_promotion() {
@@ -1801,32 +2095,43 @@ mod tests {
             return;
         };
         let temp = tempfile::tempdir().unwrap();
-        let managed_state = temp.path().join("managed-state");
-        assert!(matches!(
-            crate::renpy::install_supported_sdk_from_archive_interrupted_for_test(
-                &managed_state,
-                Path::new(&archive),
-            ),
-            Err(RenpyError::Io)
-        ));
+        let archive = Path::new(&archive);
+        let interrupted_before = temp.path().join("managed-before-promotion");
+        crash_managed_sdk_install(&interrupted_before, archive, "before");
+        let recovered_before =
+            crate::renpy::install_supported_sdk_from_archive(&interrupted_before, archive).unwrap();
+        assert_eq!(recovered_before.version, SUPPORTED_VERSION);
+
+        let managed_state = temp.path().join("managed-after-promotion");
+        crash_managed_sdk_install(&managed_state, archive, "after");
         let sdk =
-            crate::renpy::install_supported_sdk_from_archive(&managed_state, Path::new(&archive))
-                .unwrap();
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
+        let already_installed =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        assert!(sdk.same_identity(&already_installed));
+        println!("phase-1c-remediation-sdk-recovery: passed");
         let (embedded_provenance, legacy_provenance) =
             crate::renpy::managed_provenance_paths_for_test(&managed_state);
         assert!(embedded_provenance.is_file());
         assert!(!legacy_provenance.exists());
         fs::rename(&embedded_provenance, &legacy_provenance).unwrap();
+        fs::write(&embedded_provenance, b"truncated migration record").unwrap();
         let migrated = crate::renpy::discover_managed_sdk(&managed_state)
             .unwrap()
             .expect("legacy provenance should migrate into the managed SDK");
         assert!(sdk.same_identity(&migrated));
         assert!(embedded_provenance.is_file());
+        assert!(fs::read_dir(&sdk.root).unwrap().any(|entry| entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".loomlight-sdk-provenance-rejected-")));
         let discovered = crate::renpy::discover_managed_sdk(&managed_state)
             .unwrap()
             .expect("managed SDK should retain verified provenance");
         assert!(sdk.same_identity(&discovered));
+
         let sdk_root = sdk.root.clone();
         let moved_sdk = temp.path().join("moved-managed-sdk");
         fs::rename(&sdk_root, &moved_sdk).unwrap();
@@ -1836,7 +2141,6 @@ mod tests {
         fs::rename(&moved_sdk, &sdk_root).unwrap();
         sdk.revalidate(true).unwrap();
 
-        #[cfg(unix)]
         {
             let requested_stage_parent = temp.path().join("anchored-child-test");
             fs::create_dir(&requested_stage_parent).unwrap();
@@ -1854,20 +2158,81 @@ mod tests {
             fs::create_dir(stage_path.join("game")).unwrap();
             let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
             let moved = stage_parent.join("moved-anchored-child-stage");
-            fs::rename(&stage_path, &moved).unwrap();
-            fs::create_dir(&stage_path).unwrap();
-            fs::create_dir(stage_path.join("game")).unwrap();
-            RenpyAdapter::generate_starter_anchored(
+            RenpyAdapter::generate_starter_anchored_with_hooks(
                 &sdk,
                 &stage_path,
                 stage_file(&stage).unwrap(),
                 1280,
                 720,
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+                || Ok(()),
             )
             .unwrap();
-            assert!(moved.join("game/screens.rpy").is_file());
-            assert!(!stage_path.join("game/screens.rpy").exists());
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
         }
+
+        {
+            let requested_stage_parent = temp.path().join("inflight-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-inflight-child-stage");
+            RenpyAdapter::generate_starter_anchored_with_hooks(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+                || Ok(()),
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+            )
+            .unwrap();
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
+        }
+        println!("phase-1c-remediation-stage-races: passed");
 
         let projects = temp.path().join("projects");
         fs::create_dir(&projects).unwrap();

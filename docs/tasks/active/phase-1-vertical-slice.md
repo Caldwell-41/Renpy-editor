@@ -142,8 +142,11 @@ separately approved and completed without changing that replacement-only boundar
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** Complete after the archived
-[Phase 1C corrective remediation](../archive/2026-09-14-phase-1c-corrective-lifecycle.md).
+**Status:** Reopened for the active
+[Phase 1C durability/race remediation](phase-1c-durability-race-remediation.md).
+The earlier archived
+[Phase 1C corrective remediation](../archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+remains historical evidence.
 The original [Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md)
 remains historical implementation evidence; corrective production run `34832555392`
 passed the complete Windows x64/macOS ARM64 production gate at `08daf385`.

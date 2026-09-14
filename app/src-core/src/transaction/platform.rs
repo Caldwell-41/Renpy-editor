@@ -189,6 +189,47 @@ impl DirectoryAnchor {
         .map_err(|_| ErrorCode::RecoveryRequired)
     }
 
+    /// Atomically replaces one regular application-local file with another file in
+    /// this retained directory. Callers must validate the destination kind first.
+    pub fn replace_file_within(&self, from: &OsStr, to: &OsStr) -> Result<(), ErrorCode> {
+        validate_name(from)?;
+        validate_name(to)?;
+        self.validate_chain()?;
+        replace_file_at(
+            self.handle(),
+            &self.path().join(from),
+            from,
+            self.handle(),
+            &self.path().join(to),
+            to,
+        )
+        .map_err(|_| ErrorCode::RecoveryRequired)?;
+        self.validate_chain()
+    }
+
+    pub fn rename_no_replace_to(
+        &self,
+        from: &OsStr,
+        destination: &Self,
+        to: &OsStr,
+    ) -> Result<(), ErrorCode> {
+        validate_name(from)?;
+        validate_name(to)?;
+        self.validate_chain()?;
+        destination.validate_chain()?;
+        rename_no_replace_at(
+            self.handle(),
+            &self.path().join(from),
+            from,
+            destination.handle(),
+            &destination.path().join(to),
+            to,
+        )
+        .map_err(|_| ErrorCode::RecoveryRequired)?;
+        self.validate_chain()?;
+        destination.validate_chain()
+    }
+
     pub fn flush(&self) -> Result<(), ErrorCode> {
         #[cfg(unix)]
         {
@@ -415,6 +456,156 @@ fn rename_at(
             to.as_ptr(),
         )
     } == 0
+    {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(unix)]
+fn replace_file_at(
+    from_parent: &File,
+    _from_path: &Path,
+    from: &OsStr,
+    to_parent: &File,
+    _to_path: &Path,
+    to: &OsStr,
+) -> io::Result<()> {
+    rename_at(
+        from_parent,
+        Path::new(""),
+        from,
+        to_parent,
+        Path::new(""),
+        to,
+    )
+}
+
+#[cfg(target_os = "linux")]
+fn rename_no_replace_at(
+    from_parent: &File,
+    _from_path: &Path,
+    from: &OsStr,
+    to_parent: &File,
+    _to_path: &Path,
+    to: &OsStr,
+) -> io::Result<()> {
+    use std::os::fd::AsRawFd;
+    let from = c_name(from).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    let to = c_name(to).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    if unsafe {
+        libc::syscall(
+            libc::SYS_renameat2,
+            from_parent.as_raw_fd(),
+            from.as_ptr(),
+            to_parent.as_raw_fd(),
+            to.as_ptr(),
+            libc::RENAME_NOREPLACE,
+        )
+    } == 0
+    {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn rename_no_replace_at(
+    from_parent: &File,
+    _from_path: &Path,
+    from: &OsStr,
+    to_parent: &File,
+    _to_path: &Path,
+    to: &OsStr,
+) -> io::Result<()> {
+    use std::os::fd::AsRawFd;
+    const RENAME_EXCL: u32 = 0x0000_0004;
+    let from = c_name(from).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    let to = c_name(to).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    if unsafe {
+        libc::renameatx_np(
+            from_parent.as_raw_fd(),
+            from.as_ptr(),
+            to_parent.as_raw_fd(),
+            to.as_ptr(),
+            RENAME_EXCL,
+        )
+    } == 0
+    {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(windows)]
+fn rename_no_replace_at(
+    _parent: &File,
+    from_path: &Path,
+    _from: &OsStr,
+    _to_parent: &File,
+    to_path: &Path,
+    _to: &OsStr,
+) -> io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{MoveFileExW, MOVEFILE_WRITE_THROUGH};
+    let wide = |path: &Path| {
+        path.as_os_str()
+            .encode_wide()
+            .chain(Some(0))
+            .collect::<Vec<_>>()
+    };
+    let from = wide(from_path);
+    let to = wide(to_path);
+    if unsafe { MoveFileExW(from.as_ptr(), to.as_ptr(), MOVEFILE_WRITE_THROUGH) } != 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(all(unix, not(any(target_os = "linux", target_os = "macos"))))]
+fn rename_no_replace_at(
+    _parent: &File,
+    _from_path: &Path,
+    _from: &OsStr,
+    _to_parent: &File,
+    _to_path: &Path,
+    _to: &OsStr,
+) -> io::Result<()> {
+    Err(io::Error::from(io::ErrorKind::Unsupported))
+}
+
+#[cfg(windows)]
+fn replace_file_at(
+    _from_parent: &File,
+    from_path: &Path,
+    _from: &OsStr,
+    _to_parent: &File,
+    to_path: &Path,
+    _to: &OsStr,
+) -> io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+    };
+    let wide = |path: &Path| {
+        path.as_os_str()
+            .encode_wide()
+            .chain(Some(0))
+            .collect::<Vec<_>>()
+    };
+    let from = wide(from_path);
+    let to = wide(to_path);
+    if unsafe {
+        MoveFileExW(
+            from.as_ptr(),
+            to.as_ptr(),
+            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        )
+    } != 0
     {
         Ok(())
     } else {

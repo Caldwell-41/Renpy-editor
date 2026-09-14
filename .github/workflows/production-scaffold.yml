@@ -66,7 +66,14 @@ jobs:
         run: cargo fmt --check --all
       - name: Test independent Rust core
         shell: bash
-        run: cargo test -p loomlight-core --release --locked -- --nocapture | tee "$RUNNER_TEMP/phase-1b-transactions.log"
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked -- --nocapture \
+            | tee "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'recent_crash_checkpoints_restart_from_a_complete_store' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'substitution_after_final_validation_never_survives_as_final' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
       - name: Restore pinned Ren'Py SDK archive
         id: phase-1c-sdk-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -91,6 +98,8 @@ jobs:
             lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1c-remediation-sdk-recovery: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1c-remediation-stage-races: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold

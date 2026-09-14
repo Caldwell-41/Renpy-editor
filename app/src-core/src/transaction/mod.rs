@@ -12,7 +12,7 @@ mod path;
 mod platform;
 
 pub(crate) use path::is_link_or_reparse;
-pub(crate) use platform::DirectoryAnchor;
+pub(crate) use platform::{flush_open_file, DirectoryAnchor};
 
 pub use history::{HistoryEntry, HistoryMutation, HistoryStack};
 use identity::identity_for_file;

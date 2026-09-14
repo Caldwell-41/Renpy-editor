@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Corrected Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
+**Phase:** Phase 1C durability/race remediation in progress; Phase 1D not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
@@ -9,8 +9,9 @@
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
   are complete. The correction and subsequent recovery-enumeration follow-up re-closed
-  Gate E. Phase 1C was separately approved and is now complete; no later milestone is
-  approved.
+  Gate E. Phase 1C was separately approved, completed, and has now been reopened for
+  the bounded [durability/race remediation](../tasks/active/phase-1c-durability-race-remediation.md).
+  No later milestone is approved.
 - The bounded [Phase 1C task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
   is archived and ADR 0005 is accepted. Production implementation includes versioned
   metadata/Recent Projects, trusted picker-mediated opaque path choices, staged/no-replace project
@@ -125,8 +126,8 @@
 
 ## Next action
 
-Stop. Phase 1D Characters/Assets/Variables remains separately approval-gated and has not
-started. Await a new explicit instruction before beginning it or any later work.
+Complete the active Phase 1C durability/race remediation's Windows/macOS target gate,
+fresh lifecycle review, and evidence reconciliation. Do not begin Phase 1D.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

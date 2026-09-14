@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1C project lifecycle/SDK foundation complete; Phase 1D not approved<br>
+**Phase:** Phase 1C durability/race remediation in progress; Phase 1D not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -10,13 +10,14 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
-5. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
-6. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-7. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-8. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-9. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-10. [ADR 0001](../adr/0001-lossless-source-model.md),
+4. [Active Phase 1C durability/race remediation](../tasks/active/phase-1c-durability-race-remediation.md)
+5. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+6. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+7. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+8. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+9. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+10. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+11. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
    [ADR 0005](../adr/0005-staged-project-creation.md)
@@ -24,6 +25,14 @@
 The approved product brief remains authoritative. The user explicitly approved Phase
 1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
 instruction.
+
+## Active Phase 1C correction
+
+Phase 1C is reopened for managed-SDK restart durability, crash-safe Recent Projects,
+and deterministic post-validation/in-flight project-stage race evidence. The active
+brief is authoritative until supported-target validation and the fresh Phase 1C review
+complete. Earlier Phase 1C runs remain historical evidence and are not evidence for
+the new regressions.
 
 ## Completed Phase 1C checkpoint
 
