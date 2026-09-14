@@ -1,11 +1,11 @@
+#[cfg(unix)]
+use super::identity::identity_for_file;
 use super::{
     path::{self, ArtifactPaths, RelativePath},
     platform::{flush_open_file, DirectoryAnchor},
     ErrorCode, MutationKind, RecoveryItem, RecoveryMutationState, RecoveryReport, Revision,
     TransactionIntent,
 };
-#[cfg(unix)]
-use super::identity::identity_for_file;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
@@ -278,8 +278,8 @@ fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, Err
     };
 
     recovery.validate_chain()?;
-    let path = CString::new(recovery.path().as_os_str().as_bytes())
-        .map_err(|_| ErrorCode::UnsafePath)?;
+    let path =
+        CString::new(recovery.path().as_os_str().as_bytes()).map_err(|_| ErrorCode::UnsafePath)?;
     let fd = unsafe {
         libc::open(
             path.as_ptr(),
