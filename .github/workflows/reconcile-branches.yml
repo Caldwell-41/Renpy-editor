@@ -1,0 +1,210 @@
+name: One-time branch reconciliation
+
+# Temporary user-authorised maintenance; publication removes this workflow.
+# Never merges or pushes main. Tests execute without repository-write authority.
+on:
+  push:
+    branches: [corrective/phase-1a-1d-integrated]
+    paths:
+      - .github/workflows/reconcile-branches.yml
+      - scripts/apply_reconciliation.py
+      - scripts/retire_reconciled_branches.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: loomlight-one-time-branch-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  retire:
+    if: github.repository == 'Caldwell-41/Renpy-editor'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Recheck proofs and retire only six unchanged integrated refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/retire_reconciled_branches.py
+      - name: Record remaining network-branch delta for review
+        run: |
+          git diff --no-ext-diff d405820b355be026dacd1905b665d38440828374 46404b4b34afa96174b1000193a7028bb14eb972 -- app/src-core/src/renpy.rs app/src-core/src/lifecycle.rs app/src-core/src/transaction/platform.rs
+
+  regression:
+    if: github.repository == 'Caldwell-41/Renpy-editor'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      source_blob: ${{ steps.blobs.outputs.source_blob }}
+      tests_blob: ${{ steps.blobs.outputs.tests_blob }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Select repository-pinned Rust
+        working-directory: app
+        run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: sdk-reconciliation-ubuntu
+          workspaces: app -> target
+          cache-bin: "false"
+      - name: Install unchanged-behavior transport seam and regression
+        run: python3 scripts/apply_reconciliation.py prepare
+      - name: Prove the baseline loses its own downloaded archive
+        working-directory: app
+        shell: bash
+        run: |
+          set +e
+          cargo test -p loomlight-core --release --locked \
+            renpy::reconciliation_tests::download_handoff_does_not_quarantine_current_archive \
+            -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/sdk-baseline.log"
+          result=${PIPESTATUS[0]}
+          set -e
+          test "$result" -eq 101
+          grep 'current download must reach checksum verification, got Err(Io)' "$RUNNER_TEMP/sdk-baseline.log"
+      - name: Apply the selective handoff fix
+        run: python3 scripts/apply_reconciliation.py fix
+      - name: Format only changed Rust files
+        working-directory: app
+        run: rustfmt --edition 2021 src-core/src/renpy.rs
+      - name: Run core regressions
+        working-directory: app
+        run: cargo test -p loomlight-core --release --locked
+      - name: Check core Clippy
+        working-directory: app
+        run: cargo clippy -p loomlight-core --all-targets --release --locked -- -D warnings
+      - name: Check repository and exact patch
+        run: |
+          python3 scripts/validate.py
+          git diff --check
+          git diff --stat
+      - name: Record tested blobs
+        id: blobs
+        shell: bash
+        run: |
+          echo "source_blob=$(git hash-object app/src-core/src/renpy.rs)" >> "$GITHUB_OUTPUT"
+          echo "tests_blob=$(git hash-object app/src-core/src/renpy/reconciliation_tests.rs)" >> "$GITHUB_OUTPUT"
+          git hash-object app/src-core/src/renpy.rs app/src-core/src/renpy/reconciliation_tests.rs
+
+  targets:
+    needs: regression
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    name: SDK handoff - ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Select repository-pinned Rust
+        working-directory: app
+        run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: "false"
+      - name: Apply the identical selective patch
+        shell: bash
+        run: |
+          python3 scripts/apply_reconciliation.py apply
+          cd app
+          rustfmt --edition 2021 src-core/src/renpy.rs
+      - name: Verify exact tested blobs
+        shell: bash
+        env:
+          EXPECTED_SOURCE: ${{ needs.regression.outputs.source_blob }}
+          EXPECTED_TESTS: ${{ needs.regression.outputs.tests_blob }}
+        run: |
+          test "$(git hash-object app/src-core/src/renpy.rs)" = "$EXPECTED_SOURCE"
+          test "$(git hash-object app/src-core/src/renpy/reconciliation_tests.rs)" = "$EXPECTED_TESTS"
+          git diff --check
+      - name: Run synthetic SDK handoff tests
+        working-directory: app
+        shell: bash
+        run: cargo test -p loomlight-core --release --locked renpy::reconciliation_tests -- --nocapture
+      - name: Restore pinned official SDK archive
+        id: sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Obtain official archive on cache miss
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
+            --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" \
+            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+          mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+      - name: Verify real checksum-extraction-provenance handoff and reuse
+        working-directory: app
+        shell: bash
+        env:
+          LOOMLIGHT_PHASE1C_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked \
+            renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+            -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/sdk-handoff-gate.log"
+          grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/sdk-handoff-gate.log"
+
+  publish:
+    needs: [retire, regression, targets]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Select repository-pinned Rust
+        working-directory: app
+        run: rustup show active-toolchain
+      - name: Materialise only verified source and tests
+        env:
+          EXPECTED_SOURCE: ${{ needs.regression.outputs.source_blob }}
+          EXPECTED_TESTS: ${{ needs.regression.outputs.tests_blob }}
+        run: |
+          python3 scripts/apply_reconciliation.py apply
+          (cd app && rustfmt --edition 2021 src-core/src/renpy.rs)
+          test "$(git hash-object app/src-core/src/renpy.rs)" = "$EXPECTED_SOURCE"
+          test "$(git hash-object app/src-core/src/renpy/reconciliation_tests.rs)" = "$EXPECTED_TESTS"
+          git rm scripts/apply_reconciliation.py scripts/retire_reconciled_branches.py .github/workflows/reconcile-branches.yml
+          git add app/src-core/src/renpy.rs app/src-core/src/renpy/reconciliation_tests.rs
+          python3 scripts/validate.py
+          git diff --cached --check
+      - name: Publish only to unchanged existing corrective branch
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          branch=corrective/phase-1a-1d-integrated
+          live=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
+          test "$live" = "$EXPECTED_HEAD"
+          git config --local user.name Caldwell-41
+          git config --local user.email 255503715+Caldwell-41@users.noreply.github.com
+          git commit -m "fix: preserve active SDK download through installation" \
+            -m "Selectively port the missing handoff from phase-1c-network-install-fix. Baseline regression fails as expected; the corrected source blobs pass the core and Windows/macOS official SDK handoff gates. Remove temporary reconciliation machinery. Full Phase 1A-1D follow-up remains open."
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD
