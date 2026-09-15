@@ -1180,6 +1180,48 @@ mod tests {
         assert_eq!(hash.len(), 64);
     }
 
+    #[test]
+    fn selected_path_substitution_cannot_redirect_import() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let mut service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let selected_path = root.join("selected.png");
+        fs::write(&selected_path, b"approved bytes").unwrap();
+        let selected = service.select_import(&selected_path).unwrap();
+        fs::rename(&selected_path, root.join("moved-approved.png")).unwrap();
+        fs::write(&selected_path, b"replacement bytes").unwrap();
+        assert!(matches!(
+            service.import_asset(
+                &authority,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "cafe".into(),
+                    display_name: "Cafe".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            ),
+            Err(AuthoringError::UnknownImport)
+        ));
+        assert!(!root.join("game/images/bg_cafe.png").exists());
+    }
+
+    #[test]
+    fn import_size_limit_is_checked_before_streaming() {
+        let (_temporary, root, _project_uuid) = project_fixture();
+        let selected_path = root.join("oversize.png");
+        let file = File::create(&selected_path).unwrap();
+        file.set_len(MAX_IMPORT_BYTES + 1).unwrap();
+        drop(file);
+        let mut service = AuthoringService::default();
+        assert!(matches!(
+            service.select_import(&selected_path),
+            Err(AuthoringError::OversizeImport)
+        ));
+    }
+
     fn project_fixture() -> (tempfile::TempDir, PathBuf, String) {
         let temporary = tempdir().unwrap();
         let root = fs::canonicalize(temporary.path()).unwrap();
@@ -1230,6 +1272,18 @@ mod tests {
             )
             .unwrap();
         let variable_id = model.variables[0].id.clone();
+        assert!(matches!(
+            service.create_variable(
+                &authority,
+                &project_uuid,
+                CreateVariableRequest {
+                    technical_name: "alice".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::from(1),
+                },
+            ),
+            Err(AuthoringError::SymbolCollision)
+        ));
         drop(service);
 
         let reopened = AuthoringService::default();
@@ -1238,6 +1292,68 @@ mod tests {
         assert_eq!(reopened_model.characters[0].id, character_id);
         assert_eq!(reopened_model.variables[0].id, variable_id);
         assert_eq!(fs::read(root.join(CHARACTERS_PATH)).unwrap(), after);
+    }
+
+    #[test]
+    fn corrupt_metadata_never_rewrites_authoritative_source() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        fs::write(root.join(AUTHORING_PATH), b"{ corrupt").unwrap();
+        let before_characters = fs::read(root.join(CHARACTERS_PATH)).unwrap();
+        let before_variables = fs::read(root.join(VARIABLES_PATH)).unwrap();
+        let service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        assert!(matches!(
+            service.list(&authority, &project_uuid),
+            Err(AuthoringError::CorruptMetadata)
+        ));
+        assert_eq!(
+            fs::read(root.join(CHARACTERS_PATH)).unwrap(),
+            before_characters
+        );
+        assert_eq!(
+            fs::read(root.join(VARIABLES_PATH)).unwrap(),
+            before_variables
+        );
+    }
+
+    #[test]
+    fn unknown_metadata_fields_and_entity_ids_survive_supported_edits() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let mut metadata = AuthoringMetadata::empty(project_uuid.clone());
+        metadata
+            .extra
+            .insert("futureField".into(), Value::String("preserved".into()));
+        fs::write(
+            root.join(AUTHORING_PATH),
+            serde_json::to_vec_pretty(&metadata).unwrap(),
+        )
+        .unwrap();
+        let service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let updated = service
+            .create_variable(
+                &authority,
+                &project_uuid,
+                CreateVariableRequest {
+                    technical_name: "flag".into(),
+                    variable_type: VariableType::Bool,
+                    default_value: Value::Bool(true),
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            updated.extra.get("futureField"),
+            Some(&Value::String("preserved".into()))
+        );
+        assert_eq!(updated.variables.len(), 1);
+        let stable_id = updated.variables[0].id.clone();
+        let decoded: AuthoringMetadata =
+            serde_json::from_slice(&fs::read(root.join(AUTHORING_PATH)).unwrap()).unwrap();
+        assert_eq!(decoded.variables[0].id, stable_id);
+        assert_eq!(
+            decoded.extra.get("futureField"),
+            Some(&Value::String("preserved".into()))
+        );
     }
 
     #[test]

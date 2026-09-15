@@ -498,7 +498,7 @@ impl TransactionService {
             };
             if item.kind == MutationKind::CreateNew {
                 if target.parent_anchor.entry_absent(&target.name) != Ok(true) {
-                    return fail_journal(&store, &mut journal, ErrorCode::AlreadyExists);
+                    return fail_journal(&store, &mut journal, ErrorCode::Conflict);
                 }
             } else {
                 let current = target
@@ -507,6 +507,14 @@ impl TransactionService {
                     .and_then(read_revision_file);
                 if current.as_ref() != Ok(&item.base) {
                     return fail_journal(&store, &mut journal, ErrorCode::StaleRevision);
+                }
+                let companion = &companions[index - 1];
+                let exact = target
+                    .parent_anchor
+                    .open_file(&target.name)
+                    .and_then(read_bytes_file);
+                if exact.as_deref() != Ok(companion.expected_bytes.as_slice()) {
+                    return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
                 }
             }
             journal.mutations[index].commit_intent = true;
@@ -532,7 +540,14 @@ impl TransactionService {
                 )
             };
             if committed.is_err() {
-                return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                let code = if item.kind == MutationKind::CreateNew
+                    && target.parent_anchor.entry_absent(&target.name) == Ok(false)
+                {
+                    ErrorCode::Conflict
+                } else {
+                    ErrorCode::RecoveryRequired
+                };
+                return fail_journal(&store, &mut journal, code);
             }
             journal.mutations[index].exchanged = true;
             if store
@@ -797,9 +812,7 @@ impl TransactionService {
             if mutation.kind == MutationKind::CreateNew {
                 match resolved.parent_anchor.entry_absent(&resolved.name) {
                     Ok(true) => {}
-                    Ok(false) => {
-                        return fail_journal(&store, &mut journal, ErrorCode::AlreadyExists)
-                    }
+                    Ok(false) => return fail_journal(&store, &mut journal, ErrorCode::Conflict),
                     Err(code) => return fail_journal(&store, &mut journal, code),
                 }
             } else {
@@ -858,7 +871,7 @@ impl TransactionService {
                 let code = if mutation.kind == MutationKind::CreateNew
                     && resolved.parent_anchor.entry_absent(&resolved.name) == Ok(false)
                 {
-                    ErrorCode::AlreadyExists
+                    ErrorCode::Conflict
                 } else {
                     ErrorCode::RecoveryRequired
                 };

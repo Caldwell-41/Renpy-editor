@@ -195,7 +195,7 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
     const row = document.createElement("div"); row.className = "entity-row";
     const summary = document.createElement("div"); const name = document.createElement("strong"); name.textContent = character.displayName; const technical = document.createElement("code"); technical.textContent = character.technicalName; summary.append(name, technical);
     const appearanceCount = model.appearances.filter((item) => item.characterId === character.id).length; const detail = document.createElement("span"); detail.textContent = `${appearanceCount} appearance${appearanceCount === 1 ? "" : "s"}`;
-    const add = button("Add Appearance"); add.addEventListener("click", () => void addAppearance(project, character)); row.append(summary, detail, add); list.append(row);
+    const actions = document.createElement("div"); actions.className = "row-actions"; const edit = button("Edit"); edit.addEventListener("click", () => void editCharacter(project, character)); const add = button("Add Appearance"); add.addEventListener("click", () => void addAppearance(project, character)); actions.append(edit, add); row.append(summary, detail, actions); list.append(row);
     const appearancesHeading = document.createElement("h3"); appearancesHeading.textContent = `${character.displayName} Appearances`; list.append(appearancesHeading);
     const appearances = model.appearances.filter((item) => item.characterId === character.id);
     appearances.forEach((appearance) => { const item = document.createElement("div"); item.className = "appearance-row"; const label = document.createElement("span"); label.textContent = appearance.label; const mode = document.createElement("code"); mode.textContent = `${appearance.attributes.outfit} · ${appearance.attributes.pose}`; const makeDefault = button(character.defaultAppearanceId === appearance.id ? "Default" : "Set default", "text-button"); makeDefault.disabled = character.defaultAppearanceId === appearance.id; makeDefault.addEventListener("click", async () => { await value("appearance.setDefault", { characterId: character.id, appearanceId: appearance.id }); showProject(project, "characters"); }); item.append(label, mode, makeDefault); list.append(item); });
@@ -206,6 +206,13 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
   const color = input("color"); color.value = "#c5c8d0"; color.name = "dialogueColor";
   const submit = button("Create Character", "button primary"); submit.addEventListener("click", async () => { try { await value("character.create", { technicalName: technical.value, displayName: display.value, dialogueColor: color.value }); showProject(project, "characters"); } catch (error) { setStatus(message(error, "Character could not be created"), "error"); } });
   create.append(field("Technical variable (fixed after creation)", technical), field("Display name", display), field("Dialogue colour", color), submit); workspace.append(list, create);
+}
+
+async function editCharacter(project: OpenProject, character: Character): Promise<void> {
+  const displayName = window.prompt("Display name", character.displayName)?.trim(); if (!displayName) return;
+  const dialogueColor = window.prompt("Dialogue colour (#rrggbb)", character.dialogueColor)?.trim(); if (!dialogueColor) return;
+  try { await value("character.update", { id: character.id, expectedSourceRevision: character.source.sourceRevision, displayName, dialogueColor }); showProject(project, "characters"); }
+  catch (error) { setStatus(message(error, "Character could not be updated"), "error"); }
 }
 
 async function addAppearance(project: OpenProject, character: Character): Promise<void> {
@@ -227,9 +234,16 @@ function renderAssets(workspace: HTMLElement, project: OpenProject, model: Autho
 function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Variables"));
   if (!model.variables.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Variables yet."; list.append(empty); }
-  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); row.append(name, type, current); list.append(row); });
+  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); const edit = button("Edit default"); edit.addEventListener("click", () => void editVariable(project, variable)); row.append(name, type, current, edit); list.append(row); });
   const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input();
   const submit = button("Create Variable", "button primary"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "bool") parsed = defaultValue.value === "true"; if (type.value === "int") parsed = Number(defaultValue.value); try { await value("variable.create", { technicalName: technical.value, variableType: type.value, defaultValue: parsed }); showProject(project, "variables"); } catch (error) { setStatus(message(error, "Variable could not be created"), "error"); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), field("Default value (true/false for bool)", defaultValue), submit); workspace.append(list, create);
+}
+
+async function editVariable(project: OpenProject, variable: Variable): Promise<void> {
+  const entered = window.prompt(`New ${variable.variableType} default`, String(variable.defaultValue)); if (entered === null) return;
+  let defaultValue: boolean | number | string = entered; if (variable.variableType === "bool") { if (entered !== "true" && entered !== "false") { setStatus("Bool defaults must be true or false.", "error"); return; } defaultValue = entered === "true"; } if (variable.variableType === "int") defaultValue = Number(entered);
+  try { await value("variable.update", { id: variable.id, expectedSourceRevision: variable.source.sourceRevision, defaultValue }); showProject(project, "variables"); }
+  catch (error) { setStatus(message(error, "Variable could not be updated"), "error"); }
 }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
 void showWelcome();

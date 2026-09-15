@@ -179,6 +179,76 @@ fn create_new_refuses_an_existing_destination_without_overwrite() {
 }
 
 #[test]
+fn competing_create_is_preserved_as_a_conflict() {
+    let fixture = Fixture::new();
+    let create = FileMutation {
+        path: RelativePath::new("game/race.rpy").unwrap(),
+        kind: MutationKind::CreateNew,
+        base: Revision::expected_absence(),
+        expected_bytes: Vec::new(),
+        proposed: b"accepted\n".to_vec(),
+    };
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::BeforeExchange(0) {
+            fs::write(root.join("game/race.rpy"), b"external winner\n").unwrap();
+        }
+        Ok(())
+    });
+    let outcome = fixture.service.commit_with_injector(
+        &fixture.project,
+        fixture.proposal(vec![create]),
+        &mut hook,
+    );
+    assert_eq!(outcome_code(&outcome), Some(ErrorCode::Conflict));
+    assert_eq!(
+        fs::read(fixture.root.join("game/race.rpy")).unwrap(),
+        b"external winner\n"
+    );
+}
+
+#[test]
+fn interrupted_mixed_create_and_replace_blocks_follow_up() {
+    let fixture = Fixture::new();
+    let create = FileMutation {
+        path: RelativePath::new("game/new.rpy").unwrap(),
+        kind: MutationKind::CreateNew,
+        base: Revision::expected_absence(),
+        expected_bytes: Vec::new(),
+        proposed: b"created\n".to_vec(),
+    };
+    let replace = fixture.mutation("game/one.rpy", b"replacement\n");
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::AfterExchange(0) {
+            Err(ErrorCode::RecoveryRequired)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture.service.commit_with_injector(
+        &fixture.project,
+        fixture.proposal(vec![create, replace]),
+        &mut hook,
+    );
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert!(fixture
+        .service
+        .has_blocking_recovery(&fixture.project)
+        .unwrap());
+    assert!(matches!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::RecoveryRequired { .. }
+    ));
+    assert_eq!(
+        fs::read(fixture.root.join("game/new.rpy")).unwrap(),
+        b"created\n"
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+}
+
+#[test]
 fn streaming_import_exceeds_old_memory_cap_and_commits_with_metadata() {
     use std::io::Write;
     let fixture = Fixture::new();

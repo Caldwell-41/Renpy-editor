@@ -121,8 +121,9 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .supporting-workspace h3 { margin: 24px 0 6px; color: var(--text-secondary); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
 .supporting-section { padding: 18px 0 28px; border-top: 1px solid var(--border-normal); }
 .supporting-section > h2 { margin-bottom: 16px; }
-.entity-row { display: grid; grid-template-columns: minmax(140px, .7fr) minmax(160px, 1fr) auto; gap: 16px; align-items: center; min-height: 52px; border-bottom: 1px solid var(--border-normal); }
+.entity-row { display: grid; grid-template-columns: minmax(140px, .7fr) minmax(160px, 1fr) auto auto; gap: 16px; align-items: center; min-height: 52px; border-bottom: 1px solid var(--border-normal); }
 .entity-row > div { display: grid; gap: 4px; }
+.entity-row > .row-actions { display: flex; gap: 8px; }
 .entity-row code, .appearance-row code { color: var(--text-muted); font: .72rem var(--font-source); overflow-wrap: anywhere; }
 .entity-row > span, .appearance-row { color: var(--text-secondary); font-size: .78rem; }
 .appearance-row { display: grid; grid-template-columns: minmax(120px, 1fr) 1fr auto; gap: 16px; align-items: center; min-height: 40px; padding-left: 24px; border-bottom: 1px solid var(--border-normal); }
