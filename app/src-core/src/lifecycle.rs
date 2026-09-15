@@ -1784,8 +1784,9 @@ mod tests {
         let old = service.open_path(&old_root).unwrap();
 
         let transactions = TransactionService::default();
+        let candidate_authority_root = fs::canonicalize(&candidate_root).unwrap();
         let project = transactions
-            .register_trusted_project(&candidate_root)
+            .register_trusted_project(&candidate_authority_root)
             .unwrap();
         let path = RelativePath::new("game/definitions/variables.rpy").unwrap();
         let (expected, revision) = transactions.snapshot(&project, path.clone()).unwrap();
