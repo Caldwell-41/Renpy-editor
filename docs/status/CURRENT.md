@@ -1,16 +1,25 @@
 # Current status
 
-**Updated:** 2026-09-14<br>
-**Phase:** Phase 1D supporting authoring in progress; Phase 1E not approved<br>
+**Updated:** 2026-09-15<br>
+**Phase:** Phase 1D complete; Phase 1E not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
 
-- Phase 1D was explicitly approved on 2026-09-15. Its bounded
-  [active task](../tasks/active/phase-1d-supporting-authoring.md) covers expected-absence
-  file creation, trusted streaming imports, narrow Character/Variable source mapping,
-  stable Character/Appearance/Asset/Variable metadata, and supporting UI only. Phase
-  1E Scene authoring remains unapproved.
+- Phase 1D is complete. The
+  [archived task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) records
+  expected-absence file creation, trusted 512 MiB streaming imports, narrow exact-byte
+  Character/Variable source mapping, stable Character/Appearance/Asset/Variable UUID
+  metadata, deterministic Ren'Py discovery names, supporting UI, and exact evidence.
+  Phase 1E Scene authoring remains unapproved and unstarted.
+- [Production run 34913182173](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34913182173)
+  at `343e10f96e42ef1f1cb1d50f78936865436e4f2b` passed Windows x64 job
+  `104204998417` and macOS ARM64 job `104204998226`. Retained evidence artifacts are
+  `10375353123` (Windows, SHA-256
+  `d9be4e70fb5ac6870faaa530731a550f588ad5cd962cebcda5cef64a40604475`) and
+  `10375651909` (macOS, SHA-256
+  `bfa99946717782c5a97b33d331d817411714799ff255142288f2337d840cbb36`). Quality run
+  `34913182158` passed.
 
 - The bounded
   [single-instance lifecycle micro-remediation](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
@@ -26,7 +35,8 @@
   `949213ab719c6d8c895cae933839459d97670f89dbdb37281f62a0b483af38e7`) and
   `10373200561` (macOS, SHA-256
   `75fc9d2b01dcdcce046b4f1a838e5496129989a1fad1031ea28cb2c06515bb03`). Quality run
-  `34906232244` passed. Phase 1C is re-closed; Phase 1D remains unapproved and unstarted.
+  `34906232244` passed. Phase 1C is re-closed; this was the prerequisite checkpoint
+  before the now-complete Phase 1D work.
 
 - The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
   1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
@@ -158,12 +168,11 @@
 - Normal Run Game is Phase 1; correct Run From Here remains deferred with state
   simulation.
 - Production file Gate E is re-closed by the latest corrective Windows/macOS runtime
-  evidence. Authoring remains absent; Phase 1D remains approval-blocked.
+  evidence. Phase 1D authoring now extends that closed foundation without weakening it.
 
 ## Next action
 
-Complete and evidence the bounded Phase 1D task. Do not begin Phase 1E from this
-checkpoint.
+Await explicit approval for Phase 1E. Do not begin it from this checkpoint.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

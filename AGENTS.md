@@ -4,8 +4,8 @@
 
 Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0, bounded
 Phase 1A, corrected Phase 1B, and corrected Phase 1C are complete; Gate E remains
-closed. Phase 1D supporting authoring is explicitly approved and in progress; Phase
-1E remains separately approval-gated.
+closed. Phase 1D supporting authoring is complete; Phase 1E remains separately
+approval-gated.
 ADR 0003 selects Tauri 2 and ADR 0005 defines version-pinned staged project creation.
 Do not begin Scene authoring or any later milestone without that approval.
 

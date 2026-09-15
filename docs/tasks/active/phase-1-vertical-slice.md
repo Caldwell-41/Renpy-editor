@@ -188,8 +188,9 @@ parent/stage/child/promotion race evidence on both supported targets.
 
 ### 1D — Supporting authoring models: Characters, Assets, Variables
 
-**Status:** Explicitly approved and in progress under the bounded
-[Phase 1D task](phase-1d-supporting-authoring.md). Phase 1E is not approved.
+**Status:** Complete. See the archived
+[Phase 1D task](../archive/2026-09-15-phase-1d-supporting-authoring.md). Phase 1E is not
+approved.
 
 Implement bounded supporting surfaces and source definitions:
 

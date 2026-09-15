@@ -123,7 +123,8 @@ standard GUI resources under `game/gui/`. Duplicate/missing checks are required,
 advanced tagging, conversion, optimisation, search, and bulk management remain later
 work.
 
-A conventional Character layout may be:
+A future supported organizational layout may be (this is not the Phase 1D import
+layout):
 
 ```text
 game/images/characters/alice/alice neutral.png

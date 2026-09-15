@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
-**Prepared:** 2026-09-14<br>
-**Phase:** Phase 1D supporting authoring in progress; Phase 1E not approved<br>
+**Prepared:** 2026-09-15<br>
+**Phase:** Phase 1D complete; Phase 1E not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -10,7 +10,7 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Active Phase 1D supporting authoring task](../tasks/active/phase-1d-supporting-authoring.md)
+4. [Completed Phase 1D supporting authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md)
 5. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
 5. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
 6. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
@@ -24,9 +24,29 @@
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
    [ADR 0005](../adr/0005-staged-project-creation.md)
 
-The approved product brief remains authoritative. The user explicitly approved Phase
-1C on 2026-09-14. Phase 1D and every later milestone still require a new explicit
-instruction.
+The approved product brief remains authoritative. Phase 1D is complete. Phase 1E and
+every later milestone still require a new explicit instruction.
+
+## Completed Phase 1D checkpoint
+
+Phase 1D added recovery-aware expected-absence file creation, retained-handle streaming
+imports with a 512 MiB cap, lifecycle-bound authoring authority, a narrow exact-byte
+Character/Variable definition mapper, stable versioned Character/Appearance/Asset/
+Variable metadata, deterministic Ren'Py image/audio naming, and bounded supporting UI.
+The renderer still has no generic filesystem authority, and Scene/Beat/Preview/Source
+workspace work was not started.
+
+Final production run
+[34913182173](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34913182173)
+at `343e10f96e42ef1f1cb1d50f78936865436e4f2b` passed Windows x64 job
+`104204998417` (82 core passed, 3 ignored) and macOS ARM64 job `104204998226`
+(85 core passed, 3 ignored), including the controlled Ren'Py 8.5.3 Phase 1D gate,
+packaging, WebView/single-instance security, secrets, and dependency/licence checks.
+Artifacts are `10375353123` (Windows, SHA-256
+`d9be4e70fb5ac6870faaa530731a550f588ad5cd962cebcda5cef64a40604475`) and
+`10375651909` (macOS, SHA-256
+`bfa99946717782c5a97b33d331d817411714799ff255142288f2337d840cbb36`). Quality run
+`34913182158` passed. See the archived Phase 1D task for design and local evidence.
 
 ## Completed Phase 1C single-instance correction
 
@@ -36,8 +56,8 @@ launch cannot construct `LifecycleService`; it only asks the primary `main` wind
 restore, show, and focus. Production run `34906232240` at `e1e8dac` passed the full
 Windows x64 job `104183422740` and macOS ARM64 job `104183422612`, including packaged
 dual-launch evidence and all retained lifecycle/security gates. Evidence artifacts are
-`10372748134` and `10373200561`; quality run `34906232244` passed. Phase 1D remains
-unstarted.
+`10372748134` and `10373200561`; quality run `34906232244` passed. This remained the
+closed prerequisite for the later Phase 1D implementation.
 
 ## Completed Phase 1C durability/race correction
 
@@ -48,7 +68,7 @@ before SDK execution. Production run `34849801157` at `bdc7ad60` passed Windows 
 job `103994559964` and macOS ARM64 job `103994559633`, with evidence artifacts
 `10350511403` and `10351240446`; quality run `34849801200` passed. The archived brief
 records exact designs, commits, hashes, failed/superseded evidence, and limitations.
-No Phase 1D work was started.
+No Phase 1D work had been started at that historical checkpoint.
 
 ## Completed Phase 1C checkpoint
 
@@ -79,7 +99,7 @@ No Phase 1D work was started.
   hostile stage/SDK/Git regressions, official lifecycle gate, desktop/package boundary,
   packaged lifecycle UI smoke, secret scan, and dependency inventory. Evidence artifacts
   are `10343096571` (Windows) and `10342841434` (macOS); quality run `34832555407`
-  passed. Phase 1D has not started.
+  passed. Phase 1D had not started at that historical checkpoint.
 
 ## Completed Phase 1B correction
 

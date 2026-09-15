@@ -5,8 +5,8 @@ Start with [current status](status/CURRENT.md), the
 [`tasks/active`](tasks/active/).
 
 Phase 0, Phase 1A, corrected Phase 1B, and corrected Phase 1C are complete; Gate E
-remains closed. Phase 1D is approved and in progress; Phase 1E/later remains separately
-approval-gated. Read
+remains closed. Phase 1D is complete; Phase 1E/later remains separately approval-gated.
+Read
 the
 [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
 sequence, the archived
@@ -29,7 +29,7 @@ plus [production transaction contract](TRANSACTIONS.md).
 | Transaction, durability, and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
-| Active Phase 1D supporting authoring task | [tasks/active/phase-1d-supporting-authoring.md](tasks/active/phase-1d-supporting-authoring.md) |
+| Completed Phase 1D supporting authoring task | [tasks/archive/2026-09-15-phase-1d-supporting-authoring.md](tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
 | Completed Phase 1C single-instance correction | [tasks/archive/2026-09-14-phase-1c-single-instance.md](tasks/archive/2026-09-14-phase-1c-single-instance.md) |
 | Completed Phase 1C durability/race remediation | [tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md](tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
 | Completed Phase 1C corrective remediation | [tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md](tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
