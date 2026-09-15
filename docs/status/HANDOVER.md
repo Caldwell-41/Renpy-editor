@@ -3,11 +3,11 @@
 **Prepared:** 2026-09-15<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
 **Required working branch:** `corrective/phase-1d-ui-operation-race`<br>
-**Checkpoint:** PR #7 merged and post-merge gates passed; bounded Phase 1D UI operation/Flush follow-up active
+**Checkpoint:** Bounded Phase 1D UI operation/Flush follow-up passed target gates; PR #8 integration pending
 
 ## Read first
 
-1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [active Phase 1D UI follow-up](../tasks/active/2026-09-15-phase-1d-ui-operation-follow-up.md).
+1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [completed Phase 1D UI follow-up](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md).
 2. The [integrated corrective ledger](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md), which separates initial implementation, accepted R1–R7 and integration status.
 3. The amended [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md); these are planning boundaries, not implementation approval.
 4. Relevant [architecture](../ARCHITECTURE.md), [data](../DATA_MODEL.md), [UI](../UI.md), [transaction](../TRANSACTIONS.md), [security](../SECURITY.md), [testing](../TESTING.md) and [ADR](../adr/README.md) contracts.
@@ -57,12 +57,15 @@ PR #7 then merged and its post-merge gates passed as recorded above.
 
 The later review found one narrower R5 issue: the renderer used one global operation
 generation, so a same-view overlapping Flush/close could discard a mutation completion
-without a session or view change. The active follow-up uses operation-scoped generations
-and one authoring operation per project session. `Ctrl/Cmd+S` does not start a second
-Flush or claim persistence while authoring is active. Delayed success/failure DOM cases
-and delayed packaged smoke coverage are implemented. Record final local and target
-evidence in the active brief before archiving it. The prescribed local gate and diff
-review pass; supported-target execution and integration remain pending.
+without a session or view change. The follow-up uses operation-scoped generations and
+one authoring operation per project session. `Ctrl/Cmd+S` does not start a second Flush
+or claim persistence while authoring is active. Delayed success/failure DOM cases and
+delayed packaged smoke coverage are implemented. Exact candidate `4f6fef7`, tree
+`06b5609`, passed repository-quality run `34992162418` and production run
+`34992890658`: macOS ARM64 job `104461734419` and Windows x64 job `104461734679`.
+Both passed the official SDK lifecycle/authoring/discovery/N1, desktop, packaging,
+packaged WebView/supporting-authoring, privacy and dependency/licence gates. PR #8
+integration remains pending.
 
 The initial local test report is retained in the integrated task. The SDK wrapper was
 skipped and desktop packaging unavailable there. Repository quality is not production
@@ -102,7 +105,8 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 links in CURRENT. Those snapshots are historical evidence and do not override this
 handover, CURRENT or the active follow-up.
 
-The next action is to push the active UI follow-up, run the existing full Windows/macOS production workflow once for
-the final application candidate, and merge its focused PR only after required checks
-and policies pass. Then verify main/post-merge CI and update/archive the brief. Do not
-start Phase 1E until that closure is recorded and the user separately approves 1E.
+The next action is to verify PR #8's final documentation-only head, required checks and
+policies, mark it ready, and merge with an expected-head guard. Then verify main and
+required post-merge CI. Do not duplicate the expensive production matrix for unchanged
+application/test/workflow content. Do not start Phase 1E until that closure is recorded
+and the user separately approves 1E.

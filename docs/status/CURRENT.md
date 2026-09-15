@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-15<br>
-**Phase:** Bounded post-integration Phase 1D UI operation/Flush follow-up<br>
+**Phase:** Phase 1D UI operation/Flush correction target-complete; integration pending<br>
 **Working branch:** `corrective/phase-1d-ui-operation-race`<br>
 **Next milestone:** Phase 1E is unapproved and unstarted
 
@@ -34,12 +34,16 @@ A post-merge review then reproduced one same-view renderer race: starting
 the bridge could invalidate its global completion token. A later success could leave
 submitted input labelled unsubmitted and controls disabled; a later failure could lose
 its error/focus/retry state. The core transaction remained safe, but this reopens R5.
-The active [bounded follow-up](../tasks/active/2026-09-15-phase-1d-ui-operation-follow-up.md)
+The completed [bounded follow-up](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
 scopes completion generations, serializes authoring per session, suppresses overlapping
-Flush, and adds delayed success/failure DOM plus packaged regressions. The prescribed
-local gate passes; supported-target closure and integration are pending.
-Phase 1E remains unapproved and unstarted until that gate closes and separate approval
-is given.
+Flush, and adds delayed success/failure DOM plus packaged regressions. Exact candidate
+`4f6fef7a543ef817fc6e9a6d8f44744724686730`, tree
+`06b560987278148d741716d7f550034454368b5c`, passed repository-quality run
+`34992162418` and production run `34992890658`: macOS ARM64 job `104461734419` and
+Windows x64 job `104461734679` both passed the core, official SDK lifecycle/authoring/
+discovery/N1, desktop, packaging, packaged WebView/supporting-authoring, privacy and
+dependency/licence gates. PR #8 integration is pending. Phase 1E remains unapproved
+and unstarted until integration closes and separate approval is given.
 
 ## Branch reconciliation and SDK carry-forward completed
 
@@ -108,8 +112,8 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Complete the active Phase 1D UI operation/Flush follow-up: one full Windows x64/macOS
-ARM64 production run, guarded integration and
-post-merge verification. Preserve the old corrective branch and archive tag; do not
-repeat PR #7 or branch cleanup. Do not begin Phase 1E without a separately approved
-goal after this corrective checkpoint closes.
+Complete guarded integration of PR #8 and verify resulting main/post-merge CI. The
+application/test/workflow tree already passed the full supported-target matrix; do not
+duplicate it for the documentation-only evidence commit. Preserve both corrective
+branches and the archive tag; do not repeat PR #7 or branch cleanup. Do not begin Phase
+1E without a separately approved goal after this corrective checkpoint closes.

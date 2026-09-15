@@ -60,7 +60,7 @@ Retain inspected candidate authority until activation, prepare before replacing 
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
-Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the active [UI operation/Flush follow-up](2026-09-15-phase-1d-ui-operation-follow-up.md) must close before 1E approval.
+Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the completed [UI operation/Flush follow-up](../archive/2026-09-15-phase-1d-ui-operation-follow-up.md) passed its gates and awaits integration before 1E approval.
 
 Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
 

@@ -1,6 +1,6 @@
 # Task: Phase 1D UI operation/Flush follow-up
 
-**Status:** Implementation and complete local gate passed; supported-target gate and integration pending.<br>
+**Status:** Completed — implementation, local gate and supported-target gate passed; PR #8 integration is tracked separately.<br>
 **Baseline:** `main` at `98855eb23a284f500cd3285247738e4c5f250bcd`<br>
 **Branch:** `corrective/phase-1d-ui-operation-race`<br>
 **Scope:** One post-integration R5 correction only; Phase 1E remains unstarted.
@@ -50,15 +50,15 @@ history integration, recovery UI, Preview, Source or later work here.
 | Behavioral DOM | Passed locally | Delayed status, mutation success/failure and Flush in both directions; success reloads Saved, failure retains value/error/focus/retry, neither side starts while the other is active, and navigation settles to current-view Saved state |
 | Packaged regression | Implemented | Smoke delays Variable update, requires overlapping Flush suppression, then performs an explicit Flush |
 | Prescribed local gate | Passed | Validator 194 files; diff and smoke syntax checks passed; Python 26/26 and 24/24; frontend 8/8 plus build; core 115 passed/4 ignored; fmt and strict Clippy passed |
-| Windows x64/macOS ARM64 | Pending | Run the existing production workflow once for the final application candidate |
-| Integration | Pending | New bounded PR only after target closure; do not replay PR #7 |
+| Windows x64/macOS ARM64 | Passed | Run `34992890658`: macOS ARM64 job `104461734419`; Windows x64 job `104461734679`; exact head `4f6fef7`, tree `06b5609` |
+| Integration | Pending | Draft PR #8 contains the bounded correction; do not replay PR #7 |
 
 ## Completion rule
 
-Archive this brief only after the final application candidate passes local validation,
-repository quality and the full existing Windows x64/macOS ARM64 production workflow,
-then the guarded corrective PR is merged and post-merge state is verified. Phase 1E
-still requires a separate explicit approval after this corrective gate closes.
+This implementation brief closes only after the final application candidate passes
+local validation, repository quality and the full existing Windows x64/macOS ARM64
+production workflow. PR integration and post-merge state remain distinct status items.
+Phase 1E still requires corrective integration to close and separate explicit approval.
 
 ## Local evidence
 
@@ -69,3 +69,32 @@ The final pre-publication worktree passed `python3 scripts/validate.py`,
 strict all-target core Clippy. Four Rust subprocess-worker entry points remained
 intentionally ignored and were exercised by their parent crash tests. Desktop
 packaging is reserved for the supported Windows/macOS workflow.
+
+## Supported-target evidence
+
+Repository-quality run `34992162418` passed at exact remote candidate
+`4f6fef7a543ef817fc6e9a6d8f44744724686730`, tree
+`06b560987278148d741716d7f550034454368b5c`. Production run `34992890658`
+then passed:
+
+- macOS ARM64 job `104461734419`;
+- Windows x64 job `104461734679`.
+
+Both jobs passed frontend/DOM validation, 115 core tests with four intentional
+subprocess-worker entry-point ignores, the official SDK lifecycle/authoring/discovery
+gate, `phase-1c-network-handoff-gate: passed`, desktop Rust, packaging, packaged
+WebView/single-instance/supporting-authoring smoke, artifact privacy scanning and
+dependency/licence inventory. The official archive came from the keyed cache on both
+targets, so the conditional cache-miss download step was correctly skipped; the
+official-archive test gates themselves ran and passed.
+
+Retained redacted evidence artifacts:
+
+| Target | Evidence artifact | Digest | Package artifact | Digest |
+| --- | --- | --- | --- | --- |
+| macOS ARM64 | `10406636489` | `sha256:5abca06971650f30c22ce00dca010e712ccc69e1c17bdafa9c4cd3f3a066bcf9` | `10406162573` | `sha256:663a35806c8f9502560199ba92d046de920d8fc9e427a6dd9ef7aef22345ca37` |
+| Windows x64 | `10407037260` | `sha256:b6dc1f590312e0a9e68e0b946f7b8de65a90d131b5e7c94362fc25897b261493` | `10406757979` | `sha256:d09299965767bf54cc0974e2d35f3c6046aaa47401dd3593d9a8780c35475afd` |
+
+No target failure or test skip occurred. Only the cache-miss download step was skipped
+because the verified official archive was restored from cache. PR #8 remains draft and
+unmerged at this record; integration must not be represented as complete until verified.

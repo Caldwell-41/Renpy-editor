@@ -4,8 +4,9 @@
 
 Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and the
 historical Phase 1A–1D integrated correction are merged. A bounded post-integration
-Phase 1D UI operation/Flush follow-up is active. Read `docs/status/CURRENT.md`, its
-[active brief](docs/tasks/active/2026-09-15-phase-1d-ui-operation-follow-up.md), and the
+Phase 1D UI operation/Flush follow-up passed its local and supported-target gates and
+awaits PR integration. Read `docs/status/CURRENT.md`, its
+[completed brief](docs/tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md), and the
 [completed integrated follow-up](docs/tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md)
 for exact evidence and current guidance. The working corrective branch is
 `corrective/phase-1d-ui-operation-race`.
