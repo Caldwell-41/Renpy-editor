@@ -323,8 +323,14 @@ asset status and pinned-discovery collisions, idempotent compatibility declarati
 automatic FLAC discovery, more than 4096 retained terminal journals followed by a real
 write, and later corrupt-record refusal. A behavioral DOM harness reorders bridge
 responses and exercises supporting edits, cancellation, exact values, Flush, focus,
-and unsubmitted-input truth; the packaged target probe repeats the supporting workflow
-inside the real WebView. The target
+and unsubmitted-input truth. It also delays both successful and failed mutations while
+requesting Flush, proving that no second Flush invalidates the mutation completion and
+that failure restores value, controls and focus. It also proves the inverse: a mutation
+cannot start during an active Flush, and a late status read cannot overwrite active
+operation state. Same-project navigation during either operation must stay on the new
+surface and refresh its persistence status after settlement. The packaged target probe delays a
+supporting mutation, requires overlapping-Flush suppression, then performs the later
+explicit Flush inside the real WebView. The target
 gate must exercise actual imported assets in the pinned SDK with metadata removed from
 a disposable copy. Core-only Linux results do not replace Windows reparse/macOS
 descriptor, desktop package, or real WebView handler/DOM evidence.

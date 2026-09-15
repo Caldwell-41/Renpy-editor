@@ -1,13 +1,19 @@
 # Current status
 
 **Updated:** 2026-09-15<br>
-**Phase:** Phase 1A–1D corrective implementation and target acceptance complete<br>
-**Working branch:** `corrective/phase-1a-1d-integrated`<br>
+**Phase:** Bounded post-integration Phase 1D UI operation/Flush follow-up<br>
+**Working branch:** `corrective/phase-1d-ui-operation-race`<br>
 **Next milestone:** Phase 1E is unapproved and unstarted
 
 ## Current truth
 
-N1 and R1–R7 are complete. Remote implementation commit `8c19225` and its targeted
+N1 and the integrated R1–R7 correction merged once through PR #7 as main commit
+`98855eb23a284f500cd3285247738e4c5f250bcd`, tree
+`a80d0a7b708026198f5f1ccc6b0ff9f8919c81cc`. Post-merge repository-quality run
+`34985039823` and full production run `34985039897` passed; the latter passed macOS
+ARM64 job `104434851094` and Windows x64 job `104434851128`. Do not replay PR #7.
+
+The integrated remote implementation commit `8c19225` and its targeted
 test-wiring descendants culminate in application candidate
 `c912fcadf8160d32ec35c7a0135b12812ad65c56`, tree
 `17ae6e4f16600d86f39bf354b7649a470dcf51f2`. The candidate passed the prescribed local
@@ -18,17 +24,22 @@ instance/supporting-authoring, privacy and dependency/licence gates. Exact artif
 IDs, digests, counts, preserved failures and compatibility limits are in the completed
 [execution ledger](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
 
-The correction provides context-aware source mapping; reloadable metadata and exact
+That correction provides context-aware source mapping; reloadable metadata and exact
 int64 values; validated compatibility repair; pinned Ren'Py discovery/import authority;
 session-safe behavioral UI; and complete bounded-memory recovery readiness without a
 lifetime journal cap. FLAC remains automatically discovered by the pinned scanner.
 
-Implementation/test closure is distinct from integration status. At this documentation
-checkpoint, PR #7 still targets `main` from the required corrective branch and must be
-merged only through its expected-head, policy-respecting gate. The live PR and final
-handoff report are authoritative for whether that integration subsequently occurred.
-The last pre-merge main head was `0e5e8b697782ed29d61d01dbb1240b9d16561c27`.
-Phase 1E remains unapproved and unstarted.
+A post-merge review then reproduced one same-view renderer race: starting
+`Ctrl/Cmd+S`, close, or another operation while a supporting-authoring mutation awaited
+the bridge could invalidate its global completion token. A later success could leave
+submitted input labelled unsubmitted and controls disabled; a later failure could lose
+its error/focus/retry state. The core transaction remained safe, but this reopens R5.
+The active [bounded follow-up](../tasks/active/2026-09-15-phase-1d-ui-operation-follow-up.md)
+scopes completion generations, serializes authoring per session, suppresses overlapping
+Flush, and adds delayed success/failure DOM plus packaged regressions. The prescribed
+local gate passes; supported-target closure and integration are pending.
+Phase 1E remains unapproved and unstarted until that gate closes and separate approval
+is given.
 
 ## Branch reconciliation and SDK carry-forward completed
 
@@ -97,6 +108,8 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Use PR #7's live state and [HANDOVER](HANDOVER.md) to verify the one permitted guarded
-integration and required post-merge CI. If already merged, do not replay it. Branch
-cleanup is complete and must not be repeated. Do not begin Phase 1E.
+Complete the active Phase 1D UI operation/Flush follow-up: one full Windows x64/macOS
+ARM64 production run, guarded integration and
+post-merge verification. Preserve the old corrective branch and archive tag; do not
+repeat PR #7 or branch cleanup. Do not begin Phase 1E without a separately approved
+goal after this corrective checkpoint closes.

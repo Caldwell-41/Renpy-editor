@@ -69,8 +69,14 @@ test("supporting authoring ignores stale completions and reports persistence tru
   const opens: Array<ReturnType<typeof deferred<unknown>>> = [];
   const authoringLoads: Array<ReturnType<typeof deferred<unknown>>> = [];
   const characterCreates: Array<ReturnType<typeof deferred<unknown>>> = [];
+  const variableCreates: Array<ReturnType<typeof deferred<unknown>>> = [];
+  const flushes: Array<ReturnType<typeof deferred<unknown>>> = [];
+  const statuses: Array<ReturnType<typeof deferred<unknown>>> = [];
   const calls: Array<{ operation: CoreOperation; payload: Readonly<Record<string, unknown>> }> = [];
   let delayNextAuthoring = false;
+  let delayNextVariableCreate = false;
+  let delayNextFlush = false;
+  let delayNextStatus = false;
   let failVariable = true;
   let importChoiceCount = 0;
 
@@ -79,10 +85,13 @@ test("supporting authoring ignores stale completions and reports persistence tru
     let result: unknown;
     if (operation === "project.listRecent") result = [];
     else if (operation === "project.openPicker") { const pending = deferred<unknown>(); opens.push(pending); result = await pending.promise; }
+    else if (operation === "project.status" && delayNextStatus) { delayNextStatus = false; const pending = deferred<unknown>(); statuses.push(pending); result = await pending.promise; }
     else if (operation === "project.status") result = "saved";
+    else if (operation === "project.flush" && delayNextFlush) { delayNextFlush = false; const pending = deferred<unknown>(); flushes.push(pending); result = await pending.promise; }
     else if (operation === "authoring.list" && delayNextAuthoring) { delayNextAuthoring = false; const pending = deferred<unknown>(); authoringLoads.push(pending); result = await pending.promise; }
     else if (operation === "authoring.list") result = model;
     else if (operation === "character.create") { const pending = deferred<unknown>(); characterCreates.push(pending); result = await pending.promise; }
+    else if (operation === "variable.create" && delayNextVariableCreate) { delayNextVariableCreate = false; const pending = deferred<unknown>(); variableCreates.push(pending); result = await pending.promise; }
     else if (operation === "variable.create" && failVariable) { failVariable = false; return { protocolVersion: 1, requestId: "test", ok: false, error: { code: "INVALID_PAYLOAD", message: "Variable rejected" } }; }
     else if (operation === "asset.chooseImport") {
       importChoiceCount += 1;
@@ -135,7 +144,9 @@ test("supporting authoring ignores stale completions and reports persistence tru
   await tick();
   characterCreates[0]!.resolve(model);
   await tick();
+  await tick();
   assert.match(document.querySelector("h1")?.textContent ?? "", /Variables/);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
 
   const technical = labelledControl<HTMLInputElement>("Technical name (fixed after creation)");
   enter(technical, "bad_value");
@@ -174,8 +185,66 @@ test("supporting authoring ignores stale completions and reports persistence tru
   await tick();
   assert.equal(document.querySelector("#app-status")?.textContent, "Unsubmitted input — accepted changes saved");
 
+  delayNextStatus = true;
+  click("Variables");
+  await tick();
+  delayNextVariableCreate = true;
+  enter(labelledControl<HTMLInputElement>("Technical name (fixed after creation)"), "overlap_success");
+  const flushCountBeforeSuccess = calls.filter((call) => call.operation === "project.flush").length;
+  click("Create Variable");
+  await tick();
+  window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+  await tick();
+  assert.equal(calls.filter((call) => call.operation === "project.flush").length, flushCountBeforeSuccess);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Authoring operation in progress — no additional Flush started");
+  statuses[0]!.resolve("saved");
+  await tick();
+  assert.equal(document.querySelector("#app-status")?.textContent, "Authoring operation in progress — no additional Flush started");
+  variableCreates[0]!.resolve(model);
+  await tick();
+  await tick();
+  assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
+
+  delayNextVariableCreate = true;
+  const failedTechnical = labelledControl<HTMLInputElement>("Technical name (fixed after creation)");
+  enter(failedTechnical, "overlap_failure");
+  const flushCountBeforeFailure = calls.filter((call) => call.operation === "project.flush").length;
+  click("Create Variable");
+  await tick();
+  window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+  await tick();
+  variableCreates[1]!.reject(new Error("Delayed variable rejected"));
+  await tick();
+  const failedSubmit = [...document.querySelectorAll("button")].find((item) => item.textContent === "Create Variable");
+  assert.equal(calls.filter((call) => call.operation === "project.flush").length, flushCountBeforeFailure);
+  assert.equal(failedTechnical.value, "overlap_failure");
+  assert.equal(failedSubmit?.disabled, false);
+  assert.equal(document.activeElement, failedTechnical);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Delayed variable rejected");
+
+  delayNextFlush = true;
+  window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+  await tick();
+  const variableCountBeforeBlockedCreate = calls.filter((call) => call.operation === "variable.create").length;
+  click("Create Variable");
+  await tick();
+  assert.equal(calls.filter((call) => call.operation === "variable.create").length, variableCountBeforeBlockedCreate);
+  assert.equal(failedSubmit?.disabled, false);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Flush is still in progress.");
+  flushes[0]!.resolve(undefined);
+  await tick();
+  assert.equal(document.querySelector("#app-status")?.textContent, "Unsubmitted input — accepted changes saved");
+
+  delayNextFlush = true;
+  window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+  await tick();
   click("Assets");
   await tick();
+  flushes[1]!.resolve(undefined);
+  await tick();
+  await tick();
+  assert.match(document.querySelector("h1")?.textContent ?? "", /Assets/);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
   enter(labelledControl<HTMLInputElement>("Technical name"), "theme");
   enter(labelledControl<HTMLInputElement>("Display name"), "Theme");
   click("Choose and import…");
