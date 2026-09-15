@@ -155,6 +155,17 @@ impl JournalStore {
         self.directory.open_file(file_name(name)?)
     }
 
+    pub fn open_artifact_for_flush(&self, name: &Path) -> Result<fs::File, ErrorCode> {
+        #[cfg(windows)]
+        {
+            self.directory.open_file_for_flush(file_name(name)?)
+        }
+        #[cfg(not(windows))]
+        {
+            self.directory.open_file(file_name(name)?)
+        }
+    }
+
     pub fn load(&self) -> Result<Journal, ErrorCode> {
         ["journal.0.json", "journal.1.json"]
             .iter()

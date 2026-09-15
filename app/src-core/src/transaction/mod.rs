@@ -736,7 +736,7 @@ impl TransactionService {
                     _ => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
                 };
                 if store
-                    .open_artifact(&item.backup)
+                    .open_artifact_for_flush(&item.backup)
                     .and_then(|file| platform::flush_open_file(&file))
                     .is_err()
                 {
@@ -1226,7 +1226,7 @@ impl TransactionService {
                 if resolved.parent_anchor.entry_absent(&resolved.name) != Ok(true)
                     || resolved.parent_anchor.flush().is_err()
                     || store
-                        .open_artifact(&item.backup)
+                        .open_artifact_for_flush(&item.backup)
                         .and_then(|file| platform::flush_open_file(&file))
                         .is_err()
                 {

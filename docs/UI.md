@@ -302,6 +302,11 @@ Hovering between safe beats exposes a subtle insertion affordance; a permanent
 Normal supported beats have drag handles plus keyboard-accessible Move Up/Move Down.
 Moving across an opaque custom-code boundary is refused unless safety can be proven.
 
+Choice, Jump, and Return/end are terminal alternatives. Adding Choice or Jump to a
+Scene that ends in Return replaces that terminal Beat; it does not place flow after an
+unconditional transfer and does not leave an unreachable Return behind. The terminal
+Beat stays last and is not removable or reorderable through Scene authoring.
+
 ### Dialogue workflow
 
 Dialogue is the highest-frequency action and must be efficient:

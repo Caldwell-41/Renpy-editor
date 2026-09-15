@@ -72,6 +72,12 @@ music, play SFX, transition reference, and protected Custom Code. Supporting ref
 use stable Character, Appearance, Asset, Variable, and Scene UUIDs rather than
 filenames. Later phases extend the same Beat/semantic model rather than replacing it.
 
+Choice, Jump, and Return/End are mutually exclusive terminal Beat forms. A newly
+created Scene starts with Return/End; adding a Choice or Jump at the natural end
+replaces that terminal range rather than leaving unreachable statements after it.
+Terminal Beats cannot be removed, converted to a non-terminal Beat, or reordered away
+from the end through the supported Scene surface.
+
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
 byte range, exact range hash, and lexical context. The narrow mapper recognizes only
 the supported canonical form. Unsupported/custom bytes stay in sequence as protected

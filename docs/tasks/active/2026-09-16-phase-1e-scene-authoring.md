@@ -163,11 +163,36 @@ The final changed application tree will receive one complete production run on
 Windows x86-64 and macOS Apple Silicon ARM64. Failed, cancelled, and skipped evidence
 will remain explicit. The brief will be archived only after all gates pass.
 
+The first final candidate run, GitHub Actions `35016250068`, failed independently on
+the two targets and is retained as failed evidence:
+
+- Windows x64 reached the core suite, where five delete/history/Scene lifecycle tests
+  returned recovery-required after the namespace delete had succeeded. The retained
+  displaced backup was reopened read-only for the final durability flush;
+  `FlushFileBuffers` requires a write-capable handle on Windows. The correction adds a
+  narrowly scoped recovery-artifact flush handle and exercises explicit Flush after a
+  committed delete.
+- macOS ARM64 passed the complete core suite, then the SDK target fixture failed lint
+  because it authored Jump, Choice, and the default Return sequentially. Choice, Jump,
+  and Return are now enforced as mutually exclusive final Beats: adding a new terminal
+  replaces the existing terminal range, and terminal removal/conversion/reorder is
+  refused. The representative core and official SDK fixtures now put Choice on the
+  entry Scene, Jump on a destination Scene, and retain Return on other destinations.
+
+After correction, local `cargo test -p loomlight-core --locked` passed 134 tests with
+four intentional subprocess-worker ignores; strict core Clippy, Rust formatting,
+`npm run check` (15/15), `npm run build`, and `git diff --check` passed. An attempted
+workspace-wide Clippy run remains an environment-limited failure because this Linux
+host lacks `pkg-config`/GTK; the repository-prescribed strict core Clippy command
+passed and is the applicable local evidence. A replacement supported-target run is
+still required.
+
 ## Decisions and retained limitations
 
 - Story-tree order is organisational and never generates implicit runtime flow.
 - Display rename does not rename labels, paths, or stable IDs.
-- New Scenes end in an explicit `return` beat.
+- New Scenes end in an explicit `return` beat. Adding Choice or Jump replaces that
+  terminal; supported authoring keeps exactly one final terminal Beat.
 - Scene deletion is refused for the entry Scene, last Scene, known incoming Choice or
   Jump edges, or opaque source that prevents a complete incoming-reference proof.
 - Conditional choices, arbitrary expressions, Source workspace, Branches workspace,

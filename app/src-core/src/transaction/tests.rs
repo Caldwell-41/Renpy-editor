@@ -205,6 +205,10 @@ fn delete_existing_retains_bytes_and_returns_an_absence_revision() {
         fs::read(artifact(&fixture.root, ".backup")).unwrap(),
         expected_bytes
     );
+    assert_eq!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::Flushed
+    );
 }
 
 #[test]

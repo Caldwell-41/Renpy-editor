@@ -3239,21 +3239,6 @@ mod tests {
                 variable_id: flag_id,
                 value: serde_json::Value::Bool(true),
             },
-            crate::scene::BeatPayload::Jump {
-                scene_id: garden_id.clone(),
-            },
-            crate::scene::BeatPayload::Choice {
-                options: vec![
-                    crate::scene::ChoiceOption {
-                        text: "Garden".into(),
-                        destination_scene_id: garden_id,
-                    },
-                    crate::scene::ChoiceOption {
-                        text: "Library".into(),
-                        destination_scene_id: library_id,
-                    },
-                ],
-            },
         ] {
             let entry = scene_workspace
                 .scenes
@@ -3271,6 +3256,32 @@ mod tests {
                 },
             );
         }
+        let entry = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::InsertBeat {
+                scene_id: entry.id.clone(),
+                expected_source_revision: entry.source_revision.clone(),
+                before_beat_id: None,
+                beat: crate::scene::BeatPayload::Choice {
+                    options: vec![
+                        crate::scene::ChoiceOption {
+                            text: "Garden".into(),
+                            destination_scene_id: garden_id.clone(),
+                        },
+                        crate::scene::ChoiceOption {
+                            text: "Library".into(),
+                            destination_scene_id: library_id.clone(),
+                        },
+                    ],
+                },
+            },
+        );
         let entry = scene_workspace
             .scenes
             .iter()
@@ -3298,6 +3309,23 @@ mod tests {
         scene_workspace =
             apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
         assert_eq!(scene_workspace.scenes.len(), 4);
+        let garden = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == garden_id)
+            .unwrap();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::InsertBeat {
+                scene_id: garden.id.clone(),
+                expected_source_revision: garden.source_revision.clone(),
+                before_beat_id: None,
+                beat: crate::scene::BeatPayload::Jump {
+                    scene_id: library_id,
+                },
+            },
+        );
         let phase_1e_selection = scene_workspace.last_open.clone();
         let image_presentation = service
             .media_present(crate::media::MediaRequest {

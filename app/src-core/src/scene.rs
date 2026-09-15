@@ -129,6 +129,13 @@ impl BeatPayload {
     }
 }
 
+fn is_terminal_payload(payload: &BeatPayload) -> bool {
+    matches!(
+        payload,
+        BeatPayload::Choice { .. } | BeatPayload::Jump { .. } | BeatPayload::Return
+    )
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ChoiceOption {
@@ -1409,6 +1416,13 @@ fn apply_beat_edit(
     edit: BeatEdit,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
+    if beats
+        .iter()
+        .take(beats.len().saturating_sub(1))
+        .any(|beat| is_terminal_payload(&beat.payload))
+    {
+        return Err(SceneError::InvariantBlocked);
+    }
     let newline = if source.windows(2).any(|window| window == b"\r\n") {
         "\r\n"
     } else {
@@ -1420,18 +1434,48 @@ fn apply_beat_edit(
             if matches!(payload, BeatPayload::CustomCode { .. }) {
                 return Err(SceneError::InvalidPayload);
             }
+            let requested = before
+                .as_deref()
+                .map(|id| {
+                    beats
+                        .iter()
+                        .find(|beat| beat.id == id)
+                        .ok_or(SceneError::UnknownEntity)
+                })
+                .transpose()?;
+            if is_terminal_payload(&payload) {
+                if let Some(last) = beats
+                    .last()
+                    .filter(|beat| is_terminal_payload(&beat.payload))
+                {
+                    if last.protected || requested.is_some_and(|requested| requested.id != last.id)
+                    {
+                        return Err(SceneError::InvariantBlocked);
+                    }
+                    let rendered = render_payload(&payload, loaded, newline)?;
+                    let id = uuid::Uuid::new_v4().to_string();
+                    let mut output = source.to_vec();
+                    output.splice(
+                        last.byte_start as usize..last.byte_end as usize,
+                        rendered.bytes(),
+                    );
+                    return Ok((
+                        output,
+                        vec![(payload.kind().into(), sha256(rendered.as_bytes()), id)],
+                    ));
+                }
+                if requested.is_some() {
+                    return Err(SceneError::InvariantBlocked);
+                }
+            }
             let insertion = if let Some(id) = before {
-                beats
-                    .iter()
-                    .find(|beat| beat.id == id)
+                requested
+                    .filter(|beat| beat.id == id)
                     .ok_or(SceneError::UnknownEntity)?
                     .byte_start as usize
             } else {
                 beats.last().map_or(source.len(), |beat| {
-                    if matches!(
-                        beat.payload,
-                        BeatPayload::Return | BeatPayload::Jump { .. } | BeatPayload::Choice { .. }
-                    ) {
+                    if is_terminal_payload(&beat.payload) {
                         beat.byte_start as usize
                     } else {
                         beat.byte_end as usize
@@ -1463,6 +1507,12 @@ fn apply_beat_edit(
                 .ok_or(SceneError::UnknownEntity)?;
             if beat.protected {
                 return Err(SceneError::OpaqueBoundary);
+            }
+            if is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
+                || (is_terminal_payload(&payload)
+                    && beats.last().is_none_or(|last| last.id != beat.id))
+            {
+                return Err(SceneError::InvariantBlocked);
             }
             let rendered = render_payload(&payload, loaded, newline)?;
             let mut output = source.to_vec();
@@ -1520,8 +1570,11 @@ fn apply_beat_edit(
                 .iter()
                 .find(|beat| beat.id == id)
                 .ok_or(SceneError::UnknownEntity)?;
-            if beat.protected || matches!(beat.payload, BeatPayload::Return) {
+            if beat.protected {
                 return Err(SceneError::OpaqueBoundary);
+            }
+            if is_terminal_payload(&beat.payload) {
+                return Err(SceneError::InvariantBlocked);
             }
             let mut output = source.to_vec();
             output.drain(beat.byte_start as usize..beat.byte_end as usize);
@@ -1539,6 +1592,11 @@ fn apply_beat_edit(
             .ok_or(SceneError::InvariantBlocked)?;
             if beats[index].protected || beats[other].protected {
                 return Err(SceneError::OpaqueBoundary);
+            }
+            if is_terminal_payload(&beats[index].payload)
+                || is_terminal_payload(&beats[other].payload)
+            {
+                return Err(SceneError::InvariantBlocked);
             }
             let (first, second) = if index < other {
                 (index, other)
@@ -3235,8 +3293,10 @@ mod tests {
             .unwrap();
         assert!(matches!(
             entry.beats.last().unwrap().payload,
-            BeatPayload::Return
+            BeatPayload::Choice { .. }
         ));
+        let entry_source = fs::read_to_string(fixture.root.join(&entry.source_path)).unwrap();
+        assert!(!entry_source.contains("    return\n"));
         let choice_id = entry
             .beats
             .iter()
@@ -3244,6 +3304,31 @@ mod tests {
             .unwrap()
             .id
             .clone();
+        assert!(matches!(
+            fixture.apply(
+                &with_choice,
+                SceneCommand::RemoveBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    beat_id: choice_id.clone(),
+                }
+            ),
+            Err(SceneError::InvariantBlocked)
+        ));
+        assert!(matches!(
+            fixture.apply(
+                &with_choice,
+                SceneCommand::UpdateBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    beat_id: choice_id.clone(),
+                    beat: BeatPayload::Narration {
+                        text: "Not a terminal".into(),
+                    },
+                }
+            ),
+            Err(SceneError::InvariantBlocked)
+        ));
         let expanded = fixture
             .apply(
                 &with_choice,
@@ -3653,21 +3738,6 @@ mod tests {
                 character_id,
                 transition: TransitionRef::Fade,
             },
-            BeatPayload::Choice {
-                options: vec![
-                    ChoiceOption {
-                        text: "Garden".into(),
-                        destination_scene_id: garden_id.clone(),
-                    },
-                    ChoiceOption {
-                        text: "Library".into(),
-                        destination_scene_id: library_id.clone(),
-                    },
-                ],
-            },
-            BeatPayload::Jump {
-                scene_id: garden_id,
-            },
         ];
         for payload in payloads {
             let entry = workspace
@@ -3692,6 +3762,33 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::InsertBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    before_beat_id: None,
+                    beat: BeatPayload::Choice {
+                        options: vec![
+                            ChoiceOption {
+                                text: "Garden".into(),
+                                destination_scene_id: garden_id.clone(),
+                            },
+                            ChoiceOption {
+                                text: "Library".into(),
+                                destination_scene_id: library_id.clone(),
+                            },
+                        ],
+                    },
+                },
+            )
+            .unwrap();
+        let entry = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
         let choice = entry
             .beats
             .iter()
@@ -3710,6 +3807,24 @@ mod tests {
                 },
             )
             .unwrap();
+        let garden = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == garden_id)
+            .unwrap();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::InsertBeat {
+                    scene_id: garden.id.clone(),
+                    expected_source_revision: garden.source_revision.clone(),
+                    before_beat_id: None,
+                    beat: BeatPayload::Jump {
+                        scene_id: library_id,
+                    },
+                },
+            )
+            .unwrap();
         let entry = workspace
             .scenes
             .iter()
@@ -3719,7 +3834,7 @@ mod tests {
             .beats
             .iter()
             .rev()
-            .find(|beat| !beat.protected && !matches!(beat.payload, BeatPayload::Return))
+            .find(|beat| !beat.protected && !is_terminal_payload(&beat.payload))
             .unwrap();
         workspace = fixture
             .apply(
@@ -3741,12 +3856,26 @@ mod tests {
             .unwrap();
         assert!(entry.partial);
         assert!(matches!(
-            entry.beats.last().unwrap().payload,
-            BeatPayload::Return
+            &entry.beats.last().unwrap().payload,
+            BeatPayload::Choice { options } if options.len() == 3
         ));
-        assert!(entry.beats.iter().any(
-            |beat| matches!(&beat.payload, BeatPayload::Choice { options } if options.len() == 3)
+        let garden = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == garden_id)
+            .unwrap();
+        assert!(matches!(
+            garden.beats.last().unwrap().payload,
+            BeatPayload::Jump { .. }
         ));
+        assert!(workspace.scenes.iter().any(|scene| {
+            scene.id != fixture.entry_scene_id
+                && scene.id != garden_id
+                && matches!(
+                    scene.beats.last().map(|beat| &beat.payload),
+                    Some(BeatPayload::Return)
+                )
+        }));
         let exact_custom = b"    python:\n        persistent.custom_flag = True\n";
         assert!(fs::read(fixture.root.join(&entry.source_path))
             .unwrap()

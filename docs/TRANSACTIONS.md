@@ -197,6 +197,12 @@ proven-existing old-source deletion. Deletion uses exact expected bytes and iden
 If an old `.rpy` path has a same-basename `.rpyc`, it is included only when ownership is
 proven; unrelated compiled files are never broadly removed.
 
+Delete durability verifies the retained displaced backup through a handle opened with
+flush authority. This matters on Windows, where `FlushFileBuffers` on the ordinary
+read-only evidence handle is not a valid durability check; a successful namespace
+move must not be misreported as recovery-required merely because the wrong handle mode
+was used for the final flush.
+
 Entry/last Scene constraints, incoming Choice/Jump references, and opaque ownership
 are checked before producing a destructive proposal. Chapter order remains metadata
 organisation and does not rewrite runtime flow. A display rename changes metadata only.
