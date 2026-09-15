@@ -30,6 +30,8 @@ pub const OPERATIONS: &[&str] = &[
     "project.removeRecent",
     "project.close",
     "project.current",
+    "project.status",
+    "project.flush",
     "sdk.discover",
     "sdk.browse",
     "sdk.install",
@@ -39,6 +41,7 @@ pub const OPERATIONS: &[&str] = &[
     "appearance.setDefault",
     "asset.chooseImport",
     "asset.import",
+    "asset.repairCompatibility",
     "variable.create",
     "variable.update",
 ];
@@ -304,54 +307,98 @@ pub fn handle_application_request(
             .ok_or(LifecycleError::InvalidMetadata)
             .and_then(|id| lifecycle.remove_recent(id))
             .map(|_| json!({ "removed": true })),
-        "project.close" if empty_payload(validated.payload) => {
-            lifecycle.close();
-            Ok(json!({ "closed": true }))
+        "project.close" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .map(|_| {
+                    lifecycle.close();
+                    json!({ "closed": true })
+                })
         }
         "project.current" if empty_payload(validated.payload) => to_value(lifecycle.current()),
+        "project.status" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.authoring_status())
+                .and_then(to_value)
+        }
         "sdk.discover" if empty_payload(validated.payload) => to_value(lifecycle.discover_sdks()),
         "sdk.install" if empty_payload(validated.payload) => {
             lifecycle.install_sdk().and_then(to_value)
         }
-        "authoring.list" if empty_payload(validated.payload) => {
-            lifecycle.authoring_list().and_then(to_value)
-        }
-        "character.create" => serde_json::from_value::<CreateCharacterRequest>(Value::Object(
-            validated.payload.clone(),
-        ))
-        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-        .and_then(|payload| lifecycle.authoring_create_character(payload))
-        .and_then(to_value),
-        "character.update" => serde_json::from_value::<UpdateCharacterRequest>(Value::Object(
-            validated.payload.clone(),
-        ))
-        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-        .and_then(|payload| lifecycle.authoring_update_character(payload))
-        .and_then(to_value),
-        "appearance.setDefault" => serde_json::from_value::<SetDefaultAppearanceRequest>(
-            Value::Object(validated.payload.clone()),
-        )
-        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-        .and_then(|payload| lifecycle.authoring_set_default_appearance(payload))
-        .and_then(to_value),
-        "asset.import" => {
-            serde_json::from_value::<ImportAssetRequest>(Value::Object(validated.payload.clone()))
-                .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-                .and_then(|payload| lifecycle.authoring_import_asset(payload))
+        "authoring.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.authoring_list())
                 .and_then(to_value)
         }
-        "variable.create" => serde_json::from_value::<CreateVariableRequest>(Value::Object(
-            validated.payload.clone(),
-        ))
-        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-        .and_then(|payload| lifecycle.authoring_create_variable(payload))
-        .and_then(to_value),
-        "variable.update" => serde_json::from_value::<UpdateVariableRequest>(Value::Object(
-            validated.payload.clone(),
-        ))
-        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
-        .and_then(|payload| lifecycle.authoring_update_variable(payload))
-        .and_then(to_value),
+        "project.flush" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.authoring_flush())
+                .and_then(to_value)
+        }
+        "character.create" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<CreateCharacterRequest>(Value::Object(payload)).map_err(
+                    |_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload),
+                )
+            })
+            .and_then(|payload| lifecycle.authoring_create_character(payload))
+            .and_then(to_value),
+        "character.update" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<UpdateCharacterRequest>(Value::Object(payload)).map_err(
+                    |_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload),
+                )
+            })
+            .and_then(|payload| lifecycle.authoring_update_character(payload))
+            .and_then(to_value),
+        "appearance.setDefault" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SetDefaultAppearanceRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.authoring_set_default_appearance(payload))
+            .and_then(to_value),
+        "asset.import" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<ImportAssetRequest>(Value::Object(payload)).map_err(|_| {
+                    LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.authoring_import_asset(payload))
+            .and_then(to_value),
+        "asset.repairCompatibility" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.authoring_repair_asset_compatibility())
+                .and_then(to_value)
+        }
+        "variable.create" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<CreateVariableRequest>(Value::Object(payload)).map_err(
+                    |_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload),
+                )
+            })
+            .and_then(|payload| lifecycle.authoring_create_variable(payload))
+            .and_then(to_value),
+        "variable.update" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<UpdateVariableRequest>(Value::Object(payload)).map_err(
+                    |_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload),
+                )
+            })
+            .and_then(|payload| lifecycle.authoring_update_variable(payload))
+            .and_then(to_value),
         "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
                 request_id,
@@ -378,6 +425,24 @@ pub fn handle_application_request(
 
 fn to_value<T: Serialize>(value: T) -> Result<Value, LifecycleError> {
     serde_json::to_value(value).map_err(|_| LifecycleError::Io)
+}
+
+fn session_only(payload: &Map<String, Value>) -> Result<String, LifecycleError> {
+    payload
+        .get("sessionId")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty() && value.len() <= 64)
+        .map(str::to_owned)
+        .ok_or(LifecycleError::StaleSession)
+}
+
+fn session_payload(
+    payload: &Map<String, Value>,
+) -> Result<(String, Map<String, Value>), LifecycleError> {
+    let session = session_only(payload)?;
+    let mut remainder = payload.clone();
+    remainder.remove("sessionId");
+    Ok((session, remainder))
 }
 
 fn invalid_payload(request_id: String) -> CoreResponse {
@@ -428,6 +493,10 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
         LifecycleError::RecoveryRequired => (
             "RECOVERY_REQUIRED",
             "Project recovery must be resolved before authoring can continue.",
+        ),
+        LifecycleError::StaleSession => (
+            "STALE_PROJECT_SESSION",
+            "This request belongs to a closed or replaced project session.",
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
@@ -546,6 +615,43 @@ mod tests {
             ));
             assert_eq!(response["ok"], false);
             assert_eq!(response["error"]["code"], "INVALID_PAYLOAD");
+        }
+    }
+
+    #[test]
+    fn authoring_status_and_flush_require_an_exact_current_session_token() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut lifecycle = LifecycleService::new(temp.path().join("state")).unwrap();
+        for (operation, payload, expected) in [
+            ("authoring.list", json!({}), "INVALID_PAYLOAD"),
+            (
+                "authoring.list",
+                json!({ "sessionId": "stale" }),
+                "STALE_PROJECT_SESSION",
+            ),
+            (
+                "project.status",
+                json!({ "sessionId": "stale" }),
+                "STALE_PROJECT_SESSION",
+            ),
+            (
+                "project.flush",
+                json!({ "sessionId": "stale", "extra": true }),
+                "INVALID_PAYLOAD",
+            ),
+            (
+                "variable.create",
+                json!({ "technicalName": "score", "variableType": "int", "defaultValue": "1" }),
+                "STALE_PROJECT_SESSION",
+            ),
+        ] {
+            let response = response_json(handle_application_request(
+                request(operation, payload),
+                false,
+                &mut lifecycle,
+            ));
+            assert_eq!(response["ok"], false);
+            assert_eq!(response["error"]["code"], expected);
         }
     }
 

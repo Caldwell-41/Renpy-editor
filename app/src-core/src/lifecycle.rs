@@ -1,8 +1,8 @@
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
-        CreateVariableRequest, ImportAssetRequest, ImportChoice, SetDefaultAppearanceRequest,
-        UpdateCharacterRequest, UpdateVariableRequest,
+        CreateVariableRequest, ImportAssetRequest, ImportChoice, PersistenceStatus,
+        SetDefaultAppearanceRequest, UpdateCharacterRequest, UpdateVariableRequest,
     },
     metadata::{
         ChapterMetadata, ProjectMetadata, Resolution, SceneMetadata, SdkIdentity, Selection,
@@ -58,6 +58,7 @@ pub struct CreateProjectRequest {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenProject {
+    pub session_id: String,
     pub project_id: String,
     pub title: String,
     pub folder_name: String,
@@ -118,6 +119,7 @@ pub enum LifecycleError {
     PromotionFailed,
     CreatedNotOpened,
     RecoveryRequired,
+    StaleSession,
     Authoring(AuthoringError),
     Io,
 }
@@ -149,6 +151,12 @@ pub struct LifecycleService {
     sdks: HashMap<String, ValidatedSdk>,
     current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
     authoring: AuthoringService,
+}
+
+struct InspectedProject {
+    root: PathBuf,
+    project: OpenProject,
+    anchor: crate::transaction::DirectoryAnchor,
 }
 
 impl crate::ports::ProjectFilesystemPort for LifecycleService {
@@ -352,20 +360,19 @@ impl LifecycleService {
             promote_anchored_stage(parent, &mut stage, &request.folder_name)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: promoted");
-            let opened = open_valid_project(&final_path)?;
-            if opened.project_id != metadata.project_id {
+            let inspected = inspect_valid_project(&final_path)?;
+            if inspected.project.project_id != metadata.project_id {
                 return Err(LifecycleError::CreatedNotOpened);
             }
-            Ok(opened)
+            Ok(inspected)
         })();
         if prepared.is_err() && stage.path.exists() {
             let _ = cleanup_stage(parent, &mut stage);
         }
-        let opened = prepared?;
-        if self.update_recent(&final_path, &opened).is_err() {
-            return Err(LifecycleError::CreatedNotOpened);
-        }
-        self.activate_project(final_path, opened.clone())?;
+        let inspected = prepared?;
+        let opened = self
+            .activate_project(inspected)
+            .map_err(|_| LifecycleError::CreatedNotOpened)?;
         Ok(CreationResult {
             status: "complete".into(),
             project: Some(opened),
@@ -374,10 +381,8 @@ impl LifecycleService {
 
     pub fn open_path(&mut self, selected: &Path) -> Result<OpenProject, LifecycleError> {
         let root = canonical_safe_directory(selected)?;
-        let project = open_valid_project(&root)?;
-        self.update_recent(&root, &project)?;
-        self.activate_project(root, project.clone())?;
-        Ok(project)
+        let inspected = inspect_valid_project(&root)?;
+        self.activate_project(inspected)
     }
 
     pub fn open_recent(&mut self, recent_id: &str) -> Result<OpenProject, LifecycleError> {
@@ -388,10 +393,8 @@ impl LifecycleService {
             .find(|entry| entry.id == recent_id)
             .ok_or(LifecycleError::InvalidMetadata)?;
         let root = record.path.clone();
-        let project = open_valid_project(&canonical_safe_directory(&root)?)?;
-        self.update_recent(&root, &project)?;
-        self.activate_project(root, project.clone())?;
-        Ok(project)
+        let inspected = inspect_valid_project(&canonical_safe_directory(&root)?)?;
+        self.activate_project(inspected)
     }
 
     pub fn close(&mut self) {
@@ -405,18 +408,39 @@ impl LifecycleService {
 
     fn activate_project(
         &mut self,
-        root: PathBuf,
-        project: OpenProject,
-    ) -> Result<(), LifecycleError> {
-        self.close();
+        mut inspected: InspectedProject,
+    ) -> Result<OpenProject, LifecycleError> {
         let authority = self
             .authoring
-            .register_project(&root)
+            .register_inspected_project(inspected.root.clone(), inspected.anchor)
             .map_err(|error| match error {
                 AuthoringError::RecoveryRequired => LifecycleError::RecoveryRequired,
                 other => LifecycleError::Authoring(other),
             })?;
-        self.current = Some((root, project, authority));
+        inspected.project.session_id = uuid::Uuid::new_v4().to_string();
+        if let Err(error) = self.update_recent(&inspected.root, &inspected.project) {
+            self.authoring.unregister_project(&authority);
+            return Err(error);
+        }
+        let activated = inspected.project.clone();
+        let previous = self
+            .current
+            .replace((inspected.root, inspected.project, authority));
+        if let Some((_, _, previous_authority)) = previous {
+            self.authoring.unregister_project(&previous_authority);
+        }
+        Ok(activated)
+    }
+
+    pub fn require_session(&self, expected: &str) -> Result<(), LifecycleError> {
+        if expected.is_empty()
+            || self
+                .current
+                .as_ref()
+                .is_none_or(|(_, project, _)| project.session_id != expected)
+        {
+            return Err(LifecycleError::StaleSession);
+        }
         Ok(())
     }
 
@@ -432,6 +456,19 @@ impl LifecycleService {
         self.authoring
             .list(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_flush(&self) -> Result<&'static str, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .flush(&authority)
+            .map(|_| "saved")
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_status(&self) -> Result<PersistenceStatus, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        Ok(self.authoring.status(&authority))
     }
 
     pub fn authoring_create_character(
@@ -478,9 +515,9 @@ impl LifecycleService {
         &mut self,
         selected: &Path,
     ) -> Result<ImportChoice, LifecycleError> {
-        self.authoring_context()?;
+        let (authority, _) = self.authoring_context()?;
         self.authoring
-            .select_import(selected)
+            .select_import(&authority, selected)
             .map_err(LifecycleError::Authoring)
     }
 
@@ -501,6 +538,15 @@ impl LifecycleService {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
             .set_default_appearance(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_repair_asset_compatibility(
+        &self,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .repair_asset_compatibility(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
     }
 
@@ -1044,6 +1090,20 @@ fn open_valid_project_with_hook<F>(root: &Path, hook: F) -> Result<OpenProject, 
 where
     F: FnOnce() -> Result<(), LifecycleError>,
 {
+    inspect_valid_project_with_hook(root, hook).map(|candidate| candidate.project)
+}
+
+fn inspect_valid_project(root: &Path) -> Result<InspectedProject, LifecycleError> {
+    inspect_valid_project_with_hook(root, || Ok(()))
+}
+
+fn inspect_valid_project_with_hook<F>(
+    root: &Path,
+    hook: F,
+) -> Result<InspectedProject, LifecycleError>
+where
+    F: FnOnce() -> Result<(), LifecycleError>,
+{
     let anchor = crate::transaction::DirectoryAnchor::open_root(root)
         .map_err(|_| LifecycleError::UnsafePath)?;
     if anchor
@@ -1062,7 +1122,7 @@ where
     {
         return Err(LifecycleError::InvalidMetadata);
     }
-    let mut metadata_file = editor
+    let metadata_file = editor
         .open_file(OsStr::new("project.json"))
         .map_err(|_| LifecycleError::UnsafePath)?;
     if metadata_file
@@ -1075,8 +1135,12 @@ where
     }
     let mut metadata_bytes = Vec::new();
     metadata_file
+        .take(1_000_001)
         .read_to_end(&mut metadata_bytes)
         .map_err(|_| LifecycleError::InvalidMetadata)?;
+    if metadata_bytes.len() > 1_000_000 {
+        return Err(LifecycleError::InvalidMetadata);
+    }
     let metadata = ProjectMetadata::read_bytes(
         &metadata_bytes,
         root.file_name().and_then(|name| name.to_str()),
@@ -1093,7 +1157,8 @@ where
     ] {
         open_project_file(&anchor, required)?;
     }
-    Ok(OpenProject {
+    let project = OpenProject {
+        session_id: String::new(),
         project_id: metadata.project_id,
         title: metadata.title,
         folder_name: metadata.folder_name,
@@ -1103,6 +1168,11 @@ where
         scene_name: scene.display_name.clone(),
         sdk_version: metadata.sdk.version,
         resolution: metadata.resolution,
+    };
+    Ok(InspectedProject {
+        root: root.to_path_buf(),
+        project,
+        anchor,
     })
 }
 
@@ -1638,6 +1708,142 @@ fn promote_no_replace(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn make_openable_project(root: &Path, title: &str) {
+        let folder = root.file_name().unwrap().to_str().unwrap();
+        fs::create_dir_all(root.join("game/definitions")).unwrap();
+        fs::create_dir_all(root.join("game/chapters/chapter_01")).unwrap();
+        fs::create_dir_all(root.join(".renpy-editor/recovery")).unwrap();
+        let (metadata, source_map, script, scene) = build_overlay_model(
+            title,
+            folder,
+            Resolution {
+                width: 1920,
+                height: 1080,
+            },
+        );
+        for (path, bytes) in [
+            ("game/script.rpy", script.as_bytes()),
+            (
+                "game/options.rpy",
+                b"define config.name = \"Test\"".as_slice(),
+            ),
+            ("game/gui.rpy", b"# gui".as_slice()),
+            ("game/screens.rpy", b"# screens".as_slice()),
+            (
+                "game/definitions/characters.rpy",
+                b"# Characters\n".as_slice(),
+            ),
+            (
+                "game/definitions/variables.rpy",
+                b"# Variables\n".as_slice(),
+            ),
+            ("game/chapters/chapter_01/scene_001.rpy", scene.as_bytes()),
+        ] {
+            fs::write(root.join(path), bytes).unwrap();
+        }
+        metadata.write(root).unwrap();
+        source_map.write(root).unwrap();
+    }
+
+    #[test]
+    fn failed_candidate_recovery_preserves_current_project() {
+        use crate::transaction::{
+            CommitOutcome, ErrorCode, FaultInjector, FaultPoint, FileMutation, MutationKind,
+            RelativePath, TransactionIntent, TransactionProposal, TransactionService,
+        };
+        struct StopAfterExchange;
+        impl FaultInjector for StopAfterExchange {
+            fn visit(&mut self, point: FaultPoint, _root: &Path) -> Result<(), ErrorCode> {
+                if point == FaultPoint::AfterExchange(0) {
+                    Err(ErrorCode::RecoveryRequired)
+                } else {
+                    Ok(())
+                }
+            }
+        }
+        let temp = tempfile::tempdir().unwrap();
+        let old_root = temp.path().join("old-project");
+        let candidate_root = temp.path().join("candidate-project");
+        make_openable_project(&old_root, "Old");
+        make_openable_project(&candidate_root, "Candidate");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let old = service.open_path(&old_root).unwrap();
+
+        let transactions = TransactionService::default();
+        let project = transactions
+            .register_trusted_project(&candidate_root)
+            .unwrap();
+        let path = RelativePath::new("game/definitions/variables.rpy").unwrap();
+        let (expected, revision) = transactions.snapshot(&project, path.clone()).unwrap();
+        let outcome = transactions.commit_with_injector(
+            &project,
+            TransactionProposal {
+                mutations: vec![FileMutation {
+                    path,
+                    kind: MutationKind::ReplaceExisting,
+                    base: revision,
+                    expected_bytes: expected,
+                    proposed: b"# interrupted\n".to_vec(),
+                }],
+                intent: TransactionIntent::Edit,
+            },
+            &mut StopAfterExchange,
+        );
+        assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+
+        assert!(matches!(
+            service.open_path(&candidate_root),
+            Err(LifecycleError::RecoveryRequired)
+        ));
+        let current = service.current().unwrap();
+        assert_eq!(current.title, old.title);
+        assert_eq!(current.session_id, old.session_id);
+        assert!(service.authoring_list().is_ok());
+    }
+
+    #[test]
+    fn project_sessions_are_unique_and_stale_tokens_are_rejected() {
+        let temp = tempfile::tempdir().unwrap();
+        let first_root = temp.path().join("first-project");
+        let second_root = temp.path().join("second-project");
+        make_openable_project(&first_root, "First");
+        make_openable_project(&second_root, "Second");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let first = service.open_path(&first_root).unwrap();
+        service.require_session(&first.session_id).unwrap();
+        let second = service.open_path(&second_root).unwrap();
+        assert!(matches!(
+            service.require_session(&first.session_id),
+            Err(LifecycleError::StaleSession)
+        ));
+        service.require_session(&second.session_id).unwrap();
+        let reopened = service.open_path(&second_root).unwrap();
+        assert_ne!(reopened.session_id, second.session_id);
+        assert!(matches!(
+            service.require_session(&second.session_id),
+            Err(LifecycleError::StaleSession)
+        ));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn inspected_root_substitution_cannot_activate_or_replace_current() {
+        let temp = tempfile::tempdir().unwrap();
+        let old_root = temp.path().join("old-project");
+        let candidate_root = temp.path().join("candidate-project");
+        make_openable_project(&old_root, "Old");
+        make_openable_project(&candidate_root, "Candidate");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let old = service.open_path(&old_root).unwrap();
+        let inspected = inspect_valid_project(&candidate_root).unwrap();
+        let moved = temp.path().join("moved-candidate");
+        fs::rename(&candidate_root, &moved).unwrap();
+        make_openable_project(&candidate_root, "Replacement");
+        assert!(service.activate_project(inspected).is_err());
+        assert_eq!(service.current().unwrap().session_id, old.session_id);
+        assert!(moved.join(".renpy-editor/project.json").is_file());
+    }
 
     fn recent_store(title: &str, project: &Path) -> RecentStore {
         RecentStore {
@@ -2372,6 +2578,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::drop_non_drop)]
     fn official_sdk_phase_1c_target_gate() {
         let Some(archive) = std::env::var_os("LOOMLIGHT_PHASE1C_SDK_ARCHIVE") else {
             eprintln!("phase-1c-target-gate: skipped (no official SDK archive)");
@@ -2741,6 +2948,13 @@ mod tests {
                 "standard screens missing {expected}"
             );
         }
+        let scene_path = final_root.join("game/chapters/chapter_01/scene_001.rpy");
+        let scene = fs::read_to_string(&scene_path).unwrap().replace(
+            "    return\n",
+            "    scene bg cafe\n    show alice happy\n    play music music_theme\n    play sound sfx_click\n    pause 0.05\n    return\n",
+        );
+        fs::write(&scene_path, scene).unwrap();
+        RenpyAdapter::validate_generated(&sdk, &final_root).unwrap();
         RenpyAdapter::smoke_run(&sdk, &final_root).unwrap();
 
         service.close();

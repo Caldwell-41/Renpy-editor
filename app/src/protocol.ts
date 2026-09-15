@@ -16,6 +16,8 @@ export const CORE_OPERATIONS = [
   "project.removeRecent",
   "project.close",
   "project.current",
+  "project.status",
+  "project.flush",
   "sdk.discover",
   "sdk.browse",
   "sdk.install",
@@ -25,6 +27,7 @@ export const CORE_OPERATIONS = [
   "appearance.setDefault",
   "asset.chooseImport",
   "asset.import",
+  "asset.repairCompatibility",
   "variable.create",
   "variable.update",
 ] as const;

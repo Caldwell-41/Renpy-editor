@@ -17,7 +17,8 @@ pub(crate) use platform::{flush_open_file, DirectoryAnchor};
 pub use history::{HistoryEntry, HistoryMutation, HistoryStack};
 use identity::identity_for_file;
 pub use identity::FileIdentity;
-use journal::{Journal, JournalMutation, JournalState, JournalStore};
+pub use journal::JournalState;
+use journal::{Journal, JournalMutation, JournalStore};
 use path::resolve_target;
 pub use path::RelativePath;
 use platform::{exchange_preserving_target, flush_directory, PlatformCapability};
@@ -39,6 +40,10 @@ const MAX_MUTATIONS: usize = 128;
 const MAX_MUTATION_BYTES: usize = 16 * 1024 * 1024;
 pub const MAX_IMPORT_BYTES: u64 = 512 * 1024 * 1024;
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+#[cfg(test)]
+thread_local! {
+    static REVISION_BYTES_READ: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -252,10 +257,23 @@ impl TransactionService {
         if !meta.is_dir() || path::is_link_or_reparse(&meta) || canonical != root {
             return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
         }
-        let identity = identity::identity_for_path(&canonical)
-            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
         let anchor = platform::DirectoryAnchor::open_root(&canonical)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
+        self.register_trusted_anchor(canonical, anchor)
+    }
+
+    pub(crate) fn register_trusted_anchor(
+        &self,
+        root: PathBuf,
+        anchor: DirectoryAnchor,
+    ) -> Result<ProjectId, PublicDiagnostic> {
+        anchor
+            .validate_chain()
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
+        if anchor.path() != root {
+            return Err(PublicDiagnostic::new(ErrorCode::RootIdentityChanged, None));
+        }
+        let identity = anchor.identity().clone();
         let id = ProjectId(new_id("project"));
         self.projects
             .lock()
@@ -263,7 +281,7 @@ impl TransactionService {
             .insert(
                 id.clone(),
                 ApprovedProject {
-                    root: canonical,
+                    root,
                     identity,
                     anchor: Arc::new(anchor),
                 },
@@ -278,13 +296,13 @@ impl TransactionService {
     }
 
     pub fn has_blocking_recovery(&self, project: &ProjectId) -> Result<bool, PublicDiagnostic> {
-        let _ = self.approved(project)?;
-        Ok(self.recover(project).items.iter().any(|item| {
-            !matches!(
-                item.state,
-                JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
-            )
-        }))
+        let _serial = self
+            .serial
+            .lock()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        Ok(has_blocking_items(&scan_recovery(&approved)))
     }
 
     /// Core-only import path. The selected file handle is retained by the trusted
@@ -298,6 +316,28 @@ impl TransactionService {
         expected_len: u64,
         expected_sha256: &str,
         companions: Vec<FileMutation>,
+    ) -> CommitOutcome {
+        self.commit_streaming_import_with_injector(
+            project,
+            destination,
+            source,
+            expected_len,
+            expected_sha256,
+            companions,
+            &mut NoFault,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn commit_streaming_import_with_injector<I: FaultInjector>(
+        &self,
+        project: &ProjectId,
+        destination: RelativePath,
+        source: &mut File,
+        expected_len: u64,
+        expected_sha256: &str,
+        companions: Vec<FileMutation>,
+        injector: &mut I,
     ) -> CommitOutcome {
         let _serial = match self.serial.lock() {
             Ok(value) => value,
@@ -331,12 +371,7 @@ impl TransactionService {
         {
             return rejected(ErrorCode::InvalidProposal);
         }
-        if self.recover(project).items.iter().any(|item| {
-            !matches!(
-                item.state,
-                JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
-            )
-        }) {
+        if has_blocking_items(&scan_recovery(&approved)) {
             return rejected(ErrorCode::RecoveryRequired);
         }
 
@@ -428,6 +463,12 @@ impl TransactionService {
         if store.persist(&mut journal, JournalState::Prepared).is_err() {
             return recovery(&txid);
         }
+        if injector
+            .visit(FaultPoint::Prepared, &approved.root)
+            .is_err()
+        {
+            return recovery(&txid);
+        }
 
         let media = &journal.mutations[0];
         let staged_result = (|| {
@@ -464,6 +505,12 @@ impl TransactionService {
         {
             return recovery(&txid);
         }
+        if injector
+            .visit(FaultPoint::MutationStaged(0), &approved.root)
+            .is_err()
+        {
+            return recovery(&txid);
+        }
         for (index, mutation) in companions.iter().enumerate() {
             let journal_index = index + 1;
             let item = &journal.mutations[journal_index];
@@ -480,6 +527,12 @@ impl TransactionService {
                         mutation: journal_index,
                     },
                 )
+                .is_err()
+            {
+                return recovery(&txid);
+            }
+            if injector
+                .visit(FaultPoint::MutationStaged(journal_index), &approved.root)
                 .is_err()
             {
                 return recovery(&txid);
@@ -524,6 +577,12 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
+            if injector
+                .visit(FaultPoint::BeforeExchange(index), &approved.root)
+                .is_err()
+            {
+                return recovery(&txid);
+            }
             let committed = if item.kind == MutationKind::CreateNew {
                 store.directory().rename_no_replace_to(
                     artifact_name(&item.stage),
@@ -556,6 +615,12 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
+            if injector
+                .visit(FaultPoint::AfterExchange(index), &approved.root)
+                .is_err()
+            {
+                return recovery(&txid);
+            }
             let installed = target
                 .parent_anchor
                 .open_file(&target.name)
@@ -579,9 +644,21 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
+            if injector
+                .visit(FaultPoint::Verified(index), &approved.root)
+                .is_err()
+            {
+                return recovery(&txid);
+            }
         }
         if store
             .persist(&mut journal, JournalState::Committed)
+            .is_err()
+        {
+            return recovery(&txid);
+        }
+        if injector
+            .visit(FaultPoint::Committed, &approved.root)
             .is_err()
         {
             return recovery(&txid);
@@ -607,6 +684,9 @@ impl TransactionService {
         if store.persist(&mut journal, JournalState::Durable).is_err() {
             return recovery(&txid);
         }
+        if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
+            return recovery(&txid);
+        }
         CommitOutcome::Committed {
             transaction_id: txid,
             revisions,
@@ -628,9 +708,8 @@ impl TransactionService {
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         let identity = identity_for_file(&file)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        let mut bytes = Vec::new();
-        std::io::Read::read_to_end(&mut file, &mut bytes)
-            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let bytes = read_bytes_bounded(&mut file, MAX_MUTATION_BYTES)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
         Ok((
             bytes.clone(),
             Revision {
@@ -657,6 +736,54 @@ impl TransactionService {
             return Ok(None);
         }
         self.snapshot(project, path).map(Some)
+    }
+
+    pub(crate) fn inspect_file(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+    ) -> Result<Option<(u64, Revision)>, PublicDiagnostic> {
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        let target = resolve_target(&approved.anchor, &path, false)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
+        if target
+            .parent_anchor
+            .entry_absent(&target.name)
+            .map_err(|code| PublicDiagnostic::new(code, None))?
+        {
+            return Ok(None);
+        }
+        let file = target
+            .parent_anchor
+            .open_file(&target.name)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
+        let count = file
+            .metadata()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?
+            .len();
+        read_revision_file(file)
+            .map(|revision| Some((count, revision)))
+            .map_err(|code| PublicDiagnostic::new(code, None))
+    }
+
+    pub(crate) fn inventory_files(
+        &self,
+        project: &ProjectId,
+        directory: &str,
+    ) -> Result<Vec<String>, PublicDiagnostic> {
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        let mut anchor = approved.anchor.as_ref().clone();
+        for component in directory.split('/') {
+            anchor = anchor
+                .open_child(std::ffi::OsStr::new(component), false)
+                .map_err(|code| PublicDiagnostic::new(code, None))?;
+        }
+        let mut files = Vec::new();
+        inventory_directory(&anchor, directory, 0, &mut files)
+            .map_err(|code| PublicDiagnostic::new(code, None))?;
+        Ok(files)
     }
 
     pub fn commit_with_injector<I: FaultInjector>(
@@ -689,6 +816,9 @@ impl TransactionService {
                     && (m.base != Revision::expected_absence() || !m.expected_bytes.is_empty()))
         }) {
             return rejected(ErrorCode::InvalidProposal);
+        }
+        if has_blocking_items(&scan_recovery(&approved)) {
+            return rejected(ErrorCode::RecoveryRequired);
         }
         let txid = new_id("tx");
         let store = match JournalStore::create(&approved.anchor, &txid) {
@@ -992,18 +1122,15 @@ impl TransactionService {
     }
 
     pub fn recover(&self, project: &ProjectId) -> RecoveryReport {
+        let _serial = match self.serial.lock() {
+            Ok(value) => value,
+            Err(_) => return recovery_scan_failure(ErrorCode::IoFailure),
+        };
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(_) => return RecoveryReport::default(),
         };
-        JournalStore::scan(&approved.anchor).unwrap_or_else(|code| RecoveryReport {
-            items: vec![RecoveryItem {
-                transaction_id: "recovery-scan".to_owned(),
-                state: JournalState::RecoveryRequired,
-                code: Some(code),
-                mutations: Vec::new(),
-            }],
-        })
+        scan_recovery(&approved)
     }
 
     /// Completes recovery bookkeeping without choosing or deleting any content
@@ -1014,6 +1141,10 @@ impl TransactionService {
         project: &ProjectId,
         transaction_id: &str,
     ) -> Result<(), PublicDiagnostic> {
+        let _serial = self
+            .serial
+            .lock()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
@@ -1041,11 +1172,19 @@ impl TransactionService {
     }
 
     pub fn flush(&self, project: &ProjectId) -> FlushOutcome {
+        let _serial = match self.serial.lock() {
+            Ok(value) => value,
+            Err(_) => {
+                return FlushOutcome::Rejected {
+                    diagnostic: PublicDiagnostic::new(ErrorCode::IoFailure, None),
+                }
+            }
+        };
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(error) => return FlushOutcome::Rejected { diagnostic: error },
         };
-        let report = self.recover(project);
+        let report = scan_recovery(&approved);
         if let Some(item) = report.items.iter().find(|item| {
             !matches!(
                 item.state,
@@ -1109,18 +1248,103 @@ impl crate::ports::SourceTransactionPort for TransactionService {
 
 pub(super) fn read_revision_file(mut file: File) -> Result<Revision, ErrorCode> {
     let identity = identity_for_file(&file).map_err(|_| ErrorCode::IoFailure)?;
-    let mut bytes = Vec::new();
-    std::io::Read::read_to_end(&mut file, &mut bytes).map_err(|_| ErrorCode::IoFailure)?;
+    let mut digest = Sha256::new();
+    let mut buffer = [0_u8; 1024 * 1024];
+    loop {
+        let read = file.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
+        if read == 0 {
+            break;
+        }
+        digest.update(&buffer[..read]);
+        #[cfg(test)]
+        REVISION_BYTES_READ.set(REVISION_BYTES_READ.get().saturating_add(read as u64));
+    }
     Ok(Revision {
-        sha256: sha256(&bytes),
+        sha256: hex::encode(digest.finalize()),
         identity,
     })
 }
 
+#[cfg(test)]
+fn take_revision_bytes_read() -> u64 {
+    REVISION_BYTES_READ.replace(0)
+}
+
 fn read_bytes_file(mut file: File) -> Result<Vec<u8>, ErrorCode> {
+    read_bytes_bounded(&mut file, MAX_MUTATION_BYTES)
+}
+
+fn read_bytes_bounded(reader: &mut impl Read, maximum: usize) -> Result<Vec<u8>, ErrorCode> {
     let mut bytes = Vec::new();
-    std::io::Read::read_to_end(&mut file, &mut bytes).map_err(|_| ErrorCode::IoFailure)?;
+    reader
+        .take(maximum as u64 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|_| ErrorCode::IoFailure)?;
+    if bytes.len() > maximum {
+        return Err(ErrorCode::InvalidProposal);
+    }
     Ok(bytes)
+}
+
+fn scan_recovery(approved: &ApprovedProject) -> RecoveryReport {
+    JournalStore::scan(&approved.anchor).unwrap_or_else(recovery_scan_failure)
+}
+
+fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {
+    RecoveryReport {
+        items: vec![RecoveryItem {
+            transaction_id: "recovery-scan".to_owned(),
+            state: JournalState::RecoveryRequired,
+            code: Some(code),
+            mutations: Vec::new(),
+        }],
+    }
+}
+
+fn has_blocking_items(report: &RecoveryReport) -> bool {
+    report.items.iter().any(|item| {
+        !matches!(
+            item.state,
+            JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
+        )
+    })
+}
+
+fn inventory_directory(
+    anchor: &DirectoryAnchor,
+    prefix: &str,
+    depth: usize,
+    files: &mut Vec<String>,
+) -> Result<(), ErrorCode> {
+    if depth > 16 || files.len() > 4096 {
+        return Err(ErrorCode::UnsafePath);
+    }
+    anchor.validate_chain()?;
+    for entry in fs::read_dir(anchor.path()).map_err(|_| ErrorCode::IoFailure)? {
+        let entry = entry.map_err(|_| ErrorCode::IoFailure)?;
+        let name = entry
+            .file_name()
+            .into_string()
+            .map_err(|_| ErrorCode::UnsafePath)?;
+        let metadata = fs::symlink_metadata(entry.path()).map_err(|_| ErrorCode::IoFailure)?;
+        if path::is_link_or_reparse(&metadata) {
+            return Err(ErrorCode::UnsafePath);
+        }
+        let relative = format!("{prefix}/{name}");
+        if metadata.is_dir() {
+            let child = anchor.open_child(std::ffi::OsStr::new(&name), false)?;
+            inventory_directory(&child, &relative, depth + 1, files)?;
+        } else if metadata.is_file() {
+            files.push(relative);
+            if files.len() > 4096 {
+                return Err(ErrorCode::UnsafePath);
+            }
+        } else {
+            return Err(ErrorCode::UnsafePath);
+        }
+    }
+    anchor.validate_chain()?;
+    Ok(())
 }
 
 fn artifact_name(path: &Path) -> &std::ffi::OsStr {
@@ -1219,7 +1443,7 @@ fn outcome_for(code: ErrorCode, txid: Option<String>) -> CommitOutcome {
     }
 }
 fn fail_journal(store: &JournalStore, journal: &mut Journal, code: ErrorCode) -> CommitOutcome {
-    let persistent_mutation_exists = journal.mutations.iter().any(|mutation| mutation.staged);
+    let persistent_mutation_exists = store.has_persisted_mutation_evidence(journal);
     let state = if code == ErrorCode::Conflict {
         JournalState::Conflict {
             mutation: journal.current_mutation(),

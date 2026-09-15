@@ -6,7 +6,7 @@ interface DestinationPreview { valid: boolean; displayPath: string; message: str
 interface SdkInfo { id: string; version: string; displayName: string; source: string; compatible: boolean; explanation: string; cancelled?: boolean }
 interface RecentProject { id: string; projectId: string; title: string; displayPath: string; lastOpenedUnixMs: number; status: "available" | "missing" | "invalid" }
 interface Resolution { width: number; height: number }
-interface OpenProject { projectId: string; title: string; folderName: string; chapterId: string; chapterName: string; sceneId: string; sceneName: string; sdkVersion: string; resolution: Resolution; cancelled?: boolean }
+interface OpenProject { sessionId: string; projectId: string; title: string; folderName: string; chapterId: string; chapterName: string; sceneId: string; sceneName: string; sdkVersion: string; resolution: Resolution; cancelled?: boolean }
 interface CreationResult { status: string; project?: OpenProject }
 type AssetKind = "background" | "characterAppearance" | "music" | "sfx";
 type VariableType = "bool" | "int" | "string";
@@ -14,14 +14,17 @@ interface SourceDefinition { path: string; statement: string; sourceRevision: st
 interface Character { id: string; technicalName: string; displayName: string; dialogueColor: string; defaultAppearanceId?: string; source: SourceDefinition }
 interface Appearance { id: string; characterId: string; label: string; attributes: Record<string, string>; renderMode: string; assetId: string }
 interface Asset { id: string; kind: AssetKind; displayName: string; relativePath: string; discoveryName: string; sha256: string; byteCount: number; status: string }
-interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | number | string; source: SourceDefinition }
+interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
 type ProjectSurface = "story" | "characters" | "assets" | "variables";
+type PersistenceStatus = "saved" | "conflict" | "recoveryRequired";
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
 if (rootElement === null) throw new Error("Application root is unavailable.");
 const root: HTMLDivElement = rootElement;
+let viewGeneration = 0;
+let currentProject: OpenProject | undefined;
 
 const wizard = {
   step: 1, title: "", folderName: "", folderEdited: false,
@@ -41,15 +44,20 @@ function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
 async function value<T>(operation: Parameters<typeof requestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const response = await requestCore<T>(operation, payload); if (!response.ok) throw new Error(response.error.message); return response.value;
 }
+async function projectValue<T>(project: OpenProject, operation: Parameters<typeof requestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
+  if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");
+  return value<T>(operation, { ...payload, sessionId: project.sessionId });
+}
 function shell(content: HTMLElement): void {
   const main = document.createElement("main"); main.className = "app-shell";
   const header = document.createElement("header"); header.className = "app-header";
-  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void showWelcome());
+  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { const project = currentProject; if (project) { try { await projectValue(project, "project.close"); } catch (error) { setStatus(message(error, "Project could not be closed"), "error"); return; } } await showWelcome(); })());
   const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
   header.append(brand, status); main.append(header, content); root.replaceChildren(main);
 }
 
 async function showWelcome(): Promise<void> {
+  viewGeneration += 1; currentProject = undefined;
   const section = document.createElement("section"); section.className = "welcome"; section.setAttribute("aria-labelledby", "welcome-title");
   const intro = document.createElement("div"); intro.className = "welcome-intro";
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Visual Ren'Py authoring";
@@ -145,6 +153,7 @@ async function createProject(): Promise<void> {
 async function openPickedProject(): Promise<void> { try { const project = await value<OpenProject>("project.openPicker"); if (!project.cancelled) showProject(project); } catch (error) { setStatus(message(error, "Project could not be opened"), "error"); } }
 async function openRecent(id: string): Promise<void> { try { showProject(await value<OpenProject>("project.openRecent", { recentId: id })); } catch (error) { setStatus(message(error, "Project could not be opened"), "error"); } }
 function showProject(project: OpenProject, surface: ProjectSurface = "story"): void {
+  const generation = ++viewGeneration; currentProject = project;
   const layout = document.createElement("section"); layout.className = "project-shell";
   const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
@@ -160,10 +169,21 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story"): v
     const chapter = button(project.chapterName, "tree-item chapter"); chapter.ariaExpanded = "true";
     const scene = button(project.sceneName, "tree-item scene"); sidebar.append(chapter, scene);
   }
-  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { await value("project.close"); await showWelcome(); }); sidebar.append(close);
+  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { try { await projectValue(project, "project.close"); await showWelcome(); } catch (error) { setStatus(message(error, "Project could not be closed"), "error"); } }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "empty-workspace" : "supporting-workspace";
-  layout.append(sidebar, workspace); shell(layout); setStatus("Saved");
-  if (surface === "story") renderStoryReady(workspace, project); else void renderAuthoringSurface(workspace, project, surface);
+  layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
+  if (surface === "story") { renderStoryReady(workspace, project); void refreshPersistenceStatus(project, generation); }
+  else void renderAuthoringSurface(workspace, project, surface, generation);
+}
+
+async function refreshPersistenceStatus(project: OpenProject, generation: number): Promise<void> {
+  try {
+    const state = await projectValue<PersistenceStatus>(project, "project.status");
+    if (generation !== viewGeneration || currentProject?.sessionId !== project.sessionId) return;
+    setStatus(state === "saved" ? "Saved" : state === "conflict" ? "Conflict — source changed outside Loomlight" : "Recovery required — writes are disabled", state === "saved" ? "normal" : "error");
+  } catch (error) {
+    if (generation === viewGeneration && currentProject?.sessionId === project.sessionId) setStatus(message(error, "Saved state could not be checked"), "error");
+  }
 }
 
 function renderStoryReady(workspace: HTMLElement, project: OpenProject): void {
@@ -173,20 +193,30 @@ function renderStoryReady(workspace: HTMLElement, project: OpenProject): void {
   workspace.append(eyebrow, title, copy);
 }
 
-async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story">): Promise<void> {
+async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story">, generation: number): Promise<void> {
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
   workspace.append(eyebrow, title);
   try {
-    const model = await value<AuthoringMetadata>("authoring.list");
+    const model = await projectValue<AuthoringMetadata>(project, "authoring.list");
+    if (generation !== viewGeneration || currentProject?.sessionId !== project.sessionId) return;
     if (surface === "characters") renderCharacters(workspace, project, model);
     if (surface === "assets") renderAssets(workspace, project, model);
     if (surface === "variables") renderVariables(workspace, project, model);
+    await refreshPersistenceStatus(project, generation);
   } catch (error) { setStatus(message(error, "Authoring data could not be loaded"), "error"); }
 }
 
 function formHeading(text: string): HTMLHeadingElement { const heading = document.createElement("h2"); heading.textContent = text; return heading; }
 function supportingSection(): HTMLElement { const section = document.createElement("section"); section.className = "supporting-section"; return section; }
+function inlineEditor(host: HTMLElement, label: string, controls: HTMLElement[], submitLabel: string, save: () => Promise<boolean | void>): void {
+  if (host.querySelector(".inline-editor")) return;
+  const editor = document.createElement("div"); editor.className = "inline-editor"; editor.role = "group"; editor.ariaLabel = label;
+  const actions = document.createElement("div"); actions.className = "row-actions";
+  const submit = button(submitLabel, "button primary"); const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => editor.remove());
+  submit.addEventListener("click", async () => { submit.disabled = true; cancel.disabled = true; setStatus("Saving…"); try { if (await save() === false) { submit.disabled = false; cancel.disabled = false; setStatus("No file selected"); } } catch (error) { submit.disabled = false; cancel.disabled = false; setStatus(message(error, `${label} could not be saved`), "error"); } });
+  actions.append(cancel, submit); editor.append(...controls, actions); host.append(editor); controls[0]?.querySelector<HTMLElement>("input, select")?.focus();
+}
 
 function renderCharacters(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Characters"));
@@ -195,55 +225,39 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
     const row = document.createElement("div"); row.className = "entity-row";
     const summary = document.createElement("div"); const name = document.createElement("strong"); name.textContent = character.displayName; const technical = document.createElement("code"); technical.textContent = character.technicalName; summary.append(name, technical);
     const appearanceCount = model.appearances.filter((item) => item.characterId === character.id).length; const detail = document.createElement("span"); detail.textContent = `${appearanceCount} appearance${appearanceCount === 1 ? "" : "s"}`;
-    const actions = document.createElement("div"); actions.className = "row-actions"; const edit = button("Edit"); edit.addEventListener("click", () => void editCharacter(project, character)); const add = button("Add Appearance"); add.addEventListener("click", () => void addAppearance(project, character)); actions.append(edit, add); row.append(summary, detail, actions); list.append(row);
+    const actions = document.createElement("div"); actions.className = "row-actions"; const edit = button("Edit"); edit.addEventListener("click", () => { const displayName = input(); displayName.value = character.displayName; const dialogueColor = input("color"); dialogueColor.value = character.dialogueColor; inlineEditor(row, `Edit ${character.displayName}`, [field("Display name", displayName), field("Dialogue colour", dialogueColor)], "Save Character", async () => { if (!displayName.value.trim()) throw new Error("Display name is required."); await projectValue(project, "character.update", { id: character.id, expectedSourceRevision: character.source.sourceRevision, displayName: displayName.value.trim(), dialogueColor: dialogueColor.value }); showProject(project, "characters"); }); }); const add = button("Add Appearance"); add.addEventListener("click", () => { const expression = input(); expression.pattern = "[A-Za-z][A-Za-z0-9_]*"; inlineEditor(row, `Add appearance for ${character.displayName}`, [field("Expression token", expression)], "Choose image…", async () => { if (!expression.value.trim()) throw new Error("Expression token is required."); const selected = await projectValue<ImportChoice>(project, "asset.chooseImport"); if (selected.cancelled) return false; await projectValue(project, "asset.import", { authorityId: selected.authorityId, kind: "characterAppearance", technicalName: expression.value.trim(), displayName: `${character.displayName} — ${expression.value.trim()}`, characterId: character.id, expression: expression.value.trim() }); showProject(project, "characters"); return true; }); }); actions.append(edit, add); row.append(summary, detail, actions); list.append(row);
     const appearancesHeading = document.createElement("h3"); appearancesHeading.textContent = `${character.displayName} Appearances`; list.append(appearancesHeading);
     const appearances = model.appearances.filter((item) => item.characterId === character.id);
-    appearances.forEach((appearance) => { const item = document.createElement("div"); item.className = "appearance-row"; const label = document.createElement("span"); label.textContent = appearance.label; const mode = document.createElement("code"); mode.textContent = `${appearance.attributes.outfit} · ${appearance.attributes.pose}`; const makeDefault = button(character.defaultAppearanceId === appearance.id ? "Default" : "Set default", "text-button"); makeDefault.disabled = character.defaultAppearanceId === appearance.id; makeDefault.addEventListener("click", async () => { await value("appearance.setDefault", { characterId: character.id, appearanceId: appearance.id }); showProject(project, "characters"); }); item.append(label, mode, makeDefault); list.append(item); });
+    appearances.forEach((appearance) => { const item = document.createElement("div"); item.className = "appearance-row"; const label = document.createElement("span"); label.textContent = appearance.label; const mode = document.createElement("code"); mode.textContent = `${appearance.attributes.outfit} · ${appearance.attributes.pose}`; const makeDefault = button(character.defaultAppearanceId === appearance.id ? "Default" : "Set default", "text-button"); makeDefault.disabled = character.defaultAppearanceId === appearance.id; makeDefault.addEventListener("click", async () => { makeDefault.disabled = true; setStatus("Saving…"); try { await projectValue(project, "appearance.setDefault", { characterId: character.id, appearanceId: appearance.id }); showProject(project, "characters"); } catch (error) { makeDefault.disabled = false; setStatus(message(error, "Default appearance could not be changed"), "error"); } }); item.append(label, mode, makeDefault); list.append(item); });
   });
   const create = supportingSection(); create.append(formHeading("Create Character"));
   const technical = input(); technical.name = "technicalName"; technical.pattern = "[A-Za-z][A-Za-z0-9_]*";
   const display = input(); display.name = "displayName";
   const color = input("color"); color.value = "#c5c8d0"; color.name = "dialogueColor";
-  const submit = button("Create Character", "button primary"); submit.addEventListener("click", async () => { try { await value("character.create", { technicalName: technical.value, displayName: display.value, dialogueColor: color.value }); showProject(project, "characters"); } catch (error) { setStatus(message(error, "Character could not be created"), "error"); } });
+  const submit = button("Create Character", "button primary"); submit.addEventListener("click", async () => { submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "character.create", { technicalName: technical.value, displayName: display.value, dialogueColor: color.value }); showProject(project, "characters"); } catch (error) { submit.disabled = false; setStatus(message(error, "Character could not be created"), "error"); } });
   create.append(field("Technical variable (fixed after creation)", technical), field("Display name", display), field("Dialogue colour", color), submit); workspace.append(list, create);
-}
-
-async function editCharacter(project: OpenProject, character: Character): Promise<void> {
-  const displayName = window.prompt("Display name", character.displayName)?.trim(); if (!displayName) return;
-  const dialogueColor = window.prompt("Dialogue colour (#rrggbb)", character.dialogueColor)?.trim(); if (!dialogueColor) return;
-  try { await value("character.update", { id: character.id, expectedSourceRevision: character.source.sourceRevision, displayName, dialogueColor }); showProject(project, "characters"); }
-  catch (error) { setStatus(message(error, "Character could not be updated"), "error"); }
-}
-
-async function addAppearance(project: OpenProject, character: Character): Promise<void> {
-  const expression = window.prompt(`Expression token for ${character.displayName}`)?.trim(); if (!expression) return;
-  try { const selected = await value<ImportChoice>("asset.chooseImport"); if (selected.cancelled) return; await value("asset.import", { authorityId: selected.authorityId, kind: "characterAppearance", technicalName: expression, displayName: `${character.displayName} — ${expression}`, characterId: character.id, expression }); showProject(project, "characters"); }
-  catch (error) { setStatus(message(error, "Appearance could not be imported"), "error"); }
 }
 
 function renderAssets(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Project assets"));
   (["background", "characterAppearance", "music", "sfx"] as AssetKind[]).forEach((kind) => { const heading = document.createElement("h3"); heading.textContent = { background: "Backgrounds", characterAppearance: "Character appearances", music: "Music", sfx: "SFX" }[kind]; list.append(heading); const assets = model.assets.filter((item) => item.kind === kind); if (!assets.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "None imported."; list.append(empty); } assets.forEach((asset) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = asset.displayName; const path = document.createElement("code"); path.textContent = asset.relativePath; const discovery = document.createElement("span"); discovery.textContent = `Ren'Py: ${asset.discoveryName} · ${asset.status}`; row.append(name, path, discovery); list.append(row); }); });
+  if (model.assets.some((asset) => asset.status === "compatibilityRequired")) { const repair = button("Repair Ren'Py asset names", "button secondary"); repair.addEventListener("click", async () => { repair.disabled = true; setStatus("Saving compatibility declarations…"); try { await projectValue(project, "asset.repairCompatibility"); showProject(project, "assets"); } catch (error) { repair.disabled = false; setStatus(message(error, "Asset compatibility could not be repaired"), "error"); } }); list.append(repair); }
   const imported = supportingSection(); imported.append(formHeading("Import background or audio"));
   const kind = document.createElement("select"); [["background","Background"],["music","Music"],["sfx","SFX"]].forEach(([value,label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; kind.append(option); });
   const technical = input(); const display = input();
-  const choose = button("Choose and import…", "button primary"); choose.addEventListener("click", async () => { try { const selected = await value<ImportChoice>("asset.chooseImport"); if (selected.cancelled) return; await value("asset.import", { authorityId: selected.authorityId, kind: kind.value, technicalName: technical.value, displayName: display.value, characterId: null, expression: null }); showProject(project, "assets"); } catch (error) { setStatus(message(error, "Asset could not be imported"), "error"); } });
+  const choose = button("Choose and import…", "button primary"); choose.addEventListener("click", async () => { choose.disabled = true; try { const selected = await projectValue<ImportChoice>(project, "asset.chooseImport"); if (selected.cancelled) { choose.disabled = false; return; } setStatus("Saving…"); await projectValue(project, "asset.import", { authorityId: selected.authorityId, kind: kind.value, technicalName: technical.value, displayName: display.value, characterId: null, expression: null }); showProject(project, "assets"); } catch (error) { choose.disabled = false; setStatus(message(error, "Asset could not be imported"), "error"); } });
   imported.append(field("Asset kind", kind), field("Technical name", technical), field("Display name", display), choose); workspace.append(list, imported);
 }
 
 function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Variables"));
   if (!model.variables.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Variables yet."; list.append(empty); }
-  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); const edit = button("Edit default"); edit.addEventListener("click", () => void editVariable(project, variable)); row.append(name, type, current, edit); list.append(row); });
-  const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input();
-  const submit = button("Create Variable", "button primary"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "bool") parsed = defaultValue.value === "true"; if (type.value === "int") parsed = Number(defaultValue.value); try { await value("variable.create", { technicalName: technical.value, variableType: type.value, defaultValue: parsed }); showProject(project, "variables"); } catch (error) { setStatus(message(error, "Variable could not be created"), "error"); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), field("Default value (true/false for bool)", defaultValue), submit); workspace.append(list, create);
+  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); const edit = button("Edit default"); edit.addEventListener("click", () => { const control = variable.variableType === "bool" ? document.createElement("select") : input(); if (variable.variableType === "bool") { [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; option.selected = String(variable.defaultValue) === value; control.append(option); }); } else { (control as HTMLInputElement).value = String(variable.defaultValue); (control as HTMLInputElement).inputMode = variable.variableType === "int" ? "numeric" : "text"; } inlineEditor(row, `Edit ${variable.technicalName}`, [field("Default value", control)], "Save Default", async () => { const entered = (control as HTMLInputElement | HTMLSelectElement).value; if (variable.variableType === "int" && !validInt64(entered)) throw new Error("Enter a canonical signed 64-bit decimal integer."); const defaultValue: boolean | string = variable.variableType === "bool" ? entered === "true" : entered; await projectValue(project, "variable.update", { id: variable.id, expectedSourceRevision: variable.source.sourceRevision, defaultValue }); showProject(project, "variables"); }); }); row.append(name, type, current, edit); list.append(row); });
+  const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input(); const boolValue = document.createElement("select"); [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; boolValue.append(option); }); const valueField = field("Default value", boolValue); const syncControl = (): void => { valueField.replaceChildren(document.createElement("span"), type.value === "bool" ? boolValue : defaultValue); valueField.firstElementChild!.textContent = "Default value"; defaultValue.inputMode = type.value === "int" ? "numeric" : "text"; }; type.addEventListener("change", syncControl); syncControl();
+  const submit = button("Create Variable", "button primary"); submit.addEventListener("click", async () => { let parsed: boolean | string = defaultValue.value; if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !validInt64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); return; } submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technical.value, variableType: type.value, defaultValue: parsed }); showProject(project, "variables"); } catch (error) { submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
 }
 
-async function editVariable(project: OpenProject, variable: Variable): Promise<void> {
-  const entered = window.prompt(`New ${variable.variableType} default`, String(variable.defaultValue)); if (entered === null) return;
-  let defaultValue: boolean | number | string = entered; if (variable.variableType === "bool") { if (entered !== "true" && entered !== "false") { setStatus("Bool defaults must be true or false.", "error"); return; } defaultValue = entered === "true"; } if (variable.variableType === "int") defaultValue = Number(entered);
-  try { await value("variable.update", { id: variable.id, expectedSourceRevision: variable.source.sourceRevision, defaultValue }); showProject(project, "variables"); }
-  catch (error) { setStatus(message(error, "Variable could not be updated"), "error"); }
-}
+function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
+window.addEventListener("keydown", (event) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") { event.preventDefault(); const project = currentProject; if (!project) return; setStatus("Saving…"); void projectValue(project, "project.flush").then(() => setStatus("Saved")).catch((error) => setStatus(message(error, "Save could not be confirmed"), "error")); } });
 void showWelcome();

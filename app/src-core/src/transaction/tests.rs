@@ -238,6 +238,15 @@ fn interrupted_mixed_create_and_replace_blocks_follow_up() {
         fixture.service.flush(&fixture.project),
         FlushOutcome::RecoveryRequired { .. }
     ));
+    let follow_up = fixture.mutation("game/one.rpy", b"must not commit\n");
+    assert_eq!(
+        outcome_code(
+            &fixture
+                .service
+                .commit(&fixture.project, fixture.proposal(vec![follow_up]))
+        ),
+        Some(ErrorCode::RecoveryRequired)
+    );
     assert_eq!(
         fs::read(fixture.root.join("game/new.rpy")).unwrap(),
         b"created\n"
@@ -282,6 +291,16 @@ fn streaming_import_exceeds_old_memory_cap_and_commits_with_metadata() {
             .len(),
         17 * 1024 * 1024
     );
+    let _ = take_revision_bytes_read();
+    assert!(!fixture
+        .service
+        .has_blocking_recovery(&fixture.project)
+        .unwrap());
+    assert_eq!(
+        take_revision_bytes_read(),
+        0,
+        "routine readiness rehashed terminal import evidence"
+    );
     assert_eq!(
         fs::read(fixture.root.join("game/one.rpy")).unwrap(),
         b"metadata updated\n"
@@ -303,6 +322,28 @@ fn streaming_import_rejects_the_documented_maximum() {
         Vec::new(),
     );
     assert_eq!(outcome_code(&outcome), Some(ErrorCode::InvalidProposal));
+    assert!(!fixture.root.join("game/imported.png").exists());
+}
+
+#[test]
+fn failed_stream_after_persisted_stage_is_recovery_required_not_rejected() {
+    let fixture = Fixture::new();
+    let source_path = fixture.root.join("changed.png");
+    fs::write(&source_path, b"two bytes").unwrap();
+    let mut source = File::open(source_path).unwrap();
+    let outcome = fixture.service.commit_streaming_import(
+        &fixture.project,
+        RelativePath::new("game/imported.png").unwrap(),
+        &mut source,
+        1,
+        &sha256(b"x"),
+        Vec::new(),
+    );
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert!(fixture
+        .service
+        .has_blocking_recovery(&fixture.project)
+        .unwrap());
     assert!(!fixture.root.join("game/imported.png").exists());
 }
 
@@ -870,6 +911,43 @@ fn process_termination_at_each_persistent_boundary_is_recoverable() {
 }
 
 #[test]
+fn streaming_process_termination_at_each_persistent_boundary_is_recoverable() {
+    let points = [
+        "prepared",
+        "media-staged",
+        "metadata-staged",
+        "media-intent",
+        "media-exchanged",
+        "media-verified",
+        "metadata-intent",
+        "metadata-exchanged",
+        "metadata-verified",
+        "committed",
+        "durable",
+    ];
+    for point in points {
+        let fixture = Fixture::new();
+        fs::write(fixture.root.join("stream-source.png"), b"stream bytes").unwrap();
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--ignored",
+                "--exact",
+                "transaction::tests::streaming_crash_worker",
+            ])
+            .env("LOOMLIGHT_STREAM_CRASH_ROOT", &fixture.root)
+            .env("LOOMLIGHT_STREAM_CRASH_POINT", point)
+            .status()
+            .unwrap();
+        assert_eq!(status.code(), Some(85), "{point}");
+        let service = TransactionService::default();
+        let project = service.register_trusted_project(&fixture.root).unwrap();
+        let report = service.recover(&project);
+        assert_eq!(report.items.len(), 1, "{point}");
+        assert!(!matches!(report.items[0].state, JournalState::Proposed));
+    }
+}
+
+#[test]
 fn prepared_process_termination_can_be_safely_abandoned() {
     let fixture = Fixture::new();
     let status = std::process::Command::new(std::env::current_exe().unwrap())
@@ -1026,6 +1104,55 @@ fn crash_worker() {
     });
     let _ = service.commit_with_injector(&project, proposal, &mut hook);
     panic!("crash point was not reached");
+}
+
+#[test]
+#[ignore = "subprocess worker invoked by the streaming crash-boundary test"]
+fn streaming_crash_worker() {
+    let root = PathBuf::from(std::env::var_os("LOOMLIGHT_STREAM_CRASH_ROOT").unwrap());
+    let stop = std::env::var("LOOMLIGHT_STREAM_CRASH_POINT").unwrap();
+    let service = TransactionService::default();
+    let project = service.register_trusted_project(&root).unwrap();
+    let relative = RelativePath::new("game/one.rpy").unwrap();
+    let (expected_bytes, base) = service.snapshot(&project, relative.clone()).unwrap();
+    let companion = FileMutation {
+        path: relative,
+        kind: MutationKind::ReplaceExisting,
+        base,
+        expected_bytes,
+        proposed: b"metadata companion\n".to_vec(),
+    };
+    let mut source = File::open(root.join("stream-source.png")).unwrap();
+    let mut hook = Hook(|point, _root: &Path| {
+        let name = match point {
+            FaultPoint::Prepared => "prepared",
+            FaultPoint::MutationStaged(0) => "media-staged",
+            FaultPoint::MutationStaged(1) => "metadata-staged",
+            FaultPoint::BeforeExchange(0) => "media-intent",
+            FaultPoint::AfterExchange(0) => "media-exchanged",
+            FaultPoint::Verified(0) => "media-verified",
+            FaultPoint::BeforeExchange(1) => "metadata-intent",
+            FaultPoint::AfterExchange(1) => "metadata-exchanged",
+            FaultPoint::Verified(1) => "metadata-verified",
+            FaultPoint::Committed => "committed",
+            FaultPoint::Durable => "durable",
+            _ => "",
+        };
+        if name == stop {
+            std::process::exit(85);
+        }
+        Ok(())
+    });
+    let _ = service.commit_streaming_import_with_injector(
+        &project,
+        RelativePath::new("game/imported.png").unwrap(),
+        &mut source,
+        b"stream bytes".len() as u64,
+        &sha256(b"stream bytes"),
+        vec![companion],
+        &mut hook,
+    );
+    panic!("streaming crash point was not reached");
 }
 
 #[test]

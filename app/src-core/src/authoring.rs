@@ -5,8 +5,9 @@
 //! are patched only when their exact bytes and file revision still match.
 
 use crate::transaction::{
-    CommitOutcome, FileIdentity, FileMutation, MutationKind, ProjectId, RelativePath, Revision,
-    TransactionIntent, TransactionProposal, TransactionService, MAX_IMPORT_BYTES,
+    CommitOutcome, DirectoryAnchor, FileIdentity, FileMutation, FlushOutcome, MutationKind,
+    ProjectId, RecoveryMutationState, RelativePath, Revision, TransactionIntent,
+    TransactionProposal, TransactionService, MAX_IMPORT_BYTES,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -14,7 +15,7 @@ use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
     ffi::OsStr,
-    fs::{self, File, OpenOptions},
+    fs::{self, File},
     io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
 };
@@ -23,6 +24,7 @@ pub const AUTHORING_SCHEMA_VERSION: u32 = 1;
 const AUTHORING_PATH: &str = ".renpy-editor/authoring.json";
 const CHARACTERS_PATH: &str = "game/definitions/characters.rpy";
 const VARIABLES_PATH: &str = "game/definitions/variables.rpy";
+const ASSETS_PATH: &str = "game/definitions/assets.rpy";
 const MAX_TEXT: usize = 160;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -157,14 +159,33 @@ impl AuthoringMetadata {
                     .assets
                     .iter()
                     .any(|item| item.id == appearance.asset_id)
-                || appearance.attributes.get("expression").is_none()
+                || !appearance.attributes.contains_key("expression")
                 || appearance.attributes.get("outfit").map(String::as_str) != Some("default")
                 || appearance.attributes.get("pose").map(String::as_str) != Some("default")
+                || appearance.render_mode != "staticImportedAsset"
+                || appearance.label.trim().is_empty()
+                || appearance.label.len() > MAX_TEXT
             {
                 return Err(AuthoringError::CorruptMetadata);
             }
         }
         for character in &self.characters {
+            validate_identifier(&character.technical_name)
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_display(&character.display_name)
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_color(&character.dialogue_color)
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_source_definition(&character.source, CHARACTERS_PATH)?;
+            if character.source.statement
+                != character_statement(
+                    &character.technical_name,
+                    &character.display_name,
+                    &character.dialogue_color,
+                )?
+            {
+                return Err(AuthoringError::CorruptMetadata);
+            }
             if character.default_appearance_id.as_ref().is_some_and(|id| {
                 !self
                     .appearances
@@ -174,8 +195,49 @@ impl AuthoringMetadata {
                 return Err(AuthoringError::CorruptMetadata);
             }
         }
+        for variable in &self.variables {
+            validate_identifier(&variable.technical_name)
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_source_definition(&variable.source, VARIABLES_PATH)?;
+            let literal = variable_literal(variable.variable_type, &variable.default_value)
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            if variable.source.statement
+                != format!("default {} = {literal}", variable.technical_name)
+            {
+                return Err(AuthoringError::CorruptMetadata);
+            }
+        }
+        for asset in &self.assets {
+            RelativePath::new(&asset.relative_path).map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_hash(&asset.sha256).map_err(|_| AuthoringError::CorruptMetadata)?;
+            validate_display(&asset.display_name).map_err(|_| AuthoringError::CorruptMetadata)?;
+            if asset.discovery_name.trim().is_empty()
+                || asset.discovery_name.len() > MAX_TEXT
+                || asset.byte_count > MAX_IMPORT_BYTES
+                || !matches!(
+                    asset.status.as_str(),
+                    "available" | "missing" | "changed" | "unsafe" | "compatibilityRequired"
+                )
+            {
+                return Err(AuthoringError::CorruptMetadata);
+            }
+        }
         Ok(())
     }
+}
+
+fn validate_source_definition(
+    source: &SourceDefinition,
+    expected_path: &str,
+) -> Result<(), AuthoringError> {
+    if source.path != expected_path
+        || source.statement.is_empty()
+        || source.statement.len() > 10_000
+        || source.statement.contains(['\r', '\n'])
+    {
+        return Err(AuthoringError::CorruptMetadata);
+    }
+    validate_hash(&source.source_revision).map_err(|_| AuthoringError::CorruptMetadata)
 }
 
 #[derive(Debug)]
@@ -200,6 +262,14 @@ pub enum AuthoringError {
     CorruptMetadata,
     UnsupportedMetadata,
     Io,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PersistenceStatus {
+    Saved,
+    Conflict,
+    RecoveryRequired,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -263,8 +333,10 @@ pub struct ImportChoice {
 }
 
 struct ImportAuthority {
+    project: ProjectId,
     file: File,
-    path: PathBuf,
+    parent: DirectoryAnchor,
+    name: std::ffi::OsString,
     identity: FileIdentity,
     extension: String,
     byte_count: u64,
@@ -294,12 +366,76 @@ impl AuthoringService {
         Ok(id)
     }
 
-    pub fn unregister_project(&mut self, id: &ProjectId) {
-        self.transactions.unregister_trusted_project(id);
-        self.imports.clear();
+    pub(crate) fn register_inspected_project(
+        &self,
+        root: PathBuf,
+        anchor: crate::transaction::DirectoryAnchor,
+    ) -> Result<ProjectId, AuthoringError> {
+        let id = self
+            .transactions
+            .register_trusted_anchor(root, anchor)
+            .map_err(|_| AuthoringError::Io)?;
+        if self
+            .transactions
+            .has_blocking_recovery(&id)
+            .map_err(|_| AuthoringError::RecoveryRequired)?
+        {
+            self.transactions.unregister_trusted_project(&id);
+            return Err(AuthoringError::RecoveryRequired);
+        }
+        Ok(id)
     }
 
-    pub fn select_import(&mut self, selected: &Path) -> Result<ImportChoice, AuthoringError> {
+    pub fn unregister_project(&mut self, id: &ProjectId) {
+        self.transactions.unregister_trusted_project(id);
+        self.imports.retain(|_, authority| &authority.project != id);
+    }
+
+    pub fn flush(&self, project: &ProjectId) -> Result<(), AuthoringError> {
+        match self.transactions.flush(project) {
+            FlushOutcome::Flushed => Ok(()),
+            FlushOutcome::Conflict { .. } => Err(AuthoringError::SourceConflict),
+            FlushOutcome::RecoveryRequired { .. } => Err(AuthoringError::RecoveryRequired),
+            FlushOutcome::Rejected { .. } => Err(AuthoringError::Io),
+        }
+    }
+
+    /// Reports persistence readiness without acknowledging or modifying recovery state.
+    pub fn status(&self, project: &ProjectId) -> PersistenceStatus {
+        let report = self.transactions.recover(project);
+        let mut blocked = false;
+        for item in report.items {
+            if matches!(
+                item.state,
+                crate::transaction::JournalState::Durable
+                    | crate::transaction::JournalState::Rejected { .. }
+                    | crate::transaction::JournalState::Cleaned
+            ) {
+                continue;
+            }
+            blocked = true;
+            if item.mutations.iter().any(|state| {
+                matches!(
+                    state,
+                    RecoveryMutationState::ExchangeCompleteConflict
+                        | RecoveryMutationState::ExternalRevisionWithAcceptedCopy
+                )
+            }) {
+                return PersistenceStatus::Conflict;
+            }
+        }
+        if blocked {
+            PersistenceStatus::RecoveryRequired
+        } else {
+            PersistenceStatus::Saved
+        }
+    }
+
+    pub fn select_import(
+        &mut self,
+        project: &ProjectId,
+        selected: &Path,
+    ) -> Result<ImportChoice, AuthoringError> {
         let metadata = fs::symlink_metadata(selected).map_err(|_| AuthoringError::Io)?;
         if !metadata.is_file() || crate::transaction::is_link_or_reparse(&metadata) {
             return Err(AuthoringError::UnsupportedFormat);
@@ -313,11 +449,25 @@ impl AuthoringService {
         if metadata.len() > MAX_IMPORT_BYTES {
             return Err(AuthoringError::OversizeImport);
         }
-        let mut file = OpenOptions::new()
-            .read(true)
-            .open(selected)
-            .map_err(|_| AuthoringError::Io)?;
+        let parent_path = selected.parent().ok_or(AuthoringError::UnsupportedFormat)?;
+        let name = selected
+            .file_name()
+            .ok_or(AuthoringError::UnsupportedFormat)?
+            .to_os_string();
+        let parent = DirectoryAnchor::open_root(parent_path)
+            .map_err(|_| AuthoringError::UnsupportedFormat)?;
+        let selected_identity = identity_for_metadata(&metadata);
+        let mut file = parent
+            .open_file(&name)
+            .map_err(|_| AuthoringError::UnsupportedFormat)?;
         let identity = identity_for_selected(&file)?;
+        let opened_metadata = file.metadata().map_err(|_| AuthoringError::Io)?;
+        if !opened_metadata.is_file()
+            || selected_identity.is_some_and(|expected| identity != expected)
+            || opened_metadata.len() != metadata.len()
+        {
+            return Err(AuthoringError::UnknownImport);
+        }
         let (byte_count, sha256) = hash_file(&mut file)?;
         if byte_count > MAX_IMPORT_BYTES {
             return Err(AuthoringError::OversizeImport);
@@ -333,8 +483,10 @@ impl AuthoringService {
         self.imports.insert(
             authority_id.clone(),
             ImportAuthority {
+                project: project.clone(),
                 file,
-                path: selected.to_path_buf(),
+                parent,
+                name,
                 identity,
                 extension: extension.clone(),
                 byte_count,
@@ -355,7 +507,9 @@ impl AuthoringService {
         project_uuid: &str,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
-        let (metadata, _) = self.load_metadata(project, project_uuid)?;
+        let (mut metadata, _) = self.load_metadata(project, project_uuid)?;
+        self.refresh_verified_source_revisions(project, &mut metadata)?;
+        self.refresh_asset_statuses(project, &mut metadata);
         Ok(metadata)
     }
 
@@ -373,6 +527,15 @@ impl AuthoringService {
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         ensure_symbol_available(&metadata, &request.technical_name)?;
         let (source_bytes, source_revision) = self.snapshot(project, CHARACTERS_PATH)?;
+        verify_mapped_statements(
+            &source_bytes,
+            metadata
+                .characters
+                .iter()
+                .filter(|item| item.source.path == CHARACTERS_PATH)
+                .map(|item| item.source.statement.as_str()),
+        )?;
+        ensure_safe_append(&source_bytes)?;
         let statement = character_statement(
             &request.technical_name,
             &request.display_name,
@@ -427,13 +590,15 @@ impl AuthoringService {
             .iter_mut()
             .find(|item| item.id == request.id)
             .ok_or(AuthoringError::UnknownEntity)?;
-        if character.source.source_revision != request.expected_source_revision {
-            return Err(AuthoringError::SourceConflict);
-        }
         let (source_bytes, source_revision) = self.snapshot(project, CHARACTERS_PATH)?;
         if source_revision.sha256 != request.expected_source_revision {
             return Err(AuthoringError::SourceConflict);
         }
+        verify_mapped_statements(
+            &source_bytes,
+            std::iter::once(character.source.statement.as_str()),
+        )?;
+        ensure_safe_append(&source_bytes)?;
         let new_statement = character_statement(
             &character.technical_name,
             &request.display_name,
@@ -475,6 +640,14 @@ impl AuthoringService {
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         ensure_symbol_available(&metadata, &request.technical_name)?;
         let (source_bytes, source_revision) = self.snapshot(project, VARIABLES_PATH)?;
+        verify_mapped_statements(
+            &source_bytes,
+            metadata
+                .variables
+                .iter()
+                .filter(|item| item.source.path == VARIABLES_PATH)
+                .map(|item| item.source.statement.as_str()),
+        )?;
         let statement = format!("default {} = {}", request.technical_name, literal);
         let new_source = append_statement(&source_bytes, &statement);
         let new_revision = hash_bytes(&new_source);
@@ -523,13 +696,14 @@ impl AuthoringService {
             .find(|item| item.id == request.id)
             .ok_or(AuthoringError::UnknownEntity)?;
         let literal = variable_literal(variable.variable_type, &request.default_value)?;
-        if variable.source.source_revision != request.expected_source_revision {
-            return Err(AuthoringError::SourceConflict);
-        }
         let (source_bytes, source_revision) = self.snapshot(project, VARIABLES_PATH)?;
         if source_revision.sha256 != request.expected_source_revision {
             return Err(AuthoringError::SourceConflict);
         }
+        verify_mapped_statements(
+            &source_bytes,
+            std::iter::once(variable.source.statement.as_str()),
+        )?;
         let new_statement = format!("default {} = {}", variable.technical_name, literal);
         let new_source =
             replace_exact_once(&source_bytes, &variable.source.statement, &new_statement)?;
@@ -566,6 +740,9 @@ impl AuthoringService {
             .imports
             .remove(&request.authority_id)
             .ok_or(AuthoringError::UnknownImport)?;
+        if &authority.project != project {
+            return Err(AuthoringError::UnknownImport);
+        }
         revalidate_selected(&authority)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         if metadata
@@ -583,6 +760,12 @@ impl AuthoringService {
             request.expression.as_deref(),
             &authority.extension,
         )?;
+        self.ensure_physical_name_available(
+            project,
+            request.kind,
+            &relative_path,
+            &discovery_name,
+        )?;
         if metadata
             .assets
             .iter()
@@ -598,7 +781,7 @@ impl AuthoringService {
             return Err(AuthoringError::DiscoveryCollision);
         }
         let asset_id = uuid::Uuid::new_v4().to_string();
-        metadata.assets.push(Asset {
+        let mut asset = Asset {
             id: asset_id.clone(),
             kind: request.kind,
             display_name: request.display_name.clone(),
@@ -608,7 +791,17 @@ impl AuthoringService {
             byte_count: authority.byte_count,
             status: "available".into(),
             extra: Map::new(),
-        });
+        };
+        let declaration = requires_explicit_declaration(&asset)
+            .then(|| asset_declaration(&asset))
+            .transpose()?;
+        if declaration.is_some() {
+            asset.extra.insert(
+                "discoveryContract".into(),
+                Value::String("explicitDeclaration".into()),
+            );
+        }
+        metadata.assets.push(asset);
         if request.kind == AssetKind::CharacterAppearance {
             let character_id = request.character_id.ok_or(AuthoringError::InvalidPayload)?;
             let expression = request.expression.ok_or(AuthoringError::InvalidPayload)?;
@@ -636,14 +829,18 @@ impl AuthoringService {
                 character.default_appearance_id = Some(appearance_id);
             }
         }
-        let metadata_mutation = metadata_file_mutation(metadata_snapshot, &metadata)?;
+        let mut companions = Vec::new();
+        if let Some(statement) = declaration {
+            companions.push(self.declaration_mutation(project, &statement)?);
+        }
+        companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
         let outcome = self.transactions.commit_streaming_import(
             project,
             RelativePath::new(relative_path).map_err(|_| AuthoringError::InvalidPayload)?,
             &mut authority.file,
             authority.byte_count,
             &authority.sha256,
-            vec![metadata_mutation],
+            companions,
         );
         committed(outcome)?;
         Ok(metadata)
@@ -678,6 +875,71 @@ impl AuthoringService {
         Ok(metadata)
     }
 
+    pub fn repair_asset_compatibility(
+        &self,
+        project: &ProjectId,
+        project_uuid: &str,
+    ) -> Result<AuthoringMetadata, AuthoringError> {
+        self.ensure_ready(project)?;
+        let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
+        let (source_bytes, source_revision, source_kind) = match self
+            .transactions
+            .snapshot_optional(
+                project,
+                RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+            )
+            .map_err(|_| AuthoringError::SourceConflict)?
+        {
+            Some((bytes, revision)) => (bytes, revision, MutationKind::ReplaceExisting),
+            None => (
+                Vec::new(),
+                Revision::expected_absence(),
+                MutationKind::CreateNew,
+            ),
+        };
+        let mut new_source = source_bytes.clone();
+        ensure_safe_append(&new_source)?;
+        for asset in metadata
+            .assets
+            .iter_mut()
+            .filter(|asset| requires_explicit_declaration(asset))
+        {
+            let statement = asset_declaration(asset)?;
+            if !statement_ranges(&new_source)
+                .any(|(start, end)| &new_source[start..end] == statement.as_bytes())
+            {
+                new_source = append_statement(&new_source, &statement);
+            }
+            asset.extra.insert(
+                "discoveryContract".into(),
+                Value::String("explicitDeclaration".into()),
+            );
+        }
+        if new_source == source_bytes {
+            self.refresh_asset_statuses(project, &mut metadata);
+            return Ok(metadata);
+        }
+        let source_mutation = FileMutation {
+            path: RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+            kind: source_kind,
+            base: source_revision,
+            expected_bytes: source_bytes,
+            proposed: new_source,
+        };
+        committed(self.transactions.commit(
+            project,
+            TransactionProposal {
+                mutations: vec![
+                    source_mutation,
+                    metadata_file_mutation(metadata_snapshot, &metadata)?,
+                ],
+                intent: TransactionIntent::Edit,
+            },
+        ))?;
+        self.refresh_asset_statuses(project, &mut metadata);
+        Ok(metadata)
+    }
+
     fn ensure_ready(&self, project: &ProjectId) -> Result<(), AuthoringError> {
         if self
             .transactions
@@ -688,6 +950,167 @@ impl AuthoringService {
         } else {
             Ok(())
         }
+    }
+
+    fn refresh_verified_source_revisions(
+        &self,
+        project: &ProjectId,
+        metadata: &mut AuthoringMetadata,
+    ) -> Result<(), AuthoringError> {
+        let (characters, character_revision) = self.snapshot(project, CHARACTERS_PATH)?;
+        verify_mapped_statements(
+            &characters,
+            metadata
+                .characters
+                .iter()
+                .map(|item| item.source.statement.as_str()),
+        )?;
+        for character in &mut metadata.characters {
+            character.source.source_revision = character_revision.sha256.clone();
+        }
+
+        let (variables, variable_revision) = self.snapshot(project, VARIABLES_PATH)?;
+        verify_mapped_statements(
+            &variables,
+            metadata
+                .variables
+                .iter()
+                .map(|item| item.source.statement.as_str()),
+        )?;
+        for variable in &mut metadata.variables {
+            variable.source.source_revision = variable_revision.sha256.clone();
+            if variable.variable_type == VariableType::Int {
+                variable.default_value = Value::String(variable_literal(
+                    VariableType::Int,
+                    &variable.default_value,
+                )?);
+            }
+        }
+        Ok(())
+    }
+
+    fn refresh_asset_statuses(&self, project: &ProjectId, metadata: &mut AuthoringMetadata) {
+        let declarations = self
+            .transactions
+            .snapshot_optional(
+                project,
+                RelativePath::new(ASSETS_PATH).expect("constant authoring path"),
+            )
+            .ok()
+            .flatten()
+            .map(|(bytes, _)| bytes)
+            .unwrap_or_default();
+        for asset in &mut metadata.assets {
+            let physical = match RelativePath::new(&asset.relative_path)
+                .map_err(|_| ())
+                .and_then(|path| {
+                    self.transactions
+                        .inspect_file(project, path)
+                        .map_err(|_| ())
+                }) {
+                Ok(None) => "missing",
+                Ok(Some((count, revision)))
+                    if count == asset.byte_count && revision.sha256 == asset.sha256 =>
+                {
+                    "available"
+                }
+                Ok(Some(_)) => "changed",
+                Err(()) => "unsafe",
+            };
+            asset.status = if physical == "available"
+                && requires_explicit_declaration(asset)
+                && asset_declaration(asset).is_ok_and(|statement| {
+                    !statement_ranges(&declarations)
+                        .any(|(start, end)| &declarations[start..end] == statement.as_bytes())
+                }) {
+                "compatibilityRequired".into()
+            } else {
+                physical.into()
+            };
+        }
+    }
+
+    fn declaration_mutation(
+        &self,
+        project: &ProjectId,
+        statement: &str,
+    ) -> Result<FileMutation, AuthoringError> {
+        let snapshot = self
+            .transactions
+            .snapshot_optional(
+                project,
+                RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+            )
+            .map_err(|_| AuthoringError::SourceConflict)?;
+        let (kind, expected_bytes, base) = match snapshot {
+            Some((bytes, revision)) => (MutationKind::ReplaceExisting, bytes, revision),
+            None => (
+                MutationKind::CreateNew,
+                Vec::new(),
+                Revision::expected_absence(),
+            ),
+        };
+        ensure_safe_append(&expected_bytes)?;
+        let symbol = statement
+            .split_once(" = ")
+            .map(|(name, _)| name)
+            .ok_or(AuthoringError::UnsupportedSource)?;
+        if statement_ranges(&expected_bytes).any(|(start, end)| {
+            std::str::from_utf8(&expected_bytes[start..end]).is_ok_and(|line| {
+                line.split_once(" = ").map(|(name, _)| name) == Some(symbol) && line != statement
+            })
+        }) {
+            return Err(AuthoringError::DiscoveryCollision);
+        }
+        let proposed = if statement_ranges(&expected_bytes)
+            .any(|(start, end)| &expected_bytes[start..end] == statement.as_bytes())
+        {
+            expected_bytes.clone()
+        } else {
+            append_statement(&expected_bytes, statement)
+        };
+        Ok(FileMutation {
+            path: RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+            kind,
+            base,
+            expected_bytes,
+            proposed,
+        })
+    }
+
+    fn ensure_physical_name_available(
+        &self,
+        project: &ProjectId,
+        kind: AssetKind,
+        relative_path: &str,
+        discovery_name: &str,
+    ) -> Result<(), AuthoringError> {
+        let directory = if matches!(kind, AssetKind::Background | AssetKind::CharacterAppearance) {
+            "game/images"
+        } else {
+            "game/audio"
+        };
+        let files = self
+            .transactions
+            .inventory_files(project, directory)
+            .map_err(|_| AuthoringError::SourceConflict)?;
+        for existing in files {
+            if existing.eq_ignore_ascii_case(relative_path) {
+                return Err(AuthoringError::PathCollision);
+            }
+            let existing_name = if directory == "game/images" {
+                automatic_image_name(&existing)
+            } else {
+                Path::new(&existing)
+                    .file_stem()
+                    .and_then(OsStr::to_str)
+                    .map(str::to_owned)
+            };
+            if existing_name.as_deref() == Some(discovery_name) {
+                return Err(AuthoringError::DiscoveryCollision);
+            }
+        }
+        Ok(())
     }
 
     fn snapshot(
@@ -722,6 +1145,7 @@ impl AuthoringService {
         Ok(())
     }
 
+    #[allow(clippy::type_complexity)]
     fn load_metadata(
         &self,
         project: &ProjectId,
@@ -735,14 +1159,18 @@ impl AuthoringService {
             )
             .map_err(|_| AuthoringError::Io)?;
         let metadata = match &snapshot {
-            Some((bytes, _)) => serde_json::from_slice::<AuthoringMetadata>(bytes)
-                .map_err(|_| AuthoringError::CorruptMetadata)?,
+            Some((bytes, _)) if bytes.len() <= 1024 * 1024 => {
+                serde_json::from_slice::<AuthoringMetadata>(bytes)
+                    .map_err(|_| AuthoringError::CorruptMetadata)?
+            }
+            Some(_) => return Err(AuthoringError::CorruptMetadata),
             None => AuthoringMetadata::empty(project_uuid.to_owned()),
         };
         metadata.validate(project_uuid)?;
         Ok((metadata, snapshot))
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn commit_source_and_metadata(
         &self,
         project: &ProjectId,
@@ -911,11 +1339,30 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
         (VariableType::Bool, Value::Bool(true)) => Ok("True".into()),
         (VariableType::Bool, Value::Bool(false)) => Ok("False".into()),
         (VariableType::Int, Value::Number(number)) if number.is_i64() => Ok(number.to_string()),
+        (VariableType::Int, Value::String(text)) if valid_i64_decimal(text) => Ok(text.clone()),
         (VariableType::String, Value::String(text)) if text.len() <= 10_000 => {
             serde_json::to_string(text).map_err(|_| AuthoringError::InvalidValue)
         }
         _ => Err(AuthoringError::InvalidValue),
     }
+}
+
+fn valid_i64_decimal(value: &str) -> bool {
+    if value.is_empty()
+        || value.starts_with('+')
+        || (value.starts_with('0') && value.len() > 1)
+        || value.starts_with("-0")
+        || !value
+            .strip_prefix('-')
+            .unwrap_or(value)
+            .bytes()
+            .all(|byte| byte.is_ascii_digit())
+    {
+        return false;
+    }
+    value
+        .parse::<i64>()
+        .is_ok_and(|parsed| parsed.to_string() == value)
 }
 
 fn append_statement(source: &[u8], statement: &str) -> Vec<u8> {
@@ -931,6 +1378,37 @@ fn append_statement(source: &[u8], statement: &str) -> Vec<u8> {
     output.extend_from_slice(statement.as_bytes());
     output.extend_from_slice(newline.as_bytes());
     output
+}
+
+fn ensure_safe_append(source: &[u8]) -> Result<(), AuthoringError> {
+    let text = std::str::from_utf8(source).map_err(|_| AuthoringError::UnsupportedSource)?;
+    if !source.is_empty() && !source.ends_with(b"\n") {
+        return Err(AuthoringError::UnsupportedSource);
+    }
+    if text.lines().last().is_some_and(|line| line.ends_with('\\')) {
+        return Err(AuthoringError::UnsupportedSource);
+    }
+    let mut single = false;
+    let mut double = false;
+    let mut escaped = false;
+    for character in text.chars() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if character == '\\' {
+            escaped = true;
+        } else if character == '\'' && !double {
+            single = !single;
+        } else if character == '"' && !single {
+            double = !double;
+        }
+    }
+    if escaped || single || double {
+        Err(AuthoringError::UnsupportedSource)
+    } else {
+        Ok(())
+    }
 }
 
 fn top_level_symbol(line: &str) -> Option<&str> {
@@ -949,11 +1427,12 @@ fn replace_exact_once(
     expected: &str,
     replacement: &str,
 ) -> Result<Vec<u8>, AuthoringError> {
+    if expected.is_empty() || expected.contains(['\r', '\n']) {
+        return Err(AuthoringError::UnsupportedSource);
+    }
     let expected = expected.as_bytes();
-    let matches = source
-        .windows(expected.len())
-        .enumerate()
-        .filter_map(|(index, value)| (value == expected).then_some(index))
+    let matches = statement_ranges(source)
+        .filter_map(|(start, end)| (&source[start..end] == expected).then_some(start))
         .collect::<Vec<_>>();
     if matches.len() != 1 {
         return Err(AuthoringError::UnsupportedSource);
@@ -967,11 +1446,85 @@ fn replace_exact_once(
     Ok(output)
 }
 
+fn statement_ranges(source: &[u8]) -> impl Iterator<Item = (usize, usize)> + '_ {
+    let mut start = 0;
+    std::iter::from_fn(move || {
+        if start >= source.len() {
+            return None;
+        }
+        let line_start = start;
+        let relative_end = source[line_start..]
+            .iter()
+            .position(|byte| *byte == b'\n')
+            .unwrap_or(source.len() - line_start);
+        let mut line_end = line_start + relative_end;
+        start = if line_end < source.len() {
+            line_end + 1
+        } else {
+            source.len()
+        };
+        if line_end > line_start && source[line_end - 1] == b'\r' {
+            line_end -= 1;
+        }
+        Some((line_start, line_end))
+    })
+}
+
+fn verify_mapped_statements<'a>(
+    source: &[u8],
+    statements: impl Iterator<Item = &'a str>,
+) -> Result<(), AuthoringError> {
+    let ranges = statement_ranges(source).collect::<Vec<_>>();
+    for statement in statements {
+        let count = ranges
+            .iter()
+            .filter(|(start, end)| &source[*start..*end] == statement.as_bytes())
+            .count();
+        if count != 1 {
+            return Err(AuthoringError::SourceConflict);
+        }
+    }
+    Ok(())
+}
+
 fn supported_extension(extension: &str) -> bool {
     matches!(
         extension,
         "png" | "jpg" | "jpeg" | "webp" | "ogg" | "mp3" | "wav" | "flac"
     )
+}
+
+fn automatic_image_name(relative_path: &str) -> Option<String> {
+    let path = relative_path.strip_prefix("game/images/")?;
+    let stem = Path::new(path).file_stem()?.to_str()?;
+    Some(stem.to_owned())
+}
+
+fn requires_explicit_declaration(asset: &Asset) -> bool {
+    match asset.kind {
+        AssetKind::Background | AssetKind::CharacterAppearance => {
+            automatic_image_name(&asset.relative_path).as_deref()
+                != Some(asset.discovery_name.as_str())
+        }
+        AssetKind::Music | AssetKind::Sfx => asset.relative_path.ends_with(".flac"),
+    }
+}
+
+fn asset_declaration(asset: &Asset) -> Result<String, AuthoringError> {
+    let runtime_path = asset
+        .relative_path
+        .strip_prefix("game/")
+        .ok_or(AuthoringError::CorruptMetadata)?;
+    let quoted =
+        serde_json::to_string(runtime_path).map_err(|_| AuthoringError::CorruptMetadata)?;
+    Ok(match asset.kind {
+        AssetKind::Background | AssetKind::CharacterAppearance => {
+            format!("image {} = {quoted}", asset.discovery_name)
+        }
+        AssetKind::Music | AssetKind::Sfx => {
+            format!("define audio.{} = {quoted}", asset.discovery_name)
+        }
+    })
 }
 
 fn import_names(
@@ -991,7 +1544,7 @@ fn import_names(
     }
     match kind {
         AssetKind::Background => Ok((
-            format!("game/images/bg_{technical}.{extension}"),
+            format!("game/images/bg {technical}.{extension}"),
             format!("bg {technical}"),
         )),
         AssetKind::CharacterAppearance => {
@@ -1010,7 +1563,7 @@ fn import_names(
             }
             Ok((
                 format!(
-                    "game/images/{}_{}.{}",
+                    "game/images/{} {}.{}",
                     character.technical_name, expression, extension
                 ),
                 format!("{} {}", character.technical_name, expression),
@@ -1078,6 +1631,22 @@ fn identity_for_selected(file: &File) -> Result<FileIdentity, AuthoringError> {
     }
 }
 
+fn identity_for_metadata(metadata: &fs::Metadata) -> Option<FileIdentity> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        Some(FileIdentity {
+            volume: metadata.dev(),
+            file: metadata.ino(),
+        })
+    }
+    #[cfg(windows)]
+    {
+        let _ = metadata;
+        None
+    }
+}
+
 fn revalidate_selected(authority: &ImportAuthority) -> Result<(), AuthoringError> {
     let current = identity_for_selected(&authority.file)?;
     if current != authority.identity {
@@ -1085,10 +1654,16 @@ fn revalidate_selected(authority: &ImportAuthority) -> Result<(), AuthoringError
     }
     // A same-path replacement cannot redirect import because the retained handle is
     // the byte source. This check only detects it early and avoids misleading UI.
-    if let Ok(path_file) = OpenOptions::new().read(true).open(&authority.path) {
-        if identity_for_selected(&path_file)? != authority.identity {
-            return Err(AuthoringError::UnknownImport);
-        }
+    authority
+        .parent
+        .validate_chain()
+        .map_err(|_| AuthoringError::UnknownImport)?;
+    let path_file = authority
+        .parent
+        .open_file(&authority.name)
+        .map_err(|_| AuthoringError::UnknownImport)?;
+    if identity_for_selected(&path_file)? != authority.identity {
+        return Err(AuthoringError::UnknownImport);
     }
     Ok(())
 }
@@ -1124,6 +1699,35 @@ mod tests {
             variable_literal(VariableType::Int, &Value::from(-42)).unwrap(),
             "-42"
         );
+        for value in [
+            "0",
+            "-1",
+            "9223372036854775807",
+            "-9223372036854775808",
+            "9007199254740993",
+        ] {
+            assert_eq!(
+                variable_literal(VariableType::Int, &Value::String(value.into())).unwrap(),
+                value
+            );
+        }
+        for value in [
+            "",
+            " ",
+            "+1",
+            "01",
+            "-0",
+            "1.0",
+            "1e3",
+            "0x10",
+            "9223372036854775808",
+            "-9223372036854775809",
+        ] {
+            assert!(
+                variable_literal(VariableType::Int, &Value::String(value.into())).is_err(),
+                "{value}"
+            );
+        }
         assert_eq!(
             variable_literal(
                 VariableType::String,
@@ -1152,6 +1756,30 @@ mod tests {
             append_statement(b"# comment\r\n", "default flag = True"),
             b"# comment\r\ndefault flag = True\r\n"
         );
+        assert!(matches!(
+            replace_exact_once(
+                b"default score = 10\n",
+                "default score = 1",
+                "default score = 5"
+            ),
+            Err(AuthoringError::UnsupportedSource)
+        ));
+        assert!(matches!(
+            ensure_safe_append(b"default text = \"unterminated\n"),
+            Err(AuthoringError::UnsupportedSource)
+        ));
+        assert!(matches!(
+            ensure_safe_append(b"default value = (1 + \\\n"),
+            Err(AuthoringError::UnsupportedSource)
+        ));
+        assert!(matches!(
+            replace_exact_once(
+                b"# default score = 1\n",
+                "default score = 1",
+                "default score = 5"
+            ),
+            Err(AuthoringError::UnsupportedSource)
+        ));
     }
 
     #[test]
@@ -1159,7 +1787,7 @@ mod tests {
         let metadata = AuthoringMetadata::empty(uuid::Uuid::new_v4().to_string());
         assert_eq!(
             import_names(&metadata, AssetKind::Background, "cafe", None, None, "png").unwrap(),
-            ("game/images/bg_cafe.png".into(), "bg cafe".into())
+            ("game/images/bg cafe.png".into(), "bg cafe".into())
         );
         assert_eq!(
             import_names(&metadata, AssetKind::Music, "theme", None, None, "ogg").unwrap(),
@@ -1187,7 +1815,7 @@ mod tests {
         let authority = service.register_project(&root).unwrap();
         let selected_path = root.join("selected.png");
         fs::write(&selected_path, b"approved bytes").unwrap();
-        let selected = service.select_import(&selected_path).unwrap();
+        let selected = service.select_import(&authority, &selected_path).unwrap();
         fs::rename(&selected_path, root.join("moved-approved.png")).unwrap();
         fs::write(&selected_path, b"replacement bytes").unwrap();
         assert!(matches!(
@@ -1205,7 +1833,7 @@ mod tests {
             ),
             Err(AuthoringError::UnknownImport)
         ));
-        assert!(!root.join("game/images/bg_cafe.png").exists());
+        assert!(!root.join("game/images/bg cafe.png").exists());
     }
 
     #[test]
@@ -1216,8 +1844,9 @@ mod tests {
         file.set_len(MAX_IMPORT_BYTES + 1).unwrap();
         drop(file);
         let mut service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
         assert!(matches!(
-            service.select_import(&selected_path),
+            service.select_import(&authority, &selected_path),
             Err(AuthoringError::OversizeImport)
         ));
     }
@@ -1317,6 +1946,98 @@ mod tests {
     }
 
     #[test]
+    fn empty_metadata_statement_is_controlled_corruption_not_a_panic() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let model = service
+            .create_variable(
+                &authority,
+                &project_uuid,
+                CreateVariableRequest {
+                    technical_name: "score".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::String("1".into()),
+                },
+            )
+            .unwrap();
+        let mut corrupt = model;
+        corrupt.variables[0].source.statement.clear();
+        fs::write(
+            root.join(AUTHORING_PATH),
+            serde_json::to_vec_pretty(&corrupt).unwrap(),
+        )
+        .unwrap();
+        assert!(matches!(
+            service.list(&authority, &project_uuid),
+            Err(AuthoringError::CorruptMetadata)
+        ));
+        assert_eq!(
+            fs::read_to_string(root.join(VARIABLES_PATH)).unwrap(),
+            "# Variables\r\ndefault score = 1\r\n"
+        );
+    }
+
+    #[test]
+    fn external_numeric_prefix_change_cannot_be_refreshed_or_rewritten() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let model = service
+            .create_variable(
+                &authority,
+                &project_uuid,
+                CreateVariableRequest {
+                    technical_name: "score".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::from(1),
+                },
+            )
+            .unwrap();
+        let variable_id = model.variables[0].id.clone();
+        fs::write(
+            root.join(VARIABLES_PATH),
+            b"# Variables\r\ndefault score = 10\r\n",
+        )
+        .unwrap();
+
+        assert!(matches!(
+            service.create_variable(
+                &authority,
+                &project_uuid,
+                CreateVariableRequest {
+                    technical_name: "other".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::from(2),
+                },
+            ),
+            Err(AuthoringError::SourceConflict)
+        ));
+        assert!(matches!(
+            service.update_variable(
+                &authority,
+                &project_uuid,
+                UpdateVariableRequest {
+                    id: variable_id,
+                    expected_source_revision: hash_bytes(
+                        &fs::read(root.join(VARIABLES_PATH)).unwrap()
+                    ),
+                    default_value: Value::from(5),
+                },
+            ),
+            Err(AuthoringError::SourceConflict)
+        ));
+        assert_eq!(
+            fs::read(root.join(VARIABLES_PATH)).unwrap(),
+            b"# Variables\r\ndefault score = 10\r\n"
+        );
+        assert!(matches!(
+            service.list(&authority, &project_uuid),
+            Err(AuthoringError::SourceConflict)
+        ));
+    }
+
+    #[test]
     fn unknown_metadata_fields_and_entity_ids_survive_supported_edits() {
         let (_temporary, root, project_uuid) = project_fixture();
         let mut metadata = AuthoringMetadata::empty(project_uuid.clone());
@@ -1374,7 +2095,7 @@ mod tests {
             .unwrap();
         let selected_path = root.join("selected.png");
         fs::write(&selected_path, b"synthetic raster fixture").unwrap();
-        let selected = service.select_import(&selected_path).unwrap();
+        let selected = service.select_import(&authority, &selected_path).unwrap();
         let imported = service
             .import_asset(
                 &authority,
@@ -1396,7 +2117,7 @@ mod tests {
             Some(appearance_id.as_str())
         );
         assert_eq!(
-            fs::read(root.join("game/images/alice_happy.png")).unwrap(),
+            fs::read(root.join("game/images/alice happy.png")).unwrap(),
             b"synthetic raster fixture"
         );
         drop(service);
@@ -1407,5 +2128,134 @@ mod tests {
         assert_eq!(model.assets[0].id, asset_id);
         assert_eq!(model.appearances[0].id, appearance_id);
         assert_eq!(model.appearances[0].asset_id, asset_id);
+    }
+
+    #[test]
+    fn physical_asset_status_and_explicit_legacy_name_repair_are_truthful() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let mut service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let selected_path = root.join("selected.png");
+        fs::write(&selected_path, b"background bytes").unwrap();
+        let selected = service.select_import(&authority, &selected_path).unwrap();
+        let imported = service
+            .import_asset(
+                &authority,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "cafe".into(),
+                    display_name: "Cafe".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        let asset_id = imported.assets[0].id.clone();
+        fs::rename(
+            root.join("game/images/bg cafe.png"),
+            root.join("game/images/bg_cafe.png"),
+        )
+        .unwrap();
+        let mut legacy: AuthoringMetadata =
+            serde_json::from_slice(&fs::read(root.join(AUTHORING_PATH)).unwrap()).unwrap();
+        legacy.assets[0].relative_path = "game/images/bg_cafe.png".into();
+        fs::write(
+            root.join(AUTHORING_PATH),
+            serde_json::to_vec_pretty(&legacy).unwrap(),
+        )
+        .unwrap();
+        drop(service);
+
+        let service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let before = service.list(&authority, &project_uuid).unwrap();
+        assert_eq!(before.assets[0].id, asset_id);
+        assert_eq!(before.assets[0].status, "compatibilityRequired");
+        let repaired = service
+            .repair_asset_compatibility(&authority, &project_uuid)
+            .unwrap();
+        assert_eq!(repaired.assets[0].id, asset_id);
+        assert_eq!(repaired.assets[0].status, "available");
+        assert_eq!(
+            fs::read_to_string(root.join(ASSETS_PATH)).unwrap(),
+            "image bg cafe = \"images/bg_cafe.png\"\n"
+        );
+
+        fs::write(root.join("game/images/bg_cafe.png"), b"changed").unwrap();
+        assert_eq!(
+            service.list(&authority, &project_uuid).unwrap().assets[0].status,
+            "changed"
+        );
+        fs::remove_file(root.join("game/images/bg_cafe.png")).unwrap();
+        assert_eq!(
+            service.list(&authority, &project_uuid).unwrap().assets[0].status,
+            "missing"
+        );
+    }
+
+    #[test]
+    fn untracked_physical_asset_blocks_path_and_discovery_collisions() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        fs::write(root.join("game/images/bg cafe.webp"), b"external").unwrap();
+        let selected_path = root.join("selected.png");
+        fs::write(&selected_path, b"selected").unwrap();
+        let mut service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let selected = service.select_import(&authority, &selected_path).unwrap();
+        assert!(matches!(
+            service.import_asset(
+                &authority,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "cafe".into(),
+                    display_name: "Cafe".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            ),
+            Err(AuthoringError::DiscoveryCollision)
+        ));
+        assert_eq!(
+            fs::read(root.join("game/images/bg cafe.webp")).unwrap(),
+            b"external"
+        );
+        assert!(!root.join("game/images/bg cafe.png").exists());
+    }
+
+    #[test]
+    fn flac_import_adds_an_explicit_audio_namespace_definition() {
+        let (_temporary, root, project_uuid) = project_fixture();
+        let selected_path = root.join("theme.flac");
+        fs::write(&selected_path, b"synthetic flac fixture").unwrap();
+        let mut service = AuthoringService::default();
+        let authority = service.register_project(&root).unwrap();
+        let selected = service.select_import(&authority, &selected_path).unwrap();
+        let model = service
+            .import_asset(
+                &authority,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Music,
+                    technical_name: "theme".into(),
+                    display_name: "Theme".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(model.assets[0].status, "available");
+        assert_eq!(
+            fs::read_to_string(root.join(ASSETS_PATH)).unwrap(),
+            "define audio.music_theme = \"audio/music_theme.flac\"\n"
+        );
+        assert_eq!(
+            fs::read(root.join("game/audio/music_theme.flac")).unwrap(),
+            b"synthetic flac fixture"
+        );
     }
 }
