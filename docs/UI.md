@@ -525,8 +525,11 @@ structured data reviewed through semantic/file diffs.
 
 The Phase 1D shell obtains persistence truth from a read-only current-session status
 request; rendering a view never implies Saved. `Ctrl/Cmd+S` invokes the separate
-current-session flush operation. Conflict, recovery-required, validation, and stale-
-session failures remain visible, while late navigation results are ignored.
+current-session flush operation. Unsubmitted form input is explicitly distinguished
+from accepted durable changes, so Flush cannot claim that pending controls were saved.
+Conflict, recovery-required, validation, and stale-session failures remain visible.
+View/operation/session generations reject late success, error, cancellation, mutation,
+open, close, and navigation completions.
 
 Create/edit boolean input is explicit and integer text is validated losslessly before
 IPC rather than coerced through JavaScript `Number`. Character, appearance, and

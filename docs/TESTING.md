@@ -317,9 +317,14 @@ the dependency inventory. No duplicate matrix is introduced.
 The integrated corrective suite additionally covers direct ordinary-write recovery
 blocking, zero historical-media reads during terminal readiness scans, streaming
 subprocess termination boundaries, failed-switch preservation, root/session
-substitution, stale/reopened sessions, exact statement matching after external edits,
-semantic metadata corruption, signed-64 decimal boundaries, physical asset status and
-collision, legacy compatibility declarations, and FLAC explicit mapping. The target
+substitution, stale/reopened sessions, lexical/context-aware exact statement matching,
+semantic metadata corruption/loss, signed-64 serializer and IPC boundaries, physical
+asset status and pinned-discovery collisions, idempotent compatibility declarations,
+automatic FLAC discovery, more than 4096 retained terminal journals followed by a real
+write, and later corrupt-record refusal. A behavioral DOM harness reorders bridge
+responses and exercises supporting edits, cancellation, exact values, Flush, focus,
+and unsubmitted-input truth; the packaged target probe repeats the supporting workflow
+inside the real WebView. The target
 gate must exercise actual imported assets in the pinned SDK with metadata removed from
 a disposable copy. Core-only Linux results do not replace Windows reparse/macOS
 descriptor, desktop package, or real WebView handler/DOM evidence.

@@ -234,9 +234,13 @@ Phase 1 recovery path.
 `authoring.json` schema version 1 stores stable Character, Appearance, Asset, and
 Variable UUIDs and relationships. It is editor-only and never competes with runnable
 source. `characters.rpy` and `variables.rpy` remain authoritative and are edited by a
-narrow exact-statement mapper. Canonical definitions are inserted or patched only
-against an expected file revision; unrelated/unsupported bytes remain untouched. The
-general parser and Source workspace remain Phase 1F.
+narrow lexical/context-aware exact-statement mapper. A supported definition must be a
+complete unique top-level executable statement, not matching text in a comment,
+multiline string, continuation, or indented opaque block. Canonical definitions are
+inserted or patched only after every relevant mapping and the expected file revision
+are verified; unrelated/unsupported bytes, Unicode, formatting, and line endings remain
+untouched. This recognizer is intentionally not the general parser or Phase 1F Source
+workspace.
 
 Project creation itself is staged: validate destination safety, generate the scaffold
 and metadata in a private staging location, optionally initialise local Git, validate
@@ -311,3 +315,7 @@ require the exact current session while lifecycle dispatch is serialized. A cand
 retains the directory authority acquired during inspection and is recovery-checked
 before replacing the current session; failed activation leaves the prior project
 active. Renderer navigation generations discard late results from replaced sessions.
+Every asynchronous UI completion also carries its originating view, operation, and
+session generation. Late success, failure, cancellation, close/open, status, and
+mutation callbacks therefore cannot restore an obsolete project or overwrite newer
+persistence feedback.

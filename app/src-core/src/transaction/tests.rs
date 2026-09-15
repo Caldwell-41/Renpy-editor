@@ -1067,6 +1067,95 @@ fn terminal_rejected_journal_does_not_block_flush_or_later_commit() {
     );
 }
 
+fn create_terminal_journals(root: &Path, count: usize) {
+    let anchor = DirectoryAnchor::open_root(root).unwrap();
+    for index in 0..count {
+        let txid = format!("tx-terminal-{index}");
+        let store = JournalStore::create(&anchor, &txid).unwrap();
+        let mut journal =
+            Journal::new(txid, TransactionIntent::Edit, PlatformCapability::current());
+        store.persist(&mut journal, JournalState::Durable).unwrap();
+    }
+}
+
+#[test]
+fn more_than_4096_terminal_records_remain_complete_and_do_not_cap_writes() {
+    let fixture = Fixture::new();
+    create_terminal_journals(&fixture.root, 4097);
+    let report = fixture.service.recover(&fixture.project);
+    assert_eq!(report.items.len(), 4097);
+    assert!(report
+        .items
+        .iter()
+        .all(|item| item.state == JournalState::Durable));
+    let mutation = fixture.mutation("game/one.rpy", b"accepted after long history\n");
+    let outcome = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![mutation]));
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"accepted after long history\n"
+    );
+}
+
+#[test]
+fn corrupt_record_beyond_the_former_history_boundary_blocks_real_writes() {
+    let fixture = Fixture::new();
+    create_terminal_journals(&fixture.root, 4097);
+    fs::create_dir_all(
+        fixture
+            .root
+            .join(".renpy-editor/recovery/tx-unresolved-after-terminal-history"),
+    )
+    .unwrap();
+    let mutation = fixture.mutation("game/one.rpy", b"must remain blocked\n");
+    let outcome = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![mutation]));
+    assert_eq!(outcome_code(&outcome), Some(ErrorCode::RecoveryRequired));
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+    assert!(matches!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::RecoveryRequired { .. }
+    ));
+}
+
+#[test]
+fn revision_hashing_rejects_oversized_and_growing_inputs_with_bounded_work() {
+    use std::io::{Cursor, Read};
+
+    let mut oversized = Cursor::new(vec![0_u8; 9]);
+    assert_eq!(
+        hash_revision_reader(&mut oversized, 9, 8),
+        Err(ErrorCode::InvalidProposal)
+    );
+
+    struct GrowingReader {
+        emitted: usize,
+    }
+    impl Read for GrowingReader {
+        fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
+            if self.emitted >= 6 {
+                return Ok(0);
+            }
+            let count = (6 - self.emitted).min(buffer.len()).min(2);
+            buffer[..count].fill(b'x');
+            self.emitted += count;
+            Ok(count)
+        }
+    }
+    let _ = take_revision_bytes_read();
+    assert_eq!(
+        hash_revision_reader(&mut GrowingReader { emitted: 0 }, 4, 8),
+        Err(ErrorCode::InvalidProposal)
+    );
+    assert!(take_revision_bytes_read() <= 6);
+}
+
 #[test]
 #[ignore = "subprocess worker invoked by the crash-boundary test"]
 fn crash_worker() {

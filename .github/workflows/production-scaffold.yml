@@ -104,6 +104,9 @@ jobs:
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-stage-races: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-exact-ipc-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-import-authority-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-corrective-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Exercise SDK download handoff and verified managed reuse
         shell: bash
         env:
@@ -169,6 +172,7 @@ jobs:
           grep '"navigationDenied":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"supportingAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
             echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2

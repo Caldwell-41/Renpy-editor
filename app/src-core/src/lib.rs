@@ -190,6 +190,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "nodeGlobalsDenied",
         "popupRequestIssued",
         "rendererSecretsAbsent",
+        "supportingAuthoringUiPassed",
         "welcomeLifecycleVisible",
         "newProjectWizardVisible",
         "unknownCommandDenied",
@@ -554,6 +555,10 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
             "INVALID_AUTHORING_METADATA",
             "The authoring metadata is invalid or unsupported.",
         ),
+        MissingAuthoringMetadata => (
+            "MISSING_AUTHORING_METADATA",
+            "Authored project identity metadata is missing; source was left unchanged.",
+        ),
         Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
@@ -679,6 +684,7 @@ mod tests {
             "nodeGlobalsDenied": true,
             "popupRequestIssued": true,
             "rendererSecretsAbsent": true,
+            "supportingAuthoringUiPassed": true,
             "welcomeLifecycleVisible": true,
             "newProjectWizardVisible": true,
             "unknownCommandDenied": true,

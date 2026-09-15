@@ -302,7 +302,20 @@ impl TransactionService {
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
-        Ok(has_blocking_items(&scan_recovery(&approved)))
+        Ok(blocking_recovery_code(&approved).is_some())
+    }
+
+    pub(crate) fn recovery_blocker(
+        &self,
+        project: &ProjectId,
+    ) -> Result<Option<ErrorCode>, PublicDiagnostic> {
+        let _serial = self
+            .serial
+            .lock()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        Ok(blocking_recovery_code(&approved))
     }
 
     /// Core-only import path. The selected file handle is retained by the trusted
@@ -371,7 +384,7 @@ impl TransactionService {
         {
             return rejected(ErrorCode::InvalidProposal);
         }
-        if has_blocking_items(&scan_recovery(&approved)) {
+        if blocking_recovery_code(&approved).is_some() {
             return rejected(ErrorCode::RecoveryRequired);
         }
 
@@ -817,7 +830,7 @@ impl TransactionService {
         }) {
             return rejected(ErrorCode::InvalidProposal);
         }
-        if has_blocking_items(&scan_recovery(&approved)) {
+        if blocking_recovery_code(&approved).is_some() {
             return rejected(ErrorCode::RecoveryRequired);
         }
         let txid = new_id("tx");
@@ -1184,15 +1197,8 @@ impl TransactionService {
             Ok(value) => value,
             Err(error) => return FlushOutcome::Rejected { diagnostic: error },
         };
-        let report = scan_recovery(&approved);
-        if let Some(item) = report.items.iter().find(|item| {
-            !matches!(
-                item.state,
-                JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
-            )
-        }) {
-            let code = item.code.unwrap_or(ErrorCode::RecoveryRequired);
-            let diagnostic = PublicDiagnostic::new(code, Some(item.transaction_id.clone()));
+        if let Some(code) = blocking_recovery_code(&approved) {
+            let diagnostic = PublicDiagnostic::new(code, None);
             return if code == ErrorCode::Conflict {
                 FlushOutcome::Conflict { diagnostic }
             } else {
@@ -1247,22 +1253,54 @@ impl crate::ports::SourceTransactionPort for TransactionService {
 }
 
 pub(super) fn read_revision_file(mut file: File) -> Result<Revision, ErrorCode> {
-    let identity = identity_for_file(&file).map_err(|_| ErrorCode::IoFailure)?;
+    read_revision_file_bounded(&mut file, MAX_IMPORT_BYTES)
+}
+
+fn read_revision_file_bounded(file: &mut File, maximum: u64) -> Result<Revision, ErrorCode> {
+    let identity = identity_for_file(file).map_err(|_| ErrorCode::IoFailure)?;
+    let expected_len = file.metadata().map_err(|_| ErrorCode::IoFailure)?.len();
+    if expected_len > maximum {
+        return Err(ErrorCode::InvalidProposal);
+    }
+    let (count, sha256) = hash_revision_reader(file, expected_len, maximum)?;
+    let final_metadata = file.metadata().map_err(|_| ErrorCode::IoFailure)?;
+    let final_identity = identity_for_file(file).map_err(|_| ErrorCode::IoFailure)?;
+    if count != expected_len || final_metadata.len() != expected_len || final_identity != identity {
+        return Err(ErrorCode::InvalidProposal);
+    }
+    Ok(Revision { sha256, identity })
+}
+
+fn hash_revision_reader(
+    reader: &mut impl Read,
+    expected_len: u64,
+    maximum: u64,
+) -> Result<(u64, String), ErrorCode> {
+    if expected_len > maximum {
+        return Err(ErrorCode::InvalidProposal);
+    }
     let mut digest = Sha256::new();
     let mut buffer = [0_u8; 1024 * 1024];
+    let mut count = 0_u64;
     loop {
-        let read = file.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
+        let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
         if read == 0 {
             break;
+        }
+        count = count
+            .checked_add(read as u64)
+            .ok_or(ErrorCode::InvalidProposal)?;
+        if count > maximum || count > expected_len {
+            return Err(ErrorCode::InvalidProposal);
         }
         digest.update(&buffer[..read]);
         #[cfg(test)]
         REVISION_BYTES_READ.set(REVISION_BYTES_READ.get().saturating_add(read as u64));
     }
-    Ok(Revision {
-        sha256: hex::encode(digest.finalize()),
-        identity,
-    })
+    if count != expected_len {
+        return Err(ErrorCode::InvalidProposal);
+    }
+    Ok((count, hex::encode(digest.finalize())))
 }
 
 #[cfg(test)]
@@ -1290,6 +1328,10 @@ fn scan_recovery(approved: &ApprovedProject) -> RecoveryReport {
     JournalStore::scan(&approved.anchor).unwrap_or_else(recovery_scan_failure)
 }
 
+fn blocking_recovery_code(approved: &ApprovedProject) -> Option<ErrorCode> {
+    JournalStore::blocking_code(&approved.anchor).unwrap_or(Some(ErrorCode::RecoveryRequired))
+}
+
 fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {
     RecoveryReport {
         items: vec![RecoveryItem {
@@ -1299,15 +1341,6 @@ fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {
             mutations: Vec::new(),
         }],
     }
-}
-
-fn has_blocking_items(report: &RecoveryReport) -> bool {
-    report.items.iter().any(|item| {
-        !matches!(
-            item.state,
-            JournalState::Durable | JournalState::Rejected { .. } | JournalState::Cleaned
-        )
-    })
 }
 
 fn inventory_directory(

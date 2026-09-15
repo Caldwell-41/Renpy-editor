@@ -252,9 +252,16 @@ receive detailed bounded inspection and fail closed.
 
 Revision verification and recovery hashing read incrementally with a 1 MiB buffer.
 Small mutation snapshots remain capped at 16 MiB, journals at 1 MiB, and recovery
-mutation count at 4096. The 512 MiB media maximum is enforced while streaming.
+mutation count per journal at 4096. There is no 4096-journal lifetime cap: write
+readiness completely enumerates retained history with constant working memory, validates
+each terminal journal's schema/checksum without rehashing historical media, and still
+finds later corrupt or unresolved entries. An explicit recovery report remains
+output-proportional so it can describe every retained record. The 512 MiB media and
+revision-read maximum is enforced incrementally, including growing-input detection.
 
 Native selections retain an anchored parent directory and open the regular file
-descriptor-relative with no-follow/reparse-safe semantics. The retained selected
-handle supplies every imported byte; later path inspection detects replacement but
-cannot redirect the copy.
+descriptor-relative with no-follow/reparse-safe semantics before deriving size,
+identity, or hash. The retained selected handle supplies every imported byte; parent,
+pathname identity, count, and hash are revalidated, so ancestor substitution,
+same-path replacement, or same-file mutation cannot redirect or silently change the
+copy.

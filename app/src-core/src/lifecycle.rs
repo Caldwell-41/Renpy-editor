@@ -1744,6 +1744,19 @@ mod tests {
         }
         metadata.write(root).unwrap();
         source_map.write(root).unwrap();
+        fs::write(
+            root.join(".renpy-editor/authoring.json"),
+            serde_json::to_vec_pretty(&serde_json::json!({
+                "schemaVersion": 1,
+                "projectId": metadata.project_id,
+                "characters": [],
+                "appearances": [],
+                "variables": [],
+                "assets": []
+            }))
+            .unwrap(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -2822,6 +2835,79 @@ mod tests {
             })
             .unwrap();
 
+        let ipc_list = crate::handle_application_request(
+            serde_json::json!({
+                "protocolVersion": 1,
+                "requestId": "phase-1d-exact-ipc",
+                "operation": "authoring.list",
+                "payload": { "sessionId": project.session_id }
+            }),
+            false,
+            &mut service,
+        );
+        let ipc_json = serde_json::to_value(ipc_list).unwrap();
+        let ipc_score = ipc_json["value"]["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|variable| variable["technicalName"] == "score")
+            .unwrap();
+        assert_eq!(ipc_score["defaultValue"], "-2");
+        let ipc_create = crate::handle_application_request(
+            serde_json::json!({
+                "protocolVersion": 1,
+                "requestId": "phase-1d-i64-create",
+                "operation": "variable.create",
+                "payload": {
+                    "sessionId": project.session_id,
+                    "technicalName": "ipc_boundary",
+                    "variableType": "int",
+                    "defaultValue": "9223372036854775807"
+                }
+            }),
+            false,
+            &mut service,
+        );
+        let ipc_create_json = serde_json::to_value(ipc_create).unwrap();
+        assert_eq!(ipc_create_json["ok"], true);
+        let ipc_boundary = ipc_create_json["value"]["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|variable| variable["technicalName"] == "ipc_boundary")
+            .unwrap();
+        assert_eq!(ipc_boundary["defaultValue"], "9223372036854775807");
+        let boundary_id = ipc_boundary["id"].as_str().unwrap().to_owned();
+        let boundary_revision = ipc_boundary["source"]["sourceRevision"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let ipc_update = crate::handle_application_request(
+            serde_json::json!({
+                "protocolVersion": 1,
+                "requestId": "phase-1d-i64-update",
+                "operation": "variable.update",
+                "payload": {
+                    "sessionId": project.session_id,
+                    "id": boundary_id,
+                    "expectedSourceRevision": boundary_revision,
+                    "defaultValue": "-9223372036854775808"
+                }
+            }),
+            false,
+            &mut service,
+        );
+        let ipc_update_json = serde_json::to_value(ipc_update).unwrap();
+        assert_eq!(ipc_update_json["ok"], true);
+        let ipc_boundary = ipc_update_json["value"]["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|variable| variable["technicalName"] == "ipc_boundary")
+            .unwrap();
+        assert_eq!(ipc_boundary["defaultValue"], "-9223372036854775808");
+        println!("phase-1d-exact-ipc-gate: passed");
+
         let media = temp.path().join("synthetic-media");
         fs::create_dir(&media).unwrap();
         // Repository-independent 1x1 PNG and tiny PCM WAV fixtures generated only for
@@ -2833,6 +2919,25 @@ mod tests {
             96, 130,
         ];
         let mut wav = b"RIFF\x26\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x80\x3e\x00\x00\x02\x00\x10\x00data\x02\x00\x00\x00\x00\x00".to_vec();
+        let changed_selection = media.join("changed-after-selection.png");
+        fs::write(&changed_selection, png).unwrap();
+        let selected = service.authoring_select_import(&changed_selection).unwrap();
+        let mut changed = png.to_vec();
+        let changed_last = changed.len() - 1;
+        changed[changed_last] ^= 1;
+        fs::write(&changed_selection, changed).unwrap();
+        assert!(service
+            .authoring_import_asset(ImportAssetRequest {
+                authority_id: selected.authority_id,
+                kind: crate::authoring::AssetKind::Background,
+                technical_name: "race_probe".into(),
+                display_name: "Race probe".into(),
+                character_id: None,
+                expression: None,
+            })
+            .is_err());
+        assert!(!final_root.join("game/images/bg race_probe.png").exists());
+        println!("phase-1d-import-authority-gate: passed");
         let mut import_media = |filename: &str,
                                 bytes: &[u8],
                                 kind: crate::authoring::AssetKind,
@@ -3022,5 +3127,6 @@ mod tests {
         ));
         println!("phase-1c-target-gate: passed");
         println!("phase-1d-target-gate: passed");
+        println!("phase-1d-corrective-target-gate: passed");
     }
 }

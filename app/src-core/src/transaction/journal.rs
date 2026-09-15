@@ -17,7 +17,6 @@ use std::{
 
 const JOURNAL_VERSION: u32 = 2;
 const MAX_JOURNAL_BYTES: u64 = 1024 * 1024;
-const MAX_RECOVERY_ENTRIES: usize = 4096;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "name")]
@@ -245,10 +244,7 @@ impl JournalStore {
             Err(code) => return Err(code),
         };
         let mut items = Vec::new();
-        for entry_name in recovery_entry_names(&recovery)? {
-            if items.len() >= MAX_RECOVERY_ENTRIES {
-                return Err(ErrorCode::RecoveryRequired);
-            }
+        for_each_recovery_entry(&recovery, |entry_name| {
             let txid = entry_name.to_string_lossy().into_owned();
             let directory = match recovery.open_child(&entry_name, false) {
                 Ok(value) => value,
@@ -259,7 +255,7 @@ impl JournalStore {
                         state: JournalState::RecoveryRequired,
                         mutations: Vec::new(),
                     });
-                    continue;
+                    return Ok(());
                 }
             };
             let store = Self { directory };
@@ -295,14 +291,58 @@ impl JournalStore {
                     mutations: Vec::new(),
                 }),
             }
-        }
+            Ok(())
+        })?;
         items.sort_by(|a, b| a.transaction_id.cmp(&b.transaction_id));
         Ok(RecoveryReport { items })
+    }
+
+    /// Completely enumerates retained history using constant working memory and
+    /// reports whether any record blocks a write. Terminal journals are checksum and
+    /// schema validated, but their historical payloads are never rehashed here.
+    pub fn blocking_code(root: &DirectoryAnchor) -> Result<Option<ErrorCode>, ErrorCode> {
+        let metadata = match root.open_child(OsStr::new(".renpy-editor"), false) {
+            Ok(value) => value,
+            Err(_) if root.entry_absent(OsStr::new(".renpy-editor")) == Ok(true) => {
+                return Ok(None)
+            }
+            Err(code) => return Err(code),
+        };
+        let recovery = match metadata.open_child(OsStr::new("recovery"), false) {
+            Ok(value) => value,
+            Err(_) if metadata.entry_absent(OsStr::new("recovery")) == Ok(true) => return Ok(None),
+            Err(code) => return Err(code),
+        };
+        let mut blocker = None;
+        for_each_recovery_entry(&recovery, |entry_name| {
+            let code = recovery
+                .open_child(&entry_name, false)
+                .ok()
+                .and_then(|directory| Self { directory }.load().ok())
+                .map(|journal| match journal.state {
+                    JournalState::Durable
+                    | JournalState::Rejected { .. }
+                    | JournalState::Cleaned => None,
+                    JournalState::Conflict { .. } => Some(ErrorCode::Conflict),
+                    _ => Some(ErrorCode::RecoveryRequired),
+                })
+                .unwrap_or(Some(ErrorCode::RecoveryRequired));
+            if let Some(code) = code {
+                if code == ErrorCode::RecoveryRequired || blocker.is_none() {
+                    blocker = Some(code);
+                }
+            }
+            Ok(())
+        })?;
+        Ok(blocker)
     }
 }
 
 #[cfg(unix)]
-fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, ErrorCode> {
+fn for_each_recovery_entry(
+    recovery: &DirectoryAnchor,
+    mut visit: impl FnMut(OsString) -> Result<(), ErrorCode>,
+) -> Result<(), ErrorCode> {
     use std::{
         ffi::{CStr, CString},
         os::{
@@ -339,7 +379,7 @@ fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, Err
         return Err(ErrorCode::RecoveryRequired);
     }
 
-    let mut names = Vec::new();
+    let mut visit_error = None;
     loop {
         clear_errno();
         let entry = unsafe { libc::readdir(directory) };
@@ -352,7 +392,10 @@ fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, Err
         }
         let bytes = unsafe { CStr::from_ptr((*entry).d_name.as_ptr()) }.to_bytes();
         if bytes != b"." && bytes != b".." {
-            names.push(OsString::from_vec(bytes.to_vec()));
+            if let Err(code) = visit(OsString::from_vec(bytes.to_vec())) {
+                visit_error = Some(code);
+                break;
+            }
         }
     }
     if unsafe { libc::closedir(directory) } != 0 {
@@ -360,7 +403,7 @@ fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, Err
     }
 
     recovery.validate_chain()?;
-    Ok(names)
+    visit_error.map_or(Ok(()), Err)
 }
 
 #[cfg(target_os = "macos")]
@@ -384,18 +427,16 @@ fn current_errno() -> i32 {
 }
 
 #[cfg(windows)]
-fn recovery_entry_names(recovery: &DirectoryAnchor) -> Result<Vec<OsString>, ErrorCode> {
+fn for_each_recovery_entry(
+    recovery: &DirectoryAnchor,
+    mut visit: impl FnMut(OsString) -> Result<(), ErrorCode>,
+) -> Result<(), ErrorCode> {
     recovery.validate_chain()?;
-    let names = fs::read_dir(recovery.path())
-        .map_err(|_| ErrorCode::RecoveryRequired)?
-        .map(|entry| {
-            entry
-                .map(|entry| entry.file_name())
-                .map_err(|_| ErrorCode::RecoveryRequired)
-        })
-        .collect::<Result<Vec<_>, _>>()?;
+    for entry in fs::read_dir(recovery.path()).map_err(|_| ErrorCode::RecoveryRequired)? {
+        visit(entry.map_err(|_| ErrorCode::RecoveryRequired)?.file_name())?;
+    }
     recovery.validate_chain()?;
-    Ok(names)
+    Ok(())
 }
 
 fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
@@ -545,7 +586,7 @@ mod tests {
         fs::create_dir(recovery.path()).unwrap();
 
         assert_eq!(
-            recovery_entry_names(&recovery),
+            for_each_recovery_entry(&recovery, |_| Ok(())),
             Err(ErrorCode::ParentIdentityChanged)
         );
         assert!(moved.join("tx-visible-unresolved").is_dir());

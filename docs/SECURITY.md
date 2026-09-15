@@ -180,6 +180,12 @@ diagnostic record.
   34804861387 passed the latest hostile-boundary suite on actual Windows x64 and macOS
   ARM64, re-closing Gate E after the recovery-enumeration follow-up. See
   [TRANSACTIONS.md](TRANSACTIONS.md).
+- **Complete in the corrective implementation; final target gate pending:** Native
+  import selection opens a retained no-follow/reparse-safe file handle before
+  inspecting content. All size, identity, hash, and copied bytes derive from that
+  handle; retained parent/path identity and the final streamed count/hash are checked
+  again before acceptance. Path, ancestor, symlink/reparse, and same-file content races
+  fail closed without renderer path or byte authority.
 - **Complete:** Native credential prototypes do not create a renderer or leak into
   logs, source, projects, packages, or retained evidence inputs.
 - **Complete:** This threat model reflects the selected Tauri capability boundary and

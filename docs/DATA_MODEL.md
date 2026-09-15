@@ -107,6 +107,12 @@ source statement/revision mapping. Runnable source is conventional:
 define alice = Character("Alice", color="#aabbcc")
 ```
 
+The full document is schema-, size-, relationship-, identifier-, path-, discovery-,
+hash-, and source-map-validated before every accepted write. Unknown fields survive
+round trips but cannot supply executable source. Missing `authoring.json` is initialized
+only for the exact pristine Phase 1C scaffold; once authoring evidence exists, loss of
+the file is a non-destructive metadata error rather than permission to reset UUIDs.
+
 Each Appearance stores UUID, Character UUID, label, extensible string attributes,
 `staticImportedAsset` render mode, and Asset UUID. Phase 1D records explicit
 `expression` with implicit `outfit = default` and `pose = default`. The first imported
@@ -142,11 +148,14 @@ SHA-256, byte count, and availability. Supported images are PNG/JPEG/WebP; suppo
 audio is OGG/MP3/WAV/FLAC. SVG and other active/complex formats are excluded.
 
 Imports use flat deterministic names because subdirectories do not create independent
-Ren'Py namespaces. Character images use `<character>_<expression>.<ext>` and discover
-as `<character> <expression>`; backgrounds use `bg_<name>.<ext>` and discover as
+Ren'Py namespaces. Character images use `<character> <expression>.<ext>` and discover
+as `<character> <expression>`; backgrounds use `bg <name>.<ext>` and discover as
 `bg <name>`. Audio shares one automatic namespace but deliberately separates kinds as
 `music_<name>` and `sfx_<name>`. Case-folded paths, discovery names across extensions,
-and hashes produce distinct typed collision/duplicate diagnostics.
+subdirectories, image `@` oversampling suffixes, and hashes produce distinct typed
+collision/duplicate diagnostics. The pinned 8.5.3 scanner automatically discovers
+FLAC alongside WAV/MP2/MP3/OGG/Opus; Loomlight's import subset remains
+WAV/MP3/OGG/FLAC.
 
 ## Variables and state
 
@@ -256,13 +265,16 @@ inputs and are never broadly deleted during an unrelated update.
 
 New background and character-appearance filenames use lowercase space-separated
 Ren'Py image names (for example `bg cafe.png` and `alice happy.png`), because
-underscores remain part of a Ren'Py image token. WAV/MP3/OGG audio uses identifier
-filenames; FLAC receives an explicit `define audio.<name>` declaration because it is
-not part of automatic audio-namespace discovery. Physical inventory derives status
-from current path, size, and SHA-256 evidence. Legacy underscored images keep their
-paths and stable UUIDs and become compatible only through explicit transactional
-declarations.
+underscores remain part of a Ren'Py image token. WAV/MP3/OGG/FLAC audio uses identifier
+filenames and the pinned scanner's automatic audio namespace; FLAC does not require a
+compatibility declaration merely because of its format. Physical inventory derives
+status from current path, size, SHA-256, normalized-name ownership, and any required
+exact top-level declaration. Legacy underscored images keep their paths and stable
+UUIDs and become compatible only through verified explicit transactional declarations.
 
 Phase 1 integer values cross renderer IPC as canonical signed decimal strings. The
 core rejects whitespace, `+`, leading zeroes, `-0`, fractions, exponent/hex forms, and
 values outside signed 64-bit range; strings remain a distinct typed value.
+Raw string values are limited to 10,000 UTF-8 bytes, complete generated statements to
+64 KiB, and the serialized authoring document to 1 MiB, so every accepted value remains
+reloadable after escaping.

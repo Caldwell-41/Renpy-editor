@@ -76,6 +76,11 @@ fn core_request(
     let smoke_payload = is_smoke_report
         .then(|| request.get("payload").cloned())
         .flatten();
+    let supporting_authoring_ui_passed = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("supportingAuthoringUiPassed"))
+        .and_then(Value::as_bool)
+        == Some(true);
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
@@ -212,6 +217,7 @@ fn core_request(
                         "popupDenied": popup_denied,
                         "webviewRestrictionsPassed": popup_denied,
                         "lifecycleUiPassed": true,
+                        "supportingAuthoringUiPassed": supporting_authoring_ui_passed,
                         "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
@@ -219,7 +225,11 @@ fn core_request(
                 );
                 let _ = std::io::stdout().flush();
                 std::process::exit(
-                    if navigation_denied && popup_denied && single_instance_passed {
+                    if navigation_denied
+                        && popup_denied
+                        && single_instance_passed
+                        && supporting_authoring_ui_passed
+                    {
                         0
                     } else {
                         1
