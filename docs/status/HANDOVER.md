@@ -1,7 +1,7 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-14<br>
-**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
+**Phase:** Phase 1D supporting authoring in progress; Phase 1E not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
@@ -10,7 +10,8 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Current status](CURRENT.md)
 3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
+4. [Active Phase 1D supporting authoring task](../tasks/active/phase-1d-supporting-authoring.md)
+5. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
 5. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
 6. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
 7. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)

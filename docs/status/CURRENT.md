@@ -1,10 +1,16 @@
 # Current status
 
 **Updated:** 2026-09-14<br>
-**Phase:** Phase 1C re-closed; Phase 1D not approved<br>
+**Phase:** Phase 1D supporting authoring in progress; Phase 1E not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
+
+- Phase 1D was explicitly approved on 2026-09-15. Its bounded
+  [active task](../tasks/active/phase-1d-supporting-authoring.md) covers expected-absence
+  file creation, trusted streaming imports, narrow Character/Variable source mapping,
+  stable Character/Appearance/Asset/Variable metadata, and supporting UI only. Phase
+  1E Scene authoring remains unapproved.
 
 - The bounded
   [single-instance lifecycle micro-remediation](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
@@ -156,8 +162,8 @@
 
 ## Next action
 
-Await explicit approval for a new bounded Phase 1D task. Do not begin Phase 1D from
-this checkpoint.
+Complete and evidence the bounded Phase 1D task. Do not begin Phase 1E from this
+checkpoint.
 
 Phase 0 evidence and corrective closure remain authoritative historical records; the
 Phase 0 spike must not be promoted wholesale into the production application.

@@ -104,6 +104,14 @@ boundary and cannot become another Recent Projects or project-lifecycle writer. 
 plugin has no JavaScript API and grants no WebView permission; its callback only makes
 best-effort native restore/show/focus requests for the existing `main` window.
 
+Phase 1D adds one native picker for a reviewed raster/audio allowlist. Core retains
+the selected regular-file handle, identity, size, and SHA-256 and revalidates them
+before import. A pathname swap cannot redirect the copy because streaming reads that
+handle; a same-inode content change fails count/hash verification. Renderer state gets
+an opaque UUID and safe display metadata, never the absolute path or bytes. Trusted
+core generates the destination and uses expected-absence journal commit. No Tauri
+filesystem, shell/process, HTTP, opener, or media-execution capability is added.
+
 Application-local Recent Projects and the managed SDK root also retain directory
 authority and use no-follow file operations. Recent writes stage, platform-flush,
 atomically replace, directory-flush where supported, and verify. Managed SDK promotion

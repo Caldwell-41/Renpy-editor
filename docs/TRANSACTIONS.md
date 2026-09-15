@@ -183,6 +183,27 @@ user-facing resolution remain later work.
 
 Phase 1B adds no renderer operation or ambient filesystem/process/network authority.
 
+## Phase 1D create-new and import extension
+
+`replaceExisting` retains its exact base-byte, hash, and file-identity contract.
+`createNew` records expected absence. The trusted core chooses the normalized
+project-relative destination, resolves and retains the parent chain, stages accepted
+bytes under `.renpy-editor/recovery/<transaction-id>/`, records commit intent, and
+promotes with the no-replace platform primitive. A destination that exists initially
+or wins before promotion is never overwritten.
+
+Small source/metadata creates retain the 16 MiB per-mutation memory bound. Media uses
+a separate streaming entry point: a retained native-picker source handle is hashed and
+copied with a 1 MiB buffer, stage is copied to independent accepted evidence, and
+count/hash are verified. The defensive maximum is 512 MiB. Oversize input is rejected
+before live mutation. Media creation and its authoring metadata companion share one
+journal and recover as a sequential mixed set.
+
+Lifecycle opening registers the current project and checks recovery first. Close or
+switch unregisters that ephemeral authority and clears import capabilities. Durable,
+rejected, and cleaned journals do not block; staged, commit-intent, exchanged,
+conflict, corrupt, or ambiguous journals block later authoring as `Recovery required`.
+
 ## Phase 1B corrective gate evidence
 
 The latest recovery-enumeration correction is evidenced by

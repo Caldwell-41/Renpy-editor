@@ -55,6 +55,12 @@ parent/SDK/recent IDs. The core owns application-local Recent Projects, approved
 parent handles, project metadata, SDK download/extraction, allowlisted subprocesses,
 and current open-project lifecycle state.
 
+Phase 1D binds one ephemeral transaction authority to that current project. Stable
+project UUID and process authority remain distinct; close or project switch invalidates
+the latter. The host retains native-selected media handles and returns only opaque
+import IDs plus safe basename/extension/size metadata. Media streams through
+transaction recovery and never enters renderer state or a generic filesystem API.
+
 Loomlight is a single-instance desktop application. The maintained Tauri
 single-instance plugin is registered before desktop `setup`, so a losing launch is
 rejected before it can construct `LifecycleService`. The primary process is therefore
@@ -193,6 +199,7 @@ game/
 .renpy-editor/
   project.json
   source-map.json
+  authoring.json
   recovery/
 ```
 
@@ -223,6 +230,13 @@ The generated project must run when `.renpy-editor/` is absent. Phase 1 opening/
 project flows require valid Loomlight metadata; deleting that metadata and asking the
 editor to reconstruct the project is treated as future existing-project import, not a
 Phase 1 recovery path.
+
+`authoring.json` schema version 1 stores stable Character, Appearance, Asset, and
+Variable UUIDs and relationships. It is editor-only and never competes with runnable
+source. `characters.rpy` and `variables.rpy` remain authoritative and are edited by a
+narrow exact-statement mapper. Canonical definitions are inserted or patched only
+against an expected file revision; unrelated/unsupported bytes remain untouched. The
+general parser and Source workspace remain Phase 1F.
 
 Project creation itself is staged: validate destination safety, generate the scaffold
 and metadata in a private staging location, optionally initialise local Git, validate

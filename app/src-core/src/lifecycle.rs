@@ -2566,9 +2566,174 @@ mod tests {
             "game/chapters/chapter_01/scene_001.rpy",
             ".renpy-editor/project.json",
             ".renpy-editor/source-map.json",
+            ".renpy-editor/authoring.json",
         ] {
             assert!(final_root.join(path).exists(), "missing {path}");
         }
+
+        let first = service
+            .authoring_create_character(CreateCharacterRequest {
+                technical_name: "alice".into(),
+                display_name: "Alice".into(),
+                dialogue_color: "#aabbcc".into(),
+            })
+            .unwrap();
+        let alice_id = first.characters[0].id.clone();
+        let second = service
+            .authoring_create_character(CreateCharacterRequest {
+                technical_name: "ben".into(),
+                display_name: "Ben".into(),
+                dialogue_color: "#ccbbaa".into(),
+            })
+            .unwrap();
+        let ben_id = second
+            .characters
+            .iter()
+            .find(|character| character.technical_name == "ben")
+            .unwrap()
+            .id
+            .clone();
+        service
+            .authoring_create_variable(CreateVariableRequest {
+                technical_name: "door_open".into(),
+                variable_type: crate::authoring::VariableType::Bool,
+                default_value: serde_json::Value::Bool(false),
+            })
+            .unwrap();
+        service
+            .authoring_create_variable(CreateVariableRequest {
+                technical_name: "score".into(),
+                variable_type: crate::authoring::VariableType::Int,
+                default_value: serde_json::Value::from(-2),
+            })
+            .unwrap();
+        service
+            .authoring_create_variable(CreateVariableRequest {
+                technical_name: "greeting".into(),
+                variable_type: crate::authoring::VariableType::String,
+                default_value: serde_json::Value::String("Hello \\\"world\\\" — café\\n".into()),
+            })
+            .unwrap();
+
+        let media = temp.path().join("synthetic-media");
+        fs::create_dir(&media).unwrap();
+        // Repository-independent 1x1 PNG and tiny PCM WAV fixtures generated only for
+        // this controlled target test. No private or copyrighted media is retained.
+        let png: &[u8] = &[
+            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1,
+            8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84, 8, 215, 99, 248, 207,
+            192, 240, 31, 0, 5, 0, 1, 255, 137, 153, 61, 29, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66,
+            96, 130,
+        ];
+        let mut wav = b"RIFF\x26\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x80\x3e\x00\x00\x02\x00\x10\x00data\x02\x00\x00\x00\x00\x00".to_vec();
+        let mut import_media = |filename: &str,
+                                bytes: &[u8],
+                                kind: crate::authoring::AssetKind,
+                                technical_name: &str,
+                                display_name: &str,
+                                character_id: Option<String>,
+                                expression: Option<String>| {
+            let path = media.join(filename);
+            fs::write(&path, bytes).unwrap();
+            let selected = service.authoring_select_import(&path).unwrap();
+            service
+                .authoring_import_asset(ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind,
+                    technical_name: technical_name.into(),
+                    display_name: display_name.into(),
+                    character_id,
+                    expression,
+                })
+                .unwrap()
+        };
+        import_media(
+            "alice-happy.png",
+            png,
+            crate::authoring::AssetKind::CharacterAppearance,
+            "happy",
+            "Alice happy",
+            Some(alice_id.clone()),
+            Some("happy".into()),
+        );
+        let mut second_png = png.to_vec();
+        second_png.extend_from_slice(b"synthetic-variant-2");
+        import_media(
+            "alice-sad.png",
+            &second_png,
+            crate::authoring::AssetKind::CharacterAppearance,
+            "sad",
+            "Alice sad",
+            Some(alice_id.clone()),
+            Some("sad".into()),
+        );
+        let mut third_png = png.to_vec();
+        third_png.extend_from_slice(b"synthetic-variant-3");
+        import_media(
+            "ben-neutral.png",
+            &third_png,
+            crate::authoring::AssetKind::CharacterAppearance,
+            "neutral",
+            "Ben neutral",
+            Some(ben_id),
+            Some("neutral".into()),
+        );
+        let mut background_png = png.to_vec();
+        background_png.extend_from_slice(b"synthetic-background");
+        import_media(
+            "cafe.png",
+            &background_png,
+            crate::authoring::AssetKind::Background,
+            "cafe",
+            "Cafe",
+            None,
+            None,
+        );
+        import_media(
+            "theme.wav",
+            &wav,
+            crate::authoring::AssetKind::Music,
+            "theme",
+            "Theme",
+            None,
+            None,
+        );
+        wav.push(0);
+        import_media(
+            "click.wav",
+            &wav,
+            crate::authoring::AssetKind::Sfx,
+            "click",
+            "Click",
+            None,
+            None,
+        );
+        drop(import_media);
+
+        let authored = service.authoring_list().unwrap();
+        assert_eq!(authored.characters.len(), 2);
+        assert_eq!(authored.appearances.len(), 3);
+        assert_eq!(authored.assets.len(), 6);
+        assert_eq!(authored.variables.len(), 3);
+        let stable_ids = authored
+            .characters
+            .iter()
+            .map(|item| item.id.clone())
+            .chain(authored.appearances.iter().map(|item| item.id.clone()))
+            .chain(authored.assets.iter().map(|item| item.id.clone()))
+            .chain(authored.variables.iter().map(|item| item.id.clone()))
+            .collect::<Vec<_>>();
+        let characters_source =
+            fs::read_to_string(final_root.join("game/definitions/characters.rpy")).unwrap();
+        assert!(
+            characters_source.contains("define alice = Character(\"Alice\", color=\"#aabbcc\")")
+        );
+        let variables_source =
+            fs::read_to_string(final_root.join("game/definitions/variables.rpy")).unwrap();
+        assert!(variables_source.contains("default door_open = False"));
+        assert!(variables_source.contains("default score = -2"));
+        assert!(variables_source.contains("default greeting = \"Hello"));
+
         let screens = fs::read_to_string(final_root.join("game/screens.rpy")).unwrap();
         for expected in ["main_menu", "save", "load", "preferences", "history"] {
             assert!(
@@ -2586,6 +2751,38 @@ mod tests {
         let reopened = service.open_recent(&recent[0].id).unwrap();
         assert_eq!(reopened.chapter_id, project.chapter_id);
         assert_eq!(reopened.scene_id, project.scene_id);
+        let reopened_authored = service.authoring_list().unwrap();
+        let reopened_ids = reopened_authored
+            .characters
+            .iter()
+            .map(|item| item.id.clone())
+            .chain(
+                reopened_authored
+                    .appearances
+                    .iter()
+                    .map(|item| item.id.clone()),
+            )
+            .chain(reopened_authored.assets.iter().map(|item| item.id.clone()))
+            .chain(
+                reopened_authored
+                    .variables
+                    .iter()
+                    .map(|item| item.id.clone()),
+            )
+            .collect::<Vec<_>>();
+        assert_eq!(reopened_ids, stable_ids);
+        let score = reopened_authored
+            .variables
+            .iter()
+            .find(|item| item.technical_name == "score")
+            .unwrap();
+        service
+            .authoring_update_variable(UpdateVariableRequest {
+                id: score.id.clone(),
+                expected_source_revision: score.source.source_revision.clone(),
+                default_value: serde_json::Value::from(3),
+            })
+            .unwrap();
         service.close();
         assert_eq!(
             service.open_path(&final_root).unwrap().scene_id,
@@ -2610,5 +2807,6 @@ mod tests {
             Err(LifecycleError::InvalidMetadata)
         ));
         println!("phase-1c-target-gate: passed");
+        println!("phase-1d-target-gate: passed");
     }
 }

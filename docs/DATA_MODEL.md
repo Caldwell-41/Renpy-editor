@@ -98,6 +98,20 @@ colour, default appearance, and an `Appearances` list. Adding an appearance impo
 copies an image into the project and assigns an expression name; filename inference may
 prefill the name but is never authoritative.
 
+Phase 1D persists these identities in `.renpy-editor/authoring.json` schema version 1.
+Each Character stores a UUID, immutable creation-time lowercase technical identifier,
+display name, `#rrggbb` dialogue colour, optional default Appearance UUID, and exact
+source statement/revision mapping. Runnable source is conventional:
+
+```renpy
+define alice = Character("Alice", color="#aabbcc")
+```
+
+Each Appearance stores UUID, Character UUID, label, extensible string attributes,
+`staticImportedAsset` render mode, and Asset UUID. Phase 1D records explicit
+`expression` with implicit `outfit = default` and `pose = default`. The first imported
+Appearance becomes default. Raw filenames are never entity identity.
+
 ## Assets
 
 Phase 1 imports assets by copying them into the project so a Loomlight-created project
@@ -121,11 +135,38 @@ The path is organisation, not identity. Exact import naming/collision rules must
 reviewed against Ren'Py automatic image/audio discovery so the resulting names are
 predictable and unambiguous.
 
+Phase 1D Asset metadata stores UUID, kind (`background`, `characterAppearance`,
+`music`, `sfx`), display name, project-relative path, normalized discovery name,
+SHA-256, byte count, and availability. Supported images are PNG/JPEG/WebP; supported
+audio is OGG/MP3/WAV/FLAC. SVG and other active/complex formats are excluded.
+
+Imports use flat deterministic names because subdirectories do not create independent
+Ren'Py namespaces. Character images use `<character>_<expression>.<ext>` and discover
+as `<character> <expression>`; backgrounds use `bg_<name>.<ext>` and discover as
+`bg <name>`. Audio shares one automatic namespace but deliberately separates kinds as
+`music_<name>` and `sfx_<name>`. Case-folded paths, discovery names across extensions,
+and hashes produce distinct typed collision/duplicate diagnostics.
+
 ## Variables and state
 
 Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple
 assignment of a value the editor can represent. Arbitrary Python expressions remain
 source/custom code until a later expression/state model can represent them safely.
+
+Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
+typed default value, and exact source mapping. Source uses ordinary mutable state:
+
+```renpy
+default door_open = False
+default score = -2
+default greeting = "Hello"
+```
+
+Strings remain data rather than expression text and escape quotes, backslashes,
+Unicode, newlines, and controls deterministically. Character and Variable names share
+one symbol table and reject Python keywords, underscore-reserved names, known
+Ren'Py/Loomlight names, and statically visible top-level `define`/`default` collisions
+in both canonical definition files.
 
 A lore fact records subject, category, canonical text, characters who know it,
 route applicability, valid game-day/time range, source scenes/decisions, contradictory

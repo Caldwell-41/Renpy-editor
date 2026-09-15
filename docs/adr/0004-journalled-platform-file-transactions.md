@@ -63,6 +63,20 @@ to abandon and makes pre-mutation `rejected` terminal/non-blocking. Accepted/sta
 conflict, corrupt, and ambiguous states remain blocking. Exact state and residual
 platform limits are canonical in [TRANSACTIONS.md](../TRANSACTIONS.md).
 
+### Phase 1D amendment — expected-absence creation and streamed imports
+
+The journal now admits `createNew` mutations with explicit expected-absence semantics.
+Trusted core logic resolves the normalized project-relative destination, retains its
+parent authority, and durably records proposed bytes plus SHA-256 in recovery before a
+platform no-replace rename exposes the file. An existing or racing destination is
+never replaced. Mixed create and replace mutations remain a recoverable sequential
+set, not multi-file atomicity.
+
+Native-selected media streams from a retained trusted file handle through a 1 MiB
+buffer into stage and accepted evidence. Byte count and SHA-256 are verified before
+live mutation. Its deliberate 512 MiB limit is separate from the 16 MiB in-memory
+source-edit limit.
+
 ## Consequences
 
 - Accepted Loomlight bytes and displaced external bytes survive detected races.

@@ -305,6 +305,15 @@ Scene-per-file lifecycle, automatic image/audio discovery naming, stale `.rpyc`
 cleanup, unsupported/custom-code placement, and external-edit/recovery cases. Fixtures
 remain synthetic and must not contain private game content.
 
+Phase 1D adds expected-absence creation, mixed create/replace recovery, a streamed
+17 MiB regression above the old source-edit cap, 512 MiB limit rejection, typed
+literal/identifier/source-patch tests, and stable entity/relationship reopen tests.
+The existing supported-target matrix extends its controlled official-SDK lifecycle
+fixture to author two Characters, three Appearances, background, music/SFX, and
+bool/int/string Variables; it then closes/reopens, edits again, compile/lints, runs,
+tests a metadata-free copy, packages, probes WebView denial, scans secrets, and records
+the dependency inventory. No duplicate matrix is introduced.
+
 ## Required quality gate by change type
 
 | Change | Minimum gate |

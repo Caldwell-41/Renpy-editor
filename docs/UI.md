@@ -427,6 +427,12 @@ and pose are implicit defaults. Underlying appearance attributes are extensible 
 future outfit, pose, hairstyle/accessory, layered-image, animated, or other rendering
 support extends the model rather than replacing it.
 
+Phase 1D implements this as a restrained project-sidebar destination with a Character
+list, creation form, immutable-technical-name copy, dialogue colour, per-Character
+Appearances rows, native `Add Appearance` import, and default selection. Existing
+semantic tokens, border-separated rows, visible focus, labels, and reduced-motion
+behavior remain in force; no Scene staging controls are present.
+
 ## Asset supporting surface
 
 Phase 1 imports by copying files into the project. Assets are grouped sufficiently for
@@ -434,12 +440,21 @@ backgrounds, Character appearances, audio, and project/UI files, with visual pic
 where useful. Missing/duplicate checks are required; external absolute asset references,
 advanced tagging/search, conversion/optimisation, and bulk management are later work.
 
+Phase 1D groups Backgrounds, Character appearances, Music, and SFX. Each row exposes
+the safe project-relative filename, normalized Ren'Py discovery name, and status.
+Import is one explicit native-picker action; linking, generation, media editing, and
+bulk processing remain absent.
+
 ## Variable supporting surface
 
 The Phase 1 Variable surface creates/edits `bool`, `int`, and `string` variables with a
 default value and source definition mapping. Reads/writes can be surfaced where already
 known, but advanced state simulation, constraint systems, and computed-expression
 builders are deferred.
+
+Phase 1D provides the typed list/create flow for `bool`, `int`, and `string` defaults.
+Technical identifiers are labelled fixed after creation. Arbitrary expressions,
+computed defaults, conditions, and state simulation are absent.
 
 ## Validation, run, Git, and persistence
 

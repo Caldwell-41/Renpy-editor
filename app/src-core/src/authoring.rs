@@ -369,6 +369,7 @@ impl AuthoringService {
         validate_identifier(&request.technical_name)?;
         validate_display(&request.display_name)?;
         validate_color(&request.dialogue_color)?;
+        self.ensure_source_symbol_available(project, &request.technical_name)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         ensure_symbol_available(&metadata, &request.technical_name)?;
         let (source_bytes, source_revision) = self.snapshot(project, CHARACTERS_PATH)?;
@@ -470,6 +471,7 @@ impl AuthoringService {
         self.ensure_ready(project)?;
         validate_identifier(&request.technical_name)?;
         let literal = variable_literal(request.variable_type, &request.default_value)?;
+        self.ensure_source_symbol_available(project, &request.technical_name)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         ensure_symbol_available(&metadata, &request.technical_name)?;
         let (source_bytes, source_revision) = self.snapshot(project, VARIABLES_PATH)?;
@@ -701,6 +703,25 @@ impl AuthoringService {
             .map_err(|_| AuthoringError::SourceConflict)
     }
 
+    fn ensure_source_symbol_available(
+        &self,
+        project: &ProjectId,
+        name: &str,
+    ) -> Result<(), AuthoringError> {
+        for path in [CHARACTERS_PATH, VARIABLES_PATH] {
+            let (bytes, _) = self.snapshot(project, path)?;
+            let source =
+                std::str::from_utf8(&bytes).map_err(|_| AuthoringError::UnsupportedSource)?;
+            if source
+                .lines()
+                .any(|line| top_level_symbol(line) == Some(name))
+            {
+                return Err(AuthoringError::SymbolCollision);
+            }
+        }
+        Ok(())
+    }
+
     fn load_metadata(
         &self,
         project: &ProjectId,
@@ -910,6 +931,17 @@ fn append_statement(source: &[u8], statement: &str) -> Vec<u8> {
     output.extend_from_slice(statement.as_bytes());
     output.extend_from_slice(newline.as_bytes());
     output
+}
+
+fn top_level_symbol(line: &str) -> Option<&str> {
+    if line.chars().next().is_some_and(char::is_whitespace) {
+        return None;
+    }
+    let remainder = line
+        .strip_prefix("define ")
+        .or_else(|| line.strip_prefix("default "))?;
+    let symbol = remainder.split_ascii_whitespace().next()?;
+    validate_identifier(symbol).is_ok().then_some(symbol)
 }
 
 fn replace_exact_once(
