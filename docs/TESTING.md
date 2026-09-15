@@ -343,6 +343,34 @@ production run `34995109499` passed. The latter passed macOS ARM64 job
 omitted on the automatic push run; retained evidence artifacts are recorded in the
 completed follow-up ledger.
 
+## Phase 1E Scene authoring gate
+
+Phase 1E keeps the same cost-scoped production matrix and adds explicit passed markers
+for Scene authoring and media presentation to the official-SDK lifecycle fixture. The
+fixture uses production services to migrate/reopen metadata, create and move Scenes,
+author supported Beats and branching edges, exercise committed undo/redo, request
+verified image/audio presentation, compile/lint with Ren'Py 8.5.3, and run the generated
+project. A marker without successful fixture behavior is rejected by the workflow.
+
+The packaged WebView probe exercises the actual Scene DOM and bridge: 52/48
+Preview/Beats layout, provenance and partial-state indicators, keyboard reorder,
+Dialogue Ctrl/Cmd+Enter, Choice Create New Scene, no selection-triggered audio,
+explicit audition, safe confirmed recovery followed by revalidation, refused ambiguous
+recovery, and conflict presentation. It must also retain the existing lifecycle,
+supporting-authoring, delayed operation/Flush, WebView denial, and single-instance
+checks.
+
+Focused core coverage includes schema v1→v2 migration, stable identities and unknown
+fields, exact-byte minimal Scene patches, protected opaque boundaries, incoming
+reference refusal, source create/move/delete and exact `.rpyc` ghost prevention,
+committed inverse revision boundaries, interrupted transaction classification,
+safe/ambiguous recovery, bounded media formats/bytes/dimensions, stale session,
+traversal, and symlink/reparse substitution. Renderer DOM tests cover all supported
+Beat editors, drafts and navigation, focus restoration, preview provenance/unknown
+truth, media cache cancellation/disposal, accessible reordering, responsive collapse,
+and reduced motion. Exact final run/job/artifact results belong in the archived Phase
+1E execution ledger after both supported targets pass.
+
 ## Required quality gate by change type
 
 | Change | Minimum gate |

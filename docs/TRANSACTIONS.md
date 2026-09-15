@@ -37,8 +37,10 @@ picker and lifecycle.
 
 Each request contains the project ID, normalized forward-slash relative path,
 extensible mutation kind, exact expected bytes, SHA-256 plus platform identity, and
-proposed bytes. The interface accepts a mutation vector. Phase 1B implements replacement
-of existing files only.
+proposed bytes. The interface accepts a mutation vector. Phase 1B introduced
+replacement of existing files; Phase 1D added no-replace creation, and Phase 1E adds
+proven-existing deletion for Scene lifecycle transactions. All kinds retain the same
+journal, recovery preflight, path authority, and revision checks.
 
 Unix identity is device plus inode. Windows identity is volume serial plus 64-bit file
 index obtained from a handle. The root and each existing directory component are
@@ -178,10 +180,38 @@ producing a stale proposal.
 Recovery finalisation removes only partial alternating-slot temporaries and records
 `cleaned`. For `prepared`, all mutation flags must be false and every evidence entry
 must be proven absent; errors never count as absence. Accepted/displaced evidence is
-retained in every other explicitly acknowledged recovery. Retention/pruning and
-user-facing resolution remain later work.
+retained in every other explicitly acknowledged recovery. Phase 1E exposes only
+resolution choices that the report proves safe, requires explicit confirmation,
+revalidates after completion, and resumes authoring only from a terminal non-blocking
+state. Ambiguous records remain blocked. Advanced merge and evidence retention/pruning
+remain later work.
 
 Phase 1B adds no renderer operation or ambient filesystem/process/network authority.
+
+## Phase 1E Scene lifecycle, recovery, and history
+
+Scene create, move, and delete are semantic multi-file operations assembled in core.
+They combine exact minimal Scene source changes with project/source-map companions.
+Creation requires proven destination absence. Move is a create-new destination plus a
+proven-existing old-source deletion. Deletion uses exact expected bytes and identity.
+If an old `.rpy` path has a same-basename `.rpyc`, it is included only when ownership is
+proven; unrelated compiled files are never broadly removed.
+
+Entry/last Scene constraints, incoming Choice/Jump references, and opaque ownership
+are checked before producing a destructive proposal. Chapter order remains metadata
+organisation and does not rewrite runtime flow. A display rename changes metadata only.
+
+Every completed semantic commit returns the actual revisions and identities for all
+affected paths. Session-local history stores those boundaries and exact before/after
+bytes. Undo and redo submit inverse semantic transactions through this same service;
+the cursor advances only after a successful commit. External changes, a failed inverse,
+or recovery-required state stop at `HISTORY_BOUNDARY`/the corresponding blocked state
+without overwriting live bytes. Close/reopen deliberately clears the history cursor.
+
+The recovery renderer is an inspection/resolution client, not a journal editor. It can
+show affected paths and accepted/displaced evidence and invoke only the typed safe
+resolution returned by core. It cannot delete the journal, select arbitrary files,
+infer the newest revision, or restore Git state.
 
 ## Phase 1D create-new and import extension
 

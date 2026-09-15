@@ -1,7 +1,7 @@
 # Phase 1E Scene authoring execution ledger
 
 **Opened:** 2026-09-16  
-**Status:** 1E.1 and 1E.2 closed locally; 1E.3 in progress
+**Status:** 1E.1, 1E.2, and 1E.3 closed locally; final supported-target gate pending
 **Branch:** `feature/phase-1e-scene-authoring`  
 **Base:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`
 
@@ -109,7 +109,7 @@ truthfully rather than reconstructing semantic intent from retained recovery jou
 
 ## Checkpoint 1E.3 — preview, media and visual conformance
 
-**Status:** In progress
+**Status:** Closed locally
 
 ### Planned production boundary
 
@@ -123,11 +123,41 @@ truthfully rather than reconstructing semantic intent from retained recovery jou
 
 ### Gate evidence
 
-Pending.
+- `cargo test -p loomlight-core --locked`: 134 passed, 0 failed, 4 intentionally
+  ignored subprocess workers. The suite includes passive format/magic/dimension
+  validation, 16 MiB refusal, traversal metadata refusal, stale-session rejection,
+  exact hash/count conflict, and Unix symlink substitution refusal.
+- `npm run check`: 15 TypeScript/protocol/behavioral DOM tests passed;
+  `npm run build` passed. Preview tests cover scene-local reconstruction through the
+  selected Beat, contributing Beat IDs, explicit `Edit Beat N`/`Add change here`,
+  Custom Code invalidation, image/thumbnails, explicit-only audio, cache coalescing,
+  logical cancellation, and disposal.
+- `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings`,
+  `cargo fmt --check --all`, and `git diff --check`: passed.
+- The renderer requests only `{assetId, purpose}`. Core resolves the current-session
+  Asset, requires available validated metadata, uses the retained transaction path,
+  rechecks exact count/hash, caps presentation at 16 MiB and raster dimensions at
+  8192×8192, and allows only passive PNG/JPEG or OGG/WAV/FLAC/MP3 bytes. Renderer
+  object URLs are content keyed, stale generations are ignored, replaced/disposed URLs
+  are revoked, and audio is created only after a labelled user action.
+- The Preview/Beats workspace starts at 52/48, preserves the configured aspect ratio,
+  collapses responsively, exposes selected/hover/focus/disabled/error/conflict/recovery
+  states through Quiet Studio Dark semantic tokens, keeps labelled keyboard reorder,
+  and disables motion under `prefers-reduced-motion`.
+- The packaged target probe now behaviorally requires Scene Preview/Beats, provenance,
+  partial state, accessible reorder, Dialogue Ctrl/Cmd+Enter, Choice Create New Scene,
+  no automatic audio, explicit audition, safe recovery plus revalidation, refused
+  ambiguous recovery, and conflict presentation. The official SDK target fixture uses
+  production Scene/media services and requires explicit 1E passed markers before the
+  workflow can continue.
+- Focused review found no path/URL parameter exposed by media IPC, no renderer
+  filesystem/process/network authority, no capability or CSP change, no transaction
+  bypass, no automatic Ren'Py/Python execution, and no Source/Branches/Phase 1F+
+  implementation.
 
 ## Final supported-target closure
 
-**Status:** Pending all checkpoint gates
+**Status:** Pending supported-target production evidence
 
 The final changed application tree will receive one complete production run on
 Windows x86-64 and macOS Apple Silicon ARM64. Failed, cancelled, and skipped evidence
@@ -149,6 +179,25 @@ will remain explicit. The brief will be archived only after all gates pass.
   commit `a2b6002` (`feat: establish Phase 1E scene foundation`).
 - 1E.2 local gate closed only after the functional service fixture, recovery UI,
   renderer DOM suite, core suite, build, formatting and strict core Clippy passed.
+- 1E.3 local gate closed only after preview provenance/unknown-state behavior, bounded
+  media denials and disposal, responsive/accessibility/token tests, production build,
+  full core suite, formatting, strict core Clippy, and the focused privilege/scope
+  review passed.
 - The Linux desktop test attempt failed before project compilation at the host GTK
   dependency check (`pkg-config` unavailable); it is neither skipped silently nor
   counted as production evidence.
+
+The complete local candidate gate validated 200 repository files, passed 26 lossless-
+source tests and 24 SDK-boundary tests, recorded a 107.00 ms median for 620,000 bytes /
+40,000 source nodes, installed 32 locked frontend packages, passed all 15 frontend
+tests and the production frontend build, passed 134 core tests with four intentional
+subprocess-worker ignores, strict core Clippy, Rust formatting, smoke-probe syntax, and
+`git diff --check`. The first diff check reported trailing whitespace in this ledger;
+that documentation-only defect was removed and the validator/diff check were rerun
+successfully.
+
+On the same Linux host, `cargo test -p loomlight-desktop --locked` and
+`npm exec -- tauri build -- --locked` both stopped in GTK/GObject dependency discovery
+because `pkg-config` and the required system development libraries are unavailable.
+The latter completed its frontend production build first. These are environment-limited
+failed attempts, not skipped or accepted desktop evidence.

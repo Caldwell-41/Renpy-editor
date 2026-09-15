@@ -48,6 +48,7 @@ test("frontend operation list contains only bounded Phase 1C through 1E operatio
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",
+    "media.present",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
   assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
@@ -121,6 +122,24 @@ test("Phase 1D supporting surfaces and bounded operations are present", async ()
   assert.equal(source.includes("window.prompt"), false);
   assert.match(source, /addEventListener\("keydown"/);
   assert.match(source, /inlineEditor/);
+});
+
+test("Phase 1E Preview and media stay bounded, responsive, and explicit", async () => {
+  const [source, main, css] = await Promise.all([
+    readFile(new URL("src/scene-ui.ts", sourceRoot), "utf8"),
+    readFile(new URL("src/main.ts", sourceRoot), "utf8"),
+    readFile(new URL("src/styles.css", sourceRoot), "utf8"),
+  ]);
+  for (const marker of ["deriveScenePreview", "Partial / unknown", "Edit Beat", "Add change here", "Audition current music", "audioAudition", "Create New Scene"]) assert.equal(source.includes(marker), true, marker);
+  assert.match(source, /disposed \|\| generation !== mediaGeneration/);
+  assert.match(source, /URL\.revokeObjectURL/);
+  assert.doesNotMatch(`${source}\n${main}`, /file:\/\//);
+  assert.doesNotMatch(`${source}\n${main}`, /https?:\/\//);
+  assert.match(main, /"media\.present"/);
+  assert.match(css, /--preview-share: 52fr/);
+  assert.match(css, /--beats-share: 48fr/);
+  assert.match(css, /@media \(max-width: 680px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
 test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {

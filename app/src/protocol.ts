@@ -34,6 +34,7 @@ export const CORE_OPERATIONS = [
   "scene.apply",
   "scene.recovery",
   "scene.resolveRecovery",
+  "media.present",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

@@ -43,6 +43,7 @@ const activeFlushOperations = new Map<string, number>();
 let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
+let disposeSceneView: (() => void) | undefined;
 
 declare global {
   interface Window {
@@ -66,6 +67,8 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  disposeSceneView?.();
+  disposeSceneView = undefined;
   viewGeneration += 1;
   currentProject = project;
   return viewGeneration;
@@ -310,8 +313,10 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     }
     const model = await projectValue<SceneWorkspace>(project, "scene.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-    renderSceneAuthoring(workspace, tree, model, {
+    disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
       status: setStatus,
+      resolution: project.resolution,
+      present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -460,6 +465,8 @@ export function startApplication(requester: typeof desktopRequestCore = desktopR
   activeAuthoringOperations.clear();
   activeFlushOperations.clear();
   currentProject = undefined;
+  disposeSceneView?.();
+  disposeSceneView = undefined;
   resetWizard();
   installListeners();
   void showWelcome();

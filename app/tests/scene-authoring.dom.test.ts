@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import {
+  deriveScenePreview,
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
@@ -11,6 +12,7 @@ import {
 } from "../src/scene-ui.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
+function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } { let resolve!: (value: T) => void; const promise = new Promise<T>((accept) => { resolve = accept; }); return { promise, resolve }; }
 
 function installDom(): Window {
   const browser = new Window({ url: "http://tauri.localhost" });
@@ -53,7 +55,7 @@ function sceneModel(): SceneWorkspace {
     ],
     authoring: {
       characters: [{ id: "alice", displayName: "Alice", technicalName: "alice" }],
-      appearances: [{ id: "alice-happy", characterId: "alice", label: "happy" }],
+      appearances: [{ id: "alice-happy", characterId: "alice", label: "happy", assetId: "appearance" }],
       assets: [
         { id: "bg", kind: "background", displayName: "Cafe", status: "available" },
         { id: "appearance", kind: "characterAppearance", displayName: "Alice Happy", status: "available" },
@@ -69,6 +71,8 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
   renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
+    resolution: { width: 1920, height: 1080 },
+    present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async (command, expected) => {
       assert.equal(expected.projectRevision, model.projectRevision); calls.push(command);
       if (command.type === "continueDialogue") {
@@ -139,6 +143,8 @@ test("failed Beat validation preserves the draft and restores focus", async () =
   installDom(); const model = sceneModel(); let status = "";
   renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
+    resolution: { width: 1920, height: 1080 },
+    present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async () => { throw new Error("Source revision changed"); },
   });
   const dialogue = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("1. Dialogue"))!; dialogue.click();
@@ -147,4 +153,63 @@ test("failed Beat validation preserves the draft and restores focus", async () =
   assert.equal(document.querySelector<HTMLTextAreaElement>("textarea")?.value, "Unsaved words");
   assert.equal(document.activeElement, document.querySelector(".expanded-beat select"));
   assert.equal(status, "Source revision changed");
+});
+
+test("preview reconstruction is Beat-local, provenance-aware, and truthful after Custom Code", () => {
+  const scene = sceneModel().scenes[0]!;
+  const authored = { ...scene, beats: [
+    { id: "background", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } as const },
+    { id: "show", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } as const },
+    { id: "opaque", byteStart: 30, byteEnd: 40, protected: true, payload: { type: "customCode", source: "python:", reason: "Runtime-dependent" } as const },
+    { id: "dialogue-after", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "dialogue", characterId: "alice", text: "After" } as const },
+  ] };
+  const known = deriveScenePreview(authored, "show");
+  assert.equal(known.partial, false); assert.equal(known.background?.beatId, "background"); assert.equal(known.characters[0]?.appearanceBeatId, "show");
+  const partial = deriveScenePreview(authored, "dialogue-after");
+  assert.equal(partial.partial, true); assert.equal(partial.background, undefined); assert.equal(partial.backgroundUnknown, true);
+  assert.equal(partial.characters.length, 0); assert.equal(partial.charactersUnknown, true); assert.equal(partial.overlay?.text, "After");
+  assert.deepEqual(partial.unknownBeatIds, ["opaque"]);
+});
+
+test("preview presents images through the bounded bridge and auditions audio only on request", async () => {
+  installDom(); let model = sceneModel(); const first = model.scenes[0]!;
+  model = { ...model, scenes: [{ ...first, beats: [
+    { id: "bg-beat", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
+    { id: "show-beat", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "centre", transition: "none" } },
+    { id: "music-beat", byteStart: 30, byteEnd: 40, protected: false, payload: { type: "playMusic", assetId: "music" } },
+    { id: "line-beat", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Preview line" } },
+    { id: "end-beat", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "return" } },
+  ] }, model.scenes[1]!] };
+  const calls: Array<{ assetId: string; purpose: string }> = [];
+  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    status: () => {}, resolution: { width: 1280, height: 720 }, apply: async () => model,
+    present: async (assetId, purpose) => { calls.push({ assetId, purpose }); return { assetId, purpose, mimeType: purpose === "audioAudition" ? "audio/ogg" : "image/png", dataBase64: "", sha256: "hash", byteCount: 24, width: purpose === "audioAudition" ? undefined : 1, height: purpose === "audioAudition" ? undefined : 1, cacheKey: `${assetId}:hash` }; },
+  });
+  await tick();
+  assert.equal(calls.some((call) => call.purpose === "audioAudition"), false);
+  assert.equal(calls.filter((call) => call.assetId === "bg").length, 1);
+  assert.equal(calls.filter((call) => call.assetId === "appearance").length, 1);
+  assert.match(document.querySelector(".preview-overlay")?.textContent ?? "", /Return \/ End/);
+  assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent?.startsWith("Edit Beat")));
+  assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent === "Add change here"));
+  click("Audition current music"); await tick();
+  assert.equal(calls.some((call) => call.assetId === "music" && call.purpose === "audioAudition"), true);
+});
+
+test("pending media is cancelled logically and disposed with the project view", async () => {
+  installDom(); let model = sceneModel(); const first = model.scenes[0]!;
+  model = { ...model, scenes: [{ ...first, beats: [
+    { id: "background-only", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
+    { id: "return-only", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "return" } },
+  ] }, model.scenes[1]!] };
+  const pending = deferred<{ assetId: string; purpose: "thumbnail"; mimeType: string; dataBase64: string; sha256: string; byteCount: number; width: number; height: number; cacheKey: string }>();
+  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    status: () => {}, resolution: { width: 16, height: 9 }, apply: async () => model,
+    present: async () => pending.promise,
+  });
+  const oldImage = document.querySelector<HTMLImageElement>(".preview-background")!;
+  assert.equal(oldImage.src, ""); dispose(); document.querySelector("#host")!.replaceChildren();
+  pending.resolve({ assetId: "bg", purpose: "thumbnail", mimeType: "image/png", dataBase64: "iVBORw0KGgo=", sha256: "hash", byteCount: 8, width: 1, height: 1, cacheKey: "bg:hash" });
+  await tick();
+  assert.equal(oldImage.src, "");
 });

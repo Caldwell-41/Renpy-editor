@@ -2523,6 +2523,7 @@ mod tests {
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,
         ImportAssetRequest, SourceDefinition, Variable,
     };
+    use crate::media::{MediaError, MediaPurpose, MediaRequest};
     use crate::metadata::{Resolution, SdkIdentity};
     use std::collections::BTreeMap;
     use std::fs;
@@ -3422,10 +3423,19 @@ mod tests {
                 )
                 .unwrap();
         }
-        let imports = [
+        let mut png = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13];
+        png.extend_from_slice(b"IHDR");
+        png.extend_from_slice(&1920u32.to_be_bytes());
+        png.extend_from_slice(&1080u32.to_be_bytes());
+        png.extend_from_slice(&[8, 6, 0, 0, 0]);
+        let mut appearance_png = png.clone();
+        appearance_png.push(1);
+        let mut background_png = png;
+        background_png.push(2);
+        let imports = vec![
             (
                 "appearance.png",
-                b"appearance".as_slice(),
+                appearance_png,
                 AssetKind::CharacterAppearance,
                 "happy",
                 "Alice Happy",
@@ -3434,7 +3444,7 @@ mod tests {
             ),
             (
                 "cafe.png",
-                b"background".as_slice(),
+                background_png,
                 AssetKind::Background,
                 "cafe",
                 "Cafe",
@@ -3443,7 +3453,7 @@ mod tests {
             ),
             (
                 "theme.ogg",
-                b"music".as_slice(),
+                b"OggSmusic".to_vec(),
                 AssetKind::Music,
                 "theme",
                 "Theme",
@@ -3452,7 +3462,7 @@ mod tests {
             ),
             (
                 "bell.wav",
-                b"sound".as_slice(),
+                b"RIFF0000WAVEsound".to_vec(),
                 AssetKind::Sfx,
                 "bell",
                 "Bell",
@@ -3462,7 +3472,7 @@ mod tests {
         ];
         for (name, bytes, kind, technical_name, display_name, character_id, expression) in imports {
             let selected_path = fixture.root.join(name);
-            fs::write(&selected_path, bytes).unwrap();
+            fs::write(&selected_path, &bytes).unwrap();
             let selected = fixture
                 .service
                 .select_import(&fixture.project, &selected_path)
@@ -3482,6 +3492,33 @@ mod tests {
                     },
                 )
                 .unwrap();
+        }
+        let media_model = fixture
+            .service
+            .list(&fixture.project, &fixture.project_id)
+            .unwrap();
+        for (kind, purpose) in [
+            (AssetKind::Background, MediaPurpose::ImagePreview),
+            (AssetKind::Music, MediaPurpose::AudioAudition),
+        ] {
+            let asset = media_model
+                .assets
+                .iter()
+                .find(|asset| asset.kind == kind)
+                .unwrap();
+            let presented = fixture
+                .service
+                .media_present(
+                    &fixture.project,
+                    &fixture.project_id,
+                    MediaRequest {
+                        asset_id: asset.id.clone(),
+                        purpose,
+                    },
+                )
+                .unwrap();
+            assert_eq!(presented.sha256, asset.sha256);
+            assert!(!presented.data_base64.is_empty());
         }
         let mut workspace = fixture.workspace();
         let chapter_one = workspace.chapters[0].id.clone();
@@ -3740,6 +3777,173 @@ mod tests {
         );
         assert!(!reopened.can_undo && !reopened.can_redo);
         assert_eq!(reopened.last_open.scene_id, workspace.last_open.scene_id);
+    }
+
+    #[test]
+    fn media_presentation_refuses_unsupported_oversize_and_traversal_states() {
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let mut too_wide = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13];
+        too_wide.extend_from_slice(b"IHDR");
+        too_wide.extend_from_slice(&8193u32.to_be_bytes());
+        too_wide.extend_from_slice(&1u32.to_be_bytes());
+        too_wide.extend_from_slice(&[8, 6, 0, 0, 0]);
+        let mut too_large = vec![0u8; 16 * 1024 * 1024 + 1];
+        too_large[..4].copy_from_slice(b"OggS");
+        for (filename, bytes, kind, technical, display) in [
+            (
+                "active.webp",
+                b"RIFFactiveWEBP".to_vec(),
+                AssetKind::Background,
+                "active",
+                "Unsupported WebP",
+            ),
+            (
+                "wide.png",
+                too_wide,
+                AssetKind::Background,
+                "wide",
+                "Too Wide",
+            ),
+            (
+                "large.ogg",
+                too_large,
+                AssetKind::Music,
+                "large",
+                "Too Large",
+            ),
+        ] {
+            let source = fixture.root.join(filename);
+            fs::write(&source, bytes).unwrap();
+            let selected = fixture
+                .service
+                .select_import(&fixture.project, &source)
+                .unwrap();
+            fixture
+                .service
+                .import_asset(
+                    &fixture.project,
+                    &fixture.project_id,
+                    ImportAssetRequest {
+                        authority_id: selected.authority_id,
+                        kind,
+                        technical_name: technical.into(),
+                        display_name: display.into(),
+                        character_id: None,
+                        expression: None,
+                    },
+                )
+                .unwrap();
+        }
+        let model = fixture
+            .service
+            .list(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let request = |display: &str, purpose| MediaRequest {
+            asset_id: model
+                .assets
+                .iter()
+                .find(|asset| asset.display_name == display)
+                .unwrap()
+                .id
+                .clone(),
+            purpose,
+        };
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                request("Unsupported WebP", MediaPurpose::Thumbnail)
+            ),
+            Err(MediaError::UnsupportedFormat)
+        );
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                request("Too Wide", MediaPurpose::ImagePreview)
+            ),
+            Err(MediaError::InvalidDimensions)
+        );
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                request("Too Large", MediaPurpose::AudioAudition)
+            ),
+            Err(MediaError::Oversize)
+        );
+
+        let traversed_id = model.assets[0].id.clone();
+        let metadata_path = fixture.root.join(".renpy-editor/authoring.json");
+        let mut metadata: Value =
+            serde_json::from_slice(&fs::read(&metadata_path).unwrap()).unwrap();
+        metadata["assets"][0]["relativePath"] = Value::String("../outside.png".into());
+        fs::write(
+            &metadata_path,
+            serde_json::to_vec_pretty(&metadata).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                MediaRequest {
+                    asset_id: traversed_id,
+                    purpose: MediaPurpose::Thumbnail
+                }
+            ),
+            Err(MediaError::Io)
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn media_presentation_refuses_symlink_substitution() {
+        use std::os::unix::fs::symlink;
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let mut png = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13];
+        png.extend_from_slice(b"IHDR");
+        png.extend_from_slice(&1u32.to_be_bytes());
+        png.extend_from_slice(&1u32.to_be_bytes());
+        png.extend_from_slice(&[8, 6, 0, 0, 0]);
+        let selected_path = fixture.root.join("safe.png");
+        fs::write(&selected_path, &png).unwrap();
+        let selected = fixture
+            .service
+            .select_import(&fixture.project, &selected_path)
+            .unwrap();
+        let model = fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "safe".into(),
+                    display_name: "Safe".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        let asset = model.assets[0].clone();
+        let destination = fixture.root.join(&asset.relative_path);
+        fs::remove_file(&destination).unwrap();
+        symlink(&selected_path, &destination).unwrap();
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                MediaRequest {
+                    asset_id: asset.id,
+                    purpose: MediaPurpose::ImagePreview
+                }
+            ),
+            Err(MediaError::UnsafeAsset)
+        );
     }
 
     #[test]

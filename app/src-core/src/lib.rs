@@ -1,5 +1,6 @@
 pub mod authoring;
 pub mod lifecycle;
+pub mod media;
 pub mod metadata;
 pub mod ports;
 pub mod renpy;
@@ -11,6 +12,7 @@ use authoring::{
     UpdateCharacterRequest, UpdateVariableRequest,
 };
 use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
+use media::MediaRequest;
 use scene::{RecoveryResolveRequest, SceneCommandRequest};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
@@ -50,6 +52,7 @@ pub const OPERATIONS: &[&str] = &[
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",
+    "media.present",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -196,6 +199,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "nodeGlobalsDenied",
         "popupRequestIssued",
         "rendererSecretsAbsent",
+        "sceneAuthoringUiPassed",
         "supportingAuthoringUiPassed",
         "welcomeLifecycleVisible",
         "newProjectWizardVisible",
@@ -204,6 +208,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
     ];
     let mut keys = BOOLEAN_KEYS.to_vec();
     keys.push("supportingAuthoringStage");
+    keys.push("sceneAuthoringStage");
     has_exact_keys(payload, &keys)
         && BOOLEAN_KEYS
             .iter()
@@ -212,6 +217,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
             .get("supportingAuthoringStage")
             .and_then(Value::as_str)
             == Some("complete")
+        && payload.get("sceneAuthoringStage").and_then(Value::as_str) == Some("complete")
 }
 
 pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
@@ -440,6 +446,14 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
             .and_then(to_value),
+        "media.present" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<MediaRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Media(media::MediaError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.media_present(payload))
+            .and_then(to_value),
         "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
                 request_id,
@@ -541,7 +555,39 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
         LifecycleError::Scene(error) => return scene_failure(request_id, error),
+        LifecycleError::Media(error) => return media_failure(request_id, error),
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
+    };
+    CoreResponse::failure(request_id, code, message)
+}
+
+fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
+    use media::MediaError::*;
+    let (code, message) = match error {
+        InvalidPayload => ("INVALID_PAYLOAD", "The media request is invalid."),
+        UnknownAsset => ("UNKNOWN_ASSET", "The selected media item is unavailable."),
+        UnsafeAsset => ("UNSAFE_MEDIA", "The media path or file identity is unsafe."),
+        UnsupportedFormat => (
+            "UNSUPPORTED_MEDIA",
+            "This passive media format is not supported for presentation.",
+        ),
+        Oversize => (
+            "MEDIA_TOO_LARGE",
+            "The media exceeds the 16 MiB presentation limit.",
+        ),
+        InvalidDimensions => (
+            "INVALID_MEDIA_DIMENSIONS",
+            "The image dimensions are invalid or exceed 8192 pixels.",
+        ),
+        SourceConflict => (
+            "MEDIA_CHANGED",
+            "The media changed after it was imported. Revalidate it before presentation.",
+        ),
+        RecoveryRequired => (
+            "RECOVERY_REQUIRED",
+            "Project recovery must be resolved before media can be presented.",
+        ),
+        Io => ("MEDIA_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
 }
@@ -736,6 +782,16 @@ mod tests {
                 json!({ "technicalName": "score", "variableType": "int", "defaultValue": "1" }),
                 "STALE_PROJECT_SESSION",
             ),
+            (
+                "media.present",
+                json!({ "sessionId": "stale", "assetId": uuid::Uuid::new_v4().to_string(), "purpose": "thumbnail" }),
+                "STALE_PROJECT_SESSION",
+            ),
+            (
+                "media.present",
+                json!({ "sessionId": "stale", "assetId": uuid::Uuid::new_v4().to_string(), "purpose": "thumbnail", "path": "../outside" }),
+                "STALE_PROJECT_SESSION",
+            ),
         ] {
             let response = response_json(handle_application_request(
                 request(operation, payload),
@@ -771,6 +827,8 @@ mod tests {
             "nodeGlobalsDenied": true,
             "popupRequestIssued": true,
             "rendererSecretsAbsent": true,
+            "sceneAuthoringStage": "complete",
+            "sceneAuthoringUiPassed": true,
             "supportingAuthoringStage": "complete",
             "supportingAuthoringUiPassed": true,
             "welcomeLifecycleVisible": true,

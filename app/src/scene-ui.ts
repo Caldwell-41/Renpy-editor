@@ -46,8 +46,8 @@ export interface SceneDocument {
 
 interface Chapter { readonly id: string; readonly displayName: string; readonly directory: string }
 interface Character { readonly id: string; readonly displayName: string; readonly technicalName: string }
-interface Appearance { readonly id: string; readonly characterId: string; readonly label: string }
-interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "music" | "sfx"; readonly displayName: string; readonly status: string }
+interface Appearance { readonly id: string; readonly characterId: string; readonly label: string; readonly assetId?: string }
+interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "music" | "sfx"; readonly displayName: string; readonly status: string; readonly sha256?: string }
 interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string"; readonly defaultValue: boolean | string }
 
 export interface SceneWorkspace {
@@ -67,6 +67,86 @@ export interface SceneWorkspace {
   readonly canRedo: boolean;
 }
 
+export interface MediaPresentation {
+  readonly assetId: string;
+  readonly purpose: "thumbnail" | "imagePreview" | "audioAudition";
+  readonly mimeType: string;
+  readonly dataBase64: string;
+  readonly sha256: string;
+  readonly byteCount: number;
+  readonly width?: number;
+  readonly height?: number;
+  readonly cacheKey: string;
+}
+
+export interface PreviewCharacter {
+  readonly characterId: string;
+  readonly appearanceId: string;
+  readonly placement: PlacementRef;
+  readonly visibleBeatId: string;
+  readonly appearanceBeatId: string;
+  readonly placementBeatId: string;
+}
+
+export interface ScenePreviewState {
+  readonly throughBeatId?: string;
+  readonly partial: boolean;
+  readonly unknownBeatIds: readonly string[];
+  readonly background?: { readonly assetId: string; readonly beatId: string };
+  readonly backgroundUnknown: boolean;
+  readonly characters: readonly PreviewCharacter[];
+  readonly charactersUnknown: boolean;
+  readonly music?: { readonly assetId: string; readonly beatId: string };
+  readonly musicUnknown: boolean;
+  readonly variables: Readonly<Record<string, { readonly value: boolean | string; readonly beatId: string }>>;
+  readonly variablesUnknown: boolean;
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "return"; readonly text: string; readonly beatId: string };
+}
+
+export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string): ScenePreviewState {
+  const stop = throughBeatId === undefined ? scene.beats.length - 1 : scene.beats.findIndex((beat) => beat.id === throughBeatId);
+  const limit = stop < 0 ? scene.beats.length - 1 : stop;
+  let background: ScenePreviewState["background"];
+  let backgroundUnknown = false;
+  let characters: PreviewCharacter[] = [];
+  let charactersUnknown = false;
+  let music: ScenePreviewState["music"];
+  let musicUnknown = false;
+  let variables: Record<string, { value: boolean | string; beatId: string }> = {};
+  let variablesUnknown = false;
+  let overlay: ScenePreviewState["overlay"];
+  const unknownBeatIds: string[] = [];
+  for (const beat of scene.beats.slice(0, limit + 1)) {
+    const payload = beat.payload;
+    if (payload.type === "customCode") {
+      unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
+      characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
+      variables = {}; variablesUnknown = true; overlay = undefined; continue;
+    }
+    switch (payload.type) {
+      case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; break;
+      case "showCharacter": {
+        characters = characters.filter((item) => item.characterId !== payload.characterId);
+        characters.push({ characterId: payload.characterId, appearanceId: payload.appearanceId, placement: payload.placement, visibleBeatId: beat.id, appearanceBeatId: beat.id, placementBeatId: beat.id });
+        break;
+      }
+      case "hideCharacter": characters = characters.filter((item) => item.characterId !== payload.characterId); break;
+      case "changeAppearance": characters = characters.map((item) => item.characterId === payload.characterId ? { ...item, appearanceId: payload.appearanceId, appearanceBeatId: beat.id } : item); break;
+      case "placement": characters = characters.map((item) => item.characterId === payload.characterId ? { ...item, placement: payload.placement, placementBeatId: beat.id } : item); break;
+      case "playMusic": music = { assetId: payload.assetId, beatId: beat.id }; musicUnknown = false; break;
+      case "stopMusic": music = undefined; musicUnknown = false; break;
+      case "setVariable": variables[payload.variableId] = { value: payload.value, beatId: beat.id }; break;
+      case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
+      case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", text: payload.options.map((option) => option.text).join(" · "), beatId: beat.id }; break;
+      case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
+      case "return": overlay = { kind: "return", text: "Return / End", beatId: beat.id }; break;
+      case "playSfx": case "transition": break;
+    }
+  }
+  return { throughBeatId: scene.beats[limit]?.id, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
+}
+
 export type SceneCommand = Readonly<Record<string, unknown>> & { readonly type: string };
 
 export interface RecoveryEvidence { readonly path: string; readonly acceptedRetained: boolean; readonly displacedRetained: boolean }
@@ -83,6 +163,8 @@ export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 export interface SceneActions {
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
+  readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
+  readonly resolution: { readonly width: number; readonly height: number };
 }
 
 export interface RecoveryActions {
@@ -171,14 +253,26 @@ function friendlyError(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 
+function presentationUrl(media: MediaPresentation): string {
+  const binary = atob(media.dataBase64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return URL.createObjectURL(new Blob([bytes], { type: media.mimeType }));
+}
+
 export function renderSceneAuthoring(
   host: HTMLElement,
   treeHost: HTMLElement,
   initial: SceneWorkspace,
   actions: SceneActions,
-): void {
+): () => void {
   let model = initial;
   let selectedBeatId: string | undefined;
+  let mediaGeneration = 0;
+  const imageCache = new Map<string, { readonly key: string; readonly url: string }>();
+  const pendingImages = new Map<string, Promise<MediaPresentation>>();
+  const audioUrls = new Set<string>();
+  let disposed = false;
 
   const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void): Promise<void> => {
     const before = model;
@@ -203,6 +297,9 @@ export function renderSceneAuthoring(
   };
 
   const draw = (): void => {
+    mediaGeneration += 1;
+    for (const url of audioUrls) URL.revokeObjectURL?.(url);
+    audioUrls.clear();
     treeHost.replaceChildren();
     host.replaceChildren();
     const selectedScene = model.scenes.find((scene) => scene.id === model.lastOpen.sceneId) ?? model.scenes[0];
@@ -265,6 +362,100 @@ export function renderSceneAuthoring(
     });
   };
 
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
+    if (!draftGuard()) return;
+    selectedBeatId = undefined;
+    draw();
+    const current = model.scenes.find((item) => item.id === scene.id);
+    const list = host.querySelector<HTMLElement>(".beats-list");
+    if (current && list) renderNewBeat(list, current, initialType);
+  };
+
+  const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
+    const generation = mediaGeneration;
+    const assetHash = model.authoring.assets.find((asset) => asset.id === assetId)?.sha256;
+    const cached = imageCache.get(assetId);
+    if (cached && assetHash && cached.key.endsWith(assetHash)) { image.src = cached.url; return; }
+    if (cached) { URL.revokeObjectURL(cached.url); imageCache.delete(assetId); }
+    try {
+      let pending = pendingImages.get(assetId);
+      if (!pending) {
+        pending = actions.present(assetId, purpose);
+        pendingImages.set(assetId, pending);
+        void pending.then(() => pendingImages.delete(assetId), () => pendingImages.delete(assetId));
+      }
+      const media = await pending;
+      if (disposed || generation !== mediaGeneration || !image.isConnected) return;
+      const url = presentationUrl(media);
+      const replaced = imageCache.get(assetId);
+      if (replaced) URL.revokeObjectURL(replaced.url);
+      imageCache.set(assetId, { key: media.cacheKey, url }); image.src = url;
+    } catch (error) {
+      if (disposed || generation !== mediaGeneration || !errorHost.isConnected) return;
+      image.remove(); const message = document.createElement("span"); message.className = "preview-media-error"; message.textContent = friendlyError(error, "Media unavailable"); errorHost.append(message);
+    }
+  };
+
+  const audition = async (assetId: string, hostElement: HTMLElement, trigger: HTMLButtonElement): Promise<void> => {
+    const generation = mediaGeneration; trigger.disabled = true; actions.status("Preparing audio audition…");
+    try {
+      const media = await actions.present(assetId, "audioAudition");
+      if (disposed || generation !== mediaGeneration || !hostElement.isConnected) return;
+      const url = presentationUrl(media); audioUrls.add(url);
+      const audio = document.createElement("audio"); audio.controls = true; audio.autoplay = true; audio.src = url; audio.addEventListener("ended", () => { URL.revokeObjectURL(url); audioUrls.delete(url); });
+      hostElement.replaceChildren(audio); actions.status("Audio audition started by user");
+    } catch (error) { if (generation === mediaGeneration) { trigger.disabled = false; actions.status(friendlyError(error, "Audio audition unavailable"), "error"); trigger.focus(); } }
+  };
+
+  const renderPreview = (preview: HTMLElement, scene: SceneDocument): void => {
+    const state = deriveScenePreview(scene, selectedBeatId);
+    const selectedIndex = state.throughBeatId ? scene.beats.findIndex((beat) => beat.id === state.throughBeatId) : scene.beats.length - 1;
+    const header = document.createElement("div"); header.className = "preview-header";
+    const heading = document.createElement("h2"); heading.textContent = "Scene Preview";
+    const through = document.createElement("span"); through.textContent = selectedIndex >= 0 ? `Through Beat ${selectedIndex + 1}` : "Scene start";
+    if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; header.append(heading, through, badge); } else header.append(heading, through);
+    const surround = document.createElement("div"); surround.className = "preview-surround";
+    const canvas = document.createElement("div"); canvas.className = "preview-canvas"; canvas.style.aspectRatio = `${actions.resolution.width} / ${actions.resolution.height}`;
+    if (state.background) {
+      const image = document.createElement("img"); image.className = "preview-background"; image.alt = model.authoring.assets.find((asset) => asset.id === state.background?.assetId)?.displayName ?? "Scene background";
+      canvas.append(image); void loadImage(state.background.assetId, "imagePreview", image, canvas);
+    } else {
+      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after Custom Code" : "No background at this point"; canvas.append(empty);
+    }
+    for (const visible of state.characters) {
+      const figure = document.createElement("figure"); figure.className = `preview-character ${visible.placement}`;
+      const appearance = model.authoring.appearances.find((item) => item.id === visible.appearanceId);
+      const character = model.authoring.characters.find((item) => item.id === visible.characterId);
+      if (appearance?.assetId) { const image = document.createElement("img"); image.alt = `${character?.displayName ?? "Character"} — ${appearance.label}`; figure.append(image); void loadImage(appearance.assetId, "imagePreview", image, figure); }
+      const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
+    }
+    if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
+    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind); canvas.append(overlay); }
+    surround.append(canvas); preview.append(header, surround);
+
+    const details = document.createElement("div"); details.className = "preview-details";
+    const provenance = document.createElement("div"); provenance.className = "preview-provenance";
+    const provenanceHeading = document.createElement("h3"); provenanceHeading.textContent = "Visible state and provenance"; provenance.append(provenanceHeading);
+    const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
+      const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
+      if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
+      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType)); row.append(add); provenance.append(row);
+    };
+    contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
+    state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
+    contribution(state.musicUnknown ? "Music · unknown" : "Music", state.music?.beatId, "playMusic");
+    const knownVariables = Object.entries(state.variables); knownVariables.forEach(([id, value]) => contribution(`Variable ${model.authoring.variables.find((item) => item.id === id)?.technicalName ?? id} = ${String(value.value)}`, value.beatId, "setVariable"));
+    if (state.variablesUnknown && !knownVariables.length) { const unknown = document.createElement("p"); unknown.className = "muted"; unknown.textContent = "Variable state is unknown after Custom Code."; provenance.append(unknown); }
+    details.append(provenance);
+    const media = document.createElement("div"); media.className = "preview-media"; const mediaHeading = document.createElement("h3"); mediaHeading.textContent = "Scene media"; media.append(mediaHeading);
+    const referenced = new Set<string>(); if (state.background) referenced.add(state.background.assetId); state.characters.forEach((character) => { const assetId = model.authoring.appearances.find((item) => item.id === character.appearanceId)?.assetId; if (assetId) referenced.add(assetId); });
+    for (const assetId of referenced) { const tile = document.createElement("div"); tile.className = "asset-thumbnail"; const image = document.createElement("img"); const asset = model.authoring.assets.find((item) => item.id === assetId); image.alt = asset?.displayName ?? "Asset thumbnail"; const label = document.createElement("span"); label.textContent = asset?.displayName ?? "Asset"; tile.append(image, label); media.append(tile); void loadImage(assetId, "thumbnail", image, tile); }
+    const selectedBeat = scene.beats.find((beat) => beat.id === selectedBeatId);
+    const audible = selectedBeat?.payload.type === "playSfx" ? selectedBeat.payload.assetId : state.music?.assetId;
+    if (audible) { const audioHost = document.createElement("div"); audioHost.className = "audio-audition"; const play = button(selectedBeat?.payload.type === "playSfx" ? "Audition selected SFX" : "Audition current music"); play.addEventListener("click", () => void audition(audible, audioHost, play)); media.append(play, audioHost); }
+    details.append(media); preview.append(details);
+  };
+
   const drawBeats = (scene: SceneDocument): void => {
     const header = document.createElement("header"); header.className = "scene-header";
     const titleBlock = document.createElement("div");
@@ -284,12 +475,19 @@ export function renderSceneAuthoring(
     } else if (scene.partial) {
       const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = "Preview and reference certainty are partial because this Scene contains protected Custom Code."; host.append(partial);
     }
+    const stack = document.createElement("div"); stack.className = "scene-stack";
+    const preview = document.createElement("section"); preview.className = "preview-region"; preview.setAttribute("aria-label", "Scene Preview");
+    const beatsRegion = document.createElement("section"); beatsRegion.className = "beats-region"; beatsRegion.setAttribute("aria-label", "Beats writing surface");
+    stack.append(preview, beatsRegion); host.append(stack); renderPreview(preview, scene);
     const toolbar = document.createElement("div"); toolbar.className = "beats-toolbar";
     const heading = document.createElement("h2"); heading.textContent = "Beats";
     const add = button("Add Beat", "button primary"); add.disabled = scene.sourceConflict;
-    add.addEventListener("click", () => { selectedBeatId = undefined; draw(); const current = model.scenes.find((item) => item.id === model.lastOpen.sceneId); if (current) renderNewBeat(host.querySelector(".beats-list")!, current); });
-    toolbar.append(heading, add); host.append(toolbar);
-    const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); host.append(list);
+    add.addEventListener("click", () => openNewBeat(scene));
+    const allocation = document.createElement("input"); allocation.type = "range"; allocation.min = "35"; allocation.max = "70"; allocation.value = "52"; allocation.ariaLabel = "Preview vertical allocation";
+    allocation.addEventListener("input", () => { stack.style.setProperty("--preview-share", `${allocation.value}fr`); stack.style.setProperty("--beats-share", `${100 - Number(allocation.value)}fr`); });
+    const tools = document.createElement("div"); tools.className = "beats-tools"; tools.append(labelled("Preview size", allocation), add);
+    toolbar.append(heading, tools); beatsRegion.append(toolbar);
+    const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
     scene.beats.forEach((beat, index) => {
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");
       const compact = document.createElement("div"); compact.className = "beat-compact";
@@ -368,12 +566,12 @@ export function renderSceneAuthoring(
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
     if (list.querySelector(".new-beat")) return;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
     const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
-    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), "dialogue");
+    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType);
     const editorHost = document.createElement("div");
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model));
     const replaceEditor = (): void => { editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model)); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
@@ -395,6 +593,15 @@ export function renderSceneAuthoring(
   };
 
   draw();
+  return () => {
+    disposed = true;
+    mediaGeneration += 1;
+    pendingImages.clear();
+    for (const image of imageCache.values()) URL.revokeObjectURL(image.url);
+    imageCache.clear();
+    for (const url of audioUrls) URL.revokeObjectURL?.(url);
+    audioUrls.clear();
+  };
 }
 
 function inlineName(host: HTMLElement, label: string, current: string, commit: (value: string) => Promise<void>): void {
