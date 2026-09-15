@@ -52,7 +52,9 @@ to compile/package the desktop crate, so that limitation is not target evidence.
 - lossless-source suite: 26 passed; SDK spike suite: 24 passed.
 - `npm run check`: 7 passed; `npm run build`: passed.
 - `cargo test -p loomlight-core --release --locked`: 96 passed, 4 ignored
-  (subprocess workers and the official-SDK environment gate).
+  subprocess workers. The official-SDK test returned its explicit no-archive skip
+  marker on this host; it is not counted as target evidence despite the test harness
+  reporting the wrapper as passed.
 - `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings`: passed.
 - Full workspace/desktop Clippy, desktop tests, and packaging are unavailable on this
   Linux host because `pkg-config`/GLib/GTK/WebKit development packages are absent.
