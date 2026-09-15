@@ -240,3 +240,21 @@ Production run 34801268319 remains historical evidence for the preceding parent/
 `Prepared`, and terminal-`Rejected` correction. The original Phase 1B run 34797222616
 and corrective run 34800849992 also remain historical/failed evidence as documented in
 the archived corrective task; no skipped step is reclassified as passing.
+
+## Integrated corrective contract
+
+All public write entry points, including ordinary commits and streaming imports,
+perform blocking-recovery preflight while holding the same transaction serialization
+lock used by flush and recovery finalisation. Status scanning is read-only and never
+acknowledges recovery. Terminal durable/rejected/cleaned journals are checksum/schema
+validated without reopening and hashing historical media; unresolved journals still
+receive detailed bounded inspection and fail closed.
+
+Revision verification and recovery hashing read incrementally with a 1 MiB buffer.
+Small mutation snapshots remain capped at 16 MiB, journals at 1 MiB, and recovery
+mutation count at 4096. The 512 MiB media maximum is enforced while streaming.
+
+Native selections retain an anchored parent directory and open the regular file
+descriptor-relative with no-follow/reparse-safe semantics. The retained selected
+handle supplies every imported byte; later path inspection detects replacement but
+cannot redirect the copy.

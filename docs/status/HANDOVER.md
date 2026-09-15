@@ -1,31 +1,34 @@
 # Phase 1 planning handover
 
 **Prepared:** 2026-09-15<br>
-**Phase:** Phase 1D complete; Phase 1E not approved<br>
+**Phase:** Phase 1A–1D integrated corrective checkpoint open; Phase 1E not approved<br>
 **Repository:** `Caldwell-41/Renpy-editor` (confirmed public)<br>
 **Branch:** `main`
 
 ## Read first
 
 1. [`AGENTS.md`](../../AGENTS.md)
-2. [Current status](CURRENT.md)
-3. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
-4. [Completed Phase 1D supporting authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md)
-5. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
-5. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
-6. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
-7. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
-8. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
-9. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-10. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-11. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
-12. [ADR 0001](../adr/0001-lossless-source-model.md),
+2. [Active integrated corrective task](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md)
+3. [Current status](CURRENT.md)
+4. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
+5. [Completed Phase 1D supporting authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md)
+6. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
+7. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)
+8. [Completed earlier Phase 1C corrective remediation](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
+9. [Completed Phase 1C lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
+10. [Completed Phase 1 production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md)
+11. [Completed Phase 1B corrective remediation](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
+12. [Original Phase 1B transaction/recovery record](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
+13. [UI](../UI.md), [data model](../DATA_MODEL.md), and [architecture](../ARCHITECTURE.md)
+14. [ADR 0001](../adr/0001-lossless-source-model.md),
    [ADR 0002](../adr/0002-versioned-renpy-sdk-adapter.md), and
    [ADR 0003](../adr/0003-tauri-desktop-runtime.md), and
    [ADR 0005](../adr/0005-staged-project-creation.md)
 
-The approved product brief remains authoritative. Phase 1D is complete. Phase 1E and
-every later milestone still require a new explicit instruction.
+The approved corrective brief is the current bounded task. Its implementation is
+locally coherent, but the checkpoint remains open until the final Windows x64/macOS
+ARM64 production gate passes and evidence is recorded. Phase 1E and every later
+milestone still require a new explicit instruction.
 
 ## Completed Phase 1D checkpoint
 

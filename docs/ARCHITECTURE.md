@@ -302,3 +302,12 @@ turn those decisions into production services and recovery UX. Manual assistive-
 technology, physical signing/quarantine/SmartScreen, system-WebView variance, and full
 automatic graph-layout performance remain explicit later validation risks; they do
 not reopen the completed Phase 0 decision without contradictory evidence.
+
+## Corrective project-session handoff
+
+Each successful activation issues an opaque session ID distinct from the stable
+project UUID. Authoring, import selection/use, persistence status, flush, and close
+require the exact current session while lifecycle dispatch is serialized. A candidate
+retains the directory authority acquired during inspection and is recovery-checked
+before replacing the current session; failed activation leaves the prior project
+active. Renderer navigation generations discard late results from replaced sessions.

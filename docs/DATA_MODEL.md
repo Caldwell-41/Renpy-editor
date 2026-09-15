@@ -251,3 +251,18 @@ is one atomically replaced JSON object: an interrupted pre-commit update retains
 previous complete schema version, while a committed replacement is verified before
 the lifecycle operation reports success. Stale sibling temporaries are not data-model
 inputs and are never broadly deleted during an unrelated update.
+
+## Corrective Phase 1D value and asset contracts
+
+New background and character-appearance filenames use lowercase space-separated
+Ren'Py image names (for example `bg cafe.png` and `alice happy.png`), because
+underscores remain part of a Ren'Py image token. WAV/MP3/OGG audio uses identifier
+filenames; FLAC receives an explicit `define audio.<name>` declaration because it is
+not part of automatic audio-namespace discovery. Physical inventory derives status
+from current path, size, and SHA-256 evidence. Legacy underscored images keep their
+paths and stable UUIDs and become compatible only through explicit transactional
+declarations.
+
+Phase 1 integer values cross renderer IPC as canonical signed decimal strings. The
+core rejects whitespace, `+`, leading zeroes, `-0`, fractions, exponent/hex forms, and
+values outside signed 64-bit range; strings remain a distinct typed value.

@@ -112,3 +112,16 @@ persistent transition. Target-platform corrective evidence is recorded in the Ph
 1B remediation task when the gate re-closes.
 
 See [the transaction contract](../TRANSACTIONS.md).
+
+## Integrated corrective amendment — readiness and bounded inspection
+
+Every write entry point now establishes recovery readiness inside the transaction
+serialization boundary. Flush and recovery finalisation use the same linearization
+boundary, while status is read-only and never acknowledges evidence. Full-content
+media verification and unresolved recovery inspection hash incrementally. Terminal
+journals remain validated but their historical media is not rehashed during routine
+readiness checks.
+
+Native-selected imports retain an anchored parent and open the selected regular file
+descriptor-relative with no-follow/reparse-safe platform semantics. The selected
+handle supplies all imported bytes; later path inspection cannot redirect the copy.

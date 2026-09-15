@@ -1,10 +1,19 @@
 # Current status
 
 **Updated:** 2026-09-15<br>
-**Phase:** Phase 1D complete; Phase 1E not approved<br>
+**Phase:** Phase 1A–1D integrated corrective checkpoint open; Phase 1E not approved<br>
 **Working codename:** Project Loomlight (temporary)
 
 ## Current truth
+
+- The bounded [Phase 1A–1D integrated corrective checkpoint](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md)
+  is implemented locally but remains open pending the required Windows x64/macOS ARM64
+  production evidence. It corrects recovery serialization/bounded inspection, safe
+  candidate activation and session authority, exact source/metadata validation,
+  truthful Ren'Py asset discovery/physical status, retained import-parent authority,
+  exact signed-64 integer transport, and read-only persistence status plus explicit
+  flush. Historical Phase 1D closure remains evidence for its commit, not closure of
+  this later integrated review. Phase 1E remains unapproved and unstarted.
 
 - Phase 1D is complete. The
   [archived task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) records

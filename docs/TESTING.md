@@ -314,6 +314,16 @@ bool/int/string Variables; it then closes/reopens, edits again, compile/lints, r
 tests a metadata-free copy, packages, probes WebView denial, scans secrets, and records
 the dependency inventory. No duplicate matrix is introduced.
 
+The integrated corrective suite additionally covers direct ordinary-write recovery
+blocking, zero historical-media reads during terminal readiness scans, streaming
+subprocess termination boundaries, failed-switch preservation, root/session
+substitution, stale/reopened sessions, exact statement matching after external edits,
+semantic metadata corruption, signed-64 decimal boundaries, physical asset status and
+collision, legacy compatibility declarations, and FLAC explicit mapping. The target
+gate must exercise actual imported assets in the pinned SDK with metadata removed from
+a disposable copy. Core-only Linux results do not replace Windows reparse/macOS
+descriptor, desktop package, or real WebView handler/DOM evidence.
+
 ## Required quality gate by change type
 
 | Change | Minimum gate |

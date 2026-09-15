@@ -520,3 +520,15 @@ structured data reviewed through semantic/file diffs.
 - Beat reordering has keyboard alternatives to drag handles; asset/Scene/choice
   selection remains keyboard searchable.
 - Narrow windows protect dialogue/Beats readability before preview size.
+
+## Corrective persistence and exact-value behavior
+
+The Phase 1D shell obtains persistence truth from a read-only current-session status
+request; rendering a view never implies Saved. `Ctrl/Cmd+S` invokes the separate
+current-session flush operation. Conflict, recovery-required, validation, and stale-
+session failures remain visible, while late navigation results are ignored.
+
+Create/edit boolean input is explicit and integer text is validated losslessly before
+IPC rather than coerced through JavaScript `Number`. Character, appearance, and
+variable editing use labelled in-application editors that preserve their inputs after
+failure; browser prompts are not part of the supporting authoring flow.
