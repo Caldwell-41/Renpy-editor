@@ -2920,25 +2920,6 @@ mod tests {
             96, 130,
         ];
         let mut wav = b"RIFF\x26\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x80\x3e\x00\x00\x02\x00\x10\x00data\x02\x00\x00\x00\x00\x00".to_vec();
-        let changed_selection = media.join("changed-after-selection.png");
-        fs::write(&changed_selection, png).unwrap();
-        let selected = service.authoring_select_import(&changed_selection).unwrap();
-        let mut changed = png.to_vec();
-        let changed_last = changed.len() - 1;
-        changed[changed_last] ^= 1;
-        fs::write(&changed_selection, changed).unwrap();
-        assert!(service
-            .authoring_import_asset(ImportAssetRequest {
-                authority_id: selected.authority_id,
-                kind: crate::authoring::AssetKind::Background,
-                technical_name: "race_probe".into(),
-                display_name: "Race probe".into(),
-                character_id: None,
-                expression: None,
-            })
-            .is_err());
-        assert!(!final_root.join("game/images/bg race_probe.png").exists());
-        println!("phase-1d-import-authority-gate: passed");
         let mut import_media = |filename: &str,
                                 bytes: &[u8],
                                 kind: crate::authoring::AssetKind,
@@ -3027,7 +3008,7 @@ mod tests {
         assert_eq!(authored.characters.len(), 2);
         assert_eq!(authored.appearances.len(), 3);
         assert_eq!(authored.assets.len(), 6);
-        assert_eq!(authored.variables.len(), 3);
+        assert_eq!(authored.variables.len(), 4);
         let stable_ids = authored
             .characters
             .iter()
@@ -3126,6 +3107,32 @@ mod tests {
             service.open_path(&arbitrary),
             Err(LifecycleError::InvalidMetadata)
         ));
+
+        // Run the deliberately interrupted streaming-import probe only after every
+        // normal lifecycle assertion. A persisted partial is expected to require
+        // recovery and must not poison the successful authoring fixture prematurely.
+        let changed_selection = media.join("changed-after-selection.png");
+        fs::write(&changed_selection, png).unwrap();
+        let selected = service.authoring_select_import(&changed_selection).unwrap();
+        let mut changed = png.to_vec();
+        let changed_last = changed.len() - 1;
+        changed[changed_last] ^= 1;
+        fs::write(&changed_selection, changed).unwrap();
+        assert!(matches!(
+            service.authoring_import_asset(ImportAssetRequest {
+                authority_id: selected.authority_id,
+                kind: crate::authoring::AssetKind::Background,
+                technical_name: "race_probe".into(),
+                display_name: "Race probe".into(),
+                character_id: None,
+                expression: None,
+            }),
+            Err(LifecycleError::Authoring(
+                crate::authoring::AuthoringError::RecoveryRequired
+            ))
+        ));
+        assert!(!final_root.join("game/images/bg race_probe.png").exists());
+        println!("phase-1d-import-authority-gate: passed");
         println!("phase-1c-target-gate: passed");
         println!("phase-1d-target-gate: passed");
         println!("phase-1d-corrective-target-gate: passed");
