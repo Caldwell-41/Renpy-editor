@@ -1,7 +1,7 @@
 # Phase 1E Scene authoring execution ledger
 
 **Opened:** 2026-09-16  
-**Status:** 1E.1, 1E.2, and 1E.3 closed locally; final supported-target gate pending
+**Status:** Completed — 1E.1, 1E.2, 1E.3, local, and supported-target gates passed; PR #9 awaits integration
 **Branch:** `feature/phase-1e-scene-authoring`  
 **Base:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`
 
@@ -157,11 +157,11 @@ truthfully rather than reconstructing semantic intent from retained recovery jou
 
 ## Final supported-target closure
 
-**Status:** Pending supported-target production evidence
+**Status:** Closed on the final application candidate
 
-The final changed application tree will receive one complete production run on
+The final changed application tree received one complete production run on
 Windows x86-64 and macOS Apple Silicon ARM64. Failed, cancelled, and skipped evidence
-will remain explicit. The brief will be archived only after all gates pass.
+remains explicit. This brief was archived only after all gates passed.
 
 The first final candidate run, GitHub Actions `35016250068`, failed independently on
 the two targets and is retained as failed evidence:
@@ -204,7 +204,37 @@ passed 26 lossless-source and 24 SDK-boundary tests, recorded a 111.66 ms source
 benchmark median, passed all 16 frontend tests and the production build, passed 134
 core tests with four intentional worker ignores, and passed strict core Clippy, Rust
 formatting, smoke-probe syntax, and `git diff --check`. A further complete
-supported-target run is required.
+supported-target run was then performed.
+
+Final production run `35023049519` passed at exact remote application candidate
+`a32a790499900d3f3231b3e212a77fab70564e01`, tree
+`1bf03d20d350af819c6bb7cdc4c9c35f3f0b3cbb`:
+
+- Windows x64 job `104563305510` passed 16 frontend tests, 128 platform-applicable
+  core tests with four intentional worker ignores, the official-SDK Phase 1C through
+  1E fixture, managed-SDK handoff, desktop Rust tests, production packaging, packaged
+  WebView/single-instance/Scene authoring, privacy scan, and dependency inventory.
+- macOS ARM64 job `104563305803` passed 16 frontend tests, 134 core tests with four
+  intentional worker ignores, the same official-SDK, handoff, desktop, production
+  package, packaged WebView/Scene, privacy, and inventory gates.
+- Both packaged reports recorded `sceneAuthoringStage: complete`,
+  `sceneAuthoringUiPassed: true`, `supportingAuthoringStage: complete`, and
+  `supportingAuthoringUiPassed: true`. The cache-miss SDK download step alone was
+  skipped because each runner restored the pinned official archive; the SDK fixtures
+  themselves ran and passed.
+
+Retained artifacts:
+
+| Target | Evidence artifact | Digest | Package artifact | Digest |
+| --- | --- | --- | --- | --- |
+| Windows x64 | `10418698228` | `sha256:b9f5e0fc21243b23c9ea95a286e1797e6b35812abfc5fe13f88e49ff54180776` | `10418733085` | `sha256:bd285931f14d223f88755eaca96906f503a24ca14918b87e2973dce427b93689` |
+| macOS ARM64 | `10418098157` | `sha256:d3bd30dd93db8b87c6f2ae9bb3cf7421e134b26b62a0c10e94918aa605163ebc` | `10418093172` | `sha256:a126abf27920382c42b2f76951c09dd1419c0adc8e1f96197f9d7740bb1c0407` |
+
+Automatic repository-quality runs `35022880859` (push) and `35022884889` (PR)
+also passed on the same commit. Run `35016121069` was an accidental main-branch
+dispatch cancelled before completion and is not evidence. Runs `35016250068` and
+`35021344119` remain failed evidence with their distinct root causes and corrections
+recorded above; none is reclassified as a pass.
 
 ## Decisions and retained limitations
 

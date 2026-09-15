@@ -8,7 +8,9 @@ The historical Phase 1A–1D implementations and their integrated correction are
 through PR #7. A bounded [Phase 1D UI operation/Flush follow-up](tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
 passed its local and supported-target gates after a post-merge review found one
 truthful-persistence race, then merged through PR #8 with post-merge gates passed.
-Phase 1E/later remains separately approval-gated.
+Phase 1E Scene authoring and its ordered internal/final target gates are complete on
+PR #9; its [execution ledger](tasks/archive/2026-09-16-phase-1e-scene-authoring.md)
+retains exact evidence. Phase 1F/later remains separately approval-gated.
 
 Read the [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for
 explicit prerequisite ownership and internal gates, and [ROADMAP.md](ROADMAP.md) for
@@ -29,6 +31,7 @@ Historical status snapshots retain prior evidence, not current instructions.
 | Transaction, durability, and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Phase 1 milestone sequence and 1E prerequisites | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
+| Completed Phase 1E Scene authoring ledger | [tasks/archive/2026-09-16-phase-1e-scene-authoring.md](tasks/archive/2026-09-16-phase-1e-scene-authoring.md) |
 | Completed Phase 1D UI operation/Flush follow-up | [tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md](tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md) |
 | Completed correction execution record, R1–R7 | [tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md](tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md) |
 | Integrated correction and evidence ledger | [tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md](tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md) |

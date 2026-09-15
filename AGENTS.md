@@ -2,17 +2,14 @@
 
 ## Mission and current scope
 
-Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and the
-historical Phase 1A–1D integrated correction are merged. A bounded post-integration
-Phase 1D UI operation/Flush follow-up passed its local and supported-target gates and
-merged through PR #8 with post-merge gates passed. Read `docs/status/CURRENT.md`, its
-[completed brief](docs/tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md), and the
-[completed integrated follow-up](docs/tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md)
-for exact evidence and current guidance. Both corrective branches remain retained.
-ADR 0003 selects Tauri 2 and ADR 0005 defines version-pinned staged project creation.
-Phase 1E and later remain unapproved. Milestone-plan amendments are not execution
-approval; do not begin Scene authoring. PRs #7 and #8 are merged and must never be
-replayed.
+Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and Phase
+1A–1D are merged and accepted. Phase 1E Scene authoring and its ordered 1E.1–1E.3 plus
+supported-target gates are complete on PR #9; integration is pending. Read
+`docs/status/CURRENT.md`, the [Phase 1E brief](docs/tasks/archive/2026-09-16-phase-1e-scene-authoring.md),
+and the [Phase 1 plan](docs/tasks/active/phase-1-vertical-slice.md) for exact evidence
+and current guidance. ADR 0003 selects Tauri 2 and ADR 0005 defines version-pinned
+staged project creation. Phase 1F and later remain unapproved and unstarted. PRs #7
+and #8 are merged and must never be replayed; do not duplicate PR #9.
 
 ## Invariants
 

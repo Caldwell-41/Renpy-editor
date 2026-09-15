@@ -21,7 +21,7 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** historical 1A–1D implementations and their integrated corrective checkpoint are accepted. Phase 1E–1H are unapproved and unstarted. The [integrated record](tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and [completed follow-up](tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md) retain exact closure evidence; they do not approve later work.
+**Status:** Phase 1A–1D and their corrective integration are accepted. Phase 1E implementation and its three internal/final target gates are complete on PR #9; integration is pending. Phase 1F–1H are unapproved and unstarted. The [Phase 1E ledger](tasks/archive/2026-09-16-phase-1e-scene-authoring.md) retains exact closure evidence and does not approve later work.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, local Git checkpoint, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
