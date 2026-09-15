@@ -952,15 +952,7 @@ fn prepare_managed_sdk_install(data_root: &Path) -> Result<Option<ValidatedSdk>,
 }
 
 pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyError> {
-    if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
-        return Ok(sdk);
-    }
-    let sdk_dir = managed_sdk_directory(data_root, true)?.ok_or(RenpyError::Io)?;
-    let archive = sdk_dir.join(format!(
-        ".{SDK_ARCHIVE_NAME}.{}.partial",
-        uuid::Uuid::new_v4()
-    ));
-    let result = (|| {
+    install_supported_sdk_with_download(data_root, |archive| {
         let agent = ureq::Agent::config_builder()
             .https_only(true)
             .max_redirects(0)
@@ -979,14 +971,36 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
         let mut output = OpenOptions::new()
             .create_new(true)
             .write(true)
-            .open(&archive)
+            .open(archive)
             .map_err(|_| RenpyError::Io)?;
         let downloaded = io::copy(&mut source, &mut output).map_err(|_| RenpyError::Download)?;
         if downloaded > MAX_ARCHIVE_BYTES {
             return Err(RenpyError::Download);
         }
-        crate::transaction::flush_open_file(&output).map_err(|_| RenpyError::Io)?;
-        install_supported_sdk_from_archive(data_root, &archive)
+        crate::transaction::flush_open_file(&output).map_err(|_| RenpyError::Io)
+    })
+}
+
+// Keep download transport injectable for tests without adding a renderer operation,
+// changing the pinned endpoint/checksum, or bypassing production archive validation.
+fn install_supported_sdk_with_download<F>(
+    data_root: &Path,
+    download: F,
+) -> Result<ValidatedSdk, RenpyError>
+where
+    F: FnOnce(&Path) -> Result<(), RenpyError>,
+{
+    if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
+        return Ok(sdk);
+    }
+    let sdk_dir = managed_sdk_directory(data_root, true)?.ok_or(RenpyError::Io)?;
+    let archive = sdk_dir.join(format!(
+        ".{SDK_ARCHIVE_NAME}.{}.partial",
+        uuid::Uuid::new_v4()
+    ));
+    let result = (|| {
+        download(&archive)?;
+        install_supported_sdk_from_archive_prepared(data_root, &archive, |_| Ok(()))
     })();
     let _ = fs::remove_file(&archive);
     result
@@ -1014,7 +1028,7 @@ enum ManagedInstallCheckpoint {
 fn install_supported_sdk_from_archive_inner<F>(
     data_root: &Path,
     archive: &Path,
-    mut hook: F,
+    hook: F,
 ) -> Result<ValidatedSdk, RenpyError>
 where
     F: FnMut(ManagedInstallCheckpoint) -> Result<(), RenpyError>,
@@ -1022,6 +1036,20 @@ where
     if let Some(sdk) = prepare_managed_sdk_install(data_root)? {
         return Ok(sdk);
     }
+    install_supported_sdk_from_archive_prepared(data_root, archive, hook)
+}
+
+// Precondition: this operation already recovered prior installer debris. Calling
+// preparation again here would quarantine the operation's own downloaded .partial.
+// Public archive installs still prepare once through the wrapper above.
+fn install_supported_sdk_from_archive_prepared<F>(
+    data_root: &Path,
+    archive: &Path,
+    mut hook: F,
+) -> Result<ValidatedSdk, RenpyError>
+where
+    F: FnMut(ManagedInstallCheckpoint) -> Result<(), RenpyError>,
+{
     let sdk_dir = managed_sdk_directory(data_root, true)?.ok_or(RenpyError::Io)?;
     let destination = sdk_dir.join(MANAGED_SDK_DIR_NAME);
     let candidate = sdk_dir.join(format!("{SDK_CANDIDATE_PREFIX}{}", uuid::Uuid::new_v4()));
@@ -1839,3 +1867,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "renpy/reconciliation_tests.rs"]
+mod reconciliation_tests;
