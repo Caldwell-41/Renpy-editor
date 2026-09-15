@@ -73,7 +73,6 @@ setTimeout(async () => {
           { id: "dialogue", byteStart: 50, byteEnd: 70, protected: false, payload: { type: "dialogue", characterId: "character", text: "Hello" } },
           { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
           { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue", destinationSceneId: "scene-two" }] } },
-          { id: "return", byteStart: 130, byteEnd: 141, protected: false, payload: { type: "return" } },
         ],
       }, {
         id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",
@@ -172,6 +171,14 @@ setTimeout(async () => {
       supportingAuthoringStage = operation;
       await waitFor(() => called.has(operation), operation);
       await new Promise((resolve) => setTimeout(resolve, 20));
+    };
+    const awaitSceneCommit = async (count, description) => {
+      await waitFor(() => sceneApplyCount >= count, description);
+      await waitFor(
+        () => document.querySelector("#app-status")?.textContent === "Saved"
+          && !document.querySelector('.scene-draft[data-unsubmitted="true"]'),
+        `${description} committed render`,
+      );
     };
     const click = (label) => {
       const target = [...document.querySelectorAll("button")].find((item) => item.textContent === label);
@@ -311,7 +318,7 @@ setTimeout(async () => {
     dialogue.value = "Packaged Scene authoring";
     dialogue.dispatchEvent(new Event("input", { bubbles: true }));
     dialogue.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
-    await waitFor(() => sceneApplyCount >= 1, "Dialogue continuation transaction");
+    await awaitSceneCommit(1, "Dialogue continuation transaction");
     sceneAuthoringStage = "choice-create-scene";
     const choiceButton = [...document.querySelectorAll("button")]
       .find((item) => item.textContent?.startsWith("5. Choice"));
@@ -325,7 +332,7 @@ setTimeout(async () => {
     choiceFields[1].value = "New destination";
     choiceFields[1].dispatchEvent(new Event("input", { bubbles: true }));
     click("Create Scene and option");
-    await waitFor(() => sceneApplyCount >= 2, "Create New Scene Choice transaction");
+    await awaitSceneCommit(2, "Create New Scene Choice transaction");
     sceneAuthoringStage = "audio-audition";
     const audioBeforeClick = mediaPurposes.filter((purpose) => purpose === "audioAudition").length;
     click("Audition current music");
@@ -384,7 +391,7 @@ setTimeout(async () => {
       && called.has("media.present");
     sceneAuthoringStage = sceneAuthoringUiPassed ? "complete" : "assertions-failed";
   } catch {
-    supportingAuthoringUiPassed = false;
+    if (supportingAuthoringStage !== "complete") supportingAuthoringUiPassed = false;
     sceneAuthoringUiPassed = false;
   } finally {
     restoreSmokeRequester();

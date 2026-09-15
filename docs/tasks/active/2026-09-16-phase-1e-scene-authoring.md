@@ -184,8 +184,27 @@ four intentional subprocess-worker ignores; strict core Clippy, Rust formatting,
 `npm run check` (15/15), `npm run build`, and `git diff --check` passed. An attempted
 workspace-wide Clippy run remains an environment-limited failure because this Linux
 host lacks `pkg-config`/GTK; the repository-prescribed strict core Clippy command
-passed and is the applicable local evidence. A replacement supported-target run is
-still required.
+passed and is the applicable local evidence.
+
+Replacement run `35021344119` against remote correction commit
+`1ba459188adb725f97978ad9fd898b26bcb8cecc` cleared both original failures on both
+targets: core, the official-SDK Phase 1E Scene fixture, desktop boundary tests, and
+production packaging all passed on Windows x64 and macOS ARM64. Both jobs then failed
+the packaged WebView smoke at `choice-create-scene`. This was an independent probe
+synchronisation defect, not a shared production-service failure: the probe counted
+`scene.apply` when the request began and immediately tried to select Choice while the
+dirty pre-commit Dialogue DOM was still mounted, so the production draft guard
+correctly refused navigation. The final probe waits for both the apply count and the
+truthful `Saved`/no-unsubmitted-draft committed render before continuing. Its
+synthetic workspace now also contains one final terminal Choice rather than the
+invalid Choice-then-Return sequence, and a later Scene failure no longer erases a
+completed supporting-authoring result. The focused regression raises the frontend
+suite to 16 tests. The corrected local candidate validated 200 repository files,
+passed 26 lossless-source and 24 SDK-boundary tests, recorded a 111.66 ms source
+benchmark median, passed all 16 frontend tests and the production build, passed 134
+core tests with four intentional worker ignores, and passed strict core Clippy, Rust
+formatting, smoke-probe syntax, and `git diff --check`. A further complete
+supported-target run is required.
 
 ## Decisions and retained limitations
 

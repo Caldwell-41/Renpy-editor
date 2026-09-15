@@ -142,6 +142,15 @@ test("Phase 1E Preview and media stay bounded, responsive, and explicit", async 
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
+test("packaged Scene smoke waits for committed renders and uses one terminal Beat", async () => {
+  const source = await readFile(new URL("src-tauri/src/smoke_probe.js", sourceRoot), "utf8");
+  assert.match(source, /const awaitSceneCommit = async/);
+  assert.match(source, /#app-status[^\n]+Saved/);
+  assert.match(source, /scene-draft\[data-unsubmitted/);
+  assert.equal((source.match(/await awaitSceneCommit\(/g) ?? []).length, 2);
+  assert.doesNotMatch(source, /id: "choice"[^\n]+\n\s+\{ id: "return"/);
+});
+
 test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {
   const [configText, capabilityText, permission, manifest, backend, host] = await Promise.all([
     readFile(new URL("src-tauri/tauri.conf.json", sourceRoot), "utf8"),
