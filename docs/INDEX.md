@@ -7,8 +7,8 @@ Start with [current status](status/CURRENT.md), the
 The historical Phase 1A–1D implementations and their integrated correction are merged
 through PR #7. A bounded [Phase 1D UI operation/Flush follow-up](tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
 passed its local and supported-target gates after a post-merge review found one
-truthful-persistence race; its PR integration remains pending. Phase 1E/later remains
-separately approval-gated.
+truthful-persistence race, then merged through PR #8 with post-merge gates passed.
+Phase 1E/later remains separately approval-gated.
 
 Read the [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for
 explicit prerequisite ownership and internal gates, and [ROADMAP.md](ROADMAP.md) for

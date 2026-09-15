@@ -1,6 +1,6 @@
 # Task: Phase 1D UI operation/Flush follow-up
 
-**Status:** Completed — implementation, local gate and supported-target gate passed; PR #8 integration is tracked separately.<br>
+**Status:** Completed and integrated — implementation, local, supported-target and post-merge gates passed through PR #8.<br>
 **Baseline:** `main` at `98855eb23a284f500cd3285247738e4c5f250bcd`<br>
 **Branch:** `corrective/phase-1d-ui-operation-race`<br>
 **Scope:** One post-integration R5 correction only; Phase 1E remains unstarted.
@@ -51,14 +51,14 @@ history integration, recovery UI, Preview, Source or later work here.
 | Packaged regression | Implemented | Smoke delays Variable update, requires overlapping Flush suppression, then performs an explicit Flush |
 | Prescribed local gate | Passed | Validator 194 files; diff and smoke syntax checks passed; Python 26/26 and 24/24; frontend 8/8 plus build; core 115 passed/4 ignored; fmt and strict Clippy passed |
 | Windows x64/macOS ARM64 | Passed | Run `34992890658`: macOS ARM64 job `104461734419`; Windows x64 job `104461734679`; exact head `4f6fef7`, tree `06b5609` |
-| Integration | Pending | Draft PR #8 contains the bounded correction; do not replay PR #7 |
+| Integration | Passed | PR #8 merged with expected head `f3a9bc2` as main commit `3487f7c`; post-merge quality and production gates passed |
 
 ## Completion rule
 
 This implementation brief closes only after the final application candidate passes
 local validation, repository quality and the full existing Windows x64/macOS ARM64
 production workflow. PR integration and post-merge state remain distinct status items.
-Phase 1E still requires corrective integration to close and separate explicit approval.
+Phase 1E still requires separate explicit approval.
 
 ## Local evidence
 
@@ -96,5 +96,26 @@ Retained redacted evidence artifacts:
 | Windows x64 | `10407037260` | `sha256:b6dc1f590312e0a9e68e0b946f7b8de65a90d131b5e7c94362fc25897b261493` | `10406757979` | `sha256:d09299965767bf54cc0974e2d35f3c6046aaa47401dd3593d9a8780c35475afd` |
 
 No target failure or test skip occurred. Only the cache-miss download step was skipped
-because the verified official archive was restored from cache. PR #8 remains draft and
-unmerged at this record; integration must not be represented as complete until verified.
+because the verified official archive was restored from cache.
+
+## Integration evidence
+
+PR #8 was marked ready only after repository-quality run `34994768906` passed on final
+documentation-only head `f3a9bc27657b2b3907daed189fabbd2869205d3e`, tree
+`038ea466423437d531b6b2a3ebb184bfcf2d1044`. With `main` still at the recorded base,
+the PR merged using that expected-head guard as main commit
+`3487f7c9049c8f3bbae56edc8e36eff58c364b19`, retaining the same tree.
+
+Post-merge repository-quality run `34995109520` passed. Production run `34995109499`
+passed macOS ARM64 job `104469271124` and Windows x64 job `104469270622`, including
+the same official SDK/N1, desktop, packaging, packaged UI, privacy and dependency/
+licence gates. Automatic-push package upload was correctly skipped on both jobs;
+lightweight redacted evidence was retained:
+
+| Target | Evidence artifact | Digest |
+| --- | --- | --- |
+| macOS ARM64 | `10407338463` | `sha256:2c5e1e6f34189228ecbd31aa9b30aa3c1cbe6bf59ceb8514ded233369538cf5f` |
+| Windows x64 | `10406879143` | `sha256:44280631fe76d2bc857255e04572b5646181cde54415a246513d4073f9fc4e65` |
+
+PR #8 is merged, PR #7 was not replayed, both corrective branches and the archive tag
+remain intact, and Phase 1E was not started.

@@ -337,6 +337,11 @@ package, or real WebView handler/DOM evidence. Corrective production run `349928
 at exact head `4f6fef7`,
 tree `06b5609`, passed macOS ARM64 job `104461734419` and Windows x64 job
 `104461734679`, including those official-SDK and packaged supporting-authoring gates.
+PR #8 merged as `3487f7c`; post-merge repository-quality run `34995109520` and
+production run `34995109499` passed. The latter passed macOS ARM64 job
+`104469271124` and Windows x64 job `104469270622`. Package artifacts were correctly
+omitted on the automatic push run; retained evidence artifacts are recorded in the
+completed follow-up ledger.
 
 ## Required quality gate by change type
 

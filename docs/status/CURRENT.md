@@ -1,8 +1,8 @@
 # Current status
 
-**Updated:** 2026-09-15<br>
-**Phase:** Phase 1D UI operation/Flush correction target-complete; integration pending<br>
-**Working branch:** `corrective/phase-1d-ui-operation-race`<br>
+**Updated:** 2026-09-16<br>
+**Phase:** Phase 1A–1D corrective integration complete<br>
+**Main:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
 **Next milestone:** Phase 1E is unapproved and unstarted
 
 ## Current truth
@@ -42,8 +42,12 @@ Flush, and adds delayed success/failure DOM plus packaged regressions. Exact can
 `34992162418` and production run `34992890658`: macOS ARM64 job `104461734419` and
 Windows x64 job `104461734679` both passed the core, official SDK lifecycle/authoring/
 discovery/N1, desktop, packaging, packaged WebView/supporting-authoring, privacy and
-dependency/licence gates. PR #8 integration is pending. Phase 1E remains unapproved
-and unstarted until integration closes and separate approval is given.
+dependency/licence gates. PR #8 then merged with expected head `f3a9bc2` as main commit
+`3487f7c9049c8f3bbae56edc8e36eff58c364b19`, preserving final tree
+`038ea466423437d531b6b2a3ebb184bfcf2d1044`. Post-merge repository-quality run
+`34995109520` passed; production run `34995109499` passed macOS ARM64 job
+`104469271124` and Windows x64 job `104469270622`. Phase 1E remains unapproved and
+unstarted pending a separate goal.
 
 ## Branch reconciliation and SDK carry-forward completed
 
@@ -51,9 +55,9 @@ The user separately approved branch reconciliation. Six unchanged, already-integ
 branches were retired after fresh ancestry/tree-equivalence and open-PR checks.
 The remaining old SDK branch was reviewed, its missing download handoff selectively
 ported, and its complete history preserved under tag
-`archive/phase-1c-network-install-fix-2026-09-15` before retirement. Only main and this
-active corrective branch remained. No old branch was merged wholesale; main was not
-changed. Exact receipts are in the
+`archive/phase-1c-network-install-fix-2026-09-15` before retirement. The retained
+corrective branches remain alongside main. No old branch was merged wholesale. Exact
+receipts are in the
 [branch reconciliation record](../audits/2026-09-15-branch-reconciliation.md).
 
 SDK correction **N1** is implemented in `02fc772d93fbe6b0709691bad15a4307a0193c93`:
@@ -112,8 +116,7 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Complete guarded integration of PR #8 and verify resulting main/post-merge CI. The
-application/test/workflow tree already passed the full supported-target matrix; do not
-duplicate it for the documentation-only evidence commit. Preserve both corrective
-branches and the archive tag; do not repeat PR #7 or branch cleanup. Do not begin Phase
-1E without a separately approved goal after this corrective checkpoint closes.
+Phase 1A–1D has no remaining known correctness or integration blocker. Preserve both
+corrective branches and the archive tag; do not repeat PR #7, PR #8 or branch cleanup.
+Phase 1E may be planned or started only under a separate explicit goal; begin with its
+1E.1 prerequisites rather than collapsing 1E into one implementation.

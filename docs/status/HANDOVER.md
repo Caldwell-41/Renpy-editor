@@ -1,9 +1,9 @@
 # Phase 1 corrective and milestone-planning handover
 
-**Prepared:** 2026-09-15<br>
+**Prepared:** 2026-09-16<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
-**Required working branch:** `corrective/phase-1d-ui-operation-race`<br>
-**Checkpoint:** Bounded Phase 1D UI operation/Flush follow-up passed target gates; PR #8 integration pending
+**Main:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
+**Checkpoint:** Phase 1A–1D corrective integration and post-merge gates complete
 
 ## Read first
 
@@ -65,7 +65,9 @@ delayed packaged smoke coverage are implemented. Exact candidate `4f6fef7`, tree
 `34992890658`: macOS ARM64 job `104461734419` and Windows x64 job `104461734679`.
 Both passed the official SDK lifecycle/authoring/discovery/N1, desktop, packaging,
 packaged WebView/supporting-authoring, privacy and dependency/licence gates. PR #8
-integration remains pending.
+then merged with expected head `f3a9bc2` as main commit `3487f7c`, tree `038ea466`.
+Post-merge quality run `34995109520` and production run `34995109499` passed; the
+latter passed macOS ARM64 job `104469271124` and Windows x64 job `104469270622`.
 
 The initial local test report is retained in the integrated task. The SDK wrapper was
 skipped and desktop packaging unavailable there. Repository quality is not production
@@ -105,8 +107,7 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 links in CURRENT. Those snapshots are historical evidence and do not override this
 handover, CURRENT or the active follow-up.
 
-The next action is to verify PR #8's final documentation-only head, required checks and
-policies, mark it ready, and merge with an expected-head guard. Then verify main and
-required post-merge CI. Do not duplicate the expensive production matrix for unchanged
-application/test/workflow content. Do not start Phase 1E until that closure is recorded
-and the user separately approves 1E.
+There is no remaining known Phase 1A–1D blocker. Preserve both corrective branches and
+the archive tag, and do not replay PR #7 or PR #8. Phase 1E remains unapproved until a
+separate explicit goal; when approved, begin with the ordered 1E.1 prerequisites in the
+active Phase 1 plan.
