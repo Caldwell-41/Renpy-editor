@@ -4,7 +4,7 @@ Repository: https://github.com/Caldwell-41/Renpy-editor
 
 Required existing branch: `corrective/phase-1a-1d-integrated`
 
-**Status:** R1–R7 remain open. The separately approved branch reconciliation and SDK handoff correction N1 are implemented; they do not close this goal or authorise later milestones.
+**Status:** R1–R6 implemented and locally validated in `0da5138`; R7 supported-target acceptance and integration remain open. The separately approved SDK handoff correction N1 remains preserved. Phase 1E is not authorised.
 
 ## Objective and authority
 
@@ -109,3 +109,34 @@ Commit and push only the intended changes on the existing branch, verify the rem
 Do not implement Scene/Beat authoring, multi-Scene migration, preview/media presentation, the general Source workspace/parser, Branches, runtime/Git UI, generic move/delete, new history features, plugins, credentials/LLM, arbitrary project import, release/signing/updater work, or later-phase recovery UX. The lexical/declaration helpers needed to make the existing 1D operations safe are allowed; the amended 1E prerequisites are not part of this correction.
 
 Return a concise issue-by-issue result, changed paths/commits, exact tests and platform evidence, compatibility behavior/user actions, unresolved blockers and branch state. End at corrected 1A–1D closure or a clearly documented blocked checkpoint. Do not proceed automatically to Phase 1E.
+
+## Implementation checkpoint — 2026-09-15
+
+Implementation commit `0da5138` closes the reproduced R1–R6 defects and adds the
+final workflow assertions. The complete supported-target workflow has not yet run for
+this candidate, so R7 and integration are deliberately still open at this checkpoint.
+
+| ID | Result in `0da5138` | Regression/evidence before the target run |
+| --- | --- | --- |
+| N1 | Preserved unchanged from `02fc772`; the three synthetic handoff cases and official-archive target gate remain wired | Local core suite passed; local wrapper had no official archive and is not counted as live HTTP or target evidence |
+| R1 | Added a conservative top-level lexical statement recognizer, verified every mapped definition before revision refresh, and applied append/collision checks to Character and Variable creation | `external_numeric_prefix_change_cannot_be_refreshed_or_rewritten`, `lexical_context_guards_real_authoring_operations`, duplicate/opaque, CRLF/Unicode/final-line tests pass |
+| R2 | Full proposed-model and actual serialized-size validation; compatible 10,000-byte/64 KiB/1 MiB limits; pristine-only metadata initialization; canonical decimal-string int64 storage and IPC target assertions | Escaped-string/reload, metadata-loss, relationship/document-limit, unknown-field and stable-ID tests pass; target lifecycle now asserts create/update IPC at both int64 limits |
+| R3 | Imports and repair share one declaration parser/builder; repair verifies physical bytes and collisions, commits source/metadata together, and persists marker-only changes idempotently | Collision/idempotency/changed-media/reopen tests pass; mixed transaction crash-boundary suite remains the transaction authority |
+| R4 | Centralized pinned image/audio discovery normalization, including case, extension, basename, subdirectory, whitespace and image `@` suffix behavior; FLAC remains automatic | Pinned-normalization, untracked collision, FLAC, retained-handle path/parent/symlink/same-file race tests pass locally; both-target execution pending |
+| R5 | Added view/operation/session guards to async UI flows, truthful unsubmitted/accepted persistence feedback, input/focus restoration, a controllable real-DOM test, and packaged supporting-authoring smoke | Frontend suite 8/8 passes; the behavioral case covers reordered opens/errors, navigation during mutation, close/reopen, Character/Appearance/Variable operations, cancellation/repair, exact values and Flush |
+| R6 | Removed the retained-journal count cap from readiness, replaced it with complete constant-working-memory enumeration, retained full explicit reports, and bounded revision reads against oversized/growing inputs | 4,097 durable records followed by a real write, a later corrupt record blocking commit/flush, anchored enumeration, bounded media and growing-read tests pass |
+| R7 | Canonical contracts and final workflow marker requirements updated | Local gate passes; Windows x64/macOS ARM64 workflow, evidence recording, PR readiness and conditional merge remain pending |
+
+Local results for the tree committed as `0da5138`:
+
+- `python3 scripts/validate.py`: 193 repository files passed.
+- `git diff --check`: passed.
+- lossless-source suite: 26 passed; SDK spike suite: 24 passed.
+- `npm ci --ignore-scripts`: passed; `npm run check`: 8 passed; `npm run build`: passed.
+- `cargo fmt --check --all`: passed.
+- `cargo test -p loomlight-core --release --locked`: 115 passed, 0 failed,
+  4 ignored subprocess-worker entry points.
+- `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings`: passed.
+
+No local official SDK archive was supplied, so the local SDK wrappers are not recorded
+as official-archive acceptance. No Phase 1E code is present.

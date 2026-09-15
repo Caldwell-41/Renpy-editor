@@ -3,7 +3,7 @@
 **Prepared:** 2026-09-15<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
 **Required working branch:** `corrective/phase-1a-1d-integrated`<br>
-**Checkpoint:** 1A–1D correction remains open; 1E and later unapproved
+**Checkpoint:** R1–R6 implemented/local pass; final target gate and integration open
 
 ## Read first
 
@@ -14,16 +14,15 @@
 
 ## Baseline and authority
 
-Initial corrective application code is `c08414293899f8930bd2eb5e8a78a5b6c10433e7`,
-reviewed at `157b6d110c5d66c1ea7c1df3e713b8bc38bbb2e3`. Documentation amendments are
-later descendants. The last verified main head was `0e5e8b6`; this branch has not been
-merged by the documentation task. Re-read current refs and preserve newer/uncommitted
-work. Do not reset to historical SHAs or create a replacement branch.
+Corrective implementation commit `0da5138` is the locally validated R1–R6 checkpoint.
+The last verified main head was `0e5e8b6`; this branch has not yet been merged. Re-read
+current refs and preserve newer/uncommitted work. Do not reset to historical SHAs or
+create a replacement branch.
 
-The user requested a correction prompt and milestone amendments, not implementation of
-future milestones. Execute the correction only when its prompt is explicitly invoked.
-It permits bounded code/tests/docs and pushes on this branch, not main merges,
-force-pushes, branch deletion, repository-visibility changes or releases.
+The current authorization permits the bounded correction, its final production gate,
+and conditional merge of existing PR #7 only. It does not permit direct application
+pushes to main, force-pushes, replacement branches/PRs, branch deletion, repository
+policy changes, releases, or later milestones.
 
 ## What to preserve
 
@@ -39,21 +38,18 @@ checks and session-bound imports. Keep serialized recovery/commits/flush, expect
 absence creation and retained accepted/displaced evidence. Do not replace those working
 foundations with new architectures or promote spike implementations wholesale.
 
-## Remaining correction
+## Corrective implementation
 
-R1 requires lexical/context-aware definitions and safe append, not merely physical-line
-matches. R2 requires accepted metadata to reload within consistent limits, correct known
-relationships and exact integer IPC, with no silent identity reset after metadata loss.
-R3 requires validated and idempotent compatibility repair with collision/physical checks.
-R4 requires the actual pinned SDK's discovery normalization and retained-source import
-evidence. FLAC is automatically discovered in the referenced 8.5.3 scanner; the earlier
-contrary finding was wrong and must not drive a new compatibility requirement.
+R1–R6 are implemented in `0da5138`. The source recognizer proves supported top-level
+statements; metadata writes validate the full reloadable model; repair shares safe
+declaration preflight; discovery matches the pinned scanner including automatic FLAC;
+imports derive facts/bytes from retained handles; UI callbacks carry view/operation/
+session generations; and recovery readiness completely scans retained journals without
+a lifetime count cap. Behavioral DOM and packaged supporting-authoring regressions are
+wired. Details and exact local counts are in the execution prompt.
 
-R5 covers every stale success/error/cancel/navigation completion and truthful form/
-persistence behavior, with actual DOM/package tests. R6 removes the terminal-journal
-lifetime cap and bounds media/revision work without hiding unresolved recovery or
-throwing away evidence. R7 owns documentation reconciliation and the final Windows/
-macOS gate. Details and required regressions are in the execution prompt.
+R7 owns the pending Windows x64/macOS ARM64 workflow, retained evidence, documentation
+closure, PR readiness, expected-head merge, and post-merge verification.
 
 The initial local test report is retained in the integrated task. The SDK wrapper was
 skipped and desktop packaging unavailable there. Repository quality is not production
@@ -93,6 +89,8 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 links in CURRENT. Those snapshots are historical evidence and do not override this
 handover, CURRENT or the active follow-up.
 
-The next action is the bounded correction when invoked. Finish at verified 1A–1D closure
-or a clearly recorded blocker; push only this branch and return for review. Do not
-start 1E or merge automatically.
+The next action is to publish the existing branch candidate, run the existing production
+workflow once for its final code/test/workflow state, and inspect every target job and
+artifact. Merge PR #7 only if the exact candidate, reviews/checks, policies, and complete
+diff satisfy the conditional gate; then verify main and post-merge CI. Otherwise record
+the exact blocker. Do not start Phase 1E.

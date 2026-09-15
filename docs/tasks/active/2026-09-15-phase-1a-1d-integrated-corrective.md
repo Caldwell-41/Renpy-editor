@@ -1,6 +1,6 @@
 # Task: Phase 1A–1D integrated corrective checkpoint
 
-**Status:** Open — initial correction implemented; follow-up defects and supported-target acceptance outstanding.<br>
+**Status:** Open — R1–R6 implemented and locally validated; supported-target acceptance and integration outstanding.<br>
 **Baseline:** `main` at `0e5e8b697782ed29d61d01dbb1240b9d16561c27`<br>
 **Branch:** `corrective/phase-1a-1d-integrated`
 
@@ -42,17 +42,19 @@ The earlier review incorrectly treated FLAC automatic discovery as absent. The p
 
 ## Follow-up ledger
 
-All items below remain open until production regressions establish the corrected behavior. Review/isolated-helper evidence is not a substitute for those regressions.
+Implementation commit `0da5138` resolves the reproduced R1–R6 defects and adds
+production regressions. The final supported-target gate and integration remain open;
+local or helper evidence is not a substitute for R7.
 
 | ID | Required correction and acceptance |
 | --- | --- |
-| R1 | Context-aware executable definition ranges, safe append on every path, no matches inside multiline strings/comments, compact-symbol collision handling, verified revision refresh and exact-byte refusal tests |
-| R2 | Every accepted model/serialized document reloads; compatible escaped-string/statement/document bounds; known-field/relationship and exact integer IPC validation; missing authored metadata never silently resets identities |
-| R3 | Normal declarations and compatibility repair share safe preflight; reject conflicting/unsafe/missing/changed cases; preserve IDs/source/files; idempotent marker-only repair; mixed-transaction interruption evidence |
-| R4 | Match the pinned SDK's image/audio normalization and true namespace behavior across case/extensions/subdirectories/oversampling; correct FLAC assumption; verify retained import acquisition on supported targets |
-| R5 | All asynchronous success/error/cancel/open/close/mutation completions are session/view-safe; truthful persistence/buffer feedback; real supporting-surface DOM and packaged tests |
-| R6 | More than 4,096 terminal records do not block legitimate writes; complete bounded-memory scans still find later unresolved/corrupt records; oversized/growing reads terminate safely; no evidence deletion workaround |
-| R7 | Reconciled docs and original+follow-up regressions; exact final Windows x64/macOS ARM64 production evidence; branch pushed/verified, no implicit main merge or 1E approval |
+| R1 | Implemented/local pass — context-aware top-level ranges, complete mapping verification, safe append and alternate-spacing collisions; 28 authoring tests include numeric-prefix, multiline/comment/opaque, incomplete, CRLF/Unicode and exact-byte refusal |
+| R2 | Implemented/local pass — reloadable limits, full known-model validation, pristine-only initialization and exact decimal-string int64; official target includes real handler create/update round trips at both boundaries |
+| R3 | Implemented/local pass — shared declaration builder/preflight, physical/content/collision verification, one repair transaction and idempotent marker-only update; existing mixed crash suite protects interruption/reopen |
+| R4 | Implemented/local pass — pinned normalization centralized, FLAC correctly automatic, physical/explicit namespace ownership and retained-handle path/ancestor/symlink/content race regressions; target execution pending |
+| R5 | Implemented/local pass — complete generation/session guards and truthful buffers; real DOM test plus packaged WebView supporting-authoring probe wired for both targets |
+| R6 | Implemented/local pass — complete constant-working-memory readiness enumeration, no history-count cap, later-corrupt refusal, bounded oversized/growing revision reads and retained evidence |
+| R7 | In progress — local prescribed gate passed on `0da5138`; final Windows x64/macOS ARM64 workflow, evidence reconciliation, PR readiness and conditional integration pending |
 
 ## Recorded local evidence for the initial implementation tree
 

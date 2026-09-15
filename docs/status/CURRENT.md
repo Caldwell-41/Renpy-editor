@@ -1,32 +1,29 @@
 # Current status
 
 **Updated:** 2026-09-15<br>
-**Phase:** Phase 1A–1D integrated correction and bounded follow-up open<br>
+**Phase:** Phase 1A–1D corrective implementation complete; final target gate open<br>
 **Working branch:** `corrective/phase-1a-1d-integrated`<br>
 **Next milestone:** Phase 1E is unapproved and unstarted
 
 ## Current truth
 
-The initial integrated correction is present in application commit
-`c08414293899f8930bd2eb5e8a78a5b6c10433e7`, reviewed on branch head
-`157b6d110c5d66c1ea7c1df3e713b8bc38bbb2e3`. It improves recovery serialization,
-incremental media verification, retained candidate activation, session authority,
-source-line matching, asset status and supporting forms/Flush. It is not a completed
-corrective gate: follow-up defects and final Windows x64/macOS ARM64 evidence remain
-outstanding. See the [issue ledger](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md).
+Corrective implementation commit `0da5138` resolves the reproduced R1–R6 defects on
+the existing branch and passes the prescribed local gate. It adds lexical/context-aware
+source mapping; reloadable metadata and exact values; validated compatibility repair;
+pinned Ren'Py discovery/import authority; session-safe behavioral UI; and complete
+bounded-memory recovery readiness without a lifetime journal cap. See the
+[issue ledger](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md).
 
-The prepared [correction execution prompt](../tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md)
-owns R1–R7: lexical definition safety; metadata reloadability and identity preservation;
-safe compatibility repair; exact SDK discovery/import authority; all stale UI completion
-paths and persistence feedback; resource bounds without a lifetime edit cap; and exact
-supported-target closure. The earlier FLAC-discovery concern is explicitly corrected:
-Ren'Py 8.5.3's referenced audio scanner supports FLAC automatic discovery.
+The [correction execution prompt](../tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md)
+records the implementation and local regression ledger. R7 remains open until the
+existing production workflow passes on Windows x64 and macOS ARM64 for the final
+application code/test/workflow tree, evidence is reconciled, and PR #7 satisfies its
+conditional merge gate. The earlier FLAC-discovery concern is corrected: the pinned
+8.5.3 audio scanner automatically discovers FLAC.
 
-The documentation-only milestone amendment prepares that prompt and clarifies later
-gates. It does not implement R1–R7, run the application tests, close Gate E on this
-corrective tree, authorise 1E, or merge code. The last confirmed main head is
-`0e5e8b697782ed29d61d01dbb1240b9d16561c27`; the correction is on its existing branch.
-Always recheck live refs before implementation rather than resetting to these pointers.
+The last confirmed main head is `0e5e8b697782ed29d61d01dbb1240b9d16561c27`;
+the correction remains on its existing branch. These pointers must be rechecked before
+publication and merge. Phase 1E remains unapproved and unstarted.
 
 ## Branch reconciliation and SDK carry-forward completed
 
@@ -52,7 +49,7 @@ reproduced first. The earlier run `34935167989` stopped on missing Clippy and re
 failed evidence. The regular production workflow now also invokes the official
 handoff test with an explicit passed-marker requirement using its existing SDK cache.
 
-**Preserve N1; do not reimplement it or merge the archived branch. R1–R7 and the full
+**Preserve N1; do not reimplement it or merge the archived branch. R7 and the full
 application gate remain open.** The targeted handoff run is not a full packaged
 lifecycle/authoring/DOM acceptance run. Finish the existing corrective goal on this
 single branch before reviewing any main integration.
@@ -96,8 +93,8 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Execute the remaining bounded R1–R7 follow-up on the existing corrective branch and
-preserve the completed N1 carry-forward. Add production regressions; complete the final
-target gate; update evidence and documentation; then stop for review. Branch cleanup
-is complete and must not be repeated. Do not merge to main or begin Phase 1E on the
-basis of targeted N1 evidence alone. Use [HANDOVER](HANDOVER.md) for continuation.
+Push and run the existing final production workflow for the corrective candidate.
+If both supported targets, required policy, complete diff review, and expected-head
+checks pass, reconcile evidence and integrate existing PR #7 exactly once. Otherwise
+leave it open at the precise blocked checkpoint. Branch cleanup is complete and must
+not be repeated. Do not begin Phase 1E. Use [HANDOVER](HANDOVER.md) for continuation.
