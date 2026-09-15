@@ -4,17 +4,15 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active/).
 
-The historical Phase 1A–1D implementations are complete, but their integrated
-checkpoint is open for a bounded corrective review. Phase 1E/later remains separately
-approval-gated.
-Read
-the
-[Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for the milestone
-sequence, the archived
-[Phase 1 scaffold](tasks/archive/2026-09-14-phase-1-production-scaffold.md), and the
-completed [Phase 1B transaction/recovery brief](tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-and its [completed corrective remediation](tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-plus [production transaction contract](TRANSACTIONS.md).
+The historical Phase 1A–1D implementations have recorded closure evidence, but their
+integrated correction and [bounded follow-up](tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md)
+remain open. The follow-up prompt is prepared, not executed by the documentation
+amendment. Phase 1E/later remains separately approval-gated.
+
+Read the [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) for
+explicit prerequisite ownership and internal gates, and [ROADMAP.md](ROADMAP.md) for
+Phases 2–5 and release boundaries. Neither document is an open-ended coding task.
+Historical status snapshots retain prior evidence, not current instructions.
 
 | Concern | Canonical document |
 | --- | --- |
@@ -29,16 +27,17 @@ plus [production transaction contract](TRANSACTIONS.md).
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Transaction, durability, and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
-| Phase 1 milestone sequence | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
-| Active Phase 1A–1D integrated correction | [tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md](tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md) |
-| Completed Phase 1D supporting authoring task | [tasks/archive/2026-09-15-phase-1d-supporting-authoring.md](tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
-| Completed Phase 1C single-instance correction | [tasks/archive/2026-09-14-phase-1c-single-instance.md](tasks/archive/2026-09-14-phase-1c-single-instance.md) |
-| Completed Phase 1C durability/race remediation | [tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md](tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
-| Completed Phase 1C corrective remediation | [tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md](tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
-| Completed Phase 1C lifecycle gate | [tasks/archive/2026-09-14-phase-1c-project-lifecycle.md](tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
-| Completed Phase 1B corrective remediation | [tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md](tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
-| Completed Phase 1A implementation gate | [tasks/archive/2026-09-14-phase-1-production-scaffold.md](tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
-| Completed Phase 1B gate | [tasks/archive/2026-09-14-phase-1-transaction-recovery.md](tasks/archive/2026-09-14-phase-1-transaction-recovery.md) |
+| Phase 1 milestone sequence and 1E prerequisites | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
+| Current correction execution prompt, R1–R7 | [tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md](tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md) |
+| Initial integrated correction and evidence ledger | [tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md](tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md) |
+| Historical Phase 1D supporting authoring task | [tasks/archive/2026-09-15-phase-1d-supporting-authoring.md](tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
+| Historical Phase 1C single-instance correction | [tasks/archive/2026-09-14-phase-1c-single-instance.md](tasks/archive/2026-09-14-phase-1c-single-instance.md) |
+| Historical Phase 1C durability/race remediation | [tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md](tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
+| Historical Phase 1C corrective remediation | [tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md](tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
+| Historical Phase 1C lifecycle gate | [tasks/archive/2026-09-14-phase-1c-project-lifecycle.md](tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
+| Historical Phase 1B corrective remediation | [tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md](tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
+| Historical Phase 1A implementation gate | [tasks/archive/2026-09-14-phase-1-production-scaffold.md](tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
+| Historical Phase 1B gate | [tasks/archive/2026-09-14-phase-1-transaction-recovery.md](tasks/archive/2026-09-14-phase-1-transaction-recovery.md) |
 | Continuation handover | [status/HANDOVER.md](status/HANDOVER.md) |
 | Stack evidence and spike plan | [research/STACK_AND_SPIKES.md](research/STACK_AND_SPIKES.md) |
 | Desktop spike evidence | [research/DESKTOP_SPIKE_RESULTS.md](research/DESKTOP_SPIKE_RESULTS.md) |
@@ -58,4 +57,5 @@ plus [production transaction contract](TRANSACTIONS.md).
 The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
 and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md) remain
 historical evidence. Completed task briefs move to [`tasks/archive`](tasks/archive/);
-they are not canonical product documentation.
+they are not canonical product documentation. Corrective briefs stay active until
+their actual regressions and supported-target gates close.
