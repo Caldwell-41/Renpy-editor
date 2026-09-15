@@ -28,6 +28,35 @@ corrective tree, authorise 1E, or merge code. The last confirmed main head is
 `0e5e8b697782ed29d61d01dbb1240b9d16561c27`; the correction is on its existing branch.
 Always recheck live refs before implementation rather than resetting to these pointers.
 
+## Branch reconciliation and SDK carry-forward completed
+
+The user separately approved branch reconciliation. Six unchanged, already-integrated
+branches were retired after fresh ancestry/tree-equivalence and open-PR checks.
+The remaining old SDK branch was reviewed, its missing download handoff selectively
+ported, and its complete history preserved under tag
+`archive/phase-1c-network-install-fix-2026-09-15` before retirement. Only main and this
+active corrective branch remained. No old branch was merged wholesale; main was not
+changed. Exact receipts are in the
+[branch reconciliation record](../audits/2026-09-15-branch-reconciliation.md).
+
+SDK correction **N1** is implemented in `02fc772d93fbe6b0709691bad15a4307a0193c93`:
+prepare managed installation once before download, so a second cleanup cannot
+quarantine the active archive. Newer provenance-before-execution, quarantine and
+platform-durability behavior remains intact. The private transport seam and four
+regressions do not add an IPC or alter the approved endpoint/checksum.
+
+Run `34935598838` passed the corrected core suite, strict Clippy, and exact-source
+Windows x64/macOS ARM64 official-archive handoff/reuse tests, then published only the
+tested files and removed temporary maintenance machinery. The baseline failure was
+reproduced first. The earlier run `34935167989` stopped on missing Clippy and remains
+failed evidence. The regular production workflow now also invokes the official
+handoff test with an explicit passed-marker requirement using its existing SDK cache.
+
+**Preserve N1; do not reimplement it or merge the archived branch. R1–R7 and the full
+application gate remain open.** The targeted handoff run is not a full packaged
+lifecycle/authoring/DOM acceptance run. Finish the existing corrective goal on this
+single branch before reviewing any main integration.
+
 ## Evidence boundary
 
 The integrated task retains its initial local report: repository validation, source/SDK
@@ -67,7 +96,8 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-When explicitly invoked, execute the bounded R1–R7 follow-up on the existing corrective
-branch. Preserve working foundations; add regressions; complete the final target gate;
-update evidence and documentation; then stop for review. Do not merge to main or begin
-Phase 1E without a separate instruction. Use [HANDOVER](HANDOVER.md) for continuation.
+Execute the remaining bounded R1–R7 follow-up on the existing corrective branch and
+preserve the completed N1 carry-forward. Add production regressions; complete the final
+target gate; update evidence and documentation; then stop for review. Branch cleanup
+is complete and must not be repeated. Do not merge to main or begin Phase 1E on the
+basis of targeted N1 evidence alone. Use [HANDOVER](HANDOVER.md) for continuation.

@@ -4,7 +4,7 @@ Repository: https://github.com/Caldwell-41/Renpy-editor
 
 Required existing branch: `corrective/phase-1a-1d-integrated`
 
-**Status:** Prepared execution prompt. The documentation amendment does not implement these fixes or authorise later milestones.
+**Status:** R1–R7 remain open. The separately approved branch reconciliation and SDK handoff correction N1 are implemented; they do not close this goal or authorise later milestones.
 
 ## Objective and authority
 
@@ -15,6 +15,16 @@ When this prompt is explicitly submitted as the task, you are authorised to insp
 The reviewed baseline was `157b6d110c5d66c1ea7c1df3e713b8bc38bbb2e3`, containing implementation commit `c08414293899f8930bd2eb5e8a78a5b6c10433e7`. These are reference points, not instructions to reset the branch. Start from its latest confirmed head, including subsequent documentation amendments and any legitimate newer work.
 
 **Stop after the corrected Phase 1A–1D gate. Phase 1E and every later milestone remain unapproved.** The amended milestone plan is context, not permission to implement it.
+
+## Preserved SDK correction N1 — do not reapply old branches
+
+Branch reconciliation is complete. Application commit `02fc772d93fbe6b0709691bad15a4307a0193c93` selectively restores the missing SDK download handoff on this same corrective branch. Its core regressions and exact-source Windows/macOS official-archive handoff/reuse tests passed in run `34935598838`. The old source branch is preserved under tag `archive/phase-1c-network-install-fix-2026-09-15`; six already-integrated branches were retired. This was a separately approved maintenance action, not permission for this goal to delete more branches or merge main.
+
+Preserve N1: managed SDK preparation/debris recovery occurs once before network download; the active operation's `.partial` must remain available for checksum/extraction. Public archive installation still performs its own one-time preparation. Preserve newer provenance-before-execution, quarantine, platform-flush and install-checkpoint behavior. Do not copy the archived branch's older SDK/lifecycle files over the current implementation or recreate duplicate stage helpers.
+
+Keep the three synthetic handoff regressions and `renpy::reconciliation_tests::official_sdk_download_handoff_target_gate`. Include the latter in the final existing production matrix with the verified `LOOMLIGHT_PHASE1C_SDK_ARCHIVE` and require `phase-1c-network-handoff-gate: passed`; a wrapper skip does not count. The test injects archive bytes at the transport seam and exercises real checksum, extraction, provenance and reuse; do not call that a live HTTP transport test. Record N1 separately from open R1–R7 in the ledger. The targeted N1 run is not full Phase 1A–1D acceptance.
+
+See [branch reconciliation evidence](../../audits/2026-09-15-branch-reconciliation.md). Start from the latest existing corrective head including this carry-forward, not an old pre-reconciliation SHA.
 
 ## 1. Establish the baseline and preserve working changes
 
