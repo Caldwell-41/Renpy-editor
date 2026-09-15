@@ -19,6 +19,14 @@ export const CORE_OPERATIONS = [
   "sdk.discover",
   "sdk.browse",
   "sdk.install",
+  "authoring.list",
+  "character.create",
+  "character.update",
+  "appearance.setDefault",
+  "asset.chooseImport",
+  "asset.import",
+  "variable.create",
+  "variable.update",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

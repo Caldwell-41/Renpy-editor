@@ -418,6 +418,25 @@ fn inspect_mutation(
     {
         return RecoveryMutationState::Durable;
     }
+    if mutation.kind == MutationKind::CreateNew
+        && target
+            .as_ref()
+            .is_some_and(|value| value.sha256 == mutation.proposed_sha256)
+    {
+        return if matches!(state, JournalState::Durable | JournalState::Cleaned) {
+            RecoveryMutationState::Durable
+        } else {
+            RecoveryMutationState::ExchangeCompleteExpected
+        };
+    }
+    if mutation.kind == MutationKind::CreateNew
+        && target.is_none()
+        && stage
+            .as_ref()
+            .is_some_and(|value| value.sha256 == mutation.proposed_sha256)
+    {
+        return RecoveryMutationState::StagedWithBaseIntact;
+    }
     if target
         .as_ref()
         .is_some_and(|value| value.sha256 == mutation.proposed_sha256)

@@ -1,9 +1,14 @@
+pub mod authoring;
 pub mod lifecycle;
 pub mod metadata;
 pub mod ports;
 pub mod renpy;
 pub mod transaction;
 
+use authoring::{
+    CreateCharacterRequest, CreateVariableRequest, ImportAssetRequest, SetDefaultAppearanceRequest,
+    UpdateCharacterRequest, UpdateVariableRequest,
+};
 use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
@@ -28,6 +33,14 @@ pub const OPERATIONS: &[&str] = &[
     "sdk.discover",
     "sdk.browse",
     "sdk.install",
+    "authoring.list",
+    "character.create",
+    "character.update",
+    "appearance.setDefault",
+    "asset.chooseImport",
+    "asset.import",
+    "variable.create",
+    "variable.update",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -300,7 +313,46 @@ pub fn handle_application_request(
         "sdk.install" if empty_payload(validated.payload) => {
             lifecycle.install_sdk().and_then(to_value)
         }
-        "project.chooseParent" | "project.openPicker" | "sdk.browse" => {
+        "authoring.list" if empty_payload(validated.payload) => {
+            lifecycle.authoring_list().and_then(to_value)
+        }
+        "character.create" => serde_json::from_value::<CreateCharacterRequest>(Value::Object(
+            validated.payload.clone(),
+        ))
+        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+        .and_then(|payload| lifecycle.authoring_create_character(payload))
+        .and_then(to_value),
+        "character.update" => serde_json::from_value::<UpdateCharacterRequest>(Value::Object(
+            validated.payload.clone(),
+        ))
+        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+        .and_then(|payload| lifecycle.authoring_update_character(payload))
+        .and_then(to_value),
+        "appearance.setDefault" => serde_json::from_value::<SetDefaultAppearanceRequest>(
+            Value::Object(validated.payload.clone()),
+        )
+        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+        .and_then(|payload| lifecycle.authoring_set_default_appearance(payload))
+        .and_then(to_value),
+        "asset.import" => {
+            serde_json::from_value::<ImportAssetRequest>(Value::Object(validated.payload.clone()))
+                .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+                .and_then(|payload| lifecycle.authoring_import_asset(payload))
+                .and_then(to_value)
+        }
+        "variable.create" => serde_json::from_value::<CreateVariableRequest>(Value::Object(
+            validated.payload.clone(),
+        ))
+        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+        .and_then(|payload| lifecycle.authoring_create_variable(payload))
+        .and_then(to_value),
+        "variable.update" => serde_json::from_value::<UpdateVariableRequest>(Value::Object(
+            validated.payload.clone(),
+        ))
+        .map_err(|_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload))
+        .and_then(|payload| lifecycle.authoring_update_variable(payload))
+        .and_then(to_value),
+        "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
                 request_id,
                 "DESKTOP_MEDIATION_REQUIRED",
@@ -336,7 +388,7 @@ fn invalid_payload(request_id: String) -> CoreResponse {
     )
 }
 
-fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreResponse {
+pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreResponse {
     let (code, message) = match error {
         LifecycleError::InvalidParent => {
             ("INVALID_PARENT", "Choose an existing safe parent folder.")
@@ -373,7 +425,67 @@ fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreResponse 
             "CREATED_NOT_OPENED",
             "The project was created but could not be opened automatically.",
         ),
+        LifecycleError::RecoveryRequired => (
+            "RECOVERY_REQUIRED",
+            "Project recovery must be resolved before authoring can continue.",
+        ),
+        LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
+    };
+    CoreResponse::failure(request_id, code, message)
+}
+
+fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> CoreResponse {
+    use authoring::AuthoringError::*;
+    let (code, message) = match error {
+        NoOpenProject => ("NO_OPEN_PROJECT", "Open a Loomlight project first."),
+        RecoveryRequired => (
+            "RECOVERY_REQUIRED",
+            "Project recovery must be resolved before authoring can continue.",
+        ),
+        InvalidPayload | InvalidIdentifier | InvalidColor | InvalidValue => {
+            ("INVALID_PAYLOAD", "The authoring value is invalid.")
+        }
+        ReservedIdentifier => ("RESERVED_IDENTIFIER", "That technical name is reserved."),
+        SymbolCollision => ("SYMBOL_COLLISION", "That technical name is already used."),
+        UnknownEntity => (
+            "UNKNOWN_ENTITY",
+            "The selected authoring item is unavailable.",
+        ),
+        UnknownImport => ("UNKNOWN_IMPORT_AUTHORITY", "Choose the import file again."),
+        UnsupportedFormat => (
+            "UNSUPPORTED_FORMAT",
+            "Choose a supported raster image or audio file.",
+        ),
+        OversizeImport => (
+            "IMPORT_TOO_LARGE",
+            "The selected file exceeds the 512 MiB import limit.",
+        ),
+        DuplicateContent => (
+            "DUPLICATE_CONTENT",
+            "Identical asset content is already imported.",
+        ),
+        PathCollision => (
+            "PATH_COLLISION",
+            "The deterministic project filename already exists.",
+        ),
+        DiscoveryCollision => (
+            "DISCOVERY_NAME_COLLISION",
+            "The Ren'Py discovery name is already used.",
+        ),
+        SourceConflict => (
+            "SOURCE_CONFLICT",
+            "The authoritative source changed; reload before editing.",
+        ),
+        UnsupportedSource => (
+            "UNSUPPORTED_SOURCE",
+            "The mapped definition is ambiguous or unsupported.",
+        ),
+        CorruptMetadata | UnsupportedMetadata => (
+            "INVALID_AUTHORING_METADATA",
+            "The authoring metadata is invalid or unsupported.",
+        ),
+        Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
 }

@@ -8,6 +8,16 @@ interface RecentProject { id: string; projectId: string; title: string; displayP
 interface Resolution { width: number; height: number }
 interface OpenProject { projectId: string; title: string; folderName: string; chapterId: string; chapterName: string; sceneId: string; sceneName: string; sdkVersion: string; resolution: Resolution; cancelled?: boolean }
 interface CreationResult { status: string; project?: OpenProject }
+type AssetKind = "background" | "characterAppearance" | "music" | "sfx";
+type VariableType = "bool" | "int" | "string";
+interface SourceDefinition { path: string; statement: string; sourceRevision: string }
+interface Character { id: string; technicalName: string; displayName: string; dialogueColor: string; defaultAppearanceId?: string; source: SourceDefinition }
+interface Appearance { id: string; characterId: string; label: string; attributes: Record<string, string>; renderMode: string; assetId: string }
+interface Asset { id: string; kind: AssetKind; displayName: string; relativePath: string; discoveryName: string; sha256: string; byteCount: number; status: string }
+interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | number | string; source: SourceDefinition }
+interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
+interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
+type ProjectSurface = "story" | "characters" | "assets" | "variables";
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
 if (rootElement === null) throw new Error("Application root is unavailable.");
@@ -134,11 +144,92 @@ async function createProject(): Promise<void> {
 }
 async function openPickedProject(): Promise<void> { try { const project = await value<OpenProject>("project.openPicker"); if (!project.cancelled) showProject(project); } catch (error) { setStatus(message(error, "Project could not be opened"), "error"); } }
 async function openRecent(id: string): Promise<void> { try { showProject(await value<OpenProject>("project.openRecent", { recentId: id })); } catch (error) { setStatus(message(error, "Project could not be opened"), "error"); } }
-function showProject(project: OpenProject): void {
-  const layout = document.createElement("section"); layout.className = "project-shell"; const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";
-  const projectName = document.createElement("h2"); projectName.textContent = project.title; const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Story";
-  const chapter = button(project.chapterName, "tree-item chapter"); chapter.ariaExpanded = "true"; const scene = button(project.sceneName, "tree-item scene selected"); scene.ariaCurrent = "page"; sidebar.append(projectName, sectionLabel, chapter, scene);
-  const workspace = document.createElement("div"); workspace.className = "empty-workspace"; const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = `${project.chapterName} · ${project.sceneName}`; const title = document.createElement("h1"); title.textContent = "Project ready"; const copy = document.createElement("p"); copy.className = "panel-copy"; copy.textContent = `Ren'Py ${project.sdkVersion} · ${project.resolution.width} × ${project.resolution.height}. Scene authoring begins in Phase 1E.`; const close = button("Close Project"); close.addEventListener("click", async () => { await value("project.close"); await showWelcome(); }); workspace.append(eyebrow,title,copy,close); layout.append(sidebar,workspace); shell(layout); setStatus("Saved");
+function showProject(project: OpenProject, surface: ProjectSurface = "story"): void {
+  const layout = document.createElement("section"); layout.className = "project-shell";
+  const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";
+  const projectName = document.createElement("h2"); projectName.textContent = project.title;
+  const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
+  sidebar.append(projectName, sectionLabel);
+  (["story", "characters", "assets", "variables"] as const).forEach((name) => {
+    const labels: Record<ProjectSurface, string> = { story: "Story", characters: "Characters", assets: "Assets", variables: "Variables" };
+    const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
+    if (surface === name) nav.ariaCurrent = "page";
+    nav.addEventListener("click", () => showProject(project, name)); sidebar.append(nav);
+  });
+  if (surface === "story") {
+    const chapter = button(project.chapterName, "tree-item chapter"); chapter.ariaExpanded = "true";
+    const scene = button(project.sceneName, "tree-item scene"); sidebar.append(chapter, scene);
+  }
+  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { await value("project.close"); await showWelcome(); }); sidebar.append(close);
+  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "empty-workspace" : "supporting-workspace";
+  layout.append(sidebar, workspace); shell(layout); setStatus("Saved");
+  if (surface === "story") renderStoryReady(workspace, project); else void renderAuthoringSurface(workspace, project, surface);
+}
+
+function renderStoryReady(workspace: HTMLElement, project: OpenProject): void {
+  const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = `${project.chapterName} · ${project.sceneName}`;
+  const title = document.createElement("h1"); title.textContent = "Project ready";
+  const copy = document.createElement("p"); copy.className = "panel-copy"; copy.textContent = `Ren'Py ${project.sdkVersion} · ${project.resolution.width} × ${project.resolution.height}. Scene authoring begins in Phase 1E.`;
+  workspace.append(eyebrow, title, copy);
+}
+
+async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story">): Promise<void> {
+  const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
+  const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
+  workspace.append(eyebrow, title);
+  try {
+    const model = await value<AuthoringMetadata>("authoring.list");
+    if (surface === "characters") renderCharacters(workspace, project, model);
+    if (surface === "assets") renderAssets(workspace, project, model);
+    if (surface === "variables") renderVariables(workspace, project, model);
+  } catch (error) { setStatus(message(error, "Authoring data could not be loaded"), "error"); }
+}
+
+function formHeading(text: string): HTMLHeadingElement { const heading = document.createElement("h2"); heading.textContent = text; return heading; }
+function supportingSection(): HTMLElement { const section = document.createElement("section"); section.className = "supporting-section"; return section; }
+
+function renderCharacters(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
+  const list = supportingSection(); list.append(formHeading("Characters"));
+  if (!model.characters.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Characters yet."; list.append(empty); }
+  model.characters.forEach((character) => {
+    const row = document.createElement("div"); row.className = "entity-row";
+    const summary = document.createElement("div"); const name = document.createElement("strong"); name.textContent = character.displayName; const technical = document.createElement("code"); technical.textContent = character.technicalName; summary.append(name, technical);
+    const appearanceCount = model.appearances.filter((item) => item.characterId === character.id).length; const detail = document.createElement("span"); detail.textContent = `${appearanceCount} appearance${appearanceCount === 1 ? "" : "s"}`;
+    const add = button("Add Appearance"); add.addEventListener("click", () => void addAppearance(project, character)); row.append(summary, detail, add); list.append(row);
+    const appearancesHeading = document.createElement("h3"); appearancesHeading.textContent = `${character.displayName} Appearances`; list.append(appearancesHeading);
+    const appearances = model.appearances.filter((item) => item.characterId === character.id);
+    appearances.forEach((appearance) => { const item = document.createElement("div"); item.className = "appearance-row"; const label = document.createElement("span"); label.textContent = appearance.label; const mode = document.createElement("code"); mode.textContent = `${appearance.attributes.outfit} · ${appearance.attributes.pose}`; const makeDefault = button(character.defaultAppearanceId === appearance.id ? "Default" : "Set default", "text-button"); makeDefault.disabled = character.defaultAppearanceId === appearance.id; makeDefault.addEventListener("click", async () => { await value("appearance.setDefault", { characterId: character.id, appearanceId: appearance.id }); showProject(project, "characters"); }); item.append(label, mode, makeDefault); list.append(item); });
+  });
+  const create = supportingSection(); create.append(formHeading("Create Character"));
+  const technical = input(); technical.name = "technicalName"; technical.pattern = "[A-Za-z][A-Za-z0-9_]*";
+  const display = input(); display.name = "displayName";
+  const color = input("color"); color.value = "#c5c8d0"; color.name = "dialogueColor";
+  const submit = button("Create Character", "button primary"); submit.addEventListener("click", async () => { try { await value("character.create", { technicalName: technical.value, displayName: display.value, dialogueColor: color.value }); showProject(project, "characters"); } catch (error) { setStatus(message(error, "Character could not be created"), "error"); } });
+  create.append(field("Technical variable (fixed after creation)", technical), field("Display name", display), field("Dialogue colour", color), submit); workspace.append(list, create);
+}
+
+async function addAppearance(project: OpenProject, character: Character): Promise<void> {
+  const expression = window.prompt(`Expression token for ${character.displayName}`)?.trim(); if (!expression) return;
+  try { const selected = await value<ImportChoice>("asset.chooseImport"); if (selected.cancelled) return; await value("asset.import", { authorityId: selected.authorityId, kind: "characterAppearance", technicalName: expression, displayName: `${character.displayName} — ${expression}`, characterId: character.id, expression }); showProject(project, "characters"); }
+  catch (error) { setStatus(message(error, "Appearance could not be imported"), "error"); }
+}
+
+function renderAssets(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
+  const list = supportingSection(); list.append(formHeading("Project assets"));
+  (["background", "characterAppearance", "music", "sfx"] as AssetKind[]).forEach((kind) => { const heading = document.createElement("h3"); heading.textContent = { background: "Backgrounds", characterAppearance: "Character appearances", music: "Music", sfx: "SFX" }[kind]; list.append(heading); const assets = model.assets.filter((item) => item.kind === kind); if (!assets.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "None imported."; list.append(empty); } assets.forEach((asset) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = asset.displayName; const path = document.createElement("code"); path.textContent = asset.relativePath; const discovery = document.createElement("span"); discovery.textContent = `Ren'Py: ${asset.discoveryName} · ${asset.status}`; row.append(name, path, discovery); list.append(row); }); });
+  const imported = supportingSection(); imported.append(formHeading("Import background or audio"));
+  const kind = document.createElement("select"); [["background","Background"],["music","Music"],["sfx","SFX"]].forEach(([value,label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; kind.append(option); });
+  const technical = input(); const display = input();
+  const choose = button("Choose and import…", "button primary"); choose.addEventListener("click", async () => { try { const selected = await value<ImportChoice>("asset.chooseImport"); if (selected.cancelled) return; await value("asset.import", { authorityId: selected.authorityId, kind: kind.value, technicalName: technical.value, displayName: display.value, characterId: null, expression: null }); showProject(project, "assets"); } catch (error) { setStatus(message(error, "Asset could not be imported"), "error"); } });
+  imported.append(field("Asset kind", kind), field("Technical name", technical), field("Display name", display), choose); workspace.append(list, imported);
+}
+
+function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
+  const list = supportingSection(); list.append(formHeading("Variables"));
+  if (!model.variables.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Variables yet."; list.append(empty); }
+  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); row.append(name, type, current); list.append(row); });
+  const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input();
+  const submit = button("Create Variable", "button primary"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "bool") parsed = defaultValue.value === "true"; if (type.value === "int") parsed = Number(defaultValue.value); try { await value("variable.create", { technicalName: technical.value, variableType: type.value, defaultValue: parsed }); showProject(project, "variables"); } catch (error) { setStatus(message(error, "Variable could not be created"), "error"); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), field("Default value (true/false for bool)", defaultValue), submit); workspace.append(list, create);
 }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
 void showWelcome();

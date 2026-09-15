@@ -143,11 +143,30 @@ fn core_request(
                 },
                 None => CoreResponse::success(request_id, json!({ "cancelled": true })),
             },
-            "project.chooseParent" | "sdk.browse" | "project.openPicker" => CoreResponse::failure(
-                request_id,
-                "INVALID_PAYLOAD",
-                "Payload does not match the operation schema.",
-            ),
+            "asset.chooseImport" if payload_empty => match rfd::FileDialog::new()
+                .set_title("Choose image or audio asset")
+                .add_filter(
+                    "Supported media",
+                    &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
+                )
+                .pick_file()
+            {
+                Some(path) => match lifecycle.authoring_select_import(&path) {
+                    Ok(choice) => CoreResponse::success(
+                        request_id,
+                        serde_json::to_value(choice).unwrap_or(Value::Null),
+                    ),
+                    Err(error) => loomlight_core::lifecycle_failure(request_id, error),
+                },
+                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+            },
+            "project.chooseParent" | "sdk.browse" | "project.openPicker" | "asset.chooseImport" => {
+                CoreResponse::failure(
+                    request_id,
+                    "INVALID_PAYLOAD",
+                    "Payload does not match the operation schema.",
+                )
+            }
             _ => handle_application_request(request, smoke_enabled, lifecycle),
         }
     };

@@ -1,4 +1,9 @@
 use crate::{
+    authoring::{
+        AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
+        CreateVariableRequest, ImportAssetRequest, ImportChoice, SetDefaultAppearanceRequest,
+        UpdateCharacterRequest, UpdateVariableRequest,
+    },
     metadata::{
         ChapterMetadata, ProjectMetadata, Resolution, SceneMetadata, SdkIdentity, Selection,
         SourceMapMetadata, PROJECT_SCHEMA_VERSION, SOURCE_MAP_SCHEMA_VERSION,
@@ -112,6 +117,8 @@ pub enum LifecycleError {
     GenerationFailed,
     PromotionFailed,
     CreatedNotOpened,
+    RecoveryRequired,
+    Authoring(AuthoringError),
     Io,
 }
 
@@ -140,7 +147,8 @@ pub struct LifecycleService {
     data_anchor: crate::transaction::DirectoryAnchor,
     parents: HashMap<String, ParentAnchor>,
     sdks: HashMap<String, ValidatedSdk>,
-    current: Option<(PathBuf, OpenProject)>,
+    current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
+    authoring: AuthoringService,
 }
 
 impl crate::ports::ProjectFilesystemPort for LifecycleService {
@@ -190,6 +198,7 @@ impl LifecycleService {
             parents: HashMap::new(),
             sdks: HashMap::new(),
             current: None,
+            authoring: AuthoringService::default(),
         })
     }
 
@@ -356,7 +365,7 @@ impl LifecycleService {
         if self.update_recent(&final_path, &opened).is_err() {
             return Err(LifecycleError::CreatedNotOpened);
         }
-        self.current = Some((final_path, opened.clone()));
+        self.activate_project(final_path, opened.clone())?;
         Ok(CreationResult {
             status: "complete".into(),
             project: Some(opened),
@@ -367,7 +376,7 @@ impl LifecycleService {
         let root = canonical_safe_directory(selected)?;
         let project = open_valid_project(&root)?;
         self.update_recent(&root, &project)?;
-        self.current = Some((root, project.clone()));
+        self.activate_project(root, project.clone())?;
         Ok(project)
     }
 
@@ -381,15 +390,118 @@ impl LifecycleService {
         let root = record.path.clone();
         let project = open_valid_project(&canonical_safe_directory(&root)?)?;
         self.update_recent(&root, &project)?;
-        self.current = Some((root, project.clone()));
+        self.activate_project(root, project.clone())?;
         Ok(project)
     }
 
     pub fn close(&mut self) {
-        self.current = None;
+        if let Some((_, _, authority)) = self.current.take() {
+            self.authoring.unregister_project(&authority);
+        }
     }
     pub fn current(&self) -> Option<OpenProject> {
-        self.current.as_ref().map(|(_, project)| project.clone())
+        self.current.as_ref().map(|(_, project, _)| project.clone())
+    }
+
+    fn activate_project(
+        &mut self,
+        root: PathBuf,
+        project: OpenProject,
+    ) -> Result<(), LifecycleError> {
+        self.close();
+        let authority = self
+            .authoring
+            .register_project(&root)
+            .map_err(|error| match error {
+                AuthoringError::RecoveryRequired => LifecycleError::RecoveryRequired,
+                other => LifecycleError::Authoring(other),
+            })?;
+        self.current = Some((root, project, authority));
+        Ok(())
+    }
+
+    fn authoring_context(&self) -> Result<(crate::transaction::ProjectId, String), LifecycleError> {
+        self.current
+            .as_ref()
+            .map(|(_, project, authority)| (authority.clone(), project.project_id.clone()))
+            .ok_or(LifecycleError::Authoring(AuthoringError::NoOpenProject))
+    }
+
+    pub fn authoring_list(&self) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .list(&authority, &project_id)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_create_character(
+        &self,
+        request: CreateCharacterRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .create_character(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_update_character(
+        &self,
+        request: UpdateCharacterRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .update_character(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_create_variable(
+        &self,
+        request: CreateVariableRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .create_variable(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_update_variable(
+        &self,
+        request: UpdateVariableRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .update_variable(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_select_import(
+        &mut self,
+        selected: &Path,
+    ) -> Result<ImportChoice, LifecycleError> {
+        self.authoring_context()?;
+        self.authoring
+            .select_import(selected)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_import_asset(
+        &mut self,
+        request: ImportAssetRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .import_asset(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_set_default_appearance(
+        &self,
+        request: SetDefaultAppearanceRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .set_default_appearance(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
     }
 
     pub fn list_recent(&self) -> Vec<RecentProject> {
@@ -681,7 +793,7 @@ fn build_overlay_model(
             extra: Map::new(),
         },
         resolution,
-        capabilities: vec!["project-lifecycle".into()],
+        capabilities: vec!["project-lifecycle".into(), "supporting-authoring-v1".into()],
         chapters: vec![ChapterMetadata {
             id: chapter_id.clone(),
             display_name: "Chapter 1".into(),
@@ -707,6 +819,8 @@ fn build_overlay_model(
         project_id,
         sources: vec![
             "game/script.rpy".into(),
+            "game/definitions/characters.rpy".into(),
+            "game/definitions/variables.rpy".into(),
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
         extra: Map::new(),
@@ -840,6 +954,10 @@ where
         serde_json::to_vec_pretty(&source_map).map_err(|_| LifecycleError::InvalidMetadata)?;
     write_new_anchored(&editor, "project.json", &metadata_bytes)?;
     write_new_anchored(&editor, "source-map.json", &source_map_bytes)?;
+    let authoring = crate::authoring::AuthoringMetadata::empty(metadata.project_id.clone());
+    let authoring_bytes =
+        serde_json::to_vec_pretty(&authoring).map_err(|_| LifecycleError::InvalidMetadata)?;
+    write_new_anchored(&editor, "authoring.json", &authoring_bytes)?;
     editor.flush().map_err(|_| LifecycleError::Io)?;
     root.flush().map_err(|_| LifecycleError::Io)?;
     #[cfg(test)]

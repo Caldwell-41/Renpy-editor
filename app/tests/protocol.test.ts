@@ -13,7 +13,7 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
 });
 
-test("frontend operation list contains only bounded Phase 1C operations", () => {
+test("frontend operation list contains only bounded Phase 1C and 1D operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
@@ -33,6 +33,14 @@ test("frontend operation list contains only bounded Phase 1C operations", () => 
     "sdk.discover",
     "sdk.browse",
     "sdk.install",
+    "authoring.list",
+    "character.create",
+    "character.update",
+    "appearance.setDefault",
+    "asset.chooseImport",
+    "asset.import",
+    "variable.create",
+    "variable.update",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
   assert.equal(CORE_OPERATIONS.some((operation) => /status|diff|commit|reset|remote/i.test(operation)), false);
@@ -89,6 +97,20 @@ test("Phase 1C UI source exposes the bounded lifecycle flow", async () => {
     "project.openRecent",
     "project.openPicker",
   ]) assert.equal(source.includes(operation), true, operation);
+});
+
+test("Phase 1D supporting surfaces and bounded operations are present", async () => {
+  const source = await readFile(new URL("src/main.ts", sourceRoot), "utf8");
+  for (const label of ["Characters", "Appearances", "Add Appearance", "Assets", "Variables", "Create Character", "Create Variable"]) {
+    assert.equal(source.includes(label), true, label);
+  }
+  for (const operation of ["authoring.list", "character.create", "asset.chooseImport", "asset.import", "appearance.setDefault", "variable.create"]) {
+    assert.equal(source.includes(operation), true, operation);
+  }
+  for (const deferred of ["Run Game", "Beats", "Editor Preview", "Branches workspace"]) {
+    assert.equal(source.includes(deferred), false, deferred);
+  }
+  assert.match(source, /fixed after creation/);
 });
 
 test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {

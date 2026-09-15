@@ -134,6 +134,109 @@ fn commits_a_multi_path_recoverable_set() {
 }
 
 #[test]
+fn create_new_and_replace_existing_share_one_recoverable_set() {
+    let fixture = Fixture::new();
+    let create = FileMutation {
+        path: RelativePath::new("game/new.rpy").unwrap(),
+        kind: MutationKind::CreateNew,
+        base: Revision::expected_absence(),
+        expected_bytes: Vec::new(),
+        proposed: b"label new:\n    pass\n".to_vec(),
+    };
+    let replace = fixture.mutation("game/one.rpy", b"label one:\n    \"updated\"\n");
+    let outcome = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![create, replace]));
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+    assert_eq!(
+        fs::read(fixture.root.join("game/new.rpy")).unwrap(),
+        b"label new:\n    pass\n"
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    \"updated\"\n"
+    );
+}
+
+#[test]
+fn create_new_refuses_an_existing_destination_without_overwrite() {
+    let fixture = Fixture::new();
+    let create = FileMutation {
+        path: RelativePath::new("game/one.rpy").unwrap(),
+        kind: MutationKind::CreateNew,
+        base: Revision::expected_absence(),
+        expected_bytes: Vec::new(),
+        proposed: b"must not win\n".to_vec(),
+    };
+    let outcome = fixture
+        .service
+        .commit(&fixture.project, fixture.proposal(vec![create]));
+    assert_eq!(outcome_code(&outcome), Some(ErrorCode::AlreadyExists));
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+}
+
+#[test]
+fn streaming_import_exceeds_old_memory_cap_and_commits_with_metadata() {
+    use std::io::Write;
+    let fixture = Fixture::new();
+    let source_path = fixture.root.join("large-source.png");
+    let mut source = File::create(&source_path).unwrap();
+    let chunk = vec![0x5a; 1024 * 1024];
+    let mut digest = Sha256::new();
+    for _ in 0..17 {
+        source.write_all(&chunk).unwrap();
+        digest.update(&chunk);
+    }
+    drop(source);
+    let expected = hex::encode(digest.finalize());
+    let mut source = File::open(source_path).unwrap();
+    let companion = fixture.mutation("game/one.rpy", b"metadata updated\n");
+    let outcome = fixture.service.commit_streaming_import(
+        &fixture.project,
+        RelativePath::new("game/imported.png").unwrap(),
+        &mut source,
+        17 * 1024 * 1024,
+        &expected,
+        vec![companion],
+    );
+    assert!(
+        matches!(outcome, CommitOutcome::Committed { .. }),
+        "{outcome:?}"
+    );
+    assert_eq!(
+        fs::metadata(fixture.root.join("game/imported.png"))
+            .unwrap()
+            .len(),
+        17 * 1024 * 1024
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"metadata updated\n"
+    );
+}
+
+#[test]
+fn streaming_import_rejects_the_documented_maximum() {
+    let fixture = Fixture::new();
+    let source_path = fixture.root.join("tiny.png");
+    fs::write(&source_path, b"x").unwrap();
+    let mut source = File::open(source_path).unwrap();
+    let outcome = fixture.service.commit_streaming_import(
+        &fixture.project,
+        RelativePath::new("game/imported.png").unwrap(),
+        &mut source,
+        MAX_IMPORT_BYTES + 1,
+        &sha256(b"x"),
+        Vec::new(),
+    );
+    assert_eq!(outcome_code(&outcome), Some(ErrorCode::InvalidProposal));
+    assert!(!fixture.root.join("game/imported.png").exists());
+}
+
+#[test]
 fn rejects_stale_hash_and_changed_expected_bytes() {
     let fixture = Fixture::new();
     let mutation = fixture.mutation("game/one.rpy", b"loomlight\n");
