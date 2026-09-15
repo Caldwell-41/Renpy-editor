@@ -12,6 +12,7 @@ use crate::{
         discover_managed_sdk, install_supported_sdk, RenpyAdapter, RenpyError, SdkInfo,
         ValidatedSdk, SUPPORTED_VERSION,
     },
+    scene::{RecoveryResolveRequest, SceneCommandRequest, SceneError, SceneWorkspace},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Map;
@@ -121,6 +122,7 @@ pub enum LifecycleError {
     RecoveryRequired,
     StaleSession,
     Authoring(AuthoringError),
+    Scene(SceneError),
     Io,
 }
 
@@ -417,6 +419,20 @@ impl LifecycleService {
                 AuthoringError::RecoveryRequired => LifecycleError::RecoveryRequired,
                 other => LifecycleError::Authoring(other),
             })?;
+        let persistence = self.authoring.status(&authority);
+        if persistence != PersistenceStatus::Saved && self.current.is_some() {
+            self.authoring.unregister_project(&authority);
+            return Err(LifecycleError::RecoveryRequired);
+        }
+        if persistence == PersistenceStatus::Saved {
+            if let Err(error) = self
+                .authoring
+                .ensure_phase_1e_metadata(&authority, &inspected.project.project_id)
+            {
+                self.authoring.unregister_project(&authority);
+                return Err(LifecycleError::Scene(error));
+            }
+        }
         inspected.project.session_id = uuid::Uuid::new_v4().to_string();
         if let Err(error) = self.update_recent(&inspected.root, &inspected.project) {
             self.authoring.unregister_project(&authority);
@@ -548,6 +564,38 @@ impl LifecycleService {
         self.authoring
             .repair_asset_compatibility(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_workspace(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn scene_apply(
+        &self,
+        request: SceneCommandRequest,
+    ) -> Result<SceneWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_apply(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn scene_recovery(&self) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        Ok(self.authoring.scene_recovery(&authority))
+    }
+
+    pub fn scene_resolve_recovery(
+        &self,
+        request: RecoveryResolveRequest,
+    ) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_resolve_recovery(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
     }
 
     pub fn list_recent(&self) -> Vec<RecentProject> {
@@ -854,6 +902,7 @@ fn build_overlay_model(
             source_path: "game/chapters/chapter_01/scene_001.rpy".into(),
             extra: Map::new(),
         }],
+        entry_scene_id: Some(scene_id.clone()),
         last_open: Selection {
             chapter_id,
             scene_id,
@@ -869,6 +918,7 @@ fn build_overlay_model(
             "game/definitions/variables.rpy".into(),
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
+        scene_mappings: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)
@@ -1146,16 +1196,26 @@ where
         root.file_name().and_then(|name| name.to_str()),
     )
     .map_err(|_| LifecycleError::InvalidMetadata)?;
-    let chapter = &metadata.chapters[0];
-    let scene = &metadata.scenes[0];
+    let scene = metadata
+        .scenes
+        .iter()
+        .find(|scene| scene.id == metadata.last_open.scene_id)
+        .ok_or(LifecycleError::InvalidMetadata)?;
+    let chapter = metadata
+        .chapters
+        .iter()
+        .find(|chapter| chapter.id == scene.chapter_id)
+        .ok_or(LifecycleError::InvalidMetadata)?;
     for required in [
         "game/script.rpy",
         "game/options.rpy",
         "game/gui.rpy",
         "game/screens.rpy",
-        scene.source_path.as_str(),
     ] {
         open_project_file(&anchor, required)?;
+    }
+    for scene in &metadata.scenes {
+        open_project_file(&anchor, &scene.source_path)?;
     }
     let project = OpenProject {
         session_id: String::new(),

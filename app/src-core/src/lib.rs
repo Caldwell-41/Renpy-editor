@@ -3,6 +3,7 @@ pub mod lifecycle;
 pub mod metadata;
 pub mod ports;
 pub mod renpy;
+pub mod scene;
 pub mod transaction;
 
 use authoring::{
@@ -10,6 +11,7 @@ use authoring::{
     UpdateCharacterRequest, UpdateVariableRequest,
 };
 use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
+use scene::{RecoveryResolveRequest, SceneCommandRequest};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
 
@@ -44,6 +46,10 @@ pub const OPERATIONS: &[&str] = &[
     "asset.repairCompatibility",
     "variable.create",
     "variable.update",
+    "scene.list",
+    "scene.apply",
+    "scene.recovery",
+    "scene.resolveRecovery",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -406,6 +412,34 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
+        "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.scene_workspace())
+                .and_then(to_value)
+        }
+        "scene.apply" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SceneCommandRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.scene_apply(payload))
+            .and_then(to_value),
+        "scene.recovery" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.scene_recovery())
+                .and_then(to_value)
+        }
+        "scene.resolveRecovery" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<RecoveryResolveRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
+            .and_then(to_value),
         "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
                 request_id,
@@ -506,7 +540,54 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
             "This request belongs to a closed or replaced project session.",
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
+        LifecycleError::Scene(error) => return scene_failure(request_id, error),
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
+    };
+    CoreResponse::failure(request_id, code, message)
+}
+
+fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
+    use scene::SceneError::*;
+    let (code, message) = match error {
+        InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
+        InvalidMetadata => (
+            "INVALID_SCENE_METADATA",
+            "Scene metadata is invalid or unsupported.",
+        ),
+        UnsupportedSource => (
+            "UNSUPPORTED_SCENE_SOURCE",
+            "The Scene source boundary cannot be proven safely.",
+        ),
+        SourceConflict => (
+            "SOURCE_CONFLICT",
+            "The Scene source changed outside Loomlight. Reload before editing.",
+        ),
+        UnknownEntity => ("UNKNOWN_ENTITY", "The selected Scene item is unavailable."),
+        ReferenceBlocked => (
+            "INCOMING_REFERENCE",
+            "The Scene has incoming or unknown references and cannot be deleted safely.",
+        ),
+        InvariantBlocked => (
+            "SCENE_INVARIANT",
+            "That operation would break a required Chapter or Scene invariant.",
+        ),
+        OpaqueBoundary => (
+            "OPAQUE_BOUNDARY",
+            "The operation cannot cross or modify protected Custom Code.",
+        ),
+        HistoryBoundary => (
+            "HISTORY_BOUNDARY",
+            "Undo or redo stopped at an external revision boundary.",
+        ),
+        RecoveryRequired => (
+            "RECOVERY_REQUIRED",
+            "Project recovery must be resolved before authoring can continue.",
+        ),
+        Conflict => (
+            "CONFLICT",
+            "A competing file revision was preserved for recovery.",
+        ),
+        Io => ("SCENE_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
 }

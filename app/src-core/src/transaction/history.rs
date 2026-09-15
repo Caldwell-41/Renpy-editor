@@ -26,6 +26,41 @@ pub struct HistoryStack {
 }
 
 impl HistoryStack {
+    pub fn can_undo(&self) -> bool {
+        self.cursor > 0
+    }
+
+    pub fn can_redo(&self) -> bool {
+        self.cursor < self.entries.len()
+    }
+
+    pub fn undo_paths(&self) -> Result<Vec<RelativePath>, ErrorCode> {
+        self.cursor
+            .checked_sub(1)
+            .and_then(|index| self.entries.get(index))
+            .map(|entry| {
+                entry
+                    .mutations
+                    .iter()
+                    .map(|item| item.path.clone())
+                    .collect()
+            })
+            .ok_or(ErrorCode::HistoryBoundary)
+    }
+
+    pub fn redo_paths(&self) -> Result<Vec<RelativePath>, ErrorCode> {
+        self.entries
+            .get(self.cursor)
+            .map(|entry| {
+                entry
+                    .mutations
+                    .iter()
+                    .map(|item| item.path.clone())
+                    .collect()
+            })
+            .ok_or(ErrorCode::HistoryBoundary)
+    }
+
     pub fn push(&mut self, entry: HistoryEntry) {
         self.entries.truncate(self.cursor);
         self.entries.push(entry);
@@ -62,9 +97,55 @@ impl HistoryStack {
         Ok(())
     }
 
+    /// Advances the cursor only after the inverse transaction commits, replacing the
+    /// old before identities with the identities returned by that actual commit.
+    pub fn accepted_undo_with_revisions(
+        &mut self,
+        revisions: &[Revision],
+    ) -> Result<(), ErrorCode> {
+        let index = self
+            .cursor
+            .checked_sub(1)
+            .ok_or(ErrorCode::HistoryBoundary)?;
+        if revisions.len() != self.entries[index].mutations.len() {
+            return Err(ErrorCode::InvalidProposal);
+        }
+        for (mutation, revision) in self.entries[index]
+            .mutations
+            .iter_mut()
+            .zip(revisions.iter())
+        {
+            mutation.before_revision = revision.clone();
+        }
+        self.cursor = index;
+        Ok(())
+    }
+
     pub fn accepted_redo(&mut self) -> Result<(), ErrorCode> {
         if self.cursor >= self.entries.len() {
             return Err(ErrorCode::HistoryBoundary);
+        }
+        self.cursor += 1;
+        Ok(())
+    }
+
+    /// Advances the cursor only after redo commits and retains the new platform file
+    /// identities for a subsequent undo.
+    pub fn accepted_redo_with_revisions(
+        &mut self,
+        revisions: &[Revision],
+    ) -> Result<(), ErrorCode> {
+        if self.cursor >= self.entries.len()
+            || revisions.len() != self.entries[self.cursor].mutations.len()
+        {
+            return Err(ErrorCode::HistoryBoundary);
+        }
+        for (mutation, revision) in self.entries[self.cursor]
+            .mutations
+            .iter_mut()
+            .zip(revisions.iter())
+        {
+            mutation.after_revision = revision.clone();
         }
         self.cursor += 1;
         Ok(())
@@ -94,9 +175,17 @@ fn proposal(
         if current.get(&mutation.path) != Some(expected_revision) {
             return Err(ErrorCode::HistoryBoundary);
         }
+        let kind = match (
+            *expected_revision == Revision::expected_absence(),
+            proposed.is_empty(),
+        ) {
+            (true, false) => MutationKind::CreateNew,
+            (false, true) => MutationKind::DeleteExisting,
+            _ => MutationKind::ReplaceExisting,
+        };
         mutations.push(FileMutation {
             path: mutation.path.clone(),
-            kind: MutationKind::ReplaceExisting,
+            kind,
             base: expected_revision.clone(),
             expected_bytes: expected_bytes.clone(),
             proposed: proposed.clone(),

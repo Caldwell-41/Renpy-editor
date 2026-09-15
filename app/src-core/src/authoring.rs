@@ -18,6 +18,7 @@ use std::{
     fs::File,
     io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
+    sync::Mutex,
 };
 
 pub const AUTHORING_SCHEMA_VERSION: u32 = 1;
@@ -391,8 +392,9 @@ struct ImportAuthority {
 
 #[derive(Default)]
 pub struct AuthoringService {
-    transactions: TransactionService,
+    pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
+    pub(crate) scene_history: Mutex<HashMap<ProjectId, crate::transaction::HistoryStack>>,
 }
 
 impl AuthoringService {
@@ -421,20 +423,18 @@ impl AuthoringService {
             .transactions
             .register_trusted_anchor(root, anchor)
             .map_err(|_| AuthoringError::Io)?;
-        if self
-            .transactions
-            .has_blocking_recovery(&id)
-            .map_err(|_| AuthoringError::RecoveryRequired)?
-        {
-            self.transactions.unregister_trusted_project(&id);
-            return Err(AuthoringError::RecoveryRequired);
-        }
+        // A blocked project remains inspectable so Phase 1E recovery can explain
+        // retained evidence. Every write entry point still performs its own blocking
+        // recovery preflight inside the transaction serialization boundary.
         Ok(id)
     }
 
     pub fn unregister_project(&mut self, id: &ProjectId) {
         self.transactions.unregister_trusted_project(id);
         self.imports.retain(|_, authority| &authority.project != id);
+        if let Ok(mut history) = self.scene_history.lock() {
+            history.remove(id);
+        }
     }
 
     pub fn flush(&self, project: &ProjectId) -> Result<(), AuthoringError> {
