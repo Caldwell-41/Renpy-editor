@@ -1,7 +1,7 @@
 # Phase 1E Scene authoring execution ledger
 
 **Opened:** 2026-09-16  
-**Status:** 1E.1 closed locally; 1E.2 in progress  
+**Status:** 1E.1 and 1E.2 closed locally; 1E.3 in progress
 **Branch:** `feature/phase-1e-scene-authoring`  
 **Base:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`
 
@@ -67,7 +67,7 @@ truthfully rather than reconstructing semantic intent from retained recovery jou
 
 ## Checkpoint 1E.2 — functional Scene authoring and recovery UX
 
-**Status:** In progress
+**Status:** Closed locally
 
 ### Planned production boundary
 
@@ -78,11 +78,38 @@ truthfully rather than reconstructing semantic intent from retained recovery jou
 
 ### Gate evidence
 
-Pending.
+- `cargo test -p loomlight-core --locked`: 129 passed, 0 failed, 4 intentionally
+  ignored subprocess workers.
+- `npm run check`: 11 TypeScript/DOM/protocol tests passed; `npm run build` passed.
+- `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings`,
+  `cargo fmt --check --all`, and `git diff --check`: passed.
+- `representative_branching_project_is_authored_and_reopened_through_services`
+  created Characters, an Appearance, background/music/SFX assets and bool/int/string
+  Variables through supporting-authoring services; authored every approved Beat,
+  multiple unconditional Choice destinations, atomic Create New Scene, Jump and
+  terminal Return; retained Custom Code bytes; moved/reordered; undid/redid; and
+  reopened with stable IDs and selection.
+- The Scene renderer exposes multi-Chapter/Scene create, display rename, reorder,
+  cross-Chapter move, guarded delete and select/open controls. All reorder operations
+  have labelled keyboard-operable Move Up/Down buttons.
+- Selected Beats expand inline. Dialogue Enter remains a newline; Ctrl/Cmd+Enter is
+  one semantic transaction that commits the burst and inserts the next Dialogue with
+  speaker carry-forward. Commit/cancel, navigation blocking, truthful Flush wording,
+  validation-input retention and focus restoration are covered by DOM tests.
+- Recovery UI lists affected paths and retained accepted/displaced evidence, requires
+  explicit confirmation, offers only the transaction service's proven keep/accept
+  choices, revalidates after completion, and leaves ambiguous recovery blocked.
+- Focused review found no Scene write outside `scene.apply` and the shared transaction/
+  history path, no runtime execution or dynamic diagnostics, no CSP/capability widening,
+  no silent reference retargeting, and no Phase 1F+ surface.
+- A local `cargo test -p loomlight-desktop --locked` attempt could not start because
+  this Linux container lacks `pkg-config`/GTK system libraries. It is recorded as an
+  environment-limited failed attempt, not target evidence; supported Windows/macOS
+  desktop evidence remains reserved for the final production gate.
 
 ## Checkpoint 1E.3 — preview, media and visual conformance
 
-**Status:** Blocked on 1E.2 gate
+**Status:** In progress
 
 ### Planned production boundary
 
@@ -118,4 +145,10 @@ will remain explicit. The brief will be archived only after all gates pass.
 
 ## Validation record
 
-No checkpoint gate has yet been claimed.
+- 1E.1 local gate closed before any Scene renderer write path was added; checkpoint
+  commit `a2b6002` (`feat: establish Phase 1E scene foundation`).
+- 1E.2 local gate closed only after the functional service fixture, recovery UI,
+  renderer DOM suite, core suite, build, formatting and strict core Clippy passed.
+- The Linux desktop test attempt failed before project compilation at the host GTK
+  dependency check (`pkg-config` unavailable); it is neither skipped silently nor
+  counted as production evidence.

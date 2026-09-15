@@ -13,7 +13,7 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
 });
 
-test("frontend operation list contains only bounded Phase 1C and 1D operations", () => {
+test("frontend operation list contains only bounded Phase 1C through 1E operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
@@ -44,6 +44,10 @@ test("frontend operation list contains only bounded Phase 1C and 1D operations",
     "asset.repairCompatibility",
     "variable.create",
     "variable.update",
+    "scene.list",
+    "scene.apply",
+    "scene.recovery",
+    "scene.resolveRecovery",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
   assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
@@ -110,7 +114,7 @@ test("Phase 1D supporting surfaces and bounded operations are present", async ()
   for (const operation of ["authoring.list", "project.status", "project.flush", "character.create", "asset.chooseImport", "asset.import", "appearance.setDefault", "variable.create"]) {
     assert.equal(source.includes(operation), true, operation);
   }
-  for (const deferred of ["Run Game", "Beats", "Editor Preview", "Branches workspace"]) {
+  for (const deferred of ["Run Game", "Branches workspace"]) {
     assert.equal(source.includes(deferred), false, deferred);
   }
   assert.match(source, /fixed after creation/);

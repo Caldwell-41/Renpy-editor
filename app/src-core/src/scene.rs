@@ -217,6 +217,14 @@ pub enum SceneCommand {
         chapter_id: String,
         display_name: String,
     },
+    CreateSceneFromChoice {
+        scene_id: String,
+        expected_source_revision: String,
+        choice_beat_id: String,
+        option_text: String,
+        chapter_id: String,
+        display_name: String,
+    },
     RenameScene {
         scene_id: String,
         display_name: String,
@@ -245,6 +253,13 @@ pub enum SceneCommand {
         expected_source_revision: String,
         beat_id: String,
         beat: BeatPayload,
+    },
+    ContinueDialogue {
+        scene_id: String,
+        expected_source_revision: String,
+        beat_id: String,
+        character_id: String,
+        text: String,
     },
     RemoveBeat {
         scene_id: String,
@@ -559,6 +574,23 @@ impl AuthoringService {
                 chapter_id,
                 display_name,
             } => self.create_scene_proposal(project, loaded, &chapter_id, display_name),
+            SceneCommand::CreateSceneFromChoice {
+                scene_id,
+                expected_source_revision,
+                choice_beat_id,
+                option_text,
+                chapter_id,
+                display_name,
+            } => self.create_scene_from_choice_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                &choice_beat_id,
+                option_text,
+                &chapter_id,
+                display_name,
+            ),
             SceneCommand::RenameScene {
                 scene_id,
                 display_name,
@@ -631,6 +663,23 @@ impl AuthoringService {
                 BeatEdit::Update {
                     id: beat_id,
                     payload: beat,
+                },
+            ),
+            SceneCommand::ContinueDialogue {
+                scene_id,
+                expected_source_revision,
+                beat_id,
+                character_id,
+                text,
+            } => self.beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                BeatEdit::ContinueDialogue {
+                    id: beat_id,
+                    character_id,
+                    text,
                 },
             ),
             SceneCommand::RemoveBeat {
@@ -728,6 +777,156 @@ impl AuthoringService {
                     loaded.source_map_bytes,
                     loaded.source_map_revision,
                     map_bytes,
+                )?,
+            ],
+            intent: TransactionIntent::Edit,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn create_scene_from_choice_proposal(
+        &self,
+        project: &ProjectId,
+        mut loaded: Loaded,
+        source_scene_id: &str,
+        expected_source_revision: &str,
+        choice_beat_id: &str,
+        option_text: String,
+        chapter_id: &str,
+        display_name: String,
+    ) -> Result<TransactionProposal, SceneError> {
+        validate_display(&display_name)?;
+        validate_text(&option_text)?;
+        if loaded.project.scenes.len() >= MAX_SCENES {
+            return Err(SceneError::InvariantBlocked);
+        }
+        let chapter = loaded
+            .project
+            .chapters
+            .iter()
+            .find(|item| item.id == chapter_id)
+            .cloned()
+            .ok_or(SceneError::UnknownEntity)?;
+        let source_scene = loaded
+            .project
+            .scenes
+            .iter()
+            .find(|scene| scene.id == source_scene_id)
+            .cloned()
+            .ok_or(SceneError::UnknownEntity)?;
+        let stored = loaded
+            .source_map
+            .scene_mappings
+            .iter()
+            .find(|mapping| mapping.scene_id == source_scene_id)
+            .cloned()
+            .ok_or(SceneError::InvalidMetadata)?;
+        let (source_bytes, source_revision) =
+            self.scene_snapshot(project, &source_scene.source_path)?;
+        require_revision(&source_revision, expected_source_revision)?;
+        if stored.source_revision != expected_source_revision {
+            return Err(SceneError::SourceConflict);
+        }
+        let (_, beats) = build_mapping(
+            &source_scene,
+            &source_bytes,
+            &source_revision.sha256,
+            Some(&stored),
+            &[],
+            Some((&loaded.project, &loaded.authoring)),
+        )?;
+        let choice = beats
+            .iter()
+            .find(|beat| beat.id == choice_beat_id)
+            .ok_or(SceneError::UnknownEntity)?;
+        let BeatPayload::Choice { mut options } = choice.payload.clone() else {
+            return Err(SceneError::InvalidPayload);
+        };
+        if choice.protected || options.len() >= 64 {
+            return Err(SceneError::InvariantBlocked);
+        }
+
+        self.transactions
+            .ensure_directory(project, &chapter.directory)
+            .map_err(|_| SceneError::Io)?;
+        let destination_id = uuid::Uuid::new_v4().to_string();
+        let technical_label = format!("loomlight_scene_{}", destination_id.replace('-', ""));
+        let destination_path = next_scene_path(&loaded.project, &chapter.directory);
+        let destination_bytes = format!("label {technical_label}:\n    return\n").into_bytes();
+        let destination_revision = sha256(&destination_bytes);
+        let destination = SceneMetadata {
+            id: destination_id.clone(),
+            chapter_id: chapter_id.into(),
+            display_name,
+            technical_label,
+            source_path: destination_path.clone(),
+            extra: Map::new(),
+        };
+        options.push(ChoiceOption {
+            text: option_text,
+            destination_scene_id: destination_id.clone(),
+        });
+        loaded.project.scenes.push(destination.clone());
+        loaded.project.last_open = Selection {
+            chapter_id: chapter_id.into(),
+            scene_id: destination_id,
+        };
+        loaded.source_map.sources.push(destination_path.clone());
+
+        let (proposed_source, forced) = apply_beat_edit(
+            &source_bytes,
+            &beats,
+            BeatEdit::Update {
+                id: choice_beat_id.into(),
+                payload: BeatPayload::Choice { options },
+            },
+            &loaded,
+        )?;
+        let proposed_source_revision = sha256(&proposed_source);
+        let (source_mapping, _) = build_mapping(
+            &source_scene,
+            &proposed_source,
+            &proposed_source_revision,
+            Some(&stored),
+            &forced,
+            Some((&loaded.project, &loaded.authoring)),
+        )?;
+        *loaded
+            .source_map
+            .scene_mappings
+            .iter_mut()
+            .find(|mapping| mapping.scene_id == source_scene_id)
+            .ok_or(SceneError::InvalidMetadata)? = source_mapping;
+        let (destination_mapping, _) = build_mapping(
+            &destination,
+            &destination_bytes,
+            &destination_revision,
+            None,
+            &[],
+            Some((&loaded.project, &loaded.authoring)),
+        )?;
+        loaded.source_map.scene_mappings.push(destination_mapping);
+
+        Ok(TransactionProposal {
+            mutations: vec![
+                create_mutation(&destination_path, destination_bytes)?,
+                replace_mutation(
+                    &source_scene.source_path,
+                    source_bytes,
+                    source_revision,
+                    proposed_source,
+                )?,
+                replace_mutation(
+                    PROJECT_PATH,
+                    loaded.project_bytes,
+                    loaded.project_revision,
+                    json_bytes(&loaded.project)?,
+                )?,
+                replace_mutation(
+                    SOURCE_MAP_PATH,
+                    loaded.source_map_bytes,
+                    loaded.source_map_revision,
+                    json_bytes(&loaded.source_map)?,
                 )?,
             ],
             intent: TransactionIntent::Edit,
@@ -970,7 +1169,12 @@ impl AuthoringService {
             &[],
             Some((&loaded.project, &loaded.authoring)),
         )?;
-        if beats.len() >= MAX_BEATS_PER_SCENE && matches!(edit, BeatEdit::Insert { .. }) {
+        if beats.len() >= MAX_BEATS_PER_SCENE
+            && matches!(
+                edit,
+                BeatEdit::Insert { .. } | BeatEdit::ContinueDialogue { .. }
+            )
+        {
             return Err(SceneError::InvariantBlocked);
         }
         let (proposed_source, forced) = apply_beat_edit(&source_bytes, &beats, edit, &loaded)?;
@@ -1185,6 +1389,11 @@ enum BeatEdit {
         id: String,
         payload: BeatPayload,
     },
+    ContinueDialogue {
+        id: String,
+        character_id: String,
+        text: String,
+    },
     Remove {
         id: String,
     },
@@ -1218,9 +1427,16 @@ fn apply_beat_edit(
                     .ok_or(SceneError::UnknownEntity)?
                     .byte_start as usize
             } else {
-                beats
-                    .last()
-                    .map_or(source.len(), |beat| beat.byte_end as usize)
+                beats.last().map_or(source.len(), |beat| {
+                    if matches!(
+                        beat.payload,
+                        BeatPayload::Return | BeatPayload::Jump { .. } | BeatPayload::Choice { .. }
+                    ) {
+                        beat.byte_start as usize
+                    } else {
+                        beat.byte_end as usize
+                    }
+                })
             };
             if boundary_is_opaque(beats, insertion) {
                 return Err(SceneError::OpaqueBoundary);
@@ -1257,6 +1473,46 @@ fn apply_beat_edit(
             Ok((
                 output,
                 vec![(payload.kind().into(), sha256(rendered.as_bytes()), id)],
+            ))
+        }
+        BeatEdit::ContinueDialogue {
+            id,
+            character_id,
+            text,
+        } => {
+            let beat = beats
+                .iter()
+                .find(|beat| beat.id == id)
+                .ok_or(SceneError::UnknownEntity)?;
+            if beat.protected || !matches!(beat.payload, BeatPayload::Dialogue { .. }) {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            let committed = BeatPayload::Dialogue {
+                character_id: character_id.clone(),
+                text,
+            };
+            let next = BeatPayload::Dialogue {
+                character_id,
+                text: String::new(),
+            };
+            let committed_source = render_payload(&committed, loaded, newline)?;
+            let next_source = render_payload(&next, loaded, newline)?;
+            let next_id = uuid::Uuid::new_v4().to_string();
+            let mut output = source.to_vec();
+            output.splice(
+                beat.byte_start as usize..beat.byte_end as usize,
+                committed_source.bytes().chain(next_source.bytes()),
+            );
+            Ok((
+                output,
+                vec![
+                    (
+                        committed.kind().into(),
+                        sha256(committed_source.as_bytes()),
+                        id,
+                    ),
+                    (next.kind().into(), sha256(next_source.as_bytes()), next_id),
+                ],
             ))
         }
         BeatEdit::Remove { id } => {
@@ -2263,7 +2519,12 @@ impl BoolNot for bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::authoring::{
+        Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,
+        ImportAssetRequest, SourceDefinition, Variable,
+    };
     use crate::metadata::{Resolution, SdkIdentity};
+    use std::collections::BTreeMap;
     use std::fs;
     use tempfile::TempDir;
 
@@ -2422,6 +2683,254 @@ mod tests {
         );
         assert!(beats.iter().any(|beat| beat.protected));
         assert_eq!(source, source.to_vec().as_slice());
+    }
+
+    #[test]
+    fn approved_beat_subset_round_trips_without_runtime_evaluation() {
+        let chapter_id = uuid::Uuid::new_v4().to_string();
+        let scene_id = uuid::Uuid::new_v4().to_string();
+        let destination_id = uuid::Uuid::new_v4().to_string();
+        let character_id = uuid::Uuid::new_v4().to_string();
+        let appearance_id = uuid::Uuid::new_v4().to_string();
+        let appearance_asset_id = uuid::Uuid::new_v4().to_string();
+        let background_id = uuid::Uuid::new_v4().to_string();
+        let music_id = uuid::Uuid::new_v4().to_string();
+        let sfx_id = uuid::Uuid::new_v4().to_string();
+        let bool_id = uuid::Uuid::new_v4().to_string();
+        let int_id = uuid::Uuid::new_v4().to_string();
+        let string_id = uuid::Uuid::new_v4().to_string();
+        let scene = SceneMetadata {
+            id: scene_id.clone(),
+            chapter_id: chapter_id.clone(),
+            display_name: "Scene".into(),
+            technical_label: "scene_one".into(),
+            source_path: "game/chapters/chapter_01/scene_001.rpy".into(),
+            extra: Map::new(),
+        };
+        let destination = SceneMetadata {
+            id: destination_id.clone(),
+            chapter_id: chapter_id.clone(),
+            display_name: "Destination".into(),
+            technical_label: "scene_two".into(),
+            source_path: "game/chapters/chapter_01/scene_002.rpy".into(),
+            extra: Map::new(),
+        };
+        let project = ProjectMetadata {
+            schema_version: PROJECT_SCHEMA_VERSION,
+            project_id: uuid::Uuid::new_v4().to_string(),
+            title: "Fixture".into(),
+            folder_name: "fixture".into(),
+            sdk: SdkIdentity {
+                adapter: "renpy-8.5.3".into(),
+                version: "8.5.3".into(),
+                extra: Map::new(),
+            },
+            resolution: Resolution {
+                width: 1280,
+                height: 720,
+            },
+            capabilities: vec!["scene-authoring-v1".into()],
+            chapters: vec![ChapterMetadata {
+                id: chapter_id.clone(),
+                display_name: "Chapter".into(),
+                directory: "game/chapters/chapter_01".into(),
+                extra: Map::new(),
+            }],
+            scenes: vec![scene.clone(), destination],
+            entry_scene_id: Some(scene_id.clone()),
+            last_open: Selection {
+                chapter_id,
+                scene_id,
+            },
+            extra: Map::new(),
+        };
+        let source_definition = |path: &str, statement: &str| SourceDefinition {
+            path: path.into(),
+            statement: statement.into(),
+            source_revision: "0".repeat(64),
+            extra: Map::new(),
+        };
+        let asset = |id: String, kind: AssetKind, name: &str| Asset {
+            id,
+            kind,
+            display_name: name.into(),
+            relative_path: format!("game/assets/{name}.dat"),
+            discovery_name: name.into(),
+            sha256: "0".repeat(64),
+            byte_count: 1,
+            status: "available".into(),
+            extra: Map::new(),
+        };
+        let variable = |id: String,
+                        technical_name: &str,
+                        variable_type: VariableType,
+                        default_value: Value| Variable {
+            id,
+            technical_name: technical_name.into(),
+            variable_type,
+            default_value,
+            source: source_definition("game/definitions/variables.rpy", "unused"),
+            extra: Map::new(),
+        };
+        let mut attributes = BTreeMap::new();
+        attributes.insert("expression".into(), "happy".into());
+        attributes.insert("outfit".into(), "default".into());
+        attributes.insert("pose".into(), "default".into());
+        let authoring = AuthoringMetadata {
+            schema_version: 1,
+            project_id: project.project_id.clone(),
+            characters: vec![Character {
+                id: character_id.clone(),
+                technical_name: "alice".into(),
+                display_name: "Alice".into(),
+                dialogue_color: "#ffffff".into(),
+                default_appearance_id: Some(appearance_id.clone()),
+                source: source_definition("game/definitions/characters.rpy", "unused"),
+                extra: Map::new(),
+            }],
+            appearances: vec![Appearance {
+                id: appearance_id.clone(),
+                character_id: character_id.clone(),
+                label: "happy".into(),
+                attributes,
+                render_mode: "staticImportedAsset".into(),
+                asset_id: appearance_asset_id.clone(),
+                extra: Map::new(),
+            }],
+            assets: vec![
+                asset(
+                    appearance_asset_id,
+                    AssetKind::CharacterAppearance,
+                    "alice_happy",
+                ),
+                asset(background_id.clone(), AssetKind::Background, "bg_cafe"),
+                asset(music_id.clone(), AssetKind::Music, "theme"),
+                asset(sfx_id.clone(), AssetKind::Sfx, "bell"),
+            ],
+            variables: vec![
+                variable(
+                    bool_id.clone(),
+                    "flag",
+                    VariableType::Bool,
+                    Value::Bool(false),
+                ),
+                variable(
+                    int_id.clone(),
+                    "score",
+                    VariableType::Int,
+                    Value::String("0".into()),
+                ),
+                variable(
+                    string_id.clone(),
+                    "name",
+                    VariableType::String,
+                    Value::String(String::new()),
+                ),
+            ],
+            extra: Map::new(),
+        };
+        let loaded = Loaded {
+            project: project.clone(),
+            project_bytes: vec![],
+            project_revision: Revision::expected_absence(),
+            source_map: SourceMapMetadata {
+                schema_version: SOURCE_MAP_SCHEMA_VERSION,
+                project_id: project.project_id.clone(),
+                sources: vec![],
+                scene_mappings: vec![],
+                extra: Map::new(),
+            },
+            source_map_bytes: vec![],
+            source_map_revision: Revision::expected_absence(),
+            authoring,
+        };
+        let payloads = vec![
+            BeatPayload::Background {
+                asset_id: background_id,
+                transition: TransitionRef::Dissolve,
+            },
+            BeatPayload::ShowCharacter {
+                character_id: character_id.clone(),
+                appearance_id: appearance_id.clone(),
+                placement: PlacementRef::Left,
+                transition: TransitionRef::Fade,
+            },
+            BeatPayload::HideCharacter {
+                character_id: character_id.clone(),
+                transition: TransitionRef::None,
+            },
+            BeatPayload::ChangeAppearance {
+                character_id: character_id.clone(),
+                appearance_id,
+                transition: TransitionRef::Dissolve,
+            },
+            BeatPayload::Placement {
+                character_id: character_id.clone(),
+                placement: PlacementRef::Right,
+            },
+            BeatPayload::Dialogue {
+                character_id,
+                text: "Hello\nworld ☃".into(),
+            },
+            BeatPayload::Narration {
+                text: "Narration".into(),
+            },
+            BeatPayload::PlayMusic { asset_id: music_id },
+            BeatPayload::StopMusic,
+            BeatPayload::PlaySfx { asset_id: sfx_id },
+            BeatPayload::Transition {
+                transition: TransitionRef::Fade,
+            },
+            BeatPayload::SetVariable {
+                variable_id: bool_id,
+                value: Value::Bool(true),
+            },
+            BeatPayload::SetVariable {
+                variable_id: int_id,
+                value: Value::String("-9223372036854775808".into()),
+            },
+            BeatPayload::SetVariable {
+                variable_id: string_id,
+                value: Value::String("Loomlight".into()),
+            },
+            BeatPayload::Choice {
+                options: vec![
+                    ChoiceOption {
+                        text: "One".into(),
+                        destination_scene_id: destination_id.clone(),
+                    },
+                    ChoiceOption {
+                        text: "Two".into(),
+                        destination_scene_id: destination_id.clone(),
+                    },
+                    ChoiceOption {
+                        text: "Three".into(),
+                        destination_scene_id: destination_id.clone(),
+                    },
+                ],
+            },
+            BeatPayload::Jump {
+                scene_id: destination_id,
+            },
+            BeatPayload::Return,
+        ];
+        let mut source = b"label scene_one:\n".to_vec();
+        for payload in &payloads {
+            source.extend_from_slice(render_payload(payload, &loaded, "\n").unwrap().as_bytes());
+        }
+        let (_, _, parsed) =
+            parse_scene(&scene, &source, Some((&project, &loaded.authoring))).unwrap();
+        assert_eq!(
+            parsed
+                .iter()
+                .map(|beat| beat.payload.kind())
+                .collect::<Vec<_>>(),
+            payloads.iter().map(BeatPayload::kind).collect::<Vec<_>>()
+        );
+        assert_eq!(
+            parsed.iter().map(|beat| &beat.payload).collect::<Vec<_>>(),
+            payloads.iter().collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -2675,6 +3184,562 @@ mod tests {
             ),
             Err(SceneError::SourceConflict)
         ));
+    }
+
+    #[test]
+    fn choice_destination_creation_is_one_semantic_transaction() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let first = fixture.workspace();
+        let chapter_id = first.chapters[0].id.clone();
+        let with_target = fixture
+            .apply(
+                &first,
+                SceneCommand::CreateScene {
+                    chapter_id: chapter_id.clone(),
+                    display_name: "Existing destination".into(),
+                },
+            )
+            .unwrap();
+        let entry = with_target
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        let existing = with_target
+            .scenes
+            .iter()
+            .find(|scene| scene.id != fixture.entry_scene_id)
+            .unwrap();
+        let with_choice = fixture
+            .apply(
+                &with_target,
+                SceneCommand::InsertBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    before_beat_id: None,
+                    beat: BeatPayload::Choice {
+                        options: vec![ChoiceOption {
+                            text: "Take the first path".into(),
+                            destination_scene_id: existing.id.clone(),
+                        }],
+                    },
+                },
+            )
+            .unwrap();
+        let entry = with_choice
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        assert!(matches!(
+            entry.beats.last().unwrap().payload,
+            BeatPayload::Return
+        ));
+        let choice_id = entry
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+            .unwrap()
+            .id
+            .clone();
+        let expanded = fixture
+            .apply(
+                &with_choice,
+                SceneCommand::CreateSceneFromChoice {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    choice_beat_id: choice_id,
+                    option_text: "Create a new path".into(),
+                    chapter_id,
+                    display_name: "Created from Choice".into(),
+                },
+            )
+            .unwrap();
+        assert_eq!(expanded.scenes.len(), 3);
+        let created = expanded
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Created from Choice")
+            .unwrap();
+        assert!(fixture.root.join(&created.source_path).is_file());
+        let source_scene = expanded
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        let BeatPayload::Choice { options } = &source_scene
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+            .unwrap()
+            .payload
+        else {
+            panic!("choice was not preserved")
+        };
+        assert_eq!(options.len(), 2);
+        assert_eq!(options[1].destination_scene_id, created.id);
+        assert!(matches!(
+            fixture.apply(
+                &expanded,
+                SceneCommand::DeleteScene {
+                    scene_id: created.id.clone(),
+                    expected_source_revision: created.source_revision.clone(),
+                }
+            ),
+            Err(SceneError::ReferenceBlocked)
+        ));
+
+        let undone = fixture.apply(&expanded, SceneCommand::Undo).unwrap();
+        assert_eq!(undone.scenes.len(), 2);
+        assert!(!fixture.root.join(&created.source_path).exists());
+        let BeatPayload::Choice { options } = &undone
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap()
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+            .unwrap()
+            .payload
+        else {
+            panic!("choice was not restored")
+        };
+        assert_eq!(options.len(), 1);
+    }
+
+    #[test]
+    fn continue_dialogue_commits_the_burst_and_next_beat_together() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let authoring = fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "alice".into(),
+                    display_name: "Alice".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        let character_id = authoring.characters[0].id.clone();
+        let first = fixture.workspace();
+        let entry = &first.scenes[0];
+        let with_dialogue = fixture
+            .apply(
+                &first,
+                SceneCommand::InsertBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    before_beat_id: None,
+                    beat: BeatPayload::Dialogue {
+                        character_id: character_id.clone(),
+                        text: "Draft".into(),
+                    },
+                },
+            )
+            .unwrap();
+        let entry = &with_dialogue.scenes[0];
+        let dialogue = entry
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, BeatPayload::Dialogue { .. }))
+            .unwrap();
+        let continued = fixture
+            .apply(
+                &with_dialogue,
+                SceneCommand::ContinueDialogue {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    beat_id: dialogue.id.clone(),
+                    character_id,
+                    text: "Committed".into(),
+                },
+            )
+            .unwrap();
+        let dialogues: Vec<_> = continued.scenes[0]
+            .beats
+            .iter()
+            .filter_map(|beat| match &beat.payload {
+                BeatPayload::Dialogue { text, .. } => Some(text.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(dialogues, ["Committed", ""]);
+        let undone = fixture.apply(&continued, SceneCommand::Undo).unwrap();
+        let dialogues: Vec<_> = undone.scenes[0]
+            .beats
+            .iter()
+            .filter_map(|beat| match &beat.payload {
+                BeatPayload::Dialogue { text, .. } => Some(text.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(dialogues, ["Draft"]);
+    }
+
+    #[test]
+    fn representative_branching_project_is_authored_and_reopened_through_services() {
+        let mut fixture = Fixture::new(
+            b"label scene_one:\n    python:\n        persistent.custom_flag = True\n    return\n",
+        );
+        fixture.migrate();
+        let authored = fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "alice".into(),
+                    display_name: "Alice".into(),
+                    dialogue_color: "#aabbcc".into(),
+                },
+            )
+            .unwrap();
+        let character_id = authored.characters[0].id.clone();
+        for (name, variable_type, default_value) in [
+            ("flag", VariableType::Bool, Value::Bool(false)),
+            ("score", VariableType::Int, Value::String("0".into())),
+            (
+                "player_name",
+                VariableType::String,
+                Value::String("Player".into()),
+            ),
+        ] {
+            fixture
+                .service
+                .create_variable(
+                    &fixture.project,
+                    &fixture.project_id,
+                    CreateVariableRequest {
+                        technical_name: name.into(),
+                        variable_type,
+                        default_value,
+                    },
+                )
+                .unwrap();
+        }
+        let imports = [
+            (
+                "appearance.png",
+                b"appearance".as_slice(),
+                AssetKind::CharacterAppearance,
+                "happy",
+                "Alice Happy",
+                Some(character_id.clone()),
+                Some("happy".into()),
+            ),
+            (
+                "cafe.png",
+                b"background".as_slice(),
+                AssetKind::Background,
+                "cafe",
+                "Cafe",
+                None,
+                None,
+            ),
+            (
+                "theme.ogg",
+                b"music".as_slice(),
+                AssetKind::Music,
+                "theme",
+                "Theme",
+                None,
+                None,
+            ),
+            (
+                "bell.wav",
+                b"sound".as_slice(),
+                AssetKind::Sfx,
+                "bell",
+                "Bell",
+                None,
+                None,
+            ),
+        ];
+        for (name, bytes, kind, technical_name, display_name, character_id, expression) in imports {
+            let selected_path = fixture.root.join(name);
+            fs::write(&selected_path, bytes).unwrap();
+            let selected = fixture
+                .service
+                .select_import(&fixture.project, &selected_path)
+                .unwrap();
+            fixture
+                .service
+                .import_asset(
+                    &fixture.project,
+                    &fixture.project_id,
+                    ImportAssetRequest {
+                        authority_id: selected.authority_id,
+                        kind,
+                        technical_name: technical_name.into(),
+                        display_name: display_name.into(),
+                        character_id,
+                        expression,
+                    },
+                )
+                .unwrap();
+        }
+        let mut workspace = fixture.workspace();
+        let chapter_one = workspace.chapters[0].id.clone();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateChapter {
+                    display_name: "Branches".into(),
+                },
+            )
+            .unwrap();
+        let chapter_two = workspace.chapters[1].id.clone();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateScene {
+                    chapter_id: chapter_one,
+                    display_name: "Garden".into(),
+                },
+            )
+            .unwrap();
+        let garden = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Garden")
+            .unwrap()
+            .clone();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::MoveScene {
+                    scene_id: garden.id.clone(),
+                    chapter_id: chapter_two.clone(),
+                    direction: None,
+                    expected_source_revision: garden.source_revision,
+                },
+            )
+            .unwrap();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateScene {
+                    chapter_id: chapter_two.clone(),
+                    display_name: "Library".into(),
+                },
+            )
+            .unwrap();
+        let garden_id = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Garden")
+            .unwrap()
+            .id
+            .clone();
+        let library_id = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Library")
+            .unwrap()
+            .id
+            .clone();
+        let authoring = &workspace.authoring;
+        let appearance_id = authoring.appearances[0].id.clone();
+        let asset_id = |kind| {
+            authoring
+                .assets
+                .iter()
+                .find(|asset| asset.kind == kind)
+                .unwrap()
+                .id
+                .clone()
+        };
+        let variable_id = |name: &str| {
+            authoring
+                .variables
+                .iter()
+                .find(|variable| variable.technical_name == name)
+                .unwrap()
+                .id
+                .clone()
+        };
+        let payloads = vec![
+            BeatPayload::Background {
+                asset_id: asset_id(AssetKind::Background),
+                transition: TransitionRef::Dissolve,
+            },
+            BeatPayload::ShowCharacter {
+                character_id: character_id.clone(),
+                appearance_id: appearance_id.clone(),
+                placement: PlacementRef::Left,
+                transition: TransitionRef::None,
+            },
+            BeatPayload::Placement {
+                character_id: character_id.clone(),
+                placement: PlacementRef::Centre,
+            },
+            BeatPayload::ChangeAppearance {
+                character_id: character_id.clone(),
+                appearance_id,
+                transition: TransitionRef::Fade,
+            },
+            BeatPayload::Dialogue {
+                character_id: character_id.clone(),
+                text: "Where should we go?".into(),
+            },
+            BeatPayload::Narration {
+                text: "The bell rings.".into(),
+            },
+            BeatPayload::PlayMusic {
+                asset_id: asset_id(AssetKind::Music),
+            },
+            BeatPayload::PlaySfx {
+                asset_id: asset_id(AssetKind::Sfx),
+            },
+            BeatPayload::StopMusic,
+            BeatPayload::Transition {
+                transition: TransitionRef::Dissolve,
+            },
+            BeatPayload::SetVariable {
+                variable_id: variable_id("flag"),
+                value: Value::Bool(true),
+            },
+            BeatPayload::SetVariable {
+                variable_id: variable_id("score"),
+                value: Value::String("9223372036854775807".into()),
+            },
+            BeatPayload::SetVariable {
+                variable_id: variable_id("player_name"),
+                value: Value::String("Aki".into()),
+            },
+            BeatPayload::HideCharacter {
+                character_id,
+                transition: TransitionRef::Fade,
+            },
+            BeatPayload::Choice {
+                options: vec![
+                    ChoiceOption {
+                        text: "Garden".into(),
+                        destination_scene_id: garden_id.clone(),
+                    },
+                    ChoiceOption {
+                        text: "Library".into(),
+                        destination_scene_id: library_id.clone(),
+                    },
+                ],
+            },
+            BeatPayload::Jump {
+                scene_id: garden_id,
+            },
+        ];
+        for payload in payloads {
+            let entry = workspace
+                .scenes
+                .iter()
+                .find(|scene| scene.id == fixture.entry_scene_id)
+                .unwrap();
+            workspace = fixture
+                .apply(
+                    &workspace,
+                    SceneCommand::InsertBeat {
+                        scene_id: entry.id.clone(),
+                        expected_source_revision: entry.source_revision.clone(),
+                        before_beat_id: None,
+                        beat: payload,
+                    },
+                )
+                .unwrap();
+        }
+        let entry = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        let choice = entry
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+            .unwrap();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateSceneFromChoice {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    choice_beat_id: choice.id.clone(),
+                    option_text: "A new road".into(),
+                    chapter_id: chapter_two,
+                    display_name: "Created from Choice".into(),
+                },
+            )
+            .unwrap();
+        let entry = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        let movable = entry
+            .beats
+            .iter()
+            .rev()
+            .find(|beat| !beat.protected && !matches!(beat.payload, BeatPayload::Return))
+            .unwrap();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::MoveBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    beat_id: movable.id.clone(),
+                    direction: MoveDirection::Up,
+                },
+            )
+            .unwrap();
+        workspace = fixture.apply(&workspace, SceneCommand::Undo).unwrap();
+        workspace = fixture.apply(&workspace, SceneCommand::Redo).unwrap();
+        let entry = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.entry_scene_id)
+            .unwrap();
+        assert!(entry.partial);
+        assert!(matches!(
+            entry.beats.last().unwrap().payload,
+            BeatPayload::Return
+        ));
+        assert!(entry.beats.iter().any(
+            |beat| matches!(&beat.payload, BeatPayload::Choice { options } if options.len() == 3)
+        ));
+        let exact_custom = b"    python:\n        persistent.custom_flag = True\n";
+        assert!(fs::read(fixture.root.join(&entry.source_path))
+            .unwrap()
+            .windows(exact_custom.len())
+            .any(|window| window == exact_custom));
+        let scene_ids: Vec<_> = workspace
+            .scenes
+            .iter()
+            .map(|scene| scene.id.clone())
+            .collect();
+        fixture.service.unregister_project(&fixture.project);
+        let reopened_id = fixture.service.register_project(&fixture.root).unwrap();
+        fixture
+            .service
+            .ensure_phase_1e_metadata(&reopened_id, &fixture.project_id)
+            .unwrap();
+        let reopened = fixture
+            .service
+            .scene_workspace(&reopened_id, &fixture.project_id)
+            .unwrap();
+        assert_eq!(
+            reopened
+                .scenes
+                .iter()
+                .map(|scene| scene.id.clone())
+                .collect::<Vec<_>>(),
+            scene_ids
+        );
+        assert!(!reopened.can_undo && !reopened.can_redo);
+        assert_eq!(reopened.last_open.scene_id, workspace.last_open.scene_id);
     }
 
     #[test]
