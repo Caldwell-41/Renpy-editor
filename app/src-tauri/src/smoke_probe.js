@@ -33,7 +33,7 @@ setTimeout(async () => {
     pageText.includes("Review & Create");
   let supportingAuthoringUiPassed = false;
   let supportingAuthoringStage = "not-started";
-  const originalInternalInvoke = window.__TAURI_INTERNALS__.invoke;
+  let restoreSmokeRequester = () => {};
   try {
     const project = {
       sessionId: "smoke-session", projectId: "smoke-project", title: "Smoke Project",
@@ -59,9 +59,13 @@ setTimeout(async () => {
     let exactInteger = false;
     let exactIntegerUpdate = false;
     let importChoiceCount = 0;
-    const smokeInvoke = async (command, args) => {
-      if (command !== "core_request") return originalInternalInvoke(command, args);
-      const request = args.request;
+    const smokeRequester = async (operation, payload = {}) => {
+      const request = {
+        protocolVersion: 1,
+        requestId: `packaged-smoke-${crypto.randomUUID()}`,
+        operation,
+        payload,
+      };
       called.add(request.operation);
       let value = model;
       if (request.operation === "project.openPicker") value = project;
@@ -82,10 +86,9 @@ setTimeout(async () => {
       }
       return { protocolVersion: 1, requestId: request.requestId, ok: true, value };
     };
-    window.__TAURI_INTERNALS__.invoke = smokeInvoke;
-    if (window.__TAURI_INTERNALS__.invoke !== smokeInvoke) {
-      throw new Error("The packaged bridge could not enter its isolated smoke mode.");
-    }
+    supportingAuthoringStage = "install-requester";
+    if (typeof window.__loomlightInstallSmokeRequester !== "function") throw new Error("Missing smoke requester hook.");
+    restoreSmokeRequester = window.__loomlightInstallSmokeRequester(smokeRequester);
     const waitFor = async (condition, description) => {
       for (let attempt = 0; attempt < 100; attempt += 1) {
         if (condition()) return;
@@ -212,7 +215,7 @@ setTimeout(async () => {
   } catch {
     supportingAuthoringUiPassed = false;
   } finally {
-    window.__TAURI_INTERNALS__.invoke = originalInternalInvoke;
+    restoreSmokeRequester();
   }
   await invoke("core_request", {
     request: {

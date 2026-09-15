@@ -28,6 +28,25 @@ let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
 
+declare global {
+  interface Window {
+    __loomlightScaffoldSmokeMode?: boolean;
+    __loomlightInstallSmokeRequester?: (requester: typeof desktopRequestCore) => () => void;
+  }
+}
+
+Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
+  configurable: false,
+  enumerable: false,
+  writable: false,
+  value: (requester: typeof desktopRequestCore): (() => void) => {
+    if (window.__loomlightScaffoldSmokeMode !== true) throw new Error("Packaged smoke mode is not enabled.");
+    const previous = coreRequester;
+    coreRequester = requester;
+    return (): void => { coreRequester = previous; };
+  },
+});
+
 interface CompletionToken { view: number; operation: number; sessionId?: string }
 
 function beginView(project?: OpenProject): number {

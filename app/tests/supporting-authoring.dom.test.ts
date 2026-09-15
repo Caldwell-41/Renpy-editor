@@ -95,6 +95,13 @@ test("supporting authoring ignores stale completions and reports persistence tru
   };
 
   const { startApplication } = await import("../src/main.js");
+  assert.throws(() => window.__loomlightInstallSmokeRequester?.(request), /not enabled/);
+  Object.defineProperty(window, "__loomlightScaffoldSmokeMode", {
+    value: true, configurable: false, enumerable: false, writable: false,
+  });
+  const restoreSmokeRequester = window.__loomlightInstallSmokeRequester?.(request);
+  assert.equal(typeof restoreSmokeRequester, "function");
+  restoreSmokeRequester?.();
   startApplication(request);
   await tick();
 

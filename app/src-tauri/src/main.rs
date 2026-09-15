@@ -360,6 +360,10 @@ fn main() {
                         denied_for_probe.load(Ordering::SeqCst)
                     ))
                     .expect("probe state injection must succeed");
+                    main.eval(
+                        "Object.defineProperty(window, '__loomlightScaffoldSmokeMode', { value: true, configurable: false, enumerable: false, writable: false });",
+                    )
+                    .expect("smoke mode injection must succeed");
                     main.eval(include_str!("smoke_probe.js"))
                         .expect("main smoke probe injection must succeed");
                 });
