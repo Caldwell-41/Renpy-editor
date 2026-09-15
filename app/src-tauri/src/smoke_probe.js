@@ -32,6 +32,7 @@ setTimeout(async () => {
     pageText.includes("Game configuration") &&
     pageText.includes("Review & Create");
   let supportingAuthoringUiPassed = false;
+  let supportingAuthoringStage = "not-started";
   const originalInternalInvoke = window.__TAURI_INTERNALS__.invoke;
   try {
     const project = {
@@ -58,7 +59,7 @@ setTimeout(async () => {
     let exactInteger = false;
     let exactIntegerUpdate = false;
     let importChoiceCount = 0;
-    window.__TAURI_INTERNALS__.invoke = async (command, args) => {
+    const smokeInvoke = async (command, args) => {
       if (command !== "core_request") return originalInternalInvoke(command, args);
       const request = args.request;
       called.add(request.operation);
@@ -81,7 +82,29 @@ setTimeout(async () => {
       }
       return { protocolVersion: 1, requestId: request.requestId, ok: true, value };
     };
-    const wait = () => new Promise((resolve) => setTimeout(resolve, 0));
+    window.__TAURI_INTERNALS__.invoke = smokeInvoke;
+    if (window.__TAURI_INTERNALS__.invoke !== smokeInvoke) {
+      throw new Error("The packaged bridge could not enter its isolated smoke mode.");
+    }
+    const waitFor = async (condition, description) => {
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        if (condition()) return;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      throw new Error(`Timed out waiting for ${description}`);
+    };
+    const awaitSurface = async (label) => {
+      supportingAuthoringStage = label;
+      await waitFor(
+        () => [...document.querySelectorAll("button")].some((item) => item.textContent === label),
+        label,
+      );
+    };
+    const awaitCall = async (operation) => {
+      supportingAuthoringStage = operation;
+      await waitFor(() => called.has(operation), operation);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    };
     const click = (label) => {
       const target = [...document.querySelectorAll("button")].find((item) => item.textContent === label);
       if (!target) throw new Error(`Missing ${label}`);
@@ -93,39 +116,45 @@ setTimeout(async () => {
       if (!target) throw new Error(`Missing ${label}`);
       return target;
     };
+    supportingAuthoringStage = "welcome";
     click("Loomlight");
-    await wait();
+    await awaitSurface("Open Loomlight Project");
     click("Open Loomlight Project");
-    await wait();
+    await awaitSurface("Characters");
     click("Characters");
-    await wait();
+    await awaitSurface("Add Appearance");
     const characterVisible = document.body.textContent.includes("Add Appearance");
+    supportingAuthoringStage = "set-default";
     click("Set default");
-    await wait();
+    await awaitCall("appearance.setDefault");
     click("Characters");
-    await wait();
+    await awaitSurface("Add Appearance");
+    supportingAuthoringStage = "edit-character";
     click("Edit");
     const characterName = control("Display name");
     characterName.value = "Alice Updated";
     characterName.dispatchEvent(new Event("input", { bubbles: true }));
     click("Save Character");
-    await wait();
+    await awaitCall("character.update");
     click("Characters");
-    await wait();
+    await awaitSurface("Add Appearance");
+    supportingAuthoringStage = "add-appearance";
     click("Add Appearance");
     const expression = control("Expression token");
     expression.value = "delighted";
     expression.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose image…");
-    await wait();
+    await awaitCall("asset.import");
     click("Characters");
-    await wait();
+    await awaitSurface("Create Character");
+    supportingAuthoringStage = "create-character";
     control("Technical variable (fixed after creation)").value = "new_character";
     control("Display name").value = "New Character";
     click("Create Character");
-    await wait();
+    await awaitCall("character.create");
     click("Variables");
-    await wait();
+    await awaitSurface("Create Variable");
+    supportingAuthoringStage = "create-variable";
     control("Technical name (fixed after creation)").value = "maximum";
     const variableType = control("Type");
     variableType.value = "int";
@@ -134,28 +163,33 @@ setTimeout(async () => {
     defaultValue.value = "9223372036854775807";
     defaultValue.dispatchEvent(new Event("input", { bubbles: true }));
     click("Create Variable");
-    await wait();
+    await awaitCall("variable.create");
     click("Variables");
-    await wait();
+    await awaitSurface("Edit default");
+    supportingAuthoringStage = "update-variable";
     click("Edit default");
     const editedDefault = control("Default value");
     editedDefault.value = "-9223372036854775808";
     editedDefault.dispatchEvent(new Event("input", { bubbles: true }));
     click("Save Default");
-    await wait();
+    await awaitCall("variable.update");
+    supportingAuthoringStage = "flush";
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
-    await wait();
+    await awaitCall("project.flush");
     click("Assets");
-    await wait();
+    await awaitSurface("Choose and import…");
+    supportingAuthoringStage = "cancel-import";
     const technical = control("Technical name");
     technical.value = "theme";
     technical.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose and import…");
-    await wait();
+    await waitFor(() => importChoiceCount === 2, "cancelled asset choice");
+    await new Promise((resolve) => setTimeout(resolve, 20));
     const cancelledPreserved = technical.value === "theme"
       && [...document.querySelectorAll("button")].find((item) => item.textContent === "Choose and import…")?.disabled === false;
+    supportingAuthoringStage = "repair-compatibility";
     click("Repair Ren'Py asset names");
-    await wait();
+    await awaitCall("asset.repairCompatibility");
     supportingAuthoringUiPassed = characterVisible
       && exactInteger
       && exactIntegerUpdate
@@ -169,6 +203,12 @@ setTimeout(async () => {
       && called.has("asset.import")
       && called.has("project.flush")
       && called.has("asset.repairCompatibility");
+    const requiredCalls = ["appearance.setDefault", "character.create", "character.update", "variable.create", "variable.update", "asset.chooseImport", "asset.import", "project.flush", "asset.repairCompatibility"];
+    supportingAuthoringStage = !characterVisible ? "missing-character-surface"
+      : !exactInteger ? "inexact-variable-create"
+      : !exactIntegerUpdate ? "inexact-variable-update"
+      : !cancelledPreserved ? "cancel-state-lost"
+      : requiredCalls.find((operation) => !called.has(operation)) ?? "complete";
   } catch {
     supportingAuthoringUiPassed = false;
   } finally {
@@ -188,6 +228,7 @@ setTimeout(async () => {
         nodeGlobalsDenied,
         popupRequestIssued,
         rendererSecretsAbsent,
+        supportingAuthoringStage,
         supportingAuthoringUiPassed,
         welcomeLifecycleVisible,
         newProjectWizardVisible,

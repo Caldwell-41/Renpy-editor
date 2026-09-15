@@ -181,7 +181,7 @@ fn empty_payload(payload: &Map<String, Value>) -> bool {
 }
 
 fn smoke_payload(payload: &Map<String, Value>) -> bool {
-    const KEYS: &[&str] = &[
+    const BOOLEAN_KEYS: &[&str] = &[
         "ambientFilesystemDenied",
         "ambientHttpDenied",
         "ambientProcessDenied",
@@ -196,10 +196,16 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "unknownCommandDenied",
         "unauthorisedWindowDenied",
     ];
-    has_exact_keys(payload, KEYS)
-        && KEYS
+    let mut keys = BOOLEAN_KEYS.to_vec();
+    keys.push("supportingAuthoringStage");
+    has_exact_keys(payload, &keys)
+        && BOOLEAN_KEYS
             .iter()
             .all(|key| payload.get(*key).and_then(Value::as_bool) == Some(true))
+        && payload
+            .get("supportingAuthoringStage")
+            .and_then(Value::as_str)
+            == Some("complete")
 }
 
 pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
@@ -684,6 +690,7 @@ mod tests {
             "nodeGlobalsDenied": true,
             "popupRequestIssued": true,
             "rendererSecretsAbsent": true,
+            "supportingAuthoringStage": "complete",
             "supportingAuthoringUiPassed": true,
             "welcomeLifecycleVisible": true,
             "newProjectWizardVisible": true,

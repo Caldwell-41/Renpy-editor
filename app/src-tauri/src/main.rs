@@ -81,6 +81,12 @@ fn core_request(
         .and_then(|payload| payload.get("supportingAuthoringUiPassed"))
         .and_then(Value::as_bool)
         == Some(true);
+    let supporting_authoring_stage = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("supportingAuthoringStage"))
+        .and_then(Value::as_str)
+        .unwrap_or("missing")
+        .to_owned();
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
@@ -218,6 +224,7 @@ fn core_request(
                         "webviewRestrictionsPassed": popup_denied,
                         "lifecycleUiPassed": true,
                         "supportingAuthoringUiPassed": supporting_authoring_ui_passed,
+                        "supportingAuthoringStage": supporting_authoring_stage,
                         "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
