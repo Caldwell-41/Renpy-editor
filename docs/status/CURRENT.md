@@ -1,11 +1,35 @@
 # Current status
 
 **Updated:** 2026-09-16<br>
-**Phase:** Phase 1A–1D corrective integration complete<br>
-**Integration commit:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
-**Next milestone:** Phase 1E is unapproved and unstarted
+**Phase:** Phase 1E Scene authoring implementation and gates complete on PR #9<br>
+**Main baseline:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`<br>
+**Application candidate:** `a32a790499900d3f3231b3e212a77fab70564e01`, tree `1bf03d20d350af819c6bb7cdc4c9c35f3f0b3cbb`<br>
+**Next milestone:** Integrate PR #9; Phase 1F remains unapproved and unstarted
 
 ## Current truth
+
+Phase 1E completed its ordered 1E.1 source/hierarchy/lifecycle/history gate, 1E.2
+functional Scene/recovery gate, and 1E.3 Preview/media/visual gate. Exact implementation,
+failure, local-validation and target evidence is in the completed
+[Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md). PR #9 remains
+open for integration; do not duplicate it or replay its checkpoint commits.
+
+Final production run `35023049519` passed exact application candidate `a32a7904`, tree
+`1bf03d20`: Windows x64 job `104563305510` and macOS ARM64 job `104563305803` passed
+frontend, core, official Ren'Py 8.5.3 Scene/lifecycle and managed-install fixtures,
+desktop, production packaging, packaged WebView/single-instance/Scene authoring,
+privacy and dependency/licence gates. Both packaged reports recorded complete Scene
+and supporting-authoring stages. Repository-quality runs `35022880859` and
+`35022884889` also passed. Runs `35016250068` and `35021344119` remain failed evidence;
+their distinct service and production-probe corrections are recorded in the ledger.
+
+Phase 1E adds exact-byte/stable-ID Scene mappings, schema-v2 multi-Chapter/Scene
+migration, reference-safe file lifecycle and committed-operation history; the approved
+Beat/Story-tree authoring and minimum safe recovery surface; Scene-local provenance
+and partial-state preview; and asset-ID-only, session-scoped media presentation. It
+does not add the Source workspace, Branches, SDK runtime UI or any Phase 1F+ scope.
+
+## Accepted Phase 1A–1D baseline
 
 N1 and the integrated R1–R7 correction merged once through PR #7 as main commit
 `98855eb23a284f500cd3285247738e4c5f250bcd`, tree
@@ -46,8 +70,8 @@ dependency/licence gates. PR #8 then merged with expected head `f3a9bc2` as main
 `3487f7c9049c8f3bbae56edc8e36eff58c364b19`, preserving final tree
 `038ea466423437d531b6b2a3ebb184bfcf2d1044`. Post-merge repository-quality run
 `34995109520` passed; production run `34995109499` passed macOS ARM64 job
-`104469271124` and Windows x64 job `104469270622`. Phase 1E remains unapproved and
-unstarted pending a separate goal.
+`104469271124` and Windows x64 job `104469270622`. Phase 1E built on this accepted
+baseline without replaying either corrective PR.
 
 ## Branch reconciliation and SDK carry-forward completed
 
@@ -101,7 +125,7 @@ are historical, not current instructions or proof of the corrective tree.
 | Phase 1C single-instance, run 34906232240 | [Archived single-instance task](../tasks/archive/2026-09-14-phase-1c-single-instance.md) |
 | Original Phase 1D, run 34913182173 at 343e10f | [Archived supporting-authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
 
-## Amended plan, not implementation
+## Remaining milestone plan
 
 The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) now explicitly assigns
 1E.1's source/hierarchy/file-lifecycle/history prerequisites, 1E.2's functional Scene
@@ -116,7 +140,8 @@ for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Phase 1A–1D has no remaining known correctness or integration blocker. Preserve both
-corrective branches and the archive tag; do not repeat PR #7, PR #8 or branch cleanup.
-Phase 1E may be planned or started only under a separate explicit goal; begin with its
-1E.1 prerequisites rather than collapsing 1E into one implementation.
+Review and integrate existing PR #9 without duplicating or replaying it. The tested
+application tree has no known Phase 1E correctness blocker. Preserve the accepted
+Phase 1A–1D history, both corrective branches and the archive tag. Phase 1F requires a
+separate explicit goal and must extend the shared Scene/source transaction model rather
+than replacing it.

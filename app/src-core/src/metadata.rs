@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use std::{fs, io, path::Path};
+use std::{collections::HashSet, fs, io, path::Path};
 
-pub const PROJECT_SCHEMA_VERSION: u32 = 1;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
+pub const PROJECT_SCHEMA_VERSION: u32 = 2;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 2;
+pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
+pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -75,6 +77,8 @@ pub struct ProjectMetadata {
     pub capabilities: Vec<String>,
     pub chapters: Vec<ChapterMetadata>,
     pub scenes: Vec<SceneMetadata>,
+    #[serde(default)]
+    pub entry_scene_id: Option<String>,
     pub last_open: Selection,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
@@ -86,6 +90,33 @@ pub struct SourceMapMetadata {
     pub schema_version: u32,
     pub project_id: String,
     pub sources: Vec<String>,
+    #[serde(default)]
+    pub scene_mappings: Vec<SceneSourceMapping>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SceneSourceMapping {
+    pub scene_id: String,
+    pub path: String,
+    pub source_revision: String,
+    pub label_start: u64,
+    pub label_end: u64,
+    pub beats: Vec<BeatSourceMapping>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BeatSourceMapping {
+    pub id: String,
+    pub kind: String,
+    pub byte_start: u64,
+    pub byte_end: u64,
+    pub source_sha256: String,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
 }
@@ -122,7 +153,10 @@ pub fn validate_relative_path(value: &str) -> Result<(), MetadataError> {
 
 impl ProjectMetadata {
     pub fn validate(&self, expected_folder: Option<&str>) -> Result<(), MetadataError> {
-        if self.schema_version != PROJECT_SCHEMA_VERSION {
+        if !matches!(
+            self.schema_version,
+            LEGACY_PROJECT_SCHEMA_VERSION | PROJECT_SCHEMA_VERSION
+        ) {
             return Err(MetadataError::UnsupportedSchema);
         }
         if !valid_id(&self.project_id)
@@ -136,26 +170,72 @@ impl ProjectMetadata {
             return Err(MetadataError::InvalidIdentity);
         }
         self.resolution.validate()?;
-        if self.chapters.len() != 1 || self.scenes.len() != 1 {
-            return Err(MetadataError::InvalidStructure);
-        }
-        let chapter = &self.chapters[0];
-        let scene = &self.scenes[0];
-        if !valid_id(&chapter.id)
-            || !valid_id(&scene.id)
-            || scene.chapter_id != chapter.id
-            || self.last_open.chapter_id != chapter.id
-            || self.last_open.scene_id != scene.id
-            || scene.technical_label.is_empty()
-            || !scene
-                .technical_label
-                .bytes()
-                .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+        if self.chapters.is_empty()
+            || self.scenes.is_empty()
+            || self.chapters.len() > 256
+            || self.scenes.len() > 4096
         {
             return Err(MetadataError::InvalidStructure);
         }
-        validate_relative_path(&chapter.directory)?;
-        validate_relative_path(&scene.source_path)?;
+        let mut all_ids = HashSet::new();
+        let mut chapter_ids = HashSet::new();
+        let mut directories = HashSet::new();
+        for chapter in &self.chapters {
+            if !valid_id(&chapter.id)
+                || !all_ids.insert(chapter.id.clone())
+                || !chapter_ids.insert(chapter.id.clone())
+                || chapter.display_name.trim().is_empty()
+                || chapter.display_name.len() > 160
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+            validate_relative_path(&chapter.directory)?;
+            if !chapter.directory.starts_with("game/chapters/")
+                || !directories.insert(chapter.directory.to_ascii_lowercase())
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+        }
+        let mut labels = HashSet::new();
+        let mut source_paths = HashSet::new();
+        for scene in &self.scenes {
+            if !valid_id(&scene.id)
+                || !all_ids.insert(scene.id.clone())
+                || !chapter_ids.contains(&scene.chapter_id)
+                || scene.display_name.trim().is_empty()
+                || scene.display_name.len() > 160
+                || !valid_technical_label(&scene.technical_label)
+                || !labels.insert(scene.technical_label.clone())
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+            validate_relative_path(&scene.source_path)?;
+            let Some(chapter) = self
+                .chapters
+                .iter()
+                .find(|chapter| chapter.id == scene.chapter_id)
+            else {
+                return Err(MetadataError::InvalidStructure);
+            };
+            if !scene
+                .source_path
+                .starts_with(&format!("{}/", chapter.directory))
+                || !scene.source_path.ends_with(".rpy")
+                || !source_paths.insert(scene.source_path.to_ascii_lowercase())
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+        }
+        let selected = self.scenes.iter().find(|scene| {
+            scene.id == self.last_open.scene_id && scene.chapter_id == self.last_open.chapter_id
+        });
+        let entry_id = self
+            .entry_scene_id
+            .as_deref()
+            .unwrap_or_else(|| self.scenes[0].id.as_str());
+        if selected.is_none() || !self.scenes.iter().any(|scene| scene.id == entry_id) {
+            return Err(MetadataError::InvalidStructure);
+        }
         Ok(())
     }
 
@@ -200,17 +280,87 @@ impl ProjectMetadata {
 }
 
 impl SourceMapMetadata {
-    pub fn write(&self, project_root: &Path) -> Result<(), MetadataError> {
-        if self.schema_version != SOURCE_MAP_SCHEMA_VERSION || !valid_id(&self.project_id) {
+    pub(crate) fn read_bytes(bytes: &[u8], project_id: &str) -> Result<Self, MetadataError> {
+        if bytes.len() > 1_000_000 {
+            return Err(MetadataError::Corrupt);
+        }
+        let value: Self = serde_json::from_slice(bytes).map_err(|_| MetadataError::Corrupt)?;
+        value.validate(project_id)?;
+        Ok(value)
+    }
+
+    pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
+        if !matches!(
+            self.schema_version,
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | SOURCE_MAP_SCHEMA_VERSION
+        ) || !valid_id(&self.project_id)
+            || self.project_id != project_id
+            || self.sources.len() > 4096
+            || self.scene_mappings.len() > 4096
+        {
             return Err(MetadataError::InvalidIdentity);
         }
+        let mut sources = HashSet::new();
         for source in &self.sources {
             validate_relative_path(source)?;
+            if !sources.insert(source.to_ascii_lowercase()) {
+                return Err(MetadataError::InvalidStructure);
+            }
         }
+        let mut scene_ids = HashSet::new();
+        for scene in &self.scene_mappings {
+            if !valid_id(&scene.scene_id)
+                || !scene_ids.insert(scene.scene_id.clone())
+                || !sources.contains(&scene.path.to_ascii_lowercase())
+                || !valid_hash(&scene.source_revision)
+                || scene.label_start >= scene.label_end
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+            validate_relative_path(&scene.path)?;
+            let mut beat_ids = HashSet::new();
+            let mut last_end = scene.label_start;
+            for beat in &scene.beats {
+                if !valid_id(&beat.id)
+                    || !beat_ids.insert(beat.id.clone())
+                    || beat.kind.is_empty()
+                    || beat.byte_start < scene.label_start
+                    || beat.byte_start >= beat.byte_end
+                    || beat.byte_end > scene.label_end
+                    || beat.byte_start < last_end
+                    || !valid_hash(&beat.source_sha256)
+                {
+                    return Err(MetadataError::InvalidStructure);
+                }
+                last_end = beat.byte_end;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn write(&self, project_root: &Path) -> Result<(), MetadataError> {
+        self.validate(&self.project_id)?;
         let bytes = serde_json::to_vec_pretty(self).map_err(|_| MetadataError::Corrupt)?;
         write_new(&project_root.join(".renpy-editor/source-map.json"), &bytes)
             .map_err(|_| MetadataError::Io)
     }
+}
+
+fn valid_hash(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+}
+
+fn valid_technical_label(value: &str) -> bool {
+    !value.is_empty()
+        && value.len() <= 160
+        && value
+            .bytes()
+            .enumerate()
+            .all(|(index, byte)| byte.is_ascii_alphanumeric() || byte == b'_' && index > 0)
+        && value.as_bytes()[0].is_ascii_alphabetic()
 }
 
 fn write_new(path: &Path, bytes: &[u8]) -> io::Result<()> {
@@ -259,6 +409,7 @@ mod tests {
                 source_path: "game/chapters/chapter_01/scene_001.rpy".into(),
                 extra: Map::new(),
             }],
+            entry_scene_id: Some(scene.clone()),
             last_open: Selection {
                 chapter_id: chapter,
                 scene_id: scene,

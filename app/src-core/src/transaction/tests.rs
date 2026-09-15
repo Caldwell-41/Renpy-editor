@@ -179,6 +179,234 @@ fn create_new_refuses_an_existing_destination_without_overwrite() {
 }
 
 #[test]
+fn delete_existing_retains_bytes_and_returns_an_absence_revision() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let (expected_bytes, base) = fixture
+        .service
+        .snapshot(&fixture.project, path.clone())
+        .unwrap();
+    let outcome = fixture.service.commit(
+        &fixture.project,
+        fixture.proposal(vec![FileMutation {
+            path,
+            kind: MutationKind::DeleteExisting,
+            base,
+            expected_bytes: expected_bytes.clone(),
+            proposed: Vec::new(),
+        }]),
+    );
+    let CommitOutcome::Committed { revisions, .. } = outcome else {
+        panic!("{outcome:?}")
+    };
+    assert_eq!(revisions, vec![Revision::expected_absence()]);
+    assert!(!fixture.root.join("game/one.rpy").exists());
+    assert_eq!(
+        fs::read(artifact(&fixture.root, ".backup")).unwrap(),
+        expected_bytes
+    );
+    assert_eq!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::Flushed
+    );
+}
+
+#[test]
+fn interrupted_delete_is_recoverable_and_never_loses_the_displaced_source() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let (expected_bytes, base) = fixture
+        .service
+        .snapshot(&fixture.project, path.clone())
+        .unwrap();
+    let proposal = fixture.proposal(vec![FileMutation {
+        path,
+        kind: MutationKind::DeleteExisting,
+        base,
+        expected_bytes: expected_bytes.clone(),
+        proposed: Vec::new(),
+    }]);
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::AfterExchange(0) {
+            Err(ErrorCode::IoFailure)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+    assert!(!fixture.root.join("game/one.rpy").exists());
+    assert_eq!(
+        fs::read(artifact(&fixture.root, ".backup")).unwrap(),
+        expected_bytes
+    );
+    let report = fixture.service.recover(&fixture.project);
+    assert_eq!(report.items.len(), 1);
+    assert_eq!(
+        report.items[0].mutations,
+        vec![RecoveryMutationState::ExchangeCompleteExpected]
+    );
+    assert!(matches!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::RecoveryRequired { .. }
+    ));
+}
+
+#[test]
+fn explicit_recovery_resolves_only_proven_keep_or_accept_states() {
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::MutationStaged(0) {
+            Err(ErrorCode::IoFailure)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    let txid = match outcome {
+        CommitOutcome::RecoveryRequired { diagnostic } => diagnostic.transaction_id.unwrap(),
+        other => panic!("{other:?}"),
+    };
+    fixture
+        .service
+        .resolve_recovery(&fixture.project, &txid, RecoveryResolution::KeepCurrent)
+        .unwrap();
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
+    assert_eq!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::Flushed
+    );
+    assert!(contains_artifact(
+        &transaction_directory(&fixture.root),
+        ".accepted"
+    ));
+
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::AfterExchange(0) {
+            Err(ErrorCode::IoFailure)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    let txid = match outcome {
+        CommitOutcome::RecoveryRequired { diagnostic } => diagnostic.transaction_id.unwrap(),
+        other => panic!("{other:?}"),
+    };
+    fixture
+        .service
+        .resolve_recovery(&fixture.project, &txid, RecoveryResolution::AcceptLoomlight)
+        .unwrap();
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"accepted\n"
+    );
+    assert_eq!(
+        fixture.service.flush(&fixture.project),
+        FlushOutcome::Flushed
+    );
+
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, root: &Path| {
+        if point == FaultPoint::MutationStaged(0) {
+            fs::write(root.join("game/one.rpy"), b"external\n").unwrap();
+            Err(ErrorCode::IoFailure)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    let txid = match outcome {
+        CommitOutcome::RecoveryRequired { diagnostic } => diagnostic.transaction_id.unwrap(),
+        other => panic!("{other:?}"),
+    };
+    assert_eq!(
+        fixture
+            .service
+            .resolve_recovery(&fixture.project, &txid, RecoveryResolution::KeepCurrent)
+            .unwrap_err()
+            .code,
+        ErrorCode::RecoveryRequired
+    );
+    assert_eq!(
+        fs::read(fixture.root.join("game/one.rpy")).unwrap(),
+        b"external\n"
+    );
+}
+
+#[test]
+fn create_delete_history_uses_actual_commit_identities_repeatedly() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/new-scene.rpy").unwrap();
+    let bytes = b"label new_scene:\n    return\n".to_vec();
+    let created = fixture.service.commit(
+        &fixture.project,
+        fixture.proposal(vec![FileMutation {
+            path: path.clone(),
+            kind: MutationKind::CreateNew,
+            base: Revision::expected_absence(),
+            expected_bytes: Vec::new(),
+            proposed: bytes.clone(),
+        }]),
+    );
+    let CommitOutcome::Committed {
+        transaction_id,
+        revisions,
+    } = created
+    else {
+        panic!("{created:?}")
+    };
+    let mut history = HistoryStack::default();
+    history.push(HistoryEntry {
+        transaction_id,
+        mutations: vec![HistoryMutation {
+            path: path.clone(),
+            before_revision: Revision::expected_absence(),
+            before_bytes: Vec::new(),
+            after_revision: revisions[0].clone(),
+            after_bytes: bytes.clone(),
+        }],
+    });
+    let undo = history
+        .undo_proposal(&HashMap::from([(path.clone(), revisions[0].clone())]))
+        .unwrap();
+    assert_eq!(undo.mutations[0].kind, MutationKind::DeleteExisting);
+    let CommitOutcome::Committed { revisions, .. } = fixture.service.commit(&fixture.project, undo)
+    else {
+        panic!()
+    };
+    history.accepted_undo_with_revisions(&revisions).unwrap();
+    let redo = history
+        .redo_proposal(&HashMap::from([(
+            path.clone(),
+            Revision::expected_absence(),
+        )]))
+        .unwrap();
+    assert_eq!(redo.mutations[0].kind, MutationKind::CreateNew);
+    let CommitOutcome::Committed { revisions, .. } = fixture.service.commit(&fixture.project, redo)
+    else {
+        panic!()
+    };
+    history.accepted_redo_with_revisions(&revisions).unwrap();
+    assert_eq!(fs::read(fixture.root.join(path.as_path())).unwrap(), bytes);
+}
+
+#[test]
 fn competing_create_is_preserved_as_a_conflict() {
     let fixture = Fixture::new();
     let create = FileMutation {

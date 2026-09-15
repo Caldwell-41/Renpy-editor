@@ -3,8 +3,8 @@ use super::identity::identity_for_file;
 use super::{
     path::{self, ArtifactPaths, RelativePath},
     platform::{flush_open_file, DirectoryAnchor},
-    ErrorCode, MutationKind, RecoveryItem, RecoveryMutationState, RecoveryReport, Revision,
-    TransactionIntent,
+    ErrorCode, MutationKind, RecoveryEvidence, RecoveryItem, RecoveryMutationState, RecoveryReport,
+    Revision, TransactionIntent,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -155,6 +155,17 @@ impl JournalStore {
         self.directory.open_file(file_name(name)?)
     }
 
+    pub fn open_artifact_for_flush(&self, name: &Path) -> Result<fs::File, ErrorCode> {
+        #[cfg(windows)]
+        {
+            self.directory.open_file_for_flush(file_name(name)?)
+        }
+        #[cfg(not(windows))]
+        {
+            self.directory.open_file(file_name(name)?)
+        }
+    }
+
     pub fn load(&self) -> Result<Journal, ErrorCode> {
         ["journal.0.json", "journal.1.json"]
             .iter()
@@ -254,6 +265,7 @@ impl JournalStore {
                         code: Some(ErrorCode::RecoveryRequired),
                         state: JournalState::RecoveryRequired,
                         mutations: Vec::new(),
+                        affected: Vec::new(),
                     });
                     return Ok(());
                 }
@@ -281,6 +293,23 @@ impl JournalStore {
                                 })
                                 .collect()
                         },
+                        affected: if terminal {
+                            Vec::new()
+                        } else {
+                            journal
+                                .mutations
+                                .iter()
+                                .map(|mutation| RecoveryEvidence {
+                                    path: mutation.path.as_str().to_owned(),
+                                    accepted_retained: store.directory.entry_absent(
+                                        file_name(&mutation.accepted).unwrap_or_default(),
+                                    ) == Ok(false),
+                                    displaced_retained: store.directory.entry_absent(
+                                        file_name(&mutation.backup).unwrap_or_default(),
+                                    ) == Ok(false),
+                                })
+                                .collect()
+                        },
                         state: journal.state,
                     })
                 }
@@ -289,6 +318,7 @@ impl JournalStore {
                     code: Some(ErrorCode::RecoveryRequired),
                     state: JournalState::RecoveryRequired,
                     mutations: Vec::new(),
+                    affected: Vec::new(),
                 }),
             }
             Ok(())
@@ -335,6 +365,20 @@ impl JournalStore {
             Ok(())
         })?;
         Ok(blocker)
+    }
+
+    pub(crate) fn mutation_states(
+        &self,
+        root: &DirectoryAnchor,
+        journal: &Journal,
+    ) -> Result<Vec<RecoveryMutationState>, ErrorCode> {
+        self.directory.validate_chain()?;
+        root.validate_chain()?;
+        Ok(journal
+            .mutations
+            .iter()
+            .map(|mutation| inspect_mutation(root, self, mutation, &journal.state))
+            .collect())
     }
 }
 
@@ -494,11 +538,19 @@ fn inspect_mutation(
     mutation: &JournalMutation,
     state: &JournalState,
 ) -> RecoveryMutationState {
-    let target = path::resolve_target(root, &mutation.path, true)
-        .ok()
-        .and_then(|resolved| {
+    let target = path::resolve_target(
+        root,
+        &mutation.path,
+        mutation.kind != MutationKind::DeleteExisting,
+    )
+    .ok()
+    .and_then(|resolved| {
+        if resolved.parent_anchor.entry_absent(&resolved.name).ok()? {
+            None
+        } else {
             super::read_revision_file(resolved.parent_anchor.open_file(&resolved.name).ok()?).ok()
-        });
+        }
+    });
     let accepted = artifact_revision(store, &mutation.accepted);
     let stage = artifact_revision(store, &mutation.stage);
     let backup = artifact_revision(store, &mutation.backup);
@@ -523,6 +575,20 @@ fn inspect_mutation(
     if mutation.kind == MutationKind::CreateNew
         && target.is_none()
         && stage
+            .as_ref()
+            .is_some_and(|value| value.sha256 == mutation.proposed_sha256)
+    {
+        return RecoveryMutationState::StagedWithBaseIntact;
+    }
+    if mutation.kind == MutationKind::DeleteExisting
+        && target.is_none()
+        && backup.as_ref() == Some(&mutation.base)
+    {
+        return RecoveryMutationState::ExchangeCompleteExpected;
+    }
+    if mutation.kind == MutationKind::DeleteExisting
+        && target.as_ref() == Some(&mutation.base)
+        && accepted
             .as_ref()
             .is_some_and(|value| value.sha256 == mutation.proposed_sha256)
     {

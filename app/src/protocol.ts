@@ -30,6 +30,11 @@ export const CORE_OPERATIONS = [
   "asset.repairCompatibility",
   "variable.create",
   "variable.update",
+  "scene.list",
+  "scene.apply",
+  "scene.recovery",
+  "scene.resolveRecovery",
+  "media.present",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

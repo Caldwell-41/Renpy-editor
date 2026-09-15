@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+base64 = "=0.22.1"
 bzip2 = "=0.6.1"
 hex = "=0.4.3"
 serde = { version = "=1.0.229", features = ["derive"] }

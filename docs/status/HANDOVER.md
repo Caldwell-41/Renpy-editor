@@ -1,15 +1,16 @@
-# Phase 1 corrective and milestone-planning handover
+# Phase 1E Scene authoring handover
 
 **Prepared:** 2026-09-16<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
-**Integration commit:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
-**Checkpoint:** Phase 1A–1D corrective integration and post-merge gates complete
+**Main baseline:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`<br>
+**Application candidate:** `a32a790499900d3f3231b3e212a77fab70564e01`, tree `1bf03d20d350af819c6bb7cdc4c9c35f3f0b3cbb`<br>
+**Checkpoint:** Phase 1E implementation and all internal/final gates complete; PR #9 awaits integration
 
 ## Read first
 
-1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [completed Phase 1D UI follow-up](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md).
-2. The [integrated corrective ledger](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md), which separates initial implementation, accepted R1–R7 and integration status.
-3. The amended [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md); these are planning boundaries, not implementation approval.
+1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the completed [Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md).
+2. The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md); Phase 1F and later still require explicit approval.
+3. The [integrated corrective ledger](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md) for the accepted Phase 1A–1D baseline.
 4. Relevant [architecture](../ARCHITECTURE.md), [data](../DATA_MODEL.md), [UI](../UI.md), [transaction](../TRANSACTIONS.md), [security](../SECURITY.md), [testing](../TESTING.md) and [ADR](../adr/README.md) contracts.
 
 ## Baseline and authority
@@ -20,10 +21,35 @@ the local and supported-target gates. PR #7 merged it once as main commit `98855
 tree `a80d0a7b`; post-merge quality run `34985039823` and production run `34985039897`
 passed. Never replay PR #7 or reset to historical SHAs.
 
-The current authorization permits the bounded post-integration Phase 1D UI correction,
-its tests/documentation, a new focused PR, final production gate and conditional
-policy-respecting merge. It does not permit direct application pushes to main,
-force-pushes, branch deletion, repository policy changes, releases, or Phase 1E/later.
+Phase 1E was explicitly authorised and implemented on existing branch
+`feature/phase-1e-scene-authoring` and existing PR #9. Its three checkpoint commits
+were followed by narrowly scoped target-gate corrections. Do not create a replacement
+branch/PR or replay PR #7/#8. Integration remains pending; Phase 1F and later are not
+authorised.
+
+## Phase 1E completed implementation and evidence
+
+1E.1 evolves valid Loomlight projects transactionally to schema v2 with ordered
+Chapters/Scenes, stable UUIDs and unknown-field preservation. Exact-byte Scene mappings
+retain lexical context and Custom Code, while create/move/delete, obsolete owned
+`.rpyc` handling, incoming-reference refusal and undo/redo share the accepted
+transaction/recovery model.
+
+1E.2 provides the approved Beat subset, explicit terminal/Choice/Jump semantics,
+multi-Chapter Story-tree authoring, natural Dialogue continuation, truthful drafts and
+Flush behavior, and a minimum recovery surface that resolves only proven states after
+confirmation. 1E.3 provides the 52/48 responsive Preview/Beats workspace, contributing-
+Beat provenance, partial/unknown state after Custom Code, and bounded asset-ID-only
+image/audio presentation without renderer filesystem authority or CSP widening.
+
+Final application candidate `a32a7904`, tree `1bf03d20`, passed production run
+`35023049519`: Windows x64 job `104563305510` and macOS ARM64 job `104563305803` both
+passed frontend, core, official SDK Scene/lifecycle and handoff fixtures, desktop,
+packaging, packaged WebView/Scene/recovery/media interactions, privacy and inventory
+gates. Only cache-miss downloads were skipped because the pinned official archives
+were restored; the SDK tests ran. Exact artifacts and the two earlier failed runs are
+preserved in the Phase 1E ledger. Repository-quality runs `35022880859` and
+`35022884889` passed on the same candidate.
 
 ## What to preserve
 
@@ -75,14 +101,9 @@ acceptance. Do not say all fixes are done solely because initial local suites pa
 
 ## Future milestone dependencies
 
-After corrective closure and separate approval, 1E.1 establishes multi-Chapter/Scene
-metadata and reopen, minimum beat/source mapping, narrow Scene file lifecycle and
-committed-revision-aware history. 1E.2 implements functional authoring and the minimum
-safe recovery UI. 1E.3 implements scene-local partial preview, session-scoped read-only
-media presentation and the Quiet Studio Dark/accessibility pass.
-
-1F extends the same source foundation into a full Source workspace and external
-reconciliation. Safe file-local external divergence and unresolved mixed-file recovery
+With Phase 1E complete, 1F may extend the same source foundation into a full Source
+workspace and external reconciliation. Safe file-local external divergence and
+unresolved mixed-file recovery
 are different states: the latter still blocks the wider project. 1G separates graph,
 explicit SDK/runtime trust and local Git checkpoint gates. 1H proves actual behavior,
 crashes/conflicts, recovery and continued editing, not labels or file existence.
@@ -105,9 +126,8 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 [HANDOVER_PRE_FOLLOW_UP_2026_09_15.md](HANDOVER_PRE_FOLLOW_UP_2026_09_15.md) and
 [CURRENT_PRE_FOLLOW_UP_2026_09_15.md](CURRENT_PRE_FOLLOW_UP_2026_09_15.md), with archived task
 links in CURRENT. Those snapshots are historical evidence and do not override this
-handover, CURRENT or the active follow-up.
+handover, CURRENT or the completed Phase 1E ledger.
 
-There is no remaining known Phase 1A–1D blocker. Preserve both corrective branches and
-the archive tag, and do not replay PR #7 or PR #8. Phase 1E remains unapproved until a
-separate explicit goal; when approved, begin with the ordered 1E.1 prerequisites in the
-active Phase 1 plan.
+There is no remaining known Phase 1E correctness blocker. Preserve both corrective
+branches and the archive tag, do not replay PR #7 or PR #8, and do not duplicate PR #9.
+Integrate PR #9 through repository policy. Phase 1F remains unapproved and unstarted.

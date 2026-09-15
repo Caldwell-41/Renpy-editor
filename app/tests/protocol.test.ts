@@ -13,7 +13,7 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
 });
 
-test("frontend operation list contains only bounded Phase 1C and 1D operations", () => {
+test("frontend operation list contains only bounded Phase 1C through 1E operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
@@ -44,6 +44,11 @@ test("frontend operation list contains only bounded Phase 1C and 1D operations",
     "asset.repairCompatibility",
     "variable.create",
     "variable.update",
+    "scene.list",
+    "scene.apply",
+    "scene.recovery",
+    "scene.resolveRecovery",
+    "media.present",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
   assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
@@ -110,13 +115,40 @@ test("Phase 1D supporting surfaces and bounded operations are present", async ()
   for (const operation of ["authoring.list", "project.status", "project.flush", "character.create", "asset.chooseImport", "asset.import", "appearance.setDefault", "variable.create"]) {
     assert.equal(source.includes(operation), true, operation);
   }
-  for (const deferred of ["Run Game", "Beats", "Editor Preview", "Branches workspace"]) {
+  for (const deferred of ["Run Game", "Branches workspace"]) {
     assert.equal(source.includes(deferred), false, deferred);
   }
   assert.match(source, /fixed after creation/);
   assert.equal(source.includes("window.prompt"), false);
   assert.match(source, /addEventListener\("keydown"/);
   assert.match(source, /inlineEditor/);
+});
+
+test("Phase 1E Preview and media stay bounded, responsive, and explicit", async () => {
+  const [source, main, css] = await Promise.all([
+    readFile(new URL("src/scene-ui.ts", sourceRoot), "utf8"),
+    readFile(new URL("src/main.ts", sourceRoot), "utf8"),
+    readFile(new URL("src/styles.css", sourceRoot), "utf8"),
+  ]);
+  for (const marker of ["deriveScenePreview", "Partial / unknown", "Edit Beat", "Add change here", "Audition current music", "audioAudition", "Create New Scene"]) assert.equal(source.includes(marker), true, marker);
+  assert.match(source, /disposed \|\| generation !== mediaGeneration/);
+  assert.match(source, /URL\.revokeObjectURL/);
+  assert.doesNotMatch(`${source}\n${main}`, /file:\/\//);
+  assert.doesNotMatch(`${source}\n${main}`, /https?:\/\//);
+  assert.match(main, /"media\.present"/);
+  assert.match(css, /--preview-share: 52fr/);
+  assert.match(css, /--beats-share: 48fr/);
+  assert.match(css, /@media \(max-width: 680px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});
+
+test("packaged Scene smoke waits for committed renders and uses one terminal Beat", async () => {
+  const source = await readFile(new URL("src-tauri/src/smoke_probe.js", sourceRoot), "utf8");
+  assert.match(source, /const awaitSceneCommit = async/);
+  assert.match(source, /#app-status[^\n]+Saved/);
+  assert.match(source, /scene-draft\[data-unsubmitted/);
+  assert.equal((source.match(/await awaitSceneCommit\(/g) ?? []).length, 2);
+  assert.doesNotMatch(source, /id: "choice"[^\n]+\n\s+\{ id: "return"/);
 });
 
 test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {
