@@ -3,7 +3,7 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, corrective/phase-1a-1d-integrated]
     paths:
       - .github/workflows/production-scaffold.yml
       - app/**
