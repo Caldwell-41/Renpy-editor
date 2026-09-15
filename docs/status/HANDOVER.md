@@ -2,12 +2,12 @@
 
 **Prepared:** 2026-09-15<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
-**Required working branch:** `corrective/phase-1a-1d-integrated`<br>
-**Checkpoint:** N1 and R1–R7 accepted; guarded PR #7 integration tracked separately
+**Required working branch:** `corrective/phase-1d-ui-operation-race`<br>
+**Checkpoint:** Bounded Phase 1D UI operation/Flush follow-up passed target gates; PR #8 integration pending
 
 ## Read first
 
-1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [completed follow-up execution record](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
+1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [completed Phase 1D UI follow-up](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md).
 2. The [integrated corrective ledger](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md), which separates initial implementation, accepted R1–R7 and integration status.
 3. The amended [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md); these are planning boundaries, not implementation approval.
 4. Relevant [architecture](../ARCHITECTURE.md), [data](../DATA_MODEL.md), [UI](../UI.md), [transaction](../TRANSACTIONS.md), [security](../SECURITY.md), [testing](../TESTING.md) and [ADR](../adr/README.md) contracts.
@@ -16,14 +16,14 @@
 
 Remote implementation commit `8c19225` (tree-equivalent to local object `0da5138`) is
 the R1–R6 checkpoint. Final application candidate `c912fcad`, tree `17ae6e4f`, passed
-the local and supported-target gates. The last pre-merge main head was `0e5e8b6`.
-Re-read the live PR/main refs to determine integration state; never replay an already
-merged PR or reset to historical SHAs.
+the local and supported-target gates. PR #7 merged it once as main commit `98855eb`,
+tree `a80d0a7b`; post-merge quality run `34985039823` and production run `34985039897`
+passed. Never replay PR #7 or reset to historical SHAs.
 
-The current authorization permits the bounded correction, its final production gate,
-and conditional merge of existing PR #7 only. It does not permit direct application
-pushes to main, force-pushes, replacement branches/PRs, branch deletion, repository
-policy changes, releases, or later milestones.
+The current authorization permits the bounded post-integration Phase 1D UI correction,
+its tests/documentation, a new focused PR, final production gate and conditional
+policy-respecting merge. It does not permit direct application pushes to main,
+force-pushes, branch deletion, repository policy changes, releases, or Phase 1E/later.
 
 ## What to preserve
 
@@ -49,12 +49,23 @@ session generations; and recovery readiness completely scans retained journals w
 a lifetime count cap. Behavioral DOM and packaged supporting-authoring regressions are
 wired. Details and exact local counts are in the execution prompt.
 
-R7 is complete: production run `34982164071` passed macOS ARM64 job `104424934281`
+The integrated R7 gate completed: production run `34982164071` passed macOS ARM64 job `104424934281`
 and Windows x64 job `104424934679` at exact candidate `c912fcad`. Both official SDK
 gates, N1, packaging, supporting UI, WebView/single-instance, privacy and dependency/
 licence evidence passed. Artifact IDs/digests and preserved failures are in the follow-up.
-PR readiness, expected-head integration and post-merge verification are a separate live
-integration state, not implementation evidence.
+PR #7 then merged and its post-merge gates passed as recorded above.
+
+The later review found one narrower R5 issue: the renderer used one global operation
+generation, so a same-view overlapping Flush/close could discard a mutation completion
+without a session or view change. The follow-up uses operation-scoped generations and
+one authoring operation per project session. `Ctrl/Cmd+S` does not start a second Flush
+or claim persistence while authoring is active. Delayed success/failure DOM cases and
+delayed packaged smoke coverage are implemented. Exact candidate `4f6fef7`, tree
+`06b5609`, passed repository-quality run `34992162418` and production run
+`34992890658`: macOS ARM64 job `104461734419` and Windows x64 job `104461734679`.
+Both passed the official SDK lifecycle/authoring/discovery/N1, desktop, packaging,
+packaged WebView/supporting-authoring, privacy and dependency/licence gates. PR #8
+integration remains pending.
 
 The initial local test report is retained in the integrated task. The SDK wrapper was
 skipped and desktop packaging unavailable there. Repository quality is not production
@@ -94,8 +105,8 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 links in CURRENT. Those snapshots are historical evidence and do not override this
 handover, CURRENT or the active follow-up.
 
-The next action is to inspect PR #7's live head/base, checks, reviews and policies. If it
-is still open and the expected head is the documentation-only descendant of validated
-`c912fcad`, mark it ready and merge it once through the supported PR mechanism, then
-verify main and required post-merge CI. If it is already merged, verify rather than
-replay. If any gate changed, stop at the exact blocker. Do not start Phase 1E.
+The next action is to verify PR #8's final documentation-only head, required checks and
+policies, mark it ready, and merge with an expected-head guard. Then verify main and
+required post-merge CI. Do not duplicate the expensive production matrix for unchanged
+application/test/workflow content. Do not start Phase 1E until that closure is recorded
+and the user separately approves 1E.

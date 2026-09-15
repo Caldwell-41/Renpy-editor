@@ -529,7 +529,16 @@ current-session flush operation. Unsubmitted form input is explicitly distinguis
 from accepted durable changes, so Flush cannot claim that pending controls were saved.
 Conflict, recovery-required, validation, and stale-session failures remain visible.
 View/operation/session generations reject late success, error, cancellation, mutation,
-open, close, and navigation completions.
+open, close, and navigation completions. Operation generations are scoped to their
+own flow so an unrelated same-view request cannot discard a still-relevant completion.
+Supporting-authoring operations and explicit Flush are mutually serialized per project
+session. If either is requested while the other is active, no competing bridge request
+begins and the UI does not claim persistence; the active operation's own success or
+failure remains responsible for reload, error, controls and focus. A late read-only
+status response cannot overwrite an active authoring or Flush state.
+If the user navigates within the same project while an operation is active, its old
+callback cannot navigate back; settlement triggers a fresh persistence check for the
+current view instead of leaving that surface indefinitely in a checking state.
 
 Create/edit boolean input is explicit and integer text is validated losslessly before
 IPC rather than coerced through JavaScript `Number`. Character, appearance, and

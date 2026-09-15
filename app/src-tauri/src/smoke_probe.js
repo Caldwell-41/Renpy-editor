@@ -58,6 +58,8 @@ setTimeout(async () => {
     const called = new Set();
     let exactInteger = false;
     let exactIntegerUpdate = false;
+    let releaseVariableUpdate;
+    let overlappingFlushSuppressed = false;
     let importChoiceCount = 0;
     const smokeRequester = async (operation, payload = {}) => {
       const request = {
@@ -83,6 +85,7 @@ setTimeout(async () => {
       }
       if (request.operation === "variable.update") {
         exactIntegerUpdate = request.payload.defaultValue === "-9223372036854775808";
+        await new Promise((resolve) => { releaseVariableUpdate = resolve; });
       }
       return { protocolVersion: 1, requestId: request.requestId, ok: true, value };
     };
@@ -175,7 +178,14 @@ setTimeout(async () => {
     editedDefault.value = "-9223372036854775808";
     editedDefault.dispatchEvent(new Event("input", { bubbles: true }));
     click("Save Default");
-    await awaitCall("variable.update");
+    await waitFor(() => called.has("variable.update"), "variable.update");
+    supportingAuthoringStage = "overlapping-flush";
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    overlappingFlushSuppressed = !called.has("project.flush")
+      && document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started";
+    releaseVariableUpdate?.();
+    await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "completed variable update");
     supportingAuthoringStage = "flush";
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
     await awaitCall("project.flush");
@@ -196,6 +206,7 @@ setTimeout(async () => {
     supportingAuthoringUiPassed = characterVisible
       && exactInteger
       && exactIntegerUpdate
+      && overlappingFlushSuppressed
       && cancelledPreserved
       && called.has("appearance.setDefault")
       && called.has("character.create")
@@ -210,6 +221,7 @@ setTimeout(async () => {
     supportingAuthoringStage = !characterVisible ? "missing-character-surface"
       : !exactInteger ? "inexact-variable-create"
       : !exactIntegerUpdate ? "inexact-variable-update"
+      : !overlappingFlushSuppressed ? "overlapping-flush-not-suppressed"
       : !cancelledPreserved ? "cancel-state-lost"
       : requiredCalls.find((operation) => !called.has(operation)) ?? "complete";
   } catch {
