@@ -1,6 +1,6 @@
 # Task: Phase 1A–1D integrated corrective checkpoint
 
-**Status:** Open — R1–R6 implemented and locally validated; supported-target acceptance and integration outstanding.<br>
+**Status:** Completed — N1 and R1–R7 implementation/test acceptance passed; PR integration recorded separately.<br>
 **Baseline:** `main` at `0e5e8b697782ed29d61d01dbb1240b9d16561c27`<br>
 **Branch:** `corrective/phase-1a-1d-integrated`
 
@@ -10,7 +10,9 @@ Canonical initial implementation commit: `c08414293899f8930bd2eb5e8a78a5b6c10433
 
 This is a bounded correction of the existing Phase 1A–1D foundation. Preserve the shell authority boundary, authoritative ordinary Ren'Py source, stable entity IDs, the pinned Ren'Py 8.5.3 adapter, and journalled sequential transaction contract. Scene, Beat, Preview, Source workspace, Branches, Git UI, and all Phase 1E/later implementation remain excluded.
 
-The [follow-up execution brief](2026-09-15-phase-1a-1d-correction-follow-up.md) is the next bounded task on this same branch. Its preparation is not execution. Correct and verify the remaining defects before claiming closure; do not restart working foundations or merge into main without separate approval.
+The [completed follow-up execution record](2026-09-15-phase-1a-1d-correction-follow-up.md)
+contains the final correction and supported-target evidence. It did not restart working
+foundations or approve Phase 1E.
 
 ## Baseline evidence
 
@@ -42,19 +44,20 @@ The earlier review incorrectly treated FLAC automatic discovery as absent. The p
 
 ## Follow-up ledger
 
-Implementation commit `0da5138` resolves the reproduced R1–R6 defects and adds
-production regressions. The final supported-target gate and integration remain open;
-local or helper evidence is not a substitute for R7.
+Remote implementation commit `8c19225` (tree-equivalent to local object `0da5138`)
+resolves the reproduced R1–R6 defects and adds production regressions. Candidate
+`c912fcadf8160d32ec35c7a0135b12812ad65c56` passed the complete R7 supported-target
+gate; implementation/test closure and PR integration remain intentionally distinct.
 
 | ID | Required correction and acceptance |
 | --- | --- |
 | R1 | Implemented/local pass — context-aware top-level ranges, complete mapping verification, safe append and alternate-spacing collisions; 28 authoring tests include numeric-prefix, multiline/comment/opaque, incomplete, CRLF/Unicode and exact-byte refusal |
 | R2 | Implemented/local pass — reloadable limits, full known-model validation, pristine-only initialization and exact decimal-string int64; official target includes real handler create/update round trips at both boundaries |
 | R3 | Implemented/local pass — shared declaration builder/preflight, physical/content/collision verification, one repair transaction and idempotent marker-only update; existing mixed crash suite protects interruption/reopen |
-| R4 | Implemented/local pass — pinned normalization centralized, FLAC correctly automatic, physical/explicit namespace ownership and retained-handle path/ancestor/symlink/content race regressions; target execution pending |
+| R4 | Complete — pinned normalization centralized, FLAC correctly automatic, physical/explicit namespace ownership and retained-handle path/ancestor/symlink/content race regressions passed locally and on both targets |
 | R5 | Implemented/local pass — complete generation/session guards and truthful buffers; real DOM test plus packaged WebView supporting-authoring probe wired for both targets |
 | R6 | Implemented/local pass — complete constant-working-memory readiness enumeration, no history-count cap, later-corrupt refusal, bounded oversized/growing revision reads and retained evidence |
-| R7 | In progress — local prescribed gate passed on `0da5138`; final Windows x64/macOS ARM64 workflow, evidence reconciliation, PR readiness and conditional integration pending |
+| R7 | Complete — local prescribed gate and full Windows x64/macOS ARM64 production run `34982164071` passed at `c912fcad`; evidence reconciled and diff reviewed; integration status is recorded in CURRENT/HANDOVER and PR #7 |
 
 ## Recorded local evidence for the initial implementation tree
 
@@ -65,10 +68,15 @@ local or helper evidence is not a substitute for R7.
 - `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings`: passed.
 - Full workspace/desktop Clippy, tests and packaging were unavailable on that Linux host because pkg-config/GLib/GTK/WebKit development packages were absent.
 
-These are retained implementation reports, not new executions by the documentation amendment or proof of R1–R7 completion. Final run/job IDs and evidence checksums must be added before archival.
+These are retained initial implementation reports. Final R1–R7 acceptance is recorded
+in the completed follow-up, including jobs `104424934281`/`104424934679` and artifact
+IDs/digests. This brief is archived only after that complete supported-target gate passed.
 
 ## Compatibility and remaining acceptance
 
 New image names and existing legacy files/UUIDs must remain stable. Compatibility repair must be explicit, narrow, verified and non-destructive. Missing, changed, unsafe or colliding assets are not silently repaired. Follow-up behavior must be documented accurately; the earlier blanket claim that all such checks already occurred during repair is not a closure guarantee.
 
-Execute the follow-up on the existing branch when explicitly invoked, record failing-to-passing production regressions, run the complete final supported-target matrix, and update this task, the follow-up and CURRENT/HANDOVER. Preserve historical failures/skips and link exact tested trees. Do not archive the corrective tasks, label the checkpoint closed, merge into main or begin Phase 1E merely because the planning documents have been amended.
+The completed follow-up records failing-to-passing regressions, exact tested trees and
+the full supported-target matrix. Preserve those historical failures/skips. This task
+is archived because its correction and acceptance gates passed; that archive does not
+itself assert PR integration and does not approve Phase 1E.

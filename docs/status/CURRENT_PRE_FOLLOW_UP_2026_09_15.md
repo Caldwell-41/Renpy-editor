@@ -6,7 +6,7 @@
 
 ## Current truth
 
-- The bounded [Phase 1A–1D integrated corrective checkpoint](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md)
+- The bounded [Phase 1A–1D integrated corrective checkpoint](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md)
   is implemented locally but remains open pending the required Windows x64/macOS ARM64
   production evidence. It corrects recovery serialization/bounded inspection, safe
   candidate activation and session authority, exact source/metadata validation,

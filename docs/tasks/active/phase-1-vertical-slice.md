@@ -6,7 +6,7 @@
 
 ## Purpose and authority
 
-Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective task](2026-09-15-phase-1a-1d-integrated-corrective.md) for earlier implementation evidence, and its [bounded follow-up](2026-09-15-phase-1a-1d-correction-follow-up.md) for outstanding corrections.
+Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
 This amended plan authorises no application implementation. Each milestone requires explicit user approval and a bounded execution brief. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
@@ -62,7 +62,7 @@ Retain inspected candidate authority until activation, prepare before replacing 
 
 Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). Its later integrated checkpoint is still open; do not interpret the archived closure as permission to start 1E.
 
-Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [follow-up](2026-09-15-phase-1a-1d-correction-follow-up.md) owns lexical context, metadata reloadability, compatibility repair, exact discovery, session-safe supporting UI and remaining acceptance evidence.
+Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
 
 **Gate:** accepted definitions reload and match runnable source; IDs and unknown metadata survive; physical availability/collisions and discovery agree with the pinned SDK; supporting authoring and truthful persistence/Flush work in the packaged app. All integrated follow-up blockers must close before 1E can be approved.
 

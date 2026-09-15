@@ -125,7 +125,7 @@ commit and retire the completed topic branch; start new tasks from updated main.
 ## Continuing work
 
 Read [CURRENT](../status/CURRENT.md) and the
-[existing R1–R7 follow-up](../tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md).
+[existing R1–R7 follow-up](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
 N1 is implemented and should be preserved, not reimplemented by merging the archive.
 Any final main integration still requires the complete corrected gate; this record
 is not an approval to bypass that gate or begin Scene authoring.

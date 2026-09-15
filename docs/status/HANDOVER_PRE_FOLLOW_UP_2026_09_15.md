@@ -8,7 +8,7 @@
 ## Read first
 
 1. [`AGENTS.md`](../../AGENTS.md)
-2. [Active integrated corrective task](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md)
+2. [Integrated corrective task](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md)
 3. [Current status](CURRENT.md)
 4. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
 5. [Completed Phase 1D supporting authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md)

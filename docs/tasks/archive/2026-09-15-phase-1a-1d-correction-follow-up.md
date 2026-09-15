@@ -4,7 +4,7 @@ Repository: https://github.com/Caldwell-41/Renpy-editor
 
 Required existing branch: `corrective/phase-1a-1d-integrated`
 
-**Status:** R1–R6 implemented and locally validated in `0da5138`; R7 supported-target acceptance and integration remain open. The separately approved SDK handoff correction N1 remains preserved. Phase 1E is not authorised.
+**Status:** Completed — N1 and R1–R7 passed locally and on Windows x64/macOS ARM64. Implementation/test closure is recorded below; PR #7 integration is tracked separately. Phase 1E is not authorised.
 
 ## Objective and authority
 
@@ -112,22 +112,25 @@ Return a concise issue-by-issue result, changed paths/commits, exact tests and p
 
 ## Implementation checkpoint — 2026-09-15
 
-Implementation commit `0da5138` closes the reproduced R1–R6 defects and adds the
-final workflow assertions. The complete supported-target workflow has not yet run for
-this candidate, so R7 and integration are deliberately still open at this checkpoint.
+Remote implementation commit `8c19225` (tree-equivalent to the pre-publication local
+object `0da5138`) closes the reproduced R1–R6 defects and adds the final workflow
+assertions. Follow-up test-wiring fixes culminated in validated application candidate
+`c912fcadf8160d32ec35c7a0135b12812ad65c56`, tree
+`17ae6e4f16600d86f39bf354b7649a470dcf51f2`.
 
-| ID | Result in `0da5138` | Regression/evidence before the target run |
+| ID | Result in `8c19225` and the final test-wiring descendants | Regression/evidence |
 | --- | --- | --- |
 | N1 | Preserved unchanged from `02fc772`; the three synthetic handoff cases and official-archive target gate remain wired | Local core suite passed; local wrapper had no official archive and is not counted as live HTTP or target evidence |
 | R1 | Added a conservative top-level lexical statement recognizer, verified every mapped definition before revision refresh, and applied append/collision checks to Character and Variable creation | `external_numeric_prefix_change_cannot_be_refreshed_or_rewritten`, `lexical_context_guards_real_authoring_operations`, duplicate/opaque, CRLF/Unicode/final-line tests pass |
 | R2 | Full proposed-model and actual serialized-size validation; compatible 10,000-byte/64 KiB/1 MiB limits; pristine-only metadata initialization; canonical decimal-string int64 storage and IPC target assertions | Escaped-string/reload, metadata-loss, relationship/document-limit, unknown-field and stable-ID tests pass; target lifecycle now asserts create/update IPC at both int64 limits |
 | R3 | Imports and repair share one declaration parser/builder; repair verifies physical bytes and collisions, commits source/metadata together, and persists marker-only changes idempotently | Collision/idempotency/changed-media/reopen tests pass; mixed transaction crash-boundary suite remains the transaction authority |
-| R4 | Centralized pinned image/audio discovery normalization, including case, extension, basename, subdirectory, whitespace and image `@` suffix behavior; FLAC remains automatic | Pinned-normalization, untracked collision, FLAC, retained-handle path/parent/symlink/same-file race tests pass locally; both-target execution pending |
+| R4 | Centralized pinned image/audio discovery normalization, including case, extension, basename, subdirectory, whitespace and image `@` suffix behavior; FLAC remains automatic | Pinned-normalization, untracked collision, FLAC, retained-handle path/parent/symlink/same-file race tests pass locally and in both target jobs |
 | R5 | Added view/operation/session guards to async UI flows, truthful unsubmitted/accepted persistence feedback, input/focus restoration, a controllable real-DOM test, and packaged supporting-authoring smoke | Frontend suite 8/8 passes; the behavioral case covers reordered opens/errors, navigation during mutation, close/reopen, Character/Appearance/Variable operations, cancellation/repair, exact values and Flush |
 | R6 | Removed the retained-journal count cap from readiness, replaced it with complete constant-working-memory enumeration, retained full explicit reports, and bounded revision reads against oversized/growing inputs | 4,097 durable records followed by a real write, a later corrupt record blocking commit/flush, anchored enumeration, bounded media and growing-read tests pass |
-| R7 | Canonical contracts and final workflow marker requirements updated | Local gate passes; Windows x64/macOS ARM64 workflow, evidence recording, PR readiness and conditional merge remain pending |
+| R7 | Complete — canonical contracts and workflow marker requirements updated; actual diff re-reviewed; exact candidate passed repository quality and the full supported-target production matrix | Run `34982164071`: macOS ARM64 job `104424934281`, Windows x64 job `104424934679`; retained artifacts and checksums below. Integration status remains separate. |
 
-Local results for the tree committed as `0da5138`:
+Local results for the implementation tree and unchanged production code carried into
+`c912fcadf8160d32ec35c7a0135b12812ad65c56`:
 
 - `python3 scripts/validate.py`: 193 repository files passed.
 - `git diff --check`: passed.
@@ -140,3 +143,48 @@ Local results for the tree committed as `0da5138`:
 
 No local official SDK archive was supplied, so the local SDK wrappers are not recorded
 as official-archive acceptance. No Phase 1E code is present.
+
+## Supported-target closure — 2026-09-15
+
+Production run `34982164071` passed for exact application candidate
+`c912fcadf8160d32ec35c7a0135b12812ad65c56` (tree
+`17ae6e4f16600d86f39bf354b7649a470dcf51f2`) with pinned Node 24.19.0,
+npm 11.9.0 and Rust/Cargo 1.90.0:
+
+- macOS ARM64 job `104424934281`: frontend 8/8; core 115 passed, 4 ignored
+  subprocess worker entry points; official lifecycle/authoring 1/1; official N1 handoff
+  1/1; desktop compile/test, application/DMG package, WebView/single-instance/supporting-
+  authoring smoke, privacy scan and dependency/licence inventory all passed.
+- Windows x64 job `104424934679`: frontend 8/8; core 110 passed, 4 ignored
+  subprocess worker entry points (the difference is platform-conditional coverage);
+  official lifecycle/authoring 1/1; official N1 handoff 1/1; desktop compile/test,
+  application package, WebView/single-instance/supporting-authoring smoke, privacy scan
+  and dependency/licence inventory all passed.
+- Both official archive gates emitted `phase-1c-target-gate`, remediation, Phase 1D,
+  exact-IPC, import-authority and corrective passed markers. Both N1 gates emitted
+  `phase-1c-network-handoff-gate: passed`. The cache-hit download step was correctly
+  skipped; the archive-backed tests themselves ran and passed. They inject retained
+  archive bytes at the transport seam and are not live HTTP tests.
+- Artifact `10402296713` (`phase-1-production-evidence-macos-26`) has digest
+  `sha256:b9ef1b79c8831a72ce47a6b9f5699b9f4612498af921731438d2d2abe8d28d68`.
+  Artifact `10402980439` (`phase-1-production-evidence-windows-2025`) has digest
+  `sha256:30616afeab8b14a99b9fa2ca6309a8da3b844f5299fd0afa7bd3ac901aa23a38`.
+  Each retained six redacted files; each privacy scan passed six files and each
+  inventory recorded 83 npm plus 519 Cargo entries.
+- Repository-quality runs `34982164144` (push) and `34982167950` (PR) passed the exact
+  candidate. The later documentation-only closure preserves the validated application,
+  test and workflow subtrees and therefore does not duplicate the production matrix.
+
+Failing-to-passing evidence is retained rather than hidden: run `34976399471` exposed a
+non-canonical synthetic fixture path; `34976951700` exposed test-order recovery state;
+`34977509501` exposed duplicate race-fixture bytes; `34978398757` exposed a packaged
+smoke sequencing failure; and `34980730159` proved the Tauri internals bridge is
+intentionally non-writable. The final probe uses a host-enabled, otherwise refusing,
+in-renderer requester seam that grants no host I/O authority and records a finite stage.
+
+An additional local `cargo test -p loomlight-desktop --locked` attempt could not compile
+on the Linux host because pkg-config/GLib/GTK development packages were unavailable;
+it is not target evidence. Both supported desktop jobs compiled and passed. No in-scope
+correctness or security blocker remained in the complete diff review. Missing/lost or
+ambiguous metadata, unsupported source syntax, unsafe/colliding asset repair and changed
+import authority continue to refuse non-destructively by design. Phase 1E is absent.

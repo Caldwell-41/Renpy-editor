@@ -3,21 +3,22 @@
 **Prepared:** 2026-09-15<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
 **Required working branch:** `corrective/phase-1a-1d-integrated`<br>
-**Checkpoint:** R1–R6 implemented/local pass; final target gate and integration open
+**Checkpoint:** N1 and R1–R7 accepted; guarded PR #7 integration tracked separately
 
 ## Read first
 
-1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [follow-up execution prompt](../tasks/active/2026-09-15-phase-1a-1d-correction-follow-up.md).
-2. The [integrated corrective ledger](../tasks/active/2026-09-15-phase-1a-1d-integrated-corrective.md), which separates the initial implementation from remaining R1–R7.
+1. [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), and the [completed follow-up execution record](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
+2. The [integrated corrective ledger](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md), which separates initial implementation, accepted R1–R7 and integration status.
 3. The amended [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md); these are planning boundaries, not implementation approval.
 4. Relevant [architecture](../ARCHITECTURE.md), [data](../DATA_MODEL.md), [UI](../UI.md), [transaction](../TRANSACTIONS.md), [security](../SECURITY.md), [testing](../TESTING.md) and [ADR](../adr/README.md) contracts.
 
 ## Baseline and authority
 
-Corrective implementation commit `0da5138` is the locally validated R1–R6 checkpoint.
-The last verified main head was `0e5e8b6`; this branch has not yet been merged. Re-read
-current refs and preserve newer/uncommitted work. Do not reset to historical SHAs or
-create a replacement branch.
+Remote implementation commit `8c19225` (tree-equivalent to local object `0da5138`) is
+the R1–R6 checkpoint. Final application candidate `c912fcad`, tree `17ae6e4f`, passed
+the local and supported-target gates. The last pre-merge main head was `0e5e8b6`.
+Re-read the live PR/main refs to determine integration state; never replay an already
+merged PR or reset to historical SHAs.
 
 The current authorization permits the bounded correction, its final production gate,
 and conditional merge of existing PR #7 only. It does not permit direct application
@@ -40,7 +41,7 @@ foundations with new architectures or promote spike implementations wholesale.
 
 ## Corrective implementation
 
-R1–R6 are implemented in `0da5138`. The source recognizer proves supported top-level
+R1–R6 are implemented in `8c19225`. The source recognizer proves supported top-level
 statements; metadata writes validate the full reloadable model; repair shares safe
 declaration preflight; discovery matches the pinned scanner including automatic FLAC;
 imports derive facts/bytes from retained handles; UI callbacks carry view/operation/
@@ -48,8 +49,12 @@ session generations; and recovery readiness completely scans retained journals w
 a lifetime count cap. Behavioral DOM and packaged supporting-authoring regressions are
 wired. Details and exact local counts are in the execution prompt.
 
-R7 owns the pending Windows x64/macOS ARM64 workflow, retained evidence, documentation
-closure, PR readiness, expected-head merge, and post-merge verification.
+R7 is complete: production run `34982164071` passed macOS ARM64 job `104424934281`
+and Windows x64 job `104424934679` at exact candidate `c912fcad`. Both official SDK
+gates, N1, packaging, supporting UI, WebView/single-instance, privacy and dependency/
+licence evidence passed. Artifact IDs/digests and preserved failures are in the follow-up.
+PR readiness, expected-head integration and post-merge verification are a separate live
+integration state, not implementation evidence.
 
 The initial local test report is retained in the integrated task. The SDK wrapper was
 skipped and desktop packaging unavailable there. Repository quality is not production
@@ -89,8 +94,8 @@ Historical detailed handover and run/artifact records are preserved byte-for-byt
 links in CURRENT. Those snapshots are historical evidence and do not override this
 handover, CURRENT or the active follow-up.
 
-The next action is to publish the existing branch candidate, run the existing production
-workflow once for its final code/test/workflow state, and inspect every target job and
-artifact. Merge PR #7 only if the exact candidate, reviews/checks, policies, and complete
-diff satisfy the conditional gate; then verify main and post-merge CI. Otherwise record
-the exact blocker. Do not start Phase 1E.
+The next action is to inspect PR #7's live head/base, checks, reviews and policies. If it
+is still open and the expected head is the documentation-only descendant of validated
+`c912fcad`, mark it ready and merge it once through the supported PR mechanism, then
+verify main and required post-merge CI. If it is already merged, verify rather than
+replay. If any gate changed, stop at the exact blocker. Do not start Phase 1E.
