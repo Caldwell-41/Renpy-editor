@@ -2,12 +2,16 @@
 
 ## Mission and current scope
 
-Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0, bounded
-Phase 1A, corrected Phase 1B, and corrected Phase 1C are complete; Gate E remains
-closed. Phase 1D supporting authoring is complete; Phase 1E remains separately
-approval-gated.
+Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and the
+historical Phase 1A–1D implementations and their integrated corrective checkpoint have
+recorded acceptance. Read `docs/status/CURRENT.md` and the
+[completed corrective follow-up](docs/tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md)
+for exact evidence and live integration guidance.
+The working corrective branch is `corrective/phase-1a-1d-integrated`.
 ADR 0003 selects Tauri 2 and ADR 0005 defines version-pinned staged project creation.
-Do not begin Scene authoring or any later milestone without that approval.
+Phase 1E and later remain unapproved. Milestone-plan amendments are not execution
+approval; do not begin Scene authoring. PR #7 integration is separately stateful and
+must never be replayed from historical instructions.
 
 ## Invariants
 
@@ -47,7 +51,7 @@ npm exec -- tauri build -- --locked
 
 The core test command includes the Phase 1B hostile-race and real
 process-termination recovery suite. See docs/TRANSACTIONS.md for its platform
-contract.
+contract. An official-SDK test wrapper with a skip marker is not target evidence.
 
 Retain the Phase 0 regression commands:
 
@@ -77,10 +81,13 @@ Use [docs/INDEX.md](docs/INDEX.md) as the router. Material decisions require an 
 Phase 1 scope/UX lives in the canonical product/architecture/data/UI/roadmap docs; the
 ordered implementation milestones live in
 `docs/tasks/active/phase-1-vertical-slice.md`. Keep `AGENTS.md`, the index, and current
-status concise; link rather than copy where practical.
+status concise; link rather than copy where practical. Historical status snapshots
+are evidence only and do not override CURRENT or the active task.
 
 ## Handoff
 
 Each completed task updates its brief and `docs/status/CURRENT.md`, archives the brief
 when complete, and reports: outcome, changed areas, ADRs, exact validation results,
-limitations/risks, and the next bounded task.
+limitations/risks, and the next bounded task. Preserve CI cost controls: cheap checks
+first, no package matrix solely for documentation, and no duplicate expensive run of
+an unchanged tested code tree. Do not reclassify failures or skipped steps as passes.

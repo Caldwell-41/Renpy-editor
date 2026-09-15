@@ -124,6 +124,8 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .entity-row { display: grid; grid-template-columns: minmax(140px, .7fr) minmax(160px, 1fr) auto auto; gap: 16px; align-items: center; min-height: 52px; border-bottom: 1px solid var(--border-normal); }
 .entity-row > div { display: grid; gap: 4px; }
 .entity-row > .row-actions { display: flex; gap: 8px; }
+.entity-row > .inline-editor { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; padding: 12px 0 16px; }
+.inline-editor > .row-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .entity-row code, .appearance-row code { color: var(--text-muted); font: .72rem var(--font-source); overflow-wrap: anywhere; }
 .entity-row > span, .appearance-row { color: var(--text-secondary); font-size: .78rem; }
 .appearance-row { display: grid; grid-template-columns: minmax(120px, 1fr) 1fr auto; gap: 16px; align-items: center; min-height: 40px; padding-left: 24px; border-bottom: 1px solid var(--border-normal); }

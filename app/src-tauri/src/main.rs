@@ -76,6 +76,17 @@ fn core_request(
     let smoke_payload = is_smoke_report
         .then(|| request.get("payload").cloned())
         .flatten();
+    let supporting_authoring_ui_passed = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("supportingAuthoringUiPassed"))
+        .and_then(Value::as_bool)
+        == Some(true);
+    let supporting_authoring_stage = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("supportingAuthoringStage"))
+        .and_then(Value::as_str)
+        .unwrap_or("missing")
+        .to_owned();
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
@@ -84,6 +95,11 @@ fn core_request(
         let request_id = validated.request_id.clone();
         let operation = validated.operation.to_owned();
         let payload_empty = validated.payload.is_empty();
+        let session_id = validated
+            .payload
+            .get("sessionId")
+            .and_then(Value::as_str)
+            .map(str::to_owned);
         let mut guard = state
             .0
             .lock()
@@ -135,31 +151,35 @@ fn core_request(
                         request_id,
                         serde_json::to_value(project).unwrap_or(Value::Null),
                     ),
-                    Err(_) => CoreResponse::failure(
-                        request_id,
-                        "INVALID_LOOMLIGHT_PROJECT",
-                        "This is not a valid supported Loomlight project.",
-                    ),
-                },
-                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
-            },
-            "asset.chooseImport" if payload_empty => match rfd::FileDialog::new()
-                .set_title("Choose image or audio asset")
-                .add_filter(
-                    "Supported media",
-                    &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
-                )
-                .pick_file()
-            {
-                Some(path) => match lifecycle.authoring_select_import(&path) {
-                    Ok(choice) => CoreResponse::success(
-                        request_id,
-                        serde_json::to_value(choice).unwrap_or(Value::Null),
-                    ),
                     Err(error) => loomlight_core::lifecycle_failure(request_id, error),
                 },
                 None => CoreResponse::success(request_id, json!({ "cancelled": true })),
             },
+            "asset.chooseImport"
+                if validated.payload.len() == 1 && session_id.as_deref().is_some() =>
+            {
+                let session_id = session_id.expect("guarded session id");
+                if let Err(error) = lifecycle.require_session(&session_id) {
+                    return Ok(loomlight_core::lifecycle_failure(request_id, error));
+                }
+                match rfd::FileDialog::new()
+                    .set_title("Choose image or audio asset")
+                    .add_filter(
+                        "Supported media",
+                        &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
+                    )
+                    .pick_file()
+                {
+                    Some(path) => match lifecycle.authoring_select_import(&path) {
+                        Ok(choice) => CoreResponse::success(
+                            request_id,
+                            serde_json::to_value(choice).unwrap_or(Value::Null),
+                        ),
+                        Err(error) => loomlight_core::lifecycle_failure(request_id, error),
+                    },
+                    None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+                }
+            }
             "project.chooseParent" | "sdk.browse" | "project.openPicker" | "asset.chooseImport" => {
                 CoreResponse::failure(
                     request_id,
@@ -203,6 +223,8 @@ fn core_request(
                         "popupDenied": popup_denied,
                         "webviewRestrictionsPassed": popup_denied,
                         "lifecycleUiPassed": true,
+                        "supportingAuthoringUiPassed": supporting_authoring_ui_passed,
+                        "supportingAuthoringStage": supporting_authoring_stage,
                         "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
@@ -210,7 +232,11 @@ fn core_request(
                 );
                 let _ = std::io::stdout().flush();
                 std::process::exit(
-                    if navigation_denied && popup_denied && single_instance_passed {
+                    if navigation_denied
+                        && popup_denied
+                        && single_instance_passed
+                        && supporting_authoring_ui_passed
+                    {
                         0
                     } else {
                         1
@@ -334,6 +360,10 @@ fn main() {
                         denied_for_probe.load(Ordering::SeqCst)
                     ))
                     .expect("probe state injection must succeed");
+                    main.eval(
+                        "Object.defineProperty(window, '__loomlightScaffoldSmokeMode', { value: true, configurable: false, enumerable: false, writable: false });",
+                    )
+                    .expect("smoke mode injection must succeed");
                     main.eval(include_str!("smoke_probe.js"))
                         .expect("main smoke probe injection must succeed");
                 });

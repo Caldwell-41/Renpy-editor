@@ -1,312 +1,176 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Status:** Planned; Phase 1A and 1B complete, later milestones require explicit user approval<br>
-**Scope:** Production vertical slice after the scaffold gate; no Phase 2+ features
+**Updated:** 2026-09-15<br>
+**Status:** Phase 1A–1D integrated correction remains open. Phase 1E–1H are planned, unapproved and unstarted.<br>
+**Scope:** Production vertical slice; no Phase 2+ implementation
 
-## Purpose
+## Purpose and authority
 
-Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight
-workflow without collapsing the whole initial product into one implementation task.
-The first implementation task remains the bounded
-[production scaffold](../archive/2026-09-14-phase-1-production-scaffold.md). This plan governs the milestones that
-follow once each prior gate passes.
+Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
-## Product target
+This amended plan authorises no application implementation. Each milestone requires explicit user approval and a bounded execution brief. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
-A user can create a new Loomlight project, select/install and pin the supported Ren'Py
-SDK, configure resolution, save/persist it safely, close and reopen it, create
-characters/assets/basic variables, visually author a small branching VN with Scene,
-Source, and Branches, validate and run it with Ren'Py, create a local Git checkpoint,
-and continue editing after restart.
+## Product target and fixed decisions
 
-The generated game remains conventional Ren'Py and runs when `.renpy-editor/` is
-absent. It retains the normal Ren'Py starter GUI/runtime infrastructure needed for a
-working main menu, save/load, preferences, and related standard screens without
-requiring Phase 1's deferred visual UI Designer. General import/reconstruction of
-arbitrary existing Ren'Py projects is not part of Phase 1.
+A user can create a conventional Ren'Py project, select/install and pin the supported SDK, configure resolution, safely persist/close/reopen, create Characters/Appearances/Assets/basic Variables, visually author a small branching VN, use Scene/Source/Branches, validate/run, checkpoint locally in Git, and continue after restart.
 
-## Fixed Phase 1 product decisions
-
-- Supported platforms: Windows x86-64 and macOS Apple Silicon ARM64 only.
-- Tauri 2 production shell; Phase 0 spike code remains disposable evidence.
-- `.rpy` files are authoritative runnable truth; editor metadata never replaces them.
-- Loomlight-created hierarchy is `Project → Chapter → Scene → Beat`.
-- Each Loomlight-created Scene normally owns one `.rpy` file and one globally unique
-  primary technical label. Chapters are organisational folders, not Ren'Py runtime
-  semantics.
-- `script.rpy` stays small and routes the normal entry point into authored scenes.
-- The generated scaffold preserves conventional Ren'Py starter GUI/screens and uses
-  normal Ren'Py physical asset locations: `game/images/`, `game/audio/`, and `game/gui/`.
-  Loomlight's Assets surface is an editor abstraction, not a `game/assets/` directory.
-- Project creation is staged and SDK-validated before finalisation.
-- Project lifecycle explicitly includes create, automatic transactional persistence,
-  explicit save/flush, close, Recent Projects, load/reopen, and continuation.
-- `Initialize Git repository` is offered at project creation and enabled by default.
-- Assets imported in Phase 1 are copied into the project; external absolute asset
-  references are deferred.
-- Functional major workspaces are Scene, Source, and Branches. Characters, Assets,
-  Variables, Diagnostics/Runtime, Git, and project setup are supporting surfaces.
-- The visual direction is **Quiet Studio Dark** as specified in `docs/UI.md`: neutral
-  charcoal surfaces, restrained muted indigo, medium density, strong typography,
-  subtle dividers/elevation, minimal decoration, and narrative content given priority
-  over chrome. Phase 1A establishes semantic design tokens/theme infrastructure;
-  Phase 1E performs the first full visual polish pass on the real Scene workspace.
-- Character visuals use extensible appearance attributes. Phase 1 exposes expression;
-  outfit and pose are implicit defaults. The model must later admit outfits, poses,
-  layered images, animation, and additional appearance dimensions without replacement.
-- Placement, transition, and audio use extensible references/events. Phase 1 exposes
-  Left/Centre/Right, a tiny transition set such as None/Dissolve/Fade, play/stop music,
-  and play SFX.
-- Phase 1 variables support `bool`, `int`, and `string` with simple assignment only.
-- Scene Editor Preview reconstructs supported scene-local state through the selected
-  beat and marks unsupported/runtime-dependent state as partial rather than guessing.
-- Normal Run Game is included; correct arbitrary Run From Here is deferred with state
-  simulation.
-- Accepted visual/source edits share one transaction path. Natural typing bursts may be
-  buffered briefly, but no long-lived visual document competes with source.
-- Save state is visible (`Saved`, `Saving`, `Pending validation`, `Conflict`,
-  `Recovery required`). `Ctrl/Cmd+S` explicitly flushes/confirms durability.
-- Undo/redo spans the shared transaction stream but never overwrites a newer external
-  revision.
-- Unsupported/custom source remains exact, visible in sequence, and protected from
-  unsafe visual relocation.
-- Generated `.rpyc` files are derivative. If a supported Scene/source-file move,
-  rename, or delete removes an `.rpy` path, Loomlight must remove the obsolete `.rpyc`
-  at the old path in the same approved file transaction so Ren'Py cannot execute an
-  orphaned ghost script.
-- Phase 1 does not include general existing-project import, UI Designer, Timeline,
-  LLM assistance, GitHub remotes, advanced state simulation, arbitrary transform/ATL
-  authoring, or signing/notarisation.
+- Targets are Windows x86-64 and macOS Apple Silicon ARM64. Tauri 2 is the production shell; Phase 0 spikes remain evidence, not production services.
+- `.rpy` bytes are authoritative. Editor metadata stores stable identity, mappings and convenience state; it is not a second runnable document. The game runs without `.renpy-editor/`; arbitrary existing-project import and reconstruction after metadata deletion remain deferred.
+- The hierarchy is Project → Chapter → Scene → Beat. Chapters are organisational; each Scene normally owns one source file and globally unique primary label. Runtime flow is explicit, never inferred from tree order or filesystem parse order. Cosmetic names, technical identifiers, paths and UUIDs are distinct.
+- A staged, SDK-validated creation preserves normal Ren'Py starter menus, save/load, preferences, history/rollback infrastructure, and conventional `game/images/`, `game/audio/`, `game/gui/` paths. Optional local Git initialization is on by default.
+- Imported assets are copied into the project with safe paths, truthful discovery and duplicate/missing checks. Appearances use stable IDs and extensible attributes; Phase 1 exposes expression with default outfit/pose and a static imported render source. Later rendering strategies extend rather than replace those references.
+- Placement, transitions and audio are extensible references/events. Initial controls expose Left/Centre/Right, None/Dissolve/Fade, play/stop music and play SFX. Variables support bool/int/string and simple representable assignments, not arbitrary Python expressions.
+- All accepted edits use one transaction/history path. Natural typing bursts may be buffered briefly; automatic persistence and Ctrl/Cmd+S flush share the same boundary. Saved/Saving/Pending validation/Conflict/Recovery required are meaningful states. Undo/redo never overwrites external revisions.
+- Unsupported/custom code remains exact, visible and protected. The embedded preview reconstructs only supported scene-local state and marks unknown/runtime-dependent effects; the official SDK is the fidelity authority. Normal Run Game is included; correct Run From Here is deferred.
+- Scene, Source and Branches are major workspaces; Characters, Assets, Variables, Diagnostics/Runtime, Git and setup are supporting surfaces. Use [Quiet Studio Dark](../../UI.md), semantic tokens and accessible interactions, not independent feature-specific visual languages.
+- Scene file operations must handle obsolete `.rpyc` derivatives through the approved transaction contract when an old `.rpy` path is removed. Never leave executable ghost scripts after supported move/delete.
+- Phase 1 excludes the UI Designer, Timeline, advanced state/reachability analysis, arbitrary transforms/ATL, LLM assistance, GitHub remotes, plugin infrastructure, arbitrary project import, and signing/notarisation.
 
 ## Scene UX baseline
 
-- Centre workspace uses a resizable vertical Editor Preview / Beats split, defaulting
-  to approximately 52% / 48%, with aspect-ratio-preserving preview and protected Beats
-  readability.
-- Beats are the primary high-frequency authoring surface; selected rows expand inline.
-- Normal `Enter` remains newline; `Ctrl/Cmd+Enter` creates the next Dialogue beat.
-- Appearance/staging changes are explicit beats. Convenience controls may insert those
-  beats but must not hide generated mutations inside dialogue.
-- Clicking a visible preview Character distinguishes the contributing prior beat from a
-  new change at the current point (`Edit Beat N` vs `Add change here`).
-- Choice supports an arbitrary list of unconditional options even though the acceptance
-  fixture uses two; the destination picker may create a new Scene and link it.
-- Audio does not auto-audition while scrubbing beats; audition is explicit.
-- Custom Code beats can navigate to Source but cannot be freely reordered across
-  supported content unless safety is proven.
-- Scene, Source, and Branches navigate bidirectionally over one semantic model.
+The resizable vertical Preview/Beats allocation starts near 52/48, preserves the game aspect ratio and keeps Beats readable. Beats are the primary writing surface and selected rows expand inline. Enter inserts a newline; Ctrl/Cmd+Enter commits the natural edit burst and creates the next Dialogue beat. Speaker carry-forward is convenience, not hidden story state.
 
-## Implementation sequence
+Appearance and placement changes are explicit beats. Preview selection distinguishes the contributing earlier beat from a new change at the current point: Edit Beat N versus Add change here. Choice supports an arbitrary list of unconditional options and Create New Scene in its destination picker. Audio audition is explicit, never repeatedly triggered by beat selection. Provide keyboard Move Up/Down as well as drag affordances. Opaque boundaries block unsafe relocation. View in Source becomes fully navigable with 1F; until then, label the deferred action honestly rather than shipping a nonfunctional control as complete.
+
+## Implementation sequence and gates
 
 ### 1A — Production scaffold
 
-The completed
-[Phase 1A task](../archive/2026-09-14-phase-1-production-scaffold.md) created only the production
-Tauri workspace, command/capability boundary, empty production ports, locked
-build/test setup, and cross-platform packaged smoke. Do not implement authoring.
+Historical implementation: [production scaffold](../archive/2026-09-14-phase-1-production-scaffold.md). Preserve the Tauri workspace, locked toolchains, typed command boundary, main-WebView capability/CSP restrictions, safe ports, semantic theme tokens, reduced-motion support and packaged denial tests. No new desktop architecture is required by the current review.
 
-Establish the visual-system foundation without prematurely polishing feature screens:
-semantic surface/text/border/accent/status tokens, system UI typography, reviewed
-monospace Source typography, modest radius/elevation primitives, reduced-motion
-support, and theme plumbing that can later admit light mode. Do not hard-code the dark
-palette into feature components and do not introduce gradients/glass/card-heavy styling
-that conflicts with the canonical Quiet Studio Dark guidance.
-
-**Gate:** scaffold acceptance criteria are green on both supported platforms and the
-UI foundation exposes reviewed semantic design tokens without widening desktop
-privileges or adding authoring functionality.
+**Gate:** Windows/macOS packaging and authorised/unauthorised WebView probes pass without widening renderer privileges. Historical passes do not replace the integrated corrective gate.
 
 ### 1B — Transaction, file coordination, and recovery foundation
 
-Follow the bounded
-[completed Phase 1B brief](../archive/2026-09-14-phase-1-transaction-recovery.md) and
-[completed corrective remediation](../archive/2026-09-14-phase-1b-corrective-transaction-recovery.md).
+Historical implementation: [transaction brief](../archive/2026-09-14-phase-1-transaction-recovery.md), [corrective evidence](../archive/2026-09-14-phase-1b-corrective-transaction-recovery.md), and [transaction contract](../../TRANSACTIONS.md).
 
-Implement the production source/file transaction boundary before any visual authoring
-is permitted to write project source. Close Phase 0 Gate E rather than assuming the
-spike's check-then-replace behavior is production-safe.
+Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The active follow-up owns the remaining resource-limit and correctness repairs; 1E owns new file-lifecycle semantics required by Scenes.
 
-Required evidence includes stale revision/path/file identity changes, non-cooperating
-external writer races, symlink/path substitution, crash points, recovery retention,
-undo/redo boundaries, and platform durability semantics. Use stronger platform
-replace/exchange/backup primitives where appropriate, but preserve competing external
-data instead of making an unprovable compare-and-swap claim.
-
-**Gate:** no accepted edit is silently lost or overwrites an external revision in the
-specified race/recovery suite on Windows x64 and macOS ARM64.
-
-The original closure by run 34797222616 was reopened after material pathname-race and
-terminal-state findings. The handle-anchored correction passed actual Windows x64 and
-macOS ARM64 runtime evidence in run 34801268319, re-closing Gate E. Phase 1C was later
-separately approved and completed without changing that replacement-only boundary.
+**Gate:** actual stale-write, substitution, non-cooperating-writer, process-termination, evidence-retention and follow-up-write regressions pass on both targets. Bounded resource use must not impose a lifetime limit on successful authoring.
 
 ### 1C — Project lifecycle and SDK foundation
 
-**Status:** Complete and re-closed by the archived
-[single-instance lifecycle micro-remediation](../archive/2026-09-14-phase-1c-single-instance.md).
-The prior gate was re-closed by the archived
-[Phase 1C durability/race remediation](../archive/2026-09-14-phase-1c-durability-race-remediation.md).
-The earlier archived
-[Phase 1C corrective remediation](../archive/2026-09-14-phase-1c-corrective-lifecycle.md)
-remains historical evidence.
-The original [Phase 1C task](../archive/2026-09-14-phase-1c-project-lifecycle.md)
-remains historical implementation evidence; corrective production run `34832555392`
-passed the complete Windows x64/macOS ARM64 production gate at `08daf385`.
-Corrective production run `34849801157` passed the strengthened lifecycle gate at
-`bdc7ad60` on both supported targets.
-Single-instance correction run `34906232240` passed the packaged Windows x64/macOS
-ARM64 dual-launch gate at `e1e8dac`.
+Historical implementation: [project lifecycle](../archive/2026-09-14-phase-1c-project-lifecycle.md), [SDK/lifecycle correction](../archive/2026-09-14-phase-1c-corrective-lifecycle.md), [durability/race correction](../archive/2026-09-14-phase-1c-durability-race-remediation.md) and [single-instance correction](../archive/2026-09-14-phase-1c-single-instance.md).
 
-Loomlight's desktop runtime is single-instance: the primary process is the sole owner
-of mutable application lifecycle state, and a losing launch must be rejected before it
-can initialise that state. Independent concurrent Loomlight processes and
-multi-process editing are unsupported.
+Preserve Welcome/Recent Projects, title/folder/parent/path preview, discovered/installed/browsed compatible SDK selection, resolution, Review & Create, optional Git initialization, safe staging and no-replace finalisation. Preserve the exact-version SDK/provenance and child-process trust boundaries. A losing application process must never initialise independent lifecycle state.
 
-Implement Welcome/Recent Projects and the New Project workflow:
+Retain inspected candidate authority until activation, prepare before replacing the healthy current session, and distinguish session IDs from stable project IDs. Close/switch invalidates the old authority and import selections. Stale requests and UI completions cannot retarget another session.
 
-1. title, editable folder name, parent directory, final path preview;
-2. detected compatible SDK / verified install of supported SDK / browse existing SDK;
-3. resolution preset or custom dimensions;
-4. Review & Create with Git initialisation checked by default;
-5. staged generation, metadata creation, optional Git init, SDK validation, finalise;
-6. open `Chapter 1 → Scene 1`.
+**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects crash consistency, stage/parent/promotion races, single-instance ownership and metadata-free runtime checks pass on both targets.
 
-Generate the documented conventional project paths and metadata contract. Preserve the
-normal Ren'Py template files such as `options.rpy`, `gui.rpy`, `screens.rpy`,
-`game/gui/`, and the standard `game/images/` and `game/audio/` locations while adding
-Loomlight's definitions/chapters structure. Preserve standard main-menu, save/load,
-preferences, history/rollback behavior where provided by the supported SDK template;
-Phase 1 does not visually author those screens. Support close/reopen from Recent
-Projects and Open Loomlight Project. Metadata deletion must not break the game, but
-Phase 1 does not reconstruct deleted metadata.
+### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
-**Gate:** create → validate → close → reopen works on both targets; the generated game
-uses the documented conventional paths, runs with its standard Ren'Py menu/save/load
-infrastructure, and also runs without `.renpy-editor/`. Corrective closure additionally
-requires managed-SDK and Recent Projects crash recovery plus deterministic
-parent/stage/child/promotion race evidence on both supported targets.
+Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). Its later integrated checkpoint is still open; do not interpret the archived closure as permission to start 1E.
 
-### 1D — Supporting authoring models: Characters, Assets, Variables
+Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
 
-**Status:** Complete. See the archived
-[Phase 1D task](../archive/2026-09-15-phase-1d-supporting-authoring.md). Phase 1E is not
-approved.
-
-Implement bounded supporting surfaces and source definitions:
-
-- Character: technical variable, display name, dialogue colour, default appearance;
-- Appearance: stable ID, extensible attributes, Phase 1 expression + implicit default
-  outfit/pose, static imported asset render source;
-- Assets: copied project-owned backgrounds/character images under `game/images/`,
-  music/SFX under `game/audio/`, plus required standard GUI/project asset references;
-  apply missing/duplicate checks and a deterministic naming/collision policy compatible
-  with Ren'Py automatic discovery;
-- Variables: `bool`, `int`, `string` definitions/defaults and simple assignment model.
-
-Keep IDs separate from paths and display names. Do not make expression-only or raw-file
-references architectural assumptions.
-
-**Gate:** supporting definitions round-trip through ordinary Ren'Py source, reload with
-stable editor identity, and produce unambiguous discovered image/audio names.
+**Gate:** accepted definitions reload and match runnable source; IDs and unknown metadata survive; physical availability/collisions and discovery agree with the pinned SDK; supporting authoring and truthful persistence/Flush work in the packaged app. All integrated follow-up blockers must close before 1E can be approved.
 
 ### 1E — Scene authoring
 
-Implement the first polished Scene workspace and the bounded visual Beat set:
-background, show/hide Character, change appearance, placement reference, dialogue,
-narration, play/stop music, play SFX, transition reference, simple variable assignment,
-unconditional choice, jump, return/end, and Custom Code representation.
+**Entry:** corrected 1A–1D supported-target closure plus explicit user approval. Execute the following internal checkpoints in order, with separate recorded evidence. Do not attempt one undifferentiated Scene/UI implementation.
 
-Implement the agreed Preview/Beats sizing, inline dialogue flow, beat insertion/reorder,
-scene-local preview reconstruction, partial-preview indication, visual asset pickers,
-choice destination/create-scene flow, Story tree Scene create/rename/reorder/move/delete,
-and continuous lightweight diagnostics. Any supported file move/rename/delete that
-removes an old Scene `.rpy` path also removes its stale `.rpyc` derivative through the
-approved transaction layer.
+#### 1E.1 — Source, hierarchy, file lifecycle and history prerequisites
 
-This milestone performs the first full product visual-design pass using Quiet Studio
-Dark. Beat presentation, story hierarchy, preview surround, inspector controls, asset
-pickers, persistence/conflict states, hover/focus/selection, empty states, spacing, and
-responsive collapse behavior must follow the canonical `UI.md` guidance. Explicitly
-review the result against the UI anti-pattern list so it does not drift toward generic
-AI/SaaS dashboard aesthetics, excessive cards/pills, gradients, glassmorphism, or
-accent-colour overuse.
+Implement the minimum production source/range and semantic-operation foundation required to safely create, edit and reorder the approved beat subset. Original bytes, verified ranges, stable IDs, lexical context and opaque boundaries are authoritative. Reuse/extend the safe definition foundation; do not introduce a second exporter or disposable scene-document model. The full Source workspace and broader direct-edit reconciliation remain 1F, not prerequisites for implementing their UI early.
 
-**Gate:** the representative Phase 1 mini-game can be authored without routine manual
-Ren'Py scripting, produces clean conventional source, Scene lifecycle operations leave
-no orphan executable `.rpyc`/duplicate-label behavior, and the Scene surface passes the
-functional/accessibility requirements plus a visual-conformance review against the
-Quiet Studio Dark system.
+Extend the one-Chapter/one-Scene metadata/lifecycle assumptions to supported multiple Chapters and Scenes. Specify schema/capability changes, safe migration of existing Loomlight projects, validation, ordering, selection fallback and reopen. Preserve existing UUIDs and unknown fields; do not use this work as arbitrary-project import.
+
+Design and test the narrow file-lifecycle transactions Scenes require before wiring destructive UI: source create/move/delete, companion metadata/reference changes, destination absence, retained evidence, inverse operations and removal of obsolete corresponding `.rpyc` files. Include directories only as needed for supported Chapter/Scene organisation. A display rename must not implicitly rename technical labels or source files. General project-wide technical renaming remains deferred.
+
+Define incoming-reference policy before deletion: refuse or require an explicit supported resolution; never silently retarget choices/jumps or discard custom references. Unknown reference ownership means refusal where safety cannot be proven. Specify nonempty/entry-scene invariants and last-selection fallback. Story-tree reordering is organisational, not implicit execution flow.
+
+Integrate history with committed source/metadata operations. Test edit → undo → redo using the revisions/identities actually returned after each commit, plus repeated undo/redo, create/move/delete inverses, failed inverse commits and external boundaries. A cursor-only history helper is not end-to-end evidence.
+
+**Gate:** production-service tests prove multi-Scene migration/reopen, minimal patches, opaque-boundary refusal, reference-safe lifecycle, inverse/history behavior, crash recovery and no stale-bytecode execution. No Scene UI write path may bypass this foundation.
+
+#### 1E.2 — Functional Scene authoring and minimum recovery UX
+
+Implement the approved beat set: background/scene, show/hide Character, change appearance, placement reference, dialogue, narration, play/stop music, play SFX, transition reference, simple assignment, unconditional Choice, Jump, Return/End and protected Custom Code representation. Reference stable supporting entities, not filenames. Newly created Scenes are valid and normally end with a visible Return/End beat.
+
+Implement Story-tree Chapter create/display-rename/reorder and Scene create/display-rename/reorder/move/delete under 1E.1's policies. Choice Create New Scene creates the destination and the same semantic edge later used by Branches. Define end/return/jump behavior explicitly; no fall-through based on file ordering.
+
+Use short-lived typing buffers with explicit commit/cancel and navigation/close behavior. Preserve input on validation failure, group natural edits for undo, and ensure Ctrl/Cmd+S accurately handles pending accepted work without falsely claiming unsubmitted input was saved.
+
+This checkpoint owns the minimum usable recovery workflow for the supported transaction states, before the Scene authoring gate: inspect a blocked project without executing it, explain affected files/evidence, offer only safe supported resolution choices with explicit user intent, retain accepted/displaced bytes, revalidate the chosen resolution, and resume editing only after a valid terminal outcome. Ambiguous cases remain blocked with non-destructive guidance. Merely acknowledging a journal or deleting recovery data is not content resolution. Advanced merge tooling and retention/pruning remain later work; generic Git restore is not a substitute.
+
+Continuous editor diagnostics here are non-executing static checks. Do not run SDK compile/lint automatically while typing or opening a user-controlled project.
+
+**Gate:** the representative mini-game can be authored with the approved subset, edits/history stay coherent across supporting surfaces, and controlled interrupted/conflicting transactions can be understood and safely resolved through the minimum UI. SDK behavior is checked on synthetic controlled fixtures, not by silently executing users' projects.
+
+#### 1E.3 — Scene-local preview, media presentation and visual conformance
+
+Implement the agreed Preview/Beats split, inline writing, explicit staging, visual asset pickers and scene-local reconstruction through the selected beat. Record provenance for displayed state. Unknown Python/custom effects invalidate relevant certainty; retaining an earlier value must not present it as proven current state. Do not infer branch-global state or repeatedly audition audio while navigating.
+
+Provide a core-mediated, read-only, session-scoped media presentation boundary for thumbnails, supported preview assets and explicit audition. Specify byte/dimension/format bounds, caching/invalidation, cancellation and disposal on session change. Deny traversal, stale sessions, remote/active content and unapproved paths. Do not grant generic filesystem access or relax CSP to make previews work.
+
+Review actual rendered surfaces against Quiet Studio Dark: typography, spacing, hierarchy, preview surround, compact/expanded beats, inspector, hover/focus/selection, empty/error/conflict states and responsive collapse. Preserve aspect ratio without sacrificing Beats readability. Test keyboard navigation, labelled controls, focus restoration, accessible reorder and reduced motion. No dashboard cards, gradients/glass or accent overuse.
+
+**Gate:** actual Preview/Beats interactions, intentional audition, media-denial cases, fidelity/partial-state fixtures, accessibility and visual-conformance evidence pass on both supported targets. Full 1E closure requires all three internal gates; 1F still needs separate approval.
 
 ### 1F — Source synchronisation and partial-visual handling
 
-Implement the production Source workspace, conservative partial CST/range mapping,
-minimal patches, supported direct source edits, bidirectional Scene/Source selection,
-and exact unsupported/custom-code preservation. Reconcile external edits and block only
-affected files/scenes when safe rather than freezing unrelated work.
+**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it.
 
-**Gate:** golden no-op/minimal-patch tests, direct source→Scene updates, unsupported
-region preservation, and external conflict cases pass without collateral byte changes.
+Implement the Source centre workspace, conservative partial CST/range mapping, minimal patches, supported direct edits, bidirectional Scene/Source selection and exact Custom Code preservation. Track source byte offsets separately from decoded editor positions; cover Unicode, BOM/newlines and selection remapping. The Scene and Branches semantic projection must never become a competing authoritative document.
+
+The execution brief must define editing states before UI work: unsubmitted/incomplete buffer, deliberately accepted source, invalid syntax, supported versus unsupported syntax, stale last-valid visual projection, ordinary external conflict, and unresolved transaction recovery. Invalid-but-deliberately-saved source requires an explicit policy and must not make the visual view claim current validity. Specify save, undo, navigation, close and restart behavior without silently discarding buffers.
+
+Ordinary external divergence may be isolated to an affected file/Scene where safe. Unresolved mixed-file transactions, uncertain project identity or ambiguous recovery retain the wider write block required by TRANSACTIONS. Do not weaken central recovery blocking to make unrelated scenes editable. Debounce watcher events, compare hashes, invalidate stale mappings, distinguish own writes, and fail safely on ambiguous revisions.
+
+**Gate:** golden no-op/minimal-patch cases, actual Source → Scene and Scene → Source updates, opaque/invalid regions, selection mapping, undo grouping, external edit races and restart behavior pass without collateral changes. Demonstrate both safe file-local isolation and mandatory project-level blocking for unresolved recovery.
 
 ### 1G — Branches, validation/run, diagnostics, and local Git
 
-Implement the basic Scene/label/choice graph from the same semantic edges used by
-Scene; do not create a parallel graph truth. Add authoritative SDK Validate and
-normal-entry Run Game, diagnostics navigation, and local Git status/diff/checkpoint.
+**Entry:** 1F closure and explicit approval. Use three internal gates, not one broad implementation claim.
 
-Extend the established Quiet Studio Dark design system into Source, Branches,
-Diagnostics/Runtime, and Git without inventing separate visual languages for technical
-surfaces.
+#### 1G.1 — Branches
 
-Advanced graph reachability/state analysis, minimap/search maturity, Run From Here,
-and GitHub remotes remain later work.
+Render the basic Scene/label/choice graph from the same semantic edges as Scene. Navigate to source Choice/Jump and destination Scene. Define terminal/return behavior and visible dangling destinations; graph operations use the shared transaction model. Do not add a parallel graph truth, conditional authoring, advanced reachability/state analysis, mature minimap/search or Run From Here.
 
-**Gate:** choice/scene graph navigation, SDK diagnostics navigation, normal game run,
-and local checkpoint work end-to-end on both targets.
+**Gate:** two routes, jumps/returns, destination creation/removal policy, dangling references and bidirectional navigation stay coherent across Scene, Source and Branches on both targets.
+
+#### 1G.2 — Explicit SDK validation, normal Run Game and diagnostics
+
+Use the pinned adapter for authoritative validation and normal-entry runtime. Compile/lint/test/run may execute project-controlled code: require explicit trust and action, distinguish this from static editor diagnostics, and never invoke the SDK automatically on untrusted open, preview, import or typing. Specify trust scope/invalidation rather than treating a project UUID as permanent executable trust.
+
+Flush the intended accepted revision before execution; refuse unresolved recovery and report pending buffers honestly. Define child-process lifecycle, stop/cancellation, bounded output, stale diagnostics, project switching while running, and coordination with file lifecycle/compiled artifacts. A game session is user-controlled and must not inherit a short one-shot validation timeout as its entire allowed lifetime.
+
+**Gate:** actual SDK compile/lint failure and diagnostic navigation, correct source revision, explicit trust refusal, normal run/stop, output bounds and lifecycle/session races pass. Process launch alone does not prove the authored route ran.
+
+#### 1G.3 — Local Git checkpoint
+
+Implement only local status, diff and user-confirmed checkpoint. Specify which files are included, how an existing staged index is preserved, how external edits between preview and commit are handled, and how identity/missing Git are reported. Do not use blind `git add .` or silently include unrelated staged/private files. Project-controlled hooks, filters, external diff and configuration require an explicit non-execution/trust policy; a local Git operation is not automatically inert.
+
+Keep subprocess/path/session safeguards and distinguish a Git checkpoint from journalled editor recovery. Reset, checkout/restore, destructive clean, remotes, authentication and force-push remain outside 1G.
+
+**Gate:** actual status/diff/checkpoint match the user-reviewed file set, leave unrelated index/worktree changes intact, reject stale changes, and demonstrate hostile configuration handling on both targets. Extend Quiet Studio Dark consistently across technical surfaces.
 
 ### 1H — Vertical-slice acceptance
 
-Exercise a real workflow from a fresh checkout on both supported platforms:
+**Entry:** 1G closure and explicit approval. This is acceptance of implemented capabilities, not a place to hide missing feature work.
 
-1. create a project and initialise Git;
-2. confirm the untouched generated game launches with standard Ren'Py menu/save/load
-   behavior and conventional image/audio/gui paths;
-3. create two Characters and appearances;
-4. import a background, two character images, music, and SFX;
-5. define at least one simple variable;
-6. author several dialogue/staging/audio beats;
-7. change an appearance/placement explicitly;
-8. set the variable;
-9. add a Choice and create/link two destination Scenes;
-10. reorder a beat, undo, and redo;
-11. after a Ren'Py compile/run has produced bytecode, move or delete a disposable Scene
-   and prove no stale `.rpyc` ghost script/duplicate label remains;
-12. edit supported dialogue directly in Source and observe Scene synchronisation;
-13. introduce unsupported/external source and verify protected Custom Code behavior;
-14. validate and navigate diagnostics;
-15. run the game through the pinned SDK;
-16. create a local Git checkpoint;
-17. close Loomlight, reopen the project, and continue with appropriate editor state;
-18. confirm the game still runs with `.renpy-editor/` removed from a copy.
+Run the following with synthetic, repository-safe content from fresh checkouts on Windows x64 and macOS ARM64:
 
-**Phase 1 closes only when** Windows x64 and macOS ARM64 pass this workflow plus the
-transaction/recovery, golden-source, privacy/security, packaged application, and visual
-system/accessibility gates.
+1. Create a project with local Git and verify standard Ren'Py menu/save/load behavior.
+2. Create two Characters and Appearances; import backgrounds, character images, music and SFX; define bool/int/string values including an exact large integer.
+3. Author multiple Chapters/Scenes, dialogue, staging, appearance/placement, audio and assignments; assert the intended source and runtime values/assets, not only entity counts.
+4. Create an unconditional Choice and two destinations. Run both routes and verify their outcomes and common semantic edges.
+5. Reorder and edit beats, undo and redo repeatedly; verify source, metadata, views and committed revisions agree.
+6. After compilation, move/delete a disposable Scene safely. Verify incoming-reference policy, inverse behavior, close/reopen and no orphan `.rpyc`/duplicate-label execution.
+7. Edit supported Source and observe Scene/Branches synchronization; introduce unsupported/incomplete/external content and prove lossless protection, truthful stale/partial states and controlled reconciliation.
+8. Validate, navigate real diagnostics, perform explicit normal run/stop, and create a Git checkpoint containing exactly the reviewed changes.
+9. Close/reopen and continue with valid workspace selection. Run a copy without `.renpy-editor/`.
+10. Interrupt mixed transactions and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
+11. Exercise failed project switches, old-session requests, delayed/reordered successes/errors, cancelled import and rapid navigation. Prove no wrong-session effects, obsolete navigation or false Saved state.
+12. Exercise metadata limits, precision, discovery/case collisions and long terminal history. Confirm accepted data remains reloadable and the project remains writable beyond the former journal-count boundary.
 
-## Deferred implementation details
+**Phase 1 closes only when** the real workflow plus transaction/recovery, golden-source, privacy/security, packaged WebView/single-instance/media, accessibility and visual-system gates pass on both supported targets. Record exact tested commits, commands, outcomes, run/job IDs, evidence and remaining limitations. Source-label checks and skipped SDK wrappers are not behavioral acceptance.
 
-The milestone implementing each area should resolve and test details such as exact JSON
-schemas, technical-ID generation/collision rules, exact automatic-discovery-compatible
-asset naming/collision rules, precise recovery/conflict dialog copy, deletion/reference
-semantics, and exact locked dependency versions. Exact dark/light token values and the
-final reviewed icon package are also implementation details, but their choices must
-conform to `docs/UI.md` rather than redefining the visual direction.
+## Ownership and scope discipline
 
-These are implementation details, not reasons to broaden Phase 1 product scope before
-work begins.
+The current 1A–1D follow-up repairs existing operations only. 1E.1 owns new multi-Scene/schema/source/file-lifecycle/history prerequisites; 1E.2 owns minimum recovery UX; 1E.3 owns media presentation/preview. 1F owns the full Source workspace and broader external reconciliation. 1G owns Branches, explicit SDK runtime/diagnostics and local Git. 1H verifies them. Advanced recovery and full analysis remain Phase 3/4 work.
 
-## Documentation discipline
+Resolve detailed schemas, limits, references, deletion policy, dependencies and test fixtures in the owning bounded brief before implementation. Preserve the approved source/security architecture and document material changes with ADRs where needed. Do not implement an earlier milestone with an unsafe shortcut merely because a later milestone will add a larger subsystem.
 
-Each milestone gets its own bounded active task before implementation, updates
-canonical docs when behavior changes, records exact validation and target evidence,
-and must pass its gate before the next milestone begins. Do not treat this whole plan as
-a single open-ended coding task.
+Update canonical docs as behavior changes. Preserve historical evidence, archive completed briefs only after their actual gates pass, and keep CURRENT/HANDOVER/AGENTS/index consistent. Use cheap targeted checks during development, one complete final supported-target matrix per changed candidate, and no expensive package matrix solely for documentation amendments. No later milestone begins without explicit approval.

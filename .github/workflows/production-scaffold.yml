@@ -3,7 +3,7 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, corrective/phase-1a-1d-integrated]
     paths:
       - .github/workflows/production-scaffold.yml
       - app/**
@@ -104,6 +104,19 @@ jobs:
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-stage-races: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-exact-ipc-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-import-authority-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1d-corrective-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+      - name: Exercise SDK download handoff and verified managed reuse
+        shell: bash
+        env:
+          LOOMLIGHT_PHASE1C_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked \
+            renpy::reconciliation_tests::official_sdk_download_handoff_target_gate -- --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+          grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold
@@ -159,6 +172,7 @@ jobs:
           grep '"navigationDenied":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"supportingAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
             echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2
@@ -193,6 +207,7 @@ jobs:
             ${{ runner.temp }}/loomlight-single-instance-secondary.log
             ${{ runner.temp }}/phase-1b-transactions.log
             ${{ runner.temp }}/phase-1c-project-lifecycle.log
+            ${{ runner.temp }}/phase-1c-sdk-download-handoff.log
             ${{ runner.temp }}/dependency-inventory.json
           if-no-files-found: warn
           retention-days: 7

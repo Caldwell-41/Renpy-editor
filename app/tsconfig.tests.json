@@ -7,7 +7,9 @@
     "outDir": "dist-tests",
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "rewriteRelativeImportExtensions": true,
+    "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src/protocol.ts", "src/ports.ts", "tests/**/*.ts"]
+  "include": ["src/bridge.ts", "src/main.ts", "src/protocol.ts", "src/ports.ts", "tests/**/*.ts"]
 }

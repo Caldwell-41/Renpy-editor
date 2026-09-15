@@ -1,178 +1,102 @@
 # Current status
 
 **Updated:** 2026-09-15<br>
-**Phase:** Phase 1D complete; Phase 1E not approved<br>
-**Working codename:** Project Loomlight (temporary)
+**Phase:** Phase 1A–1D corrective implementation and target acceptance complete<br>
+**Working branch:** `corrective/phase-1a-1d-integrated`<br>
+**Next milestone:** Phase 1E is unapproved and unstarted
 
 ## Current truth
 
-- Phase 1D is complete. The
-  [archived task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) records
-  expected-absence file creation, trusted 512 MiB streaming imports, narrow exact-byte
-  Character/Variable source mapping, stable Character/Appearance/Asset/Variable UUID
-  metadata, deterministic Ren'Py discovery names, supporting UI, and exact evidence.
-  Phase 1E Scene authoring remains unapproved and unstarted.
-- [Production run 34913182173](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34913182173)
-  at `343e10f96e42ef1f1cb1d50f78936865436e4f2b` passed Windows x64 job
-  `104204998417` and macOS ARM64 job `104204998226`. Retained evidence artifacts are
-  `10375353123` (Windows, SHA-256
-  `d9be4e70fb5ac6870faaa530731a550f588ad5cd962cebcda5cef64a40604475`) and
-  `10375651909` (macOS, SHA-256
-  `bfa99946717782c5a97b33d331d817411714799ff255142288f2337d840cbb36`). Quality run
-  `34913182158` passed.
+N1 and R1–R7 are complete. Remote implementation commit `8c19225` and its targeted
+test-wiring descendants culminate in application candidate
+`c912fcadf8160d32ec35c7a0135b12812ad65c56`, tree
+`17ae6e4f16600d86f39bf354b7649a470dcf51f2`. The candidate passed the prescribed local
+gate, repository quality, complete diff review and full production run `34982164071`:
+macOS ARM64 job `104424934281` and Windows x64 job `104424934679` both passed core,
+desktop, official SDK lifecycle/authoring/discovery/N1, packaging, WebView/single-
+instance/supporting-authoring, privacy and dependency/licence gates. Exact artifact
+IDs, digests, counts, preserved failures and compatibility limits are in the completed
+[execution ledger](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
 
-- The bounded
-  [single-instance lifecycle micro-remediation](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
-  is complete. The maintained Tauri single-instance boundary is the first registered
-  plugin and rejects a secondary process before desktop setup can construct
-  `LifecycleService`; the primary best-effort restores, shows, and focuses `main`.
-- [Production run 34906232240](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34906232240)
-  at `e1e8dac27b5d98ceca58e7a14a4361c93854b7ff` passed Windows x64 job
-  `104183422740` and macOS ARM64 job `104183422612`. Both packaged dual-launch probes
-  proved the secondary never reached lifecycle setup, the primary received activation
-  and retained a usable main window, and the existing lifecycle/UI/WebView restrictions
-  remained green. Evidence artifacts are `10372748134` (Windows, SHA-256
-  `949213ab719c6d8c895cae933839459d97670f89dbdb37281f62a0b483af38e7`) and
-  `10373200561` (macOS, SHA-256
-  `75fc9d2b01dcdcce046b4f1a838e5496129989a1fad1031ea28cb2c06515bb03`). Quality run
-  `34906232244` passed. Phase 1C is re-closed; this was the prerequisite checkpoint
-  before the now-complete Phase 1D work.
+The correction provides context-aware source mapping; reloadable metadata and exact
+int64 values; validated compatibility repair; pinned Ren'Py discovery/import authority;
+session-safe behavioral UI; and complete bounded-memory recovery readiness without a
+lifetime journal cap. FLAC remains automatically discovered by the pinned scanner.
 
-- The Phase 0 corrective checkpoint, bounded Phase 1A production scaffold, and Phase
-  1B [corrective transaction/recovery task](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md)
-  are complete. The correction and subsequent recovery-enumeration follow-up re-closed
-  Gate E. Phase 1C was separately approved, completed, and re-closed by the bounded
-  [durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md).
-  No later milestone is approved.
-- The bounded [Phase 1C task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md)
-  is archived and ADR 0005 is accepted. Production implementation includes versioned
-  metadata/Recent Projects, trusted picker-mediated opaque path choices, staged/no-replace project
-  creation, the exact Ren'Py 8.5.3 adapter/verified installer, optional `git init`, and
-  Welcome/New Project/Open/minimal Chapter 1 → Scene 1 UI.
-- [Production run 34814995559](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34814995559)
-  at `1b241954e936f943d558f267a86f5e3592ab99cb` passed the complete Phase 1C gate:
-  Windows x64 job `103883726104` and macOS ARM64 job `103883726218` both created,
-  validated, ran, closed, and reopened the generated game; checked standard Ren'Py
-  screens and stable Chapter 1 / Scene 1 identity; ran a metadata-free copy; rejected
-  arbitrary Ren'Py opening; and passed desktop/package/security evidence. Artifacts are
-  `10335964464` (Windows) and `10335279104` (macOS). Quality run `34814995493` passed.
-- A post-closure review reopened Phase 1C and the bounded
-  [corrective lifecycle/SDK task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md)
-  is now complete. The correction pins private stage identity through privileged execution
-  and promotion, binds SDK capabilities to filesystem identity plus launcher/template
-  fingerprints, requires checksum-derived provenance for managed SDK reuse, sanitizes
-  Ren'Py/Git child environments, neutralizes hostile Git redirection/configuration,
-  deduplicates SDK registration, refuses SDK redirects, dispatches lifecycle work off the
-  Tauri UI thread, and exercises the actual Welcome/New Project DOM in packaged smoke.
-- [Corrective production run 34832555392](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34832555392)
-  at `08daf385246c345f53f46f9dedc43762a1c060e9` passed the complete production gate:
-  Windows x64 job `103939004703` and macOS ARM64 job `103939004630` both passed the
-  full core suite, official Ren'Py 8.5.3 lifecycle gate, desktop tests, packaging,
-  packaged WebView/lifecycle UI smoke, artifact secret scan, and dependency/licence
-  inventory. Evidence artifacts are `10343096571` (Windows, SHA-256
-  `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`) and
-  `10342841434` (macOS, SHA-256
-  `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`). Quality run
-  `34832555407` passed at the same commit. Failed/superseded corrective runs remain
-  recorded in the archived corrective brief and are not reclassified as passes.
-- The final Phase 1C durability/race correction makes managed SDK payload/provenance
-  one durable promotion unit with bounded quarantine/retry, atomically replaces Recent
-  Projects through retained application-state authority, anchors project stage child
-  work and project-open inspection, and detects/quarantines final-promotion
-  substitution. Managed provenance is now checked before SDK execution.
-- [Production run 34849801157](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34849801157)
-  at `bdc7ad60a64bfa51fd9c5380b33fd7fda6d92131` passed Windows x64 job
-  `103994559964` and macOS ARM64 job `103994559633`: platform core suites, official
-  Ren'Py 8.5.3 lifecycle/remediation markers, desktop tests, packaging, packaged smoke,
-  scans, and inventories. Evidence artifacts are `10350511403` (Windows, SHA-256
-  `30fd5e2a8479513eace75856aa9747a63cafe70be2cbf6124cc1be1e8566d675`) and
-  `10351240446` (macOS, SHA-256
-  `cf3e7dc9a913ca1b84ca5b8377e1af0422b880ed66d16e93e8d7fe684a17e9d5`). Quality run
-  `34849801200` passed. Failed/superseded attempts remain in the archived brief.
-- Production code now lives separately under `app/`: a Cargo core/desktop workspace,
-  vanilla TypeScript/Vite UI, one versioned `core_request` command, an explicit local
-  main-WebView capability plus matching handler guard, capability-specific ports, locked
-  dependencies, and semantic Quiet Studio Dark/light-ready tokens.
-- Local TypeScript build/tests, framework-independent Rust core tests, repository
-  validation, Phase 0 regressions, privacy scans, and dependency audit pass.
-  [Production run 34792368716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34792368716)
-  at `0a6a6c5d` passed the corrected complete gate on Windows x64 and macOS ARM64:
-  frontend/Rust tests, packaging, packaged-WebView denial smoke, artifact secret scan,
-  and dependency/licence inventory. The smoke reported navigation, popup, and aggregate
-  WebView restrictions true on both targets. Quality run 34792368711 passed at the same
-  commit.
-- The successful run produced the Windows executable/MSI/NSIS installer and macOS
-  application/DMG. Under the routine-run retention policy it uploaded lightweight
-  evidence artifacts 10328234722 (Windows) and 10328548641 (macOS), not full packages.
-  Earlier failed/cancelled runs and the hosted-runner interruption remain documented in
-  the archived Phase 1A task; skipped steps are not reclassified as passes.
-- Routine CI has been cost-scoped without weakening the Phase 1A gate: the production
-  Windows/macOS package matrix runs on relevant `app/**` or workflow changes pushed to
-  `main`, plus explicit manual dispatch, rather than running once for a pull request and
-  again after merge. Documentation-only changes do not trigger it. Normal runs retain
-  only lightweight smoke/licence evidence; full packaged bundles are uploaded only for
-  manual production runs. Legacy Phase 0 desktop and SDK evidence matrices are manual-
-  only, while routine Ubuntu repository validation remains automatic.
-- Phase 1 product scope and core UX are now defined in
-  [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
-  [ARCHITECTURE.md](../ARCHITECTURE.md), and the
-  [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md).
-- The first Phase 1 implementation gate is the completed
-  [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
-  The bounded [Phase 1B transaction/recovery brief](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)
-  is complete.
-- The corrective implementation keeps transaction artifacts in anchored recovery,
-  carries validated directory-handle chains through sensitive operations, uses no-
-  follow descriptor-relative macOS/Unix I/O, and pins Windows directory namespaces
-  against rename/delete during `ReplaceFileW`. It adds proved-empty `Prepared`
-  abandonment, terminal/non-blocking pre-mutation `Rejected` semantics, and anchored
-  recovery discovery so replacement of the recovery pathname cannot hide unresolved
-  transactions from Save/Flush.
-- [Production run 34804861387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/34804861387)
-  at `dc2efdf` passed the latest transaction/recovery suite on actual Windows x64 and
-  macOS ARM64, plus desktop tests, packaging, packaged denial smoke, secret scan, and
-  dependency/licence inventory. macOS exercised the new recovery-path substitution
-  regression; Windows retained its pinned-namespace coverage. Evidence artifacts are
-  10332572412 (Windows) and 10333101940 (macOS). Quality run 34804861410 passed. The
-  archived corrective task records the preceding formatting-only failed attempt and all
-  earlier evidence. See [TRANSACTIONS.md](../TRANSACTIONS.md) and amended ADR 0004.
-- ADR 0001 accepts exact `.rpy` source bytes, a conservative partial CST, and verified
-  minimal range patches. Authoritative source, formatting, comments, custom syntax,
-  embedded Python, and unsupported regions remain losslessly preserved.
-- ADR 0002 accepts the exact-version Ren'Py adapter and checksum-first staged install.
-  Ren'Py 8.5.3 is evidenced on Windows x64, macOS ARM64, and the Linux regression
-  baseline; physical SmartScreen/quarantine/signing UX remains later release work.
-- ADR 0003 accepts Tauri 2 as the desktop runtime: an unprivileged shared web UI over
-  named schema-validated commands in a Rust privileged core. Electron is the explicit
-  fallback under ADR-defined reconsideration conditions.
-- Confirmed targets are Windows x86-64 and macOS Apple Silicon ARM64 only. Intel macOS
-  is out of scope.
+Implementation/test closure is distinct from integration status. At this documentation
+checkpoint, PR #7 still targets `main` from the required corrective branch and must be
+merged only through its expected-head, policy-respecting gate. The live PR and final
+handoff report are authoritative for whether that integration subsequently occurred.
+The last pre-merge main head was `0e5e8b697782ed29d61d01dbb1240b9d16561c27`.
+Phase 1E remains unapproved and unstarted.
 
-## Agreed Phase 1 shape
+## Branch reconciliation and SDK carry-forward completed
 
-- Create new Loomlight projects only; general arbitrary Ren'Py import remains deferred.
-- Project lifecycle includes create, transactional persistence, explicit save/flush,
-  close, Recent Projects, load/reopen, and continuation.
-- Generated hierarchy is Project → Chapter → Scene → Beat; each Loomlight Scene normally
-  owns one `.rpy` file and one globally unique technical label.
-- Functional major workspaces are Scene, Source, and Branches. Characters, Assets,
-  Variables, Diagnostics/Runtime, Git, and project setup are supporting surfaces.
-- Scene uses an approximately 52/48 resizable Editor Preview/Beats split, inline beat
-  editing, scene-local supported preview reconstruction, protected Custom Code regions,
-  and explicit staging mutations.
-- Characters use extensible appearance attributes. Phase 1 exposes expression with
-  implicit default outfit/pose; future outfit/pose/layered-image support extends rather
-  than replaces this model.
-- Phase 1 assets are copied into the project; variables are `bool`, `int`, and `string`
-  with simple assignment; basic placement/transitions/music/SFX use extensible models.
-- Normal Run Game is Phase 1; correct Run From Here remains deferred with state
-  simulation.
-- Production file Gate E is re-closed by the latest corrective Windows/macOS runtime
-  evidence. Phase 1D authoring now extends that closed foundation without weakening it.
+The user separately approved branch reconciliation. Six unchanged, already-integrated
+branches were retired after fresh ancestry/tree-equivalence and open-PR checks.
+The remaining old SDK branch was reviewed, its missing download handoff selectively
+ported, and its complete history preserved under tag
+`archive/phase-1c-network-install-fix-2026-09-15` before retirement. Only main and this
+active corrective branch remained. No old branch was merged wholesale; main was not
+changed. Exact receipts are in the
+[branch reconciliation record](../audits/2026-09-15-branch-reconciliation.md).
+
+SDK correction **N1** is implemented in `02fc772d93fbe6b0709691bad15a4307a0193c93`:
+prepare managed installation once before download, so a second cleanup cannot
+quarantine the active archive. Newer provenance-before-execution, quarantine and
+platform-durability behavior remains intact. The private transport seam and four
+regressions do not add an IPC or alter the approved endpoint/checksum.
+
+Run `34935598838` passed the corrected core suite, strict Clippy, and exact-source
+Windows x64/macOS ARM64 official-archive handoff/reuse tests, then published only the
+tested files and removed temporary maintenance machinery. The baseline failure was
+reproduced first. The earlier run `34935167989` stopped on missing Clippy and remains
+failed evidence. The regular production workflow now also invokes the official
+handoff test with an explicit passed-marker requirement using its existing SDK cache.
+
+**Preserve N1; do not reimplement it or merge the archived branch.** The earlier
+targeted handoff run was not full acceptance; full application acceptance is now run
+`34982164071` at `c912fcad`.
+
+## Evidence boundary
+
+The integrated task retains its initial local report: repository validation, source/SDK
+spike tests, frontend check/build, core tests and Clippy. Its official-SDK wrapper was
+skipped on that host and desktop packaging was unavailable. Those results are not final
+supported-target acceptance. Repository quality run `34928075865` at `157b6d1` is a
+repository-validation result, not a Windows/macOS production matrix.
+
+Historical closures and exact run/job/artifact details remain in the archived task
+briefs and the byte-preserved [pre-follow-up status snapshot](CURRENT_PRE_FOLLOW_UP_2026_09_15.md)
+and [handover snapshot](HANDOVER_PRE_FOLLOW_UP_2026_09_15.md). Statements in those snapshots
+are historical, not current instructions or proof of the corrective tree.
+
+| Historical checkpoint | Evidence entry point |
+| --- | --- |
+| Phase 0 source/SDK/runtime decisions | [ADR index](../adr/README.md) and [Phase 0 corrective record](../tasks/archive/2026-09-13-phase-0-corrective-review.md) |
+| Phase 1A scaffold, run 34792368716 | [Archived scaffold task](../tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
+| Phase 1B correction, run 34804861387 | [Archived transaction correction](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
+| Phase 1C lifecycle, run 34814995559 | [Archived lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
+| Phase 1C SDK/lifecycle correction, run 34832555392 | [Archived corrective task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
+| Phase 1C durability/races, run 34849801157 | [Archived durability task](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
+| Phase 1C single-instance, run 34906232240 | [Archived single-instance task](../tasks/archive/2026-09-14-phase-1c-single-instance.md) |
+| Original Phase 1D, run 34913182173 at 343e10f | [Archived supporting-authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
+
+## Amended plan, not implementation
+
+The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) now explicitly assigns
+1E.1's source/hierarchy/file-lifecycle/history prerequisites, 1E.2's functional Scene
+and minimum recovery UI, and 1E.3's preview/media/polish. 1F extends that source model
+with the full Source workspace. 1G has separate Branches, SDK/runtime and local-Git
+gates. 1H requires behavioral success and failure/recovery workflows on both targets.
+
+The [roadmap](../ROADMAP.md) bounds Phase 2 selected-route context, assigns provider/
+credential/proposal gates, splits Phase 3 release capabilities, preserves Phase 4/5
+unknown-state/optional-extension boundaries, and requires an actually private channel
+for private distribution. No later phase is approved by these planning edits.
 
 ## Next action
 
-Await explicit approval for Phase 1E. Do not begin it from this checkpoint.
-
-Phase 0 evidence and corrective closure remain authoritative historical records; the
-Phase 0 spike must not be promoted wholesale into the production application.
+Use PR #7's live state and [HANDOVER](HANDOVER.md) to verify the one permitted guarded
+integration and required post-merge CI. If already merged, do not replay it. Branch
+cleanup is complete and must not be repeated. Do not begin Phase 1E.

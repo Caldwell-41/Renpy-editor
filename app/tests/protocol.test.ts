@@ -30,6 +30,8 @@ test("frontend operation list contains only bounded Phase 1C and 1D operations",
     "project.removeRecent",
     "project.close",
     "project.current",
+    "project.status",
+    "project.flush",
     "sdk.discover",
     "sdk.browse",
     "sdk.install",
@@ -39,11 +41,12 @@ test("frontend operation list contains only bounded Phase 1C and 1D operations",
     "appearance.setDefault",
     "asset.chooseImport",
     "asset.import",
+    "asset.repairCompatibility",
     "variable.create",
     "variable.update",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
-  assert.equal(CORE_OPERATIONS.some((operation) => /status|diff|commit|reset|remote/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {
@@ -104,13 +107,16 @@ test("Phase 1D supporting surfaces and bounded operations are present", async ()
   for (const label of ["Characters", "Appearances", "Add Appearance", "Assets", "Variables", "Create Character", "Create Variable"]) {
     assert.equal(source.includes(label), true, label);
   }
-  for (const operation of ["authoring.list", "character.create", "asset.chooseImport", "asset.import", "appearance.setDefault", "variable.create"]) {
+  for (const operation of ["authoring.list", "project.status", "project.flush", "character.create", "asset.chooseImport", "asset.import", "appearance.setDefault", "variable.create"]) {
     assert.equal(source.includes(operation), true, operation);
   }
   for (const deferred of ["Run Game", "Beats", "Editor Preview", "Branches workspace"]) {
     assert.equal(source.includes(deferred), false, deferred);
   }
   assert.match(source, /fixed after creation/);
+  assert.equal(source.includes("window.prompt"), false);
+  assert.match(source, /addEventListener\("keydown"/);
+  assert.match(source, /inlineEditor/);
 });
 
 test("desktop manifest grants one local capability and only the host single-instance plugin", async () => {
