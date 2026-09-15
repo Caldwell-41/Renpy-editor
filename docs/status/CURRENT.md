@@ -2,7 +2,7 @@
 
 **Updated:** 2026-09-16<br>
 **Phase:** Phase 1A–1D corrective integration complete<br>
-**Main:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
+**Integration commit:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
 **Next milestone:** Phase 1E is unapproved and unstarted
 
 ## Current truth

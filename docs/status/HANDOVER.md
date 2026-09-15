@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-16<br>
 **Repository:** `Caldwell-41/Renpy-editor`<br>
-**Main:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
+**Integration commit:** `3487f7c9049c8f3bbae56edc8e36eff58c364b19`<br>
 **Checkpoint:** Phase 1A–1D corrective integration and post-merge gates complete
 
 ## Read first
