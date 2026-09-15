@@ -3112,9 +3112,11 @@ mod tests {
         // normal lifecycle assertion. A persisted partial is expected to require
         // recovery and must not poison the successful authoring fixture prematurely.
         let changed_selection = media.join("changed-after-selection.png");
-        fs::write(&changed_selection, png).unwrap();
+        let mut race_bytes = png.to_vec();
+        race_bytes.extend_from_slice(b"unique-race-probe");
+        fs::write(&changed_selection, &race_bytes).unwrap();
         let selected = service.authoring_select_import(&changed_selection).unwrap();
-        let mut changed = png.to_vec();
+        let mut changed = race_bytes;
         let changed_last = changed.len() - 1;
         changed[changed_last] ^= 1;
         fs::write(&changed_selection, changed).unwrap();
