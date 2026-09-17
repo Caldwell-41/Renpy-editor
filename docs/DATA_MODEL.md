@@ -65,11 +65,23 @@ orphaned compiled script.
 | Appearance variant | ID, character ID, attribute map, render mode, asset/render reference |
 | Variable | ID/name, supported type/default, definition range, reads/writes, persistence/category |
 
-Phase 1's visual Beat set is intentionally bounded to background/scene, show/hide
-character, change appearance, placement/transform reference, dialogue, narration,
-unconditional choice, jump, return/end, simple variable assignment, play/stop music,
-play sound, transition reference, and custom/unsupported source region. Later phases
-extend the same Beat/semantic model rather than replacing it.
+Phase 1E implements the bounded visual Beat set: background/scene, show/hide Character,
+change appearance, placement reference, dialogue, narration, arbitrary-list
+unconditional Choice, Jump, Return/End, typed simple variable assignment, play/stop
+music, play SFX, transition reference, and protected Custom Code. Supporting references
+use stable Character, Appearance, Asset, Variable, and Scene UUIDs rather than
+filenames. Later phases extend the same Beat/semantic model rather than replacing it.
+
+Choice, Jump, and Return/End are mutually exclusive terminal Beat forms. A newly
+created Scene starts with Return/End; adding a Choice or Jump at the natural end
+replaces that terminal range rather than leaving unreachable statements after it.
+Terminal Beats cannot be removed, converted to a non-terminal Beat, or reordered away
+from the end through the supported Scene surface.
+
+Every recognized Beat mapping records a stable UUID, exact source revision, verified
+byte range, exact range hash, and lexical context. The narrow mapper recognizes only
+the supported canonical form. Unsupported/custom bytes stay in sequence as protected
+regions; any operation that cannot prove source ownership or a safe boundary refuses.
 
 ## Characters and appearance
 
@@ -230,9 +242,12 @@ journal slots record per-mutation staged/commit/exchange/verification progress.
 Journal version 2 stores only relative evidence names; stage, accepted, and displaced
 bytes remain separate artifacts inside the anchored transaction recovery directory.
 `prepared` is safely abandonable only when evidence absence is proved, while a pre-
-mutation `rejected` record is terminal and does not poison later flush. See
-[TRANSACTIONS.md](TRANSACTIONS.md); source semantic operations and patches remain
-Phase 1E/1F work.
+mutation `rejected` record is terminal and does not poison later flush. Phase 1E adds
+source create/move/delete and minimal Beat patches to this envelope. Committed history
+stores the actual returned before/after revisions; an inverse is submitted only when
+the live revisions match the recorded boundary. History is session-local in Phase 1E
+and starts empty after reopen. See [TRANSACTIONS.md](TRANSACTIONS.md). The general
+Source workspace and arbitrary source reconciliation remain Phase 1F work.
 
 ## Project lifecycle metadata
 
@@ -249,17 +264,42 @@ rewriting of authoritative `.rpy` source. Deleting `.renpy-editor/` must not sto
 game from running, but Phase 1 does not reconstruct missing metadata as a substitute
 for the deferred arbitrary-project importer.
 
-Phase 1C implements schema version 1 for `project.json` and `source-map.json`.
-`project.json` contains the stable project ID, distinct title/folder identity, exact
-SDK adapter/version, even bounded resolution, lifecycle capability, one Chapter and
-Scene record, the Scene's globally unique technical label and source path, and the
-last-open Chapter/Scene selection. IDs are UUIDs and paths are relative forward-slash
-paths. Unknown fields are preserved on schema round trips. Machine-local absolute
+Phase 1C introduced schema version 1 for `project.json` and `source-map.json` with one
+Chapter and one Scene. Phase 1E transactionally migrates valid projects to version 2,
+preserving project/Chapter/Scene UUIDs and unknown fields. Version 2 stores ordered
+Chapters, ordered Scenes with exactly one Chapter owner, globally unique primary
+technical labels, unique safe relative source paths, explicit entry Scene, and
+last-open Chapter/Scene selection. Reopen validates every relationship and source
+mapping. Move/delete selects the nearest deterministic surviving Scene; at least one
+Chapter and one Scene remain, and the entry Scene cannot be deleted. Display rename
+changes neither labels, source paths, nor UUIDs.
+
+Scene source-map entries contain the exact file revision and ordered Beat mappings.
+Migration is a recoverable source-map/project-metadata transaction; corrupt or missing
+metadata does not authorize reconstruction from `.rpy` files. IDs are UUIDs and paths
+are relative forward-slash paths. Unknown fields are preserved on schema round trips.
+Machine-local absolute
 paths exist only in the application-local versioned Recent Projects store. That store
 is one atomically replaced JSON object: an interrupted pre-commit update retains the
 previous complete schema version, while a committed replacement is verified before
 the lifecycle operation reports success. Stale sibling temporaries are not data-model
 inputs and are never broadly deleted during an unrelated update.
+
+## Phase 1E media presentation
+
+Asset import support is broader than preview presentation. `media.present` accepts
+only a stable Asset UUID and a purpose (`thumbnail`, `imagePreview`, or
+`audioAudition`); paths are resolved from current validated metadata in core. The
+snapshot must match the recorded regular-file identity, byte count, and SHA-256 through
+an anchored read. Presentation is capped at 16 MiB. PNG/JPEG dimensions must be between
+1 and 8192 pixels on each axis; OGG/WAV/FLAC/MP3 are accepted for explicit audio
+audition. WebP may remain a valid imported asset but is not rendered by this passive
+Phase 1E presentation boundary.
+
+The response contains passive bytes, MIME type, content hash/cache key, and image
+dimensions where applicable. Renderer caches are memory-only and content keyed; stale
+view/session generations are cancelled, object URLs are revoked on invalidation, and
+all media is disposed when the active project/session changes.
 
 ## Corrective Phase 1D value and asset contracts
 

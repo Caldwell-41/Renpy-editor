@@ -1,4 +1,13 @@
 import { requestCore as desktopRequestCore } from "./bridge.ts";
+import {
+  focusSceneDraft,
+  hasSceneDraft,
+  renderRecoverySurface,
+  renderSceneAuthoring,
+  type RecoveryReport,
+  type SceneCommand,
+  type SceneWorkspace,
+} from "./scene-ui.ts";
 
 interface ParentChoice { id: string; displayPath: string; cancelled?: boolean }
 interface DestinationPreview { valid: boolean; displayPath: string; message: string }
@@ -27,13 +36,14 @@ let operationGeneration = 0;
 let operationGenerations = new WeakMap<object, number>();
 const operationScopes = {
   projectOpen: {}, projectClose: {}, projectCreate: {}, persistence: {},
-  authoringLoad: {}, wizardDestination: {}, wizardSdk: {},
+  authoringLoad: {}, sceneLoad: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
 };
 const activeAuthoringOperations = new Map<string, number>();
 const activeFlushOperations = new Map<string, number>();
 let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
+let disposeSceneView: (() => void) | undefined;
 
 declare global {
   interface Window {
@@ -57,6 +67,8 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  disposeSceneView?.();
+  disposeSceneView = undefined;
   viewGeneration += 1;
   currentProject = project;
   return viewGeneration;
@@ -134,7 +146,7 @@ async function projectValue<T>(project: OpenProject, operation: Parameters<typeo
 function shell(content: HTMLElement): void {
   const main = document.createElement("main"); main.className = "app-shell";
   const header = document.createElement("header"); header.className = "app-header";
-  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { const project = currentProject; if (!project) { await showWelcome(); return; } const token = beginCompletion(project, operationScopes.projectClose); try { await projectValue(project, "project.close"); if (completionIsCurrent(token)) await showWelcome(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be closed"), "error"); } })());
+  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { if (!allowSceneNavigation()) return; const project = currentProject; if (!project) { await showWelcome(); return; } const token = beginCompletion(project, operationScopes.projectClose); try { await projectValue(project, "project.close"); if (completionIsCurrent(token)) await showWelcome(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be closed"), "error"); } })());
   const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
   header.append(brand, status); main.append(header, content); root.replaceChildren(main);
 }
@@ -255,16 +267,13 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story"): v
     const labels: Record<ProjectSurface, string> = { story: "Story", characters: "Characters", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
     if (surface === name) nav.ariaCurrent = "page";
-    nav.addEventListener("click", () => showProject(project, name)); sidebar.append(nav);
+    nav.addEventListener("click", () => { if (surface === name) { if (name !== "story") showProject(project, name); return; } if (allowSceneNavigation()) showProject(project, name); }); sidebar.append(nav);
   });
-  if (surface === "story") {
-    const chapter = button(project.chapterName, "tree-item chapter"); chapter.ariaExpanded = "true";
-    const scene = button(project.sceneName, "tree-item scene"); sidebar.append(chapter, scene);
-  }
-  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { const token = beginCompletion(project, operationScopes.projectClose); try { await projectValue(project, "project.close"); if (completionIsCurrent(token)) await showWelcome(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be closed"), "error"); } }); sidebar.append(close);
-  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "empty-workspace" : "supporting-workspace";
+  const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story") sidebar.append(tree);
+  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation()) return; const token = beginCompletion(project, operationScopes.projectClose); try { await projectValue(project, "project.close"); if (completionIsCurrent(token)) await showWelcome(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be closed"), "error"); } }); sidebar.append(close);
+  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : "supporting-workspace";
   layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
-  if (surface === "story") { renderStoryReady(workspace, project); void refreshPersistenceStatus(project, generation); }
+  if (surface === "story") void renderStorySurface(workspace, tree, project, generation);
   else void renderAuthoringSurface(workspace, project, surface, generation);
 }
 
@@ -280,11 +289,50 @@ async function refreshPersistenceStatus(project: OpenProject, generation: number
   }
 }
 
-function renderStoryReady(workspace: HTMLElement, project: OpenProject): void {
-  const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = `${project.chapterName} · ${project.sceneName}`;
-  const title = document.createElement("h1"); title.textContent = "Project ready";
-  const copy = document.createElement("p"); copy.className = "panel-copy"; copy.textContent = `Ren'Py ${project.sdkVersion} · ${project.resolution.width} × ${project.resolution.height}. Scene authoring begins in Phase 1E.`;
-  workspace.append(eyebrow, title, copy);
+async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number): Promise<void> {
+  const token = beginCompletion(project, operationScopes.sceneLoad);
+  try {
+    const persistence = await projectValue<PersistenceStatus>(project, "project.status");
+    if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+    if (persistence === "recoveryRequired") {
+      const report = await projectValue<RecoveryReport>(project, "scene.recovery");
+      if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+      tree.replaceChildren();
+      renderRecoverySurface(workspace, report, {
+        status: setStatus,
+        resolve: async (transactionId, resolution) => {
+          const recoveryToken = beginAuthoringCompletion(project, operationScopes.recovery);
+          if (!recoveryToken) throw new Error("Another persistence operation is still in progress.");
+          try { return await projectValue<RecoveryReport>(project, "scene.resolveRecovery", { transactionId, resolution }); }
+          finally { finishAuthoringCompletion(recoveryToken); }
+        },
+        completed: () => showProject(project, "story"),
+      });
+      setStatus("Recovery required — writes are disabled", "error");
+      return;
+    }
+    const model = await projectValue<SceneWorkspace>(project, "scene.list");
+    if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+    disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
+      status: setStatus,
+      resolution: project.resolution,
+      present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
+      apply: async (command: SceneCommand, expected) => {
+        const operationToken = beginAuthoringCompletion(project, command);
+        if (!operationToken) throw new Error("Another persistence operation is still in progress.");
+        try {
+          return await projectValue<SceneWorkspace>(project, "scene.apply", {
+            expectedProjectRevision: expected.projectRevision,
+            expectedSourceMapRevision: expected.sourceMapRevision,
+            command,
+          });
+        } finally { finishAuthoringCompletion(operationToken); }
+      },
+    });
+    setStatus(persistence === "conflict" ? "Conflict — source changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
+  } catch (error) {
+    if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
+  }
 }
 
 async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story">, generation: number): Promise<void> {
@@ -358,6 +406,13 @@ function hasUnsubmittedInput(): boolean {
   return root.querySelector('[data-unsubmitted="true"]') !== null;
 }
 
+function allowSceneNavigation(): boolean {
+  if (!hasSceneDraft(root)) return true;
+  setStatus("Commit or cancel the Scene editor before navigating.", "error");
+  focusSceneDraft(root);
+  return false;
+}
+
 function installListeners(): void {
   if (listenersInstalled) return;
   listenersInstalled = true;
@@ -410,6 +465,8 @@ export function startApplication(requester: typeof desktopRequestCore = desktopR
   activeAuthoringOperations.clear();
   activeFlushOperations.clear();
   currentProject = undefined;
+  disposeSceneView?.();
+  disposeSceneView = undefined;
   resetWizard();
   installListeners();
   void showWelcome();

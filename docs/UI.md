@@ -23,8 +23,8 @@ accent, medium density, strong typography, subtle separation between regions, an
 little decorative chrome. Narrative content, the game preview, and the selected Beat
 must dominate attention; branding and shell furniture recede once a project is open.
 
-Phase 1A establishes the design-system foundation. Phase 1E is the first full visual
-polish pass when the real Scene authoring interactions exist. Source, Branches,
+Phase 1A establishes the design-system foundation. Phase 1E implements the first full
+visual polish pass around the real Scene authoring interactions. Source, Branches,
 Diagnostics, Git, and later workspaces extend the same system rather than introducing
 independent styling.
 
@@ -302,6 +302,11 @@ Hovering between safe beats exposes a subtle insertion affordance; a permanent
 Normal supported beats have drag handles plus keyboard-accessible Move Up/Move Down.
 Moving across an opaque custom-code boundary is refused unless safety can be proven.
 
+Choice, Jump, and Return/end are terminal alternatives. Adding Choice or Jump to a
+Scene that ends in Return replaces that terminal Beat; it does not place flow after an
+unconditional transfer and does not leave an unreachable Return behind. The terminal
+Beat stays last and is not removable or reorderable through Scene authoring.
+
 ### Dialogue workflow
 
 Dialogue is the highest-frequency action and must be efficient:
@@ -330,7 +335,8 @@ state, and selected dialogue/menu where known. It does not attempt arbitrary
 branch-global state reconstruction.
 
 If Python, unsupported source, or runtime-only behavior makes the state uncertain, the
-preview retains known safe state and displays an explicit `Partial preview` /
+preview preserves provenance for facts it can still prove, clears affected values that
+are no longer proven current, and displays an explicit `Partial preview` /
 `Runtime-dependent state required` indicator rather than guessing.
 
 Selecting a visible Character in the preview must distinguish current state from the
@@ -356,6 +362,12 @@ Dissolve, and Fade. Initial audio controls cover play/stop music and play SFX pl
 explicit audition. These are narrow Phase 1 UIs over extensible transform, transition,
 and audio references intended for later Timeline/advanced staging work.
 
+Phase 1E thumbnails and preview images are resolved by stable Asset ID through the
+current project session. The renderer never receives a project path or `file://` URL.
+It keeps only content-keyed memory/object-URL state, cancels obsolete view generations,
+and revokes every URL on invalidation or project/session switch. Selecting an audio
+Beat never plays it; only the labelled audition action requests and starts audio.
+
 ### Choices
 
 Choice is visually first-class in Beats. Each option has text and a destination Scene.
@@ -377,9 +389,10 @@ misrepresented visually.
 ### Custom/unsupported source
 
 Unsupported source appears in sequence as a protected Custom Code beat with a reason/
-warning and `View in Source`. It can be selected and inspected, but Phase 1 does not
-freely drag/reorder it or allow safe-looking operations to cross its boundary unless
-the source transaction layer can prove the operation.
+warning. It can be selected and inspected, but Phase 1 does not freely drag/reorder it
+or allow safe-looking operations to cross its boundary unless the source transaction
+layer can prove the operation. `View in Source` is labelled as deferred until the 1F
+Source workspace exists; Phase 1E does not present it as a working navigation action.
 
 ### New Scene state
 
@@ -544,3 +557,16 @@ Create/edit boolean input is explicit and integer text is validated losslessly b
 IPC rather than coerced through JavaScript `Number`. Character, appearance, and
 variable editing use labelled in-application editors that preserve their inputs after
 failure; browser prompts are not part of the supporting authoring flow.
+
+Phase 1E applies the same ordering to Scene editors. A dirty inline Beat buffer has
+explicit Commit/Cancel actions, blocks navigation that would discard it, and makes
+Flush say that editor input remains unsubmitted. Ctrl/Cmd+Enter on Dialogue submits one
+natural semantic operation and creates the next Dialogue; ordinary Enter remains a
+newline. Failed validation retains text and restores focus. Scene switching, workspace
+switching, and close cannot silently convert draft text into persisted work.
+
+When transaction state blocks writing, the recovery surface remains available without
+executing the project. It lists affected paths and retained evidence, offers only
+core-proven resolutions, requires confirmation for destructive resolution, and
+revalidates the project before returning to Scene authoring. Ambiguous recovery stays
+blocked; acknowledging a warning or deleting a journal is not an available resolution.

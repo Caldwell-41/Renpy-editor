@@ -90,7 +90,7 @@ jobs:
             --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" \
             https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
           mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
-      - name: Exercise Phase 1C lifecycle and Phase 1D authoring target gate
+      - name: Exercise Phase 1C lifecycle through Phase 1E Scene target gate
         shell: bash
         env:
           LOOMLIGHT_PHASE1C_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
@@ -107,6 +107,8 @@ jobs:
           grep 'phase-1d-exact-ipc-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-import-authority-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-corrective-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1e-scene-authoring-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1e-media-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Exercise SDK download handoff and verified managed reuse
         shell: bash
         env:
@@ -173,6 +175,7 @@ jobs:
           grep '"webviewRestrictionsPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"supportingAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sceneAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
             echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2

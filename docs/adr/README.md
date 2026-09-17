@@ -12,5 +12,6 @@ supersede them with a later ADR rather than editing history.
 | [0003](0003-tauri-desktop-runtime.md) | Accepted | Tauri 2 desktop runtime with a narrow Rust privileged core |
 | [0004](0004-journalled-platform-file-transactions.md) | Accepted | Journalled platform replacement with retained competing revisions |
 | [0005](0005-staged-project-creation.md) | Accepted | Version-pinned starter generation with sibling staging and no-replace promotion |
+| [0006](0006-scene-authoring-source-and-media-boundary.md) | Accepted | Exact-range Scene operations, schema v2, revision-bound history, and asset-ID-only media presentation |
 
 Future changes to an accepted decision require a superseding ADR.

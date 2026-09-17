@@ -85,6 +85,7 @@ pub struct FileMutation {
 pub enum MutationKind {
     ReplaceExisting,
     CreateNew,
+    DeleteExisting,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -191,6 +192,23 @@ pub struct RecoveryItem {
     pub state: JournalState,
     pub code: Option<ErrorCode>,
     pub mutations: Vec<RecoveryMutationState>,
+    #[serde(default)]
+    pub affected: Vec<RecoveryEvidence>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecoveryEvidence {
+    pub path: String,
+    pub accepted_retained: bool,
+    pub displaced_retained: bool,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum RecoveryResolution {
+    KeepCurrent,
+    AcceptLoomlight,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -372,6 +390,9 @@ impl TransactionService {
                             || !item.expected_bytes.is_empty()))
                     || (item.kind == MutationKind::ReplaceExisting
                         && sha256(&item.expected_bytes) != item.base.sha256)
+                    || (item.kind == MutationKind::DeleteExisting
+                        && (!item.proposed.is_empty()
+                            || sha256(&item.expected_bytes) != item.base.sha256))
             })
         {
             return rejected(ErrorCode::InvalidProposal);
@@ -430,7 +451,7 @@ impl TransactionService {
             let target = match resolve_target(
                 &approved.anchor,
                 &mutation.path,
-                mutation.kind == MutationKind::ReplaceExisting,
+                mutation.kind != MutationKind::CreateNew,
             ) {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
@@ -557,7 +578,7 @@ impl TransactionService {
             let target = match resolve_target(
                 &approved.anchor,
                 &item.path,
-                item.kind == MutationKind::ReplaceExisting,
+                item.kind != MutationKind::CreateNew,
             ) {
                 Ok(value) if value.parent_identity == item.artifacts.parent_identity => value,
                 _ => return fail_journal(&store, &mut journal, ErrorCode::ParentIdentityChanged),
@@ -596,20 +617,24 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
-            let committed = if item.kind == MutationKind::CreateNew {
-                store.directory().rename_no_replace_to(
+            let committed = match item.kind {
+                MutationKind::CreateNew => store.directory().rename_no_replace_to(
                     artifact_name(&item.stage),
                     &target.parent_anchor,
                     &target.name,
-                )
-            } else {
-                exchange_preserving_target(
+                ),
+                MutationKind::ReplaceExisting => exchange_preserving_target(
                     &target.parent_anchor,
                     &target.name,
                     store.directory(),
                     artifact_name(&item.stage),
                     artifact_name(&item.backup),
-                )
+                ),
+                MutationKind::DeleteExisting => target.parent_anchor.rename_no_replace_to(
+                    &target.name,
+                    store.directory(),
+                    artifact_name(&item.backup),
+                ),
             };
             if committed.is_err() {
                 let code = if item.kind == MutationKind::CreateNew
@@ -634,19 +659,30 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
-            let installed = target
-                .parent_anchor
-                .open_file(&target.name)
-                .and_then(read_revision_file);
+            let installed = if item.kind == MutationKind::DeleteExisting {
+                target
+                    .parent_anchor
+                    .entry_absent(&target.name)
+                    .map(|absent| absent.then_some(Revision::expected_absence()))
+                    .and_then(|value| value.ok_or(ErrorCode::RecoveryRequired))
+            } else {
+                target
+                    .parent_anchor
+                    .open_file(&target.name)
+                    .and_then(read_revision_file)
+            };
             let backup_ok = item.kind == MutationKind::CreateNew
                 || store
                     .open_artifact(&item.backup)
                     .and_then(read_revision_file)
                     .as_ref()
                     == Ok(&item.base);
-            if !backup_ok
-                || installed.as_ref().map(|value| &value.sha256) != Ok(&item.proposed_sha256)
-            {
+            let installed_matches = if item.kind == MutationKind::DeleteExisting {
+                installed.as_ref() == Ok(&Revision::expected_absence())
+            } else {
+                installed.as_ref().map(|value| &value.sha256) == Ok(&item.proposed_sha256)
+            };
+            if !backup_ok || !installed_matches {
                 let _ = store.persist(&mut journal, JournalState::Conflict { mutation: index });
                 return conflict(&txid);
             }
@@ -678,20 +714,52 @@ impl TransactionService {
         }
         let mut revisions = Vec::new();
         for item in &journal.mutations {
-            let target = match resolve_target(&approved.anchor, &item.path, true) {
+            let target = match resolve_target(
+                &approved.anchor,
+                &item.path,
+                item.kind != MutationKind::DeleteExisting,
+            ) {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
-            let file = match target.parent_anchor.open_file_for_flush(&target.name) {
-                Ok(value) => value,
-                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
-            };
-            if platform::flush_open_file(&file).is_err() || target.parent_anchor.flush().is_err() {
-                return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
-            }
-            match read_revision_file(file) {
-                Ok(value) if value.sha256 == item.proposed_sha256 => revisions.push(value),
-                _ => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+            if item.kind == MutationKind::DeleteExisting {
+                if target.parent_anchor.entry_absent(&target.name) != Ok(true)
+                    || target.parent_anchor.flush().is_err()
+                {
+                    return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                }
+                let backup = match store
+                    .open_artifact(&item.backup)
+                    .and_then(read_revision_file)
+                {
+                    Ok(value) if value == item.base => value,
+                    _ => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+                };
+                if store
+                    .open_artifact_for_flush(&item.backup)
+                    .and_then(|file| platform::flush_open_file(&file))
+                    .is_err()
+                {
+                    return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                }
+                let _ = backup;
+                revisions.push(Revision::expected_absence());
+            } else {
+                let file = match target.parent_anchor.open_file_for_flush(&target.name) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired)
+                    }
+                };
+                if platform::flush_open_file(&file).is_err()
+                    || target.parent_anchor.flush().is_err()
+                {
+                    return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                }
+                match read_revision_file(file) {
+                    Ok(value) if value.sha256 == item.proposed_sha256 => revisions.push(value),
+                    _ => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+                }
             }
         }
         if store.persist(&mut journal, JournalState::Durable).is_err() {
@@ -799,6 +867,39 @@ impl TransactionService {
         Ok(files)
     }
 
+    /// Creates only the missing components of a validated project-relative directory
+    /// while retaining the approved root chain. Empty directories are not runnable
+    /// source and may remain after a later rejected file transaction.
+    pub(crate) fn ensure_directory(
+        &self,
+        project: &ProjectId,
+        directory: &str,
+    ) -> Result<(), PublicDiagnostic> {
+        let _serial = self
+            .serial
+            .lock()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        if blocking_recovery_code(&approved).is_some() {
+            return Err(PublicDiagnostic::new(ErrorCode::RecoveryRequired, None));
+        }
+        let relative =
+            RelativePath::new(directory).map_err(|code| PublicDiagnostic::new(code, None))?;
+        let mut anchor = approved.anchor.as_ref().clone();
+        for component in relative.as_path().components() {
+            let std::path::Component::Normal(name) = component else {
+                return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
+            };
+            anchor = anchor
+                .open_child(name, true)
+                .map_err(|code| PublicDiagnostic::new(code, None))?;
+        }
+        anchor
+            .validate_chain()
+            .map_err(|code| PublicDiagnostic::new(code, None))
+    }
+
     pub fn commit_with_injector<I: FaultInjector>(
         &self,
         project: &ProjectId,
@@ -827,6 +928,7 @@ impl TransactionService {
                 || !valid_hash(&m.base.sha256)
                 || (m.kind == MutationKind::CreateNew
                     && (m.base != Revision::expected_absence() || !m.expected_bytes.is_empty()))
+                || (m.kind == MutationKind::DeleteExisting && !m.proposed.is_empty())
         }) {
             return rejected(ErrorCode::InvalidProposal);
         }
@@ -841,7 +943,7 @@ impl TransactionService {
         let mut journal =
             Journal::new(txid.clone(), proposal.intent, PlatformCapability::current());
         for (index, mutation) in proposal.mutations.iter().enumerate() {
-            if mutation.kind == MutationKind::ReplaceExisting
+            if mutation.kind != MutationKind::CreateNew
                 && sha256(&mutation.expected_bytes) != mutation.base.sha256
             {
                 return fail_journal(&store, &mut journal, ErrorCode::ExpectedBytesChanged);
@@ -849,7 +951,7 @@ impl TransactionService {
             let resolved = match resolve_target(
                 &approved.anchor,
                 &mutation.path,
-                mutation.kind == MutationKind::ReplaceExisting,
+                mutation.kind != MutationKind::CreateNew,
             ) {
                 Ok(value) => value,
                 Err(code) => return fail_journal(&store, &mut journal, code),
@@ -995,20 +1097,24 @@ impl TransactionService {
             {
                 return recovery(&txid);
             }
-            let namespace_result = if mutation.kind == MutationKind::CreateNew {
-                store.directory().rename_no_replace_to(
+            let namespace_result = match mutation.kind {
+                MutationKind::CreateNew => store.directory().rename_no_replace_to(
                     artifact_name(&journal.mutations[index].stage),
                     &resolved.parent_anchor,
                     &resolved.name,
-                )
-            } else {
-                exchange_preserving_target(
+                ),
+                MutationKind::ReplaceExisting => exchange_preserving_target(
                     &resolved.parent_anchor,
                     &resolved.name,
                     store.directory(),
                     artifact_name(&journal.mutations[index].stage),
                     artifact_name(&journal.mutations[index].backup),
-                )
+                ),
+                MutationKind::DeleteExisting => resolved.parent_anchor.rename_no_replace_to(
+                    &resolved.name,
+                    store.directory(),
+                    artifact_name(&journal.mutations[index].backup),
+                ),
             };
             if namespace_result.is_err() {
                 let code = if mutation.kind == MutationKind::CreateNew
@@ -1037,27 +1143,45 @@ impl TransactionService {
             if self.validate_root(&approved).is_err() {
                 return fail_journal(&store, &mut journal, ErrorCode::RootIdentityChanged);
             }
-            match resolve_target(&approved.anchor, &mutation.path, true) {
+            match resolve_target(
+                &approved.anchor,
+                &mutation.path,
+                mutation.kind != MutationKind::DeleteExisting,
+            ) {
                 Ok(target)
                     if target.parent_identity
                         == journal.mutations[index].artifacts.parent_identity => {}
                 _ => return fail_journal(&store, &mut journal, ErrorCode::ParentIdentityChanged),
             }
 
-            let installed = match resolved
-                .parent_anchor
-                .open_file(&resolved.name)
-                .and_then(read_revision_file)
-            {
-                Ok(value) => value,
-                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+            let installed = if mutation.kind == MutationKind::DeleteExisting {
+                match resolved.parent_anchor.entry_absent(&resolved.name) {
+                    Ok(true) => Revision::expected_absence(),
+                    _ => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+                }
+            } else {
+                match resolved
+                    .parent_anchor
+                    .open_file(&resolved.name)
+                    .and_then(read_revision_file)
+                {
+                    Ok(value) => value,
+                    Err(_) => {
+                        return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired)
+                    }
+                }
             };
             let displaced_matches = mutation.kind == MutationKind::CreateNew
                 || store
                     .open_artifact(&journal.mutations[index].backup)
                     .and_then(read_revision_file)
                     .is_ok_and(|value| value == mutation.base);
-            if !displaced_matches || installed.sha256 != journal.mutations[index].proposed_sha256 {
+            let installed_matches = if mutation.kind == MutationKind::DeleteExisting {
+                installed == Revision::expected_absence()
+            } else {
+                installed.sha256 == journal.mutations[index].proposed_sha256
+            };
+            if !displaced_matches || !installed_matches {
                 let _ = store.persist(&mut journal, JournalState::Conflict { mutation: index });
                 return conflict(&txid);
             }
@@ -1090,24 +1214,46 @@ impl TransactionService {
         }
         let mut revisions = Vec::new();
         for item in &journal.mutations {
-            let resolved = match resolve_target(&approved.anchor, &item.path, true) {
+            let resolved = match resolve_target(
+                &approved.anchor,
+                &item.path,
+                item.kind != MutationKind::DeleteExisting,
+            ) {
                 Ok(value) => value,
                 Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
             };
-            let target_file = match resolved.parent_anchor.open_file_for_flush(&resolved.name) {
-                Ok(value) => value,
-                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
+            let revision = if item.kind == MutationKind::DeleteExisting {
+                if resolved.parent_anchor.entry_absent(&resolved.name) != Ok(true)
+                    || resolved.parent_anchor.flush().is_err()
+                    || store
+                        .open_artifact_for_flush(&item.backup)
+                        .and_then(|file| platform::flush_open_file(&file))
+                        .is_err()
+                {
+                    return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                }
+                Revision::expected_absence()
+            } else {
+                let target_file = match resolved.parent_anchor.open_file_for_flush(&resolved.name) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired)
+                    }
+                };
+                if platform::flush_open_file(&target_file).is_err()
+                    || resolved.parent_anchor.flush().is_err()
+                {
+                    return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
+                }
+                match read_revision_file(target_file) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired)
+                    }
+                }
             };
-            if platform::flush_open_file(&target_file).is_err()
-                || resolved.parent_anchor.flush().is_err()
+            if item.kind != MutationKind::DeleteExisting && revision.sha256 != item.proposed_sha256
             {
-                return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired);
-            }
-            let revision = match read_revision_file(target_file) {
-                Ok(value) => value,
-                Err(_) => return fail_journal(&store, &mut journal, ErrorCode::RecoveryRequired),
-            };
-            if revision.sha256 != item.proposed_sha256 {
                 let _ = store.persist(
                     &mut journal,
                     JournalState::Conflict {
@@ -1177,6 +1323,104 @@ impl TransactionService {
                 ErrorCode::RecoveryRequired,
                 Some(transaction_id.to_owned()),
             ));
+        }
+        store
+            .persist(&mut journal, JournalState::Cleaned)
+            .and_then(|_| store.cleanup_partial_slots())
+            .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))
+    }
+
+    /// Resolves only states whose byte ownership is completely proven. It never
+    /// chooses by timestamp and never removes accepted or displaced evidence.
+    pub fn resolve_recovery(
+        &self,
+        project: &ProjectId,
+        transaction_id: &str,
+        resolution: RecoveryResolution,
+    ) -> Result<(), PublicDiagnostic> {
+        let _serial = self
+            .serial
+            .lock()
+            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        if !valid_internal_id(transaction_id, "tx") {
+            return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
+        }
+        let approved = self.approved(project)?;
+        self.validate_root(&approved)?;
+        let store = JournalStore::open(&approved.anchor, transaction_id)
+            .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
+        let mut journal = store
+            .load()
+            .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
+        if journal.transaction_id != transaction_id {
+            return Err(PublicDiagnostic::new(
+                ErrorCode::RecoveryRequired,
+                Some(transaction_id.to_owned()),
+            ));
+        }
+        let states = store
+            .mutation_states(&approved.anchor, &journal)
+            .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
+        let supported = match resolution {
+            RecoveryResolution::KeepCurrent => states.iter().all(|state| {
+                matches!(
+                    state,
+                    RecoveryMutationState::PreparedWithoutStage
+                        | RecoveryMutationState::StagedWithBaseIntact
+                )
+            }),
+            RecoveryResolution::AcceptLoomlight => states.iter().all(|state| {
+                matches!(
+                    state,
+                    RecoveryMutationState::ExchangeCompleteExpected
+                        | RecoveryMutationState::Durable
+                )
+            }),
+        };
+        if states.is_empty() || !supported {
+            return Err(PublicDiagnostic::new(
+                ErrorCode::RecoveryRequired,
+                Some(transaction_id.to_owned()),
+            ));
+        }
+        if resolution == RecoveryResolution::AcceptLoomlight {
+            for mutation in &journal.mutations {
+                let target = resolve_target(
+                    &approved.anchor,
+                    &mutation.path,
+                    mutation.kind != MutationKind::DeleteExisting,
+                )
+                .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
+                if mutation.kind == MutationKind::DeleteExisting {
+                    if target.parent_anchor.entry_absent(&target.name) != Ok(true) {
+                        return Err(PublicDiagnostic::new(
+                            ErrorCode::RecoveryRequired,
+                            Some(transaction_id.to_owned()),
+                        ));
+                    }
+                } else {
+                    let revision = target
+                        .parent_anchor
+                        .open_file_for_flush(&target.name)
+                        .and_then(|file| {
+                            platform::flush_open_file(&file)?;
+                            read_revision_file(file)
+                        })
+                        .map_err(|code| {
+                            PublicDiagnostic::new(code, Some(transaction_id.to_owned()))
+                        })?;
+                    if revision.sha256 != mutation.proposed_sha256 {
+                        return Err(PublicDiagnostic::new(
+                            ErrorCode::RecoveryRequired,
+                            Some(transaction_id.to_owned()),
+                        ));
+                    }
+                }
+                target
+                    .parent_anchor
+                    .flush()
+                    .map_err(|code| PublicDiagnostic::new(code, Some(transaction_id.to_owned())))?;
+            }
         }
         store
             .persist(&mut journal, JournalState::Cleaned)
@@ -1339,6 +1583,7 @@ fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {
             state: JournalState::RecoveryRequired,
             code: Some(code),
             mutations: Vec::new(),
+            affected: Vec::new(),
         }],
     }
 }

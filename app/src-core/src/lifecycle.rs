@@ -4,6 +4,7 @@ use crate::{
         CreateVariableRequest, ImportAssetRequest, ImportChoice, PersistenceStatus,
         SetDefaultAppearanceRequest, UpdateCharacterRequest, UpdateVariableRequest,
     },
+    media::{MediaError, MediaPresentation, MediaRequest},
     metadata::{
         ChapterMetadata, ProjectMetadata, Resolution, SceneMetadata, SdkIdentity, Selection,
         SourceMapMetadata, PROJECT_SCHEMA_VERSION, SOURCE_MAP_SCHEMA_VERSION,
@@ -12,6 +13,7 @@ use crate::{
         discover_managed_sdk, install_supported_sdk, RenpyAdapter, RenpyError, SdkInfo,
         ValidatedSdk, SUPPORTED_VERSION,
     },
+    scene::{RecoveryResolveRequest, SceneCommandRequest, SceneError, SceneWorkspace},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Map;
@@ -121,6 +123,8 @@ pub enum LifecycleError {
     RecoveryRequired,
     StaleSession,
     Authoring(AuthoringError),
+    Scene(SceneError),
+    Media(MediaError),
     Io,
 }
 
@@ -417,6 +421,20 @@ impl LifecycleService {
                 AuthoringError::RecoveryRequired => LifecycleError::RecoveryRequired,
                 other => LifecycleError::Authoring(other),
             })?;
+        let persistence = self.authoring.status(&authority);
+        if persistence != PersistenceStatus::Saved && self.current.is_some() {
+            self.authoring.unregister_project(&authority);
+            return Err(LifecycleError::RecoveryRequired);
+        }
+        if persistence == PersistenceStatus::Saved {
+            if let Err(error) = self
+                .authoring
+                .ensure_phase_1e_metadata(&authority, &inspected.project.project_id)
+            {
+                self.authoring.unregister_project(&authority);
+                return Err(LifecycleError::Scene(error));
+            }
+        }
         inspected.project.session_id = uuid::Uuid::new_v4().to_string();
         if let Err(error) = self.update_recent(&inspected.root, &inspected.project) {
             self.authoring.unregister_project(&authority);
@@ -548,6 +566,48 @@ impl LifecycleService {
         self.authoring
             .repair_asset_compatibility(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_workspace(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn scene_apply(
+        &self,
+        request: SceneCommandRequest,
+    ) -> Result<SceneWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_apply(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn scene_recovery(&self) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        Ok(self.authoring.scene_recovery(&authority))
+    }
+
+    pub fn scene_resolve_recovery(
+        &self,
+        request: RecoveryResolveRequest,
+    ) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_resolve_recovery(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn media_present(
+        &self,
+        request: MediaRequest,
+    ) -> Result<MediaPresentation, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .media_present(&authority, &project_id, request)
+            .map_err(LifecycleError::Media)
     }
 
     pub fn list_recent(&self) -> Vec<RecentProject> {
@@ -854,6 +914,7 @@ fn build_overlay_model(
             source_path: "game/chapters/chapter_01/scene_001.rpy".into(),
             extra: Map::new(),
         }],
+        entry_scene_id: Some(scene_id.clone()),
         last_open: Selection {
             chapter_id,
             scene_id,
@@ -869,6 +930,7 @@ fn build_overlay_model(
             "game/definitions/variables.rpy".into(),
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
+        scene_mappings: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)
@@ -1146,16 +1208,26 @@ where
         root.file_name().and_then(|name| name.to_str()),
     )
     .map_err(|_| LifecycleError::InvalidMetadata)?;
-    let chapter = &metadata.chapters[0];
-    let scene = &metadata.scenes[0];
+    let scene = metadata
+        .scenes
+        .iter()
+        .find(|scene| scene.id == metadata.last_open.scene_id)
+        .ok_or(LifecycleError::InvalidMetadata)?;
+    let chapter = metadata
+        .chapters
+        .iter()
+        .find(|chapter| chapter.id == scene.chapter_id)
+        .ok_or(LifecycleError::InvalidMetadata)?;
     for required in [
         "game/script.rpy",
         "game/options.rpy",
         "game/gui.rpy",
         "game/screens.rpy",
-        scene.source_path.as_str(),
     ] {
         open_project_file(&anchor, required)?;
+    }
+    for scene in &metadata.scenes {
+        open_project_file(&anchor, &scene.source_path)?;
     }
     let project = OpenProject {
         session_id: String::new(),
@@ -1757,6 +1829,20 @@ mod tests {
             .unwrap(),
         )
         .unwrap();
+    }
+
+    fn apply_scene_target(
+        service: &LifecycleService,
+        workspace: &SceneWorkspace,
+        command: crate::scene::SceneCommand,
+    ) -> SceneWorkspace {
+        service
+            .scene_apply(SceneCommandRequest {
+                expected_project_revision: workspace.project_revision.clone(),
+                expected_source_map_revision: workspace.source_map_revision.clone(),
+                command,
+            })
+            .unwrap()
     }
 
     #[test]
@@ -3035,14 +3121,230 @@ mod tests {
                 "standard screens missing {expected}"
             );
         }
-        let scene_path = final_root.join("game/chapters/chapter_01/scene_001.rpy");
-        let scene = fs::read_to_string(&scene_path).unwrap().replace(
-            "    return\n",
-            "    scene bg cafe\n    show alice happy\n    play music music_theme\n    play sound sfx_click\n    pause 0.05\n    return\n",
+        let mut scene_workspace = service.scene_workspace().unwrap();
+        let entry_scene_id = scene_workspace.entry_scene_id.clone();
+        let chapter_one = scene_workspace.chapters[0].id.clone();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::CreateChapter {
+                display_name: "Branches".into(),
+            },
         );
-        fs::write(&scene_path, scene).unwrap();
+        let chapter_two = scene_workspace.chapters[1].id.clone();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::CreateScene {
+                chapter_id: chapter_one,
+                display_name: "Garden".into(),
+            },
+        );
+        let garden = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Garden")
+            .unwrap()
+            .clone();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::MoveScene {
+                scene_id: garden.id.clone(),
+                chapter_id: chapter_two.clone(),
+                direction: None,
+                expected_source_revision: garden.source_revision,
+            },
+        );
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::CreateScene {
+                chapter_id: chapter_two.clone(),
+                display_name: "Library".into(),
+            },
+        );
+        let garden_id = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Garden")
+            .unwrap()
+            .id
+            .clone();
+        let library_id = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Library")
+            .unwrap()
+            .id
+            .clone();
+        let appearance_id = authored
+            .appearances
+            .iter()
+            .find(|appearance| appearance.character_id == alice_id && appearance.label == "happy")
+            .unwrap()
+            .id
+            .clone();
+        let background_id = authored
+            .assets
+            .iter()
+            .find(|asset| asset.kind == crate::authoring::AssetKind::Background)
+            .unwrap()
+            .id
+            .clone();
+        let music_id = authored
+            .assets
+            .iter()
+            .find(|asset| asset.kind == crate::authoring::AssetKind::Music)
+            .unwrap()
+            .id
+            .clone();
+        let sfx_id = authored
+            .assets
+            .iter()
+            .find(|asset| asset.kind == crate::authoring::AssetKind::Sfx)
+            .unwrap()
+            .id
+            .clone();
+        let flag_id = authored
+            .variables
+            .iter()
+            .find(|variable| variable.technical_name == "door_open")
+            .unwrap()
+            .id
+            .clone();
+        for beat in [
+            crate::scene::BeatPayload::Background {
+                asset_id: background_id.clone(),
+                transition: crate::scene::TransitionRef::Dissolve,
+            },
+            crate::scene::BeatPayload::ShowCharacter {
+                character_id: alice_id.clone(),
+                appearance_id,
+                placement: crate::scene::PlacementRef::Centre,
+                transition: crate::scene::TransitionRef::None,
+            },
+            crate::scene::BeatPayload::Dialogue {
+                character_id: alice_id.clone(),
+                text: "Welcome to Loomlight.".into(),
+            },
+            crate::scene::BeatPayload::Narration {
+                text: "A production-authored Scene.".into(),
+            },
+            crate::scene::BeatPayload::PlayMusic {
+                asset_id: music_id.clone(),
+            },
+            crate::scene::BeatPayload::PlaySfx { asset_id: sfx_id },
+            crate::scene::BeatPayload::SetVariable {
+                variable_id: flag_id,
+                value: serde_json::Value::Bool(true),
+            },
+        ] {
+            let entry = scene_workspace
+                .scenes
+                .iter()
+                .find(|scene| scene.id == entry_scene_id)
+                .unwrap();
+            scene_workspace = apply_scene_target(
+                &service,
+                &scene_workspace,
+                crate::scene::SceneCommand::InsertBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    before_beat_id: None,
+                    beat,
+                },
+            );
+        }
+        let entry = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::InsertBeat {
+                scene_id: entry.id.clone(),
+                expected_source_revision: entry.source_revision.clone(),
+                before_beat_id: None,
+                beat: crate::scene::BeatPayload::Choice {
+                    options: vec![
+                        crate::scene::ChoiceOption {
+                            text: "Garden".into(),
+                            destination_scene_id: garden_id.clone(),
+                        },
+                        crate::scene::ChoiceOption {
+                            text: "Library".into(),
+                            destination_scene_id: library_id.clone(),
+                        },
+                    ],
+                },
+            },
+        );
+        let entry = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap();
+        let choice = entry
+            .beats
+            .iter()
+            .find(|beat| matches!(beat.payload, crate::scene::BeatPayload::Choice { .. }))
+            .unwrap();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::CreateSceneFromChoice {
+                scene_id: entry.id.clone(),
+                expected_source_revision: entry.source_revision.clone(),
+                choice_beat_id: choice.id.clone(),
+                option_text: "New road".into(),
+                chapter_id: chapter_two,
+                display_name: "Created from Choice".into(),
+            },
+        );
+        scene_workspace =
+            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Undo);
+        scene_workspace =
+            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
+        assert_eq!(scene_workspace.scenes.len(), 4);
+        let garden = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == garden_id)
+            .unwrap();
+        scene_workspace = apply_scene_target(
+            &service,
+            &scene_workspace,
+            crate::scene::SceneCommand::InsertBeat {
+                scene_id: garden.id.clone(),
+                expected_source_revision: garden.source_revision.clone(),
+                before_beat_id: None,
+                beat: crate::scene::BeatPayload::Jump {
+                    scene_id: library_id,
+                },
+            },
+        );
+        let phase_1e_selection = scene_workspace.last_open.clone();
+        let image_presentation = service
+            .media_present(crate::media::MediaRequest {
+                asset_id: background_id,
+                purpose: crate::media::MediaPurpose::ImagePreview,
+            })
+            .unwrap();
+        assert_eq!(image_presentation.mime_type, "image/png");
+        let audio = service
+            .media_present(crate::media::MediaRequest {
+                asset_id: music_id,
+                purpose: crate::media::MediaPurpose::AudioAudition,
+            })
+            .unwrap();
+        assert_eq!(audio.mime_type, "audio/wav");
         RenpyAdapter::validate_generated(&sdk, &final_root).unwrap();
         RenpyAdapter::smoke_run(&sdk, &final_root).unwrap();
+        println!("phase-1e-scene-authoring-target-gate: passed");
+        println!("phase-1e-media-target-gate: passed");
 
         service.close();
         assert!(service.current().is_none());
@@ -3050,8 +3352,8 @@ mod tests {
         assert_eq!(recent.len(), 1);
         assert_eq!(recent[0].status, "available");
         let reopened = service.open_recent(&recent[0].id).unwrap();
-        assert_eq!(reopened.chapter_id, project.chapter_id);
-        assert_eq!(reopened.scene_id, project.scene_id);
+        assert_eq!(reopened.chapter_id, phase_1e_selection.chapter_id);
+        assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
         let reopened_authored = service.authoring_list().unwrap();
         let reopened_ids = reopened_authored
             .characters
@@ -3087,7 +3389,7 @@ mod tests {
         service.close();
         assert_eq!(
             service.open_path(&final_root).unwrap().scene_id,
-            project.scene_id
+            phase_1e_selection.scene_id
         );
 
         let portable = projects.join("portable-copy");

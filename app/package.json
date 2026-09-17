@@ -12,7 +12,7 @@
     "build:tests": "tsc -p tsconfig.tests.json",
     "check": "npm run typecheck && npm test",
     "dev": "vite",
-    "test": "npm run build:tests && node --test dist-tests/tests/*.test.js",
+    "test": "npm run build:tests && node --test --test-concurrency=1 dist-tests/tests/*.test.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "tauri": "tauri"
   },

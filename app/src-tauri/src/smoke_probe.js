@@ -33,6 +33,8 @@ setTimeout(async () => {
     pageText.includes("Review & Create");
   let supportingAuthoringUiPassed = false;
   let supportingAuthoringStage = "not-started";
+  let sceneAuthoringUiPassed = false;
+  let sceneAuthoringStage = "not-started";
   let restoreSmokeRequester = () => {};
   try {
     const project = {
@@ -55,12 +57,49 @@ setTimeout(async () => {
       assets: [{ id: "legacy", kind: "background", displayName: "Cafe", relativePath: "game/images/bg_cafe.png", discoveryName: "bg cafe", sha256: "1".repeat(64), byteCount: 4, status: "compatibilityRequired" }],
       variables: [{ id: "score", technicalName: "score", variableType: "int", defaultValue: "9007199254740993", source: { path: "game/definitions/variables.rpy", statement: "default score = 9007199254740993", sourceRevision: "2".repeat(64) } }],
     };
+    const sceneWorkspace = {
+      projectRevision: "3".repeat(64), sourceMapRevision: "4".repeat(64), entrySceneId: "scene",
+      lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: true, canRedo: false,
+      chapters: [
+        { id: "chapter", displayName: "Chapter 1", directory: "game/chapters/chapter_01" },
+        { id: "chapter-two", displayName: "Chapter 2", directory: "game/chapters/chapter_02" },
+      ],
+      scenes: [{
+        id: "scene", chapterId: "chapter", displayName: "Scene 1", technicalLabel: "scene_one",
+        sourcePath: "game/chapters/chapter_01/scene_001.rpy", sourceRevision: "5".repeat(64), sourceConflict: false, partial: true,
+        beats: [
+          { id: "custom", byteStart: 16, byteEnd: 30, protected: true, payload: { type: "customCode", source: "python:", reason: "Runtime-dependent source" } },
+          { id: "background", byteStart: 30, byteEnd: 50, protected: false, payload: { type: "background", assetId: "background", transition: "dissolve" } },
+          { id: "dialogue", byteStart: 50, byteEnd: 70, protected: false, payload: { type: "dialogue", characterId: "character", text: "Hello" } },
+          { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
+          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue", destinationSceneId: "scene-two" }] } },
+        ],
+      }, {
+        id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",
+        sourcePath: "game/chapters/chapter_02/scene_001.rpy", sourceRevision: "6".repeat(64), sourceConflict: false, partial: false,
+        beats: [{ id: "return-two", byteStart: 16, byteEnd: 27, protected: false, payload: { type: "return" } }],
+      }],
+      authoring: {
+        characters: model.characters,
+        appearances: model.appearances,
+        assets: [
+          { id: "background", kind: "background", displayName: "Cafe", status: "available", sha256: "7".repeat(64) },
+          { id: "asset-one", kind: "characterAppearance", displayName: "Alice happy", status: "available", sha256: "8".repeat(64) },
+          { id: "music", kind: "music", displayName: "Theme", status: "available", sha256: "9".repeat(64) },
+        ],
+        variables: model.variables,
+      },
+    };
     const called = new Set();
     let exactInteger = false;
     let exactIntegerUpdate = false;
     let releaseVariableUpdate;
     let overlappingFlushSuppressed = false;
     let importChoiceCount = 0;
+    let sceneApplyCount = 0;
+    const mediaPurposes = [];
+    let projectStatus = "saved";
+    let recoveryReport = { items: [] };
     const smokeRequester = async (operation, payload = {}) => {
       const request = {
         protocolVersion: 1,
@@ -72,8 +111,30 @@ setTimeout(async () => {
       let value = model;
       if (request.operation === "project.openPicker") value = project;
       if (request.operation === "project.listRecent") value = [];
-      if (request.operation === "project.status") value = "saved";
+      if (request.operation === "project.status") value = projectStatus;
       if (request.operation === "project.flush") value = null;
+      if (request.operation === "scene.list") value = sceneWorkspace;
+      if (request.operation === "scene.apply") {
+        sceneApplyCount += 1;
+        value = sceneWorkspace;
+      }
+      if (request.operation === "scene.recovery") value = recoveryReport;
+      if (request.operation === "scene.resolveRecovery") {
+        projectStatus = "saved";
+        recoveryReport = { items: [] };
+        value = recoveryReport;
+      }
+      if (request.operation === "media.present") {
+        mediaPurposes.push(request.payload.purpose);
+        const audio = request.payload.purpose === "audioAudition";
+        value = {
+          assetId: request.payload.assetId, purpose: request.payload.purpose,
+          mimeType: audio ? "audio/ogg" : "image/png", dataBase64: audio ? "T2dnUw==" : "iVBORw0KGgo=",
+          sha256: audio ? "9".repeat(64) : "7".repeat(64), byteCount: 8,
+          width: audio ? null : 1, height: audio ? null : 1,
+          cacheKey: `${request.payload.assetId}:smoke`,
+        };
+      }
       if (request.operation === "asset.chooseImport") {
         importChoiceCount += 1;
         value = importChoiceCount === 1
@@ -110,6 +171,14 @@ setTimeout(async () => {
       supportingAuthoringStage = operation;
       await waitFor(() => called.has(operation), operation);
       await new Promise((resolve) => setTimeout(resolve, 20));
+    };
+    const awaitSceneCommit = async (count, description) => {
+      await waitFor(() => sceneApplyCount >= count, description);
+      await waitFor(
+        () => document.querySelector("#app-status")?.textContent === "Saved"
+          && !document.querySelector('.scene-draft[data-unsubmitted="true"]'),
+        `${description} committed render`,
+      );
     };
     const click = (label) => {
       const target = [...document.querySelectorAll("button")].find((item) => item.textContent === label);
@@ -224,8 +293,106 @@ setTimeout(async () => {
       : !overlappingFlushSuppressed ? "overlapping-flush-not-suppressed"
       : !cancelledPreserved ? "cancel-state-lost"
       : requiredCalls.find((operation) => !called.has(operation)) ?? "complete";
+
+    sceneAuthoringStage = "open-scene-workspace";
+    click("Story");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Beat"), "Add Beat");
+    await waitFor(() => called.has("scene.list") && called.has("media.present"), "Scene data and image presentation");
+    const previewVisible = document.body.textContent.includes("Scene Preview")
+      && document.body.textContent.includes("Beats")
+      && document.body.textContent.includes("Partial / unknown")
+      && document.body.textContent.includes("Visible state and provenance");
+    const allocation = control("Preview size");
+    const allocationCorrect = allocation.value === "52";
+    const accessibleReorder = [...document.querySelectorAll("button")]
+      .some((item) => item.ariaLabel === "Move scene Scene 1 down")
+      && [...document.querySelectorAll("button")]
+        .some((item) => item.ariaLabel === "Move beat 3 down");
+    sceneAuthoringStage = "continue-dialogue";
+    const dialogueButton = [...document.querySelectorAll("button")]
+      .find((item) => item.textContent?.startsWith("3. Dialogue"));
+    if (!dialogueButton) throw new Error("Missing Dialogue Beat");
+    dialogueButton.click();
+    const dialogue = document.querySelector(".expanded-beat textarea");
+    if (!dialogue) throw new Error("Missing expanded Dialogue editor");
+    dialogue.value = "Packaged Scene authoring";
+    dialogue.dispatchEvent(new Event("input", { bubbles: true }));
+    dialogue.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+    await awaitSceneCommit(1, "Dialogue continuation transaction");
+    sceneAuthoringStage = "choice-create-scene";
+    const choiceButton = [...document.querySelectorAll("button")]
+      .find((item) => item.textContent?.startsWith("5. Choice"));
+    if (!choiceButton) throw new Error("Missing Choice Beat");
+    choiceButton.click();
+    click("Create New Scene");
+    const choiceFields = [...document.querySelectorAll(".choice-new-scene input")];
+    if (choiceFields.length !== 2) throw new Error("Missing Create New Scene fields");
+    choiceFields[0].value = "A new path";
+    choiceFields[0].dispatchEvent(new Event("input", { bubbles: true }));
+    choiceFields[1].value = "New destination";
+    choiceFields[1].dispatchEvent(new Event("input", { bubbles: true }));
+    click("Create Scene and option");
+    await awaitSceneCommit(2, "Create New Scene Choice transaction");
+    sceneAuthoringStage = "audio-audition";
+    const audioBeforeClick = mediaPurposes.filter((purpose) => purpose === "audioAudition").length;
+    click("Audition current music");
+    await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
+    const audioIntentional = audioBeforeClick === 0;
+
+    sceneAuthoringStage = "safe-recovery";
+    projectStatus = "recoveryRequired";
+    recoveryReport = { items: [{
+      transactionId: "smoke-recovery", state: { name: "recoveryRequired" }, code: null,
+      mutations: ["stagedWithBaseIntact"],
+      affected: [{ path: "game/chapters/chapter_01/scene_001.rpy", acceptedRetained: true, displacedRetained: true }],
+    }] };
+    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters during recovery smoke"); click("Story");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Keep current project files"), "safe recovery action");
+    const recoveryEvidenceVisible = document.body.textContent.includes("Accepted copy")
+      && document.body.textContent.includes("Displaced copy");
+    const recoveryConfirm = document.querySelector("#confirm-smoke-recovery");
+    if (!recoveryConfirm) throw new Error("Missing recovery confirmation");
+    recoveryConfirm.click(); click("Keep current project files");
+    await waitFor(() => document.body.textContent.includes("Scene Preview"), "Scene Preview after recovery");
+    const safeRecoveryCompleted = projectStatus === "saved";
+
+    sceneAuthoringStage = "ambiguous-recovery";
+    projectStatus = "recoveryRequired";
+    recoveryReport = { items: [{
+      transactionId: "smoke-ambiguous", state: { name: "recoveryRequired" }, code: null,
+      mutations: ["ambiguous"],
+      affected: [{ path: "game/chapters/chapter_02/scene_001.rpy", acceptedRetained: true, displacedRetained: true }],
+    }] };
+    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before ambiguous recovery"); click("Story");
+    await waitFor(() => document.body.textContent.includes("This state is ambiguous"), "ambiguous recovery refusal");
+    const ambiguousRefused = ![...document.querySelectorAll("button")]
+      .some((item) => item.textContent?.includes("project files") || item.textContent?.includes("Loomlight files"));
+
+    sceneAuthoringStage = "conflict-presentation";
+    projectStatus = "conflict";
+    sceneWorkspace.scenes[0].sourceConflict = true;
+    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before conflict state"); click("Story");
+    await waitFor(() => document.body.textContent.includes("Source conflict"), "Scene source conflict state");
+    const conflictVisible = document.body.textContent.includes("Scene writes and history are blocked");
+    sceneWorkspace.scenes[0].sourceConflict = false;
+    sceneAuthoringUiPassed = previewVisible
+      && allocationCorrect
+      && accessibleReorder
+      && sceneApplyCount >= 2
+      && audioIntentional
+      && recoveryEvidenceVisible
+      && safeRecoveryCompleted
+      && ambiguousRefused
+      && conflictVisible
+      && called.has("scene.list")
+      && called.has("scene.apply")
+      && called.has("scene.recovery")
+      && called.has("scene.resolveRecovery")
+      && called.has("media.present");
+    sceneAuthoringStage = sceneAuthoringUiPassed ? "complete" : "assertions-failed";
   } catch {
-    supportingAuthoringUiPassed = false;
+    if (supportingAuthoringStage !== "complete") supportingAuthoringUiPassed = false;
+    sceneAuthoringUiPassed = false;
   } finally {
     restoreSmokeRequester();
   }
@@ -243,6 +410,8 @@ setTimeout(async () => {
         nodeGlobalsDenied,
         popupRequestIssued,
         rendererSecretsAbsent,
+        sceneAuthoringStage,
+        sceneAuthoringUiPassed,
         supportingAuthoringStage,
         supportingAuthoringUiPassed,
         welcomeLifecycleVisible,

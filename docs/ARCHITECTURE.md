@@ -2,13 +2,13 @@
 
 ## Status
 
-This is the accepted Phase 0 target architecture plus the approved Phase 1 planning
-constraints and the completed Phase 1A production scaffold. ADR 0001
-selects exact source bytes plus a conservative partial CST,
-ADR 0002 selects the versioned SDK boundary, and
-[ADR 0003](adr/0003-tauri-desktop-runtime.md) selects Tauri 2. The boundaries remain
-framework-light even though the production shell is now explicit. The bounded
-production scaffold lives in `app/`; later Phase 1 milestones remain separately gated.
+This is the accepted Phase 0 target architecture plus the Phase 1A–1E production
+architecture. ADR 0001 selects exact source bytes plus a conservative partial CST,
+ADR 0002 selects the versioned SDK boundary, ADR 0003 selects Tauri 2, ADRs 0004–0005
+define transaction and project-creation safety, and
+[ADR 0006](adr/0006-scene-authoring-source-and-media-boundary.md) defines the bounded
+Scene/source/media boundary. The production application lives in `app/`; Phase 1F and
+later milestones remain separately gated.
 
 ## Production scaffold boundary
 
@@ -20,11 +20,12 @@ the core can reject malformed envelopes itself and always return the same redact
 result shape.
 
 Protocol version 1 requires exactly `protocolVersion`, `requestId`, `operation`, and
-`payload`. Phase 1A allowlists only health/version and synthetic denial/smoke probes.
-The capability is local, scoped to WebView label `main`, and names only
-`allow-loomlight-core`; no general Tauri filesystem, shell/process, HTTP, opener, or
-credential plugin is present. Source transactions, project files, Ren'Py, Git,
-credentials, and network providers exist only as authority-free empty port markers.
+`payload`. The allowlist now includes lifecycle, supporting authoring, Scene semantic
+operations, persistence/recovery, and asset-ID media presentation. Every operation is
+schema checked and session bound in core. The capability is local, scoped to WebView
+label `main`, and names only `allow-loomlight-core`; no general Tauri filesystem,
+shell/process, HTTP, opener, or credential plugin is present. Git, credentials, and
+network providers remain unavailable to renderer operations.
 
 ## System boundaries
 
@@ -60,6 +61,14 @@ project UUID and process authority remain distinct; close or project switch inva
 the latter. The host retains native-selected media handles and returns only opaque
 import IDs plus safe basename/extension/size metadata. Media streams through
 transaction recovery and never enters renderer state or a generic filesystem API.
+
+Phase 1E extends the same authority with ordered multi-Chapter/Scene metadata, exact-
+range Beat operations, session-local committed history, and explicit recovery
+resolution. Scene writes never originate in the renderer: `scene.apply` submits a
+typed semantic command whose core implementation verifies current metadata and source
+revisions, constructs the smallest safe mutation set, and commits through the shared
+transaction service. `media.present` is read-only and accepts an Asset UUID plus a
+presentation purpose, never a path or URL.
 
 Loomlight is a single-instance desktop application. The maintained Tauri
 single-instance plugin is registered before desktop `setup`, so a losing launch is
@@ -140,7 +149,8 @@ blur, or an explicit action they become one semantic transaction and are persist
 through the source/file boundary.
 
 The shell always exposes a meaningful persistence state such as `Saved`, `Saving`,
-`Pending validation`, `Conflict`, or `Recovery required`. `Ctrl/Cmd+S` remains an
+`Unsubmitted editor input`, `Pending validation`, `Conflict`, or `Recovery required`.
+`Ctrl/Cmd+S` remains an
 explicit flush/durability action: it completes pending accepted work and confirms that
 the project is durably persisted; it is not the only moment when visual state is
 translated into `.rpy`.
@@ -232,8 +242,12 @@ editor to reconstruct the project is treated as future existing-project import, 
 Phase 1 recovery path.
 
 `authoring.json` schema version 1 stores stable Character, Appearance, Asset, and
-Variable UUIDs and relationships. It is editor-only and never competes with runnable
-source. `characters.rpy` and `variables.rpy` remain authoritative and are edited by a
+Variable UUIDs and relationships. Project and source-map schema version 2 adds ordered
+multi-Chapter/Scene ownership, entry/selection state, and exact Beat mappings while
+transactionally migrating the valid version 1 scaffold without changing its UUIDs or
+unknown fields. All metadata is editor-only and never competes with runnable source.
+`characters.rpy`, `variables.rpy`, and Scene `.rpy` files remain authoritative and are
+edited by a
 narrow lexical/context-aware exact-statement mapper. A supported definition must be a
 complete unique top-level executable statement, not matching text in a comment,
 multiline string, continuation, or indented opaque block. Canonical definitions are
@@ -241,6 +255,12 @@ inserted or patched only after every relevant mapping and the expected file revi
 are verified; unrelated/unsupported bytes, Unicode, formatting, and line endings remain
 untouched. This recognizer is intentionally not the general parser or Phase 1F Source
 workspace.
+
+The Scene recognizer follows the same rule: supported canonical Beats retain stable
+IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
+protected Custom Code. Insert, replace, remove, and reorder refuse ambiguous ownership
+or opaque crossings. Scene create/move/delete commits source, metadata, references,
+and only a proven corresponding obsolete `.rpyc` as one recoverable semantic change.
 
 Project creation itself is staged: validate destination safety, generate the scaffold
 and metadata in a private staging location, optionally initialise local Git, validate
@@ -292,6 +312,14 @@ It marks runtime-dependent or unsupported state as partial/unknown rather than
 inventing fidelity. Navigating beats must not repeatedly audition audio; audio has
 explicit audition controls.
 
+Preview media is a bounded presentation snapshot, not a renderer file capability.
+Core resolves a current-session Asset UUID, retains and revalidates the safe relative
+path and regular-file identity, verifies recorded size/hash, accepts only passive
+PNG/JPEG or OGG/WAV/FLAC/MP3 presentation bytes, caps delivery at 16 MiB, and caps
+images at 8192 pixels per dimension. Returned data is content keyed. Renderer caches
+are memory-only, cancelled by view generation, invalidated by content key, and fully
+disposed on project/session switch. Audio starts only from an explicit user action.
+
 The selected official SDK remains the fidelity authority. Phase 1 provides normal
 `Run Game` from the game entry point and explicit validation; correct arbitrary
 `Run From Here` is deferred until state simulation can establish the required prior
@@ -301,8 +329,9 @@ behavior require the official runtime.
 ## Resolved Phase 0 boundaries and implementation risks
 
 Phase 0 resolved the desktop runtime, source model, SDK adapter/install boundary,
-preview fidelity classes, and target atomic/watch observations. Phase 1 still has to
-turn those decisions into production services and recovery UX. Manual assistive-
+preview fidelity classes, and target atomic/watch observations. Phase 1A–1E have
+turned the scaffold, lifecycle, supporting authoring, Scene source operations,
+recovery UX, and bounded preview/media decisions into production services. Manual assistive-
 technology, physical signing/quarantine/SmartScreen, system-WebView variance, and full
 automatic graph-layout performance remain explicit later validation risks; they do
 not reopen the completed Phase 0 decision without contradictory evidence.
