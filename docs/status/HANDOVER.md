@@ -53,9 +53,15 @@ and no service/supervisor/production CI was installed or changed.
 - `git diff --check`: passed.
 - Scope review: four documentation files in the candidate; no application, workflow,
   probe implementation or runtime configuration change.
-- CI run/attempt/jobs: none dispatched. Do not infer native application acceptance.
+- Automatic Repository quality
+  [push run 35404027500](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35404027500)
+  and [PR run 35404031132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35404031132),
+  attempt 1, both completed successfully for the first handover publication head
+  `2917b50a0c469d9308c0cb118a1a36ad554760fd`. No production/native matrix was manually
+  dispatched; do not infer native application acceptance.
 - Publication: candidate pushed to `origin/maintenance/ci-optimisation`; PR #12 open.
-  Verify the remote head after the handover-only follow-up is pushed.
+  This receipt-only follow-up may move the PR head without changing the W0 candidate.
+  Verify the final remote head after publication.
 
 ## Recovery boundary and next action
 
