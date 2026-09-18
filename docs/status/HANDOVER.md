@@ -3,63 +3,74 @@
 **Prepared:** 2026-09-19.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Task:** [CI optimisation and durable wait/wake](../tasks/active/ci-optimisation.md).
-**Next checkpoint:** **W0 only — actual-host feasibility**.
-**State:** Approved, not started. This publication is planning, not implementation.
+**Checkpoint:** **W0 actual-host feasibility — review ready, no-go for automatic support**.
+**Acceptance:** User review pending; no later checkpoint is approved or started.
 
 ## Continue from
 
+Use branch `maintenance/ci-optimisation` and the single integration
+[PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12). The W0 evidence candidate
+is `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`, based on freshly fetched main
+`7d634eeaf53fe0244a2739f26914797ca16ef544`. A handover-only publication commit follows
+the candidate; do not confuse its newer SHA with a different implementation candidate.
+
 Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md),
-[WORKFLOW](../WORKFLOW.md), then the plan's W0 section and relevant source references.
-All detailed requirements and confidence-review gaps are in the linked plan; no old
-chat or attachment is required.
+[WORKFLOW](../WORKFLOW.md), the plan's W0 ledger, and the
+[qualification report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md). Reuse this branch
+and PR. Do not create another implementation branch/PR, reset to the older planning
+baseline, or replay merged Phase 1E work.
 
-This planning publication starts from main
-`f1be3f0745f76e46113df7d3e84e70e13ee9d9c9` and is published on main. Resolve the
-actual current remote main before starting; that SHA is the inspected application
-baseline, NOT an instruction to reset history. No implementation branch/PR was
-created by this documentation publication.
+## W0 outcome
 
-For W0, first check whether `maintenance/ci-optimisation` or a corresponding task PR
-has appeared. Reuse existing progress if present. Otherwise create that branch from
-freshly verified main, record it here and use one integration PR across subsequent
-checkpoint chats. Do not start from stale corrective or already-merged Phase 1E work.
+The investigation qualified the actual local Windows x64 desktop owner. The native
+task ID matched the exact owner record, expected workspace and running Codex binary;
+the owner read this original active task by exact ID. The installed CLI/daemon binary
+is `0.155.0-alpha.9`, and the desktop host reported build `153.0.8010.48`. Private IDs,
+paths, process details and endpoints remain outside Git.
 
-## Completed and preserved
+Installed stable and experimental schemas plus exact `rust-v0.155.0-alpha.9` source
+confirm persisted queue IDs, caller message IDs, exact list/delete/start primitives,
+loaded-task wake behavior and idle-only start. They also confirm that goal mutation
+has no caller-visible owner, revision or conditional update.
 
-The repo now holds the plan, four W0-W3 gate definitions, later CI-efficiency
-checkpoints, unresolved runtime/pause/delivery risks and final cleanup procedure.
-AGENTS/WORKFLOW require repo-first planning, one checkpoint per chat, published
-handovers and lightweight prompts. Phase 1E PR #9 is already merged; old live
-integration instructions have been reconciled. Application code/workflows and
-historical task ledgers are unchanged.
+Automatic support is a no-go on the current exposed contract because:
 
-Validation for this planning publication is its exact commit's repository-quality
-check and reviewed documentation-only diff. Read that check's result; it is not
-predeclared passing. No W0 probe, runtime test, watcher/service or production matrix
-was executed here. Do not redispatch an operation merely to validate this handover.
+1. safe goal restoration cannot be proved against an intervening user pause; and
+2. the owning desktop surface does not expose queue list/delete/start receipts and
+   authoritative activity/user-event telemetry to an external non-model observer.
 
-## W0 work and stopping rule
+Loaded-idle delivery, unloaded same-ID continuation and real goal inactivity were not
+live-tested. Restored tool use and cancellation remain partial. No self-message was
+left queued, no task was unloaded, no goal was paused, no competing task was created,
+and no service/supervisor/production CI was installed or changed.
 
-Qualify the ACTUAL task-owning host/thread, not an unrelated Codex installation.
-Establish same-thread loaded/unloaded continuation, usable tools, safe goal-pause
-ownership/restoration, delivery reconciliation, cancellation and telemetry access.
-Use bounded isolated probes only under the plan's safety rules. Do not install a
-production supervisor, change production CI, migrate hosts, bypass approvals/budgets,
-create a competing task or advance into W1/OPT-1A.
+## Validation and publication
 
-No runtime endpoint, installed version, persistence host or pause-ownership mechanism
-has been qualified. If access or safe control is missing, publish partial/no-go
-findings with precise recovery needs and stop. Mocks/manual continuation cannot
-substitute for automatic-support proof.
+- Candidate: `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`.
+- `scripts/validate.py`: passed for 203 repository files using bundled Python 3.12.14.
+  The ordinary `python` and `py` launchers were unavailable; this was an environment
+  alias gap, not a validator failure.
+- `git diff --check`: passed.
+- Scope review: four documentation files in the candidate; no application, workflow,
+  probe implementation or runtime configuration change.
+- CI run/attempt/jobs: none dispatched. Do not infer native application acceptance.
+- Publication: candidate pushed to `origin/maintenance/ci-optimisation`; PR #12 open.
+  Verify the remote head after the handover-only follow-up is pushed.
 
-## Required output before ending W0
+## Recovery boundary and next action
 
-Record actual findings in `docs/research/CODEX_WAIT_WAKE_QUALIFICATION.md`, update
-the plan's W0 ledger/resolved choices and replace this handover with exact branch,
-PR, candidate, tests/evidence, blockers and next action. Keep private runtime details
-outside Git. Self-review and troubleshoot W0 with the user; publish before giving
-the next prompt. Do not create a second handover file.
+The durable recovery requirements are in the qualification report: supported access
+to the owning daemon's reconciliation primitives, ownership-safe goal control, and
+authoritative activity telemetry. Only after those exist should the user authorise a
+bounded live original-task pause/unload/delivery race probe with an allowance, deadline,
+restoration and abort contract.
 
-After W0, stop for review. The next chat selects the next approved checkpoint or W0
-recovery; a successful proof is not approval for the entire implementation. Final
-integration, legacy branch retirement and documentation cleanup belong to CLOSE.
+Until then, external waits use a published manual-resume handover. A user-scoped
+Windows Scheduled Task plus Windows toast/durable status is the provisional native
+supervisor/notification choice for later qualification; none was installed. There is
+no outstanding operation to watch or recover.
+
+Stop for user review. The next chat should review/select documented **W0 recovery**;
+it must not start OPT-1A, W1 or later checkpoints, install a service, migrate hosts,
+or run the live pause/unload probe without explicit new authority. Independent OPT-1A
+remains possible only if the user separately selects that checkpoint.
