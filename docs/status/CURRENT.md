@@ -3,7 +3,8 @@
 **Updated:** 2026-09-19.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Current maintenance task:** [CI optimisation plan](../tasks/active/ci-optimisation.md).
-**Next approved checkpoint:** W0 actual-host wait/wake feasibility, not started.
+**Current checkpoint:** W0 actual-host wait/wake feasibility is review ready with a
+no-go result for automatic support; user acceptance is pending.
 **Exact continuation routing:** [HANDOVER.md](HANDOVER.md).
 
 ## Application state
@@ -34,9 +35,12 @@ handovers in Git, and safe branch/documentation cleanup after implementation. Th
 [maintenance plan](../tasks/active/ci-optimisation.md) owns sequence and approval gates.
 
 No CI helper, supervisor, automatic queue/resume bridge or evidence-reuse policy is
-implemented by this documentation publication. The actual owning Codex runtime and
-pause-ownership safety remain unqualified. Stop model-driven polling; use an explicit
-manual-resume handover until verified automatic waiting exists on the actual host.
+implemented. W0 identified the actual local Windows owner and exact task, but the
+owning surface lacks external queue reconciliation/activity telemetry and goal control
+lacks ownership-safe conditional restoration. The
+[qualification report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) records the
+no-go evidence. Stop model-driven polling; use an explicit manual-resume handover
+until a documented W0 recovery is selected and verified on the actual host.
 
 Only documentation changes are published from the inspected main baseline. Inspect
 the publishing commit and its repository-quality check for validation; no fresh native

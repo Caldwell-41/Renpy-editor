@@ -9,7 +9,8 @@ here; chat prompts select one checkpoint rather than repeat the implementation p
 Phase 1E PR #9 is merged, as are corrected Phase 1A-1D and PR #8's UI follow-up.
 Archived ledgers retain exact evidence. Current maintenance is
 [CI optimisation / wait-wake](tasks/active/ci-optimisation.md), with W0 feasibility
-approved first. CURRENT/HANDOVER own live state; this index is not another status ledger.
+performed first and awaiting review. CURRENT/HANDOVER own live state; this index is
+not another status ledger.
 
 Read the [Phase 1 plan](tasks/active/phase-1-vertical-slice.md) for product prerequisites
 and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
@@ -19,6 +20,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
 | CI optimisation roadmap, W0 brief and wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
+| W0 actual-host wait/wake qualification | [research/CODEX_WAIT_WAKE_QUALIFICATION.md](research/CODEX_WAIT_WAKE_QUALIFICATION.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |

@@ -546,11 +546,45 @@ operation and recovery details; blocked gates hand over recovery, not later work
   claimed by documentation publication.
 - Next: W0 only, following HANDOVER from freshly verified current main.
 
-### W0 — not started
+### W0 — actual-host feasibility, review ready (no-go) — 2026-09-19
 
-No actual host proof, queue/resume test, pause-ownership proof, watcher survival test
-or model-activity measurement has been performed by publishing this plan. Replace
-this placeholder with actual evidence; never promote requirements into passed tests.
+- Authority: the user selected W0 only and required publication before review. No
+  later checkpoint, runtime installation, host migration or production CI change was
+  authorised.
+- State/outcome: investigation complete and `review_ready`; **no-go for automatic
+  wait/wake acceptance**. User acceptance remains pending.
+- Branch/baseline: `maintenance/ci-optimisation`, created from freshly fetched main
+  `7d634eeaf53fe0244a2739f26914797ca16ef544`; no prior task branch or PR existed.
+- Actual owner: local Windows x64 ChatGPT desktop task. Native task ID, exact-ID host
+  record, workspace and running binary matched. Installed CLI/daemon binary reported
+  `0.155.0-alpha.9`; the desktop host reported build `153.0.8010.48`. Private IDs,
+  paths and endpoints are not committed.
+- Evidence: [W0 qualification report](../../research/CODEX_WAIT_WAKE_QUALIFICATION.md).
+  Exact-ID owner read and current-workspace tools passed. Installed stable/experimental
+  schema generation and exact-tag source review passed without changing runtime state.
+- Partial/failed gates: loaded-idle and unloaded same-ID delivery were not safely
+  testable on the active original task; restored tool use and cancellation are partial.
+  Goal inactivity was not tested. User control and ambiguous-delivery reconciliation
+  are blocked by the current exposed host contract.
+- Resolved choices: retain the actual local Windows owner; use exact task IDs only;
+  prefer a version-qualified structured-protocol adapter over CLI prose; provisionally
+  select a user-scoped Windows Scheduled Task plus Windows toast/durable status for
+  later supervisor qualification. Do not install it yet.
+- Decisive blockers: goal set has no caller-visible pause owner/revision/conditional
+  update, and the owning desktop surface does not expose queue list/delete/start plus
+  authoritative activity/user-event telemetry to an external observer. Queue source
+  support or manual continuation is not target-path proof.
+- Commands/evidence: `codex --version`, selected process-binary comparison, exact-ID
+  host list/read, `codex queue --help`, stable and experimental app-server schema
+  generation, exact `rust-v0.155.0-alpha.9` source inspection, repository validation
+  and `git diff --check`. No CI run or attempt was dispatched.
+- Recovery: expose supported authenticated owning-daemon reconciliation, ownership-safe
+  goal control and authoritative activity telemetry; then obtain explicit authority
+  for the bounded live pause/unload/delivery race probe. Until then use a published
+  manual-resume handover.
+- Next approval/action: stop for user review. The next chat may select documented W0
+  recovery, or independently select OPT-1A; neither is started or approved by this
+  record.
 
 ## Primary sources and verification boundary
 
