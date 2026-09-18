@@ -2,81 +2,67 @@
 
 **Prepared:** 2026-09-19.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Task:** [CI optimisation and durable wait/wake](../tasks/active/ci-optimisation.md).
-**Checkpoint:** **W0 actual-host feasibility — review ready, no-go for automatic support**.
-**Acceptance:** User review pending; no later checkpoint is approved or started.
+**Branch / PR:** `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
+**Checkpoint:** W0 review plus user-requested local-only configuration safeguards.
+**Outcome:** Review ready; automatic wait/wake remains unqualified/no-go. No later
+checkpoint has been started or approved by this review.
 
-## Continue from
-
-Use branch `maintenance/ci-optimisation` and the single integration
-[PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12). The W0 evidence candidate
-is `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`, based on freshly fetched main
-`7d634eeaf53fe0244a2739f26914797ca16ef544`. A handover-only publication commit follows
-the candidate; do not confuse its newer SHA with a different implementation candidate.
+## Entry and baseline
 
 Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md),
-[WORKFLOW](../WORKFLOW.md), the plan's W0 ledger, and the
-[qualification report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md). Reuse this branch
-and PR. Do not create another implementation branch/PR, reset to the older planning
-baseline, or replay merged Phase 1E work.
+[WORKFLOW](../WORKFLOW.md), [local client setup](../LOCAL_CODEX_CONFIG.md),
+[active plan](../tasks/active/ci-optimisation.md) and
+[qualification report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md).
+Reuse this branch/PR. The review started at `7062f63e73025feffe240faffc88418ea3e5c895`,
+following W0 evidence candidate `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`.
+Main's planning baseline was `7d634eeaf53fe0244a2739f26914797ca16ef544`.
+Resolve current remote head; these are evidence references, not reset instructions.
 
-## W0 outcome
+## Review changes
 
-The investigation qualified the actual local Windows x64 desktop owner. The native
-task ID matched the exact owner record, expected workspace and running Codex binary;
-the owner read this original active task by exact ID. The installed CLI/daemon binary
-is `0.155.0-alpha.9`, and the desktop host reported build `153.0.8010.48`. Private IDs,
-paths, process details and endpoints remain outside Git.
+Corrected stale not-started/new-branch text; qualified unsupported-host claims to the
+actual path examined; retained unperformed live-test gates. Private observations are
+not represented as independently repeated proof. Removed installed desktop-build
+inventory from current shared text; prior commits remain unchanged.
 
-Installed stable and experimental schemas plus exact `rust-v0.155.0-alpha.9` source
-confirm persisted queue IDs, caller message IDs, exact list/delete/start primitives,
-loaded-task wake behavior and idle-only start. They also confirm that goal mutation
-has no caller-visible owner, revision or conditional update.
+Added `scripts/codex_local.py`, a placeholder-only client template, `.codex-local/`
+ignore rules, local-configuration policy, validator index guards and offline privacy
+tests in the cheap quality job. Initialisation never contacts Codex or GitHub, touches
+credentials, manipulates a goal, or enables automatic waiting. A distinct detected
+client context gets a fresh blank profile; every session still verifies actual ownership.
 
-Automatic support is a no-go on the current exposed contract because:
+Raw host/client identity and runtime task/queue/turn bindings stay local, including
+local evidence. Never copy them into this handover, commits, PRs, CI output or artifacts.
+Before using host-specific tooling on a new client, run the documented local bootstrap
+on that actual host and complete verified fields locally. This remote review did not
+set up the user's real client or infer its current runtime values.
 
-1. safe goal restoration cannot be proved against an intervening user pause; and
-2. the owning desktop surface does not expose queue list/delete/start receipts and
-   authoritative activity/user-event telemetry to an external non-model observer.
+## Validation and limitations
 
-Loaded-idle delivery, unloaded same-ID continuation and real goal inactivity were not
-live-tested. Restored tool use and cancellation remain partial. No self-message was
-left queued, no task was unloaded, no goal was paused, no competing task was created,
-and no service/supervisor/production CI was installed or changed.
+Local review: **16 offline privacy/bootstrap tests passed**, with no skips, on
+synthetic Git fixtures in the Linux review environment. Changed-file privacy and staged
+whitespace checks passed. The publishing commit contains these tests and their
+quality-workflow step. Run `python -m unittest discover -s tests/ci_privacy -v` and
+`python scripts/validate.py` on the actual checkout; inspect the exact publishing
+commit's checks for full repository validation. The local review exercised synthetic
+Git fixtures and changed-file checks, not a full downloaded checkout.
 
-## Validation and publication
+Original W0 evidence includes successful Repository quality runs `35404027500` and
+`35404031132`, attempt 1, for `2917b50a0c469d9308c0cb118a1a36ad554760fd`.
+Those checks validate documentation, not live runtime feasibility or this review's
+new code. The publishing commit/checks provide the new receipt; do not commit another
+handover merely to chase its own SHA or CI result.
 
-- Candidate: `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`.
-- `scripts/validate.py`: passed for 203 repository files using bundled Python 3.12.14.
-  The ordinary `python` and `py` launchers were unavailable; this was an environment
-  alias gap, not a validator failure.
-- `git diff --check`: passed.
-- Scope review: four documentation files in the candidate; no application, workflow,
-  probe implementation or runtime configuration change.
-- Automatic Repository quality
-  [push run 35404027500](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35404027500)
-  and [PR run 35404031132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35404031132),
-  attempt 1, both completed successfully for the first handover publication head
-  `2917b50a0c469d9308c0cb118a1a36ad554760fd`. No production/native matrix was manually
-  dispatched; do not infer native application acceptance.
-- Publication: candidate pushed to `origin/maintenance/ci-optimisation`; PR #12 open.
-  This receipt-only follow-up may move the PR head without changing the W0 candidate.
-  Verify the final remote head after publication.
+No native Windows/macOS bootstrap execution or ACL qualification, live queue/resume,
+actual goal suspension/inactivity, watcher persistence or production matrix was run
+by this review. The bootstrap is not a durable event journal or a hostile-local-writer
+security boundary. No operation was registered, queued or left awaiting recovery.
 
-## Recovery boundary and next action
+## Next bounded action
 
-The durable recovery requirements are in the qualification report: supported access
-to the owning daemon's reconciliation primitives, ownership-safe goal control, and
-authoritative activity telemetry. Only after those exist should the user authorise a
-bounded live original-task pause/unload/delivery race probe with an allowance, deadline,
-restoration and abort contract.
-
-Until then, external waits use a published manual-resume handover. A user-scoped
-Windows Scheduled Task plus Windows toast/durable status is the provisional native
-supervisor/notification choice for later qualification; none was installed. There is
-no outstanding operation to watch or recover.
-
-Stop for user review. The next chat should review/select documented **W0 recovery**;
-it must not start OPT-1A, W1 or later checkpoints, install a service, migrate hosts,
-or run the live pause/unload probe without explicit new authority. Independent OPT-1A
-remains possible only if the user separately selects that checkpoint.
+Stop for user review. Independent **OPT-1A** is the recommended next separately
+selected checkpoint; it does not require automatic Codex wake-up. Alternatively the
+user may select W0 recovery after its missing prerequisites change. Do not automatically
+repeat blocked discovery, start W1-W3, install services, migrate clients or weaken gates.
+Each next chat must publish its ledger and this single handover before giving a small
+next-chat prompt. Integration and branch/documentation cleanup remain CLOSE work.

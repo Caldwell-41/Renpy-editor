@@ -28,7 +28,8 @@ version-pinned staged project creation.
 
 Follow [WORKFLOW](docs/WORKFLOW.md). Detailed implementation instructions, acceptance
 criteria, decisions, known issues, evidence and handovers belong in the repository,
-not in a long chat prompt or an external attachment.
+not in a long chat prompt or an external attachment. Private runtime data is the
+explicit exception: publish sanitised conclusions, never identifiable client state.
 
 1. Read CURRENT, HANDOVER, the selected active task, relevant ADRs, and the closest
    nested AGENTS.md before editing. Search before reading broadly.
@@ -50,6 +51,35 @@ Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in their can
 homes and checkpoint evidence in the task ledger. Do not create a new handover file
 for every chat or require the next chat to find an old attachment.
 
+## Local Codex client setup and privacy
+
+Follow [LOCAL_CODEX_CONFIG](docs/LOCAL_CODEX_CONFIG.md) on EVERY new client and
+revalidate the binding on every task/session. On the actual execution host, run
+`python scripts/codex_local.py init` with a verified available Python interpreter,
+then complete only locally verified runtime fields in its ignored private profile.
+Do not print the profile or native command output into GitHub. Unknown values remain
+null; missing access is not permission to invent a host, endpoint or thread ID.
+
+Keep host/usernames, device/client IDs, private addresses/endpoints, home/workspace/
+binary paths, binary hashes, installed-build inventory and all thread/session/goal/
+queue/turn bindings only in `.codex-local/` or protected local environment/storage.
+Never commit them, copy them into PRs/issues/CI logs/artifacts/screenshots, or publish
+a stable hash as an allegedly anonymous substitute. Tokens remain in credential stores
+or protected local environment variables; templates contain placeholders only.
+
+The bootstrap creates separate profiles for different detected contexts, preserves
+existing values and leaves automatic mode disabled. It is NOT runtime qualification.
+A new session must obtain and cross-check its current task ID through its actual
+owner; never copy a previous task ID, use `--last`, or inherit another client's
+qualification/pause authority. Recheck indistinguishable contexts and changed runtimes
+explicitly; separate shared-checkout writers before making task changes.
+
+If the actual client cannot be reached, record only `client setup unavailable` and
+perform authorised host-independent work. Initialising this chat's unrelated sandbox
+would not satisfy actual-client setup. Never request credentials or private paths in
+shared chat to fill the template. Before publishing run privacy tests and inspect the
+staged diff. Force-added local files are failures, not exceptions to the privacy rule.
+
 ## Commands
 
 Production scaffold commands run from `app/`:
@@ -68,10 +98,11 @@ The core test command includes the Phase 1B hostile-race and real process-termin
 recovery suite. See [TRANSACTIONS](docs/TRANSACTIONS.md). An official-SDK wrapper with
 a skip marker is not target evidence.
 
-Retain the Phase 0 regression commands:
+Retain the Phase 0 regression commands and scoped privacy checks:
 
 ```bash
 python3 scripts/validate.py
+python3 -m unittest discover -s tests/ci_privacy -v
 python3 -m unittest discover -s spikes/lossless-source/tests -v
 python3 -m unittest discover -s spikes/renpy-sdk/tests -v
 python3 spikes/lossless-source/benchmark.py
@@ -90,9 +121,10 @@ approved, ownership-safe runtime mechanism; yield and resume from the completion
 event. Never equate queue acceptance with actual continuation.
 
 Until that mechanism is implemented and qualified on the actual host, record the
-exact run/attempt/SHA and a blocked/manual-resume handover, then stop active polling.
-Do not invoke hypothetical helper commands or claim automatic wake-up. Do not start
-a second agent, reset a goal, weaken approvals, or bypass budgets to keep work alive.
+exact Actions run/attempt/SHA and a blocked/manual-resume handover, then stop active
+polling. Private Codex routing IDs stay local. Do not invoke hypothetical helper
+commands or claim automatic wake-up. Do not start a second agent, reset a goal,
+weaken approvals, or bypass budgets to keep work alive.
 
 No package matrix solely for documentation, no duplicate expensive run of unchanged
 validated inputs, and no automatic retry after ambiguous dispatch. Reuse acceptance
@@ -123,4 +155,5 @@ Update canonical docs with behavioral changes. At task closure, consolidate less
 archive the completed plan/evidence, remove redundant transient handovers or retain
 only a justified historical record, repair links, and reset CURRENT/HANDOVER to the
 next actual state. Never delete unique failure evidence or unresolved recovery state.
-Historical snapshots do not override live instructions.
+Historical snapshots do not override live instructions. Review summaries distinguish
+reported original observations from independently repeated probes.

@@ -8,6 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from codex_local import LocalConfigError, TEMPLATE, git_paths, is_local_only, read_config
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = (
@@ -49,50 +50,16 @@ REQUIRED = (
     "app/src-tauri/capabilities/main.json",
     "app/src-tauri/permissions/core-request.toml",
     "app/src-core/src/lib.rs",
+    "config/codex-client.example.json",
+    "docs/LOCAL_CODEX_CONFIG.md",
 )
 TEXT_SUFFIXES = {
-    ".cjs",
-    ".css",
-    ".example",
-    ".html",
-    ".js",
-    ".json",
-    ".md",
-    ".mjs",
-    ".ps1",
-    ".py",
-    ".rpy",
-    ".rs",
-    ".sh",
-    ".toml",
-    ".ts",
-    ".tsx",
-    ".txt",
-    ".yaml",
-    ".yml",
+    ".cjs", ".css", ".example", ".html", ".js", ".json", ".md", ".mjs",
+    ".ps1", ".py", ".rpy", ".rs", ".sh", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml",
 }
 TEXT_FILENAMES = {
-    ".editorconfig",
-    ".gitattributes",
-    ".gitignore",
-    "Dockerfile",
-    "LICENSE",
-    "Makefile",
-    "NOTICE",
+    ".editorconfig", ".gitattributes", ".gitignore", "Dockerfile", "LICENSE", "Makefile", "NOTICE",
 }
-SKIP_PARTS = {
-    ".git",
-    ".toolchains",
-    "__pycache__",
-    "node_modules",
-    "target",
-    "dist",
-    "dist-tests",
-    "gen",
-    "build",
-    "out",
-}
-
 SECRET_PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     "GitHub token": re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{20,}\b"),
@@ -100,10 +67,10 @@ SECRET_PATTERNS = {
     "Anthropic-style key": re.compile(r"\bsk-ant-[A-Za-z0-9_-]{20,}\b"),
     "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     "Google API key": re.compile(r"\bAIza[0-9A-Za-z_-]{30,}\b"),
-    "GitLab token": re.compile(r"\bglpat-[0-9A-Za-z_-]{20,}\b"),
-    "npm token": re.compile(r"\bnpm_[0-9A-Za-z]{20,}\b"),
-    "Slack token": re.compile(r"\bxox[baprs]-[0-9A-Za-z-]{20,}\b"),
-    "Stripe live secret": re.compile(r"\bsk_live_[0-9A-Za-z]{16,}\b"),
+    "GitLab token": re.compile(r"\bglpat-[A-Za-z0-9_-]{20,}\b"),
+    "npm token": re.compile(r"\bnpm_[A-Za-z0-9]{20,}\b"),
+    "Slack token": re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{20,}\b"),
+    "Stripe live secret": re.compile(r"\bsk_live_[A-Za-z0-9]{16,}\b"),
 }
 MACHINE_PATHS = {
     "Windows user path": re.compile(r"[A-Za-z]:\\Users\\[^\\\s]+", re.IGNORECASE),
@@ -116,11 +83,27 @@ MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 
 def repository_files() -> list[Path]:
+    # Respect Git's ignore rules instead of opening private .env/client evidence.
+    # Tracked ignored files remain visible to the independent publication guard.
+    paths = git_paths(ROOT, "--cached", "--others", "--exclude-standard")
     return [
-        path
-        for path in ROOT.rglob("*")
-        if path.is_file() and not any(part in SKIP_PARTS for part in path.relative_to(ROOT).parts)
+        ROOT / relative for relative in sorted(set(paths))
+        if not is_local_only(relative)
+        and not (ROOT / relative).is_symlink()
+        and (ROOT / relative).is_file()
     ]
+
+
+def check_local_privacy(errors: list[str]) -> None:
+    tracked = git_paths(ROOT, "--cached")
+    if any(is_local_only(p) for p in tracked):
+        errors.append("local-only configuration/evidence is tracked; stop publication and untrack it")
+    if any((ROOT / p).is_symlink() for p in tracked):
+        errors.append("tracked symlink requires review; validator will not follow it")
+    try:
+        read_config(ROOT / TEMPLATE, template=True)
+    except LocalConfigError:
+        errors.append("client example must be valid and contain placeholders only; values omitted")
 
 
 def check_required(errors: list[str]) -> None:
@@ -172,23 +155,26 @@ def check_markdown_links(files: list[Path], errors: list[str]) -> None:
 
 def check_git_diff(errors: list[str]) -> None:
     result = subprocess.run(
-        ["git", "diff", "--check", "--cached"],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
+        ["git", "diff", "--check", "--cached"], cwd=ROOT,
+        capture_output=True, text=True, check=False,
     )
     if result.returncode:
-        errors.append(result.stdout.strip() or result.stderr.strip() or "git diff --check failed")
+        # Git's diagnostic can quote a private staged line; never echo it to CI.
+        errors.append("git diff --check failed; inspect the staged diff locally")
 
 
 def main() -> int:
     errors: list[str] = []
-    files = repository_files()
-    check_required(errors)
-    check_text(files, errors)
-    check_markdown_links(files, errors)
-    check_git_diff(errors)
+    try:
+        check_local_privacy(errors)
+        files = repository_files()
+        check_required(errors)
+        check_text(files, errors)
+        check_markdown_links(files, errors)
+        check_git_diff(errors)
+    except (LocalConfigError, OSError):
+        print("Validation could not inspect repository files safely; details withheld.", file=sys.stderr)
+        return 1
     if errors:
         print("Validation failed:", file=sys.stderr)
         for error in errors:

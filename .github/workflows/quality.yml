@@ -18,3 +18,5 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+      - name: Test local-only Codex configuration boundaries
+        run: python3 -m unittest discover -s tests/ci_privacy -v
