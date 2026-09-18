@@ -1,15 +1,13 @@
 # Agent Guide
 
-## Mission and current scope
+## Mission and entry points
 
-Project Loomlight is a Windows/macOS visual Ren'Py authoring tool. Phase 0 and Phase
-1A–1D are merged and accepted. Phase 1E Scene authoring and its ordered 1E.1–1E.3 plus
-supported-target gates are complete on PR #9; integration is pending. Read
-`docs/status/CURRENT.md`, the [Phase 1E brief](docs/tasks/archive/2026-09-16-phase-1e-scene-authoring.md),
-and the [Phase 1 plan](docs/tasks/active/phase-1-vertical-slice.md) for exact evidence
-and current guidance. ADR 0003 selects Tauri 2 and ADR 0005 defines version-pinned
-staged project creation. Phase 1F and later remain unapproved and unstarted. PRs #7
-and #8 are merged and must never be replayed; do not duplicate PR #9.
+Project Loomlight is a single-user Windows x64/macOS ARM64 visual Ren'Py authoring
+tool. Read [CURRENT](docs/status/CURRENT.md) for project state,
+[HANDOVER](docs/status/HANDOVER.md) for the exact continuation branch/checkpoint,
+and the linked active task for approved scope. Do not duplicate volatile phase,
+branch or approval state in this guide. ADR 0003 selects Tauri 2; ADR 0005 defines
+version-pinned staged project creation.
 
 ## Invariants
 
@@ -26,12 +24,31 @@ and #8 are merged and must never be replayed; do not duplicate PR #9.
 - Do not commit secrets, personal data, real private game content, absolute user
   paths, logs, downloaded SDKs, build output, or credentials.
 
-## Before editing
+## Repository-first planning and checkpoint execution
 
-1. Read `docs/status/CURRENT.md`, the relevant active task, and linked ADRs.
-2. Read the closest nested `AGENTS.md` if one exists.
-3. Inspect status and history; preserve unrelated and uncommitted work.
-4. Search before reading broadly. Update canonical docs with behavioral changes.
+Follow [WORKFLOW](docs/WORKFLOW.md). Detailed implementation instructions, acceptance
+criteria, decisions, known issues, evidence and handovers belong in the repository,
+not in a long chat prompt or an external attachment.
+
+1. Read CURRENT, HANDOVER, the selected active task, relevant ADRs, and the closest
+   nested AGENTS.md before editing. Search before reading broadly.
+2. Fetch/inspect current refs, the recorded working branch, open PRs and history.
+   Preserve unrelated work. A newer timestamp is not proof of integration; never
+   reset to a historical SHA just because an old prompt names it.
+3. Execute ONE approved checkpoint per chat. Implement or investigate that checkpoint,
+   review it, run its actual gates, and resolve bounded findings with the user.
+   Do not advance to the next checkpoint in the same chat.
+4. Before stopping, commit and publish the task's checkpoint record and update the
+   existing HANDOVER.md. Record failures, missing evidence, branch/PR, exact candidate,
+   outstanding operations and the next bounded action. An interruption also needs a
+   handover; it is not a completed checkpoint.
+5. After verifying publication, give one lightweight next-chat prompt naming the
+   repository, working branch, checkpoint and handover. Link to detail rather than
+   copying it. State any approval boundary; a plan is not blanket execution approval.
+
+Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in their canonical
+homes and checkpoint evidence in the task ledger. Do not create a new handover file
+for every chat or require the next chat to find an old attachment.
 
 ## Commands
 
@@ -47,45 +64,63 @@ cargo test -p loomlight-desktop --locked  # supported desktop build environment
 npm exec -- tauri build -- --locked
 ```
 
-The core test command includes the Phase 1B hostile-race and real
-process-termination recovery suite. See docs/TRANSACTIONS.md for its platform
-contract. An official-SDK test wrapper with a skip marker is not target evidence.
+The core test command includes the Phase 1B hostile-race and real process-termination
+recovery suite. See [TRANSACTIONS](docs/TRANSACTIONS.md). An official-SDK wrapper with
+a skip marker is not target evidence.
 
 Retain the Phase 0 regression commands:
 
 ```bash
-python3 scripts/validate.py  # structure, links, privacy, secret patterns
+python3 scripts/validate.py
 python3 -m unittest discover -s spikes/lossless-source/tests -v
 python3 -m unittest discover -s spikes/renpy-sdk/tests -v
 python3 spikes/lossless-source/benchmark.py
-git diff --check            # whitespace and conflict-marker sanity
+git diff --check
 ```
 
-Stack-spike commands must remain isolated and are defined in their task brief.
-Do not present a spike as the production application.
+Run checks relevant to the changed scope, cheap checks first. Stack spikes remain
+isolated; do not present a spike as the production application.
+
+## Waiting and CI cost controls
+
+Do not use repeated model turns to poll externally observable long-running work.
+Use a qualified non-model watcher with a durable checkpoint and verified same-thread
+continuation when available. Pause autonomous goal continuation only through an
+approved, ownership-safe runtime mechanism; yield and resume from the completion
+event. Never equate queue acceptance with actual continuation.
+
+Until that mechanism is implemented and qualified on the actual host, record the
+exact run/attempt/SHA and a blocked/manual-resume handover, then stop active polling.
+Do not invoke hypothetical helper commands or claim automatic wake-up. Do not start
+a second agent, reset a goal, weaken approvals, or bypass budgets to keep work alive.
+
+No package matrix solely for documentation, no duplicate expensive run of unchanged
+validated inputs, and no automatic retry after ambiguous dispatch. Reuse acceptance
+only under an implemented, verified policy. Failed, cancelled, unavailable and skipped
+gates are not passes. Preserve exact failed/superseded run evidence.
 
 ## Security and Git
 
-- Use argument arrays for subprocesses; never interpolate project content into a
-  shell command.
+- Use argument arrays for subprocesses; never interpolate project content into shell commands.
 - Apply canonical path, containment, symlink, and archive-entry checks before I/O.
 - Keep renderer/webview privileges deny-by-default and expose typed, narrow IPC.
-- Configure identity only in this repository using the account's noreply address.
+- Use the account's noreply identity; configure local Git identity only in this repository.
 - Never rewrite history, force-push, change repository visibility, or discard work.
+- Reuse the recorded implementation branch/PR across checkpoint chats. Create a new
+  branch only when the handover calls for it and no corresponding work already exists.
+- At authorised integration/closure, merge reviewed, validated work, verify main,
+  and delete only branches proven redundant and unused. Do not merge unreviewed changes
+  merely to empty the branch list. Preserve active PRs, unique work and archive tags.
 
-## Canonical documentation
+## Canonical documentation and closure
 
-Use [docs/INDEX.md](docs/INDEX.md) as the router. Material decisions require an ADR.
-Phase 1 scope/UX lives in the canonical product/architecture/data/UI/roadmap docs; the
-ordered implementation milestones live in
-`docs/tasks/active/phase-1-vertical-slice.md`. Keep `AGENTS.md`, the index, and current
-status concise; link rather than copy where practical. Historical status snapshots
-are evidence only and do not override CURRENT or the active task.
+[INDEX](docs/INDEX.md) routes documentation; material architecture decisions require
+an ADR. Product scope/UX remains in the canonical product, architecture, data, UI and
+roadmap documents; Phase 1 milestones remain in
+[the vertical-slice plan](docs/tasks/active/phase-1-vertical-slice.md).
 
-## Handoff
-
-Each completed task updates its brief and `docs/status/CURRENT.md`, archives the brief
-when complete, and reports: outcome, changed areas, ADRs, exact validation results,
-limitations/risks, and the next bounded task. Preserve CI cost controls: cheap checks
-first, no package matrix solely for documentation, and no duplicate expensive run of
-an unchanged tested code tree. Do not reclassify failures or skipped steps as passes.
+Update canonical docs with behavioral changes. At task closure, consolidate lessons,
+archive the completed plan/evidence, remove redundant transient handovers or retain
+only a justified historical record, repair links, and reset CURRENT/HANDOVER to the
+next actual state. Never delete unique failure evidence or unresolved recovery state.
+Historical snapshots do not override live instructions.

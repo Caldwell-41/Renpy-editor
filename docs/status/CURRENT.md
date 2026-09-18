@@ -1,147 +1,54 @@
 # Current status
 
-**Updated:** 2026-09-16<br>
-**Phase:** Phase 1E Scene authoring implementation and gates complete on PR #9<br>
-**Main baseline:** `06850418b3f5e4e7a39c7b967483872ab78b68dc`<br>
-**Application candidate:** `a32a790499900d3f3231b3e212a77fab70564e01`, tree `1bf03d20d350af819c6bb7cdc4c9c35f3f0b3cbb`<br>
-**Next milestone:** Integrate PR #9; Phase 1F remains unapproved and unstarted
+**Updated:** 2026-09-19.
+**Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
+**Current maintenance task:** [CI optimisation plan](../tasks/active/ci-optimisation.md).
+**Next approved checkpoint:** W0 actual-host wait/wake feasibility, not started.
+**Exact continuation routing:** [HANDOVER.md](HANDOVER.md).
 
-## Current truth
+## Application state
 
-Phase 1E completed its ordered 1E.1 source/hierarchy/lifecycle/history gate, 1E.2
-functional Scene/recovery gate, and 1E.3 Preview/media/visual gate. Exact implementation,
-failure, local-validation and target evidence is in the completed
-[Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md). PR #9 remains
-open for integration; do not duplicate it or replay its checkpoint commits.
+Phase 0 and corrected Phase 1A-1D are integrated. Phase 1E Scene authoring PR #9
+merged on 2026-09-17 as `f1be3f0`; do not replay its commits or try to merge it again.
+The earlier CURRENT/HANDOVER statements that PR #9 awaited integration were stale.
+The [Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) records
+accepted candidate `a32a790499900d3f3231b3e212a77fab70564e01` and production run
+`35023049519`, with Windows x64/macOS ARM64 evidence and retained failed attempts.
 
-Final production run `35023049519` passed exact application candidate `a32a7904`, tree
-`1bf03d20`: Windows x64 job `104563305510` and macOS ARM64 job `104563305803` passed
-frontend, core, official Ren'Py 8.5.3 Scene/lifecycle and managed-install fixtures,
-desktop, production packaging, packaged WebView/single-instance/Scene authoring,
-privacy and dependency/licence gates. Both packaged reports recorded complete Scene
-and supporting-authoring stages. Repository-quality runs `35022880859` and
-`35022884889` also passed. Runs `35016250068` and `35021344119` remain failed evidence;
-their distinct service and production-probe corrections are recorded in the ledger.
+Preserve corrected transactions/recovery, lifecycle/single-instance behavior, N1 SDK
+handoff, supporting authoring and Scene/source/media boundaries. PRs #7 and #8 are
+merged and must not be replayed. Durable evidence remains in the archived
+[integrated correction](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md),
+[UI-operation correction](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
+and [branch reconciliation](../audits/2026-09-15-branch-reconciliation.md).
 
-Phase 1E adds exact-byte/stable-ID Scene mappings, schema-v2 multi-Chapter/Scene
-migration, reference-safe file lifecycle and committed-operation history; the approved
-Beat/Story-tree authoring and minimum safe recovery surface; Scene-local provenance
-and partial-state preview; and asset-ID-only, session-scoped media presentation. It
-does not add the Source workspace, Branches, SDK runtime UI or any Phase 1F+ scope.
+The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and
+[product roadmap](../ROADMAP.md) remain the product sequence. This maintenance plan
+does not authorise or implement Phase 1F/later application work. Preserve any separately
+approved concurrent work after inspecting actual branches/PRs.
 
-## Accepted Phase 1A–1D baseline
+## Maintenance approval and capability
 
-N1 and the integrated R1–R7 correction merged once through PR #7 as main commit
-`98855eb23a284f500cd3285247738e4c5f250bcd`, tree
-`a80d0a7b708026198f5f1ccc6b0ff9f8919c81cc`. Post-merge repository-quality run
-`34985039823` and full production run `34985039897` passed; the latter passed macOS
-ARM64 job `104434851094` and Windows x64 job `104434851128`. Do not replay PR #7.
+The user approved W0 feasibility first, one checkpoint per chat, detailed plans and
+handovers in Git, and safe branch/documentation cleanup after implementation. The
+[maintenance plan](../tasks/active/ci-optimisation.md) owns sequence and approval gates.
 
-The integrated remote implementation commit `8c19225` and its targeted
-test-wiring descendants culminate in application candidate
-`c912fcadf8160d32ec35c7a0135b12812ad65c56`, tree
-`17ae6e4f16600d86f39bf354b7649a470dcf51f2`. The candidate passed the prescribed local
-gate, repository quality, complete diff review and full production run `34982164071`:
-macOS ARM64 job `104424934281` and Windows x64 job `104424934679` both passed core,
-desktop, official SDK lifecycle/authoring/discovery/N1, packaging, WebView/single-
-instance/supporting-authoring, privacy and dependency/licence gates. Exact artifact
-IDs, digests, counts, preserved failures and compatibility limits are in the completed
-[execution ledger](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md).
+No CI helper, supervisor, automatic queue/resume bridge or evidence-reuse policy is
+implemented by this documentation publication. The actual owning Codex runtime and
+pause-ownership safety remain unqualified. Stop model-driven polling; use an explicit
+manual-resume handover until verified automatic waiting exists on the actual host.
 
-That correction provides context-aware source mapping; reloadable metadata and exact
-int64 values; validated compatibility repair; pinned Ren'Py discovery/import authority;
-session-safe behavioral UI; and complete bounded-memory recovery readiness without a
-lifetime journal cap. FLAC remains automatically discovered by the pinned scanner.
+Only documentation changes are published from the inspected main baseline. Inspect
+the publishing commit and its repository-quality check for validation; no fresh native
+application acceptance is claimed merely because docs changed.
 
-A post-merge review then reproduced one same-view renderer race: starting
-`Ctrl/Cmd+S`, close, or another operation while a supporting-authoring mutation awaited
-the bridge could invalidate its global completion token. A later success could leave
-submitted input labelled unsubmitted and controls disabled; a later failure could lose
-its error/focus/retry state. The core transaction remained safe, but this reopens R5.
-The completed [bounded follow-up](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
-scopes completion generations, serializes authoring per session, suppresses overlapping
-Flush, and adds delayed success/failure DOM plus packaged regressions. Exact candidate
-`4f6fef7a543ef817fc6e9a6d8f44744724686730`, tree
-`06b560987278148d741716d7f550034454368b5c`, passed repository-quality run
-`34992162418` and production run `34992890658`: macOS ARM64 job `104461734419` and
-Windows x64 job `104461734679` both passed the core, official SDK lifecycle/authoring/
-discovery/N1, desktop, packaging, packaged WebView/supporting-authoring, privacy and
-dependency/licence gates. PR #8 then merged with expected head `f3a9bc2` as main commit
-`3487f7c9049c8f3bbae56edc8e36eff58c364b19`, preserving final tree
-`038ea466423437d531b6b2a3ebb184bfcf2d1044`. Post-merge repository-quality run
-`34995109520` passed; production run `34995109499` passed macOS ARM64 job
-`104469271124` and Windows x64 job `104469270622`. Phase 1E built on this accepted
-baseline without replaying either corrective PR.
+## Documentation ownership
 
-## Branch reconciliation and SDK carry-forward completed
+[AGENTS](../../AGENTS.md) contains stable rules; [WORKFLOW](../WORKFLOW.md) defines
+repository-first checkpoint delivery. CURRENT is the state summary; HANDOVER is the
+single live continuation record. Detailed implementation and checkpoint evidence live
+in the active task, not chat prompts. Historical snapshots are evidence only.
 
-The user separately approved branch reconciliation. Six unchanged, already-integrated
-branches were retired after fresh ancestry/tree-equivalence and open-PR checks.
-The remaining old SDK branch was reviewed, its missing download handoff selectively
-ported, and its complete history preserved under tag
-`archive/phase-1c-network-install-fix-2026-09-15` before retirement. The retained
-corrective branches remain alongside main. No old branch was merged wholesale. Exact
-receipts are in the
-[branch reconciliation record](../audits/2026-09-15-branch-reconciliation.md).
-
-SDK correction **N1** is implemented in `02fc772d93fbe6b0709691bad15a4307a0193c93`:
-prepare managed installation once before download, so a second cleanup cannot
-quarantine the active archive. Newer provenance-before-execution, quarantine and
-platform-durability behavior remains intact. The private transport seam and four
-regressions do not add an IPC or alter the approved endpoint/checksum.
-
-Run `34935598838` passed the corrected core suite, strict Clippy, and exact-source
-Windows x64/macOS ARM64 official-archive handoff/reuse tests, then published only the
-tested files and removed temporary maintenance machinery. The baseline failure was
-reproduced first. The earlier run `34935167989` stopped on missing Clippy and remains
-failed evidence. The regular production workflow now also invokes the official
-handoff test with an explicit passed-marker requirement using its existing SDK cache.
-
-**Preserve N1; do not reimplement it or merge the archived branch.** The earlier
-targeted handoff run was not full acceptance; full application acceptance is now run
-`34982164071` at `c912fcad`.
-
-## Evidence boundary
-
-The integrated task retains its initial local report: repository validation, source/SDK
-spike tests, frontend check/build, core tests and Clippy. Its official-SDK wrapper was
-skipped on that host and desktop packaging was unavailable. Those results are not final
-supported-target acceptance. Repository quality run `34928075865` at `157b6d1` is a
-repository-validation result, not a Windows/macOS production matrix.
-
-Historical closures and exact run/job/artifact details remain in the archived task
-briefs and the byte-preserved [pre-follow-up status snapshot](CURRENT_PRE_FOLLOW_UP_2026_09_15.md)
-and [handover snapshot](HANDOVER_PRE_FOLLOW_UP_2026_09_15.md). Statements in those snapshots
-are historical, not current instructions or proof of the corrective tree.
-
-| Historical checkpoint | Evidence entry point |
-| --- | --- |
-| Phase 0 source/SDK/runtime decisions | [ADR index](../adr/README.md) and [Phase 0 corrective record](../tasks/archive/2026-09-13-phase-0-corrective-review.md) |
-| Phase 1A scaffold, run 34792368716 | [Archived scaffold task](../tasks/archive/2026-09-14-phase-1-production-scaffold.md) |
-| Phase 1B correction, run 34804861387 | [Archived transaction correction](../tasks/archive/2026-09-14-phase-1b-corrective-transaction-recovery.md) |
-| Phase 1C lifecycle, run 34814995559 | [Archived lifecycle task](../tasks/archive/2026-09-14-phase-1c-project-lifecycle.md) |
-| Phase 1C SDK/lifecycle correction, run 34832555392 | [Archived corrective task](../tasks/archive/2026-09-14-phase-1c-corrective-lifecycle.md) |
-| Phase 1C durability/races, run 34849801157 | [Archived durability task](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md) |
-| Phase 1C single-instance, run 34906232240 | [Archived single-instance task](../tasks/archive/2026-09-14-phase-1c-single-instance.md) |
-| Original Phase 1D, run 34913182173 at 343e10f | [Archived supporting-authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md) |
-
-## Remaining milestone plan
-
-The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) now explicitly assigns
-1E.1's source/hierarchy/file-lifecycle/history prerequisites, 1E.2's functional Scene
-and minimum recovery UI, and 1E.3's preview/media/polish. 1F extends that source model
-with the full Source workspace. 1G has separate Branches, SDK/runtime and local-Git
-gates. 1H requires behavioral success and failure/recovery workflows on both targets.
-
-The [roadmap](../ROADMAP.md) bounds Phase 2 selected-route context, assigns provider/
-credential/proposal gates, splits Phase 3 release capabilities, preserves Phase 4/5
-unknown-state/optional-extension boundaries, and requires an actually private channel
-for private distribution. No later phase is approved by these planning edits.
-
-## Next action
-
-Review and integrate existing PR #9 without duplicating or replaying it. The tested
-application tree has no known Phase 1E correctness blocker. Preserve the accepted
-Phase 1A–1D history, both corrective branches and the archive tag. Phase 1F requires a
-separate explicit goal and must extend the shared Scene/source transaction model rather
-than replacing it.
+Do not delete legacy branches now. At authorised closure, prove integration/redundancy,
+retain unique work/open PRs/archive tags, and consolidate redundant handovers without
+losing lessons or failed-run evidence.
