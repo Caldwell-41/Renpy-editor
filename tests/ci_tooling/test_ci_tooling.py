@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
+import urllib.error
 
 SOURCE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(SOURCE / "scripts"))
@@ -173,6 +175,24 @@ class CiToolingTests(unittest.TestCase):
         self.assertNotIn("github_pat_", diagnostic)
         self.assertNotIn("\x1b", diagnostic)
         self.assertFalse(result["accepted"])
+
+    def test_log_redirect_drops_authorization_and_bounds_download(self):
+        location = "https://logs.blob.core.windows.net/container/log.txt?signature=private"
+        redirect = urllib.error.HTTPError(
+            "https://api.github.com/logs", 302, "Found", {"Location": location}, None,
+        )
+        opener = MagicMock()
+        opener.open.side_effect = redirect
+        download = MagicMock()
+        download.__enter__.return_value.read.return_value = b"bounded-log"
+        with patch.object(ci_lib.urllib.request, "build_opener", return_value=opener), patch.object(
+            ci_lib.urllib.request, "urlopen", return_value=download
+        ) as fetch:
+            value = ci_lib.GitHubTransport("private-token").request_bytes("/safe/logs", limit=20)
+        self.assertEqual(value, b"bounded-log")
+        request = fetch.call_args.args[0]
+        self.assertNotIn("Authorization", request.headers)
+        self.assertNotIn("signature=private", repr(request.headers))
 
     def test_collect_uses_attempt_specific_pagination(self):
         filler = [self.job(f"filler-{index}") for index in range(100)]

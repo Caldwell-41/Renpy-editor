@@ -484,6 +484,33 @@ This is still documentation-only correction, not execution of Gate P or OPT-1A.
   publication, automatic quality/native-tools and the one final production run remain
   to be recorded below.
 
+### First candidate failure and bounded correction — 2026-09-19
+
+- Candidate `64836c879cc965713c7753bc83f130ff6a7ca79c` was published to PR #12.
+  Automatic quality push run `35412536443` and PR run `35412537941`, attempt 1,
+  both failed. Windows tools passed; Ubuntu validation and macOS tools failed the same
+  `test_linked_template_refused` assertion. The failed runs are retained evidence.
+- Production run `35413052524`, attempt 1, was captured directly. A second submit
+  attached to it without another POST. It failed only the cheap candidate job, so the
+  Windows/macOS package jobs were not allocated. The exact collector reported both
+  native jobs missing and `accepted=false`.
+- The cause was bounded: on symlink-capable hosts the linked public template was
+  rejected after an empty local root had been created. Template validation now precedes
+  any private directory or identity collection, and a cross-platform invalid-template
+  regression asserts that no local root exists on refusal.
+- The failure also proved authenticated job-log redirects need credentials only on the
+  GitHub request, not on the signed storage URL. The collector now follows only approved
+  HTTPS storage hosts without forwarding Authorization, and operation-bound collection
+  uses existing local credentials for failed-log evidence.
+- Controlled wrong-SHA run `35413322655`, attempt 1, failed the immutable candidate
+  identity step as designed. Collection found only `Validate candidate`; neither native
+  job existed. It is negative gate evidence, not application acceptance.
+- Retained Phase 0 evidence: lossless/source mapping passed 26 tests and the benchmark
+  completed. The legacy SDK spike suite on this Windows host produced 13 passes,
+  4 failures, 5 errors and 2 POSIX-only skips because its fixtures/assertions use POSIX
+  launchers, path parsing and executable bits. Those failures are not rewritten as
+  passes and do not substitute for the supported-target workflow.
+
 ## Primary implementation references
 
 Checked on 2026-09-19. These describe public tool/API contracts, not the user's local

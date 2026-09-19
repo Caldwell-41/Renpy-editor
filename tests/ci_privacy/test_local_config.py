@@ -130,6 +130,9 @@ class LocalPrivacyTests(unittest.TestCase):
         errors = self.errors()
         self.assertTrue(errors)
         self.assertNotIn("test-private-endpoint", " ".join(errors))
+        with self.assertRaises(codex_local.LocalConfigError):
+            codex_local.initialise(self.root, client_context=self.client_context)
+        self.assertFalse((self.root / ".codex-local").exists())
 
     def test_staged_populated_template_fails_when_worktree_is_clean(self):
         path = self.root / codex_local.TEMPLATE

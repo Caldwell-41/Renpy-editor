@@ -47,8 +47,9 @@ def main() -> int:
             operation = store.get(args.operation) if store else None
             if operation and (operation["run_id"] != args.run or operation["attempt"] != args.attempt):
                 raise CiError("Requested run/attempt does not match the selected operation.")
+            transport = GitHubTransport.from_local_credentials(ROOT) if operation else GitHubTransport()
             result = collect(
-                GitHubTransport(), run_id=args.run, attempt=args.attempt,
+                transport, run_id=args.run, attempt=args.attempt,
                 expected_sha=operation["candidate_sha"] if operation else None,
                 expected_ref=operation["ref"] if operation else None,
             )

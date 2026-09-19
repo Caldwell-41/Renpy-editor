@@ -115,8 +115,27 @@ class GitHubTransport:
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request("https://api.github.com" + path, headers=headers, method="GET")
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, request, file_pointer, code, message, response_headers, new_url):
+                return None
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            try:
+                urllib.request.build_opener(NoRedirect).open(request, timeout=self.timeout)
+                raise CiError("Job log endpoint returned no download redirect.")
+            except urllib.error.HTTPError as response:
+                if response.code != 302:
+                    raise
+                location = response.headers.get("Location", "")
+            parsed = urllib.parse.urlsplit(location)
+            if parsed.scheme != "https" or not (
+                parsed.hostname and (
+                    parsed.hostname.endswith(".blob.core.windows.net")
+                    or parsed.hostname.endswith(".githubusercontent.com")
+                )
+            ):
+                raise CiError("Job log redirect host was not approved.")
+            download = urllib.request.Request(location, headers={"User-Agent": "loomlight-ci-operation/1"})
+            with urllib.request.urlopen(download, timeout=self.timeout) as response:
                 value = response.read(limit + 1)
                 return value[:limit]
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
@@ -437,7 +456,7 @@ def sanitize_diagnostic(value: bytes, *, truncated: bool) -> str:
     )
     for pattern, replacement in substitutions:
         text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-    lines = [line[-500:] for line in text.splitlines()[-40:]]
+    lines = [line[-500:] for line in text.splitlines()[-120:]]
     result = "\n".join(lines)
     if len(result) > 12000:
         result = result[-12000:]

@@ -252,6 +252,7 @@ def initialise(
     path = profile_path(root, client_context)
     private_paths = tuple(path.with_name(name) for name in PRIVATE_SUFFIXES)
     assert_ignored(root, private_paths)
+    template = read_config(root / TEMPLATE, template=True)
 
     # Creating a blank directory is safe; identifying observations are collected only
     # after its permissions have been checked on the native host.
@@ -260,7 +261,6 @@ def initialise(
     if context is None:
         context = bootstrap_context(root)
 
-    template = read_config(root / TEMPLATE, template=True)
     parent = root / LOCAL_DIR
     for part in path.parent.relative_to(parent).parts:
         parent /= part
