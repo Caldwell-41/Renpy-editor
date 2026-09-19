@@ -4,8 +4,8 @@
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Branch / PR:** `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
 **Delivery:** Privacy corrections (Gate P) and OPT-1A (Gate A).
-**State:** Implementation complete, self-reviewed, published and review-ready; user
-acceptance and integration have not occurred.
+**State:** Second corrective pass selected after review; implementation is not currently accepted as complete.
+**Corrective brief:** [OPT-1A second corrective pass](../tasks/active/ci-opt-1a-second-corrective-pass.md).
 **W1 prerequisite:** W0 automatic support remains unqualified/no-go and is not waived.
 
 ## What was delivered
@@ -74,16 +74,4 @@ goal restoration, and demonstrated loaded/unloaded/inactivity behavior with zero
 autonomous model inference. Passing CI and privacy setup does not satisfy that separate
 prerequisite.
 
-The next chat may perform only the documented W1 entry review. If W0 is still
-unqualified, record the blockers and stop. Do not implement W1, repeat live W0 probes,
-start W2/W3/OPT-2, merge PR #12, or clean branches without separate authority.
-
-Suggested next-chat prompt:
-
-```text
-/goal — W1 entry review only
-Repository: https://github.com/Caldwell-41/Renpy-editor
-Continue maintenance/ci-optimisation and PR #12. Read AGENTS.md and
-docs/status/HANDOVER.md. Check the documented W1 entry evidence. If W0 remains
-unqualified, record the blockers and stop; do not implement W1 or repeat live probes.
-```
+The next chat must execute the linked second corrective pass. It moves private runtime state out of the Git worktree, removes obsolete repository-local protection complexity, fixes the reviewed CI identity/reconciliation/collector/publication defects, and then performs a fresh integrated Gate P + OPT-1A acceptance review. Do not implement W1 during that work. After the correction is published and verified, update this handover from the actual result and perform the conditional W1 entry decision specified in the corrective brief.
