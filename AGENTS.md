@@ -36,49 +36,56 @@ explicit exception: publish sanitised conclusions, never identifiable client sta
 2. Fetch/inspect current refs, the recorded working branch, open PRs and history.
    Preserve unrelated work. A newer timestamp is not proof of integration; never
    reset to a historical SHA just because an old prompt names it.
-3. Execute ONE approved checkpoint per chat. Implement or investigate that checkpoint,
-   review it, run its actual gates, and resolve bounded findings with the user.
-   Do not advance to the next checkpoint in the same chat.
-4. Before stopping, commit and publish the task's checkpoint record and update the
-   existing HANDOVER.md. Record failures, missing evidence, branch/PR, exact candidate,
-   outstanding operations and the next bounded action. An interruption also needs a
-   handover; it is not a completed checkpoint.
-5. After verifying publication, give one lightweight next-chat prompt naming the
-   repository, working branch, checkpoint and handover. Link to detail rather than
-   copying it. State any approval boundary; a plan is not blanket execution approval.
+3. Execute one approved checkpoint per chat by default. If the user explicitly groups
+   named checkpoints, record that exception/order in the active brief and HANDOVER;
+   complete that bounded group in one chat without unnecessary approval pauses between
+   passing internal gates. Keep separate evidence and do not expand beyond the group.
+4. Self-review and run actual gates; resolve bounded findings. Before stopping, commit
+   and publish the task record and existing HANDOVER.md, including failures, missing
+   evidence, branch/PR, candidate, pending operations and the next bounded action.
+   An interruption also needs a handover; it is not a completed checkpoint.
+5. After verifying publication, give one lightweight next-chat prompt naming the repo,
+   branch, selected checkpoint and handover. Do not copy the implementation plan.
+   Review every next-checkpoint prerequisite independently; a missing capability pass
+   cannot be inferred from unrelated tests. Give a readiness/recovery selector when
+   needed rather than falsely authorising implementation.
 
-Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in their canonical
-homes and checkpoint evidence in the task ledger. Do not create a new handover file
-for every chat or require the next chat to find an old attachment.
+Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in canonical
+homes and evidence in task ledgers. Do not create a handover per chat or require the
+next chat to find an old attachment. Full requirements remain in the linked brief.
 
 ## Local Codex client setup and privacy
 
-Follow [LOCAL_CODEX_CONFIG](docs/LOCAL_CODEX_CONFIG.md) on EVERY new client and
-revalidate the binding on every task/session. On the actual execution host, run
-`python scripts/codex_local.py init` with a verified available Python interpreter,
-then complete only locally verified runtime fields in its ignored private profile.
-Do not print the profile or native command output into GitHub. Unknown values remain
-null; missing access is not permission to invent a host, endpoint or thread ID.
+Follow [LOCAL_CODEX_CONFIG](docs/LOCAL_CODEX_CONFIG.md) on EVERY new actual client and
+revalidate ownership on every task/session. First read its implementation-status and
+known-gap section: do not create sensitive local data with safeguards known to be
+incomplete. Perform authorised corrective work on synthetic fixtures first.
 
-Keep host/usernames, device/client IDs, private addresses/endpoints, home/workspace/
-binary paths, binary hashes, installed-build inventory and all thread/session/goal/
-queue/turn bindings only in `.codex-local/` or protected local environment/storage.
-Never commit them, copy them into PRs/issues/CI logs/artifacts/screenshots, or publish
-a stable hash as an allegedly anonymous substitute. Tokens remain in credential stores
-or protected local environment variables; templates contain placeholders only.
+Once destination and storage protections pass, initialise using
+`python scripts/codex_local.py init` with a verified available interpreter and complete
+only locally verified runtime fields. Do not print the profile or native output into
+GitHub. Unknown fields remain null; missing access is not permission to invent a
+host, endpoint or task ID. Treat any future options in the brief as planned until coded.
 
-The bootstrap creates separate profiles for different detected contexts, preserves
-existing values and leaves automatic mode disabled. It is NOT runtime qualification.
-A new session must obtain and cross-check its current task ID through its actual
-owner; never copy a previous task ID, use `--last`, or inherit another client's
-qualification/pause authority. Recheck indistinguishable contexts and changed runtimes
-explicitly; separate shared-checkout writers before making task changes.
+Keep host/usernames, client/device IDs, private addresses/endpoints, home/workspace/
+binary paths, binary hashes, installed-build inventory and thread/session/goal/queue/
+turn bindings only in protected local storage. Never commit them or copy them into
+PRs/issues/CI logs/artifacts/screenshots. A stable hash is not anonymous permission to
+publish. Tokens stay in credential stores/protected local environment; templates blank.
 
-If the actual client cannot be reached, record only `client setup unavailable` and
-perform authorised host-independent work. Initialising this chat's unrelated sandbox
-would not satisfy actual-client setup. Never request credentials or private paths in
-shared chat to fill the template. Before publishing run privacy tests and inspect the
-staged diff. Force-added local files are failures, not exceptions to the privacy rule.
+Routing observations and an existing profile do not establish runtime ownership or
+distinguish identical-looking clients. Use explicit verified local client selection,
+preserve existing profiles, and keep ambiguous/stale bindings unverified. Obtain the
+current task ID afresh through the actual owner, not `--last` or another client's
+settings. No inherited qualification or pause authority. Separate shared-checkout
+writers. Automatic waiting stays disabled until its own host/runtime gates pass.
+
+If the actual client is unreachable, record only `client setup unavailable` and do
+approved host-independent work. An unrelated sandbox does not count as setup. Do not
+request secrets/private paths in shared chat. Before publication inspect staged bytes
+and working-copy scope; force-added local files are errors. Git ignore and local access
+permissions are separate requirements; native Windows privacy needs an actual ACL check
+or safe refusal before identifying data is written, not a POSIX-mode assumption.
 
 ## Commands
 
@@ -94,11 +101,9 @@ cargo test -p loomlight-desktop --locked  # supported desktop build environment
 npm exec -- tauri build -- --locked
 ```
 
-The core test command includes the Phase 1B hostile-race and real process-termination
-recovery suite. See [TRANSACTIONS](docs/TRANSACTIONS.md). An official-SDK wrapper with
-a skip marker is not target evidence.
-
-Retain the Phase 0 regression commands and scoped privacy checks:
+The core suite includes hostile-race and real process-termination recovery tests.
+See [TRANSACTIONS](docs/TRANSACTIONS.md). A skipped SDK wrapper is not target evidence.
+Retain Phase 0 regressions and scoped privacy checks:
 
 ```bash
 python3 scripts/validate.py
@@ -109,27 +114,26 @@ python3 spikes/lossless-source/benchmark.py
 git diff --check
 ```
 
-Run checks relevant to the changed scope, cheap checks first. Stack spikes remain
-isolated; do not present a spike as the production application.
+Run relevant cheap checks first; keep stack spikes isolated. Existing test success
+covers only those tests, not known untested privacy or runtime cases. New CI tooling
+commands become mandatory only when implemented/documented by the current delivery.
 
 ## Waiting and CI cost controls
 
 Do not use repeated model turns to poll externally observable long-running work.
 Use a qualified non-model watcher with a durable checkpoint and verified same-thread
-continuation when available. Pause autonomous goal continuation only through an
-approved, ownership-safe runtime mechanism; yield and resume from the completion
-event. Never equate queue acceptance with actual continuation.
+continuation when available. Pause autonomous goals only through approved ownership-safe
+control; yield and resume from the completion event. Queue acceptance is not continuation.
 
-Until that mechanism is implemented and qualified on the actual host, record the
-exact Actions run/attempt/SHA and a blocked/manual-resume handover, then stop active
-polling. Private Codex routing IDs stay local. Do not invoke hypothetical helper
-commands or claim automatic wake-up. Do not start a second agent, reset a goal,
-weaken approvals, or bypass budgets to keep work alive.
+Until implemented/qualified on the actual host, record Actions run/attempt/SHA and a
+manual-resume handover, then stop active polling. Private routing stays local. Do not
+invoke hypothetical helpers, claim automatic wake-up, launch a second agent, reset a
+goal, weaken approvals or bypass budgets to keep work alive.
 
 No package matrix solely for documentation, no duplicate expensive run of unchanged
-validated inputs, and no automatic retry after ambiguous dispatch. Reuse acceptance
-only under an implemented, verified policy. Failed, cancelled, unavailable and skipped
-gates are not passes. Preserve exact failed/superseded run evidence.
+validated inputs, and no blind retry after ambiguous dispatch. Reuse acceptance only
+under an implemented verified policy. Failed/cancelled/unavailable/skipped gates are
+not passes. Preserve run evidence; identify branch-head versus PR merge-tested SHA.
 
 ## Security and Git
 
@@ -137,23 +141,21 @@ gates are not passes. Preserve exact failed/superseded run evidence.
 - Apply canonical path, containment, symlink, and archive-entry checks before I/O.
 - Keep renderer/webview privileges deny-by-default and expose typed, narrow IPC.
 - Use the account's noreply identity; configure local Git identity only in this repository.
-- Never rewrite history, force-push, change repository visibility, or discard work.
-- Reuse the recorded implementation branch/PR across checkpoint chats. Create a new
-  branch only when the handover calls for it and no corresponding work already exists.
-- At authorised integration/closure, merge reviewed, validated work, verify main,
-  and delete only branches proven redundant and unused. Do not merge unreviewed changes
-  merely to empty the branch list. Preserve active PRs, unique work and archive tags.
+- Never rewrite history, force-push, change visibility, or discard work.
+- Reuse the recorded branch/PR across chats. Create one only if the handover calls for
+  it and corresponding work does not already exist.
+- At authorised closure, merge reviewed/validated work and delete only proven redundant
+  inactive branches. Preserve unique work, active PRs and archive tags. Do not merge
+  unrelated/unreviewed work merely to empty the branch list.
 
 ## Canonical documentation and closure
 
-[INDEX](docs/INDEX.md) routes documentation; material architecture decisions require
-an ADR. Product scope/UX remains in the canonical product, architecture, data, UI and
-roadmap documents; Phase 1 milestones remain in
-[the vertical-slice plan](docs/tasks/active/phase-1-vertical-slice.md).
+[INDEX](docs/INDEX.md) routes docs; material architecture decisions require an ADR.
+Product scope remains in canonical product/architecture/data/UI/roadmap documents;
+Phase 1 stays in [its vertical-slice plan](docs/tasks/active/phase-1-vertical-slice.md).
 
-Update canonical docs with behavioral changes. At task closure, consolidate lessons,
-archive the completed plan/evidence, remove redundant transient handovers or retain
-only a justified historical record, repair links, and reset CURRENT/HANDOVER to the
-next actual state. Never delete unique failure evidence or unresolved recovery state.
-Historical snapshots do not override live instructions. Review summaries distinguish
-reported original observations from independently repeated probes.
+Update canonical docs with behavioral changes. At closure consolidate lessons, archive
+finished plans/evidence, remove only redundant handovers, repair links and reset live
+status to the actual next task. Preserve unique failure evidence and unresolved private
+recovery state. Historical snapshots do not override current instructions. Distinguish
+reported original observations from independently repeated proof.

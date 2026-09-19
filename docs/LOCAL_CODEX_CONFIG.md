@@ -1,131 +1,136 @@
 # Local-only Codex client configuration
 
-**Established:** 2026-09-19, during the W0 review at the user's request.
-This is a privacy/bootstrap contract, not an implemented wait/wake mechanism.
+**Established:** 2026-09-19, at the user's request.
+This is a privacy/bootstrap contract, not an implemented automatic wait/wake mechanism.
+
+## Implementation status and known gaps
+
+The reviewed bootstrap/validator at `33d0e202` does not yet fully enforce this contract.
+The validator checks tracked names but reads template/text from the working copy;
+the initializer checks an ignored sentinel rather than its actual destination. Existing
+16 passing tests do not cover those bypasses. Native Windows ACL protection and
+explicit distinction between identical-looking clients also need correction/qualification.
+
+The user has approved these fixes as Gate P of the
+[combined privacy plus OPT-1A brief](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+Run its synthetic regressions and corrections before trusting sensitive bootstrap
+writes. Publishing this document does not implement them. The implementation chat must
+update this status with actual results, not leave this warning indefinitely or claim
+future protections already exist.
 
 ## What belongs where
 
 | Information | Storage |
 | --- | --- |
-| Hostname, username, home/workspace paths, executable paths, Codex home, socket/pipe/endpoint, private IP or DNS, process IDs, device/client IDs, binary hashes, installed-version/build inventory | Private client profile or local evidence only. |
-| Current thread/session/goal IDs, queue/turn/claim IDs, pause ownership, operation journal and raw telemetry | Private per-task state only, never a shared handover. |
-| Tokens, passwords and private keys | Existing credential store or locally protected environment; never a template or publication. |
-| Generic OS/architecture categories, public upstream source tags/schema references, capability outcomes, test names, repo commit/PR/Actions IDs | May be published if they do not include host data or identify the local client. |
+| Hostname, username, paths, Codex home, socket/pipe/endpoint, private IP/DNS, process/device/client identities, binary hashes and installed-build inventory | Protected local client profile/evidence only. |
+| Thread/session/goal/queue/turn/claim IDs, pause ownership, raw telemetry and operation journal | Private per-task state, never shared handover. |
+| Tokens/passwords/private keys | Existing credential store or protected local environment. |
+| Generic platform categories, public upstream source/schema references, capability/test outcomes, repo commit/PR/Actions references | Share only after excluding host-identifying data. |
 
-The rule covers repository files, commits, PR bodies/comments, issues, Actions output,
-job summaries, screenshots, uploaded artifacts and handovers. Hashing a device ID or
-endpoint is not permission to publish a stable fingerprint. Do not upload local files
-as artifacts, include them in archives, or put them in temporary commits. Sanitise an
-explicit allowlist of result fields instead of trying to redact an environment dump.
+This covers commits, PR bodies/comments, issues, Actions output, summaries, screenshots,
+artifacts and handovers. Hashing a private ID/endpoint is not permission to publish a
+stable fingerprint. No local profiles in archives, temporary commits or artifacts.
+Export an allowlist of result fields, not a redacted environment dump.
 
-The sole committed client template is
-[`config/codex-client.example.json`](../config/codex-client.example.json). Its runtime
-fields must remain null. The existing `.env.example` is also placeholders only.
-`.env`, `.env.*` (except `.env.example`) and `.codex-local/` are local-only.
+The committed template is [config/codex-client.example.json](../config/codex-client.example.json).
+It stays blank/null. `.env.example` also contains placeholders only. Other `.env` files
+and `.codex-local/` stay local. A random per-CI-request correlation ID may be sent to
+GitHub only when independent of all private client/thread/host identity; it is not a
+client fingerprint or permission to export a local journal.
 
-## Mandatory agent setup on each client
+## Agent setup on each actual client
 
-After reading AGENTS and before running Codex-host probes or configuring CI helpers,
-the agent must initialise local state on the machine actually running the task:
+First read AGENTS and the status above. Once Gate P protection is implemented and
+verified, the agent runs the documented local initializer on the actual execution host:
 
 ```text
 python scripts/codex_local.py init
 ```
 
-Use a verified available Python 3 interpreter; an alias may be absent. Do not install
-or download one automatically. If this chat has no local execution access to the actual
-client, record `client setup unavailable` without host values and continue only
-host-independent authorised work. Setting up a sandbox elsewhere is not client setup.
+Use an available verified Python interpreter; do not auto-install one. No actual host
+access means `client setup unavailable`, not surrogate setup in another sandbox.
+Authorised host-independent CI development/testing can still proceed.
 
-The helper checks that private paths are untracked and ignored, creates a protected
-local profile, and prints only created/existing, unverified and automatic-mode-off
-status. It does not invoke Codex, read credentials, connect to a daemon, set environment
-variables in another process, start inference or install anything.
+The existing helper is non-networking and does not invoke Codex, read credentials,
+change another process's environment, install a service or enable inference. It creates
+routing-profile scaffolding, not a verified runtime connection. Any new selection/
+verification options specified in the brief remain hypothetical until implemented.
 
-Profiles live below `.codex-local/clients/<local-routing-key>/client.json`. The routing
-key depends on local host/user/workspace and declared Codex home/launcher observations.
-A different detected client context receives a separate blank profile; existing values
-are not overwritten or copied into the new profile. This is convenient routing, not
-an authoritative device identity or proof that two identical-looking contexts are the
-same runtime. Profiles and their routing keys stay local.
+Keep reusable local client configuration separate from private per-task bindings.
+The old hostname/home/workspace/Codex-home/PATH routing key does not uniquely identify
+an owning runtime. Gate P must provide explicit local client selection/rebinding so
+identical observations do not silently reuse another client's settings. Preserve existing
+profiles; do not copy or overwrite them. Unknown/changed/ambiguous clients stay unverified.
 
-To locate the current file for local editing, capture the output of
-`python scripts/codex_local.py path` into a local shell variable. Do not paste that
-path or its contents into GitHub or a shared prompt. Never source a generated `.env`
-as shell code or invent an endpoint from a historical report.
+Every session obtains its native task ID afresh and cross-checks it through the actual
+owner with the expected workspace and permission profile. Never use `--last`, a global
+current-thread default, or another client's IDs. Runtime upgrades, endpoint changes,
+client changes and lost observation invalidate affected qualifications. An existing
+profile or executable match is insufficient. No cross-host takeover or inherited pause
+ownership is implied by repo access.
 
-The agent then completes each applicable runtime field using the current client's
-native, approved interfaces. `auth_token_env` is the NAME of an existing local
-credential environment variable, not its value. Unknown fields stay null. Record a
-missing capability explicitly instead of asking for secrets in chat, scanning ports,
-reading unrelated credential stores or copying another machine's configuration.
+The agent completes only locally verified fields. `auth_token_env` holds a variable
+NAME, not its secret value. Unknown values remain null. Never ask for secrets/private
+paths in shared chat, scan ports, read unrelated credential stores or execute generated
+`.env` text as shell code. Capture any identity-bearing setup outputs locally without
+copying them into GitHub. Automatic waiting remains false until W0/W2/W3 gates qualify
+that path. CI-only tools must report Codex unavailable separately from CI capability.
 
-Before EVERY session/operation, revalidate the owning runtime and workspace through
-its actual host interface. A persisted profile and a working launcher are not ownership
-proof. A new installation, endpoint/version change or interrupted observation invalidates
-old capability assumptions. Bind the current native thread ID afresh and cross-check
-it through the owning runtime; never keep a global current-thread default, use `--last`,
-or copy another thread's IDs. Runtime task bindings belong in private per-task files
-below `.codex-local/tasks/` or an approved private per-user directory, not this reusable
-client template. No task binding/journal implementation is added by this bootstrap.
+## Storage protection and recovery
 
-Until W0/W2 actually qualify safe continuation, automatic mode remains false even after
-all local fields are filled. A new client does not inherit another client's capability
-pass, pause authority, queued events or pending work. Shared checkouts/concurrent clients
-require separate task ownership; this helper does not implement distributed locking.
+Validate the exact destination's untracked/ignored status, including used temporary/
+lock/evidence paths, before creation. Effective ignore negations matter; a protected
+sentinel does not prove a profile is protected. Detect existing exposed untracked
+private files without opening or printing them. Recheck before writing and publishing.
+These are Gate P requirements, not claims about the reviewed implementation.
 
-## Local permissions and recovery
+Verify protected storage BEFORE collecting/persisting identifying bootstrap fields.
+POSIX 0700/0600 checks are not Windows ACL proof. On Windows require a current-account
+ACL check or safe refusal before sensitive writes; a documented preprotected per-user
+root may be used. No administrator requirement or system-wide policy changes merely to
+configure this repo. Native positive/negative behavior needs actual evidence; mocks
+and skips cannot be labelled native qualification.
 
-The helper creates private POSIX directories/files with modes 0700/0600, refuses
-existing broad POSIX permissions, static symlink/reparse paths and linked files, and
-uses exclusive creation rather than overwriting an existing profile. Malformed/partial
-files cause a safe error; inspect and repair them locally without discarding unresolved
-task evidence. This bootstrap is not a journal or a defence against a hostile same-user
-filesystem writer. Native Windows ACL and lifecycle qualification remain W2 work.
+Refuse symlink/reparse/hardlink or malformed unsafe paths/files; preserve existing
+profiles and unresolved data. Exclusive creation must not clobber another initializer.
+Describe the non-hostile-same-user boundary honestly rather than claiming a complete
+filesystem security barrier. Store journals separately from Codex's internal databases;
+no shared native/WSL live database. A bootstrap profile is not the future event journal.
 
-On Windows, the agent must verify that the chosen workspace/profile storage is
-accessible only to the intended account before entering credentials or sensitive
-runtime bindings. Move to separately protected local storage if necessary; do not assume
-POSIX mode arguments establish a Windows ACL. Do not auto-change system-wide policies.
+Do not copy profiles between clients/clones as proof of compatibility. Preserve pending
+private events when changing clients; the repo transfers task intent, not runtime rights.
+Choose a private backup policy; GitHub is not that backup. Missing local evidence stays
+unavailable until re-probed under appropriate authority, never reconstructed from prose.
 
-Do not copy profiles into a fresh clone or across machines. Preserve unresolved events
-and evidence when changing clients. Git history and the shared handover transfer task
-intent; they do not transfer the right or technical ability to resume a private thread.
-Local state has no backup guarantee: choose a private backup policy without pushing it
-to GitHub. If local proof was not retained, record it unavailable and re-run only under
-the appropriate checkpoint authority.
+## Publication validation contract
 
-## Validation and publication boundary
+After implementation, inspect BOTH the exact staged Git blobs and the public working
+copy. Stage modes/conflicts/object failures must fail safely; no textconv, filters or
+symlink traversal to inspect raw blobs. A clean working copy or unstaged deletion must
+not hide private staged data. No automatic restaging or index mutation by the validator.
+Revalidate the actual candidate if the index changes. Keep local-only pathname checks
+independent of contents and check the staged template remains blank.
 
-Run the repository validator and privacy regressions before publishing:
+Read tracked and non-ignored public files, not a recursive scan of private state.
+Diagnostics never echo private values, offending private paths or unsanitised Git
+stderr. CI uses synthetic contexts only and must not initialise a real user profile.
+Run the actual implemented validator/tests and inspect the staged diff before publishing:
 
 ```text
 python scripts/validate.py
 python -m unittest discover -s tests/ci_privacy -v
 ```
 
-The validator uses Git's tracked plus non-ignored untracked file list, not a recursive
-walk through private local data. A separate index guard rejects local-only files even
-when someone force-adds them. It checks the committed client template remains blank.
-Diagnostics must not echo configuration values or offending private filenames. Tests
-use synthetic contexts only; Actions must never initialise a real user profile.
+Ignore rules/index guards reduce accidents, not arbitrary identifying prose/screenshots
+or every possible secret. Current-tip checks also do not detect every earlier-commit
+exposure. No temporary commits of private data. If exposure is found, stop publication,
+untrack safely, assess/rotate credentials as needed, and obtain authority before history
+rewriting. Removing current text is not retroactive erasure.
 
-These checks reduce accidental exposure but cannot recognise arbitrary identifying
-prose, screenshots or every secret. Review the staged diff and artifact allowlists as
-well. `.gitignore` does not untrack existing files or remove history. If a local-only
-file was tracked, stop publishing, remove it from the index, assess actual exposure,
-and rotate exposed credentials when needed. History rewriting needs explicit authority.
-Removing current text is not retroactive erasure from prior commits.
+## Historical evidence boundary
 
-## W0 review boundary
-
-The earlier W0 documents did not contain a raw endpoint, user path, full thread ID or
-credential in the reviewed changes. They did associate an exact desktop build with
-the investigated host; current documents no longer retain that inventory. Prior Git
-history remains unchanged. Public source tags remain as code references, not settings
-for a new client.
-
-The review cannot reconstruct the original private probes from public summaries.
-Future probes retain exact versions, source/schema hashes, owner checks and bounded
-raw receipts locally; publish only methods, result categories and unresolved limits.
-Do not export deterministic hashes of that private evidence as client fingerprints.
+The reviewed W0 changes contained no raw endpoint/user path/full thread ID/credential;
+installed desktop-build inventory was removed from current text but remains in old
+commits. Public source tags remain code references, not new-client settings. Original
+private probes were not replayed by the remote review. Future exact version/schema/
+owner receipts stay local; shared reports contain only methods, results and limits.

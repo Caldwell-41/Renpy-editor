@@ -3,66 +3,64 @@
 **Prepared:** 2026-09-19.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Branch / PR:** `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
-**Checkpoint:** W0 review plus user-requested local-only configuration safeguards.
-**Outcome:** Review ready; automatic wait/wake remains unqualified/no-go. No later
-checkpoint has been started or approved by this review.
+**Approved next delivery:** **Privacy corrections/checks AND OPT-1A in one chat.**
+**State:** Approved, not started by this documentation amendment.
+**W1 prerequisite:** W0 automatic support remains unqualified/no-go; not waived.
 
-## Entry and baseline
+## Read and continue
 
-Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md),
-[WORKFLOW](../WORKFLOW.md), [local client setup](../LOCAL_CODEX_CONFIG.md),
-[active plan](../tasks/active/ci-optimisation.md) and
-[qualification report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md).
-Reuse this branch/PR. The review started at `7062f63e73025feffe240faffc88418ea3e5c895`,
-following W0 evidence candidate `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`.
-Main's planning baseline was `7d634eeaf53fe0244a2739f26914797ca16ef544`.
-Resolve current remote head; these are evidence references, not reset instructions.
+Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md),
+then the [combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+It owns the detailed correction plan, OPT-1A design, tests, self-review and next-prompt
+rules. [LOCAL_CODEX_CONFIG](../LOCAL_CODEX_CONFIG.md) owns privacy boundaries;
+[the parent roadmap](../tasks/active/ci-optimisation.md) owns later dependencies;
+[W0 qualification](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) retains runtime limits.
+Do not require earlier chat text or attachments to reconstruct the task.
 
-## Review changes
+The documentation amendment is based on review candidate
+`33d0e202b2116d11e12c316313f9c1bd0888731e`; main was
+`7d634eeaf53fe0244a2739f26914797ca16ef544`. Resolve current remote refs and preserve
+any newer/uncommitted work. Reuse the existing branch/PR; these SHAs are evidence, not
+reset instructions. No new branch, merge or deletion is needed for this delivery.
 
-Corrected stale not-started/new-branch text; qualified unsupported-host claims to the
-actual path examined; retained unperformed live-test gates. Private observations are
-not represented as independently repeated proof. Removed installed desktop-build
-inventory from current shared text; prior commits remain unchanged.
+## Execute this approved sequence
 
-Added `scripts/codex_local.py`, a placeholder-only client template, `.codex-local/`
-ignore rules, local-configuration policy, validator index guards and offline privacy
-tests in the cheap quality job. Initialisation never contacts Codex or GitHub, touches
-credentials, manipulates a goal, or enables automatic waiting. A distinct detected
-client context gets a fresh blank profile; every session still verifies actual ownership.
+1. Gate P: reproduce the staged-template/clean-working-copy and sentinel/exact-ignore
+   defects with synthetic regression tests, fix them, and verify client/storage safety.
+   Do not initialise identifying local data through uncorrected safeguards.
+2. Gate A: after P passes, continue directly to OPT-1A in THIS chat without another
+   approval pause. Implement and validate the candidate-bound CI operation foundation
+   exactly as specified. Keep identifying client values local and bind each real client
+   afresh. CI tools must not require automatic Codex resumption to work.
+3. Review the integrated work against both gates; fix bounded findings; run relevant
+   cheap/native tooling checks and the ready-candidate workflow validation. Preserve
+   actual failures/skips/pending work; do not manufacture a pass to reach W1.
+4. Publish the brief's result ledger, current state and THIS handover, update PR #12,
+   then give one short next-chat selector and stop. Do not create another handover file.
 
-Raw host/client identity and runtime task/queue/turn bindings stay local, including
-local evidence. Never copy them into this handover, commits, PRs, CI output or artifacts.
-Before using host-specific tooling on a new client, run the documented local bootstrap
-on that actual host and complete verified fields locally. This remote review did not
-set up the user's real client or infer its current runtime values.
+## Acceptance and waiting boundaries
 
-## Validation and limitations
+All concrete tests and live-CI limits are in the brief. Existing Repository quality
+run `35406289376` passed the prior validator and 16 tests using PR merge-test SHA
+`f98551d451fd4d14857f4b5646de5e0fe600fee9`; it does not cover the new defects or prove
+future OPT-1A. The current publication is documentation only. Inspect its own check,
+and record subsequent implementation evidence under the actual tested revision.
 
-Local review: **16 offline privacy/bootstrap tests passed**, with no skips, on
-synthetic Git fixtures in the Linux review environment. Changed-file privacy and staged
-whitespace checks passed. The publishing commit contains these tests and their
-quality-workflow step. Run `python -m unittest discover -s tests/ci_privacy -v` and
-`python scripts/validate.py` on the actual checkout; inspect the exact publishing
-commit's checks for full repository validation. The local review exercised synthetic
-Git fixtures and changed-file checks, not a full downloaded checkout.
+Do not poll running workflows using repeated model turns. Persist run/attempt/candidate
+and next collection action, then use a supported ordinary wait or a manual-resume
+handover. Unknown dispatch is not permission to resend. On interruption preserve
+awaiting/blocked state and resume that same operation, not a fresh candidate by default.
+No runtime queue message, observer or service is pending from this amendment.
 
-Original W0 evidence includes successful Repository quality runs `35404027500` and
-`35404031132`, attempt 1, for `2917b50a0c469d9308c0cb118a1a36ad554760fd`.
-Those checks validate documentation, not live runtime feasibility or this review's
-new code. The publishing commit/checks provide the new receipt; do not commit another
-handover merely to chase its own SHA or CI result.
+## W1 handoff decision
 
-No native Windows/macOS bootstrap execution or ACL qualification, live queue/resume,
-actual goal suspension/inactivity, watcher persistence or production matrix was run
-by this review. The bootstrap is not a durable event journal or a hostile-local-writer
-security boundary. No operation was registered, queued or left awaiting recovery.
+If P and OPT-1A pass, publish that result and inspect W1 entry evidence. W1 implementation
+also requires an actual W0 go for the intended host. Current W0 remains no-go: unit tests,
+CI success, completed privacy setup or this approval do not change it. Do not run live
+W0 probes or W1 implementation within this combined chat.
 
-## Next bounded action
-
-Stop for user review. Independent **OPT-1A** is the recommended next separately
-selected checkpoint; it does not require automatic Codex wake-up. Alternatively the
-user may select W0 recovery after its missing prerequisites change. Do not automatically
-repeat blocked discovery, start W1-W3, install services, migrate clients or weaken gates.
-Each next chat must publish its ledger and this single handover before giving a small
-next-chat prompt. Integration and branch/documentation cleanup remain CLOSE work.
+With all entry gates proven, provide the short W1-only prompt for a SEPARATE chat.
+If P/OPT-1A pass but W0 remains blocked, provide the brief's **W1 entry-review-only**
+prompt and explicitly report why implementation cannot start. If P/OPT-1A are incomplete,
+provide only their precise recovery prompt. Always publish the handover, even on failure.
+Do not silently reopen unchanged W0 discovery or skip to W2/W3/OPT-2/CLOSE.
