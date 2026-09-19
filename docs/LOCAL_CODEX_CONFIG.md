@@ -3,20 +3,21 @@
 **Established:** 2026-09-19, at the user's request.
 This is a privacy/bootstrap contract, not an implemented automatic wait/wake mechanism.
 
-## Implementation status and known gaps
+## Implementation status and known limits
 
-The reviewed bootstrap/validator at `33d0e202` does not yet fully enforce this contract.
-The validator checks tracked names but reads template/text from the working copy;
-the initializer checks an ignored sentinel rather than its actual destination. Existing
-16 passing tests do not cover those bypasses. Native Windows ACL protection and
-explicit distinction between identical-looking clients also need correction/qualification.
+Gate P now inspects raw staged blobs as well as the public working copy, requires the
+staged template and ignore policy, validates exact private destinations, refuses exposed
+reserved names, and checks storage permissions before collecting identifying fields.
+The bootstrap uses explicit local client-context selection; identical environment
+observations no longer select the same profile implicitly. Exact implementation-candidate
+evidence is kept in the
+[combined privacy plus OPT-1A ledger](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
 
-The user has approved these fixes as Gate P of the
-[combined privacy plus OPT-1A brief](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
-Run its synthetic regressions and corrections before trusting sensitive bootstrap
-writes. Publishing this document does not implement them. The implementation chat must
-update this status with actual results, not leave this warning indefinitely or claim
-future protections already exist.
+This is an accident-prevention boundary against publication and overly broad local
+access, not isolation from a hostile process running as the same account. Windows uses
+a protected ACL for the current account, local system and administrators, followed by
+a SID-based access check. POSIX hosts require owner-only mode bits. A host that cannot
+establish or inspect these protections refuses before bootstrap observations.
 
 ## What belongs where
 
@@ -44,24 +45,25 @@ First read AGENTS and the status above. Once Gate P protection is implemented an
 verified, the agent runs the documented local initializer on the actual execution host:
 
 ```text
-python scripts/codex_local.py init
+python scripts/codex_local.py init --client-context <explicit-local-label>
 ```
 
 Use an available verified Python interpreter; do not auto-install one. No actual host
 access means `client setup unavailable`, not surrogate setup in another sandbox.
 Authorised host-independent CI development/testing can still proceed.
 
-The existing helper is non-networking and does not invoke Codex, read credentials,
+The helper is non-networking and does not invoke Codex, read credentials,
 change another process's environment, install a service or enable inference. It creates
-routing-profile scaffolding, not a verified runtime connection. Any new selection/
-verification options specified in the brief remain hypothetical until implemented.
+routing-profile scaffolding, not a verified runtime connection. The context label uses
+only letters, digits, dot, underscore and dash, remains in ignored local state, and is
+never a GitHub receipt. A different label creates a separate blank profile; no existing
+profile is overwritten.
 
 Keep reusable local client configuration separate from private per-task bindings.
-The old routing key combines hostname, home directory, workspace, Codex home and PATH
-observations; it does not uniquely identify an owning runtime. Gate P must provide
-explicit local client selection/rebinding so identical observations do not silently
-reuse another client's settings. Preserve existing profiles; do not copy or overwrite
-them. Unknown/changed/ambiguous clients stay unverified.
+Earlier environment-derived profiles remain local historical state and are not silently
+migrated. They do not uniquely identify an owning runtime. Explicit selection is now
+required; copied, changed or ambiguous profiles stay unverified and must be rebound
+under a new reviewed local context.
 
 Every session obtains its native task ID afresh and cross-checks it through the actual
 owner with the expected workspace and permission profile. Never use `--last`, a global
@@ -79,11 +81,11 @@ that path. CI-only tools must report Codex unavailable separately from CI capabi
 
 ## Storage protection and recovery
 
-Validate the exact destination's untracked/ignored status, including used temporary/
-lock/evidence paths, before creation. Effective ignore negations matter; a protected
-sentinel does not prove a profile is protected. Detect existing exposed untracked
-private files without opening or printing them. Recheck before writing and publishing.
-These are Gate P requirements, not claims about the reviewed implementation.
+The helper validates the exact profile, temporary, lock and evidence destinations before
+creation and rechecks before writing. Effective ignore negations matter; a protected
+sentinel does not prove a profile is protected. Existing exposed untracked private names
+block without opening or printing them. The publication validator independently checks
+tracked names and the staged ignore policy.
 
 Verify protected storage BEFORE collecting/persisting identifying bootstrap fields.
 POSIX 0700/0600 checks are not Windows ACL proof. On Windows require a current-account

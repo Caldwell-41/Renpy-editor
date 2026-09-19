@@ -2,7 +2,7 @@
 
 **Approved:** 2026-09-19, by the user's instruction to do both the review corrections
 and 1A in the next chat, self-review, publish a handover and provide a W1 prompt.
-**State:** Approved, not started. This publication updates documentation only.
+**State:** Implemented locally; exact published CI evidence pending.
 **Repository / working branch / PR:** `Caldwell-41/Renpy-editor`,
 `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
 **Reviewed starting candidate:** `33d0e202b2116d11e12c316313f9c1bd0888731e`.
@@ -446,6 +446,43 @@ the existing home-path detector. Reworded those lists as prose; no actual client
 was published and no validator rule was weakened. The failed runs remain failed
 evidence. Check the correction commit's actual quality result; no result is predeclared.
 This is still documentation-only correction, not execution of Gate P or OPT-1A.
+
+### Gate P implementation and local evidence — 2026-09-19
+
+- The two required pre-fix regressions failed against the reviewed code: staged private
+  template bytes were missed when the working copy was clean, and an ignored sentinel
+  did not protect an exposed exact profile destination.
+- The validator now enumerates the index with NUL-safe stage metadata, permits only
+  ordinary file modes at stage zero, reads bounded raw objects without filters/textconv,
+  validates staged and working content/policy separately, withholds private names/values
+  and rejects index changes. The initializer checks every actual private path and the
+  exposed namespace before creation and again before write.
+- Client schema 2 requires an explicit safe local context. New Windows directories get
+  a current-account/system/administrator ACL and are re-read by SID before identity
+  collection; POSIX hosts require owner-only modes. Existing profiles are never
+  overwritten and automatic mode remains false.
+- Initial native Windows run: 25 tests passed with two symlink-creation tests skipped
+  because that sandbox did not permit test symlinks. The ACL success path and refusal
+  ordering ran natively; the skipped link cases are not positive native evidence.
+
+### OPT-1A implementation and local evidence — 2026-09-19
+
+- Added candidate-bound doctor/preflight/submit/collect commands, schema-1 SQLite
+  operation state, atomic fingerprint reservation, exact origin/ref/SHA/workflow checks,
+  intent-before-POST, direct 2026-03-10 API receipts, safe 204/lost-response
+  reconciliation and no automatic retransmission/rerun.
+- Collection binds exact run and attempt, reads all attempt-job pages, preserves raw
+  provider outcomes, requires candidate validation plus both native jobs, and fetches
+  only bounded redacted failed-job diagnostics. Public exports are allowlisted.
+- The production workflow validates strict SHA/request identities before native
+  allocation and pins every native checkout to the validated SHA. Package build remains
+  mandatory while manual package upload defaults off. Quality adds 15 offline helper
+  tests on Ubuntu and tools-only Windows/macOS coverage.
+- Local `py_compile` and all 15 CI-tooling tests passed. Doctor reported public read
+  collection and a configured-but-unverified Git credential provider; npm/Rust tools
+  were unavailable in this host environment and are not counted as passes. Candidate
+  publication, automatic quality/native-tools and the one final production run remain
+  to be recorded below.
 
 ## Primary implementation references
 

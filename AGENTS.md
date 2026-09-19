@@ -118,6 +118,12 @@ Run relevant cheap checks first; keep stack spikes isolated. Existing test succe
 covers only those tests, not known untested privacy or runtime cases. New CI tooling
 commands become mandatory only when implemented/documented by the current delivery.
 
+Candidate-bound CI operations are documented in
+[CI_ORCHESTRATION](docs/CI_ORCHESTRATION.md). Use explicit ref/SHA and recorded
+run/attempt identities. A `dispatch_unknown` operation is never permission to submit
+again, and `collect` never reruns, cancels, merges or resumes Codex. Keep the SQLite
+journal local and publish only the helper's allowlisted result fields.
+
 ## Waiting and CI cost controls
 
 Do not use repeated model turns to poll externally observable long-running work.

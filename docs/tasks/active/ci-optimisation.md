@@ -1,7 +1,7 @@
 # CI optimisation and durable external wait/wake
 
-**Revision:** 2026-09-19, combined privacy corrections and OPT-1A authorised.
-**Current delivery:** [Privacy corrections plus OPT-1A](ci-opt-1a-privacy-and-operation-foundation.md), approved and not started by this documentation amendment.
+**Revision:** 2026-09-19, combined privacy corrections and OPT-1A implemented locally.
+**Current delivery:** [Privacy corrections plus OPT-1A](ci-opt-1a-privacy-and-operation-foundation.md), preparing exact published CI evidence.
 **W0 capability status:** Investigation complete; automatic wait/wake remains no-go/unqualified for the path examined.
 **Repository / branch / PR:** `Caldwell-41/Renpy-editor`, `maintenance/ci-optimisation`, #12.
 **Integration baseline:** main `7d634eeaf53fe0244a2739f26914797ca16ef544`.
@@ -30,7 +30,7 @@ approve live goal manipulation. No application-feature scope is created here.
 | Delivery / checkpoint | Scope and gate |
 | --- | --- |
 | W0 | Investigation complete; automatic path unqualified. Recovery only after changed prerequisites and separate selection. |
-| **Privacy corrections + OPT-1A** | **Approved combined next chat.** Reproduce/fix privacy defects, then implement candidate-specific submission, collection and checkpoint contracts; self-review and publish. See linked brief. |
+| **Privacy corrections + OPT-1A** | Implemented locally; exact published quality/native/production evidence is recorded in the combined ledger. |
 | W1 | Qualified wait/wake implementation and offline fault tests. Requires actual W0 go and passing combined delivery; separate chat, automatic mode initially disabled. |
 | W2 | Real owning-runtime/native supervisor qualification after W1 and approval; service installation requires explicit permission. |
 | W3 | Real GitHub Actions end-to-end wake proof and agent adoption after W2 and approval. |
@@ -416,6 +416,28 @@ exception; CURRENT/HANDOVER select the delivery. This amendment is documentation
 no P/A code, runtime probe or native validation is executed by publishing it. Its exact
 commit's repository-quality check validates docs against the current code, not the
 unimplemented corrections. W1 readiness remains conditional on actual W0 go.
+
+### Privacy corrections plus OPT-1A implementation — 2026-09-19
+
+Gate P reproduced both reviewed bypasses before correction: staged populated template
+with a clean working copy and ignored sentinel with an exposed exact destination both
+failed their new regressions. The implementation now reads raw staged Git objects,
+checks stage/mode/object/index stability and staged/working privacy policy, protects
+every used local destination, selects client contexts explicitly and verifies native
+ACL/mode safety before collecting identity. The synthetic/native-host suite expanded
+from 16 to 25 tests; two symlink creation cases were unavailable in the current Windows
+sandbox and remain explicit skips rather than passes.
+
+OPT-1A added `scripts/ci.py`, its reusable operation/API/collector layer, 15 offline
+tests, candidate validation/pinning in the production workflow, and Windows/macOS
+tools-only quality jobs. The local store persists intent before POST and prevents
+duplicate dispatch; current 200 receipts, legacy 204, lost response, exact request
+reconciliation, pagination, attempts, statuses and bounded redacted failure logs are
+covered. `docs/CI_ORCHESTRATION.md` owns commands and recovery. Local doctor found a
+configured-but-unverified Git credential provider, public collection, no Codex binding,
+and automatic wake disabled. Local npm/Rust tools were unavailable and remain delegated
+to the exact native workflow, not passed. Exact candidate/run receipts follow in the
+combined brief and handover after publication.
 
 ## Primary sources
 

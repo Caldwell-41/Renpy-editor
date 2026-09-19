@@ -3,59 +3,37 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-from codex_local import LocalConfigError, TEMPLATE, git_paths, is_local_only, read_config
+from codex_local import LocalConfigError, TEMPLATE, git_paths, is_local_only, read_config, read_config_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = (
-    "AGENTS.md",
-    "README.md",
-    "SECURITY.md",
-    "CONTRIBUTING.md",
-    "LICENSE",
-    "NOTICE",
-    "docs/INDEX.md",
-    "docs/PRODUCT.md",
-    "docs/ARCHITECTURE.md",
-    "docs/DATA_MODEL.md",
-    "docs/UI.md",
-    "docs/SECURITY.md",
-    "docs/TESTING.md",
-    "docs/ROADMAP.md",
-    "docs/status/CURRENT.md",
-    "docs/research/STACK_AND_SPIKES.md",
-    "docs/research/PARSER_ROUND_TRIP.md",
-    "docs/research/PARSER_SPIKE_RESULTS.md",
-    "docs/adr/0001-lossless-source-model.md",
-    "docs/adr/0002-versioned-renpy-sdk-adapter.md",
-    "docs/adr/0003-tauri-desktop-runtime.md",
-    "docs/dependencies/phase-1a.md",
-    "docs/fixtures/REPRESENTATIVE_GAME.md",
-    "tests/fixtures/crossroads-at-sundown/manifest.json",
-    "spikes/lossless-source/source_model.py",
-    "spikes/lossless-source/tests/test_source_model.py",
-    "spikes/renpy-sdk/archive_safety.py",
-    "spikes/renpy-sdk/sdk_adapter.py",
-    "spikes/renpy-sdk/tests/test_archive_safety.py",
-    "spikes/renpy-sdk/tests/test_sdk_adapter.py",
-    "app/package.json",
-    "app/package-lock.json",
-    "app/Cargo.toml",
-    "app/Cargo.lock",
-    "app/src-tauri/tauri.conf.json",
-    "app/src-tauri/capabilities/main.json",
-    "app/src-tauri/permissions/core-request.toml",
-    "app/src-core/src/lib.rs",
-    "config/codex-client.example.json",
-    "docs/LOCAL_CODEX_CONFIG.md",
+    "AGENTS.md", "README.md", "SECURITY.md", "CONTRIBUTING.md", "LICENSE", "NOTICE",
+    "docs/INDEX.md", "docs/PRODUCT.md", "docs/ARCHITECTURE.md", "docs/DATA_MODEL.md",
+    "docs/UI.md", "docs/SECURITY.md", "docs/TESTING.md", "docs/ROADMAP.md",
+    "docs/status/CURRENT.md", "docs/research/STACK_AND_SPIKES.md",
+    "docs/research/PARSER_ROUND_TRIP.md", "docs/research/PARSER_SPIKE_RESULTS.md",
+    "docs/adr/0001-lossless-source-model.md", "docs/adr/0002-versioned-renpy-sdk-adapter.md",
+    "docs/adr/0003-tauri-desktop-runtime.md", "docs/dependencies/phase-1a.md",
+    "docs/fixtures/REPRESENTATIVE_GAME.md", "tests/fixtures/crossroads-at-sundown/manifest.json",
+    "spikes/lossless-source/source_model.py", "spikes/lossless-source/tests/test_source_model.py",
+    "spikes/renpy-sdk/archive_safety.py", "spikes/renpy-sdk/sdk_adapter.py",
+    "spikes/renpy-sdk/tests/test_archive_safety.py", "spikes/renpy-sdk/tests/test_sdk_adapter.py",
+    "app/package.json", "app/package-lock.json", "app/Cargo.toml", "app/Cargo.lock",
+    "app/src-tauri/tauri.conf.json", "app/src-tauri/capabilities/main.json",
+    "app/src-tauri/permissions/core-request.toml", "app/src-core/src/lib.rs",
+    "config/codex-client.example.json", "docs/LOCAL_CODEX_CONFIG.md",
+    "docs/CI_ORCHESTRATION.md",
 )
 TEXT_SUFFIXES = {
-    ".cjs", ".css", ".example", ".html", ".js", ".json", ".md", ".mjs",
-    ".ps1", ".py", ".rpy", ".rs", ".sh", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml",
+    ".cjs", ".css", ".example", ".html", ".js", ".json", ".md", ".mjs", ".ps1",
+    ".py", ".rpy", ".rs", ".sh", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml",
 }
 TEXT_FILENAMES = {
     ".editorconfig", ".gitattributes", ".gitignore", "Dockerfile", "LICENSE", "Makefile", "NOTICE",
@@ -82,9 +60,57 @@ ALLOWED_EMAIL_DOMAINS = {"example.com", "users.noreply.github.com", "github.com"
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 
+@dataclass(frozen=True)
+class StagedEntry:
+    mode: str
+    oid: str
+    stage: int
+    path_bytes: bytes
+
+    @property
+    def path(self) -> str:
+        return os.fsdecode(self.path_bytes)
+
+
+def _git(args: list[str], *, input_bytes: bytes | None = None) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(
+            ["git", *args], cwd=ROOT, input=input_bytes, capture_output=True,
+            check=False, timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        raise LocalConfigError("Git inspection failed; details withheld.") from None
+
+
+def staged_entries() -> tuple[bytes, list[StagedEntry]]:
+    result = _git(["ls-files", "--stage", "-z"])
+    if result.returncode or len(result.stdout) > 32 * 1024 * 1024:
+        raise LocalConfigError("Cannot inspect the staged candidate safely.")
+    entries: list[StagedEntry] = []
+    for item in result.stdout.split(b"\0"):
+        if not item:
+            continue
+        try:
+            metadata, path = item.split(b"\t", 1)
+            mode, oid, stage = metadata.split(b" ", 2)
+            entries.append(StagedEntry(mode.decode("ascii"), oid.decode("ascii"), int(stage), path))
+        except (ValueError, UnicodeError):
+            raise LocalConfigError("Invalid staged entry metadata; publication blocked.") from None
+    return result.stdout, entries
+
+
+def staged_blob(entry: StagedEntry) -> bytes:
+    if entry.stage != 0 or entry.mode not in {"100644", "100755"}:
+        raise LocalConfigError("Unmerged or disallowed staged entry mode; publication blocked.")
+    if not re.fullmatch(r"[0-9a-f]{40,64}", entry.oid):
+        raise LocalConfigError("Invalid staged object identity; publication blocked.")
+    result = _git(["cat-file", "blob", entry.oid])
+    if result.returncode or len(result.stdout) > 8 * 1024 * 1024:
+        raise LocalConfigError("A staged object could not be read safely; publication blocked.")
+    return result.stdout
+
+
 def repository_files() -> list[Path]:
-    # Respect Git's ignore rules instead of opening private .env/client evidence.
-    # Tracked ignored files remain visible to the independent publication guard.
     paths = git_paths(ROOT, "--cached", "--others", "--exclude-standard")
     return [
         ROOT / relative for relative in sorted(set(paths))
@@ -94,16 +120,106 @@ def repository_files() -> list[Path]:
     ]
 
 
-def check_local_privacy(errors: list[str]) -> None:
+def check_content(relative: Path, content: str, errors: list[str], *, snapshot: str) -> None:
+    label = f"{relative} ({snapshot})"
+    if content and not content.endswith("\n"):
+        errors.append(f"missing final newline: {label}")
+    suffix = relative.suffix.lower()
+    for line_number, line in enumerate(content.splitlines(), 1):
+        if line.endswith((" ", "\t")) and suffix != ".md":
+            errors.append(f"trailing whitespace: {label}:{line_number}")
+    privacy_patterns = SECRET_PATTERNS
+    if relative != Path("scripts/validate.py"):
+        privacy_patterns = {**privacy_patterns, **MACHINE_PATHS}
+    for pattern_label, pattern in privacy_patterns.items():
+        if pattern.search(content):
+            errors.append(f"possible {pattern_label}: {label}")
+    for match in EMAIL.finditer(content):
+        domain = match.group(0).rsplit("@", 1)[1].lower()
+        if domain not in ALLOWED_EMAIL_DOMAINS:
+            errors.append(f"non-placeholder email address: {label}")
+
+
+def ignore_policy_safe(content: str) -> bool:
+    required_rules = {".codex-local/", ".env", ".env.*", "!.env.example"}
+    effective = {
+        line.strip() for line in content.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    unsafe_negation = any(
+        line.startswith("!") and (
+            ".codex-local" in line.casefold()
+            or (".env" in line.casefold() and line != "!.env.example")
+        )
+        for line in effective
+    )
+    return required_rules.issubset(effective) and not unsafe_negation
+
+
+def check_staged_privacy(errors: list[str]) -> bytes:
+    raw, entries = staged_entries()
+    staged_names = {entry.path for entry in entries if entry.stage == 0}
+    if TEMPLATE not in staged_names:
+        errors.append("required client template is absent from the staged candidate")
+    if ".gitignore" not in staged_names:
+        errors.append("required ignore policy is absent from the staged candidate")
+    for entry in entries:
+        relative_text = entry.path
+        if is_local_only(relative_text):
+            errors.append("local-only configuration/evidence is staged; path and values withheld")
+            continue
+        try:
+            relative = Path(relative_text)
+            content_bytes = staged_blob(entry)
+        except LocalConfigError as error:
+            errors.append(str(error))
+            continue
+        if relative.as_posix() == TEMPLATE:
+            try:
+                read_config_bytes(content_bytes, template=True)
+            except LocalConfigError:
+                errors.append("staged client example must be valid and contain placeholders only; values withheld")
+        if relative.as_posix() == ".gitignore":
+            try:
+                ignore_content = content_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                errors.append("staged ignore policy is not UTF-8")
+            else:
+                if not ignore_policy_safe(ignore_content):
+                    errors.append("staged ignore policy does not protect the reserved private namespaces")
+        if relative.suffix.lower() not in TEXT_SUFFIXES and relative.name not in TEXT_FILENAMES:
+            continue
+        try:
+            content = content_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            errors.append(f"not UTF-8: {relative} (staged)")
+            continue
+        check_content(relative, content, errors, snapshot="staged")
+    return raw
+
+
+def check_local_privacy(errors: list[str]) -> bytes:
+    raw = check_staged_privacy(errors)
     tracked = git_paths(ROOT, "--cached")
     if any(is_local_only(p) for p in tracked):
         errors.append("local-only configuration/evidence is tracked; stop publication and untrack it")
     if any((ROOT / p).is_symlink() for p in tracked):
         errors.append("tracked symlink requires review; validator will not follow it")
+    exposed = git_paths(ROOT, "--others", "--exclude-standard", "--", ".codex-local")
+    if exposed:
+        errors.append("reserved private namespace contains exposed untracked data; names withheld")
     try:
         read_config(ROOT / TEMPLATE, template=True)
     except LocalConfigError:
-        errors.append("client example must be valid and contain placeholders only; values omitted")
+        errors.append("working client example must be valid and contain placeholders only; values withheld")
+    try:
+        ignore_content = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        errors.append("working ignore policy could not be read safely")
+    else:
+        if not ignore_policy_safe(ignore_content):
+            errors.append("working ignore policy does not protect the reserved private namespaces")
+    return raw
 
 
 def check_required(errors: list[str]) -> None:
@@ -120,23 +236,9 @@ def check_text(files: list[Path], errors: list[str]) -> None:
         try:
             content = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
-            errors.append(f"not UTF-8: {relative}")
+            errors.append(f"not UTF-8: {relative} (working copy)")
             continue
-        if content and not content.endswith("\n"):
-            errors.append(f"missing final newline: {relative}")
-        for line_number, line in enumerate(content.splitlines(), 1):
-            if line.endswith((" ", "\t")) and path.suffix.lower() != ".md":
-                errors.append(f"trailing whitespace: {relative}:{line_number}")
-        privacy_patterns = SECRET_PATTERNS
-        if relative != Path("scripts/validate.py"):
-            privacy_patterns = {**privacy_patterns, **MACHINE_PATHS}
-        for label, pattern in privacy_patterns.items():
-            if pattern.search(content):
-                errors.append(f"possible {label}: {relative}")
-        for match in EMAIL.finditer(content):
-            domain = match.group(0).rsplit("@", 1)[1].lower()
-            if domain not in ALLOWED_EMAIL_DOMAINS:
-                errors.append(f"non-placeholder email address: {relative}")
+        check_content(relative, content, errors, snapshot="working copy")
 
 
 def check_markdown_links(files: list[Path], errors: list[str]) -> None:
@@ -154,24 +256,23 @@ def check_markdown_links(files: list[Path], errors: list[str]) -> None:
 
 
 def check_git_diff(errors: list[str]) -> None:
-    result = subprocess.run(
-        ["git", "diff", "--check", "--cached"], cwd=ROOT,
-        capture_output=True, text=True, check=False,
-    )
+    result = _git(["diff", "--check", "--cached"])
     if result.returncode:
-        # Git's diagnostic can quote a private staged line; never echo it to CI.
         errors.append("git diff --check failed; inspect the staged diff locally")
 
 
 def main() -> int:
     errors: list[str] = []
     try:
-        check_local_privacy(errors)
+        initial_index = check_local_privacy(errors)
         files = repository_files()
         check_required(errors)
         check_text(files, errors)
         check_markdown_links(files, errors)
         check_git_diff(errors)
+        final_index, _ = staged_entries()
+        if final_index != initial_index:
+            errors.append("Git index changed during validation; re-run against the exact candidate")
     except (LocalConfigError, OSError):
         print("Validation could not inspect repository files safely; details withheld.", file=sys.stderr)
         return 1
@@ -180,7 +281,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print(f"Validation passed for {len(files)} repository files.")
+    print(f"Validation passed for {len(files)} repository files and the exact staged snapshot.")
     return 0
 
 

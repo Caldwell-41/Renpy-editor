@@ -2,6 +2,25 @@ name: Phase 1 production gates
 
 on:
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Full candidate commit SHA resolved by the requested ref
+        required: true
+        type: string
+      request_id:
+        description: Opaque per-operation correlation UUID
+        required: true
+        type: string
+      upload_packages:
+        description: Upload packaged applications after mandatory package builds
+        required: false
+        default: false
+        type: boolean
+      force_full:
+        description: Reserved no-reuse marker; does not grant retry authority
+        required: false
+        default: false
+        type: boolean
   push:
     branches: [main, corrective/phase-1a-1d-integrated]
     paths:
@@ -11,13 +30,61 @@ on:
 permissions:
   contents: read
 
+run-name: >-
+  Phase 1 production gates / ${{ github.event_name == 'workflow_dispatch' && inputs.request_id || github.sha }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  validate-candidate:
+    name: Validate candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      checkout_sha: ${{ steps.identity.outputs.checkout_sha }}
+    steps:
+      - name: Validate immutable candidate identity
+        id: identity
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SHA: ${{ github.sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          candidate="$EVENT_SHA"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+              echo "expected_sha must be a full lowercase commit SHA" >&2
+              exit 1
+            }
+            [[ "$REQUEST_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
+              echo "request_id must be an opaque UUIDv4" >&2
+              exit 1
+            }
+            [ "$EXPECTED_SHA" = "$EVENT_SHA" ] || {
+              echo "requested ref did not resolve to expected_sha" >&2
+              exit 1
+            }
+            candidate="$EXPECTED_SHA"
+          fi
+          echo "checkout_sha=$candidate" >> "$GITHUB_OUTPUT"
+      - name: Check out validated candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ steps.identity.outputs.checkout_sha }}
+      - name: Validate repository and CI helpers
+        run: |
+          python3 scripts/validate.py
+          python3 -m unittest discover -s tests/ci_privacy -v
+          python3 -m unittest discover -s tests/ci_tooling -v
+
   packaged-boundary:
     name: ${{ matrix.name }}
+    needs: validate-candidate
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +101,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.validate-candidate.outputs.checkout_sha }}
       - name: Select locked Node toolchain
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -215,7 +284,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Upload packaged application for manual runs
-        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.upload_packages }}
         continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

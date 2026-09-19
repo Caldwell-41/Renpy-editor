@@ -3,7 +3,7 @@
 **Updated:** 2026-09-19.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
-**Current approved delivery:** Privacy corrections plus OPT-1A in one implementation chat; approved, not started by this documentation amendment.
+**Current approved delivery:** Privacy corrections plus OPT-1A; implementation complete locally and preparing the exact published CI candidate.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -29,10 +29,12 @@ attempt-specific collection. Both are authorised in the same chat with separate 
 followed by self-review and the published handover. This is an explicit exception to
 the usual one-checkpoint-per-chat rule, not authority to continue to W1.
 
-The existing bootstrap/privacy helpers at review candidate `33d0e202` have uncovered
-gaps despite their original 16 passing tests. Those corrections and `ci.py` are not
-implemented by this planning amendment. Identifying client values must remain local;
-do not trust sensitive setup until the Gate P protections are verified.
+Gate P now validates raw staged blobs and both staged/working ignore policy, checks the
+exact destinations, establishes/verifies native storage protection before collecting
+identity, and requires explicit client context. OPT-1A now supplies doctor/preflight,
+atomic local operation state, exact one-POST submission/reconciliation, attempt-specific
+collection and a candidate-pinned workflow gate. The combined ledger owns exact test
+and CI evidence; do not treat this summary as acceptance before its published runs.
 
 The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
 external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.
@@ -43,6 +45,5 @@ manipulation is authorised by this delivery.
 
 Detailed later dependencies and cleanup are in the
 [parent optimisation roadmap](../tasks/active/ci-optimisation.md).
-This documentation-only amendment changes neither helpers nor workflows and launches
-no production matrix. Inspect its exact repository-quality result without treating
-that result as proof of future P/A or runtime work.
+W0 remains unchanged: no automatic Codex wake-up, goal restoration or W1 implementation
+is provided by these independent privacy/CI changes.

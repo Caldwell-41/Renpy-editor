@@ -24,6 +24,7 @@ open-ended coding approval. Historical snapshots are not current instructions.
 | Current privacy corrections plus OPT-1A implementation and test plan | [tasks/active/ci-opt-1a-privacy-and-operation-foundation.md](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md) |
 | Parent CI optimisation roadmap and later wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Local client setup, private data and known protection gaps | [LOCAL_CODEX_CONFIG.md](LOCAL_CODEX_CONFIG.md) |
+| Candidate-bound CI doctor, preflight, submission, collection and recovery | [CI_ORCHESTRATION.md](CI_ORCHESTRATION.md) |
 | W0 actual-host wait/wake qualification | [research/CODEX_WAIT_WAKE_QUALIFICATION.md](research/CODEX_WAIT_WAKE_QUALIFICATION.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
