@@ -215,7 +215,10 @@ class LocalPrivacyTests(unittest.TestCase):
     @unittest.skipIf(os.name == "nt", "Git-valid non-UTF-8 path bytes require a POSIX host")
     def test_git_valid_unusual_path_bytes_do_not_break_staged_scan(self):
         raw = os.fsencode(self.root) + b"/odd-\xff.md"
-        descriptor = os.open(raw, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            descriptor = os.open(raw, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except OSError:
+            self.skipTest("host filesystem does not permit the raw byte filename")
         with os.fdopen(descriptor, "wb") as output:
             output.write(b"public fixture\n")
         subprocess.run([b"git", b"add", b"odd-\xff.md"], cwd=os.fsencode(self.root), check=True)
