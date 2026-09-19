@@ -278,6 +278,42 @@ class CiToolingTests(unittest.TestCase):
         )
         with self.assertRaises(ci_lib.CiError):
             ci_lib.submit(self.root, self.store, transport, ref="topic", sha=self.sha)
+        operation_id, state = self.store.connection.execute(
+            "SELECT operation_id, state FROM operations"
+        ).fetchone()
+        self.assertEqual(state, "dispatch_unknown")
+        recovery = FakeTransport([response(200, self.run_body(sha="1" * 40))])
+        result = ci_lib.reconcile_operation(
+            self.store,
+            recovery,
+            operation_id=operation_id,
+        )
+        self.assertFalse(result["reconciled"])
+        self.assertEqual(result["reason_code"], "direct_receipt_identity_contradiction")
+        self.assertEqual(
+            self.store.connection.execute("SELECT state FROM operations").fetchone()[0],
+            "blocked",
+        )
+        self.assertEqual(sum(call[0] == "POST" for call in transport.calls + recovery.calls), 1)
+
+    def test_delayed_direct_receipt_title_can_reconcile_from_blocked_legacy_state(self):
+        operation, _ = self.store.reserve(self.identity)
+        self.store.transition(
+            operation["operation_id"],
+            {"prepared"},
+            "blocked",
+            run_id=41,
+            next_action="legacy delayed direct receipt",
+        )
+        recovery = FakeTransport([response(200, self.run_body())])
+        result = ci_lib.reconcile_operation(
+            self.store,
+            recovery,
+            operation_id=operation["operation_id"],
+        )
+        self.assertTrue(result["reconciled"])
+        self.assertEqual(result["reason_code"], "direct_receipt_validated")
+        self.assertEqual(sum(call[0] == "POST" for call in recovery.calls), 0)
 
     def test_direct_receipt_metadata_delay_recovers_without_second_post(self):
         transport = FakeTransport(

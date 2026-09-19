@@ -35,7 +35,7 @@ class ExternalStateRegressions(unittest.TestCase):
 
     def test_profile_is_created_only_in_redirected_external_root(self):
         with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary)
+            base = Path(temporary).resolve()
             repository = base / "repository"
             state_root = base / "application-data" / "private-state"
             repository.mkdir()
@@ -64,7 +64,7 @@ class ExternalStateRegressions(unittest.TestCase):
 
     def test_legacy_state_requires_explicit_reinitialisation(self):
         with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary)
+            base = Path(temporary).resolve()
             repository = base / "repository"
             state_root = base / "application-data" / "private-state"
             repository.mkdir()
@@ -100,7 +100,7 @@ class ExternalStateRegressions(unittest.TestCase):
 
     def test_sqlite_journal_and_companions_are_external_and_private(self):
         with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary)
+            base = Path(temporary).resolve()
             repository = base / "repository"
             state_root = base / "application-data" / "private-state"
             repository.mkdir()
@@ -117,7 +117,7 @@ class ExternalStateRegressions(unittest.TestCase):
 
     def test_hardlinked_sqlite_journal_is_refused_on_reopen(self):
         with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary)
+            base = Path(temporary).resolve()
             repository = base / "repository"
             state_root = base / "application-data" / "private-state"
             repository.mkdir()

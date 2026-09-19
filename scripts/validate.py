@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 import re
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -115,9 +116,52 @@ def repository_files() -> list[Path]:
     return [
         ROOT / relative for relative in sorted(set(paths))
         if not is_local_only(relative)
+        and not _has_surrogate(relative)
         and not (ROOT / relative).is_symlink()
         and (ROOT / relative).is_file()
     ]
+
+
+def _has_surrogate(value: str) -> bool:
+    return any(0xD800 <= ord(character) <= 0xDFFF for character in value)
+
+
+def _working_lstat(relative: str) -> os.stat_result | None:
+    try:
+        return os.lstat(os.path.join(os.fsencode(ROOT), os.fsencode(relative)))
+    except FileNotFoundError:
+        return None
+    except OSError:
+        raise LocalConfigError("A working-copy entry could not be inspected safely.") from None
+
+
+def check_nonportable_working_files(errors: list[str]) -> None:
+    """Scan Git-valid byte names without converting them back through pathlib."""
+    paths = git_paths(ROOT, "--cached", "--others", "--exclude-standard")
+    for relative in sorted(set(paths)):
+        if not _has_surrogate(relative) or is_local_only(relative):
+            continue
+        info = _working_lstat(relative)
+        if info is None or stat.S_ISLNK(info.st_mode):
+            continue
+        if not stat.S_ISREG(info.st_mode):
+            errors.append("non-portable working-copy entry is not a regular file")
+            continue
+        absolute = os.path.join(os.fsencode(ROOT), os.fsencode(relative))
+        try:
+            descriptor = os.open(absolute, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            with os.fdopen(descriptor, "rb") as stream:
+                content_bytes = stream.read(8 * 1024 * 1024 + 1)
+        except OSError:
+            raise LocalConfigError("A non-portable working-copy entry could not be read safely.") from None
+        if len(content_bytes) > 8 * 1024 * 1024:
+            errors.append("non-portable working-copy entry exceeds the inspection limit")
+            continue
+        try:
+            content = content_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        check_content(Path("non-portable-name.txt"), content, errors, snapshot="working copy")
 
 
 def check_content(relative: Path, content: str, errors: list[str], *, snapshot: str) -> None:
@@ -177,7 +221,10 @@ def check_local_privacy(errors: list[str]) -> bytes:
     tracked = git_paths(ROOT, "--cached")
     if any(is_local_only(p) for p in tracked):
         errors.append("local-only configuration/evidence is tracked; stop publication and untrack it")
-    if any((ROOT / p).is_symlink() for p in tracked):
+    if any(
+        (info := _working_lstat(path)) is not None and stat.S_ISLNK(info.st_mode)
+        for path in tracked
+    ):
         errors.append("tracked symlink requires review; validator will not follow it")
     exposed = git_paths(ROOT, "--others", "--exclude-standard")
     if any(is_local_only(path) for path in exposed):
@@ -233,6 +280,7 @@ def main() -> int:
     try:
         initial_index = check_local_privacy(errors)
         files = repository_files()
+        check_nonportable_working_files(errors)
         check_required(errors)
         check_text(files, errors)
         check_markdown_links(files, errors)

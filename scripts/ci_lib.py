@@ -867,7 +867,15 @@ def reconcile_operation(
             "reconciled": True,
             "reason_code": "operation_already_attached",
         }
-    if operation["state"] not in {"prepared", "dispatching", "dispatch_unknown"}:
+    recoverable_blocked_receipt = (
+        operation["state"] == "blocked"
+        and operation["run_id"] is not None
+        and operation["attempt"] is None
+    )
+    if (
+        operation["state"] not in {"prepared", "dispatching", "dispatch_unknown"}
+        and not recoverable_blocked_receipt
+    ):
         raise CiError("The selected operation is not eligible for read-only reconciliation.")
     identity = store.identity(operation)
     if operation["run_id"]:
@@ -1045,11 +1053,11 @@ def submit(
         store.transition(
             operation["operation_id"],
             {"dispatching"},
-            "blocked",
+            "dispatch_unknown",
             run_id=run_id,
-            next_action="resolve contradictory direct receipt; do not dispatch",
+            next_action="reconcile delayed direct receipt metadata; do not dispatch",
         )
-        raise
+        raise CiError("Direct run receipt metadata was not yet consistent; retransmission is blocked.") from None
     operation = store.transition(
         operation["operation_id"],
         {"dispatching"},

@@ -25,7 +25,10 @@ class LocalPrivacyTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
-        self.base = Path(self.temporary.name)
+        # macOS exposes its temporary root through /var -> /private/var.  Resolve
+        # that system alias so the fixture itself does not simulate a substituted
+        # private-state path.
+        self.base = Path(self.temporary.name).resolve()
         self.root = self.base / "repository"
         self.state_root = self.base / "application-data" / "private-state"
         self.root.mkdir()
