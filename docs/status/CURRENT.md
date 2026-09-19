@@ -4,8 +4,9 @@
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
 **Current approved delivery:** [OPT-1A second corrective pass](../tasks/active/ci-opt-1a-second-corrective-pass.md).
-Local correction and integrated review are in progress; publication/native evidence is
-not complete until the corrective candidate and GitHub checks are recorded.
+Correction, integrated review and exact native acceptance are complete at implementation
+candidate `b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d`. PR #12 is review-ready; it is not
+merged or otherwise integrated by this delivery.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -32,8 +33,9 @@ integrated review. It does not authorise W1.
 The earlier production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
 and run `35414571185` remain historical evidence for the packaged application baseline.
 They do not prove the corrected workflow identity, external-state architecture or
-affirmative collector. The corrective ledger must record the new exact candidate and
-checks before this delivery returns to review-ready.
+affirmative collector. The corrective ledger records the new exact candidate, automatic
+quality runs and accepted candidate-bound production matrix; the historical run is not
+reused for the corrected workflow.
 
 The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
 external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.

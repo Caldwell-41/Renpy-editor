@@ -1,6 +1,6 @@
 # CI optimisation and durable external wait/wake
 
-**Revision:** 2026-09-19, OPT-1A second corrective pass in progress.
+**Revision:** 2026-09-19, OPT-1A second corrective pass review-ready.
 **Current delivery:** [OPT-1A second corrective pass](ci-opt-1a-second-corrective-pass.md),
 with the [original combined brief](ci-opt-1a-privacy-and-operation-foundation.md) retained
 as the acceptance baseline and historical ledger.
@@ -32,7 +32,7 @@ approve live goal manipulation. No application-feature scope is created here.
 | Delivery / checkpoint | Scope and gate |
 | --- | --- |
 | W0 | Investigation complete; automatic path unqualified. Recovery only after changed prerequisites and separate selection. |
-| **OPT-1A second corrective pass** | External-state architecture and mandatory fixes implemented locally; final publication/native evidence pending in the corrective ledger. |
+| **OPT-1A second corrective pass** | Complete and review-ready at `b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d`; exact Windows/macOS production acceptance is recorded in the corrective ledger. |
 | W1 | Qualified wait/wake implementation and offline fault tests. Requires actual W0 go and passing combined delivery; separate chat, automatic mode initially disabled. |
 | W2 | Real owning-runtime/native supervisor qualification after W1 and approval; service installation requires explicit permission. |
 | W3 | Real GitHub Actions end-to-end wake proof and agent adoption after W2 and approval. |
@@ -456,9 +456,11 @@ application data, treats legacy `.codex-local` as non-authoritative, derives ope
 identity from the requested candidate workflow blob, performs complete deterministic
 find-or-start reconciliation, adds supported read-only `dispatch_unknown` recovery,
 requires affirmative job/step evidence and stores bounded provider logs only in the
-private journal. The fresh integrated checklist and exact final CI receipts belong in
-the corrective brief. Until they are published, the earlier review-ready label is
-superseded. W0 remains independently no-go and no W1 code is included.
+private journal. The fresh integrated checklist and exact final CI receipts are
+published in the corrective brief. Candidate
+`b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d` passed both automatic quality contexts and
+production run `35431721525`, attempt 1. The delivery is review-ready. W0 remains
+independently no-go and no W1 code is included.
 
 ## Primary sources
 

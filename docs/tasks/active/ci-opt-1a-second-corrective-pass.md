@@ -196,11 +196,11 @@ are stored only in the protected journal, with public generic availability/reaso
 | Supported unresolved-dispatch recovery | Directly tested pass | Public CLI/API, direct-ID and operation-key recovery; zero/incomplete/multiple/contradictory outcomes; POST-count assertions. |
 | Exact run/attempt and affirmative job/step evidence | Directly tested pass | Attempt-specific pagination, newer-attempt refusal, PR/non-dispatch refusal, required job/step contract, package scope and every provider conclusion. |
 | Diagnostic publication boundary | Directly tested pass | Future-format secret, endpoint/control text, 64 KiB bound/truncation, malformed logs, signed redirect and private-only DB capture tests. |
-| Workflow pinning/native allocation/package/test/security/smoke gates | Structural pass; fresh live proof pending | Candidate dependency, immutable checkout output and unchanged mandatory production steps reviewed. Workflow identity changes invalidate the old production proof. |
+| Workflow pinning/native allocation/package/test/security/smoke gates | Native/live validated | Candidate `b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d`, production run `35431721525`, attempt 1; candidate, Windows and macOS jobs all passed and the exact collector accepted every mandatory step. |
 | Malformed API/subprocess/network bounds | Directly tested pass | Shape/count/identity failures, bounded pages/body/logs, subprocess timeout and value-free error tests. |
 | Read versus dispatch authority | Directly reviewed | Public collect is tokenless; POST uses approved Actions-write credentials; private log capture only with selected protected operation. |
-| Windows/macOS behavior | Windows local pass; native quality pending | Synthetic Windows ACL/profile/SQLite success; macOS mode/symlink path must pass the exact pushed quality run. |
-| Documentation accuracy and accidental W1 scope | Direct review pass, publication pending | Canonical docs describe external state/recovery/private logs. Searches show no queue/goal/wake implementation; automatic mode remains false. |
+| Windows/macOS behavior | Native/live validated | Windows local ACL/profile/SQLite suite passed; quality runs `35431546974` and `35431548846` passed on Windows x64 and macOS ARM64. macOS exercised POSIX/symlink behavior; its APFS raw-byte-name capability is explicitly skipped because the filesystem rejects fixture creation. |
+| Documentation accuracy and accidental W1 scope | Direct review pass | Canonical docs describe external state/recovery/private logs. Searches show no queue/goal/wake implementation; automatic mode remains false. |
 
 The integrated review also corrected four significant in-scope omissions found beyond
 the mandatory list: Python capability was absent from `doctor`; direct-receipt metadata
@@ -210,24 +210,47 @@ cover each correction. No W1, OPT-2, application feature, merge or cleanup code 
 
 ### Validation and CI-cost decision
 
-Current local evidence: Python compilation passed; 35 privacy/local-state tests passed
+Final local evidence: Python compilation passed; 35 privacy/local-state tests passed
 on Windows with three explicit skips (two sandbox-denied symlink creations and the
-POSIX-only unusual-byte case); 40 CI operation/recovery tests passed; repository
-validation passed 216 public files before final staging; 26 lossless/source tests and
+POSIX-only unusual-byte case); 41 CI operation/recovery tests passed; exact-staged
+repository validation passed 216 public files; 26 lossless/source tests and
 the 620,000-byte/40,000-node benchmark passed. The legacy SDK spike retained its known
 unsupported-Windows outcome (24 tests: 4 failures, 5 errors, 2 skips) and is not target
-evidence. Final exact-staged validation and native CI remain pending.
+evidence. Preflight truthfully reported repository/privacy/tooling pass and unavailable
+local frontend/Rust tools, delegating those native gates to the production matrix.
 
 Unlike the prior collector-only follow-up, this pass changes the production workflow's
 dispatch inputs, operation-key validation and candidate gate. It therefore affects
 candidate pinning/native allocation and requires one fresh full production matrix on the
 corrective candidate. Historical run `35414571185` remains valid only for the packaged
 application/workflow tree at `83e86aa`; it is not broadened to the corrected workflow.
-After the one required matrix, documentation-only receipts do not justify another.
+The implementation candidate required its own matrix; documentation-only receipts do
+not justify another.
 
-### Publication and W1 entry
+### Publication and W1 entry — accepted result
 
-Pending: exact implementation candidate, push/PR quality runs, production run/attempt /
-jobs, final collector output, documentation follow-up head, PR body and final handover.
-W0 remains unchanged and no live W0 probe is authorised. Even after this correction
-passes, W1 entry remains blocked unless the separate W0 report changes to a genuine go.
+Implementation candidate `b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d` is published on
+`maintenance/ci-optimisation` / PR #12. Automatic Repository quality push run
+`35431546974` and PR run `35431548846`, attempt 1, both passed. Candidate-bound
+production run `35431721525`, attempt 1, passed with exact jobs: Validate candidate
+`105867412640`, macOS ARM64 `105867451179`, and Windows x64 `105867451191`.
+
+The production submit first recorded `dispatch_unknown` because GitHub's direct run
+title metadata was not yet stable. Supported read-only reconciliation then attached the
+same run without another POST. The exact-attempt collector reported `accepted: true`,
+complete pagination, affirmative required steps, no missing jobs and no reason codes.
+A second identical submit attached the completed local operation and did not dispatch.
+Private operation/request selectors and provider logs remain only in protected local
+state and are not part of this ledger.
+
+Retained evidence includes the initial quality failures `35429884079` / `35429886171`
+that exposed macOS temporary-root aliasing, `35430469385` / `35430470755` that exposed
+the raw-byte-path syscall assumption, and `35431136205` / `35431138970` that established
+APFS rejects fixture creation itself. Each bounded finding was corrected before the
+final green candidate; no failed/cancelled run is treated as acceptance.
+
+Gate P + OPT-1A are complete and review-ready. W0 remains unchanged and no live W0
+probe was repeated. W1 entry is blocked: supported owning-runtime telemetry,
+ownership-safe user-control preservation, loaded/unloaded continuation with restored
+tools, and authoritative zero-wait-inference proof are still absent. No W1 code is
+authorised or included.
