@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
+import sqlite3
+import stat
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(SOURCE / "scripts"))
@@ -131,6 +135,38 @@ class ExternalStateRegressions(unittest.TestCase):
                 self.skipTest("host does not permit hard links")
             with self.assertRaises(local_state.LocalStateError):
                 ci_lib.OperationStore(repository, state_root=state_root)
+
+    def test_unsafe_existing_sqlite_companion_is_rejected_before_connect(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary).resolve()
+            repository = base / "repository"
+            state_root = base / "application-data" / "private-state"
+            repository.mkdir()
+            directory = local_state.ensure_private_subdirectory(state_root, "ci")
+            database = directory / "operations.sqlite3"
+            local_state.create_private_file(database)
+            database.with_name(database.name + "-wal").mkdir()
+            with patch.object(ci_lib.sqlite3, "connect", wraps=sqlite3.connect) as connect:
+                with self.assertRaises(local_state.LocalStateError):
+                    ci_lib.OperationStore(repository, state_root=state_root)
+                connect.assert_not_called()
+
+    def test_posix_private_storage_requires_current_effective_owner(self):
+        regular = SimpleNamespace(st_mode=stat.S_IFREG | 0o600, st_nlink=1, st_uid=2000)
+        directory = SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_nlink=1, st_uid=2000)
+        with (
+            patch.object(local_state.os, "name", "posix"),
+            patch.object(local_state.os, "geteuid", return_value=1000, create=True),
+        ):
+            for info, is_directory in ((regular, False), (directory, True)):
+                with self.subTest(directory=is_directory):
+                    with patch.object(local_state, "_lstat", return_value=info):
+                        self.assertFalse(
+                            local_state.storage_is_private(Path("synthetic"), directory=is_directory)
+                        )
+            owned = SimpleNamespace(st_mode=stat.S_IFREG | 0o600, st_nlink=1, st_uid=1000)
+            with patch.object(local_state, "_lstat", return_value=owned):
+                self.assertTrue(local_state.storage_is_private(Path("synthetic"), directory=False))
 
 
 if __name__ == "__main__":

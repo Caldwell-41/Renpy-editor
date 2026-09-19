@@ -53,6 +53,8 @@ VALID_CONCLUSIONS = {
     None,
 }
 VALID_STATES = {"prepared", "dispatching", "dispatch_unknown", "attached", "running", "completed", "blocked"}
+RECOVERABLE_STATES = {"prepared", "dispatching", "dispatch_unknown", "blocked"}
+VALIDATED_ATTACHMENT_STATES = {"attached", "running", "completed"}
 MAX_RECONCILIATION_PAGES = 10
 MAX_JOB_PAGES = 10
 RUN_TITLE = re.compile(
@@ -368,6 +370,7 @@ class OperationStore:
                 raise CiError("A test operation database path is required.")
             self.path = path
             self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._verify_files()
         old_umask = os.umask(0o077)
         try:
             self.connection = sqlite3.connect(self.path, timeout=10, isolation_level=None)
@@ -492,6 +495,22 @@ class OperationStore:
             or type(row.get("deadline_at")) is not int
         ):
             raise CiError("Stored operation identity is contradictory.")
+        run_id = row.get("run_id")
+        attempt = row.get("attempt")
+        if (
+            (run_id is not None and (type(run_id) is not int or run_id < 1))
+            or (attempt is not None and (type(attempt) is not int or attempt < 1))
+            or (attempt is not None and run_id is None)
+            or (
+                row.get("state") in VALIDATED_ATTACHMENT_STATES
+                and (run_id is None or attempt is None)
+            )
+            or (
+                row.get("state") in {"prepared", "dispatching"}
+                and (run_id is not None or attempt is not None)
+            )
+        ):
+            raise CiError("Stored operation receipt state is contradictory.")
         try:
             local_checks = json.loads(row["local_checks_json"])
             job_refs = json.loads(row["job_refs_json"])
@@ -528,7 +547,7 @@ class OperationStore:
                 return result, False
             collisions = self.connection.execute(
                 """
-                SELECT state, result_json FROM operations
+                SELECT * FROM operations
                 WHERE repository = ? AND workflow = ? AND workflow_revision = ?
                   AND ref = ? AND candidate_sha = ? AND operation_key <> ?
                 """,
@@ -541,11 +560,9 @@ class OperationStore:
                     identity.operation_key,
                 ),
             ).fetchall()
-            if any(
-                collision["state"] in {"prepared", "dispatching", "dispatch_unknown", "attached", "running"}
-                or identity.force_full
-                for collision in collisions
-            ):
+            for collision in collisions:
+                self._identity_from_row(dict(collision))
+            if any(not self._safely_terminal(collision) or identity.force_full for collision in collisions):
                 raise CiError("A colliding candidate operation already exists; no new dispatch is permitted.")
             self.connection.execute(
                 """
@@ -598,6 +615,51 @@ class OperationStore:
         self._identity_from_row(result)
         return result
 
+    @staticmethod
+    def _safely_terminal(operation: dict[str, Any] | sqlite3.Row) -> bool:
+        if (
+            operation["state"] != "completed"
+            or type(operation["run_id"]) is not int
+            or type(operation["attempt"]) is not int
+            or not isinstance(operation["result_json"], str)
+        ):
+            return False
+        try:
+            result = json.loads(operation["result_json"])
+        except (TypeError, json.JSONDecodeError):
+            return False
+        return (
+            isinstance(result, dict)
+            and result.get("provider_status") == "completed"
+            and result.get("accepted") is True
+            and result.get("run_id") == operation["run_id"]
+            and result.get("attempt") == operation["attempt"]
+        )
+
+    def list_recoverable(self) -> list[dict[str, Any]]:
+        """Return local-only selectors for operations that may need read-only recovery."""
+        placeholders = ",".join("?" for _ in RECOVERABLE_STATES)
+        rows = self.connection.execute(
+            f"SELECT * FROM operations WHERE state IN ({placeholders}) ORDER BY created_at, operation_id",
+            tuple(sorted(RECOVERABLE_STATES)),
+        ).fetchall()
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            operation = dict(row)
+            self._identity_from_row(operation)
+            result.append(
+                {
+                    "operation_id": operation["operation_id"],
+                    "ref": operation["ref"],
+                    "candidate_sha": operation["candidate_sha"],
+                    "state": operation["state"],
+                    "run_id": operation["run_id"],
+                    "attempt": operation["attempt"],
+                    "next_action": operation["next_action"],
+                }
+            )
+        return result
+
     def identity(self, operation: dict[str, Any]) -> OperationIdentity:
         return self._identity_from_row(operation)
 
@@ -637,6 +699,13 @@ class OperationStore:
                 f"UPDATE operations SET {', '.join(assignments)} WHERE operation_id = ?",
                 values,
             )
+            updated = self.connection.execute(
+                "SELECT * FROM operations WHERE operation_id = ?",
+                (operation_id,),
+            ).fetchone()
+            if updated is None:
+                raise CiError("Operation state transition was not durable.")
+            self._identity_from_row(dict(updated))
             self.connection.execute("COMMIT")
         except Exception:
             if self.connection.in_transaction:
@@ -854,6 +923,16 @@ def _attach_reconciliation(
     return None
 
 
+def _has_validated_attachment(operation: dict[str, Any]) -> bool:
+    return (
+        operation.get("state") in VALIDATED_ATTACHMENT_STATES
+        and type(operation.get("run_id")) is int
+        and operation["run_id"] > 0
+        and type(operation.get("attempt")) is int
+        and operation["attempt"] > 0
+    )
+
+
 def reconcile_operation(
     store: OperationStore,
     transport: Transport,
@@ -861,24 +940,16 @@ def reconcile_operation(
     operation_id: str,
 ) -> dict[str, Any]:
     operation = store.get(operation_id)
-    if operation["run_id"] and operation["state"] in {"attached", "running", "completed"}:
+    if _has_validated_attachment(operation):
         return {
             **public_operation(operation, attached=True),
             "reconciled": True,
             "reason_code": "operation_already_attached",
         }
-    recoverable_blocked_receipt = (
-        operation["state"] == "blocked"
-        and operation["run_id"] is not None
-        and operation["attempt"] is None
-    )
-    if (
-        operation["state"] not in {"prepared", "dispatching", "dispatch_unknown"}
-        and not recoverable_blocked_receipt
-    ):
+    if operation["state"] not in RECOVERABLE_STATES:
         raise CiError("The selected operation is not eligible for read-only reconciliation.")
     identity = store.identity(operation)
-    if operation["run_id"]:
+    if operation["run_id"] is not None:
         try:
             direct_run = _get_run(transport, operation["run_id"])
         except CiError:
@@ -939,9 +1010,9 @@ def submit(
         force_full=force_full,
     )
     operation, created = store.reserve(identity)
-    if operation["run_id"]:
+    if _has_validated_attachment(operation):
         return public_operation(operation, attached=True)
-    if not created and operation["state"] in {"dispatching", "dispatch_unknown"}:
+    if not created and operation["state"] in {"dispatching", "dispatch_unknown", "blocked"}:
         result = reconcile_operation(store, transport, operation_id=operation["operation_id"])
         if result["reconciled"]:
             return result

@@ -209,6 +209,14 @@ def storage_is_private(path: Path, *, directory: bool) -> bool:
         return False
     if os.name == "nt":
         return _windows_acl_private(path)
+    get_effective_uid = getattr(os, "geteuid", None)
+    if not callable(get_effective_uid):
+        return False
+    try:
+        if info.st_uid != get_effective_uid():
+            return False
+    except (AttributeError, OSError):
+        return False
     expected = 0o700 if directory else 0o600
     return stat.S_IMODE(info.st_mode) == expected
 

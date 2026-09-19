@@ -13,6 +13,7 @@ import urllib.error
 
 SOURCE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(SOURCE / "scripts"))
+import ci as ci_entry
 import ci_lib
 
 
@@ -338,6 +339,136 @@ class CiToolingTests(unittest.TestCase):
         self.assertTrue(result["reconciled"])
         self.assertEqual(result["reason_code"], "direct_receipt_validated")
         self.assertEqual(sum(call[0] == "POST" for call in transport.calls + recovery.calls), 1)
+
+    def test_submit_revalidates_saved_run_id_before_reporting_attachment(self):
+        operation, _ = self.store.reserve(self.identity)
+        self.store.transition(
+            operation["operation_id"],
+            {"prepared"},
+            "dispatch_unknown",
+            run_id=41,
+            next_action="validate saved direct receipt",
+        )
+        transport = FakeTransport([response(200, self.run_body())])
+        result = ci_lib.submit(self.root, self.store, transport, ref="topic", sha=self.sha)
+        self.assertEqual(result["state"], "attached")
+        self.assertEqual(result["attempt"], 1)
+        self.assertTrue(result["reconciled"])
+        self.assertEqual(len(transport.calls), 1)
+
+    def test_submit_fails_closed_when_saved_run_id_remains_unvalidated(self):
+        operation, _ = self.store.reserve(self.identity)
+        self.store.transition(
+            operation["operation_id"],
+            {"prepared"},
+            "blocked",
+            run_id=41,
+            next_action="resolve contradictory saved receipt",
+        )
+        transport = FakeTransport([ci_lib.CiError("metadata unavailable"), self.no_remote_match()])
+        with self.assertRaises(ci_lib.CiError):
+            ci_lib.submit(self.root, self.store, transport, ref="topic", sha=self.sha)
+        current = self.store.get(operation["operation_id"])
+        self.assertEqual(current["state"], "blocked")
+        self.assertIsNone(current["attempt"])
+
+    def test_blocked_candidate_cannot_be_bypassed_with_changed_options(self):
+        second = self.run_body(run_id=42)
+        first = FakeTransport(
+            [response(200, {"total_count": 2, "workflow_runs": [self.run_body(), second]})]
+        )
+        with self.assertRaises(ci_lib.CiError):
+            ci_lib.submit(self.root, self.store, first, ref="topic", sha=self.sha)
+        blocked = self.store.connection.execute(
+            "SELECT operation_id, state FROM operations"
+        ).fetchone()
+        self.assertEqual(blocked["state"], "blocked")
+        changed = FakeTransport([])
+        with self.assertRaises(ci_lib.CiError):
+            ci_lib.submit(
+                self.root,
+                self.store,
+                changed,
+                ref="topic",
+                sha=self.sha,
+                upload_packages=True,
+            )
+        self.assertEqual(
+            self.store.connection.execute("SELECT COUNT(*) FROM operations").fetchone()[0],
+            1,
+        )
+        self.assertEqual(changed.calls, [])
+
+    def test_first_failure_is_discoverable_and_recoverable_after_restart(self):
+        self.assertEqual(ci_entry.parser().parse_args(["operations"]).command, "operations")
+        first = FakeTransport(
+            [self.no_remote_match(), ci_lib.CiError("lost"), self.no_remote_match()]
+        )
+        with self.assertRaises(ci_lib.CiError):
+            ci_lib.submit(self.root, self.store, first, ref="topic", sha=self.sha)
+        self.store.connection.close()
+        restarted = ci_lib.OperationStore(self.root, self.database, secure=False)
+        self.addCleanup(restarted.connection.close)
+        self.store = restarted
+        pending = restarted.list_recoverable()
+        self.assertEqual(len(pending), 1)
+        self.assertEqual(pending[0]["state"], "dispatch_unknown")
+        self.assertEqual(pending[0]["candidate_sha"], self.sha)
+        operation_id = pending[0]["operation_id"]
+        recovery = FakeTransport(
+            [response(200, {"total_count": 1, "workflow_runs": [self.run_body()]})]
+        )
+        result = ci_lib.reconcile_operation(
+            restarted,
+            recovery,
+            operation_id=operation_id,
+        )
+        self.assertTrue(result["reconciled"])
+        self.assertFalse(any(call[0] == "POST" for call in recovery.calls))
+
+    def test_incomplete_attachment_transition_rolls_back(self):
+        operation, _ = self.store.reserve(self.identity)
+        with self.assertRaises(ci_lib.CiError):
+            self.store.transition(
+                operation["operation_id"],
+                {"prepared"},
+                "attached",
+                run_id=41,
+            )
+        current = self.store.get(operation["operation_id"])
+        self.assertEqual(current["state"], "prepared")
+        self.assertIsNone(current["run_id"])
+        self.assertIsNone(current["attempt"])
+
+    def test_only_accepted_completed_collision_is_safely_terminal(self):
+        operation, _ = self.store.reserve(self.identity)
+        operation = self.store.transition(
+            operation["operation_id"],
+            {"prepared"},
+            "attached",
+            run_id=41,
+            attempt=1,
+        )
+        accepted_result = {
+            "provider_status": "completed",
+            "accepted": True,
+            "run_id": 41,
+            "attempt": 1,
+        }
+        self.store.transition(
+            operation["operation_id"],
+            {"attached"},
+            "completed",
+            result_json=json.dumps(accepted_result, sort_keys=True),
+        )
+        changed = ci_lib.operation_identity(
+            self.root,
+            ref="topic",
+            sha=self.sha,
+            upload_packages=True,
+        )
+        _, created = self.store.reserve(changed)
+        self.assertTrue(created)
 
     def test_concurrent_reservation_has_one_operation(self):
         second = ci_lib.OperationStore(self.root, self.database, secure=False)

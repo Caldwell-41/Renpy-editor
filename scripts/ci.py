@@ -9,6 +9,7 @@ import sys
 import time
 
 from ci_lib import (
+    SCHEMA_VERSION,
     CiError,
     GitHubTransport,
     OperationStore,
@@ -28,6 +29,8 @@ def parser() -> argparse.ArgumentParser:
     commands = top.add_subparsers(dest="command", required=True)
     commands.add_parser("doctor")
     commands.add_parser("preflight")
+    inventory = commands.add_parser("operations")
+    inventory.add_argument("--acknowledge-legacy-state", action="store_true")
     send = commands.add_parser("submit")
     send.add_argument("--ref", required=True)
     send.add_argument("--sha", required=True)
@@ -53,6 +56,13 @@ def main() -> int:
             result = doctor(ROOT)
         elif args.command == "preflight":
             result = preflight(ROOT)
+        elif args.command == "operations":
+            store = OperationStore(ROOT, acknowledge_legacy=args.acknowledge_legacy_state)
+            result = {
+                "schema_version": SCHEMA_VERSION,
+                "local_only": True,
+                "recoverable_operations": store.list_recoverable(),
+            }
         elif args.command == "submit":
             store = OperationStore(ROOT, acknowledge_legacy=args.acknowledge_legacy_state)
             result = submit(
@@ -104,7 +114,11 @@ def main() -> int:
             return 3
         return 0
     except (CiError, LocalStateError):
-        print("CI operation blocked; inspect the local operation record and documented recovery. No private values were printed.", file=sys.stderr)
+        print(
+            "CI operation blocked; run `python scripts/ci.py operations` locally and follow "
+            "the documented read-only recovery. Do not publish that local output.",
+            file=sys.stderr,
+        )
         return 1
     finally:
         if store is not None:
