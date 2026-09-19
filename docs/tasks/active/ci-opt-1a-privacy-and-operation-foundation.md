@@ -112,14 +112,14 @@ Keep identifiable host, user, paths, endpoint, installed-build inventory, binary
 and runtime task/queue/turn bindings only in protected local state. Examples remain
 blank. Do not put stable hashes of private identity in GitHub receipts or artifacts.
 
-A host/home/worktree/PATH fingerprint is a routing convenience, not owning-runtime
-identity. Implement an explicit local client-context selection/rebinding contract so
-two clients with the same observed environment cannot silently inherit each other's
-settings. Preserve existing profiles, never overwrite them automatically, and leave
-ambiguous/new/stale client bindings unverified. The agent sets up applicable verified
-local fields on each actual client and rechecks ownership every session. Native task
-IDs are obtained afresh, never persisted as a reusable global default or found by
-`--last`. Do not enable automatic mode or perform W0 live probes in this checkpoint.
+A fingerprint combining host, home directory, worktree and PATH is a routing
+convenience, not owning-runtime identity. Implement explicit local client-context
+selection/rebinding so two clients with the same observed environment cannot silently
+inherit each other's settings. Preserve existing profiles, never overwrite them
+automatically, and leave ambiguous/new/stale client bindings unverified. The agent sets
+up applicable verified local fields on each actual client and rechecks ownership every
+session. Native task IDs are obtained afresh, never persisted as a reusable global
+default or found by `--last`. Do not enable automatic mode or perform W0 live probes.
 
 Before collecting/writing ANY identifying bootstrap fields, including hostname/home,
 verify private storage permissions. On Windows, establish an explicit current-account
@@ -403,7 +403,7 @@ give this small selector after the handover is published:
 /goal — W1 only
 Repository: https://github.com/Caldwell-41/Renpy-editor
 Continue maintenance/ci-optimisation and PR #12. Read AGENTS.md and
- docs/status/HANDOVER.md, then the linked roadmap. Verify W1 entry gates;
+docs/status/HANDOVER.md, then the linked roadmap. Verify W1 entry gates;
 implement W1 only, self-review/test, publish the ledger and handover, and stop.
 If any entry gate is not met, report it without starting W1.
 ```
@@ -415,7 +415,7 @@ selector, not a misleading implementation approval:
 /goal — W1 entry review only
 Repository: https://github.com/Caldwell-41/Renpy-editor
 Continue maintenance/ci-optimisation and PR #12. Read AGENTS.md and
- docs/status/HANDOVER.md. Check the documented W1 entry evidence. If W0 remains
+docs/status/HANDOVER.md. Check the documented W1 entry evidence. If W0 remains
 unqualified, record the blockers and stop; do not implement W1 or repeat live probes.
 ```
 
@@ -436,6 +436,16 @@ no P correction, CI helper, runtime probe or native run is performed by publishi
 The preceding assessment reported the staged-template/clean-worktree and sentinel/
 actual-path gaps. The implementation chat must reproduce both with new tests. Existing
 CI success and 16 tests do not cover them. Add P and A result entries here when run.
+
+### Documentation publication correction — 2026-09-19
+
+Planning commit `44625f0556a6f0b1798798defaecdeead7f590a1` triggered quality runs
+`35409127200` and `35409130385`. The PR job failed repository validation before privacy
+tests: slash-separated generic field lists in this brief and LOCAL_CODEX_CONFIG matched
+the existing home-path detector. Reworded those lists as prose; no actual client path
+was published and no validator rule was weakened. The failed runs remain failed
+evidence. Check the correction commit's actual quality result; no result is predeclared.
+This is still documentation-only correction, not execution of Gate P or OPT-1A.
 
 ## Primary implementation references
 

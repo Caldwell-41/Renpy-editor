@@ -57,10 +57,11 @@ routing-profile scaffolding, not a verified runtime connection. Any new selectio
 verification options specified in the brief remain hypothetical until implemented.
 
 Keep reusable local client configuration separate from private per-task bindings.
-The old hostname/home/workspace/Codex-home/PATH routing key does not uniquely identify
-an owning runtime. Gate P must provide explicit local client selection/rebinding so
-identical observations do not silently reuse another client's settings. Preserve existing
-profiles; do not copy or overwrite them. Unknown/changed/ambiguous clients stay unverified.
+The old routing key combines hostname, home directory, workspace, Codex home and PATH
+observations; it does not uniquely identify an owning runtime. Gate P must provide
+explicit local client selection/rebinding so identical observations do not silently
+reuse another client's settings. Preserve existing profiles; do not copy or overwrite
+them. Unknown/changed/ambiguous clients stay unverified.
 
 Every session obtains its native task ID afresh and cross-checks it through the actual
 owner with the expected workspace and permission profile. Never use `--last`, a global
