@@ -428,7 +428,7 @@ ACL/mode safety before collecting identity. The synthetic/native-host suite expa
 from 16 to 25 tests; two symlink creation cases were unavailable in the current Windows
 sandbox and remain explicit skips rather than passes.
 
-OPT-1A added `scripts/ci.py`, its reusable operation/API/collector layer, 15 offline
+OPT-1A added `scripts/ci.py`, its reusable operation/API/collector layer, 17 offline
 tests, candidate validation/pinning in the production workflow, and Windows/macOS
 tools-only quality jobs. The local store persists intent before POST and prevents
 duplicate dispatch; current 200 receipts, legacy 204, lost response, exact request
@@ -436,8 +436,13 @@ reconciliation, pagination, attempts, statuses and bounded redacted failure logs
 covered. `docs/CI_ORCHESTRATION.md` owns commands and recovery. Local doctor found a
 configured-but-unverified Git credential provider, public collection, no Codex binding,
 and automatic wake disabled. Local npm/Rust tools were unavailable and remain delegated
-to the exact native workflow, not passed. Exact candidate/run receipts follow in the
-combined brief and handover after publication.
+to the exact native workflow, not passed. The exact production workflow candidate
+`83e86aaacaa86993d5851283d4bb48509718b72b` passed run `35414571185`, attempt 1,
+including both mandatory native package jobs. Collector follow-up
+`609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed push/PR quality runs
+`35415495692` and `35415497671`; it did not trigger a redundant package matrix. Exact
+job receipts and retained failures are in the combined brief and handover. P/OPT-1A are
+review-ready, while W1 remains blocked by the unchanged W0 no-go result.
 
 ## Primary sources
 

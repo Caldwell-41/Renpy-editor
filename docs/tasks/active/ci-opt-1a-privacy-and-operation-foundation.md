@@ -531,6 +531,15 @@ This is still documentation-only correction, not execution of Gate P or OPT-1A.
   by run `35414571185`. It receives its own repository/native-tools quality evidence;
   no third equivalent package matrix is dispatched. This is exact-scope reporting, not
   a claim that the later commit itself received fresh application packaging.
+- Collector follow-up `609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed automatic quality
+  push run `35415495692` and PR run `35415497671`, attempt 1. Each passed repository
+  validation plus tools-only Windows x64 and macOS ARM64 jobs. The final offline
+  collector suite contains 17 passing tests; Gate P remains 25 passing tests with the
+  two locally unavailable symlink cases covered by successful macOS quality execution.
+- Gate P and OPT-1A are implementation-complete and self-reviewed. W0 remains no-go:
+  no owning-runtime reconciliation/telemetry, ownership-safe goal restoration, or
+  loaded/unloaded/inactivity proof was added. Therefore the next action is the bounded
+  W1 entry review from section 8, not W1 implementation or repeated live probing.
 
 ## Primary implementation references
 

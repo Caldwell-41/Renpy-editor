@@ -3,64 +3,87 @@
 **Prepared:** 2026-09-19.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Branch / PR:** `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
-**Approved next delivery:** **Privacy corrections/checks AND OPT-1A in one chat.**
-**State:** Approved, not started by this documentation amendment.
-**W1 prerequisite:** W0 automatic support remains unqualified/no-go; not waived.
+**Delivery:** Privacy corrections (Gate P) and OPT-1A (Gate A).
+**State:** Implementation complete, self-reviewed, published and review-ready; user
+acceptance and integration have not occurred.
+**W1 prerequisite:** W0 automatic support remains unqualified/no-go and is not waived.
 
-## Read and continue
+## What was delivered
 
 Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md),
-then the [combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
-It owns the detailed correction plan, OPT-1A design, tests, self-review and next-prompt
-rules. [LOCAL_CODEX_CONFIG](../LOCAL_CODEX_CONFIG.md) owns privacy boundaries;
-[the parent roadmap](../tasks/active/ci-optimisation.md) owns later dependencies;
-[W0 qualification](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) retains runtime limits.
-Do not require earlier chat text or attachments to reconstruct the task.
+the [combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md),
+and [CI orchestration](../CI_ORCHESTRATION.md). The brief is the detailed implementation
+and evidence ledger; this file records the exact continuation boundary.
 
-The documentation amendment is based on review candidate
-`33d0e202b2116d11e12c316313f9c1bd0888731e`; main was
-`7d634eeaf53fe0244a2739f26914797ca16ef544`. Resolve current remote refs and preserve
-any newer/uncommitted work. Reuse the existing branch/PR; these SHAs are evidence, not
-reset instructions. No new branch, merge or deletion is needed for this delivery.
+Gate P now validates bounded raw staged blobs and both staged/working privacy policy,
+checks every exact private destination, refuses exposed private namespaces, requires an
+explicit client context, and verifies Windows ACLs or POSIX owner-only modes before
+identity collection. Existing profiles are never overwritten and automatic mode stays
+off. The suite has 25 passing tests locally; two symlink-creation cases were skipped in
+the restricted Windows sandbox, while successful macOS quality runs exercised the
+symlink-capable path.
 
-## Execute this approved sequence
+Gate A adds `doctor`, `preflight`, candidate-bound one-POST `submit`, and exact
+attempt-specific `collect`. Its private SQLite journal records intent before dispatch,
+deduplicates candidate operations and preserves uncertain outcomes without resending.
+Workflow identity, immutable SHA, required jobs, provider outcomes and bounded redacted
+failure evidence are checked explicitly. The offline CI-tooling suite has 17 passing
+tests. No Codex wake-up, queue manipulation, goal restoration or W1 code was added.
 
-1. Gate P: reproduce the staged-template/clean-working-copy and sentinel/exact-ignore
-   defects with synthetic regression tests, fix them, and verify client/storage safety.
-   Do not initialise identifying local data through uncorrected safeguards.
-2. Gate A: after P passes, continue directly to OPT-1A in THIS chat without another
-   approval pause. Implement and validate the candidate-bound CI operation foundation
-   exactly as specified. Keep identifying client values local and bind each real client
-   afresh. CI tools must not require automatic Codex resumption to work.
-3. Review the integrated work against both gates; fix bounded findings; run relevant
-   cheap/native tooling checks and the ready-candidate workflow validation. Preserve
-   actual failures/skips/pending work; do not manufacture a pass to reach W1.
-4. Publish the brief's result ledger, current state and THIS handover, update PR #12,
-   then give one short next-chat selector and stop. Do not create another handover file.
+## Exact candidates and successful evidence
 
-## Acceptance and waiting boundaries
+- Corrected workflow/application candidate
+  `83e86aaacaa86993d5851283d4bb48509718b72b` passed automatic quality push run
+  `35414545592` and PR run `35414547340`, attempt 1. Both passed repository validation
+  plus Windows x64 and macOS ARM64 tools jobs.
+- Production run `35414571185`, attempt 1, was received directly and a duplicate submit
+  attached without another POST. Candidate job `105820540518`, macOS ARM64 job
+  `105820559305`, and Windows x64 job `105820559328` all succeeded at exact candidate
+  `83e86aa`. Mandatory package builds ran; opt-in artifact uploads were skipped.
+- Re-collection of that immutable run after the bounded conditional-skip classifier fix
+  returned `accepted=true`, provider success, complete required gates, no missing jobs
+  and no failure diagnostics.
+- Collector follow-up `609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed quality push run
+  `35415495692` and PR run `35415497671`, attempt 1. Each passed repository validation
+  and Windows/macOS tools jobs. This follow-up did not change the workflow or application
+  tree packaged at `83e86aa`, so no third equivalent production matrix was dispatched.
+- Exact staged-byte repository validation passed 212 files. Local `py_compile`, 25
+  privacy tests, 17 CI-tooling tests, 26 lossless/source tests, the lossless benchmark,
+  and `git diff --check` passed. Local preflight truthfully left frontend/Rust checks
+  unavailable; the exact native workflows supplied those gates.
 
-All concrete tests and live-CI limits are in the brief. Existing Repository quality
-run `35406289376` passed the prior validator and 16 tests using PR merge-test SHA
-`f98551d451fd4d14857f4b5646de5e0fe600fee9`; it does not cover the new defects or prove
-future OPT-1A. The current publication is documentation only. Inspect its own check,
-and record subsequent implementation evidence under the actual tested revision.
+## Retained failures and limits
 
-Do not poll running workflows using repeated model turns. Persist run/attempt/candidate
-and next collection action, then use a supported ordinary wait or a manual-resume
-handover. Unknown dispatch is not permission to resend. On interruption preserve
-awaiting/blocked state and resume that same operation, not a fresh candidate by default.
-No runtime queue message, observer or service is pending from this amendment.
+- Candidate `64836c879cc965713c7753bc83f130ff6a7ca79c` failed quality push run
+  `35412536443`, PR run `35412537941`, and production run `35413052524`, attempt 1.
+  Ubuntu/macOS exposed creation of an empty private root before linked-template refusal;
+  native package jobs were not allocated. The ordering regression is fixed and retained.
+- Controlled wrong-SHA production run `35413322655`, attempt 1, failed immutable
+  candidate validation as designed and allocated no native jobs. It is negative evidence.
+- The legacy Phase 0 SDK spike on this Windows host reported 13 passes, 4 failures,
+  5 errors and 2 skips because its fixtures assume POSIX launchers, paths and executable
+  bits. Preserve this result; it is not a supported-target pass.
+- No operation remains awaiting collection or reconciliation. Private local operation
+  identifiers, credentials, profile values and paths are intentionally absent here.
 
-## W1 handoff decision
+## W1 entry decision and next action
 
-If P and OPT-1A pass, publish that result and inspect W1 entry evidence. W1 implementation
-also requires an actual W0 go for the intended host. Current W0 remains no-go: unit tests,
-CI success, completed privacy setup or this approval do not change it. Do not run live
-W0 probes or W1 implementation within this combined chat.
+Gate P and OPT-1A are complete and reviewed. W0 is still no-go because the intended
+owning-runtime path lacks qualified external reconciliation/telemetry, ownership-safe
+goal restoration, and demonstrated loaded/unloaded/inactivity behavior with zero
+autonomous model inference. Passing CI and privacy setup does not satisfy that separate
+prerequisite.
 
-With all entry gates proven, provide the short W1-only prompt for a SEPARATE chat.
-If P/OPT-1A pass but W0 remains blocked, provide the brief's **W1 entry-review-only**
-prompt and explicitly report why implementation cannot start. If P/OPT-1A are incomplete,
-provide only their precise recovery prompt. Always publish the handover, even on failure.
-Do not silently reopen unchanged W0 discovery or skip to W2/W3/OPT-2/CLOSE.
+The next chat may perform only the documented W1 entry review. If W0 is still
+unqualified, record the blockers and stop. Do not implement W1, repeat live W0 probes,
+start W2/W3/OPT-2, merge PR #12, or clean branches without separate authority.
+
+Suggested next-chat prompt:
+
+```text
+/goal — W1 entry review only
+Repository: https://github.com/Caldwell-41/Renpy-editor
+Continue maintenance/ci-optimisation and PR #12. Read AGENTS.md and
+docs/status/HANDOVER.md. Check the documented W1 entry evidence. If W0 remains
+unqualified, record the blockers and stop; do not implement W1 or repeat live probes.
+```

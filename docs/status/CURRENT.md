@@ -3,7 +3,8 @@
 **Updated:** 2026-09-19.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
-**Current approved delivery:** Privacy corrections plus OPT-1A; implementation complete locally and preparing the exact published CI candidate.
+**Current approved delivery:** Privacy corrections plus OPT-1A; implementation and
+published validation complete, awaiting user review/acceptance on PR #12.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -34,7 +35,10 @@ exact destinations, establishes/verifies native storage protection before collec
 identity, and requires explicit client context. OPT-1A now supplies doctor/preflight,
 atomic local operation state, exact one-POST submission/reconciliation, attempt-specific
 collection and a candidate-pinned workflow gate. The combined ledger owns exact test
-and CI evidence; do not treat this summary as acceptance before its published runs.
+and CI evidence. Production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
+passed run `35414571185`, attempt 1; collector follow-up
+`609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed both automatic quality runs. This
+is review-ready evidence, not user acceptance or integration.
 
 The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
 external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.
