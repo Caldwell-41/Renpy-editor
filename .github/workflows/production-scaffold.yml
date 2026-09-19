@@ -3,8 +3,16 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      expected_ref:
+        description: Exact branch or tag used to resolve the candidate
+        required: true
+        type: string
       expected_sha:
         description: Full candidate commit SHA resolved by the requested ref
+        required: true
+        type: string
+      operation_key:
+        description: Deterministic public identity of candidate, workflow, ref, and options
         required: true
         type: string
       request_id:
@@ -31,7 +39,9 @@ permissions:
   contents: read
 
 run-name: >-
-  Phase 1 production gates / ${{ github.event_name == 'workflow_dispatch' && inputs.request_id || github.sha }}
+  ${{ github.event_name == 'workflow_dispatch'
+      && format('Phase 1 production gates / {0} / packages={1} / full={2} / request={3}', inputs.operation_key, inputs.upload_packages, inputs.force_full, inputs.request_id)
+      || format('Phase 1 production gates / {0}', github.sha) }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
@@ -51,7 +61,10 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_SHA: ${{ github.sha }}
+          EVENT_REF_NAME: ${{ github.ref_name }}
+          EXPECTED_REF: ${{ inputs.expected_ref }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
           REQUEST_ID: ${{ inputs.request_id }}
         run: |
           set -euo pipefail
@@ -59,6 +72,18 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || {
               echo "expected_sha must be a full lowercase commit SHA" >&2
+              exit 1
+            }
+            [[ "$EXPECTED_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$ ]] || {
+              echo "expected_ref must be an explicit safe ref name" >&2
+              exit 1
+            }
+            [ "$EXPECTED_REF" = "$EVENT_REF_NAME" ] || {
+              echo "requested ref name did not match expected_ref" >&2
+              exit 1
+            }
+            [[ "$OPERATION_KEY" =~ ^[0-9a-f]{64}$ ]] || {
+              echo "operation_key must be a lowercase SHA-256 value" >&2
               exit 1
             }
             [[ "$REQUEST_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
@@ -76,6 +101,46 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ steps.identity.outputs.checkout_sha }}
+      - name: Validate operation identity
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        env:
+          EXPECTED_REF: ${{ inputs.expected_ref }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FORCE_FULL: ${{ inputs.force_full }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import subprocess
+
+          revision = subprocess.run(
+              ["git", "rev-parse", "HEAD:.github/workflows/production-scaffold.yml"],
+              check=True,
+              capture_output=True,
+              text=True,
+              timeout=30,
+          ).stdout.strip()
+          payload = {
+              "candidate_sha": os.environ["EXPECTED_SHA"],
+              "options": {
+                  "force_full": os.environ["FORCE_FULL"].lower() == "true",
+                  "upload_packages": os.environ["UPLOAD_PACKAGES"].lower() == "true",
+              },
+              "ref": os.environ["EXPECTED_REF"],
+              "repository": "Caldwell-41/Renpy-editor",
+              "workflow": "production-scaffold.yml",
+              "workflow_revision": revision,
+          }
+          actual = hashlib.sha256(
+              json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+          ).hexdigest()
+          if actual != os.environ["OPERATION_KEY"]:
+              raise SystemExit("operation identity did not match the checked-out candidate")
+          PY
       - name: Validate repository and CI helpers
         run: |
           python3 scripts/validate.py

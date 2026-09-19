@@ -139,3 +139,95 @@ If W0 remains unqualified, record Gate P/OPT-1A complete (if true) and W1 blocke
 If W0 genuinely passes, HANDOVER may select W1. Finish with a concise assessment,
 remaining blockers, exact branch/head/PR and evidence, confirmation of updated handover,
 and one short next-chat /goal selector appropriate to the actual state.
+
+## Execution ledger
+
+### Defect reproduction and architectural correction — 2026-09-19
+
+The remote branch was fast-forwarded from `f3ec56f` to selected-plan head `a86dd8e`
+before edits. Focused corrective regressions were added first and failed on the reviewed
+implementation: external-state APIs were absent; a `dispatch_unknown` candidate could
+produce a second POST after a local-HEAD-only workflow change; empty/null step evidence
+was accepted; incomplete reconciliation posted; and an unrecognised synthetic secret
+was returned in `failure_diagnostics`. The initial focused run reported five failing
+assertions plus four errors across eight test methods/subtests. No real identity or
+credential was used.
+
+`scripts/local_state.py` now resolves protected per-user application data with testable
+Windows/macOS/XDG routing. Profiles and the schema-2 SQLite operation journal live there,
+outside the worktree. Directory/file type, containment, symlink/reparse, hardlink count,
+POSIX `0700`/`0600`, Windows owner and allow-ACE checks cover profiles, DB and applicable
+companions before sensitive use. Synthetic roots are redirectable; actual paths and
+identity never enter test output. Legacy `.codex-local` is checked only for presence,
+blocks by default, and requires an explicit external-reinitialisation acknowledgement
+that does not inspect, migrate, overwrite or delete it. Git ignore remains convenience;
+the publication validator retains exact staged-blob/working-copy scanning and rejects
+copied runtime DB/legacy names without reading them.
+
+CI operation identity now hashes the requested repository/workflow/ref/candidate,
+candidate workflow blob and options. The production workflow independently recomputes
+that key after immutable checkout. A separate random UUID remains the GitHub request
+correlation. New operations reserve intent and advisory deadlines atomically; local
+checks, run/attempt, job references, structured result and private diagnostics are
+checkpointed. Active same-candidate option collisions, including `force_full`, refuse.
+
+Every prepared request performs bounded complete remote reconciliation before its sole
+POST. The current API request opts into the HTTP-200 run receipt; 204, lost response,
+eventual direct-metadata delay and restart paths remain fail-closed. `ci.py reconcile`
+uses the stored identity, never POSTs, attaches only one exact run, and leaves zero /
+incomplete evidence unresolved or multiple/contradictory evidence blocked.
+
+Collection now requires complete attempt pagination, unique required jobs and affirmative
+completion of every named candidate/test/security/package/smoke/inventory/evidence step.
+Only cache-miss download and non-requested package upload may skip according to actual
+scope. Missing/empty/duplicate/malformed/null/unknown/in-progress/unexpected-skip evidence
+cannot pass. Provider-controlled text is absent from public JSON; bounded raw job logs
+are stored only in the protected journal, with public generic availability/reason codes.
+
+### Fresh integrated acceptance review — local result
+
+| Material criterion | Classification before publication | Evidence |
+| --- | --- | --- |
+| Public/private boundary and external state location | Directly tested pass | Redirected external roots, in-worktree refusal, legacy acknowledgement and copied-runtime publication regressions. |
+| Directory/profile/SQLite/companion security | Native Windows pass plus direct tests | Owner-verified ACL creation/classification, hardlink refusal, exact POSIX mode assertions for native POSIX quality; local Windows symlink creation remains unavailable and explicit. |
+| Candidate/ref/workflow/options identity | Directly tested pass | Candidate-blob key, local-HEAD-change regression, changed-candidate-workflow, malicious/moved ref and contradictory SHA/options tests; workflow recomputation step. |
+| Intent-before-POST, state machine, concurrency and restart | Directly tested pass | Atomic reserve/transition, cooperating-store duplicate, crash/lost-response/restart/direct-delay and no-retransmission tests. No distributed exactly-once claim. |
+| Remote find-or-start and pagination completeness | Directly tested pass | Fresh-state exact attach, zero complete, incomplete, ambiguous, duplicate/malformed and contradictory listings. |
+| Supported unresolved-dispatch recovery | Directly tested pass | Public CLI/API, direct-ID and operation-key recovery; zero/incomplete/multiple/contradictory outcomes; POST-count assertions. |
+| Exact run/attempt and affirmative job/step evidence | Directly tested pass | Attempt-specific pagination, newer-attempt refusal, PR/non-dispatch refusal, required job/step contract, package scope and every provider conclusion. |
+| Diagnostic publication boundary | Directly tested pass | Future-format secret, endpoint/control text, 64 KiB bound/truncation, malformed logs, signed redirect and private-only DB capture tests. |
+| Workflow pinning/native allocation/package/test/security/smoke gates | Structural pass; fresh live proof pending | Candidate dependency, immutable checkout output and unchanged mandatory production steps reviewed. Workflow identity changes invalidate the old production proof. |
+| Malformed API/subprocess/network bounds | Directly tested pass | Shape/count/identity failures, bounded pages/body/logs, subprocess timeout and value-free error tests. |
+| Read versus dispatch authority | Directly reviewed | Public collect is tokenless; POST uses approved Actions-write credentials; private log capture only with selected protected operation. |
+| Windows/macOS behavior | Windows local pass; native quality pending | Synthetic Windows ACL/profile/SQLite success; macOS mode/symlink path must pass the exact pushed quality run. |
+| Documentation accuracy and accidental W1 scope | Direct review pass, publication pending | Canonical docs describe external state/recovery/private logs. Searches show no queue/goal/wake implementation; automatic mode remains false. |
+
+The integrated review also corrected four significant in-scope omissions found beyond
+the mandatory list: Python capability was absent from `doctor`; direct-receipt metadata
+delay was conflated with contradiction; `force_full` could collide with unresolved
+state; and journal checkpoints omitted deadlines/local-check/job references. Regressions
+cover each correction. No W1, OPT-2, application feature, merge or cleanup code was added.
+
+### Validation and CI-cost decision
+
+Current local evidence: Python compilation passed; 35 privacy/local-state tests passed
+on Windows with three explicit skips (two sandbox-denied symlink creations and the
+POSIX-only unusual-byte case); 40 CI operation/recovery tests passed; repository
+validation passed 216 public files before final staging; 26 lossless/source tests and
+the 620,000-byte/40,000-node benchmark passed. The legacy SDK spike retained its known
+unsupported-Windows outcome (24 tests: 4 failures, 5 errors, 2 skips) and is not target
+evidence. Final exact-staged validation and native CI remain pending.
+
+Unlike the prior collector-only follow-up, this pass changes the production workflow's
+dispatch inputs, operation-key validation and candidate gate. It therefore affects
+candidate pinning/native allocation and requires one fresh full production matrix on the
+corrective candidate. Historical run `35414571185` remains valid only for the packaged
+application/workflow tree at `83e86aa`; it is not broadened to the corrected workflow.
+After the one required matrix, documentation-only receipts do not justify another.
+
+### Publication and W1 entry
+
+Pending: exact implementation candidate, push/PR quality runs, production run/attempt /
+jobs, final collector output, documentation follow-up head, PR body and final handover.
+W0 remains unchanged and no live W0 probe is authorised. Even after this correction
+passes, W1 entry remains blocked unless the separate W0 report changes to a genuine go.

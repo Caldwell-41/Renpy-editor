@@ -69,7 +69,8 @@ host, endpoint or task ID. Treat any future options in the brief as planned unti
 
 Keep host/usernames, client/device IDs, private addresses/endpoints, home/workspace/
 binary paths, binary hashes, installed-build inventory and thread/session/goal/queue/
-turn bindings only in protected local storage. Never commit them or copy them into
+turn bindings only in protected per-user Loomlight application-data storage outside
+the Git worktree. Never commit them or copy them into
 PRs/issues/CI logs/artifacts/screenshots. A stable hash is not anonymous permission to
 publish. Tokens stay in credential stores/protected local environment; templates blank.
 
@@ -118,11 +119,13 @@ Run relevant cheap checks first; keep stack spikes isolated. Existing test succe
 covers only those tests, not known untested privacy or runtime cases. New CI tooling
 commands become mandatory only when implemented/documented by the current delivery.
 
-Candidate-bound CI operations are documented in
+Candidate-bound CI operations and `dispatch_unknown` read-only recovery are documented in
 [CI_ORCHESTRATION](docs/CI_ORCHESTRATION.md). Use explicit ref/SHA and recorded
 run/attempt identities. A `dispatch_unknown` operation is never permission to submit
 again, and `collect` never reruns, cancels, merges or resumes Codex. Keep the SQLite
-journal local and publish only the helper's allowlisted result fields.
+journal in protected per-user application data and publish only the helper's allowlisted
+result fields. Legacy `.codex-local` content is non-authoritative and is never inspected,
+migrated or removed automatically.
 
 ## Waiting and CI cost controls
 

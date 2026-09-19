@@ -7,7 +7,9 @@ implementation detail and handover live here; prompts select a bounded delivery.
 Explicit user-approved checkpoint groupings are recorded in the selected brief.
 
 The current maintenance entry is the
-[combined privacy corrections and OPT-1A brief](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+[OPT-1A second corrective pass](tasks/active/ci-opt-1a-second-corrective-pass.md),
+which reviews the complete
+[original Gate P plus OPT-1A brief](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
 The [parent roadmap](tasks/active/ci-optimisation.md) retains later wait/wake and
 CI-efficiency dependencies. CURRENT/HANDOVER own live scope and branch state.
 The [W0 qualification](research/CODEX_WAIT_WAKE_QUALIFICATION.md) is separate evidence;
@@ -21,7 +23,8 @@ open-ended coding approval. Historical snapshots are not current instructions.
 | Concern | Canonical document |
 | --- | --- |
 | Repo-first delivery, explicit groups, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
-| Current privacy corrections plus OPT-1A implementation and test plan | [tasks/active/ci-opt-1a-privacy-and-operation-foundation.md](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md) |
+| Current OPT-1A architectural/correctness pass and integrated review | [tasks/active/ci-opt-1a-second-corrective-pass.md](tasks/active/ci-opt-1a-second-corrective-pass.md) |
+| Original Gate P plus OPT-1A requirements and historical evidence | [tasks/active/ci-opt-1a-privacy-and-operation-foundation.md](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md) |
 | Parent CI optimisation roadmap and later wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Local client setup, private data and known protection gaps | [LOCAL_CODEX_CONFIG.md](LOCAL_CODEX_CONFIG.md) |
 | Candidate-bound CI doctor, preflight, submission, collection and recovery | [CI_ORCHESTRATION.md](CI_ORCHESTRATION.md) |

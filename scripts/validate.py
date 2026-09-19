@@ -140,29 +140,11 @@ def check_content(relative: Path, content: str, errors: list[str], *, snapshot: 
             errors.append(f"non-placeholder email address: {label}")
 
 
-def ignore_policy_safe(content: str) -> bool:
-    required_rules = {".codex-local/", ".env", ".env.*", "!.env.example"}
-    effective = {
-        line.strip() for line in content.splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    }
-    unsafe_negation = any(
-        line.startswith("!") and (
-            ".codex-local" in line.casefold()
-            or (".env" in line.casefold() and line != "!.env.example")
-        )
-        for line in effective
-    )
-    return required_rules.issubset(effective) and not unsafe_negation
-
-
 def check_staged_privacy(errors: list[str]) -> bytes:
     raw, entries = staged_entries()
     staged_names = {entry.path for entry in entries if entry.stage == 0}
     if TEMPLATE not in staged_names:
         errors.append("required client template is absent from the staged candidate")
-    if ".gitignore" not in staged_names:
-        errors.append("required ignore policy is absent from the staged candidate")
     for entry in entries:
         relative_text = entry.path
         if is_local_only(relative_text):
@@ -179,14 +161,6 @@ def check_staged_privacy(errors: list[str]) -> bytes:
                 read_config_bytes(content_bytes, template=True)
             except LocalConfigError:
                 errors.append("staged client example must be valid and contain placeholders only; values withheld")
-        if relative.as_posix() == ".gitignore":
-            try:
-                ignore_content = content_bytes.decode("utf-8")
-            except UnicodeDecodeError:
-                errors.append("staged ignore policy is not UTF-8")
-            else:
-                if not ignore_policy_safe(ignore_content):
-                    errors.append("staged ignore policy does not protect the reserved private namespaces")
         if relative.suffix.lower() not in TEXT_SUFFIXES and relative.name not in TEXT_FILENAMES:
             continue
         try:
@@ -205,20 +179,13 @@ def check_local_privacy(errors: list[str]) -> bytes:
         errors.append("local-only configuration/evidence is tracked; stop publication and untrack it")
     if any((ROOT / p).is_symlink() for p in tracked):
         errors.append("tracked symlink requires review; validator will not follow it")
-    exposed = git_paths(ROOT, "--others", "--exclude-standard", "--", ".codex-local")
-    if exposed:
-        errors.append("reserved private namespace contains exposed untracked data; names withheld")
+    exposed = git_paths(ROOT, "--others", "--exclude-standard")
+    if any(is_local_only(path) for path in exposed):
+        errors.append("reserved private runtime artifact is exposed as untracked data; names withheld")
     try:
         read_config(ROOT / TEMPLATE, template=True)
     except LocalConfigError:
         errors.append("working client example must be valid and contain placeholders only; values withheld")
-    try:
-        ignore_content = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    except (OSError, UnicodeError):
-        errors.append("working ignore policy could not be read safely")
-    else:
-        if not ignore_policy_safe(ignore_content):
-            errors.append("working ignore policy does not protect the reserved private namespaces")
     return raw
 
 

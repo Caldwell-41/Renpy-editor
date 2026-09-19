@@ -1,139 +1,140 @@
 # Local-only Codex client configuration
 
-**Established:** 2026-09-19, at the user's request.
-This is a privacy/bootstrap contract, not an implemented automatic wait/wake mechanism.
+**Corrected:** 2026-09-19. This is a private bootstrap/storage contract, not an
+automatic wait/wake mechanism.
 
-## Implementation status and known limits
+## Architecture and current limits
 
-Gate P now inspects raw staged blobs as well as the public working copy, requires the
-staged template and ignore policy, validates exact private destinations, refuses exposed
-reserved names, and checks storage permissions before collecting identifying fields.
-The bootstrap uses explicit local client-context selection; identical environment
-observations no longer select the same profile implicitly. Exact implementation-candidate
-evidence is kept in the
-[combined privacy plus OPT-1A ledger](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+Private client, CI and future runtime state normally lives outside every Git worktree
+in an OS-appropriate per-user Loomlight application-data root:
 
-This is an accident-prevention boundary against publication and overly broad local
-access, not isolation from a hostile process running as the same account. Windows uses
-a protected ACL for the current account, local system and administrators, followed by
-a SID-based access check. POSIX hosts require owner-only mode bits. A host that cannot
-establish or inspect these protections refuses before bootstrap observations.
+- Windows: the user's Local AppData under `Loomlight/private-state`.
+- macOS: the user's Application Support under `Loomlight/private-state`.
+- Other development/CI hosts: the standard XDG state location, with a user-state
+  fallback. Production support remains Windows x64 and macOS ARM64.
+
+`LOOMLIGHT_STATE_ROOT` can redirect tests to an absolute synthetic location. The helper
+rejects a root inside the repository. Tests never use a real user profile or print the
+resolved location.
+
+Client profiles are separated by an explicit local context label under the protected
+root. CI operations use a separate versioned SQLite journal there; neither shares
+Codex's internal databases. Automatic waiting remains false, runtime binding remains
+unverified until independently revalidated, and no task/queue/goal control is added.
+
+The boundary prevents accidental publication and access by other ordinary accounts. It
+does not isolate data from a hostile process already running as the same account.
 
 ## What belongs where
 
 | Information | Storage |
 | --- | --- |
-| Hostname, username, paths, Codex home, socket/pipe/endpoint, private IP/DNS, process/device/client identities, binary hashes and installed-build inventory | Protected local client profile/evidence only. |
-| Thread/session/goal/queue/turn/claim IDs, pause ownership, raw telemetry and operation journal | Private per-task state, never shared handover. |
-| Tokens/passwords/private keys | Existing credential store or protected local environment. |
-| Generic platform categories, public upstream source/schema references, capability/test outcomes, repo commit/PR/Actions references | Share only after excluding host-identifying data. |
+| Host/user identity, private paths/endpoints, installed runtime/build inventory and binary identity | Protected local client profile/evidence only. |
+| Task/session/goal/queue/turn/claim IDs, pause ownership, raw telemetry, operation journal and provider logs | Protected per-user task/CI state only. |
+| Tokens, passwords and private keys | Existing credential store or protected local environment; never the profile/journal. |
+| Generic platform class, public source/schema references, sanitised capability outcomes, commit/PR/run/attempt references | Repository-safe documentation after an allowlist review. |
 
-This covers commits, PR bodies/comments, issues, Actions output, summaries, screenshots,
-artifacts and handovers. Hashing a private ID/endpoint is not permission to publish a
-stable fingerprint. No local profiles in archives, temporary commits or artifacts.
-Export an allowlist of result fields, not a redacted environment dump.
+The committed [client template](../config/codex-client.example.json) remains blank/null.
+`.env.example` remains placeholder-only. A random CI request UUID and deterministic key
+derived exclusively from public candidate/workflow/options may be sent to GitHub; they
+must not encode or hash local client identity.
 
-The committed template is [config/codex-client.example.json](../config/codex-client.example.json).
-It stays blank/null. `.env.example` also contains placeholders only. Other `.env` files
-and `.codex-local/` stay local. A random per-CI-request correlation ID may be sent to
-GitHub only when independent of all private client/thread/host identity; it is not a
-client fingerprint or permission to export a local journal.
+## Storage protection
 
-## Agent setup on each actual client
+Protection is established before collecting identifying bootstrap fields.
 
-First read AGENTS and the status above. Once Gate P protection is implemented and
-verified, the agent runs the documented local initializer on the actual execution host:
+- Every owned state directory must be a real directory, never a symlink or Windows
+  reparse point. Redirected state must resolve outside the worktree.
+- POSIX directories are exactly mode `0700`; files are exactly `0600` and have one
+  hard link.
+- Windows removes inheritance on owned state entries, grants full control only to the
+  current owner, Local System and Administrators, permits the owner-rights pseudo-SID,
+  verifies the current account remains owner, and rejects every other allow ACE.
+- Client files, SQLite databases and applicable WAL/SHM/journal companions are regular,
+  single-link protected files. Unknown ACL/mode/type/link evidence blocks use.
+- Exclusive profile creation and atomic SQLite transactions prevent clobbering by
+  cooperating initialisers/processes. Ambiguous state refuses rather than guessing.
+
+Parent application-data directories need not be Loomlight-private, but pre-existing
+path components may not be links/reparse substitutions. No administrator elevation,
+system-wide policy, service installation or unrelated directory ACL change is used.
+
+## Actual-client setup
+
+On each actual client, after reading this status and verifying an available interpreter:
 
 ```text
 python scripts/codex_local.py init --client-context <explicit-local-label>
 ```
 
-Use an available verified Python interpreter; do not auto-install one. No actual host
-access means `client setup unavailable`, not surrogate setup in another sandbox.
-Authorised host-independent CI development/testing can still proceed.
+The command is non-networking. It does not invoke Codex, discover credentials, change
+another process, install a service or enable inference. Output contains only created /
+existing status, protected-storage classification, unverified runtime binding and
+automatic mode false; it never prints the state path or collected identity.
 
-The helper is non-networking and does not invoke Codex, read credentials,
-change another process's environment, install a service or enable inference. It creates
-routing-profile scaffolding, not a verified runtime connection. The context label uses
-only letters, digits, dot, underscore and dash, remains in ignored local state, and is
-never a GitHub receipt. A different label creates a separate blank profile; no existing
-profile is overwritten.
+The context label uses letters, digits, dot, underscore and dash. Two labels always map
+to separate blank profiles even if their observed host/workspace fields look identical.
+An existing profile is re-read only after storage revalidation and is never overwritten.
+Malformed, copied, context-mismatched, hard-linked or permission-unsafe profiles block.
+Runtime/client/context changes require a new reviewed local context or explicit safe
+rebinding; they never inherit qualification.
 
-Keep reusable local client configuration separate from private per-task bindings.
-Earlier environment-derived profiles remain local historical state and are not silently
-migrated. They do not uniquely identify an owning runtime. Explicit selection is now
-required; copied, changed or ambiguous profiles stay unverified and must be rebound
-under a new reviewed local context.
+Complete only fields verified on that actual client. `auth_token_env` is a variable
+name, never its value. Unknown fields stay null. Obtain the native task ID afresh through
+the actual owner every session; never use `--last`, a global default, or another client.
+No profile or executable match proves owning-runtime control.
 
-Every session obtains its native task ID afresh and cross-checks it through the actual
-owner with the expected workspace and permission profile. Never use `--last`, a global
-current-thread default, or another client's IDs. Runtime upgrades, endpoint changes,
-client changes and lost observation invalidate affected qualifications. An existing
-profile or executable match is insufficient. No cross-host takeover or inherited pause
-ownership is implied by repo access.
+## Legacy repository-local state
 
-The agent completes only locally verified fields. `auth_token_env` holds a variable
-NAME, not its secret value. Unknown values remain null. Never ask for secrets/private
-paths in shared chat, scan ports, read unrelated credential stores or execute generated
-`.env` text as shell code. Capture any identity-bearing setup outputs locally without
-copying them into GitHub. Automatic waiting remains false until W0/W2/W3 gates qualify
-that path. CI-only tools must report Codex unavailable separately from CI capability.
+Existing `.codex-local` state is non-authoritative. New code checks only whether that
+namespace entry exists; it does not inspect contents, migrate, overwrite, publish or
+delete it. Its presence blocks new external profile/journal use until the operator has
+preserved it and explicitly chooses external reinitialisation:
 
-## Storage protection and recovery
+```text
+python scripts/codex_local.py init --client-context <explicit-local-label> --acknowledge-legacy-state
+```
 
-The helper validates the exact profile, temporary, lock and evidence destinations before
-creation and rechecks before writing. Effective ignore negations matter; a protected
-sentinel does not prove a profile is protected. Existing exposed untracked private names
-block without opening or printing them. The publication validator independently checks
-tracked names and the staged ignore policy.
+The same acknowledgement option exists on CI commands that open an operation journal.
+It changes only the decision to create/use new external state. It does not certify that
+an old unresolved dispatch is safe to forget; use the documented remote reconciliation
+contract before any new POST. If old and new state remain ambiguous, stop.
 
-Verify protected storage BEFORE collecting/persisting identifying bootstrap fields.
-POSIX 0700/0600 checks are not Windows ACL proof. On Windows require a current-account
-ACL check or safe refusal before sensitive writes; a documented preprotected per-user
-root may be used. No administrator requirement or system-wide policy changes merely to
-configure this repo. Native positive/negative behavior needs actual evidence; mocks
-and skips cannot be labelled native qualification.
+`.codex-local/` may remain in `.gitignore` as convenience, but Git ignore is not the
+runtime security boundary. The publication validator still rejects tracked or exposed
+legacy/runtime database names without opening them and scans staged blobs plus public
+working files for credentials, private paths and identifying prose.
 
-Refuse symlink/reparse/hardlink or malformed unsafe paths/files; preserve existing
-profiles and unresolved data. Exclusive creation must not clobber another initializer.
-Describe the non-hostile-same-user boundary honestly rather than claiming a complete
-filesystem security barrier. Store journals separately from Codex's internal databases;
-no shared native/WSL live database. A bootstrap profile is not the future event journal.
+## Publication validation
 
-Do not copy profiles between clients/clones as proof of compatibility. Preserve pending
-private events when changing clients; the repo transfers task intent, not runtime rights.
-Choose a private backup policy; GitHub is not that backup. Missing local evidence stays
-unavailable until re-probed under appropriate authority, never reconstructed from prose.
+Inspect exact staged Git objects and the working public snapshot. Stage modes/conflicts,
+object failures, index changes, populated templates, copied runtime databases and
+local-only names fail closed without echoing paths/values or raw Git errors. The
+validator never follows private links, invokes text conversion/filters, recursively
+scans protected state or mutates the index.
 
-## Publication validation contract
-
-After implementation, inspect BOTH the exact staged Git blobs and the public working
-copy. Stage modes/conflicts/object failures must fail safely; no textconv, filters or
-symlink traversal to inspect raw blobs. A clean working copy or unstaged deletion must
-not hide private staged data. No automatic restaging or index mutation by the validator.
-Revalidate the actual candidate if the index changes. Keep local-only pathname checks
-independent of contents and check the staged template remains blank.
-
-Read tracked and non-ignored public files, not a recursive scan of private state.
-Diagnostics never echo private values, offending private paths or unsanitised Git
-stderr. CI uses synthetic contexts only and must not initialise a real user profile.
-Run the actual implemented validator/tests and inspect the staged diff before publishing:
+Run before publication:
 
 ```text
 python scripts/validate.py
 python -m unittest discover -s tests/ci_privacy -v
+python -m unittest discover -s tests/ci_tooling -v
+git diff --check
 ```
 
-Ignore rules/index guards reduce accidents, not arbitrary identifying prose/screenshots
-or every possible secret. Current-tip checks also do not detect every earlier-commit
-exposure. No temporary commits of private data. If exposure is found, stop publication,
-untrack safely, assess/rotate credentials as needed, and obtain authority before history
-rewriting. Removing current text is not retroactive erasure.
+These guards reduce accidents; they cannot detect every arbitrary secret in prose,
+screenshot or earlier history. If exposure is found, stop publication, preserve local
+evidence, rotate affected credentials where necessary, and obtain authority before any
+history rewrite.
 
-## Historical evidence boundary
+## Recovery and evidence boundary
 
-The reviewed W0 changes contained no raw endpoint/user path/full thread ID/credential;
-installed desktop-build inventory was removed from current text but remains in old
-commits. Public source tags remain code references, not new-client settings. Original
-private probes were not replayed by the remote review. Future exact version/schema/
-owner receipts stay local; shared reports contain only methods, results and limits.
+Do not copy profiles between machines/clones as compatibility proof. Keep private backup
+and retention policy outside GitHub. Missing state/evidence remains unavailable rather
+than reconstructed from prose. Future W0/W1 work may extend the external SQLite schema,
+but only after its own approval and runtime qualification.
+
+The W0 report contains sanitised historical observations, not the original private
+receipts. This corrective pass does not repeat those probes. Exact runtime versions,
+owner identities and endpoints remain local; shared reports contain only methods,
+generic outcomes and repository/Actions references.

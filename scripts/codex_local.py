@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Create private client configuration; never contact or resume a Codex runtime."""
+"""Create protected per-user client configuration; never contact Codex."""
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
@@ -14,53 +12,85 @@ import shutil
 import stat
 import subprocess
 import sys
+import time
 import uuid
 
+from local_state import (
+    LocalStateError,
+    application_state_root,
+    assert_private_file,
+    create_private_file,
+    ensure_private_subdirectory,
+    require_external_state_root,
+    require_legacy_acknowledgement,
+    storage_is_private,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
-LOCAL_DIR = ".codex-local"
+LEGACY_LOCAL_DIR = ".codex-local"
 TEMPLATE = "config/codex-client.example.json"
 SCHEMA_VERSION = 2
 RUNTIME_KEYS = (
-    "codex_home", "codex_executable", "owner_endpoint", "auth_token_env",
-    "cli_version", "daemon_version", "desktop_build",
+    "codex_home",
+    "codex_executable",
+    "owner_endpoint",
+    "auth_token_env",
+    "cli_version",
+    "daemon_version",
+    "desktop_build",
 )
 CLIENT_CONTEXT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
-PRIVATE_SUFFIXES = ("client.json", "client.json.tmp", "client.lock", "evidence.json")
 
-
-class LocalConfigError(Exception):
-    """A value-free diagnostic that is safe to show without leaking configuration."""
+# Preserve the public exception name used by the repository validator and callers.
+LocalConfigError = LocalStateError
 
 
 def run_bounded(
-    args: list[str], root: Path, *, input_bytes: bytes | None = None,
+    args: list[str],
+    root: Path,
+    *,
+    input_bytes: bytes | None = None,
     environment: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(
-            args, cwd=root, input=input_bytes, capture_output=True, check=False,
-            timeout=15, env=environment,
+            args,
+            cwd=root,
+            input=input_bytes,
+            capture_output=True,
+            check=False,
+            timeout=15,
+            env=environment,
         )
     except (OSError, subprocess.TimeoutExpired):
-        raise LocalConfigError("A required local safety check was unavailable; private setup is blocked.") from None
+        raise LocalConfigError("A required local safety check was unavailable; setup is blocked.") from None
 
 
 def git_paths(root: Path, *args: str) -> list[str]:
     result = run_bounded(["git", "ls-files", "-z", *args], root)
     if result.returncode:
-        raise LocalConfigError("Cannot inspect Git index; private setup is blocked.")
-    return [os.fsdecode(p) for p in result.stdout.split(b"\0") if p]
+        raise LocalConfigError("Cannot inspect Git index; publication safety check is blocked.")
+    return [os.fsdecode(path) for path in result.stdout.split(b"\0") if path]
 
 
 def is_local_only(path: str) -> bool:
+    """Identify legacy/runtime names that must never become repository content."""
     parts = Path(path).parts
+    name = Path(path).name.casefold()
     return any(
-        part.casefold() == LOCAL_DIR
-        or (part.casefold().startswith(".env")
+        part.casefold() in {LEGACY_LOCAL_DIR, "private-state"}
+        or (
+            part.casefold().startswith(".env")
             and (part.casefold() == ".env" or part.casefold().startswith(".env."))
-            and part != ".env.example")
+            and part != ".env.example"
+        )
         for part in parts
-    )
+    ) or name in {
+        "operations.sqlite3",
+        "operations.sqlite3-wal",
+        "operations.sqlite3-shm",
+        "operations.sqlite3-journal",
+    }
 
 
 def validate_client_context(value: str) -> str:
@@ -69,40 +99,16 @@ def validate_client_context(value: str) -> str:
     return value
 
 
-def profile_path(root: Path, client_context: str) -> Path:
+def profile_path(state_root: Path, client_context: str) -> Path:
     context = validate_client_context(client_context)
-    # This routing digest stays local. It is not anonymous publication data.
     key = hashlib.sha256(context.encode("utf-8")).hexdigest()
-    return root / LOCAL_DIR / "clients" / key / "client.json"
-
-
-def _relative(root: Path, path: Path) -> str:
-    try:
-        return path.relative_to(root).as_posix()
-    except ValueError:
-        raise LocalConfigError("Private destination is outside the repository.") from None
-
-
-def assert_ignored(root: Path, destinations: tuple[Path, ...]) -> None:
-    if any(is_local_only(p) for p in git_paths(root, "--cached")):
-        raise LocalConfigError("Local-only configuration is tracked; stop publication and untrack it.")
-    exposed = git_paths(root, "--others", "--exclude-standard", "--", LOCAL_DIR)
-    if exposed:
-        raise LocalConfigError("A private namespace contains non-ignored untracked data; setup refused.")
-    for destination in destinations:
-        relative = _relative(root, destination)
-        result = run_bounded(
-            ["git", "check-ignore", "--no-index", "--quiet", "--", relative], root,
-        )
-        if result.returncode == 1:
-            raise LocalConfigError("A private destination is not effectively ignored; setup refused.")
-        if result.returncode != 0:
-            raise LocalConfigError("Git ignore protection could not be verified; setup refused.")
+    return state_root / "clients" / key / "client.json"
 
 
 def bootstrap_context(root: Path) -> dict[str, str | None]:
-    # Collect only after storage protection passes. These observations remain local.
+    # This is called only after the external storage boundary is established.
     import socket
+
     return {
         "host": socket.gethostname(),
         "user_home": str(Path.home()),
@@ -112,91 +118,14 @@ def bootstrap_context(root: Path) -> dict[str, str | None]:
     }
 
 
-def _windows_acl_private(path: Path) -> bool:
-    script = r"""
-$ErrorActionPreference = 'Stop'
-$env:PSModulePath = "$env:WINDIR\System32\WindowsPowerShell\v1.0\Modules"
-Import-Module Microsoft.PowerShell.Security -Force
-$target = [Environment]::GetEnvironmentVariable('LOOMLIGHT_ACL_TARGET')
-$acl = Get-Acl -LiteralPath $target
-$sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-$writeMask = [System.Security.AccessControl.FileSystemRights]::Write -bor
-  [System.Security.AccessControl.FileSystemRights]::Modify -bor
-  [System.Security.AccessControl.FileSystemRights]::FullControl -bor
-  [System.Security.AccessControl.FileSystemRights]::CreateFiles -bor
-  [System.Security.AccessControl.FileSystemRights]::CreateDirectories
-$broad = @('S-1-1-0', 'S-1-5-11', 'S-1-5-32-545')
-$mine = $false
-$unsafe = $false
-foreach ($rule in $acl.Access) {
-  $ruleSid = $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value
-  $writes = (($rule.FileSystemRights -band $writeMask) -ne 0)
-  if ($rule.AccessControlType -eq 'Allow' -and $writes -and $ruleSid -eq $sid) { $mine = $true }
-  if ($rule.AccessControlType -eq 'Allow' -and $writes -and $broad -contains $ruleSid) { $unsafe = $true }
-}
-if ($mine -and -not $unsafe) { exit 0 }
-exit 1
-"""
-    result = run_bounded(
-        [r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
-        path.parent, environment={**os.environ, "LOOMLIGHT_ACL_TARGET": str(path)},
-    )
-    return result.returncode == 0
-
-
-def _protect_windows_directory(path: Path) -> None:
-    identity = run_bounded(["whoami", "/user", "/fo", "csv", "/nh"], path.parent)
-    if identity.returncode:
-        raise LocalConfigError("Current Windows account could not be identified; setup refused.")
-    try:
-        sid = next(csv.reader(io.StringIO(identity.stdout.decode("utf-8"))))[1]
-    except (IndexError, StopIteration, UnicodeError, csv.Error):
-        raise LocalConfigError("Current Windows account could not be identified; setup refused.") from None
-    if not re.fullmatch(r"S-1-(?:\d+-)+\d+", sid):
-        raise LocalConfigError("Current Windows account identity was invalid; setup refused.")
-    result = run_bounded([
-        "icacls", str(path), "/inheritance:r", "/grant:r",
-        f"*{sid}:(OI)(CI)F", "*S-1-5-18:(OI)(CI)F", "*S-1-5-32-544:(OI)(CI)F",
-    ], path.parent)
-    if result.returncode:
-        raise LocalConfigError("Private Windows ACL could not be established; setup refused.")
-
-
-def storage_is_private(path: Path, *, directory: bool) -> bool:
-    try:
-        info = path.lstat()
-    except OSError:
-        return False
-    reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
-    if stat.S_ISLNK(info.st_mode) or reparse:
-        return False
-    if directory:
-        if not stat.S_ISDIR(info.st_mode):
-            return False
-    elif not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-        return False
-    if os.name == "nt":
-        return _windows_acl_private(path)
-    return stat.S_IMODE(info.st_mode) & 0o077 == 0
-
-
-def ensure_private_directory(path: Path) -> None:
-    created = False
-    try:
-        path.mkdir(mode=0o700)
-        created = True
-    except FileExistsError:
-        pass
-    if created and os.name == "nt":
-        _protect_windows_directory(path)
-    if not storage_is_private(path, directory=True):
-        raise LocalConfigError("Private storage permissions could not be verified; setup refused.")
-
-
 def check_shape(data: object, *, template: bool) -> dict:
     required = {
-        "schema_version", "automatic_wait_enabled", "client_context",
-        "client_instance_id", "bootstrap_context", "runtime",
+        "schema_version",
+        "automatic_wait_enabled",
+        "client_context",
+        "client_instance_id",
+        "bootstrap_context",
+        "runtime",
     }
     if not isinstance(data, dict) or set(data) != required:
         raise LocalConfigError("Invalid client configuration schema.")
@@ -212,7 +141,8 @@ def check_shape(data: object, *, template: bool) -> dict:
     if data["client_context"] is not None and not isinstance(data["client_context"], str):
         raise LocalConfigError("Invalid client context.")
     if template and (
-        data["client_context"] is not None or data["client_instance_id"] is not None
+        data["client_context"] is not None
+        or data["client_instance_id"] is not None
         or data["bootstrap_context"] is not None
         or any(value is not None for value in runtime.values())
     ):
@@ -229,13 +159,18 @@ def read_config_bytes(content: bytes, *, template: bool = False) -> dict:
         raise LocalConfigError("Cannot parse client configuration; values withheld.") from None
 
 
-def read_config(path: Path, *, template: bool = False) -> dict:
+def read_config(path: Path, *, template: bool = False, private: bool = False) -> dict:
     try:
         info = path.lstat()
-        if stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode) or (
-            getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+        if (
+            stat.S_ISLNK(info.st_mode)
+            or not stat.S_ISREG(info.st_mode)
+            or getattr(info, "st_file_attributes", 0)
+            & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
         ):
             raise LocalConfigError("Refusing linked or non-regular configuration input.")
+        if private and info.st_nlink != 1:
+            raise LocalConfigError("Refusing hard-linked private configuration input.")
         if info.st_size > 65536:
             raise LocalConfigError("Client configuration is too large.")
         return read_config_bytes(path.read_bytes(), template=template)
@@ -248,45 +183,51 @@ def initialise(
     context: dict[str, str | None] | None = None,
     *,
     client_context: str,
+    state_root: Path | None = None,
+    acknowledge_legacy: bool = False,
 ) -> tuple[Path, bool]:
-    path = profile_path(root, client_context)
-    private_paths = tuple(path.with_name(name) for name in PRIVATE_SUFFIXES)
-    assert_ignored(root, private_paths)
+    """Create or revalidate one explicit profile in protected application data."""
+    context_label = validate_client_context(client_context)
+    require_legacy_acknowledgement(root, acknowledged=acknowledge_legacy)
     template = read_config(root / TEMPLATE, template=True)
+    selected_root = state_root or application_state_root()
+    require_external_state_root(root, selected_root)
+    ensure_private_subdirectory(selected_root, "clients")
+    key = hashlib.sha256(context_label.encode("utf-8")).hexdigest()
+    parent = ensure_private_subdirectory(selected_root, "clients", key)
+    path = parent / "client.json"
 
-    # Creating a blank directory is safe; identifying observations are collected only
-    # after its permissions have been checked on the native host.
-    ensure_private_directory(root / LOCAL_DIR)
-    assert_ignored(root, private_paths)
+    # Identity collection begins only after every destination directory is protected.
     if context is None:
         context = bootstrap_context(root)
 
-    parent = root / LOCAL_DIR
-    for part in path.parent.relative_to(parent).parts:
-        parent /= part
-        ensure_private_directory(parent)
-    assert_ignored(root, private_paths)
-
-    template["client_context"] = client_context
+    template["client_context"] = context_label
     template["client_instance_id"] = str(uuid.uuid4())
     template["bootstrap_context"] = context
-    created = False
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        descriptor = os.open(path, flags, 0o600)
-    except FileExistsError:
-        pass
-    else:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as output:
-            output.write(json.dumps(template, indent=2) + "\n")
-            output.flush()
-            os.fsync(output.fileno())
-        created = True
-    if not storage_is_private(path, directory=False):
-        raise LocalConfigError("Private configuration permissions could not be verified.")
-    data = read_config(path)
+    created = create_private_file(path)
+    if created:
+        flags = os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
+        try:
+            descriptor = os.open(path, flags)
+            with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as output:
+                output.write(json.dumps(template, indent=2) + "\n")
+                output.flush()
+                os.fsync(output.fileno())
+        except OSError:
+            raise LocalConfigError("Private configuration could not be written safely.") from None
+    data = None
+    for attempt in range(40 if not created else 1):
+        try:
+            assert_private_file(path)
+            data = read_config(path, private=True)
+            break
+        except LocalConfigError:
+            if attempt == (39 if not created else 0):
+                raise
+            time.sleep(0.05)
+    assert data is not None
     if (
-        data["client_context"] != client_context
+        data["client_context"] != context_label
         or data["bootstrap_context"] != context
         or not isinstance(data["client_instance_id"], str)
     ):
@@ -300,22 +241,34 @@ def initialise(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("init", "path"))
+    parser.add_argument("command", choices=("init",))
     parser.add_argument(
-        "--client-context", required=True,
-        help="explicit local context label; stored only in ignored private state",
+        "--client-context",
+        required=True,
+        help="explicit local context label stored only in protected application data",
+    )
+    parser.add_argument(
+        "--acknowledge-legacy-state",
+        action="store_true",
+        help="reinitialise externally without reading, changing, or deleting legacy repository-local state",
     )
     args = parser.parse_args()
     try:
-        path, created = initialise(ROOT, client_context=args.client_context)
-        if args.command == "path":
-            print(path.relative_to(ROOT).as_posix())
-        else:
-            print(json.dumps({
-                "status": "created" if created else "existing",
-                "runtime_binding": "unverified",
-                "automatic_wait_enabled": False,
-            }))
+        _, created = initialise(
+            ROOT,
+            client_context=args.client_context,
+            acknowledge_legacy=args.acknowledge_legacy_state,
+        )
+        print(
+            json.dumps(
+                {
+                    "status": "created" if created else "existing",
+                    "storage": "protected_user_application_data",
+                    "runtime_binding": "unverified",
+                    "automatic_wait_enabled": False,
+                }
+            )
+        )
         return 0
     except (LocalConfigError, OSError, ValueError):
         print(

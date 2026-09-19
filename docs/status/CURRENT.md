@@ -3,8 +3,9 @@
 **Updated:** 2026-09-19.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
-**Current approved delivery:** Privacy corrections plus OPT-1A; implementation and
-published validation complete, awaiting user review/acceptance on PR #12.
+**Current approved delivery:** [OPT-1A second corrective pass](../tasks/active/ci-opt-1a-second-corrective-pass.md).
+Local correction and integrated review are in progress; publication/native evidence is
+not complete until the corrective candidate and GitHub checks are recorded.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -22,23 +23,17 @@ application feature. Preserve unrelated active work and do not merge/retire bran
 
 ## Current delivery and remaining gates
 
-Read the [combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md)
-for detailed requirements. Gate P first reproduces and corrects staged-content validation,
-exact destination ignore checks, client rebinding and storage safety; Gate A then
-implements CI doctor/preflight, durable candidate-specific submission and bounded
-attempt-specific collection. Both are authorised in the same chat with separate evidence,
-followed by self-review and the published handover. This is an explicit exception to
-the usual one-checkpoint-per-chat rule, not authority to continue to W1.
+Read the [second corrective brief](../tasks/active/ci-opt-1a-second-corrective-pass.md)
+and the [original combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+The corrective pass moves private state to protected per-user application data, fixes
+candidate identity/reconciliation/collector/publication defects, and performs a fresh
+integrated review. It does not authorise W1.
 
-Gate P now validates raw staged blobs and both staged/working ignore policy, checks the
-exact destinations, establishes/verifies native storage protection before collecting
-identity, and requires explicit client context. OPT-1A now supplies doctor/preflight,
-atomic local operation state, exact one-POST submission/reconciliation, attempt-specific
-collection and a candidate-pinned workflow gate. The combined ledger owns exact test
-and CI evidence. Production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
-passed run `35414571185`, attempt 1; collector follow-up
-`609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed both automatic quality runs. This
-is review-ready evidence, not user acceptance or integration.
+The earlier production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
+and run `35414571185` remain historical evidence for the packaged application baseline.
+They do not prove the corrected workflow identity, external-state architecture or
+affirmative collector. The corrective ledger must record the new exact candidate and
+checks before this delivery returns to review-ready.
 
 The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
 external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.

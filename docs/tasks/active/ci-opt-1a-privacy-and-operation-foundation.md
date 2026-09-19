@@ -2,7 +2,8 @@
 
 **Approved:** 2026-09-19, by the user's instruction to do both the review corrections
 and 1A in the next chat, self-review, publish a handover and provide a W1 prompt.
-**State:** Implemented locally; exact published CI evidence pending.
+**State:** Historical Gate P/OPT-1A baseline and evidence; its initial implementation is
+superseded by the [second corrective pass](ci-opt-1a-second-corrective-pass.md).
 **Repository / working branch / PR:** `Caldwell-41/Renpy-editor`,
 `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
 **Reviewed starting candidate:** `33d0e202b2116d11e12c316313f9c1bd0888731e`.
@@ -15,6 +16,11 @@ prompt is only a selector. Read [AGENTS](../../../AGENTS.md),
 [W0 report](../../research/CODEX_WAIT_WAKE_QUALIFICATION.md). Inspect actual remote
 refs, PR changes, worktree and any nested agent instructions before editing. Preserve
 unrelated work and reuse the existing branch/PR; do not reset to the reference SHA.
+
+The second corrective brief changes the live-state architecture: repository-local
+ignore/destination proofs in P2 are retained here as historical acceptance context, but
+new runtime state must be external and protected directly. Ordinary publication hygiene
+for copied legacy/runtime artifacts remains required.
 
 ## 1. Authority, order and limits
 
@@ -540,6 +546,16 @@ This is still documentation-only correction, not execution of Gate P or OPT-1A.
   no owning-runtime reconciliation/telemetry, ownership-safe goal restoration, or
   loaded/unloaded/inactivity proof was added. Therefore the next action is the bounded
   W1 entry review from section 8, not W1 implementation or repeated live probing.
+
+### Second corrective pass — superseding review
+
+The linked [second corrective brief](ci-opt-1a-second-corrective-pass.md) supersedes the
+initial review-ready conclusion above. It records reproduced defects, protected external
+application-data state, corrected candidate/reconciliation/collector/publication
+behavior, expanded tests and a fresh requirement-by-requirement review. The original
+production run remains historical packaged-application evidence only; it does not prove
+the corrected workflow or collector. Read the corrective brief and live handover for
+the current candidate and exact results.
 
 ## Primary implementation references
 

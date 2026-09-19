@@ -17,26 +17,87 @@ import urllib.parse
 import urllib.request
 import uuid
 
-from codex_local import LocalConfigError, assert_ignored, ensure_private_directory
+from local_state import (
+    LocalStateError,
+    application_state_root,
+    assert_private_file,
+    create_private_file,
+    ensure_private_subdirectory,
+    require_external_state_root,
+    require_legacy_acknowledgement,
+)
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+STORE_VERSION = 2
 API_VERSION = "2026-03-10"
 REPOSITORY = "Caldwell-41/Renpy-editor"
 WORKFLOW = "production-scaffold.yml"
 WORKFLOW_PATH = ".github/workflows/production-scaffold.yml"
 FULL_SHA = re.compile(r"[0-9a-f]{40}\Z")
+OBJECT_ID = re.compile(r"[0-9a-f]{40,64}\Z")
 SAFE_REF = re.compile(r"(?!.*(?:\.\.|@\{|\\|\s))[A-Za-z0-9][A-Za-z0-9._/-]{0,199}\Z")
 REQUEST_ID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z")
+OPERATION_KEY = re.compile(r"[0-9a-f]{64}\Z")
 REQUIRED_JOBS = ("Validate candidate", "Windows x64", "macOS ARM64")
-TERMINAL_FAILURES = {"failure", "cancelled", "timed_out", "neutral", "skipped", "stale", "action_required"}
-EXPECTED_CONDITIONAL_SKIPS = {
+VALID_STATUSES = {"queued", "in_progress", "completed", "waiting", "requested", "pending"}
+VALID_CONCLUSIONS = {
+    "success",
+    "failure",
+    "cancelled",
+    "timed_out",
+    "neutral",
+    "skipped",
+    "stale",
+    "action_required",
+    "startup_failure",
+    None,
+}
+VALID_STATES = {"prepared", "dispatching", "dispatch_unknown", "attached", "running", "completed", "blocked"}
+MAX_RECONCILIATION_PAGES = 10
+MAX_JOB_PAGES = 10
+RUN_TITLE = re.compile(
+    r"Phase 1 production gates / (?P<key>[0-9a-f]{64}) / "
+    r"packages=(?P<packages>true|false) / full=(?P<full>true|false) / "
+    r"request=(?P<request>[0-9a-f-]{36})\Z"
+)
+VALIDATE_STEPS = (
+    "Validate immutable candidate identity",
+    "Check out validated candidate",
+    "Validate operation identity",
+    "Validate repository and CI helpers",
+)
+NATIVE_STEPS = (
+    "Check out repository",
+    "Select locked Node toolchain",
+    "Select locked npm toolchain",
+    "Record runner and toolchain",
+    "Restore Rust dependency cache",
+    "Install locked JavaScript dependencies",
+    "Validate frontend and protocol",
+    "Build frontend",
+    "Check Rust formatting",
+    "Test independent Rust core",
+    "Restore pinned Ren'Py SDK archive",
     "Download pinned official Ren'Py SDK on cache miss",
+    "Exercise Phase 1C lifecycle through Phase 1E Scene target gate",
+    "Exercise SDK download handoff and verified managed reuse",
+    "Test desktop Rust boundary",
+    "Package production scaffold",
+    "Run packaged WebView boundary smoke",
+    "Scan production artifacts for secrets",
+    "Record dependency and licence inventory",
+    "Upload lightweight production evidence",
     "Upload packaged application for manual runs",
+)
+REQUIRED_STEPS = {
+    "Validate candidate": VALIDATE_STEPS,
+    "Windows x64": NATIVE_STEPS,
+    "macOS ARM64": NATIVE_STEPS,
 }
 
 
 class CiError(Exception):
-    """Safe, public diagnostic without credentials, private paths, or provider bodies."""
+    """Safe diagnostic without credentials, private paths, or provider bodies."""
 
 
 @dataclass(frozen=True)
@@ -44,6 +105,33 @@ class ApiResponse:
     status: int
     body: dict[str, Any] | None
     headers: dict[str, str]
+
+
+@dataclass(frozen=True)
+class OperationIdentity:
+    repository: str
+    workflow: str
+    ref: str
+    candidate_sha: str
+    workflow_revision: str
+    upload_packages: bool
+    force_full: bool
+    operation_key: str
+
+    @property
+    def options(self) -> dict[str, bool]:
+        return {
+            "force_full": self.force_full,
+            "upload_packages": self.upload_packages,
+        }
+
+
+@dataclass(frozen=True)
+class Reconciliation:
+    status: str
+    reason_code: str
+    run_id: int | None = None
+    attempt: int | None = None
 
 
 class Transport(Protocol):
@@ -59,12 +147,16 @@ class GitHubTransport:
     def from_local_credentials(cls, root: Path) -> "GitHubTransport":
         token = os.environ.get("GITHUB_TOKEN")
         if token:
+            if len(token) > 4096:
+                raise CiError("Approved GitHub credentials were invalid.")
             return cls(token)
         result = _run(
-            ["git", "credential", "fill"], root, 20,
+            ["git", "credential", "fill"],
+            root,
+            20,
             input_bytes=b"protocol=https\nhost=github.com\n\n",
         )
-        if result.returncode:
+        if result.returncode or len(result.stdout) > 16384:
             raise CiError("Approved GitHub dispatch credentials are unavailable locally.")
         fields: dict[str, str] = {}
         try:
@@ -80,18 +172,21 @@ class GitHubTransport:
         return cls(token)
 
     def request(self, method: str, path: str, body: dict[str, Any] | None = None) -> ApiResponse:
-        if not path.startswith("/") or ".." in path:
-            raise CiError("Invalid GitHub API path.")
+        if method not in {"GET", "POST"} or not path.startswith("/") or ".." in path:
+            raise CiError("Invalid GitHub API request.")
         data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
         headers = {
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": API_VERSION,
-            "User-Agent": "loomlight-ci-operation/1",
+            "User-Agent": "loomlight-ci-operation/2",
         }
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request(
-            "https://api.github.com" + path, data=data, headers=headers, method=method,
+            "https://api.github.com" + path,
+            data=data,
+            headers=headers,
+            method=method,
         )
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
@@ -103,7 +198,6 @@ class GitHubTransport:
                     raise CiError("GitHub returned an unexpected response shape.")
                 return ApiResponse(response.status, parsed, dict(response.headers.items()))
         except urllib.error.HTTPError as error:
-            # Do not expose response text; it can contain echoed inputs or URLs.
             raise CiError(f"GitHub API request failed with HTTP {error.code}.") from None
         except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
             raise CiError("GitHub API response was unavailable or invalid.") from None
@@ -114,14 +208,16 @@ class GitHubTransport:
         headers = {
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": API_VERSION,
-            "User-Agent": "loomlight-ci-operation/1",
+            "User-Agent": "loomlight-ci-operation/2",
         }
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request("https://api.github.com" + path, headers=headers, method="GET")
+
         class NoRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, request, file_pointer, code, message, response_headers, new_url):
                 return None
+
         try:
             try:
                 urllib.request.build_opener(NoRedirect).open(request, timeout=self.timeout)
@@ -132,13 +228,14 @@ class GitHubTransport:
                 location = response.headers.get("Location", "")
             parsed = urllib.parse.urlsplit(location)
             if parsed.scheme != "https" or not (
-                parsed.hostname and (
+                parsed.hostname
+                and (
                     parsed.hostname.endswith(".blob.core.windows.net")
                     or parsed.hostname.endswith(".githubusercontent.com")
                 )
             ):
                 raise CiError("Job log redirect host was not approved.")
-            download = urllib.request.Request(location, headers={"User-Agent": "loomlight-ci-operation/1"})
+            download = urllib.request.Request(location, headers={"User-Agent": "loomlight-ci-operation/2"})
             with urllib.request.urlopen(download, timeout=self.timeout) as response:
                 value = response.read(limit + 1)
                 return value[:limit]
@@ -147,12 +244,20 @@ class GitHubTransport:
 
 
 def _run(
-    args: list[str], cwd: Path, timeout: int = 120, *, input_bytes: bytes | None = None,
+    args: list[str],
+    cwd: Path,
+    timeout: int = 120,
+    *,
+    input_bytes: bytes | None = None,
 ) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(
-            args, cwd=cwd, input=input_bytes, capture_output=True,
-            check=False, timeout=timeout,
+            args,
+            cwd=cwd,
+            input=input_bytes,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
         )
     except (OSError, subprocess.TimeoutExpired):
         raise CiError("A bounded local tool check was unavailable.") from None
@@ -160,7 +265,7 @@ def _run(
 
 def git_output(root: Path, *args: str) -> str:
     result = _run(["git", *args], root, 30)
-    if result.returncode:
+    if result.returncode or len(result.stdout) > 65536:
         raise CiError("Git identity check failed; inspect the repository locally.")
     try:
         return result.stdout.decode("utf-8").strip()
@@ -168,7 +273,7 @@ def git_output(root: Path, *args: str) -> str:
         raise CiError("Git identity output was not valid UTF-8.") from None
 
 
-def validate_identity(root: Path, ref: str, sha: str) -> None:
+def validate_identity(root: Path, ref: str, sha: str) -> str:
     if not SAFE_REF.fullmatch(ref) or not FULL_SHA.fullmatch(sha):
         raise CiError("Ref or candidate SHA is invalid.")
     remote = git_output(root, "remote", "get-url", "origin")
@@ -178,30 +283,132 @@ def validate_identity(root: Path, ref: str, sha: str) -> None:
     resolved = git_output(root, "rev-parse", "--verify", f"refs/remotes/origin/{ref}^{{commit}}")
     if resolved != sha:
         raise CiError("The requested remote ref does not resolve to the exact candidate SHA.")
-    workflow = root / WORKFLOW_PATH
-    if not workflow.is_file():
-        raise CiError("The approved production workflow is missing.")
+    revision = git_output(root, "rev-parse", f"{sha}:{WORKFLOW_PATH}")
+    if not OBJECT_ID.fullmatch(revision):
+        raise CiError("The candidate production workflow identity is invalid.")
+    return revision
+
+
+def _operation_key_payload(
+    *,
+    ref: str,
+    sha: str,
+    workflow_revision: str,
+    upload_packages: bool,
+    force_full: bool,
+) -> dict[str, Any]:
+    return {
+        "candidate_sha": sha,
+        "options": {
+            "force_full": bool(force_full),
+            "upload_packages": bool(upload_packages),
+        },
+        "ref": ref,
+        "repository": REPOSITORY,
+        "workflow": WORKFLOW,
+        "workflow_revision": workflow_revision,
+    }
+
+
+def operation_identity(
+    root: Path,
+    *,
+    ref: str,
+    sha: str,
+    upload_packages: bool = False,
+    force_full: bool = False,
+) -> OperationIdentity:
+    revision = validate_identity(root, ref, sha)
+    payload = _operation_key_payload(
+        ref=ref,
+        sha=sha,
+        workflow_revision=revision,
+        upload_packages=upload_packages,
+        force_full=force_full,
+    )
+    operation_key = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return OperationIdentity(
+        repository=REPOSITORY,
+        workflow=WORKFLOW,
+        ref=ref,
+        candidate_sha=sha,
+        workflow_revision=revision,
+        upload_packages=bool(upload_packages),
+        force_full=bool(force_full),
+        operation_key=operation_key,
+    )
 
 
 class OperationStore:
-    def __init__(self, root: Path, path: Path | None = None, *, secure: bool = True):
+    def __init__(
+        self,
+        root: Path,
+        path: Path | None = None,
+        *,
+        secure: bool = True,
+        state_root: Path | None = None,
+        acknowledge_legacy: bool = False,
+    ):
         self.root = root
-        self.path = path or root / ".codex-local" / "ci" / "operations.sqlite3"
+        self.secure = secure
         if secure:
-            companions = tuple(self.path.with_name(self.path.name + suffix) for suffix in ("", "-wal", "-shm", ".lock"))
-            assert_ignored(root, companions)
-            ensure_private_directory(root / ".codex-local")
-            ensure_private_directory(self.path.parent)
-            assert_ignored(root, companions)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = sqlite3.connect(self.path, timeout=10, isolation_level=None)
-        self.connection.row_factory = sqlite3.Row
-        self.connection.execute("PRAGMA journal_mode=WAL")
-        self.connection.execute("PRAGMA busy_timeout=10000")
-        self.connection.execute("""
+            if path is not None:
+                raise LocalStateError("Secure operation storage does not accept an arbitrary database path.")
+            require_legacy_acknowledgement(root, acknowledged=acknowledge_legacy)
+            selected_root = state_root or application_state_root()
+            require_external_state_root(root, selected_root)
+            directory = ensure_private_subdirectory(selected_root, "ci")
+            self.path = directory / "operations.sqlite3"
+            create_private_file(self.path)
+            assert_private_file(self.path)
+        else:
+            if path is None:
+                raise CiError("A test operation database path is required.")
+            self.path = path
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+        old_umask = os.umask(0o077)
+        try:
+            self.connection = sqlite3.connect(self.path, timeout=10, isolation_level=None)
+            self.connection.row_factory = sqlite3.Row
+            self.connection.execute("PRAGMA busy_timeout=10000")
+            self.connection.execute("PRAGMA foreign_keys=ON")
+            self.connection.execute("PRAGMA journal_mode=WAL")
+            self._initialise_schema()
+        except (CiError, LocalStateError):
+            if hasattr(self, "connection"):
+                self.connection.close()
+            raise
+        except (sqlite3.Error, OSError):
+            if hasattr(self, "connection"):
+                self.connection.close()
+            raise CiError("The durable CI operation journal could not be opened safely.") from None
+        finally:
+            os.umask(old_umask)
+        try:
+            self._verify_files()
+        except Exception:
+            self.connection.close()
+            raise
+
+    def _initialise_schema(self) -> None:
+        version = self.connection.execute("PRAGMA user_version").fetchone()[0]
+        if version not in {0, STORE_VERSION}:
+            raise CiError("The local CI operation journal version is unsupported.")
+        existing_tables = {
+            row[0]
+            for row in self.connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+            )
+        }
+        if version == 0 and existing_tables:
+            raise CiError("An unversioned local CI operation journal is not trusted.")
+        self.connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS operations (
               operation_id TEXT PRIMARY KEY,
-              fingerprint TEXT NOT NULL UNIQUE,
+              operation_key TEXT NOT NULL UNIQUE,
               request_id TEXT NOT NULL UNIQUE,
               repository TEXT NOT NULL,
               workflow TEXT NOT NULL,
@@ -214,92 +421,327 @@ class OperationStore:
               attempt INTEGER,
               created_at INTEGER NOT NULL,
               updated_at INTEGER NOT NULL,
+              deadline_at INTEGER NOT NULL,
+              local_checks_json TEXT NOT NULL,
+              job_refs_json TEXT NOT NULL,
               next_action TEXT NOT NULL,
               result_json TEXT
             )
-        """)
+            """
+        )
+        self.connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS diagnostics (
+              operation_id TEXT NOT NULL,
+              job_name TEXT NOT NULL,
+              job_id INTEGER NOT NULL,
+              captured_at INTEGER NOT NULL,
+              truncated INTEGER NOT NULL,
+              content BLOB NOT NULL,
+              PRIMARY KEY (operation_id, job_id),
+              FOREIGN KEY (operation_id) REFERENCES operations(operation_id)
+            )
+            """
+        )
+        self.connection.execute(f"PRAGMA user_version={STORE_VERSION}")
+
+    def _verify_files(self) -> None:
+        if not self.secure:
+            return
+        for candidate in (
+            self.path,
+            self.path.with_name(self.path.name + "-wal"),
+            self.path.with_name(self.path.name + "-shm"),
+            self.path.with_name(self.path.name + "-journal"),
+        ):
+            try:
+                candidate.lstat()
+            except FileNotFoundError:
+                continue
+            except OSError:
+                raise LocalStateError("Private journal metadata could not be inspected safely.") from None
+            assert_private_file(candidate)
 
     @staticmethod
-    def fingerprint(sha: str, workflow_revision: str, options: dict[str, Any]) -> str:
-        encoded = json.dumps(
-            {"sha": sha, "workflow_revision": workflow_revision, "options": options},
-            sort_keys=True, separators=(",", ":"),
-        ).encode("utf-8")
-        return hashlib.sha256(encoded).hexdigest()
+    def _identity_from_row(row: dict[str, Any]) -> OperationIdentity:
+        try:
+            options = json.loads(row["options_json"])
+        except (KeyError, TypeError, json.JSONDecodeError):
+            raise CiError("Stored operation identity is malformed.") from None
+        expected_options = {"force_full", "upload_packages"}
+        if not isinstance(options, dict) or set(options) != expected_options:
+            raise CiError("Stored operation options are malformed.")
+        if any(type(options[name]) is not bool for name in expected_options):
+            raise CiError("Stored operation options are malformed.")
+        payload = _operation_key_payload(
+            ref=row["ref"],
+            sha=row["candidate_sha"],
+            workflow_revision=row["workflow_revision"],
+            upload_packages=options["upload_packages"],
+            force_full=options["force_full"],
+        )
+        key = hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if (
+            row.get("repository") != REPOSITORY
+            or row.get("workflow") != WORKFLOW
+            or row.get("operation_key") != key
+            or not REQUEST_ID.fullmatch(str(row.get("request_id", "")))
+            or row.get("state") not in VALID_STATES
+            or type(row.get("deadline_at")) is not int
+        ):
+            raise CiError("Stored operation identity is contradictory.")
+        try:
+            local_checks = json.loads(row["local_checks_json"])
+            job_refs = json.loads(row["job_refs_json"])
+        except (KeyError, TypeError, json.JSONDecodeError):
+            raise CiError("Stored operation checkpoint data is malformed.") from None
+        if not isinstance(local_checks, list) or not isinstance(job_refs, list):
+            raise CiError("Stored operation checkpoint data is malformed.")
+        return OperationIdentity(
+            repository=REPOSITORY,
+            workflow=WORKFLOW,
+            ref=row["ref"],
+            candidate_sha=row["candidate_sha"],
+            workflow_revision=row["workflow_revision"],
+            upload_packages=options["upload_packages"],
+            force_full=options["force_full"],
+            operation_key=key,
+        )
 
-    def reserve(self, *, ref: str, sha: str, workflow_revision: str, options: dict[str, Any]) -> tuple[dict[str, Any], bool]:
-        fingerprint = self.fingerprint(sha, workflow_revision, options)
+    def reserve(self, identity: OperationIdentity) -> tuple[dict[str, Any], bool]:
         now = int(time.time())
         operation_id = str(uuid.uuid4())
         request_id = str(uuid.uuid4())
         self.connection.execute("BEGIN IMMEDIATE")
         try:
             row = self.connection.execute(
-                "SELECT * FROM operations WHERE fingerprint = ?", (fingerprint,),
+                "SELECT * FROM operations WHERE operation_key = ?",
+                (identity.operation_key,),
             ).fetchone()
             if row:
                 self.connection.execute("COMMIT")
-                return dict(row), False
-            self.connection.execute("""
-                INSERT INTO operations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, NULL)
-            """, (
-                operation_id, fingerprint, request_id, REPOSITORY, WORKFLOW,
-                workflow_revision, ref, sha, json.dumps(options, sort_keys=True),
-                "prepared", now, now, "dispatch exact candidate",
-            ))
+                result = dict(row)
+                if self._identity_from_row(result) != identity:
+                    raise CiError("Stored operation identity contradicts the requested candidate.")
+                return result, False
+            collisions = self.connection.execute(
+                """
+                SELECT state, result_json FROM operations
+                WHERE repository = ? AND workflow = ? AND workflow_revision = ?
+                  AND ref = ? AND candidate_sha = ? AND operation_key <> ?
+                """,
+                (
+                    identity.repository,
+                    identity.workflow,
+                    identity.workflow_revision,
+                    identity.ref,
+                    identity.candidate_sha,
+                    identity.operation_key,
+                ),
+            ).fetchall()
+            if any(
+                collision["state"] in {"prepared", "dispatching", "dispatch_unknown", "attached", "running"}
+                or identity.force_full
+                for collision in collisions
+            ):
+                raise CiError("A colliding candidate operation already exists; no new dispatch is permitted.")
+            self.connection.execute(
+                """
+                INSERT INTO operations (
+                  operation_id, operation_key, request_id, repository, workflow,
+                  workflow_revision, ref, candidate_sha, options_json, state,
+                  run_id, attempt, created_at, updated_at, deadline_at,
+                  local_checks_json, job_refs_json, next_action, result_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, NULL)
+                """,
+                (
+                    operation_id,
+                    identity.operation_key,
+                    request_id,
+                    identity.repository,
+                    identity.workflow,
+                    identity.workflow_revision,
+                    identity.ref,
+                    identity.candidate_sha,
+                    json.dumps(identity.options, sort_keys=True, separators=(",", ":")),
+                    "prepared",
+                    now,
+                    now,
+                    now + 900,
+                    json.dumps([{"name": "candidate_identity", "status": "passed"}], separators=(",", ":")),
+                    "[]",
+                    "reconcile exact operation before dispatch",
+                ),
+            )
             self.connection.execute("COMMIT")
         except Exception:
-            self.connection.execute("ROLLBACK")
+            if self.connection.in_transaction:
+                self.connection.execute("ROLLBACK")
             raise
+        self._verify_files()
         return self.get(operation_id), True
 
     def get(self, operation_id: str) -> dict[str, Any]:
+        try:
+            uuid.UUID(operation_id)
+        except (ValueError, TypeError):
+            raise CiError("The requested CI operation selector is invalid.") from None
         row = self.connection.execute(
-            "SELECT * FROM operations WHERE operation_id = ?", (operation_id,),
+            "SELECT * FROM operations WHERE operation_id = ?",
+            (operation_id,),
         ).fetchone()
         if not row:
             raise CiError("The requested CI operation does not exist locally.")
-        return dict(row)
+        result = dict(row)
+        self._identity_from_row(result)
+        return result
+
+    def identity(self, operation: dict[str, Any]) -> OperationIdentity:
+        return self._identity_from_row(operation)
 
     def find_run(self, run_id: int) -> dict[str, Any] | None:
         row = self.connection.execute(
-            "SELECT * FROM operations WHERE run_id = ?", (run_id,),
+            "SELECT * FROM operations WHERE run_id = ?",
+            (run_id,),
         ).fetchone()
-        return dict(row) if row else None
+        if not row:
+            return None
+        result = dict(row)
+        self._identity_from_row(result)
+        return result
 
     def transition(self, operation_id: str, expected: set[str], state: str, **fields: Any) -> dict[str, Any]:
-        if not expected or state not in {"prepared", "dispatching", "dispatch_unknown", "attached", "running", "completed", "blocked"}:
+        if not expected or state not in VALID_STATES:
             raise CiError("Invalid operation state transition.")
         self.connection.execute("BEGIN IMMEDIATE")
         try:
             row = self.get(operation_id)
             if row["state"] not in expected:
                 raise CiError("Operation ownership changed; attach or inspect instead of dispatching again.")
-            allowed = {"run_id", "attempt", "next_action", "result_json"}
+            allowed = {
+                "run_id",
+                "attempt",
+                "deadline_at",
+                "local_checks_json",
+                "job_refs_json",
+                "next_action",
+                "result_json",
+            }
             if set(fields) - allowed:
                 raise CiError("Invalid operation update.")
             assignments = ["state = ?", "updated_at = ?"] + [f"{name} = ?" for name in fields]
             values = [state, int(time.time()), *fields.values(), operation_id]
             self.connection.execute(
-                f"UPDATE operations SET {', '.join(assignments)} WHERE operation_id = ?", values,
+                f"UPDATE operations SET {', '.join(assignments)} WHERE operation_id = ?",
+                values,
             )
             self.connection.execute("COMMIT")
         except Exception:
-            self.connection.execute("ROLLBACK")
+            if self.connection.in_transaction:
+                self.connection.execute("ROLLBACK")
             raise
+        self._verify_files()
         return self.get(operation_id)
 
+    def store_job_references(self, operation_id: str, references: list[dict[str, Any]]) -> None:
+        normalised: list[dict[str, Any]] = []
+        for reference in references:
+            if (
+                not isinstance(reference, dict)
+                or reference.get("name") not in REQUIRED_JOBS
+                or type(reference.get("job_id")) is not int
+                or reference["job_id"] < 1
+            ):
+                raise CiError("Job reference checkpoint is invalid.")
+            normalised.append({"job_id": reference["job_id"], "name": reference["name"]})
+        self.get(operation_id)
+        self.connection.execute("BEGIN IMMEDIATE")
+        try:
+            self.connection.execute(
+                "UPDATE operations SET job_refs_json = ?, updated_at = ? WHERE operation_id = ?",
+                (
+                    json.dumps(normalised, sort_keys=True, separators=(",", ":")),
+                    int(time.time()),
+                    operation_id,
+                ),
+            )
+            self.connection.execute("COMMIT")
+        except Exception:
+            if self.connection.in_transaction:
+                self.connection.execute("ROLLBACK")
+            raise
+        self._verify_files()
 
-def workflow_revision(root: Path) -> str:
-    return git_output(root, "rev-parse", f"HEAD:{WORKFLOW_PATH}")
+    def store_diagnostic(
+        self,
+        operation_id: str,
+        *,
+        job_name: str,
+        job_id: int,
+        content: bytes,
+        truncated: bool,
+    ) -> None:
+        if job_name not in REQUIRED_JOBS or type(job_id) is not int or job_id < 1:
+            raise CiError("Diagnostic evidence identity is invalid.")
+        if not isinstance(content, bytes) or len(content) > 65536:
+            raise CiError("Diagnostic evidence exceeded the private storage limit.")
+        self.get(operation_id)
+        self.connection.execute("BEGIN IMMEDIATE")
+        try:
+            self.connection.execute(
+                """
+                INSERT OR REPLACE INTO diagnostics
+                (operation_id, job_name, job_id, captured_at, truncated, content)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (operation_id, job_name, job_id, int(time.time()), int(truncated), content),
+            )
+            self.connection.execute("COMMIT")
+        except Exception:
+            if self.connection.in_transaction:
+                self.connection.execute("ROLLBACK")
+            raise
+        self._verify_files()
 
 
-def _validate_run(run: dict[str, Any], *, run_id: int, sha: str, ref: str) -> int:
+def _parse_run_title(value: object) -> tuple[str, dict[str, bool], str] | None:
+    if not isinstance(value, str):
+        return None
+    match = RUN_TITLE.fullmatch(value)
+    if not match or not REQUEST_ID.fullmatch(match.group("request")):
+        return None
+    return (
+        match.group("key"),
+        {
+            "upload_packages": match.group("packages") == "true",
+            "force_full": match.group("full") == "true",
+        },
+        match.group("request"),
+    )
+
+
+def _validate_run(
+    run: dict[str, Any],
+    *,
+    run_id: int,
+    identity: OperationIdentity,
+) -> int:
+    parsed_title = _parse_run_title(run.get("display_title"))
     if (
-        run.get("id") != run_id or run.get("event") != "workflow_dispatch"
-        or run.get("head_sha") != sha or run.get("head_branch") != ref
+        run.get("id") != run_id
+        or run.get("event") != "workflow_dispatch"
+        or run.get("head_sha") != identity.candidate_sha
+        or run.get("head_branch") != identity.ref
         or not isinstance(run.get("path"), str)
-        or not (run["path"] == WORKFLOW_PATH or run["path"].startswith(WORKFLOW_PATH + "@"))
+        or not (
+            run["path"] == WORKFLOW_PATH
+            or run["path"].startswith(WORKFLOW_PATH + "@")
+        )
+        or parsed_title is None
+        or parsed_title[0] != identity.operation_key
+        or parsed_title[1] != identity.options
     ):
         raise CiError("Returned workflow run identity does not match the operation.")
     attempt = run.get("run_attempt", 1)
@@ -316,244 +758,578 @@ def _get_run(transport: Transport, run_id: int, attempt: int | None = None) -> d
     return response.body
 
 
-def reconcile_request(
-    transport: Transport, *, request_id: str, sha: str, ref: str,
-) -> tuple[int, int] | None:
-    if not REQUEST_ID.fullmatch(request_id):
-        raise CiError("Stored request correlation identity is invalid.")
+def reconcile_identity(transport: Transport, identity: OperationIdentity) -> Reconciliation:
     matches: list[dict[str, Any]] = []
-    for page in range(1, 4):
+    seen_ids: set[int] = set()
+    fetched = 0
+    total_count: int | None = None
+    complete = False
+    contradictory = False
+    for page in range(1, MAX_RECONCILIATION_PAGES + 1):
         response = transport.request(
             "GET",
-            f"/repos/{REPOSITORY}/actions/workflows/{WORKFLOW}/runs?event=workflow_dispatch&branch={urllib.parse.quote(ref, safe='')}&per_page=100&page={page}",
+            f"/repos/{REPOSITORY}/actions/workflows/{WORKFLOW}/runs?"
+            f"event=workflow_dispatch&branch={urllib.parse.quote(identity.ref, safe='')}"
+            f"&per_page=100&page={page}",
         )
-        if response.status != 200 or not isinstance(response.body, dict) or not isinstance(response.body.get("workflow_runs"), list):
-            raise CiError("Dispatch reconciliation evidence was unavailable.")
-        runs = [run for run in response.body["workflow_runs"] if isinstance(run, dict)]
-        for run in runs:
-            name = run.get("display_title")
-            if (
-                isinstance(name, str) and name.endswith(" / " + request_id)
-                and run.get("event") == "workflow_dispatch"
-                and run.get("head_sha") == sha and run.get("head_branch") == ref
-            ):
-                matches.append(run)
-        if len(runs) < 100:
+        body = response.body
+        if (
+            response.status != 200
+            or not isinstance(body, dict)
+            or type(body.get("total_count")) is not int
+            or body["total_count"] < 0
+            or not isinstance(body.get("workflow_runs"), list)
+            or any(not isinstance(run, dict) for run in body["workflow_runs"])
+        ):
+            return Reconciliation("inconclusive", "reconciliation_response_invalid")
+        if total_count is None:
+            total_count = body["total_count"]
+        elif body["total_count"] != total_count:
+            return Reconciliation("inconclusive", "reconciliation_listing_changed")
+        batch = body["workflow_runs"]
+        fetched += len(batch)
+        for run in batch:
+            run_id = run.get("id")
+            if type(run_id) is not int or run_id < 1 or run_id in seen_ids:
+                return Reconciliation("inconclusive", "reconciliation_run_identity_invalid")
+            seen_ids.add(run_id)
+            parsed = _parse_run_title(run.get("display_title"))
+            if parsed is None or parsed[0] != identity.operation_key:
+                continue
+            if parsed[1] != identity.options:
+                contradictory = True
+                continue
+            try:
+                _validate_run(run, run_id=run_id, identity=identity)
+            except CiError:
+                contradictory = True
+                continue
+            matches.append(run)
+        if fetched >= total_count or len(batch) < 100:
+            complete = fetched >= total_count
             break
+    if not complete:
+        return Reconciliation("inconclusive", "reconciliation_pagination_incomplete")
+    if contradictory:
+        return Reconciliation("contradictory", "reconciliation_identity_contradiction")
+    if len(matches) > 1:
+        return Reconciliation("ambiguous", "reconciliation_multiple_matches")
     if not matches:
-        return None
-    if len(matches) != 1:
-        raise CiError("Dispatch reconciliation found multiple matching runs; manual resolution is required.")
-    run_id = matches[0].get("id")
-    if type(run_id) is not int or run_id < 1:
-        raise CiError("Reconciled run identity is invalid.")
-    attempt = _validate_run(matches[0], run_id=run_id, sha=sha, ref=ref)
-    return run_id, attempt
+        return Reconciliation("no_match", "reconciliation_no_match")
+    run_id = matches[0]["id"]
+    attempt = _validate_run(matches[0], run_id=run_id, identity=identity)
+    return Reconciliation("match", "reconciliation_exact_match", run_id, attempt)
+
+
+def _attach_reconciliation(
+    store: OperationStore,
+    operation: dict[str, Any],
+    reconciliation: Reconciliation,
+) -> dict[str, Any] | None:
+    if reconciliation.status == "match":
+        assert reconciliation.run_id is not None and reconciliation.attempt is not None
+        return store.transition(
+            operation["operation_id"],
+            {operation["state"]},
+            "attached",
+            run_id=reconciliation.run_id,
+            attempt=reconciliation.attempt,
+            deadline_at=int(time.time()) + 7200,
+            next_action="collect the exact attached run attempt",
+        )
+    if reconciliation.status in {"ambiguous", "contradictory"}:
+        store.transition(
+            operation["operation_id"],
+            {operation["state"]},
+            "blocked",
+            next_action="resolve contradictory remote identity without dispatching",
+        )
+    elif operation["state"] in {"dispatching", "dispatch_unknown"}:
+        store.transition(
+            operation["operation_id"],
+            {operation["state"]},
+            "dispatch_unknown",
+            next_action="retry read-only reconciliation; do not dispatch",
+        )
+    return None
+
+
+def reconcile_operation(
+    store: OperationStore,
+    transport: Transport,
+    *,
+    operation_id: str,
+) -> dict[str, Any]:
+    operation = store.get(operation_id)
+    if operation["run_id"] and operation["state"] in {"attached", "running", "completed"}:
+        return {
+            **public_operation(operation, attached=True),
+            "reconciled": True,
+            "reason_code": "operation_already_attached",
+        }
+    if operation["state"] not in {"prepared", "dispatching", "dispatch_unknown"}:
+        raise CiError("The selected operation is not eligible for read-only reconciliation.")
+    identity = store.identity(operation)
+    if operation["run_id"]:
+        try:
+            direct_run = _get_run(transport, operation["run_id"])
+        except CiError:
+            direct_run = None
+        if direct_run is not None:
+            try:
+                attempt = _validate_run(direct_run, run_id=operation["run_id"], identity=identity)
+            except CiError:
+                current = store.transition(
+                    operation["operation_id"],
+                    {operation["state"]},
+                    "blocked",
+                    next_action="resolve contradictory direct receipt without dispatching",
+                )
+                return {
+                    **public_operation(current, attached=False),
+                    "reconciled": False,
+                    "reason_code": "direct_receipt_identity_contradiction",
+                }
+            current = store.transition(
+                operation["operation_id"],
+                {operation["state"]},
+                "attached",
+                attempt=attempt,
+                deadline_at=int(time.time()) + 7200,
+                next_action="collect the exact attached run attempt",
+            )
+            return {
+                **public_operation(current, attached=True),
+                "reconciled": True,
+                "reason_code": "direct_receipt_validated",
+            }
+    reconciliation = reconcile_identity(transport, identity)
+    attached = _attach_reconciliation(store, operation, reconciliation)
+    current = attached or store.get(operation_id)
+    return {
+        **public_operation(current, attached=attached is not None),
+        "reconciled": attached is not None,
+        "reason_code": reconciliation.reason_code,
+    }
 
 
 def submit(
-    root: Path, store: OperationStore, transport: Transport, *, ref: str, sha: str,
-    upload_packages: bool = False, force_full: bool = False,
+    root: Path,
+    store: OperationStore,
+    transport: Transport,
+    *,
+    ref: str,
+    sha: str,
+    upload_packages: bool = False,
+    force_full: bool = False,
 ) -> dict[str, Any]:
-    validate_identity(root, ref, sha)
-    revision = workflow_revision(root)
-    options = {"upload_packages": bool(upload_packages), "force_full": bool(force_full)}
-    operation, created = store.reserve(ref=ref, sha=sha, workflow_revision=revision, options=options)
-    if not created:
-        if operation["run_id"]:
-            return public_operation(operation, attached=True)
-        if operation["state"] in {"dispatching", "dispatch_unknown"}:
-            raise CiError("Equivalent dispatch is unresolved; inspect or reconcile it without retransmitting.")
-        if operation["state"] != "prepared":
-            raise CiError("Equivalent operation is not dispatchable; inspect its recorded result.")
-    operation = store.transition(operation["operation_id"], {"prepared"}, "dispatching", next_action="await direct dispatch receipt")
+    identity = operation_identity(
+        root,
+        ref=ref,
+        sha=sha,
+        upload_packages=upload_packages,
+        force_full=force_full,
+    )
+    operation, created = store.reserve(identity)
+    if operation["run_id"]:
+        return public_operation(operation, attached=True)
+    if not created and operation["state"] in {"dispatching", "dispatch_unknown"}:
+        result = reconcile_operation(store, transport, operation_id=operation["operation_id"])
+        if result["reconciled"]:
+            return result
+        raise CiError("Equivalent dispatch remains unresolved; no new dispatch was sent.")
+    if operation["state"] != "prepared":
+        raise CiError("Equivalent operation is not dispatchable; inspect its recorded result.")
+
+    reconciliation = reconcile_identity(transport, identity)
+    attached = _attach_reconciliation(store, operation, reconciliation)
+    if attached:
+        return public_operation(attached, attached=True)
+    if reconciliation.status != "no_match":
+        raise CiError("Remote equivalence could not be established completely; dispatch was not sent.")
+
+    operation = store.transition(
+        operation["operation_id"],
+        {"prepared"},
+        "dispatching",
+        next_action="await direct dispatch receipt",
+    )
     payload = {
-        "ref": ref,
+        "ref": identity.ref,
+        "return_run_details": True,
         "inputs": {
-            "expected_sha": sha,
+            "expected_ref": identity.ref,
+            "expected_sha": identity.candidate_sha,
+            "operation_key": identity.operation_key,
             "request_id": operation["request_id"],
-            "upload_packages": "true" if upload_packages else "false",
-            "force_full": "true" if force_full else "false",
+            "upload_packages": "true" if identity.upload_packages else "false",
+            "force_full": "true" if identity.force_full else "false",
         },
     }
     try:
         response = transport.request(
-            "POST", f"/repos/{REPOSITORY}/actions/workflows/{WORKFLOW}/dispatches", payload,
+            "POST",
+            f"/repos/{REPOSITORY}/actions/workflows/{WORKFLOW}/dispatches",
+            payload,
         )
     except CiError:
         try:
-            reconciled = reconcile_request(
-                transport, request_id=operation["request_id"], sha=sha, ref=ref,
-            )
+            reconciliation = reconcile_identity(transport, identity)
         except CiError:
-            reconciled = None
-        if reconciled:
-            run_id, attempt = reconciled
-            operation = store.transition(
-                operation["operation_id"], {"dispatching"}, "attached",
-                run_id=run_id, attempt=attempt, next_action=f"collect run {run_id} attempt {attempt}",
+            store.transition(
+                operation["operation_id"],
+                {"dispatching"},
+                "dispatch_unknown",
+                next_action="retry read-only reconciliation; do not dispatch",
             )
-            return public_operation(operation, attached=True)
-        store.transition(operation["operation_id"], {"dispatching"}, "dispatch_unknown", next_action="reconcile request ID; do not POST again")
-        raise CiError("Dispatch response was lost or unavailable; operation is dispatch_unknown and was not retried.") from None
+            raise CiError("Dispatch response and reconciliation were unavailable; retransmission is blocked.") from None
+        attached = _attach_reconciliation(store, operation, reconciliation)
+        if attached:
+            return public_operation(attached, attached=True)
+        if store.get(operation["operation_id"])["state"] == "dispatching":
+            store.transition(
+                operation["operation_id"],
+                {"dispatching"},
+                "dispatch_unknown",
+                next_action="retry read-only reconciliation; do not dispatch",
+            )
+        raise CiError("Dispatch response was unavailable; retransmission is blocked.") from None
+
     if response.status == 204:
         try:
-            reconciled = reconcile_request(
-                transport, request_id=operation["request_id"], sha=sha, ref=ref,
-            )
+            reconciliation = reconcile_identity(transport, identity)
         except CiError:
-            reconciled = None
-        if reconciled:
-            run_id, attempt = reconciled
-            operation = store.transition(
-                operation["operation_id"], {"dispatching"}, "attached",
-                run_id=run_id, attempt=attempt, next_action=f"collect run {run_id} attempt {attempt}",
+            store.transition(
+                operation["operation_id"],
+                {"dispatching"},
+                "dispatch_unknown",
+                next_action="retry read-only reconciliation; do not dispatch",
             )
-            return public_operation(operation, attached=True)
-        store.transition(operation["operation_id"], {"dispatching"}, "dispatch_unknown", next_action="reconcile legacy no-content receipt; do not POST again")
-        raise CiError("Dispatch returned no run identity; operation is dispatch_unknown and was not retried.")
+            raise CiError("Dispatch reconciliation was unavailable; retransmission is blocked.") from None
+        attached = _attach_reconciliation(store, operation, reconciliation)
+        if attached:
+            return public_operation(attached, attached=True)
+        if store.get(operation["operation_id"])["state"] == "dispatching":
+            store.transition(
+                operation["operation_id"],
+                {"dispatching"},
+                "dispatch_unknown",
+                next_action="retry read-only reconciliation; do not dispatch",
+            )
+        raise CiError("Dispatch returned no direct run identity; retransmission is blocked.")
+
     body = response.body or {}
     run_id = body.get("workflow_run_id")
     if response.status != 200 or type(run_id) is not int or run_id < 1:
-        store.transition(operation["operation_id"], {"dispatching"}, "dispatch_unknown", next_action="reconcile invalid receipt; do not POST again")
+        store.transition(
+            operation["operation_id"],
+            {"dispatching"},
+            "dispatch_unknown",
+            next_action="retry read-only reconciliation; do not dispatch",
+        )
         raise CiError("Dispatch receipt did not contain a valid run identity; retransmission is blocked.")
     try:
         run = _get_run(transport, run_id)
-        attempt = _validate_run(run, run_id=run_id, sha=sha, ref=ref)
     except CiError:
         store.transition(
-            operation["operation_id"], {"dispatching"}, "blocked",
-            run_id=run_id, next_action="inspect contradictory direct receipt; do not dispatch again",
+            operation["operation_id"],
+            {"dispatching"},
+            "dispatch_unknown",
+            run_id=run_id,
+            next_action="validate direct receipt by read-only reconciliation; do not dispatch",
+        )
+        raise CiError("Direct run receipt could not yet be validated; retransmission is blocked.") from None
+    try:
+        attempt = _validate_run(run, run_id=run_id, identity=identity)
+    except CiError:
+        store.transition(
+            operation["operation_id"],
+            {"dispatching"},
+            "blocked",
+            run_id=run_id,
+            next_action="resolve contradictory direct receipt; do not dispatch",
         )
         raise
     operation = store.transition(
-        operation["operation_id"], {"dispatching"}, "attached",
-        run_id=run_id, attempt=attempt, next_action=f"collect run {run_id} attempt {attempt}",
+        operation["operation_id"],
+        {"dispatching"},
+        "attached",
+        run_id=run_id,
+        attempt=attempt,
+        deadline_at=int(time.time()) + 7200,
+        next_action="collect the exact attached run attempt",
     )
     return public_operation(operation, attached=False)
 
 
 def _jobs(transport: Transport, run_id: int, attempt: int) -> list[dict[str, Any]]:
     jobs: list[dict[str, Any]] = []
-    for page in range(1, 11):
+    total_count: int | None = None
+    seen_ids: set[int] = set()
+    for page in range(1, MAX_JOB_PAGES + 1):
         response = transport.request(
-            "GET", f"/repos/{REPOSITORY}/actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100&page={page}",
+            "GET",
+            f"/repos/{REPOSITORY}/actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100&page={page}",
         )
-        if response.status != 200 or not isinstance(response.body, dict) or not isinstance(response.body.get("jobs"), list):
-            raise CiError("Attempt-specific job evidence was unavailable.")
-        batch = response.body["jobs"]
-        jobs.extend(job for job in batch if isinstance(job, dict))
-        if len(batch) < 100:
+        body = response.body
+        if (
+            response.status != 200
+            or not isinstance(body, dict)
+            or type(body.get("total_count")) is not int
+            or body["total_count"] < 0
+            or not isinstance(body.get("jobs"), list)
+            or any(not isinstance(job, dict) for job in body["jobs"])
+        ):
+            raise CiError("Attempt-specific job evidence was malformed or unavailable.")
+        if total_count is None:
+            total_count = body["total_count"]
+        elif body["total_count"] != total_count:
+            raise CiError("Attempt job pagination changed during collection.")
+        batch = body["jobs"]
+        for job in batch:
+            job_id = job.get("id")
+            if type(job_id) is not int or job_id < 1 or job_id in seen_ids:
+                raise CiError("Attempt job identity was malformed or duplicated.")
+            seen_ids.add(job_id)
+            jobs.append(job)
+        if len(jobs) >= total_count:
+            if len(jobs) != total_count:
+                raise CiError("Attempt job count was contradictory.")
             return jobs
+        if len(batch) < 100:
+            raise CiError("Attempt job pagination ended before the declared total.")
     raise CiError("Attempt job pagination exceeded the safety limit.")
 
 
-def sanitize_diagnostic(value: bytes, *, truncated: bool) -> str:
-    text = value.decode("utf-8", errors="replace")
-    text = re.sub(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))", "", text)
-    text = "".join(character if character in "\n\t" or ord(character) >= 32 else "?" for character in text)
-    substitutions = (
-        (r"[A-Za-z]:\\Users\\[^\\\s]+", "<redacted-user-path>"),
-        (r"/(?:Users|home)/[^/\s]+", "/<redacted-user-path>"),
-        (r"\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{16,}\b", "<redacted-token>"),
-        (r"https://[^\s?]+\?[^\s]+", "<redacted-signed-url>"),
-    )
-    for pattern, replacement in substitutions:
-        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-    lines = [line[-500:] for line in text.splitlines()[-120:]]
-    result = "\n".join(lines)
-    if len(result) > 12000:
-        result = result[-12000:]
-        truncated = True
-    if truncated:
-        result += "\n[diagnostic truncated]"
-    return result
+def _safe_status(value: object) -> str:
+    return value if isinstance(value, str) and value in VALID_STATUSES else "unknown"
+
+
+def _safe_conclusion(value: object) -> str | None:
+    if value is None:
+        return None
+    return value if isinstance(value, str) and value in VALID_CONCLUSIONS else "unknown"
+
+
+def _expected_step_conclusions(
+    step_name: str,
+    *,
+    upload_packages: bool,
+) -> set[str]:
+    if step_name == "Download pinned official Ren'Py SDK on cache miss":
+        return {"success", "skipped"}
+    if step_name == "Upload packaged application for manual runs":
+        return {"success"} if upload_packages else {"skipped"}
+    return {"success"}
+
+
+def _assess_required_job(
+    name: str,
+    job: dict[str, Any],
+    *,
+    sha: str,
+    upload_packages: bool,
+) -> tuple[dict[str, Any], list[str], int | None]:
+    reasons: list[str] = []
+    status = _safe_status(job.get("status"))
+    conclusion = _safe_conclusion(job.get("conclusion"))
+    if status != "completed":
+        reasons.append("job_not_completed")
+    if conclusion != "success":
+        reasons.append("job_not_successful")
+    if job.get("head_sha") != sha:
+        reasons.append("job_candidate_mismatch")
+    job_id = job.get("id") if type(job.get("id")) is int and job.get("id") > 0 else None
+    if job_id is None:
+        reasons.append("job_identity_invalid")
+    steps = job.get("steps")
+    if not isinstance(steps, list) or not steps:
+        reasons.append("steps_missing")
+        steps = []
+    elif any(not isinstance(step, dict) for step in steps):
+        reasons.append("steps_malformed")
+        steps = []
+    by_name: dict[str, dict[str, Any]] = {}
+    duplicate = False
+    for step in steps:
+        step_name = step.get("name")
+        if not isinstance(step_name, str):
+            reasons.append("steps_malformed")
+            continue
+        if step_name in by_name:
+            duplicate = True
+        by_name[step_name] = step
+    if duplicate:
+        reasons.append("steps_duplicated")
+    for required_step in REQUIRED_STEPS[name]:
+        step = by_name.get(required_step)
+        if step is None:
+            reasons.append("mandatory_step_missing")
+            continue
+        if step.get("status") != "completed":
+            reasons.append("mandatory_step_not_completed")
+        allowed = _expected_step_conclusions(required_step, upload_packages=upload_packages)
+        step_conclusion = step.get("conclusion")
+        if not isinstance(step_conclusion, str) or step_conclusion not in allowed:
+            reasons.append("mandatory_step_conclusion_invalid")
+    unique_reasons = sorted(set(reasons))
+    public = {
+        "name": name,
+        "status": status,
+        "conclusion": conclusion,
+        "candidate_match": job.get("head_sha") == sha,
+        "evidence": "complete" if not unique_reasons else "incomplete",
+        "reason_codes": unique_reasons,
+    }
+    return public, unique_reasons, job_id
 
 
 def collect(
-    transport: Transport, *, run_id: int, attempt: int, expected_sha: str | None = None,
+    transport: Transport,
+    *,
+    run_id: int,
+    attempt: int,
+    expected_sha: str | None = None,
     expected_ref: str | None = None,
+    expected_identity: OperationIdentity | None = None,
+    evidence_store: OperationStore | None = None,
+    operation_id: str | None = None,
 ) -> dict[str, Any]:
-    if run_id < 1 or attempt < 1:
+    if type(run_id) is not int or type(attempt) is not int or run_id < 1 or attempt < 1:
         raise CiError("Run and attempt must be positive integers.")
     run = _get_run(transport, run_id, attempt)
-    sha = expected_sha or run.get("head_sha")
-    ref = expected_ref or run.get("head_branch")
-    if not isinstance(sha, str) or not FULL_SHA.fullmatch(sha) or not isinstance(ref, str):
-        raise CiError("Run identity is incomplete.")
-    returned_attempt = _validate_run(run, run_id=run_id, sha=sha, ref=ref)
+    parsed = _parse_run_title(run.get("display_title"))
+    if parsed is None:
+        raise CiError("Run operation identity is missing or malformed.")
+    key, options, _ = parsed
+    if expected_identity is None:
+        sha = expected_sha or run.get("head_sha")
+        ref = expected_ref or run.get("head_branch")
+        if not isinstance(sha, str) or not FULL_SHA.fullmatch(sha) or not isinstance(ref, str):
+            raise CiError("Run identity is incomplete.")
+        revision = run.get("workflow_revision")
+        if not isinstance(revision, str) or not OBJECT_ID.fullmatch(revision):
+            # Public collection cannot derive the candidate blob without a repository.
+            # The operation key from the validated workflow remains the binding here.
+            revision = "0" * 40
+        expected_identity = OperationIdentity(
+            repository=REPOSITORY,
+            workflow=WORKFLOW,
+            ref=ref,
+            candidate_sha=sha,
+            workflow_revision=revision,
+            upload_packages=options["upload_packages"],
+            force_full=options["force_full"],
+            operation_key=key,
+        )
+    elif key != expected_identity.operation_key or options != expected_identity.options:
+        raise CiError("Run operation identity contradicts the selected operation.")
+    returned_attempt = _validate_run(run, run_id=run_id, identity=expected_identity)
     if returned_attempt != attempt:
         raise CiError("Requested attempt does not match provider metadata.")
     jobs = _jobs(transport, run_id, attempt)
-    by_name = {job.get("name"): job for job in jobs if isinstance(job.get("name"), str)}
+    required_by_name: dict[str, list[dict[str, Any]]] = {name: [] for name in REQUIRED_JOBS}
+    for job in jobs:
+        name = job.get("name")
+        if name in required_by_name:
+            required_by_name[name].append(job)
     required: list[dict[str, Any]] = []
     missing: list[str] = []
-    failed_job_ids: list[int] = []
+    reason_codes: set[str] = set()
+    failed_job_ids: list[tuple[str, int]] = []
+    job_references: list[dict[str, Any]] = []
     for name in REQUIRED_JOBS:
-        job = by_name.get(name)
-        if not job:
+        matches = required_by_name[name]
+        if not matches:
             missing.append(name)
+            reason_codes.add("required_job_missing")
             continue
-        steps = job.get("steps") if isinstance(job.get("steps"), list) else []
-        step_failures = []
-        for step in steps:
-            step_name = str(step.get("name", "unnamed"))
-            step_conclusion = step.get("conclusion")
-            if step_conclusion in TERMINAL_FAILURES and not (
-                step_conclusion == "skipped" and step_name in EXPECTED_CONDITIONAL_SKIPS
-            ):
-                step_failures.append(step_name)
-        required.append({
-            "name": name,
-            "status": job.get("status", "unknown"),
-            "conclusion": job.get("conclusion"),
-            "head_sha": job.get("head_sha"),
-            "failed_steps": step_failures[:20],
-        })
-        if (job.get("conclusion") in TERMINAL_FAILURES or step_failures) and type(job.get("id")) is int:
-            failed_job_ids.append(job["id"])
-    status = run.get("status", "unknown")
-    conclusion = run.get("conclusion")
-    complete = not missing and all(
-        item["status"] == "completed" and item["conclusion"] == "success"
-        and item["head_sha"] == sha and not item["failed_steps"]
-        for item in required
-    )
-    accepted = status == "completed" and conclusion == "success" and complete
-    diagnostics: list[str] = []
-    evidence_available = True
+        if len(matches) != 1:
+            reason_codes.add("required_job_duplicated")
+            required.append(
+                {
+                    "name": name,
+                    "status": "unknown",
+                    "conclusion": "unknown",
+                    "candidate_match": False,
+                    "evidence": "incomplete",
+                    "reason_codes": ["required_job_duplicated"],
+                }
+            )
+            continue
+        public_job, job_reasons, job_id = _assess_required_job(
+            name,
+            matches[0],
+            sha=expected_identity.candidate_sha,
+            upload_packages=expected_identity.upload_packages,
+        )
+        required.append(public_job)
+        reason_codes.update(job_reasons)
+        if job_id is not None:
+            job_references.append({"name": name, "job_id": job_id})
+        if job_reasons and job_id is not None:
+            failed_job_ids.append((name, job_id))
+    provider_status = _safe_status(run.get("status"))
+    provider_conclusion = _safe_conclusion(run.get("conclusion"))
+    if provider_status != "completed":
+        reason_codes.add("run_not_completed")
+    if provider_conclusion != "success":
+        reason_codes.add("run_not_successful")
+    complete = not missing and not reason_codes and len(required) == len(REQUIRED_JOBS)
+    accepted = provider_status == "completed" and provider_conclusion == "success" and complete
+
+    if evidence_store is not None and operation_id is not None:
+        evidence_store.store_job_references(operation_id, job_references)
+
+    evidence: list[dict[str, Any]] = []
     reader = getattr(transport, "request_bytes", None)
-    for job_id in failed_job_ids[:3]:
-        if not callable(reader):
-            evidence_available = False
-            break
-        try:
-            raw = reader(f"/repos/{REPOSITORY}/actions/jobs/{job_id}/logs", limit=65536)
-            diagnostics.append(sanitize_diagnostic(raw, truncated=len(raw) >= 65536))
-        except CiError:
-            evidence_available = False
+    for job_name, job_id in failed_job_ids[:3]:
+        item = {"job": job_name, "available": False, "reason_code": "private_store_not_selected"}
+        if evidence_store is not None and operation_id is not None and callable(reader):
+            try:
+                raw = reader(f"/repos/{REPOSITORY}/actions/jobs/{job_id}/logs", limit=65536)
+                if not isinstance(raw, bytes):
+                    raise CiError("Diagnostic evidence was malformed.")
+                evidence_store.store_diagnostic(
+                    operation_id,
+                    job_name=job_name,
+                    job_id=job_id,
+                    content=raw,
+                    truncated=len(raw) >= 65536,
+                )
+                item = {"job": job_name, "available": True, "reason_code": "captured_bounded_private"}
+            except (CiError, LocalStateError):
+                item = {"job": job_name, "available": False, "reason_code": "private_capture_unavailable"}
+        evidence.append(item)
+
     return {
         "schema_version": SCHEMA_VERSION,
         "repository": REPOSITORY,
         "workflow": WORKFLOW,
         "run_id": run_id,
         "attempt": attempt,
-        "candidate_sha": sha,
-        "provider_status": status,
-        "provider_conclusion": conclusion,
+        "candidate_sha": expected_identity.candidate_sha,
+        "provider_status": provider_status,
+        "provider_conclusion": provider_conclusion,
         "required_gate_complete": complete,
         "accepted": accepted,
         "missing_jobs": missing,
         "required_jobs": required,
+        "reason_codes": sorted(reason_codes),
+        "failure_evidence": evidence,
         "monitoring_error": None,
-        "evidence": "attempt-specific metadata and paginated jobs",
-        "failure_diagnostics": diagnostics,
-        "failure_log_evidence_available": evidence_available if failed_job_ids else None,
-        "next_action": "publish exact evidence" if accepted else "inspect recorded missing or failed gates; do not rerun automatically",
+        "evidence": "attempt-specific run, complete pagination, and affirmative required steps",
+        "next_action": "publish_exact_evidence" if accepted else "inspect_private_evidence_without_automatic_rerun",
+        "summary": (
+            f"run {run_id} attempt {attempt} candidate {expected_identity.candidate_sha[:12]}: "
+            f"{'accepted' if accepted else 'not accepted'}"
+        ),
     }
 
 
 def public_operation(operation: dict[str, Any], *, attached: bool) -> dict[str, Any]:
+    # operation_id is an opaque local selector needed for supported recovery.  It is
+    # intentionally not a handover/publication receipt.
     return {
         "schema_version": SCHEMA_VERSION,
         "operation_id": operation["operation_id"],
@@ -571,6 +1347,7 @@ def public_operation(operation: dict[str, Any], *, attached: bool) -> dict[str, 
 
 def doctor(root: Path) -> dict[str, Any]:
     tools = {name: bool(shutil.which(name)) for name in ("git", "node", "npm", "cargo", "rustc")}
+    tools["python"] = bool(os.sys.executable and Path(os.sys.executable).is_file())
     credential_helper = _run(["git", "config", "--get", "credential.helper"], root, 15)
     if os.environ.get("GITHUB_TOKEN"):
         dispatch = "environment_configured_unverified"
@@ -578,12 +1355,18 @@ def doctor(root: Path) -> dict[str, Any]:
         dispatch = "git_credential_provider_configured_unverified"
     else:
         dispatch = "unavailable_missing_local_credentials"
+    try:
+        state_root = application_state_root()
+        storage = "external_application_data_resolved_unverified" if state_root.is_absolute() else "unavailable"
+    except LocalStateError:
+        storage = "unavailable"
     return {
         "schema_version": SCHEMA_VERSION,
         "repository": REPOSITORY,
         "tools": tools,
         "github_collect": "available_public_read",
         "github_dispatch": dispatch,
+        "private_state": storage,
         "codex_binding": "unverified",
         "automatic_wake": False,
     }
@@ -592,8 +1375,8 @@ def doctor(root: Path) -> dict[str, Any]:
 def preflight(root: Path) -> dict[str, Any]:
     commands = [
         ([os.sys.executable, "scripts/validate.py"], root, 120, "repository_privacy"),
-        ([os.sys.executable, "-m", "unittest", "discover", "-s", "tests/ci_privacy", "-v"], root, 180, "privacy_tests"),
-        ([os.sys.executable, "-m", "unittest", "discover", "-s", "tests/ci_tooling", "-v"], root, 180, "ci_tooling_tests"),
+        ([os.sys.executable, "-m", "unittest", "discover", "-s", "tests/ci_privacy", "-v"], root, 300, "privacy_tests"),
+        ([os.sys.executable, "-m", "unittest", "discover", "-s", "tests/ci_tooling", "-v"], root, 300, "ci_tooling_tests"),
         (["npm", "run", "check"], root / "app", 300, "frontend_check"),
         (["cargo", "fmt", "--check", "--all"], root / "app", 180, "rust_format"),
     ]
@@ -609,7 +1392,9 @@ def preflight(root: Path) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "candidate_sha": git_output(root, "rev-parse", "HEAD"),
-        "index_identity": hashlib.sha256(_run(["git", "ls-files", "--stage", "-z"], root, 30).stdout).hexdigest(),
+        "index_identity": hashlib.sha256(
+            _run(["git", "ls-files", "--stage", "-z"], root, 30).stdout
+        ).hexdigest(),
         "checks": results,
         "passed": bool(results) and all(item["status"] == "passed" for item in results),
         "native_acceptance": "delegated_to_candidate_bound_production_workflow",

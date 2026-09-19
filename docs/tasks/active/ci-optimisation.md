@@ -1,15 +1,17 @@
 # CI optimisation and durable external wait/wake
 
-**Revision:** 2026-09-19, combined privacy corrections and OPT-1A implemented locally.
-**Current delivery:** [Privacy corrections plus OPT-1A](ci-opt-1a-privacy-and-operation-foundation.md), preparing exact published CI evidence.
+**Revision:** 2026-09-19, OPT-1A second corrective pass in progress.
+**Current delivery:** [OPT-1A second corrective pass](ci-opt-1a-second-corrective-pass.md),
+with the [original combined brief](ci-opt-1a-privacy-and-operation-foundation.md) retained
+as the acceptance baseline and historical ledger.
 **W0 capability status:** Investigation complete; automatic wait/wake remains no-go/unqualified for the path examined.
 **Repository / branch / PR:** `Caldwell-41/Renpy-editor`, `maintenance/ci-optimisation`, #12.
 **Integration baseline:** main `7d634eeaf53fe0244a2739f26914797ca16ef544`.
 **Continuation:** [HANDOVER](../../status/HANDOVER.md).
 **Rules:** [WORKFLOW](../../WORKFLOW.md), [local client privacy](../../LOCAL_CODEX_CONFIG.md).
 
-This is the parent roadmap and detailed wait/wake design. The linked combined brief
-owns the current privacy/OPT-1A implementation specification and result ledger;
+This is the parent roadmap and detailed wait/wake design. The linked corrective brief
+owns current scope/results while the original combined brief owns baseline requirements;
 this roadmap owns dependencies and later scope. Prompts select the delivery, not a
 second specification. W0 evidence remains in the
 [qualification report](../../research/CODEX_WAIT_WAKE_QUALIFICATION.md).
@@ -30,7 +32,7 @@ approve live goal manipulation. No application-feature scope is created here.
 | Delivery / checkpoint | Scope and gate |
 | --- | --- |
 | W0 | Investigation complete; automatic path unqualified. Recovery only after changed prerequisites and separate selection. |
-| **Privacy corrections + OPT-1A** | Implemented locally; exact published quality/native/production evidence is recorded in the combined ledger. |
+| **OPT-1A second corrective pass** | External-state architecture and mandatory fixes implemented locally; final publication/native evidence pending in the corrective ledger. |
 | W1 | Qualified wait/wake implementation and offline fault tests. Requires actual W0 go and passing combined delivery; separate chat, automatic mode initially disabled. |
 | W2 | Real owning-runtime/native supervisor qualification after W1 and approval; service installation requires explicit permission. |
 | W3 | Real GitHub Actions end-to-end wake proof and agent adoption after W2 and approval. |
@@ -56,12 +58,13 @@ Target: no autonomous inference/model polling attributable to a registered wait 
 the originating turn finishes and before a terminal/monitoring-failure event. User
 messages remain allowed and may supersede it. Do not infer savings from elapsed time.
 
-Identifiable host/runtime information must exist ONLY locally under
+Identifiable host/runtime information must exist ONLY in protected per-user
+application-data storage described by
 [LOCAL_CODEX_CONFIG](../../LOCAL_CODEX_CONFIG.md), including diagnostic receipts.
-Public templates stay null. Gate P must correct staged-byte and exact-ignore checking
-BEFORE trusting bootstrap for sensitive writes. It also makes explicit-client selection
-and storage permissions truthful. A routing fingerprint is neither client identity nor
-qualification. Native thread/goal/queue/turn bindings remain local per-task state.
+Public templates stay null. Git ignore remains publication convenience, not live-state
+security. Explicit-client selection and storage permissions remain mandatory. A routing
+label is neither client identity nor qualification. Native thread/goal/queue/turn
+bindings remain local per-task state.
 Shared handovers publish methods/outcomes and repo commit/Actions references only.
 
 ## 3. W0 recovery: bounded actual-host proof
@@ -443,6 +446,19 @@ including both mandatory native package jobs. Collector follow-up
 `35415495692` and `35415497671`; it did not trigger a redundant package matrix. Exact
 job receipts and retained failures are in the combined brief and handover. P/OPT-1A are
 review-ready, while W1 remains blocked by the unchanged W0 no-go result.
+
+### OPT-1A second corrective pass — 2026-09-19
+
+The user selected the linked second corrective brief after review rejected repository-
+local runtime state and found identity/recovery/collector/publication defects. Local
+implementation now moves profiles and the versioned SQLite journal to protected OS
+application data, treats legacy `.codex-local` as non-authoritative, derives operation
+identity from the requested candidate workflow blob, performs complete deterministic
+find-or-start reconciliation, adds supported read-only `dispatch_unknown` recovery,
+requires affirmative job/step evidence and stores bounded provider logs only in the
+private journal. The fresh integrated checklist and exact final CI receipts belong in
+the corrective brief. Until they are published, the earlier review-ready label is
+superseded. W0 remains independently no-go and no W1 code is included.
 
 ## Primary sources
 
