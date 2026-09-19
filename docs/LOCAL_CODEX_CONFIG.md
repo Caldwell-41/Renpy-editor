@@ -46,12 +46,14 @@ Protection is established before collecting identifying bootstrap fields.
 - Every owned state directory must be a real directory, never a symlink or Windows
   reparse point. Redirected state must resolve outside the worktree.
 - POSIX directories are exactly mode `0700`; files are exactly `0600` and have one
-  hard link.
+  hard link. Every entry must also be owned by the current effective user.
 - Windows removes inheritance on owned state entries, grants full control only to the
   current owner, Local System and Administrators, permits the owner-rights pseudo-SID,
   verifies the current account remains owner, and rejects every other allow ACE.
 - Client files, SQLite databases and applicable WAL/SHM/journal companions are regular,
-  single-link protected files. Unknown ACL/mode/type/link evidence blocks use.
+  single-link protected files. Existing companions are validated before SQLite can open
+  or consume them and revalidated after opening and writes. Unknown ACL/owner/mode/type/
+  link evidence blocks use.
 - Exclusive profile creation and atomic SQLite transactions prevent clobbering by
   cooperating initialisers/processes. Ambiguous state refuses rather than guessing.
 

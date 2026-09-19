@@ -254,3 +254,56 @@ probe was repeated. W1 entry is blocked: supported owning-runtime telemetry,
 ownership-safe user-control preservation, loaded/unloaded continuation with restored
 tools, and authoritative zero-wait-inference proof are still absent. No W1 code is
 authorised or included.
+
+### Final bounded OPT-1A hardening — 2026-09-19
+
+A final review supplied four additional bounded findings. Each was reproduced against
+published head `3882834b41d98443f709ef6bb853ba6c8714be05` before implementation. The
+focused six-method run produced five assertion failures and two errors: submit trusted
+an unvalidated saved run ID; a blocked operation could be bypassed by changing options;
+no supported inventory could identify a first-failure operation after restart; an
+unsafe existing SQLite companion reached `sqlite3.connect`; and mocked POSIX entries
+with the wrong owner still passed both file and directory classification.
+
+Implementation candidate `a9631343bb9ab4099ed36750a29eb757a7960ed2` makes attachment
+success require an attached/running/completed state with positive validated run and
+attempt identities. `submit` now reconciles recoverable saved receipts read-only or
+fails closed. `blocked` is explicitly unresolved and remains a same-candidate collision
+barrier across option changes; only a completed, affirmatively accepted exact result is
+safely terminal, and `force_full` still cannot grant retry. Receipt-state validation is
+part of atomic transitions so incomplete attachment updates roll back.
+
+`python scripts/ci.py operations` now returns a minimal local-only inventory of prepared,
+dispatching, dispatch-unknown and blocked records. This lets an operator select the
+opaque operation ID for the existing read-only `reconcile` command after an ordinary
+first failure or restart. The output is private local recovery state and must not be
+copied into shared handovers, PRs, issues or logs.
+
+Secure journal startup now validates the database and every existing WAL/SHM/journal
+companion before `sqlite3.connect`, then retains the existing post-open/write checks.
+POSIX classification additionally requires `st_uid` to equal the current effective
+user for both directories and files. The documented same-account threat boundary is
+unchanged; this is not a distributed dispatch guarantee.
+
+Final focused regressions passed, including negative, restart, blocked retry,
+reconciliation, invalid-transition rollback, pre-open companion and owner-match paths.
+Python compilation passed. The complete local suites passed: 37 privacy/local-state
+tests with three explicit Windows host-capability skips, and 47 CI operation/recovery
+tests. Exact staged repository validation passed 216 public files; 26 lossless/source
+tests passed; the 620,000-byte / 40,000-node benchmark passed at 159.46 ms median across
+seven samples; and `git diff --check` passed.
+
+Automatic Repository quality push run `35435261321` and PR run `35435263405`, attempt
+1, passed at the exact implementation candidate. Each included successful Validate
+repository, Tools / Windows x64 and Tools / macOS ARM64 jobs. This hardening changes
+only the helper state machine, local recovery CLI, protected local-storage validation
+and their tests/docs. It does not change the production workflow, candidate pinning,
+native allocation, application/runtime, package inputs or packaged output. Therefore
+no new full production matrix was justified; accepted production run `35431721525`
+remains the exact production-workflow/application evidence and is not broadened to
+claim that it tested these helper changes.
+
+The focused review of the four fixes and adjacent transitions found and corrected the
+incomplete-transition commit issue; no further significant in-scope blocker was found.
+All four findings are resolved. OPT-1A is ready for final independent review, not merge.
+W0 and W1 remain unchanged and outside this bounded pass.

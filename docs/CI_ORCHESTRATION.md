@@ -18,7 +18,8 @@ the Git worktree. The versioned SQLite journal records the repository, workflow 
 ref, candidate, options, deterministic operation key, random request UUID, state,
 run/attempt, advisory deadline, completed local checks, job references, structured
 result and next action. SQLite and applicable WAL/SHM companions must pass the same
-file-type, link-count, POSIX-mode or Windows-ACL checks before use.
+file-type, link-count, POSIX-mode/current-effective-owner or Windows-ACL checks before
+SQLite opens the journal, and are rechecked after opening and writes.
 
 The operation key is SHA-256 over public request identity: repository, workflow, ref,
 candidate SHA, candidate workflow blob and options. It never includes host, user,
@@ -39,6 +40,7 @@ Run from the repository root with an available verified Python 3 interpreter:
 ```text
 python scripts/ci.py doctor
 python scripts/ci.py preflight
+python scripts/ci.py operations
 python scripts/ci.py submit --ref maintenance/ci-optimisation --sha <full-sha>
 python scripts/ci.py reconcile --operation <private-operation-id>
 python scripts/ci.py collect --run <run-id> --attempt <attempt>
@@ -61,13 +63,21 @@ unavailable native work as delegated rather than passed.
 `submit` returns exit 0 only for a validated direct or reconciled run receipt. Package
 builds remain mandatory; package artifact upload is opt-in with `--upload-packages`.
 `--force-full` is only a scope marker and cannot bypass an unresolved/colliding local
-operation or grant retry authority.
+operation or grant retry authority. A saved run ID without a validated positive attempt
+never counts as attached; submit uses read-only reconciliation or fails closed.
+
+`operations` is a local-only recovery inventory. It lists only the minimal selector,
+candidate and checkpoint fields needed to choose a recoverable operation after a failed
+submit or restart. Its output contains private operation selectors: use it locally with
+`reconcile --operation`, and never paste it into a PR, issue, shared handover or log.
 
 `reconcile` is read-only and never POSTs. Exit 0 means the selected operation attached
 to one proven run. Exit 4 means no safe attachment yet; zero matches or incomplete
 pagination stay unresolved, while multiple or contradictory identities become blocked.
-The same command supports a saved direct run ID whose metadata was temporarily
-unavailable. Ordinary recovery never requires SQLite edits or internal Python calls.
+Blocked remains an unresolved state, not a terminal result, and may be inspected again
+only through this read-only path. The same command supports a saved direct run ID whose
+metadata was temporarily unavailable. Ordinary recovery never requires SQLite edits or
+internal Python calls.
 
 `collect` is read-only. Without `--operation` it creates no state and uses unauthenticated
 public metadata. With an operation it validates and checkpoints that record and may use
@@ -123,8 +133,11 @@ failed regex guess. Logs are never executed or extracted.
 ## Recovery and limits
 
 - `prepared` may dispatch only after complete no-match reconciliation.
-- `dispatching` and `dispatch_unknown` may only reconcile; never POST again.
+- `dispatching`, `dispatch_unknown` and `blocked` may only reconcile; never POST again.
 - `attached` and `running` collect only their recorded run/attempt; never follow reruns.
+- A same-candidate option change cannot cross an unresolved, blocked, attached, running
+  or non-accepted completed operation. Only a completed, affirmatively accepted exact
+  result is safely terminal for collision purposes; `force_full` still grants no retry.
 - Advisory deadlines guide manual recovery. Expiry does not cancel CI or authorise a
   new operation.
 - Losing the external journal removes local ownership evidence. Reconstruction is
