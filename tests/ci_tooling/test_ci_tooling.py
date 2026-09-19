@@ -148,6 +148,30 @@ class CiToolingTests(unittest.TestCase):
         result = ci_lib.collect(transport, run_id=41, attempt=1, expected_sha=self.sha, expected_ref="topic")
         self.assertTrue(result["accepted"])
 
+    def test_collect_allows_only_named_conditional_skips(self):
+        expected_steps = [
+            {"name": "gate", "conclusion": "success"},
+            {"name": "Download pinned official Ren'Py SDK on cache miss", "conclusion": "skipped"},
+            {"name": "Upload packaged application for manual runs", "conclusion": "skipped"},
+        ]
+        jobs = [self.job(name, steps=expected_steps) for name in ci_lib.REQUIRED_JOBS]
+        transport = FakeTransport([
+            response(200, self.run_body(status="completed", conclusion="success")),
+            response(200, {"jobs": jobs}),
+        ])
+        result = ci_lib.collect(transport, run_id=41, attempt=1, expected_sha=self.sha, expected_ref="topic")
+        self.assertTrue(result["accepted"])
+
+        unexpected = [dict(step) for step in expected_steps]
+        unexpected.append({"name": "Required security gate", "conclusion": "skipped"})
+        jobs = [self.job(name, steps=unexpected) for name in ci_lib.REQUIRED_JOBS]
+        transport = FakeTransport([
+            response(200, self.run_body(status="completed", conclusion="success")),
+            response(200, {"jobs": jobs}),
+        ])
+        result = ci_lib.collect(transport, run_id=41, attempt=1, expected_sha=self.sha, expected_ref="topic")
+        self.assertFalse(result["accepted"])
+
     def test_collect_missing_or_skipped_gate_is_not_accepted(self):
         jobs = [self.job("Validate candidate"), self.job("Windows x64", conclusion="skipped")]
         jobs[1]["id"] = 9

@@ -511,6 +511,27 @@ This is still documentation-only correction, not execution of Gate P or OPT-1A.
   launchers, path parsing and executable bits. Those failures are not rewritten as
   passes and do not substitute for the supported-target workflow.
 
+### Corrected workflow candidate and collector correction — 2026-09-19
+
+- Corrected workflow/helper candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
+  passed automatic quality push run `35414545592` and PR run `35414547340`, attempt 1.
+  Each passed repository validation plus tools-only Windows x64 and macOS ARM64 jobs.
+- Production run `35414571185`, attempt 1, was captured directly; the second submit
+  attached without another POST. Candidate job `105820540518`, macOS ARM64 job
+  `105820559305`, and Windows x64 job `105820559328` all completed successfully at
+  exact head SHA `83e86aa`. Package builds remained mandatory and the opt-in package
+  upload steps were skipped as requested.
+- The first collection truthfully returned `accepted=false`: it classified the named
+  cache-miss download and opt-in package-upload skips as failures. The collector now
+  allows only those two expected conditional skips; an added regression proves an
+  unexpected skipped security gate still prevents acceptance. Re-collecting the same
+  immutable run/attempt then returned `accepted=true`, all required jobs complete,
+  no missing jobs, provider success and no failure diagnostics.
+- This collector-only follow-up does not change the workflow or application tree tested
+  by run `35414571185`. It receives its own repository/native-tools quality evidence;
+  no third equivalent package matrix is dispatched. This is exact-scope reporting, not
+  a claim that the later commit itself received fresh application packaging.
+
 ## Primary implementation references
 
 Checked on 2026-09-19. These describe public tool/API contracts, not the user's local

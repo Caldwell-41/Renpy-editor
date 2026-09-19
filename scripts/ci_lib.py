@@ -29,6 +29,10 @@ SAFE_REF = re.compile(r"(?!.*(?:\.\.|@\{|\\|\s))[A-Za-z0-9][A-Za-z0-9._/-]{0,199
 REQUEST_ID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z")
 REQUIRED_JOBS = ("Validate candidate", "Windows x64", "macOS ARM64")
 TERMINAL_FAILURES = {"failure", "cancelled", "timed_out", "neutral", "skipped", "stale", "action_required"}
+EXPECTED_CONDITIONAL_SKIPS = {
+    "Download pinned official Ren'Py SDK on cache miss",
+    "Upload packaged application for manual runs",
+}
 
 
 class CiError(Exception):
@@ -491,10 +495,14 @@ def collect(
             missing.append(name)
             continue
         steps = job.get("steps") if isinstance(job.get("steps"), list) else []
-        step_failures = [
-            str(step.get("name", "unnamed")) for step in steps
-            if step.get("conclusion") in TERMINAL_FAILURES
-        ]
+        step_failures = []
+        for step in steps:
+            step_name = str(step.get("name", "unnamed"))
+            step_conclusion = step.get("conclusion")
+            if step_conclusion in TERMINAL_FAILURES and not (
+                step_conclusion == "skipped" and step_name in EXPECTED_CONDITIONAL_SKIPS
+            ):
+                step_failures.append(step_name)
         required.append({
             "name": name,
             "status": job.get("status", "unknown"),

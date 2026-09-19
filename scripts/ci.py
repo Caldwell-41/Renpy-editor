@@ -56,7 +56,7 @@ def main() -> int:
             if operation and store:
                 target = "completed" if result["provider_status"] == "completed" else "running"
                 store.transition(
-                    operation["operation_id"], {"attached", "running"}, target,
+                    operation["operation_id"], {"attached", "running", "completed"}, target,
                     result_json=json.dumps(result, sort_keys=True), next_action=result["next_action"],
                 )
         print(json.dumps(result, indent=2, sort_keys=True))
