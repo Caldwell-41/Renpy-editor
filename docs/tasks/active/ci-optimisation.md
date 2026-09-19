@@ -1,259 +1,194 @@
 # CI optimisation and durable external wait/wake
 
-**Plan revision:** 2026-09-19, repository-owned revision 1.
-**State:** Planned; W0 feasibility approved, not started.
-**Repository:** `Caldwell-41/Renpy-editor`.
-**Inspected integration baseline:** main `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
+**Revision:** 2026-09-19, OPT-1A second corrective pass review-ready.
+**Current delivery:** [OPT-1A second corrective pass](ci-opt-1a-second-corrective-pass.md),
+with the [original combined brief](ci-opt-1a-privacy-and-operation-foundation.md) retained
+as the acceptance baseline and historical ledger.
+**W0 capability status:** Investigation complete; automatic wait/wake remains no-go/unqualified for the path examined.
+**Repository / branch / PR:** `Caldwell-41/Renpy-editor`, `maintenance/ci-optimisation`, #12.
+**Integration baseline:** main `7d634eeaf53fe0244a2739f26914797ca16ef544`.
 **Continuation:** [HANDOVER](../../status/HANDOVER.md).
-**Delivery rules:** [WORKFLOW](../../WORKFLOW.md).
+**Rules:** [WORKFLOW](../../WORKFLOW.md), [local client privacy](../../LOCAL_CODEX_CONFIG.md).
 
-This canonical detailed plan replaces the chat-only proposals and external wait/wake
-attachment. It includes the subsequent confidence-review corrections. Publishing it
-is not execution of W0 or proof of runtime capability. Future chats read the repo;
-prompts select one checkpoint.
+This is the parent roadmap and detailed wait/wake design. The linked corrective brief
+owns current scope/results while the original combined brief owns baseline requirements;
+this roadmap owns dependencies and later scope. Prompts select the delivery, not a
+second specification. W0 evidence remains in the
+[qualification report](../../research/CODEX_WAIT_WAKE_QUALIFICATION.md).
 
-## 1. Approval, scope and checkpoint sequence
+## 1. Authority and checkpoint sequence
 
-The user approved bounded W0 feasibility before full implementation, repo-owned plans
-and handovers, one checkpoint per chat, and safe final integration/cleanup. Only W0
-is currently authorised for execution. Later checkpoints require the user's checkpoint-
-start instruction after review. This does not approve Phase 1F or other app features.
+The latest user instruction explicitly selects the privacy corrections/checks AND
+OPT-1A in one next implementation chat, followed by self-review, published handover
+and a W1 next-chat selector subject to its entry gates. This is one bounded exception
+to the one-checkpoint-per-chat default. Execute Gate P, then Gate A, without another
+approval pause between them once P passes. The implementation brief defines the tests
+and scope-appropriate CI authority. This amendment itself is documentation only.
 
-W0 precedes the foundation implementation: small isolated probes can establish host
-capability without first building a supervisor. Production wait/wake still depends
-on OPT-1A. W0-W3 below are the canonical four gate names, superseding the earlier
-three-gate shorthand. Each table row is its own checkpoint chat.
+W1 implementation is NOT part of that chat. W0 no-go is not waived by approving
+independent CI tooling. Printing a W1 prompt does not establish qualification or
+approve live goal manipulation. No application-feature scope is created here.
 
-| Checkpoint | Scope | Entry / exit |
-| --- | --- | --- |
-| **W0** | Actual-host queue/resume, tools and goal-control feasibility. | Approved now; publish go/partial/no-go evidence and stop for review. |
-| OPT-1A | Candidate-specific CI submission, compact collection, operation/checkpoint contract. | Separate approval; can proceed independently after a W0 no-go. |
-| W1 | OPT-1B implementation plus offline state-machine and fault tests. | W0 qualified path, OPT-1A, separate approval; automatic mode disabled by default. |
-| W2 | Real-runtime integration and native host/supervisor qualification. | W1 plus separate approval; explicit permission for any service installation. |
-| W3 | Real GitHub Actions end-to-end proof and agent workflow adoption. | W2 qualified hosts plus separate approval; no simulated acceptance substitution. |
-| OPT-2A | Cheap preflight dependencies, trigger/concurrency controls and diagnostics. | Separate approval; retain native acceptance gates. |
-| OPT-2B | Conservative acceptance-evidence reuse. | OPT-2A evidence and separate approval; start in observation-only mode. |
-| CLOSE | Integration, branch retirement and documentation consolidation. | Approved implementation complete; reconcile explicitly deferred scope first. |
-
-Each chat completes/reviews/troubleshoots ONE row, publishes its ledger and live
-handover, provides a short next-chat selector and stops. A blocked W0 does not approve
-W1 or a host migration. Report whether independent CI work could proceed separately.
-
-Use one implementation branch `maintenance/ci-optimisation` and one integration PR
-across checkpoint chats. The name is reserved by this plan, not a claim the branch
-already exists. Reuse existing work if found; otherwise create it from freshly verified
-main when W0 starts. The planning publication is on main. Do not retire old branches
-before CLOSE's safety review.
-
-## 2. Starting evidence and intended benefit
-
-The inspected main has `scripts/validate.py`, separate repository-quality CI and a
-Windows x64/macOS ARM64 production matrix. It contains no published `ci.py` or wait/wake
-helper. Main includes merged Phase 1E PR #9; older live status/handover instructions
-claiming integration was pending are reconciled by this publication. Unpushed local
-work is not covered by the remote inspection. [R1-R3]
-
-The earlier plan provided external observation and manual continuation, not verified
-same-thread wake-up, unloaded-thread handling, safe goal suspension, delivery
-reconciliation, supervisor recovery or late queued-message cancellation.
-
-Separate GitHub runner usage, ordinary observer API/process work and model turns.
-The target is no autonomous inference or model-driven polling attributable to the
-registered wait after the originating turn finishes and before a terminal or monitoring-
-failure event is delivered. User messages are permitted and can supersede the wait.
-Do not infer token savings from elapsed time or promise a fixed allowance multiplier.
-
-## 3. W0: actual-host feasibility
-
-### Safe scope
-
-W0 is investigation with the smallest reproducible isolated probes. Put any reusable
-probe code/tests under `spikes/codex-waitwake/`. Do not implement the production
-supervisor, modify production CI, enable reuse, install services, upgrade/restart the
-user's runtime, expose listeners or change unrelated tasks. Begin with read-only
-discovery using approved authentication; never print credentials.
-
-Inspect current official docs and source matching BOTH the installed CLI and owning
-daemon before live protocol tests. Section 4 records historical source findings,
-not a promise about the installed version. Discover the actual task host through
-available interfaces, not guessed endpoints, port scans, session names or another
-machine's CLI. Establish access to the original task first.
-
-A disposable session can supplement risky tests only with explicit authority; it
-cannot replace proof that the actual task is accessible. Never fork the task or start
-a competing executor as fallback. Before live pause/unload tests, record the narrow
-test action, usage/turn allowance, deadline, restoration steps and safe abort path.
-Obtain any missing live manipulation permission. Do not pause an unrelated thread
-or intentionally strand the current one. Missing access is a blocked result, not
-permission to create a new runtime platform.
-
-### Capability matrix
-
-| Question | Required proof |
+| Delivery / checkpoint | Scope and gate |
 | --- | --- |
-| Actual owner | Runtime endpoint/host identity, installed CLI/daemon versions, original thread ID and matching workspace. Private details stay local. |
-| Addressable task | Successful read of the original thread through the owner; no `--last`, newest-session or title shortcut. |
-| Loaded-idle delivery | Queue receipt, correlated started turn and harmless result/claim on the same ID. |
-| Unloaded saved thread | Safe same-ID resume, auto-dispatch reconciliation, no duplicate start, verified result. |
-| Usable execution | Harmless representative tool operation after resume in the expected worktree with existing permissions/handlers. |
-| Real goal inactivity | Authorised pause and runtime-side evidence of no autonomous continuation during the bounded wait. |
-| User control | Ownership/revision or serialized-host mechanism that never restores over an intervening user decision. |
-| Ambiguous delivery | Queue/turn/history access sufficient to distinguish accepted, started, claimed and unknown without blind resend. |
-| Cancellation | Reconcile/delete only the wait's queued item and revoke late continuation; unrelated items unaffected. |
-| Persistent observer | Identify the actual host, selected supervisor and visible failure-notification route; no service installation yet. |
+| W0 | Investigation complete; automatic path unqualified. Recovery only after changed prerequisites and separate selection. |
+| **OPT-1A second corrective pass** | Complete and review-ready at `b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d`; exact Windows/macOS production acceptance is recorded in the corrective ledger. |
+| W1 | Qualified wait/wake implementation and offline fault tests. Requires actual W0 go and passing combined delivery; separate chat, automatic mode initially disabled. |
+| W2 | Real owning-runtime/native supervisor qualification after W1 and approval; service installation requires explicit permission. |
+| W3 | Real GitHub Actions end-to-end wake proof and agent adoption after W2 and approval. |
+| OPT-2A | Cheap shared preflight, trigger/concurrency controls and diagnostics; separately selected when ready. |
+| OPT-2B | Conservative cross-commit acceptance-evidence reuse after OPT-2A; observation-only first and separate approval. |
+| CLOSE | Integrated review, merge, branch retirement and documentation consolidation after accepted implemented scope or explicit deferral. |
 
-Cross-check native tool-shell `CODEX_THREAD_ID` when available; distinguish thread ID
-from session/root identifiers. An arbitrary environment variable or a new CLI install
-does not establish owner/daemon compatibility. [C1-C6, D1]
+Keep separate Gate P and Gate A evidence even though they share a chat. Otherwise
+retain one checkpoint per chat. On interruption/failure publish the exact incomplete
+state; do not skip gates to reach the next prompt. Ordinary CI work does not require
+successful automatic Codex resumption. Reuse the existing branch/PR and preserve
+unrelated work. No merge/deletion during this delivery; CLOSE retains cleanup ownership.
 
-### Hard ambiguities to resolve
+## 2. Evidence, intent and local-only identity
 
-1. Local Codex, a remote app-server and a hosted chat are not interchangeable. An
-   unrelated local demonstration does not qualify a hosted task.
-2. A local pause marker and a read of `paused` cannot distinguish a later user pause.
-   Read-check-write is not atomic. Identify caller-visible revision/ownership or a
-   host integration serializing relevant changes. Lost event visibility invalidates
-   conclusions based only on having observed no user changes. Internal goal-ID checks
-   are not automatically caller-visible pause ownership.
-3. Registration cannot arm delivery before suspension is confirmed and the originating
-   turn ends. An operation may already be complete; buffer that event until armed.
-4. Stable client IDs provide correlation, not assumed enqueue deduplication. Absence
-   from the queue is not proof of consumption.
-5. Instructing the agent to claim first is not runtime enforcement. Identify exactly
-   which task-changing operations are gated and what remains instruction-level.
-6. Restored metadata may not restore dynamic tool clients, required MCPs or credentials.
-   Prove usable tools without weakening the permission profile.
-7. Missing notifications while disconnected are not zero inference. Identify authoritative
-   runtime-side activity records and their coverage.
+The planning baseline had `scripts/validate.py`, separate quality CI and Windows x64/
+macOS ARM64 production gates. W0 added documentation; the subsequent review added
+privacy/bootstrap code but not `ci.py`, a watcher or a continuation bridge. That
+bootstrap has two reviewed protection gaps, now assigned to Gate P. [R1-R3]
 
-### Deliverable and exit
+Separate runner execution, ordinary process/API work and model turns/context work.
+Target: no autonomous inference/model polling attributable to a registered wait after
+the originating turn finishes and before a terminal/monitoring-failure event. User
+messages remain allowed and may supersede it. Do not infer savings from elapsed time.
 
-Write actual evidence to `docs/research/CODEX_WAIT_WAKE_QUALIFICATION.md`: versions,
-source/schema references, host, probe revision, bounded commands, expected/observed
-results, rollback and limits. Keep raw endpoints, history, secrets and machine paths
-private. Sanitised receipts must still support the claims.
+Identifiable host/runtime information must exist ONLY in protected per-user
+application-data storage described by
+[LOCAL_CODEX_CONFIG](../../LOCAL_CODEX_CONFIG.md), including diagnostic receipts.
+Public templates stay null. Git ignore remains publication convenience, not live-state
+security. Explicit-client selection and storage permissions remain mandatory. A routing
+label is neither client identity nor qualification. Native thread/goal/queue/turn
+bindings remain local per-task state.
+Shared handovers publish methods/outcomes and repo commit/Actions references only.
 
-Record pass/partial/blocked/not-tested per capability. `go` requires actual target-path
-and user-control proof. `partial`/`no-go` finishes the investigation but does NOT pass
-automatic-support acceptance. Without pause-ownership proof, leave the goal paused
-and require manual continuation; do not call that equivalent automatic support.
+## 3. W0 recovery: bounded actual-host proof
 
-Update resolved choices in this plan, record blockers, publish ledger/HANDOVER and
-stop for review. Do not implement W1, install a service, migrate hosts or relax the
-requirements inside W0. Independent OPT-1A needs a separate checkpoint selection.
+Original observations and untested gates are in the qualification report; the remote
+review did not re-execute them. Missing original private receipts cannot be reconstructed
+from prose. Future probes retain exact versions, schema/source hashes, owner comparisons
+and raw receipts locally; publish an allowlisted capability report, not installed inventory.
 
-## 4. Pinned source baseline, not a runtime guarantee
+Investigate only the actual task via supported native interfaces. Inspect documentation
+and source matching installed CLI and owner runtime privately. No guessed endpoints,
+port scans, unrelated task access, replacement server, competing agent, forced runtime
+upgrade, exposed listener or installed service. Small probes may live under
+`spikes/codex-waitwake/`; production bridge implementation is not W0.
 
-The earlier audit inspected `rust-v0.155.1` on 2026-09-19. Its CLI exposes
-`codex queue --thread <id> --message <text>` and sends `thread/queue/add`; command
-success is not a call to resume or start a queued turn. Each CLI invocation creates
-a new client message UUID. The queue service wakes eligible loaded idle threads;
-queue-start requires an unloaded thread to be resumed and refuses active/pending
-turns. Interrupted, archived and ephemeral threads have distinct restrictions. [C1-C4]
+Disposable sessions supplement risky tests only with explicit permission and never
+replace actual-owner proof. Live pause/unload/delivery probes need authority, test action,
+usage allowance, deadline and abort/restoration contract. Do not strand the task, reset
+budgets or change unrelated goals. Current combined-delivery approval does not grant
+these live probe permissions or require repeating unchanged blocked W0 discovery.
 
-The inspected goal service/tool supports state changes but does not establish a
-caller-supplied pause-owner/revision compare-and-set contract. Internal goal identity
-checks do not settle the later-user-pause race. Recheck the exposed schema in W0. [C5-C6]
+| Capability | Required proof; identifiable evidence stays private |
+| --- | --- |
+| Actual owner | Native thread ID, exact owner record, workspace, binary/runtime and endpoint cross-check; distinguish thread from session root. |
+| External observer connection | Authenticated supported connection usable without model turns; chat-only tool access is insufficient. |
+| Loaded idle | Correlated queue receipt, started turn and claimed result on the same thread. |
+| Unloaded saved | Same-ID resume, auto-dispatch reconciliation, no duplicate start and valid result. |
+| Usable tools | Harmless representative post-resume tool operation in the intended workspace with existing permissions/handlers. |
+| Inactivity | Authorised suspension with authoritative records showing no wait-driven autonomous continuation. |
+| User control | Ownership/revision OR supported host serialization of all relevant user actions; never overwrite a later user pause. |
+| Delivery reconciliation | Queue/turn/history distinguishes accepted, started, claimed and unknown; queue absence is not consumption proof. |
+| Cancellation | Reconcile/delete only the event's queued item, revoke generation and reject late task-changing actions. |
+| Persistence/visibility | Select actual supervisor and visible non-model failure path; lifecycle qualification remains W2. |
 
-Official app-server documentation distinguishes read, resume and turn execution,
-and describes experimental surfaces. Inactive-thread unloading is not conversation
-erasure or proof of a universal model timeout. Required tools/clients can affect
-resumed execution. These source observations require host validation. [D1]
+A pause marker plus reading `paused` is not compare-and-set; internal goal-ID checks
+are not caller-visible revision control. Lost user-event visibility invalidates claims
+based on observing no changes. Establish ownership-safe control rather than declaring
+an upstream patch the only remedy. Without it, automatic restoration remains blocked.
 
-Prefer a small version-qualified structured-protocol adapter over parsing CLI prose.
-Use a reviewed pinned transport if needed; do not write a WebSocket stack or modify
-Codex internals. Do not start a second owner server to hide missing host capability.
+Registration cannot arm delivery before verified suspension and originating-turn end;
+CI may finish first and its event must be buffered. Stable client IDs are correlation,
+not assumed server deduplication. Claim instructions are not runtime guards. Saved
+metadata does not restore dead tool clients or failed required MCPs. Disconnected
+telemetry is not zero-inference proof. Resolve these before qualifying W1 entry.
 
-## 5. OPT-1A: CI operation foundation
+Publish pass/reported/partial/blocked/not-tested per capability. A finished investigation
+may be no-go, not qualified just because source primitives exist. Missing access in one
+path is not proof all clients lack an API. Stop for review after recovery; no gate waiver.
 
-Add `scripts/ci.py`, following existing Python conventions and approved GitHub
-authentication. The following interface is PROPOSED, not implemented:
+## 4. Source references versus deployment qualification
+
+Public tags `rust-v0.155.1` and `rust-v0.155.0-alpha.9` identify historical source reviews,
+not a new client's runtime settings. The reviewed CLI queues through `thread/queue/add`,
+creates a fresh client ID each invocation and returns acceptance, not proof of resume/
+start/claim. Eligible loaded idle threads can dispatch; queue-start requires a loaded
+thread and refuses active/pending turns. Interrupted/archived/ephemeral differ. [C1-C4]
+
+The reviewed goal contract did not establish caller pause ownership/revision. Recheck
+the actual schema rather than invent fields. App-server documentation distinguishes
+read, resume and execution; inactive-thread unloading is not conversation erasure or
+proof of a universal model timeout. Required client tools need separate verification. [C5-C6, D1]
+
+Prefer a narrow qualified structured adapter, not CLI prose or a handwritten WebSocket
+stack. Do not modify Codex internals or launch another owner to hide missing capability.
+
+## 5. Current combined implementation brief
+
+The canonical specification is
+[ci-opt-1a-privacy-and-operation-foundation.md](ci-opt-1a-privacy-and-operation-foundation.md).
+It replaces the earlier short OPT-1A sketch for the current delivery, without approving
+OPT-2A/B or W1. It owns Gate P staged-content/exact-ignore/client-storage corrections;
+Gate A doctor/preflight, durable candidate/request identity, current dispatch receipts,
+immutable workflow checkout, attempt-specific collection; negative/fault/native tests;
+actual GitHub validation; final self-review and conditional W1 handover.
+
+No `ci.py` command is implemented merely by publishing the brief. CI tooling must work
+independently of an unqualified Codex binding. Actual client setup cannot be replaced
+by initialisation in an unrelated review sandbox. Sensitive writes wait for corrected
+protection; source/helpers/tests and documentation may be developed with synthetic data.
+
+## 6. Wait/wake architecture and initial operating contract
+
+GitHub Actions is the first/only backend. Keep small observation/delivery interfaces
+for future process/render/file/MCP jobs without implementing them now. No subagents,
+alternate models, public webhooks, distributed failover or self-hosted CI runners.
+One owning supervisor host, one registered wait per task, clean committed candidate,
+explicit deadlines; no automatic reruns/merges. A different client does not gain private
+thread control from a repo handover.
 
 ```text
-python scripts/ci.py doctor
-python scripts/ci.py preflight
-python scripts/ci.py submit --ref <branch> --sha <full-sha>
-python scripts/ci.py collect --run <id> --attempt <n>
+Task -> bind run/attempt/SHA -> durable private checkpoint -> register observer
+     -> confirm authorised suspension -> originating turn ends -> arm delivery
+           NO AUTONOMOUS MODEL ACTIVITY ATTRIBUTABLE TO THIS WAIT
+Observer -> detect outcome -> persist event -> owning-runtime queue/resume
+         -> correlated turn -> single verified claim -> existing checkpoint work
 ```
 
-`doctor` records capabilities once per relevant tool/config signature. Do not repeat
-known-impossible desktop builds. Linux/frontend/core checks are not supported-target
-acceptance. Re-evaluate when dependencies or environment change.
+Ordinary non-model API polling is allowed; do not allocate an Actions runner merely
+to watch another run. Reuse OPT-1A collection rather than a second CI controller.
 
-`submit` finds or starts: attach to matching running work, return verifiable existing
-results under actual policy, or dispatch once. Persist a request ID before dispatch.
-Lost response/auth/API failure is unknown, not permission to retry blindly. Correlate
-request, workflow, branch and SHA; never pick the newest run. Reject wrong/moving refs
-before expensive work. All jobs check out the validated immutable candidate. Record
-workflow source revision as well as application SHA and explicit run attempt.
-
-Introduce `expected_sha`, `request_id`, `force_full`, and `upload_packages` dispatch
-inputs as appropriate. Package building stays mandatory for full acceptance; large
-bundle upload is opt-in. Preserve lightweight evidence and existing required gates.
-
-Share versioned operation/checkpoint/result contracts with W1. Keep runtime state
-private/outside Git, and publish sanitised run/attempt/SHA handovers. `collect` follows
-pagination, distinguishes failure/cancel/timeout/skipped/unknown, and loads only bounded
-relevant diagnostics. Missing artifacts or partial logs do not mean passing.
-
-Tests cover duplicate submission, lost response, wrong ref, branch movement, auth/API
-failure, attempt mismatch, pagination, missing evidence and interrupted collection.
-No evidence-reuse policy or unattended Codex continuation is enabled here. [R2-R3, G1-G2]
-
-## 6. OPT-1B architecture and scope
-
-Implement GitHub Actions observation and one qualified Codex continuation path only.
-Expose small observe/deliver interfaces for future process/render/file/MCP adapters,
-but do not implement those backends. No subagents, alternate models, public webhook
-receiver, distributed failover, self-hosted Actions runners or application features.
-
-Initial contract: one owning supervisor host, one active registered wait per task,
-clean committed candidate, explicit deadlines, no automatic CI reruns or merges.
-
-```text
-Task -> bind run/attempt/SHA -> durable checkpoint -> register observer
-     -> confirm authorised suspension -> originating turn finishes -> arm delivery
-
-       NO AUTONOMOUS MODEL ACTIVITY FOR THIS WAIT
-
-Observer -> detect outcome -> persist compact terminal event
-         -> owning-runtime queue/resume/reconcile -> correlated turn
-         -> single validated continuation claim -> continue checkpoint
-```
-
-Event-driven means at the model boundary. Ordinary external API polling is allowed
-and does not require model turns. Do not allocate an Actions runner to watch another
-run. Reuse OPT-1A collection rather than building a competing CI controller.
-
-| Proposed component | Responsibility |
+| Planned component | Responsibility |
 | --- | --- |
-| `scripts/waitwake.py` | Doctor, register, status, recover, cancel, claim and cleanup. |
-| `scripts/waitwake_lib/state.py` | Versioned private journal/outbox and fenced ownership. |
-| `scripts/waitwake_lib/github_actions.py` | Bound run/attempt observation and collection. |
-| `scripts/waitwake_lib/codex_bridge.py` | Owner verification, queue/resume/start and receipt reconciliation. |
-| `scripts/waitwake_lib/supervisor.py` | Non-model watcher lifecycle, heartbeat and recovery. |
-| `tests/waitwake/` | Fake-provider, state-machine, crash/race and integration tests. |
-| `.agents/skills/external-wait/SKILL.md` | Tested invocation/recovery procedure after the helper exists. |
-| `docs/CI_ORCHESTRATION.md` | Lasting operations, compatibility, security and recovery contract. |
+| `scripts/waitwake.py` | Doctor, registration, status, recovery, cancellation, claim and cleanup. |
+| `scripts/waitwake_lib/state.py` | Private versioned SQLite journal/outbox, unique events and fenced leases. |
+| `scripts/waitwake_lib/github_actions.py` | Bound run/attempt observation and shared collection. |
+| `scripts/waitwake_lib/codex_bridge.py` | Owner verification and queue/resume/start reconciliation. |
+| `scripts/waitwake_lib/supervisor.py` | Non-model lifecycle, heartbeat, restart and delivery ownership. |
+| `tests/waitwake/` | Provider/runtime fakes, fault injection and qualified integration tests. |
+| `docs/CI_ORCHESTRATION.md` and external-wait skill | Tested operational and recovery instructions; mark available versus future commands. |
 
-Paths are planned. Do not invoke nonexistent commands. Pin/copy the helper revision
-or otherwise verify it so changing the worktree cannot silently change an in-flight
-privileged observer. Avoid premature frameworks and multiple competing service models.
+Do not invoke hypothetical wait/wake commands. Pin/copy a verified helper revision so
+worktree changes cannot silently replace a privileged worker. Local bootstrap is not
+the event journal. OPT-1A may publish its own implemented commands in the operations
+guide before W3, but must explicitly state that automatic wait/wake is unavailable.
 
-## 7. State, checkpoints and continuation ownership
+## 7. Private state and transition guards
 
-Use a private per-user local state directory and small SQLite journal for atomic
-updates, durable outbox, unique identities and restart recovery. Do not edit Codex's
-internal database/history or share a live journal between native and WSL processes.
+Use protected local storage/SQLite, not Codex's internal DB or a shared native/WSL
+journal. Persist schema/policy/helper versions; operation generation; repo/workflow/
+run/attempt/SHA; required gates; owner/config/thread/session/goal identity; worktree/
+HEAD and permissions; next approved action; deadlines; lease fencing; queue/turn/claim
+receipts and side-effect checkpoints. Do not publish hashes of private identities.
 
-Persist schema/policy/helper versions, operation/event IDs, repository/workflow/run/
-attempt/SHA, required gates, owner endpoint/config-home identity, exact thread ID,
-separate session identity if relevant, goal identity, task generation, worktree/branch/
-HEAD, permissions/config identity, completed checks, next authorised action, deadlines,
-lease/fencing generation, queue/turn/claim receipts and last side-effect checkpoint.
-Keep secrets in existing credential stores and private machine details outside Git.
-
-Observation, delivery, continuation claim and task completion are separate axes:
+Observation, delivery, claim and task completion are separate axes:
 
 ```text
 prepared -> observer_registered -> suspended -> yield_confirmed/armed
@@ -261,313 +196,288 @@ prepared -> observer_registered -> suspended -> yield_confirmed/armed
          -> continuation_claimed -> checkpoint_result_recorded
 ```
 
-A terminal observation may precede arming; buffer it. Only verified suspension and
-originating-turn completion permit delivery. The arm signal must use W0's qualified
-host contract, not an extra model keep-alive. Failure to arm is visible/recoverable.
+Buffer pre-arm completion. Arming uses a proven runtime contract, not model keep-alives.
+Persist events before delivery. Exceptional states include `delivery_unknown`,
+`blocked_manual`, `revoked`, `superseded`, `user_paused`, `cancelled`. New instructions,
+changed workspace, lost ownership/telemetry or stop require revalidation; no automatic
+worktree reset. A claim is not completed follow-up work; reconcile interrupted effects.
 
-Exceptional states include `delivery_unknown`, `blocked_manual`, `revoked`,
-`superseded`, `user_paused` and `cancelled`. New instructions, changed files/branch,
-explicit stop or lost user-event visibility require revalidation. Do not reset a
-changed worktree. Claiming an event is not finishing the task; reconcile interrupted
-claims against recorded actions before continuing.
-
-One supervisor lease prevents cooperating supervisors from racing; it does not prove
-that an unrelated agent cannot act. State what is actually enforced. Require one
-authoritative event claim and safe side-effect reconciliation. Do not promise exactly-
-once model inference through every remote crash boundary.
+Leases protect cooperating observers, not arbitrary agents. Distinguish enforced guards
+from instructions. Require one authoritative claim and side-effect reconciliation;
+do not promise exactly-once inference across every remote crash. Ambiguity blocks visibly.
 
 ## 8. Watcher lifecycle, deadlines and diagnostics
 
-Observation runs under a persistent user-owned supervisor, not a disposable model-tool
-child. Confirm durable registration/ownership before yielding. Use modest configurable
-API intervals, request timeouts, retry-after handling and bounded backoff/jitter.
-Persist transitions/retries, not repeated full logs.
+Use a persistent user-owned supervisor, not a disposable tool child. Confirm durable
+registration before yield. Use modest API intervals, request limits, retry-after and
+bounded backoff/jitter. Record transitions rather than repeated full logs.
 
-Choose the actual first host/supervisor/notification path in W0 and qualify it in W2.
-Native Windows x64 and macOS ARM64 are intended targets; neither is supported by
-assertion. User-scoped Windows scheduled-task/service or macOS LaunchAgent installation
-requires explicit permission and tested crash/login/wake/uninstall behavior. Do not
-assume Bash, POSIX signals, terminal detachment or WSL interoperability.
+Qualify the actual host. Windows scheduled-task/toast and macOS LaunchAgent are candidate
+patterns, not installed selections. Installation needs permission. Verify each native
+target's locks/ACLs, spaces/Unicode, crash/login/sleep/reboot recovery, notifications and
+uninstall. WSL is separate. Do not assume POSIX signals or detached children survive.
 
-Restart recovers unfinished operations without dispatching replacement CI. Use process
-start identity and fencing, not PID alone; no cross-host takeover in v1. Wall-clock
-observation deadlines include sleep. Distinguish provider timeout, observation timeout,
-delivery timeout and pending approval. Do not cancel CI because local waiting expired.
-Late events for revoked/superseded/deadline-closed generations remain for inspection,
-not automatic reactivation.
+Restart recovers existing operations, not replacement CI. Fence with process start
+identity, not PID alone; no cross-host takeover. Observation deadlines include sleep;
+provider, watcher, delivery timeout and approval wait are distinct. Local expiry does
+not cancel CI. Late revoked/superseded/deadline-closed events remain private for manual
+inspection, not automatic wake-up.
 
-Persist events before delivery. Retry only operations safe under known state. After
-bounded failure, expose `blocked_manual`, a precise status/recovery command and the
-chosen visible non-model notification. A quiet file alone is not a notification.
-No execution guarantee applies while required machines/services are powered off.
+After bounded safe retries expose visible non-model notification, durable blocked
+status and precise recovery. A quiet file is not notification proof. Powered-off
+infrastructure cannot wake immediately. Diagnose notification failure. Preserve
+unresolved outbox/claims and bounded tombstones during cleanup.
 
-Log versions, timestamps, state reasons, retry counts and operation/event/queue/turn/
-claim correlations with redaction. Measure observation-to-event and event-to-claim
-latency, duplicate suppression and actual model activity. Keep unresolved outbox/claims
-and bounded tombstones during cleanup; never delete unfinished recovery evidence.
+Raw identities/logs remain local. Publish sanitised transition reasons and test results.
+Measure observation-to-event/event-to-claim latency, duplicate suppression and actual
+model activity without uploading client fingerprints.
 
-## 9. Queue/resume, goal control and cancellation
+## 9. Delivery, pause restoration and cancellation
 
-Loaded idle: queue and observe automatic dispatch. Loaded active: leave the event
-queued without interrupting user work or reordering unrelated messages. Unloaded:
-resume the same authorised saved thread, then re-read queue/turn state because resume
-may auto-dispatch. Start a selected item only if still queued and the thread is idle.
-Never queue and unconditionally issue a second `turn/start` or independent exec-resume.
+Loaded idle: queue and observe dispatch. Loaded active: leave queued; do not interrupt
+user work or reorder unrelated messages. Unloaded saved: resume same authorised ID,
+recheck for auto-dispatch, and start the selected item only if still queued and idle.
+Never additionally issue unconditional turn-start or independent exec-resume.
 
-Queue receipt, correlated started turn and atomic verified claim are distinct receipts.
-Use a stable event/client ID but do not assume enqueue idempotence. Lost response means
-`delivery_unknown`: inspect qualified queue/turn/history evidence before retrying.
-If ambiguity persists, block and notify instead of producing duplicate model work.
-Absence from queue is not delivery proof. [C1-C4]
+Queue receipt, correlated start and verified claim are distinct. Stable IDs do not
+prove server deduplication. Lost response requires queue/turn/history reconciliation;
+still unknown means block/notify. Absence is not consumption. Validate task generation,
+workspace/candidate, permissions and scope before effects. Duplicates must not repeat
+submissions, commits or merges.
 
-Before task-changing actions, validate generation, candidate/worktree, permissions and
-scope. Identify runtime/tool-enforced guards separately from agent instructions.
-An AGENTS rule alone cannot be sold as enforcement of claim-before-action.
+Cancel/supersede by revoking generation and reconciling/deleting only this wait's item.
+Started continuations reject revoked actions. Do not touch unrelated messages or resume
+intentional user interruption/archive. New clients do not inherit pause ownership.
 
-Cancellation/supersession revokes the local generation AND reconciles/deletes only our
-own pending queued message where safe. If a continuation already started, its guard
-must reject revoked actions. Do not touch unrelated messages. Distinguish a deliberate
-user interruption from an infrastructure failure; interrupted/archived does not mean
-permission to resume automatically.
+Pause only with ownership-safe authority. Preserve goal/objective/accounting, model/
+reasoning, tools, approvals, sandbox and budgets; never mark complete just to suppress
+work. Establish event handling before restoration to avoid competing continuation.
+Missing ownership/serialization, lost events, user pause, approval or usage limits block
+restoration. Manual recovery remains labelled degraded support, not a passing gate.
 
-Pause an active goal only through authorised ownership-safe control. Preserve objective,
-accounting, budget, model, tools, sandbox and approval settings. Never mark complete
-to suppress work. Sequence event handling and goal restoration so restoring the goal
-cannot create a competing continuation before the result is consumed.
+## 10. Outcome envelope and security
 
-A read of `paused` plus a local marker is insufficient ownership proof. Missing
-conditional control, lost event visibility, new user pause, approval request, archive
-or usage limit blocks restoration. The fallback leaves the goal paused with explicit
-manual recovery; it is not passing automatic support. Test the pause-to-queue and
-queue-to-restore races. Do not invent API fields or reset budgets.
+Bind repository/workflow/run/attempt/candidate and all required job pages. Overall
+success is not proof of complete required gates. Distinguish success, test failure,
+cancellation, provider timeout, monitoring/auth error, watcher crash, delivery unavailable/
+unknown and user stop. Retry via bounded ordinary code only.
 
-## 10. Outcomes and wake-up content
+Private wake envelopes contain operation/checkpoint generation, candidate, Actions
+identity, required jobs, bounded redacted errors, evidence and next approved action.
+Cap fields/total size and mark truncation. Public receipts strip routing/local evidence
+references. Do not load entire logs by default.
 
-Bind the exact repository, workflow, run, attempt and candidate. Follow all job pages;
-do not silently track a newer rerun. The observer reports facts, while the existing
-acceptance policy determines required gates. Overall workflow success alone is not
-proof every required job executed.
+Observer needs Actions read, not write/merge/cancel. Bridge is privileged: restrict
+registered targets and operations and identify host-enforced versus adapter-only limits.
+Use protected local/authenticated transport, never a public unauthenticated endpoint
+or model credentials in Actions. Strict schemas, identity checks, argument arrays,
+limits and control-sequence removal are required. Logs/project content are data, not
+instructions. No bypass flags, internal DB edits or automatic host migration. [D1]
 
-| Outcome | Behavior |
-| --- | --- |
-| Success | Exact identity, required job/gate outcomes and bounded next action. |
-| Failure | Relevant failing jobs/steps and short redacted errors; no automatic rerun. |
-| Cancellation | Distinct conclusion; no automatic restart. |
-| Provider timeout | Distinct from observer/delivery deadlines. |
-| API/auth/monitoring failure | Bounded ordinary retry, then monitoring-error event; not test failure. |
-| Watcher crash | Recover same operation through supervisor. |
-| Codex unavailable | Persist event and retry safe delivery within deadline. |
-| Delivery uncertain | Reconcile or block; never blindly enqueue again. |
-| User stop or task change | Revoke wait and reconcile its pending queued item. |
+## 11. W1-W3 test and rollout gates
 
-The compact envelope contains operation/checkpoint generation, candidate, run/attempt,
-conclusion, required job statuses, bounded redacted diagnostic data, evidence references
-and next authorised action. Cap total size and each field; explicitly mark truncation.
-Fetch full logs only for targeted diagnosis. Illustrative message, not actual evidence:
+**W1 entry:** both Gate P/OPT-1A acceptance AND actual W0 go are required. The combined
+chat performs a bounded entry review and provides a readiness-only W1 prompt if W0 is
+still no-go; it does not run W0 recovery or fabricate a pass. W1 coding is a separate
+chat after real prerequisites. Existing 16 privacy tests and new CI tests are not
+host/runtime qualification. See the combined brief's next-prompt decision rule.
 
-```text
-Operation: <id>; checkpoint generation: <n>; candidate: <sha>
-Actions run: <id>; attempt: <n>; conclusion: failure
-Windows x64: failed at <step>; macOS ARM64: passed
-Diagnostic: <bounded redacted data>; full evidence: <reference>
-Claim this event and verify the existing checkpoint before acting.
-Inspect the named failure; do not dispatch replacement CI automatically.
-```
+**W1 implementation:** automatic mode off. Offline tests cover statuses/pagination,
+missing evidence, redaction, wrong identity/attempt, lost responses, pre-arm completion
+and deadlines. Inject crashes before/after checkpoint/outbox, enqueue, receipt, start
+and claim. Cover dual observers, stale leases/fencing/PID reuse, duplicate/revoked
+items, user changes, unrelated messages, changed worktrees, interrupted claims,
+notification failure, copied/stale profiles and session rebinding. Mocks are not native
+acceptance. Publish evidence and remaining limits, then stop.
 
-## 11. Security boundaries
+**W2:** test loaded idle/active, unloaded, paused-goal, interrupted, archived, ephemeral,
+required-tool failure, approval/usage blocks, disconnected and unsupported cases. Test
+resume/start races, receipt loss, cancellation after enqueue, user-pause races and tools
+after cold resume. Qualify each host/ACL/supervisor/notification explicitly. Linux mocks
+or application CI do not substitute. Version/client changes invalidate affected proof;
+no silent model/host fallback. Stop for review.
 
-The observer needs Actions read access, not push/merge/cancel/rerun permissions.
-The continuation bridge is privileged: restrict registration/IDs and fixed operations.
-State which restrictions the runtime enforces and which only our adapter enforces.
-Use protected local or authenticated transport; no unauthenticated network listener
-and no model credentials in Actions callbacks. [D1]
+**W3:** approved cheap manual Actions fixture for real success/failure/cancel/timeout;
+bind actual identity, yield and prove the same original thread claims completion.
+Include unload, restart, duplicate delivery, revocation and restored tools. Shared runs
+cannot create competing writers. Prove no wait-driven model turns/goal continuation
+using authoritative telemetry; record user activity separately. Missing notifications
+or no API key in a watcher is not proof. Identifiable telemetry stays local.
 
-Use argument arrays, strict schemas/identity checks, bounded output, control-sequence
-removal and redaction. CI logs are untrusted data, never instructions or commands to
-execute. Preserve model/reasoning, credential, sandbox, approval, trust and budget
-settings. No bypass flags, runtime database edits or automatic host migration.
+Attach to one otherwise-required production run and verify both target outcomes; no
+matrix per watcher test. Retain private queue/turn/claim equivalence receipts and publish
+only sanitised methods/results and repo references. Add tested automatic commands and
+`.agents/skills/external-wait/SKILL.md` only after proof. Confirm instruction discovery
+and actual registration/yield behavior; instructions are not enforcement. Enable only
+qualified configurations with visible manual fallback. Publish and stop. [D1-D2, G1-G2]
 
-## 12. W1-W3 tests and rollout
+## 12. OPT-2A: cheap gates and execution efficiency
 
-### W1: implementation and offline proof
+Make shared cheap preflight a native-job prerequisite: repository/staged privacy, tooling
+tests, `npm run check`, Rust formatting. Do not duplicate a full Linux Rust/SDK build
+without benefit. Preserve native core/SDK/desktop/package/WebView/denial/privacy/inventory.
+The small candidate-identity gate in OPT-1A is not this full preflight redesign.
 
-After W0 review, OPT-1A and approval, implement the selected bridge/state/observer/
-supervisor with automatic mode off by default. Fake time/providers/runtime exercise
-logic but do not establish host compatibility.
+Share PR/production checks without redundant push-plus-PR work or disappearing required
+checks. Main reports docs-only decisions inside checks. Aggregator requires full native
+success or verified equivalence, never skipped-job success. Review check names/rules;
+missing administrative access does not permit weaker policy.
 
-Cover outcomes, pagination, missing/expired evidence, sanitisation, wrong identities,
-attempt changes, completion before registration/arming, unknown dispatch and deadlines.
-Inject crashes before/after checkpoint/outbox persistence, enqueue, response, turn-start
-and claim. Include dual supervisors, expired leases/fencing, PID reuse, duplicates,
-revoked queued items, changed workspaces, user activity, unrelated messages, interrupted
-claims and notification failure. Assert no blind retries or repeated task-changing
-side effects. Publish exact tests and unresolved runtime gaps; stop for review.
+Concurrency serializes rather than deduplicates. Share branch/workflow groups across
+push/manual events; initially protect running candidates (`cancel-in-progress: false`)
+and recheck after completion. Obsolete cancellation is explicit and run-specific, not
+triggered by every docs push. Add measured watchdogs with cold-cache margin, remove
+standalone frontend duplication only while Tauri's hook builds it, preserve useful
+caches, mandatory package building and opt-in large uploads. Measure real overhead/
+savings and test wrong-SHA/preflight rejection, both required targets and truthful
+unknown/skipped outcomes. No fixed speedup promise.
 
-### W2: actual runtime and native hosts
+## 13. OPT-2B: conservative acceptance-evidence reuse
 
-Use W0's real owning runtime and selected supervisor. Test loaded idle/active,
-unloaded saved, paused-goal, interrupted, archived, ephemeral, failed required tools,
-approval-blocked, usage-limited, disconnected observer and unsupported capability.
-Test automatic-resume versus queue-start race, cancellation after enqueue, lost receipt
-recovery, user-pause ownership and usable tools/permissions after resume.
+Separate approval, observation-only first. Receipt includes schema/policy, tested commit,
+input fingerprint, workflow source/run/attempt, gates/jobs, toolchain/SDK/relevant CI
+runner class, time and verifiable artifacts. User Codex inventory never belongs here.
+Cache hits are not acceptance. Exact already-tested candidate lookup in OPT-1A is not
+cross-commit equivalence.
 
-Qualify Windows x64 and macOS ARM64 separately: spaces/Unicode paths, locks, permissions,
-crash/login/sleep recovery, visible notifications and uninstall. Install only with
-explicit permission. A Linux mock or application matrix is not native watcher proof.
-Record unqualified platforms honestly; keep one owner host per task. Requalify affected
-contracts on version changes. No silent fallback to a different model/client/host.
+Fingerprint tracked paths/modes/bytes by default, including app/scripts/tests/fixtures/
+locks/toolchains/SDK/workflows/policy. Exclude only reviewed non-executable docs proven
+not to affect results. Unknown paths count; do not ignore all Markdown or hash only app/.
+Account for commit metadata and unpinned inputs. Private client profiles never affect
+product builds.
 
-### W3: real GitHub Actions and agent adoption
+Initially reuse a trusted recent candidate only for docs-only integration descendants
+with matching inputs/policy, complete verifiable Windows/macOS success and no invalidating
+environment assumption. Proposed maximum seven days, not beyond artifact availability;
+age does not prove hosted environment equality. Unproven means full run; explicit
+`force_full` bypasses reuse. Report equivalence, not fresh tests. Preserve checks and
+refuse changed sources/locks/workflows, unknown inputs, schema differences, unavailable
+evidence or incomplete/cancelled/failed targets. No broad historical search. Measure
+actual avoided runs, not hypothetical allowance savings.
 
-After approval, use a cheap manual fixture workflow for controlled success, failure,
-cancellation and timeout. Bind actual runs/attempts/SHA to checkpoints, yield, and
-verify the SAME thread receives/claims the event. Include unloaded-thread, watcher-
-restart, duplicate-delivery, revocation and tool-availability cases. Shared fixture
-runs must not create competing task writers. Do not rerun the production matrix for
-each watcher test.
+## 14. CLOSE and handover contract
 
-Measure the task from authoritative runtime-side records: no autonomous model turns,
-inference or goal continuations caused by the wait between completed yield and event
-delivery. User interactions are separately recorded. No model API key in the watcher
-is insufficient proof; disconnected/missing telemetry is not evidence of zero activity.
+Review exact scope/approvals/evidence, merge via the existing PR and verify main. Skip
+another matrix only with implemented verified policy. Inventory branches/PR ownership;
+delete only proven integrated/redundant inactive branches via ancestry or reviewed patch
+equivalence. Do not merge obsolete work just to delete it. Preserve main/protected refs,
+archive tags, unique work and unrelated PRs. No current-delivery merge/cleanup.
 
-Attach to one otherwise-required `production-scaffold.yml` acceptance run and verify
-its actual Windows/macOS summaries. Record owner/host/versions, original and resumed
-ID correlation, event/queue/turn/claim receipts, run/attempt/candidate, recovery tests
-and telemetry coverage. Simulated completion is not this gate.
+Consolidate lessons into docs/tests/ADRs, archive completed briefs/ledgers and repair
+links. Keep one live handover; Git holds older revisions, not a new snapshot each chat.
+Keep unique failure evidence and unresolved private journals. Report retained exceptions.
 
-Publish lasting `docs/CI_ORCHESTRATION.md`, real commands and the external-wait skill
-only once operational. Verify the actual host reads AGENTS/skill and uses registration/
-yield rather than polling. Instruction discovery is not process enforcement. Enable
-only qualified paths and retain explicit visible manual/degraded outcomes. [D1-D2, G1-G2]
+Each delivery publishes authority, state, branch/PR, known implementation candidate,
+commands/results, run/attempt/tested SHA, partial/failure evidence, choices and next gate.
+Private IDs/paths stay local. No receipt-only commit to chase its own hash or every CI
+result. Verify remote publication/checks externally. Interrupted work hands over safe
+recovery. The user's combined exception requires both P and A results, not a new chat
+between them. W1-readiness reporting never implies a missing W0 pass.
 
-## 13. OPT-2A: cheap gates and reduced duplicate work
+## 15. Execution ledger
 
-Make inexpensive preflight a dependency of both native jobs: repository validation,
-CI/helper tests, existing `npm run check` and Rust formatting. Do not add another
-complete Linux Rust/SDK build without evidence it saves work. Preserve native core,
-official SDK, packaging, packaged WebView/denial, privacy and inventory gates.
+### Planning — 2026-09-19
 
-Share preflight logic between ordinary PR checks and production. Avoid redundant
-push-plus-PR cheap runs without making required checks disappear. Main's controller
-emits an explicit result for docs-only changes, deciding expensive work inside a check.
-The final aggregator verifies required native success or validated equivalence,
-not merely success from skipped dependent jobs.
+User approved repo-first planning, W0 first, short selectors and safe future cleanup.
+Main advanced from Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9` to
+`7d634eeaf53fe0244a2739f26914797ca16ef544`; quality run `35399385224` passed. No runtime
+implementation or production matrix was part of that publication.
 
-Concurrency serializes work, not deduplicates it. Normal acceptance shares a workflow/
-branch group across push/manual events; initially protect running work with
-`cancel-in-progress: false` and recheck evidence afterward. Do not cancel nearly
-finished acceptance on every docs push. Obsolete-run cancellation is deliberate and
-run-specific. Review required-check names/rules before changes; never weaken policy
-because administration access is unavailable.
+### W0 investigation — 2026-09-19
 
-Add measured step watchdogs for downloads/external processes with cold-cache margin.
-Remove standalone duplicate frontend build only while Tauri's build hook remains active.
-Each native package retains its actual frontend build. Preserve useful npm/Rust/SDK
-caches. Measure preflight delay, failed-candidate savings and runner time; no fixed
-speedup promise. Test wrong SHA/preflight failure avoids native work, both target gates
-remain required, and missing/skipped/unknown results never become acceptance.
+Candidate `24c0f0b5e02ff73d18cb7c872a15719a4edd0b7c`, PR #12. Original owner/task/
+workspace/binary matches and current tools were reported successful. Schema/source
+review established primitives, not external access, safe cold resume or goal restoration.
+Loaded/unloaded wake and inactivity remain untested; cancellation/restored tools partial.
+Qualification report retains methods/limits, not private installed inventory. No live
+message/goal/task/service/production CI changes. Original validator reported 203 files;
+available interpreter used after ordinary launchers were absent. Quality runs
+`35404027500` and `35404031132`, attempt 1, passed at
+`2917b50a0c469d9308c0cb118a1a36ad554760fd`; receipt head
+`7062f63e73025feffe240faffc88418ea3e5c895`. These are docs checks, not automatic-support
+acceptance. Investigation finished no-go; that capability result remains unchanged.
 
-## 14. OPT-2B: conservative acceptance-evidence reuse
+### Initial local-privacy addition and subsequent review — 2026-09-19
 
-This needs separate review because a false equivalence could weaken acceptance.
-Start in observation-only mode: compute decisions but retain fresh native execution
-until the negative/positive tests and a complete candidate establish the policy.
+Commit `33d0e202b2116d11e12c316313f9c1bd0888731e` added inert local bootstrap/template,
+ignore/index guards, policy and 16 synthetic tests, without observer/CI-controller/
+queue bridge/runtime manipulation. Repository quality run `35406289376` passed the
+existing validator/tests; its PR checkout was merge-test SHA
+`f98551d451fd4d14857f4b5646de5e0fe600fee9`, not direct branch-head execution.
 
-Emit a receipt containing schema/policy version, tested commit, relevant-input
-fingerprint, workflow source revision/run/attempt, required jobs/gates, toolchain/SDK/
-runner identity, completion time and verifiable artifact IDs/digests. Cache hits are
-not acceptance evidence.
+The subsequent assessment identified staged-content versus working-copy bypass and
+sentinel-versus-destination ignore bypass. Existing passing tests did not cover them.
+Explicit client identity, native permissions and actual-client setup remain only
+partially established. No fix is claimed until Gate P reproduces/corrects/tests them.
 
-Fingerprint tracked paths, modes and contents by default, including app, tests,
-fixtures, scripts, lockfiles, toolchains, SDK configuration, workflows and policy.
-Exclude only reviewed non-executable docs proven not to influence build/test/package
-results. Unknown new paths are relevant. Do not ignore all Markdown or hash only app/.
-Check commit-identity, generated metadata and external/unpinned input dependencies.
+### Combined-delivery authorisation — 2026-09-19
 
-Initially reuse only a trusted recent accepted candidate for its docs-only integration
-descendants. Require matching inputs/policy, complete verifiable Windows/macOS success,
-available evidence and no invalidating environment assumptions. Proposed age cap is
-seven days and never beyond evidence availability; age is not proof hosted images
-stayed unchanged. Unproven equivalence means full validation. `force_full` bypasses
-reuse for explicitly requested diagnostics.
+The user explicitly requested privacy corrections/check AND OPT-1A in one next chat,
+then self-review, published handover and an appropriate W1 prompt. Current detailed
+specification/ledger is in the linked combined brief. AGENTS/WORKFLOW record the explicit
+exception; CURRENT/HANDOVER select the delivery. This amendment is documentation only;
+no P/A code, runtime probe or native validation is executed by publishing it. Its exact
+commit's repository-quality check validates docs against the current code, not the
+unimplemented corrections. W1 readiness remains conditional on actual W0 go.
 
-Report 'acceptance verified by equivalence to run X', never fresh native execution
-on the new commit. Preserve required checks and aggregation. Refuse reuse for changed
-code/locks/workflow/unknown inputs, schema changes, missing evidence, cancelled/failing
-one-target results and unverifiable external dependencies. No broad historical branch
-search. Record measured avoided runs, not hypothetical savings as actual token usage.
+### Privacy corrections plus OPT-1A implementation — 2026-09-19
 
-## 15. CLOSE: integration and cleanup
+Gate P reproduced both reviewed bypasses before correction: staged populated template
+with a clean working copy and ignored sentinel with an exposed exact destination both
+failed their new regressions. The implementation now reads raw staged Git objects,
+checks stage/mode/object/index stability and staged/working privacy policy, protects
+every used local destination, selects client contexts explicitly and verifies native
+ACL/mode safety before collecting identity. The synthetic/native-host suite expanded
+from 16 to 25 tests; two symlink creation cases were unavailable in the current Windows
+sandbox and remain explicit skips rather than passes.
 
-Review scoped diff, checkpoint approvals and actual required evidence. Integrate useful
-validated work through the existing PR and verify main's resulting tree/checks. Avoid
-another full matrix only when an implemented verified equivalence policy permits it;
-otherwise obey existing acceptance requirements.
+OPT-1A added `scripts/ci.py`, its reusable operation/API/collector layer, 17 offline
+tests, candidate validation/pinning in the production workflow, and Windows/macOS
+tools-only quality jobs. The local store persists intent before POST and prevents
+duplicate dispatch; current 200 receipts, legacy 204, lost response, exact request
+reconciliation, pagination, attempts, statuses and bounded redacted failure logs are
+covered. `docs/CI_ORCHESTRATION.md` owns commands and recovery. Local doctor found a
+configured-but-unverified Git credential provider, public collection, no Codex binding,
+and automatic wake disabled. Local npm/Rust tools were unavailable and remain delegated
+to the exact native workflow, not passed. The exact production workflow candidate
+`83e86aaacaa86993d5851283d4bb48509718b72b` passed run `35414571185`, attempt 1,
+including both mandatory native package jobs. Collector follow-up
+`609aaf4ac6a4db33c193204f610fc241cbcf08b8` passed push/PR quality runs
+`35415495692` and `35415497671`; it did not trigger a redundant package matrix. Exact
+job receipts and retained failures are in the combined brief and handover. P/OPT-1A are
+review-ready, while W1 remains blocked by the unchanged W0 no-go result.
 
-Inventory all branches/open PRs. Merge useful authorised reviewed work; remove only
-integrated/redundant branches after ancestry or squash/patch-equivalence and active-task
-checks. Do not merge obsolete branches merely to delete them. Preserve main, protected
-refs, archive tags, unique commits, unfinished tasks and unrelated dependency/app PRs.
-The historical instruction to retain corrective branches can be superseded by the
-user's later safe-cleanup approval only after those proofs and a written receipt.
-Do not delete legacy branches during W0.
+### OPT-1A second corrective pass — 2026-09-19
 
-Consolidate lessons into lasting operations docs/tests/ADRs, archive this finished
-plan/ledger, repair links and leave one live HANDOVER. Remove/archive unnecessary
-snapshots only after unique evidence is preserved. Git history retains earlier live
-handovers; do not create one duplicate per checkpoint. Never delete private pending
-events/recovery journals as doc cleanup. Report merged/deleted/retained decisions and
-actual final validation; explain retained unique work instead of forcing an empty list.
+The user selected the linked second corrective brief after review rejected repository-
+local runtime state and found identity/recovery/collector/publication defects. Local
+implementation now moves profiles and the versioned SQLite journal to protected OS
+application data, treats legacy `.codex-local` as non-authoritative, derives operation
+identity from the requested candidate workflow blob, performs complete deterministic
+find-or-start reconciliation, adds supported read-only `dispatch_unknown` recovery,
+requires affirmative job/step evidence and stores bounded provider logs only in the
+private journal. The fresh integrated checklist and exact final CI receipts are
+published in the corrective brief. Candidate
+`b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d` passed both automatic quality contexts and
+production run `35431721525`, attempt 1. The delivery is review-ready. W0 remains
+independently no-go and no W1 code is included.
 
-## 16. Execution ledger and handover
+## Primary sources
 
-Each checkpoint appends one compact evidence record: authority, state, branch/PR,
-exact implementation candidate, commands/environments/results, CI run/attempt/jobs,
-failed/partial evidence, resolved choices, durable lesson links, blockers and next
-approval/action. Update the design when implementation choices change.
+Public references do not identify a client's installed runtime or qualify a host.
+Use matching current schemas privately. Current Git/dispatch references for OPT-1A are
+in the combined brief; do not copy older dispatch assumptions from this roadmap.
 
-HANDOVER owns current routing, not another copy of the plan. Publish it before the
-next-chat prompt. Record a known candidate rather than a self-referential handover
-commit hash, and verify published head externally. Interrupted waits retain exact
-operation and recovery details; blocked gates hand over recovery, not later work.
-
-### Planning publication — 2026-09-19
-
-- Authority: user requested repo-owned detailed plan, checkpoint handovers, concise
-  prompts and future safe cleanup; W0 approved for a subsequent chat.
-- Baseline: main `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`; PR #9 already merged.
-- Scope: documentation only. Canonical plan, confidence-review gaps, stable AGENTS
-  rules, WORKFLOW policy, reconciled CURRENT/HANDOVER and INDEX.
-- No application/workflow changes, runtime manipulation, watcher, service or production
-  matrix dispatch. No implementation/runtime compatibility is claimed.
-- Validation receipt: inspect this document's publishing commit and its exact repository-
-  quality check. Do not infer a pass before completion; no fresh native acceptance is
-  claimed by documentation publication.
-- Next: W0 only, following HANDOVER from freshly verified current main.
-
-### W0 — not started
-
-No actual host proof, queue/resume test, pause-ownership proof, watcher survival test
-or model-activity measurement has been performed by publishing this plan. Replace
-this placeholder with actual evidence; never promote requirements into passed tests.
-
-## Primary sources and verification boundary
-
-These are source references from the audit/plan, not installed-host acceptance.
-W0 must verify current docs and source matching the actual runtime. Repo facts are
-pinned to the inspected integration baseline.
-
-- [R1] [Merged Phase 1E PR](https://github.com/Caldwell-41/Renpy-editor/pull/9).
-- [R2] [Production baseline](https://github.com/Caldwell-41/Renpy-editor/blob/f1be3f0745f76e46113df7d3e84e70e13ee9d9c9/.github/workflows/production-scaffold.yml).
-- [R3] [Quality baseline](https://github.com/Caldwell-41/Renpy-editor/blob/f1be3f0745f76e46113df7d3e84e70e13ee9d9c9/.github/workflows/quality.yml).
-- [C1] [Pinned CLI arguments](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/cli/src/queue_cmd.rs).
-- [C2] [Pinned queue command/client IDs](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/tui/src/session_queue_commands.rs).
-- [C3] [Pinned queue service](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/queue/src/service.rs).
-- [C4] [Pinned queue RPC processor](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/app-server/src/request_processors/thread_queue_processor.rs).
-- [C5] [Pinned goal tool](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/goal/src/tool.rs).
-- [C6] [Pinned goal service](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/goal/src/api.rs).
+- [R1] [Merged Phase 1E](https://github.com/Caldwell-41/Renpy-editor/pull/9).
+- [R2] [Original production workflow](https://github.com/Caldwell-41/Renpy-editor/blob/f1be3f0745f76e46113df7d3e84e70e13ee9d9c9/.github/workflows/production-scaffold.yml).
+- [R3] [Original quality workflow](https://github.com/Caldwell-41/Renpy-editor/blob/f1be3f0745f76e46113df7d3e84e70e13ee9d9c9/.github/workflows/quality.yml).
+- [C1] [Queue arguments](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/cli/src/queue_cmd.rs).
+- [C2] [Queue/client IDs](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/tui/src/session_queue_commands.rs).
+- [C3] [Queue service](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/queue/src/service.rs).
+- [C4] [Queue RPC processor](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/app-server/src/request_processors/thread_queue_processor.rs).
+- [C5] [Goal tool](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/goal/src/tool.rs).
+- [C6] [Goal service](https://github.com/openai/codex/blob/rust-v0.155.1/codex-rs/ext/goal/src/api.rs).
 - [D1] [Official app-server documentation](https://learn.chatgpt.com/docs/app-server).
 - [D2] [Official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 - [G1] [Workflow-run API](https://docs.github.com/en/rest/actions/workflow-runs).
-- [G2] [GitHub CLI run inspection](https://cli.github.com/manual/gh_run_view).
+- [G2] [Structured GitHub run inspection](https://cli.github.com/manual/gh_run_view).

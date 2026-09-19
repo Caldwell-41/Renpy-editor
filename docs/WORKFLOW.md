@@ -12,133 +12,125 @@ instructions take precedence and must be recorded before conflicting work contin
 | --- | --- |
 | [AGENTS.md](../AGENTS.md) | Stable operating rules and entry points. |
 | [CURRENT.md](status/CURRENT.md) | Current project state, accepted baseline and active workstreams. |
-| [HANDOVER.md](status/HANDOVER.md) | One live continuation record: branch, checkpoint, evidence and next action. |
-| `docs/tasks/active/` | Detailed scope, implementation plan, checkpoint gates and execution ledger. |
+| [HANDOVER.md](status/HANDOVER.md) | One live continuation record: branch, selected delivery, evidence and next action. |
+| `docs/tasks/active/` | Detailed scope, implementation plan, gates and execution ledger; parent roadmaps link to child briefs rather than duplicate them. |
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
 
-Prompts select a task/checkpoint and point to the repo. They must not be the only
-location of requirements, test commands, unresolved risks or continuation state.
-Avoid independent copies of a plan in attachments, PR comments and several Markdown
-files. PRs link to the canonical plan; comments may record publication/CI receipts.
+Prompts select a delivery and point to the repo. They must not be the only location of
+requirements, tests, risks or continuation. PRs link to the canonical plan, not another
+copy. Private client configuration/evidence is the exception: keep it local and publish
+only allowlisted outcomes under [LOCAL_CODEX_CONFIG](LOCAL_CODEX_CONFIG.md).
 
 ## Start of each checkpoint chat
 
-Read AGENTS, CURRENT and HANDOVER from the indicated working branch, then the active
-plan sections relevant to this checkpoint. Inspect remote refs, open PRs, recent
-commits and the local worktree. Verify that the recorded candidate is present and
-that no other chat is already writing this checkpoint. Preserve unrelated edits.
+Read AGENTS, CURRENT and HANDOVER from the indicated branch, then the active brief.
+Inspect refs, open PRs, recent commits, worktree and nested instructions. Verify the
+recorded candidate and absence of competing writers; preserve unrelated edits.
 
-An existing working branch is authoritative for unfinished checkpoint work. Main is
-the integration baseline, not permission to ignore unmerged progress. If main moved,
-review its delta and reconcile safely without resetting or force-pushing. If HANDOVER
-says no implementation branch exists, create its named branch from freshly verified
-main only after checking that the branch or corresponding PR has not appeared meanwhile.
+The existing branch is authoritative for unfinished work. Main is the integration
+baseline, not permission to ignore progress. Reconcile any main delta without reset or
+force-push. Create a recorded new branch only if corresponding branch/PR work has not
+appeared. Record current scope/branch early and publish sufficient state before waits.
 
-Record the branch/PR and checkpoint-in-progress in the repository early. Before an
-external wait or interruption, publish sufficient state to resume without asking the
-user to reconstruct the previous chat.
+Review known bootstrap/privacy limitations before sensitive local writes. Each actual
+client initialises its own verified local configuration when protections are ready;
+never use a remote review sandbox or another client's profile as a substitute.
 
-## One checkpoint, one chat
+## Default checkpoint boundary and explicit combined deliveries
 
-The chat performs the selected approved checkpoint, self-reviews its diff, runs the
-specified gates, fixes scope-bounded findings, and troubleshoots that checkpoint with
-the user. It must not continue into a later checkpoint automatically, even if tests
-pass early or the later checkpoint looks easy.
+Default: one selected checkpoint per chat, including its implementation, self-review,
+validation and bounded troubleshooting. Do not advance simply because tests pass early.
 
-Checkpoint states are `not_started`, `in_progress`, `awaiting_ci`, `blocked`,
-`review_ready`, and `accepted`. Record implementation/test outcome separately from
-user acceptance. Missing host access or tests means blocked/partial, not passing by
-substitution. A feasibility investigation can finish with a no-go report without
-satisfying its capability gate.
+Exception: the user may explicitly group named checkpoints in one chat. Record the
+exact grouping, order, internal gates and stop boundary in the active brief and live
+handover. Execute the approved sequence without another approval pause between passing
+internal gates, retain separate evidence, and stop after that group. The exception
+never waives a technical prerequisite or authorises unrelated work. CURRENT/HANDOVER
+identify the active grouping; this stable policy does not duplicate its changing status.
 
-Before starting, record which user instruction authorises the checkpoint. Approval
-of a plan is not approval to install services, change security settings, incur unrelated
-usage, merge application work or expand scope. A next-chat prompt cannot manufacture
-approval: it selects the bounded checkpoint the user elects to start.
+States are `not_started`, `in_progress`, `awaiting_ci`, `blocked`, `review_ready` and
+`accepted`. Separate implementation/test outcome from user acceptance. Missing host
+proof is blocked/partial, not a pass by substitution. A feasibility investigation can
+finish no-go without satisfying a capability gate. All-green independent CI tests do
+not repair a failed prerequisite for a later runtime milestone.
 
-## Required handover before ending the chat
+Record the instruction authorising the work. Approval of a plan does not automatically
+approve services, security changes, unrelated usage, merges or expanded runtime control.
+A next-chat prompt selects scope; printing it does not manufacture approval or evidence.
 
-Update the existing HANDOVER.md and the active plan's ledger. Keep HANDOVER focused;
-put lengthy diagnosis and durable lessons in the ledger/canonical docs and link them.
+## Required handover before ending
+
+Update the existing HANDOVER and the selected brief's ledger. Keep lengthy detail in
+that brief/canonical docs and link it, not a transcript or duplicate snapshot.
 
 | Field | Required content |
 | --- | --- |
-| Task/checkpoint and state | Exact identifier, approved scope, implemented versus accepted status. |
-| Continuation location | Repository, branch, PR if any, latest verified baseline/candidate. |
-| Completed work | Relevant commits/files, decisions and regressions; no transcript dump. |
-| Validation | Exact commands, environment and outcomes; run ID, attempt, SHA, jobs/evidence where applicable. |
-| Remaining work | Blockers, failed/skipped/unavailable gates, outstanding operations and safe recovery action. |
-| Lessons | Canonical document/test paths containing lasting learning. |
-| Next action | One bounded checkpoint or recovery step and whether approval is still required. |
-| Publication | What is committed/pushed; any local-only work and why it could not be published. |
+| Delivery and state | Selected checkpoint/group, internal gate results, approved scope, implemented versus accepted. |
+| Location | Repo, branch, PR and verified baseline/candidate. |
+| Completed work | Relevant commits/files, decisions and regressions. |
+| Validation | Commands and actual outcomes; generic host categories; run/attempt/jobs and actual tested SHA, including PR merge SHA where different. |
+| Remaining work | Failed/skipped/unavailable gates, pending operation and exact safe recovery action. |
+| Lessons | Canonical test/document references. |
+| Next action | One bounded checkpoint, entry review or recovery step; approval and unmet prerequisites explicit. |
+| Publication | Committed/pushed content and any local-only/unpublished work. No identifying client fields. |
 
-Record the implementation candidate SHA, not an impossible self-referential SHA of
-the handover commit still being written. A docs-only follow-up commit may name a
-preceding candidate. Resolve and report actual published head after committing.
-Do not make another commit solely to chase a document's own hash.
+Record the known implementation candidate, not a self-referential handover hash. A docs
+follow-up may name the preceding candidate. Verify actual published head/checks outside
+the file; do not chase every receipt with another commit. Do not mislabel a PR merge
+checkout as direct branch-head execution.
 
-Commit coherent changes, push to the recorded authorised branch, and verify remote
-content before saying the handover is available. If publishing fails, report the
-failure and local-only state; do not give a prompt implying a nonexistent remote
-checkpoint. Keep final chat summaries short but honest about limits.
+Commit coherent scope, push to the authorised branch and verify publication before
+saying the handover exists. On failed publication, report local-only state honestly.
+A failure/interruption still needs a handover; write it before ending rather than only
+when all tests pass. Keep the final summary short without omitting material limitations.
 
 ## Lightweight next-chat prompt
 
-Use a short selector, normally under 100 words:
+Normally under 100 words, naming repo, branch/PR, selected checkpoint and handover:
 
 ```text
-/goal — <checkpoint> only
+/goal — <selected delivery> only
 Repository: Caldwell-41/Renpy-editor
-Continue branch <recorded branch>. Read AGENTS.md and docs/status/HANDOVER.md,
-then the linked active plan. Complete only <checkpoint>, verify it, publish the
-checkpoint ledger and handover, and stop. Give me the short next-chat prompt.
+Continue the branch in docs/status/HANDOVER.md. Read AGENTS.md and that handover,
+then the linked active brief. Complete only the selected approved scope, self-review,
+validate, publish the ledger and handover, and stop. Give the short next-chat prompt.
 ```
 
-For a blocked checkpoint, select the documented recovery step, not a later milestone.
-For an approval gate, state the pending decision. Do not embed the implementation
-specification or imply that merely printing a prompt has approved its execution.
+Check next-checkpoint prerequisites independently. If the completed delivery passes but
+the requested next milestone still lacks a required capability, provide its clearly
+labelled entry-review-only selector, not a misleading implementation prompt. If current
+work is incomplete, select its recovery instead. Do not repeatedly reopen unchanged
+blocked discovery or include detailed implementation instructions in chat.
 
 ## Waiting without model polling
 
-Record operation identity and continuation state before a long wait. Use an ordinary
-observer and an actually qualified continuation mechanism. Distinguish a queued
-message from a started turn and a claimed event. Never reset a goal or start a second
-executor merely because the external operation has not finished.
+Record operation identity before waiting. Use an ordinary observer and actually
+qualified continuation mechanism; distinguish queued, started and claimed. No second
+executor or goal reset just because external work has not finished.
 
-Until automatic waiting is implemented/qualified, use a published manual-resume
-handover and end the working turn. No repeated status-check turns, keep-alive prompts,
-or extra model used as a watcher. Ordinary API polling by a script is permitted.
-A user-requested status check is not an autonomous polling loop.
+Until automatic support is qualified, publish a manual-resume handover and finish the
+working turn or use an already-supported ordinary wait within its lifetime. No repeated
+model status checks/keep-alives or a model watcher. Ordinary bounded API checks in code
+are permitted. A user-requested status check is not an autonomous polling loop.
 
 ## Integration and branch cleanup
 
-At the plan's authorised integration checkpoint, review the exact candidate and
-required evidence, merge useful completed work into main through current repository
-policy, and verify the resulting tree/status. Never bypass required checks; evidence
-reuse requires the implemented policy and truthful equivalence reporting.
+At authorised closure, review exact scope/evidence, merge through repository policy,
+and verify main. Do not bypass checks; evidence reuse requires the implemented policy
+and truthful equivalence reporting. Inventory branches/PRs and active consumers. Delete
+only integrated/redundant inactive work after ancestry or reviewed patch equivalence.
+Names/timestamps are not proof; do not merge redundant branches just to remove them.
 
-Inventory branches and open PRs before cleanup. Delete a branch only after proving
-its work is integrated or safely redundant and no active task depends on it. Use
-ancestry where applicable; for squash/cherry-pick histories, review content/patch
-equivalence and PR merge evidence. Names and timestamps are not proof. Do not merge
-redundant old branches just to enable deletion.
-
-Keep branches with unique/unreviewed changes and open dependency/application work;
-record why they remain. Do not delete main, protected refs, archive tags or local
-uncommitted work. Report retained exceptions rather than forcing an empty branch list.
-The user's cleanup instruction authorises safe retirement after implementation,
-not premature deletion during feasibility/planning.
+Preserve unique/unreviewed work, open PRs, main/protected refs, archive tags and local
+edits. Report retained exceptions instead of forcing an empty list. Final-cleanup
+approval is not permission for premature deletion during implementation.
 
 ## Documentation cleanup
 
-Consolidate architecture decisions, operational recovery instructions and regression
-lessons before archiving a completed task. Preserve unique acceptance/failure evidence
-and unresolved issues. Archive the completed task/ledger with a final status and update
-INDEX/CURRENT/HANDOVER links. Pure duplicate handovers can be removed once useful
-content is preserved; Git history retains earlier live HANDOVER revisions.
-
-Do not generate a snapshot for every chat. Existing historical snapshots may remain
-until a link/evidence audit proves they can be consolidated. Never remove runtime
-journals or unacknowledged events as documentation cleanup. Finish by checking links,
-privacy/secrets, whitespace, changed-path scope and actual remote publication.
+Consolidate decisions, recovery instructions and lessons before archiving finished
+briefs. Keep unique acceptance/failure evidence and unresolved issues. Update live
+routers/links. Remove pure duplicates only once useful content is preserved; Git history
+already holds old handovers. No snapshot for each chat. Private pending journals/events
+are never documentation clutter. Finish with link/privacy/whitespace/scope checks and
+verified publication.

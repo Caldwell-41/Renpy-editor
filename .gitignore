@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+.codex-local/
 *.pem
 *.key
 *.p12

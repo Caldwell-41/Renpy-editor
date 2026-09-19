@@ -2,53 +2,60 @@
 
 **Updated:** 2026-09-19.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
-**Current maintenance task:** [CI optimisation plan](../tasks/active/ci-optimisation.md).
-**Next approved checkpoint:** W0 actual-host wait/wake feasibility, not started.
-**Exact continuation routing:** [HANDOVER.md](HANDOVER.md).
+**Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
+**Current approved delivery:** [OPT-1A second corrective pass](../tasks/active/ci-opt-1a-second-corrective-pass.md).
+Correction, final bounded hardening, focused review and exact quality acceptance are
+complete at implementation candidate `a9631343bb9ab4099ed36750a29eb757a7960ed2`.
+PR #12 is ready for final independent review; it is not merged or otherwise integrated
+by this delivery.
+**W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
+**Continuation:** [HANDOVER](HANDOVER.md).
 
-## Application state
+## Preserved application state
 
-Phase 0 and corrected Phase 1A-1D are integrated. Phase 1E Scene authoring PR #9
-merged on 2026-09-17 as `f1be3f0`; do not replay its commits or try to merge it again.
-The earlier CURRENT/HANDOVER statements that PR #9 awaited integration were stale.
-The [Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) records
-accepted candidate `a32a790499900d3f3231b3e212a77fab70564e01` and production run
-`35023049519`, with Windows x64/macOS ARM64 evidence and retained failed attempts.
+Phase 0 and corrected Phase 1A-1D are integrated. Phase 1E PR #9 is merged; do not replay
+it or PRs #7/#8. The [Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md)
+retains candidate `a32a790499900d3f3231b3e212a77fab70564e01`, run `35023049519`, both target
+results and earlier failures. Preserve transactions/recovery, lifecycle/single-instance,
+N1 SDK handoff, supporting authoring and Scene/source/media boundaries.
 
-Preserve corrected transactions/recovery, lifecycle/single-instance behavior, N1 SDK
-handoff, supporting authoring and Scene/source/media boundaries. PRs #7 and #8 are
-merged and must not be replayed. Durable evidence remains in the archived
-[integrated correction](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md),
-[UI-operation correction](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
-and [branch reconciliation](../audits/2026-09-15-branch-reconciliation.md).
+The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [roadmap](../ROADMAP.md)
+remain the application sequence. This maintenance approval adds no Phase 1F or other
+application feature. Preserve unrelated active work and do not merge/retire branches now.
 
-The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and
-[product roadmap](../ROADMAP.md) remain the product sequence. This maintenance plan
-does not authorise or implement Phase 1F/later application work. Preserve any separately
-approved concurrent work after inspecting actual branches/PRs.
+## Current delivery and remaining gates
 
-## Maintenance approval and capability
+Read the [second corrective brief](../tasks/active/ci-opt-1a-second-corrective-pass.md)
+and the [original combined implementation brief](../tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+The corrective pass moves private state to protected per-user application data, fixes
+candidate identity/reconciliation/collector/publication defects, and performs a fresh
+integrated review. It does not authorise W1.
 
-The user approved W0 feasibility first, one checkpoint per chat, detailed plans and
-handovers in Git, and safe branch/documentation cleanup after implementation. The
-[maintenance plan](../tasks/active/ci-optimisation.md) owns sequence and approval gates.
+The earlier production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
+and run `35414571185` remain historical evidence for the packaged application baseline.
+They do not prove the corrected workflow identity, external-state architecture or
+affirmative collector. The corrective ledger records the new exact candidate, automatic
+quality runs and accepted candidate-bound production matrix; the historical run is not
+reused for the corrected workflow.
 
-No CI helper, supervisor, automatic queue/resume bridge or evidence-reuse policy is
-implemented by this documentation publication. The actual owning Codex runtime and
-pause-ownership safety remain unqualified. Stop model-driven polling; use an explicit
-manual-resume handover until verified automatic waiting exists on the actual host.
+The final hardening candidate fixes four review findings without changing the production
+workflow or application/package inputs: stored run IDs require validated attempts before
+attachment; unresolved blocked operations remain collision barriers across option
+changes; `ci.py operations` provides local-only recovery selection; and SQLite companion
+plus POSIX ownership checks occur before open. Automatic quality runs `35435261321`
+(push) and `35435263405` (PR), attempt 1, passed at the exact candidate on repository,
+Windows x64 and macOS ARM64 jobs. The accepted production run `35431721525` remains the
+app/workflow evidence; no redundant production matrix was dispatched for this helper-
+and-local-storage-only change.
 
-Only documentation changes are published from the inspected main baseline. Inspect
-the publishing commit and its repository-quality check for validation; no fresh native
-application acceptance is claimed merely because docs changed.
+The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
+external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.
+Loaded/unloaded wake-up and zero-autonomous-inference proof remain unperformed.
+Passing P/OPT-1A does not satisfy W0. The next W1 prompt must therefore check entry
+gates; it is readiness-only if W0 remains unqualified. No automatic wake-up or goal
+manipulation is authorised by this delivery.
 
-## Documentation ownership
-
-[AGENTS](../../AGENTS.md) contains stable rules; [WORKFLOW](../WORKFLOW.md) defines
-repository-first checkpoint delivery. CURRENT is the state summary; HANDOVER is the
-single live continuation record. Detailed implementation and checkpoint evidence live
-in the active task, not chat prompts. Historical snapshots are evidence only.
-
-Do not delete legacy branches now. At authorised closure, prove integration/redundancy,
-retain unique work/open PRs/archive tags, and consolidate redundant handovers without
-losing lessons or failed-run evidence.
+Detailed later dependencies and cleanup are in the
+[parent optimisation roadmap](../tasks/active/ci-optimisation.md).
+W0 remains unchanged: no automatic Codex wake-up, goal restoration or W1 implementation
+is provided by these independent privacy/CI changes.
