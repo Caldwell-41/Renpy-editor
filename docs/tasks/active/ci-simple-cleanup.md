@@ -2,9 +2,12 @@
 
 **Selected:** 2026-09-20, following the user's explicit abandonment of OPT-1A and W0.
 **Checkpoint:** CI-SIMPLE.
-**State:** Approved scope; implementation not started by this documentation change.
+**State:** `awaiting_ci`; implementation candidate published and the single required
+production matrix is in progress.
 **Baseline:** Freshly verified integrated `main`, not `maintenance/ci-optimisation`.
 **Implementation branch:** `maintenance/ci-simple-cleanup`; check for existing matching work before creating it.
+**Implementation candidate:** `7693d58193b4cccd76c423f377dbefe9158c06ee`.
+**Pull request:** [#13](https://github.com/Caldwell-41/Renpy-editor/pull/13).
 **Continuation:** [HANDOVER](../../status/HANDOVER.md).
 
 ## Objective and boundary
@@ -76,3 +79,52 @@ Consult current official references only as needed; this is not a new research c
 ## Execution ledger
 
 2026-09-20: Scope and stopping rules published only. No implementation, workflow changes, new native acceptance or savings measurement is claimed.
+
+2026-09-20: CI-SIMPLE implementation candidate `7693d58193b4cccd76c423f377dbefe9158c06ee`
+was created from freshly fetched main `5b16950900bb87d2c89de7abbae3295b4dc310c3`
+after confirming there was no matching branch or PR. The dirty
+`maintenance/ci-optimisation` checkout and PR #12 were left untouched; work used a
+separate checkout on `maintenance/ci-simple-cleanup`.
+
+The candidate preserves workflow/check names and both native targets. Repository
+quality now runs for PRs, main pushes and manual dispatch, avoiding the duplicate
+feature-push run for PR updates. Production now uses one shared Linux preflight before
+native allocation, stable workflow/ref concurrency with `cancel-in-progress: false`,
+and an `upload_packages` boolean defaulting false. Shared validator/frontend/Rust-format
+checks run once instead of inside each native target. The standalone frontend build
+was removed after confirming `app/src-tauri/tauri.conf.json` runs `npm run build` via
+`beforeBuildCommand`; Tauri packaging, package smoke/security and both native gates
+remain mandatory. Large packages upload only on a successful manual run with the
+input enabled; lightweight evidence and npm/Rust/SDK caches remain.
+
+| Scenario | Repository quality | Production | Full package upload |
+| --- | --- | --- | --- |
+| Pull-request update | Runs | Does not run | No |
+| Main production-input change (`app/**`, workflow or validator) | Runs | Preflight, then both native targets | No |
+| Main documentation-only change | Runs | Does not run | No |
+| Manual production, uploads off/default | Separate quality dispatch only if requested | Preflight, then both native targets | No |
+| Manual production, uploads on | Separate quality dispatch only if requested | Preflight, then both native targets | After all gates succeed |
+
+Local validation used the bundled Python runtime: the repository validator passed 203
+tracked files; a pinned temporary YAML 1.2 parser loaded both workflows and structural
+assertions passed for the table above, native dependencies/gates, stable concurrency
+and upload conditions; `git diff --check` passed. npm and Rust were not available
+locally, so no local frontend or Rust outcome is claimed. The single implementation
+self-review found and fixed one bounded issue: `scripts/validate.py` was added to the
+production path filter because the preflight now executes it.
+
+Quality run [35495071833](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35495071833),
+attempt 1, passed on the exact candidate; its actual checkout and validator steps
+completed successfully. Production run
+[35495121351](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35495121351),
+attempt 1, was dispatched once on the same SHA with `upload_packages=false`. At the
+handover snapshot, preflight passed every step, both native jobs were in progress,
+macOS core tests had passed, and the macOS SDK download was explicitly skipped after
+a successful cache restore. No duplicate matrix was dispatched.
+
+State is `awaiting_ci`. Resume manually after run 35495121351 completes and inspect
+actual test counts, failures/skips, package/build-hook behavior, smoke/security and
+artifact outcomes. Do not run a production matrix for the following documentation-only
+receipt. A pass advances only to `review_ready` for independent review; do not merge
+or delete branches. These are expected structural savings, not measured runner-minute
+or token percentages.
