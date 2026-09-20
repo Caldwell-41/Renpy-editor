@@ -3,25 +3,25 @@
 **Prepared:** 2026-09-20.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Completed implementation:** [CI-SIMPLE acceptance/integration](../tasks/archive/2026-09-20-ci-simple-cleanup.md), merged PR #13.
-**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md).
-**Baseline:** Fresh remote main containing merge `998b5f4684c5c287920bfda67d12e818e3bd0371` and this documentation closeout.
+**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md); its seven source-editing behaviours and mandatory regression matrix are now fixed by user approval.
+**Baseline:** Fresh remote main containing merge `998b5f4684c5c287920bfda67d12e818e3bd0371` and the documentation closeout/amendment.
 **Planned application branch:** `feature/phase-1f-source-synchronisation`; inspect current refs/PRs before creating or reusing it.
 
-## Finish only the recorded closeout checks
+## Completed CI verification and remaining housekeeping
 
-PR #13 was merged with expected reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. GitHub returned merge `998b5f46`; its tree matches the reviewed head exactly. The accepted candidate matrix is `35496193908`, attempt 1. The normal post-merge quality run `35497664235`, attempt 1, passed. Normal production run `35497664212`, attempt 1, was in progress at this snapshot: inspect the final exact job/step outcomes and relevant test summaries, or the subsequent PR #13 closeout receipt, without redispatching. If a significant failure exists, address only that demonstrated blocker before 1F. If pending, publish/retain a manual continuation and stop active polling.
+PR #13 was merged with expected reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. GitHub returned merge `998b5f46`; its tree matches the reviewed head exactly. The accepted candidate matrix is `35496193908`, attempt 1. Normal post-merge quality run `35497664235` and production run `35497664212`, attempt 1, both passed. The [final PR #13 closeout](https://github.com/Caldwell-41/Renpy-editor/pull/13) records the reviewed native logs: Windows core 128 passed / 0 failed / 4 ignored worker entries; macOS core 134 passed / 0 failed / 4 ignored worker entries; both dedicated SDK gates, packaging, packaged smoke/security and inventory passed. This supersedes the earlier in-progress snapshot. Documentation closeout `80bd3b3d` passed quality run `35497935210`, attempt 1, with 205 repository files checked. Do not redispatch those completed checks or rerun production for this documentation-only amendment.
 
-The user also authorised deleting the merged remote `maintenance/ci-simple-cleanup` branch. This session could merge but the connector exposes no branch deletion; lookup confirmed the branch remains. On a client with ordinary Git/GitHub tooling, verify PR #13 is merged and that the current branch tip is an ancestor of current main with no new active dependency; then delete ONLY that remote branch and verify absence. Do not remove local dirty worktrees or unrelated branches. A newer unmerged tip is not authorised for deletion. A suitable GitHub CLI operation after those checks is `gh api --method DELETE repos/Caldwell-41/Renpy-editor/git/refs/heads/maintenance/ci-simple-cleanup`. Record the real outcome; do not claim deletion merely because the PR is closed.
+The user also authorised deleting the merged remote `maintenance/ci-simple-cleanup` branch. The connector used for closeout exposed no branch deletion; the latest inspected branch inventory still contains it. On a client with ordinary Git/GitHub tooling, verify PR #13 is merged and that the current branch tip is an ancestor of current main with no new active dependency; then delete ONLY that remote branch and verify absence. Do not remove local dirty worktrees or unrelated branches. A newer unmerged tip is not authorised for deletion. A suitable GitHub CLI operation after those checks is `gh api --method DELETE repos/Caldwell-41/Renpy-editor/git/refs/heads/maintenance/ci-simple-cleanup`. Record the real outcome or precise limitation; do not claim deletion merely because the PR is closed.
 
-No custom controller, services or expanded optimisation work is needed for those checks. They are not another repair milestone.
+No custom controller, services, permission changes or expanded optimisation work is needed for housekeeping. It is not another repair milestone.
 
 ## Start Phase 1F
 
 Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md), the 1F brief, the 1F section of the [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md), and relevant source/transaction/UI contracts. Read historical ledgers only for needed evidence.
 
-Fetch actual refs and preserve unrelated changes. No 1F branch existed in the inspected branch inventory; search again before starting. Create the named 1F branch from current main only when matching work does not already exist. Do not start from either maintenance branch or reset a dirty checkout; use a separate worktree when needed. Issuing the next 1F goal selects implementation of 1F only after the closeout checks above, not 1G/1H or an open-ended Phase 1 goal.
+Fetch actual refs and preserve unrelated changes. No 1F branch existed in the inspected branch inventory; search again before starting. Create the named 1F branch from current main only when matching work does not already exist. Do not start from either maintenance branch or reset a dirty checkout; use a separate worktree when needed. Issuing the next 1F goal selects implementation of 1F only after the recorded entry checks, not 1G/1H or an open-ended Phase 1 goal.
 
-Define the source-buffer/persistence/partial-visual state policy before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate. Full detailed requirements and test cases live in the brief. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking.
+Implement the fixed behaviours in section 1 of the 1F brief; do not reselect the save-invalid, draft lifetime, conflict, grammar, selection or undo policies. Record the bounded technical approach/state transitions before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate against the mandatory regression matrix. Full detail lives in the brief, not another planning checkpoint. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking. This amendment adds no application code or new native acceptance.
 
 ## Stop and return
 
