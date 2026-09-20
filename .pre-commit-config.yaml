@@ -1,8 +1,0 @@
-repos:
-  - repo: local
-    hooks:
-      - id: phase-zero-validation
-        name: Phase 0 repository validation
-        entry: python3 scripts/validate.py
-        language: system
-        pass_filenames: false

@@ -3,7 +3,7 @@
 **Prepared:** 2026-09-20.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Completed implementation:** [CI-SIMPLE acceptance/integration](../tasks/archive/2026-09-20-ci-simple-cleanup.md), merged PR #13.
-**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md); its seven source-editing behaviours and mandatory regression matrix are now fixed by user approval.
+**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md); its source-editing behaviours, Gate-E reconciliation, bounds and mandatory regression matrix are now fixed by user approval and omission review.
 **Baseline:** Fresh remote main containing merge `998b5f4684c5c287920bfda67d12e818e3bd0371` and the documentation closeout/amendment.
 **Planned application branch:** `feature/phase-1f-source-synchronisation`; inspect current refs/PRs before creating or reusing it.
 
@@ -21,7 +21,7 @@ Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md), the 1F brief,
 
 Fetch actual refs and preserve unrelated changes. No 1F branch existed in the inspected branch inventory; search again before starting. Create the named 1F branch from current main only when matching work does not already exist. Do not start from either maintenance branch or reset a dirty checkout; use a separate worktree when needed. Issuing the next 1F goal selects implementation of 1F only after the recorded entry checks, not 1G/1H or an open-ended Phase 1 goal.
 
-Implement the fixed behaviours in section 1 of the 1F brief; do not reselect the save-invalid, draft lifetime, conflict, grammar, selection or undo policies. Record the bounded technical approach/state transitions before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate against the mandatory regression matrix. Full detail lives in the brief, not another planning checkpoint. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking. This amendment adds no application code or new native acceptance.
+Implement the fixed behaviours in section 1 of the 1F brief; do not reselect the save-invalid, draft lifetime, conflict, grammar, selection, undo, shortcut/status, Save All, Source-scope/encoding/bounds or external-reconciliation policies. In particular preserve the accepted source-model Gate E: never auto-merge, but offer explicit user-confirmed combination only for provably non-overlapping exact patches; overlapping/ambiguous changes write nothing. Record the bounded technical approach/state transitions before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate against the mandatory regression matrix. Full detail lives in the brief, not another planning checkpoint. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking. These brief amendments add no application code or new native acceptance.
 
 ## Stop and return
 

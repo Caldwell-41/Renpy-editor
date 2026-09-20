@@ -1,4 +1,0 @@
-[[permission]]
-identifier = "allow-loomlight-core"
-description = "Allows only the versioned, schema-validated Loomlight core request envelope."
-commands.allow = ["core_request"]

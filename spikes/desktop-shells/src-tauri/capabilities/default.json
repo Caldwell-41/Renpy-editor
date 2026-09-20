@@ -1,7 +1,0 @@
-{
-  "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "main-local-only",
-  "description": "Only the local spike window receives core application capability.",
-  "windows": ["main"],
-  "permissions": ["core:default", "allow-desktop-operations"]
-}
