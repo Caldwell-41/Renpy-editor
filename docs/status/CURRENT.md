@@ -1,13 +1,13 @@
 # Current status
 
-**Updated:** 2026-09-19.
+**Updated:** 2026-09-20.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Maintenance branch / PR:** `maintenance/ci-optimisation`, PR #12.
-**Current approved delivery:** [OPT-1A second corrective pass](../tasks/active/ci-opt-1a-second-corrective-pass.md).
-Correction, final bounded hardening, focused review and exact quality acceptance are
-complete at implementation candidate `a9631343bb9ab4099ed36750a29eb757a7960ed2`.
-PR #12 is ready for final independent review; it is not merged or otherwise integrated
-by this delivery.
+**Current approved delivery:** [OPT-1A Windows validation repair](../tasks/active/ci-opt-1a-second-corrective-pass.md).
+The prior Windows quality acceptance is invalidated. The bounded repair is locally
+complete at implementation candidate `270dc2aa769e4bb69e017288f099d972c6f9961a`;
+native Windows x64 and macOS ARM64 quality evidence is still required before PR #12 can
+return to review-ready state. The PR is not merged or otherwise integrated.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -34,19 +34,26 @@ integrated review. It does not authorise W1.
 The earlier production candidate `83e86aaacaa86993d5851283d4bb48509718b72b`
 and run `35414571185` remain historical evidence for the packaged application baseline.
 They do not prove the corrected workflow identity, external-state architecture or
-affirmative collector. The corrective ledger records the new exact candidate, automatic
-quality runs and accepted candidate-bound production matrix; the historical run is not
-reused for the corrected workflow.
+affirmative collector. The corrective ledger records the exact candidates, the accepted
+candidate-bound production matrix and the now-superseded automatic quality evidence;
+the historical run is not reused for the corrected workflow.
 
-The final hardening candidate fixes four review findings without changing the production
-workflow or application/package inputs: stored run IDs require validated attempts before
+The four final-hardening fixes remain: stored run IDs require validated attempts before
 attachment; unresolved blocked operations remain collision barriers across option
 changes; `ci.py operations` provides local-only recovery selection; and SQLite companion
-plus POSIX ownership checks occur before open. Automatic quality runs `35435261321`
-(push) and `35435263405` (PR), attempt 1, passed at the exact candidate on repository,
-Windows x64 and macOS ARM64 jobs. The accepted production run `35431721525` remains the
-app/workflow evidence; no redundant production matrix was dispatched for this helper-
-and-local-storage-only change.
+plus POSIX ownership checks occur before open. Raw logs now prove that the Windows jobs
+behind provider-success quality runs `35431546974`, `35431548846`, `35435261321`,
+`35435263405`, `35436013835` and `35436015412` failed their privacy suites before a
+later successful CI-tooling command hid the exit code. They are retained as failed
+Windows evidence, not acceptance.
+
+The local repair makes native privacy and CI-tooling separate required workflow steps
+and explicitly sets the Windows owner to the validated current SID after installing the
+restrictive DACL. Local synthetic Windows validation discovered 40 privacy tests:
+37 passed, none failed or errored, and 3 skipped for explicit host capabilities. All 47
+CI-tooling tests passed. Native candidate confirmation remains pending. The accepted
+production run `35431721525` remains only the unchanged application/production-workflow
+evidence; this helper/quality repair does not justify a production matrix rerun.
 
 The [W0 report](../research/CODEX_WAIT_WAKE_QUALIFICATION.md) still lacks qualified
 external owning-runtime reconciliation/telemetry and ownership-safe goal restoration.
