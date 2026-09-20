@@ -28,6 +28,8 @@ Read AGENTS, CURRENT and HANDOVER from the indicated working branch, then the ac
 plan sections relevant to this checkpoint. Inspect remote refs, open PRs, recent
 commits and the local worktree. Verify that the recorded candidate is present and
 that no other chat is already writing this checkpoint. Preserve unrelated edits.
+Read relevant code, diffs and directly linked evidence; do not sweep every historical
+ledger unless the selected task requires it.
 
 An existing working branch is authoritative for unfinished checkpoint work. Main is
 the integration baseline, not permission to ignore unmerged progress. If main moved,
@@ -45,6 +47,10 @@ The chat performs the selected approved checkpoint, self-reviews its diff, runs 
 specified gates, fixes scope-bounded findings, and troubleshoots that checkpoint with
 the user. It must not continue into a later checkpoint automatically, even if tests
 pass early or the later checkpoint looks easy.
+
+Run cheap applicable checks before expensive or scarce-runner gates. Push coherent
+checkpoint changes. Report exact test counts, skips and relevant failure excerpts;
+do not paste complete successful logs into handovers or chat.
 
 Checkpoint states are `not_started`, `in_progress`, `awaiting_ci`, `blocked`,
 `review_ready`, and `accepted`. Record implementation/test outcome separately from
@@ -76,7 +82,8 @@ put lengthy diagnosis and durable lessons in the ledger/canonical docs and link 
 Record the implementation candidate SHA, not an impossible self-referential SHA of
 the handover commit still being written. A docs-only follow-up commit may name a
 preceding candidate. Resolve and report actual published head after committing.
-Do not make another commit solely to chase a document's own hash.
+Do not make another commit solely to chase a document's own hash, and do not create
+receipt-only commits whose only purpose is to record their own publication.
 
 Commit coherent changes, push to the recorded authorised branch, and verify remote
 content before saying the handover is available. If publishing fails, report the

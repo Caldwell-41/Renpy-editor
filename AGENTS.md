@@ -81,6 +81,12 @@ git diff --check
 Run checks relevant to the changed scope, cheap checks first. Stack spikes remain
 isolated; do not present a spike as the production application.
 
+Keep agent use bounded: start with the live status, handover, selected task and
+relevant code or diffs. Read historical ledgers only when the active task points to
+them or they contain needed evidence. Push coherent checkpoints and report compact
+test counts, skips and relevant failure excerpts instead of full successful logs.
+Do not create receipt-only commits that chase their own SHA.
+
 ## Waiting and CI cost controls
 
 Do not use repeated model turns to poll externally observable long-running work.
