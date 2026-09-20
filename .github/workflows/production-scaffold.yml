@@ -2,22 +2,57 @@ name: Phase 1 production gates
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_packages:
+        description: Upload packaged applications after all production gates pass
+        required: false
+        type: boolean
+        default: false
   push:
-    branches: [main, corrective/phase-1a-1d-integrated]
+    branches: [main]
     paths:
       - .github/workflows/production-scaffold.yml
       - app/**
+      - scripts/validate.py
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Validate repository structure, links, privacy, and secrets
+        run: python3 scripts/validate.py
+      - name: Select locked Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm toolchain
+        run: npm install --global npm@11.9.0
+      - name: Install locked JavaScript dependencies
+        working-directory: app
+        run: npm ci --ignore-scripts
+      - name: Validate frontend and protocol
+        working-directory: app
+        run: npm run check
+      - name: Check Rust formatting
+        working-directory: app
+        run: cargo fmt --check --all
+
   packaged-boundary:
     name: ${{ matrix.name }}
+    needs: preflight
     strategy:
       fail-fast: false
       matrix:
@@ -58,12 +93,8 @@ jobs:
           cache-bin: "false"
       - name: Install locked JavaScript dependencies
         run: npm ci --ignore-scripts
-      - name: Validate frontend and protocol
-        run: npm run check
-      - name: Build frontend
+      - name: Build frontend for desktop tests
         run: npm run build
-      - name: Check Rust formatting
-        run: cargo fmt --check --all
       - name: Test independent Rust core
         shell: bash
         run: |
@@ -215,7 +246,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Upload packaged application for manual runs
-        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.upload_packages }}
         continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

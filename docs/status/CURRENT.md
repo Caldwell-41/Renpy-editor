@@ -3,7 +3,9 @@
 **Updated:** 2026-09-20.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
 **Current maintenance:** [CI-SIMPLE: simple CI and agent-usage cleanup](../tasks/active/ci-simple-cleanup.md).
-**State:** Scope selected; implementation not started by this documentation publication.
+**State:** `awaiting_ci`; corrected candidate
+`eeef503a40af05c3435297e1384f743a58ee1a3e` is published in PR #13. Quality passed;
+the one replacement native production run remains in progress.
 **Abandoned:** W0 and OPT-1A, including all corrective/Windows/SQLite follow-ups. W1-W3 are not proceeding; OPT-2B is deferred.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
@@ -17,6 +19,9 @@ Preserve transactions/recovery, lifecycle/single-instance, N1 SDK handoff, suppo
 
 The [abandonment decision](../tasks/active/ci-optimisation.md) supersedes the old W0-first roadmap and all instructions to complete OPT-1A or review it for W1 entry. PR #12 / `maintenance/ci-optimisation` remains unmerged historical work, not a dependency to finish or import. No test acceptance is inferred from stopping it.
 
-CI-SIMPLE starts from freshly verified integrated main, using `maintenance/ci-simple-cleanup` after checking for existing matching work. It contains ordinary trigger, cheap-preflight, concurrency, confirmed duplicate-build and optional-upload changes plus compact agent instructions. No custom orchestration, database, watcher, client bootstrap or evidence-reuse framework.
+CI-SIMPLE starts from freshly verified integrated main, using `maintenance/ci-simple-cleanup` after checking for existing matching work. It contains ordinary trigger, cheap-preflight, concurrency and optional-upload changes plus compact agent instructions. Native evidence proved the standalone frontend build remains required before desktop tests. No custom orchestration, database, watcher, client bootstrap or evidence-reuse framework.
 
-This publication changes documentation only. It does not run or accept application/native tests, cancel workflows, merge PRs, remove branches or touch private local state. Implementation and review must report actual evidence separately.
+CI-SIMPLE changes only the existing workflows and concise operating guidance. It has
+not been accepted or merged. Production run `35495121351` exposed and retained a
+real build-order failure. Replacement run `35496193908`, attempt 1, is the only native
+validation for the corrected candidate; do not dispatch a documentation-only rerun.
