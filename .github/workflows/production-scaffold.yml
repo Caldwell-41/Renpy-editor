@@ -93,6 +93,8 @@ jobs:
           cache-bin: "false"
       - name: Install locked JavaScript dependencies
         run: npm ci --ignore-scripts
+      - name: Build frontend for desktop tests
+        run: npm run build
       - name: Test independent Rust core
         shell: bash
         run: |
