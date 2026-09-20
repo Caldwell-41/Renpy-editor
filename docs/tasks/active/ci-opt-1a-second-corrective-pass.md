@@ -393,3 +393,9 @@ Python compilation and exact repository validation passed for 217 public files; 
 lossless/source tests and the 620,000-byte / 40,000-node benchmark passed at 161.92 ms
 median across seven samples; `git diff --check` passed. Native Windows x64 and macOS
 ARM64 quality evidence for the published corrected candidate remains pending.
+
+The repair was published with documentation head
+`d6e311d6d58a83b06a341988062385bbd5f4fc6a`. Automatic Repository quality push run
+`35492538939` and PR run `35492541232`, attempt 1, were in progress at handover. Resume
+by collecting those exact runs and inspecting their native suite logs; do not redispatch
+or infer acceptance from provider status.

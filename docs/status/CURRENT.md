@@ -6,8 +6,10 @@
 **Current approved delivery:** [OPT-1A Windows validation repair](../tasks/active/ci-opt-1a-second-corrective-pass.md).
 The prior Windows quality acceptance is invalidated. The bounded repair is locally
 complete at implementation candidate `270dc2aa769e4bb69e017288f099d972c6f9961a`;
-native Windows x64 and macOS ARM64 quality evidence is still required before PR #12 can
-return to review-ready state. The PR is not merged or otherwise integrated.
+published candidate head `d6e311d6d58a83b06a341988062385bbd5f4fc6a` is awaiting
+native Windows x64 and macOS ARM64 evidence in push run `35492538939` and PR run
+`35492541232`, attempt 1. PR #12 cannot return to review-ready state until the actual
+suite logs pass. The PR is not merged or otherwise integrated.
 **W0 result:** Investigation complete; automatic wait/wake remains no-go/unqualified for the examined path.
 **Continuation:** [HANDOVER](HANDOVER.md).
 

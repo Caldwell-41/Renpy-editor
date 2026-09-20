@@ -4,9 +4,11 @@
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Branch / PR:** `maintenance/ci-optimisation`, [PR #12](https://github.com/Caldwell-41/Renpy-editor/pull/12).
 **Delivery:** [OPT-1A Windows validation repair](../tasks/active/ci-opt-1a-second-corrective-pass.md).
-**State:** local repair complete; awaiting native quality publication and exact-log
-acceptance; not review-ready and not merged.
+**State:** `awaiting_ci`; published repair awaits exact-log native acceptance; not
+review-ready and not merged.
 **Implementation candidate:** `270dc2aa769e4bb69e017288f099d972c6f9961a`.
+**Published candidate head:** `d6e311d6d58a83b06a341988062385bbd5f4fc6a`.
+**Pending quality:** push run `35492538939` and PR run `35492541232`, attempt 1.
 **W1 prerequisite:** W0 automatic support remains unqualified/no-go and is not waived.
 
 ## Superseded acceptance
@@ -63,11 +65,12 @@ is justified.
 
 ## Pending publication and next action
 
-Publish the coherent branch once, capture the automatic Repository quality push and PR
-run identities for the published candidate, and record them here as `awaiting_ci` if
-still pending. Do not actively poll or redispatch. On resumption, collect those same
-runs and inspect actual Windows x64 and macOS ARM64 suite summaries plus the Windows
-generic owner-probe line. Completion requires both native jobs to show genuine privacy
-and CI-tooling passes with separate discovered/passed/failed/errored/skipped counts.
-Then correct PR #12's description and return the delivery to review-ready only if the
-evidence passes. Do not run the production matrix or merge.
+The coherent repair is published at the candidate head above. Automatic Repository
+quality push run `35492538939` and PR run `35492541232`, attempt 1, were in progress
+when this handover was written. Do not actively poll or redispatch. On resumption,
+collect those same runs and inspect actual Windows x64 and macOS ARM64 suite summaries
+plus the Windows generic owner-probe line. Completion requires both native jobs to show
+genuine privacy and CI-tooling passes with separate discovered/passed/failed/errored/
+skipped counts. Then update the corrective ledger, CURRENT, this handover and PR #12's
+description, returning the delivery to review-ready only if the evidence passes. Do not
+run the production matrix or merge.
