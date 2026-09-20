@@ -1,54 +1,22 @@
 # Current status
 
-**Updated:** 2026-09-19.
+**Updated:** 2026-09-20.
 **Integrated application baseline:** Phase 1E merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
-**Current maintenance task:** [CI optimisation plan](../tasks/active/ci-optimisation.md).
-**Next approved checkpoint:** W0 actual-host wait/wake feasibility, not started.
-**Exact continuation routing:** [HANDOVER.md](HANDOVER.md).
+**Current maintenance:** [CI-SIMPLE: simple CI and agent-usage cleanup](../tasks/active/ci-simple-cleanup.md).
+**State:** Scope selected; implementation not started by this documentation publication.
+**Abandoned:** W0 and OPT-1A, including all corrective/Windows/SQLite follow-ups. W1-W3 are not proceeding; OPT-2B is deferred.
+**Continuation:** [HANDOVER](HANDOVER.md).
 
-## Application state
+## Preserved application state
 
-Phase 0 and corrected Phase 1A-1D are integrated. Phase 1E Scene authoring PR #9
-merged on 2026-09-17 as `f1be3f0`; do not replay its commits or try to merge it again.
-The earlier CURRENT/HANDOVER statements that PR #9 awaited integration were stale.
-The [Phase 1E ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) records
-accepted candidate `a32a790499900d3f3231b3e212a77fab70564e01` and production run
-`35023049519`, with Windows x64/macOS ARM64 evidence and retained failed attempts.
+Phase 0 and corrected Phase 1A-1D are integrated. Phase 1E Scene authoring PR #9 is merged; do not replay it or PRs #7/#8. The [Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) retains candidate `a32a790499900d3f3231b3e212a77fab70564e01`, production run `35023049519`, both target results and earlier failures.
 
-Preserve corrected transactions/recovery, lifecycle/single-instance behavior, N1 SDK
-handoff, supporting authoring and Scene/source/media boundaries. PRs #7 and #8 are
-merged and must not be replayed. Durable evidence remains in the archived
-[integrated correction](../tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md),
-[UI-operation correction](../tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md)
-and [branch reconciliation](../audits/2026-09-15-branch-reconciliation.md).
+Preserve transactions/recovery, lifecycle/single-instance, N1 SDK handoff, supporting authoring and Scene/source/media boundaries. The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and [product roadmap](../ROADMAP.md) remain the application sequence. This cleanup does not authorise Phase 1F or other application features. Preserve separately approved work after inspecting actual refs and PRs.
 
-The [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) and
-[product roadmap](../ROADMAP.md) remain the product sequence. This maintenance plan
-does not authorise or implement Phase 1F/later application work. Preserve any separately
-approved concurrent work after inspecting actual branches/PRs.
+## Maintenance reset
 
-## Maintenance approval and capability
+The [abandonment decision](../tasks/active/ci-optimisation.md) supersedes the old W0-first roadmap and all instructions to complete OPT-1A or review it for W1 entry. PR #12 / `maintenance/ci-optimisation` remains unmerged historical work, not a dependency to finish or import. No test acceptance is inferred from stopping it.
 
-The user approved W0 feasibility first, one checkpoint per chat, detailed plans and
-handovers in Git, and safe branch/documentation cleanup after implementation. The
-[maintenance plan](../tasks/active/ci-optimisation.md) owns sequence and approval gates.
+CI-SIMPLE starts from freshly verified integrated main, using `maintenance/ci-simple-cleanup` after checking for existing matching work. It contains ordinary trigger, cheap-preflight, concurrency, confirmed duplicate-build and optional-upload changes plus compact agent instructions. No custom orchestration, database, watcher, client bootstrap or evidence-reuse framework.
 
-No CI helper, supervisor, automatic queue/resume bridge or evidence-reuse policy is
-implemented by this documentation publication. The actual owning Codex runtime and
-pause-ownership safety remain unqualified. Stop model-driven polling; use an explicit
-manual-resume handover until verified automatic waiting exists on the actual host.
-
-Only documentation changes are published from the inspected main baseline. Inspect
-the publishing commit and its repository-quality check for validation; no fresh native
-application acceptance is claimed merely because docs changed.
-
-## Documentation ownership
-
-[AGENTS](../../AGENTS.md) contains stable rules; [WORKFLOW](../WORKFLOW.md) defines
-repository-first checkpoint delivery. CURRENT is the state summary; HANDOVER is the
-single live continuation record. Detailed implementation and checkpoint evidence live
-in the active task, not chat prompts. Historical snapshots are evidence only.
-
-Do not delete legacy branches now. At authorised closure, prove integration/redundancy,
-retain unique work/open PRs/archive tags, and consolidate redundant handovers without
-losing lessons or failed-run evidence.
+This publication changes documentation only. It does not run or accept application/native tests, cancel workflows, merge PRs, remove branches or touch private local state. Implementation and review must report actual evidence separately.

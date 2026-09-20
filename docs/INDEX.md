@@ -8,8 +8,9 @@ here; chat prompts select one checkpoint rather than repeat the implementation p
 
 Phase 1E PR #9 is merged, as are corrected Phase 1A-1D and PR #8's UI follow-up.
 Archived ledgers retain exact evidence. Current maintenance is
-[CI optimisation / wait-wake](tasks/active/ci-optimisation.md), with W0 feasibility
-approved first. CURRENT/HANDOVER own live state; this index is not another status ledger.
+[simple CI and agent-usage cleanup](tasks/active/ci-simple-cleanup.md).
+[W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
+programme is not the next task. CURRENT/HANDOVER own live state.
 
 Read the [Phase 1 plan](tasks/active/phase-1-vertical-slice.md) for product prerequisites
 and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
@@ -18,7 +19,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Concern | Canonical document |
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
-| CI optimisation roadmap, W0 brief and wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
+| Simple CI cleanup: triggers, preflight, concurrency, builds/uploads and usage | [tasks/active/ci-simple-cleanup.md](tasks/active/ci-simple-cleanup.md) |
+| Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
@@ -60,8 +62,9 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Decision records | [`adr/`](adr/) |
 
 Archive completed task briefs after their acceptance/integration requirements are
-resolved. Preserve unique failure evidence and lessons, consolidate redundant handovers
-and repair links. No new handover snapshot is required for every chat. The completed
-[Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
+resolved. Abandoned tasks must retain an explicit disposition and historical evidence,
+not a false completion claim. Preserve unique failure evidence and lessons, consolidate
+redundant handovers and repair links. No new handover snapshot is required for every
+chat. The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
 and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md)
 remain historical evidence.

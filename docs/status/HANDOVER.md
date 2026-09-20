@@ -1,65 +1,28 @@
 # Current checkpoint handover
 
-**Prepared:** 2026-09-19.
+**Prepared:** 2026-09-20.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Task:** [CI optimisation and durable wait/wake](../tasks/active/ci-optimisation.md).
-**Next checkpoint:** **W0 only — actual-host feasibility**.
-**State:** Approved, not started. This publication is planning, not implementation.
+**Selected checkpoint:** [CI-SIMPLE only](../tasks/active/ci-simple-cleanup.md).
+**State:** Approved scope; implementation not started.
+**Baseline:** Current remote `main`, including this documentation publication.
+**Implementation branch:** `maintenance/ci-simple-cleanup`; create from current main only if no matching branch/PR exists.
 
-## Continue from
+## Start here
 
-Read [AGENTS](../../AGENTS.md), [CURRENT](CURRENT.md),
-[WORKFLOW](../WORKFLOW.md), then the plan's W0 section and relevant source references.
-All detailed requirements and confidence-review gaps are in the linked plan; no old
-chat or attachment is required.
+Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md) and the CI-SIMPLE brief. Inspect actual refs and preserve unrelated work. The inspected main before this publication was `7d634eeaf53fe0244a2739f26914797ca16ef544`; that is historical context, not an instruction to reset or use stale main.
 
-This planning publication starts from main
-`f1be3f0745f76e46113df7d3e84e70e13ee9d9c9` and is published on main. Resolve the
-actual current remote main before starting; that SHA is the inspected application
-baseline, NOT an instruction to reset history. No implementation branch/PR was
-created by this documentation publication.
+Use a new chat and the simple-cleanup branch. Do not reuse or merge `maintenance/ci-optimisation` / PR #12. If the old checkout has uncommitted work, preserve it and use a separate worktree/checkout rather than resetting it.
 
-For W0, first check whether `maintenance/ci-optimisation` or a corresponding task PR
-has appeared. Reuse existing progress if present. Otherwise create that branch from
-freshly verified main, record it here and use one integration PR across subsequent
-checkpoint chats. Do not start from stale corrective or already-merged Phase 1E work.
+## Abandoned work
 
-## Completed and preserved
+The user explicitly abandoned W0 and OPT-1A, including all later corrections and Windows/SQLite acceptance work. W1-W3 are not proceeding and OPT-2B is deferred. The [decision record](../tasks/active/ci-optimisation.md) overrides old branch-local instructions to resume CI acceptance, initialise a private client or investigate runtime control. Existing reports remain historical evidence; no completion or capability pass is claimed.
 
-The repo now holds the plan, four W0-W3 gate definitions, later CI-efficiency
-checkpoints, unresolved runtime/pause/delivery risks and final cleanup procedure.
-AGENTS/WORKFLOW require repo-first planning, one checkpoint per chat, published
-handovers and lightweight prompts. Phase 1E PR #9 is already merged; old live
-integration instructions have been reconciled. Application code/workflows and
-historical task ledgers are unchanged.
+Do not start W0 recovery, fix the old journal, install a watcher, manipulate goals or import PR #12 as a prerequisite. Do not delete its branch or any private state. Updating docs does not stop a running external agent; no such stop is claimed here.
 
-Validation for this planning publication is its exact commit's repository-quality
-check and reviewed documentation-only diff. Read that check's result; it is not
-predeclared passing. No W0 probe, runtime test, watcher/service or production matrix
-was executed here. Do not redispatch an operation merely to validate this handover.
+## Delivery and return point
 
-## W0 work and stopping rule
+Implement only the bounded workflow/documentation cleanup in the brief. Self-review once, run cheap checks first, and obtain the one scope-justified native production validation without duplicate dispatches. Inspect actual results and report skips/unavailable work honestly.
 
-Qualify the ACTUAL task-owning host/thread, not an unrelated Codex installation.
-Establish same-thread loaded/unloaded continuation, usable tools, safe goal-pause
-ownership/restoration, delivery reconciliation, cancellation and telemetry access.
-Use bounded isolated probes only under the plan's safety rules. Do not install a
-production supervisor, change production CI, migrate hosts, bypass approvals/budgets,
-create a competing task or advance into W1/OPT-1A.
+Publish a narrow branch/PR and update the CI-SIMPLE ledger, CURRENT and this handover. Stop at `review_ready` for independent review; do not merge or delete branches. If CI remains pending, record exact run/attempt/SHA and publish `awaiting_ci`, then stop model polling. An actual blocker is also a valid return point. Do not create more optimisation milestones to finish this checkpoint.
 
-No runtime endpoint, installed version, persistence host or pause-ownership mechanism
-has been qualified. If access or safe control is missing, publish partial/no-go
-findings with precise recovery needs and stop. Mocks/manual continuation cannot
-substitute for automatic-support proof.
-
-## Required output before ending W0
-
-Record actual findings in `docs/research/CODEX_WAIT_WAKE_QUALIFICATION.md`, update
-the plan's W0 ledger/resolved choices and replace this handover with exact branch,
-PR, candidate, tests/evidence, blockers and next action. Keep private runtime details
-outside Git. Self-review and troubleshoot W0 with the user; publish before giving
-the next prompt. Do not create a second handover file.
-
-After W0, stop for review. The next chat selects the next approved checkpoint or W0
-recovery; a successful proof is not approval for the entire implementation. Final
-integration, legacy branch retirement and documentation cleanup belong to CLOSE.
+This handover publication is documentation only; no CI-SIMPLE implementation or new native acceptance is recorded.
