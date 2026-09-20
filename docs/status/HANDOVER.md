@@ -53,7 +53,7 @@ parser, privilege/CSP widening, or 1G work was included.
   Windows/macOS CI is the authoritative desktop/package gate.
 - Remote candidate `4fc544559e9f5d7ea8d591f08b95fb58bf2c30ef` has tree
   `50e503c0403afaa01bc95779212a9ce66391555e`, exactly the locally tested tree, and is
-  PR #14's verified head.
+  PR #14's verified implementation head beneath the docs-only handover receipt.
 - Repository quality run `35544769657`, attempt 1, passed at that SHA.
 - Production run `35544944804`, attempt 1, was queued at that exact SHA when this
   handover was published. It owns preflight plus Windows x64/macOS ARM64 core, SDK,
