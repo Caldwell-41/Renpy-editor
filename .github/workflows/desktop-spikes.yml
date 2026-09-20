@@ -1,0 +1,197 @@
+name: Phase 0 desktop-shell evidence
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  platform-spike:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: spikes/desktop-shells
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Record runner and toolchain
+        shell: bash
+        run: |
+          uname -a || true
+          node --version
+          npm --version
+          rustc --version
+          cargo --version
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: ${{ matrix.runner }}
+          workspaces: spikes/desktop-shells/src-tauri -> target
+          cache-bin: "false"
+      - name: Install pinned JavaScript dependencies
+        run: npm ci
+      - name: Test shared contract and filesystem adapter
+        run: npm test
+      - name: Package Electron spike
+        run: npm run package:electron
+      - name: Probe packaged Electron denial boundary
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_SMOKE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+          else
+            ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+          fi
+      - name: Probe packaged Electron shared UI behavior
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          for mode in wide narrow; do
+            if [ "$SPIKE_OS" = "Windows" ]; then
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+            else
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+            fi
+          done
+      - name: Probe packaged Electron branch-graph scale
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_GRAPH_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./artifacts/electron/LoomlightSpike-win32-x64/LoomlightSpike.exe
+          else
+            ./artifacts/electron/LoomlightSpike-darwin-arm64/LoomlightSpike.app/Contents/MacOS/LoomlightSpike
+          fi
+      - name: Test Tauri privileged adapter in release profile
+        run: cargo test --manifest-path src-tauri/Cargo.toml --release --locked
+      - name: Package Tauri spike
+        run: npm run tauri:build
+      - name: Probe packaged Tauri core denial and filesystem boundary
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_SECURITY_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
+      - name: Probe packaged Tauri WebView denial boundary
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_WEBVIEW_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
+      - name: Probe packaged Tauri shared UI behavior
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          for mode in wide narrow; do
+            if [ "$SPIKE_OS" = "Windows" ]; then
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+            else
+              LOOMLIGHT_SPIKE_UI_PROBE="$mode" ./src-tauri/target/release/loomlight-desktop-tauri-spike
+            fi
+          done
+      - name: Probe packaged Tauri branch-graph scale
+        shell: bash
+        env:
+          LOOMLIGHT_SPIKE_GRAPH_PROBE: "1"
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            LOOMLIGHT_SPIKE_GRAPH_PROBE="1" ./src-tauri/target/release/loomlight-desktop-tauri-spike.exe
+          else
+            LOOMLIGHT_SPIKE_GRAPH_PROBE="1" ./src-tauri/target/release/loomlight-desktop-tauri-spike
+          fi
+      - name: Probe packaged native credential storage and plaintext leaks
+        shell: bash
+        env:
+          SPIKE_OS: ${{ runner.os }}
+        run: |
+          export LOOMLIGHT_SPIKE_CREDENTIAL_PROBE="1"
+          export LOOMLIGHT_SPIKE_CREDENTIAL_SECRET="loomlight-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${RANDOM}-${RANDOM}-sentinel"
+          export LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT="probe-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${RANDOM}"
+          node scripts/run-credential-probe.mjs electron
+          node scripts/run-credential-probe.mjs tauri
+          if [ "$SPIKE_OS" = "Windows" ]; then
+            tauri_executable="src-tauri/target/release/loomlight-desktop-tauri-spike.exe"
+          else
+            tauri_executable="src-tauri/target/release/loomlight-desktop-tauri-spike"
+          fi
+          node scripts/scan-credential-leaks.mjs --tracked fixtures/project artifacts/electron src-tauri/target/release/bundle "$tauri_executable"
+          unset LOOMLIGHT_SPIKE_CREDENTIAL_SECRET LOOMLIGHT_SPIKE_CREDENTIAL_ACCOUNT LOOMLIGHT_SPIKE_CREDENTIAL_PROBE
+      - name: Record dependency licence and complexity inventory
+        shell: bash
+        run: |
+          cargo metadata --manifest-path src-tauri/Cargo.toml --locked --format-version 1 > "$RUNNER_TEMP/cargo-metadata.json"
+          node scripts/report-static-comparison.mjs \
+            --cargo-metadata "$RUNNER_TEMP/cargo-metadata.json" \
+            --output "$RUNNER_TEMP/desktop-static-comparison.json"
+      - name: Measure packaged Electron and Tauri candidates
+        shell: bash
+        run: |
+          electron_status=0
+          tauri_status=0
+          node scripts/measure-packaged-candidate.mjs electron --output "$RUNNER_TEMP/desktop-measure-electron.json" || electron_status=$?
+          node scripts/measure-packaged-candidate.mjs tauri --output "$RUNNER_TEMP/desktop-measure-tauri.json" || tauri_status=$?
+          if [ "$electron_status" -ne 0 ] || [ "$tauri_status" -ne 0 ]; then
+            exit 1
+          fi
+      - name: Upload comparative measurement evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-comparison-${{ matrix.runner }}
+          path: |
+            ${{ runner.temp }}/desktop-measure-electron.json
+            ${{ runner.temp }}/desktop-measure-tauri.json
+            ${{ runner.temp }}/desktop-static-comparison.json
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload generated Rust lockfile
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-cargo-lock-${{ matrix.runner }}
+          path: spikes/desktop-shells/src-tauri/Cargo.lock
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload private unsigned evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-shells-${{ matrix.runner }}
+          path: |
+            spikes/desktop-shells/artifacts/electron/**
+            spikes/desktop-shells/src-tauri/target/release/bundle/**
+          if-no-files-found: warn
+          retention-days: 7

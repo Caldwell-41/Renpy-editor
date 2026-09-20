@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "sdk_validation": "renpy-8.5.3-linux-pass",
+  "files": [
+    {
+      "path": "encoded/bom_dialogue.rpy.b64",
+      "sha256": "51040957b5681f2320ce69f706612e40c5eedb2a0bd12d6804389628703242d9",
+      "bytes": 69,
+      "encoding": "ascii-base64",
+      "line_endings": "lf",
+      "disposition": "encoded-byte-fixture"
+    },
+    {
+      "path": "encoded/crlf_dialogue.rpy.b64",
+      "sha256": "2f136d3d169f8170865d92c6a0fa18b0022796db1787f649a95c01369b4eb08a",
+      "bytes": 85,
+      "encoding": "ascii-base64",
+      "line_endings": "lf",
+      "disposition": "encoded-byte-fixture"
+    },
+    {
+      "path": "game/chapters/chapter_01/scene_010.rpy",
+      "sha256": "372934c9aaaaf273d36c40d07eda964643f0516dc3c8d8a265e37f2178f9a641",
+      "bytes": 333,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/chapters/chapter_01/scene_020.rpy",
+      "sha256": "8eee890f26daa68bd69028bfd5b950a3581d6f8d0a9fcae93567bc8af8a77fff",
+      "bytes": 222,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/chapters/chapter_01/scene_030.rpy",
+      "sha256": "5e3aeacdd99eeb369a70a8012d25b14ead2ebd5bbb33d750261ed20ca4289820",
+      "bytes": 464,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/corrective_dialogue.rpy",
+      "sha256": "bd224cf8869022199db8697b7debf39297c704ae1bc52789345d641b7ea501d3",
+      "bytes": 214,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
+      "path": "game/definitions/characters.rpy",
+      "sha256": "90e00d9e0a22ba7e1e98917d172e968059347486f64ac10818f5dcadcbe63e5d",
+      "bytes": 199,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/definitions/images.rpy",
+      "sha256": "40a26b923caebf3a0c802d095be765e1dced87b119c16cbc9911e986757752ee",
+      "bytes": 529,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/definitions/transforms.rpy",
+      "sha256": "1a9cbbcacd6e27f554b3f2a33c5f18823db72ee87dfbbb1e6b49c4e9d7d59b59",
+      "bytes": 148,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/definitions/variables.rpy",
+      "sha256": "bb3cf55c268ca660721c713c22cf0eb0e3f529534376e6e6fbddbfb9db3f91ea",
+      "bytes": 170,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/screens/route_status.rpy",
+      "sha256": "599d903bada0e9e919b1dfd4fe2c4e69106c37560112855ef9ae783d5cdbd6a4",
+      "bytes": 276,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/options.rpy",
+      "sha256": "1e15fe6a75c843d7f257f9c9fb06133e0ffc75c7494fe83dce91e45258c15bda",
+      "bytes": 272,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/script.rpy",
+      "sha256": "46b7230ca2de7c4fbc661859ceb740aba1ef053ce80c7a4c2385d1eee9d487b6",
+      "bytes": 674,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/systems/custom_code.rpy",
+      "sha256": "e19e424baa596b1fef665e9863a51be5d8b89a2d59eaf2ace17e2ee1bc52c390",
+      "bytes": 387,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/testcases.rpy",
+      "sha256": "6dd732fea793973e59f75ddd0165b1b9804d0160e8beca4e722f913da9d18298",
+      "bytes": 958,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "game/tl/es/fixture_strings.rpy",
+      "sha256": "80d0bcda088dff0dfb2e9050df56c42024cabb37e78db2d1c2a5604c076aec87",
+      "bytes": 157,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "renpy-8.5.3-linux-pass"
+    },
+    {
+      "path": "micro/recovery/incomplete_block.rpy",
+      "sha256": "9049a6e0f4041c8a0cbd50da07b7d82672cc33659b4ebb57416eb97ccdc46773",
+      "bytes": 82,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "intentionally-invalid"
+    },
+    {
+      "path": "micro/recovery/incomplete_dialogue.rpy",
+      "sha256": "7e899beec2ce2547a8a1ba3f8cf7860838901badb79e9276ec3d896efddc5890",
+      "bytes": 57,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "intentionally-invalid"
+    },
+    {
+      "path": "micro/valid/lexical.rpy",
+      "sha256": "c034932092a8fbcef3491559337026a1c77f24bdef575e633f7441bca835fec1",
+      "bytes": 290,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
+      "path": "micro/valid/media_and_atl.rpy",
+      "sha256": "24afda31b88e46244dca609e739826174670c4061ff02e6a1d320f2c4606ef47",
+      "bytes": 406,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    },
+    {
+      "path": "micro/valid/unsupported_neighbour.rpy",
+      "sha256": "f7f14211c8381b39d83fcee05338f8641ed4beaefcec0f1294f8b78ffc4fb576",
+      "bytes": 302,
+      "encoding": "utf-8",
+      "line_endings": "lf",
+      "disposition": "sdk-validation-pending"
+    }
+  ]
+}
