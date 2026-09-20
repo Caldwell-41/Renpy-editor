@@ -107,7 +107,7 @@ pub enum BeatPayload {
 }
 
 impl BeatPayload {
-    fn kind(&self) -> &'static str {
+    pub(crate) fn kind(&self) -> &'static str {
         match self {
             Self::Background { .. } => "background",
             Self::ShowCharacter { .. } => "showCharacter",
@@ -289,6 +289,7 @@ pub enum SceneError {
     InvalidMetadata,
     UnsupportedSource,
     SourceConflict,
+    DirtySource,
     UnknownEntity,
     ReferenceBlocked,
     InvariantBlocked,
@@ -416,6 +417,8 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<SceneWorkspace, SceneError> {
+        self.source_refresh_project(project, project_id)
+            .map_err(|_| SceneError::SourceConflict)?;
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         for scene in &loaded.project.scenes {
@@ -425,16 +428,35 @@ impl AuthoringService {
                 .iter()
                 .find(|mapping| mapping.scene_id == scene.id)
                 .ok_or(SceneError::InvalidMetadata)?;
-            let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            let Some((bytes, revision)) = self.snapshot_optional(project, &scene.source_path)?
+            else {
+                scenes.push(SceneDocument {
+                    id: scene.id.clone(),
+                    chapter_id: scene.chapter_id.clone(),
+                    display_name: scene.display_name.clone(),
+                    technical_label: scene.technical_label.clone(),
+                    source_path: scene.source_path.clone(),
+                    source_revision: stored.source_revision.clone(),
+                    source_conflict: true,
+                    partial: true,
+                    beats: Vec::new(),
+                });
+                continue;
+            };
             let conflict = revision.sha256 != stored.source_revision;
-            let (_, beats) = build_mapping(
-                scene,
-                &bytes,
-                &revision.sha256,
-                Some(stored),
-                &[],
-                Some((&loaded.project, &loaded.authoring)),
-            )?;
+            let beats = if conflict {
+                Vec::new()
+            } else {
+                build_mapping(
+                    scene,
+                    &bytes,
+                    &revision.sha256,
+                    Some(stored),
+                    &[],
+                    Some((&loaded.project, &loaded.authoring)),
+                )?
+                .1
+            };
             scenes.push(SceneDocument {
                 id: scene.id.clone(),
                 chapter_id: scene.chapter_id.clone(),
@@ -477,6 +499,9 @@ impl AuthoringService {
             SceneCommand::Redo => self.redo_scene(project)?,
             command => {
                 let loaded = self.load(project, project_id)?;
+                let guarded = command_source_paths(&loaded.project, &command)?;
+                self.ensure_source_paths_clean(project, guarded.iter().map(String::as_str))
+                    .map_err(|_| SceneError::DirtySource)?;
                 if loaded.project_revision.sha256 != request.expected_project_revision
                     || loaded.source_map_revision.sha256 != request.expected_source_map_revision
                 {
@@ -1285,17 +1310,18 @@ impl AuthoringService {
         Ok(())
     }
 
-    fn commit_history(
+    pub(crate) fn commit_history(
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
-    ) -> Result<(), SceneError> {
+    ) -> Result<Vec<Revision>, SceneError> {
         let snapshot = proposal.mutations.clone();
         match self.transactions.commit(project, proposal) {
             CommitOutcome::Committed {
                 transaction_id,
                 revisions,
             } => {
+                let retained_revisions = revisions.clone();
                 let mutations = snapshot
                     .into_iter()
                     .zip(revisions)
@@ -1316,7 +1342,7 @@ impl AuthoringService {
                         transaction_id,
                         mutations,
                     });
-                Ok(())
+                Ok(retained_revisions)
             }
             outcome => Err(outcome_error(outcome)),
         }
@@ -1327,11 +1353,10 @@ impl AuthoringService {
         let history = histories
             .get_mut(project)
             .ok_or(SceneError::HistoryBoundary)?;
-        let current = current_revisions(
-            &self.transactions,
-            project,
-            history.undo_paths().map_err(history_error)?,
-        )?;
+        let paths = history.undo_paths().map_err(history_error)?;
+        self.ensure_source_paths_clean(project, paths.iter().map(RelativePath::as_str))
+            .map_err(|_| SceneError::DirtySource)?;
+        let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.undo_proposal(&current).map_err(history_error)?;
         match self.transactions.commit(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
@@ -1346,11 +1371,10 @@ impl AuthoringService {
         let history = histories
             .get_mut(project)
             .ok_or(SceneError::HistoryBoundary)?;
-        let current = current_revisions(
-            &self.transactions,
-            project,
-            history.redo_paths().map_err(history_error)?,
-        )?;
+        let paths = history.redo_paths().map_err(history_error)?;
+        self.ensure_source_paths_clean(project, paths.iter().map(RelativePath::as_str))
+            .map_err(|_| SceneError::DirtySource)?;
+        let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.redo_proposal(&current).map_err(history_error)?;
         match self.transactions.commit(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
@@ -1842,8 +1866,12 @@ fn parse_scene(
     bytes: &[u8],
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
-    let source = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
-    let lines = physical_lines(source);
+    let bom = usize::from(bytes.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
+    let source = std::str::from_utf8(&bytes[bom..]).map_err(|_| SceneError::UnsupportedSource)?;
+    let lines = physical_lines(source)
+        .into_iter()
+        .map(|(start, end, body)| (start + bom, end + bom, body))
+        .collect::<Vec<_>>();
     let wanted = format!("label {}:", scene.technical_label);
     let labels: Vec<_> = lines
         .iter()
@@ -1853,7 +1881,11 @@ fn parse_scene(
         return Err(SceneError::UnsupportedSource);
     }
     let (label_start, label_end, _) = *labels[0];
-    if source[..label_start].trim().is_empty().not() {
+    if source[..label_start.saturating_sub(bom)]
+        .trim()
+        .is_empty()
+        .not()
+    {
         return Err(SceneError::UnsupportedSource);
     }
     let mut beats = Vec::new();
@@ -2057,7 +2089,7 @@ fn parse_show(
     }
 }
 
-fn build_mapping(
+pub(crate) fn build_mapping(
     scene: &SceneMetadata,
     bytes: &[u8],
     revision: &str,
@@ -2220,6 +2252,33 @@ fn current_revisions(
         current.insert(path, revision);
     }
     Ok(current)
+}
+
+fn command_source_paths(
+    project: &ProjectMetadata,
+    command: &SceneCommand,
+) -> Result<Vec<String>, SceneError> {
+    let scene_id = match command {
+        SceneCommand::CreateSceneFromChoice { scene_id, .. }
+        | SceneCommand::MoveScene { scene_id, .. }
+        | SceneCommand::DeleteScene { scene_id, .. }
+        | SceneCommand::InsertBeat { scene_id, .. }
+        | SceneCommand::UpdateBeat { scene_id, .. }
+        | SceneCommand::ContinueDialogue { scene_id, .. }
+        | SceneCommand::RemoveBeat { scene_id, .. }
+        | SceneCommand::MoveBeat { scene_id, .. } => Some(scene_id),
+        _ => None,
+    };
+    scene_id
+        .map(|id| {
+            project
+                .scenes
+                .iter()
+                .find(|scene| &scene.id == id)
+                .map(|scene| vec![scene.source_path.clone()])
+                .ok_or(SceneError::UnknownEntity)
+        })
+        .unwrap_or_else(|| Ok(Vec::new()))
 }
 
 fn move_item<T>(

@@ -5,6 +5,7 @@ pub mod metadata;
 pub mod ports;
 pub mod renpy;
 pub mod scene;
+pub mod source;
 pub mod transaction;
 
 use authoring::{
@@ -16,6 +17,7 @@ use media::MediaRequest;
 use scene::{RecoveryResolveRequest, SceneCommandRequest};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
+use source::{SourceDraftRequest, SourceOpenRequest, SourcePathRequest, SourceSaveRequest};
 
 pub const PROTOCOL_VERSION: u64 = 1;
 pub const OPERATIONS: &[&str] = &[
@@ -53,6 +55,14 @@ pub const OPERATIONS: &[&str] = &[
     "scene.recovery",
     "scene.resolveRecovery",
     "media.present",
+    "source.list",
+    "source.open",
+    "source.updateDraft",
+    "source.save",
+    "source.discard",
+    "source.applyBoth",
+    "source.saveAll",
+    "source.discardAll",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -200,6 +210,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "popupRequestIssued",
         "rendererSecretsAbsent",
         "sceneAuthoringUiPassed",
+        "sourceAuthoringUiPassed",
         "supportingAuthoringUiPassed",
         "welcomeLifecycleVisible",
         "newProjectWizardVisible",
@@ -209,6 +220,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
     let mut keys = BOOLEAN_KEYS.to_vec();
     keys.push("supportingAuthoringStage");
     keys.push("sceneAuthoringStage");
+    keys.push("sourceAuthoringStage");
     has_exact_keys(payload, &keys)
         && BOOLEAN_KEYS
             .iter()
@@ -218,6 +230,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
             .and_then(Value::as_str)
             == Some("complete")
         && payload.get("sceneAuthoringStage").and_then(Value::as_str) == Some("complete")
+        && payload.get("sourceAuthoringStage").and_then(Value::as_str) == Some("complete")
 }
 
 pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
@@ -329,10 +342,8 @@ pub fn handle_application_request(
         "project.close" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))
-                .map(|_| {
-                    lifecycle.close();
-                    json!({ "closed": true })
-                })
+                .and_then(|_| lifecycle.close())
+                .map(|_| json!({ "closed": true }))
         }
         "project.current" if empty_payload(validated.payload) => to_value(lifecycle.current()),
         "project.status" if has_exact_keys(validated.payload, &["sessionId"]) => {
@@ -454,6 +465,64 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.media_present(payload))
             .and_then(to_value),
+        "source.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.source_inventory())
+                .and_then(to_value)
+        }
+        "source.open" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SourceOpenRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.source_open(payload))
+            .and_then(to_value),
+        "source.updateDraft" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SourceDraftRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.source_update_draft(payload))
+            .and_then(to_value),
+        "source.save" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SourceSaveRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.source_save(payload))
+            .and_then(to_value),
+        "source.discard" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SourcePathRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.source_discard(payload))
+            .and_then(to_value),
+        "source.applyBoth" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SourceSaveRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.source_apply_both(payload))
+            .and_then(to_value),
+        "source.saveAll" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.source_save_all())
+                .and_then(to_value)
+        }
+        "source.discardAll" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.source_discard_all())
+                .and_then(to_value)
+        }
         "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
                 request_id,
@@ -555,6 +624,7 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
         LifecycleError::Scene(error) => return scene_failure(request_id, error),
+        LifecycleError::Source(error) => return source_failure(request_id, error),
         LifecycleError::Media(error) => return media_failure(request_id, error),
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
     };
@@ -608,6 +678,10 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "SOURCE_CONFLICT",
             "The Scene source changed outside Loomlight. Reload before editing.",
         ),
+        DirtySource => (
+            "DIRTY_SOURCE",
+            "This source file has an unaccepted draft. Save or discard it before changing the Scene.",
+        ),
         UnknownEntity => ("UNKNOWN_ENTITY", "The selected Scene item is unavailable."),
         ReferenceBlocked => (
             "INCOMING_REFERENCE",
@@ -634,6 +708,46 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "A competing file revision was preserved for recovery.",
         ),
         Io => ("SCENE_ERROR", GENERIC_ERROR),
+    };
+    CoreResponse::failure(request_id, code, message)
+}
+
+fn source_failure(request_id: String, error: source::SourceError) -> CoreResponse {
+    use source::SourceError::*;
+    let (code, message) = match error {
+        InvalidPayload => ("INVALID_PAYLOAD", "The Source request is invalid."),
+        UnknownFile => ("UNKNOWN_SOURCE", "The selected project source is unavailable."),
+        InvalidUtf8 => ("INVALID_UTF8", "Invalid UTF-8 source is preserved read-only."),
+        Oversize => ("SOURCE_TOO_LARGE", "Editable source is limited to 16 MiB."),
+        DraftLimit => (
+            "DRAFT_LIMIT",
+            "The project has reached the 64-draft or 64 MiB draft limit.",
+        ),
+        InvalidSource => (
+            "INVALID_SOURCE",
+            "The draft is incomplete or cannot be reconciled safely.",
+        ),
+        UnsupportedMappedDefinition => (
+            "MAPPED_DEFINITION",
+            "Mapped Character and Variable definitions must be changed in their authoring workspace.",
+        ),
+        SourceConflict => (
+            "SOURCE_CONFLICT",
+            "The accepted source changed outside Loomlight. Both versions were retained.",
+        ),
+        DirtySource => (
+            "DIRTY_SOURCE",
+            "Unaccepted Source drafts must be saved or discarded first.",
+        ),
+        RecoveryRequired => (
+            "RECOVERY_REQUIRED",
+            "Project recovery must be resolved before source can be accepted.",
+        ),
+        HistoryBoundary => (
+            "HISTORY_BOUNDARY",
+            "Undo or redo stopped at a source revision boundary.",
+        ),
+        Io => ("SOURCE_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
 }
@@ -679,6 +793,10 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
         SourceConflict => (
             "SOURCE_CONFLICT",
             "The authoritative source changed; reload before editing.",
+        ),
+        DirtySource => (
+            "DIRTY_SOURCE",
+            "This source file has an unaccepted draft. Save or discard it first.",
         ),
         UnsupportedSource => (
             "UNSUPPORTED_SOURCE",
@@ -792,6 +910,16 @@ mod tests {
                 json!({ "sessionId": "stale", "assetId": uuid::Uuid::new_v4().to_string(), "purpose": "thumbnail", "path": "../outside" }),
                 "STALE_PROJECT_SESSION",
             ),
+            (
+                "source.list",
+                json!({ "sessionId": "stale" }),
+                "STALE_PROJECT_SESSION",
+            ),
+            (
+                "source.open",
+                json!({ "sessionId": "stale", "path": "game/script.rpy" }),
+                "STALE_PROJECT_SESSION",
+            ),
         ] {
             let response = response_json(handle_application_request(
                 request(operation, payload),
@@ -829,6 +957,8 @@ mod tests {
             "rendererSecretsAbsent": true,
             "sceneAuthoringStage": "complete",
             "sceneAuthoringUiPassed": true,
+            "sourceAuthoringStage": "complete",
+            "sourceAuthoringUiPassed": true,
             "supportingAuthoringStage": "complete",
             "supportingAuthoringUiPassed": true,
             "welcomeLifecycleVisible": true,

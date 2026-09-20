@@ -14,6 +14,10 @@ use crate::{
         ValidatedSdk, SUPPORTED_VERSION,
     },
     scene::{RecoveryResolveRequest, SceneCommandRequest, SceneError, SceneWorkspace},
+    source::{
+        SourceDocument, SourceDraftRequest, SourceError, SourceInventory, SourceOpenRequest,
+        SourcePathRequest, SourceSaveRequest,
+    },
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Map;
@@ -124,6 +128,7 @@ pub enum LifecycleError {
     StaleSession,
     Authoring(AuthoringError),
     Scene(SceneError),
+    Source(SourceError),
     Media(MediaError),
     Io,
 }
@@ -401,10 +406,18 @@ impl LifecycleService {
         self.activate_project(inspected)
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&mut self) -> Result<(), LifecycleError> {
+        if self
+            .current
+            .as_ref()
+            .is_some_and(|(_, _, authority)| self.authoring.has_dirty_sources(authority))
+        {
+            return Err(LifecycleError::Source(SourceError::DirtySource));
+        }
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
+        Ok(())
     }
     pub fn current(&self) -> Option<OpenProject> {
         self.current.as_ref().map(|(_, project, _)| project.clone())
@@ -414,6 +427,13 @@ impl LifecycleService {
         &mut self,
         mut inspected: InspectedProject,
     ) -> Result<OpenProject, LifecycleError> {
+        if self
+            .current
+            .as_ref()
+            .is_some_and(|(_, _, authority)| self.authoring.has_dirty_sources(authority))
+        {
+            return Err(LifecycleError::Source(SourceError::DirtySource));
+        }
         let authority = self
             .authoring
             .register_inspected_project(inspected.root.clone(), inspected.anchor)
@@ -608,6 +628,77 @@ impl LifecycleService {
         self.authoring
             .media_present(&authority, &project_id, request)
             .map_err(LifecycleError::Media)
+    }
+
+    pub fn source_inventory(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_inventory(&authority, &project_id)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_open(
+        &self,
+        request: SourceOpenRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_open(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_update_draft(
+        &self,
+        request: SourceDraftRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_update_draft(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_save(
+        &self,
+        request: SourceSaveRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_save(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_apply_both(
+        &self,
+        request: SourceSaveRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_apply_both(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_discard(
+        &self,
+        request: SourcePathRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_discard(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_save_all(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_save_all(&authority, &project_id)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_discard_all(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_discard_all(&authority, &project_id)
+            .map_err(LifecycleError::Source)
     }
 
     pub fn list_recent(&self) -> Vec<RecentProject> {
@@ -3346,7 +3437,7 @@ mod tests {
         println!("phase-1e-scene-authoring-target-gate: passed");
         println!("phase-1e-media-target-gate: passed");
 
-        service.close();
+        service.close().unwrap();
         assert!(service.current().is_none());
         let recent = service.list_recent();
         assert_eq!(recent.len(), 1);
@@ -3386,7 +3477,7 @@ mod tests {
                 default_value: serde_json::Value::from(3),
             })
             .unwrap();
-        service.close();
+        service.close().unwrap();
         assert_eq!(
             service.open_path(&final_root).unwrap().scene_id,
             phase_1e_selection.scene_id

@@ -219,6 +219,26 @@ show affected paths and accepted/displaced evidence and invoke only the typed sa
 resolution returned by core. It cannot delete the journal, select arbitrary files,
 infer the newest revision, or restore Git state.
 
+## Phase 1F Source acceptance and reconciliation
+
+Source editor text is a bounded, session-local draft over an exact accepted base; it
+is not a transaction until explicit Save. Preflight checks UTF-8/size, bounded syntax,
+live base revision, mapping companions, and recovery before building a proposal. A
+refusal leaves both disk and the draft unchanged. A successful acceptance records the
+source origin and actual returned revisions in the same session-local history used by
+Scene operations. Save All performs this preflight for every dirty buffer before
+submitting one mutation vector; the vector remains a recoverable sequential commit,
+not all-files atomicity.
+
+A clean verified external revision replaces the buffer base and reconciles its
+source-map projection transactionally when required. A dirty external revision keeps
+base, draft, and external bytes and blocks stale writes. Core computes conservative
+single exact base-relative patches; only non-overlap exposes a combined preview and
+confirmed Apply Both proposal against the verified external revision. Overlap,
+missing/renamed files, invalid encoding, ambiguous mapping, or recovery state produces
+no proposal. Dirty-file guards also stop same-file Scene/supporting/file-lifecycle and
+history writes. Unresolved transaction recovery retains its project-wide block.
+
 ## Phase 1D create-new and import extension
 
 `replaceExisting` retains its exact base-byte, hash, and file-identity contract.

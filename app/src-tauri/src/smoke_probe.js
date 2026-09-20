@@ -35,6 +35,8 @@ setTimeout(async () => {
   let supportingAuthoringStage = "not-started";
   let sceneAuthoringUiPassed = false;
   let sceneAuthoringStage = "not-started";
+  let sourceAuthoringUiPassed = false;
+  let sourceAuthoringStage = "not-started";
   let restoreSmokeRequester = () => {};
   try {
     const project = {
@@ -90,6 +92,16 @@ setTimeout(async () => {
         variables: model.variables,
       },
     };
+    let sourceDocument = {
+      path: "game/chapters/chapter_01/scene_001.rpy", text: "label scene_one:\n    python:\n        score += 1\n    return\n",
+      state: "clean", editable: true, dirty: false, baseRevision: "5".repeat(64), liveRevision: "5".repeat(64), draftVersion: 0,
+      hasBom: false, newline: "LF", partial: true, diagnostics: [], selectionStart: 0, selectionEnd: 0,
+      selectedSceneId: null, selectedBeatId: null, canApplyBoth: false, combinedPreview: null, externalText: null,
+      ranges: [
+        { sceneId: "scene", beatId: "custom", kind: "customCode", byteStart: 17, byteEnd: 49, editorStart: 17, editorEnd: 49, protected: true },
+        { sceneId: "scene", beatId: "return", kind: "return", byteStart: 49, byteEnd: 60, editorStart: 49, editorEnd: 60, protected: false },
+      ],
+    };
     const called = new Set();
     let exactInteger = false;
     let exactIntegerUpdate = false;
@@ -119,6 +131,21 @@ setTimeout(async () => {
         value = sceneWorkspace;
       }
       if (request.operation === "scene.recovery") value = recoveryReport;
+      if (request.operation === "source.list") value = {
+        files: [{ path: sourceDocument.path, state: sourceDocument.state, sceneId: "scene", dirty: sourceDocument.dirty, readOnly: false }],
+        dirtyCount: sourceDocument.dirty ? 1 : 0, draftBytes: sourceDocument.dirty ? sourceDocument.text.length : 0,
+      };
+      if (request.operation === "source.open") value = sourceDocument;
+      if (request.operation === "source.updateDraft") {
+        projectStatus = "pendingValidation";
+        sourceDocument = { ...sourceDocument, text: request.payload.text, state: "dirty", dirty: true, draftVersion: sourceDocument.draftVersion + 1 };
+        value = sourceDocument;
+      }
+      if (request.operation === "source.save") {
+        projectStatus = "saved";
+        sourceDocument = { ...sourceDocument, state: "clean", dirty: false, draftVersion: sourceDocument.draftVersion + 1 };
+        value = sourceDocument;
+      }
       if (request.operation === "scene.resolveRecovery") {
         projectStatus = "saved";
         recoveryReport = { items: [] };
@@ -339,6 +366,29 @@ setTimeout(async () => {
     await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
     const audioIntentional = audioBeforeClick === 0;
 
+    sourceAuthoringStage = "open-source-workspace";
+    click("Source");
+    await waitFor(() => document.querySelector(".source-editor"), "Source editor");
+    const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
+      && document.body.textContent.includes("Custom Code")
+      && document.querySelectorAll(".source-line-numbers").length === 1;
+    sourceAuthoringStage = "retain-draft";
+    const sourceEditor = document.querySelector(".source-editor");
+    sourceEditor.value = sourceEditor.value.replace("score += 1", "score += 2");
+    sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
+    await waitFor(() => called.has("source.updateDraft") && projectStatus === "pendingValidation", "Source draft retention");
+    sourceAuthoringStage = "source-focused-save";
+    sourceEditor.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    await waitFor(() => called.has("source.save") && projectStatus === "saved", "Source acceptance");
+    await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
+    sourceAuthoringUiPassed = sourceSurfaceVisible
+      && sourceDocument.text.includes("score += 2")
+      && called.has("source.list")
+      && called.has("source.open")
+      && called.has("source.updateDraft")
+      && called.has("source.save");
+    sourceAuthoringStage = sourceAuthoringUiPassed ? "complete" : "assertions-failed";
+
     sceneAuthoringStage = "safe-recovery";
     projectStatus = "recoveryRequired";
     recoveryReport = { items: [{
@@ -393,6 +443,7 @@ setTimeout(async () => {
   } catch {
     if (supportingAuthoringStage !== "complete") supportingAuthoringUiPassed = false;
     sceneAuthoringUiPassed = false;
+    sourceAuthoringUiPassed = false;
   } finally {
     restoreSmokeRequester();
   }
@@ -412,6 +463,8 @@ setTimeout(async () => {
         rendererSecretsAbsent,
         sceneAuthoringStage,
         sceneAuthoringUiPassed,
+        sourceAuthoringStage,
+        sourceAuthoringUiPassed,
         supportingAuthoringStage,
         supportingAuthoringUiPassed,
         welcomeLifecycleVisible,

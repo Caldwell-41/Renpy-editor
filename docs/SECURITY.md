@@ -31,7 +31,7 @@ does not stop Python from changing files, so it is not an application sandbox.
 | Archive → SDK root | Zip-slip, symlink/hardlink escape, overwrite, decompression bomb | Validate every entry/type/size/path before extraction; stage privately; atomic promote; no overwrite |
 | Core → child process | Script/filename becomes shell syntax or environment leak | Direct executable plus argument array, minimal environment, bounded output/time, no shell strings |
 | Project → Ren'Py runtime | Embedded Python executes with user privileges | Inspection never runs; explicit trust/run boundary; redacted preview; future sandbox research not implied protection |
-| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Base revisions plus a reviewed platform transaction/recovery protocol; revalidate approved root/path/file/recovery identity at the latest safe point; preserve competing data/recovery state; explicit conflict UI; never claim portable CAS from check-then-replace alone |
+| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Debounced anchored reads and content revisions, plus the reviewed platform transaction/recovery protocol; preserve base/draft/external bytes; expose Apply Both only for exact non-overlap; revalidate root/path/file/recovery identity at the latest safe point; never claim portable CAS from check-then-replace alone |
 | Network → SDK/update | Tampered binary or downgrade | Official HTTPS origin allowlist, published checksum, version pin, staged verification, explicit upgrade |
 | LLM provider | Private/adult content exfiltration or malicious structured output | User-initiated send, locality disclosure/warning, minimal context, TLS, schema/path/identifier validation, reviewed diff |
 | Git/GitHub | Credential leak, destructive restore/push | OS credential flow, no token logs, safe defaults, recoverable restore, no force push, private repo default |
@@ -111,6 +111,14 @@ handle; a same-inode content change fails count/hash verification. Renderer stat
 an opaque UUID and safe display metadata, never the absolute path or bytes. Trusted
 core generates the destination and uses expected-absence journal commit. No Tauri
 filesystem, shell/process, HTTP, opener, or media-execution capability is added.
+
+Phase 1F adds only current-session Source operations using normalized project-relative
+existing `.rpy` paths discovered under the anchored `game/` root. Renderer input cannot
+name a host root, create/move/delete raw source, or edit `.rpyc`. Invalid UTF-8 stays
+byte-exact and read-only; editable files are capped at 16 MiB, with at most 64 dirty
+buffers and 64 MiB of drafts. Observation compares verified revisions and never runs
+Ren'Py or project Python. Stale sessions, unsafe mappings, external divergence, and
+transaction recovery fail closed without widening the Tauri capability or CSP.
 
 Application-local Recent Projects and the managed SDK root also retain directory
 authority and use no-follow file operations. Recent writes stage, platform-flush,

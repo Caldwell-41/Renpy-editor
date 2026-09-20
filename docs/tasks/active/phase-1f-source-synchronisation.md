@@ -2,7 +2,8 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** Next milestone selected; implementation not started by this documentation publication.
+**State:** Implementation complete on the existing review branch; supported-target
+publication evidence is pending below, so this is not integrated or authorised for 1G.
 **Execution authority:** The user's next 1F goal starts this bounded milestone after the closeout checks in [HANDOVER](../../status/HANDOVER.md). No later milestone is authorised.
 **Baseline:** Fresh integrated main with Phase 1A-1E and CI-SIMPLE; never either maintenance branch.
 **Working branch:** `feature/phase-1f-source-synchronisation`; reuse matching work if it exists, otherwise create from verified main.
@@ -175,3 +176,30 @@ claimed. The next bounded action is to implement the core Source inventory/buffe
 acceptance boundary from the recorded approach in small compiling increments, add its
 service regressions, and only then proceed to IPC/UI wiring. Preserve the existing
 branch and draft PR and do not replay the entry checks or CI-SIMPLE validation.
+
+2026-09-20 implementation continuation: Resumed at that exact action without replaying
+entry or housekeeping checks. Added the core-owned existing-`.rpy` inventory, bounded
+session drafts, explicit single/Save All acceptance, exact external reconciliation,
+source-map/history integration, same-file guards, conservative stable-ID reconciliation,
+and missing/invalid/conflict states. Wired the eight typed Source operations, centre
+workspace, exact Scene/Source navigation, session-only draft warning, Save/Discard/
+Apply Both and close/switch/exit Save All / Discard All / Cancel flows. Extended the
+packaged smoke and made the production workflow require its Source completion markers.
+No Branches, SDK run/validation, Git UI, raw source lifecycle, autosave journal, general
+parser, capability, or Phase 1G work was added.
+
+Local validation passed after self-review: `scripts/validate.py` checked 209 repository
+files; `git diff --check`, Rust formatting, and clippy with `-D warnings` passed; the
+independent core suite ran 150 tests with 146 passed and four documented subprocess
+worker markers ignored; frontend type/tests ran 19 passed and the Vite production build
+passed; lossless-source ran 26 passed; SDK adapter/archive ran 24 passed; the 620,000-byte
+lossless benchmark parsed 40,000 nodes with a 237.50 ms median over seven samples.
+Focused 1F coverage includes Source↔Scene updates, exact/opaque preservation, invalid
+save refusal, non-overlap Apply Both and overlap refusal, zero-write Save All preflight,
+shared history, same-file/supporting guards, stale sessions, clean/missing external
+source, BOM/CRLF/supplementary Unicode, invalid UTF-8, `.rpyc`/traversal denial, real
+16 MiB/64-buffer/64 MiB limits, exact reorder versus ambiguous ID handling, Source-local
+undo, and failed/successful close choices. Local Linux desktop/package compilation was
+attempted only as supplemental evidence and was unavailable because this client lacks
+`pkg-config`/GLib development metadata; supported Windows/macOS native/package evidence
+remains the authoritative pending gate.

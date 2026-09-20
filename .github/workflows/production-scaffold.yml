@@ -207,6 +207,8 @@ jobs:
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"supportingAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"sceneAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sourceAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sourceAuthoringStage":"complete"' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
             echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2

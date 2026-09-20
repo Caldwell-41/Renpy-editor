@@ -165,6 +165,7 @@ export interface SceneActions {
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
+  readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number) => void;
 }
 
 export interface RecoveryActions {
@@ -265,9 +266,10 @@ export function renderSceneAuthoring(
   treeHost: HTMLElement,
   initial: SceneWorkspace,
   actions: SceneActions,
+  initialBeatId?: string,
 ): () => void {
   let model = initial;
-  let selectedBeatId: string | undefined;
+  let selectedBeatId: string | undefined = initialBeatId;
   let mediaGeneration = 0;
   const imageCache = new Map<string, { readonly key: string; readonly url: string }>();
   const pendingImages = new Map<string, Promise<MediaPresentation>>();
@@ -464,9 +466,11 @@ export function renderSceneAuthoring(
     const technical = document.createElement("code"); technical.textContent = `${scene.technicalLabel} · ${scene.sourcePath}`;
     titleBlock.append(eyebrow, title, technical);
     const history = document.createElement("div"); history.className = "scene-history";
+    const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
+    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd));
     const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "undo" }); });
     const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "redo" }); });
-    history.append(undo, redo); header.append(titleBlock, history); host.append(header);
+    history.append(viewSource, undo, redo); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
       const heading = document.createElement("h2"); heading.textContent = "Source conflict";

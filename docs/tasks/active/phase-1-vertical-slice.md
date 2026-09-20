@@ -114,6 +114,10 @@ Review actual rendered surfaces against Quiet Studio Dark: typography, spacing, 
 
 **Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
 
+**Review candidate:** implemented on `feature/phase-1f-source-synchronisation` in draft
+PR #14. The execution brief owns the exact candidate and gate evidence. This is not an
+integration claim and does not authorise 1G.
+
 Implement the Source centre workspace, conservative partial CST/range mapping, minimal patches, supported direct edits, bidirectional Scene/Source selection and exact Custom Code preservation. Track source byte offsets separately from decoded editor positions; cover Unicode, BOM/newlines and selection remapping. The Scene and Branches semantic projection must never become a competing authoritative document.
 
 The execution brief must define editing states before UI work: unsubmitted/incomplete buffer, deliberately accepted source, invalid syntax, supported versus unsupported syntax, stale last-valid visual projection, ordinary external conflict, and unresolved transaction recovery. Invalid-but-deliberately-saved source requires an explicit policy and must not make the visual view claim current validity. Specify save, undo, navigation, close and restart behavior without silently discarding buffers.
