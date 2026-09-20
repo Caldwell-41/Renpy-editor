@@ -2,68 +2,31 @@
 
 **Prepared:** 2026-09-20.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Selected checkpoint:** [CI-SIMPLE only](../tasks/active/ci-simple-cleanup.md).
-**State:** `awaiting_ci`; implementation complete, acceptance evidence pending.
-**Baseline:** Remote `main` `5b16950900bb87d2c89de7abbae3295b4dc310c3`.
-**Implementation branch:** `maintenance/ci-simple-cleanup`.
-**Implementation candidate:** `eeef503a40af05c3435297e1384f743a58ee1a3e`.
-**Pull request:** [#13](https://github.com/Caldwell-41/Renpy-editor/pull/13).
+**Completed implementation:** [CI-SIMPLE acceptance/integration](../tasks/archive/2026-09-20-ci-simple-cleanup.md), merged PR #13.
+**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md).
+**Baseline:** Fresh remote main containing merge `998b5f4684c5c287920bfda67d12e818e3bd0371` and this documentation closeout.
+**Planned application branch:** `feature/phase-1f-source-synchronisation`; inspect current refs/PRs before creating or reusing it.
 
-## Start here
+## Finish only the recorded closeout checks
 
-Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md) and the
-CI-SIMPLE brief. Continue the published simple-cleanup branch; do not reset to main
-or use its documentation-only head as a new production candidate. The dirty abandoned
-checkout was preserved and the implementation used a separate worktree.
+PR #13 was merged with expected reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. GitHub returned merge `998b5f46`; its tree matches the reviewed head exactly. The accepted candidate matrix is `35496193908`, attempt 1. The normal post-merge quality run `35497664235`, attempt 1, passed. Normal production run `35497664212`, attempt 1, was in progress at this snapshot: inspect the final exact job/step outcomes and relevant test summaries, or the subsequent PR #13 closeout receipt, without redispatching. If a significant failure exists, address only that demonstrated blocker before 1F. If pending, publish/retain a manual continuation and stop active polling.
 
-## Abandoned work
+The user also authorised deleting the merged remote `maintenance/ci-simple-cleanup` branch. This session could merge but the connector exposes no branch deletion; lookup confirmed the branch remains. On a client with ordinary Git/GitHub tooling, verify PR #13 is merged and that the current branch tip is an ancestor of current main with no new active dependency; then delete ONLY that remote branch and verify absence. Do not remove local dirty worktrees or unrelated branches. A newer unmerged tip is not authorised for deletion. A suitable GitHub CLI operation after those checks is `gh api --method DELETE repos/Caldwell-41/Renpy-editor/git/refs/heads/maintenance/ci-simple-cleanup`. Record the real outcome; do not claim deletion merely because the PR is closed.
 
-The user explicitly abandoned W0 and OPT-1A, including all later corrections and Windows/SQLite acceptance work. W1-W3 are not proceeding and OPT-2B is deferred. The [decision record](../tasks/active/ci-optimisation.md) overrides old branch-local instructions to resume CI acceptance, initialise a private client or investigate runtime control. Existing reports remain historical evidence; no completion or capability pass is claimed.
+No custom controller, services or expanded optimisation work is needed for those checks. They are not another repair milestone.
 
-Do not start W0 recovery, fix the old journal, install a watcher, manipulate goals or import PR #12 as a prerequisite. Do not delete its branch or any private state. Updating docs does not stop a running external agent; no such stop is claimed here.
+## Start Phase 1F
 
-## Completed work
+Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md), the 1F brief, the 1F section of the [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md), and relevant source/transaction/UI contracts. Read historical ledgers only for needed evidence.
 
-Candidate `eeef503` narrows quality pushes to `main`, adds one shared production
-preflight before native allocation, uses stable ref concurrency without cancellation,
-removes the native copies of shared checks, retains the frontend build required before
-desktop tests, and makes full package upload an explicit successful manual-run option. Windows
-x64, macOS ARM64, package construction, SDK, desktop, WebView/security, inventory,
-lightweight evidence and caches remain in place. AGENTS/WORKFLOW now carry the bounded
-context and compact-reporting rules. The one self-review added `scripts/validate.py`
-to production paths because it became an executable preflight input.
+Fetch actual refs and preserve unrelated changes. No 1F branch existed in the inspected branch inventory; search again before starting. Create the named 1F branch from current main only when matching work does not already exist. Do not start from either maintenance branch or reset a dirty checkout; use a separate worktree when needed. Issuing the next 1F goal selects implementation of 1F only after the closeout checks above, not 1G/1H or an open-ended Phase 1 goal.
 
-## Validation and outstanding operation
+Define the source-buffer/persistence/partial-visual state policy before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate. Full detailed requirements and test cases live in the brief. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking.
 
-- Local bundled Python: `scripts/validate.py` passed all 203 tracked files.
-- A pinned temporary YAML 1.2 parser loaded both workflows; offline assertions passed
-  for triggers, preflight dependency, both native targets, retained gates, stable
-  concurrency and upload off/on behavior. `git diff --check` passed.
-- Local npm and Rust were unavailable; no local frontend/Rust pass is claimed.
-- Corrected-candidate quality run
-  [35496107906](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496107906),
-  attempt 1, completed successfully; its checkout and repository validation steps passed.
-- Production run [35495121351](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35495121351),
-  attempt 1, failed on initial candidate `7693d58`. Preflight, both core suites, both
-  official-SDK lifecycle gates and both SDK-handoff gates passed. Both desktop tests
-  then failed at Tauri context generation because `frontendDist` (`app/dist`) did not
-  exist; packaging, packaged smoke, artifact scan and inventory were correctly skipped.
-  Lightweight evidence uploaded and full packages were skipped. The failure proved
-  the standalone build was an earlier desktop-test dependency, not a removable duplicate.
-- Replacement production run
-  [35496193908](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496193908),
-  attempt 1, tests exact corrected candidate `eeef503a40af05c3435297e1384f743a58ee1a3e`
-  with `upload_packages=false`. At the recorded snapshot, preflight was in progress;
-  checkout and repository validation had passed.
+## Stop and return
 
-Do not poll, watch, redispatch or run production for the documentation-only handover
-head. After run 35496193908 completes, inspect actual job/step logs, test counts,
-skips, Tauri build-hook behavior, package smoke/security results, lightweight evidence
-and absence of the opt-in package artifacts. If it passes, update the ledger/CURRENT/
-HANDOVER to `review_ready` and stop for independent review. If it fails, record the
-failure and perform only a demonstrated CI-SIMPLE correction; a changed implementation
-candidate requires its own justified matrix. Do not merge or delete branches.
+Self-review the bounded milestone, resolve demonstrated blockers, run cheap checks before the necessary native validation, and inspect actual outcomes rather than badges. Update the 1F ledger, CURRENT and this single HANDOVER with branch/PR/candidate, commands/counts, any unavailable/skipped checks and exact outstanding run/attempt/SHA. Stop at review-ready for independent review; do not merge 1F or start 1G. An awaiting-CI or concrete-blocker handover is also a valid return point.
 
-The corrected candidate and this awaiting-CI record are published on the branch. PR #12 remains
-abandoned and untouched; no private state, application feature or automatic watcher
-was introduced.
+## Abandoned and preserved
+
+W0/OPT-1A and every corrective pass are [abandoned](../tasks/active/ci-optimisation.md). W1-W3 are not proceeding and OPT-2B is deferred. PR #12, its unique history, other branches and private client state remain untouched. The editor's own transactional persistence/recovery is unrelated and must remain intact.

@@ -6,9 +6,11 @@ Start with [current status](status/CURRENT.md), the
 [repository-first delivery workflow](WORKFLOW.md): detail and handover state live
 here; chat prompts select one checkpoint rather than repeat the implementation plan.
 
-Phase 1E PR #9 is merged, as are corrected Phase 1A-1D and PR #8's UI follow-up.
-Archived ledgers retain exact evidence. Current maintenance is
-[simple CI and agent-usage cleanup](tasks/active/ci-simple-cleanup.md).
+Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
+PR #8's UI follow-up. The next application milestone is
+[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md).
+The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
+acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
 programme is not the next task. CURRENT/HANDOVER own live state.
 
@@ -19,7 +21,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Concern | Canonical document |
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
-| Simple CI cleanup: triggers, preflight, concurrency, builds/uploads and usage | [tasks/active/ci-simple-cleanup.md](tasks/active/ci-simple-cleanup.md) |
+| Phase 1F Source editing, synchronisation and partial-visual handling | [tasks/active/phase-1f-source-synchronisation.md](tasks/active/phase-1f-source-synchronisation.md) |
+| Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |

@@ -1,14 +1,14 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-16<br>
-**Status:** Phase 1A–1D are merged and accepted. Phase 1E implementation and all three internal/final supported-target gates are complete on PR #9; integration remains pending. Phase 1F–1H are unapproved and unstarted.<br>
+**Updated:** 2026-09-20<br>
+**Status:** Phase 1A–1E are merged and accepted. Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`; do not replay it. CI-SIMPLE PR #13 is merged. Phase 1F is the selected next application milestone, not started; Phase 1G–1H remain unapproved and unstarted. See [CURRENT](../../status/CURRENT.md) and [HANDOVER](../../status/HANDOVER.md) for exact closeout checks.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
 
 Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
-This amended plan authorises no application implementation. Each milestone requires explicit user approval and a bounded execution brief. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
+Each milestone requires explicit user approval and a bounded execution brief. The requested next [Phase 1F goal](phase-1f-source-synchronisation.md) selects only 1F after the recorded entry checks; this documentation closeout implements no application feature. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
 ## Product target and fixed decisions
 
@@ -44,7 +44,7 @@ Historical implementation: [production scaffold](../archive/2026-09-14-phase-1-p
 
 Historical implementation: [transaction brief](../archive/2026-09-14-phase-1-transaction-recovery.md), [corrective evidence](../archive/2026-09-14-phase-1b-corrective-transaction-recovery.md), and [transaction contract](../../TRANSACTIONS.md).
 
-Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The active follow-up owns the remaining resource-limit and correctness repairs; 1E owns new file-lifecycle semantics required by Scenes.
+Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The completed follow-up records the resource-limit and correctness repairs; 1E owns the integrated file-lifecycle semantics required by Scenes.
 
 **Gate:** actual stale-write, substitution, non-cooperating-writer, process-termination, evidence-retention and follow-up-write regressions pass on both targets. Bounded resource use must not impose a lifetime limit on successful authoring.
 
@@ -60,13 +60,15 @@ Retain inspected candidate authority until activation, prepare before replacing 
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
-Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the completed [UI operation/Flush follow-up](../archive/2026-09-15-phase-1d-ui-operation-follow-up.md) merged through PR #8 and passed post-merge gates. Phase 1E received separate explicit approval and is tracked in its active execution ledger.
+Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the completed [UI operation/Flush follow-up](../archive/2026-09-15-phase-1d-ui-operation-follow-up.md) merged through PR #8 and passed post-merge gates. Phase 1E received separate explicit approval and its merged implementation is tracked in the [archived Scene ledger](../archive/2026-09-16-phase-1e-scene-authoring.md).
 
 Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
 
 **Gate:** accepted definitions reload and match runnable source; IDs and unknown metadata survive; physical availability/collisions and discovery agree with the pinned SDK; supporting authoring and truthful persistence/Flush work in the packaged app. All integrated follow-up blockers must close before 1E can be approved.
 
 ### 1E — Scene authoring
+
+**Integrated:** PR #9, merge `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`. The following requirements are retained as the accepted contract, not instructions to restart 1E.
 
 **Entry:** corrected 1A–1D supported-target closure plus explicit user approval. Execute the following internal checkpoints in order, with separate recorded evidence. Do not attempt one undifferentiated Scene/UI implementation.
 
@@ -110,7 +112,7 @@ Review actual rendered surfaces against Quiet Studio Dark: typography, spacing, 
 
 ### 1F — Source synchronisation and partial-visual handling
 
-**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it.
+**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
 
 Implement the Source centre workspace, conservative partial CST/range mapping, minimal patches, supported direct edits, bidirectional Scene/Source selection and exact Custom Code preservation. Track source byte offsets separately from decoded editor positions; cover Unicode, BOM/newlines and selection remapping. The Scene and Branches semantic projection must never become a competing authoritative document.
 
@@ -169,7 +171,7 @@ Run the following with synthetic, repository-safe content from fresh checkouts o
 
 ## Ownership and scope discipline
 
-The current 1A–1D follow-up repairs existing operations only. 1E.1 owns new multi-Scene/schema/source/file-lifecycle/history prerequisites; 1E.2 owns minimum recovery UX; 1E.3 owns media presentation/preview. 1F owns the full Source workspace and broader external reconciliation. 1G owns Branches, explicit SDK runtime/diagnostics and local Git. 1H verifies them. Advanced recovery and full analysis remain Phase 3/4 work.
+The completed 1A–1D follow-up repaired existing operations. 1E.1 owns the integrated multi-Scene/schema/source/file-lifecycle/history prerequisites; 1E.2 owns minimum recovery UX; 1E.3 owns media presentation/preview. 1F owns the full Source workspace and broader external reconciliation. 1G owns Branches, explicit SDK runtime/diagnostics and local Git. 1H verifies them. Advanced recovery and full analysis remain Phase 3/4 work.
 
 Resolve detailed schemas, limits, references, deletion policy, dependencies and test fixtures in the owning bounded brief before implementation. Preserve the approved source/security architecture and document material changes with ADRs where needed. Do not implement an earlier milestone with an unsafe shortcut merely because a later milestone will add a larger subsystem.
 
