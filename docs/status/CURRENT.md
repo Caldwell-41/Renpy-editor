@@ -3,29 +3,47 @@
 **Updated:** 2026-09-20.
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
-**Active application milestone:** [Phase 1F — Source synchronisation and partial-visual handling](../tasks/active/phase-1f-source-synchronisation.md), `in_progress` on `feature/phase-1f-source-synchronisation`, draft PR #14. Entry checks and the bounded technical approach are published at candidate `6a593cffd6b32109e88a5c56b6925f955c3fb13c`; application implementation has not started in the published candidate.
+**Active application milestone:** [Phase 1F — Source synchronisation and partial-visual handling](../tasks/active/phase-1f-source-synchronisation.md), implementation complete and awaiting the dispatched supported-target gate on `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
+**Implementation candidate:** `4fc544559e9f5d7ea8d591f08b95fb58bf2c30ef`; its tree `50e503c0403afaa01bc95779212a9ce66391555e` exactly matches the locally validated implementation commit.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
 ## Accepted baseline
 
-Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`. PRs #7/#8 and corrected 1A-1D are also integrated; do not replay them. The [Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) and [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) retain their evidence and requirements.
+Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
+PRs #7/#8 and corrected 1A-1D are also integrated; do not replay them. The
+[Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) and
+[Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) retain their evidence.
 
-CI-SIMPLE passed bounded independent review. Production run `35496193908`, attempt 1, genuinely passed preflight, Windows x64 and macOS ARM64 at implementation `eeef503a40af05c3435297e1384f743a58ee1a3e`. The merge tree exactly matches reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. The [closeout record](../tasks/archive/2026-09-20-ci-simple-cleanup.md) contains actual counts, skipped-worker interpretation, the corrected frontend build-order failure and validation limits.
+CI-SIMPLE passed bounded independent review and post-merge gates. Its closeout remains
+in [the archived ledger](../tasks/archive/2026-09-20-ci-simple-cleanup.md). The merged
+remote cleanup branch was retired during Phase 1F entry without touching unrelated
+branches or work. W0/OPT-1A remain abandoned; PR #12 and its history remain unmerged.
 
-Normal post-merge quality run `35497664235` and production run `35497664212`,
-attempt 1, both passed at the merge SHA. The final PR #13 closeout records the
-reviewed results; do not duplicate either dispatch.
+## Phase 1F validation snapshot
 
-The merged remote `maintenance/ci-simple-cleanup` branch was verified at PR #13's reviewed head, confirmed as an ancestor of current main, deleted with ordinary GitHub tooling, and verified absent during Phase 1F entry. Other branches and local work are untouched.
+The candidate implements the existing-`.rpy` Source inventory, bounded session-local
+drafts, explicit Source Save and all-before-write Save All, transaction/source-map/
+history integration, conservative supported/opaque mapping, exact external conflict
+reconciliation, same-file guards, the Source centre workspace, bidirectional selection,
+truthful persistence states, and close/switch/normal-exit choices. It does not add a
+raw source lifecycle, autosave journal, general parser, Branches, Run/Validate, Git UI,
+new renderer authority, or Phase 1G work.
+
+Local acceptance passed: 209-file repository validation; whitespace; Rust format and
+clippy; core 150 total / 146 passed / four intentional subprocess-worker ignores;
+frontend 19 passed plus production build; lossless-source 26 passed; SDK adapter/archive
+24 passed; and the 620,000-byte/40,000-node benchmark at 237.50 ms median. Local Linux
+desktop/package compilation was unavailable because the client lacks `pkg-config` and
+GLib development metadata; it is not substituted for supported-target evidence.
+
+Repository quality run `35544769657`, attempt 1, passed at the exact implementation
+candidate. Production run `35544944804`, attempt 1, was manually dispatched at that
+candidate with Windows x64 and macOS ARM64 package/smoke jobs and was queued at this
+publication snapshot. Its smoke gate now requires `sourceAuthoringUiPassed: true` and
+`sourceAuthoringStage: complete`.
 
 ## Scope now
 
-Preserve source authority, transactions/recovery, lifecycle/single-instance, SDK trust/handoff, supporting authoring and Scene/source/media boundaries. Phase 1F extends these; 1G/1H and Phase 2+ remain outside the next goal.
-
-[W0 and OPT-1A are abandoned](../tasks/active/ci-optimisation.md), including every Windows/SQLite correction. W1-W3 are not proceeding; OPT-2B remains deferred. PR #12 / `maintenance/ci-optimisation` stays unmerged historical work. Do not resume, import or validate it as a prerequisite.
-
-The Phase 1F branch currently changes documentation only. No Source feature,
-automatic watcher, private client setup, application recovery change or new toolchain
-is present in the published candidate. CURRENT owns current state, HANDOVER owns the
-interrupted continuation, and the task brief owns the approved implementation and
-acceptance criteria.
+Do not merge or start 1G. Independent review should inspect PR #14 and the actual
+production-run outcome. If that run passes, Phase 1F is review-ready; if it fails,
+continue only the demonstrated Phase 1F correction on the same branch and PR.

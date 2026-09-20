@@ -203,3 +203,15 @@ undo, and failed/successful close choices. Local Linux desktop/package compilati
 attempted only as supplemental evidence and was unavailable because this client lacks
 `pkg-config`/GLib development metadata; supported Windows/macOS native/package evidence
 remains the authoritative pending gate.
+
+2026-09-20 candidate publication: Local implementation commit `8547bfdc` produced tree
+`50e503c0403afaa01bc95779212a9ce66391555e`. Because this continuation client had no
+shell Git credential, the approved GitHub connector published that exact tree as
+fast-forward candidate `4fc544559e9f5d7ea8d591f08b95fb58bf2c30ef` on the existing
+branch; PR #14 was verified still draft with that head. Repository quality run
+`35544769657`, attempt 1, passed at the candidate. Production run `35544944804`,
+attempt 1, was manually dispatched at that same SHA and was queued when the ledger and
+handover were published. The production gate includes preflight, Windows x64 and macOS
+ARM64 core/SDK/desktop/package checks, packaged Source interaction/security smoke,
+artifact scan and dependency inventory. No native success is claimed before terminal
+evidence; per this brief, the exact pending run is recorded and active polling stops.
