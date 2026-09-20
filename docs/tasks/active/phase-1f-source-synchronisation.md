@@ -102,6 +102,44 @@ Passing counts, ignored workers, SDK skip wrappers, real archive-backed SDK exec
 
 Self-review once against this scope and resolve significant demonstrated findings without reopening unrelated architecture. Commit/push coherent work on the 1F branch, open/update its PR, and publish the execution ledger plus CURRENT and the single HANDOVER. Stop for independent review; do not merge or proceed into 1G. If CI is pending, preserve exact run/attempt/SHA and stop active model polling. No full log dumps or self-referential receipt commits.
 
+## Bounded technical approach and state transitions
+
+Phase 1F extends `AuthoringService` rather than adding a second filesystem or export
+stack. Core owns a session-local draft registry keyed by the opaque project authority
+and normalized project-relative `.rpy` path. Source discovery uses the transaction
+service's anchored `game/` inventory; reads, accepted writes, source-map companions,
+history and recovery checks use that same service. Renderer requests carry the current
+session plus relative path and expected draft/base revisions, never a project root.
+
+Each open file has an accepted base byte snapshot/revision, optional UTF-8 editor
+buffer and selection, parse/mapping result, and conflict/unavailable classification.
+Clean refresh replaces the accepted snapshot only after a verified anchored read and
+remaps or clears selection. Editing creates or updates an in-memory draft without a
+write. Save preflights size/encoding, current base, bounded grammar diagnostics,
+recovery and mapping/metadata reconciliation before proposing one shared transaction;
+success replaces the base with the returned revision, resets local text history and
+adds one committed history entry. Refusal retains the draft and selection. Explicit
+discard/reload removes the draft only after confirmation and resets to the verified
+current revision. Close/switch/exit uses an all-draft preflight, then either one
+multi-mutation transaction, explicit discard, or no state change.
+
+A dirty file whose live revision differs from its accepted base becomes `conflict` and
+keeps base, draft and external bytes. Core derives exact base-to-draft and base-to-live
+patches; only provably non-overlapping patches expose a combined preview. Confirmed
+Apply Both applies both patches to the verified live revision through the normal
+transaction path. Overlap, ambiguous mapping, invalid UTF-8, missing/renamed files or
+unresolved recovery exposes no write proposal. Dirty-file guards are consulted by
+Scene and project-history mutations; unrelated-file operations remain available only
+when the existing transaction/recovery scope proves them safe.
+
+The Source UI is a centre workspace backed by these returned states: project-owned
+`.rpy` navigator, relative path, line-numbered monospace editor, diagnostics,
+supported/opaque mapped ranges, selection bridge, dirty/conflict/partial badges and
+explicit Save/Discard/reconciliation actions. Source-focused Save and text undo stay
+inside the draft flow; project history remains separate. A bounded refresh request
+debounces external observation and distinguishes the last accepted Loomlight revision
+from a genuinely new live revision, without executing Ren'Py or project Python.
+
 ## Execution ledger
 
 2026-09-20: Continuation brief published during CI-SIMPLE closeout. No 1F application code or test acceptance is claimed. The existing Phase 1F requirements remain the milestone boundary; starting the next goal selects execution only after the recorded entry checks.
@@ -109,3 +147,15 @@ Self-review once against this scope and resolve significant demonstrated finding
 2026-09-20: User approved fixing the seven source-editing behaviours before implementation. Removed the open-ended save-invalid policy choice, pinned the Phase 1E grammar boundary, draft/conflict/navigation/selection/undo behaviour and the mandatory regression matrix. This is a brief/handover amendment only, not 1F implementation or new application acceptance; no new planning checkpoint or CI orchestration work is introduced.
 
 2026-09-20: Follow-up omission review reconciled the brief with UI, DATA_MODEL, TRANSACTIONS and the accepted lossless-source Gate E. Added Source-focused Save/undo and persistence-state precedence, all-before-write Save All preflight, explicit safe non-overlap Apply Both reconciliation, source-file scope and mapped-definition safety, UTF-8/16 MiB and bounded-draft limits, clean missing/rename behaviour, and minimum Source UI requirements. No application code was changed and no production/package matrix is warranted for this documentation-only clarification.
+
+2026-09-20: Phase 1F entry checks started from freshly fetched main `8862495f`. Phase
+1E and CI-SIMPLE integration/post-merge evidence were confirmed without rerunning the
+completed matrix. PR #13's head was verified as an ancestor of main and the already-
+authorised remote `maintenance/ci-simple-cleanup` ref was deleted and verified absent.
+No matching Phase 1F branch/PR existed, so
+`feature/phase-1f-source-synchronisation` was created from that main head in an isolated
+worktree. The bounded approach/state transitions above were recorded before UI writes.
+Actual-client setup was unavailable on this baseline: a bundled interpreter was
+located, but `scripts/codex_local.py` is absent from integrated main. No private
+profile or journal was created; work used only repository fixtures and ordinary
+host-independent development tools.
