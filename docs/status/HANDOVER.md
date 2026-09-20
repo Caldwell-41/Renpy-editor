@@ -2,31 +2,62 @@
 
 **Prepared:** 2026-09-20.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Completed implementation:** [CI-SIMPLE acceptance/integration](../tasks/archive/2026-09-20-ci-simple-cleanup.md), merged PR #13.
-**Next application task:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md); its source-editing behaviours, Gate-E reconciliation, bounds and mandatory regression matrix are now fixed by user approval and omission review.
-**Baseline:** Fresh remote main containing merge `998b5f4684c5c287920bfda67d12e818e3bd0371` and the documentation closeout/amendment.
-**Planned application branch:** `feature/phase-1f-source-synchronisation`; inspect current refs/PRs before creating or reusing it.
+**Delivery:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md).
+**State:** `in_progress`; interrupted for transfer before application implementation.
+**Branch / PR:** `feature/phase-1f-source-synchronisation`, [draft PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
+**Verified implementation candidate:** `6a593cffd6b32109e88a5c56b6925f955c3fb13c` (entry checks and approach only; no application code).
+**Baseline:** `8862495f5465c35a0d951fa65743be52d3c813e7` from freshly fetched `origin/main`.
 
-## Completed CI verification and remaining housekeeping
+## Completed and preserved
 
-PR #13 was merged with expected reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. GitHub returned merge `998b5f46`; its tree matches the reviewed head exactly. The accepted candidate matrix is `35496193908`, attempt 1. Normal post-merge quality run `35497664235` and production run `35497664212`, attempt 1, both passed. The [final PR #13 closeout](https://github.com/Caldwell-41/Renpy-editor/pull/13) records the reviewed native logs: Windows core 128 passed / 0 failed / 4 ignored worker entries; macOS core 134 passed / 0 failed / 4 ignored worker entries; both dedicated SDK gates, packaging, packaged smoke/security and inventory passed. This supersedes the earlier in-progress snapshot. Documentation closeout `80bd3b3d` passed quality run `35497935210`, attempt 1, with 205 repository files checked. Do not redispatch those completed checks or rerun production for this documentation-only amendment.
+Phase 1E and the accepted CI-SIMPLE post-merge results were confirmed from the
+existing records; their expensive matrix was not repeated. PR #13's reviewed head was
+verified as an ancestor of current main. The already-authorised merged remote
+`maintenance/ci-simple-cleanup` branch was deleted with ordinary GitHub tooling and a
+fresh fetch verified it absent. No other remote/local branch, worktree or unrelated
+change was removed. The pre-existing dirty `maintenance/ci-optimisation` checkout was
+not modified by Phase 1F work.
 
-The user also authorised deleting the merged remote `maintenance/ci-simple-cleanup` branch. The connector used for closeout exposed no branch deletion; the latest inspected branch inventory still contains it. On a client with ordinary Git/GitHub tooling, verify PR #13 is merged and that the current branch tip is an ancestor of current main with no new active dependency; then delete ONLY that remote branch and verify absence. Do not remove local dirty worktrees or unrelated branches. A newer unmerged tip is not authorised for deletion. A suitable GitHub CLI operation after those checks is `gh api --method DELETE repos/Caldwell-41/Renpy-editor/git/refs/heads/maintenance/ci-simple-cleanup`. Record the real outcome or precise limitation; do not claim deletion merely because the PR is closed.
+No matching Phase 1F branch or PR existed, so the authorised branch was created from
+the verified baseline in an isolated worktree. The active brief now records the
+bounded core-owned draft/transaction/reconciliation approach and state transitions.
+Actual-client setup was unavailable because integrated main has no
+`scripts/codex_local.py`; no private profile or operation journal was created.
 
-No custom controller, services, permission changes or expanded optimisation work is needed for housekeeping. It is not another repair milestone.
+An exploratory core Source-service/protocol slice was begun locally but could not be
+compiled because this client has no Rust toolchain, and the UI slice was not applied.
+All of those incomplete code/protocol edits were reverted before the published
+candidate. Do not look for or recover them from another branch: the brief's recorded
+approach is the authoritative continuation, and no implementation acceptance is
+claimed.
 
-## Start Phase 1F
+## Validation and publication
 
-Read AGENTS.md, [CURRENT](CURRENT.md), [WORKFLOW](../WORKFLOW.md), the 1F brief, the 1F section of the [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md), and relevant source/transaction/UI contracts. Read historical ledgers only for needed evidence.
+- Bundled Python `scripts/validate.py`: passed for 205 repository files.
+- `git diff --check` and staged `git diff --check`: passed before candidate commit.
+- Candidate `6a593cff...` was pushed and verified equal to
+  `origin/feature/phase-1f-source-synchronisation` and PR #14's head.
+- Repository quality run `35507258915`, attempt 1, completed successfully at that
+  exact SHA; its sole `Validate repository` job `106069068525` passed.
+- No frontend, Rust core, Source-service, Source interaction, native Windows x64,
+  macOS ARM64, package or mandatory behavioural-matrix gate was run or claimed because
+  the published candidate contains no application implementation.
+- The entry/approach candidate and this interruption handover publication are
+  committed/pushed on the recorded branch. Verify the published branch head directly;
+  no self-referential receipt commit is required.
 
-Fetch actual refs and preserve unrelated changes. No 1F branch existed in the inspected branch inventory; search again before starting. Create the named 1F branch from current main only when matching work does not already exist. Do not start from either maintenance branch or reset a dirty checkout; use a separate worktree when needed. Issuing the next 1F goal selects implementation of 1F only after the recorded entry checks, not 1G/1H or an open-ended Phase 1 goal.
+## Exact next bounded action
 
-Implement the fixed behaviours in section 1 of the 1F brief; do not reselect the save-invalid, draft lifetime, conflict, grammar, selection, undo, shortcut/status, Save All, Source-scope/encoding/bounds or external-reconciliation policies. In particular preserve the accepted source-model Gate E: never auto-merge, but offer explicit user-confirmed combination only for provably non-overlapping exact patches; overlapping/ambiguous changes write nothing. Record the bounded technical approach/state transitions before wiring writes, extend the existing source/transaction/history boundary, implement Source/Scene synchronisation and selection, then validate the exact candidate against the mandatory regression matrix. Full detail lives in the brief, not another planning checkpoint. Do not replace authoritative .rpy bytes with an editor model or weaken project recovery blocking. These brief amendments add no application code or new native acceptance.
+Continue the same approved Phase 1F milestone on the existing branch and draft PR.
+Do not replay entry checks, CI-SIMPLE, housekeeping or the approach decision. Begin
+with the core Source inventory/buffer/acceptance boundary in small compiling
+increments: anchored existing-`.rpy` discovery, session-local bounded drafts, explicit
+save/refusal, source-map reconciliation and shared transaction/history integration,
+with focused service regressions for UTF-8/BOM/newlines, invalid/refused save, limits,
+same-file guards and exact non-overlap Apply Both. Run cheap Rust/source checks before
+adding IPC and the Source UI. Then complete the rest of the brief and mandatory matrix
+within Phase 1F only.
 
-## Stop and return
-
-Self-review the bounded milestone, resolve demonstrated blockers, run cheap checks before the necessary native validation, and inspect actual outcomes rather than badges. Update the 1F ledger, CURRENT and this single HANDOVER with branch/PR/candidate, commands/counts, any unavailable/skipped checks and exact outstanding run/attempt/SHA. Stop at review-ready for independent review; do not merge 1F or start 1G. An awaiting-CI or concrete-blocker handover is also a valid return point.
-
-## Abandoned and preserved
-
-W0/OPT-1A and every corrective pass are [abandoned](../tasks/active/ci-optimisation.md). W1-W3 are not proceeding and OPT-2B is deferred. PR #12, its unique history, other branches and private client state remain untouched. The editor's own transactional persistence/recovery is unrelated and must remain intact.
+Preserve source authority, project-wide unresolved-recovery blocking and unrelated
+work. Phase 1G/1H, W0/OPT-1A and other optimisation work remain outside authority.
+Stop for independent review after full 1F validation; do not merge.

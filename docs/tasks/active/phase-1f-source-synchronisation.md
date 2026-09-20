@@ -159,3 +159,19 @@ Actual-client setup was unavailable on this baseline: a bundled interpreter was
 located, but `scripts/codex_local.py` is absent from integrated main. No private
 profile or journal was created; work used only repository fixtures and ordinary
 host-independent development tools.
+
+2026-09-20 interruption transfer: The checkpoint is `in_progress`, not review-ready.
+An exploratory core Source-service slice and matching protocol edits were started but
+could not be compiled on this client because no Rust toolchain was available; the UI
+slice was not applied. Every incomplete application/protocol edit was therefore
+reverted before publication. Candidate
+`6a593cffd6b32109e88a5c56b6925f955c3fb13c` contains only the verified entry checks
+and bounded approach above. Local `scripts/validate.py` passed for 205 repository
+files and staged/working `git diff --check` passed. Draft PR #14 points to that exact
+candidate; Repository quality run `35507258915`, attempt 1, passed its single
+`Validate repository` job at the candidate SHA. No production, native, package,
+frontend, Rust core, Source interaction or mandatory behavioural-matrix evidence is
+claimed. The next bounded action is to implement the core Source inventory/buffer/
+acceptance boundary from the recorded approach in small compiling increments, add its
+service regressions, and only then proceed to IPC/UI wiring. Preserve the existing
+branch and draft PR and do not replay the entry checks or CI-SIMPLE validation.
