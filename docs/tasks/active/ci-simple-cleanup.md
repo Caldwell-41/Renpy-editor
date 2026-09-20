@@ -6,7 +6,7 @@
 production matrix is in progress.
 **Baseline:** Freshly verified integrated `main`, not `maintenance/ci-optimisation`.
 **Implementation branch:** `maintenance/ci-simple-cleanup`; check for existing matching work before creating it.
-**Implementation candidate:** `7693d58193b4cccd76c423f377dbefe9158c06ee`.
+**Implementation candidate:** `eeef503a40af05c3435297e1384f743a58ee1a3e`.
 **Pull request:** [#13](https://github.com/Caldwell-41/Renpy-editor/pull/13).
 **Continuation:** [HANDOVER](../../status/HANDOVER.md).
 
@@ -91,11 +91,13 @@ quality now runs for PRs, main pushes and manual dispatch, avoiding the duplicat
 feature-push run for PR updates. Production now uses one shared Linux preflight before
 native allocation, stable workflow/ref concurrency with `cancel-in-progress: false`,
 and an `upload_packages` boolean defaulting false. Shared validator/frontend/Rust-format
-checks run once instead of inside each native target. The standalone frontend build
-was removed after confirming `app/src-tauri/tauri.conf.json` runs `npm run build` via
-`beforeBuildCommand`; Tauri packaging, package smoke/security and both native gates
-remain mandatory. Large packages upload only on a successful manual run with the
-input enabled; lightweight evidence and npm/Rust/SDK caches remain.
+checks run once instead of inside each native target. The initial candidate removed
+the standalone frontend build because `app/src-tauri/tauri.conf.json` runs
+`npm run build` via `beforeBuildCommand`; native validation later proved that an
+earlier desktop-test consumer still requires it, so the corrective candidate below
+restores the step. Tauri packaging, package smoke/security and both native gates remain
+mandatory. Large packages upload only on a successful manual run with the input
+enabled; lightweight evidence and npm/Rust/SDK caches remain.
 
 | Scenario | Repository quality | Production | Full package upload |
 | --- | --- | --- | --- |
@@ -122,9 +124,33 @@ handover snapshot, preflight passed every step, both native jobs were in progres
 macOS core tests had passed, and the macOS SDK download was explicitly skipped after
 a successful cache restore. No duplicate matrix was dispatched.
 
-State is `awaiting_ci`. Resume manually after run 35495121351 completes and inspect
-actual test counts, failures/skips, package/build-hook behavior, smoke/security and
-artifact outcomes. Do not run a production matrix for the following documentation-only
+Run 35495121351 completed as failed evidence. Preflight, both native core suites, both
+official-SDK lifecycle gates and both SDK download-handoff gates passed. Windows x64
+and macOS ARM64 then failed `Test desktop Rust boundary`: Tauri context generation
+reported that configured `frontendDist` `../dist` did not exist. Packaging, packaged
+WebView smoke, artifact scanning and inventory were skipped on both targets; lightweight
+evidence uploaded, and full package upload was skipped as requested. This was a direct
+effect of removing the earlier frontend build, not a flaky target failure.
+
+Corrective candidate `eeef503a40af05c3435297e1384f743a58ee1a3e` restores only
+`npm run build` after each native locked install so `app/dist` exists before desktop
+tests. The repository validator again passed 203 files, YAML parse and consumer-order
+assertions passed, and `git diff --check` passed. Quality run
+[35496107906](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496107906),
+attempt 1, passed with successful checkout and validator steps.
+
+Replacement production run
+[35496193908](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496193908),
+attempt 1, was dispatched once on exact corrected candidate `eeef503a` with
+`upload_packages=false`; no existing production run for that SHA was present. At the
+handover snapshot its preflight was in progress after checkout and repository
+validation passed.
+
+State remains `awaiting_ci`. Resume manually after run 35496193908 completes and
+inspect actual test counts, failures/skips, package/build-hook behavior, smoke/security
+and artifact outcomes. Do not run production for the following documentation-only
 receipt. A pass advances only to `review_ready` for independent review; do not merge
-or delete branches. These are expected structural savings, not measured runner-minute
-or token percentages.
+or delete branches. Confirmed savings are the removed feature-push quality duplicate,
+single shared frontend/Rust-format preflight, and opt-in large uploads. The frontend
+build was not eliminated because actual native evidence proved it necessary. No
+runner-minute or token percentages are claimed.

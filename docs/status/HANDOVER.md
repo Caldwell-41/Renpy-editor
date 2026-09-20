@@ -6,7 +6,7 @@
 **State:** `awaiting_ci`; implementation complete, acceptance evidence pending.
 **Baseline:** Remote `main` `5b16950900bb87d2c89de7abbae3295b4dc310c3`.
 **Implementation branch:** `maintenance/ci-simple-cleanup`.
-**Implementation candidate:** `7693d58193b4cccd76c423f377dbefe9158c06ee`.
+**Implementation candidate:** `eeef503a40af05c3435297e1384f743a58ee1a3e`.
 **Pull request:** [#13](https://github.com/Caldwell-41/Renpy-editor/pull/13).
 
 ## Start here
@@ -24,10 +24,10 @@ Do not start W0 recovery, fix the old journal, install a watcher, manipulate goa
 
 ## Completed work
 
-Candidate `7693d58` narrows quality pushes to `main`, adds one shared production
+Candidate `eeef503` narrows quality pushes to `main`, adds one shared production
 preflight before native allocation, uses stable ref concurrency without cancellation,
-removes the native copies of shared checks and the Tauri-hook duplicate frontend
-build, and makes full package upload an explicit successful manual-run option. Windows
+removes the native copies of shared checks, retains the frontend build required before
+desktop tests, and makes full package upload an explicit successful manual-run option. Windows
 x64, macOS ARM64, package construction, SDK, desktop, WebView/security, inventory,
 lightweight evidence and caches remain in place. AGENTS/WORKFLOW now carry the bounded
 context and compact-reporting rules. The one self-review added `scripts/validate.py`
@@ -40,23 +40,30 @@ to production paths because it became an executable preflight input.
   for triggers, preflight dependency, both native targets, retained gates, stable
   concurrency and upload off/on behavior. `git diff --check` passed.
 - Local npm and Rust were unavailable; no local frontend/Rust pass is claimed.
-- Quality run [35495071833](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35495071833),
-  attempt 1, tested the candidate and completed successfully. Its checkout and
-  repository validation steps both passed.
+- Corrected-candidate quality run
+  [35496107906](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496107906),
+  attempt 1, completed successfully; its checkout and repository validation steps passed.
 - Production run [35495121351](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35495121351),
-  attempt 1, tests the exact candidate with `upload_packages=false`. The recorded
-  snapshot has a successful preflight (validator, locked install, frontend/protocol
-  checks and Rust formatting); Windows x64 and macOS ARM64 are in progress. macOS core
-  passed and its SDK download step was explicitly skipped because the cache restored.
+  attempt 1, failed on initial candidate `7693d58`. Preflight, both core suites, both
+  official-SDK lifecycle gates and both SDK-handoff gates passed. Both desktop tests
+  then failed at Tauri context generation because `frontendDist` (`app/dist`) did not
+  exist; packaging, packaged smoke, artifact scan and inventory were correctly skipped.
+  Lightweight evidence uploaded and full packages were skipped. The failure proved
+  the standalone build was an earlier desktop-test dependency, not a removable duplicate.
+- Replacement production run
+  [35496193908](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35496193908),
+  attempt 1, tests exact corrected candidate `eeef503a40af05c3435297e1384f743a58ee1a3e`
+  with `upload_packages=false`. At the recorded snapshot, preflight was in progress;
+  checkout and repository validation had passed.
 
 Do not poll, watch, redispatch or run production for the documentation-only handover
-head. After run 35495121351 completes, inspect actual job/step logs, test counts,
+head. After run 35496193908 completes, inspect actual job/step logs, test counts,
 skips, Tauri build-hook behavior, package smoke/security results, lightweight evidence
 and absence of the opt-in package artifacts. If it passes, update the ledger/CURRENT/
 HANDOVER to `review_ready` and stop for independent review. If it fails, record the
 failure and perform only a demonstrated CI-SIMPLE correction; a changed implementation
 candidate requires its own justified matrix. Do not merge or delete branches.
 
-Candidate and this awaiting-CI record are published on the branch. PR #12 remains
+The corrected candidate and this awaiting-CI record are published on the branch. PR #12 remains
 abandoned and untouched; no private state, application feature or automatic watcher
 was introduced.
