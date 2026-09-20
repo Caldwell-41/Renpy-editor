@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Validate privacy and CI tooling on native filesystem
-        run: |
-          python -m unittest discover -s tests/ci_privacy -v
-          python -m unittest discover -s tests/ci_tooling -v
+      - name: Test local-only Codex configuration boundaries on native filesystem
+        run: python -m unittest discover -s tests/ci_privacy -v
+      - name: Test candidate-bound CI operations on native filesystem
+        run: python -m unittest discover -s tests/ci_tooling -v

@@ -156,6 +156,47 @@ def _protect_windows(path: Path) -> None:
     )
     if result.returncode:
         raise LocalStateError("Private Windows ACL could not be established; setup refused.")
+    owner_script = r"""
+$ErrorActionPreference = 'Stop'
+$target = [Environment]::GetEnvironmentVariable('LOOMLIGHT_ACL_TARGET')
+$targetType = [Environment]::GetEnvironmentVariable('LOOMLIGHT_ACL_TARGET_TYPE')
+$owner = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList (
+  [Environment]::GetEnvironmentVariable('LOOMLIGHT_ACL_OWNER')
+)
+$sections = [System.Security.AccessControl.AccessControlSections]::Owner
+if ($targetType -eq 'directory') {
+  $acl = [System.IO.Directory]::GetAccessControl($target, $sections)
+} elseif ($targetType -eq 'file') {
+  $acl = [System.IO.File]::GetAccessControl($target, $sections)
+} else {
+  throw 'Invalid private Windows target type.'
+}
+$acl.SetOwner($owner)
+if ($targetType -eq 'directory') {
+  [System.IO.Directory]::SetAccessControl($target, $acl)
+} else {
+  [System.IO.File]::SetAccessControl($target, $acl)
+}
+"""
+    owner = _run(
+        [
+            r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            owner_script,
+        ],
+        path.parent,
+        environment={
+            **os.environ,
+            "LOOMLIGHT_ACL_OWNER": sid,
+            "LOOMLIGHT_ACL_TARGET": str(path),
+            "LOOMLIGHT_ACL_TARGET_TYPE": "directory" if stat.S_ISDIR(info.st_mode) else "file",
+        },
+        timeout=45,
+    )
+    if owner.returncode:
+        raise LocalStateError("Private Windows owner could not be established; setup refused.")
 
 
 def _windows_acl_private(path: Path) -> bool:

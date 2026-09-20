@@ -5,6 +5,7 @@ import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import sqlite3
 import stat
+import subprocess
 import sys
 import tempfile
 from types import SimpleNamespace
@@ -20,6 +21,52 @@ import local_state
 
 
 class ExternalStateRegressions(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "Windows ACL behavior requires a Windows host")
+    def test_windows_acl_protection_normalises_default_owner(self):
+        classify_owner = r"""
+$ErrorActionPreference = 'Stop'
+$env:PSModulePath = "$env:WINDIR\System32\WindowsPowerShell\v1.0\Modules"
+Import-Module Microsoft.PowerShell.Security -Force
+$target = [Environment]::GetEnvironmentVariable('LOOMLIGHT_ACL_TARGET')
+$acl = Get-Acl -LiteralPath $target
+$owner = $acl.GetOwner([System.Security.Principal.SecurityIdentifier]).Value
+$current = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+if ($owner -eq $current) { 'current'; exit 0 }
+if ($owner -eq 'S-1-5-32-544') { 'administrators'; exit 0 }
+if ($owner -eq 'S-1-5-18') { 'system'; exit 0 }
+'other'
+"""
+
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary).resolve() / "ownership-probe"
+            path.mkdir()
+
+            def owner_category() -> str:
+                result = subprocess.run(
+                    [
+                        r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-Command",
+                        classify_owner,
+                    ],
+                    cwd=path.parent,
+                    capture_output=True,
+                    check=False,
+                    env={**os.environ, "LOOMLIGHT_ACL_TARGET": str(path)},
+                    timeout=45,
+                )
+                self.assertEqual(result.returncode, 0)
+                category = result.stdout.decode("ascii").strip()
+                self.assertIn(category, {"current", "administrators", "system", "other"})
+                return category
+
+            default_owner = owner_category()
+            local_state._protect_windows(path)
+            self.assertEqual(owner_category(), "current")
+            self.assertTrue(local_state.storage_is_private(path, directory=True))
+            print(f"native_windows_default_owner={default_owner}; protected_owner=current")
+
     def test_platform_state_roots_are_external_and_deterministic(self):
         windows = codex_local.application_state_root(
             platform="win32",

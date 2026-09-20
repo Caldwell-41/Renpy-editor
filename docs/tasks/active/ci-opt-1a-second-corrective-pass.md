@@ -307,3 +307,89 @@ The focused review of the four fixes and adjacent transitions found and correcte
 incomplete-transition commit issue; no further significant in-scope blocker was found.
 All four findings are resolved. OPT-1A is ready for final independent review, not merge.
 W0 and W1 remain unchanged and outside this bounded pass.
+
+### Windows validation repair follow-up — authorised 2026-09-20
+
+The user-authorised OPT-1A follow-up is limited to correcting Windows validation and
+the adjacent workflow failure-propagation defect. It supersedes the earlier claim that
+the affected Windows quality job passed its privacy suite. Reported evidence to verify
+is Repository quality run `35435261321`, attempt 1, Windows job `105876723427`, and run
+`35436013835`, attempt 1, Windows job `105878666437`: both reportedly discovered 37
+privacy tests with 1 failure, 15 errors and 1 skip, followed by 47 passing CI-tooling
+tests, while the combined workflow step/job was incorrectly reported successful. The
+repeated privacy error was the value-free refusal `Private directory permissions could
+not be verified; setup refused.` These runs must be retained as failed Windows test
+evidence behind successful provider statuses, not as acceptance.
+
+This bounded repair will:
+
+1. Separate the native privacy and CI-tooling commands in `quality.yml` so either is an
+   independent required step, with a cheap synthetic negative proof under the actual
+   Windows shell that a failing required command cannot be hidden by a later success.
+2. Establish and fix the actual native-Windows protected-directory creation or
+   verification cause using redirected synthetic fixtures only. The correction must
+   retain fail-closed owner/ACL, link/type, external-root and SQLite-companion checks;
+   it must not skip tests, trust CI specially, weaken permissions or redesign storage.
+3. Correct this ledger, CURRENT, HANDOVER and PR #12 description so badges are never
+   substituted for inspected suite summaries and relevant failure logs.
+
+Acceptance requires relevant cheap regressions first; regression coverage for the
+diagnosed ACL cause and PowerShell failure propagation; native tools-only quality
+evidence on Windows x64 and macOS ARM64 at one exact corrected candidate; and direct
+inspection of the actual suite summaries and relevant logs. Record discovered, passed,
+failed, errored and skipped counts separately. The protected-state positive tests and
+the companion-before-open regression must demonstrably reach their intended assertions.
+Only the repair and adjacent propagation receive self-review. The four preceding
+hardening fixes remain preserved. No real profile or journal manipulation, production
+matrix rerun, W0 recovery, W1, OPT-2, application feature, merge or branch deletion is
+authorised. If CI remains pending, publish an `awaiting_ci` handover with exact
+run/attempt/SHA and resume only by collecting those same runs.
+
+#### Superseded evidence and local repair result
+
+Read-only GitHub metadata and raw-log inspection verified the reported defect. At
+`a9631343bb9ab4099ed36750a29eb757a7960ed2`, push run `35435261321` / Windows job
+`105876723427` and PR run `35435263405` / Windows job `105876728690`, attempt 1,
+each discovered 37 privacy tests: 20 passed, 1 failed, 15 errored and 1 skipped. At
+documentation head `aad8d0a35fdcef8f59604922f5957b30af8c5bc1`, push run
+`35436013835` / Windows job `105878666437` and PR run `35436015412` / Windows job
+`105878671087`, attempt 1, repeated the same result. Each combined shell step then ran
+and passed all 47 CI-tooling tests, so the last native command supplied exit zero and
+GitHub recorded the Windows step/job and overall run as successful.
+
+The earlier corrective candidate was affected too: at
+`b6e064dcbc4be0692a4ad1c7ba08ada29b38b76d`, push run `35431546974` / Windows job
+`105866946893` and PR run `35431548846` / Windows job `105866952061`, attempt 1,
+each discovered 35 privacy tests: 19 passed, 1 failed, 14 errored and 1 skipped. Their
+following 41 CI-tooling tests passed and likewise hid the privacy result. These six
+Windows jobs are failed test evidence behind provider-success conclusions. They do not
+prove native Windows acceptance. The macOS and repository-job results retain only their
+own platform/job scope.
+
+The Windows creator installed the intended restrictive DACL but never changed the
+owner. The verifier correctly requires the owner SID to equal the current account, so
+any Windows token whose newly created temporary directory is owned by another allowed
+principal fails closed. The candidate now applies only the ACL owner section after the
+restrictive DACL, setting it to the already validated current SID without rewriting the
+DACL or SACL. Directory/file type, reparse, link-count, allowed-ACE, external-root and
+pre-open SQLite-companion checks remain unchanged. A native regression records only a
+generic default-owner category, then requires owner normalisation and the complete
+private-storage verifier to pass. The corrected GitHub Windows run must establish which
+generic default-owner condition the hosted runner actually exercised before this cause
+is accepted as native proof.
+
+The workflow now runs privacy and CI-tooling as separate required steps. A native
+PowerShell regression demonstrated the old sequence (exit 23 followed by exit 0) returns
+zero, while the same failing command in its own invocation returns 23 and a later
+independent success returns zero. The workflow-structure assertion binds those suites
+to separate `run` entries.
+
+Local synthetic Windows validation passed: 40 privacy tests discovered, 37 passed,
+0 failed, 0 errored and 3 skipped for explicit host capabilities; all 47 CI-tooling
+tests passed. The positive external profile, SQLite journal/companion and hardlink tests
+passed. `test_unsafe_existing_sqlite_companion_is_rejected_before_connect` passed with
+its `sqlite3.connect` mock still uncalled, proving the pre-open assertion was reached.
+Python compilation and exact repository validation passed for 217 public files; 26
+lossless/source tests and the 620,000-byte / 40,000-node benchmark passed at 161.92 ms
+median across seven samples; `git diff --check` passed. Native Windows x64 and macOS
+ARM64 quality evidence for the published corrected candidate remains pending.
