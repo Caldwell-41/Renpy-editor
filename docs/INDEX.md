@@ -2,23 +2,33 @@
 
 Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
-[`tasks/active`](tasks/active/). Follow the
-[repository-first delivery workflow](WORKFLOW.md): detail and handover state live
-here; chat prompts select one checkpoint rather than repeat the implementation plan.
+[`tasks/active`](tasks/active/). Follow [repository-first delivery](WORKFLOW.md):
+implementation detail and handover live here; prompts select a bounded delivery.
+Explicit user-approved checkpoint groupings are recorded in the selected brief.
 
-Phase 1E PR #9 is merged, as are corrected Phase 1A-1D and PR #8's UI follow-up.
-Archived ledgers retain exact evidence. Current maintenance is
-[CI optimisation / wait-wake](tasks/active/ci-optimisation.md), with W0 feasibility
-approved first. CURRENT/HANDOVER own live state; this index is not another status ledger.
+The current maintenance entry is the
+[OPT-1A second corrective pass](tasks/active/ci-opt-1a-second-corrective-pass.md),
+which reviews the complete
+[original Gate P plus OPT-1A brief](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md).
+The [parent roadmap](tasks/active/ci-optimisation.md) retains later wait/wake and
+CI-efficiency dependencies. CURRENT/HANDOVER own live scope and branch state.
+The [W0 qualification](research/CODEX_WAIT_WAKE_QUALIFICATION.md) is separate evidence;
+passing independent CI work does not qualify automatic Codex resumption.
 
-Read the [Phase 1 plan](tasks/active/phase-1-vertical-slice.md) for product prerequisites
-and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
-open-ended coding task. Historical snapshots are evidence, not current instructions.
+Phase 1E PR #9 and the corrected Phase 1A-1D/PR #8 baseline are integrated; archived
+ledgers retain evidence. The [Phase 1 plan](tasks/active/phase-1-vertical-slice.md) and
+[ROADMAP.md](ROADMAP.md) describe product prerequisites and release boundaries, not
+open-ended coding approval. Historical snapshots are not current instructions.
 
 | Concern | Canonical document |
 | --- | --- |
-| Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
-| CI optimisation roadmap, W0 brief and wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
+| Repo-first delivery, explicit groups, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
+| Current OPT-1A architectural/correctness pass and integrated review | [tasks/active/ci-opt-1a-second-corrective-pass.md](tasks/active/ci-opt-1a-second-corrective-pass.md) |
+| Original Gate P plus OPT-1A requirements and historical evidence | [tasks/active/ci-opt-1a-privacy-and-operation-foundation.md](tasks/active/ci-opt-1a-privacy-and-operation-foundation.md) |
+| Parent CI optimisation roadmap and later wait/wake design | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
+| Local client setup, private data and known protection gaps | [LOCAL_CODEX_CONFIG.md](LOCAL_CODEX_CONFIG.md) |
+| Candidate-bound CI doctor, preflight, submission, collection and recovery | [CI_ORCHESTRATION.md](CI_ORCHESTRATION.md) |
+| W0 actual-host wait/wake qualification | [research/CODEX_WAIT_WAKE_QUALIFICATION.md](research/CODEX_WAIT_WAKE_QUALIFICATION.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
@@ -59,9 +69,9 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Phase 1A dependency/licence review | [dependencies/phase-1a.md](dependencies/phase-1a.md) |
 | Decision records | [`adr/`](adr/) |
 
-Archive completed task briefs after their acceptance/integration requirements are
-resolved. Preserve unique failure evidence and lessons, consolidate redundant handovers
-and repair links. No new handover snapshot is required for every chat. The completed
+Archive completed briefs once their acceptance/integration requirements are resolved.
+Preserve unique failure evidence and lessons, consolidate duplicate handovers and repair
+links. No snapshot per chat. The completed
 [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
 and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md)
 remain historical evidence.

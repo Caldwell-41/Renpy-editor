@@ -18,3 +18,27 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+      - name: Test local-only Codex configuration boundaries
+        run: python3 -m unittest discover -s tests/ci_privacy -v
+      - name: Test candidate-bound CI operations
+        run: python3 -m unittest discover -s tests/ci_tooling -v
+
+  native-tools:
+    name: Tools / ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Test local-only Codex configuration boundaries on native filesystem
+        run: python -m unittest discover -s tests/ci_privacy -v
+      - name: Test candidate-bound CI operations on native filesystem
+        run: python -m unittest discover -s tests/ci_tooling -v
