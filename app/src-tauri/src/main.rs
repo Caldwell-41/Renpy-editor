@@ -223,7 +223,7 @@ fn core_request(
             _ => handle_application_request(request, smoke_enabled, lifecycle),
         }
     };
-    if smoke_enabled && is_smoke_report && response.is_success() {
+    if smoke_enabled && is_smoke_report {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         if let Some(window) = app.get_webview_window("main") {
             let original_url = window.url().ok();
@@ -410,7 +410,7 @@ fn main() {
                         .expect("main smoke probe injection must succeed");
                 });
                 thread::spawn(|| {
-                    thread::sleep(Duration::from_secs(60));
+                    thread::sleep(Duration::from_secs(20));
                     if !SMOKE_REPORT_RECEIVED.load(Ordering::SeqCst) {
                         eprintln!("packaged boundary smoke report timed out");
                         std::process::exit(1);

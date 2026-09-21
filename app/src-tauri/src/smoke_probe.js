@@ -454,6 +454,7 @@ setTimeout(async () => {
     const shortcutFlushDelta = (operationCounts.get("project.flush") ?? 0) - shortcutFlushBefore;
     sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${shortcutFlushDelta}:saved`);
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "shortcut Source Save barrier release");
 
     sourceAuthoringStage = "source-clean-flush";
     const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
@@ -463,6 +464,7 @@ setTimeout(async () => {
     const cleanShortcut = new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true });
     sourceEditor.dispatchEvent(cleanShortcut);
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "clean Source Flush barrier release");
     const cleanSaveDelta = (operationCounts.get("source.save") ?? 0) - cleanSaveBefore;
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
