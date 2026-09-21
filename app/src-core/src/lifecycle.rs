@@ -3432,6 +3432,125 @@ mod tests {
             })
             .unwrap();
         assert_eq!(audio.mime_type, "audio/wav");
+
+        // Phase 1F real-service acceptance: the target gate crosses the same Source,
+        // transaction, history, disk, projection, close, and reopen boundaries as the UI.
+        let source_path = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap()
+            .source_path
+            .clone();
+        let source_file = final_root.join(&source_path);
+        let accepted_before_source = fs::read_to_string(&source_file).unwrap();
+        let opened_source = service
+            .source_open(SourceOpenRequest {
+                path: source_path.clone(),
+                selection_start: Some(0),
+                selection_end: Some(0),
+                byte_start: None,
+                byte_end: None,
+            })
+            .unwrap();
+        let invalid_source = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: opened_source.base_revision.clone(),
+                text: "label incomplete:\n    menu:\n".into(),
+                selection_start: 0,
+                selection_end: 0,
+            })
+            .unwrap();
+        assert!(!invalid_source.diagnostics.is_empty());
+        assert!(matches!(
+            service.source_save(SourceSaveRequest {
+                path: source_path.clone(),
+                expected_base_revision: invalid_source.base_revision.clone(),
+                expected_draft_version: invalid_source.draft_version,
+            }),
+            Err(LifecycleError::Source(SourceError::InvalidSource))
+        ));
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_before_source
+        );
+
+        let accepted_source_text = accepted_before_source.replace(
+            "A production-authored Scene.",
+            "A durable Source-authored Scene.",
+        );
+        assert_ne!(accepted_source_text, accepted_before_source);
+        let retained_source = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: invalid_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 3,
+                selection_end: 3,
+            })
+            .unwrap();
+        let retained_version = retained_source.draft_version;
+        let selection_only = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: retained_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 5,
+                selection_end: 5,
+            })
+            .unwrap();
+        assert_eq!(selection_only.draft_version, retained_version);
+        let saved_source = service
+            .source_save(SourceSaveRequest {
+                path: source_path.clone(),
+                expected_base_revision: selection_only.base_revision.clone(),
+                expected_draft_version: selection_only.draft_version,
+            })
+            .unwrap();
+        assert!(!saved_source.dirty);
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_source_text
+        );
+        let clean_selection_only = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: saved_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 7,
+                selection_end: 7,
+            })
+            .unwrap();
+        assert!(!clean_selection_only.dirty);
+        assert_eq!(
+            clean_selection_only.draft_version,
+            saved_source.draft_version
+        );
+        scene_workspace = apply_scene_target(
+            &service,
+            &service.scene_workspace().unwrap(),
+            crate::scene::SceneCommand::Undo,
+        );
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_before_source
+        );
+        scene_workspace =
+            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_source_text
+        );
+        assert!(scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap()
+            .beats
+            .iter()
+            .any(|beat| matches!(&beat.payload, crate::scene::BeatPayload::Narration { text } if text == "A durable Source-authored Scene.")));
+        println!("phase-1f-source-save-target-gate: passed");
         RenpyAdapter::validate_generated(&sdk, &final_root).unwrap();
         RenpyAdapter::smoke_run(&sdk, &final_root).unwrap();
         println!("phase-1e-scene-authoring-target-gate: passed");
@@ -3445,6 +3564,20 @@ mod tests {
         let reopened = service.open_recent(&recent[0].id).unwrap();
         assert_eq!(reopened.chapter_id, phase_1e_selection.chapter_id);
         assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
+        let reopened_source = service
+            .source_open(SourceOpenRequest {
+                path: source_path.clone(),
+                selection_start: None,
+                selection_end: None,
+                byte_start: None,
+                byte_end: None,
+            })
+            .unwrap();
+        assert_eq!(
+            reopened_source.text.as_deref(),
+            Some(accepted_source_text.as_str())
+        );
+        assert!(!reopened_source.dirty);
         let reopened_authored = service.authoring_list().unwrap();
         let reopened_ids = reopened_authored
             .characters

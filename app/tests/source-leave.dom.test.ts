@@ -53,7 +53,12 @@ test("dirty Source close offers cancel and zero-leave failed Save All before a s
   await tick();
   const choices = document.querySelector(".leave-source-dialog")?.textContent ?? "";
   for (const choice of ["Save All", "Discard All", "Cancel"]) assert.match(choices, new RegExp(choice));
-  click("Cancel");
+  assert.equal((document.activeElement as HTMLElement | null)?.textContent, "Save All");
+  document.activeElement?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+  assert.equal((document.activeElement as HTMLElement | null)?.textContent, "Cancel");
+  document.activeElement?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true }));
+  assert.equal((document.activeElement as HTMLElement | null)?.textContent, "Save All");
+  document.querySelector(".leave-source-dialog")?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
   assert.equal(closeCount, 0);
   assert.match(document.body.textContent ?? "", /Source Project/);
 

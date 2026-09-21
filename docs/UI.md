@@ -190,9 +190,10 @@ shrink the aspect-ratio preview, then collapse inspector/sidebar before reducing
 below its preferred minimum.
 
 The top toolbar always shows persistence truth such as `Saved`, `Saving`,
-`Pending validation`, `Conflict`, or `Recovery required`. `Ctrl/Cmd+S` explicitly
-flushes pending accepted work and confirms durability, while normal accepted edits are
-also persisted transactionally.
+`Pending validation`, `Conflict`, or `Recovery required`. The shell owns one
+`Ctrl/Cmd+S` route: outside Source it flushes pending accepted work, while a focused
+Source editor settles and accepts its captured draft. A clean settled Source performs
+the ordinary Flush; a refused Source draft never falls through to a false Saved result.
 
 ## Welcome and project lifecycle
 
@@ -409,6 +410,11 @@ highlights, custom-code boundaries, staged/conflict information, and diagnostics
 
 Typing creates a bounded, session-local draft. It is accepted only by Save Source or
 Source-focused `Ctrl/Cmd+S`; tab/workspace navigation keeps the draft without writing.
+Both Save entry points use the same document-bound executor. During its short retention
+and acceptance barrier the editor and conflicting navigation/actions are disabled
+without replacing the text control, so selection and native draft undo survive a
+refusal. Failed retention preserves the newest local text for retry, copy, or an
+explicitly confirmed discard.
 Dirty drafts show Pending validation and a crash/restart warning. Close, project switch,
 and normal exit offer Save All / Discard All / Cancel. Save All preflights every draft
 before its one recoverable multi-mutation transaction, so a refusal writes nothing.
@@ -581,6 +587,10 @@ lifecycle, and committed-history writes that touch it while unrelated files rema
 available when recovery scope permits. Invalid source retains its draft and accepted
 visual revision; missing/renamed source shows unavailable/stale state and is never
 recreated or retargeted. Recovery required retains project-wide precedence.
+The shell combines fresh project status with newer local/unretained input. Conflict and
+recovery retain precedence, delayed status reads cannot overwrite an active operation,
+and a post-acceptance status failure reports accepted-but-unconfirmed rather than
+resubmitting or claiming Saved.
 
 When transaction state blocks writing, the recovery surface remains available without
 executing the project. It lists affected paths and retained evidence, offers only

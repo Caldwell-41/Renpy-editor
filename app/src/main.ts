@@ -12,7 +12,9 @@ import {
   renderSourceWorkspace,
   type SourceDocument,
   type SourceInventory,
+  type SourceSaveIntent,
   type SourceTarget,
+  type SourceWorkspaceController,
 } from "./source-ui.ts";
 
 interface ParentChoice { id: string; displayPath: string; cancelled?: boolean }
@@ -44,22 +46,41 @@ let operationGeneration = 0;
 let operationGenerations = new WeakMap<object, number>();
 const operationScopes = {
   projectOpen: {}, projectClose: {}, projectCreate: {}, persistence: {},
-  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
+  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, sourceSave: {}, sourceNavigation: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
 };
 const activeAuthoringOperations = new Map<string, number>();
 const activeFlushOperations = new Map<string, number>();
+const sourceActionScopes = new Map<string, object>();
 let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
 let disposeSceneView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
+let sourceRegistrationSequence = 0;
+let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
+let statusRequestSequence = 0;
 
 declare global {
   interface Window {
     __loomlightScaffoldSmokeMode?: boolean;
     __loomlightInstallSmokeRequester?: (requester: typeof desktopRequestCore) => () => void;
+    __loomlightReadSaveTrace?: () => readonly string[];
   }
 }
+
+const saveCommandTrace: string[] = [];
+function recordSaveTrace(entry: string): void {
+  if (window.__loomlightScaffoldSmokeMode !== true) return;
+  saveCommandTrace.push(entry);
+  if (saveCommandTrace.length > 32) saveCommandTrace.shift();
+}
+
+Object.defineProperty(window, "__loomlightReadSaveTrace", {
+  configurable: false,
+  enumerable: false,
+  writable: false,
+  value: (): readonly string[] => [...saveCommandTrace],
+});
 
 Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
   configurable: false,
@@ -130,6 +151,40 @@ function refreshPersistenceAfterStaleCompletion(token: CompletionToken): void {
   if (project && project.sessionId === token.sessionId && token.view !== viewGeneration) {
     void refreshPersistenceStatus(project, viewGeneration);
   }
+}
+
+async function runAuthoringOperation<T>(project: OpenProject, scope: object, task: () => Promise<T>): Promise<T> {
+  const token = beginAuthoringCompletion(project, scope);
+  if (!token) throw new Error("Another persistence operation is still in progress.");
+  try {
+    return await task();
+  } finally {
+    finishAuthoringCompletion(token);
+  }
+}
+
+function registerSourceController(project: OpenProject, controller: SourceWorkspaceController): () => void {
+  const token = ++sourceRegistrationSequence;
+  activeSourceController = { token, project, controller };
+  return () => {
+    if (activeSourceController?.token === token) activeSourceController = undefined;
+  };
+}
+
+function currentSourceController(project: OpenProject): SourceWorkspaceController | undefined {
+  const registration = activeSourceController;
+  return registration?.project.sessionId === project.sessionId ? registration.controller : undefined;
+}
+
+function hasBlockingModal(): boolean {
+  return document.querySelector<HTMLElement>('[aria-modal="true"]') !== null;
+}
+
+function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error" } {
+  if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
+  if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
+  if (localPending || state === "pendingValidation") return { text: "Pending validation", kind: "normal" };
+  return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
 const wizard = {
@@ -278,10 +333,14 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", characters: "Characters", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
     if (surface === name) nav.ariaCurrent = "page";
-    nav.addEventListener("click", () => { if (surface === name) { if (name !== "story") showProject(project, name); return; } if (allowSceneNavigation()) showProject(project, name); }); sidebar.append(nav);
+    nav.addEventListener("click", () => {
+      if (surface === name && name === "story") return;
+      void requestProjectNavigation(project, name);
+    });
+    sidebar.append(nav);
   });
   const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story" || surface === "source") sidebar.append(tree);
-  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation()) return; await requestProjectClose(project); }); sidebar.append(close);
+  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : "supporting-workspace";
   layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
@@ -289,15 +348,66 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   else void renderAuthoringSurface(workspace, project, surface, generation);
 }
 
-async function refreshPersistenceStatus(project: OpenProject, generation: number): Promise<void> {
+async function requestProjectNavigation(project: OpenProject, surface: ProjectSurface, target?: ProjectTarget): Promise<void> {
+  if (hasBlockingModal() || !allowSceneNavigation()) return;
+  const controller = currentSourceController(project);
+  if (!controller) {
+    showProject(project, surface, target);
+    return;
+  }
+  try {
+    const transition = await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation"));
+    if (!transition) return;
+    try {
+      if (currentProject?.sessionId === project.sessionId) showProject(project, surface, target);
+    } finally {
+      transition.release();
+    }
+  } catch (error) {
+    if (currentProject?.sessionId === project.sessionId) setStatus(message(error, "Source input could not be retained before navigation"), "error");
+  }
+}
+
+async function requestSourceSave(project: OpenProject, controller: SourceWorkspaceController, intent: SourceSaveIntent): Promise<void> {
+  if (currentSourceController(project) !== controller) {
+    setStatus("The captured Source editor is no longer active.", "error");
+    return;
+  }
+  recordSaveTrace(`route=source;origin=${intent.origin};generation=${intent.documentGeneration};phase=start`);
+  try {
+    const outcome = await runAuthoringOperation(project, operationScopes.sourceSave, () => controller.executeSave(
+      intent,
+      () => projectValue(project, "project.flush"),
+    ));
+    recordSaveTrace(`route=source;origin=${intent.origin};generation=${intent.documentGeneration};phase=${outcome.kind};status=${document.querySelector<HTMLElement>("#app-status")?.textContent ?? "missing"}`);
+    if (outcome.kind === "busy" || outcome.kind === "blocked") setStatus(outcome.message, "error");
+    if (currentProject?.sessionId === project.sessionId) {
+      await refreshPersistenceStatus(
+        project,
+        viewGeneration,
+        outcome.kind === "accepted" ? "Source accepted, but project status could not be confirmed" : undefined,
+      );
+    }
+  } catch (error) {
+    recordSaveTrace(`route=source;origin=${intent.origin};generation=${intent.documentGeneration};phase=error`);
+    if (currentProject?.sessionId === project.sessionId) setStatus(message(error, "Save could not be started"), "error");
+  }
+}
+
+async function refreshPersistenceStatus(project: OpenProject, generation: number, acceptedStatusFailure?: string): Promise<void> {
+  const requestSequence = ++statusRequestSequence;
   const token = beginCompletion(project, operationScopes.persistence);
   try {
     const state = await projectValue<PersistenceStatus>(project, "project.status");
-    if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+    if (requestSequence !== statusRequestSequence || generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (activeAuthoringOperations.has(project.sessionId) || activeFlushOperations.has(project.sessionId)) return;
-    setStatus(state === "saved" ? "Saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Recovery required — writes are disabled", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
+    const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
+    setStatus(rendered.text, rendered.kind);
   } catch (error) {
-    if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Saved state could not be checked"), "error");
+    if (requestSequence === statusRequestSequence && generation === viewGeneration && completionIsCurrent(token)) {
+      const detail = message(error, "Saved state could not be checked");
+      setStatus(acceptedStatusFailure ? `${acceptedStatusFailure}: ${detail}` : detail, "error");
+    }
   }
 }
 
@@ -357,7 +467,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
   try {
     const inventory = await projectValue<SourceInventory>(project, "source.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-    disposeSourceView = renderSourceWorkspace(workspace, tree, inventory, {
+    const controller = renderSourceWorkspace(workspace, tree, inventory, {
       status: setStatus,
       reloadInventory: () => projectValue<SourceInventory>(project, "source.list"),
       open: (selection) => projectValue<SourceDocument>(project, "source.open", { ...selection }),
@@ -365,8 +475,17 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       save: (request) => projectValue<SourceDocument>(project, "source.save", request),
       discard: (path) => projectValue<SourceDocument>(project, "source.discard", { path }),
       applyBoth: (request) => projectValue<SourceDocument>(project, "source.applyBoth", request),
-      viewScene: (sceneId, beatId) => showProject(project, "story", { sceneId, beatId }),
+      viewScene: (sceneId, beatId) => { void requestProjectNavigation(project, "story", { sceneId, beatId }); },
+      requestSave: (sourceController, intent) => requestSourceSave(project, sourceController, intent),
+      registerController: (sourceController) => registerSourceController(project, sourceController),
+      runCoordinated: (label, task) => {
+        let scope = sourceActionScopes.get(label);
+        if (!scope) { scope = {}; sourceActionScopes.set(label, scope); }
+        return runAuthoringOperation(project, scope, task);
+      },
+      refreshPersistence: () => { void refreshPersistenceStatus(project, viewGeneration); },
     }, target);
+    disposeSourceView = controller.dispose;
     await refreshPersistenceStatus(project, generation);
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Source workspace could not be loaded"), "error");
@@ -374,32 +493,68 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 }
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
-  const closeNow = async (): Promise<void> => {
-    const token = beginCompletion(project, operationScopes.projectClose);
-    await projectValue(project, "project.close");
-    if (completionIsCurrent(token)) await afterClose();
-  };
+  if (document.querySelector(".leave-source-dialog")) return;
+  const controller = currentSourceController(project);
+  let transition: Awaited<ReturnType<SourceWorkspaceController["prepareTransition"]>>;
+  let inventory: SourceInventory;
   try {
-    const inventory = await projectValue<SourceInventory>(project, "source.list");
-    if (!inventory.dirtyCount) { await closeNow(); return; }
-    if (document.querySelector(".leave-source-dialog")) return;
+    inventory = await runAuthoringOperation(project, operationScopes.projectClose, async () => {
+      transition = controller ? await controller.prepareTransition("leave") : undefined;
+      if (controller && !transition) throw new Error("Source input could not be retained; the project remains open.");
+      const currentInventory = await projectValue<SourceInventory>(project, "source.list");
+      if (!currentInventory.dirtyCount) await projectValue(project, "project.close");
+      return currentInventory;
+    });
+    if (!inventory.dirtyCount) {
+      transition?.release();
+      if (currentProject?.sessionId === project.sessionId) await afterClose();
+      return;
+    }
     const restoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
-    const backdrop = document.createElement("div"); backdrop.className = "leave-source-dialog"; backdrop.role = "dialog"; backdrop.ariaModal = "true"; backdrop.setAttribute("aria-labelledby", "leave-source-title");
+    const backdrop = document.createElement("div"); backdrop.className = "leave-source-dialog"; backdrop.role = "dialog"; backdrop.setAttribute("aria-modal", "true"); backdrop.setAttribute("aria-labelledby", "leave-source-title");
     const panel = document.createElement("section");
     const heading = document.createElement("h2"); heading.id = "leave-source-title"; heading.textContent = "Unaccepted Source drafts";
     const copy = document.createElement("p"); copy.textContent = `${inventory.dirtyCount} Source draft${inventory.dirtyCount === 1 ? " is" : "s are"} held only for this session. Save all, discard all, or cancel closing.`;
     const actions = document.createElement("div"); actions.className = "row-actions";
-    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { backdrop.remove(); restoreFocus?.focus(); });
+    controller?.setModalBlocked(true);
+    const finishDialog = (restore: boolean): void => {
+      backdrop.removeEventListener("keydown", trapFocus);
+      backdrop.remove();
+      controller?.setModalBlocked(false);
+      transition?.release();
+      if (restore && restoreFocus?.isConnected) restoreFocus.focus();
+    };
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => finishDialog(true));
     const discard = button("Discard All", "button danger");
     const save = button("Save All", "button primary");
     const run = async (operation: "source.saveAll" | "source.discardAll"): Promise<void> => {
       save.disabled = true; discard.disabled = true; cancel.disabled = true; setStatus(operation === "source.saveAll" ? "Validating all Source drafts…" : "Discarding Source drafts…");
-      try { await projectValue<SourceInventory>(project, operation); backdrop.remove(); await closeNow(); }
+      try {
+        await runAuthoringOperation(project, operation === "source.saveAll" ? save : discard, async () => {
+          await projectValue<SourceInventory>(project, operation);
+          await projectValue(project, "project.close");
+        });
+        finishDialog(false);
+        if (currentProject?.sessionId === project.sessionId) await afterClose();
+      }
       catch (error) { save.disabled = false; discard.disabled = false; cancel.disabled = false; setStatus(message(error, operation === "source.saveAll" ? "No Source files were saved" : "Source drafts were not discarded"), "error"); save.focus(); }
     };
+    const trapFocus = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") { event.preventDefault(); cancel.click(); return; }
+      if (event.key !== "Tab") return;
+      const controls = [cancel, discard, save].filter((item) => !item.disabled);
+      if (!controls.length) return;
+      const first = controls[0]!; const last = controls.at(-1)!;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    backdrop.addEventListener("keydown", trapFocus);
     discard.addEventListener("click", () => void run("source.discardAll")); save.addEventListener("click", () => void run("source.saveAll"));
     actions.append(cancel, discard, save); panel.append(heading, copy, actions); backdrop.append(panel); root.querySelector(".app-shell")?.append(backdrop); save.focus();
-  } catch (error) { setStatus(message(error, "Project could not be closed"), "error"); }
+  } catch (error) {
+    transition?.release();
+    setStatus(message(error, "Project could not be closed"), "error");
+  }
 }
 
 async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source">, generation: number): Promise<void> {
@@ -474,10 +629,50 @@ function hasUnsubmittedInput(): boolean {
 }
 
 function allowSceneNavigation(): boolean {
+  if (hasBlockingModal()) return false;
   if (!hasSceneDraft(root)) return true;
   setStatus("Commit or cancel the Scene editor before navigating.", "error");
   focusSceneDraft(root);
   return false;
+}
+
+function isMacPlatform(): boolean {
+  return /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
+}
+
+function isSaveShortcut(event: KeyboardEvent): boolean {
+  if (event.key.toLowerCase() !== "s" || event.altKey || event.shiftKey) return false;
+  return isMacPlatform()
+    ? event.metaKey && !event.ctrlKey
+    : event.ctrlKey && !event.metaKey;
+}
+
+function requestProjectFlush(project: OpenProject): void {
+  if (activeAuthoringOperations.has(project.sessionId)) {
+    setStatus("Authoring operation in progress — no additional Flush started");
+    return;
+  }
+  if (activeFlushOperations.has(project.sessionId)) {
+    setStatus("Flush is still in progress.");
+    return;
+  }
+  const token = beginCompletion(project, operationScopes.persistence);
+  activeFlushOperations.set(project.sessionId, token.operation);
+  recordSaveTrace("route=flush;origin=keyboard;context=non-source;phase=start");
+  setStatus("Saving…");
+  void projectValue(project, "project.flush").then(async () => {
+    if (!completionIsCurrent(token)) return;
+    const state = await projectValue<PersistenceStatus>(project, "project.status");
+    if (!completionIsCurrent(token)) return;
+    const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
+    setStatus(rendered.text, rendered.kind);
+    recordSaveTrace(`route=flush;origin=keyboard;context=non-source;phase=completed;status=${rendered.text}`);
+  }).catch((error) => {
+    recordSaveTrace("route=flush;origin=keyboard;context=non-source;phase=error");
+    if (completionIsCurrent(token)) setStatus(message(error, "Save could not be confirmed"), "error");
+  }).finally(() => {
+    finishFlushCompletion(token);
+  });
 }
 
 function installListeners(): void {
@@ -498,46 +693,50 @@ function installListeners(): void {
     }
   });
   window.addEventListener("keydown", (event) => {
-    if (!((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s")) return;
+    if (!isSaveShortcut(event)) return;
     event.preventDefault();
     const project = currentProject;
     if (!project) return;
-    if (activeAuthoringOperations.has(project.sessionId)) {
-      setStatus("Authoring operation in progress — no additional Flush started");
+    if (event.isComposing) {
+      recordSaveTrace("route=suppressed;origin=keyboard;reason=composition");
+      setStatus("Finish text composition before saving.");
       return;
     }
-    if (activeFlushOperations.has(project.sessionId)) {
-      setStatus("Flush is still in progress.");
+    if (event.repeat) {
+      recordSaveTrace("route=suppressed;origin=keyboard;reason=repeat");
+      setStatus("Save is already being handled.");
       return;
     }
-    const token = beginCompletion(project, operationScopes.persistence);
-    activeFlushOperations.set(project.sessionId, token.operation);
-    setStatus("Saving…");
-    void projectValue(project, "project.flush").then(async () => {
-      if (!completionIsCurrent(token)) return;
-      const state = await projectValue<PersistenceStatus>(project, "project.status");
-      if (!completionIsCurrent(token)) return;
-      setStatus(hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : state === "recoveryRequired" ? "Recovery required — writes are disabled" : "Saved", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
-    }).catch((error) => {
-      if (completionIsCurrent(token)) setStatus(message(error, "Save could not be confirmed"), "error");
-    }).finally(() => {
-      finishFlushCompletion(token);
-    });
+    if (hasBlockingModal()) { recordSaveTrace("route=suppressed;origin=keyboard;reason=modal"); return; }
+    const controller = currentSourceController(project);
+    const source = controller?.captureSaveIntent("keyboard", true);
+    if (controller && source?.kind === "captured") {
+      void requestSourceSave(project, controller, source.intent);
+      return;
+    }
+    if (source?.kind === "blocked") {
+      setStatus(source.message, "error");
+      return;
+    }
+    requestProjectFlush(project);
   });
 }
 
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
   coreRequester = requester;
+  saveCommandTrace.length = 0;
   viewGeneration = 0;
   operationGeneration = 0;
   operationGenerations = new WeakMap<object, number>();
   activeAuthoringOperations.clear();
   activeFlushOperations.clear();
+  statusRequestSequence += 1;
   currentProject = undefined;
   disposeSceneView?.();
   disposeSceneView = undefined;
   disposeSourceView?.();
   disposeSourceView = undefined;
+  activeSourceController = undefined;
   resetWizard();
   installListeners();
   void showWelcome();

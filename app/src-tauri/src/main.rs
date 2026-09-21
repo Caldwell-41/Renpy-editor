@@ -109,6 +109,17 @@ fn core_request(
         .and_then(Value::as_str)
         .unwrap_or("missing")
         .to_owned();
+    let source_command_trace_passed = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceCommandTracePassed"))
+        .and_then(Value::as_bool)
+        == Some(true);
+    let source_command_trace = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceCommandTrace"))
+        .and_then(Value::as_str)
+        .unwrap_or("missing")
+        .to_owned();
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
@@ -251,6 +262,8 @@ fn core_request(
                         "sceneAuthoringStage": scene_authoring_stage,
                         "sourceAuthoringUiPassed": source_authoring_ui_passed,
                         "sourceAuthoringStage": source_authoring_stage,
+                        "sourceCommandTracePassed": source_command_trace_passed,
+                        "sourceCommandTrace": source_command_trace,
                         "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
@@ -263,6 +276,8 @@ fn core_request(
                         && single_instance_passed
                         && supporting_authoring_ui_passed
                         && scene_authoring_ui_passed
+                        && source_authoring_ui_passed
+                        && source_command_trace_passed
                     {
                         0
                     } else {

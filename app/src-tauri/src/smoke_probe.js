@@ -103,6 +103,10 @@ setTimeout(async () => {
       ],
     };
     const called = new Set();
+    const operationCounts = new Map();
+    const sourceCommandTrace = [];
+    let acceptedSourceText = sourceDocument.text;
+    let retainedSourceDraft = null;
     let exactInteger = false;
     let exactIntegerUpdate = false;
     let releaseVariableUpdate;
@@ -120,10 +124,19 @@ setTimeout(async () => {
         payload,
       };
       called.add(request.operation);
+      operationCounts.set(request.operation, (operationCounts.get(request.operation) ?? 0) + 1);
       let value = model;
       if (request.operation === "project.openPicker") value = project;
       if (request.operation === "project.listRecent") value = [];
-      if (request.operation === "project.status") value = projectStatus;
+      if (request.operation === "project.status") {
+        value = projectStatus === "recoveryRequired"
+          ? "recoveryRequired"
+          : projectStatus === "conflict"
+            ? "conflict"
+            : sourceDocument.state === "conflict" || sourceDocument.state === "invalid" || sourceDocument.state === "unavailable"
+              ? "conflict"
+              : sourceDocument.dirty ? "pendingValidation" : "saved";
+      }
       if (request.operation === "project.flush") value = null;
       if (request.operation === "scene.list") value = sceneWorkspace;
       if (request.operation === "scene.apply") {
@@ -137,12 +150,23 @@ setTimeout(async () => {
       };
       if (request.operation === "source.open") value = sourceDocument;
       if (request.operation === "source.updateDraft") {
-        projectStatus = "pendingValidation";
-        sourceDocument = { ...sourceDocument, text: request.payload.text, state: "dirty", dirty: true, draftVersion: sourceDocument.draftVersion + 1 };
+        const nextDraft = request.payload.text === acceptedSourceText ? null : request.payload.text;
+        const changed = retainedSourceDraft !== nextDraft;
+        retainedSourceDraft = nextDraft;
+        sourceDocument = {
+          ...sourceDocument,
+          text: request.payload.text,
+          state: nextDraft === null ? "clean" : "dirty",
+          dirty: nextDraft !== null,
+          draftVersion: sourceDocument.draftVersion + Number(changed),
+          selectionStart: request.payload.selectionStart,
+          selectionEnd: request.payload.selectionEnd,
+        };
         value = sourceDocument;
       }
       if (request.operation === "source.save") {
-        projectStatus = "saved";
+        acceptedSourceText = retainedSourceDraft ?? acceptedSourceText;
+        retainedSourceDraft = null;
         sourceDocument = { ...sourceDocument, state: "clean", dirty: false, draftVersion: sourceDocument.draftVersion + 1 };
         value = sourceDocument;
       }
@@ -372,37 +396,78 @@ setTimeout(async () => {
     const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
       && document.body.textContent.includes("Custom Code")
       && document.querySelectorAll(".source-line-numbers").length === 1;
-    sourceAuthoringStage = "retain-draft";
-    const sourceEditor = document.querySelector(".source-editor");
+    sourceAuthoringStage = "retain-button-draft";
+    let sourceEditor = document.querySelector(".source-editor");
     sourceEditor.value = sourceEditor.value.replace("score += 1", "score += 2");
     sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
-    await waitFor(() => called.has("source.updateDraft") && projectStatus === "pendingValidation", "Source draft retention");
+    await waitFor(() => sourceDocument.dirty, "Source draft retention");
     await waitFor(() => {
       const save = document.querySelector('button[data-source-action="save"]');
       return save && !save.disabled && document.querySelector("#app-status")?.textContent === "Pending validation";
     }, "Source dirty UI state");
-    sourceAuthoringStage = "source-focused-save";
+    const buttonSaveBefore = operationCounts.get("source.save") ?? 0;
+    const buttonFlushBefore = operationCounts.get("project.flush") ?? 0;
+    sourceAuthoringStage = "source-button-save";
+    click("Save Source");
+    await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
+    sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${(operationCounts.get("project.flush") ?? 0) - buttonFlushBefore}:saved`);
+    sourceEditor = document.querySelector(".source-editor");
+    sourceEditor.dispatchEvent(new Event("select", { bubbles: true }));
+    await waitFor(() => !sourceDocument.dirty, "selection-only clean stability");
+
+    sourceAuthoringStage = "retain-shortcut-draft";
+    sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
+    sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
+    await waitFor(() => sourceDocument.dirty, "fresh shortcut Source draft");
+    const shortcutSaveBefore = operationCounts.get("source.save") ?? 0;
+    const shortcutFlushBefore = operationCounts.get("project.flush") ?? 0;
+    sourceAuthoringStage = "source-synthetic-shortcut-save";
     sourceEditor.focus();
     const sourceSaveShortcut = new Event("keydown", { bubbles: true, cancelable: true, composed: true });
+    const macPlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     Object.defineProperties(sourceSaveShortcut, {
       key: { value: "s" },
-      ctrlKey: { value: true },
-      metaKey: { value: false },
+      ctrlKey: { value: !macPlatform },
+      metaKey: { value: macPlatform },
+      altKey: { value: false },
+      shiftKey: { value: false },
+      repeat: { value: false },
+      isComposing: { value: false },
     });
     if (sourceEditor.dispatchEvent(sourceSaveShortcut)) throw new Error("Source save shortcut was not handled by the focused editor");
     try {
-      await waitFor(() => called.has("source.save") && projectStatus === "saved", "Source acceptance");
+      await waitFor(() => (operationCounts.get("source.save") ?? 0) === shortcutSaveBefore + 1 && !sourceDocument.dirty, "synthetic Source shortcut acceptance");
     } catch (error) {
       const status = document.querySelector("#app-status")?.textContent ?? "missing";
-      throw new Error(`${error instanceof Error ? error.message : String(error)}; status=${status}; calls=${[...called].sort().join(",")}`);
+      throw new Error(`${error instanceof Error ? error.message : String(error)}; status=${status}; counts=${JSON.stringify(Object.fromEntries(operationCounts))}`);
     }
+    sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${(operationCounts.get("project.flush") ?? 0) - shortcutFlushBefore}:saved`);
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
+
+    sourceAuthoringStage = "source-clean-flush";
+    const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
+    const cleanSaveBefore = operationCounts.get("source.save") ?? 0;
+    sourceEditor = document.querySelector(".source-editor");
+    sourceEditor.focus();
+    const cleanShortcut = new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true });
+    sourceEditor.dispatchEvent(cleanShortcut);
+    await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
+    sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${(operationCounts.get("source.save") ?? 0) - cleanSaveBefore}:flushes=1:saved`);
+
+    sourceAuthoringStage = "non-source-flush";
+    click("Characters");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "non-Source workspace");
+    const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
+    await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
+    sourceCommandTrace.push(`keyboard-synthetic:non-source:${macPlatform ? "meta" : "ctrl"}+s:completed:flushes=1:saved`);
     sourceAuthoringUiPassed = sourceSurfaceVisible
-      && sourceDocument.text.includes("score += 2")
+      && sourceDocument.text.includes("score += 3")
       && called.has("source.list")
       && called.has("source.open")
       && called.has("source.updateDraft")
-      && called.has("source.save");
+      && (operationCounts.get("source.save") ?? 0) === shortcutSaveBefore + 1
+      && (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1;
     sourceAuthoringStage = sourceAuthoringUiPassed ? "complete" : "assertions-failed";
 
     sceneAuthoringStage = "safe-recovery";
@@ -471,6 +536,15 @@ setTimeout(async () => {
   } finally {
     restoreSmokeRequester();
   }
+  const shellSaveTrace = typeof window.__loomlightReadSaveTrace === "function"
+    ? window.__loomlightReadSaveTrace().join("|")
+    : "missing";
+  const sourceCommandTracePassed = sourceCommandTrace.length === 4
+    && shellSaveTrace.includes("route=source;origin=toolbar")
+    && shellSaveTrace.includes("route=source;origin=keyboard")
+    && shellSaveTrace.includes("phase=accepted")
+    && shellSaveTrace.includes("phase=flushed")
+    && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
   await invoke("core_request", {
     request: {
       protocolVersion: 1,
@@ -489,6 +563,8 @@ setTimeout(async () => {
         sceneAuthoringUiPassed,
         sourceAuthoringStage,
         sourceAuthoringUiPassed,
+        sourceCommandTrace: `${sourceCommandTrace.join("|")}|shell=${shellSaveTrace}`,
+        sourceCommandTracePassed,
         supportingAuthoringStage,
         supportingAuthoringUiPassed,
         welcomeLifecycleVisible,

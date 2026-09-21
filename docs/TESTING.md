@@ -360,6 +360,17 @@ recovery, and conflict presentation. It must also retain the existing lifecycle,
 supporting-authoring, delayed operation/Flush, WebView denial, and single-instance
 checks.
 
+The bounded 1F-SAVE correction adds a faithful fake Source service whose accepted text
+is distinct from its retained draft, a retained Chromium regression for selection-only
+updates after acceptance, and shell/controller DOM races for immediate Save, failed
+retention and retry, duplicate command suppression, remount/stale completion, modal
+focus, leave settlement, modifier/composition policy and authoritative status. Packaged
+evidence records command route, synthetic versus target-native input, document
+generation, completion, Source-save/Flush counts and final status. Synthetic DOM or
+WebView keyboard dispatch does not certify Windows Ctrl+S or macOS Cmd+S delivery;
+native input and the real-service disk/reopen target fixture remain separately named
+acceptance rows.
+
 Focused core coverage includes schema v1→v2 migration, stable identities and unknown
 fields, exact-byte minimal Scene patches, protected opaque boundaries, incoming
 reference refusal, source create/move/delete and exact `.rpyc` ghost prevention,

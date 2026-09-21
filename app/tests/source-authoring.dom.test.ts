@@ -3,11 +3,19 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import {
   renderSourceWorkspace,
+  type SourceActions,
   type SourceDocument,
   type SourceInventory,
 } from "../src/source-ui.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
+
+function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (error: Error) => void } {
+  let resolve!: (value: T) => void;
+  let reject!: (error: Error) => void;
+  const promise = new Promise<T>((accept, decline) => { resolve = accept; reject = decline; });
+  return { promise, resolve, reject };
+}
 
 function installDom(): void {
   const browser = new Window({ url: "http://tauri.localhost" });
@@ -40,7 +48,26 @@ function documentModel(overrides: Partial<SourceDocument> = {}): SourceDocument 
   };
 }
 
-test("Source workspace retains drafts, uses Source-focused save, and bridges exact selection", async () => {
+function sourceActions(overrides: Partial<SourceActions>): SourceActions {
+  const fallback = documentModel();
+  return {
+    status: () => {},
+    reloadInventory: async () => inventory(),
+    open: async () => fallback,
+    update: async () => fallback,
+    save: async () => fallback,
+    discard: async () => fallback,
+    applyBoth: async () => fallback,
+    viewScene: () => {},
+    requestSave: async (controller, intent) => { await controller.executeSave(intent, async () => {}); },
+    registerController: () => () => {},
+    runCoordinated: async (_label, task) => task(),
+    refreshPersistence: () => {},
+    ...overrides,
+  };
+}
+
+test("Source workspace retains drafts, uses the shared toolbar Save executor, and bridges exact selection", async () => {
   installDom();
   let model = documentModel();
   const calls: string[] = [];
@@ -49,7 +76,7 @@ test("Source workspace retains drafts, uses Source-focused save, and bridges exa
   window.addEventListener("keydown", (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") globalSaveShortcuts += 1;
   });
-  const dispose = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), {
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
     status: (message) => { calls.push(`status:${message}`); },
     reloadInventory: async () => inventory(model.state, model.dirty),
     open: async () => model,
@@ -66,7 +93,7 @@ test("Source workspace retains drafts, uses Source-focused save, and bridges exa
     discard: async () => model,
     applyBoth: async () => model,
     viewScene: (sceneId, beatId) => { viewed = `${sceneId}:${beatId}`; },
-  });
+  }));
   await tick();
   assert.match(document.querySelector("#tree")?.textContent ?? "", /scene\.rpy/);
   assert.match(document.querySelector("#host")?.textContent ?? "", /Custom Code/);
@@ -81,18 +108,202 @@ test("Source workspace retains drafts, uses Source-focused save, and bridges exa
   editor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
   await tick();
   assert.equal(calls.filter((call) => call.startsWith("save:")).length, savesBeforeUndo);
-  const sourceSave = new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true, cancelable: true });
-  const unhandled = editor.dispatchEvent(sourceSave);
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
   await tick(); await tick();
-  assert.equal(unhandled, false);
   assert.equal(globalSaveShortcuts, 0);
   assert.equal(calls.some((call) => call.startsWith("save:")), true);
   assert.equal(model.dirty, false);
   const savedEditor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
-  dispose();
+  controller.dispose();
   savedEditor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true, cancelable: true }));
   await tick();
   assert.equal(globalSaveShortcuts, 1);
+});
+
+test("selection notifications after Source Save do not re-dirty accepted text", async () => {
+  installDom();
+  let model = documentModel();
+  let acceptedText = model.text ?? "";
+  let saves = 0;
+  let flushes = 0;
+  let failInventoryAfterAcceptance = false;
+  let saveOutcome = "";
+  const statuses: string[] = [];
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    status: (message) => { statuses.push(message); },
+    reloadInventory: async () => {
+      if (failInventoryAfterAcceptance) throw new Error("status service unavailable");
+      return inventory(model.state, model.dirty);
+    },
+    open: async () => model,
+    update: async (request) => {
+      const dirty = request.text !== acceptedText;
+      const changed = model.text !== request.text || model.dirty !== dirty;
+      model = { ...model, text: request.text, dirty, state: dirty ? "dirty" : "clean", draftVersion: model.draftVersion + Number(changed) };
+      return model;
+    },
+    save: async () => {
+      saves += 1;
+      acceptedText = model.text ?? "";
+      model = { ...model, dirty: false, state: "clean", draftVersion: model.draftVersion + 1 };
+      return model;
+    },
+    discard: async () => model,
+    applyBoth: async () => model,
+    viewScene: () => {},
+    requestSave: async (controller, intent) => {
+      failInventoryAfterAcceptance = true;
+      saveOutcome = (await controller.executeSave(intent, async () => { flushes += 1; })).kind;
+    },
+  }));
+  await tick();
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value = editor.value.replace("Hello", "Changed");
+  editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await tick(); await tick();
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick(); await tick();
+  const redrawn = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  redrawn.dispatchEvent(new window.Event("select", { bubbles: true }));
+  await tick(); await tick();
+  assert.equal(acceptedText.includes("Changed"), true);
+  assert.equal(saves, 1);
+  assert.equal(flushes, 0);
+  assert.equal(model.dirty, false);
+  assert.equal(saveOutcome, "accepted");
+  assert.match(statuses.at(-1) ?? "", /accepted, but project state could not be confirmed/i);
+});
+
+test("immediate Save waits for latest retention, coalesces duplicates, and fails closed on retention error", async () => {
+  installDom();
+  let model = documentModel();
+  const pendingUpdates: Array<ReturnType<typeof deferred<SourceDocument>>> = [];
+  const pendingSaves: Array<ReturnType<typeof deferred<SourceDocument>>> = [];
+  const savedTexts: string[] = [];
+  const statuses: string[] = [];
+  let requestPromise: Promise<void> | undefined;
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    status: (message) => { statuses.push(message); },
+    reloadInventory: async () => inventory(model.state, model.dirty),
+    open: async () => model,
+    update: async () => {
+      const pending = deferred<SourceDocument>();
+      pendingUpdates.push(pending);
+      return pending.promise;
+    },
+    save: async () => {
+      savedTexts.push(model.text ?? "");
+      const pending = deferred<SourceDocument>();
+      pendingSaves.push(pending);
+      return pending.promise;
+    },
+    requestSave: async (sourceController, intent) => {
+      requestPromise = sourceController.executeSave(intent, async () => { throw new Error("dirty Save must not Flush"); }).then(() => undefined);
+      await requestPromise;
+    },
+  }));
+  await tick();
+  let editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value = editor.value.replace("Hello", "Latest");
+  editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick();
+  assert.equal(pendingUpdates.length, 1);
+  assert.equal(editor.readOnly, true);
+  assert.equal(pendingSaves.length, 0);
+  const saveButton = [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!;
+  assert.equal(saveButton.disabled, true);
+
+  model = { ...model, text: editor.value, dirty: true, state: "dirty", draftVersion: 1 };
+  pendingUpdates[0]!.resolve(model);
+  await tick();
+  assert.equal(pendingSaves.length, 1);
+  assert.deepEqual(savedTexts, [model.text]);
+  model = { ...model, dirty: false, state: "clean", draftVersion: 2 };
+  pendingSaves[0]!.resolve(model);
+  await requestPromise;
+  await tick();
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")?.readOnly, false);
+
+  editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value = editor.value.replace("Latest", "Unretained");
+  editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick();
+  pendingUpdates[1]!.reject(new Error("Draft limit reached; latest text retained locally"));
+  await requestPromise;
+  await tick();
+  assert.equal(pendingSaves.length, 1);
+  assert.match(document.querySelector<HTMLTextAreaElement>(".source-editor")?.value ?? "", /Unretained/);
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")?.readOnly, false);
+  assert.match(statuses.at(-1) ?? "", /Draft limit reached/);
+
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick();
+  assert.equal(pendingUpdates.length, 3);
+  model = { ...model, text: editor.value, dirty: true, state: "dirty", draftVersion: 3 };
+  pendingUpdates[2]!.resolve(model);
+  await tick();
+  assert.equal(pendingSaves.length, 2);
+  assert.match(savedTexts.at(-1) ?? "", /Unretained/);
+  model = { ...model, dirty: false, state: "clean", draftVersion: 4 };
+  pendingSaves[1]!.resolve(model);
+  await requestPromise;
+  await tick();
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")?.readOnly, false);
+  controller.dispose();
+});
+
+test("stale completion and old disposal cannot replace or unregister a remounted same-path controller", async () => {
+  installDom();
+  let activeController: import("../src/source-ui.js").SourceWorkspaceController | undefined;
+  let registration = 0;
+  const registerController: SourceActions["registerController"] = (controller) => {
+    const token = ++registration;
+    activeController = controller;
+    return () => { if (registration === token) activeController = undefined; };
+  };
+  let oldModel = documentModel();
+  const oldSave = deferred<SourceDocument>();
+  let oldRequest: Promise<void> | undefined;
+  const oldController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    registerController,
+    reloadInventory: async () => inventory(oldModel.state, oldModel.dirty),
+    open: async () => oldModel,
+    update: async (request) => {
+      oldModel = { ...oldModel, text: request.text, dirty: true, state: "dirty", draftVersion: oldModel.draftVersion + 1 };
+      return oldModel;
+    },
+    save: async () => oldSave.promise,
+    requestSave: async (controller, intent) => {
+      oldRequest = controller.executeSave(intent, async () => {}).then(() => undefined);
+      await oldRequest;
+    },
+  }));
+  await tick();
+  const oldEditor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  oldEditor.value = oldEditor.value.replace("Hello", "Old pending");
+  oldEditor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await tick();
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick();
+
+  const newModel = documentModel({ text: 'label scene:\n    "New controller"\n    return\n' });
+  const newController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    registerController,
+    open: async () => newModel,
+    reloadInventory: async () => inventory(),
+  }));
+  await tick();
+  assert.equal(activeController, newController);
+  oldController.dispose();
+  assert.equal(activeController, newController);
+  oldSave.resolve({ ...oldModel, dirty: false, state: "clean", draftVersion: oldModel.draftVersion + 1 });
+  await oldRequest;
+  await tick();
+  assert.match(document.querySelector<HTMLTextAreaElement>(".source-editor")?.value ?? "", /New controller/);
+  assert.equal(activeController, newController);
+  newController.dispose();
 });
 
 test("Source conflict exposes both retained versions and only offers Apply Both with proof", async () => {
@@ -102,11 +313,11 @@ test("Source conflict exposes both retained versions and only offers Apply Both 
     selectedSceneId: undefined, selectedBeatId: undefined,
   });
   let applied = false;
-  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), {
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
     status: () => {}, reloadInventory: async () => inventory(model.state, model.dirty), open: async () => model,
     update: async () => model, save: async () => model, discard: async () => model,
     applyBoth: async () => { applied = true; model = documentModel(); return model; }, viewScene: () => {},
-  });
+  }));
   await tick();
   assert.match(document.body.textContent ?? "", /both retained/i);
   assert.match(document.querySelector(".source-conflict pre")?.textContent ?? "", /combined/);
@@ -119,12 +330,12 @@ test("destructive Source draft actions require confirmation and Cancel changes n
   installDom();
   let model = documentModel({ state: "dirty", dirty: true });
   let discarded = 0;
-  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), {
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
     status: () => {}, reloadInventory: async () => inventory(model.state, model.dirty), open: async () => model,
     update: async () => model, save: async () => model,
     discard: async () => { discarded += 1; model = documentModel(); return model; },
     applyBoth: async () => model, viewScene: () => {},
-  });
+  }));
   await tick();
 
   const discard = [...document.querySelectorAll("button")].find((item) => item.textContent === "Discard Draft")!;
@@ -148,12 +359,12 @@ test("conflict Copy Draft copies bytes and external reload requires confirmation
   let copied = "";
   let discarded = 0;
   Object.defineProperty(window.navigator, "clipboard", { configurable: true, value: { writeText: async (value: string) => { copied = value; } } });
-  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), {
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
     status: () => {}, reloadInventory: async () => inventory(model.state, model.dirty), open: async () => model,
     update: async () => model, save: async () => model,
     discard: async () => { discarded += 1; model = documentModel(); return model; },
     applyBoth: async () => model, viewScene: () => {},
-  });
+  }));
   await tick();
 
   [...document.querySelectorAll("button")].find((item) => item.textContent === "Copy Draft")!.click();

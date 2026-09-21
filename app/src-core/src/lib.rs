@@ -211,6 +211,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
         "rendererSecretsAbsent",
         "sceneAuthoringUiPassed",
         "sourceAuthoringUiPassed",
+        "sourceCommandTracePassed",
         "supportingAuthoringUiPassed",
         "welcomeLifecycleVisible",
         "newProjectWizardVisible",
@@ -221,6 +222,7 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
     keys.push("supportingAuthoringStage");
     keys.push("sceneAuthoringStage");
     keys.push("sourceAuthoringStage");
+    keys.push("sourceCommandTrace");
     has_exact_keys(payload, &keys)
         && BOOLEAN_KEYS
             .iter()
@@ -231,6 +233,10 @@ fn smoke_payload(payload: &Map<String, Value>) -> bool {
             == Some("complete")
         && payload.get("sceneAuthoringStage").and_then(Value::as_str) == Some("complete")
         && payload.get("sourceAuthoringStage").and_then(Value::as_str) == Some("complete")
+        && payload
+            .get("sourceCommandTrace")
+            .and_then(Value::as_str)
+            .is_some_and(|value| !value.is_empty() && value.len() <= 2048)
 }
 
 pub fn handle_request(request: Value, smoke_enabled: bool) -> CoreResponse {
@@ -959,6 +965,8 @@ mod tests {
             "sceneAuthoringUiPassed": true,
             "sourceAuthoringStage": "complete",
             "sourceAuthoringUiPassed": true,
+            "sourceCommandTrace": "button:source:completed|keyboard-synthetic:source:completed",
+            "sourceCommandTracePassed": true,
             "supportingAuthoringStage": "complete",
             "supportingAuthoringUiPassed": true,
             "welcomeLifecycleVisible": true,

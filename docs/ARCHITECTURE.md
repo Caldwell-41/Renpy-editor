@@ -151,10 +151,13 @@ through the source/file boundary.
 
 The shell always exposes a meaningful persistence state such as `Saved`, `Saving`,
 `Unsubmitted editor input`, `Pending validation`, `Conflict`, or `Recovery required`.
-`Ctrl/Cmd+S` remains an
-explicit flush/durability action: it completes pending accepted work and confirms that
-the project is durably persisted; it is not the only moment when visual state is
-translated into `.rpy`.
+One application-lifetime shell adapter owns `Ctrl/Cmd+S`. Outside Source editing it is
+an explicit Flush/durability action. In a Source editing context, the registered
+document controller captures the session, controller, open generation and latest input,
+settles ordered draft retention under the existing per-session mutation lease, and
+accepts that exact draft once. A clean settled Source falls through to normal Flush
+without an ownership gap; refusal never falls through. Successful Source acceptance is
+already durable through the shared transaction and does not append another Flush.
 
 Undo/redo records semantic intent and exact patches across visual and source edits.
 External filesystem revisions are safety boundaries: undo/redo must not silently
@@ -305,6 +308,10 @@ special cases:
   when a known race/failure prevents safe completion.
 - Source typing is session-local and never autosaves. Explicit Source Save/Save All
   and accepted visual edits use the same transaction/recovery mechanism.
+- Source acceptance temporarily makes the captured editor and navigation read-only,
+  drains prior retention, and fails closed while preserving local text. Navigation and
+  leave settle local input without accepting it; controller/document generations and
+  token-matched leases suppress stale redraw, status and cleanup.
 - Undo/redo stops at unresolved external conflicts rather than applying stale inverses.
 
 ## Preview boundary
