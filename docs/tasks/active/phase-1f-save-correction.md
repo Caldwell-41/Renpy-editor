@@ -1,12 +1,14 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `not_started`; this is the implementation brief, not a claim of repaired code.
+**State:** `blocked_on_target_evidence`; implementation and local verification are complete, but P1/P2 macOS, P3, and P5 remain outstanding.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
-**Reviewed application:** `4dfedd24b4831972376d69fde216ad2063d708d4`.
-**Reviewed documentation head:** `3aebbcd9aff8a051e28f5b92dc6e50ee324dd3b5`.
+**Final application candidate:** `a720ea3fb150f2a49422e8385256179185129968`.
+**Publication state:** closeout documentation is being published after the exact
+candidate's repository-quality and production runs; the branch head may therefore be
+a later documentation-only commit.
 
 ## Authority and scope
 
@@ -381,3 +383,120 @@ obligations. No application change or production dispatch is part of this public
 The previous immediate-dispatch handover is superseded. Implementation and validation
 of this correction remain `not_started`; previous application evidence belongs to the
 candidate explicitly named above, not to this planned design.
+
+2026-09-21 implementation and verification closeout: resumed the existing branch and
+draft PR without resetting the substantial `b8f15275` checkpoint. The final tested
+application candidate is `a720ea3fb150f2a49422e8385256179185129968` (tree
+`8edc9136aa362e180faa52421584f519aa0c0935`). Repository-quality run
+[`35624010863`](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35624010863),
+attempt 1, passed at that exact SHA.
+
+The complete correction diff was reviewed against S1-S5 before further edits. Two
+demonstrated evidence defects were fixed: the real-browser regression did not retain
+an executable historical red case, and packaged smoke recorded cumulative commands
+without enforcing per-phase Save/Flush deltas. Subsequent target runs exposed three
+more smoke-only defects: selection was dispatched before the Source Save barrier
+released, later clean/navigation phases had the same barrier race, and failed smoke
+reports were discarded and surfaced only as watchdog timeouts. The smoke now waits on
+the controller's explicit `data-source-busy=false` state, retains failed reports, and
+emits bounded Source checkpoints. No Source transaction or reconciliation architecture
+was redesigned.
+
+### Local commands and results
+
+| Command | Result |
+| --- | --- |
+| `python3 scripts/validate.py` | Passed, 215 repository files. |
+| `git diff --check` | Passed. |
+| `npm ci --ignore-scripts` | Passed with Node 24.19.0/npm 11.9.0. |
+| `npm run check` | Passed typecheck and 25/25 frontend tests. |
+| `npm run build` | Passed Vite production build. |
+| `cargo fmt --check --all` | Passed. |
+| `cargo clippy -p loomlight-core --all-targets --locked -- -D warnings` | Passed. |
+| `cargo test -p loomlight-core --locked` | Passed: 147 tests; four documented worker fixtures ignored. |
+| `python3 -m unittest discover -s spikes/lossless-source/tests -v` | Passed 26/26. |
+| `python3 -m unittest discover -s spikes/renpy-sdk/tests -v` | Passed 24/24. |
+| `python3 spikes/lossless-source/benchmark.py` | Passed: 620,000 bytes, 40,000 nodes, 156.88 ms median. |
+| `npm run test:source-browser` | Locally unavailable: no system Chromium; Playwright downloads failed with CDN timeout/502/truncated archive. The same command passed in Preflight and both target jobs. |
+| `cargo test -p loomlight-desktop --locked` | Locally unavailable before compile because this Linux client lacks `pkg-config`/GLib development metadata. It passed on both supported targets. |
+
+The final target browser output retained executable red-to-green evidence. Preflight
+printed `source-browser-red: legacy-clean-assertion=false saves=1 flushes=0 updates=11 dirty=true`
+and `source-browser-green: faithful-clean-assertion=true saves=1 flushes=0 updates=11 dirty=false`.
+macOS printed the same counts; Windows printed 11 legacy updates and 10 faithful
+updates, with the same one Save, zero Flush and dirty-to-clean distinction. This is the
+actual Source UI and selectable fake model, not a prose reconstruction.
+
+### S1-S5 requirement matrix
+
+| ID | Status | Evidence |
+| --- | --- | --- |
+| S1 | Implemented and verified | Faithful accepted-text/draft fake plus the retained red/green browser run; unchanged selection stays clean. |
+| S2 | Implemented and verified locally; target partial | One shell listener and controller-owned semantic capture; shared toolbar/keyboard executor; frontend shell test and Windows packaged checkpoints. macOS packaged routing is outstanding. |
+| S3 | Implemented and verified | Ordered retention, barrier, shared operation ownership, duplicate suppression, exact per-phase Save/Flush assertions, and `finally` release are covered by focused DOM/shell tests. |
+| S4 | Implemented and verified locally | Controller/document generation, input sequence, session completion token, observation suppression, stale remount and disposal tests pass. |
+| S5 | Implemented and verified locally | Navigation retention, leave barrier/modal, Save All failure retention, focus/status ownership and post-accept status failure tests pass. |
+
+### L1-L16 evidence matrix
+
+| ID | Status | Exercised evidence or outstanding part |
+| --- | --- | --- |
+| L1 | Pass | Core no-op rules, frontend selection regression, and browser red/green. |
+| L2 | Pass locally / Windows packaged | Shared executor test plus Windows `source-button-save-complete` and `source-shortcut-save-complete`; macOS packaged phase outstanding. |
+| L3 | Partial | Clean Source and non-Source exact Flush routes are tested and reached on Windows. A combined dirty-other-file plus unsubmitted-supporting-form scenario is not a distinct retained case. |
+| L4 | Pass | `immediate Save waits for latest retention...` uses a delayed update and asserts latest accepted text. |
+| L5 | Pass | The same focused test rejects newest retention, retains text, and verifies retry. |
+| L6 | Pass locally | Core invalid/conflict/unavailable/recovery and UI fail-closed/refusal cases retain drafts and prevent fallback. |
+| L7 | Pass locally | Duplicate toolbar clicks, repeat/busy keyboard paths, coordinated ownership and token release are exercised. |
+| L8 | Partial | Stale Save completion, view switch, same-path remount and old disposal are tested; every delayed Discard/Apply Both permutation is not separately exercised. |
+| L9 | Partial | Input barriers and stale-generation rejection are tested; a dedicated external-observation-resumes-after-acceptance case remains outstanding. |
+| L10 | Pass | Immediate navigation/close settles local input; failed retention cancels leave and preserves the editor. |
+| L11 | Pass | Core Save All zero-write preflight/recovery and frontend Save All/Discard All/Cancel close behavior pass. |
+| L12 | Pass | Modal background suppression, keyboard containment and live-target focus restoration are exercised. |
+| L13 | Pass synthetic / native outstanding | Ctrl/Cmd, Shift/Alt, composition and repeat policy pass shell tests; actual OS-native P3 is absent. |
+| L14 | Pass locally | Conflict/recovery precedence, stale status suppression and post-accept status failure are covered. |
+| L15 | Pass | Draft undo/refusal and core committed-history behavior pass retained suites. |
+| L16 | Partial | Semantic controller routing and mount/unmount/remount pass; a distinct non-textarea editor adapter fixture is not present. |
+
+### Final production evidence and P1-P5
+
+Final production run [`35624108754`](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35624108754)
+(workflow #75), attempt 1, ran exactly SHA `a720ea3fb150f2a49422e8385256179185129968`.
+Preflight passed. Windows x64 job `106414336722` and macOS ARM64 job
+`106414336670` passed real-browser, core, official-SDK lifecycle,
+`phase-1f-source-save-target-gate`, desktop-boundary and packaging steps, then failed
+the packaged WebView smoke. Subsequent secret scan and dependency/licence inventory
+were skipped by that failure. Windows retained every bounded Source checkpoint through
+`source-complete`; macOS timed out before `open-source-workspace`. Both primary logs
+ended with `packaged boundary smoke report timed out`.
+
+| ID | Windows x64 | macOS ARM64 | Conclusion |
+| --- | --- | --- | --- |
+| P1 packaged visible Save | Pass for the Source phase: `source-button-save-complete`, selection-clean and `source-complete`. | Outstanding: packaged flow did not reach Source. | Partial. |
+| P2 packaged routing | Pass for Source dirty Save, clean Source Flush and non-Source Flush checkpoints; reaching `source-complete` also requires the exact zero-fallback deltas. | Outstanding: packaged flow did not reach Source. | Partial. |
+| P3 native Ctrl/Cmd+S | Outstanding. | Outstanding. | Synthetic DOM/WebView events are not native input evidence. |
+| P4 real-service persistence | Pass: target lifecycle emitted `phase-1f-source-save-target-gate: passed`. | Pass: target lifecycle emitted the same marker. | Real service covers disk, projection/history, refusal/no-op and reopen; this is separate from the fake packaged UI. |
+| P5 trace/full gate | Fail: Source checkpoints are retained, but the later smoke watchdog failed and scan/inventory skipped. | Fail: no Source checkpoint before watchdog; scan/inventory skipped. | Full production gate failed. |
+
+Diagnostic predecessor runs `35613460026`, `35615201780`, `35616730283`,
+`35618387359`, `35620508570`, and `35622463437` were each attempt 1 on their exact
+then-current candidate and isolated the smoke-model delta, barrier races, discarded
+failure reports and watchdog boundary. No SHA was rerun and the final candidate was
+dispatched once.
+
+Self-review covered every Save/Flush owner, await and early return, controller/session/
+document generation check, operation-token `finally` release, retention rejection,
+observation refresh, modal/leave path and status update. Significant findings were
+the evidence defects and smoke races above; affected syntax, frontend, formatting,
+core schema, repository validation and whitespace checks were rerun after correction.
+
+**Outstanding evidence:** macOS packaged P1/P2, native P3 on both targets, a complete
+P5 run, L3's combined state, L8's full delayed adjacent-action set, L9 external-refresh
+resumption, and L16's non-textarea adapter fixture. Phase 1F is not review-ready and
+PR #14 must remain draft.
+
+**One continuation action:** independently review `a720ea3f`, then repair or split the
+pre-Source/post-Source legacy packaged-smoke tail so both target jobs reach a terminal
+report and complete scan/inventory; rerun the production gate only on a new coherent
+candidate and collect native Windows Ctrl+S/macOS Cmd+S evidence. Do not merge or begin
+Phase 1G.

@@ -3,46 +3,47 @@
 **Updated:** 2026-09-21.
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
-**Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not accepted or ready to merge.
-**Selected correction:** [1F-SAVE](../tasks/active/phase-1f-save-correction.md), `not_started`; implement and verify the reviewed command/harness correction before target validation.
+**Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), blocked on target evidence and not ready to merge.
+**Selected correction:** [1F-SAVE](../tasks/active/phase-1f-save-correction.md), implementation and local verification complete; target acceptance incomplete.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Latest application candidate:** `4dfedd24b4831972376d69fde216ad2063d708d4`; tree `f925db131c27fd744d13b64fadd6019ab370e1ea`.
-**Reviewed documentation-only head:** `3aebbcd9aff8a051e28f5b92dc6e50ee324dd3b5`; this later planning update also changes documentation only.
+**Final application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; tree `8edc9136aa362e180faa52421584f519aa0c0935`.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
-## Accepted baseline
+## Verified application state
 
-Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`.
-PRs #7/#8 and corrected 1A-1D are integrated. The
-[Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md),
-[Phase 1 plan](../tasks/active/phase-1-vertical-slice.md), and
-[CI-SIMPLE closeout](../tasks/archive/2026-09-20-ci-simple-cleanup.md) retain their evidence.
-Completed entry checks and merged-branch housekeeping must not be replayed.
-W0/OPT-1A remain abandoned; their PR #12 and history remain unmerged.
+The correction was reviewed against S1-S5 before further edits. It now retains an
+executable browser red-to-green case for the historical unconditional-dirty fake,
+enforces exact per-phase Save/Flush deltas, waits for the Source operation barrier in
+packaged phases, and retains bounded failure checkpoints. The Source transaction and
+reconciliation architecture was not redesigned.
 
-## Why another bounded correction is required
+Local verification passed repository validation (215 files), whitespace, frontend
+typecheck/tests (25/25), frontend build, Rust format, core clippy, core tests (147
+passed plus four intentional ignored workers), lossless-source (26/26), SDK suites
+(24/24), and the 620,000-byte/40,000-node benchmark at 156.88 ms median. Local browser
+execution was unavailable after Chromium download failures; local desktop compilation
+was unavailable for missing `pkg-config`/GLib metadata. Both commands passed on the
+supported-target runners. Repository-quality run `35624010863`, attempt 1, passed at
+the exact candidate.
 
-The reviewed packaged smoke falsely marks unchanged selection updates dirty. Source
-Save can complete and then be re-dirtied by its fake service, so the composite timeout
-is not proof that Source Save never ran or global Flush stole its shortcut. The
-[corrected diagnosis and evidence limits](../tasks/active/phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis)
-supersede earlier causal interpretations without discarding historical failures.
+The retained browser output proves the old fake can finish with one `source.save`, no
+`project.flush`, and dirty state, while the faithful fake finishes clean with the same
+command counts. The detailed S1-S5 and L1-L16 matrix is in the correction ledger.
+L3, L8, L9 and L16 remain explicitly partial.
 
-[ADR 0007](../adr/0007-shell-save-command-ownership.md) selects one shell Save owner,
-a document-bound Source controller, reliable retention barriers, coordinated
-operations/leave handling, and authoritative status. These fixes are planned, not
-implemented. The existing source, transaction, recovery, mapping and history
-foundation remains; no Phase 1F restart is authorised.
+## Target evidence and next action
 
-## Evidence and next action
+Production run `35624108754` (#75), attempt 1, ran exactly `a720ea3f`. Preflight
+passed. Windows x64 and macOS ARM64 passed browser, core, official-SDK lifecycle,
+real-service Source persistence, desktop-boundary and packaging steps, but both failed
+packaged smoke; later scan and dependency/licence inventory steps were skipped.
+Windows reached every bounded Source checkpoint through `source-complete`; macOS
+timed out before the first Source checkpoint. P1/P2 therefore pass only for the
+Windows Source phase, P4 passes on both real services, native P3 is outstanding on
+both, and full-gate P5 fails on both.
 
-Production runs `35544944804` at `4fc54455` and `35553029892` at `822e3fbe` failed on
-both supported targets at packaged Source acceptance. Quality run `35554153917` passed
-for `4dfedd24`; the reviewed history has no production acceptance for that candidate.
-The parent ledger preserves local counts, unavailable Linux desktop dependencies and
-exact failed-run records. None is acceptance for the new correction.
-
-Implement 1F-SAVE, run its local regressions and self-review, then validate the corrected
-candidate under the selected goal. Do not dispatch the old capture candidate as the
-next action. Missing native input/real-service evidence remains an explicit blocker.
-Do not merge PR #14, begin 1G, create another delivery line, or revive abandoned CI work.
+The precise continuation is to independently review `a720ea3f`, then make a bounded
+repair or split of the legacy packaged-smoke tail on a new coherent candidate so both
+target jobs reach a terminal report and complete scan/inventory, and collect actual
+Windows Ctrl+S and macOS Cmd+S evidence. Keep PR #14 draft. Do not merge, start Phase
+1G, create another branch/PR, or replay completed implementation.

@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** Implementation exists on the review branch, but significant Save corrections and supported-target acceptance remain outstanding. Phase 1F is not complete, integrated, or authorised for 1G.
+**State:** The 1F-SAVE implementation and local verification are complete, but supported-target evidence remains incomplete. Phase 1F is not review-ready, integrated, or authorised for 1G.
 **Current correction:** [1F-SAVE](phase-1f-save-correction.md); its precise requirements and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the next bounded implementation goal.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
@@ -294,3 +294,40 @@ no `source.save` call is superseded; the exact native event sequence remains unv
 The old dispatch-first continuation is replaced by implementation and local verification
 before validation of a corrected candidate. This update is documentation only; code,
 production gates and merge state are unchanged. 1F-SAVE remains `not_started`.
+
+2026-09-21 1F-SAVE implementation closeout: The existing branch was resumed without
+resetting its substantial checkpoint. The final application candidate is
+`a720ea3fb150f2a49422e8385256179185129968` (tree
+`8edc9136aa362e180faa52421584f519aa0c0935`); repository-quality run
+`35624010863`, attempt 1, passed at that exact SHA. Local repository validation checked
+215 files; whitespace, frontend typecheck/tests (25/25), frontend build, Rust format,
+core clippy and core tests (147 passed, four intentional worker fixtures ignored) all
+passed. Lossless-source passed 26/26, SDK adapter/archive passed 24/24, and the
+620,000-byte/40,000-node benchmark recorded a 156.88 ms median. Linux desktop tests
+were unavailable before compile because this client lacks `pkg-config`/GLib metadata;
+the browser command was locally unavailable because Chromium downloads failed, but it
+passed in Preflight and both target jobs.
+
+The retained executable regression prints the historical fake-model red result as
+`legacy-clean-assertion=false saves=1 flushes=0 updates=11 dirty=true` and the faithful
+green result as `faithful-clean-assertion=true saves=1 flushes=0 updates=11 dirty=false`
+in Preflight. The target copies show the same one Save, zero Flush and dirty-to-clean
+distinction. The complete S1-S5 and L1-L16 matrix is in the 1F-SAVE ledger; L3, L8, L9
+and L16 retain specifically named partial rows rather than inferred coverage.
+
+Final production run `35624108754` (#75), attempt 1, ran exactly `a720ea3f`.
+Preflight passed. Windows x64 job `106414336722` and macOS ARM64 job `106414336670`
+passed browser, core, official-SDK lifecycle, the real-service
+`phase-1f-source-save-target-gate`, desktop-boundary and packaging steps, then failed
+packaged smoke, so later scan/inventory steps were skipped. Windows retained Source
+button Save, selection-clean, shortcut Save, clean Source Flush, non-Source Flush and
+`source-complete` checkpoints. macOS timed out before its first Source checkpoint.
+Thus P1/P2 pass only for the Windows Source phase; P4 passes on both real services; P3
+native Ctrl+S/Cmd+S is absent on both; and P5 fails on both. Synthetic DOM/WebView
+input is not counted as P3.
+
+Phase 1F and draft PR #14 remain blocked on target evidence. The single continuation
+action is independent review of `a720ea3f`, followed by a bounded repair or split of
+the legacy packaged-smoke tail so a new coherent candidate completes both target jobs
+and scan/inventory, plus collection of native Windows Ctrl+S and macOS Cmd+S evidence.
+Do not merge or begin Phase 1G.
