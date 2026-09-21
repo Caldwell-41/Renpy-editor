@@ -215,3 +215,32 @@ handover were published. The production gate includes preflight, Windows x64 and
 ARM64 core/SDK/desktop/package checks, packaged Source interaction/security smoke,
 artifact scan and dependency inventory. No native success is claimed before terminal
 evidence; per this brief, the exact pending run is recorded and active polling stops.
+
+2026-09-21 bounded review correction: Independent review was verified against current
+code and failed production run `35544944804`, attempt 1. Its Windows x64 and macOS ARM64
+artifacts both showed the packaged smoke stopping at `source-focused-save` before a
+`source.save` call. The correction keeps that assertion but uses a deterministic,
+cancelable focused-editor event and records the actual exception in the stage marker.
+Clean mapped source changed externally from valid to detected-invalid now remains
+inspectable as current bytes while Source is invalid, persistence is Conflict, affected
+writes block, and Scene is explicitly stale/conflicted with no previous Beats presented
+as current. Opaque supported-preservation behavior is unchanged. Discard Draft and
+Reload External / Discard Draft now require confirmation with Cancel/no-change, and
+Copy Draft performs an actual clipboard copy with a bounded fallback.
+
+Focused regressions cover clean external valid-to-invalid transition through Source,
+inventory, persistence and Scene projection; both destructive confirmation flows and
+Cancel; and Copy Draft. Corrected local gates passed: 209-file repository validation,
+whitespace, Rust format and clippy, core 151 total / 147 passed / four intentional
+worker fixtures ignored, frontend 21/21 plus production build, lossless-source 26/26,
+SDK adapter/archive 24/24, and the 620,000-byte/40,000-node benchmark at 224.81 ms
+median. Linux desktop compilation remains unavailable before compile because this
+client lacks `pkg-config`/GLib metadata. Local correction commit
+`026209493f5c7ea16433564ec4844e436ac631d3` and remote candidate
+`822e3fbeea9e90409ecc66988322cc524309468c` share exact tree
+`bb8fca46a99b6e07cdee9898c7b0f1b938fd5d51`. Repository quality run `35552625358`,
+attempt 1, passed. Corrected production run `35553029892`, attempt 1, was manually
+dispatched at that exact remote candidate and was in preflight at publication. Per the
+no-polling rule, no supported-target success is inferred. The next bounded action is to
+inspect that run's actual Windows/macOS jobs and Source markers once terminal, then stop
+for independent review on pass or record only the exact remaining blocker on failure.
