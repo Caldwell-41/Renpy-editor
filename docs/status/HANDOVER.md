@@ -3,78 +3,83 @@
 **Prepared:** 2026-09-21.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Delivery:** [Phase 1F only](../tasks/active/phase-1f-source-synchronisation.md).
-**State:** bounded independent-review corrections published; corrected supported-target
-production run dispatched and pending.
+**State:** interrupted after publishing a second bounded Source-smoke correction;
+supported-target production validation has not run for the latest implementation.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft
 [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Corrected implementation candidate:** `822e3fbeea9e90409ecc66988322cc524309468c`.
-**Candidate tree:** `bb8fca46a99b6e07cdee9898c7b0f1b938fd5d51`, exactly matching
-local correction commit `026209493f5c7ea16433564ec4844e436ac631d3`.
+**Latest implementation candidate:** `4dfedd24b4831972376d69fde216ad2063d708d4`.
+**Candidate tree:** `f925db131c27fd744d13b64fadd6019ab370e1ea`, exactly matching
+local commit `3ce6e8fdd69b946d7d31d7b1104a991e1ccfb8ec`.
 **Baseline:** `8862495f5465c35a0d951fa65743be52d3c813e7`.
+
+## Last completed work
+
+The earlier correction candidate `822e3fbe` preserved externally invalid current
+Source bytes while marking Source invalid and Scene stale/conflicted; added confirmed
+discard/reload with Cancel/no-change; provided real Copy Draft; and improved smoke-stage
+failure reporting. Failed production run `35553029892`, attempt 1, subsequently showed
+that both supported targets still timed out at Source-focused save before Source
+acceptance. Preflight, core, SDK, desktop-boundary and package work passed on both;
+the packaged WebView smoke failed on both.
+
+The bounded follow-up candidate `4dfedd24` routes focused Source Ctrl/Cmd+S at the
+window capture boundary before application-wide Flush, waits for the dirty UI state in
+the packaged smoke, and reports status and observed operations if acceptance times out.
+It retains the real Source draft/save/Saved-state and terminal Source marker assertions.
+The focused frontend regression proves Source save suppresses global Flush and that
+view disposal removes the shortcut handler.
+
+Candidate `4dfedd24` was successfully published to the existing branch and PR.
+Repository-quality run `35554153917`, attempt 1, passed. The interrupted executor then
+reached the step of opening the production-workflow page, but no workflow was dispatched.
+The user's closeout instruction superseded that action before dispatch. There is no CI
+wait, approval wait or recorded tooling error after publication; this is a user-directed
+interruption at the pre-dispatch step. Available client/repository evidence does not
+explain any longer apparent wall-clock duration before the closeout request.
 
 ## Corrected and preserved
 
-The correction reused the existing branch and draft PR without replaying Phase 1F entry
-checks, CI-SIMPLE housekeeping, creating another delivery line, merging, or beginning
-1G. No unrelated branch, PR, or historical optimisation work was changed.
+The work reused the existing branch and draft PR without replaying Phase 1F entry checks,
+CI-SIMPLE housekeeping, creating another delivery line, merging, or beginning 1G. No
+unrelated branch, PR, or historical optimisation work was changed.
 
-Phase 1F now provides anchored existing-`.rpy` discovery; UTF-8/BOM/newline-aware,
-bounded session drafts; explicit Save, Save All, Discard and exact non-overlap Apply
-Both; source-map reconciliation and shared committed history; dirty/conflict/missing/
-invalid/read-only states; same-file Scene/supporting/history guards; and clean external
-refresh. Multiple ambiguous same-kind edits invalidate Beat identities rather than
-guessing, while exact-content reorders follow their existing IDs.
-
-Independent review and failed production run `35544944804`, attempt 1, showed Windows
-x64 and macOS ARM64 both reaching `sourceAuthoringStage: source-focused-save` without
-observing `source.save`. The smoke harness now dispatches a deterministic cancelable
-focused save event, verifies that the editor handled it, and appends the actual failure
-to its stage marker. It still requires an actual Source draft, Source save, Saved status,
-`sourceAuthoringUiPassed: true`, and `sourceAuthoringStage: complete`.
-
-Clean mapped source changed externally from valid to detected-invalid now remains
-inspectable as the current bytes. Source is explicitly invalid, persistence is Conflict,
-same-file writes block, and Scene returns an empty stale/conflicted projection rather
-than showing previous Beats as current. Unsupported/opaque source remains distinct and
-accepted as partial. Discard Draft and Reload External / Discard Draft require explicit
-confirmation with Cancel/no-change. Conflict handling now provides a real Copy Draft
-operation with a bounded fallback.
+Phase 1F retains anchored existing-`.rpy` discovery; UTF-8/BOM/newline-aware bounded
+session drafts; explicit Save, Save All, Discard and exact non-overlap Apply Both;
+source-map reconciliation and shared committed history; dirty/conflict/missing/invalid/
+read-only states; same-file Scene/supporting/history guards; and clean external refresh.
+Unsupported/opaque source remains distinct from detected-invalid supported structure.
+Clean external valid-to-invalid Source stays inspectable while Scene becomes explicitly
+stale/conflicted. Discard Draft and Reload External / Discard Draft require confirmation
+with Cancel/no-change, and conflict handling provides real Copy Draft.
 
 No Branches, SDK Run/Validate, local Git surface, UI Designer, Timeline, arbitrary
 project import, raw source create/move/delete, autosave draft journal, general Ren'Py
 parser, privilege/CSP widening, or 1G work was included.
 
-## Validation and publication
+## Validation and evidence
 
-- `python3 scripts/validate.py`: 209 repository files passed.
-- `git diff --check`, staged diff check, `cargo fmt --check --all`, and core clippy
-  with `-D warnings`: passed.
-- `cargo test -p loomlight-core --locked`: 151 total, 147 passed, zero failed, four
-  ignored subprocess-worker markers. The ignored entries are fixtures invoked by their
-  parent crash tests, not skipped product tests.
-- `npm run check`: typecheck plus 21/21 frontend tests passed. `npm run build` passed.
-- Lossless-source suite: 26/26 passed. SDK adapter/archive suite: 24/24 passed.
-- Lossless benchmark: 620,000 bytes / 40,000 nodes, 224.81 ms median over seven samples.
-- Local `loomlight-desktop` and Tauri package attempts were unavailable before compile
-  because this Linux client lacks `pkg-config`/GLib development metadata. Supported
-  Windows/macOS CI is the authoritative desktop/package gate.
-- Failed production run `35544944804`, attempt 1, is preserved as superseded evidence:
-  preflight and both targets' core/SDK/package work passed, but both packaged WebView
-  smoke jobs failed at the Source-focused save stage.
-- Remote corrected candidate `822e3fbeea9e90409ecc66988322cc524309468c` has tree
-  `bb8fca46a99b6e07cdee9898c7b0f1b938fd5d51`, exactly the locally tested correction
-  tree, and is PR #14's verified implementation head beneath this docs receipt.
-- Repository quality run `35552625358`, attempt 1, passed at that SHA.
-- Production run `35553029892`, attempt 1, was manually dispatched at that exact SHA.
-  Its preflight was in progress when this handover was published. It owns Windows x64
-  and macOS ARM64 core, SDK, desktop/package, packaged Source interaction/security smoke,
-  artifact scan, and dependency inventory evidence. No success is inferred while pending.
+- Latest local gates passed: repository validation for 209 files, `git diff --check`,
+  Rust format and core clippy, core 151 total / 147 passed / four intentional worker
+  fixtures ignored, frontend 21/21 and production build, lossless-source 26/26, SDK
+  adapter/archive 24/24, and the 620,000-byte/40,000-node benchmark at 168.57 ms median.
+- Repository-quality run `35554153917`, attempt 1, passed at `4dfedd24`.
+- Failed production run `35544944804`, attempt 1, remains earlier superseded evidence:
+  both supported targets passed core/SDK/package work and failed the packaged Source-
+  focused save smoke before a `source.save` call was observed.
+- Failed production run `35553029892`, attempt 1, is preserved as superseded evidence
+  for candidate `822e3fbe`: Windows x64 and macOS ARM64 each failed packaged WebView
+  Source acceptance with `source-focused-save: Timed out waiting for Source acceptance`.
+- The Actions history has no production run after `35553029892`; consequently there is
+  no Windows x64/macOS ARM64 production, package or WebView acceptance for `4dfedd24`.
+- Local Linux desktop/package compilation remains unavailable because `pkg-config` and
+  GLib development metadata are absent; it is not substituted for supported targets.
 
 ## Exact next bounded action
 
-Inspect production run `35553029892`, attempt 1, once it reaches a terminal state and
-review its actual jobs/log markers, including `sourceAuthoringUiPassed: true` and
-`sourceAuthoringStage: complete` on both supported targets. If it passes, independently
-review draft PR #14 against the Phase 1F mandatory matrix. If it fails, record and fix
-only the exact demonstrated Phase 1F blocker on this branch/PR. Do not merge, start
-1G/1H, revive W0/OPT-1A, or perform unrelated cleanup without separate authority.
+In a fresh continuation chat, verify the current branch/PR and dispatch the existing
+Phase 1 production workflow for the branch containing implementation candidate
+`4dfedd24`. Inspect the actual Windows x64 and macOS ARM64 jobs/log markers, including
+`sourceAuthoringUiPassed: true` and `sourceAuthoringStage: complete`. If it passes, stop
+for independent Phase 1F review. If it fails, record and fix only the demonstrated
+Phase 1F blocker. Do not merge PR #14, start 1G/1H, revive W0/OPT-1A, or perform
+unrelated cleanup.

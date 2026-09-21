@@ -244,3 +244,35 @@ dispatched at that exact remote candidate and was in preflight at publication. P
 no-polling rule, no supported-target success is inferred. The next bounded action is to
 inspect that run's actual Windows/macOS jobs and Source markers once terminal, then stop
 for independent review on pass or record only the exact remaining blocker on failure.
+
+2026-09-21 interrupted-correction closeout: Production run `35553029892`, attempt 1,
+was inspected after becoming terminal. Preflight and both supported targets' core, SDK,
+desktop-boundary and packaging steps passed, but the packaged WebView smoke failed on
+Windows x64 and macOS ARM64. Both evidence artifacts reported
+`sourceAuthoringStage: source-focused-save: Timed out waiting for Source acceptance`;
+Source UI acceptance did not complete. This supersedes the ledger's earlier pending
+description and is retained as failed evidence for candidate `822e3fbe`.
+
+The bounded follow-up routes focused Source Ctrl/Cmd+S at the window capture boundary
+before application-wide Flush, waits for the rendered dirty state before the packaged
+smoke shortcut, and includes status plus observed calls in any future acceptance
+timeout. Its regression proves Source save suppresses global Flush and that disposing
+the Source view removes the handler. Local commit
+`3ce6e8fdd69b946d7d31d7b1104a991e1ccfb8ec` and published candidate
+`4dfedd24b4831972376d69fde216ad2063d708d4` share tree
+`f925db131c27fd744d13b64fadd6019ab370e1ea`.
+
+Latest local gates passed: 209-file repository validation, whitespace, Rust format and
+core clippy, core 151 total / 147 passed / four intentional worker fixtures ignored,
+frontend 21/21 plus production build, lossless-source 26/26, SDK adapter/archive 24/24,
+and the 620,000-byte/40,000-node benchmark at 168.57 ms median. Repository-quality run
+`35554153917`, attempt 1, passed at `4dfedd24`. No supported-target production workflow
+was dispatched after that publication; the Actions history still ends with failed run
+`35553029892` (#68). The last completed action was therefore publication plus repository
+quality, not supported-target validation. The executor opened the production-workflow
+page, but the user's closeout instruction superseded the task before dispatch; no CI,
+approval or recorded tool error was pending. The next bounded action is to dispatch the
+existing production gate for the current Phase 1F branch containing `4dfedd24`, inspect
+both supported-target jobs and Source completion markers, and stop for independent
+review on pass or record only the exact demonstrated blocker on failure. Phase 1F is not
+review-ready or authorised for merge/1G at this closeout.
