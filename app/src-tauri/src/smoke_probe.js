@@ -211,6 +211,19 @@ setTimeout(async () => {
       }
       throw new Error(`Timed out waiting for ${description}`);
     };
+    let checkpointSequence = 0;
+    const checkpoint = async (stage) => {
+      checkpointSequence += 1;
+      const value = await invoke("core_request", {
+        request: {
+          protocolVersion: 1,
+          requestId: `smoke-checkpoint-${checkpointSequence}`,
+          operation: "probe.smokeCheckpoint",
+          payload: { stage },
+        },
+      });
+      if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
+    };
     const awaitSurface = async (label) => {
       supportingAuthoringStage = label;
       await waitFor(
@@ -391,6 +404,7 @@ setTimeout(async () => {
     const audioIntentional = audioBeforeClick === 0;
 
     sourceAuthoringStage = "open-source-workspace";
+    await checkpoint(sourceAuthoringStage);
     click("Source");
     await waitFor(() => document.querySelector(".source-editor"), "Source editor");
     const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
@@ -411,6 +425,7 @@ setTimeout(async () => {
     click("Save Source");
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
+    await checkpoint("source-button-save-complete");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
     sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
     sourceEditor = document.querySelector(".source-editor");
@@ -424,6 +439,7 @@ setTimeout(async () => {
         && sourceDocument.selectionEnd === 5,
       "selection-only clean stability",
     );
+    await checkpoint("selection-only-clean");
 
     sourceAuthoringStage = "retain-shortcut-draft";
     sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
@@ -455,6 +471,7 @@ setTimeout(async () => {
     sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${shortcutFlushDelta}:saved`);
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "shortcut Source Save barrier release");
+    await checkpoint("source-shortcut-save-complete");
 
     sourceAuthoringStage = "source-clean-flush";
     const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
@@ -465,6 +482,7 @@ setTimeout(async () => {
     sourceEditor.dispatchEvent(cleanShortcut);
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "clean Source Flush barrier release");
+    await checkpoint("source-clean-flush-complete");
     const cleanSaveDelta = (operationCounts.get("source.save") ?? 0) - cleanSaveBefore;
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
@@ -474,6 +492,7 @@ setTimeout(async () => {
     const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
+    await checkpoint("non-source-flush-complete");
     sourceCommandTrace.push(`keyboard-synthetic:non-source:${macPlatform ? "meta" : "ctrl"}+s:completed:flushes=1:saved`);
     sourceAuthoringUiPassed = sourceSurfaceVisible
       && sourceDocument.text.includes("score += 3")
@@ -486,6 +505,7 @@ setTimeout(async () => {
       && shortcutFlushDelta === 0
       && cleanSaveDelta === 0;
     sourceAuthoringStage = sourceAuthoringUiPassed ? "complete" : "assertions-failed";
+    await checkpoint(`source-${sourceAuthoringStage}`);
 
     sceneAuthoringStage = "safe-recovery";
     projectStatus = "recoveryRequired";

@@ -71,8 +71,30 @@ fn core_request(
         return Err("Command is not authorised for this window.");
     }
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
-    let is_smoke_report =
-        request.get("operation").and_then(Value::as_str) == Some("probe.smokeReport");
+    let operation = request.get("operation").and_then(Value::as_str);
+    if smoke_enabled && operation == Some("probe.smokeCheckpoint") {
+        let request_id = request
+            .get("requestId")
+            .and_then(Value::as_str)
+            .unwrap_or("smoke-checkpoint")
+            .to_owned();
+        let stage = request
+            .get("payload")
+            .and_then(|payload| payload.get("stage"))
+            .and_then(Value::as_str)
+            .filter(|stage| !stage.is_empty() && stage.len() <= 128)
+            .unwrap_or("invalid");
+        println!(
+            "{}",
+            json!({ "evidence": "packaged-smoke-checkpoint", "stage": stage })
+        );
+        let _ = std::io::stdout().flush();
+        return Ok(loomlight_core::CoreResponse::success(
+            request_id,
+            json!({ "recorded": true }),
+        ));
+    }
+    let is_smoke_report = operation == Some("probe.smokeReport");
     let smoke_payload = is_smoke_report
         .then(|| request.get("payload").cloned())
         .flatten();
