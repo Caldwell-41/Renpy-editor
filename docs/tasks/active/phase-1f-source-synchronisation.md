@@ -2,12 +2,14 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** Implementation complete on the existing review branch; supported-target
-publication evidence is pending below, so this is not integrated or authorised for 1G.
-**Execution authority:** The user's next 1F goal starts this bounded milestone after the closeout checks in [HANDOVER](../../status/HANDOVER.md). No later milestone is authorised.
-**Baseline:** Fresh integrated main with Phase 1A-1E and CI-SIMPLE; never either maintenance branch.
-**Working branch:** `feature/phase-1f-source-synchronisation`; reuse matching work if it exists, otherwise create from verified main.
+**State:** Implementation exists on the review branch, but significant Save corrections and supported-target acceptance remain outstanding. Phase 1F is not complete, integrated, or authorised for 1G.
+**Current correction:** [1F-SAVE](phase-1f-save-correction.md); its precise requirements and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the next bounded implementation goal.
+**Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
+**Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
+**Working branch:** `feature/phase-1f-source-synchronisation`, existing draft PR #14; do not create another branch or PR.
 **Parent requirements:** [Phase 1 plan](phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.
+
+**2026-09-21 precedence note:** The [corrected diagnosis](phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis) supersedes the historical inference that the smoke proved `source.save` never ran. Its composite predicate and missing operation trace do not establish that. The fake service can re-dirty unchanged text after successful Save. Historical ledger entries and failed runs below are preserved, but their old immediate-dispatch instructions are not current authority. Implement and self-check 1F-SAVE before validating a corrected application candidate; follow [HANDOVER](../../status/HANDOVER.md).
 
 ## Objective and exclusions
 
@@ -17,7 +19,7 @@ No Branches workspace, SDK Run/Validate UI, Git checkpoint UI, UI Designer, Time
 
 ## Entry and bounded delivery
 
-Confirm integrated 1E and the recorded CI-SIMPLE post-merge result rather than replaying prior milestones. Finish the already-authorised merged-branch housekeeping described in HANDOVER using existing GitHub tooling. Search current refs/PRs and preserve unrelated work; do not create a duplicate 1F branch or PR.
+Phase 1F entry and CI-SIMPLE merged-branch housekeeping are completed in the ledger. Do not replay them. Inspect fresh refs, the existing branch/PR, and worktree ownership before continuing. Preserve unrelated and newer work; quoted baseline SHAs are evidence, not reset instructions. The selected next work is 1F-SAVE, not the original implementation sequence again.
 
 This is one approved milestone with an implementation order, not a new series of optimisation/review checkpoints. The behavioural choices below are fixed, not options for the implementing agent to reselect. Record only the bounded technical approach and state transitions needed to implement them before UI writes, then proceed through source services, UI wiring and validation. Do not pause between those steps solely to request an approval already supplied by the 1F goal. A material scope change or unsafe missing prerequisite remains a genuine stop condition.
 
@@ -39,7 +41,7 @@ Keep three distinct states: the unsubmitted editor buffer, accepted on-disk sour
 
 7. **Undo.** Uncommitted text undo/redo stays in the Source buffer and groups natural typing bursts; it performs no disk writes. A successful source acceptance creates one committed project-history action for that edit. Reset buffer history to the accepted revision after successful Save or explicit Discard, not after a refused save. Committed undo/redo uses the existing project history and actual returned revisions, subject to rule 3 and external/recovery guards. When the Source editor has text focus, Ctrl/Cmd+Z and redo act only on the draft buffer; project-history controls remain distinct and refuse an operation that would touch a dirty/conflicted file. Do not promise history persistence across restart.
 
-8. **Persistence status and Save shortcut.** Any dirty Source draft makes the project persistence indicator at least **Pending validation**, never Saved. An ordinary external draft conflict reports **Conflict**; unresolved transaction state reports **Recovery required** and keeps its existing wider precedence. While Source has focus, Ctrl/Cmd+S first attempts acceptance of the current dirty Source buffer and, on success, flushes the resulting accepted work through the existing durability boundary. With no current Source draft it retains the existing global Flush behaviour. Other dirty Source files keep the project in Pending validation until explicitly accepted or discarded.
+8. **Persistence status and Save shortcut.** Any dirty Source draft or newer unretained local input makes the project persistence indicator at least **Pending validation**, never Saved. An ordinary external draft conflict reports **Conflict**; unresolved transaction state reports **Recovery required** and keeps its existing wider precedence. While Source owns the editing context, Ctrl/Cmd+S settles current input and attempts acceptance of that captured draft through the shared durable transaction boundary. Successful `source.save` already establishes the required durability; it does not require a redundant renderer Flush afterward. With no current draft after successful settlement, retain existing global Flush behaviour. Refused or failed Source acceptance never falls through to Flush. Other dirty Source files remain Pending validation. [ADR 0007](../../adr/0007-shell-save-command-ownership.md) and [1F-SAVE](phase-1f-save-correction.md) specify shell ownership, the shared toolbar command, operation/lifecycle safeguards and authoritative project status.
 
 9. **Save All.** Project close/switch/normal-exit Save All first preflights every dirty draft—encoding/size, recognized-invalid state, current base revision, mapping/reconciliation and transaction recovery—before any write. If any draft fails preflight, Save All writes none of them, retains every draft and cancels leaving. If all pass, commit the affected source and required metadata/source-map changes as one existing multi-mutation transaction. This is the recoverable sequential transaction guaranteed by TRANSACTIONS, not a claim of filesystem-wide atomicity. Conflict/recovery never clears drafts or reports success; retain draft snapshots until a terminal recovery result, then reconcile them against the actual accepted/current revisions before leaving.
 
@@ -75,7 +77,7 @@ Ordinary divergence can be isolated to an affected file/Scene where safe. Unreso
 
 ## Acceptance and evidence
 
-The following is the minimum mandatory behavioural regression matrix. Test real service results and UI/IPC interactions, not merely labels or source-string presence.
+The following is the minimum mandatory behavioural regression matrix. Test real service results and UI/IPC interactions, not merely labels or source-string presence. The [1F-SAVE local and supported-target matrices](phase-1f-save-correction.md#3-local-regression-matrix--mandatory) add the precise correction regressions; neither matrix replaces the other.
 
 | Case | Required result |
 | --- | --- |
@@ -86,7 +88,7 @@ The following is the minimum mandatory behavioural regression matrix. Test real 
 | Clean external change | Verified content refreshes and mappings/selection update or clear; own writes do not create a watch/write loop. |
 | Dirty external conflict and Gate-E reconciliation | Both competing contents are preserved. Proven non-overlapping exact patches have an explicit preview/Apply Both path; overlap/ambiguity writes nothing. Delete/rename never auto-merges, recreates or retargets. |
 | Multi-draft Save All | One failed preflight causes zero writes; a fully valid set uses one recoverable multi-mutation transaction, and interrupted/conflicting outcomes do not clear drafts or allow leaving. |
-| Persistence shortcuts/status | Dirty draft = Pending validation; external draft conflict = Conflict; recovery keeps Recovery required precedence. Source Ctrl/Cmd+S accepts current draft then flushes; draft Ctrl/Cmd+Z never invokes project history. |
+| Persistence shortcuts/status | Dirty draft = Pending validation; external draft conflict = Conflict; recovery keeps Recovery required precedence. Source Ctrl/Cmd+S accepts the captured draft through shared durability; clean Source uses global Flush; draft Ctrl/Cmd+Z never invokes project history. |
 | Source scope and mapped definitions | Existing project `.rpy` files only; Scene sync works, unmapped source remains source-only, and mapped supporting definitions cannot be accepted into silently stale metadata. No raw file lifecycle UI. |
 | Encoding and resource bounds | UTF-8/optional BOM round trips exactly; invalid UTF-8 remains untouched/read-only. 16 MiB editable-file and dirty-buffer aggregate/count limits fail without losing existing drafts. |
 | Missing/renamed clean source | Affected projection becomes explicitly stale/unavailable and mapped writes block; no guessed rename, recreation or retargeting. |
@@ -101,7 +103,7 @@ Run repository/whitespace checks, frontend/type tests, relevant core regressions
 
 Passing counts, ignored workers, SDK skip wrappers, real archive-backed SDK executions and unavailable tools must be distinguished. A process launch, source-string assertion or green badge alone is not behavioural acceptance. Do not claim broad native evidence for an untested later implementation.
 
-Self-review once against this scope and resolve significant demonstrated findings without reopening unrelated architecture. Commit/push coherent work on the 1F branch, open/update its PR, and publish the execution ledger plus CURRENT and the single HANDOVER. Stop for independent review; do not merge or proceed into 1G. If CI is pending, preserve exact run/attempt/SHA and stop active model polling. No full log dumps or self-referential receipt commits.
+Self-review once against this scope and resolve significant demonstrated findings without reopening unrelated architecture. Commit/push coherent work on the 1F branch, update its existing PR, and publish the execution ledger plus CURRENT and the single HANDOVER. Stop for independent review; do not merge or proceed into 1G. If CI is pending, preserve exact run/attempt/SHA and stop active model polling. No full log dumps or self-referential receipt commits.
 
 ## Bounded technical approach and state transitions
 
@@ -142,6 +144,10 @@ debounces external observation and distinguishes the last accepted Loomlight rev
 from a genuinely new live revision, without executing Ren'Py or project Python.
 
 ## Execution ledger
+
+Earlier entries record the state and interpretation at publication. The precedence note
+above and the 1F-SAVE brief supersede older causal claims and continuation directions;
+historical failures and validation remain associated with their exact candidates.
 
 2026-09-20: Continuation brief published during CI-SIMPLE closeout. No 1F application code or test acceptance is claimed. The existing Phase 1F requirements remain the milestone boundary; starting the next goal selects execution only after the recorded entry checks.
 
@@ -276,3 +282,15 @@ existing production gate for the current Phase 1F branch containing `4dfedd24`, 
 both supported-target jobs and Source completion markers, and stop for independent
 review on pass or record only the exact demonstrated blocker on failure. Phase 1F is not
 review-ready or authorised for merge/1G at this closeout.
+
+2026-09-21 independent review and correction planning: the user requested publication
+of the recommended fixes and a goal for another chat to implement and check them.
+The [1F-SAVE brief](phase-1f-save-correction.md) records the faulty smoke dirty model,
+the reduced experiment and its limits, shell/Source command ownership, retention and
+lifecycle safeguards, exact local and target acceptance, and mandatory self-review.
+[ADR 0007](../../adr/0007-shell-save-command-ownership.md) records the durable design
+without replacing the transaction layer. The historical claim that the timeout proves
+no `source.save` call is superseded; the exact native event sequence remains unverified.
+The old dispatch-first continuation is replaced by implementation and local verification
+before validation of a corrected candidate. This update is documentation only; code,
+production gates and merge state are unchanged. 1F-SAVE remains `not_started`.

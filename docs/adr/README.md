@@ -13,5 +13,8 @@ supersede them with a later ADR rather than editing history.
 | [0004](0004-journalled-platform-file-transactions.md) | Accepted | Journalled platform replacement with retained competing revisions |
 | [0005](0005-staged-project-creation.md) | Accepted | Version-pinned starter generation with sibling staging and no-replace promotion |
 | [0006](0006-scene-authoring-source-and-media-boundary.md) | Accepted | Exact-range Scene operations, schema v2, revision-bound history, and asset-ID-only media presentation |
+| [0007](0007-shell-save-command-ownership.md) | Accepted design | Shell-owned Save arbitration, document-bound Source acceptance and shared operation/lifecycle coordination; delivery tracked in 1F-SAVE |
 
-Future changes to an accepted decision require a superseding ADR.
+Future changes to an accepted decision require a superseding ADR. An accepted design
+is not a claim that its implementation or supported-target acceptance is complete;
+CURRENT, HANDOVER and the linked active task own that delivery state.

@@ -7,8 +7,9 @@ Start with [current status](status/CURRENT.md), the
 here; chat prompts select one checkpoint rather than repeat the implementation plan.
 
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
-PR #8's UI follow-up. The next application milestone is
-[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md).
+PR #8's UI follow-up. The active application milestone is
+[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md),
+with the bounded [1F-SAVE correction](tasks/active/phase-1f-save-correction.md) next.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
 acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
@@ -22,6 +23,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [tasks/active/phase-1f-source-synchronisation.md](tasks/active/phase-1f-source-synchronisation.md) |
+| Phase 1F Save correction, precise regressions and target acceptance | [tasks/active/phase-1f-save-correction.md](tasks/active/phase-1f-save-correction.md) |
+| Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
