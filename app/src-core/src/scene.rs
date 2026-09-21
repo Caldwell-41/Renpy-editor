@@ -465,7 +465,7 @@ impl AuthoringService {
                 source_path: scene.source_path.clone(),
                 source_revision: revision.sha256,
                 source_conflict: conflict,
-                partial: beats.iter().any(|beat| beat.protected),
+                partial: conflict || beats.iter().any(|beat| beat.protected),
                 beats,
             });
         }

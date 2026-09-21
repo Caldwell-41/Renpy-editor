@@ -378,7 +378,14 @@ setTimeout(async () => {
     sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
     await waitFor(() => called.has("source.updateDraft") && projectStatus === "pendingValidation", "Source draft retention");
     sourceAuthoringStage = "source-focused-save";
-    sourceEditor.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    sourceEditor.focus();
+    const sourceSaveShortcut = new Event("keydown", { bubbles: true, cancelable: true, composed: true });
+    Object.defineProperties(sourceSaveShortcut, {
+      key: { value: "s" },
+      ctrlKey: { value: true },
+      metaKey: { value: false },
+    });
+    if (sourceEditor.dispatchEvent(sourceSaveShortcut)) throw new Error("Source save shortcut was not handled by the focused editor");
     await waitFor(() => called.has("source.save") && projectStatus === "saved", "Source acceptance");
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
     sourceAuthoringUiPassed = sourceSurfaceVisible
@@ -440,7 +447,15 @@ setTimeout(async () => {
       && called.has("scene.resolveRecovery")
       && called.has("media.present");
     sceneAuthoringStage = sceneAuthoringUiPassed ? "complete" : "assertions-failed";
-  } catch {
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    if (sourceAuthoringStage !== "not-started" && sourceAuthoringStage !== "complete") {
+      sourceAuthoringStage = `${sourceAuthoringStage}: ${detail}`;
+    } else if (sceneAuthoringStage !== "not-started" && sceneAuthoringStage !== "complete") {
+      sceneAuthoringStage = `${sceneAuthoringStage}: ${detail}`;
+    } else if (supportingAuthoringStage !== "not-started" && supportingAuthoringStage !== "complete") {
+      supportingAuthoringStage = `${supportingAuthoringStage}: ${detail}`;
+    }
     if (supportingAuthoringStage !== "complete") supportingAuthoringUiPassed = false;
     sceneAuthoringUiPassed = false;
     sourceAuthoringUiPassed = false;

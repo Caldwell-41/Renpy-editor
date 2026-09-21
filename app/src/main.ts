@@ -295,7 +295,7 @@ async function refreshPersistenceStatus(project: OpenProject, generation: number
     const state = await projectValue<PersistenceStatus>(project, "project.status");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (activeAuthoringOperations.has(project.sessionId) || activeFlushOperations.has(project.sessionId)) return;
-    setStatus(state === "saved" ? "Saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — source changed outside Loomlight" : "Recovery required — writes are disabled", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
+    setStatus(state === "saved" ? "Saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Recovery required — writes are disabled", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Saved state could not be checked"), "error");
   }
@@ -346,7 +346,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         } finally { finishAuthoringCompletion(operationToken); }
       },
     }, target?.beatId);
-    setStatus(persistence === "pendingValidation" ? "Pending validation" : persistence === "conflict" ? "Conflict — source changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
+    setStatus(persistence === "pendingValidation" ? "Pending validation" : persistence === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
   }
@@ -517,7 +517,7 @@ function installListeners(): void {
       if (!completionIsCurrent(token)) return;
       const state = await projectValue<PersistenceStatus>(project, "project.status");
       if (!completionIsCurrent(token)) return;
-      setStatus(hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — source changed outside Loomlight" : state === "recoveryRequired" ? "Recovery required — writes are disabled" : "Saved", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
+      setStatus(hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : state === "pendingValidation" ? "Pending validation" : state === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : state === "recoveryRequired" ? "Recovery required — writes are disabled" : "Saved", state === "conflict" || state === "recoveryRequired" ? "error" : "normal");
     }).catch((error) => {
       if (completionIsCurrent(token)) setStatus(message(error, "Save could not be confirmed"), "error");
     }).finally(() => {

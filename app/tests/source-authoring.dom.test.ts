@@ -102,3 +102,62 @@ test("Source conflict exposes both retained versions and only offers Apply Both 
   assert.equal(applied, true);
   assert.equal(document.querySelector(".source-conflict"), null);
 });
+
+test("destructive Source draft actions require confirmation and Cancel changes nothing", async () => {
+  installDom();
+  let model = documentModel({ state: "dirty", dirty: true });
+  let discarded = 0;
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), {
+    status: () => {}, reloadInventory: async () => inventory(model.state, model.dirty), open: async () => model,
+    update: async () => model, save: async () => model,
+    discard: async () => { discarded += 1; model = documentModel(); return model; },
+    applyBoth: async () => model, viewScene: () => {},
+  });
+  await tick();
+
+  const discard = [...document.querySelectorAll("button")].find((item) => item.textContent === "Discard Draft")!;
+  discard.click();
+  assert.equal(discarded, 0);
+  assert.match(document.querySelector(".source-discard-confirmation")?.textContent ?? "", /permanently discards/i);
+  [...document.querySelectorAll<HTMLButtonElement>(".source-discard-confirmation button")].find((item) => item.textContent === "Cancel")!.click();
+  assert.equal(discarded, 0);
+  assert.equal(model.dirty, true);
+
+  discard.click();
+  [...document.querySelectorAll<HTMLButtonElement>(".source-discard-confirmation button")].find((item) => item.textContent === "Discard Draft")!.click();
+  await tick(); await tick();
+  assert.equal(discarded, 1);
+  assert.equal(model.dirty, false);
+});
+
+test("conflict Copy Draft copies bytes and external reload requires confirmation", async () => {
+  installDom();
+  let model = documentModel({ state: "conflict", dirty: true, externalText: "external", selectedSceneId: undefined, selectedBeatId: undefined });
+  let copied = "";
+  let discarded = 0;
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true, value: { writeText: async (value: string) => { copied = value; } } });
+  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), {
+    status: () => {}, reloadInventory: async () => inventory(model.state, model.dirty), open: async () => model,
+    update: async () => model, save: async () => model,
+    discard: async () => { discarded += 1; model = documentModel(); return model; },
+    applyBoth: async () => model, viewScene: () => {},
+  });
+  await tick();
+
+  [...document.querySelectorAll("button")].find((item) => item.textContent === "Copy Draft")!.click();
+  await tick();
+  assert.equal(copied, model.text);
+
+  const reload = [...document.querySelectorAll("button")].find((item) => item.textContent === "Reload External / Discard Draft")!;
+  reload.click();
+  assert.equal(discarded, 0);
+  [...document.querySelectorAll<HTMLButtonElement>(".source-discard-confirmation button")].find((item) => item.textContent === "Cancel")!.click();
+  assert.equal(discarded, 0);
+  assert.equal(model.state, "conflict");
+
+  reload.click();
+  [...document.querySelectorAll<HTMLButtonElement>(".source-discard-confirmation button")].find((item) => item.textContent === "Reload External")!.click();
+  await tick(); await tick();
+  assert.equal(discarded, 1);
+  assert.equal(model.state, "clean");
+});

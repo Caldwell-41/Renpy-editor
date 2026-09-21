@@ -83,7 +83,7 @@ function button(label: string, className = "button secondary"): HTMLButtonElemen
 }
 
 function stateLabel(state: SourceFileState): string {
-  return ({ clean: "Clean", dirty: "Pending validation", conflict: "Conflict", invalid: "Invalid draft", readOnly: "Read-only", unavailable: "Unavailable" })[state];
+  return ({ clean: "Clean", dirty: "Pending validation", conflict: "Conflict", invalid: "Invalid Source · Scene stale", readOnly: "Read-only", unavailable: "Unavailable" })[state];
 }
 
 function lineNumbers(text: string): string {
@@ -185,6 +185,52 @@ export function renderSourceWorkspace(
     }
   };
 
+  const copyDraft = async (): Promise<void> => {
+    if (!current?.dirty || current.text === undefined) return;
+    try {
+      if (window.navigator.clipboard?.writeText) {
+        await window.navigator.clipboard.writeText(current.text);
+      } else {
+        editor?.focus();
+        editor?.select();
+        if (!document.execCommand?.("copy")) throw new Error("Copy is unavailable");
+      }
+      actions.status("Draft copied");
+    } catch {
+      editor?.focus();
+      actions.status("Draft could not be copied", "error");
+    }
+  };
+
+  const confirmDiscard = (external: boolean): void => {
+    if (!current?.dirty || host.querySelector(".source-discard-confirmation")) return;
+    const path = current.path;
+    const restoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : editor;
+    const confirmation = document.createElement("section"); confirmation.className = "source-conflict source-discard-confirmation"; confirmation.role = "dialog"; confirmation.ariaModal = "true";
+    const heading = document.createElement("h2"); heading.textContent = external ? "Reload external Source?" : "Discard this draft?";
+    const warning = document.createElement("p"); warning.textContent = external
+      ? "This permanently discards the session-only draft and loads the external Source bytes."
+      : "This permanently discards the session-only draft and restores the accepted Source bytes.";
+    const controls = document.createElement("div"); controls.className = "row-actions";
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { confirmation.remove(); restoreFocus?.focus(); });
+    const confirm = button(external ? "Reload External" : "Discard Draft", "button danger");
+    confirm.addEventListener("click", async () => {
+      if (!current || current.path !== path) return;
+      confirm.disabled = true; cancel.disabled = true;
+      try {
+        current = await actions.discard(path);
+        const latest = await refreshInventory();
+        drawDocument();
+        actions.status(latest.dirtyCount ? "Pending validation" : external ? "External Source loaded" : "Draft discarded");
+      } catch (error) {
+        confirm.disabled = false; cancel.disabled = false;
+        actions.status(error instanceof Error ? error.message : external ? "External Source could not be loaded" : "Draft could not be discarded", "error");
+        confirm.focus();
+      }
+    });
+    controls.append(cancel, confirm); confirmation.append(heading, warning, controls); host.append(confirmation); cancel.focus();
+  };
+
   const openFile = async (target: SourceTarget): Promise<void> => {
     await enqueueUpdate();
     await updateQueue;
@@ -235,7 +281,7 @@ export function renderSourceWorkspace(
 
     const toolbar = document.createElement("div"); toolbar.className = "source-toolbar";
     const save = button("Save Source", "button primary"); save.dataset.sourceAction = "save"; save.disabled = !current.dirty || current.state === "conflict" || current.state === "invalid"; save.addEventListener("click", () => void saveCurrent());
-    const discard = button("Discard Draft"); discard.dataset.sourceAction = "discard"; discard.disabled = !current.dirty; discard.addEventListener("click", async () => { if (!current) return; try { current = await actions.discard(current.path); const latest = await refreshInventory(); drawDocument(); actions.status(latest.dirtyCount ? "Pending validation" : "Draft discarded"); } catch (error) { actions.status(error instanceof Error ? error.message : "Draft could not be discarded", "error"); } });
+    const discard = button("Discard Draft"); discard.dataset.sourceAction = "discard"; discard.disabled = !current.dirty; discard.addEventListener("click", () => confirmDiscard(false));
     const refresh = button("Refresh"); refresh.addEventListener("click", () => { if (current) void openFile({ path: current.path, selectionStart: editor?.selectionStart, selectionEnd: editor?.selectionEnd }); });
     toolbar.append(save, discard, refresh); host.append(toolbar);
     const draftWarning = document.createElement("p");
@@ -253,12 +299,12 @@ export function renderSourceWorkspace(
     if (current.state === "conflict") {
       const conflict = document.createElement("section"); conflict.className = "source-conflict"; const heading = document.createElement("h2"); heading.textContent = "External Source conflict";
       const copy = document.createElement("p"); copy.textContent = "Your draft and the external bytes are both retained. Loomlight will not overwrite either version automatically."; conflict.append(heading, copy);
-      const selectDraft = button("Select Draft to Copy"); selectDraft.addEventListener("click", () => { editor?.focus(); editor?.select(); actions.status("Draft selected — use the system Copy command"); }); conflict.append(selectDraft);
+      const copyDraftButton = button("Copy Draft"); copyDraftButton.addEventListener("click", () => void copyDraft()); conflict.append(copyDraftButton);
       if (current.canApplyBoth && current.combinedPreview !== undefined) {
         const preview = document.createElement("details"); const summary = document.createElement("summary"); summary.textContent = "Review combined non-overlapping result"; const code = document.createElement("pre"); code.textContent = current.combinedPreview; preview.append(summary, code); conflict.append(preview);
         const apply = button("Apply Both", "button primary"); apply.addEventListener("click", async () => { if (!current) return; try { current = await actions.applyBoth({ path: current.path, expectedBaseRevision: current.baseRevision, expectedDraftVersion: current.draftVersion }); const latest = await refreshInventory(); drawDocument(); actions.status(latest.dirtyCount ? "Pending validation" : "Combined Source saved"); } catch (error) { actions.status(error instanceof Error ? error.message : "The sources could not be combined", "error"); } }); conflict.append(apply);
       }
-      const reload = button("Reload External / Discard Draft", "button danger"); reload.addEventListener("click", async () => { if (!current) return; try { current = await actions.discard(current.path); const latest = await refreshInventory(); drawDocument(); actions.status(latest.dirtyCount ? "Pending validation" : "External Source loaded"); } catch (error) { actions.status(error instanceof Error ? error.message : "External Source could not be loaded", "error"); } });
+      const reload = button("Reload External / Discard Draft", "button danger"); reload.addEventListener("click", () => confirmDiscard(true));
       const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => editor?.focus()); conflict.append(reload, cancel); host.append(conflict);
     }
 

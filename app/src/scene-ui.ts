@@ -473,8 +473,8 @@ export function renderSceneAuthoring(
     history.append(viewSource, undo, redo); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
-      const heading = document.createElement("h2"); heading.textContent = "Source conflict";
-      const copy = document.createElement("p"); copy.textContent = "This Scene changed outside Loomlight. Scene writes and history are blocked until the exact source revision is reconciled.";
+      const heading = document.createElement("h2"); heading.textContent = "Source projection unavailable";
+      const copy = document.createElement("p"); copy.textContent = "The current Source is invalid, missing, or unreconciled. The previous visual projection is stale; Scene writes and history remain blocked until the exact source revision is reconciled.";
       conflict.append(heading, copy); host.append(conflict);
     } else if (scene.partial) {
       const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = "Preview and reference certainty are partial because this Scene contains protected Custom Code."; host.append(partial);

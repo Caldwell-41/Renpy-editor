@@ -146,6 +146,7 @@ struct SourceBuffer {
     selection_end: u64,
     external: Option<(Vec<u8>, Revision)>,
     unavailable: bool,
+    projection_invalid: bool,
 }
 
 #[derive(Default)]
@@ -183,7 +184,7 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<SourceInventory, SourceError> {
-        self.source_refresh_all(project)?;
+        self.source_refresh_project(project, project_id)?;
         let metadata = self.project_metadata(project, project_id)?;
         let scene_paths: HashMap<_, _> = metadata
             .scenes
@@ -394,6 +395,7 @@ impl AuthoringService {
             buffer.draft_version = buffer.draft_version.saturating_add(1);
         }
         self.refresh_buffer(project, &request.path)?;
+        self.reconcile_clean_source(project, project_id, &request.path)?;
         self.source_document(project, project_id, &request.path)
     }
 
@@ -414,6 +416,7 @@ impl AuthoringService {
         };
         for path in paths {
             self.refresh_buffer(project, &path)?;
+            self.reconcile_clean_source(project, project_id, &path)?;
         }
         self.source_inventory(project, project_id)
     }
@@ -468,10 +471,9 @@ impl AuthoringService {
         let Some(buffers) = sessions.projects.get(project) else {
             return PersistenceStatus::Saved;
         };
-        if buffers
-            .values()
-            .any(|buffer| buffer.external.is_some() || buffer.unavailable)
-        {
+        if buffers.values().any(|buffer| {
+            buffer.external.is_some() || buffer.unavailable || buffer.projection_invalid
+        }) {
             PersistenceStatus::Conflict
         } else if buffers.values().any(|buffer| buffer.draft.is_some()) {
             PersistenceStatus::PendingValidation
@@ -503,7 +505,10 @@ impl AuthoringService {
         if sessions.projects.get(project).is_some_and(|buffers| {
             buffers.values().any(|buffer| {
                 wanted.contains(buffer.path.as_str())
-                    && (buffer.draft.is_some() || buffer.external.is_some() || buffer.unavailable)
+                    && (buffer.draft.is_some()
+                        || buffer.external.is_some()
+                        || buffer.unavailable
+                        || buffer.projection_invalid)
             })
         }) {
             Err(SourceError::DirtySource)
@@ -592,6 +597,7 @@ impl AuthoringService {
             selection_end: 0,
             external: None,
             unavailable: false,
+            projection_invalid: false,
         };
         self.source_sessions
             .lock()
@@ -631,6 +637,7 @@ impl AuthoringService {
                 buffer.base_revision = revision;
                 buffer.external = None;
                 buffer.unavailable = false;
+                buffer.projection_invalid = false;
                 let max = accepted_text(&buffer.base_bytes)
                     .map(|value| value.encode_utf16().count() as u64)
                     .unwrap_or(0);
@@ -727,7 +734,7 @@ impl AuthoringService {
         let selected_scene_id = selected.map(|range| range.scene_id.clone());
         let selected_beat_id = selected.map(|range| range.beat_id.clone());
         let invalid_utf8 = accepted_text(&buffer.base_bytes).is_err();
-        let invalid = parse_invalid && buffer.draft.is_some();
+        let invalid = parse_invalid || buffer.projection_invalid;
         Ok(SourceDocument {
             path: path.to_owned(),
             text,
@@ -747,7 +754,7 @@ impl AuthoringService {
             draft_version: buffer.draft_version,
             has_bom: buffer.base_bytes.starts_with(&[0xef, 0xbb, 0xbf]),
             newline: newline_name(&buffer.base_bytes).into(),
-            partial: scene.is_none() || ranges.iter().any(|range| range.protected),
+            partial: invalid || scene.is_none() || ranges.iter().any(|range| range.protected),
             diagnostics,
             ranges,
             selection_start: buffer.selection_start,
@@ -970,14 +977,33 @@ impl AuthoringService {
         let authoring = self
             .list(project, project_id)
             .map_err(|_| SourceError::Io)?;
-        let (mapping, _) = build_reconciled_mapping(
+        let reconciled = build_reconciled_mapping(
             scene,
             &buffer.base_bytes,
             &buffer.base_revision.sha256,
             Some(&previous),
             Some((&project_metadata, &authoring)),
-        )
-        .map_err(scene_source_error)?;
+        );
+        let (mapping, _) = match reconciled {
+            Ok(value) => value,
+            Err(error) => {
+                let error = scene_source_error(error);
+                if error == SourceError::InvalidSource {
+                    if let Some(current) = self
+                        .source_sessions
+                        .lock()
+                        .map_err(|_| SourceError::Io)?
+                        .projects
+                        .get_mut(project)
+                        .and_then(|items| items.get_mut(path))
+                    {
+                        current.projection_invalid = true;
+                    }
+                    return Ok(());
+                }
+                return Err(error);
+            }
+        };
         *source_map
             .scene_mappings
             .iter_mut()
@@ -1001,7 +1027,19 @@ impl AuthoringService {
             },
         );
         match outcome {
-            CommitOutcome::Committed { .. } => Ok(()),
+            CommitOutcome::Committed { .. } => {
+                if let Some(current) = self
+                    .source_sessions
+                    .lock()
+                    .map_err(|_| SourceError::Io)?
+                    .projects
+                    .get_mut(project)
+                    .and_then(|items| items.get_mut(path))
+                {
+                    current.projection_invalid = false;
+                }
+                Ok(())
+            }
             other => Err(commit_error(other)),
         }
     }
@@ -1045,6 +1083,7 @@ impl AuthoringService {
             buffer.draft = None;
             buffer.external = None;
             buffer.unavailable = false;
+            buffer.projection_invalid = false;
             buffer.draft_version = buffer.draft_version.saturating_add(1);
         }
         Ok(())
@@ -1185,6 +1224,8 @@ fn buffer_state(buffer: &SourceBuffer) -> SourceFileState {
         SourceFileState::Conflict
     } else if accepted_text(&buffer.base_bytes).is_err() {
         SourceFileState::ReadOnly
+    } else if buffer.projection_invalid {
+        SourceFileState::Invalid
     } else if buffer.draft.is_some() {
         SourceFileState::Dirty
     } else {
@@ -1702,6 +1743,51 @@ mod tests {
         let overlap = fixture.open("game/custom.rpy");
         assert_eq!(overlap.text, next.text);
         assert!(!overlap.can_apply_both);
+    }
+
+    #[test]
+    fn clean_external_invalid_source_remains_visible_and_marks_scene_projection_stale() {
+        let fixture = Fixture::new(b"label scene_one:\n    \"Hello\"\n    return\n");
+        let opened = fixture.open(&fixture.scene_path);
+        assert_eq!(opened.state, SourceFileState::Clean);
+
+        let invalid = "label scene_one\n    \"unfinished\n";
+        fs::write(fixture.root.join(&fixture.scene_path), invalid.as_bytes()).unwrap();
+
+        let refreshed = fixture.open(&fixture.scene_path);
+        assert_eq!(refreshed.text.as_deref(), Some(invalid));
+        assert_eq!(refreshed.state, SourceFileState::Invalid);
+        assert!(!refreshed.dirty);
+        assert!(refreshed.editable);
+        assert!(refreshed.partial);
+        assert!(refreshed.ranges.is_empty());
+        assert!(refreshed
+            .diagnostics
+            .iter()
+            .any(|item| item.code == "INVALID_SOURCE"));
+        assert_eq!(
+            fixture.service.status(&fixture.project),
+            PersistenceStatus::Conflict
+        );
+
+        let inventory = fixture
+            .service
+            .source_inventory(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert_eq!(inventory.files[0].state, SourceFileState::Invalid);
+
+        let workspace = fixture
+            .service
+            .scene_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let scene = workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == fixture.scene_id)
+            .unwrap();
+        assert!(scene.source_conflict);
+        assert!(scene.partial);
+        assert!(scene.beats.is_empty());
     }
 
     #[test]
