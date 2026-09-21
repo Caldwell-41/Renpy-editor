@@ -107,6 +107,22 @@ export function renderSourceWorkspace(
   let observationTimer: number | undefined;
   let observationInterval: number | undefined;
 
+  const handleSourceSaveShortcut = (event: KeyboardEvent): void => {
+    if (
+      disposed
+      || event.target !== editor
+      || !((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s")
+    ) return;
+    event.preventDefault();
+    event.stopPropagation();
+    void saveCurrent();
+  };
+
+  // Capture the focused-editor shortcut before the application-wide Flush handler.
+  // Native WebViews do not consistently deliver synthetic keyboard events through a
+  // textarea's target listener, while capture on the owning window is deterministic.
+  window.addEventListener("keydown", handleSourceSaveShortcut, true);
+
   const drawTree = (): void => {
     treeHost.replaceChildren();
     const heading = document.createElement("p"); heading.className = "eyebrow"; heading.textContent = "Source files"; treeHost.append(heading);
@@ -315,7 +331,6 @@ export function renderSourceWorkspace(
     text.addEventListener("scroll", () => { gutter.scrollTop = text.scrollTop; });
     text.addEventListener("input", () => { gutter.textContent = lineNumbers(text.value); void enqueueUpdate(); });
     for (const event of ["select", "keyup", "mouseup"]) text.addEventListener(event, () => { void enqueueUpdate(); });
-    text.addEventListener("keydown", (event) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") { event.preventDefault(); event.stopPropagation(); void saveCurrent(); } });
     editor = text; editorShell.append(gutter, text); host.append(editorShell);
 
     const mapping = document.createElement("section"); mapping.className = "source-mapping"; const mappingHeading = document.createElement("h2"); mappingHeading.textContent = "Mapped ranges"; mapping.append(mappingHeading);
@@ -346,5 +361,6 @@ export function renderSourceWorkspace(
     if (observationTimer !== undefined) window.clearTimeout(observationTimer);
     if (observationInterval !== undefined) window.clearInterval(observationInterval);
     window.removeEventListener("focus", observeCurrent);
+    window.removeEventListener("keydown", handleSourceSaveShortcut, true);
   };
 }

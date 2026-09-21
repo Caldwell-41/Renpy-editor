@@ -377,6 +377,10 @@ setTimeout(async () => {
     sourceEditor.value = sourceEditor.value.replace("score += 1", "score += 2");
     sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
     await waitFor(() => called.has("source.updateDraft") && projectStatus === "pendingValidation", "Source draft retention");
+    await waitFor(() => {
+      const save = document.querySelector('button[data-source-action="save"]');
+      return save && !save.disabled && document.querySelector("#app-status")?.textContent === "Pending validation";
+    }, "Source dirty UI state");
     sourceAuthoringStage = "source-focused-save";
     sourceEditor.focus();
     const sourceSaveShortcut = new Event("keydown", { bubbles: true, cancelable: true, composed: true });
@@ -386,7 +390,12 @@ setTimeout(async () => {
       metaKey: { value: false },
     });
     if (sourceEditor.dispatchEvent(sourceSaveShortcut)) throw new Error("Source save shortcut was not handled by the focused editor");
-    await waitFor(() => called.has("source.save") && projectStatus === "saved", "Source acceptance");
+    try {
+      await waitFor(() => called.has("source.save") && projectStatus === "saved", "Source acceptance");
+    } catch (error) {
+      const status = document.querySelector("#app-status")?.textContent ?? "missing";
+      throw new Error(`${error instanceof Error ? error.message : String(error)}; status=${status}; calls=${[...called].sort().join(",")}`);
+    }
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
     sourceAuthoringUiPassed = sourceSurfaceVisible
       && sourceDocument.text.includes("score += 2")

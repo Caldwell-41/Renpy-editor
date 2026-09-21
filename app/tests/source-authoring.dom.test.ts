@@ -45,7 +45,11 @@ test("Source workspace retains drafts, uses Source-focused save, and bridges exa
   let model = documentModel();
   const calls: string[] = [];
   let viewed = "";
-  renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), {
+  let globalSaveShortcuts = 0;
+  window.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") globalSaveShortcuts += 1;
+  });
+  const dispose = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), {
     status: (message) => { calls.push(`status:${message}`); },
     reloadInventory: async () => inventory(model.state, model.dirty),
     open: async () => model,
@@ -77,10 +81,18 @@ test("Source workspace retains drafts, uses Source-focused save, and bridges exa
   editor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
   await tick();
   assert.equal(calls.filter((call) => call.startsWith("save:")).length, savesBeforeUndo);
-  editor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+  const sourceSave = new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true, cancelable: true });
+  const unhandled = editor.dispatchEvent(sourceSave);
   await tick(); await tick();
+  assert.equal(unhandled, false);
+  assert.equal(globalSaveShortcuts, 0);
   assert.equal(calls.some((call) => call.startsWith("save:")), true);
   assert.equal(model.dirty, false);
+  const savedEditor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  dispose();
+  savedEditor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true, cancelable: true }));
+  await tick();
+  assert.equal(globalSaveShortcuts, 1);
 });
 
 test("Source conflict exposes both retained versions and only offers Apply Both with proof", async () => {
