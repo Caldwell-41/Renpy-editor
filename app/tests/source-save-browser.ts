@@ -9,6 +9,7 @@ declare global {
   interface Window {
     __sourceBrowserEvidence: {
       acceptedText: string;
+      acceptedVersion: number;
       dirty: boolean;
       draftVersion: number;
       flushes: number;
@@ -21,6 +22,7 @@ declare global {
 }
 
 const acceptedRevision = "a".repeat(64);
+const legacyUnconditionalDirty = new URLSearchParams(window.location.search).get("model") === "legacy";
 let acceptedText = 'label scene:\n    "Hello browser"\n    return\n';
 let retainedDraft: string | undefined;
 let model: SourceDocument = {
@@ -45,6 +47,7 @@ let updates = 0;
 let saves = 0;
 let flushes = 0;
 let status = "";
+let acceptedVersion = 0;
 const inventory = (): SourceInventory => ({
   files: [{ path: model.path, state: model.state, dirty: model.dirty, readOnly: false }],
   dirtyCount: model.dirty ? 1 : 0,
@@ -54,6 +57,7 @@ const syncEvidence = (): void => {
   if (!("__sourceBrowserEvidence" in window)) return;
   Object.assign(window.__sourceBrowserEvidence, {
     acceptedText,
+    acceptedVersion,
     dirty: model.dirty,
     draftVersion: model.draftVersion,
     flushes,
@@ -77,6 +81,20 @@ const controller = renderSourceWorkspace(
     open: async () => model,
     update: async (request) => {
       updates += 1;
+      if (legacyUnconditionalDirty) {
+        retainedDraft = request.text;
+        model = {
+          ...model,
+          text: request.text,
+          dirty: true,
+          state: "dirty",
+          draftVersion: model.draftVersion + 1,
+          selectionStart: request.selectionStart,
+          selectionEnd: request.selectionEnd,
+        };
+        syncEvidence();
+        return model;
+      }
       const nextDraft = request.text === acceptedText ? undefined : request.text;
       const changed = retainedDraft !== nextDraft;
       retainedDraft = nextDraft;
@@ -97,6 +115,7 @@ const controller = renderSourceWorkspace(
       acceptedText = retainedDraft ?? acceptedText;
       retainedDraft = undefined;
       model = { ...model, text: acceptedText, dirty: false, state: "clean", draftVersion: model.draftVersion + 1 };
+      acceptedVersion = model.draftVersion;
       syncEvidence();
       return model;
     },
@@ -114,6 +133,7 @@ const controller = renderSourceWorkspace(
 
 window.__sourceBrowserEvidence = {
   acceptedText,
+  acceptedVersion,
   dirty: model.dirty,
   draftVersion: model.draftVersion,
   flushes,

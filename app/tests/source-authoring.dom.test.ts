@@ -108,7 +108,9 @@ test("Source workspace retains drafts, uses the shared toolbar Save executor, an
   editor.dispatchEvent(new window.KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
   await tick();
   assert.equal(calls.filter((call) => call.startsWith("save:")).length, savesBeforeUndo);
-  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  const immediateSave = [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!;
+  immediateSave.click();
+  immediateSave.click();
   await tick(); await tick();
   assert.equal(globalSaveShortcuts, 0);
   assert.equal(calls.some((call) => call.startsWith("save:")), true);
@@ -206,7 +208,9 @@ test("immediate Save waits for latest retention, coalesces duplicates, and fails
   let editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
   editor.value = editor.value.replace("Hello", "Latest");
   editor.dispatchEvent(new window.Event("input", { bubbles: true }));
-  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  const delayedSave = [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!;
+  delayedSave.click();
+  delayedSave.click();
   await tick();
   assert.equal(pendingUpdates.length, 1);
   assert.equal(editor.readOnly, true);

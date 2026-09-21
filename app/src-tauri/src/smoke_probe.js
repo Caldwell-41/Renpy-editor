@@ -410,10 +410,15 @@ setTimeout(async () => {
     sourceAuthoringStage = "source-button-save";
     click("Save Source");
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
-    sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${(operationCounts.get("project.flush") ?? 0) - buttonFlushBefore}:saved`);
+    const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
+    sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
     sourceEditor = document.querySelector(".source-editor");
+    const selectionUpdateBefore = operationCounts.get("source.updateDraft") ?? 0;
     sourceEditor.dispatchEvent(new Event("select", { bubbles: true }));
-    await waitFor(() => !sourceDocument.dirty, "selection-only clean stability");
+    await waitFor(
+      () => (operationCounts.get("source.updateDraft") ?? 0) > selectionUpdateBefore && !sourceDocument.dirty,
+      "selection-only clean stability",
+    );
 
     sourceAuthoringStage = "retain-shortcut-draft";
     sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
@@ -441,7 +446,8 @@ setTimeout(async () => {
       const status = document.querySelector("#app-status")?.textContent ?? "missing";
       throw new Error(`${error instanceof Error ? error.message : String(error)}; status=${status}; counts=${JSON.stringify(Object.fromEntries(operationCounts))}`);
     }
-    sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${(operationCounts.get("project.flush") ?? 0) - shortcutFlushBefore}:saved`);
+    const shortcutFlushDelta = (operationCounts.get("project.flush") ?? 0) - shortcutFlushBefore;
+    sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${shortcutFlushDelta}:saved`);
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
 
     sourceAuthoringStage = "source-clean-flush";
@@ -452,7 +458,8 @@ setTimeout(async () => {
     const cleanShortcut = new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true });
     sourceEditor.dispatchEvent(cleanShortcut);
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
-    sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${(operationCounts.get("source.save") ?? 0) - cleanSaveBefore}:flushes=1:saved`);
+    const cleanSaveDelta = (operationCounts.get("source.save") ?? 0) - cleanSaveBefore;
+    sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
     sourceAuthoringStage = "non-source-flush";
     click("Characters");
@@ -467,7 +474,10 @@ setTimeout(async () => {
       && called.has("source.open")
       && called.has("source.updateDraft")
       && (operationCounts.get("source.save") ?? 0) === shortcutSaveBefore + 1
-      && (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1;
+      && (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1
+      && buttonFlushDelta === 0
+      && shortcutFlushDelta === 0
+      && cleanSaveDelta === 0;
     sourceAuthoringStage = sourceAuthoringUiPassed ? "complete" : "assertions-failed";
 
     sceneAuthoringStage = "safe-recovery";
@@ -540,6 +550,13 @@ setTimeout(async () => {
     ? window.__loomlightReadSaveTrace().join("|")
     : "missing";
   const sourceCommandTracePassed = sourceCommandTrace.length === 4
+    && sourceCommandTrace[0]?.includes("button:source:generation-current:completed:saves=1:flushes=0:saved")
+    && sourceCommandTrace[1]?.includes("keyboard-synthetic:source:")
+    && sourceCommandTrace[1]?.includes(":completed:saves=1:flushes=0:saved")
+    && sourceCommandTrace[2]?.includes("keyboard-synthetic:source-clean:")
+    && sourceCommandTrace[2]?.includes(":completed:saves=0:flushes=1:saved")
+    && sourceCommandTrace[3]?.includes("keyboard-synthetic:non-source:")
+    && sourceCommandTrace[3]?.includes(":completed:flushes=1:saved")
     && shellSaveTrace.includes("route=source;origin=toolbar")
     && shellSaveTrace.includes("route=source;origin=keyboard")
     && shellSaveTrace.includes("phase=accepted")

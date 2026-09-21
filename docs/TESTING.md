@@ -6,7 +6,9 @@ From `app/`, the Phase 1A production checks are:
 
 ```bash
 npm ci --ignore-scripts
+npx playwright install chromium  # only when no system Chrome is available
 npm run check
+npm run test:source-browser
 npm run build
 cargo fmt --check --all
 cargo test -p loomlight-core --locked
@@ -18,6 +20,12 @@ The full desktop Rust test, package, and injected packaged-WebView probe run sep
 on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
 also runnable where a complete Tauri desktop build environment is unavailable. This is
 not a substitute for either target gate.
+
+The retained Source Save browser regression first executes the historical
+unconditional-dirty fake and requires it to demonstrate the false re-dirty after one
+completed Source Save and zero Flushes. It then executes the faithful accepted-text
+model and requires the same selection notification to remain clean. The launcher uses
+system Chrome when available and otherwise the locked Playwright Chromium binary.
 
 The packaged probe also starts a primary Loomlight process, waits for its explicit
 post-setup readiness marker, and launches the same packaged executable again. The
