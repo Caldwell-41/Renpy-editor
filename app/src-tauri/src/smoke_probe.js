@@ -410,15 +410,20 @@ setTimeout(async () => {
     sourceAuthoringStage = "source-button-save";
     click("Save Source");
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
     sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
     sourceEditor = document.querySelector(".source-editor");
+    const selectionUpdateBefore = operationCounts.get("source.updateDraft") ?? 0;
     sourceEditor.setSelectionRange(5, 5);
     sourceEditor.dispatchEvent(new Event("select", { bubbles: true }));
-    await new Promise((resolve) => requestAnimationFrame(() => resolve()));
-    if (sourceDocument.dirty || sourceEditor.selectionStart !== 5 || sourceEditor.selectionEnd !== 5) {
-      throw new Error("selection-only clean stability failed");
-    }
+    await waitFor(
+      () => (operationCounts.get("source.updateDraft") ?? 0) > selectionUpdateBefore
+        && !sourceDocument.dirty
+        && sourceDocument.selectionStart === 5
+        && sourceDocument.selectionEnd === 5,
+      "selection-only clean stability",
+    );
 
     sourceAuthoringStage = "retain-shortcut-draft";
     sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
