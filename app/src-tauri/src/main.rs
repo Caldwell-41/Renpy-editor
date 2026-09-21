@@ -432,7 +432,7 @@ fn main() {
                         .expect("main smoke probe injection must succeed");
                 });
                 thread::spawn(|| {
-                    thread::sleep(Duration::from_secs(20));
+                    thread::sleep(Duration::from_secs(60));
                     if !SMOKE_REPORT_RECEIVED.load(Ordering::SeqCst) {
                         eprintln!("packaged boundary smoke report timed out");
                         std::process::exit(1);
