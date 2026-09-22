@@ -449,3 +449,22 @@ exact SHA. Preflight `106682217975` passed; Windows `106682384572` and macOS
 `awaiting_ci`/manual resume under repository no-polling rules. Inspect this existing
 run's terminal reports plus scans/inventories; do not dispatch again. P5 and P3 remain
 unverified, not passed. On gate failure preserve evidence and stop for review.
+
+2026-09-22 terminal evidence closeout (no redispatch): Existing production
+`35708223679` (#84), attempt 1, passed on exact candidate
+`85e44e926399ae7ad8431c948e1751db04dcde35`. Preflight `106682217975`, Windows x64
+`106682384572` and macOS ARM64 `106682384566` all succeeded. Both target artifacts
+(`10685588341` Windows; `10685592982` macOS) contain accepted final packaged reports
+with all Source/security assertions true, complete Source command traces and all five
+checkpoints. Final-report-start was 898 ms Windows / 5,782 ms macOS. Both subsequent
+secret scans and dependency/licence inventories passed; inventories contain 85 npm
+and 519 Cargo entries each. Real-service Source persistence also passed on both.
+P1/P2/P4/P5 automated evidence is now satisfied for this candidate; the pending state
+above is historical. Exact evidence/timings are in 1F-SAVE section 7.16.
+
+Native P3 is the sole remaining acceptance-evidence blocker: dirty Source native Save,
+clean Source ordinary Flush and non-Source isolation with Windows Ctrl+S/macOS Cmd+S.
+Synthetic events do not satisfy it. Optional installable-package upload was not
+selected, so evidence archives are not manual-test packages. No app code changed or
+new run was dispatched. Documentation validation/whitespace passed. Keep PR #14 draft
+and stop for independent review; no merge or Phase 1G.

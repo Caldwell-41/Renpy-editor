@@ -1,14 +1,14 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `awaiting_ci`; the Save implementation and E1-E6 are retained. The locally verified final-report scope correction is section 7.16; manual resume is required for native results.
+**State:** `blocked` on native P3 only; automated P5 passed on both targets. Final-report scope correction and evidence closeout are in section 7.16; stop for independent review.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
 **Original 1F-SAVE application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; current evidence correction is recorded in section 7.16.
 **Publication state:** corrected candidate `85e44e926399ae7ad8431c948e1751db04dcde35`
-is published; Repository Quality passed and production #84 is active. This
-documentation-only handoff does not change the candidate or dispatch another gate.
+is published; Repository Quality and production #84 passed. This documentation-only
+evidence closeout does not change the candidate or dispatch another gate.
 
 ## Authority and scope
 
@@ -506,8 +506,8 @@ Phase 1G.
 
 **Selected:** 2026-09-22 after independent review of application candidate
 `a720ea3fb150f2a49422e8385256179185129968`.
-**State:** `awaiting_ci` for the section 7.16 scope correction; completed E1-E6
-remain retained. Automated P5 and native P3 remain open; manual resume required.
+**State:** automated evidence closed; `blocked` on native P3 only. Completed E1-E6
+remain retained, and section 7.16 records the passing exact-candidate P5 evidence.
 **Purpose:** close the remaining evidence/harness blockers without reopening the Save
 architecture. The shell-owned Save coordinator, Source controller, retention barrier,
 transaction/reconciliation/history path and Source core are retained unless a focused
@@ -1016,3 +1016,61 @@ Source/security assertions, then successful secret scan and dependency/licence
 inventory on both targets. On failure retain exact error/timings/SHA/run/jobs and
 stop for independent review, with no timeout/yield/split/Source changes or retries.
 P3 remains outstanding under section 7.10. PR #14 stays draft; no merge or Phase 1G.
+
+#### Terminal evidence closeout — 2026-09-22
+
+The user authorised inspection and evidence closeout of the existing run only, with
+no redispatch. Ref/PR/worktree inspection found remote documentation head
+`e7b5a4bc91a2d34dc13f22dd3c22cadba2b1934e`, open draft PR #14 and a clean,
+content-equivalent local tree. No newer application work was overwritten.
+
+Run **35708223679 (#84), attempt 1**, completed successfully on exact application
+candidate **`85e44e926399ae7ad8431c948e1751db04dcde35`**. Artifact metadata independently
+confirms that SHA and branch; target logs identify attempt 1. This supersedes the
+pending handoff above, not its historical evidence.
+
+| Job | ID | Packaged final report | Secret scan | Dependency/licence inventory |
+| --- | --- | --- | --- | --- |
+| Preflight | 106682217975 | Not a packaged target; passed frontend/browser/format gates | — | — |
+| Windows x64 | 106682384572 | Accepted, passed | Passed | Passed |
+| macOS ARM64 | 106682384566 | Accepted, passed | Passed | Passed |
+
+Downloaded and inspected Windows artifact `10685588341`
+(`phase-1-production-evidence-windows-2025`) and macOS artifact `10685592982`
+(`phase-1-production-evidence-macos-26`). Each contains exactly one
+`production-packaged-boundary` terminal report, with all reported boolean assertions
+true: lifecycle, supporting/Scene/Source authoring, Source command trace, WebView
+restrictions, navigation/popup denial and single-instance enforcement. Authoring
+stages are `complete`. Trace evidence retains button Save and synthetic Ctrl+S/Cmd+S
+Source acceptance with zero fallback Flushes, clean Source Flush with zero Saves,
+non-Source Flush, and shell accepted/flushed/completed phases. The host's accepted
+report path and successful smoke step establish acceptance, not merely receipt of
+`final-report-start`.
+
+| Checkpoint | Windows x64 elapsedMs | macOS ARM64 elapsedMs |
+| --- | ---: | ---: |
+| pre-source-complete | 834 | 4802 |
+| source-complete | 869 | 5631 |
+| post-source-recovery-complete | 886 | 5728 |
+| post-source-conflict-complete | 894 | 5779 |
+| final-report-start | 898 | 5782 |
+
+Both jobs also passed core, official-SDK lifecycle, real-service Source persistence
+(`phase-1f-source-save-target-gate: passed`), desktop boundary and packaging. Each
+artifact contains a parsed dependency/licence inventory with 85 npm and 519 Cargo
+entries. The post-smoke scan and inventory steps are successful, not skipped.
+Optional packaged-application upload was skipped because it was not selected; the
+evidence archives are not installable packages. Artifact retention expires
+2026-09-29. This ledger retains the decisive results without committing raw logs.
+
+**P1/P2/P4/P5 automated evidence passes on both targets for this candidate. P3 remains
+outstanding:** packaged shortcuts here are synthetic events, not trusted native input.
+The exact section 7.10 manual three-action checklist remains required on each target,
+with candidate/package identity, OS/architecture and observed outcomes. No new native
+automation, production rerun, merge or Phase 1G is authorised by this closeout.
+
+Evidence-only self-review confirmed exact SHA/job/artifact mapping, all five timings,
+accepted final reports, subsequent scans/inventories and the separate P3 boundary.
+Only four documentation files and PR text changed. Repository validation and
+`git diff --check` passed; unchanged application suites were not replayed. The
+remaining acceptance blocker is P3; stop for independent review with PR #14 draft.
