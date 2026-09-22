@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `blocked` on F4 from the completed independent correction review (section 7.25). F1 core binding and F2–F3 pass targeted review; Apply Both availability regresses after selection retention. Phase 1F is not accepted or integrated.
+**State:** F4 correction `review_ready` (section 7.26); browser and native evidence remain open. Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1676,10 +1676,11 @@ open/observation calls: `pending=false`, `disabled=true`, `applies=0`,
 
 Retained required-behavior probes, deliberately outside the normal test glob:
 
-- [DOM selection probe](../../../app/tests/review/phase-1f-selection.repro.mts):
-  `node --test tests/review/phase-1f-selection.repro.mts` from `app/`; 1 failed as expected.
-- [Browser selection probe](../../../app/tests/review/phase-1f-selection.browser.mjs):
-  `node tests/review/phase-1f-selection.browser.mjs` from `app/`; fails the assertion
+- DOM selection probe (historical review path `app/tests/review/phase-1f-selection.repro.mts`,
+  now incorporated in the ordinary [Source DOM suite](../../../app/tests/source-authoring.dom.test.ts)):
+  `node --test tests/review/phase-1f-selection.repro.mts` from `app/`; 1 failed as expected at review time.
+- [Browser selection probe](../../../app/tests/phase-1f-selection.browser.mjs)
+  (formerly `app/tests/review/phase-1f-selection.browser.mjs`): at review time it failed the assertion
   that the current review becomes enabled after settled unchanged selection.
 
 Smallest follow-up: refresh relevant controls after removing the finished retention,
@@ -1754,3 +1755,53 @@ The legacy local Python SDK result remains 23 pass / 1 `os.killpg` permission er
 DIST-MAC-01 remains outside scope. PR #14 stays draft, Phase 1F unaccepted/unmerged.
 Review is complete with one blocking P2 finding; no operation is pending. The next
 bounded action requires user selection of an F4 correction checkpoint. Stop here.
+
+### 7.26 F4 settled-selection correction — review ready
+
+**Authority:** user's bounded F4 checkpoint request. **Branch/PR:**
+`feature/phase-1f-source-synchronisation`, draft #14. Entry head was clean
+`6463155e3d0abb252b5013d7a49df2c45aa8d45d`; fetched branch and PR matched it,
+main was `75a91c5f72cd0eac8586faf2be036ec5021a939d`, and no other local
+worktree or pending execution owner was present. No newer F4 implementation existed.
+**Application candidate:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
+
+The original DOM diagnostic failed on entry with `pending=false`, `disabled=true`,
+`applies=0`; the prior independent review retained the equivalent real Chrome red
+result (`observations=2`). Local browser launch before and after correction failed
+because no Chrome/Playwright Chromium binary is installed. Attempted Playwright
+installation fetched a zero-byte/truncated ZIP from the blocked download endpoint;
+it was stopped. This host cannot supply new green browser evidence. The test is now
+in `npm run test:source-browser` alongside the existing Source Save browser test,
+so supported CI will enforce it; no production workflow was dispatched here.
+
+The application change redraws the Source controls only after a finished retention
+entry is removed and only for the still-current generation/path/latest snapshot.
+`updateStateOnly` continues to check `hasLocalInput`, `reviewMatches` and the
+barrier. The success path still stores its versioned result; failures retain their
+blocker. There is no change to core stale-write checks, Source Save, Scene, Preview,
+transaction/recovery, observation policy or renderer privileges. The original DOM
+diagnostic's after-click disabled assertion conflated the Apply Both busy barrier
+with settled availability; the promoted test checks availability before clicking.
+
+Four promoted DOM cases pass: unchanged selection re-enables and accepts a reviewed
+combination; an older completion cannot override newer pending input or a changed
+draft; failed retention stays blocked; a disposed controller's completion cannot
+touch a replacement document with its own pending retention. Existing changed-draft,
+changed-external-revision and delayed Apply Both tests remain green. Real browser
+regression uses a real click and unchanged scheduled observation, asserting enabled
+state before acceptance; it has not run green on this host.
+
+Local Node 24.19.0/npm 11.9.0 matches pinned versions. `npm ci --ignore-scripts
+--offline` passed; `npm run check` passed typecheck and **42/42** ordinary frontend
+tests, 0 failed/skipped; `npm run build` passed; repository validation and whitespace
+passed after path updates. Rust/Cargo and official SDK/native desktop checks are
+unavailable locally and were not substituted with browser/DOM tests. No new native
+package was built or tested. Build #88 predates this fix and is not evidence for it.
+
+All six user-reported native Save passes from #87 remain PASS, with no repeated Save
+case. DIST-MAC-01 stays outside scope. Phase 1F is not accepted and PR #14 remains
+draft. Next bounded action: independent F4 diff/evidence review, run the actual
+browser regression on a browser-equipped host, then obtain verified corrected
+Windows/macOS packages and perform focused native Apply Both selection re-enabling
+and stale draft/external refusal checks. This checkpoint neither dispatches a
+production build nor authorises merge, branch deletion or Phase 1G.
