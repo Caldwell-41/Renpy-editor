@@ -1250,3 +1250,18 @@ For an unverified-developer/notarisation block on the intended trusted build, Ap
 per-app exception may permit testing. If the damaged warning persists or no exception
 is offered, inspect the local signature and download hash before changing quarantine.
 Do not disable Gatekeeper globally. No application change, redispatch or merge here.
+
+### 7.21 macOS manual pass after local launch workaround
+
+The user subsequently reports: `I used command xattr -cr /Applications/Loomlight.app`
+and `Mac OS passed`. Record macOS manual testing as user-reported PASS after that local
+workaround; the previous launch block no longer prevents this user's test. Windows
+physical Save and the Beat fix were also reported passing. The command was run by the
+user, not this agent. This is not evidence of a repaired signature, notarisation, or a
+normal first launch of the downloaded app. Preserve the macOS distribution limitation.
+
+These reports follow the #87 test handoff. Exact OS versions, installed artifact identity
+and separate P3-A/B/C observations remain absent; do not fabricate detailed acceptance
+records or silently mark the formal six-row checklist complete. Next action is to review
+available manual evidence and the independent code review before Phase 1F closeout.
+No application edits, rebuild, redispatch, merge or Phase 1G are authorised by this report.

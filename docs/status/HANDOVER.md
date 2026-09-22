@@ -3,7 +3,7 @@
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Checkpoint:** [Build #87 replacement-package verification](../tasks/active/phase-1f-save-correction.md#719-build-87-replacement-package-verification).
-**State:** `review_ready` for the Scene correction and replacement packages; Windows physical Save reported passing (row detail pending); macOS launch blocked.
+**State:** `review_ready` for the Scene correction and replacement packages; Windows and macOS manual testing reported passing (row detail pending); Mac required a local launch workaround.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Validated application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 **Verified run:** [#87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, `upload_packages=true`, terminal success.
@@ -38,36 +38,17 @@ annotations and three regressions are described in ledger section 7.18 and docs/
 but use only #87 for the next manual tests. Package IDs, exact filenames, hashes and
 expiry are recorded in ledger section 7.19 and linked from the checklist.
 
-## Previous handoff (superseded by report below)
+## Latest manual testing and next action
 
-Download #87 installers and complete [the native P3 checklist](../tasks/active/phase-1f-native-p3-checklist.md)
-on Windows x64 and macOS ARM64. First edit/commit the starting narration, insert a Beat,
-and verify persistence. Then test dirty Source Save, clean Source Flush and non-Source
-isolation using actual Ctrl+S/Cmd+S. Record OS, build/artifact identity and observations.
-Native installation and P3 were not performed here; automated passes cannot replace them.
-Return those results for review. Keep PR #14 draft. No redispatch, merge, Phase 1G,
-main reconciliation or further implementation is selected. No CI remains to poll.
+The user subsequently reports: `I used command xattr -cr /Applications/Loomlight.app`
+and `Mac OS passed`. Record macOS manual testing as user-reported PASS after that local
+workaround; the previous launch block no longer prevents this user's test. Windows
+physical Save and the Beat fix were also reported passing. The command was run by the
+user, not this agent. This is not evidence of a repaired signature, notarisation, or a
+normal first launch of the downloaded app. Preserve the macOS distribution limitation.
 
-This closeout updates documentation and PR metadata only; repository validation and
-whitespace pass. Publish the evidence record and verify branch content before handoff.
-
-## User manual-test report — 2026-09-22
-
-The user reports that the Beat fix works and physical Save testing passes on Windows.
-Record these as user-reported results; OS version, exact installed package identity and
-separate P3-A/B/C outcomes were not supplied. Do not infer all three acceptance rows.
-macOS launch is blocked by a reported app-is-damaged warning; native Mac P3 has not run.
-The report follows delivery of #87, but its local package identity is not yet confirmed.
-
-Current Tauri configuration and production workflow contain no Developer ID signing or
-notarisation configuration. Gatekeeper/signature assessment is a plausible explanation,
-not a verified diagnosis. Apple distinguishes an unverified-developer warning from a
-modified/damaged-app warning: https://support.apple.com/en-us/102445 . The previously
-verified archive hashes do not prove the user's local copy or its signature is valid.
-
-Next: obtain the exact warning and macOS version, confirm installation from #87's DMG
-into Applications, and check whether Privacy & Security offers Open Anyway for Loomlight.
-For an unverified-developer/notarisation block on the intended trusted build, Apple's
-per-app exception may permit testing. If the damaged warning persists or no exception
-is offered, inspect the local signature and download hash before changing quarantine.
-Do not disable Gatekeeper globally. No application change, redispatch or merge here.
+These reports follow the #87 test handoff. Exact OS versions, installed artifact identity
+and separate P3-A/B/C observations remain absent; do not fabricate detailed acceptance
+records or silently mark the formal six-row checklist complete. Next action is to review
+available manual evidence and the independent code review before Phase 1F closeout.
+No application edits, rebuild, redispatch, merge or Phase 1G are authorised by this report.
