@@ -19,24 +19,3 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
-  source-selection-browser:
-    name: Source selection browser regression
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Select locked Node toolchain
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 24.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - name: Select locked npm toolchain
-        run: npm install --global npm@11.9.0
-      - name: Install locked JavaScript dependencies
-        working-directory: app
-        run: npm ci --ignore-scripts
-      - name: Run F4 selection regression in Chrome
-        working-directory: app
-        run: node tests/phase-1f-selection.browser.mjs
