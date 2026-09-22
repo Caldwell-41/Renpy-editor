@@ -409,3 +409,13 @@ before the absolute ceiling. Per the stop condition, do not increase the timeout
 rerun this SHA, start another yield experiment, split the smoke automatically or modify
 Source Save. Native P3 remains the manual Windows Ctrl+S/macOS Cmd+S checklist. Keep
 PR #14 draft and stop for independent review; do not merge or begin Phase 1G.
+
+
+2026-09-22 timing-diagnostic correction: Independent review of the failed 300-second
+candidate corrected the prior causal wording. A persisted
+`post-source-conflict-complete` checkpoint proves host receipt, but without elapsed
+timing it cannot distinguish a checkpoint arriving near the 300-second deadline from a
+long IPC-response stall. The selected diagnostic adds native monotonic `elapsedMs` to
+the existing five checkpoint records only. Timeout, renderer flow/yields, Source/core
+behavior and acceptance semantics remain unchanged. One exact production measurement
+is required before choosing any smoke split or IPC correction.

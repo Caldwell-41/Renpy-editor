@@ -856,3 +856,48 @@ condition, do not increase the timeout again, rerun the same SHA, start another 
 experiment, split the smoke automatically or modify Source Save. Native P3 remains the
 existing manual Windows Ctrl+S/macOS Cmd+S checklist. Keep PR #14 draft and stop for
 independent review.
+
+
+### 7.15 Timing-only diagnostic after failed 300-second run
+
+Independent review of production run
+[35697492679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35697492679)
+corrects one over-strong inference in the prior closeout. The retained
+`post-source-conflict-complete` record proves that the host received and printed that
+checkpoint. Because checkpoint records did not contain elapsed time, it does **not**
+prove that the IPC response then remained blocked for most of the 300-second ceiling.
+The checkpoint may instead have arrived very near the absolute deadline.
+
+The next approved checkpoint is diagnostic only. Keep application candidate behaviour,
+the 300-second ceiling, JavaScript yield strategy, five checkpoint locations, sequential
+terminal reporting, Source Save/core behavior, security assertions and workflow
+unchanged.
+
+Instrument the existing native `probe.smokeCheckpoint` handler with one monotonic
+`elapsedMs` field measured from packaged-smoke start. Use native
+`std::time::Instant`; do not derive timing from the renderer event loop. Start the
+clock immediately before the packaged probe/timeout threads are launched so the values
+correspond to the same wall-clock interval protected by `PACKAGED_SMOKE_TIMEOUT`.
+All five existing checkpoint calls automatically receive the measurement; add no new
+checkpoints, heartbeat, timers, retries or renderer logic.
+
+Run repository validation/whitespace and Rust formatting/desktop compile where
+available. Publish one coherent diagnostic candidate and run the existing production
+gate once on that exact SHA. Preserve the target artifacts.
+
+Interpret the result without automatically changing code:
+
+- If `post-source-conflict-complete` lands very near the 300-second ceiling, the
+  evidence supports monolithic smoke duration/budget exhaustion rather than a long
+  checkpoint-response stall. Return for review before deciding how to partition the
+  smoke.
+- If it lands substantially earlier and `final-report-start` remains absent until the
+  300-second kill, the evidence supports a terminal IPC/return stall after host receipt.
+  Return for review before changing the Tauri boundary.
+- If timing is intermediate or targets differ materially, preserve exact values and
+  return for review; do not infer a fix.
+- If the full gate unexpectedly passes, retain the timing evidence and proceed only to
+  the already-defined native P3/manual acceptance boundary.
+
+Do not increase the timeout, alter yield behavior, split the smoke, modify Source Save,
+or rerun the same SHA as part of this diagnostic checkpoint.

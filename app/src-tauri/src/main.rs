@@ -9,7 +9,7 @@ use std::{
         Arc, Condvar, Mutex, OnceLock,
     },
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 use tauri::{Manager, WebviewUrl};
 
@@ -21,6 +21,7 @@ static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_RECEIVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_WINDOW_FOUND: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_SIGNAL: OnceLock<(Mutex<bool>, Condvar)> = OnceLock::new();
+static SMOKE_STARTED: OnceLock<Instant> = OnceLock::new();
 const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(300);
 
 #[derive(Debug, PartialEq, Eq)]
@@ -118,9 +119,17 @@ fn core_request(
             .and_then(Value::as_str)
             .filter(|stage| !stage.is_empty() && stage.len() <= 128)
             .unwrap_or("invalid");
+        let elapsed_ms = SMOKE_STARTED
+            .get()
+            .map(|started| started.elapsed().as_millis() as u64)
+            .unwrap_or(0);
         println!(
             "{}",
-            json!({ "evidence": "packaged-smoke-checkpoint", "stage": stage })
+            json!({
+                "evidence": "packaged-smoke-checkpoint",
+                "stage": stage,
+                "elapsedMs": elapsed_ms
+            })
         );
         let _ = std::io::stdout().flush();
         return Ok(loomlight_core::CoreResponse::success(
@@ -437,6 +446,7 @@ fn main() {
                 .expect("unauthorised probe window must be created");
                 drop(unauthorised);
 
+                let _ = SMOKE_STARTED.set(Instant::now());
                 let main = app
                     .get_webview_window("main")
                     .expect("main probe window must exist");
