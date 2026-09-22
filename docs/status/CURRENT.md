@@ -4,7 +4,7 @@
 **Integrated application:** Phase 0 and corrected Phase 1A–1E; CI-SIMPLE PR #13.
 **Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`, including planning PR #15.
 **Active milestone:** [Phase 1F](../tasks/active/phase-1f-source-synchronisation.md), **not accepted / unmerged**.
-**Selected checkpoint:** **1F-CLOSEOUT-CORRECTION**, F1–F3 implemented locally;
+**Selected checkpoint:** **1F-CLOSEOUT-CORRECTION**, F1–F3 implemented; **awaiting_ci / manual resume**;
 [correction ledger section 7.23](../tasks/active/phase-1f-save-correction.md#723-1f-closeout-correction).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Continuation:** [HANDOVER](HANDOVER.md).
@@ -14,7 +14,11 @@ combined text; stale reviews refuse. Preview retains the selected insertion anch
 Background clears visible Characters and their default-layer uncertainty. The three
 retained probes and their promoted regressions pass. Local frontend: 38 pass; core:
 153 pass / 4 ignored workers. Full validation and local limitations are in the ledger.
-Corrected-candidate supported-target validation and independent review remain required.
+Corrected candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653` is published.
+[Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
+attempt 1, was dispatched once with packages enabled and verified in progress
+(Preflight `106762105167`). Supported-target validation and independent review remain
+required; no corrected-target pass or package availability is claimed.
 Production #87 validates the previous application only.
 
 All six native P3 Save cases remain user-reported PASS. The user now confirms both

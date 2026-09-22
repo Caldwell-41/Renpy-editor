@@ -2,7 +2,10 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** **1F-CLOSEOUT-CORRECTION**, in_progress; F1–F3 implemented and locally tested.
+**Checkpoint:** **1F-CLOSEOUT-CORRECTION**, **awaiting_ci / blocked on external validation; manual resume**.
+**Corrected application candidate:** `f452d0a8c1599b05650ae2e835d14d9f86f14653` (published).
+**Run:** [production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675), **attempt 1**, `upload_packages=true`.
+**Last observed:** in_progress; Preflight `106762105167`, candidate SHA verified. No target pass/package claim.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Entry head:** `baf7a00bab8a7e7af84c19a690bad2bf2e1c628c`.
 **Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
@@ -39,9 +42,34 @@ Save passes remain user-reported PASS. User confirmed both installed build #87, 
 No repetition of unchanged native Save tests. Any new native follow-up is limited to
 F1–F3. DIST-MAC-01 remains outside scope.
 
-Next: publish the coherent corrected candidate, verify no equivalent active run,
-dispatch the existing production workflow once with package upload, then record exact
-run/attempt/SHA. Until a qualified watcher exists, publish a blocked/manual-resume
-handover and stop polling. Inspect results without redispatch, then stop for independent
-review. Keep PR #14 draft and all branches/1F records. Existing Phase 1G planning is
-integrated; its implementation is not selected.
+## Manual-resume boundary
+
+The candidate is committed/pushed on the existing branch. Production #88 was dispatched
+once and its attempt/SHA verified directly. No second dispatch, watcher or automatic
+wake-up is claimed. Under AGENTS/WORKFLOW stop active polling here. The documentation
+follow-up records this external wait without changing application/CI inputs; it does
+not require another package matrix.
+
+On manual resume, inspect #88, attempt 1, for the exact candidate above. Verify all
+preflight and Windows x64/macOS ARM64 jobs, actual core/desktop regression results,
+explicit official-SDK gates, packaging/smoke and actual package/evidence uploads.
+Retain failed/skipped results and diagnose before any new dispatch. Do not treat a
+successful job alone as proof of package availability. Update the same ledger/status/PR
+with terminal evidence, then stop for independent review. No merge or branch deletion.
+If focused native validation is needed, use the corrected packages for F1–F3 only;
+the six unchanged #87 native Save passes remain recorded. Windows numeric build is
+still unspecified. No automatic application acceptance is claimed from local checks.
+
+PR #14 remains draft. Keep all branches and active 1F records. Existing Phase 1G
+planning is integrated; no further planning or implementation is selected.
+
+Next-chat selector:
+
+```text
+/goal — Phase 1F correction validation and independent review only
+Repository: Caldwell-41/Renpy-editor. Continue feature/phase-1f-source-synchronisation
+and draft PR #14. Read AGENTS.md, docs/status/HANDOVER.md and correction ledger 7.23.
+Inspect #88 / 35732725675 attempt 1 on f452d0a8c1599b05650ae2e835d14d9f86f14653;
+do not redispatch. Record exact terminal evidence and review F1–F3 independently.
+Preserve native Save passes. Publish the handover and stop; no merge, cleanup or 1G.
+```

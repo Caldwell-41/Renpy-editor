@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `in_progress`: 1F-CLOSEOUT-CORRECTION implemented; supported-target validation and independent review pending (section 7.23). Phase 1F is not accepted or integrated.
+**State:** `awaiting_ci` / manual resume: 1F-CLOSEOUT-CORRECTION published; production #88 and independent review pending (section 7.23). Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1518,3 +1518,27 @@ Repository/link/privacy validation passed for 222 files; `git diff --check` pass
 Self-review confirmed the correction is limited to Source review binding, Preview
 insertion/layer state, their regressions and canonical evidence. No dependency lock,
 workflow, shell Save route, transaction engine or security configuration changed.
+
+
+#### Published candidate and supported-target dispatch
+
+Candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653` was committed/pushed and remote
+head verified. Fresh pre-push refs still matched entry; PR #14 remained open/draft;
+main unchanged. No equivalent active production run existed. Dispatched the existing
+`production-scaffold.yml` once, with `upload_packages=true`.
+
+[Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
+**attempt 1**, directly confirms candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653`.
+Last observed: **in_progress**, Preflight `106762105167`; structure/toolchain/dependency
+steps passed and frontend validation was running. Windows/macOS results and artifacts
+were not yet observed. No supported-target acceptance or replacement-package claim.
+The list endpoint initially lagged dispatch; the returned run URL was read directly,
+not redispatched. #87 remains previous-application evidence only.
+
+Checkpoint state is **awaiting_ci; blocked on external validation / manual resume**.
+AGENTS/WORKFLOW has no qualified automatic continuation mechanism on this host, so
+stop active polling and resume only by explicit continuation. The docs-only follow-up
+updates CURRENT, HANDOVER, this ledger and PR description with exact identity and
+limitations; no additional package matrix is warranted. On resume inspect terminal
+#88 jobs/logs and actual artifacts without redispatch, preserve failures/skips, reconcile
+any affected native follow-up, and stop for independent review. No merge/deletion/1G.
