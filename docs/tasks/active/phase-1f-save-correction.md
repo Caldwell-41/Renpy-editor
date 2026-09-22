@@ -1,14 +1,14 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `in_progress`; the Save implementation and E1-E6 are retained. The selected bounded final-report scope correction is section 7.16.
+**State:** `awaiting_ci`; the Save implementation and E1-E6 are retained. The locally verified final-report scope correction is section 7.16; manual resume is required for native results.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
 **Original 1F-SAVE application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; current evidence correction is recorded in section 7.16.
-**Publication state:** closeout documentation is being published after the exact
-candidate's repository-quality and production runs; the branch head may therefore be
-a later documentation-only commit.
+**Publication state:** corrected candidate `85e44e926399ae7ad8431c948e1751db04dcde35`
+is published; Repository Quality passed and production #84 is active. This
+documentation-only handoff does not change the candidate or dispatch another gate.
 
 ## Authority and scope
 
@@ -506,8 +506,8 @@ Phase 1G.
 
 **Selected:** 2026-09-22 after independent review of application candidate
 `a720ea3fb150f2a49422e8385256179185129968`.
-**State:** `in_progress` for the section 7.16 scope correction; completed E1-E6
-remain retained. Automated P5 and native P3 remain open.
+**State:** `awaiting_ci` for the section 7.16 scope correction; completed E1-E6
+remain retained. Automated P5 and native P3 remain open; manual resume required.
 **Purpose:** close the remaining evidence/harness blockers without reopening the Save
 architecture. The shell-owned Save coordinator, Source controller, retention barrier,
 transaction/reconciliation/history path and Source core are retained unless a focused
@@ -916,6 +916,20 @@ Preflight `106664883810` passed. Windows job `106665056764` retained
 5,157 ms. Both then ended at the 300-second ceiling without `final-report-start`.
 Those timings localise missing terminal reporting, not its mechanism.
 
+Artifact inspection confirmed Windows artifact `10683248578` and macOS artifact
+`10683138492` contain these native elapsed values, followed by the exact error
+`packaged boundary smoke report timed out` (no final checkpoint/report):
+
+| Checkpoint | Windows x64 elapsedMs | macOS ARM64 elapsedMs |
+| --- | ---: | ---: |
+| pre-source-complete | 947 | 4516 |
+| source-complete | 988 | 5072 |
+| post-source-recovery-complete | 1007 | 5147 |
+| post-source-conflict-complete | 1017 | 5157 |
+| final-report-start | absent | absent |
+
+Both jobs failed packaged smoke and skipped secret scan/dependency inventory.
+
 Independent local execution of the actual reporting code with UI/IPC stubs found
 `ReferenceError: sourceCommandTrace is not defined`: its declaration is inside the
 authoring `try`, but report construction is outside that scope and catch. Move the
@@ -974,3 +988,31 @@ awaits/cleanup, all five checkpoint locations, `elapsedMs`, task yielding, E1 ha
 L3/L8/L9/L16 and disposed guard remain unchanged. Source Save routing, core transaction,
 reconciliation/history, recovery, revision checks and renderer privileges/CSP have
 zero diff. Native P5 on the corrected candidate remains unverified pending the gate.
+
+#### Published candidate and external wait
+
+Application candidate **`85e44e926399ae7ad8431c948e1751db04dcde35`**, tree
+`ca22dc8486a7114eeda227821582a7945a344d77`, is published on the existing branch/PR.
+It preserves reviewed remote `1d5704b…`; equivalent local history was reconciled
+without reset or discarded edits. Repository Quality
+[35707727479](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35707727479)
+passed on this exact candidate.
+
+After inspecting the production workflow list and confirming #83 was the latest
+terminal run with no equivalent active/ambiguous dispatch, dispatched
+[35708223679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35708223679)
+(#84), attempt 1, **once**. Its run-summary commit link verifies the exact candidate.
+Preflight `106682217975` passed; Windows x64 `106682384572` and macOS ARM64
+`106682384566` were in progress at handoff. The artifact API returned no artifacts
+yet. No corrected packaged final report, target scan or inventory is claimed passed.
+Preflight logs explicitly retain all three new regression cases passing and frontend
+summary `tests 32`, `pass 32`, `fail 0`, confirming execution before packaging.
+
+Under AGENTS/WORKFLOW no-polling rules, no qualified same-thread continuation exists
+here: publish this `awaiting_ci`/manual-resume checkpoint and stop active polling.
+Resume by inspecting this existing run's terminal jobs and both evidence artifacts;
+do not dispatch another run. P5 needs both accepted final reports with all required
+Source/security assertions, then successful secret scan and dependency/licence
+inventory on both targets. On failure retain exact error/timings/SHA/run/jobs and
+stop for independent review, with no timeout/yield/split/Source changes or retries.
+P3 remains outstanding under section 7.10. PR #14 stays draft; no merge or Phase 1G.

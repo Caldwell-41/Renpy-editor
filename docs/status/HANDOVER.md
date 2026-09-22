@@ -3,9 +3,11 @@
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Checkpoint:** [1F-SAVE-EVIDENCE final-report scope correction](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction).
-**State:** locally verified; publishing one candidate for Repository Quality and one production gate. P5 and native P3 remain open.
+**State:** `awaiting_ci`; correction locally verified and published. Manual resume required; P5 and native P3 remain open.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Reviewed baseline:** `1d5704b738de25a1b95197cc0866f866ae52826d`.
+**Application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35` (tree `ca22dc8486a7114eeda227821582a7945a344d77`).
+**Publication:** candidate and this documentation-only handoff are on the existing branch/PR; no additional production dispatch for documentation.
 
 ## Completed and verified locally
 
@@ -23,12 +25,19 @@ locally. Corrected native acceptance is not yet established.
 
 ## Next bounded action
 
-After Repository Quality passes for the corrected candidate, verify no equivalent
-production run is active or ambiguously dispatched, then dispatch the existing gate
-once. Record exact SHA/run/attempt/jobs. Both supported targets must produce accepted
-final reports and complete artifact secret scan and dependency/licence inventory.
-Under repository waiting rules, publish pending/manual-resume state if the run is
-still active; do not model-poll or claim automatic continuation.
+Repository Quality `35707727479` passed the exact candidate. After confirming no
+equivalent active/ambiguous run, production
+[35708223679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35708223679)
+(#84), attempt 1, was dispatched once and its exact SHA verified.
+Preflight `106682217975` passed. Windows x64 `106682384572` and macOS ARM64
+`106682384566` were in progress at handoff; the artifact list was empty.
+
+Read AGENTS/CURRENT and section 7.16; preserve newer work. Inspect the existing run's
+terminal jobs and both target artifacts. P5 requires accepted packaged final reports
+and successful artifact secret scan and dependency/licence inventory on BOTH targets.
+Do not dispatch again. No qualified same-thread continuation is available here, so
+active polling has stopped under repository rules; this is a manual-resume handoff,
+not a completed gate or claimed automatic wake-up.
 
 If the gate fails, retain exact error, timings, SHA/run/jobs and stop for independent
 review. Do not increase timeout, rerun the SHA, experiment with yielding, split smoke,

@@ -439,3 +439,13 @@ See [1F-SAVE section 7.16](phase-1f-save-correction.md#716-final-report-lexical-
 for retained red/green evidence and exact scope. Corrected native P5 remains unverified
 until both packaged reports plus scan/inventory pass. P3 remains the manual three-action
 Ctrl+S/Cmd+S checklist. Keep PR #14 draft; stop for independent review, no merge/1G.
+
+Published application candidate `85e44e926399ae7ad8431c948e1751db04dcde35`, tree
+`ca22dc8486a7114eeda227821582a7945a344d77`, passed Repository Quality `35707727479`.
+Production [35708223679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35708223679)
+(#84), attempt 1, was dispatched once after checking ownership and verified on that
+exact SHA. Preflight `106682217975` passed; Windows `106682384572` and macOS
+`106682384566` were in progress at handoff, with no artifacts yet. State is
+`awaiting_ci`/manual resume under repository no-polling rules. Inspect this existing
+run's terminal reports plus scans/inventories; do not dispatch again. P5 and P3 remain
+unverified, not passed. On gate failure preserve evidence and stop for review.

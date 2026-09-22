@@ -4,9 +4,10 @@
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
 **Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not ready to merge.
-**Selected checkpoint:** [1F-SAVE-EVIDENCE final-report scope correction](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction), locally verified; candidate publication in progress.
+**Selected checkpoint:** [1F-SAVE-EVIDENCE final-report scope correction](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction), `awaiting_ci`; locally verified and published, manual resume required.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Reviewed baseline:** `1d5704b738de25a1b95197cc0866f866ae52826d`.
+**Application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
 ## Corrected diagnosis and bounded change
@@ -27,6 +28,13 @@ The 300-second ceiling, sequential terminal awaits, five checkpoints, elapsed ti
 all assertions, E1-E6 evidence, Source Save/core architecture and privileges are
 unchanged. Corrected native P5 is still unverified: require accepted packaged final
 reports plus secret scan and dependency/licence inventory on BOTH targets.
+
+Repository Quality `35707727479` passed the exact candidate. Production
+[35708223679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35708223679)
+(#84), attempt 1, was dispatched once after ownership checks and verified on that SHA.
+Preflight `106682217975` passed; Windows `106682384572` and macOS `106682384566`
+are in progress at handoff; no artifacts yet. Follow repository waiting rules:
+stop active polling and manually resume inspection of this run, not another dispatch.
 
 Native P3 remains the manual three-action Windows Ctrl+S/macOS Cmd+S checklist in
 section 7.10. PR #14 remains draft. No merge, Phase 1G or speculative retry.
