@@ -1809,9 +1809,11 @@ production build nor authorises merge, branch deletion or Phase 1G.
 
 **Authority:** user's F4 evidence-only review and package/native test planning.
 **Reviewed application:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
-**CI-enablement commit:** `74ce3487bcd7834c21d519f795e30017977d7c2c` on draft PR #14;
-the change adds a focused Chrome selection job to PR quality checks without repeating
-manual native Save tests. At review entry, PR/head and fetched refs matched the
+**Browser CI probe commit:** `74ce3487bcd7834c21d519f795e30017977d7c2c` on draft PR #14;
+it temporarily added a focused Chrome selection job to PR quality checks without
+repeating manual native Save tests. After its pass, `aa39e2fa81b03a0940adc1f9213b19f1b27134f1`
+removed that temporary job to avoid repetition on later PR updates. The F4 script
+remains in the normal production browser suite. At review entry, PR/head and fetched refs matched the
 published handover; the scratch checkout had no unrelated changes or execution owner.
 
 The F4 application diff changes only the post-retention control refresh, after
