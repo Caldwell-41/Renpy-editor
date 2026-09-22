@@ -1805,3 +1805,62 @@ browser regression on a browser-equipped host, then obtain verified corrected
 Windows/macOS packages and perform focused native Apply Both selection re-enabling
 and stale draft/external refusal checks. This checkpoint neither dispatches a
 production build nor authorises merge, branch deletion or Phase 1G.
+### 7.27 Independent F4 evidence review — browser passed, native pending
+
+**Authority:** user's F4 evidence-only review and package/native test planning.
+**Reviewed application:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
+**CI-enablement commit:** `74ce3487bcd7834c21d519f795e30017977d7c2c` on draft PR #14;
+the change adds a focused Chrome selection job to PR quality checks without repeating
+manual native Save tests. At review entry, PR/head and fetched refs matched the
+published handover; the scratch checkout had no unrelated changes or execution owner.
+
+The F4 application diff changes only the post-retention control refresh, after
+removing the settled sequence. `identityMatches` guards disposal, generation and path;
+the latest-sequence check excludes older completion. `updateStateOnly` continues to
+enforce pending input, failed retention, barriers and the displayed review identity.
+The Apply Both handler still settles its captured snapshot and checks the review
+against the returned document before sending the exact versioned request. Four
+promoted DOM cases cover availability, newer input, failure and replacement
+controller; existing tests cover changed draft/external identity. No new bounded
+code finding was identified. This is a targeted review, not a new core audit.
+
+Local Node 24.19.0/npm 11.9.0: `npm ci --ignore-scripts --offline` passed and
+`npm run check` passed typecheck and **42/42** frontend tests, zero failed/skipped.
+Repository validation passed for 223 files and `git diff --check` passed. The
+scratch host has no Chrome or Playwright Chromium; a direct F4 browser invocation
+failed at browser launch. Playwright download yielded a truncated zero-byte ZIP on
+repeated attempts, so it supplied no browser result.
+
+On GitHub's equipped Ubuntu Chrome runner, [Repository quality #378 / 35782023645](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35782023645),
+attempt 1, completed successfully for CI commit `74ce3487…` with both Validate
+repository job `106929608224` and Source selection browser regression job
+`106929608406` green. The latter directly ran
+`node tests/phase-1f-selection.browser.mjs` and logged
+`{"beforeApply":{"pending":false,"disabled":false,"staleNoticeHidden":true,"observations":2},"applies":1}`.
+This is a real Chrome controller regression using a selection-only service double;
+it is not a native WebView, real disk-I/O, or package acceptance result.
+
+**Next package and native evidence checkpoint (planned, not dispatched):**
+
+1. Recheck actual PR/head, main and execution ownership. Dispatch the existing
+   `Phase 1 production gates` workflow once from the corrected PR branch with
+   `upload_packages=true`, recording run ID, attempt, exact head SHA and input.
+   Its existing preflight and Windows/macOS matrix remain mandatory production gates;
+   no separate manual repetition of the six unchanged Save cases is requested.
+2. Confirm preflight, Windows x64 and macOS ARM64 jobs all succeed on the same SHA;
+   inspect explicit SDK/desktop/packaged-smoke evidence. Download both package ZIPs,
+   verify GitHub artifact metadata size and SHA-256, archive integrity and installer
+   contents, and record artifact IDs/hashes. Build #88 predates F4 and is ineligible.
+3. Install only the verified corrected package on each target. In a disposable
+   project, create a non-overlapping Source draft/external conflict and display its
+   combined preview. Click within the editor without changing text; after retention
+   settles, confirm Apply Both re-enables, the stale notice stays hidden, and applying
+   yields the reviewed combination after reopening.
+4. On both targets, independently make the reviewed draft stale, then the external
+   revision stale. In each case confirm the old combination cannot be accepted and
+   neither the draft nor external bytes are overwritten. Record OS/build, package
+   hash, steps, observations and any error text or screenshots. Do not infer a native
+   pass from the Chrome service-double result.
+
+PR #14 remains draft; Phase 1F remains unaccepted/unmerged. Corrected packages and
+native F4 observations are outstanding. DIST-MAC-01 remains outside this checkpoint.
