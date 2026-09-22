@@ -21,7 +21,7 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1D and their corrective integration are accepted. Phase 1E implementation and its three internal/final target gates are complete on PR #9; integration is pending. Phase 1F–1H are unapproved and unstarted. The [Phase 1E ledger](tasks/archive/2026-09-16-phase-1e-scene-authoring.md) retains exact closure evidence and does not approve later work.
+**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is active on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); its working-branch status and handover own actual gate state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines five checkpoint chats across its three capability gates; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) preserves all twelve acceptance cases. Each needs accepted/integrated prerequisites and explicit execution selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, local Git checkpoint, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
@@ -38,7 +38,7 @@ The bounded beat set remains background/scene, show/hide and appearance changes,
 | 1E.2 | Functional Scene/Story authoring and minimum recovery UX | Explicit beats and choices; safe inspection/resolution of supported recovery states, not evidence deletion |
 | 1E.3 | Preview, session-scoped media presentation and Scene polish | Truthful partial state, safe thumbnails/audition, keyboard/accessibility and visual-conformance evidence |
 | 1F | Full Source workspace, broader mapping and direct/external reconciliation | Lossless bytes, explicit invalid-buffer/stale-view policy, correct local conflict versus global recovery blocking |
-| 1G.1–1G.3 | Branches; explicit SDK runtime/diagnostics; local Git | Three internal gates with shared semantic truth, executable trust and reviewed checkpoint contents |
+| 1G.1, 1G.2a–b, 1G.3a–b | Branches; runtime foundation and UI; Git foundation and UI | Five checkpoints proving the three capability gates: shared semantic truth, executable trust/runtime ownership and reviewed checkpoint contents |
 | 1H | Integrated acceptance | Real authoring, both runtime routes, failure/recovery paths and continued editing on both targets |
 
 These subdivisions do not add a new product scope or bypass milestone approval. The minimum source service is required by 1E; the general Source workspace remains 1F. Minimum usable recovery belongs before the 1E authoring gate; advanced recovery tooling stays later. Ordinary external file divergence can be isolated when safe, while incomplete/ambiguous multi-file recovery retains the central write block.
