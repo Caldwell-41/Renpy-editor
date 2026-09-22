@@ -331,3 +331,23 @@ action is independent review of `a720ea3f`, followed by a bounded repair or spli
 the legacy packaged-smoke tail so a new coherent candidate completes both target jobs
 and scan/inventory, plus collection of native Windows Ctrl+S and macOS Cmd+S evidence.
 Do not merge or begin Phase 1G.
+
+
+2026-09-22 independent-review follow-up planning: Application candidate `a720ea3f`
+was independently reviewed after its 1F-SAVE goal closeout. The Save architecture is
+retained; no Source/core/transaction redesign is selected. Review identified two
+acceptance-harness blockers: the packaged host's fixed 60-second whole-smoke deadline
+can terminate a progressing run, and successful/rejected smoke-report handling uses an
+identical condition so the rejection branch is unreachable. Windows run `35624108754`
+reached `source-complete` before that host timeout; macOS timed out before Source after
+passing browser/core/SDK/real-service/desktop/package work.
+
+The selected next checkpoint is
+[1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence).
+It deliberately uses a simple 180-second coarse safety ceiling plus five stage
+checkpoints rather than a heartbeat system or immediate smoke split; closes L3 with one
+combined shell case, L8 with delayed Discard and Apply Both, L9 with deterministic
+observation resumption, and L16 by the semantic shell boundary; then performs one final
+target gate and separate native shortcut evidence. The checkpoint uses narrow local
+validation because the Source core, transaction/recovery architecture and parser/SDK
+spikes are not being changed. PR #14 stays draft; no merge or Phase 1G is authorised.

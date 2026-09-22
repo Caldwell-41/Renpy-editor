@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `blocked_on_target_evidence`; implementation and local verification are complete, but P1/P2 macOS, P3, and P5 remain outstanding.
+**State:** `follow_up_not_started`; the Save implementation/local verification are retained. The selected next checkpoint is 1F-SAVE-EVIDENCE in section 7.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -500,3 +500,263 @@ pre-Source/post-Source legacy packaged-smoke tail so both target jobs reach a te
 report and complete scan/inventory; rerun the production gate only on a new coherent
 candidate and collect native Windows Ctrl+S/macOS Cmd+S evidence. Do not merge or begin
 Phase 1G.
+
+
+## 7. Independent-review follow-up — 1F-SAVE-EVIDENCE
+
+**Selected:** 2026-09-22 after independent review of application candidate
+`a720ea3fb150f2a49422e8385256179185129968`.
+**State:** `not_started`.
+**Purpose:** close the remaining evidence/harness blockers without reopening the Save
+architecture. The shell-owned Save coordinator, Source controller, retention barrier,
+transaction/reconciliation/history path and Source core are retained unless a focused
+regression demonstrates a new application defect.
+
+### 7.1 Evidence driving this follow-up
+
+Final production run
+[35624108754](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35624108754)
+ran exact application candidate `a720ea3f`. Both supported targets passed the browser
+regression, core, official-SDK lifecycle, real-service
+`phase-1f-source-save-target-gate`, desktop-boundary and packaging work before the
+packaged smoke failed. Windows retained every Source checkpoint through
+`source-complete`; macOS reached the same host timeout before the first Source
+checkpoint. Both logs ended with `packaged boundary smoke report timed out`.
+
+Independent review found two concrete smoke-host defects:
+
+1. `app/src-tauri/src/main.rs` uses one fixed 60-second deadline for the entire
+   packaged smoke, irrespective of progress. The current enlarged smoke can therefore
+   be killed after a successful Source phase or before Source begins.
+2. The accepted-report and rejected-report branches use the same
+   `smoke_enabled && is_smoke_report` condition. The rejection branch is unreachable,
+   and report handling does not explicitly require a successful CoreResponse.
+
+These are acceptance-harness defects. They are not evidence for another Source Save,
+transaction, reconciliation or command-routing redesign.
+
+### 7.2 E1 — make smoke-report rejection terminal and trustworthy
+
+In `app/src-tauri/src/main.rs`, distinguish a successful smoke response from a
+rejected/schema-failed response. The normal post-report path requires all of:
+
+- smoke mode enabled;
+- operation is `probe.smokeReport`;
+- the resulting `CoreResponse` is successful.
+
+A rejected smoke report is still terminal evidence: set the report-received signal so
+the watchdog does not later mislabel it as a timeout, print a bounded diagnostic, flush
+stderr and exit non-zero. Do not weaken the report schema or convert invalid payloads
+into successful evidence.
+
+Prefer the smallest testable condition/helper. Add only the focused regression needed
+to prove a successful report is accepted and a failed report cannot enter the success
+path. Do not create a Tauri integration framework merely for this branch condition.
+
+### 7.3 E2 — replace the obsolete 60-second deadline, without a new watchdog system
+
+Replace the inline 60-second sleep with one named coarse host safety limit:
+
+```rust
+const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(180);
+```
+
+The JavaScript probe already gives individual waits short bounded timeouts. The Rust
+deadline is therefore only the outer protection against the entire probe disappearing
+or never reporting. Do not build a resettable heartbeat service, phase scheduler,
+watchdog thread network, or new CI orchestration layer in this correction.
+
+Add only these coarse checkpoints to the existing packaged probe, reusing
+`probe.smokeCheckpoint`:
+
+- `pre-source-complete`: immediately before entering the Source section;
+- retain the existing `source-complete` equivalent;
+- `post-source-recovery-complete`: after the safe/ambiguous recovery tail;
+- `post-source-conflict-complete`: after conflict presentation;
+- `final-report-start`: immediately before invoking `probe.smokeReport`.
+
+Do not checkpoint every click. Do not split the packaged smoke on this first attempt.
+If a 180-second bounded run still fails, use these stages to decide whether a later
+split is justified instead of increasing the timeout speculatively.
+
+### 7.4 E3 — finish L3 with one shell regression
+
+Extend the existing Save-command shell test rather than adding a new suite. Model:
+
+1. current Source is clean;
+2. another Source file keeps project status `pendingValidation`;
+3. a supporting workspace contains unsubmitted form input;
+4. the ordinary platform Save shortcut is invoked outside Source editing context.
+
+Assert exactly:
+
+- `project.flush` increases by one;
+- `source.save` and `source.saveAll` do not run;
+- no Character/Variable/supporting mutation is submitted implicitly;
+- refreshed project status does not become Saved while the other Source draft remains.
+
+One representative supporting form is sufficient; do not duplicate this across every
+supporting workspace.
+
+### 7.5 E4 — finish the meaningful L8 stale-action coverage
+
+Do not create a delayed-action permutation matrix. Add two deterministic cases to the
+existing Source DOM tests:
+
+**Delayed Discard:** start confirmed Discard, hold the mocked `source.discard`,
+dispose/remount the controller including reopening the same path, then resolve the old
+operation. The replacement view must keep its content, registration, status and focus;
+the old completion must not redraw or retarget it.
+
+**Delayed Apply Both:** repeat the same identity test for a conflict document with held
+`source.applyBoth`. The old merge completion must not redraw/retarget the replacement
+controller.
+
+These two cases cover the destructive and accepted-reconciliation adjacent actions.
+Do not enumerate every view/action cross-product unless one of these cases exposes a
+new invariant violation.
+
+### 7.6 E5 — finish L9 with deterministic observation resumption
+
+Use the existing Source UI test. Under a Tauri-like test window, capture the callback
+registered by `setInterval(observeCurrent, 2000)` instead of waiting in real time.
+
+1. Start a Source Save and hold its mocked `source.save` completion.
+2. Invoke the captured observation callback while the Source barrier is active.
+3. Assert no observation-driven `source.open` occurs.
+4. Resolve Save and allow the barrier to release.
+5. Invoke the same observation callback again.
+6. Assert observation-driven `source.open` occurs and external observation is active
+   again.
+
+This proves both suppression during acceptance and resumption afterward. Do not add a
+production-only testing hook or real two-second sleeps.
+
+### 7.7 E6 — close L16 by the architectural boundary, not a hypothetical editor
+
+L16 exists to prevent the shell Save router from depending on textarea implementation
+details. Review the production shell boundary and record it satisfied when
+`app/src/main.ts` routes only through `SourceWorkspaceController` semantics and does
+not inspect `.source-editor`, `HTMLTextAreaElement`, `selectionStart` or
+`selectionEnd` to decide Save ownership.
+
+The current Source controller may continue to implement the present textarea editor.
+Do not build a dummy rich editor, generic editor framework or new production abstraction
+solely to satisfy L16. If executable evidence is considered useful, a tiny semantic
+controller stub at the shell boundary is the maximum justified addition.
+
+### 7.8 Narrow validation for this follow-up
+
+The expected application changes are limited to:
+
+- `app/src-tauri/src/main.rs`;
+- `app/src-tauri/src/smoke_probe.js`;
+- `app/tests/save-command.dom.test.ts`;
+- `app/tests/source-authoring.dom.test.ts`;
+- documentation/PR closeout.
+
+A production TypeScript or core change requires a newly demonstrated failing regression
+and must be explained in the ledger before widening scope.
+
+Run cheap relevant checks first:
+
+From repository root:
+
+```bash
+python3 scripts/validate.py
+git diff --check
+```
+
+From `app/`:
+
+```bash
+npm ci --ignore-scripts
+npm run check
+npm run build
+npm run test:source-browser
+cargo fmt --check --all
+```
+
+Because `main.rs` changes, compile/check the desktop crate wherever the current host
+supports it. If the local Linux client still lacks the required WebKit/GLib metadata,
+record that as unavailable rather than changing the host or substituting another claim;
+the supported-target production gate must compile/test the desktop crate.
+
+Do not rerun the full core suite, lossless-source suite, SDK archive suite or large
+benchmark locally merely to repeat unchanged evidence unless the correction actually
+touches those subsystems or a focused test demonstrates a dependency. The production
+workflow will re-exercise its existing core/lifecycle target gates on the exact final
+candidate.
+
+Before publication, self-review only the changed behaviour: successful versus rejected
+smoke report, 180-second outer bound, checkpoint placement, L3/L8/L9 tests, and L16
+shell-boundary inspection. Confirm no Source acceptance semantics, transaction
+durability, recovery rules, revision matching, renderer privilege/CSP or Save routing
+were accidentally changed.
+
+### 7.9 One final automated target gate
+
+After focused local checks and repository quality pass, publish one coherent candidate.
+Check first for an already-running or ambiguously dispatched equivalent workflow, then
+dispatch the existing Phase 1 production gate once.
+
+Both Windows x64 and macOS ARM64 must reach a terminal packaged report and satisfy the
+existing Source/security markers. The workflow must then continue through the artifact
+secret scan and dependency/licence inventory. A target that only reaches packaging,
+Source checkpoints, or a partial report does not satisfy P5.
+
+If the run fails, use the new coarse checkpoints to identify the exact stage. Do not
+blindly increase the timeout, rerun the same SHA, split the smoke, or modify Source Save
+without demonstrated evidence.
+
+### 7.10 Native P3 evidence stays separate and simple
+
+Synthetic Ctrl/Cmd events continue to prove renderer routing only. P3 requires one
+actual packaged keyboard check on each target:
+
+- Windows x64: dirty Source Ctrl+S accepts; clean Source Ctrl+S performs ordinary
+  Flush; non-Source Ctrl+S does not accept Source.
+- macOS ARM64: repeat with Cmd+S.
+
+Record exact application candidate/package identity, OS/architecture and observed
+outcomes. Use existing native automation only if it already provides trustworthy OS
+input. Do not build an accessibility/window-automation system for this checkpoint.
+If the executing environment cannot generate real native input, publish the precise
+manual checklist above and leave P3 explicitly outstanding for the user; do not relabel
+synthetic evidence as native.
+
+### 7.11 First-attempt confidence recorded for execution planning
+
+| Item | First-attempt likelihood |
+| --- | ---: |
+| E1 rejected-report fix | 99% |
+| E2 timeout/checkpoint implementation | 97% |
+| E2 removes the currently observed timeout failure | ~85% |
+| E3 L3 focused regression | 95% |
+| E4 delayed Discard/Apply Both coverage | 85% |
+| E5 observation-resumption coverage | 85–90% |
+| E6 architectural L16 closure | 98% technically; ~85% if a reviewer insists on an executable fixture |
+| Focused local validation | 95% |
+| Windows final production job | ~90% |
+| macOS final production job | ~80% |
+| Both target jobs on the same first final run | ~75% |
+| Windows native P3 check | 95% |
+| macOS native P3 check | 90% |
+| No broader Phase 1F redesign required | ~90% |
+
+The lower whole-run confidence is dominated by the currently unobserved macOS packaged
+tail after removal of the premature host deadline, not by evidence of a Save-architecture
+defect.
+
+### 7.12 Completion and stop condition
+
+This checkpoint is complete only when the focused corrections are implemented,
+self-reviewed and published; L3/L8/L9 are closed; L16 is explicitly closed at the
+semantic shell boundary; one exact corrected candidate completes the automated
+Windows/macOS production gate including scan/inventory; and P3 native evidence is
+either collected or explicitly handed over as the sole manual blocker.
+
+Update this ledger, the parent Phase 1F ledger, CURRENT, the single HANDOVER and PR #14.
+Keep PR #14 draft and stop for independent review. Do not merge, begin Phase 1G, create
+another branch/PR, replay the original 1F-SAVE implementation, or revive abandoned
+W0/OPT-1A work.
