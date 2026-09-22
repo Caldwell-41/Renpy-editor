@@ -1229,3 +1229,24 @@ Replacement packages are ready for user testing. Native P3 remains untested on b
 targets; repeat Scene setup with #87 first, then the three native Save contexts.
 No new CI run, application edit, merge or Phase 1G. Documentation validation (217 files)
 and whitespace passed. No extra application suites were needed for this evidence update.
+
+### 7.20 User manual-test report and macOS launch blocker
+
+The user reports that the Beat fix works and physical Save testing passes on Windows.
+Record these as user-reported results; OS version, exact installed package identity and
+separate P3-A/B/C outcomes were not supplied. Do not infer all three acceptance rows.
+macOS launch is blocked by a reported app-is-damaged warning; native Mac P3 has not run.
+The report follows delivery of #87, but its local package identity is not yet confirmed.
+
+Current Tauri configuration and production workflow contain no Developer ID signing or
+notarisation configuration. Gatekeeper/signature assessment is a plausible explanation,
+not a verified diagnosis. Apple distinguishes an unverified-developer warning from a
+modified/damaged-app warning: https://support.apple.com/en-us/102445 . The previously
+verified archive hashes do not prove the user's local copy or its signature is valid.
+
+Next: obtain the exact warning and macOS version, confirm installation from #87's DMG
+into Applications, and check whether Privacy & Security offers Open Anyway for Loomlight.
+For an unverified-developer/notarisation block on the intended trusted build, Apple's
+per-app exception may permit testing. If the damaged warning persists or no exception
+is offered, inspect the local signature and download hash before changing quarantine.
+Do not disable Gatekeeper globally. No application change, redispatch or merge here.

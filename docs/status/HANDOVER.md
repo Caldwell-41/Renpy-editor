@@ -3,7 +3,7 @@
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Checkpoint:** [Build #87 replacement-package verification](../tasks/active/phase-1f-save-correction.md#719-build-87-replacement-package-verification).
-**State:** `review_ready` for the Scene correction and replacement packages; native P3 still untested.
+**State:** `review_ready` for the Scene correction and replacement packages; Windows physical Save reported passing (row detail pending); macOS launch blocked.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Validated application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 **Verified run:** [#87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, `upload_packages=true`, terminal success.
@@ -38,7 +38,7 @@ annotations and three regressions are described in ledger section 7.18 and docs/
 but use only #87 for the next manual tests. Package IDs, exact filenames, hashes and
 expiry are recorded in ledger section 7.19 and linked from the checklist.
 
-## Next bounded action
+## Previous handoff (superseded by report below)
 
 Download #87 installers and complete [the native P3 checklist](../tasks/active/phase-1f-native-p3-checklist.md)
 on Windows x64 and macOS ARM64. First edit/commit the starting narration, insert a Beat,
@@ -50,3 +50,24 @@ main reconciliation or further implementation is selected. No CI remains to poll
 
 This closeout updates documentation and PR metadata only; repository validation and
 whitespace pass. Publish the evidence record and verify branch content before handoff.
+
+## User manual-test report — 2026-09-22
+
+The user reports that the Beat fix works and physical Save testing passes on Windows.
+Record these as user-reported results; OS version, exact installed package identity and
+separate P3-A/B/C outcomes were not supplied. Do not infer all three acceptance rows.
+macOS launch is blocked by a reported app-is-damaged warning; native Mac P3 has not run.
+The report follows delivery of #87, but its local package identity is not yet confirmed.
+
+Current Tauri configuration and production workflow contain no Developer ID signing or
+notarisation configuration. Gatekeeper/signature assessment is a plausible explanation,
+not a verified diagnosis. Apple distinguishes an unverified-developer warning from a
+modified/damaged-app warning: https://support.apple.com/en-us/102445 . The previously
+verified archive hashes do not prove the user's local copy or its signature is valid.
+
+Next: obtain the exact warning and macOS version, confirm installation from #87's DMG
+into Applications, and check whether Privacy & Security offers Open Anyway for Loomlight.
+For an unverified-developer/notarisation block on the intended trusted build, Apple's
+per-app exception may permit testing. If the damaged warning persists or no exception
+is offered, inspect the local signature and download hash before changing quarantine.
+Do not disable Gatekeeper globally. No application change, redispatch or merge here.

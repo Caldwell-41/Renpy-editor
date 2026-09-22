@@ -23,3 +23,11 @@ Native P3 still requires dirty Source acceptance, clean Source ordinary Flush, a
 non-Source isolation using real Windows Ctrl+S/macOS Cmd+S. First confirm Scene setup
 works. Native installation and user acceptance remain untested, despite passing CI.
 Keep PR #14 draft. No redispatch, merge or Phase 1G; no CI remains to poll.
+
+## Latest user testing
+
+Beat fix works and physical Save passes on Windows, per the user. Individual P3 rows,
+OS version and local package identity remain to be recorded. macOS launch is blocked
+by an app-is-damaged warning; Mac P3 has not run. Signing/notarisation is not configured;
+Gatekeeper/signature cause remains unconfirmed. See HANDOVER for bounded diagnostics.
+No redispatch or merge.
