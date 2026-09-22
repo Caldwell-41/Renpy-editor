@@ -1,11 +1,11 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `follow_up_not_started`; the Save implementation/local verification are retained. The selected next checkpoint is 1F-SAVE-EVIDENCE in section 7.
+**State:** `in_progress`; the Save implementation and E1-E6 are retained. The selected bounded final-report scope correction is section 7.16.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
-**Final application candidate:** `a720ea3fb150f2a49422e8385256179185129968`.
+**Original 1F-SAVE application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; current evidence correction is recorded in section 7.16.
 **Publication state:** closeout documentation is being published after the exact
 candidate's repository-quality and production runs; the branch head may therefore be
 a later documentation-only commit.
@@ -506,8 +506,8 @@ Phase 1G.
 
 **Selected:** 2026-09-22 after independent review of application candidate
 `a720ea3fb150f2a49422e8385256179185129968`.
-**State:** `blocked` after implementation and target validation; automated P5 and
-native P3 remain open.
+**State:** `in_progress` for the section 7.16 scope correction; completed E1-E6
+remain retained. Automated P5 and native P3 remain open.
 **Purpose:** close the remaining evidence/harness blockers without reopening the Save
 architecture. The shell-owned Save coordinator, Source controller, retention barrier,
 transaction/reconciliation/history path and Source core are retained unless a focused
@@ -901,3 +901,76 @@ Interpret the result without automatically changing code:
 
 Do not increase the timeout, alter yield behavior, split the smoke, modify Source Save,
 or rerun the same SHA as part of this diagnostic checkpoint.
+
+### 7.16 Final-report lexical scope correction
+
+The user's 2026-09-22 continuation authorises only the reviewed trace-declaration
+scope fix and a small executable regression against the actual production probe.
+This supersedes the terminal IPC/return-stall inference in sections 7.14–7.15;
+neither stalled checkpoint IPC nor insufficient time was established.
+
+Native run [35702906716](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35702906716)
+(#83), attempt 1, used `1d5704b738de25a1b95197cc0866f866ae52826d`.
+Preflight `106664883810` passed. Windows job `106665056764` retained
+`post-source-conflict-complete` at 1,017 ms; macOS job `106665056681` retained it at
+5,157 ms. Both then ended at the 300-second ceiling without `final-report-start`.
+Those timings localise missing terminal reporting, not its mechanism.
+
+Independent local execution of the actual reporting code with UI/IPC stubs found
+`ReferenceError: sourceCommandTrace is not defined`: its declaration is inside the
+authoring `try`, but report construction is outside that scope and catch. Move the
+single array declaration to the enclosing callback before the `try`, preserving all
+collection and assertions. Retain an executable red/green regression via the existing
+frontend check/preflight path for successful reporting, guarded authoring failure,
+and incomplete trace rejection. Corrected native acceptance remains unverified.
+
+Preserve the 300-second absolute ceiling, sequential terminal reporting, all five
+checkpoint locations, native `elapsedMs`, task yielding, security/Source assertions,
+E1 rejection handling and disposed-controller guard. No Source/core, routing,
+transaction, reconciliation, recovery, privilege or CSP changes are authorised.
+Run focused regression, syntax, frontend check/build, repository validation and
+whitespace checks; self-review before one exact new candidate and gate. On failure
+retain SHA/run/jobs/error/timings and stop, without retry or speculative changes.
+P3 remains the section 7.10 native manual checklist.
+
+#### Local red/green and self-review
+
+`app/tests/smoke-report.dom.test.ts` loads and executes the entire production
+`smoke_probe.js` unchanged in a VM, using Happy DOM, the actual shell/Source UI and
+the probe's existing authoring requester. Desktop IPC/network denial are stubs, not
+security or native acceptance evidence. The existing `tests/*.test.js` discovery in
+`npm test` includes this group via `npm run check`, which the unchanged production
+Preflight runs before packaging. No dependency, workflow or alternate probe was added.
+
+Retained original red result on `1d5704b…` probe content, before the declaration move:
+`npm run build:tests && node --test dist-tests/tests/smoke-report.dom.test.js`
+failed all three subcases (Node summary: 0 pass, 4 fail including the parent group).
+Success threw `ReferenceError: sourceCommandTrace is not defined` at
+`smoke_probe.js:586:36`; authoring-failure and incomplete-trace received that same
+ReferenceError instead of the expected `Smoke report was rejected.` failure.
+No final report could be submitted. After the one-declaration move, the identical
+regression passed all three subcases (4/4 including the group):
+
+- success: exactly one report, successful authoring and valid Source/shell trace;
+- guarded checkpoint rejection before Source: exactly one report attempted, truthful
+  failed authoring flags and stage, empty Source trace and false trace assertion;
+- completed authoring with missing shell acceptance trace: exactly one report
+  attempted, authoring remains true but trace assertion is false.
+
+Both negative cases also exercise the unchanged JavaScript report-rejection path.
+Cleanup precedes `final-report-start`, which precedes the report; the successful case
+asserts the complete ordered five-checkpoint sequence.
+
+Focused checks on Node 24.19.0/npm 11.9.0 passed: the command above;
+`node --check app/src-tauri/src/smoke_probe.js`; `npm run check` (32/32, no skips);
+`npm run build`; `python3 scripts/validate.py` (216 repository files); and
+`git diff --check`. Unchanged heavy core/SDK/spike/benchmark suites were not replayed.
+No Rust file changed in this correction.
+
+Exact-diff self-review found no further significant defect: one trace declaration in
+callback scope, no inner shadow; existing four pushes and all final assertions
+unchanged; guarded failure reaches reporting; the 300-second ceiling, sequential
+awaits/cleanup, all five checkpoint locations, `elapsedMs`, task yielding, E1 handling,
+L3/L8/L9/L16 and disposed guard remain unchanged. Source Save routing, core transaction,
+reconciliation/history, recovery, revision checks and renderer privileges/CSP have
+zero diff. Native P5 on the corrected candidate remains unverified pending the gate.

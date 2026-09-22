@@ -4,36 +4,29 @@
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
 **Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not ready to merge.
-**Selected checkpoint:** [1F-SAVE timing diagnostic](../tasks/active/phase-1f-save-correction.md#715-timing-only-diagnostic-after-failed-300-second-run), implementation being published for one target measurement.
+**Selected checkpoint:** [1F-SAVE-EVIDENCE final-report scope correction](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction), locally verified; candidate publication in progress.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Retained behavior candidate before instrumentation:** `628c901d9c5e860656ab0c194bc104ae3c4b760c`; tree `703bb7b747634e88583aa94817afedba6a9ddcd8`.
+**Reviewed baseline:** `1d5704b738de25a1b95197cc0866f866ae52826d`.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
-## Why measurement is now required
+## Corrected diagnosis and bounded change
 
-Production run `35697492679` passed browser, core, official-SDK lifecycle,
-real-service Source persistence, desktop-boundary and packaging on Windows x64 and
-macOS ARM64. Both packaged smokes retained `pre-source-complete`,
-`source-complete`, `post-source-recovery-complete` and
-`post-source-conflict-complete`, then hit the unchanged 300-second outer ceiling
-without `final-report-start`. P5 therefore remains failed; native P3 is also open.
+Native run `35702906716` (#83), attempt 1, retained post-conflict at 1,017 ms on
+Windows and 5,157 ms on macOS, then timed out at 300 seconds without final reporting.
+Neither insufficient time nor a stalled checkpoint IPC response was established.
+Both secret scan and dependency/licence inventory were skipped; that run failed P5.
 
-The prior handover over-inferred that the post-conflict IPC response itself remained
-blocked until the deadline. Existing checkpoint evidence has no elapsed timing, so the
-host may instead have received that checkpoint near 300 seconds. The current checkpoint
-exists only to distinguish those cases.
+The actual probe now has one `sourceCommandTrace` declaration in callback scope,
+instead of inside the authoring try. A new executable regression runs the full probe
+with the real shell/UI and minimal desktop stubs. All three cases reproduced the
+ReferenceError before the fix and now pass: success, guarded authoring failure and
+incomplete trace. Frontend check passes 32/32; build, syntax, repository validation
+(216 files) and whitespace pass. See the correction ledger for exact commands/review.
 
-## Selected diagnostic
+The 300-second ceiling, sequential terminal awaits, five checkpoints, elapsed timing,
+all assertions, E1-E6 evidence, Source Save/core architecture and privileges are
+unchanged. Corrected native P5 is still unverified: require accepted packaged final
+reports plus secret scan and dependency/licence inventory on BOTH targets.
 
-The native checkpoint record now carries monotonic `elapsedMs` measured from packaged
-smoke start using `std::time::Instant`. The measurement is added at the single Rust
-checkpoint handler, so all five existing checkpoints are timed without modifying the
-renderer probe or event loop.
-
-Keep the 300-second ceiling, sequential terminal reporting, existing five checkpoint
-locations, yield behavior, assertions, Source Save/core logic and workflow unchanged.
-Run one exact supported-target production gate after repository quality. Use the
-checkpoint timings to decide the next scope; do not automatically increase the timeout,
-split the smoke, change IPC, rerun the same SHA or modify Source Save.
-
-PR #14 remains draft. No merge or Phase 1G.
+Native P3 remains the manual three-action Windows Ctrl+S/macOS Cmd+S checklist in
+section 7.10. PR #14 remains draft. No merge, Phase 1G or speculative retry.

@@ -46,6 +46,7 @@ setTimeout(async () => {
   let sceneAuthoringStage = "not-started";
   let sourceAuthoringUiPassed = false;
   let sourceAuthoringStage = "not-started";
+  const sourceCommandTrace = [];
   let restoreSmokeRequester = () => {};
   let checkpointSequence = 0;
   const checkpoint = async (stage) => {
@@ -126,7 +127,6 @@ setTimeout(async () => {
     };
     const called = new Set();
     const operationCounts = new Map();
-    const sourceCommandTrace = [];
     let acceptedSourceText = sourceDocument.text;
     let retainedSourceDraft = null;
     let exactInteger = false;

@@ -2,36 +2,44 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** [1F-SAVE timing diagnostic](../tasks/active/phase-1f-save-correction.md#715-timing-only-diagnostic-after-failed-300-second-run).
-**State:** diagnostic instrumentation published for one production measurement; P5 and native P3 remain open.
+**Checkpoint:** [1F-SAVE-EVIDENCE final-report scope correction](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction).
+**State:** locally verified; publishing one candidate for Repository Quality and one production gate. P5 and native P3 remain open.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Prior application candidate:** `628c901d9c5e860656ab0c194bc104ae3c4b760c`.
+**Reviewed baseline:** `1d5704b738de25a1b95197cc0866f866ae52826d`.
 
-## Resume here
+## Completed and verified locally
 
-Read AGENTS.md, CURRENT and section 7.15 of the 1F-SAVE ledger. Inspect actual refs and
-preserve newer work.
+Moved the single trace declaration out of the authoring try into callback scope;
+collection/assertions and all other production behavior are unchanged. Added one
+actual-probe/real-shell executable test group to existing frontend discovery.
+Red: all three cases hit `ReferenceError: sourceCommandTrace is not defined`.
+Green: all three now submit exactly one truthful report, including failure/incomplete
+trace rejection. Full check 32/32, build, syntax, repository validation (216 files)
+and whitespace passed. Exact commands and self-review are in section 7.16.
 
-The prior 300-second run established that both supported targets pass Source, recovery
-and conflict presentation before the outer watchdog, but the evidence did not record
-when each checkpoint occurred. Therefore the earlier statement that the post-conflict
-IPC response itself remained blocked until the deadline was not proven.
+Native #83 post-conflict timing was 1,017 ms Windows / 5,157 ms macOS, well before
+300 seconds. Timing does not prove an IPC stall; the scope error is reproduced
+locally. Corrected native acceptance is not yet established.
 
-The diagnostic change is intentionally one native measurement: each existing
-`probe.smokeCheckpoint` record includes monotonic `elapsedMs` from packaged-smoke
-start. No JavaScript flow, checkpoint location, timeout, yield strategy, smoke
-assertion, Source/core behavior, renderer privilege or workflow behavior is changed.
+## Next bounded action
 
-After Repository Quality passes, dispatch the existing Phase 1 production gate once on
-the exact diagnostic candidate. Preserve Windows/macOS evidence artifacts and record
-the five elapsed values from each target.
+After Repository Quality passes for the corrected candidate, verify no equivalent
+production run is active or ambiguously dispatched, then dispatch the existing gate
+once. Record exact SHA/run/attempt/jobs. Both supported targets must produce accepted
+final reports and complete artifact secret scan and dependency/licence inventory.
+Under repository waiting rules, publish pending/manual-resume state if the run is
+still active; do not model-poll or claim automatic continuation.
 
-Interpret only after measurement:
-- post-conflict near 300 seconds => duration/budget exhaustion is supported;
-- post-conflict substantially earlier with no final checkpoint => terminal IPC/return
-  stall is supported;
-- intermediate/divergent values => report exact data and stop.
+If the gate fails, retain exact error, timings, SHA/run/jobs and stop for independent
+review. Do not increase timeout, rerun the SHA, experiment with yielding, split smoke,
+or modify Source Save. No merge, new branch/PR or Phase 1G.
 
-Do not increase timeout, split the smoke, alter yield behavior, modify IPC/Source Save,
-or rerun the same SHA during this checkpoint. Update ledger/CURRENT/HANDOVER/PR with
-the terminal measurement and stop for independent review. Native P3 remains separate.
+## Native P3 — outstanding
+
+No trusted native keyboard input is available here. On the exact packaged candidate:
+
+- Windows x64: dirty Source Ctrl+S accepts; clean Source Ctrl+S performs ordinary
+  Flush; non-Source Ctrl+S does not accept Source.
+- macOS ARM64: repeat with Cmd+S.
+
+Record package identity, OS/architecture and outcomes. Synthetic events are not P3.

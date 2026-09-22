@@ -419,3 +419,23 @@ long IPC-response stall. The selected diagnostic adds native monotonic `elapsedM
 the existing five checkpoint records only. Timeout, renderer flow/yields, Source/core
 behavior and acceptance semantics remain unchanged. One exact production measurement
 is required before choosing any smoke split or IPC correction.
+
+2026-09-22 final-report scope correction: Run `35702906716` (#83), attempt 1,
+at `1d5704b738de25a1b95197cc0866f866ae52826d` retained post-conflict at 1,017 ms
+on Windows (`106665056764`) and 5,157 ms on macOS (`106665056681`), then failed
+at 300 seconds without a final report. Preflight `106664883810` passed, but both
+target secret scans and inventories were skipped. This supersedes the prior causal
+inference: neither insufficient time nor stalled checkpoint IPC was proven.
+
+The actual probe's `sourceCommandTrace` was declared inside the authoring try and used
+outside its scope/catch. The new full-probe/real-shell regression reproduced
+`ReferenceError: sourceCommandTrace is not defined` in all three subcases before the
+fix. Moving that single declaration to callback scope made successful reporting,
+guarded failure reporting and incomplete-trace rejection pass. Existing frontend
+discovery/preflight includes the group; check passes 32/32, build/syntax/repository
+validation (216 files)/whitespace pass. Self-review confirms no assertion, timeout,
+checkpoint, yield, Source/core or privilege changes; no further significant finding.
+See [1F-SAVE section 7.16](phase-1f-save-correction.md#716-final-report-lexical-scope-correction)
+for retained red/green evidence and exact scope. Corrected native P5 remains unverified
+until both packaged reports plus scan/inventory pass. P3 remains the manual three-action
+Ctrl+S/Cmd+S checklist. Keep PR #14 draft; stop for independent review, no merge/1G.
