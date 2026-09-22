@@ -1074,3 +1074,33 @@ accepted final reports, subsequent scans/inventories and the separate P3 boundar
 Only four documentation files and PR text changed. Repository validation and
 `git diff --check` passed; unchanged application suites were not replayed. The
 remaining acceptance blocker is P3; stop for independent review with PR #14 draft.
+
+
+### 7.17 Native P3 package delivery
+
+After independent review, the user explicitly requested Windows/macOS builds,
+repository publication and a detailed checklist. This authorises one installer-delivery
+run with package upload enabled and supersedes the prior no-redispatch instruction
+for that purpose. It does not authorise application changes, merge, Phase 1G or new
+native automation. Existing #84 acceptance remains historical passing evidence.
+
+Inspected fresh PR/ref and the workflow list: PR #14 remains open/draft at
+`6d1ab428b2e3cd052323a8890c27897fb906b937`, no equivalent active production run was
+present, and the delta from reviewed `85e44e92` contains only four documentation files.
+The user-requested installers therefore retain the reviewed application code.
+
+Dispatched [35711244992 (#85)](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992),
+attempt 1, exactly once using the existing workflow with `upload_packages=true`.
+The run page confirmed build SHA `6d1ab428b2e3cd052323a8890c27897fb906b937` and
+Preflight job `106692103651`. Build completion and uploaded packages are not yet
+claimed. Upload uses `continue-on-error`, so verify actual package artifact presence,
+identity and expiry in addition to successful target jobs before claiming delivery.
+
+The [native P3 checklist](phase-1f-native-p3-checklist.md) provides setup, six required
+native checks, observable outcomes, handling for an unobservable clean Flush, optional
+adjacent checks and separate target result records. It deliberately does not claim a
+manual test can count internal IPC calls. Native P3 remains untested on both targets.
+Only documentation changes in this checkpoint; keep PR #14 draft and preserve main.
+
+Documentation self-review and `python3 scripts/validate.py` (217 files) passed, as
+did `git diff --check`. No application suite was rerun locally for these doc changes.

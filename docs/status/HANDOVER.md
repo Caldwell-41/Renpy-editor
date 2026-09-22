@@ -2,47 +2,56 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** [1F-SAVE-EVIDENCE scope correction and terminal evidence closeout](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction).
-**State:** automated P5 verified; `blocked` on native P3 only. Stop for independent review.
+**Checkpoint:** Native P3 package delivery and [manual checklist](../tasks/active/phase-1f-native-p3-checklist.md).
+**State:** `awaiting_ci`; native P3 remains untested. No merge or Phase 1G.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35` (tree `ca22dc8486a7114eeda227821582a7945a344d77`).
-**Publication:** documentation-only evidence closeout on the existing branch/PR; application candidate unchanged.
+**Reviewed application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
+**Package build ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937`.
+The difference is four documentation files only; application/dependencies/workflow
+are unchanged. No unrelated working copy was modified.
 
-## Completed evidence
+## Authority and prior acceptance
 
-[Production 35708223679](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35708223679)
-(#84), attempt 1, passed on the exact candidate. Preflight `106682217975`,
-Windows `106682384572` and macOS `106682384566` all succeeded.
-Windows artifact `10685588341` and macOS artifact `10685592982` were downloaded
-and inspected: each contains one accepted final report with complete Source traces,
-all reported security/authoring assertions true, and all five timed checkpoints.
-Final-report-start: Windows 898 ms; macOS 5,782 ms. Both post-smoke secret scans and
-dependency/licence inventories passed (85 npm / 519 Cargo entries each). Real-service
-Source persistence passed on both. P1/P2/P4/P5 automated evidence is satisfied.
+After independent review, the user explicitly requested Windows/macOS builds,
+publication on the repository and a detailed testing checklist. That authorises one
+package-producing run with uploads enabled, superseding the old no-redispatch boundary
+for this purpose. Do not change application code, merge, begin Phase 1G or build new
+native automation. The existing workflow retains its full production gates.
 
-Repository Quality `35707727479` passed the candidate. The prior correction retained
-three-case executable red/green evidence, frontend 32/32, build, syntax and repository
-checks. This evidence-only closeout reran repository validation and whitespace checks;
-no application suites or production runs were repeated. No application code changed.
-See section 7.16 for exact timings, historical failure evidence and self-review.
+Production #84 (`35708223679`), attempt 1, passed the exact application candidate on
+Windows x64/macOS ARM64, including accepted final reports, real-service persistence,
+secret scans and inventories. Repository Quality `35707727479` passed. P1/P2/P4/P5
+are satisfied; synthetic shortcuts do not satisfy native P3. See
+[1F-SAVE section 7.16](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction)
+for retained exact evidence. #84 uploaded evidence only, not installable packages.
+
+## Installer delivery operation
+
+[Production 35711244992 (#85)](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992),
+attempt 1, was dispatched once with `upload_packages=true`. The run page confirmed
+`6d1ab428b2e3cd052323a8890c27897fb906b937`; Preflight job `106692103651` started.
+No equivalent run was active at dispatch. Do not redispatch or automatically retry.
+
+Expected package artifacts: `phase-1-production-package-windows-2025` and
+`phase-1-production-package-macos-26`. Upload happens after target gates, but is
+`continue-on-error`; successful jobs alone do not prove the installers were uploaded.
+Verify artifact existence, SHA/run mapping, contents and seven-day expiry. Evidence
+archives are not installers. Build completion/package delivery is not yet claimed.
 
 ## Next bounded action
 
-Independently review this exact candidate and its completed evidence. Do not redispatch
-#84, merge PR #14 or begin Phase 1G. No automatic follow-on implementation is authorised.
-The only remaining acceptance-evidence blocker is native P3 below. Any package
-acquisition/build needed for manual testing is a separate explicit next action:
-optional installable-package upload was not selected in #84. Evidence artifacts expire
-2026-09-29 and are not installable application packages.
+Inspect the existing #85 terminal jobs and package artifacts, then publish download
+links and the completed delivery record. If still running, preserve this exact
+run/attempt/ref handover and stop model polling under AGENTS/WORKFLOW; there is no
+qualified automatic same-thread continuation here. On failure record the exact
+stage/error and stop; no blind retry. The existing #84 pass is not a #85 pass.
 
-## Native P3 — outstanding
+Then the user performs [the checklist](../tasks/active/phase-1f-native-p3-checklist.md)
+on both packaged targets: dirty Source accepts, clean Source ordinarily Flushes, and
+non-Source Flush preserves a pending Source draft. Record real Ctrl+S/Cmd+S input,
+OS/architecture, package identity and observed outcomes. All six rows remain untested;
+unclear native delivery must not be marked passed. Return results for review.
 
-No trusted native keyboard evidence was collected. On the exact packaged candidate:
-
-- Windows x64: dirty Source Ctrl+S accepts; clean Source Ctrl+S performs ordinary
-  Flush; non-Source Ctrl+S does not accept Source.
-- macOS ARM64: repeat with Cmd+S.
-
-Record package identity, OS/architecture and observed outcomes. Synthetic events are
-renderer-routing evidence only. Keep PR #14 draft pending independent review and
-the remaining acceptance requirement.
+The checklist and current-state corrections are documentation-only. PR #14 remains
+draft; reconciliation with updated main is a later integration action, not part of
+installer delivery. Publication/validation results belong in the active ledger.

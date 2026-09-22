@@ -4,7 +4,7 @@
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
 **Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not ready to merge: native P3 remains outstanding.
-**Selected checkpoint:** [1F-SAVE-EVIDENCE scope correction and closeout](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction). Automated evidence closed; stop for independent review.
+**Selected checkpoint:** [Native P3 package delivery and manual checklist](../tasks/active/phase-1f-native-p3-checklist.md). User-authorised package run #85 is in progress; native testing remains outstanding.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
 **Continuation:** [HANDOVER](HANDOVER.md).
@@ -36,4 +36,8 @@ Native P3 is outstanding: real Windows Ctrl+S/macOS Cmd+S for dirty Source accep
 clean Source ordinary Flush, and non-Source isolation. Synthetic events are not native
 evidence. Optional installable-package upload was not selected in #84; evidence
 archives are not manual-test packages. Keep PR #14 draft and stop for independent
-review. No merge, Phase 1G, new run or native automation is authorised here.
+review. The subsequent user request explicitly authorises one package-producing run
+with upload enabled: [#85, 35711244992](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992),
+at documentation-only head `6d1ab428b2e3cd052323a8890c27897fb906b937`.
+This does not authorise merge, Phase 1G, application changes or new native automation.
+See the [manual checklist](../tasks/active/phase-1f-native-p3-checklist.md).

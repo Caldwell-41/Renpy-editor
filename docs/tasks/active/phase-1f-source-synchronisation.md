@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** 1F-SAVE-EVIDENCE is implemented and locally verified, but automated P5 and native P3 remain blocked. Phase 1F is not review-ready, integrated, or authorised for 1G.
+**State:** automated P1/P2/P4/P5 passed on both targets; native P3 remains outstanding. User-authorised package run #85 supports the [manual checklist](phase-1f-native-p3-checklist.md). Phase 1F is not accepted, integrated, or authorised for 1G.
 **Current correction:** [1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence); its execution closeout and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the remaining independent review.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
@@ -468,3 +468,14 @@ Synthetic events do not satisfy it. Optional installable-package upload was not
 selected, so evidence archives are not manual-test packages. No app code changed or
 new run was dispatched. Documentation validation/whitespace passed. Keep PR #14 draft
 and stop for independent review; no merge or Phase 1G.
+
+
+2026-09-22 native P3 package request: Following independent review, the user explicitly
+requested Windows x64/macOS ARM64 builds published on the repository and a detailed
+manual checklist. Existing production run #85 (`35711244992`), attempt 1, was dispatched
+once with `upload_packages=true` at `6d1ab428b2e3cd052323a8890c27897fb906b937`; the
+delta from reviewed `85e44e92` is four documentation files only. This run is for
+installer delivery because #84 did not retain packages, not a speculative retry of
+failed evidence. Native acceptance is untested. See [the checklist](phase-1f-native-p3-checklist.md)
+and [HANDOVER](../../status/HANDOVER.md) for package verification and the next action.
+The stale opening P5 status has been corrected; all historical evidence is retained.
