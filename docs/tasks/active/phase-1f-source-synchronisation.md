@@ -2,9 +2,9 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** 1F-CLOSEOUT-CORRECTION is `review_ready`; production #88 attempt 1 passed on the corrected candidate and its artifacts were verified. Stop for independent review. See [ledger sections 7.23–7.24](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification). #87 and six native Save passes remain historical evidence; the user confirmed build #87 on both targets and macOS 26.6.2 (numeric Windows build unspecified). No merge or 1G implementation.
-**Current correction:** [1F-CLOSEOUT-CORRECTION](phase-1f-save-correction.md#723-1f-closeout-correction), with verified #88 evidence in section 7.24; preserve [ADR 0007](../../adr/0007-shell-save-command-ownership.md) and the earlier Save guarantees.
-**Execution authority:** The user selected F1–F3 correction and then resumed to verify #88 without redispatch, publish results, and stop for independent review. No merge or Phase 1G is authorised.
+**State:** independent 1F-CLOSEOUT-CORRECTION review complete; closeout `blocked` on F4 (P2), settled-selection Apply Both availability. F1 core safeguards and F2/F3 pass targeted review. [Ledger 7.25](phase-1f-save-correction.md#725-independent-correction-review--f4-blocks-closeout) records the reproduced finding; #88 success remains valid for its covered gates. All six user-reported #87 native Save passes remain intact. No merge or 1G implementation.
+**Current correction:** [1F-CLOSEOUT-CORRECTION](phase-1f-save-correction.md#723-1f-closeout-correction), verified #88 evidence in 7.24 and independent findings in 7.25. Preserve ADR 0007 and earlier Save guarantees.
+**Execution authority:** independent review, publication and stop only. A bounded F4 correction requires user selection. No redispatch, merge, branch deletion or Phase 1G.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
 **Working branch:** `feature/phase-1f-source-synchronisation`, existing draft PR #14; do not create another branch or PR.
 **Parent requirements:** [Phase 1 plan](phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.

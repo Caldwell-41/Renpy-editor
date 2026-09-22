@@ -19,12 +19,12 @@ macOS 26.6.2; Windows was described as “the latest windows version”, without
 version/build. This is user-reported package provenance, not independent binary
 inspection. Do not invent screenshots, per-step observations or installer hashes, or
 repeat unchanged native Save tests. Exact Windows version/build remains unspecified.
-Phase 1F acceptance awaits independent review of the [verified #88 correction](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
+Phase 1F acceptance is blocked by [independent review finding F4](phase-1f-save-correction.md#725-independent-correction-review--f4-blocks-closeout).
 Signing/notarisation remains the later DIST-MAC-01 limitation, not a native Save failure.
 
 
 **Prepared:** 2026-09-22.
-**State:** six user-reported native passes recorded above; build #87 and macOS 26.6.2 confirmed by the user; numeric Windows build unspecified. Corrected-candidate #88 validation passed; independent review remains.
+**State:** six user-reported native passes recorded above; build #87 and macOS 26.6.2 confirmed by the user; numeric Windows build unspecified. Corrected-candidate #88 validation passed; independent review found F4 (P2), with all six Save passes preserved.
 Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
@@ -50,8 +50,10 @@ The historical #87 procedure/results below remain intact. Corrected build #88
 automated targets. Package/evidence ZIP hashes and contents were verified; downloads
 and installer hashes are in [ledger section 7.24](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
 No native #88 installation or manual F1–F3 pass is claimed. Preserve all six #87 native
-Save passes. Independent review is next; any requested new native testing should focus
-on stale Apply Both confirmation, selected-Beat insertion and Background clearing only.
+Save passes. Independent review found F4: selection retention leaves Apply Both disabled.
+No extra native F2/F3 gate is required for the targeted review. After an authorised F4
+correction, focus native follow-up on selection-only re-enabling and stale draft/external
+refusal using verified corrected packages. No new native pass is claimed here.
 
 ## 1. Download and identify the packages
 

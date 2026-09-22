@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `review_ready`: 1F-CLOSEOUT-CORRECTION and production #88 verified; stop for independent review (sections 7.23–7.24). Phase 1F is not accepted or integrated.
+**State:** `blocked` on F4 from the completed independent correction review (section 7.25). F1 core binding and F2–F3 pass targeted review; Apply Both availability regresses after selection retention. Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1638,3 +1638,119 @@ attempt 1 evidence. Stop here. No merge, branch deletion, duplicate plan or Phas
 
 Documentation-only verification checks: repository/link/privacy validation passed for
 222 files; whitespace passed. No application suite or package matrix was rerun.
+
+
+### 7.25 Independent correction review — F4 blocks closeout
+
+**Date:** 2026-09-23 (Australia/Brisbane).
+**Authority:** independent review of F1–F3 against #88, preserve native Save passes,
+publish findings and stop. No implementation correction, redispatch, merge, branch
+deletion or Phase 1G is authorised in this task.
+**Reviewed application:** `f452d0a8c1599b05650ae2e835d14d9f86f14653`.
+**Entry/published evidence head:** `01e9a857f447f3ffa1d6fe0c1f15ee5b2dd3eca7` on
+`feature/phase-1f-source-synchronisation`, open/draft PR #14. Fresh fetched refs matched
+that clean local head and main `75a91c5f72cd0eac8586faf2be036ec5021a939d`. The visible
+prior local task was idle. No remote worktree ownership is inferred. All five files
+changed between the application candidate and review entry are documentation only.
+
+#### Finding F4 — re-enable Apply Both after unchanged retention (P2)
+
+The new disable rule in `app/src/source-ui.ts:375–378` includes `hasLocalInput()`.
+`queueRetention` calls `updateStateOnly` at line 329 while the completed snapshot is
+still in `retentions`; `hasLocalInput()` therefore returns true and disables Apply Both.
+Its `finally` at line 348 removes that snapshot without updating controls again.
+
+Reproduction: open a conflict with a valid reviewed non-overlapping combination,
+click/select in the Source textarea without changing its text, then let retention
+finish. `hasUnretainedInput()` is false and the review identity is unchanged, but
+Apply Both remains disabled, no stale-review notice appears, and clicking it sends
+zero acceptance requests. An unchanged scheduled observation does not redraw the
+controls, so waiting for the normal observation cycle does not recover availability.
+This is a UI availability regression, not a demonstrated stale write or loss of bytes.
+
+Executed against the actual Source controller with a faithful selection-only service
+double in both Happy DOM and headless Chrome. Browser input used a real automation
+mouse click; the production observation timer was enabled. Browser result after two
+open/observation calls: `pending=false`, `disabled=true`, `applies=0`,
+`staleNoticeHidden=true`. It is browser evidence, not WKWebView/WebView2 or real disk I/O.
+
+Retained required-behavior probes, deliberately outside the normal test glob:
+
+- [DOM selection probe](../../../app/tests/review/phase-1f-selection.repro.mts):
+  `node --test tests/review/phase-1f-selection.repro.mts` from `app/`; 1 failed as expected.
+- [Browser selection probe](../../../app/tests/review/phase-1f-selection.browser.mjs):
+  `node tests/review/phase-1f-selection.browser.mjs` from `app/`; fails the assertion
+  that the current review becomes enabled after settled unchanged selection.
+
+Smallest follow-up: refresh relevant controls after removing the finished retention,
+with existing document-generation/disposal and newer-pending-input guards preserved.
+Promote the probe to a normal regression, including unchanged selection completion,
+a newer pending edit, failed retention and stale-review refusal. Do not bypass the
+review-binding check or the retention barrier to restore availability. This review
+publishes diagnosis only; the application has not been changed.
+
+#### F1–F3 disposition and evidence assessment
+
+- **F1 core stale-review write defect addressed.** The strict JSON request binds base,
+  draft version, external hash and exact combined text. Renderer checks the displayed
+  identity before/after settlement; core checks it before producing the transaction.
+  The proposal uses the reviewed external bytes/revision as its write precondition.
+  Real JSON tests cover changed identities, replacement sessions, no-write/draft
+  preservation and successful persistence/reopen. The production-proposal race test
+  checks staging refusal and final-exchange recovery. No new bypass was found in these
+  inspected paths. **F1 is not fully closed because F4 breaks confirmation availability.**
+- **F2 addressed.** Preview captures the selected Beat before clearing selection and
+  passes it into the insertion form. DOM coverage exercises the actual control; real
+  JSON coverage checks exact adjacency, stale-anchor refusal without source/map writes,
+  and stable ordering/identity after reopening. General Add Beat still defaults to end
+  insertion. No additional finding.
+- **F3 addressed.** Background clears visible Characters and default-layer uncertainty,
+  consistent with core serialization to `scene`. Music/variable uncertainty and the
+  Custom Code partial marker survive. Ordinary and post-Custom-Code tests cover this.
+  No additional finding.
+
+This is a targeted correction review, not a complete new audit of Phase 1F or every
+transaction/parser path. Existing shell Save ownership, transaction engine, dependency
+locks, desktop permissions and workflow inputs were unchanged by the correction.
+
+#### Build #88 independently rechecked
+
+Fresh GitHub run metadata/logs confirm [#88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
+attempt 1, terminal success on the exact application SHA above. Preflight
+`106762105167` ran 38 passing frontend tests; both platform logs explicitly show the
+new JSON binding/ambiguity, Scene insertion/reopen and production-proposal race tests.
+Windows `106762349561`: 147 passed, 0 failed, 4 ignored subprocess workers. macOS
+`106762349306`: 153 passed, 0 failed, 4 ignored workers. Explicit official-SDK lifecycle
+and download-handoff gates and desktop tests (1 each) passed. Cache-hit download skips
+and the earlier no-archive sweep markers are not substituted for these explicit runs.
+
+All four previously downloaded ZIPs were independently hashed and CRC-tested again
+against fresh GitHub artifact metadata: sizes/hashes matched, none expired, exact
+candidate lineage matched, installers present. This was verification of retained
+archives, not a second download or native install. Both evidence archives contain one
+final report with all boolean assertions true, complete Source traces and five
+checkpoints. Section 7.24 owns links and exact hashes. These genuine passes do not
+cover F4's settled-selection button state and do not turn the new red probe green.
+
+Local review checks: Node 26.8.1/npm 11.19.0, different from pinned CI. `npm run check`
+passed typecheck and 38 tests, 0 failed/skipped. The three original retained F1–F3
+probes passed. The two new F4 probes fail as described. Browser execution needed local
+loopback permission; after fixing the diagnostic page setup, the application failure
+was reproduced. No Rust/SDK suite or package matrix was rerun; exact #88 evidence was
+inspected. Repository/link/privacy and whitespace checks passed before publication.
+
+#### Native evidence and stop boundary
+
+Preserve all six user-reported native Save passes from #87, confirmed #87 lineage,
+macOS 26.6.2 and unspecified numeric Windows build. Do not repeat unchanged Save cases.
+No native #88 or F1–F3 pass is claimed. F2/F3's DOM/pure-state plus core persistence
+coverage is sufficient for this targeted review; lack of a new native F2/F3 observation
+is not an additional blocker. F4 is already reproducible without another package run.
+After a separately authorised correction, focused native Apply Both testing should
+cover selection-only re-enabling and stale draft/external refusal on both targets;
+it must use a verified corrected package, not claim #88 contains the future fix.
+
+The legacy local Python SDK result remains 23 pass / 1 `os.killpg` permission error;
+DIST-MAC-01 remains outside scope. PR #14 stays draft, Phase 1F unaccepted/unmerged.
+Review is complete with one blocking P2 finding; no operation is pending. The next
+bounded action requires user selection of an F4 correction checkpoint. Stop here.
