@@ -3,8 +3,10 @@
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Checkpoint:** [Scene JSON contract correction](../tasks/active/phase-1f-save-correction.md#718-scene-json-contract-correction).
-**State:** correction implemented; supported-target validation and replacement packages required.
+**State:** `in_progress`; applying exact CI formatting changes before replacement validation.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
+**Initial correction candidate (format failure):** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
+**Failed package run:** [#86, 35719196417](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417), attempt 1, `upload_packages=true`.
 **Entry head:** `616667ce9b1d13928c7acf57d0c86cd685363946`.
 **Previous package ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937` (#85; contains the reported defect).
 
@@ -47,16 +49,19 @@ run as historical evidence and do not ask the user to repeat P3 on these builds.
 
 ## Next bounded action
 
-Publish the correction on this branch after confirming no newer work, then dispatch
-the existing production workflow once with package upload enabled. Record the exact
-corrected SHA/run/attempt and inspect the actual new core regression, packaging,
-smoke, scans, inventories and artifact uploads. A successful job does not prove upload
-because the upload step is continue-on-error. No automatic retry or merge.
+Run #86 failed Rust formatting in Preflight `106717842885`; both target builds were
+skipped. The log requires only expanding two Serde attributes and one new test method
+chain. Those exact formatting changes are applied without semantics changes. Publish
+the formatted candidate and validate it once with package upload enabled under the
+existing correction/build authority. Do not rerun unchanged #86 inputs.
 
-If the run remains active at handoff, keep the exact identity here and stop model
-polling under AGENTS/WORKFLOW. Native P3 remains blocked/untested until valid replacement
-packages are available and the user completes [the checklist](../tasks/active/phase-1f-native-p3-checklist.md).
-The checklist now requires starting-narration edit and new-Beat commit before native
-shortcut tests. Record the user's OS/package identity with their next result; it was
-not specified in the defect report. P3 cannot be marked failed/passed from this setup
-failure alone. Keep PR #14 draft; no Phase 1G or main reconciliation in this checkpoint.
+Verify the new core regression, packaging, smoke, scans, inventories and actual uploads.
+A successful job does not prove upload because that step is continue-on-error.
+Record the new run/attempt/SHA; if active at handoff, stop model polling under
+AGENTS/WORKFLOW and leave a manual-resume handover. No automatic retry or merge.
+
+Native P3 remains blocked/untested until valid replacement packages are available and
+the user completes [the checklist](../tasks/active/phase-1f-native-p3-checklist.md).
+The checklist requires starting-narration edit and new-Beat commit before native
+shortcut tests. Record OS/package identity with the next result; the report did not
+specify it. Keep PR #14 draft; no Phase 1G or main reconciliation in this checkpoint.

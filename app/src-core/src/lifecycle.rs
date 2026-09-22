@@ -2000,7 +2000,10 @@ mod tests {
         assert_eq!(stale["error"]["code"], "SOURCE_CONFLICT");
         assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);
         let mut malformed = update;
-        malformed["command"].as_object_mut().unwrap().remove("sceneId");
+        malformed["command"]
+            .as_object_mut()
+            .unwrap()
+            .remove("sceneId");
         let rejected = ipc(&mut service, "scene.apply", malformed);
         assert_eq!(rejected["error"]["code"], "INVALID_PAYLOAD");
         assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);

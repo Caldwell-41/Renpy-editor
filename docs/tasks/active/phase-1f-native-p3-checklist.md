@@ -6,20 +6,23 @@ Do not use #85 to sign off P3. Await validated replacement packages; native resu
 remain untested. See [the correction ledger](phase-1f-save-correction.md#718-scene-json-contract-correction).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
-**Reviewed application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
-**Package build ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937`.
-The build ref adds only four documentation files relative to the reviewed candidate;
-application, dependencies and workflow are unchanged. Version `0.1.0` alone does
+**Initial correction candidate (formatting failed):** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
+**Failed replacement build ref:** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
+This corrects the Scene/Beat JSON contract defect in the previous #85 packages.
+Run #86 failed formatting and produced no replacement packages. Await the formatted
+candidate/run recorded in HANDOVER; it is not ready until target gates and uploads pass.
+Version `0.1.0` alone does
 not identify this candidate: retain the run and commit below.
 
 The user explicitly requested Windows/macOS builds, publication on the repository,
 and this detailed checklist after independent review. That authorises the package
 build and documentation, superseding the previous no-redispatch boundary for this
-purpose only. No merge, Phase 1G, application changes or new automation is selected.
+purpose only. The subsequent Beat-commit defect report authorises its bounded correction. No merge,
+Phase 1G or new automation is selected.
 
 ## 1. Download and identify the packages
 
-Package-producing run: [35711244992 (#85), attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992).
+Failed replacement run: [35719196417 (#86), attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417).
 The existing production workflow was dispatched once with `upload_packages=true`.
 It builds both supported targets and uploads each package only after that target's
 production checks pass. The upload step is allowed to fail without failing the job,
@@ -38,7 +41,7 @@ the original archive locally. Confirm actual expiry and artifact identity on the
 These are pre-acceptance development packages, not a stable release or an Intel Mac
 build. Signing/notarisation is not configured in the current packaging configuration.
 
-- [ ] Run #85 is terminal and both target jobs passed.
+- [ ] The replacement run recorded in HANDOVER is terminal and both target jobs passed.
 - [ ] Both package artifacts exist, and the downloaded archive is from this run.
 - [ ] Record the run URL, complete build SHA, artifact name/ID, installer filename,
   OS version, architecture and test date in section 7.
@@ -176,8 +179,8 @@ Do not prefill passing results. **PASS** means the stated outcome was observed;
 Target: Windows x64 / macOS ARM64
 OS version and architecture:
 Test date:
-Package run: https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992
-Package build SHA: 6d1ab428b2e3cd052323a8890c27897fb906b937
+Package run: https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417
+Package build SHA: 36904fd2deecf37bc55276bc4ce6e2eedb511d8e
 Artifact name and ID:
 Installer filename:
 Installer SHA-256 (optional):

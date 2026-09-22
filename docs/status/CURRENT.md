@@ -47,8 +47,15 @@ See the [manual checklist](../tasks/active/phase-1f-native-p3-checklist.md).
 
 Run #85 completed and uploaded both installers, but the user cannot commit an edited
 starting narration or a new Beat: `The Scene operation is invalid.` A renderer/Rust
-JSON field-casing mismatch is identified and corrected locally, with three new core
+JSON field-casing mismatch is identified and corrected on the branch, with three new core
 regressions. Rust execution remains unavailable locally; no corrected target pass is
 claimed yet. Prior automated evidence used fake UI or typed Rust commands at the
 relevant boundary and missed this defect. See HANDOVER for the corrected candidate
 and build state. Do not repeat P3 on #85 or merge PR #14.
+
+
+Scene correction `36904fd2deecf37bc55276bc4ce6e2eedb511d8e` is published.
+[Production #86, 35719196417](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417),
+attempt 1, failed Rust formatting in Preflight `106717842885`; target jobs were skipped.
+The exact formatter changes are applied in the following candidate. See HANDOVER for
+its validation/package identity. No corrected Rust/target pass or P3 acceptance yet.

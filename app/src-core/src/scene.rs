@@ -47,7 +47,11 @@ pub enum TransitionRef {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", tag = "type")]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type"
+)]
 pub enum BeatPayload {
     Background {
         asset_id: String,
@@ -204,7 +208,11 @@ pub struct RecoveryResolveRequest {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", tag = "type")]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type"
+)]
 pub enum SceneCommand {
     CreateChapter {
         display_name: String,

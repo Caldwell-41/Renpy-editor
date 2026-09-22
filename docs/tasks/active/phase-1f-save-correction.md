@@ -1158,3 +1158,18 @@ checks are the local evidence; supported-target results must validate the correc
 before replacement packages can be called ready. Do not weaken or skip any existing
 production gate. Dispatch one coherent corrected candidate with package upload enabled,
 record exact SHA/run/attempt, and stop on failure or a required manual-resume boundary.
+
+
+Published correction `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`, tree
+`236e93c98fba24cd5855f857098d88ee9d65086a`, preserves entry head `616667ce`.
+Remote comparison verified exactly two Rust files (two runtime attributes plus tests)
+and six documentation files. Repository validation (217 files) and whitespace passed.
+After confirming #85 terminal/no equivalent active run, dispatched
+[35719196417 (#86)](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417),
+attempt 1, once with `upload_packages=true`; the run page verified the exact candidate
+and Preflight `106717842885`. Run #86 failed only at Rust formatting: two expanded
+Serde attributes and one test method chain. Target jobs were skipped; no corrected
+Rust test pass or packages resulted. Applied the exact three formatting diffs from
+the job log without semantic changes. A new formatted candidate requires its own
+validation run; #86 remains failed evidence, not an automatic retry of unchanged input.
+Native P3 remains blocked/untested.
