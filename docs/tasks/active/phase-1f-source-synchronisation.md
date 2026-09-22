@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** closeout reviewed; **blocked / unaccepted** by the Apply Both review-binding and Scene/Preview findings in [ledger section 7.22](phase-1f-save-correction.md#722-independent-closeout-review). #87 automated evidence and six user-reported native passes are preserved; exact local package/OS metadata remains unconfirmed. No merge or 1G implementation.
+**State:** 1F-CLOSEOUT-CORRECTION implemented locally; supported-target validation and independent review pending. See [ledger section 7.23](phase-1f-save-correction.md#723-1f-closeout-correction). #87 and six native Save passes remain historical evidence; the user confirmed build #87 on both targets and macOS 26.6.2 (numeric Windows build unspecified). No merge or 1G implementation.
 **Current correction:** [1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence); its execution closeout and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the remaining independent review.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.

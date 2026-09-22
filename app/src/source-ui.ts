@@ -98,7 +98,7 @@ export interface SourceActions {
   readonly update: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly text: string; readonly selectionStart: number; readonly selectionEnd: number }) => Promise<SourceDocument>;
   readonly save: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number }) => Promise<SourceDocument>;
   readonly discard: (path: string) => Promise<SourceDocument>;
-  readonly applyBoth: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number }) => Promise<SourceDocument>;
+  readonly applyBoth: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number; readonly expectedExternalRevision: string; readonly expectedCombinedText: string }) => Promise<SourceDocument>;
   readonly reloadInventory: () => Promise<SourceInventory>;
   readonly viewScene: (sceneId: string, beatId: string) => void;
   readonly status: (message: string, kind?: "normal" | "error") => void;
@@ -182,6 +182,7 @@ export function renderSourceWorkspace(
   let inventory = initialInventory;
   let current: SourceDocument | undefined;
   let editor: HTMLTextAreaElement | undefined;
+  let displayedReview: SourceDocument | undefined;
   let disposed = false;
   let documentGeneration = 0;
   let inputSequence = 0;
@@ -361,9 +362,22 @@ export function renderSourceWorkspace(
     return queueRetention(snapshot);
   };
 
+  const reviewMatches = (review: SourceDocument, value: SourceDocument | undefined): boolean =>
+    value !== undefined && review.path === value.path
+    && review.baseRevision === value.baseRevision && review.draftVersion === value.draftVersion
+    && review.liveRevision === value.liveRevision && review.combinedPreview === value.combinedPreview
+    && review.text === value.text && editor?.value === review.text
+    && value.canApplyBoth && typeof review.liveRevision === "string"
+    && typeof review.combinedPreview === "string";
+
   const updateStateOnly = (): void => {
     if (!current) return;
     const localPending = hasLocalInput();
+    const staleReview = displayedReview !== undefined && !reviewMatches(displayedReview, current);
+    const apply = host.querySelector<HTMLButtonElement>('button[data-source-action="apply-both"]');
+    if (apply) apply.disabled = barriers.size > 0 || localPending || staleReview;
+    const reviewNotice = host.querySelector<HTMLElement>(".source-review-stale");
+    if (reviewNotice) reviewNotice.hidden = !staleReview;
     const badge = host.querySelector<HTMLElement>(".source-document-state");
     if (badge) {
       badge.textContent = localPending ? "Pending validation" : stateLabel(current.state);
@@ -553,7 +567,11 @@ export function renderSourceWorkspace(
     });
   };
 
-  const runApplyBoth = async (): Promise<void> => {
+  const runApplyBoth = async (review: SourceDocument, generation: number): Promise<void> => {
+    if (!identityMatches(generation, review.path) || !reviewMatches(review, current) || hasLocalInput()) {
+      actions.status("The combination has changed. Refresh and review it before applying both.", "error");
+      return;
+    }
     const capture = captureSaveIntent("toolbar", false);
     if (capture.kind !== "captured") {
       if (capture.kind === "blocked") actions.status(capture.message, "error");
@@ -566,12 +584,17 @@ export function renderSourceWorkspace(
       try {
         const retained = await settleSnapshot(snapshot);
         if (!retained.ok) throw retained.error;
-        const settled = retained.document;
-        if (!identityMatches(capture.intent.documentGeneration, capture.intent.path)) return;
+        if (!identityMatches(generation, review.path)) return;
+        if (!reviewMatches(review, retained.document)) {
+          actions.status("The combination has changed. Refresh and review it before applying both.", "error");
+          return;
+        }
         const next = await actions.applyBoth({
-          path: settled.path,
-          expectedBaseRevision: settled.baseRevision,
-          expectedDraftVersion: settled.draftVersion,
+          path: review.path,
+          expectedBaseRevision: review.baseRevision,
+          expectedDraftVersion: review.draftVersion,
+          expectedExternalRevision: review.liveRevision!,
+          expectedCombinedText: review.combinedPreview!,
         });
         if (!identityMatches(capture.intent.documentGeneration, capture.intent.path)) return;
         current = next;
@@ -788,6 +811,7 @@ export function renderSourceWorkspace(
       host.append(diagnostics);
     }
 
+    displayedReview = undefined;
     if (current.state === "conflict") {
       const conflict = document.createElement("section");
       conflict.className = "source-conflict";
@@ -807,8 +831,17 @@ export function renderSourceWorkspace(
         code.textContent = current.combinedPreview;
         preview.append(summary, code);
         conflict.append(preview);
+        const review = current;
+        const reviewGeneration = documentGeneration;
+        displayedReview = review;
+        const stale = document.createElement("p");
+        stale.className = "source-review-stale";
+        stale.textContent = "This review is out of date. Refresh and review the new combination before applying both.";
+        stale.hidden = true;
+        conflict.append(stale);
         const apply = button("Apply Both", "button primary");
-        apply.addEventListener("click", () => void runApplyBoth().catch((cause) => {
+        apply.dataset.sourceAction = "apply-both";
+        apply.addEventListener("click", () => void runApplyBoth(review, reviewGeneration).catch((cause) => {
           actions.status(cause instanceof Error ? cause.message : "The sources could not be combined", "error");
         }));
         conflict.append(apply);

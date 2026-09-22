@@ -17,7 +17,10 @@ use media::MediaRequest;
 use scene::{RecoveryResolveRequest, SceneCommandRequest};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
-use source::{SourceDraftRequest, SourceOpenRequest, SourcePathRequest, SourceSaveRequest};
+use source::{
+    SourceApplyBothRequest, SourceDraftRequest, SourceOpenRequest, SourcePathRequest,
+    SourceSaveRequest,
+};
 
 pub const PROTOCOL_VERSION: u64 = 1;
 pub const OPERATIONS: &[&str] = &[
@@ -512,7 +515,7 @@ pub fn handle_application_request(
         "source.applyBoth" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
-                serde_json::from_value::<SourceSaveRequest>(Value::Object(payload))
+                serde_json::from_value::<SourceApplyBothRequest>(Value::Object(payload))
                     .map_err(|_| LifecycleError::Source(source::SourceError::InvalidPayload))
             })
             .and_then(|payload| lifecycle.source_apply_both(payload))

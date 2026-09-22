@@ -548,3 +548,73 @@ test("conflict Copy Draft copies bytes and external reload requires confirmation
   assert.equal(discarded, 1);
   assert.equal(model.state, "clean");
 });
+
+test("closeout: editing after review must not apply an undisplayed combination", async () => {
+  installDom(); let applies = 0;
+  let model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), externalText: "external", combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model,
+    update: async (request) => { model = { ...model, text: request.text, draftVersion: 2, combinedPreview: "different unreviewed combination" }; return model; },
+    applyBoth: async () => { applies += 1; return model; },
+  }));
+  await tick();
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value += "\n# changed draft"; editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await tick(); await tick();
+  assert.equal(document.querySelector(".source-conflict pre")!.textContent, "reviewed combined");
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Apply Both")!.click();
+  await tick(); await tick(); controller.dispose();
+  assert.equal(applies, 0, "stale displayed combination must require fresh review");
+});
+
+test("Apply Both keeps the displayed identity across delayed retention and requires refreshed review", async () => {
+  installDom();
+  const pending = deferred<SourceDocument>();
+  const calls: Parameters<SourceActions["applyBoth"]>[0][] = [];
+  let model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), externalText: "external", combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model, update: async () => pending.promise,
+    applyBoth: async (request) => { calls.push(request); return { ...model, state: "clean", dirty: false, canApplyBoth: false }; },
+  }));
+  await tick();
+  const oldButton = document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!;
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value += "\n# newer"; editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  assert.equal(oldButton.disabled, true);
+  oldButton.dispatchEvent(new window.Event("click")); // even a queued/stale event must refuse
+  await tick(); assert.equal(calls.length, 0);
+  model = { ...model, text: editor.value, draftVersion: 2, combinedPreview: "new combined" };
+  pending.resolve(model); await tick(); await tick();
+  assert.equal(oldButton.disabled, true);
+  assert.equal(document.querySelector<HTMLElement>(".source-review-stale")!.hidden, false);
+  [...document.querySelectorAll("button")].find(item => item.textContent === "Refresh")!.click();
+  await tick(); await tick();
+  assert.equal(document.querySelector(".source-conflict pre")!.textContent, "new combined");
+  oldButton.dispatchEvent(new window.Event("click")); await tick(); assert.equal(calls.length, 0);
+  document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!.click();
+  await tick(); await tick();
+  assert.deepEqual(calls, [{ path: model.path, expectedBaseRevision: model.baseRevision, expectedDraftVersion: 2,
+    expectedExternalRevision: model.liveRevision, expectedCombinedText: "new combined" }]);
+  controller.dispose();
+});
+
+test("Apply Both refuses a changed external revision returned while settling the captured draft", async () => {
+  installDom(); const pending = deferred<SourceDocument>(); let applies = 0;
+  const model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model, update: async () => pending.promise,
+    applyBoth: async () => { applies++; return model; },
+  }));
+  await tick();
+  // Selection changes require retention but do not alter the reviewed text/version.
+  document.querySelector<HTMLTextAreaElement>(".source-editor")!.selectionStart = 0;
+  document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!.click(); await tick();
+  pending.resolve({ ...model, liveRevision: "f".repeat(64), combinedPreview: "unreviewed external" });
+  await tick(); await tick();
+  assert.equal(applies, 0);
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.value, model.text);
+  controller.dispose();
+});

@@ -2,64 +2,46 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** independent Phase 1F closeout review; completed with acceptance **blocked**.
+**Checkpoint:** **1F-CLOSEOUT-CORRECTION**, in_progress; F1–F3 implemented and locally tested.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Entry head:** `22479027008342bda0d4601f195a006116373a4e`.
-**Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`; merged into this review branch to preserve existing plans and resolve the documentation conflict.
-**Application candidate:** unchanged `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
-**Evidence and full diagnosis:** [ledger section 7.22](../tasks/active/phase-1f-save-correction.md#722-independent-closeout-review).
+**Entry head:** `baf7a00bab8a7e7af84c19a690bad2bf2e1c628c`.
+**Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
+**Authority:** user authorised F1–F3 correction/validation and publication only; stop for independent review. No merge, branch deletion, Phase 1G or signing work.
+**Detailed evidence:** [ledger section 7.23](../tasks/active/phase-1f-save-correction.md#723-1f-closeout-correction).
 
-## Acceptance decision
+## Completed correction
 
-No merge: Apply Both is not bound to the displayed review. Editing a draft leaves an
-old combined preview while confirmation submits the new version; an external change
-can also be refreshed and combined without re-review. This is a substantive acceptance/
-IPC correction. Preview Add change here also loses its insertion anchor, and Background
-does not clear visible Characters. Three executable review probes fail as expected.
+Apply Both now carries the exact reviewed base/draft/external revision and combined
+text through a dedicated JSON request; core refuses a stale review before proposing
+writes. Renderer checks before and after retention and requires refresh for stale review.
+Preview's Add change here retains the selected Beat anchor. Background clears Characters
+and their layer uncertainty while preserving unrelated uncertainty.
 
-The user authorised conditional merge and cleanup, but explicitly required diagnosis/
-handover and a stop if a substantive defect needs a new checkpoint. This is that stop.
-No additional permission is required merely to merge once actual acceptance is met.
+The three failing entry probes now pass and also run in normal regression coverage.
+Real JSON/service tests cover stale identities/sessions, no-write/draft preservation,
+successful persistence/reopen, overlap/same-position/Custom Code boundary ambiguity,
+and Scene insertion adjacency/reopen/missing-anchor refusal. Production-proposal
+transaction races preserve external bytes and existing final-window recovery behavior.
 
-## Evidence preserved
+Local validation: frontend typecheck + 38 tests; build; browser Save regression; pinned
+Rust formatting; core 153 passed / 4 ignored worker tests; lossless Python 26 passed;
+benchmark passed. Legacy Python SDK suite is 23 pass / 1 host process-group permission
+error after correcting the local interpreter/path setup. Explicit official-SDK, desktop,
+packaging/smoke and supported-target validation remain for the existing CI workflow.
+Node/npm differ from pinned CI. No claim of native testing of the corrections.
 
-- Production [#87 / 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, terminal success on the application candidate above. Target jobs and artifact details remain in ledger section 7.19. No redispatch.
-- Entry HANDOVER `2247902` records user-reported PASS for dirty Source, clean Source Flush and non-Source isolation on both supported targets. These outcomes are retained. Exact OS versions and local installed package identity remain missing; confirm those facts only, without repeating tests.
-- User reported Mac pass after `xattr -cr /Applications/Loomlight.app`. DIST-MAC-01 retains normal downloaded-app launch/signing/notarisation as a later distribution requirement; Phase 1 explicitly excludes signing.
-- Local review: `npm run check` (32 pass, 0 failures/skips), `npm run build` pass. From app, `node --test tests/review/*.repro.mts`: three failing expected-behaviour probes. Review host Node/npm differ from pinned CI; Rust/native tests unavailable here. Repository/link/privacy validation passed for 222 files; whitespace checks passed.
-- No application behaviour changed. No 1F records archived, branches deleted, or unrelated work discarded. The branch inventory and integrated-but-retained cleanup candidates are in section 7.22.
+## Preserved evidence and remaining work
 
-## Next bounded action
+#87 (`35719829561`, attempt 1, SHA `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`)
+remains successful historical evidence, not a pass for these corrections. All six native
+Save passes remain user-reported PASS. User confirmed both installed build #87, macOS
+26.6.2 and Windows “the latest windows version”; numeric Windows build unspecified.
+No repetition of unchanged native Save tests. Any new native follow-up is limited to
+F1–F3. DIST-MAC-01 remains outside scope.
 
-Select **1F-CLOSEOUT-CORRECTION** on this same branch/PR. Fix F1 review binding across
-renderer/JSON/core, F2 insertion anchor, and F3 Background preview; add actual service/
-JSON tests and promote the retained red probes into regular regression coverage.
-Preserve exact-byte conflicts, no-write refusal, drafts, transaction/recovery and
-session ownership. Resolve reviewed-result freshness before any merge.
-
-Run cheap relevant checks first, then required supported-target evidence on the new
-application candidate. #87 remains valid historical evidence for its exact code, not
-acceptance of these fixes. Do not repeat an unchanged expensive matrix. Before an
-external wait, publish exact run/attempt/SHA and stop active polling under WORKFLOW.
-Inspect fresh refs and any newer owner work before writing; do not reset to these SHAs.
-
-## Phase 1G preparation only
-
-The existing [1G plan](../tasks/active/phase-1g-branches-runtime-git.md) was merged by
-PR #15; do not create another planning PR. All implementation checkpoints remain
-`not_started`. After 1F acceptance/integration, select **1G.1 shared flow projection and
-Branches** only. Its G1 gate covers truthful resolved/missing/unknown flow, two routes,
-cycles/reconvergence, guarded existing-command edits, Source/Scene navigation, draft/
-revision/session safety, and bounded accessible layout on both packaged targets.
-R1/R2 runtime and V1/V2 Git gates remain separate later checkpoints.
-
-Future selector (not current implementation authority):
-
-```text
-/goal — Phase 1G.1 only
-Repository: Caldwell-41/Renpy-editor. Read AGENTS.md and docs/status/HANDOVER.md,
-then the existing Phase 1G plan. Verify Phase 1F is accepted and integrated; stop if
-not. Inspect fresh main, refs, PRs and ownership, reuse matching work, and implement
-only shared flow projection and Branches against G1. Publish evidence and handover;
-do not start 1G.2 or merge without its required acceptance.
-```
+Next: publish the coherent corrected candidate, verify no equivalent active run,
+dispatch the existing production workflow once with package upload, then record exact
+run/attempt/SHA. Until a qualified watcher exists, publish a blocked/manual-resume
+handover and stop polling. Inspect results without redispatch, then stop for independent
+review. Keep PR #14 draft and all branches/1F records. Existing Phase 1G planning is
+integrated; its implementation is not selected.

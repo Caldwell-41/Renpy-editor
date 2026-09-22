@@ -1,4 +1,4 @@
-// Closeout review: deliberately failing expected-behaviour probe, outside the normal test glob.
+// Retained closeout diagnostic; scenario is also in the normal Source regression suite.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";

@@ -124,7 +124,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
       variables = {}; variablesUnknown = true; overlay = undefined; continue;
     }
     switch (payload.type) {
-      case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; break;
+      case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; characters = []; charactersUnknown = false; break;
       case "showCharacter": {
         characters = characters.filter((item) => item.characterId !== payload.characterId);
         characters.push({ characterId: payload.characterId, appearanceId: payload.appearanceId, placement: payload.placement, visibleBeatId: beat.id, appearanceBeatId: beat.id, placementBeatId: beat.id });
@@ -364,13 +364,13 @@ export function renderSceneAuthoring(
     });
   };
 
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
     selectedBeatId = undefined;
     draw();
     const current = model.scenes.find((item) => item.id === scene.id);
     const list = host.querySelector<HTMLElement>(".beats-list");
-    if (current && list) renderNewBeat(list, current, initialType);
+    if (current && list) renderNewBeat(list, current, initialType, beforeBeatId);
   };
 
   const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
@@ -441,7 +441,7 @@ export function renderSceneAuthoring(
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
       const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
       if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType)); row.append(add); provenance.append(row);
+      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null)); row.append(add); provenance.append(row);
     };
     contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
@@ -570,7 +570,7 @@ export function renderSceneAuthoring(
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (list.querySelector(".new-beat")) return;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
@@ -586,7 +586,7 @@ export function renderSceneAuthoring(
       try {
         const payload = editor.read();
         const oldIds = new Set(scene.beats.map((item) => item.id));
-        await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId: null, beat: payload }, (_before, next) => {
+        await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId, beat: payload }, (_before, next) => {
           selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => !oldIds.has(item.id))?.id;
         });
       } catch (error) {

@@ -1,12 +1,12 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `blocked` by the independent closeout findings in section 7.22. Automated #87 evidence and user-reported native outcomes are retained; Phase 1F is not accepted or integrated.
+**State:** `in_progress`: 1F-CLOSEOUT-CORRECTION implemented; supported-target validation and independent review pending (section 7.23). Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
-**Current application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`, production #87 passed; see sections 7.18–7.22.
-**Publication state:** current closeout publishes review probes and documentation only.
+**Historical application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`, production #87 passed. Corrected candidate/evidence are recorded in section 7.23.
+**Publication state:** the current correction publishes bounded implementation, regressions and documentation on the existing branch/PR.
 Original 1F-SAVE `a720ea3f` and #84 candidate `85e44e92` remain historical evidence,
 not the current application or acceptance decision.
 
@@ -1435,3 +1435,86 @@ only after 1F acceptance/integration and explicit selection. Later R1/R2/V1/V2 r
 separate checkpoints. Preserve Source draft/session/recovery authority and treat these
 newly documented review-binding limitations as unresolved prerequisites, not accepted
 foundations. No duplicate plan or implementation branch was created.
+
+### 7.23 1F-CLOSEOUT-CORRECTION
+
+**Authority (2026-09-22):** user explicitly selected F1–F3 correction, real JSON/core
+and race regressions, corrected-candidate supported-target validation, and a stop for
+independent review. No merge, branch deletion, Phase 1G or signing work is authorised.
+**State:** in_progress. This local task owns execution; visible preceding tasks are
+idle. Fresh fetched branch/PR head is `baf7a00bab8a7e7af84c19a690bad2bf2e1c628c`,
+clean with no divergence; main remains `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
+PR #14 is open/draft with no submitted reviews. Remote worktree state was not inspected.
+All three retained probes reproduced their recorded failures before implementation.
+No pending production run or equivalent corrected candidate exists; #87 is historical.
+Preserve the six user-reported native Save passes and existing provenance limitations.
+
+
+#### Corrections and regression coverage
+
+- F1: dedicated strict camelCase `SourceApplyBothRequest` binds path/base, draft version,
+  external SHA-256 and exact combined preview text. Core validates these before proposing
+  writes. Renderer captures the displayed review and document generation, disables stale
+  confirmation immediately, and rechecks after retention; Refresh exposes the new review.
+  Same-position insertions now refuse as ambiguous. Transaction/history/recovery and
+  lifecycle session serialization are unchanged.
+- F2: Preview captures the selected Beat ID in the insertion form and submits it as
+  `beforeBeatId`; the general Add Beat action retains its prior end insertion behavior.
+  Real Scene JSON coverage verifies exact adjacency, refusal of a missing anchor without
+  source/map writes, and stable ordering/Beat identity after a fresh-service reopen.
+- F3: Background clears Characters and their default-layer uncertainty. Regression
+  coverage includes Show → Background and Custom Code → Show → Background, retaining
+  unrelated music/variable uncertainty and the partial-preview marker.
+- All three retained probes were red at entry and green after correction; their cases
+  now run in the ordinary frontend suite. Additional DOM cases cover delayed retention,
+  detached stale controls, refreshed exact requests and external changes during settlement.
+- Real application JSON tests exercise changed drafts, external writes after review,
+  altered base/combined identities, missing required review fields, replacement sessions,
+  successful disk persistence/fresh reopen, overlap, same-position insertion and an
+  overlapping patch across a Custom Code boundary. Refusals retain draft and disk bytes.
+- Deterministic race tests pass the production Apply Both proposal (decoded from JSON)
+  to the real transaction engine, injecting external writes after staging and immediately
+  before exchange. They verify no accepted outcome, retained drafts, unchanged
+  live external bytes for the staging race, and both versions plus the project recovery
+  block for the final exchange window. This is real filesystem/core coverage; it does
+  not claim a native webview race or alter the established recovery semantics.
+
+#### Local validation and limitations
+
+Host: macOS ARM64; Node 26.8.1/npm 11.19.0 (different from pinned CI). Installed Rust
+1.90.0/rustfmt in temporary storage without changing user toolchain configuration.
+
+- `npm run check`: 38 passed, 0 failed/skipped; TypeScript passed.
+- `npm run build`: passed. `node --test tests/review/*.repro.mts`: 3 passed.
+- `npm run test:source-browser`: passed in headless Chrome, expected legacy red and
+  faithful green assertions. This is browser routing evidence, not native Save evidence.
+- `cargo fmt --check --all`: passed with pinned Rust 1.90.0.
+- `cargo test -p loomlight-core --locked`: 153 passed, 0 failed, 4 ignored subprocess
+  workers; real crash/recovery parents ran. SDK wrapper tests without an official local
+  archive return skip markers and are **not** local SDK target evidence. Explicit SDK,
+  desktop, packaging/smoke and both supported-target gates remain required in CI.
+- Python 3.12.14 lossless-source suite: 26 passed. Benchmark: 620,000 bytes / 40,000
+  nodes, median 113.39 ms over seven samples. System Python 3.9 initially could not
+  load dataclass `slots`; switched interpreter without repository changes.
+- Legacy Python SDK suite: initial four path spelling failures and one process-group
+  permission error. Canonical temporary paths resolved all four path failures. Retest
+  remains 23 pass / 1 error: `test_process_output_is_bounded` raises `PermissionError`
+  at `os.killpg`, even with escalated execution. This local host limitation is retained,
+  not waived/passed or fixed through unrelated scope. No SDK spike code changed.
+
+#### Native provenance and review boundary
+
+The user confirmed both installations were build #87 replacement installers, macOS
+26.6.2, and Windows “the latest windows version” (numeric build not supplied). Preserve
+all six native Save passes; no repeated unchanged Save checklist is requested. Exact
+Windows build remains a provenance limitation rather than an invented value.
+No native observation of the new F1–F3 behavior is claimed. After corrected packages
+are verified, focus any native follow-up on stale Apply Both review/refusal, selected
+Beat insertion ordering, and Background Character clearing. Independent review decides
+whether additional evidence is needed; signing/notarisation stays DIST-MAC-01 and out
+of scope. Stop before merge, branch deletion or Phase 1G.
+
+Repository/link/privacy validation passed for 222 files; `git diff --check` passed.
+Self-review confirmed the correction is limited to Source review binding, Preview
+insertion/layer state, their regressions and canonical evidence. No dependency lock,
+workflow, shell Save route, transaction engine or security configuration changed.

@@ -129,6 +129,17 @@ pub struct SourceSaveRequest {
     pub expected_draft_version: u64,
 }
 
+/// Confirmation of the exact displayed combination, never a request to re-merge latest bytes.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SourceApplyBothRequest {
+    pub path: String,
+    pub expected_base_revision: String,
+    pub expected_draft_version: u64,
+    pub expected_external_revision: String,
+    pub expected_combined_text: String,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SourcePathRequest {
@@ -425,8 +436,21 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         project_id: &str,
-        request: SourceSaveRequest,
+        request: SourceApplyBothRequest,
     ) -> Result<SourceDocument, SourceError> {
+        let proposal = self.prepare_apply_both(project, project_id, &request)?;
+        self.commit_source_history(project, proposal)?;
+        self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
+        self.source_document(project, project_id, &request.path)
+    }
+
+    fn prepare_apply_both(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        request: &SourceApplyBothRequest,
+    ) -> Result<TransactionProposal, SourceError> {
+        validate_source_path(&request.path)?;
         self.refresh_buffer(project, &request.path)?;
         let prepared = {
             let sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
@@ -445,6 +469,11 @@ impl AuthoringService {
                 buffer.external.clone().ok_or(SourceError::SourceConflict)?;
             let combined = combine_non_overlapping(&buffer.base_bytes, &draft, &external)
                 .ok_or(SourceError::SourceConflict)?;
+            if revision.sha256 != request.expected_external_revision
+                || accepted_text(&combined)? != request.expected_combined_text
+            {
+                return Err(SourceError::SourceConflict);
+            }
             PreparedSource {
                 path: buffer.path.clone(),
                 proposed: combined,
@@ -452,10 +481,7 @@ impl AuthoringService {
                 base_revision: revision,
             }
         };
-        let proposal = self.source_proposal(project, project_id, vec![prepared])?;
-        self.commit_source_history(project, proposal)?;
-        self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
-        self.source_document(project, project_id, &request.path)
+        self.source_proposal(project, project_id, vec![prepared])
     }
 
     pub(crate) fn clear_source_project(&self, project: &ProjectId) {
@@ -1298,7 +1324,9 @@ fn combine_non_overlapping(base: &[u8], draft: &[u8], external: &[u8]) -> Option
     let external_patch = single_patch(base, external);
     let separated =
         draft_patch.end <= external_patch.start || external_patch.end <= draft_patch.start;
-    if !separated || apply_single(base, &external_patch) != external {
+    // Two insertions at the same position have no provable ordering.
+    let same_position = draft_patch.start == external_patch.start;
+    if !separated || same_position || apply_single(base, &external_patch) != external {
         return None;
     }
     let mut patches = [draft_patch, external_patch];
@@ -1729,10 +1757,12 @@ mod tests {
             .source_apply_both(
                 &fixture.project,
                 &fixture.project_id,
-                SourceSaveRequest {
+                SourceApplyBothRequest {
                     path: conflict.path,
                     expected_base_revision: conflict.base_revision,
                     expected_draft_version: conflict.draft_version,
+                    expected_external_revision: conflict.live_revision.unwrap(),
+                    expected_combined_text: conflict.combined_preview.unwrap(),
                 },
             )
             .unwrap();
@@ -1743,6 +1773,86 @@ mod tests {
         let overlap = fixture.open("game/custom.rpy");
         assert_eq!(overlap.text, next.text);
         assert!(!overlap.can_apply_both);
+    }
+
+    #[test]
+    fn reviewed_combination_transaction_preserves_external_writer_during_commit() {
+        use crate::transaction::{FaultInjector, FaultPoint};
+        use std::path::Path;
+
+        struct Writer {
+            point: FaultPoint,
+        }
+        impl FaultInjector for Writer {
+            fn visit(&mut self, point: FaultPoint, root: &Path) -> Result<(), ErrorCode> {
+                if point == self.point {
+                    fs::write(root.join("game/custom.rpy"), b"alpha beta DELTA\n").unwrap();
+                }
+                Ok(())
+            }
+        }
+        for point in [FaultPoint::MutationStaged(0), FaultPoint::BeforeExchange(0)] {
+            let fixture = Fixture::new(b"label scene_one:\n    return\n");
+            let opened = fixture.open("game/custom.rpy");
+            let draft = fixture.draft(&opened, "ALPHA beta gamma\n");
+            fs::write(fixture.root.join("game/custom.rpy"), b"alpha beta GAMMA\n").unwrap();
+            let review = fixture.open("game/custom.rpy");
+            // JSON request -> production proposal -> real transactional exchange, with deterministic external I/O.
+            let request: SourceApplyBothRequest = serde_json::from_value(serde_json::json!({
+                "path": review.path, "expectedBaseRevision": review.base_revision,
+                "expectedDraftVersion": review.draft_version,
+                "expectedExternalRevision": review.live_revision,
+                "expectedCombinedText": review.combined_preview,
+            }))
+            .unwrap();
+            let proposal = fixture
+                .service
+                .prepare_apply_both(&fixture.project, &fixture.project_id, &request)
+                .unwrap();
+            assert_eq!(proposal.mutations[0].expected_bytes, b"alpha beta GAMMA\n");
+            assert_eq!(proposal.mutations[0].proposed, b"ALPHA beta GAMMA\n");
+            let outcome = fixture.service.transactions.commit_with_injector(
+                &fixture.project,
+                proposal,
+                &mut Writer { point },
+            );
+            assert!(
+                !matches!(outcome, CommitOutcome::Committed { .. }),
+                "{outcome:?}"
+            );
+            let retained = fixture
+                .service
+                .source_document(&fixture.project, &fixture.project_id, "game/custom.rpy")
+                .unwrap();
+            assert_eq!(retained.text, draft.text);
+            assert!(retained.dirty);
+            if point == FaultPoint::MutationStaged(0) {
+                assert_eq!(
+                    fs::read(fixture.root.join("game/custom.rpy")).unwrap(),
+                    b"alpha beta DELTA\n"
+                );
+            } else {
+                // The final exchange window retains both versions in recovery, never silently accepts.
+                fn contains_bytes(path: &Path, expected: &[u8]) -> bool {
+                    fs::read_dir(path).unwrap().any(|entry| {
+                        let path = entry.unwrap().path();
+                        if path.is_dir() {
+                            contains_bytes(&path, expected)
+                        } else {
+                            fs::read(path).unwrap() == expected
+                        }
+                    })
+                }
+                let recovery = fixture.root.join(".renpy-editor/recovery");
+                assert!(contains_bytes(&recovery, b"alpha beta DELTA\n"));
+                assert!(contains_bytes(&recovery, b"ALPHA beta GAMMA\n"));
+                assert!(fixture
+                    .service
+                    .transactions
+                    .has_blocking_recovery(&fixture.project)
+                    .unwrap());
+            }
+        }
     }
 
     #[test]

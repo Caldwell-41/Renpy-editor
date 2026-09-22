@@ -344,7 +344,11 @@ Selecting a visible Character in the preview must distinguish current state from
 beat that contributed it. Offer actions such as `Edit Beat 2` and `Add change here`;
 do not silently edit an earlier beat merely because the Character remains visible at
 the current playhead. `Add change here` inserts a new explicit staging beat before the
-current beat.
+current beat. The insertion form retains that Beat ID while selection changes; a stale
+anchor refuses through the existing revision/identity guards instead of appending.
+A Background Beat emits `scene` on the default layer, so Preview clears visible
+Characters and their layer uncertainty at that Beat. Music and variable uncertainty
+from Custom Code remains explicit.
 
 Phase 1 placement exposes Left, Centre, and Right preset references. Do not offer
 arbitrary drag positioning that implies a freeform transform editor. Preview navigation

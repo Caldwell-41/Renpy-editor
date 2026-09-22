@@ -234,8 +234,16 @@ A clean verified external revision replaces the buffer base and reconciles its
 source-map projection transactionally when required. A dirty external revision keeps
 base, draft, and external bytes and blocks stale writes. Core computes conservative
 single exact base-relative patches; only non-overlap exposes a combined preview and
-confirmed Apply Both proposal against the verified external revision. Overlap,
-missing/renamed files, invalid encoding, ambiguous mapping, or recovery state produces
+confirmed Apply Both proposal against the verified external revision. Confirmation uses
+`SourceApplyBothRequest`: path, accepted base hash, draft version, reviewed external
+hash, and exact displayed combined text. Core refreshes disk and checks every binding
+before creating a proposal; it never substitutes a newer draft or external combination.
+The renderer invalidates changed reviews immediately, checks again after retention,
+and requires Refresh/review before another confirmation. Refusal preserves the draft
+and external bytes. The proposal still carries the external file identity, exact bytes
+and revision through the existing transaction/recovery boundary. A final-window writer
+is retained as recovery evidence and never silently accepted. Same-position insertions
+have no provable ordering and are refused. Overlap, missing/renamed files, invalid encoding, ambiguous mapping, or recovery state produces
 no proposal. Dirty-file guards also stop same-file Scene/supporting/file-lifecycle and
 history writes. Unresolved transaction recovery retains its project-wide block.
 
