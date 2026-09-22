@@ -1,16 +1,16 @@
 # Phase 1F — native P3 manual acceptance
 
 **Prepared:** 2026-09-22.
-**State:** blocked by the user-reported Scene JSON contract defect in build #85.
-Do not use #85 to sign off P3. Await validated replacement packages; native results
-remain untested. See [the correction ledger](phase-1f-save-correction.md#718-scene-json-contract-correction).
+**State:** #87 installers verified and ready for manual testing; native results remain untested.
+Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
-**Corrected application candidate (validation pending):** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
+**Validated application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 **Replacement package build ref:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 This corrects the Scene/Beat JSON contract defect in the previous #85 packages.
 Run #86 failed formatting and produced no replacement packages. Formatted replacement
-run #87 passed Preflight and both target jobs were running at handoff; it is not ready until target gates and actual package uploads pass.
+run #87 passed all target gates and actual package uploads. ZIP hashes and integrity
+were independently verified; native installation and P3 remain for the user.
 Version `0.1.0` alone does
 not identify this candidate: retain the run and commit below.
 
@@ -32,12 +32,13 @@ On the run page, scroll to **Artifacts** and download the applicable package arc
 
 | Computer | Expected artifact | Installer inside |
 | --- | --- | --- |
-| Windows x64 | `phase-1-production-package-windows-2025` | NSIS `.exe` or WiX `.msi`; use one installer, not both |
-| Apple Silicon Mac (ARM64) | `phase-1-production-package-macos-26` | `.dmg`, containing Loomlight.app |
+| Windows x64 | [Download package 10690749279](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561/artifacts/10690749279) | `nsis/Loomlight_0.1.0_x64-setup.exe` or `msi/Loomlight_0.1.0_x64_en-US.msi`; use one |
+| Apple Silicon Mac (ARM64) | [Download package 10691460673](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561/artifacts/10691460673) | `dmg/Loomlight_0.1.0_aarch64.dmg`, containing Loomlight.app |
 
 Do not use the similarly named `phase-1-production-evidence-*` archives as installers.
 Artifacts require repository access and have seven-day retention; download and keep
-the original archive locally. Confirm actual expiry and artifact identity on the run.
+the original archive locally. Both expire on **29 September 2026**. Exact archive/installer hashes are in
+[the verification ledger](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 These are pre-acceptance development packages, not a stable release or an Intel Mac
 build. Signing/notarisation is not configured in the current packaging configuration.
 
@@ -73,6 +74,7 @@ browser JavaScript, `dispatchEvent`, developer tools or the packaged smoke mode.
    Then use **Add Beat**, choose **Narration**, enter `P3 baseline`, and commit the
    new Beat. If either operation reports **The Scene operation is invalid**, stop
    and record setup as blocked; do not continue or mark native Save as failed.
+   Close and reopen the project; confirm both narration changes remain before P3-A.
 6. Use **View in Source** for that Beat, or open **Source** and select its Scene
    `.rpy` file. Locate the quoted narration text. Keep its quotes and indentation intact.
 7. Confirm Source is clean and the project reports **Saved**, with no modal,

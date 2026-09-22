@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** blocked by the user-reported Scene JSON contract defect in package #85; native P3 cannot proceed until corrected packages pass validation. Prior automated passes are historical evidence with a demonstrated coverage gap. See [the correction](phase-1f-save-correction.md#718-scene-json-contract-correction). No merge or 1G.
+**State:** Scene JSON correction and #87 replacement packages verified; native P3 remains untested. Ready for user testing using [the checklist](phase-1f-native-p3-checklist.md). See [verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification). No merge or 1G.
 **Current correction:** [1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence); its execution closeout and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the remaining independent review.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
@@ -487,3 +487,8 @@ aligns enum fields with the existing renderer contract and adds literal-JSON and
 real-IPC persistence regressions. Native P3 is blocked at setup; #85 installers must
 not be presented as accepted or retested for signoff. Corrected packages need fresh
 validation. No Source Save/core transaction redesign, merge or 1G is selected.
+
+2026-09-22 build #87 evidence closeout: exact candidate `0b9ea0f0` passed Preflight
+and Windows/macOS target gates, including the new real-IPC Scene regression. Replacement
+installers and evidence archives were downloaded, hash matched and ZIP checked. Use #87
+for manual setup and native P3; see correction ledger section 7.19. No redispatch or merge.

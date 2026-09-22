@@ -1183,3 +1183,49 @@ once, attempt 1, `upload_packages=true`. The run page confirms this exact SHA; P
 Manual-resume handoff under AGENTS/WORKFLOW: inspect #87, including actual new Rust
 regression results and installer uploads; do not redispatch. No corrected target pass
 or replacement package availability is claimed at handoff. Keep PR #14 draft.
+
+### 7.19 Build #87 replacement-package verification
+
+User authorised inspection of #87 and replacement installers only, explicitly no
+redispatch or merge. Remote entry head was `14f1b4cbdc67c371f58c3e1e55a2804e4f95ede0`;
+PR #14 remained draft. Existing work preserved; only documentation changes here.
+
+Run #87 (`35719829561`), attempt 1, passed on exact application candidate
+`0b9ea0f0c23f843b3324cd63a524a642a2399f2e`. Preflight `106719866991`,
+Windows x64 `106720077739` and macOS ARM64 `106720077724` all succeeded.
+All three new Scene JSON regressions passed on both targets, including real IPC
+starting-narration edit, Beat insert, refusal without writes, and fresh-service reopen.
+Core totals: Windows 144 passed / 0 failed / 4 ignored; macOS 150 passed / 0 failed /
+4 ignored. The four ignored cases are subprocess crash workers, not omitted acceptance
+tests. Explicit SDK lifecycle/Scene/Source and network-handoff gates also passed;
+the download-on-cache-miss step alone was skipped after SDK cache hits.
+
+Desktop boundary tests, packaging, packaged smoke, secret scans, dependency inventories
+and both package uploads passed. Downloaded evidence archives contain exactly one
+accepted final report each, all reported boolean assertions true, complete command
+traces, and all five checkpoints. Final-report-start: Windows 2,369 ms; macOS 3,011 ms.
+Both inventories contain 85 npm / 519 Cargo entries. Evidence artifacts: Windows
+`10691213999`, macOS `10691700431`.
+
+Both package ZIPs and both evidence ZIPs were downloaded; their byte lengths and
+SHA-256 matched GitHub artifact metadata, and all ZIP CRC checks passed. This verifies
+archive integrity and CI provenance, not native installation or manual P3 acceptance.
+
+| Target | Package artifact | ZIP bytes | Expiry (UTC) |
+| --- | --- | --- | --- |
+| Windows x64 | [10690749279](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561/artifacts/10690749279) | 7,582,210 | 2026-09-29 11:22:07 |
+| macOS ARM64 | [10691460673](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561/artifacts/10691460673) | 9,636,712 | 2026-09-29 11:15:34 |
+
+ZIP SHA-256: Windows `95beb817a67b46183602ce7b5860711dc350d21f1ac79ffa81ddf86dd092ec7e`;
+macOS `a10e48f88465106154bc5adc26ae3f825ecd5c26a1cf94e1779ede714b6c404a`.
+
+| Installer | SHA-256 |
+| --- | --- |
+| `nsis/Loomlight_0.1.0_x64-setup.exe` | `024ead6ccd427a49919a828e973feee2d0ee89e20c6183f5197457816c9f9c39` |
+| `msi/Loomlight_0.1.0_x64_en-US.msi` | `2bce8f04f71bfe5643a7badaeb05ce9007951639f05d119f4ed41d40d6fa68e7` |
+| `dmg/Loomlight_0.1.0_aarch64.dmg` | `1445d18754f7742415acfc5d8c66e5eeea2bef934f747008cfc96c1ca0f87389` |
+
+Replacement packages are ready for user testing. Native P3 remains untested on both
+targets; repeat Scene setup with #87 first, then the three native Save contexts.
+No new CI run, application edit, merge or Phase 1G. Documentation validation (217 files)
+and whitespace passed. No extra application suites were needed for this evidence update.
