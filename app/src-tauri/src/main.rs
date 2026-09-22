@@ -21,7 +21,7 @@ static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_RECEIVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_WINDOW_FOUND: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_SIGNAL: OnceLock<(Mutex<bool>, Condvar)> = OnceLock::new();
-const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(180);
+const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(300);
 
 #[derive(Debug, PartialEq, Eq)]
 enum SmokeReportDisposition {

@@ -47,7 +47,6 @@ setTimeout(async () => {
   let sourceAuthoringUiPassed = false;
   let sourceAuthoringStage = "not-started";
   let restoreSmokeRequester = () => {};
-  let postConflictCheckpoint = Promise.resolve();
   let checkpointSequence = 0;
   const checkpoint = async (stage) => {
     checkpointSequence += 1;
@@ -550,7 +549,7 @@ setTimeout(async () => {
     await waitFor(() => document.body.textContent.includes("Source projection unavailable"), "Scene source conflict state");
     const conflictVisible = document.body.textContent.includes("Scene writes and history remain blocked");
     sceneWorkspace.scenes[0].sourceConflict = false;
-    postConflictCheckpoint = checkpoint("post-source-conflict-complete");
+    await checkpoint("post-source-conflict-complete");
     sceneAuthoringUiPassed = previewVisible
       && allocationCorrect
       && accessibleReorder
@@ -597,8 +596,8 @@ setTimeout(async () => {
     && shellSaveTrace.includes("phase=accepted")
     && shellSaveTrace.includes("phase=flushed")
     && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
-  const finalReportCheckpoint = checkpoint("final-report-start");
-  const finalReport = invoke("core_request", {
+  await checkpoint("final-report-start");
+  await invoke("core_request", {
     request: {
       protocolVersion: 1,
       requestId: "smoke-report",
@@ -629,5 +628,4 @@ setTimeout(async () => {
   }).then((value) => {
     if (value?.ok !== true) throw new Error("Smoke report was rejected.");
   });
-  await Promise.all([postConflictCheckpoint, finalReportCheckpoint, finalReport]);
 }, 100);
