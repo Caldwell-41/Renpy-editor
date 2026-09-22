@@ -2,8 +2,8 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** The 1F-SAVE implementation and local verification are complete, but supported-target evidence remains incomplete. Phase 1F is not review-ready, integrated, or authorised for 1G.
-**Current correction:** [1F-SAVE](phase-1f-save-correction.md); its precise requirements and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the next bounded implementation goal.
+**State:** 1F-SAVE-EVIDENCE is implemented and locally verified, but automated P5 and native P3 remain blocked. Phase 1F is not review-ready, integrated, or authorised for 1G.
+**Current correction:** [1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence); its execution closeout and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the remaining independent review.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
 **Working branch:** `feature/phase-1f-source-synchronisation`, existing draft PR #14; do not create another branch or PR.
@@ -351,3 +351,34 @@ observation resumption, and L16 by the semantic shell boundary; then performs on
 target gate and separate native shortcut evidence. The checkpoint uses narrow local
 validation because the Source core, transaction/recovery architecture and parser/SDK
 spikes are not being changed. PR #14 stays draft; no merge or Phase 1G is authorised.
+
+2026-09-22 1F-SAVE-EVIDENCE blocked closeout: The bounded E1-E6 correction is
+implemented at application candidate
+`fc918ae9c69f451d17e8d93292f7e4980d88356d` (tree
+`de7821df25cce564d24009026869bdf22fb81b71`). Successful and rejected smoke reports
+now take distinct terminal paths; the host has one named 180-second coarse ceiling and
+the five specified checkpoints; L3, delayed Discard/Apply Both L8, deterministic L9
+suppression/resumption and semantic-boundary L16 are closed. The delayed cases exposed
+and now cover one real defect: a disposed Source controller no longer releases an old
+barrier into replacement DOM. Save routing, Source/core transactions, reconciliation,
+history, recovery and renderer privileges remain unchanged.
+
+Focused local validation passed repository validation for 215 files, whitespace,
+frontend check 28/28 and build. Repository Quality run `35689830891` passed the exact
+candidate and supplied Rust format/compile/focused-test evidence unavailable on this
+client. Phase 1 production run `35689869416` (#81) passed Preflight and, on Windows x64
+and macOS ARM64, browser, core, official-SDK lifecycle, real-service Source persistence,
+desktop-boundary and packaging. Both target artifacts reached
+`post-source-conflict-complete` after all earlier prescribed checkpoints but not
+`final-report-start` before the 180-second ceiling. Packaged smoke failed on both, so
+secret scan and dependency/licence inventory were skipped; automated P5 remains open.
+
+The matching cross-platform terminal stage, after earlier diagnostic candidates fixed
+format, macOS modifier and conflict-copy issues and falsified microtask-only polling,
+localizes the remaining blocker to the monolithic packaged tail after conflict. This
+closeout does not increase the ceiling, rerun the same SHA, split the smoke or redesign
+Source Save. Independent review must decide whether the repeated evidence justifies a
+separately scoped split or another focused harness correction. Trusted native input was
+unavailable, so P3 also remains open: Windows must verify dirty Source Ctrl+S, clean
+Source Ctrl+S Flush and non-Source Ctrl+S isolation; macOS must repeat with Cmd+S.
+PR #14 remains draft. Do not merge or begin Phase 1G.

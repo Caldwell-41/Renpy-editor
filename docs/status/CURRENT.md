@@ -4,44 +4,51 @@
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
 **Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not ready to merge.
-**Selected checkpoint:** [1F-SAVE-EVIDENCE](../tasks/active/phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence), `not_started`.
+**Selected checkpoint:** [1F-SAVE-EVIDENCE](../tasks/active/phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence), `blocked` on automated P5 and native P3.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Retained application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; tree `8edc9136aa362e180faa52421584f519aa0c0935`.
+**Application candidate:** `fc918ae9c69f451d17e8d93292f7e4980d88356d`; tree `de7821df25cce564d24009026869bdf22fb81b71`.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
-## Independent-review result
+## Completed correction
 
-The Source Save architecture is retained. The reviewed candidate has one shell Save
-owner, document-bound Source control, fail-closed retention, operation/generation
-guards, clean-Source Flush fallback and real transaction durability. No new evidence
-justifies a Source/core/transaction redesign.
+E1-E6 are implemented. Only successful smoke CoreResponses enter the accepted path;
+rejection is explicit terminal failure evidence. The packaged host has a named
+180-second coarse ceiling and exactly the five specified checkpoints. The combined L3
+shell case, delayed Discard and Apply Both L8 cases, deterministic L9 observation
+suppression/resumption, and semantic Source-controller L16 boundary are closed.
 
-Production run `35624108754`, attempt 1, passed browser, core, official-SDK lifecycle,
-real-service Source persistence, desktop-boundary and packaging steps on both supported
-targets before packaged smoke failed. Windows reached `source-complete`; macOS hit the
-same host timeout before Source. Later scan/inventory was skipped.
+The delayed L8 regressions demonstrated one application defect: a disposed controller
+could release an old barrier into replacement DOM. A one-line disposed guard fixed it;
+the focused test moved from 9 passing/two failing to 11/11. The shell Save coordinator,
+Source/core transaction and reconciliation/history paths, recovery rules, revision
+matching and renderer privileges were not changed.
 
-The independent review identified two concrete harness blockers in
-`app/src-tauri/src/main.rs`: the whole smoke has a fixed 60-second deadline regardless
-of progress, and the smoke-report rejection branch duplicates the success condition and
-is unreachable. Remaining local evidence gaps are L3, the meaningful delayed
-Discard/Apply Both part of L8, observation resumption in L9, and L16 shell-boundary
-closure. Native P3 remains separate evidence.
+Focused local checks passed repository validation (215 files), whitespace, frontend
+check (28/28) and build. Repository Quality run `35689830891` passed the exact candidate
+and covered Rust format/compile plus the focused smoke-report regression unavailable on
+this client. The supported-target Preflight also passed the browser red/green test.
 
-## Next bounded action
+## Remaining evidence blockers
 
-Implement only 1F-SAVE-EVIDENCE section 7. Use a named 180-second coarse safety ceiling
-plus five bounded stage checkpoints; do not build a heartbeat system or split the smoke
-on the first attempt. Fix successful/rejected report discrimination. Close L3 with one
-shell case, L8 with delayed Discard and Apply Both, L9 with a captured observation
-callback, and L16 by verifying the shell depends only on Source controller semantics.
+Phase 1 production run `35689869416` (#81) ran the exact application candidate.
+Preflight job `106624364068` passed. Windows x64 job `106624505342` and macOS ARM64 job
+`106624505374` passed browser, core, official-SDK lifecycle, real-service Source
+persistence, desktop-boundary and packaging. Both artifacts then recorded
+`pre-source-complete`, `source-complete`, `post-source-recovery-complete` and
+`post-source-conflict-complete`, but not `final-report-start`, before the 180-second
+coarse ceiling. Both packaged smokes failed; artifact secret scan and dependency/licence
+inventory were skipped. P5 therefore remains failed.
 
-Use the narrow validation matrix recorded in section 7 rather than replaying unchanged
-core/spike/benchmark suites. After self-review and repository quality, dispatch the
-existing production gate once for one coherent candidate. Require both target jobs to
-finish packaged evidence and subsequent scan/inventory. Collect actual Windows Ctrl+S
-and macOS Cmd+S P3 evidence where native input is available; otherwise hand over the
-precise manual checklist as an explicit blocker.
+The matching terminal stage localizes the blocker to the monolithic packaged tail after
+conflict, not Source Save/core behavior. Do not blindly increase the timeout, rerun the
+same SHA, split the smoke or redesign Source Save. Independent review must decide
+whether the repeated evidence justifies a separately scoped split or another focused
+harness correction.
 
-Keep PR #14 draft. Do not merge, start Phase 1G, create another branch/PR, repeat
-completed 1F-SAVE implementation, or revive W0/OPT-1A.
+Trusted native input was unavailable, so P3 remains explicitly outstanding. On the
+exact packaged candidate, Windows x64 must verify dirty Source Ctrl+S accepts, clean
+Source Ctrl+S performs ordinary Flush, and non-Source Ctrl+S does not accept Source;
+macOS ARM64 must repeat the same actions with Cmd+S. Synthetic events do not satisfy P3.
+
+Keep PR #14 draft and stop for independent review. Do not merge, start Phase 1G, create
+another branch/PR, replay completed 1F work, or revive W0/OPT-1A.

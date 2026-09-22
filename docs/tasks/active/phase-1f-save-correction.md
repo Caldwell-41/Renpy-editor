@@ -506,7 +506,8 @@ Phase 1G.
 
 **Selected:** 2026-09-22 after independent review of application candidate
 `a720ea3fb150f2a49422e8385256179185129968`.
-**State:** `not_started`.
+**State:** `blocked` after implementation and target validation; automated P5 and
+native P3 remain open.
 **Purpose:** close the remaining evidence/harness blockers without reopening the Save
 architecture. The shell-owned Save coordinator, Source controller, retention barrier,
 transaction/reconciliation/history path and Source core are retained unless a focused
@@ -760,3 +761,61 @@ Update this ledger, the parent Phase 1F ledger, CURRENT, the single HANDOVER and
 Keep PR #14 draft and stop for independent review. Do not merge, begin Phase 1G, create
 another branch/PR, replay the original 1F-SAVE implementation, or revive abandoned
 W0/OPT-1A work.
+
+### 7.13 Execution closeout
+
+The bounded correction is implemented at application candidate
+`fc918ae9c69f451d17e8d93292f7e4980d88356d` (tree
+`de7821df25cce564d24009026869bdf22fb81b71`). E1 now admits only a successful
+`probe.smokeReport` response to the accepted path; rejection sets the terminal signal,
+emits a bounded diagnostic, flushes stderr and exits non-zero. E2 uses the named
+180-second coarse ceiling and exactly the five specified checkpoints. E3 closes L3
+with the combined clean-current/dirty-other-Source/unsubmitted-Character case. E4
+closes L8 with delayed Discard and Apply Both across controller replacement. E5 closes
+L9 with captured observation suppression during held Save and resumption after release.
+E6 is closed by inspection at the `SourceWorkspaceController` shell boundary: the
+shell uses controller semantics and does not inspect textarea class, type or selection
+fields to choose Save ownership.
+
+The delayed L8 cases exposed one application defect: a disposed controller's old
+barrier completion could still mutate the replacement DOM. The focused red run passed
+9 tests and failed those two replacement cases; the one-line disposed guard in
+`app/src/source-ui.ts` made all 11 pass. No shell Save routing, Source/core transaction,
+reconciliation/history, recovery rule, revision match, CSP or renderer privilege was
+changed. Self-review confirmed the successful/rejected report branches, the named
+ceiling and five checkpoint placements, L3/L8/L9 evidence, and L16 independence.
+
+Focused local validation passed: repository validation (215 files), whitespace,
+frontend check (28/28) and production build. The local browser command was unavailable
+because its Chromium binary is absent; supported-target Preflight supplied the browser
+red/green evidence. Local Rust/desktop checks were unavailable because this client has
+no Rust toolchain; Repository Quality and supported-target Preflight performed format,
+compile and the focused Rust regression. Unchanged heavy core, spike, SDK archive and
+benchmark suites were not replayed locally.
+
+Repository Quality run `35689830891` passed for the exact candidate. After confirming
+no equivalent run was active, Phase 1 production run `35689869416` (#81) was dispatched
+once. Preflight job `106624364068` passed. Windows x64 job `106624505342` and macOS
+ARM64 job `106624505374` both passed browser, core, official-SDK lifecycle, real-service
+Source persistence, desktop-boundary and packaging. Both packaged reports then recorded
+`pre-source-complete`, `source-complete`, `post-source-recovery-complete` and
+`post-source-conflict-complete`, but not `final-report-start`, before the documented
+180-second coarse ceiling. Both target jobs therefore failed packaged smoke and skipped
+the subsequent secret scan and dependency/licence inventory. P5 remains failed.
+
+Earlier correction runs supplied distinct diagnostics rather than same-SHA retries:
+#76 exposed Rust formatting, #77 exposed the macOS modifier and stale conflict-copy
+assumptions, #78 and #79 localized the remaining exhaustion after the conflict
+checkpoint, and #80 falsified microtask-only polling because it starved task-based UI.
+Candidate `fc918ae9` restores task yielding and retains terminal report batching; #81
+still localizes the blocker to the monolithic packaged tail after conflict. No timeout
+increase, smoke split or Source Save redesign is selected in this closeout. The next
+review must decide whether that repeated cross-platform evidence justifies a separately
+scoped smoke split or another focused harness correction.
+
+Trusted native keyboard input was unavailable. P3 is explicitly outstanding with this
+manual checklist on the exact packaged candidate: on Windows x64 verify dirty Source
+Ctrl+S accepts, clean Source Ctrl+S performs ordinary Flush, and non-Source Ctrl+S does
+not accept Source; on macOS ARM64 repeat the same three actions with Cmd+S. Synthetic
+events are renderer-routing evidence only. PR #14 remains draft; stop for independent
+review without merge or Phase 1G.
