@@ -1,12 +1,11 @@
-// Independent review diagnostic: asserts required behavior and is red on build #88.
-// Run from app/: node tests/review/phase-1f-selection.browser.mjs
+// Real-browser regression for settled selection and reviewed Apply Both availability.
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "playwright";
 
 const server = await createServer({
-  root: fileURLToPath(new URL("../..", import.meta.url)),
+  root: fileURLToPath(new URL("..", import.meta.url)),
   logLevel: "error",
   server: { host: "127.0.0.1", port: 0 },
 });
@@ -53,20 +52,20 @@ try {
   await page.waitForFunction(() => window.__selectionReview.updates > 0 && !window.__selectionController.hasUnretainedInput());
   // Wait for a real scheduled observation, not a fixed sleep: an unchanged observation must not hide the defect.
   await page.waitForFunction(() => window.__selectionReview.observations > 1);
-  const evidence = await page.evaluate(() => {
-    const apply = document.querySelector('[data-source-action="apply-both"]');
-    apply.click();
-    return {
-      pending: window.__selectionController.hasUnretainedInput(),
-      disabled: apply.disabled,
-      applies: window.__selectionReview.applies,
-      staleNoticeHidden: document.querySelector(".source-review-stale").hidden,
-      observations: window.__selectionReview.observations,
-    };
-  });
-  console.log(JSON.stringify(evidence));
+  const beforeApply = await page.evaluate(() => ({
+    pending: window.__selectionController.hasUnretainedInput(),
+    disabled: document.querySelector('[data-source-action="apply-both"]').disabled,
+    staleNoticeHidden: document.querySelector(".source-review-stale").hidden,
+    observations: window.__selectionReview.observations,
+  }));
+  assert.equal(beforeApply.pending, false);
+  assert.equal(beforeApply.disabled, false, "settled selection must enable the reviewed combination");
+  assert.equal(beforeApply.staleNoticeHidden, true);
+  assert.ok(beforeApply.observations >= 2);
+  await page.locator('[data-source-action="apply-both"]').click();
+  await page.waitForFunction(() => window.__selectionReview.applies === 1);
+  console.log(JSON.stringify({ beforeApply, applies: 1 }));
   await page.evaluate(() => window.__selectionController.dispose());
-  assert.equal(evidence.disabled, false, "unchanged selection must not leave a current Apply Both review disabled");
 } finally {
   await browser?.close();
   await server.close();

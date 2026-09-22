@@ -345,7 +345,12 @@ export function renderSourceWorkspace(
     });
     retentionTail = run.then(() => undefined);
     retentions.set(snapshot.sequence, run);
-    void run.finally(() => retentions.delete(snapshot.sequence));
+    void run.finally(() => {
+      retentions.delete(snapshot.sequence);
+      if (identityMatches(snapshot.documentGeneration, snapshot.path) && latestSnapshot?.sequence === snapshot.sequence) {
+        updateStateOnly();
+      }
+    });
     return run;
   };
 

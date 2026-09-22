@@ -568,6 +568,103 @@ test("closeout: editing after review must not apply an undisplayed combination",
   assert.equal(applies, 0, "stale displayed combination must require fresh review");
 });
 
+test("unchanged selection retention re-enables a reviewed Apply Both after settlement", async () => {
+  installDom(); let applies = 0;
+  let model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), externalText: "external", combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model,
+    update: async (request) => { model = { ...model, selectionStart: request.selectionStart, selectionEnd: request.selectionEnd }; return model; },
+    applyBoth: async () => { applies++; return model; },
+  }));
+  await tick();
+  const apply = document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!;
+  assert.equal(apply.disabled, false);
+  document.querySelector<HTMLTextAreaElement>(".source-editor")!.dispatchEvent(new window.Event("mouseup"));
+  assert.equal(apply.disabled, true, "retention must block acceptance while pending");
+  await tick(); await tick();
+  assert.equal(controller.hasUnretainedInput(), false);
+  assert.equal(apply.disabled, false);
+  assert.equal(document.querySelector<HTMLElement>(".source-review-stale")!.hidden, true);
+  apply.click(); await tick();
+  assert.equal(applies, 1);
+  controller.dispose();
+});
+
+test("settling an older selection cannot enable Apply Both over newer pending input", async () => {
+  installDom(); const first = deferred<SourceDocument>(); const second = deferred<SourceDocument>();
+  let updates = 0; let applies = 0;
+  const model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model, update: async () => (++updates === 1 ? first.promise : second.promise),
+    applyBoth: async () => { applies++; return model; },
+  }));
+  await tick();
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  const apply = document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!;
+  editor.dispatchEvent(new window.Event("mouseup"));
+  editor.value += "# newer"; editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  first.resolve(model); await tick();
+  assert.equal(controller.hasUnretainedInput(), true);
+  assert.equal(apply.disabled, true);
+  apply.dispatchEvent(new window.Event("click")); await tick();
+  assert.equal(applies, 0);
+  second.resolve({ ...model, text: editor.value, draftVersion: 2, combinedPreview: "new combination" });
+  await tick(); await tick();
+  assert.equal(apply.disabled, true);
+  assert.equal(document.querySelector<HTMLElement>(".source-review-stale")!.hidden, false);
+  controller.dispose();
+});
+
+test("failed selection retention does not enable Apply Both", async () => {
+  installDom(); const pending = deferred<SourceDocument>(); let applies = 0;
+  const model = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), combinedPreview: "reviewed combined" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => model, update: async () => pending.promise,
+    applyBoth: async () => { applies++; return model; },
+  }));
+  await tick();
+  const apply = document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!;
+  document.querySelector<HTMLTextAreaElement>(".source-editor")!.dispatchEvent(new window.Event("mouseup"));
+  pending.reject(new Error("Draft retention failed")); await tick(); await tick();
+  assert.equal(controller.hasUnretainedInput(), true);
+  assert.equal(apply.disabled, true);
+  apply.dispatchEvent(new window.Event("click")); await tick();
+  assert.equal(applies, 0);
+  controller.dispose();
+});
+
+test("disposed selection completion cannot change the replacement document's controls", async () => {
+  installDom(); const oldRetention = deferred<SourceDocument>(); const newRetention = deferred<SourceDocument>();
+  const oldModel = documentModel({ state: "conflict", dirty: true, draftVersion: 1, canApplyBoth: true,
+    liveRevision: "e".repeat(64), combinedPreview: "old combination" });
+  const oldController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => oldModel, update: async () => oldRetention.promise,
+  }));
+  await tick();
+  document.querySelector<HTMLTextAreaElement>(".source-editor")!.dispatchEvent(new window.Event("mouseup"));
+  await tick();
+  oldController.dispose();
+  const replacement = documentModel({ path: "game/replacement.rpy", state: "conflict", dirty: true,
+    draftVersion: 3, canApplyBoth: true, liveRevision: "f".repeat(64), combinedPreview: "new combination" });
+  const replacementController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    open: async () => replacement, update: async () => newRetention.promise,
+  }), { path: replacement.path });
+  await tick();
+  const apply = document.querySelector<HTMLButtonElement>('[data-source-action="apply-both"]')!;
+  assert.equal(apply.disabled, false);
+  document.querySelector<HTMLTextAreaElement>(".source-editor")!.dispatchEvent(new window.Event("mouseup"));
+  assert.equal(apply.disabled, true);
+  oldRetention.resolve(oldModel); await tick(); await tick();
+  assert.equal(apply.disabled, true);
+  assert.match(document.querySelector("#host")?.textContent ?? "", /replacement\.rpy/);
+  newRetention.resolve(replacement); await tick(); await tick();
+  assert.equal(apply.disabled, false);
+  replacementController.dispose();
+});
+
 test("Apply Both keeps the displayed identity across delayed retention and requires refreshed review", async () => {
   installDom();
   const pending = deferred<SourceDocument>();
