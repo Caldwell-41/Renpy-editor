@@ -2,60 +2,64 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** [Build #87 replacement-package verification](../tasks/active/phase-1f-save-correction.md#719-build-87-replacement-package-verification).
-**State:** `review_ready` for Phase 1F closeout; all six native P3 rows are user-reported PASS on Windows x64 and macOS ARM64. Mac required a local launch workaround.
+**Checkpoint:** independent Phase 1F closeout review; completed with acceptance **blocked**.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Validated application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
-**Verified run:** [#87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, `upload_packages=true`, terminal success.
-**Entry head:** `14f1b4cbdc67c371f58c3e1e55a2804e4f95ede0` (documentation only after the application candidate).
+**Entry head:** `22479027008342bda0d4601f195a006116373a4e`.
+**Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`; merged into this review branch to preserve existing plans and resolve the documentation conflict.
+**Application candidate:** unchanged `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
+**Evidence and full diagnosis:** [ledger section 7.22](../tasks/active/phase-1f-save-correction.md#722-independent-closeout-review).
 
-## Completed verification
+## Acceptance decision
 
-Run #87 (`35719829561`), attempt 1, passed on exact application candidate
-`0b9ea0f0c23f843b3324cd63a524a642a2399f2e`. Preflight `106719866991`,
-Windows x64 `106720077739` and macOS ARM64 `106720077724` all succeeded.
-All three new Scene JSON regressions passed on both targets, including real IPC
-starting-narration edit, Beat insert, refusal without writes, and fresh-service reopen.
-Core totals: Windows 144 passed / 0 failed / 4 ignored; macOS 150 passed / 0 failed /
-4 ignored. The four ignored cases are subprocess crash workers, not omitted acceptance
-tests. Explicit SDK lifecycle/Scene/Source and network-handoff gates also passed;
-the download-on-cache-miss step alone was skipped after SDK cache hits.
+No merge: Apply Both is not bound to the displayed review. Editing a draft leaves an
+old combined preview while confirmation submits the new version; an external change
+can also be refreshed and combined without re-review. This is a substantive acceptance/
+IPC correction. Preview Add change here also loses its insertion anchor, and Background
+does not clear visible Characters. Three executable review probes fail as expected.
 
-Desktop boundary tests, packaging, packaged smoke, secret scans, dependency inventories
-and both package uploads passed. Downloaded evidence archives contain exactly one
-accepted final report each, all reported boolean assertions true, complete command
-traces, and all five checkpoints. Final-report-start: Windows 2,369 ms; macOS 3,011 ms.
-Both inventories contain 85 npm / 519 Cargo entries. Evidence artifacts: Windows
-`10691213999`, macOS `10691700431`.
+The user authorised conditional merge and cleanup, but explicitly required diagnosis/
+handover and a stop if a substantive defect needs a new checkpoint. This is that stop.
+No additional permission is required merely to merge once actual acceptance is met.
 
-Both package ZIPs and both evidence ZIPs were downloaded; their byte lengths and
-SHA-256 matched GitHub artifact metadata, and all ZIP CRC checks passed. This verifies
-archive integrity and CI provenance; native P3 acceptance is recorded separately below.
+## Evidence preserved
 
-The Scene fix aligns Rust enum fields with renderer camelCase JSON. Its two production
-annotations and three regressions are described in ledger section 7.18 and docs/TESTING.md.
-#85 packages contain the reported defect; #86 failed formatting. Preserve their history
-and use only #87 as the valid replacement-package lineage. Package IDs, exact filenames,
-hashes and expiry are recorded in ledger section 7.19 and linked from the checklist.
+- Production [#87 / 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, terminal success on the application candidate above. Target jobs and artifact details remain in ledger section 7.19. No redispatch.
+- Entry HANDOVER `2247902` records user-reported PASS for dirty Source, clean Source Flush and non-Source isolation on both supported targets. These outcomes are retained. Exact OS versions and local installed package identity remain missing; confirm those facts only, without repeating tests.
+- User reported Mac pass after `xattr -cr /Applications/Loomlight.app`. DIST-MAC-01 retains normal downloaded-app launch/signing/notarisation as a later distribution requirement; Phase 1 explicitly excludes signing.
+- Local review: `npm run check` (32 pass, 0 failures/skips), `npm run build` pass. From app, `node --test tests/review/*.repro.mts`: three failing expected-behaviour probes. Review host Node/npm differ from pinned CI; Rust/native tests unavailable here. Repository/link/privacy validation passed for 222 files; whitespace checks passed.
+- No application behaviour changed. No 1F records archived, branches deleted, or unrelated work discarded. The branch inventory and integrated-but-retained cleanup candidates are in section 7.22.
 
-## Native P3 result and next action
+## Next bounded action
 
-The user confirms that all three native P3 tests passed on both supported targets:
+Select **1F-CLOSEOUT-CORRECTION** on this same branch/PR. Fix F1 review binding across
+renderer/JSON/core, F2 insertion anchor, and F3 Background preview; add actual service/
+JSON tests and promote the retained red probes into regular regression coverage.
+Preserve exact-byte conflicts, no-write refusal, drafts, transaction/recovery and
+session ownership. Resolve reviewed-result freshness before any merge.
 
-- Windows x64: P3-A dirty Source Ctrl+S PASS; P3-B clean Source Ctrl+S ordinary
-  Flush PASS; P3-C non-Source Ctrl+S isolation PASS.
-- macOS ARM64: P3-A dirty Source Cmd+S PASS; P3-B clean Source Cmd+S ordinary
-  Flush PASS; P3-C non-Source Cmd+S isolation PASS.
+Run cheap relevant checks first, then required supported-target evidence on the new
+application candidate. #87 remains valid historical evidence for its exact code, not
+acceptance of these fixes. Do not repeat an unchanged expensive matrix. Before an
+external wait, publish exact run/attempt/SHA and stop active polling under WORKFLOW.
+Inspect fresh refs and any newer owner work before writing; do not reset to these SHAs.
 
-This closes the six-row native P3 outcome requirement for Phase 1F by user report.
-The prior Windows physical-Save and Beat-fix report is retained. On macOS, the user
-reported running `xattr -cr /Applications/Loomlight.app` before the Mac tests passed.
-That local workaround does not establish repaired signing, notarisation or normal
-first launch of the downloaded app; preserve the macOS distribution limitation.
+## Phase 1G preparation only
 
-Exact OS versions and the locally installed artifact/installer identity were not
-separately supplied. Record those as evidence-metadata limitations, not as untested P3
-rows, and do not invent them. The next bounded action is Phase 1F closeout review and
-main/PR reconciliation. PR #14 is still draft and current-main integration remains a
-separate decision. No rebuild, redispatch, merge or Phase 1G is authorised by this
-handover update.
+The existing [1G plan](../tasks/active/phase-1g-branches-runtime-git.md) was merged by
+PR #15; do not create another planning PR. All implementation checkpoints remain
+`not_started`. After 1F acceptance/integration, select **1G.1 shared flow projection and
+Branches** only. Its G1 gate covers truthful resolved/missing/unknown flow, two routes,
+cycles/reconvergence, guarded existing-command edits, Source/Scene navigation, draft/
+revision/session safety, and bounded accessible layout on both packaged targets.
+R1/R2 runtime and V1/V2 Git gates remain separate later checkpoints.
+
+Future selector (not current implementation authority):
+
+```text
+/goal — Phase 1G.1 only
+Repository: Caldwell-41/Renpy-editor. Read AGENTS.md and docs/status/HANDOVER.md,
+then the existing Phase 1G plan. Verify Phase 1F is accepted and integrated; stop if
+not. Inspect fresh main, refs, PRs and ownership, reuse matching work, and implement
+only shared flow projection and Branches against G1. Publish evidence and handover;
+do not start 1G.2 or merge without its required acceptance.
+```

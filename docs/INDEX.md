@@ -9,7 +9,12 @@ here; chat prompts select one checkpoint rather than repeat the implementation p
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
 PR #8's UI follow-up. The active application milestone is
 [Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md),
-with the bounded [1F-SAVE correction](tasks/active/phase-1f-save-correction.md) next.
+on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); its
+[closeout review](tasks/active/phase-1f-save-correction.md#722-independent-closeout-review)
+blocks acceptance pending a bounded Source reconciliation correction.
+Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
+and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
+integrated documentation, with implementation unstarted and separately gated.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
 acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
@@ -25,8 +30,11 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Phase 1F Source editing, synchronisation and partial-visual handling | [tasks/active/phase-1f-source-synchronisation.md](tasks/active/phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [tasks/active/phase-1f-save-correction.md](tasks/active/phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
+| Planned Phase 1G Branches, runtime/diagnostics and local Git checkpoints | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| Planned Phase 1H integrated acceptance, full twelve-case matrix | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
+| Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |

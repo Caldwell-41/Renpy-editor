@@ -1,7 +1,28 @@
 # Phase 1F — native P3 manual acceptance
 
+## Closeout outcome record — 2026-09-22
+
+Entry HANDOVER at `22479027008342bda0d4601f195a006116373a4e` explicitly records the
+user's confirmation of all three contexts on both targets. These are user-reported
+outcomes, not independently observed native tests. Earlier untested instructions below
+are the historical procedure; this result record supersedes their status.
+
+| Target | P3-A dirty Source | P3-B clean Source Flush | P3-C non-Source isolation |
+| --- | --- | --- | --- |
+| Windows x64, Ctrl+S | User-reported PASS | User-reported PASS | User-reported PASS |
+| macOS ARM64, Cmd+S | User-reported PASS | User-reported PASS | User-reported PASS |
+
+Beat editing/insertion was also reported working. Mac testing followed the user's
+`xattr -cr /Applications/Loomlight.app` workaround. OS versions and exact locally
+installed package identity are unconfirmed; #87 is the handoff context, not proven
+local provenance. Do not invent screenshots, per-step observations or installer hashes.
+Confirm only these missing metadata facts; do not repeat unchanged native tests.
+Phase 1F acceptance is separately blocked by [review findings](phase-1f-save-correction.md#722-independent-closeout-review).
+Signing/notarisation remains the later DIST-MAC-01 limitation, not a native Save failure.
+
+
 **Prepared:** 2026-09-22.
-**State:** #87 installers verified and ready for manual testing; native results remain untested.
+**State:** six user-reported native passes recorded above; installed package/OS provenance remains unconfirmed. Phase 1F is blocked separately by closeout findings.
 Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
@@ -10,7 +31,7 @@ Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-buil
 This corrects the Scene/Beat JSON contract defect in the previous #85 packages.
 Run #86 failed formatting and produced no replacement packages. Formatted replacement
 run #87 passed all target gates and actual package uploads. ZIP hashes and integrity
-were independently verified; native installation and P3 remain for the user.
+were independently verified; native outcomes are now recorded above, with local package identity still unconfirmed.
 Version `0.1.0` alone does
 not identify this candidate: retain the run and commit below.
 

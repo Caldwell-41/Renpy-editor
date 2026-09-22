@@ -1,14 +1,14 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `blocked` on native P3 only; automated P5 passed on both targets. Final-report scope correction and evidence closeout are in section 7.16; stop for independent review.
+**State:** `blocked` by the independent closeout findings in section 7.22. Automated #87 evidence and user-reported native outcomes are retained; Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
-**Original 1F-SAVE application candidate:** `a720ea3fb150f2a49422e8385256179185129968`; current evidence correction is recorded in section 7.16.
-**Publication state:** corrected candidate `85e44e926399ae7ad8431c948e1751db04dcde35`
-is published; Repository Quality and production #84 passed. This documentation-only
-evidence closeout does not change the candidate or dispatch another gate.
+**Current application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`, production #87 passed; see sections 7.18–7.22.
+**Publication state:** current closeout publishes review probes and documentation only.
+Original 1F-SAVE `a720ea3f` and #84 candidate `85e44e92` remain historical evidence,
+not the current application or acceptance decision.
 
 ## Authority and scope
 
@@ -1265,3 +1265,173 @@ and separate P3-A/B/C observations remain absent; do not fabricate detailed acce
 records or silently mark the formal six-row checklist complete. Next action is to review
 available manual evidence and the independent code review before Phase 1F closeout.
 No application edits, rebuild, redispatch, merge or Phase 1G are authorised by this report.
+
+
+### 7.22 Independent closeout review
+
+**Selected authority (2026-09-22):** user requested independent 1F review, bounded
+closeout corrections, conditional PR #14 merge/cleanup, and 1G preparation only.
+The same instruction requires a diagnosis/handover and stop before merge when a
+substantive defect needs a new implementation checkpoint. This review takes that
+stop path: **not accepted; no merge or Phase 1G implementation**. Earlier no-merge
+instructions in historical entries are superseded by the user's conditional authority,
+not by an assertion that acceptance passed.
+
+#### Entry, ownership and evidence lineage
+
+Fresh remote 1F head was `22479027008342bda0d4601f195a006116373a4e`, newer than the
+prompt's historical `48eb0b0`. Its only change was HANDOVER's six-row user-pass record.
+Current main is `75a91c5f72cd0eac8586faf2be036ec5021a939d` (merged planning PR #15);
+it contains existing 1G/1H and Phase 2 plans. The local checkout was clean on an old
+main with one worktree; it now tracks the existing 1F branch. The visible prior Windows
+1F executor was idle; no active matching local executor or second writer was found.
+Its remote worktree state was not independently inspected, so no remote/local
+worktree removal or historical branch retirement is claimed.
+
+PR #14 was open/draft with no submitted GitHub reviews. GitHub reported a merge
+conflict; local merge analysis located it in docs/INDEX.md. Main was merged into the
+1F review branch preserving both sets of links and all unique planning documents.
+No reset, rebase, force push, duplicate planning PR or application change was used.
+
+The completed independent task “Review Loomlight Defects” reported the two Scene
+findings below; both were independently reproduced here. “Independent P3 Review”
+contained a request/dispatch acknowledgment, not accessible completed findings. It
+was not treated as a completed review.
+
+The application, dependency locks, workflow and script inputs at entry are byte-identical
+to `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`; intervening commits and new main are
+documentation only. Run #87 (`35719829561`), attempt 1, was independently re-read:
+terminal success on that exact SHA, Preflight `106719866991`, Windows `106720077739`,
+macOS `106720077724`, including core, explicit SDK gates, desktop, package/smoke,
+scans/inventories and uploads. Only cache-miss SDK downloads were skipped. Section
+7.19's archive/hash/log inspection is retained as prior evidence, not a new download
+or new native test. These passes describe that application; they do not erase newly
+found defects or transfer acceptance to future fixes. No production matrix dispatched.
+
+#### Findings, ordered by persistence impact
+
+**F1 — Apply Both can accept a combination other than the displayed review (P1).**
+In `app/src/source-ui.ts`, draft retention calls `updateStateOnly`, which does not
+refresh the combined preview. `runApplyBoth` settles current input and submits its
+latest draft version instead of binding the click to the displayed combination.
+A DOM probe with the actual controller displays “reviewed combined”, edits the draft,
+receives a different combined result from the service double, then clicks Apply Both.
+The old preview is still displayed, but an acceptance call starts (1; expected 0
+until renewed review). This is an executed renderer defect, not native disk evidence.
+
+The external-file variant is established by code inspection: `SourceSaveRequest`
+contains only path/base revision/draft version; `source_apply_both` refreshes disk,
+checks only those fields, recomputes from the latest external revision, and commits.
+An external editor can change `alpha BETA GAMMA` to `alpha BETA DELTA` after the user
+reviews a combination with local `ALPHA`; the same request can write `ALPHA BETA DELTA`
+although the preview showed `ALPHA BETA GAMMA`. The transaction's revision check
+protects the newly read external bytes, not the bytes the user reviewed. The desktop
+lifecycle mutex serializes app commands but cannot serialize external editors.
+No end-to-end Rust/native execution of this race is claimed on this host.
+
+Smallest correction checkpoint: bind Apply Both to the exact reviewed base, draft,
+external revision and combined result (a dedicated typed request or bounded review
+identity), validate that binding in core before proposing writes, and invalidate stale
+renderer previews before confirmation. Preserve drafts and external bytes on refusal.
+Test changed draft, delayed retention, external change before click and during commit,
+unchanged successful combination, overlapping/same-position insertions, opaque-boundary
+uncertainty and session replacement through the real JSON/service boundary. Existing
+DOM tests cover delayed completion/disposal, while the core Apply Both test changes
+external bytes before preview only; neither exercises preview-to-commit freshness.
+This changes the acceptance/IPC contract and requires a new implementation checkpoint,
+so it is not implemented as an incidental closeout edit.
+
+**F2 — Preview “Add change here” loses the selected Beat anchor (P2).**
+`scene-ui.ts::openNewBeat` clears `selectedBeatId`; `renderNewBeat` sends
+`beforeBeatId: null`. Actual DOM interaction selecting an early dialogue then Add
+change here and Add Beat reproduced null instead of `dialogue`. Core insertion places
+it before the terminal Beat/end, not before the requested playhead. Preserve the
+captured insertion anchor; test the actual control and persisted ordering via JSON.
+Existing tests check control presence; the Scene JSON test supplies a valid anchor
+itself. This also confirms the earlier independent finding remains unfixed.
+
+**F3 — Background does not clear Preview Characters (P2).**
+`scene-ui.ts::deriveScenePreview` changes only the background, while core Background
+serialization emits `scene` on the same default layer as Character `show`.
+Show Character → Background leaves one visible Character with `partial=false` in the
+actual preview function (expected zero). Clear Characters and their layer uncertainty
+when processing Background; retain unrelated variable/music uncertainty. Test both
+ordinary and post-Custom-Code sequences. Existing fixtures put Background first.
+Native game rendering was not executed in this review.
+
+The recent Scene JSON correction itself matches the renderer: both enums use
+`rename_all_fields = "camelCase"`; command/Beat tests cross JSON, and the real handler
+edit/insert/reopen regression addresses the reported defect. Those payloads are
+transient; persisted source maps store mapping identity/ranges rather than these enums.
+No additional casing failure was demonstrated. Review also traced Source Save/Save All
+through preflight, transaction/history and returned revisions, shell exclusion/token
+release, draft settlement and stale completion checks, session validation and desktop
+serialization. No separate demonstrated defect was found in those inspected paths.
+This is targeted review, not proof that every parser/recovery/concurrency path is correct.
+Remaining coverage gaps include cast response payloads, mocked UI-to-core paths and
+unknown optional nested fields; these are not additional reproduced defects.
+
+#### Retained executable diagnosis and checks
+
+From `app/`, run `node --test tests/review/*.repro.mts` after locked dependency install.
+The three probes deliberately assert required behaviour and currently fail: stale
+Apply Both review (1 call versus 0), lost insertion anchor (null versus dialogue),
+Background clearing (1 Character versus 0). They are retained outside the ordinary
+`*.test.js` glob as review evidence, not skipped acceptance or passing regressions.
+The correction checkpoint must promote these scenarios into the normal suite with
+green outcomes plus real-core coverage; do not leave the default suite green as a
+substitute for resolving these red probes.
+
+Local environment: macOS 26.6.2 ARM64, Node 26.8.1/npm 11.19.0; this is the review
+host, **not** the user's native P3 environment. Locked dependencies installed with
+scripts disabled. Node/npm differ from the pinned 24.19.0/11.9.0 CI toolchain, so local
+results supplement exact pinned #87 evidence. `npm run check`: typecheck and 32 tests
+passed, 0 failed/skipped. `npm run build`: passed. Rust/core/desktop and native key
+checks were not rerun; Rust is unavailable locally. Repository/link/privacy validation passed (222 files), as did whitespace checks. No acceptance assertions weakened.
+
+#### Native P3 reconciliation and macOS distribution
+
+The entry HANDOVER at `2247902` explicitly records the user's confirmation of P3-A,
+P3-B and P3-C on Windows x64 and macOS ARM64. Preserve all six as **user-reported PASS**;
+do not regress them to untested or ask to repeat unchanged tests. The checklist now
+records those outcomes with that provenance. Earlier generic reports alone were not
+enough; the later explicit record supplies context-specific results. Raw observations,
+OS versions, exact locally installed package identity and screenshots were not supplied.
+The #87 handoff is contextual lineage, not proof of the installed binaries. Formal
+exact-candidate metadata remains to confirm; request only Windows/macOS versions and
+whether both used the #87 replacement installers (identify another build if not).
+No individual observations or package identities are invented.
+
+The user ran `xattr -cr /Applications/Loomlight.app` before reporting the Mac pass.
+This enabled their test; it does not prove normal quarantined download launch, valid
+Developer ID signing or notarisation. Phase 1 parent scope explicitly excludes signing/
+notarisation; ROADMAP's release policy allows disclosed private unsigned builds and
+requires signing/notarisation before wider distribution. Track this as **DIST-MAC-01**:
+normal downloaded-app installation/launch and signing/notarisation evidence before
+wider distribution. It is not an extra 1F gate and is not fixed here. No signing
+infrastructure or security-setting change was made by this review.
+
+#### Integration, branches and next checkpoint
+
+Main remains `75a91c5f72cd0eac8586faf2be036ec5021a939d`, with planning PR #15 integrated
+but 1F unmerged. No merge SHA for PR #14 exists. Do not archive the 1F brief/correction
+ledger/checklist while F1-F3 and candidate provenance remain unresolved. All unique
+failed-run evidence remains intact; CURRENT/HANDOVER and plan headers are reconciled.
+
+No branches were deleted. Retain 1F (draft PR #14, unaccepted implementation),
+`maintenance/ci-optimisation` (unique abandoned history, still-open PR #12), Dependabot
+branches (open PRs #10/#11), main and the archive tag. Ancestry proves current remote
+`corrective/phase-1a-1d-integrated`, `corrective/phase-1d-ui-operation-race`,
+`feature/phase-1e-scene-authoring` and `docs/phase-1g-1h-planning` are integrated into
+main (PRs #7/#8/#9/#15). They are cleanup candidates, retained pending cross-host
+worktree/dependency confirmation at the resumed integration checkpoint; their names
+alone are not proof of safe retirement. No local worktree was removed.
+
+Next bounded task: **1F-CLOSEOUT-CORRECTION**, specifically F1-F3 and their regression/
+exact-candidate validation, on the same branch/PR, selected explicitly by the user.
+Do not implement 1G to bypass the blocker. Existing 1G planning is already integrated;
+1G.1 (shared flow projection and Branches, G1 gate) is the next application checkpoint
+only after 1F acceptance/integration and explicit selection. Later R1/R2/V1/V2 remain
+separate checkpoints. Preserve Source draft/session/recovery authority and treat these
+newly documented review-binding limitations as unresolved prerequisites, not accepted
+foundations. No duplicate plan or implementation branch was created.
