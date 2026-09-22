@@ -382,3 +382,30 @@ separately scoped split or another focused harness correction. Trusted native in
 unavailable, so P3 also remains open: Windows must verify dirty Source Ctrl+S, clean
 Source Ctrl+S Flush and non-Source Ctrl+S isolation; macOS must repeat with Cmd+S.
 PR #14 remains draft. Do not merge or begin Phase 1G.
+
+2026-09-22 final 1F-SAVE-EVIDENCE harness correction: Independent review authorised
+one last harness-only candidate. Application candidate
+`628c901d9c5e860656ab0c194bc104ae3c4b760c` (tree
+`703bb7b747634e88583aa94817afedba6a9ddcd8`) changes only the named coarse ceiling
+from 180 to 300 seconds and restores deterministic terminal ordering: await the
+post-conflict checkpoint, restore the requester during normal cleanup, await the final
+checkpoint, then await the report. The five checkpoints, all smoke/security assertions,
+E1 and L3/L8/L9/L16 evidence remain unchanged; no Source/core architecture changed.
+
+Local validation passed repository validation for 215 files, whitespace, JavaScript
+syntax, frontend check 28/28 and build; Cargo was unavailable. Repository Quality run
+`35697359981` passed the exact candidate. Phase 1 production run `35697492679` (#82)
+was dispatched once after confirming ownership. Preflight `106647498726` passed.
+Windows x64 `106647641203` and macOS ARM64 `106647641198` passed browser, core,
+official-SDK lifecycle, real-service Source persistence, desktop boundary and packaging.
+Both packaged artifacts persisted every checkpoint through
+`post-source-conflict-complete`, then timed out at 300 seconds without
+`final-report-start`. Secret scan and dependency/licence inventory were skipped; P5
+remains failed.
+
+Because the post-conflict checkpoint is now awaited, the evidence shows its request
+reaches and is persisted by the host but its IPC response does not return to the probe
+before the absolute ceiling. Per the stop condition, do not increase the timeout again,
+rerun this SHA, start another yield experiment, split the smoke automatically or modify
+Source Save. Native P3 remains the manual Windows Ctrl+S/macOS Cmd+S checklist. Keep
+PR #14 draft and stop for independent review; do not merge or begin Phase 1G.

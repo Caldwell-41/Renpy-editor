@@ -5,8 +5,8 @@
 **Checkpoint:** [1F-SAVE-EVIDENCE](../tasks/active/phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence).
 **State:** `blocked`; E1-E6 are implemented, automated P5 and native P3 are open.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Application candidate:** `fc918ae9c69f451d17e8d93292f7e4980d88356d`.
-**Application tree:** `de7821df25cce564d24009026869bdf22fb81b71`.
+**Application candidate:** `628c901d9c5e860656ab0c194bc104ae3c4b760c`.
+**Application tree:** `703bb7b747634e88583aa94817afedba6a9ddcd8`.
 
 ## Resume here
 
@@ -15,42 +15,41 @@ refs, PR/worktree and execution ownership before acting. Preserve newer work; do
 reset to a quoted SHA or replay completed Phase 1F/1F-SAVE work.
 
 The bounded evidence correction is complete in the application candidate. Smoke-report
-success and rejection have distinct terminal paths, the host uses the named 180-second
-coarse ceiling and five specified checkpoints, and L3/L8/L9/L16 are closed. A delayed
+success and rejection have distinct terminal paths, the host now uses one named
+300-second absolute ceiling and deterministic sequential terminal reporting, and the
+five specified checkpoints plus L3/L8/L9/L16 remain intact. A delayed
 controller regression exposed one real application defect; the minimal disposed guard
 prevents an old barrier completion from mutating replacement DOM. The shell Save owner,
 Source/core transactions, reconciliation/history, recovery and renderer privileges are
 otherwise retained.
 
-Focused local validation passed repository validation for 215 files, whitespace,
-frontend check 28/28 and build. The focused delayed-action red/green was 9 pass/two fail
-before the guard and 11/11 after it. Local browser execution was unavailable because
-Chromium is absent and local Rust/desktop checks were unavailable because this client
-has no Rust toolchain. Repository Quality run `35689830891` passed the exact candidate,
-including Rust format/compile/focused report handling; target Preflight passed the
-browser red/green test.
+Focused local validation passed repository validation for 215 files, whitespace and
+JavaScript syntax, frontend check 28/28 and build. Cargo was unavailable locally.
+Repository Quality run `35697359981` passed the exact candidate; target Preflight
+passed Rust format/compile, focused report handling and the browser red/green test.
 
 ## Exact production result
 
-Phase 1 production run `35689869416` (#81) was dispatched once after Repository Quality
+Phase 1 production run `35697492679` (#82) was dispatched once after Repository Quality
 and after confirming no equivalent production run was active or ambiguous.
 
-- Preflight `106624364068`: passed.
-- Windows x64 `106624505342`: browser, core, official-SDK lifecycle, real-service
+- Preflight `106647498726`: passed.
+- Windows x64 `106647641203`: browser, core, official-SDK lifecycle, real-service
   Source gate, desktop boundary and packaging passed; packaged smoke failed.
-- macOS ARM64 `106624505374`: the same pre-smoke gates passed; packaged smoke failed.
+- macOS ARM64 `106647641198`: the same pre-smoke gates passed; packaged smoke failed.
 - Both artifacts contain `pre-source-complete`, `source-complete`,
   `post-source-recovery-complete`, and `post-source-conflict-complete`, followed by
   `packaged boundary smoke report timed out`; neither contains `final-report-start`.
 - Secret scan and dependency/licence inventory were skipped on both targets after the
   smoke failure. P5 remains failed.
 
-Earlier diagnostic candidates were not same-SHA reruns: #76 exposed formatting, #77
-exposed the macOS modifier and stale conflict copy, #78/#79 localized the terminal
-budget, and #80 falsified microtask-only polling. #81 restores task yielding and still
-places the cross-platform blocker after conflict. Do not increase the timeout, rerun
-`fc918ae9`, split the smoke or redesign Source Save without a separately reviewed,
-evidence-based scope decision.
+Candidate `628c901d` changed only the coarse ceiling from 180 to 300 seconds and restored
+sequential ordering: await post-conflict checkpoint, restore the requester in `finally`,
+await final checkpoint, then await the report. Because both artifacts persist the
+awaited post-conflict checkpoint but never reach the final checkpoint, the demonstrated
+blocker is failure to return that checkpoint IPC response to the probe before the
+absolute ceiling. Do not increase the timeout again, rerun `628c901d`, start another
+microtask/task-yield experiment, split the smoke automatically or modify Source Save.
 
 ## Outstanding native P3
 

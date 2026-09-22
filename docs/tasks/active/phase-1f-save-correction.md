@@ -819,3 +819,40 @@ Ctrl+S accepts, clean Source Ctrl+S performs ordinary Flush, and non-Source Ctrl
 not accept Source; on macOS ARM64 repeat the same three actions with Cmd+S. Synthetic
 events are renderer-routing evidence only. PR #14 remains draft; stop for independent
 review without merge or Phase 1G.
+
+### 7.14 Final bounded harness correction
+
+Independent review authorised one last harness-only candidate. Application candidate
+`628c901d9c5e860656ab0c194bc104ae3c4b760c` (tree
+`703bb7b747634e88583aa94817afedba6a9ddcd8`) changes the single named coarse ceiling
+from 180 to 300 seconds and removes terminal concurrency. The probe now awaits
+`post-source-conflict-complete`, finishes normal cleanup including requester restoration,
+awaits `final-report-start`, then invokes and awaits `probe.smokeReport`. No heartbeat,
+resettable watchdog, orchestration layer or elapsed-time infrastructure was added.
+All smoke assertions, security assertions, Source traces, E1 rejection handling,
+L3/L8/L9/L16 evidence and the disposed-controller guard are unchanged.
+
+Focused local validation passed repository validation for 215 files, whitespace,
+JavaScript syntax, frontend check 28/28 and production build. Cargo was unavailable on
+this client. Self-review confirmed a two-file application diff: the only timeout change
+is 180 to 300 seconds, terminal operations are sequential, the five checkpoint calls
+remain, no assertion changed, and no Source/core/application architecture file changed.
+Repository Quality run `35697359981` passed the exact candidate.
+
+After confirming no equivalent run was active or ambiguous, Phase 1 production run
+`35697492679` (#82) was dispatched once. Preflight `106647498726` passed. Windows x64
+`106647641203` and macOS ARM64 `106647641198` both passed browser, core, official-SDK
+lifecycle, real-service Source persistence, desktop-boundary and packaging. Both
+packaged artifacts retained `pre-source-complete`, `source-complete`,
+`post-source-recovery-complete` and `post-source-conflict-complete`, followed by
+`packaged boundary smoke report timed out`; neither retained `final-report-start`.
+Packaged smoke failed on both, so secret scan and dependency/licence inventory were
+skipped. P5 remains failed.
+
+The sequential ordering narrows the demonstrated blocker: the awaited post-conflict
+checkpoint reaches the host and is persisted, but its IPC response does not return to
+the JavaScript probe before the 300-second absolute ceiling. Per the authorised stop
+condition, do not increase the timeout again, rerun the same SHA, start another yield
+experiment, split the smoke automatically or modify Source Save. Native P3 remains the
+existing manual Windows Ctrl+S/macOS Cmd+S checklist. Keep PR #14 draft and stop for
+independent review.
