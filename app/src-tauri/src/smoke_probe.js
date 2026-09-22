@@ -1,5 +1,14 @@
 setTimeout(async () => {
   const invoke = window.__TAURI_INTERNALS__.invoke;
+  const yieldTask = () => new Promise((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      channel.port1.close();
+      channel.port2.close();
+      resolve();
+    };
+    channel.port2.postMessage(null);
+  });
   const known = await invoke("core_request", {
     request: { protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} },
   }).then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
@@ -24,7 +33,7 @@ setTimeout(async () => {
   const openProject = buttons.find((button) => button.textContent === "Open Loomlight Project");
   const welcomeLifecycleVisible = Boolean(newProject && openProject);
   newProject?.click();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await yieldTask();
   const pageText = document.body.textContent ?? "";
   const newProjectWizardVisible =
     pageText.includes("Project details") &&
@@ -218,9 +227,10 @@ setTimeout(async () => {
     if (typeof window.__loomlightInstallSmokeRequester !== "function") throw new Error("Missing smoke requester hook.");
     restoreSmokeRequester = window.__loomlightInstallSmokeRequester(smokeRequester);
     const waitFor = async (condition, description) => {
-      for (let attempt = 0; attempt < 100; attempt += 1) {
+      const deadline = performance.now() + 2000;
+      while (performance.now() < deadline) {
         if (condition()) return;
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        await yieldTask();
       }
       throw new Error(`Timed out waiting for ${description}`);
     };
@@ -234,7 +244,7 @@ setTimeout(async () => {
     const awaitCall = async (operation) => {
       supportingAuthoringStage = operation;
       await waitFor(() => called.has(operation), operation);
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await yieldTask();
     };
     const awaitSceneCommit = async (count, description) => {
       await waitFor(() => sceneApplyCount >= count, description);
@@ -315,7 +325,7 @@ setTimeout(async () => {
     await waitFor(() => called.has("variable.update"), "variable.update");
     supportingAuthoringStage = "overlapping-flush";
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await yieldTask();
     overlappingFlushSuppressed = !called.has("project.flush")
       && document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started";
     releaseVariableUpdate?.();
@@ -331,7 +341,7 @@ setTimeout(async () => {
     technical.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose and import…");
     await waitFor(() => importChoiceCount === 2, "cancelled asset choice");
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await yieldTask();
     const cancelledPreserved = technical.value === "theme"
       && [...document.querySelectorAll("button")].find((item) => item.textContent === "Choose and import…")?.disabled === false;
     supportingAuthoringStage = "repair-compatibility";
