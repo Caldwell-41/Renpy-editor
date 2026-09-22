@@ -255,6 +255,7 @@ setTimeout(async () => {
       if (!target) throw new Error(`Missing ${label}`);
       return target;
     };
+    const macPlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     supportingAuthoringStage = "welcome";
     click("Loomlight");
     await awaitSurface("Open Loomlight Project");
@@ -313,14 +314,14 @@ setTimeout(async () => {
     click("Save Default");
     await waitFor(() => called.has("variable.update"), "variable.update");
     supportingAuthoringStage = "overlapping-flush";
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await new Promise((resolve) => setTimeout(resolve, 20));
     overlappingFlushSuppressed = !called.has("project.flush")
       && document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started";
     releaseVariableUpdate?.();
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "completed variable update");
     supportingAuthoringStage = "flush";
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await awaitCall("project.flush");
     click("Assets");
     await awaitSurface("Choose and import…");
@@ -448,7 +449,6 @@ setTimeout(async () => {
     sourceAuthoringStage = "source-synthetic-shortcut-save";
     sourceEditor.focus();
     const sourceSaveShortcut = new Event("keydown", { bubbles: true, cancelable: true, composed: true });
-    const macPlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     Object.defineProperties(sourceSaveShortcut, {
       key: { value: "s" },
       ctrlKey: { value: !macPlatform },
@@ -536,8 +536,8 @@ setTimeout(async () => {
     projectStatus = "conflict";
     sceneWorkspace.scenes[0].sourceConflict = true;
     click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before conflict state"); click("Story");
-    await waitFor(() => document.body.textContent.includes("Source conflict"), "Scene source conflict state");
-    const conflictVisible = document.body.textContent.includes("Scene writes and history are blocked");
+    await waitFor(() => document.body.textContent.includes("Source projection unavailable"), "Scene source conflict state");
+    const conflictVisible = document.body.textContent.includes("Scene writes and history remain blocked");
     sceneWorkspace.scenes[0].sourceConflict = false;
     await checkpoint("post-source-conflict-complete");
     sceneAuthoringUiPassed = previewVisible
