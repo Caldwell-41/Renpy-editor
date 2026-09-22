@@ -37,5 +37,6 @@ Do not repeat the six unchanged native Save cases, merge, delete branches, or be
 Phase 1G. Production dispatch requires an explicit checkpoint decision and
 ownership check.
 
-**Publication:** application commit above and focused CI commit `74ce3487…` are
-published; this review ledger/handover publication must be verified on the remote.
+**Publication:** application commit above, passing focused CI probe `74ce3487…`,
+and removal of its temporary quality job `aa39e2fa…` are published. The F4 browser
+script remains in production gates. Verify this review ledger/handover on the remote.
