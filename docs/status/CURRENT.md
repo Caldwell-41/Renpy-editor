@@ -3,10 +3,10 @@
 **Updated:** 2026-09-22.
 **Integrated application:** Phase 0 and corrected Phase 1A-1E.
 **Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
-**Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), not ready to merge: native P3 remains outstanding.
-**Selected checkpoint:** [Native P3 package delivery and manual checklist](../tasks/active/phase-1f-native-p3-checklist.md). User-authorised package run #85 is in progress; native testing remains outstanding.
+**Active milestone:** [Phase 1F Source synchronisation](../tasks/active/phase-1f-source-synchronisation.md), blocked by the Scene JSON contract defect reported during manual setup; native P3 remains outstanding.
+**Selected checkpoint:** [Scene JSON contract correction](../tasks/active/phase-1f-save-correction.md#718-scene-json-contract-correction). Two enum field annotations and real-boundary regressions; replacement package validation required.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
+**Previously validated application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
 ## Verified automated result
@@ -41,3 +41,14 @@ with upload enabled: [#85, 35711244992](https://github.com/Caldwell-41/Renpy-edi
 at documentation-only head `6d1ab428b2e3cd052323a8890c27897fb906b937`.
 This does not authorise merge, Phase 1G, application changes or new native automation.
 See the [manual checklist](../tasks/active/phase-1f-native-p3-checklist.md).
+
+
+## Manual testing blocker
+
+Run #85 completed and uploaded both installers, but the user cannot commit an edited
+starting narration or a new Beat: `The Scene operation is invalid.` A renderer/Rust
+JSON field-casing mismatch is identified and corrected locally, with three new core
+regressions. Rust execution remains unavailable locally; no corrected target pass is
+claimed yet. Prior automated evidence used fake UI or typed Rust commands at the
+relevant boundary and missed this defect. See HANDOVER for the corrected candidate
+and build state. Do not repeat P3 on #85 or merge PR #14.

@@ -1104,3 +1104,57 @@ Only documentation changes in this checkpoint; keep PR #14 draft and preserve ma
 
 Documentation self-review and `python3 scripts/validate.py` (217 files) passed, as
 did `git diff --check`. No application suite was rerun locally for these doc changes.
+
+
+### 7.18 Scene JSON contract correction
+
+The user reported that editing the starting narration and inserting a new Beat both
+fail with `The Scene operation is invalid.` during manual package testing. This
+selects a bounded defect correction in the current branch/PR, with replacement
+packages under the existing build/publication request. Native P3 is blocked at setup;
+this report does not establish a native Save-key defect. Do not merge or start 1G.
+
+Ref inspection found head `616667ce9b1d13928c7acf57d0c86cd685363946`, draft PR #14.
+Run #85 (`35711244992`), attempt 1, is now terminal success on build ref `6d1ab428`:
+Preflight `106692103651`, Windows `106692343143`, macOS `106692343146` all passed.
+Its package artifacts exist: Windows `10687188438` and macOS `10686289367`, both
+expiring 2026-09-29. Those packages contain the reported defect; package delivery
+success is not user acceptance. Do not ask the user to repeat acceptance on #85.
+
+Code inspection identifies the shared wire-contract defect. The renderer sends
+`sceneId`, `expectedSourceRevision`, `beatId` and other camelCase fields. Both
+`SceneCommand` and `BeatPayload` only declared enum `rename_all = "camelCase"`, which
+renames variants but not their fields. Rust therefore expected snake_case fields.
+`handle_application_request` maps a deserialization failure to the exact reported
+`INVALID_PAYLOAD` message before any Scene transaction starts. Beat response payloads
+also emitted snake_case character/asset/variable IDs, inconsistent with the renderer.
+See [Serde's container attribute definitions](https://serde.rs/container-attrs.html).
+
+Bounded production correction: add `rename_all_fields = "camelCase"` to these two
+enums. The renderer contract, source bytes, transaction/revision/history semantics,
+permissions and Save coordinator are unchanged. No speculative parser or Save redesign.
+
+Regression coverage added:
+
+- All 17 Scene command variants decode literal renderer JSON; a non-null
+  `beforeBeatId` must be retained, not silently ignored.
+- All 16 Beat payload variants decode and serialize the exact camelCase JSON shape,
+  including nested Choice destinations and character/appearance/asset/variable IDs.
+- A real `handle_application_request` test opens a generated starting Scene, edits
+  its existing narration, inserts another narration before it, checks persisted
+  order, rejects stale/malformed requests without writes, and verifies disk and
+  projection after reopening with a fresh lifecycle service.
+
+Why existing green evidence missed it: the packaged authoring smoke uses a fake
+requester; the real Scene target helper constructs typed Rust commands and bypasses
+JSON deserialization. The new regression crosses the actual JSON request boundary
+and runs in the existing core suite on both targets. Historical passes are preserved
+with this coverage limitation; they never certified the missing native P3 results.
+
+Local Rust execution/formatting is unavailable: this client has no Rust toolchain and
+the official distribution endpoint timed out. No executable pre-fix red or post-fix
+Rust pass is claimed locally. Static review, repository validation and whitespace
+checks are the local evidence; supported-target results must validate the correction
+before replacement packages can be called ready. Do not weaken or skip any existing
+production gate. Dispatch one coherent corrected candidate with package upload enabled,
+record exact SHA/run/attempt, and stop on failure or a required manual-resume boundary.

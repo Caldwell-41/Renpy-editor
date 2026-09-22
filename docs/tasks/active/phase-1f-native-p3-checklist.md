@@ -1,7 +1,9 @@
 # Phase 1F — native P3 manual acceptance
 
 **Prepared:** 2026-09-22.
-**State:** package build in progress; all native results are untested.
+**State:** blocked by the user-reported Scene JSON contract defect in build #85.
+Do not use #85 to sign off P3. Await validated replacement packages; native results
+remain untested. See [the correction ledger](phase-1f-save-correction.md#718-scene-json-contract-correction).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
 **Reviewed application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
@@ -64,7 +66,10 @@ browser JavaScript, `dispatchEvent`, developer tools or the packaged smoke mode.
    **Browse existing SDK** if necessary. Node, npm, Rust and Codex are not required
    to run the packaged application. Git initialisation is optional for this test.
 4. Finish **Review & Create**, then open **Story** and its initial Scene.
-5. Use **Add Beat**, choose **Narration**, enter `P3 baseline`, and commit the Beat.
+5. First edit and commit the starting narration to confirm Scene commits work.
+   Then use **Add Beat**, choose **Narration**, enter `P3 baseline`, and commit the
+   new Beat. If either operation reports **The Scene operation is invalid**, stop
+   and record setup as blocked; do not continue or mark native Save as failed.
 6. Use **View in Source** for that Beat, or open **Source** and select its Scene
    `.rpy` file. Locate the quoted narration text. Keep its quotes and indentation intact.
 7. Confirm Source is clean and the project reports **Saved**, with no modal,

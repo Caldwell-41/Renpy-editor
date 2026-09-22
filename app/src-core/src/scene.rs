@@ -47,7 +47,7 @@ pub enum TransitionRef {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", tag = "type")]
 pub enum BeatPayload {
     Background {
         asset_id: String,
@@ -204,7 +204,7 @@ pub struct RecoveryResolveRequest {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", tag = "type")]
 pub enum SceneCommand {
     CreateChapter {
         display_name: String,
@@ -2645,6 +2645,71 @@ mod tests {
     use std::collections::BTreeMap;
     use std::fs;
     use tempfile::TempDir;
+
+    #[test]
+    fn scene_commands_decode_renderer_camel_case_fields() {
+        use serde_json::json;
+        // Literal renderer JSON, never serialize a Rust command to make the input.
+        let commands = [
+            json!({"type": "createChapter", "displayName": "Chapter"}),
+            json!({"type": "renameChapter", "chapterId": "c", "displayName": "Chapter"}),
+            json!({"type": "moveChapter", "chapterId": "c", "direction": "up"}),
+            json!({"type": "deleteChapter", "chapterId": "c"}),
+            json!({"type": "createScene", "chapterId": "c", "displayName": "Scene"}),
+            json!({"type": "createSceneFromChoice", "sceneId": "s", "expectedSourceRevision": "r", "choiceBeatId": "b", "optionText": "Go", "chapterId": "c", "displayName": "Scene"}),
+            json!({"type": "renameScene", "sceneId": "s", "displayName": "Scene"}),
+            json!({"type": "moveScene", "sceneId": "s", "chapterId": "c", "direction": null, "expectedSourceRevision": "r"}),
+            json!({"type": "deleteScene", "sceneId": "s", "expectedSourceRevision": "r"}),
+            json!({"type": "selectScene", "sceneId": "s"}),
+            json!({"type": "insertBeat", "sceneId": "s", "expectedSourceRevision": "r", "beforeBeatId": "before", "beat": {"type": "narration", "text": "New"}}),
+            json!({"type": "updateBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "beat": {"type": "narration", "text": "Edited"}}),
+            json!({"type": "continueDialogue", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "characterId": "character", "text": "Next"}),
+            json!({"type": "removeBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b"}),
+            json!({"type": "moveBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "direction": "down"}),
+            json!({"type": "undo"}),
+            json!({"type": "redo"}),
+        ];
+        for command in commands {
+            let request = json!({
+                "expectedProjectRevision": "project-revision",
+                "expectedSourceMapRevision": "map-revision",
+                "command": command,
+            });
+            let decoded: SceneCommandRequest = serde_json::from_value(request.clone())
+                .unwrap_or_else(|error| panic!("renderer request {request}: {error}"));
+            if let SceneCommand::InsertBeat { before_beat_id, .. } = decoded.command {
+                assert_eq!(before_beat_id.as_deref(), Some("before"));
+            }
+        }
+    }
+
+    #[test]
+    fn beat_payloads_round_trip_the_renderer_wire_contract() {
+        use serde_json::json;
+        // Check output too: scene.list must expose characterId/assetId, not snake_case.
+        for wire in [
+            json!({"type": "background", "assetId": "a", "transition": "fade"}),
+            json!({"type": "showCharacter", "characterId": "c", "appearanceId": "a", "placement": "centre", "transition": "none"}),
+            json!({"type": "hideCharacter", "characterId": "c", "transition": "none"}),
+            json!({"type": "changeAppearance", "characterId": "c", "appearanceId": "a", "transition": "dissolve"}),
+            json!({"type": "placement", "characterId": "c", "placement": "left"}),
+            json!({"type": "dialogue", "characterId": "c", "text": "Hello"}),
+            json!({"type": "narration", "text": "Narration"}),
+            json!({"type": "playMusic", "assetId": "a"}),
+            json!({"type": "stopMusic"}),
+            json!({"type": "playSfx", "assetId": "a"}),
+            json!({"type": "transition", "transition": "fade"}),
+            json!({"type": "setVariable", "variableId": "v", "value": true}),
+            json!({"type": "choice", "options": [{"text": "Go", "destinationSceneId": "s"}]}),
+            json!({"type": "jump", "sceneId": "s"}),
+            json!({"type": "return"}),
+            json!({"type": "customCode", "source": "pass", "reason": "Unsupported"}),
+        ] {
+            let payload: BeatPayload = serde_json::from_value(wire.clone())
+                .unwrap_or_else(|error| panic!("renderer Beat {wire}: {error}"));
+            assert_eq!(serde_json::to_value(payload).unwrap(), wire);
+        }
+    }
 
     struct Fixture {
         _temporary: TempDir,

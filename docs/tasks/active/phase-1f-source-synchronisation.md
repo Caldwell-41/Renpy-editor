@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** automated P1/P2/P4/P5 passed on both targets; native P3 remains outstanding. User-authorised package run #85 supports the [manual checklist](phase-1f-native-p3-checklist.md). Phase 1F is not accepted, integrated, or authorised for 1G.
+**State:** blocked by the user-reported Scene JSON contract defect in package #85; native P3 cannot proceed until corrected packages pass validation. Prior automated passes are historical evidence with a demonstrated coverage gap. See [the correction](phase-1f-save-correction.md#718-scene-json-contract-correction). No merge or 1G.
 **Current correction:** [1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence); its execution closeout and [ADR 0007](../../adr/0007-shell-save-command-ownership.md) govern the remaining independent review.
 **Execution authority:** The user requested the correction documentation and a next-chat goal. Starting that goal selects 1F-SAVE, not a restart of this milestone. This documentation publication authorises no application edits or production dispatch by itself.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
@@ -479,3 +479,11 @@ installer delivery because #84 did not retain packages, not a speculative retry 
 failed evidence. Native acceptance is untested. See [the checklist](phase-1f-native-p3-checklist.md)
 and [HANDOVER](../../status/HANDOVER.md) for package verification and the next action.
 The stale opening P5 status has been corrected; all historical evidence is retained.
+
+
+2026-09-22 manual package feedback: Editing the starting narration and adding a Beat
+fail with `The Scene operation is invalid.` The bounded [Scene JSON correction](phase-1f-save-correction.md#718-scene-json-contract-correction)
+aligns enum fields with the existing renderer contract and adds literal-JSON and
+real-IPC persistence regressions. Native P3 is blocked at setup; #85 installers must
+not be presented as accepted or retested for signoff. Corrected packages need fresh
+validation. No Source Save/core transaction redesign, merge or 1G is selected.

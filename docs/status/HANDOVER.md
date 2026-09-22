@@ -2,56 +2,61 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Native P3 package delivery and [manual checklist](../tasks/active/phase-1f-native-p3-checklist.md).
-**State:** `awaiting_ci`; native P3 remains untested. No merge or Phase 1G.
+**Checkpoint:** [Scene JSON contract correction](../tasks/active/phase-1f-save-correction.md#718-scene-json-contract-correction).
+**State:** correction implemented; supported-target validation and replacement packages required.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Reviewed application candidate:** `85e44e926399ae7ad8431c948e1751db04dcde35`.
-**Package build ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937`.
-The difference is four documentation files only; application/dependencies/workflow
-are unchanged. No unrelated working copy was modified.
+**Entry head:** `616667ce9b1d13928c7acf57d0c86cd685363946`.
+**Previous package ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937` (#85; contains the reported defect).
 
-## Authority and prior acceptance
+## User report and bounded action
 
-After independent review, the user explicitly requested Windows/macOS builds,
-publication on the repository and a detailed testing checklist. That authorises one
-package-producing run with uploads enabled, superseding the old no-redispatch boundary
-for this purpose. Do not change application code, merge, begin Phase 1G or build new
-native automation. The existing workflow retains its full production gates.
+The user cannot commit edits to the initial narration or add any Beat: the app reports
+`The Scene operation is invalid.` This selects a bounded defect correction and
+replacement installers under the existing package request. Do not merge, begin 1G,
+redesign Source Save or change the transaction/recovery architecture.
 
-Production #84 (`35708223679`), attempt 1, passed the exact application candidate on
-Windows x64/macOS ARM64, including accepted final reports, real-service persistence,
-secret scans and inventories. Repository Quality `35707727479` passed. P1/P2/P4/P5
-are satisfied; synthetic shortcuts do not satisfy native P3. See
-[1F-SAVE section 7.16](../tasks/active/phase-1f-save-correction.md#716-final-report-lexical-scope-correction)
-for retained exact evidence. #84 uploaded evidence only, not installable packages.
+The renderer uses camelCase Scene command and Beat fields. Rust enum `rename_all`
+renames variants only, leaving their fields snake_case. `scene.apply` rejects the
+renderer request during deserialization and returns the exact reported error. Beat
+responses also use the wrong field names for character/asset/variable references.
 
-## Installer delivery operation
+## Correction and validation
 
-[Production 35711244992 (#85)](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35711244992),
-attempt 1, was dispatched once with `upload_packages=true`. The run page confirmed
-`6d1ab428b2e3cd052323a8890c27897fb906b937`; Preflight job `106692103651` started.
-No equivalent run was active at dispatch. Do not redispatch or automatically retry.
+Production change: add `rename_all_fields = "camelCase"` to `SceneCommand` and
+`BeatPayload`. No other runtime behavior is intentionally changed. New tests cover
+17 command shapes, 16 Beat round trips, and a real IPC starting-narration edit/Beat
+insert with disk, stale/malformed refusal, and fresh-service reopen assertions.
 
-Expected package artifacts: `phase-1-production-package-windows-2025` and
-`phase-1-production-package-macos-26`. Upload happens after target gates, but is
-`continue-on-error`; successful jobs alone do not prove the installers were uploaded.
-Verify artifact existence, SHA/run mapping, contents and seven-day expiry. Evidence
-archives are not installers. Build completion/package delivery is not yet claimed.
+The old packaged UI smoke fakes the requester; the real Scene helper passes typed
+Rust commands. Neither crossed the missing JSON boundary. The new real-IPC regression
+runs in the existing core suite on both targets. No workflow/dependency change.
+
+Local `python3 scripts/validate.py` (217 files) and `git diff --check` pass. Static
+review confirms two production attribute changes plus tests. Rust is unavailable in
+this client, and fetching the official distribution timed out. No local compiled
+red/green or Rust-format pass is claimed. The target workflow must validate this
+candidate before installers are considered ready; do not transfer #85's pass.
+
+## Existing package run
+
+#85 (`35711244992`), attempt 1, passed Preflight `106692103651`, Windows
+`106692343143` and macOS `106692343146` on exact ref `6d1ab428`.
+Windows installer artifact `10687188438` and macOS `10686289367` both exist and
+expire 2026-09-29. These installers are blocked by the reported defect. Preserve the
+run as historical evidence and do not ask the user to repeat P3 on these builds.
 
 ## Next bounded action
 
-Inspect the existing #85 terminal jobs and package artifacts, then publish download
-links and the completed delivery record. If still running, preserve this exact
-run/attempt/ref handover and stop model polling under AGENTS/WORKFLOW; there is no
-qualified automatic same-thread continuation here. On failure record the exact
-stage/error and stop; no blind retry. The existing #84 pass is not a #85 pass.
+Publish the correction on this branch after confirming no newer work, then dispatch
+the existing production workflow once with package upload enabled. Record the exact
+corrected SHA/run/attempt and inspect the actual new core regression, packaging,
+smoke, scans, inventories and artifact uploads. A successful job does not prove upload
+because the upload step is continue-on-error. No automatic retry or merge.
 
-Then the user performs [the checklist](../tasks/active/phase-1f-native-p3-checklist.md)
-on both packaged targets: dirty Source accepts, clean Source ordinarily Flushes, and
-non-Source Flush preserves a pending Source draft. Record real Ctrl+S/Cmd+S input,
-OS/architecture, package identity and observed outcomes. All six rows remain untested;
-unclear native delivery must not be marked passed. Return results for review.
-
-The checklist and current-state corrections are documentation-only. PR #14 remains
-draft; reconciliation with updated main is a later integration action, not part of
-installer delivery. Publication/validation results belong in the active ledger.
+If the run remains active at handoff, keep the exact identity here and stop model
+polling under AGENTS/WORKFLOW. Native P3 remains blocked/untested until valid replacement
+packages are available and the user completes [the checklist](../tasks/active/phase-1f-native-p3-checklist.md).
+The checklist now requires starting-narration edit and new-Beat commit before native
+shortcut tests. Record the user's OS/package identity with their next result; it was
+not specified in the defect report. P3 cannot be marked failed/passed from this setup
+failure alone. Keep PR #14 draft; no Phase 1G or main reconciliation in this checkpoint.

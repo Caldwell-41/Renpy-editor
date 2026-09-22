@@ -1937,6 +1937,119 @@ mod tests {
     }
 
     #[test]
+    fn scene_renderer_json_edits_and_inserts_beats_through_real_ipc() {
+        use serde_json::{json, Value};
+
+        fn ipc(service: &mut LifecycleService, operation: &str, payload: Value) -> Value {
+            serde_json::to_value(crate::handle_application_request(
+                json!({
+                    "protocolVersion": 1,
+                    "requestId": "scene-renderer-regression",
+                    "operation": operation,
+                    "payload": payload,
+                }),
+                false,
+                service,
+            ))
+            .unwrap()
+        }
+
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("scene-renderer-project");
+        make_openable_project(&root, "Scene renderer regression");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let project = service.open_path(&root).unwrap();
+        let session = &project.session_id;
+        let listed = ipc(&mut service, "scene.list", json!({"sessionId": session}));
+        assert_eq!(listed["ok"], true, "{listed}");
+        let mut workspace = listed["value"].clone();
+        let scene_id = workspace["entrySceneId"].clone();
+        let scene = workspace["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let source_path = scene["sourcePath"].as_str().unwrap().to_owned();
+        let beat_id = scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|beat| beat["payload"]["type"] == "narration")
+            .unwrap()["id"]
+            .clone();
+
+        // These are the editor's real JSON envelopes, not typed Rust commands.
+        let update = json!({
+            "sessionId": session,
+            "expectedProjectRevision": workspace["projectRevision"],
+            "expectedSourceMapRevision": workspace["sourceMapRevision"],
+            "command": {
+                "type": "updateBeat", "sceneId": scene_id,
+                "expectedSourceRevision": scene["sourceRevision"], "beatId": beat_id,
+                "beat": {"type": "narration", "text": "Edited via renderer IPC"},
+            },
+        });
+        let updated = ipc(&mut service, "scene.apply", update.clone());
+        assert_eq!(updated["ok"], true, "{updated}");
+        workspace = updated["value"].clone();
+        let edited_bytes = fs::read(root.join(&source_path)).unwrap();
+        assert!(String::from_utf8_lossy(&edited_bytes).contains("Edited via renderer IPC"));
+
+        let stale = ipc(&mut service, "scene.apply", update.clone());
+        assert_eq!(stale["error"]["code"], "SOURCE_CONFLICT");
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);
+        let mut malformed = update;
+        malformed["command"].as_object_mut().unwrap().remove("sceneId");
+        let rejected = ipc(&mut service, "scene.apply", malformed);
+        assert_eq!(rejected["error"]["code"], "INVALID_PAYLOAD");
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);
+
+        let scene = workspace["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let inserted = ipc(
+            &mut service,
+            "scene.apply",
+            json!({
+                "sessionId": session,
+                "expectedProjectRevision": workspace["projectRevision"],
+                "expectedSourceMapRevision": workspace["sourceMapRevision"],
+                "command": {
+                    "type": "insertBeat", "sceneId": scene_id,
+                    "expectedSourceRevision": scene["sourceRevision"], "beforeBeatId": beat_id,
+                    "beat": {"type": "narration", "text": "Inserted via renderer IPC"},
+                },
+            }),
+        );
+        assert_eq!(inserted["ok"], true, "{inserted}");
+        let accepted = fs::read(root.join(&source_path)).unwrap();
+        let text = String::from_utf8_lossy(&accepted);
+        let inserted_at = text.find("Inserted via renderer IPC").unwrap();
+        let edited_at = text.find("Edited via renderer IPC").unwrap();
+        assert!(inserted_at < edited_at);
+
+        // A fresh service verifies durability rather than reusing an in-memory model.
+        service.close().unwrap();
+        drop(service);
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let reopened = service.open_path(&root).unwrap();
+        let listed = ipc(
+            &mut service,
+            "scene.list",
+            json!({"sessionId": reopened.session_id}),
+        );
+        assert_eq!(listed["ok"], true, "{listed}");
+        let projected = listed["value"].to_string();
+        assert!(projected.contains("Inserted via renderer IPC"));
+        assert!(projected.contains("Edited via renderer IPC"));
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), accepted);
+    }
+
+    #[test]
     fn failed_candidate_recovery_preserves_current_project() {
         use crate::transaction::{
             CommitOutcome, ErrorCode, FaultInjector, FaultPoint, FileMutation, MutationKind,

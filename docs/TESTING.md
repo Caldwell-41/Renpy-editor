@@ -418,3 +418,16 @@ silently assume, are visible edit feedback within 100 ms, incremental source map
 within 250 ms for a typical Scene file, responsive pan/filter on a 10,000-node graph
 through virtualization where that graph work is in scope, and no UI-thread blocking
 during SDK or Git operations.
+
+
+## Scene JSON boundary regression
+
+Scene UI mocks and typed Rust service calls do not validate the renderer/core wire
+contract. Keep literal camelCase request coverage for every `SceneCommand` variant
+and exact serialization coverage for every `BeatPayload` variant. Enum variant
+renaming and variant-field renaming are separate Serde settings. Exercise starting
+narration update and Beat insertion through `handle_application_request` with a real
+lifecycle/project, verify accepted bytes and reopened projection, and retain refusal
+checks for stale revisions and malformed payloads. These tests run in the normal core
+suite on both packaged targets. Synthetic UI routing still does not replace native
+keyboard acceptance.
