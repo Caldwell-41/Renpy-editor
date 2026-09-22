@@ -59,3 +59,8 @@ Scene correction `36904fd2deecf37bc55276bc4ce6e2eedb511d8e` is published.
 attempt 1, failed Rust formatting in Preflight `106717842885`; target jobs were skipped.
 The exact formatter changes are applied in the following candidate. See HANDOVER for
 its validation/package identity. No corrected Rust/target pass or P3 acceptance yet.
+
+Formatted candidate `0b9ea0f0c23f843b3324cd63a524a642a2399f2e` is published.
+[Production #87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1,
+started with package uploads enabled; Preflight passed and both targets were running. Manual resume: inspect this existing run;
+no redispatch. Corrected target evidence and installer availability remain pending.

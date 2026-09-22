@@ -6,11 +6,11 @@ Do not use #85 to sign off P3. Await validated replacement packages; native resu
 remain untested. See [the correction ledger](phase-1f-save-correction.md#718-scene-json-contract-correction).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
-**Initial correction candidate (formatting failed):** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
-**Failed replacement build ref:** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
+**Corrected application candidate (validation pending):** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
+**Replacement package build ref:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 This corrects the Scene/Beat JSON contract defect in the previous #85 packages.
-Run #86 failed formatting and produced no replacement packages. Await the formatted
-candidate/run recorded in HANDOVER; it is not ready until target gates and uploads pass.
+Run #86 failed formatting and produced no replacement packages. Formatted replacement
+run #87 passed Preflight and both target jobs were running at handoff; it is not ready until target gates and actual package uploads pass.
 Version `0.1.0` alone does
 not identify this candidate: retain the run and commit below.
 
@@ -22,7 +22,7 @@ Phase 1G or new automation is selected.
 
 ## 1. Download and identify the packages
 
-Failed replacement run: [35719196417 (#86), attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417).
+Package-producing run: [35719829561 (#87), attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561).
 The existing production workflow was dispatched once with `upload_packages=true`.
 It builds both supported targets and uploads each package only after that target's
 production checks pass. The upload step is allowed to fail without failing the job,
@@ -179,8 +179,8 @@ Do not prefill passing results. **PASS** means the stated outcome was observed;
 Target: Windows x64 / macOS ARM64
 OS version and architecture:
 Test date:
-Package run: https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417
-Package build SHA: 36904fd2deecf37bc55276bc4ce6e2eedb511d8e
+Package run: https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561
+Package build SHA: 0b9ea0f0c23f843b3324cd63a524a642a2399f2e
 Artifact name and ID:
 Installer filename:
 Installer SHA-256 (optional):

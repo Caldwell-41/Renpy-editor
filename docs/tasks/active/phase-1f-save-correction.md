@@ -1173,3 +1173,13 @@ Rust test pass or packages resulted. Applied the exact three formatting diffs fr
 the job log without semantic changes. A new formatted candidate requires its own
 validation run; #86 remains failed evidence, not an automatic retry of unchanged input.
 Native P3 remains blocked/untested.
+
+Formatted candidate `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`, tree
+`ca2aec4568f1b093d0e9cb2c4b157f7d263f1ef6`, changes only the three formatter hunks
+and four evidence/status documents relative to `36904fd2`. Repository validation
+(217 files) and whitespace passed. After confirming #86 terminal and no equivalent
+active run, dispatched [#87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561)
+once, attempt 1, `upload_packages=true`. The run page confirms this exact SHA; Preflight passed and both target jobs were running.
+Manual-resume handoff under AGENTS/WORKFLOW: inspect #87, including actual new Rust
+regression results and installer uploads; do not redispatch. No corrected target pass
+or replacement package availability is claimed at handoff. Keep PR #14 draft.

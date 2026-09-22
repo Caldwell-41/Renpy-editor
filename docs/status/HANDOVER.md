@@ -3,9 +3,10 @@
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
 **Checkpoint:** [Scene JSON contract correction](../tasks/active/phase-1f-save-correction.md#718-scene-json-contract-correction).
-**State:** `in_progress`; applying exact CI formatting changes before replacement validation.
+**State:** `awaiting_ci`; manual resume required, corrected target evidence/packages pending.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Initial correction candidate (format failure):** `36904fd2deecf37bc55276bc4ce6e2eedb511d8e`.
+**Corrected application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
+**Active package run:** [#87, 35719829561](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719829561), attempt 1, `upload_packages=true`; confirmed on this exact SHA.
 **Failed package run:** [#86, 35719196417](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35719196417), attempt 1, `upload_packages=true`.
 **Entry head:** `616667ce9b1d13928c7acf57d0c86cd685363946`.
 **Previous package ref:** `6d1ab428b2e3cd052323a8890c27897fb906b937` (#85; contains the reported defect).
@@ -51,14 +52,16 @@ run as historical evidence and do not ask the user to repeat P3 on these builds.
 
 Run #86 failed Rust formatting in Preflight `106717842885`; both target builds were
 skipped. The log requires only expanding two Serde attributes and one new test method
-chain. Those exact formatting changes are applied without semantics changes. Publish
-the formatted candidate and validate it once with package upload enabled under the
-existing correction/build authority. Do not rerun unchanged #86 inputs.
+chain. Those exact formatting changes are published without semantic changes.
+Run #87 was dispatched once after confirming #86 terminal and no equivalent active
+run. Inspect existing #87 on manual resume; do not redispatch or rerun #86 inputs.
 
 Verify the new core regression, packaging, smoke, scans, inventories and actual uploads.
 A successful job does not prove upload because that step is continue-on-error.
-Record the new run/attempt/SHA; if active at handoff, stop model polling under
-AGENTS/WORKFLOW and leave a manual-resume handover. No automatic retry or merge.
+The exact run/attempt/SHA is recorded above. Preflight passed and both target jobs were running at handoff; model polling
+stops under AGENTS/WORKFLOW. No qualified automatic continuation exists here.
+No corrected Rust pass or replacement package availability is claimed.
+No automatic retry or merge.
 
 Native P3 remains blocked/untested until valid replacement packages are available and
 the user completes [the checklist](../tasks/active/phase-1f-native-p3-checklist.md).
