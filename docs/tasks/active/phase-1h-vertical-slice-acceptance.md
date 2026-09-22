@@ -62,10 +62,10 @@ policy; it cannot substitute for the integrated workflow on the final candidate.
 
 | Area | Required cases | Parent mapping |
 | --- | --- | --- |
-| Graph | Missing versus unknown targets, partial Choice, duplicate option text, self-loop, reconvergence, source navigation both directions, stale selection after deletion, declared size limit | H04, H07, H11, H12 |
+| Graph | Missing versus unknown targets with proven absence, incomplete/ambiguous label inventory, partial Choice, duplicate option text, self-loop, reconvergence, source navigation both directions, stale selection after deletion, declared size limit | H04, H07, H11, H12 |
 | Draft preparation | Save All and continue, explicitly use saved revision, Cancel, refused Save All retains all input, dirty Source remains Pending validation | H07, H08, H11 |
 | Trust | Untrusted open/preview/import/typing has zero SDK launch; reject stale grant after root/SDK or relevant executable change; revocation and copied-UUID rejection | H08, H11 |
-| Runtime | Play beyond smoke timeout, continued authoring and earlier-revision status, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
+| Runtime | Play beyond smoke timeout, continued authoring and launch-revision status including later reads of changed assets, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
 | Diagnostics | Multiline SDK failures, Unicode/spaces/BOM/newlines, absent location, deleted/out-of-scope file, stale revision, inert output, bounds/truncation and empty parsed list after failure | H07, H08, H11 |
 | Git | First commit, no repo, missing executable/identity, binary/add/delete, source/metadata dependencies, selected partial staging, unrelated staging preserved, stale HEAD/index/review | H01, H08, H11 |
 | Git failures | Hostile hooks/filters/config/helpers remain unexecuted; interruption around HEAD/index publication preserves evidence and recognises already-created commit | H08, H10, H11 |

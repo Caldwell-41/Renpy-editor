@@ -123,6 +123,10 @@ Display process text as inert bounded text; no active HTML or arbitrary file/URL
    Choice may expose proven routes with an explicit incomplete boundary, never silently
    disappear or imply all routes were found. Additional custom labels are not invented
    supported Scenes; show partial/unmapped flow and bounded Source navigation where safe.
+   Mark a target missing only when the bounded project-wide label inventory proves its
+   absence. Duplicate/ambiguous labels, unreadable files or incomplete recognition mean
+   unresolved/unknown, not proven missing. Reuse the shared lexical/source boundary;
+   do not add a regex graph parser or expand into a general language implementation.
 4. Build Branches with basic deterministic layout, pan/zoom, fit-to-view, selected Scene
    and edge state, keyboard-accessible equivalent controls, and explicit origin/destination
    navigation. Keep dialogue rows out of the default graph. Preserve caret/drafts on
@@ -158,7 +162,7 @@ including cancellation and failure from each relevant intermediate state.
 | Duplicate Run/Validate | One owned SDK operation at a time; explicit busy result, no duplicate spawn |
 | Preparation | Drain/flush/recheck under a short coordination lease; never hold lifecycle mutex through child lifetime |
 | Validation | Temporarily block writes that invalidate the validation manifest; bounded timeout/cancellation; external change marks results stale |
-| Running game | Allow ordinary authoring; display launch revision and Running an earlier revision after relevant edits |
+| Running game | Allow ordinary authoring; display launch revision and Started from an earlier revision after relevant edits |
 | Runtime reload | Verify and control SDK automatic reload so editing does not silently execute a new revision under the old Run action |
 | Move/delete/undo | Reject only operations conflicting with live source/compiled-file ownership, including relevant history inverses; show Stop action |
 | Switch/close/exit | Offer Stop and continue / Cancel; finish child cleanup before invalidating session; then honour existing draft leave flow |
@@ -171,6 +175,12 @@ source saves, file lifecycle, history, recovery and Git checkpoints. Runtime-con
 operations may offer Stop and retry; do not impose a whole-session editor lock as an
 unannounced scope reduction. If safe continued authoring or reload control cannot be
 proven, stop with a specific design finding for user review.
+
+Launch provenance is not a promise that every later runtime read uses those same bytes.
+The live game can load an updated asset or other file after an editor/external change.
+Explain that distinction when changes occur; do not present the runtime as an immutable
+copy or proof of the newly edited revision. Route acceptance uses a controlled unchanged
+fixture, while a separate live-read test verifies truthful status during authoring.
 
 Cover environment/argument safety, root/SDK revalidation, spawn/cleanup races, bounded
 reader shutdown even when descendants retain pipes, cancellation during preparation,
@@ -346,3 +356,23 @@ Branches, a whole-session editor lock and refusal for any staged Git content. Te
 mechanisms remain proof obligations in their owning checkpoints, not claims of tested
 implementation. Repository validation and remote-diff review belong to this planning
 publication; application/native acceptance has not been run by it.
+
+### Post-publication review
+
+The review of [planning PR #15](https://github.com/Caldwell-41/Renpy-editor/pull/15)
+against the agreed conversation and parent contract found two precision gaps in the
+initial planning candidate `7a71eb94e916a91b9ae6914a85934ad099f3d895`:
+
+- A statically named target is not proven missing merely because no mapped Scene owns
+  it. Section 4 now requires proven absence and treats incomplete/ambiguous inventories
+  as unknown, with H07/H11 regression coverage.
+- Continued editing means the game can read changed files after launch. Section 5 now
+  distinguishes launch provenance from immutable runtime input; H08 tests live-read
+  status separately from deterministic route acceptance.
+
+All previously agreed decisions map to the table above; H01–H12 retain the parent's
+complete acceptance matrix. Remote review confirmed five Markdown paths only, with
+CURRENT/HANDOVER, active 1F files, code/workflows and Phase 2 content preserved.
+The local repository validator passed for 208 files and staged whitespace checks passed.
+Git safety and runtime coordination remain unimplemented proof gates, not unresolved
+planning omissions. This review makes no native acceptance or merge claim.
