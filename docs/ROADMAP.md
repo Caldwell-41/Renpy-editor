@@ -55,7 +55,9 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 
 ## Phase 2 — Initial LLM assistance
 
-**Outcome:** Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. No hardcoded model catalogue or automatic application.
+**Outcome:** Unsloth Studio, Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
+
+The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
 
