@@ -19,12 +19,12 @@ macOS 26.6.2; Windows was described as “the latest windows version”, without
 version/build. This is user-reported package provenance, not independent binary
 inspection. Do not invent screenshots, per-step observations or installer hashes, or
 repeat unchanged native Save tests. Exact Windows version/build remains unspecified.
-Phase 1F acceptance is separately blocked by [review findings](phase-1f-save-correction.md#722-independent-closeout-review).
+Phase 1F acceptance awaits independent review of the [verified #88 correction](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
 Signing/notarisation remains the later DIST-MAC-01 limitation, not a native Save failure.
 
 
 **Prepared:** 2026-09-22.
-**State:** six user-reported native passes recorded above; build #87 and macOS 26.6.2 confirmed by the user; numeric Windows build unspecified. Corrected-candidate validation and independent review remain.
+**State:** six user-reported native passes recorded above; build #87 and macOS 26.6.2 confirmed by the user; numeric Windows build unspecified. Corrected-candidate #88 validation passed; independent review remains.
 Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
@@ -42,6 +42,16 @@ and this detailed checklist after independent review. That authorises the packag
 build and documentation, superseding the previous no-redispatch boundary for this
 purpose only. The subsequent Beat-commit defect report authorises its bounded correction. No merge,
 Phase 1G or new automation is selected.
+
+## Corrected build #88 follow-up — 2026-09-22
+
+The historical #87 procedure/results below remain intact. Corrected build #88
+(`35732725675`, attempt 1, `f452d0a8c1599b05650ae2e835d14d9f86f14653`) passed both
+automated targets. Package/evidence ZIP hashes and contents were verified; downloads
+and installer hashes are in [ledger section 7.24](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
+No native #88 installation or manual F1–F3 pass is claimed. Preserve all six #87 native
+Save passes. Independent review is next; any requested new native testing should focus
+on stale Apply Both confirmation, selected-Beat insertion and Background clearing only.
 
 ## 1. Download and identify the packages
 

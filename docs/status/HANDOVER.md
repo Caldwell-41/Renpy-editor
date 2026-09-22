@@ -2,74 +2,68 @@
 
 **Prepared:** 2026-09-22.
 **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** **1F-CLOSEOUT-CORRECTION**, **awaiting_ci / blocked on external validation; manual resume**.
-**Corrected application candidate:** `f452d0a8c1599b05650ae2e835d14d9f86f14653` (published).
-**Run:** [production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675), **attempt 1**, `upload_packages=true`.
-**Last observed:** in_progress; Preflight `106762105167`, candidate SHA verified. No target pass/package claim.
+**Checkpoint:** **1F-CLOSEOUT-CORRECTION**, **review_ready**; automated validation complete, stop for independent review.
+**Corrected application candidate:** `f452d0a8c1599b05650ae2e835d14d9f86f14653`.
+**Run:** [production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675), **attempt 1**, terminal **success**, `upload_packages=true`.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Entry head:** `baf7a00bab8a7e7af84c19a690bad2bf2e1c628c`.
+**Verification entry head:** `caad2ad0fcedf5af3251568d493d1cdf8e4d7510`; only documentation changed after the tested candidate.
 **Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
-**Authority:** user authorised F1–F3 correction/validation and publication only; stop for independent review. No merge, branch deletion, Phase 1G or signing work.
-**Detailed evidence:** [ledger section 7.23](../tasks/active/phase-1f-save-correction.md#723-1f-closeout-correction).
+**Authority:** user resumed to verify #88 without redispatch, publish results, and stop for independent review. No merge, branch deletion or Phase 1G.
+**Detailed evidence:** [ledger sections 7.23–7.24](../tasks/active/phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
 
-## Completed correction
+## Completed correction and verification
 
-Apply Both now carries the exact reviewed base/draft/external revision and combined
-text through a dedicated JSON request; core refuses a stale review before proposing
-writes. Renderer checks before and after retention and requires refresh for stale review.
-Preview's Add change here retains the selected Beat anchor. Background clears Characters
-and their layer uncertainty while preserving unrelated uncertainty.
+F1 binds Apply Both to the exact reviewed base/draft/external revision and combined
+text, checks before/after retention, and rejects stale confirmation while preserving
+drafts/external bytes. F2 retains Preview's selected Beat insertion anchor. F3 clears
+Characters and default-layer uncertainty on Background while preserving unrelated
+uncertainty. All three retained probes were reproduced red then promoted to passing
+normal regressions. Real JSON/core persistence, stale-session and commit-race tests
+exercise the corrected candidate; existing transaction/recovery guarantees remain.
 
-The three failing entry probes now pass and also run in normal regression coverage.
-Real JSON/service tests cover stale identities/sessions, no-write/draft preservation,
-successful persistence/reopen, overlap/same-position/Custom Code boundary ambiguity,
-and Scene insertion adjacency/reopen/missing-anchor refusal. Production-proposal
-transaction races preserve external bytes and existing final-window recovery behavior.
+Build #88's exact SHA/attempt, terminal jobs, logs and downloaded artifacts were
+verified. Preflight `106762105167` passed 38 frontend tests, typecheck, browser Save
+regression and formatting. Windows `106762349561`: 147 core passed / 0 failed / 4
+ignored workers; macOS `106762349306`: 153 passed / 0 failed / 4 ignored workers.
+All new correction tests ran on both targets. Desktop boundary: 1 test each passed.
+Explicit official-SDK lifecycle/Scene/Source and network-handoff gates passed; the
+initial general-sweep SDK skips were followed by actual explicit runs. Only the
+cache-miss download workflow step was skipped after cache hits.
 
-Local validation: frontend typecheck + 38 tests; build; browser Save regression; pinned
-Rust formatting; core 153 passed / 4 ignored worker tests; lossless Python 26 passed;
-benchmark passed. Legacy Python SDK suite is 23 pass / 1 host process-group permission
-error after correcting the local interpreter/path setup. Explicit official-SDK, desktop,
-packaging/smoke and supported-target validation remain for the existing CI workflow.
-Node/npm differ from pinned CI. No claim of native testing of the corrections.
+Both packaged smoke reports have all assertions true, complete traces and five
+checkpoints. Secret scans, inventories and package/evidence uploads passed. All four
+ZIPs matched GitHub size/SHA-256 metadata and passed CRC checks; installers are present.
+Download links and installer hashes are in ledger 7.24. No installer was run here.
 
-## Preserved evidence and remaining work
+This verification changed documentation only. No new workflow was dispatched, no
+application input changed, and no further package run is warranted. No production
+operation remains pending. Publish this evidence on the existing branch/PR; keep the
+worktree clean and stop for independent review.
 
-#87 (`35719829561`, attempt 1, SHA `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`)
-remains successful historical evidence, not a pass for these corrections. All six native
-Save passes remain user-reported PASS. User confirmed both installed build #87, macOS
-26.6.2 and Windows “the latest windows version”; numeric Windows build unspecified.
-No repetition of unchanged native Save tests. Any new native follow-up is limited to
-F1–F3. DIST-MAC-01 remains outside scope.
+## Remaining review and limitations
 
-## Manual-resume boundary
+Phase 1F is not accepted or merged. Independently review candidate `f452d0a8` against
+findings F1–F3 and the exact #88 evidence. Do not assume CI success grants acceptance.
+Assess whether focused native F1–F3 testing is needed using the verified #88 packages;
+no native #88 installation or manual correction pass has been claimed.
 
-The candidate is committed/pushed on the existing branch. Production #88 was dispatched
-once and its attempt/SHA verified directly. No second dispatch, watcher or automatic
-wake-up is claimed. Under AGENTS/WORKFLOW stop active polling here. The documentation
-follow-up records this external wait without changing application/CI inputs; it does
-not require another package matrix.
+Preserve all six user-reported native Save passes from #87. The user confirmed #87
+installations and macOS 26.6.2; Windows was “the latest windows version”, without a
+numeric build. Do not ask to repeat unchanged native Save cases. Local legacy Python
+SDK testing remains 23 pass / 1 `os.killpg` permission error; the new CI Rust/official-SDK
+passes do not erase that local result. Local Node/npm differed from pinned CI; #88
+provides the pinned-toolchain evidence. DIST-MAC-01 remains outside Phase 1 scope.
 
-On manual resume, inspect #88, attempt 1, for the exact candidate above. Verify all
-preflight and Windows x64/macOS ARM64 jobs, actual core/desktop regression results,
-explicit official-SDK gates, packaging/smoke and actual package/evidence uploads.
-Retain failed/skipped results and diagnose before any new dispatch. Do not treat a
-successful job alone as proof of package availability. Update the same ledger/status/PR
-with terminal evidence, then stop for independent review. No merge or branch deletion.
-If focused native validation is needed, use the corrected packages for F1–F3 only;
-the six unchanged #87 native Save passes remain recorded. Windows numeric build is
-still unspecified. No automatic application acceptance is claimed from local checks.
-
-PR #14 remains draft. Keep all branches and active 1F records. Existing Phase 1G
-planning is integrated; no further planning or implementation is selected.
+PR #14 stays draft; preserve all branches and active 1F records. No merge, cleanup,
+signing work, duplicate planning or Phase 1G implementation is authorised.
 
 Next-chat selector:
 
 ```text
-/goal — Phase 1F correction validation and independent review only
+/goal — Independent Phase 1F correction review only
 Repository: Caldwell-41/Renpy-editor. Continue feature/phase-1f-source-synchronisation
-and draft PR #14. Read AGENTS.md, docs/status/HANDOVER.md and correction ledger 7.23.
-Inspect #88 / 35732725675 attempt 1 on f452d0a8c1599b05650ae2e835d14d9f86f14653;
-do not redispatch. Record exact terminal evidence and review F1–F3 independently.
-Preserve native Save passes. Publish the handover and stop; no merge, cleanup or 1G.
+and draft PR #14. Read AGENTS.md, docs/status/HANDOVER.md and correction ledger 7.23–7.24.
+Review candidate f452d0a8c1599b05650ae2e835d14d9f86f14653 against F1–F3 and build #88,
+35732725675 attempt 1. Preserve native Save passes; assess only affected missing evidence.
+Publish findings and handover, then stop. No redispatch, merge, branch deletion or 1G.
 ```

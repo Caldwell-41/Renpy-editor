@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** `awaiting_ci` / manual resume: 1F-CLOSEOUT-CORRECTION published; production #88 and independent review pending (section 7.23). Phase 1F is not accepted or integrated.
+**State:** `review_ready`: 1F-CLOSEOUT-CORRECTION and production #88 verified; stop for independent review (sections 7.23–7.24). Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1441,7 +1441,7 @@ foundations. No duplicate plan or implementation branch was created.
 **Authority (2026-09-22):** user explicitly selected F1–F3 correction, real JSON/core
 and race regressions, corrected-candidate supported-target validation, and a stop for
 independent review. No merge, branch deletion, Phase 1G or signing work is authorised.
-**State:** in_progress. This local task owns execution; visible preceding tasks are
+**Entry state:** in_progress. This local task owns execution; visible preceding tasks are
 idle. Fresh fetched branch/PR head is `baf7a00bab8a7e7af84c19a690bad2bf2e1c628c`,
 clean with no divergence; main remains `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
 PR #14 is open/draft with no submitted reviews. Remote worktree state was not inspected.
@@ -1529,16 +1529,112 @@ main unchanged. No equivalent active production run existed. Dispatched the exis
 
 [Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
 **attempt 1**, directly confirms candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653`.
-Last observed: **in_progress**, Preflight `106762105167`; structure/toolchain/dependency
+At the dispatch handoff: **in_progress**, Preflight `106762105167`; structure/toolchain/dependency
 steps passed and frontend validation was running. Windows/macOS results and artifacts
 were not yet observed. No supported-target acceptance or replacement-package claim.
 The list endpoint initially lagged dispatch; the returned run URL was read directly,
 not redispatched. #87 remains previous-application evidence only.
 
-Checkpoint state is **awaiting_ci; blocked on external validation / manual resume**.
+Dispatch handoff state was **awaiting_ci; blocked on external validation / manual resume**.
 AGENTS/WORKFLOW has no qualified automatic continuation mechanism on this host, so
 stop active polling and resume only by explicit continuation. The docs-only follow-up
 updates CURRENT, HANDOVER, this ledger and PR description with exact identity and
 limitations; no additional package matrix is warranted. On resume inspect terminal
 #88 jobs/logs and actual artifacts without redispatch, preserve failures/skips, reconcile
 any affected native follow-up, and stop for independent review. No merge/deletion/1G.
+
+
+### 7.24 Build #88 corrected-candidate verification
+
+**Authority (2026-09-22):** user explicitly resumed from HANDOVER to verify build #88
+without redispatch, publish results, and stop for independent review. No merge or
+Phase 1G. **State:** `review_ready`; correction implementation and automated gates
+are verified, independent acceptance remains outstanding.
+
+Fresh fetched branch/PR head is `caad2ad0fcedf5af3251568d493d1cdf8e4d7510`, clean with
+zero divergence. Main remains `75a91c5f72cd0eac8586faf2be036ec5021a939d`. PR #14 is
+open/draft with no submitted reviews. The visible prior local task is idle; this task
+owns the verification update. No remote worktree inspection/removal is claimed.
+Only four documentation files changed after the tested application candidate. This
+verification changes documentation only; no application edits or dispatch occurred.
+
+#### Exact run and results
+
+[Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
+**attempt 1**, is terminal **success** on exact corrected application
+`f452d0a8c1599b05650ae2e835d14d9f86f14653`. The run, job logs and downloaded evidence
+were inspected; these are #88 results, not reused #87 acceptance.
+
+| Job | Job ID | Result |
+| --- | --- | --- |
+| Preflight | `106762105167` | Passed; typecheck, 38 frontend tests, browser regression, pinned Rust formatting, repository validation. |
+| Windows x64 | `106762349561` | Passed; core 147 passed / 0 failed / 4 ignored workers; desktop 1 passed. |
+| macOS ARM64 | `106762349306` | Passed; core 153 passed / 0 failed / 4 ignored workers; desktop 1 passed. |
+
+Both target logs explicitly show passing new real-JSON review-binding and ambiguity
+regressions, the production-proposal commit-race regression, and the extended Scene
+JSON insertion/ordering/reopen regression. Preflight ran all promoted DOM probes and
+new delayed-retention/external-revision/Background-uncertainty cases. No failing,
+skipped or ignored correction test was treated as a pass.
+
+The four ignored core entries are subprocess crash workers invoked by their parent
+tests. The initial general core sweep prints two no-archive SDK skip markers; the
+subsequent **explicit** official-SDK lifecycle/Scene/Source and network-handoff gates
+actually ran and passed on both targets. All required lifecycle/recovery/trust/stage,
+authoring/import/IPC, Scene/media, Source-save and handoff markers were verified in
+the evidence logs. The only skipped workflow step was download-on-cache-miss after a
+pinned SDK cache hit; it is not missing target evidence.
+
+Both targets passed frontend builds, real-browser Save regressions, desktop boundary,
+packaging, packaged WebView smoke, secret scan, dependency inventory and both uploads.
+Each downloaded smoke log has exactly one final report, all reported boolean assertions
+true, complete Source command traces and all five checkpoints. Final-report-start:
+Windows 821 ms; macOS 6,202 ms. Both inventories contain 85 npm / 519 Cargo entries.
+This automated smoke uses synthetic keyboard delivery; it is not a new physical-key
+native Save pass or independent native observation of F1–F3.
+
+#### Artifacts and integrity
+
+All four artifacts exist, are unexpired, and identify the exact #88 SHA. Downloaded
+ZIP lengths and SHA-256 values matched GitHub metadata; every ZIP CRC check passed.
+The package archives contain the expected platform installers. No installer was run.
+
+| Artifact | ID / link | ZIP bytes | Expiry (UTC) |
+| --- | --- | --- | --- |
+| Windows package | [10696178711](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675/artifacts/10696178711) | 7,588,973 | 2026-09-29 13:30:39 |
+| macOS package | [10695933986](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675/artifacts/10695933986) | 9,644,762 | 2026-09-29 13:30:55 |
+| Windows evidence | [10696218574](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675/artifacts/10696218574) | 12,575 | 2026-09-29 13:30:38 |
+| macOS evidence | [10695779076](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675/artifacts/10695779076) | 12,568 | 2026-09-29 13:30:53 |
+
+| Verified file | SHA-256 |
+| --- | --- |
+| Windows package ZIP | `013cbf4901e6671c1020eabee067ac6adf7a317381da56109eaa9a877a3241b4` |
+| macOS package ZIP | `ed015541bafb80936072e2ac50eb53ca7e0fcecf7f42d2dc814a9e61c42c739c` |
+| Windows evidence ZIP | `b19540c1cd6b3dc4265c01858839d16fa2554bcaee30ba1841244fa627464a13` |
+| macOS evidence ZIP | `f6c26a6dbfbd4084eba2503349e657968ae17fb872e915edcda3c155d38ca225` |
+| `nsis/Loomlight_0.1.0_x64-setup.exe` | `fe33d82ca34bec89bb421fe17254ffeed756041940394514d6ffce28f951e29c` |
+| `msi/Loomlight_0.1.0_x64_en-US.msi` | `340c30eee6126f40138204f594801d443ce1c306bd5f9289cfb8d48215250944` |
+| `dmg/Loomlight_0.1.0_aarch64.dmg` | `eefd1cd49161d2722a9ac5f36ab926be64b792052b12d2476d50b7e0f7c6eb9f` |
+
+#### Limits and next boundary
+
+#88 closes the outstanding corrected-candidate automated validation gate. PR #14
+remains draft and Phase 1F unaccepted/unmerged pending independent review. No pending
+production run remains to poll or redispatch. Preserve the six user-reported native
+Save passes from #87, confirmed #87 package lineage and macOS 26.6.2. Numeric Windows
+version/build remains unspecified; no observation is invented. If independent review
+requires new native evidence, limit it to changed F1–F3 behavior using these verified
+#88 packages rather than repeating unchanged Save cases.
+
+The local legacy Python SDK `os.killpg` permission error from section 7.23 remains
+recorded; #88's real Rust/official-SDK gates passed but do not retrospectively turn that
+local Python result into a pass. No signing/notarisation work occurred; DIST-MAC-01 is
+still the later distribution limitation. No application code, dependency, workflow,
+branch ownership or history was changed by this verification.
+
+CURRENT, HANDOVER, active milestone/checklist status and PR description now select
+independent review of candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653` with #88
+attempt 1 evidence. Stop here. No merge, branch deletion, duplicate plan or Phase 1G.
+
+Documentation-only verification checks: repository/link/privacy validation passed for
+222 files; whitespace passed. No application suite or package matrix was rerun.
