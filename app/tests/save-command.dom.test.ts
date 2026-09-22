@@ -57,15 +57,20 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
     selectionStart: 0, selectionEnd: 0, canApplyBoth: false,
   };
   const inventory = (): SourceInventory => ({
-    files: [{ path: model.path, state: model.state, dirty: model.dirty, readOnly: false }],
-    dirtyCount: model.dirty ? 1 : 0,
-    draftBytes: model.dirty ? (model.text?.length ?? 0) : 0,
+    files: [
+      { path: model.path, state: model.state, dirty: model.dirty, readOnly: false },
+      ...(otherSourceDirty ? [{ path: "game/other.rpy", state: "dirty" as const, dirty: true, readOnly: false }] : []),
+    ],
+    dirtyCount: Number(model.dirty) + Number(otherSourceDirty),
+    draftBytes: (model.dirty ? (model.text?.length ?? 0) : 0) + (otherSourceDirty ? 32 : 0),
   });
   const calls: CoreOperation[] = [];
   let saves = 0;
+  let saveAlls = 0;
   let flushes = 0;
   let closes = 0;
   let failNextRetention = false;
+  let otherSourceDirty = false;
   const authoring = {
     schemaVersion: 1,
     projectId: project.projectId,
@@ -87,7 +92,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
     let value: unknown = {};
     if (operation === "project.listRecent") value = [];
     else if (operation === "project.openPicker") value = project;
-    else if (operation === "project.status") value = model.state === "conflict" || model.state === "invalid" ? "conflict" : model.dirty ? "pendingValidation" : "saved";
+    else if (operation === "project.status") value = model.state === "conflict" || model.state === "invalid" ? "conflict" : model.dirty || otherSourceDirty ? "pendingValidation" : "saved";
     else if (operation === "project.flush") { flushes += 1; value = null; }
     else if (operation === "project.close") { closes += 1; value = null; }
     else if (operation === "source.list") value = inventory();
@@ -118,6 +123,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
       model = { ...model, text: acceptedText, dirty: false, state: "clean", draftVersion: model.draftVersion + 1 };
       value = model;
     } else if (operation === "source.saveAll") {
+      saveAlls += 1;
       acceptedText = retainedDraft ?? acceptedText;
       retainedDraft = undefined;
       model = { ...model, text: acceptedText, dirty: false, state: "clean", draftVersion: model.draftVersion + 1 };
@@ -177,11 +183,30 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
 
   click("Characters");
   await ticks();
-  window.dispatchEvent(saveEvent({ meta: true }));
+  const supportingInput = document.querySelector<HTMLInputElement>('input[name="technicalName"]')!;
+  supportingInput.value = "unsubmitted_character";
+  supportingInput.dispatchEvent(new window.Event("input", { bubbles: true }));
+  otherSourceDirty = true;
+  const flushesBeforeCombinedCase = flushes;
+  const savesBeforeCombinedCase = saves;
+  const saveAllsBeforeCombinedCase = saveAlls;
+  const supportingMutationsBefore = calls.filter((operation) => [
+    "character.create", "character.update", "variable.create", "variable.update", "asset.import", "asset.repairCompatibility",
+  ].includes(operation)).length;
+  const nonSourceShortcut = saveEvent({ meta: true });
+  window.dispatchEvent(nonSourceShortcut);
   await ticks(5);
-  assert.equal(flushes, 2, JSON.stringify(calls.slice(-20)));
+  assert.equal(nonSourceShortcut.defaultPrevented, true);
+  assert.equal(flushes, flushesBeforeCombinedCase + 1, JSON.stringify(calls.slice(-20)));
+  assert.equal(saves, savesBeforeCombinedCase);
+  assert.equal(saveAlls, saveAllsBeforeCombinedCase);
+  assert.equal(calls.filter((operation) => [
+    "character.create", "character.update", "variable.create", "variable.update", "asset.import", "asset.repairCompatibility",
+  ].includes(operation)).length, supportingMutationsBefore);
+  assert.equal(document.querySelector("#app-status")?.textContent, "Pending validation");
+  assert.equal(supportingInput.value, "unsubmitted_character");
+  assert.equal(flushes, 2);
   assert.equal(saves, 1);
-  assert.equal(calls.includes("character.create"), false);
 
   click("Source");
   await ticks();

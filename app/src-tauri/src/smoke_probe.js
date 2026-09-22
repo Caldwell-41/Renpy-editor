@@ -38,6 +38,19 @@ setTimeout(async () => {
   let sourceAuthoringUiPassed = false;
   let sourceAuthoringStage = "not-started";
   let restoreSmokeRequester = () => {};
+  let checkpointSequence = 0;
+  const checkpoint = async (stage) => {
+    checkpointSequence += 1;
+    const value = await invoke("core_request", {
+      request: {
+        protocolVersion: 1,
+        requestId: `smoke-checkpoint-${checkpointSequence}`,
+        operation: "probe.smokeCheckpoint",
+        payload: { stage },
+      },
+    });
+    if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
+  };
   try {
     const project = {
       sessionId: "smoke-session", projectId: "smoke-project", title: "Smoke Project",
@@ -210,19 +223,6 @@ setTimeout(async () => {
         await new Promise((resolve) => setTimeout(resolve, 20));
       }
       throw new Error(`Timed out waiting for ${description}`);
-    };
-    let checkpointSequence = 0;
-    const checkpoint = async (stage) => {
-      checkpointSequence += 1;
-      const value = await invoke("core_request", {
-        request: {
-          protocolVersion: 1,
-          requestId: `smoke-checkpoint-${checkpointSequence}`,
-          operation: "probe.smokeCheckpoint",
-          payload: { stage },
-        },
-      });
-      if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
     };
     const awaitSurface = async (label) => {
       supportingAuthoringStage = label;
@@ -403,8 +403,8 @@ setTimeout(async () => {
     await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
     const audioIntentional = audioBeforeClick === 0;
 
+    await checkpoint("pre-source-complete");
     sourceAuthoringStage = "open-source-workspace";
-    await checkpoint(sourceAuthoringStage);
     click("Source");
     await waitFor(() => document.querySelector(".source-editor"), "Source editor");
     const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
@@ -425,7 +425,6 @@ setTimeout(async () => {
     click("Save Source");
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
-    await checkpoint("source-button-save-complete");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
     sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
     sourceEditor = document.querySelector(".source-editor");
@@ -439,7 +438,6 @@ setTimeout(async () => {
         && sourceDocument.selectionEnd === 5,
       "selection-only clean stability",
     );
-    await checkpoint("selection-only-clean");
 
     sourceAuthoringStage = "retain-shortcut-draft";
     sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
@@ -471,7 +469,6 @@ setTimeout(async () => {
     sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${shortcutFlushDelta}:saved`);
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "shortcut Source Save barrier release");
-    await checkpoint("source-shortcut-save-complete");
 
     sourceAuthoringStage = "source-clean-flush";
     const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
@@ -482,7 +479,6 @@ setTimeout(async () => {
     sourceEditor.dispatchEvent(cleanShortcut);
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "clean Source Flush barrier release");
-    await checkpoint("source-clean-flush-complete");
     const cleanSaveDelta = (operationCounts.get("source.save") ?? 0) - cleanSaveBefore;
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
@@ -492,7 +488,6 @@ setTimeout(async () => {
     const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
-    await checkpoint("non-source-flush-complete");
     sourceCommandTrace.push(`keyboard-synthetic:non-source:${macPlatform ? "meta" : "ctrl"}+s:completed:flushes=1:saved`);
     sourceAuthoringUiPassed = sourceSurfaceVisible
       && sourceDocument.text.includes("score += 3")
@@ -535,6 +530,7 @@ setTimeout(async () => {
     await waitFor(() => document.body.textContent.includes("This state is ambiguous"), "ambiguous recovery refusal");
     const ambiguousRefused = ![...document.querySelectorAll("button")]
       .some((item) => item.textContent?.includes("project files") || item.textContent?.includes("Loomlight files"));
+    await checkpoint("post-source-recovery-complete");
 
     sceneAuthoringStage = "conflict-presentation";
     projectStatus = "conflict";
@@ -543,6 +539,7 @@ setTimeout(async () => {
     await waitFor(() => document.body.textContent.includes("Source conflict"), "Scene source conflict state");
     const conflictVisible = document.body.textContent.includes("Scene writes and history are blocked");
     sceneWorkspace.scenes[0].sourceConflict = false;
+    await checkpoint("post-source-conflict-complete");
     sceneAuthoringUiPassed = previewVisible
       && allocationCorrect
       && accessibleReorder
@@ -589,6 +586,7 @@ setTimeout(async () => {
     && shellSaveTrace.includes("phase=accepted")
     && shellSaveTrace.includes("phase=flushed")
     && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
+  await checkpoint("final-report-start");
   await invoke("core_request", {
     request: {
       protocolVersion: 1,

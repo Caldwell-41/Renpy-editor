@@ -239,6 +239,7 @@ export function renderSourceWorkspace(
         if (released) return;
         released = true;
         barriers.delete(id);
+        if (disposed) return;
         applyBarrierState();
         updateStateOnly();
       },

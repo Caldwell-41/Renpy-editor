@@ -310,6 +310,166 @@ test("stale completion and old disposal cannot replace or unregister a remounted
   newController.dispose();
 });
 
+test("delayed confirmed Discard cannot redraw or retarget a replacement controller", async () => {
+  installDom();
+  let activeController: import("../src/source-ui.js").SourceWorkspaceController | undefined;
+  let registration = 0;
+  const registerController: SourceActions["registerController"] = (controller) => {
+    const token = ++registration;
+    activeController = controller;
+    return () => { if (registration === token) activeController = undefined; };
+  };
+  let status = "";
+  const delayedDiscard = deferred<SourceDocument>();
+  let discardStarted = 0;
+  const oldModel = documentModel({ state: "dirty", dirty: true, text: 'label scene:\n    "Old draft"\n    return\n' });
+  const oldController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
+    registerController,
+    status: (message) => { status = message; },
+    open: async () => oldModel,
+    reloadInventory: async () => inventory("dirty", true),
+    discard: async () => { discardStarted += 1; return delayedDiscard.promise; },
+  }));
+  await tick();
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Discard Draft")!.click();
+  [...document.querySelectorAll<HTMLButtonElement>(".source-discard-confirmation button")].find((item) => item.textContent === "Discard Draft")!.click();
+  await tick();
+  assert.equal(discardStarted, 1);
+
+  oldController.dispose();
+  const replacementModel = documentModel({ text: 'label scene:\n    "Replacement after discard"\n    return\n' });
+  const replacement = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    registerController,
+    status: (message) => { status = message; },
+    open: async () => replacementModel,
+    reloadInventory: async () => inventory(),
+  }));
+  await tick();
+  const replacementEditor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  replacementEditor.focus();
+  status = "Replacement ready";
+  delayedDiscard.resolve(documentModel());
+  await tick(); await tick();
+
+  assert.match(document.querySelector<HTMLTextAreaElement>(".source-editor")?.value ?? "", /Replacement after discard/);
+  assert.equal(document.querySelector(".source-document-state")?.textContent, "Clean");
+  assert.equal(activeController, replacement);
+  assert.equal(status, "Replacement ready");
+  assert.equal(document.activeElement, replacementEditor);
+  replacement.dispose();
+});
+
+test("delayed Apply Both cannot redraw or retarget a replacement controller", async () => {
+  installDom();
+  let activeController: import("../src/source-ui.js").SourceWorkspaceController | undefined;
+  let registration = 0;
+  const registerController: SourceActions["registerController"] = (controller) => {
+    const token = ++registration;
+    activeController = controller;
+    return () => { if (registration === token) activeController = undefined; };
+  };
+  let status = "";
+  const delayedApplyBoth = deferred<SourceDocument>();
+  let applyBothStarted = 0;
+  const conflictModel = documentModel({
+    state: "conflict", dirty: true, canApplyBoth: true, externalText: "external", combinedPreview: "combined",
+    text: 'label scene:\n    "Old conflict"\n    return\n', selectedSceneId: undefined, selectedBeatId: undefined,
+  });
+  const oldController = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("conflict", true), sourceActions({
+    registerController,
+    status: (message) => { status = message; },
+    open: async () => conflictModel,
+    reloadInventory: async () => inventory("conflict", true),
+    update: async () => conflictModel,
+    applyBoth: async () => { applyBothStarted += 1; return delayedApplyBoth.promise; },
+  }));
+  await tick();
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Apply Both")!.click();
+  await tick();
+  assert.equal(applyBothStarted, 1);
+
+  oldController.dispose();
+  const replacementModel = documentModel({ text: 'label scene:\n    "Replacement after merge"\n    return\n' });
+  const replacement = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    registerController,
+    status: (message) => { status = message; },
+    open: async () => replacementModel,
+    reloadInventory: async () => inventory(),
+  }));
+  await tick();
+  const replacementEditor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  replacementEditor.focus();
+  status = "Replacement ready";
+  delayedApplyBoth.resolve(documentModel());
+  await tick(); await tick();
+
+  assert.match(document.querySelector<HTMLTextAreaElement>(".source-editor")?.value ?? "", /Replacement after merge/);
+  assert.equal(document.querySelector(".source-document-state")?.textContent, "Clean");
+  assert.equal(activeController, replacement);
+  assert.equal(status, "Replacement ready");
+  assert.equal(document.activeElement, replacementEditor);
+  replacement.dispose();
+});
+
+test("Source observation is suppressed during Save and resumes after the barrier releases", async () => {
+  installDom();
+  Object.defineProperty(window, "__TAURI_INTERNALS__", { configurable: true, value: {} });
+  let observationCallback: (() => void) | undefined;
+  window.setInterval = ((handler: TimerHandler) => {
+    observationCallback = handler as () => void;
+    return 1;
+  }) as typeof window.setInterval;
+  let model = documentModel();
+  let openCalls = 0;
+  const delayedSave = deferred<SourceDocument>();
+  let saveStarted = 0;
+  let saveRequest: Promise<void> | undefined;
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    open: async () => { openCalls += 1; return model; },
+    reloadInventory: async () => inventory(model.state, model.dirty),
+    update: async (request) => {
+      model = { ...model, text: request.text, dirty: true, state: "dirty", draftVersion: model.draftVersion + 1 };
+      return model;
+    },
+    save: async () => { saveStarted += 1; return delayedSave.promise; },
+    requestSave: async (sourceController, intent) => {
+      saveRequest = sourceController.executeSave(intent, async () => {}).then(() => undefined);
+      await saveRequest;
+    },
+  }));
+  await tick();
+  assert.ok(observationCallback);
+  assert.equal(openCalls, 1);
+
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value = editor.value.replace("Hello", "Held save");
+  editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await tick(); await tick();
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Save Source")!.click();
+  await tick();
+  assert.equal(saveStarted, 1);
+  observationCallback!();
+  await tick();
+  assert.equal(openCalls, 1);
+
+  model = { ...model, dirty: false, state: "clean", draftVersion: model.draftVersion + 1 };
+  delayedSave.resolve(model);
+  await saveRequest;
+  await tick();
+  let observationTimeout: (() => void) | undefined;
+  window.setTimeout = ((handler: TimerHandler) => {
+    observationTimeout = handler as () => void;
+    return 2;
+  }) as typeof window.setTimeout;
+  observationCallback!();
+  assert.ok(observationTimeout);
+  assert.equal(openCalls, 1);
+  observationTimeout!();
+  await tick(); await tick();
+  assert.equal(openCalls, 2);
+  controller.dispose();
+});
+
 test("Source conflict exposes both retained versions and only offers Apply Both with proof", async () => {
   installDom();
   let model = documentModel({

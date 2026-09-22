@@ -21,6 +21,40 @@ static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_RECEIVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_WINDOW_FOUND: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_SIGNAL: OnceLock<(Mutex<bool>, Condvar)> = OnceLock::new();
+const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(180);
+
+#[derive(Debug, PartialEq, Eq)]
+enum SmokeReportDisposition {
+    Ignore,
+    Accepted,
+    Rejected,
+}
+
+fn smoke_report_disposition(
+    smoke_enabled: bool,
+    is_smoke_report: bool,
+    response: &CoreResponse,
+) -> SmokeReportDisposition {
+    if !smoke_enabled || !is_smoke_report {
+        SmokeReportDisposition::Ignore
+    } else if response.is_success() {
+        SmokeReportDisposition::Accepted
+    } else {
+        SmokeReportDisposition::Rejected
+    }
+}
+
+fn terminate_rejected_smoke_report(response: &CoreResponse) {
+    SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
+    let diagnostic =
+        serde_json::to_string(response).unwrap_or_else(|_| "{\"ok\":false}".to_owned());
+    eprintln!("packaged boundary smoke report rejected: {diagnostic}");
+    let _ = std::io::stderr().flush();
+    thread::spawn(|| {
+        thread::sleep(Duration::from_millis(100));
+        std::process::exit(1);
+    });
+}
 
 fn single_instance_smoke_enabled() -> bool {
     std::env::var("LOOMLIGHT_SINGLE_INSTANCE_SMOKE").as_deref() == Ok("1")
@@ -145,7 +179,12 @@ fn core_request(
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
-            Err(response) => return Ok(response),
+            Err(response) => {
+                if smoke_enabled && is_smoke_report {
+                    terminate_rejected_smoke_report(&response);
+                }
+                return Ok(response);
+            }
         };
         let request_id = validated.request_id.clone();
         let operation = validated.operation.to_owned();
@@ -245,11 +284,13 @@ fn core_request(
             _ => handle_application_request(request, smoke_enabled, lifecycle),
         }
     };
-    if smoke_enabled && is_smoke_report {
+    let report_disposition = smoke_report_disposition(smoke_enabled, is_smoke_report, &response);
+    if report_disposition == SmokeReportDisposition::Accepted {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         if let Some(window) = app.get_webview_window("main") {
             let original_url = window.url().ok();
-            let _ = window.eval("location.href = 'https://example.invalid/loomlight-navigation'");
+            let _ =
+                window.eval("location.href = 'https://example.invalid/loomlight-navigation'");
             thread::spawn(move || {
                 thread::sleep(Duration::from_millis(500));
                 let navigation_denied =
@@ -260,7 +301,9 @@ fn core_request(
                     let (received, ready) = second_instance_signal();
                     received.lock().ok().and_then(|received| {
                         ready
-                            .wait_timeout_while(received, Duration::from_secs(10), |value| !*value)
+                            .wait_timeout_while(received, Duration::from_secs(10), |value| {
+                                !*value
+                            })
                             .ok()
                             .map(|(value, _)| *value)
                     }) == Some(true)
@@ -268,8 +311,8 @@ fn core_request(
                     true
                 };
                 let primary_window_found = SECOND_INSTANCE_WINDOW_FOUND.load(Ordering::SeqCst);
-                let single_instance_passed =
-                    !single_instance_required || (single_instance_received && primary_window_found);
+                let single_instance_passed = !single_instance_required
+                    || (single_instance_received && primary_window_found);
                 println!(
                     "{}",
                     json!({
@@ -308,17 +351,8 @@ fn core_request(
                 );
             });
         }
-    } else if smoke_enabled && is_smoke_report {
-        SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
-        eprintln!(
-            "packaged boundary smoke report rejected: {}",
-            smoke_payload.unwrap_or(Value::Null)
-        );
-        let _ = std::io::stderr().flush();
-        thread::spawn(|| {
-            thread::sleep(Duration::from_millis(100));
-            std::process::exit(1);
-        });
+    } else if report_disposition == SmokeReportDisposition::Rejected {
+        terminate_rejected_smoke_report(&response);
     }
     Ok(response)
 }
@@ -432,9 +466,10 @@ fn main() {
                         .expect("main smoke probe injection must succeed");
                 });
                 thread::spawn(|| {
-                    thread::sleep(Duration::from_secs(60));
+                    thread::sleep(PACKAGED_SMOKE_TIMEOUT);
                     if !SMOKE_REPORT_RECEIVED.load(Ordering::SeqCst) {
                         eprintln!("packaged boundary smoke report timed out");
+                        let _ = std::io::stderr().flush();
                         std::process::exit(1);
                     }
                 });
@@ -444,4 +479,36 @@ fn main() {
         .invoke_handler(tauri::generate_handler![core_request])
         .run(tauri::generate_context!())
         .expect("Loomlight desktop runtime failed");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_successful_smoke_reports_enter_the_accepted_path() {
+        let accepted = CoreResponse::success("accepted".to_owned(), json!({ "accepted": true }));
+        let rejected = CoreResponse::failure(
+            "rejected".to_owned(),
+            "INVALID_PAYLOAD",
+            "Payload does not match the operation schema.",
+        );
+
+        assert_eq!(
+            smoke_report_disposition(true, true, &accepted),
+            SmokeReportDisposition::Accepted
+        );
+        assert_eq!(
+            smoke_report_disposition(true, true, &rejected),
+            SmokeReportDisposition::Rejected
+        );
+        assert_eq!(
+            smoke_report_disposition(false, true, &accepted),
+            SmokeReportDisposition::Ignore
+        );
+        assert_eq!(
+            smoke_report_disposition(true, false, &accepted),
+            SmokeReportDisposition::Ignore
+        );
+    }
 }
