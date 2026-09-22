@@ -289,8 +289,7 @@ fn core_request(
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         if let Some(window) = app.get_webview_window("main") {
             let original_url = window.url().ok();
-            let _ =
-                window.eval("location.href = 'https://example.invalid/loomlight-navigation'");
+            let _ = window.eval("location.href = 'https://example.invalid/loomlight-navigation'");
             thread::spawn(move || {
                 thread::sleep(Duration::from_millis(500));
                 let navigation_denied =
@@ -301,9 +300,7 @@ fn core_request(
                     let (received, ready) = second_instance_signal();
                     received.lock().ok().and_then(|received| {
                         ready
-                            .wait_timeout_while(received, Duration::from_secs(10), |value| {
-                                !*value
-                            })
+                            .wait_timeout_while(received, Duration::from_secs(10), |value| !*value)
                             .ok()
                             .map(|(value, _)| *value)
                     }) == Some(true)
@@ -311,8 +308,8 @@ fn core_request(
                     true
                 };
                 let primary_window_found = SECOND_INSTANCE_WINDOW_FOUND.load(Ordering::SeqCst);
-                let single_instance_passed = !single_instance_required
-                    || (single_instance_received && primary_window_found);
+                let single_instance_passed =
+                    !single_instance_required || (single_instance_received && primary_window_found);
                 println!(
                     "{}",
                     json!({
