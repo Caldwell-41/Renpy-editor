@@ -7,8 +7,12 @@ Start with [current status](status/CURRENT.md), the
 here; chat prompts select one checkpoint rather than repeat the implementation plan.
 
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
-PR #8's UI follow-up. The next application milestone is
-[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md).
+PR #8's UI follow-up. The active application milestone is
+[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md),
+on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); use its working-branch
+CURRENT/HANDOVER for actual continuation. Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
+and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
+approved documentation, with implementation unstarted and separately gated.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
 acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
@@ -22,6 +26,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [tasks/active/phase-1f-source-synchronisation.md](tasks/active/phase-1f-source-synchronisation.md) |
+| Planned Phase 1G Branches, runtime/diagnostics and local Git checkpoints | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| Planned Phase 1H integrated acceptance, full twelve-case matrix | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |

@@ -1,14 +1,14 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-20<br>
-**Status:** Phase 1A–1E are merged and accepted. Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`; do not replay it. CI-SIMPLE PR #13 is merged. Phase 1F is the selected next application milestone, not started; Phase 1G–1H remain unapproved and unstarted. See [CURRENT](../../status/CURRENT.md) and [HANDOVER](../../status/HANDOVER.md) for exact closeout checks.<br>
+**Updated:** 2026-09-22 (remaining Phase 1 planning)<br>
+**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is active on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); inspect its branch-local CURRENT/HANDOVER for current evidence and continuation. Phase 1G–1H product planning is approved; implementation remains unstarted and requires accepted/integrated prerequisites plus explicit checkpoint selection. The [1G brief](phase-1g-branches-runtime-git.md) and [1H brief](phase-1h-vertical-slice-acceptance.md) own the detailed remaining plan.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
 
 Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
-Each milestone requires explicit user approval and a bounded execution brief. The requested next [Phase 1F goal](phase-1f-source-synchronisation.md) selects only 1F after the recorded entry checks; this documentation closeout implements no application feature. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
+Each milestone requires explicit user approval and a bounded execution brief. The active [Phase 1F goal](phase-1f-source-synchronisation.md) remains separately owned; this planning publication changes no 1F implementation, correction ledger or live handover. Planning approval and a documentation merge do not authorise 1G/1H execution. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
 ## Product target and fixed decisions
 
@@ -124,7 +124,13 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 ### 1G — Branches, validation/run, diagnostics, and local Git
 
-**Entry:** 1F closure and explicit approval. Use three internal gates, not one broad implementation claim.
+**Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
+[1G execution brief](phase-1g-branches-runtime-git.md) subdivides the three capability
+gates into five checkpoint chats: 1G.1, 1G.2a, 1G.2b, 1G.3a and 1G.3b. All are
+unstarted. Its approved behaviours include existing-command graph editing, continued
+authoring during play with targeted restrictions, explicit session trust and preservation
+of unrelated staged Git changes. Technical strategies must pass their owning proof
+gates before UI completion; this is not one broad implementation claim.
 
 #### 1G.1 — Branches
 
@@ -150,7 +156,10 @@ Keep subprocess/path/session safeguards and distinguish a Git checkpoint from jo
 
 ### 1H — Vertical-slice acceptance
 
-**Entry:** 1G closure and explicit approval. This is acceptance of implemented capabilities, not a place to hide missing feature work.
+**Entry:** 1G accepted and integrated, plus explicit user selection. The detailed
+[1H acceptance brief](phase-1h-vertical-slice-acceptance.md) maps every case below to
+H01–H12 and adds cross-capability failure scenarios and evidence requirements. This is
+acceptance of implemented capabilities, not a place to hide missing feature work.
 
 Run the following with synthetic, repository-safe content from fresh checkouts on Windows x64 and macOS ARM64:
 
