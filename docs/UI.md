@@ -190,9 +190,10 @@ shrink the aspect-ratio preview, then collapse inspector/sidebar before reducing
 below its preferred minimum.
 
 The top toolbar always shows persistence truth such as `Saved`, `Saving`,
-`Pending validation`, `Conflict`, or `Recovery required`. `Ctrl/Cmd+S` explicitly
-flushes pending accepted work and confirms durability, while normal accepted edits are
-also persisted transactionally.
+`Pending validation`, `Conflict`, or `Recovery required`. The shell owns one
+`Ctrl/Cmd+S` route: outside Source it flushes pending accepted work, while a focused
+Source editor settles and accepts its captured draft. A clean settled Source performs
+the ordinary Flush; a refused Source draft never falls through to a false Saved result.
 
 ## Welcome and project lifecycle
 
@@ -343,7 +344,11 @@ Selecting a visible Character in the preview must distinguish current state from
 beat that contributed it. Offer actions such as `Edit Beat 2` and `Add change here`;
 do not silently edit an earlier beat merely because the Character remains visible at
 the current playhead. `Add change here` inserts a new explicit staging beat before the
-current beat.
+current beat. The insertion form retains that Beat ID while selection changes; a stale
+anchor refuses through the existing revision/identity guards instead of appending.
+A Background Beat emits `scene` on the default layer, so Preview clears visible
+Characters and their layer uncertainty at that Beat. Music and variable uncertainty
+from Custom Code remains explicit.
 
 Phase 1 placement exposes Left, Centre, and Right preset references. Do not offer
 arbitrary drag positioning that implies a freeform transform editor. Preview navigation
@@ -391,8 +396,8 @@ misrepresented visually.
 Unsupported source appears in sequence as a protected Custom Code beat with a reason/
 warning. It can be selected and inspected, but Phase 1 does not freely drag/reorder it
 or allow safe-looking operations to cross its boundary unless the source transaction
-layer can prove the operation. `View in Source` is labelled as deferred until the 1F
-Source workspace exists; Phase 1E does not present it as a working navigation action.
+layer can prove the operation. Phase 1F makes `View in Source` select the exact current
+mapped range; a Source cursor maps back only when containing-Beat ownership is proved.
 
 ### New Scene state
 
@@ -407,12 +412,27 @@ Source is a proper centre tab rather than an embedded `Visual/Split/Source` togg
 the Scene workspace. It provides syntax-aware source, scene/beat anchors, mapped-range
 highlights, custom-code boundaries, staged/conflict information, and diagnostics.
 
+Typing creates a bounded, session-local draft. It is accepted only by Save Source or
+Source-focused `Ctrl/Cmd+S`; tab/workspace navigation keeps the draft without writing.
+Both Save entry points use the same document-bound executor. During its short retention
+and acceptance barrier the editor and conflicting navigation/actions are disabled
+without replacing the text control, so selection and native draft undo survive a
+refusal. Failed retention preserves the newest local text for retry, copy, or an
+explicitly confirmed discard.
+Dirty drafts show Pending validation and a crash/restart warning. Close, project switch,
+and normal exit offer Save All / Discard All / Cancel. Save All preflights every draft
+before its one recoverable multi-mutation transaction, so a refusal writes nothing.
+Text-focused undo/redo stays native to the draft; committed project history remains a
+separate revision-checked action.
+
 Selection is bidirectional: `View in Source` opens the exact mapped range; supported
 direct source edits update the Scene representation after the shared transaction/source
 path succeeds; Source can navigate back to the owning Scene/Beat. Source-only mode never
 hides whether a range is supported. External edits are parsed against the last
 revision; supported changes update visual views and overlapping/unsafe changes enter
-explicit reconciliation.
+explicit reconciliation. A conflict keeps draft and external text. Apply Both appears
+only for proven non-overlapping exact patches and shows the combined result first;
+otherwise the user may copy the draft, explicitly reload/discard, or cancel.
 
 ## Branches workspace
 
@@ -564,6 +584,17 @@ Flush say that editor input remains unsubmitted. Ctrl/Cmd+Enter on Dialogue subm
 natural semantic operation and creates the next Dialogue; ordinary Enter remains a
 newline. Failed validation retains text and restores focus. Scene switching, workspace
 switching, and close cannot silently convert draft text into persisted work.
+
+Phase 1F Source drafts follow the same session/view generation rules but remain
+per-file across same-project navigation. A dirty file blocks Scene, definition, file
+lifecycle, and committed-history writes that touch it while unrelated files remain
+available when recovery scope permits. Invalid source retains its draft and accepted
+visual revision; missing/renamed source shows unavailable/stale state and is never
+recreated or retargeted. Recovery required retains project-wide precedence.
+The shell combines fresh project status with newer local/unretained input. Conflict and
+recovery retain precedence, delayed status reads cannot overwrite an active operation,
+and a post-acceptance status failure reports accepted-but-unconfirmed rather than
+resubmitting or claiming Saved.
 
 When transaction state blocks writing, the recovery surface remains available without
 executing the project. It lists affected paths and retained evidence, offers only

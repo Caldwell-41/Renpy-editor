@@ -213,3 +213,45 @@ test("pending media is cancelled logically and disposed with the project view", 
   await tick();
   assert.equal(oldImage.src, "");
 });
+
+test("closeout: Background clears previously visible Characters", () => {
+  const scene = sceneModel().scenes[0]!;
+  const actual = deriveScenePreview({ ...scene, beats: [
+    { id: "show", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } },
+    { id: "bg", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
+  ] }, "bg");
+  assert.equal(actual.characters.length, 0);
+});
+test("closeout: Add change here retains selected Beat anchor", async () => {
+  installDom(); const base = sceneModel(); const calls: SceneCommand[] = [];
+  const first = base.scenes[0]!;
+  const model = { ...base, scenes: [{ ...first, beats: [
+    { id: "show", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } as const },
+    ...first.beats,
+  ] }, base.scenes[1]!] };
+  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    status: () => {}, resolution: { width: 1920, height: 1080 },
+    present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
+    apply: async (command) => { calls.push(command); return model; },
+  });
+  [...document.querySelectorAll("button")].find(item => item.textContent?.startsWith("2. Dialogue"))!.click();
+  click("Add change here"); document.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
+  assert.equal(calls.at(-1)?.beforeBeatId, "dialogue");
+});
+
+test("Background resolves default-layer uncertainty after Custom Code without clearing music or variable uncertainty", () => {
+  const scene = sceneModel().scenes[0]!;
+  const actual = deriveScenePreview({ ...scene, beats: [
+    { id: "custom", byteStart: 0, byteEnd: 10, protected: true, payload: { type: "customCode", source: "$ unknown()", reason: "unknown staging" } },
+    { id: "show", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } },
+    { id: "bg", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
+  ] }, "bg");
+  assert.deepEqual(actual.characters, []);
+  assert.equal(actual.charactersUnknown, false);
+  assert.equal(actual.backgroundUnknown, false);
+  assert.equal(actual.background?.beatId, "bg");
+  assert.equal(actual.musicUnknown, true);
+  assert.equal(actual.variablesUnknown, true);
+  assert.equal(actual.partial, true);
+  assert.deepEqual(actual.unknownBeatIds, ["custom"]);
+});

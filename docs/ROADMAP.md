@@ -21,7 +21,7 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is active on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); its working-branch status and handover own actual gate state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines five checkpoint chats across its three capability gates; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) preserves all twelve acceptance cases. Each needs accepted/integrated prerequisites and explicit execution selection.
+**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is pending and CURRENT/HANDOVER own its verified state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines five checkpoint chats across its three capability gates; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) preserves all twelve acceptance cases. Each needs accepted/integrated prerequisites and explicit execution selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, local Git checkpoint, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 

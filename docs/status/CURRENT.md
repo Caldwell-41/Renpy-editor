@@ -1,25 +1,28 @@
 # Current status
 
-**Updated:** 2026-09-20.
-**Integrated application:** Phase 0 and corrected Phase 1A-1E.
-**Integrated maintenance:** CI-SIMPLE, [PR #13](https://github.com/Caldwell-41/Renpy-editor/pull/13), merge `998b5f4684c5c287920bfda67d12e818e3bd0371`.
-**Next application milestone:** [Phase 1F — Source synchronisation and partial-visual handling](../tasks/active/phase-1f-source-synchronisation.md), selected for the user's next goal; not implemented by this closeout.
-**Continuation and remaining housekeeping:** [HANDOVER](HANDOVER.md).
+**Updated:** 2026-09-23.
+**Integrated baseline:** Phase 0, corrected Phase 1A-1E, CI-SIMPLE and 1G/1H planning;
+main at review entry `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
+**Phase 1F:** accepted; PR #14 integration pending publication.
+**Selected checkpoint:** final closeout and authorised integration only.
+**Reviewed head:** `0075d98f80a680588b7eb3f49ab437c71b48a237`.
+**Tested production commit:** `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
+**Evidence:** [final review 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review),
+[packages/native F4 7.28](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence).
+**Continuation:** [HANDOVER](HANDOVER.md).
 
-## Accepted baseline
+Production [35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
+attempt 1 (called #90 in the native reports; fresh GitHub metadata labels it #91),
+passed Preflight and both supported target jobs. The reviewed head changes documentation
+only after that tested commit. Frontend 42, Windows core 147 and macOS core 153 passed;
+four ignored subprocess workers per core suite are not extra passing tests. Explicit
+SDK/real-service persistence, desktop, packaged smoke, scans, inventories and uploads
+passed. F1-F4 are closed. Windows 11 Pro and macOS 27 native F4 A/B/C are user-reported
+PASS; the six original native Save passes remain PASS on #87 without repetition.
+Native local installer hashes/exact OS builds were not supplied; reports retain their
+actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-Phase 1E PR #9 merged as `f1be3f0745f76e46113df7d3e84e70e13ee9d9c9`. PRs #7/#8 and corrected 1A-1D are also integrated; do not replay them. The [Scene ledger](../tasks/archive/2026-09-16-phase-1e-scene-authoring.md) and [Phase 1 plan](../tasks/active/phase-1-vertical-slice.md) retain their evidence and requirements.
-
-CI-SIMPLE passed bounded independent review. Production run `35496193908`, attempt 1, genuinely passed preflight, Windows x64 and macOS ARM64 at implementation `eeef503a40af05c3435297e1384f743a58ee1a3e`. The merge tree exactly matches reviewed head `1af10328620d2115f22673baf3f1c1050c0e220c`. The [closeout record](../tasks/archive/2026-09-20-ci-simple-cleanup.md) contains actual counts, skipped-worker interpretation, the corrected frontend build-order failure and validation limits.
-
-Normal post-merge quality run `35497664235`, attempt 1, passed; normal production run `35497664212`, attempt 1, must be checked at the merge SHA before new application implementation. It was in progress at this document's snapshot, not failed or accepted by inference. Use the exact existing run and subsequent PR #13 closeout receipt; no duplicate manual dispatch.
-
-The remote `maintenance/ci-simple-cleanup` branch was not deleted by this session because the available connector has no ref-deletion action. Its retirement is authorised but must be verified after execution; it is housekeeping, not unfinished CI implementation. Other branches and local work are untouched.
-
-## Scope now
-
-Preserve source authority, transactions/recovery, lifecycle/single-instance, SDK trust/handoff, supporting authoring and Scene/source/media boundaries. Phase 1F extends these; 1G/1H and Phase 2+ remain outside the next goal.
-
-[W0 and OPT-1A are abandoned](../tasks/active/ci-optimisation.md), including every Windows/SQLite correction. W1-W3 are not proceeding; OPT-2B remains deferred. PR #12 / `maintenance/ci-optimisation` stays unmerged historical work. Do not resume, import or validate it as a prerequisite.
-
-The closeout publication changes documentation only. No Phase 1F feature, automatic watcher, private client setup, application recovery change or new toolchain was introduced. CURRENT owns current state, HANDOVER owns continuation, and task briefs own detailed implementation/acceptance criteria.
+**Next eligible application checkpoint:** [Phase 1G.1](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches),
+shared flow projection and Branches, after verified integration and explicit user
+selection. Every 1G/1H checkpoint remains `not_started`; no implementation branch is
+created. Phase 2 planning is preserved. No automatic progression into implementation.

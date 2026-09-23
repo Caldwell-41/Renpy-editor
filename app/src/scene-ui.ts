@@ -124,7 +124,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
       variables = {}; variablesUnknown = true; overlay = undefined; continue;
     }
     switch (payload.type) {
-      case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; break;
+      case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; characters = []; charactersUnknown = false; break;
       case "showCharacter": {
         characters = characters.filter((item) => item.characterId !== payload.characterId);
         characters.push({ characterId: payload.characterId, appearanceId: payload.appearanceId, placement: payload.placement, visibleBeatId: beat.id, appearanceBeatId: beat.id, placementBeatId: beat.id });
@@ -165,6 +165,7 @@ export interface SceneActions {
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
+  readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number) => void;
 }
 
 export interface RecoveryActions {
@@ -265,9 +266,10 @@ export function renderSceneAuthoring(
   treeHost: HTMLElement,
   initial: SceneWorkspace,
   actions: SceneActions,
+  initialBeatId?: string,
 ): () => void {
   let model = initial;
-  let selectedBeatId: string | undefined;
+  let selectedBeatId: string | undefined = initialBeatId;
   let mediaGeneration = 0;
   const imageCache = new Map<string, { readonly key: string; readonly url: string }>();
   const pendingImages = new Map<string, Promise<MediaPresentation>>();
@@ -362,13 +364,13 @@ export function renderSceneAuthoring(
     });
   };
 
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
     selectedBeatId = undefined;
     draw();
     const current = model.scenes.find((item) => item.id === scene.id);
     const list = host.querySelector<HTMLElement>(".beats-list");
-    if (current && list) renderNewBeat(list, current, initialType);
+    if (current && list) renderNewBeat(list, current, initialType, beforeBeatId);
   };
 
   const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
@@ -439,7 +441,7 @@ export function renderSceneAuthoring(
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
       const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
       if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType)); row.append(add); provenance.append(row);
+      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null)); row.append(add); provenance.append(row);
     };
     contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
@@ -464,13 +466,15 @@ export function renderSceneAuthoring(
     const technical = document.createElement("code"); technical.textContent = `${scene.technicalLabel} · ${scene.sourcePath}`;
     titleBlock.append(eyebrow, title, technical);
     const history = document.createElement("div"); history.className = "scene-history";
+    const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
+    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd));
     const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "undo" }); });
     const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "redo" }); });
-    history.append(undo, redo); header.append(titleBlock, history); host.append(header);
+    history.append(viewSource, undo, redo); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
-      const heading = document.createElement("h2"); heading.textContent = "Source conflict";
-      const copy = document.createElement("p"); copy.textContent = "This Scene changed outside Loomlight. Scene writes and history are blocked until the exact source revision is reconciled.";
+      const heading = document.createElement("h2"); heading.textContent = "Source projection unavailable";
+      const copy = document.createElement("p"); copy.textContent = "The current Source is invalid, missing, or unreconciled. The previous visual projection is stale; Scene writes and history remain blocked until the exact source revision is reconciled.";
       conflict.append(heading, copy); host.append(conflict);
     } else if (scene.partial) {
       const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = "Preview and reference certainty are partial because this Scene contains protected Custom Code."; host.append(partial);
@@ -566,7 +570,7 @@ export function renderSceneAuthoring(
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue"): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (list.querySelector(".new-beat")) return;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
@@ -582,7 +586,7 @@ export function renderSceneAuthoring(
       try {
         const payload = editor.read();
         const oldIds = new Set(scene.beats.map((item) => item.id));
-        await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId: null, beat: payload }, (_before, next) => {
+        await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId, beat: payload }, (_before, next) => {
           selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => !oldIds.has(item.id))?.id;
         });
       } catch (error) {

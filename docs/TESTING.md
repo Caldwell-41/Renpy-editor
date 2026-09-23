@@ -6,7 +6,9 @@ From `app/`, the Phase 1A production checks are:
 
 ```bash
 npm ci --ignore-scripts
+npx playwright install chromium  # only when no system Chrome is available
 npm run check
+npm run test:source-browser
 npm run build
 cargo fmt --check --all
 cargo test -p loomlight-core --locked
@@ -18,6 +20,12 @@ The full desktop Rust test, package, and injected packaged-WebView probe run sep
 on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
 also runnable where a complete Tauri desktop build environment is unavailable. This is
 not a substitute for either target gate.
+
+The retained Source Save browser regression first executes the historical
+unconditional-dirty fake and requires it to demonstrate the false re-dirty after one
+completed Source Save and zero Flushes. It then executes the faithful accepted-text
+model and requires the same selection notification to remain clean. The launcher uses
+system Chrome when available and otherwise the locked Playwright Chromium binary.
 
 The packaged probe also starts a primary Loomlight process, waits for its explicit
 post-setup readiness marker, and launches the same packaged executable again. The
@@ -360,6 +368,17 @@ recovery, and conflict presentation. It must also retain the existing lifecycle,
 supporting-authoring, delayed operation/Flush, WebView denial, and single-instance
 checks.
 
+The bounded 1F-SAVE correction adds a faithful fake Source service whose accepted text
+is distinct from its retained draft, a retained Chromium regression for selection-only
+updates after acceptance, and shell/controller DOM races for immediate Save, failed
+retention and retry, duplicate command suppression, remount/stale completion, modal
+focus, leave settlement, modifier/composition policy and authoritative status. Packaged
+evidence records command route, synthetic versus target-native input, document
+generation, completion, Source-save/Flush counts and final status. Synthetic DOM or
+WebView keyboard dispatch does not certify Windows Ctrl+S or macOS Cmd+S delivery;
+native input and the real-service disk/reopen target fixture remain separately named
+acceptance rows.
+
 Focused core coverage includes schema v1→v2 migration, stable identities and unknown
 fields, exact-byte minimal Scene patches, protected opaque boundaries, incoming
 reference refusal, source create/move/delete and exact `.rpyc` ghost prevention,
@@ -370,6 +389,26 @@ Beat editors, drafts and navigation, focus restoration, preview provenance/unkno
 truth, media cache cancellation/disposal, accessible reordering, responsive collapse,
 and reduced motion. Exact final run/job/artifact results belong in the archived Phase
 1E execution ledger after both supported targets pass.
+
+## Phase 1F accepted regression contract
+
+[Final closeout review](tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review)
+records exact current production evidence and preserves the earlier native Save passes.
+Keep the frontend L1-L16, real-service Source tests, packaged P1/P2/P5 and separately
+reported native P3 evidence distinct. A documentation-only delta does not imply a new
+package or native execution.
+
+Apply Both must bind confirmation to the displayed base/draft/external/combined text
+identity in renderer and core, using the reviewed external revision as the transaction
+precondition. Selection-only retention must refresh controls after cleanup for the
+live document/latest input; failures, pending newer input and barriers still block.
+Keep the retained DOM and real-browser regression in normal production gates. Test
+literal renderer JSON through the real IPC/service boundary, including persistence
+and reopening, so enum-field casing cannot silently invalidate all Scene operations.
+Retain the actual Preview insertion-anchor and Background/Character state regressions.
+A packaged probe must construct its terminal report on success and guarded failure;
+lexical-scope/report errors must fail a retained full-probe test, not prompt timeout
+increases or unsupported causal claims about application Save routing.
 
 ## Required quality gate by change type
 
@@ -399,3 +438,16 @@ silently assume, are visible edit feedback within 100 ms, incremental source map
 within 250 ms for a typical Scene file, responsive pan/filter on a 10,000-node graph
 through virtualization where that graph work is in scope, and no UI-thread blocking
 during SDK or Git operations.
+
+
+## Scene JSON boundary regression
+
+Scene UI mocks and typed Rust service calls do not validate the renderer/core wire
+contract. Keep literal camelCase request coverage for every `SceneCommand` variant
+and exact serialization coverage for every `BeatPayload` variant. Enum variant
+renaming and variant-field renaming are separate Serde settings. Exercise starting
+narration update and Beat insertion through `handle_application_request` with a real
+lifecycle/project, verify accepted bytes and reopened projection, and retain refusal
+checks for stale revisions and malformed payloads. These tests run in the normal core
+suite on both packaged targets. Synthetic UI routing still does not replace native
+keyboard acceptance.

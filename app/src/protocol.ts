@@ -35,6 +35,14 @@ export const CORE_OPERATIONS = [
   "scene.recovery",
   "scene.resolveRecovery",
   "media.present",
+  "source.list",
+  "source.open",
+  "source.updateDraft",
+  "source.save",
+  "source.discard",
+  "source.applyBoth",
+  "source.saveAll",
+  "source.discardAll",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

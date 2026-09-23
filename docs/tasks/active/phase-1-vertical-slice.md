@@ -1,14 +1,18 @@
 # Plan: Phase 1 complete authoring vertical slice
 
 **Updated:** 2026-09-22 (remaining Phase 1 planning)<br>
-**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is active on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); inspect its branch-local CURRENT/HANDOVER for current evidence and continuation. Phase 1G–1H product planning is approved; implementation remains unstarted and requires accepted/integrated prerequisites plus explicit checkpoint selection. The [1G brief](phase-1g-branches-runtime-git.md) and [1H brief](phase-1h-vertical-slice-acceptance.md) own the detailed remaining plan.<br>
+**Status:** Phase 1A-1E and CI-SIMPLE are integrated. Phase 1F is accepted by
+[final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
+PR #14 integration is pending. 1G/1H planning is integrated through PR #15, with all
+implementation checkpoints unstarted and separately selected. CURRENT/HANDOVER own
+actual integration state.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
 
 Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
-Each milestone requires explicit user approval and a bounded execution brief. The active [Phase 1F goal](phase-1f-source-synchronisation.md) remains separately owned; this planning publication changes no 1F implementation, correction ledger or live handover. Planning approval and a documentation merge do not authorise 1G/1H execution. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
+Each milestone requires explicit user approval and a bounded execution brief. The archived [Phase 1F goal](../archive/2026-09-23-phase-1f-source-synchronisation.md) retains the accepted contract and historical evidence. Planning approval and a documentation merge do not authorise 1G/1H execution. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
 ## Product target and fixed decisions
 
@@ -112,7 +116,13 @@ Review actual rendered surfaces against Quiet Studio Dark: typography, spacing, 
 
 ### 1F — Source synchronisation and partial-visual handling
 
-**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
+**Accepted:** final review 2026-09-23; integration through PR #14 is pending. F1-F4 are closed; preserve all six native Save passes. See CURRENT/HANDOVER for the verified main state.
+
+**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](../archive/2026-09-23-phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
+
+**Review candidate:** implemented on `feature/phase-1f-source-synchronisation` in draft
+PR #14. The execution brief owns the exact candidate and gate evidence. This is not an
+integration claim and does not authorise 1G.
 
 Implement the Source centre workspace, conservative partial CST/range mapping, minimal patches, supported direct edits, bidirectional Scene/Source selection and exact Custom Code preservation. Track source byte offsets separately from decoded editor positions; cover Unicode, BOM/newlines and selection remapping. The Scene and Branches semantic projection must never become a competing authoritative document.
 

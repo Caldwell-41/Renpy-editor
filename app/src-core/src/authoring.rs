@@ -304,6 +304,7 @@ pub enum AuthoringError {
     PathCollision,
     DiscoveryCollision,
     SourceConflict,
+    DirtySource,
     UnsupportedSource,
     CorruptMetadata,
     UnsupportedMetadata,
@@ -315,6 +316,7 @@ pub enum AuthoringError {
 #[serde(rename_all = "camelCase")]
 pub enum PersistenceStatus {
     Saved,
+    PendingValidation,
     Conflict,
     RecoveryRequired,
 }
@@ -395,6 +397,7 @@ pub struct AuthoringService {
     pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
     pub(crate) scene_history: Mutex<HashMap<ProjectId, crate::transaction::HistoryStack>>,
+    pub(crate) source_sessions: Mutex<crate::source::SourceSessions>,
 }
 
 impl AuthoringService {
@@ -430,6 +433,7 @@ impl AuthoringService {
     }
 
     pub fn unregister_project(&mut self, id: &ProjectId) {
+        self.clear_source_project(id);
         self.transactions.unregister_trusted_project(id);
         self.imports.retain(|_, authority| &authority.project != id);
         if let Ok(mut history) = self.scene_history.lock() {
@@ -449,7 +453,7 @@ impl AuthoringService {
     /// Reports persistence readiness without acknowledging or modifying recovery state.
     pub fn status(&self, project: &ProjectId) -> PersistenceStatus {
         match self.transactions.recovery_blocker(project) {
-            Ok(None) => PersistenceStatus::Saved,
+            Ok(None) => self.source_persistence_status(project),
             Ok(Some(crate::transaction::ErrorCode::Conflict)) => PersistenceStatus::Conflict,
             Ok(Some(_)) | Err(_) => PersistenceStatus::RecoveryRequired,
         }
@@ -538,6 +542,8 @@ impl AuthoringService {
         request: CreateCharacterRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [CHARACTERS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         validate_identifier(&request.technical_name)?;
         validate_display(&request.display_name)?;
         validate_color(&request.dialogue_color)?;
@@ -598,6 +604,8 @@ impl AuthoringService {
         request: UpdateCharacterRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [CHARACTERS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         validate_uuid(&request.id)?;
         validate_hash(&request.expected_source_revision)?;
         validate_display(&request.display_name)?;
@@ -657,6 +665,8 @@ impl AuthoringService {
         request: CreateVariableRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [VARIABLES_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         validate_identifier(&request.technical_name)?;
         let literal = variable_literal(request.variable_type, &request.default_value)?;
         let stored_value = canonical_variable_value(request.variable_type, &request.default_value)?;
@@ -712,6 +722,8 @@ impl AuthoringService {
         request: UpdateVariableRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [VARIABLES_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         validate_uuid(&request.id)?;
         validate_hash(&request.expected_source_revision)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
@@ -766,6 +778,8 @@ impl AuthoringService {
         request: ImportAssetRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [ASSETS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         validate_identifier(&request.technical_name)?;
         validate_display(&request.display_name)?;
         let mut authority = self
@@ -914,6 +928,8 @@ impl AuthoringService {
         project_uuid: &str,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [ASSETS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         let (source_bytes, source_revision, source_kind) = match self
             .transactions

@@ -1,5 +1,14 @@
 setTimeout(async () => {
   const invoke = window.__TAURI_INTERNALS__.invoke;
+  const yieldTask = () => new Promise((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      channel.port1.close();
+      channel.port2.close();
+      resolve();
+    };
+    channel.port2.postMessage(null);
+  });
   const known = await invoke("core_request", {
     request: { protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} },
   }).then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
@@ -24,7 +33,7 @@ setTimeout(async () => {
   const openProject = buttons.find((button) => button.textContent === "Open Loomlight Project");
   const welcomeLifecycleVisible = Boolean(newProject && openProject);
   newProject?.click();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await yieldTask();
   const pageText = document.body.textContent ?? "";
   const newProjectWizardVisible =
     pageText.includes("Project details") &&
@@ -35,7 +44,23 @@ setTimeout(async () => {
   let supportingAuthoringStage = "not-started";
   let sceneAuthoringUiPassed = false;
   let sceneAuthoringStage = "not-started";
+  let sourceAuthoringUiPassed = false;
+  let sourceAuthoringStage = "not-started";
+  const sourceCommandTrace = [];
   let restoreSmokeRequester = () => {};
+  let checkpointSequence = 0;
+  const checkpoint = async (stage) => {
+    checkpointSequence += 1;
+    const value = await invoke("core_request", {
+      request: {
+        protocolVersion: 1,
+        requestId: `smoke-checkpoint-${checkpointSequence}`,
+        operation: "probe.smokeCheckpoint",
+        payload: { stage },
+      },
+    });
+    if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
+  };
   try {
     const project = {
       sessionId: "smoke-session", projectId: "smoke-project", title: "Smoke Project",
@@ -90,7 +115,20 @@ setTimeout(async () => {
         variables: model.variables,
       },
     };
+    let sourceDocument = {
+      path: "game/chapters/chapter_01/scene_001.rpy", text: "label scene_one:\n    python:\n        score += 1\n    return\n",
+      state: "clean", editable: true, dirty: false, baseRevision: "5".repeat(64), liveRevision: "5".repeat(64), draftVersion: 0,
+      hasBom: false, newline: "LF", partial: true, diagnostics: [], selectionStart: 0, selectionEnd: 0,
+      selectedSceneId: null, selectedBeatId: null, canApplyBoth: false, combinedPreview: null, externalText: null,
+      ranges: [
+        { sceneId: "scene", beatId: "custom", kind: "customCode", byteStart: 17, byteEnd: 49, editorStart: 17, editorEnd: 49, protected: true },
+        { sceneId: "scene", beatId: "return", kind: "return", byteStart: 49, byteEnd: 60, editorStart: 49, editorEnd: 60, protected: false },
+      ],
+    };
     const called = new Set();
+    const operationCounts = new Map();
+    let acceptedSourceText = sourceDocument.text;
+    let retainedSourceDraft = null;
     let exactInteger = false;
     let exactIntegerUpdate = false;
     let releaseVariableUpdate;
@@ -108,10 +146,19 @@ setTimeout(async () => {
         payload,
       };
       called.add(request.operation);
+      operationCounts.set(request.operation, (operationCounts.get(request.operation) ?? 0) + 1);
       let value = model;
       if (request.operation === "project.openPicker") value = project;
       if (request.operation === "project.listRecent") value = [];
-      if (request.operation === "project.status") value = projectStatus;
+      if (request.operation === "project.status") {
+        value = projectStatus === "recoveryRequired"
+          ? "recoveryRequired"
+          : projectStatus === "conflict"
+            ? "conflict"
+            : sourceDocument.state === "conflict" || sourceDocument.state === "invalid" || sourceDocument.state === "unavailable"
+              ? "conflict"
+              : sourceDocument.dirty ? "pendingValidation" : "saved";
+      }
       if (request.operation === "project.flush") value = null;
       if (request.operation === "scene.list") value = sceneWorkspace;
       if (request.operation === "scene.apply") {
@@ -119,6 +166,32 @@ setTimeout(async () => {
         value = sceneWorkspace;
       }
       if (request.operation === "scene.recovery") value = recoveryReport;
+      if (request.operation === "source.list") value = {
+        files: [{ path: sourceDocument.path, state: sourceDocument.state, sceneId: "scene", dirty: sourceDocument.dirty, readOnly: false }],
+        dirtyCount: sourceDocument.dirty ? 1 : 0, draftBytes: sourceDocument.dirty ? sourceDocument.text.length : 0,
+      };
+      if (request.operation === "source.open") value = sourceDocument;
+      if (request.operation === "source.updateDraft") {
+        const nextDraft = request.payload.text === acceptedSourceText ? null : request.payload.text;
+        const changed = retainedSourceDraft !== nextDraft;
+        retainedSourceDraft = nextDraft;
+        sourceDocument = {
+          ...sourceDocument,
+          text: request.payload.text,
+          state: nextDraft === null ? "clean" : "dirty",
+          dirty: nextDraft !== null,
+          draftVersion: sourceDocument.draftVersion + Number(changed),
+          selectionStart: request.payload.selectionStart,
+          selectionEnd: request.payload.selectionEnd,
+        };
+        value = sourceDocument;
+      }
+      if (request.operation === "source.save") {
+        acceptedSourceText = retainedSourceDraft ?? acceptedSourceText;
+        retainedSourceDraft = null;
+        sourceDocument = { ...sourceDocument, state: "clean", dirty: false, draftVersion: sourceDocument.draftVersion + 1 };
+        value = sourceDocument;
+      }
       if (request.operation === "scene.resolveRecovery") {
         projectStatus = "saved";
         recoveryReport = { items: [] };
@@ -154,9 +227,10 @@ setTimeout(async () => {
     if (typeof window.__loomlightInstallSmokeRequester !== "function") throw new Error("Missing smoke requester hook.");
     restoreSmokeRequester = window.__loomlightInstallSmokeRequester(smokeRequester);
     const waitFor = async (condition, description) => {
-      for (let attempt = 0; attempt < 100; attempt += 1) {
+      const deadline = performance.now() + 2000;
+      while (performance.now() < deadline) {
         if (condition()) return;
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        await yieldTask();
       }
       throw new Error(`Timed out waiting for ${description}`);
     };
@@ -170,7 +244,7 @@ setTimeout(async () => {
     const awaitCall = async (operation) => {
       supportingAuthoringStage = operation;
       await waitFor(() => called.has(operation), operation);
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await yieldTask();
     };
     const awaitSceneCommit = async (count, description) => {
       await waitFor(() => sceneApplyCount >= count, description);
@@ -191,6 +265,7 @@ setTimeout(async () => {
       if (!target) throw new Error(`Missing ${label}`);
       return target;
     };
+    const macPlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     supportingAuthoringStage = "welcome";
     click("Loomlight");
     await awaitSurface("Open Loomlight Project");
@@ -249,14 +324,14 @@ setTimeout(async () => {
     click("Save Default");
     await waitFor(() => called.has("variable.update"), "variable.update");
     supportingAuthoringStage = "overlapping-flush";
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
+    await yieldTask();
     overlappingFlushSuppressed = !called.has("project.flush")
       && document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started";
     releaseVariableUpdate?.();
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "completed variable update");
     supportingAuthoringStage = "flush";
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await awaitCall("project.flush");
     click("Assets");
     await awaitSurface("Choose and import…");
@@ -266,7 +341,7 @@ setTimeout(async () => {
     technical.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose and import…");
     await waitFor(() => importChoiceCount === 2, "cancelled asset choice");
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await yieldTask();
     const cancelledPreserved = technical.value === "theme"
       && [...document.querySelectorAll("button")].find((item) => item.textContent === "Choose and import…")?.disabled === false;
     supportingAuthoringStage = "repair-compatibility";
@@ -339,6 +414,104 @@ setTimeout(async () => {
     await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
     const audioIntentional = audioBeforeClick === 0;
 
+    await checkpoint("pre-source-complete");
+    sourceAuthoringStage = "open-source-workspace";
+    click("Source");
+    await waitFor(() => document.querySelector(".source-editor"), "Source editor");
+    const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
+      && document.body.textContent.includes("Custom Code")
+      && document.querySelectorAll(".source-line-numbers").length === 1;
+    sourceAuthoringStage = "retain-button-draft";
+    let sourceEditor = document.querySelector(".source-editor");
+    sourceEditor.value = sourceEditor.value.replace("score += 1", "score += 2");
+    sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
+    await waitFor(() => sourceDocument.dirty, "Source draft retention");
+    await waitFor(() => {
+      const save = document.querySelector('button[data-source-action="save"]');
+      return save && !save.disabled && document.querySelector("#app-status")?.textContent === "Pending validation";
+    }, "Source dirty UI state");
+    const buttonSaveBefore = operationCounts.get("source.save") ?? 0;
+    const buttonFlushBefore = operationCounts.get("project.flush") ?? 0;
+    sourceAuthoringStage = "source-button-save";
+    click("Save Source");
+    await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
+    const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
+    sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
+    sourceEditor = document.querySelector(".source-editor");
+    const selectionUpdateBefore = operationCounts.get("source.updateDraft") ?? 0;
+    sourceEditor.setSelectionRange(5, 5);
+    sourceEditor.dispatchEvent(new Event("select", { bubbles: true }));
+    await waitFor(
+      () => (operationCounts.get("source.updateDraft") ?? 0) > selectionUpdateBefore
+        && !sourceDocument.dirty
+        && sourceDocument.selectionStart === 5
+        && sourceDocument.selectionEnd === 5,
+      "selection-only clean stability",
+    );
+
+    sourceAuthoringStage = "retain-shortcut-draft";
+    sourceEditor.value = sourceEditor.value.replace("score += 2", "score += 3");
+    sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
+    await waitFor(() => sourceDocument.dirty, "fresh shortcut Source draft");
+    const shortcutSaveBefore = operationCounts.get("source.save") ?? 0;
+    const shortcutFlushBefore = operationCounts.get("project.flush") ?? 0;
+    sourceAuthoringStage = "source-synthetic-shortcut-save";
+    sourceEditor.focus();
+    const sourceSaveShortcut = new Event("keydown", { bubbles: true, cancelable: true, composed: true });
+    Object.defineProperties(sourceSaveShortcut, {
+      key: { value: "s" },
+      ctrlKey: { value: !macPlatform },
+      metaKey: { value: macPlatform },
+      altKey: { value: false },
+      shiftKey: { value: false },
+      repeat: { value: false },
+      isComposing: { value: false },
+    });
+    if (sourceEditor.dispatchEvent(sourceSaveShortcut)) throw new Error("Source save shortcut was not handled by the focused editor");
+    try {
+      await waitFor(() => (operationCounts.get("source.save") ?? 0) === shortcutSaveBefore + 1 && !sourceDocument.dirty, "synthetic Source shortcut acceptance");
+    } catch (error) {
+      const status = document.querySelector("#app-status")?.textContent ?? "missing";
+      throw new Error(`${error instanceof Error ? error.message : String(error)}; status=${status}; counts=${JSON.stringify(Object.fromEntries(operationCounts))}`);
+    }
+    const shortcutFlushDelta = (operationCounts.get("project.flush") ?? 0) - shortcutFlushBefore;
+    sourceCommandTrace.push(`keyboard-synthetic:source:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=1:flushes=${shortcutFlushDelta}:saved`);
+    await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "Source saved status");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "shortcut Source Save barrier release");
+
+    sourceAuthoringStage = "source-clean-flush";
+    const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
+    const cleanSaveBefore = operationCounts.get("source.save") ?? 0;
+    sourceEditor = document.querySelector(".source-editor");
+    sourceEditor.focus();
+    const cleanShortcut = new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true });
+    sourceEditor.dispatchEvent(cleanShortcut);
+    await waitFor(() => (operationCounts.get("project.flush") ?? 0) === cleanFlushBefore + 1, "clean Source Flush");
+    await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "clean Source Flush barrier release");
+    const cleanSaveDelta = (operationCounts.get("source.save") ?? 0) - cleanSaveBefore;
+    sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
+
+    sourceAuthoringStage = "non-source-flush";
+    click("Characters");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "non-Source workspace");
+    const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
+    await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
+    sourceCommandTrace.push(`keyboard-synthetic:non-source:${macPlatform ? "meta" : "ctrl"}+s:completed:flushes=1:saved`);
+    sourceAuthoringUiPassed = sourceSurfaceVisible
+      && sourceDocument.text.includes("score += 3")
+      && called.has("source.list")
+      && called.has("source.open")
+      && called.has("source.updateDraft")
+      && (operationCounts.get("source.save") ?? 0) === shortcutSaveBefore + 1
+      && (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1
+      && buttonFlushDelta === 0
+      && shortcutFlushDelta === 0
+      && cleanSaveDelta === 0;
+    sourceAuthoringStage = sourceAuthoringUiPassed ? "complete" : "assertions-failed";
+    await checkpoint(`source-${sourceAuthoringStage}`);
+
     sceneAuthoringStage = "safe-recovery";
     projectStatus = "recoveryRequired";
     recoveryReport = { items: [{
@@ -367,14 +540,16 @@ setTimeout(async () => {
     await waitFor(() => document.body.textContent.includes("This state is ambiguous"), "ambiguous recovery refusal");
     const ambiguousRefused = ![...document.querySelectorAll("button")]
       .some((item) => item.textContent?.includes("project files") || item.textContent?.includes("Loomlight files"));
+    await checkpoint("post-source-recovery-complete");
 
     sceneAuthoringStage = "conflict-presentation";
     projectStatus = "conflict";
     sceneWorkspace.scenes[0].sourceConflict = true;
     click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before conflict state"); click("Story");
-    await waitFor(() => document.body.textContent.includes("Source conflict"), "Scene source conflict state");
-    const conflictVisible = document.body.textContent.includes("Scene writes and history are blocked");
+    await waitFor(() => document.body.textContent.includes("Source projection unavailable"), "Scene source conflict state");
+    const conflictVisible = document.body.textContent.includes("Scene writes and history remain blocked");
     sceneWorkspace.scenes[0].sourceConflict = false;
+    await checkpoint("post-source-conflict-complete");
     sceneAuthoringUiPassed = previewVisible
       && allocationCorrect
       && accessibleReorder
@@ -390,12 +565,38 @@ setTimeout(async () => {
       && called.has("scene.resolveRecovery")
       && called.has("media.present");
     sceneAuthoringStage = sceneAuthoringUiPassed ? "complete" : "assertions-failed";
-  } catch {
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    if (sourceAuthoringStage !== "not-started" && sourceAuthoringStage !== "complete") {
+      sourceAuthoringStage = `${sourceAuthoringStage}: ${detail}`;
+    } else if (sceneAuthoringStage !== "not-started" && sceneAuthoringStage !== "complete") {
+      sceneAuthoringStage = `${sceneAuthoringStage}: ${detail}`;
+    } else if (supportingAuthoringStage !== "not-started" && supportingAuthoringStage !== "complete") {
+      supportingAuthoringStage = `${supportingAuthoringStage}: ${detail}`;
+    }
     if (supportingAuthoringStage !== "complete") supportingAuthoringUiPassed = false;
     sceneAuthoringUiPassed = false;
+    sourceAuthoringUiPassed = false;
   } finally {
     restoreSmokeRequester();
   }
+  const shellSaveTrace = typeof window.__loomlightReadSaveTrace === "function"
+    ? window.__loomlightReadSaveTrace().join("|")
+    : "missing";
+  const sourceCommandTracePassed = sourceCommandTrace.length === 4
+    && sourceCommandTrace[0]?.includes("button:source:generation-current:completed:saves=1:flushes=0:saved")
+    && sourceCommandTrace[1]?.includes("keyboard-synthetic:source:")
+    && sourceCommandTrace[1]?.includes(":completed:saves=1:flushes=0:saved")
+    && sourceCommandTrace[2]?.includes("keyboard-synthetic:source-clean:")
+    && sourceCommandTrace[2]?.includes(":completed:saves=0:flushes=1:saved")
+    && sourceCommandTrace[3]?.includes("keyboard-synthetic:non-source:")
+    && sourceCommandTrace[3]?.includes(":completed:flushes=1:saved")
+    && shellSaveTrace.includes("route=source;origin=toolbar")
+    && shellSaveTrace.includes("route=source;origin=keyboard")
+    && shellSaveTrace.includes("phase=accepted")
+    && shellSaveTrace.includes("phase=flushed")
+    && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
+  await checkpoint("final-report-start");
   await invoke("core_request", {
     request: {
       protocolVersion: 1,
@@ -412,6 +613,10 @@ setTimeout(async () => {
         rendererSecretsAbsent,
         sceneAuthoringStage,
         sceneAuthoringUiPassed,
+        sourceAuthoringStage,
+        sourceAuthoringUiPassed,
+        sourceCommandTrace: `${sourceCommandTrace.join("|")}|shell=${shellSaveTrace}`,
+        sourceCommandTracePassed,
         supportingAuthoringStage,
         supportingAuthoringUiPassed,
         welcomeLifecycleVisible,

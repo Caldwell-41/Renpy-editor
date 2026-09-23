@@ -2,13 +2,13 @@
 
 ## Status
 
-This is the accepted Phase 0 target architecture plus the Phase 1A–1E production
+This is the accepted Phase 0 target architecture plus the Phase 1A–1F production
 architecture. ADR 0001 selects exact source bytes plus a conservative partial CST,
 ADR 0002 selects the versioned SDK boundary, ADR 0003 selects Tauri 2, ADRs 0004–0005
 define transaction and project-creation safety, and
 [ADR 0006](adr/0006-scene-authoring-source-and-media-boundary.md) defines the bounded
-Scene/source/media boundary. The production application lives in `app/`; Phase 1F and
-later milestones remain separately gated.
+Scene/source/media boundary. The production application lives in `app/`; Phase 1F is
+accepted by final review, with integration tracked in CURRENT/HANDOVER; later milestones remain separately gated.
 
 ## Production scaffold boundary
 
@@ -21,8 +21,9 @@ result shape.
 
 Protocol version 1 requires exactly `protocolVersion`, `requestId`, `operation`, and
 `payload`. The allowlist now includes lifecycle, supporting authoring, Scene semantic
-operations, persistence/recovery, and asset-ID media presentation. Every operation is
-schema checked and session bound in core. The capability is local, scoped to WebView
+operations, Source inventory/draft/acceptance/reconciliation, persistence/recovery,
+and asset-ID media presentation. Every operation is schema checked and session bound
+in core. The capability is local, scoped to WebView
 label `main`, and names only `allow-loomlight-core`; no general Tauri filesystem,
 shell/process, HTTP, opener, or credential plugin is present. Git, credentials, and
 network providers remain unavailable to renderer operations.
@@ -150,10 +151,13 @@ through the source/file boundary.
 
 The shell always exposes a meaningful persistence state such as `Saved`, `Saving`,
 `Unsubmitted editor input`, `Pending validation`, `Conflict`, or `Recovery required`.
-`Ctrl/Cmd+S` remains an
-explicit flush/durability action: it completes pending accepted work and confirms that
-the project is durably persisted; it is not the only moment when visual state is
-translated into `.rpy`.
+One application-lifetime shell adapter owns `Ctrl/Cmd+S`. Outside Source editing it is
+an explicit Flush/durability action. In a Source editing context, the registered
+document controller captures the session, controller, open generation and latest input,
+settles ordered draft retention under the existing per-session mutation lease, and
+accepts that exact draft once. A clean settled Source falls through to normal Flush
+without an ownership gap; refusal never falls through. Successful Source acceptance is
+already durable through the shared transaction and does not append another Flush.
 
 Undo/redo records semantic intent and exact patches across visual and source edits.
 External filesystem revisions are safety boundaries: undo/redo must not silently
@@ -253,8 +257,8 @@ complete unique top-level executable statement, not matching text in a comment,
 multiline string, continuation, or indented opaque block. Canonical definitions are
 inserted or patched only after every relevant mapping and the expected file revision
 are verified; unrelated/unsupported bytes, Unicode, formatting, and line endings remain
-untouched. This recognizer is intentionally not the general parser or Phase 1F Source
-workspace.
+untouched. This recognizer is intentionally not a general Ren'Py parser. Phase 1F
+reuses it for bounded Source mapping and leaves all unproved syntax visibly opaque.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
@@ -297,10 +301,17 @@ special cases:
 - Watch events are debounced and compared using content hashes, not timestamps only.
 - A transaction records the base revision. If disk changed, no blind write occurs.
 - Reparse and map supported edits; surface unsupported regions without relocating
-  them. If both revisions touch the same source range, present an explicit conflict.
+  them. A dirty buffer retains its accepted base, draft, and external bytes. Only two
+  exact, non-overlapping base-relative patches expose a reviewed Apply Both result;
+  overlap, deletion, ambiguity, or unsafe identity remains an explicit conflict.
 - Recovery information is written before destructive commitment steps and retained
   when a known race/failure prevents safe completion.
-- Autosave and explicit save/flush use the same transaction/recovery mechanism.
+- Source typing is session-local and never autosaves. Explicit Source Save/Save All
+  and accepted visual edits use the same transaction/recovery mechanism.
+- Source acceptance temporarily makes the captured editor and navigation read-only,
+  drains prior retention, and fails closed while preserving local text. Navigation and
+  leave settle local input without accepting it; controller/document generations and
+  token-matched leases suppress stale redraw, status and cleanup.
 - Undo/redo stops at unresolved external conflicts rather than applying stale inverses.
 
 ## Preview boundary
@@ -329,9 +340,10 @@ behavior require the official runtime.
 ## Resolved Phase 0 boundaries and implementation risks
 
 Phase 0 resolved the desktop runtime, source model, SDK adapter/install boundary,
-preview fidelity classes, and target atomic/watch observations. Phase 1A–1E have
+preview fidelity classes, and target atomic/watch observations. Phase 1A–1F have
 turned the scaffold, lifecycle, supporting authoring, Scene source operations,
-recovery UX, and bounded preview/media decisions into production services. Manual assistive-
+recovery UX, bounded preview/media, and direct Source synchronisation decisions into
+production services. Manual assistive-
 technology, physical signing/quarantine/SmartScreen, system-WebView variance, and full
 automatic graph-layout performance remain explicit later validation risks; they do
 not reopen the completed Phase 0 decision without contradictory evidence.

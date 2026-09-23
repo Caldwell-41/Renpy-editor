@@ -284,11 +284,16 @@ test("supporting authoring ignores stale completions and reports persistence tru
   await tick();
   click("Loomlight");
   await tick();
+  assert.match(document.body.textContent ?? "", /Project B/);
+  assert.match(document.querySelector("#app-status")?.textContent ?? "", /operation is still in progress/i);
+  characterCreates[1]!.resolve(model);
+  await tick();
+  await tick();
+  click("Loomlight");
+  await tick();
   click("Open Loomlight Project");
   assert.equal(opens.length, 3);
   opens[2]!.resolve(projectA);
-  await tick();
-  characterCreates[1]!.resolve(model);
   await tick();
   assert.match(document.body.textContent ?? "", /Project A/);
 });

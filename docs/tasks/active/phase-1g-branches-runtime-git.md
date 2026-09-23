@@ -14,6 +14,17 @@ authority to implement, dispatch production gates, merge this PR or advance Phas
 selection of ONE checkpoint. Reuse an existing matching implementation branch/PR;
 otherwise record the new implementation branch in the live handover at entry.
 
+## Closeout preparation — 2026-09-23
+
+Planning PR #15 is integrated in main `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
+The planning-branch/authority text above is historical. Phase 1F acceptance is now
+satisfied by [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
+PR #14 integration is the remaining closeout operation. F1-F4 and the focused native
+gates are closed, with earlier Save passes preserved. CURRENT/HANDOVER own the actual
+integration result. Every checkpoint below remains `not_started`; 1G.1 becomes eligible
+after integration and explicit user selection. No duplicate plan or implementation
+branch is created by this handover.
+
 ## 1. Ownership and existing foundations
 
 Read [AGENTS](../../../AGENTS.md), [WORKFLOW](../../WORKFLOW.md), current status and

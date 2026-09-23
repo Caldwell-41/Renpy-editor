@@ -14,6 +14,10 @@ use crate::{
         ValidatedSdk, SUPPORTED_VERSION,
     },
     scene::{RecoveryResolveRequest, SceneCommandRequest, SceneError, SceneWorkspace},
+    source::{
+        SourceApplyBothRequest, SourceDocument, SourceDraftRequest, SourceError, SourceInventory,
+        SourceOpenRequest, SourcePathRequest, SourceSaveRequest,
+    },
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Map;
@@ -124,6 +128,7 @@ pub enum LifecycleError {
     StaleSession,
     Authoring(AuthoringError),
     Scene(SceneError),
+    Source(SourceError),
     Media(MediaError),
     Io,
 }
@@ -401,10 +406,18 @@ impl LifecycleService {
         self.activate_project(inspected)
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&mut self) -> Result<(), LifecycleError> {
+        if self
+            .current
+            .as_ref()
+            .is_some_and(|(_, _, authority)| self.authoring.has_dirty_sources(authority))
+        {
+            return Err(LifecycleError::Source(SourceError::DirtySource));
+        }
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
+        Ok(())
     }
     pub fn current(&self) -> Option<OpenProject> {
         self.current.as_ref().map(|(_, project, _)| project.clone())
@@ -414,6 +427,13 @@ impl LifecycleService {
         &mut self,
         mut inspected: InspectedProject,
     ) -> Result<OpenProject, LifecycleError> {
+        if self
+            .current
+            .as_ref()
+            .is_some_and(|(_, _, authority)| self.authoring.has_dirty_sources(authority))
+        {
+            return Err(LifecycleError::Source(SourceError::DirtySource));
+        }
         let authority = self
             .authoring
             .register_inspected_project(inspected.root.clone(), inspected.anchor)
@@ -608,6 +628,77 @@ impl LifecycleService {
         self.authoring
             .media_present(&authority, &project_id, request)
             .map_err(LifecycleError::Media)
+    }
+
+    pub fn source_inventory(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_inventory(&authority, &project_id)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_open(
+        &self,
+        request: SourceOpenRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_open(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_update_draft(
+        &self,
+        request: SourceDraftRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_update_draft(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_save(
+        &self,
+        request: SourceSaveRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_save(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_apply_both(
+        &self,
+        request: SourceApplyBothRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_apply_both(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_discard(
+        &self,
+        request: SourcePathRequest,
+    ) -> Result<SourceDocument, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_discard(&authority, &project_id, request)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_save_all(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_save_all(&authority, &project_id)
+            .map_err(LifecycleError::Source)
+    }
+
+    pub fn source_discard_all(&self) -> Result<SourceInventory, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .source_discard_all(&authority, &project_id)
+            .map_err(LifecycleError::Source)
     }
 
     pub fn list_recent(&self) -> Vec<RecentProject> {
@@ -1843,6 +1934,364 @@ mod tests {
                 command,
             })
             .unwrap()
+    }
+
+    fn closeout_ipc(
+        service: &mut LifecycleService,
+        operation: &str,
+        payload: serde_json::Value,
+    ) -> serde_json::Value {
+        serde_json::to_value(crate::handle_application_request(
+            serde_json::json!({"protocolVersion": 1, "requestId": "closeout", "operation": operation, "payload": payload}),
+            false, service,
+        )).unwrap()
+    }
+
+    #[test]
+    fn apply_both_json_binds_review_and_preserves_draft_and_disk_on_every_stale_identity() {
+        use serde_json::json;
+        for change in [
+            "draft", "external", "combined", "base", "missing", "session", "success",
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = temp.path().join("review-project");
+            make_openable_project(&root, "Review binding");
+            let path = "game/custom.rpy";
+            fs::write(root.join(path), b"alpha beta gamma\n").unwrap();
+            let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+            let project = service.open_path(&root).unwrap();
+            let mut session = project.session_id.clone();
+            let opened = closeout_ipc(
+                &mut service,
+                "source.open",
+                json!({"sessionId": session, "path": path}),
+            );
+            assert_eq!(opened["ok"], true, "{opened}");
+            let base = opened["value"]["baseRevision"].clone();
+            let draft = closeout_ipc(
+                &mut service,
+                "source.updateDraft",
+                json!({"sessionId": session, "path": path,
+                "expectedBaseRevision": base, "text": "ALPHA beta gamma\n", "selectionStart": 0, "selectionEnd": 0}),
+            );
+            assert_eq!(draft["ok"], true, "{draft}");
+            fs::write(root.join(path), b"alpha beta GAMMA\n").unwrap();
+            let review = closeout_ipc(
+                &mut service,
+                "source.open",
+                json!({"sessionId": session, "path": path}),
+            );
+            let review = &review["value"];
+            assert_eq!(review["canApplyBoth"], true);
+            let mut request = json!({"sessionId": session, "path": path, "expectedBaseRevision": base,
+                "expectedDraftVersion": review["draftVersion"], "expectedExternalRevision": review["liveRevision"],
+                "expectedCombinedText": review["combinedPreview"]});
+            let mut expected_draft = "ALPHA beta gamma\n";
+            match change {
+                "draft" => {
+                    expected_draft = "NEW beta gamma\n";
+                    let retained = closeout_ipc(
+                        &mut service,
+                        "source.updateDraft",
+                        json!({"sessionId": session, "path": path,
+                        "expectedBaseRevision": base, "text": expected_draft, "selectionStart": 0, "selectionEnd": 0}),
+                    );
+                    assert_eq!(retained["ok"], true, "{retained}");
+                }
+                "external" => fs::write(root.join(path), b"alpha beta DELTA\n").unwrap(),
+                "combined" => request["expectedCombinedText"] = json!("unreviewed"),
+                "base" => request["expectedBaseRevision"] = json!("0".repeat(64)),
+                "missing" => {
+                    request
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("expectedExternalRevision");
+                }
+                "session" => {
+                    service.source_discard_all().unwrap();
+                    service.close().unwrap();
+                    session = service.open_path(&root).unwrap().session_id;
+                    let opened = closeout_ipc(
+                        &mut service,
+                        "source.open",
+                        json!({"sessionId": session, "path": path}),
+                    );
+                    expected_draft = "replacement session draft\n";
+                    let retained = closeout_ipc(
+                        &mut service,
+                        "source.updateDraft",
+                        json!({"sessionId": session, "path": path,
+                        "expectedBaseRevision": opened["value"]["baseRevision"], "text": expected_draft, "selectionStart": 0, "selectionEnd": 0}),
+                    );
+                    assert_eq!(retained["ok"], true, "{retained}");
+                }
+                _ => {}
+            }
+            let disk_before = fs::read(root.join(path)).unwrap();
+            let map_before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+            let result = closeout_ipc(&mut service, "source.applyBoth", request);
+            if change == "success" {
+                assert_eq!(result["ok"], true, "{result}");
+                assert_eq!(result["value"]["dirty"], false);
+                assert_eq!(fs::read(root.join(path)).unwrap(), b"ALPHA beta GAMMA\n");
+                service.close().unwrap();
+                drop(service);
+                let mut reopened = LifecycleService::new(temp.path().join("state")).unwrap();
+                let project = reopened.open_path(&root).unwrap();
+                let value = closeout_ipc(
+                    &mut reopened,
+                    "source.open",
+                    json!({"sessionId": project.session_id, "path": path}),
+                );
+                assert_eq!(value["value"]["text"], "ALPHA beta GAMMA\n");
+                assert_eq!(value["value"]["dirty"], false);
+            } else {
+                let code = match change {
+                    "missing" => "INVALID_PAYLOAD",
+                    "session" => "STALE_PROJECT_SESSION",
+                    _ => "SOURCE_CONFLICT",
+                };
+                assert_eq!(result["error"]["code"], code, "{change}: {result}");
+                assert_eq!(fs::read(root.join(path)).unwrap(), disk_before);
+                assert_eq!(
+                    fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+                    map_before
+                );
+                let retained = closeout_ipc(
+                    &mut service,
+                    "source.open",
+                    json!({"sessionId": session, "path": path}),
+                );
+                assert_eq!(retained["value"]["text"], expected_draft);
+                assert_eq!(retained["value"]["dirty"], true);
+            }
+        }
+    }
+
+    #[test]
+    fn apply_both_json_refuses_overlap_same_position_and_uncertain_custom_code_boundary() {
+        use serde_json::json;
+        for (base, draft, external) in [
+            (
+                "alpha beta gamma\n",
+                "alpha BETA gamma\n",
+                "alpha XXXX gamma\n",
+            ),
+            (
+                "alpha beta\n",
+                "alpha LOCAL beta\n",
+                "alpha EXTERNAL beta\n",
+            ),
+            (
+                "label custom:\n    python:\n        custom()\n    return\n",
+                "label custom:\n    python:\n        local()\n    return\n",
+                "label custom:\n    python hide:\n        external()\n    return\n",
+            ),
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = temp.path().join("uncertain-project");
+            make_openable_project(&root, "Uncertain combination");
+            let path = "game/custom.rpy";
+            fs::write(root.join(path), base).unwrap();
+            let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+            let session = service.open_path(&root).unwrap().session_id;
+            let opened = closeout_ipc(
+                &mut service,
+                "source.open",
+                json!({"sessionId": session, "path": path}),
+            );
+            let retained = closeout_ipc(
+                &mut service,
+                "source.updateDraft",
+                json!({"sessionId": session, "path": path,
+                "expectedBaseRevision": opened["value"]["baseRevision"], "text": draft, "selectionStart": 0, "selectionEnd": 0}),
+            );
+            assert_eq!(retained["ok"], true, "{retained}");
+            fs::write(root.join(path), external).unwrap();
+            let review = closeout_ipc(
+                &mut service,
+                "source.open",
+                json!({"sessionId": session, "path": path}),
+            );
+            let review = &review["value"];
+            assert_eq!(review["canApplyBoth"], false, "{review}");
+            let result = closeout_ipc(
+                &mut service,
+                "source.applyBoth",
+                json!({"sessionId": session, "path": path,
+                "expectedBaseRevision": review["baseRevision"], "expectedDraftVersion": review["draftVersion"],
+                "expectedExternalRevision": review["liveRevision"], "expectedCombinedText": draft}),
+            );
+            assert_eq!(result["error"]["code"], "SOURCE_CONFLICT", "{result}");
+            assert_eq!(fs::read_to_string(root.join(path)).unwrap(), external);
+            let retained = closeout_ipc(
+                &mut service,
+                "source.open",
+                json!({"sessionId": session, "path": path}),
+            );
+            assert_eq!(retained["value"]["text"], draft);
+        }
+    }
+
+    #[test]
+    fn scene_renderer_json_edits_and_inserts_beats_through_real_ipc() {
+        use serde_json::{json, Value};
+
+        fn ipc(service: &mut LifecycleService, operation: &str, payload: Value) -> Value {
+            serde_json::to_value(crate::handle_application_request(
+                json!({
+                    "protocolVersion": 1,
+                    "requestId": "scene-renderer-regression",
+                    "operation": operation,
+                    "payload": payload,
+                }),
+                false,
+                service,
+            ))
+            .unwrap()
+        }
+
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("scene-renderer-project");
+        make_openable_project(&root, "Scene renderer regression");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let project = service.open_path(&root).unwrap();
+        let session = &project.session_id;
+        let listed = ipc(&mut service, "scene.list", json!({"sessionId": session}));
+        assert_eq!(listed["ok"], true, "{listed}");
+        let mut workspace = listed["value"].clone();
+        let scene_id = workspace["entrySceneId"].clone();
+        let scene = workspace["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let source_path = scene["sourcePath"].as_str().unwrap().to_owned();
+        let beat_id = scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|beat| beat["payload"]["type"] == "narration")
+            .unwrap()["id"]
+            .clone();
+
+        // These are the editor's real JSON envelopes, not typed Rust commands.
+        let update = json!({
+            "sessionId": session,
+            "expectedProjectRevision": workspace["projectRevision"],
+            "expectedSourceMapRevision": workspace["sourceMapRevision"],
+            "command": {
+                "type": "updateBeat", "sceneId": scene_id,
+                "expectedSourceRevision": scene["sourceRevision"], "beatId": beat_id,
+                "beat": {"type": "narration", "text": "Edited via renderer IPC"},
+            },
+        });
+        let updated = ipc(&mut service, "scene.apply", update.clone());
+        assert_eq!(updated["ok"], true, "{updated}");
+        workspace = updated["value"].clone();
+        let edited_bytes = fs::read(root.join(&source_path)).unwrap();
+        assert!(String::from_utf8_lossy(&edited_bytes).contains("Edited via renderer IPC"));
+
+        let stale = ipc(&mut service, "scene.apply", update.clone());
+        assert_eq!(stale["error"]["code"], "SOURCE_CONFLICT");
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);
+        let mut malformed = update;
+        malformed["command"]
+            .as_object_mut()
+            .unwrap()
+            .remove("sceneId");
+        let rejected = ipc(&mut service, "scene.apply", malformed);
+        assert_eq!(rejected["error"]["code"], "INVALID_PAYLOAD");
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), edited_bytes);
+
+        let scene = workspace["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let inserted = ipc(
+            &mut service,
+            "scene.apply",
+            json!({
+                "sessionId": session,
+                "expectedProjectRevision": workspace["projectRevision"],
+                "expectedSourceMapRevision": workspace["sourceMapRevision"],
+                "command": {
+                    "type": "insertBeat", "sceneId": scene_id,
+                    "expectedSourceRevision": scene["sourceRevision"], "beforeBeatId": beat_id,
+                    "beat": {"type": "narration", "text": "Inserted via renderer IPC"},
+                },
+            }),
+        );
+        assert_eq!(inserted["ok"], true, "{inserted}");
+        let accepted = fs::read(root.join(&source_path)).unwrap();
+        let text = String::from_utf8_lossy(&accepted);
+        let inserted_at = text.find("Inserted via renderer IPC").unwrap();
+        let edited_at = text.find("Edited via renderer IPC").unwrap();
+        assert!(inserted_at < edited_at);
+        let accepted_scene = inserted["value"]["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let beats = accepted_scene["beats"].as_array().unwrap();
+        let anchor_index = beats.iter().position(|beat| beat["id"] == beat_id).unwrap();
+        assert!(anchor_index > 0);
+        assert_eq!(
+            beats[anchor_index - 1]["payload"]["text"],
+            "Inserted via renderer IPC"
+        );
+        let map_before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+        // A stale/deleted anchor must not fall back to insertion at the terminal Beat.
+        let stale_anchor = ipc(
+            &mut service,
+            "scene.apply",
+            json!({
+                "sessionId": session,
+                "expectedProjectRevision": inserted["value"]["projectRevision"],
+                "expectedSourceMapRevision": inserted["value"]["sourceMapRevision"],
+                "command": {"type": "insertBeat", "sceneId": scene_id,
+                    "expectedSourceRevision": accepted_scene["sourceRevision"], "beforeBeatId": "missing-beat",
+                    "beat": {"type": "narration", "text": "Must not be appended"}}
+            }),
+        );
+        assert_eq!(stale_anchor["ok"], false, "{stale_anchor}");
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), accepted);
+        assert_eq!(
+            fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+            map_before
+        );
+
+        // A fresh service verifies durability rather than reusing an in-memory model.
+        service.close().unwrap();
+        drop(service);
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let reopened = service.open_path(&root).unwrap();
+        let listed = ipc(
+            &mut service,
+            "scene.list",
+            json!({"sessionId": reopened.session_id}),
+        );
+        assert_eq!(listed["ok"], true, "{listed}");
+        let projected = listed["value"].to_string();
+        assert!(projected.contains("Inserted via renderer IPC"));
+        assert!(projected.contains("Edited via renderer IPC"));
+        let reopened_scene = listed["value"]["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["id"] == scene_id)
+            .unwrap();
+        let beats = reopened_scene["beats"].as_array().unwrap();
+        let anchor_index = beats.iter().position(|beat| beat["id"] == beat_id).unwrap();
+        assert_eq!(
+            beats[anchor_index - 1]["payload"]["text"],
+            "Inserted via renderer IPC"
+        );
+        assert_eq!(fs::read(root.join(&source_path)).unwrap(), accepted);
     }
 
     #[test]
@@ -3341,12 +3790,131 @@ mod tests {
             })
             .unwrap();
         assert_eq!(audio.mime_type, "audio/wav");
+
+        // Phase 1F real-service acceptance: the target gate crosses the same Source,
+        // transaction, history, disk, projection, close, and reopen boundaries as the UI.
+        let source_path = scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap()
+            .source_path
+            .clone();
+        let source_file = final_root.join(&source_path);
+        let accepted_before_source = fs::read_to_string(&source_file).unwrap();
+        let opened_source = service
+            .source_open(SourceOpenRequest {
+                path: source_path.clone(),
+                selection_start: Some(0),
+                selection_end: Some(0),
+                byte_start: None,
+                byte_end: None,
+            })
+            .unwrap();
+        let invalid_source = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: opened_source.base_revision.clone(),
+                text: "label incomplete:\n    menu:\n".into(),
+                selection_start: 0,
+                selection_end: 0,
+            })
+            .unwrap();
+        assert!(!invalid_source.diagnostics.is_empty());
+        assert!(matches!(
+            service.source_save(SourceSaveRequest {
+                path: source_path.clone(),
+                expected_base_revision: invalid_source.base_revision.clone(),
+                expected_draft_version: invalid_source.draft_version,
+            }),
+            Err(LifecycleError::Source(SourceError::InvalidSource))
+        ));
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_before_source
+        );
+
+        let accepted_source_text = accepted_before_source.replace(
+            "A production-authored Scene.",
+            "A durable Source-authored Scene.",
+        );
+        assert_ne!(accepted_source_text, accepted_before_source);
+        let retained_source = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: invalid_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 3,
+                selection_end: 3,
+            })
+            .unwrap();
+        let retained_version = retained_source.draft_version;
+        let selection_only = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: retained_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 5,
+                selection_end: 5,
+            })
+            .unwrap();
+        assert_eq!(selection_only.draft_version, retained_version);
+        let saved_source = service
+            .source_save(SourceSaveRequest {
+                path: source_path.clone(),
+                expected_base_revision: selection_only.base_revision.clone(),
+                expected_draft_version: selection_only.draft_version,
+            })
+            .unwrap();
+        assert!(!saved_source.dirty);
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_source_text
+        );
+        let clean_selection_only = service
+            .source_update_draft(SourceDraftRequest {
+                path: source_path.clone(),
+                expected_base_revision: saved_source.base_revision.clone(),
+                text: accepted_source_text.clone(),
+                selection_start: 7,
+                selection_end: 7,
+            })
+            .unwrap();
+        assert!(!clean_selection_only.dirty);
+        assert_eq!(
+            clean_selection_only.draft_version,
+            saved_source.draft_version
+        );
+        scene_workspace = apply_scene_target(
+            &service,
+            &service.scene_workspace().unwrap(),
+            crate::scene::SceneCommand::Undo,
+        );
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_before_source
+        );
+        scene_workspace =
+            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
+        assert_eq!(
+            fs::read_to_string(&source_file).unwrap(),
+            accepted_source_text
+        );
+        assert!(scene_workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap()
+            .beats
+            .iter()
+            .any(|beat| matches!(&beat.payload, crate::scene::BeatPayload::Narration { text } if text == "A durable Source-authored Scene.")));
+        println!("phase-1f-source-save-target-gate: passed");
         RenpyAdapter::validate_generated(&sdk, &final_root).unwrap();
         RenpyAdapter::smoke_run(&sdk, &final_root).unwrap();
         println!("phase-1e-scene-authoring-target-gate: passed");
         println!("phase-1e-media-target-gate: passed");
 
-        service.close();
+        service.close().unwrap();
         assert!(service.current().is_none());
         let recent = service.list_recent();
         assert_eq!(recent.len(), 1);
@@ -3354,6 +3922,20 @@ mod tests {
         let reopened = service.open_recent(&recent[0].id).unwrap();
         assert_eq!(reopened.chapter_id, phase_1e_selection.chapter_id);
         assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
+        let reopened_source = service
+            .source_open(SourceOpenRequest {
+                path: source_path.clone(),
+                selection_start: None,
+                selection_end: None,
+                byte_start: None,
+                byte_end: None,
+            })
+            .unwrap();
+        assert_eq!(
+            reopened_source.text.as_deref(),
+            Some(accepted_source_text.as_str())
+        );
+        assert!(!reopened_source.dirty);
         let reopened_authored = service.authoring_list().unwrap();
         let reopened_ids = reopened_authored
             .characters
@@ -3386,7 +3968,7 @@ mod tests {
                 default_value: serde_json::Value::from(3),
             })
             .unwrap();
-        service.close();
+        service.close().unwrap();
         assert_eq!(
             service.open_path(&final_root).unwrap().scene_id,
             phase_1e_selection.scene_id

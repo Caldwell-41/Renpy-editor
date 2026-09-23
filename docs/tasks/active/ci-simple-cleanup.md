@@ -7,4 +7,4 @@ The canonical [acceptance, integration and retained-failure record](../archive/2
 
 Implementation is complete. The sole branch-retirement housekeeping item and exact post-merge run are recorded in [HANDOVER](../../status/HANDOVER.md); do not claim the remote branch has been deleted until verified. No new implementation or optimisation checkpoint is required.
 
-Continue with [Phase 1F](phase-1f-source-synchronisation.md) under the live handover and its entry checks. W0 and OPT-1A remain [abandoned](ci-optimisation.md); PR #12 is not a dependency. This path remains a short redirect to preserve existing links.
+Continue with [Phase 1F](../archive/2026-09-23-phase-1f-source-synchronisation.md) under the live handover and its entry checks. W0 and OPT-1A remain [abandoned](ci-optimisation.md); PR #12 is not a dependency. This path remains a short redirect to preserve existing links.

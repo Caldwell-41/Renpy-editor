@@ -9,7 +9,7 @@ use std::{
         Arc, Condvar, Mutex, OnceLock,
     },
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 use tauri::{Manager, WebviewUrl};
 
@@ -21,6 +21,41 @@ static UNAUTHORISED_ALLOW_OBSERVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_RECEIVED: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_WINDOW_FOUND: AtomicBool = AtomicBool::new(false);
 static SECOND_INSTANCE_SIGNAL: OnceLock<(Mutex<bool>, Condvar)> = OnceLock::new();
+static SMOKE_STARTED: OnceLock<Instant> = OnceLock::new();
+const PACKAGED_SMOKE_TIMEOUT: Duration = Duration::from_secs(300);
+
+#[derive(Debug, PartialEq, Eq)]
+enum SmokeReportDisposition {
+    Ignore,
+    Accepted,
+    Rejected,
+}
+
+fn smoke_report_disposition(
+    smoke_enabled: bool,
+    is_smoke_report: bool,
+    response: &CoreResponse,
+) -> SmokeReportDisposition {
+    if !smoke_enabled || !is_smoke_report {
+        SmokeReportDisposition::Ignore
+    } else if response.is_success() {
+        SmokeReportDisposition::Accepted
+    } else {
+        SmokeReportDisposition::Rejected
+    }
+}
+
+fn terminate_rejected_smoke_report(response: &CoreResponse) {
+    SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
+    let diagnostic =
+        serde_json::to_string(response).unwrap_or_else(|_| "{\"ok\":false}".to_owned());
+    eprintln!("packaged boundary smoke report rejected: {diagnostic}");
+    let _ = std::io::stderr().flush();
+    thread::spawn(|| {
+        thread::sleep(Duration::from_millis(100));
+        std::process::exit(1);
+    });
+}
 
 fn single_instance_smoke_enabled() -> bool {
     std::env::var("LOOMLIGHT_SINGLE_INSTANCE_SMOKE").as_deref() == Ok("1")
@@ -71,8 +106,38 @@ fn core_request(
         return Err("Command is not authorised for this window.");
     }
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
-    let is_smoke_report =
-        request.get("operation").and_then(Value::as_str) == Some("probe.smokeReport");
+    let operation = request.get("operation").and_then(Value::as_str);
+    if smoke_enabled && operation == Some("probe.smokeCheckpoint") {
+        let request_id = request
+            .get("requestId")
+            .and_then(Value::as_str)
+            .unwrap_or("smoke-checkpoint")
+            .to_owned();
+        let stage = request
+            .get("payload")
+            .and_then(|payload| payload.get("stage"))
+            .and_then(Value::as_str)
+            .filter(|stage| !stage.is_empty() && stage.len() <= 128)
+            .unwrap_or("invalid");
+        let elapsed_ms = SMOKE_STARTED
+            .get()
+            .map(|started| started.elapsed().as_millis() as u64)
+            .unwrap_or(0);
+        println!(
+            "{}",
+            json!({
+                "evidence": "packaged-smoke-checkpoint",
+                "stage": stage,
+                "elapsedMs": elapsed_ms
+            })
+        );
+        let _ = std::io::stdout().flush();
+        return Ok(loomlight_core::CoreResponse::success(
+            request_id,
+            json!({ "recorded": true }),
+        ));
+    }
+    let is_smoke_report = operation == Some("probe.smokeReport");
     let smoke_payload = is_smoke_report
         .then(|| request.get("payload").cloned())
         .flatten();
@@ -98,10 +163,37 @@ fn core_request(
         .and_then(Value::as_str)
         .unwrap_or("missing")
         .to_owned();
+    let source_authoring_ui_passed = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceAuthoringUiPassed"))
+        .and_then(Value::as_bool)
+        == Some(true);
+    let source_authoring_stage = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceAuthoringStage"))
+        .and_then(Value::as_str)
+        .unwrap_or("missing")
+        .to_owned();
+    let source_command_trace_passed = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceCommandTracePassed"))
+        .and_then(Value::as_bool)
+        == Some(true);
+    let source_command_trace = smoke_payload
+        .as_ref()
+        .and_then(|payload| payload.get("sourceCommandTrace"))
+        .and_then(Value::as_str)
+        .unwrap_or("missing")
+        .to_owned();
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
-            Err(response) => return Ok(response),
+            Err(response) => {
+                if smoke_enabled && is_smoke_report {
+                    terminate_rejected_smoke_report(&response);
+                }
+                return Ok(response);
+            }
         };
         let request_id = validated.request_id.clone();
         let operation = validated.operation.to_owned();
@@ -201,7 +293,8 @@ fn core_request(
             _ => handle_application_request(request, smoke_enabled, lifecycle),
         }
     };
-    if smoke_enabled && is_smoke_report && response.is_success() {
+    let report_disposition = smoke_report_disposition(smoke_enabled, is_smoke_report, &response);
+    if report_disposition == SmokeReportDisposition::Accepted {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
         if let Some(window) = app.get_webview_window("main") {
             let original_url = window.url().ok();
@@ -238,6 +331,10 @@ fn core_request(
                         "supportingAuthoringStage": supporting_authoring_stage,
                         "sceneAuthoringUiPassed": scene_authoring_ui_passed,
                         "sceneAuthoringStage": scene_authoring_stage,
+                        "sourceAuthoringUiPassed": source_authoring_ui_passed,
+                        "sourceAuthoringStage": source_authoring_stage,
+                        "sourceCommandTracePassed": source_command_trace_passed,
+                        "sourceCommandTrace": source_command_trace,
                         "singleInstancePassed": single_instance_passed,
                         "targetOs": std::env::consts::OS,
                         "targetArch": std::env::consts::ARCH
@@ -250,6 +347,8 @@ fn core_request(
                         && single_instance_passed
                         && supporting_authoring_ui_passed
                         && scene_authoring_ui_passed
+                        && source_authoring_ui_passed
+                        && source_command_trace_passed
                     {
                         0
                     } else {
@@ -258,17 +357,8 @@ fn core_request(
                 );
             });
         }
-    } else if smoke_enabled && is_smoke_report {
-        SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
-        eprintln!(
-            "packaged boundary smoke report rejected: {}",
-            smoke_payload.unwrap_or(Value::Null)
-        );
-        let _ = std::io::stderr().flush();
-        thread::spawn(|| {
-            thread::sleep(Duration::from_millis(100));
-            std::process::exit(1);
-        });
+    } else if report_disposition == SmokeReportDisposition::Rejected {
+        terminate_rejected_smoke_report(&response);
     }
     Ok(response)
 }
@@ -356,6 +446,7 @@ fn main() {
                 .expect("unauthorised probe window must be created");
                 drop(unauthorised);
 
+                let _ = SMOKE_STARTED.set(Instant::now());
                 let main = app
                     .get_webview_window("main")
                     .expect("main probe window must exist");
@@ -382,9 +473,10 @@ fn main() {
                         .expect("main smoke probe injection must succeed");
                 });
                 thread::spawn(|| {
-                    thread::sleep(Duration::from_secs(20));
+                    thread::sleep(PACKAGED_SMOKE_TIMEOUT);
                     if !SMOKE_REPORT_RECEIVED.load(Ordering::SeqCst) {
                         eprintln!("packaged boundary smoke report timed out");
+                        let _ = std::io::stderr().flush();
                         std::process::exit(1);
                     }
                 });
@@ -394,4 +486,36 @@ fn main() {
         .invoke_handler(tauri::generate_handler![core_request])
         .run(tauri::generate_context!())
         .expect("Loomlight desktop runtime failed");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_successful_smoke_reports_enter_the_accepted_path() {
+        let accepted = CoreResponse::success("accepted".to_owned(), json!({ "accepted": true }));
+        let rejected = CoreResponse::failure(
+            "rejected".to_owned(),
+            "INVALID_PAYLOAD",
+            "Payload does not match the operation schema.",
+        );
+
+        assert_eq!(
+            smoke_report_disposition(true, true, &accepted),
+            SmokeReportDisposition::Accepted
+        );
+        assert_eq!(
+            smoke_report_disposition(true, true, &rejected),
+            SmokeReportDisposition::Rejected
+        );
+        assert_eq!(
+            smoke_report_disposition(false, true, &accepted),
+            SmokeReportDisposition::Ignore
+        );
+        assert_eq!(
+            smoke_report_disposition(true, false, &accepted),
+            SmokeReportDisposition::Ignore
+        );
+    }
 }

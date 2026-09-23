@@ -46,6 +46,9 @@ jobs:
       - name: Validate frontend and protocol
         working-directory: app
         run: npm run check
+      - name: Run Source Save real-browser regression
+        working-directory: app
+        run: npm run test:source-browser
       - name: Check Rust formatting
         working-directory: app
         run: cargo fmt --check --all
@@ -95,6 +98,8 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Build frontend for desktop tests
         run: npm run build
+      - name: Run Source Save real-browser regression
+        run: npm run test:source-browser
       - name: Test independent Rust core
         shell: bash
         run: |
@@ -140,6 +145,7 @@ jobs:
           grep 'phase-1d-corrective-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1e-scene-authoring-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1e-media-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep 'phase-1f-source-save-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
       - name: Exercise SDK download handoff and verified managed reuse
         shell: bash
         env:
@@ -207,6 +213,13 @@ jobs:
           grep '"lifecycleUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"supportingAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"sceneAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sourceAuthoringUiPassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sourceAuthoringStage":"complete"' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep '"sourceCommandTracePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep 'button:source:generation-current:completed:saves=1:flushes=0:saved' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep -E 'keyboard-synthetic:source:(ctrl|meta)\+s:generation-current:completed:saves=1:flushes=0:saved' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep -E 'keyboard-synthetic:source-clean:(ctrl|meta)\+s:generation-current:completed:saves=0:flushes=1:saved' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
+          grep -E 'keyboard-synthetic:non-source:(ctrl|meta)\+s:completed:flushes=1:saved' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           grep '"singleInstancePassed":true' "$RUNNER_TEMP/loomlight-scaffold-smoke.json"
           if grep -q '"evidence":"single-instance-primary-ready"' "$SECONDARY_LOG"; then
             echo "Secondary Loomlight process reached setup and initialized lifecycle state." >&2

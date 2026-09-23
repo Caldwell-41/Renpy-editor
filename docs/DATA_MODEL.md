@@ -245,9 +245,13 @@ bytes remain separate artifacts inside the anchored transaction recovery directo
 mutation `rejected` record is terminal and does not poison later flush. Phase 1E adds
 source create/move/delete and minimal Beat patches to this envelope. Committed history
 stores the actual returned before/after revisions; an inverse is submitted only when
-the live revisions match the recorded boundary. History is session-local in Phase 1E
-and starts empty after reopen. See [TRANSACTIONS.md](TRANSACTIONS.md). The general
-Source workspace and arbitrary source reconciliation remain Phase 1F work.
+the live revisions match the recorded boundary. Phase 1F adds bounded session-local
+Source buffers: accepted base bytes/revision, optional UTF-8 draft, editor selection,
+and retained external bytes for conflict. Drafts are not authoritative and do not
+survive restart. Accepted source and any reconciled source-map companion share one
+transaction/history action; multi-draft Save All is one mutation vector after complete
+preflight. History remains session-local and starts empty after reopen. See
+[TRANSACTIONS.md](TRANSACTIONS.md).
 
 ## Project lifecycle metadata
 
