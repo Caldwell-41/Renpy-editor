@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** accepted by [final closeout review, ledger 7.29](2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review); PR #14 integration pending publication. F1-F4 are closed. All six earlier native Save passes remain intact.
+**State:** accepted by [final closeout review, ledger 7.29](2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review); PR #14 merged and verified on main. F1-F4 are closed. All six earlier native Save passes remain intact.
 **Current authority:** user's final closeout goal authorises conditional integration and handover; Phase 1G implementation is excluded. Historical checkpoint instructions below do not override this decision.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
 **Historical working branch:** `feature/phase-1f-source-synchronisation`, PR #14. Final closure is governed by ledger 7.29.

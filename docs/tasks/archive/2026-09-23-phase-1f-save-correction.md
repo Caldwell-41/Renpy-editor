@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** accepted by final closeout review (section 7.29); PR #14 integration pending publication. This archived ledger preserves earlier failures and checkpoint restrictions as historical evidence.
+**State:** accepted by final closeout review (section 7.29); PR #14 merged and verified on main. This archived ledger preserves earlier failures and checkpoint restrictions as historical evidence.
 **Parent milestone:** [Phase 1F Source synchronisation](2026-09-23-phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, PR #14. Final integration follows section 7.29.
@@ -1997,3 +1997,28 @@ but requires explicit user selection in a later chat. No implementation branch e
 Closeout documentation validation: `python3 scripts/validate.py` passed for 223 files;
 relative links/privacy checks and `git diff --check` passed. No application suite,
 package matrix or physical native case was repeated for this documentation-only work.
+
+#### Integration result and branch disposition
+
+PR #14 merged at `973e3565d7cf41c6dca936df088ced10969821ac` after closeout commit
+`e225dee19c6f772f409c4fe76ac0493b769adefd` passed Repository quality run
+`35821483373`. Fresh GitHub state confirms closed/merged and the exact expected head.
+The merge tree `ae81ddfcfdf6ada7f756f1d8bd9bf46474f731a2` equals the reviewed
+closeout tree; application/build inputs still match production `88dc6286`. The F4
+review thread is resolved. The actual integration result is recorded on main and
+CURRENT/HANDOVER select 1G.1 as eligible, unstarted and awaiting explicit selection.
+
+No remote branch deletion is claimed. The merged 1F ref remains because this host's
+shell Git has no write credential and the connected API exposes no branch deletion;
+publication and merge succeeded through the API with the account's noreply identity.
+Four older integrated refs remain pending cross-host usage confirmation as already
+required by section 7.22. Open dependency PRs, unique abandoned history and archive
+tags remain untouched. No production workflow was dispatched by this closeout.
+
+Automatic post-merge checks: repository quality `35821582664` passed; production
+`35821582755`, attempt 1, on merge `973e3565` was in progress at handoff (Preflight
+`107054377077` passed; Windows `107054543325`, macOS `107054543438` running). This
+was triggered by the merge's application paths, not a manual dispatch or docs-only
+matrix. Its result remains outstanding and is not inferred from prior acceptance.
+The single HANDOVER records manual-resume review of this exact run before 1G. No
+model polling, repeated dispatch or hypothetical automatic continuation is used.

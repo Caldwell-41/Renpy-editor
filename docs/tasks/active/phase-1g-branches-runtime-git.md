@@ -19,7 +19,7 @@ otherwise record the new implementation branch in the live handover at entry.
 Planning PR #15 is integrated in main `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
 The planning-branch/authority text above is historical. Phase 1F acceptance is now
 satisfied by [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
-PR #14 integration is the remaining closeout operation. F1-F4 and the focused native
+PR #14 is merged at `973e3565d7cf41c6dca936df088ced10969821ac`. F1-F4 and the focused native
 gates are closed, with earlier Save passes preserved. CURRENT/HANDOVER own the actual
 integration result. Every checkpoint below remains `not_started`; 1G.1 becomes eligible
 after integration and explicit user selection. No duplicate plan or implementation

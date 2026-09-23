@@ -9,7 +9,7 @@ here; chat prompts select one checkpoint rather than repeat the implementation p
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
 PR #8's UI follow-up. [Phase 1F](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md)
 is accepted by [final review 7.29](tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
-Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) is pending;
+Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) is complete;
 CURRENT/HANDOVER own the verified result.
 Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
 and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
