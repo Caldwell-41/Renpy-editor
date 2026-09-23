@@ -2,14 +2,13 @@
 
 **Prepared:** 2026-09-20, as the requested Phase 1 continuation after CI-SIMPLE integration.
 **Behavioural decisions approved:** 2026-09-20; section 1 fixes the previously open product policies.
-**State:** independent 1F-CLOSEOUT-CORRECTION review complete; closeout `blocked` on F4 (P2), settled-selection Apply Both availability. F1 core safeguards and F2/F3 pass targeted review. [Ledger 7.25](phase-1f-save-correction.md#725-independent-correction-review--f4-blocks-closeout) records the reproduced finding; #88 success remains valid for its covered gates. All six user-reported #87 native Save passes remain intact. No merge or 1G implementation.
-**Current correction:** [1F-CLOSEOUT-CORRECTION](phase-1f-save-correction.md#723-1f-closeout-correction), verified #88 evidence in 7.24 and independent findings in 7.25. Preserve ADR 0007 and earlier Save guarantees.
-**Execution authority:** independent review, publication and stop only. A bounded F4 correction requires user selection. No redispatch, merge, branch deletion or Phase 1G.
+**State:** accepted by [final closeout review, ledger 7.29](2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review); PR #14 integration pending publication. F1-F4 are closed. All six earlier native Save passes remain intact.
+**Current authority:** user's final closeout goal authorises conditional integration and handover; Phase 1G implementation is excluded. Historical checkpoint instructions below do not override this decision.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
-**Working branch:** `feature/phase-1f-source-synchronisation`, existing draft PR #14; do not create another branch or PR.
-**Parent requirements:** [Phase 1 plan](phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.
+**Historical working branch:** `feature/phase-1f-source-synchronisation`, PR #14. Final closure is governed by ledger 7.29.
+**Parent requirements:** [Phase 1 plan](../active/phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.
 
-**2026-09-21 precedence note:** The [corrected diagnosis](phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis) supersedes the historical inference that the smoke proved `source.save` never ran. Its composite predicate and missing operation trace do not establish that. The fake service can re-dirty unchanged text after successful Save. Historical ledger entries and failed runs below are preserved, but their old immediate-dispatch instructions are not current authority. Implement and self-check 1F-SAVE before validating a corrected application candidate; follow [HANDOVER](../../status/HANDOVER.md).
+**2026-09-21 precedence note:** The [corrected diagnosis](2026-09-23-phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis) supersedes the historical inference that the smoke proved `source.save` never ran. Its composite predicate and missing operation trace do not establish that. The fake service can re-dirty unchanged text after successful Save. Historical ledger entries and failed runs below are preserved, but their old immediate-dispatch instructions are not current authority. Implement and self-check 1F-SAVE before validating a corrected application candidate; follow [HANDOVER](../../status/HANDOVER.md).
 
 ## Objective and exclusions
 
@@ -41,7 +40,7 @@ Keep three distinct states: the unsubmitted editor buffer, accepted on-disk sour
 
 7. **Undo.** Uncommitted text undo/redo stays in the Source buffer and groups natural typing bursts; it performs no disk writes. A successful source acceptance creates one committed project-history action for that edit. Reset buffer history to the accepted revision after successful Save or explicit Discard, not after a refused save. Committed undo/redo uses the existing project history and actual returned revisions, subject to rule 3 and external/recovery guards. When the Source editor has text focus, Ctrl/Cmd+Z and redo act only on the draft buffer; project-history controls remain distinct and refuse an operation that would touch a dirty/conflicted file. Do not promise history persistence across restart.
 
-8. **Persistence status and Save shortcut.** Any dirty Source draft or newer unretained local input makes the project persistence indicator at least **Pending validation**, never Saved. An ordinary external draft conflict reports **Conflict**; unresolved transaction state reports **Recovery required** and keeps its existing wider precedence. While Source owns the editing context, Ctrl/Cmd+S settles current input and attempts acceptance of that captured draft through the shared durable transaction boundary. Successful `source.save` already establishes the required durability; it does not require a redundant renderer Flush afterward. With no current draft after successful settlement, retain existing global Flush behaviour. Refused or failed Source acceptance never falls through to Flush. Other dirty Source files remain Pending validation. [ADR 0007](../../adr/0007-shell-save-command-ownership.md) and [1F-SAVE](phase-1f-save-correction.md) specify shell ownership, the shared toolbar command, operation/lifecycle safeguards and authoritative project status.
+8. **Persistence status and Save shortcut.** Any dirty Source draft or newer unretained local input makes the project persistence indicator at least **Pending validation**, never Saved. An ordinary external draft conflict reports **Conflict**; unresolved transaction state reports **Recovery required** and keeps its existing wider precedence. While Source owns the editing context, Ctrl/Cmd+S settles current input and attempts acceptance of that captured draft through the shared durable transaction boundary. Successful `source.save` already establishes the required durability; it does not require a redundant renderer Flush afterward. With no current draft after successful settlement, retain existing global Flush behaviour. Refused or failed Source acceptance never falls through to Flush. Other dirty Source files remain Pending validation. [ADR 0007](../../adr/0007-shell-save-command-ownership.md) and [1F-SAVE](2026-09-23-phase-1f-save-correction.md) specify shell ownership, the shared toolbar command, operation/lifecycle safeguards and authoritative project status.
 
 9. **Save All.** Project close/switch/normal-exit Save All first preflights every dirty draft—encoding/size, recognized-invalid state, current base revision, mapping/reconciliation and transaction recovery—before any write. If any draft fails preflight, Save All writes none of them, retains every draft and cancels leaving. If all pass, commit the affected source and required metadata/source-map changes as one existing multi-mutation transaction. This is the recoverable sequential transaction guaranteed by TRANSACTIONS, not a claim of filesystem-wide atomicity. Conflict/recovery never clears drafts or reports success; retain draft snapshots until a terminal recovery result, then reconcile them against the actual accepted/current revisions before leaving.
 
@@ -77,7 +76,7 @@ Ordinary divergence can be isolated to an affected file/Scene where safe. Unreso
 
 ## Acceptance and evidence
 
-The following is the minimum mandatory behavioural regression matrix. Test real service results and UI/IPC interactions, not merely labels or source-string presence. The [1F-SAVE local and supported-target matrices](phase-1f-save-correction.md#3-local-regression-matrix--mandatory) add the precise correction regressions; neither matrix replaces the other.
+The following is the minimum mandatory behavioural regression matrix. Test real service results and UI/IPC interactions, not merely labels or source-string presence. The [1F-SAVE local and supported-target matrices](2026-09-23-phase-1f-save-correction.md#3-local-regression-matrix--mandatory) add the precise correction regressions; neither matrix replaces the other.
 
 | Case | Required result |
 | --- | --- |
@@ -285,7 +284,7 @@ review-ready or authorised for merge/1G at this closeout.
 
 2026-09-21 independent review and correction planning: the user requested publication
 of the recommended fixes and a goal for another chat to implement and check them.
-The [1F-SAVE brief](phase-1f-save-correction.md) records the faulty smoke dirty model,
+The [1F-SAVE brief](2026-09-23-phase-1f-save-correction.md) records the faulty smoke dirty model,
 the reduced experiment and its limits, shell/Source command ownership, retention and
 lifecycle safeguards, exact local and target acceptance, and mandatory self-review.
 [ADR 0007](../../adr/0007-shell-save-command-ownership.md) records the durable design
@@ -343,7 +342,7 @@ reached `source-complete` before that host timeout; macOS timed out before Sourc
 passing browser/core/SDK/real-service/desktop/package work.
 
 The selected next checkpoint is
-[1F-SAVE-EVIDENCE](phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence).
+[1F-SAVE-EVIDENCE](2026-09-23-phase-1f-save-correction.md#7-independent-review-follow-up--1f-save-evidence).
 It deliberately uses a simple 180-second coarse safety ceiling plus five stage
 checkpoints rather than a heartbeat system or immediate smoke split; closes L3 with one
 combined shell case, L8 with delayed Discard and Apply Both, L9 with deterministic
@@ -435,7 +434,7 @@ guarded failure reporting and incomplete-trace rejection pass. Existing frontend
 discovery/preflight includes the group; check passes 32/32, build/syntax/repository
 validation (216 files)/whitespace pass. Self-review confirms no assertion, timeout,
 checkpoint, yield, Source/core or privilege changes; no further significant finding.
-See [1F-SAVE section 7.16](phase-1f-save-correction.md#716-final-report-lexical-scope-correction)
+See [1F-SAVE section 7.16](2026-09-23-phase-1f-save-correction.md#716-final-report-lexical-scope-correction)
 for retained red/green evidence and exact scope. Corrected native P5 remains unverified
 until both packaged reports plus scan/inventory pass. P3 remains the manual three-action
 Ctrl+S/Cmd+S checklist. Keep PR #14 draft; stop for independent review, no merge/1G.
@@ -476,13 +475,13 @@ manual checklist. Existing production run #85 (`35711244992`), attempt 1, was di
 once with `upload_packages=true` at `6d1ab428b2e3cd052323a8890c27897fb906b937`; the
 delta from reviewed `85e44e92` is four documentation files only. This run is for
 installer delivery because #84 did not retain packages, not a speculative retry of
-failed evidence. Native acceptance is untested. See [the checklist](phase-1f-native-p3-checklist.md)
+failed evidence. Native acceptance is untested. See [the checklist](2026-09-23-phase-1f-native-p3-checklist.md)
 and [HANDOVER](../../status/HANDOVER.md) for package verification and the next action.
 The stale opening P5 status has been corrected; all historical evidence is retained.
 
 
 2026-09-22 manual package feedback: Editing the starting narration and adding a Beat
-fail with `The Scene operation is invalid.` The bounded [Scene JSON correction](phase-1f-save-correction.md#718-scene-json-contract-correction)
+fail with `The Scene operation is invalid.` The bounded [Scene JSON correction](2026-09-23-phase-1f-save-correction.md#718-scene-json-contract-correction)
 aligns enum fields with the existing renderer contract and adds literal-JSON and
 real-IPC persistence regressions. Native P3 is blocked at setup; #85 installers must
 not be presented as accepted or retested for signoff. Corrected packages need fresh

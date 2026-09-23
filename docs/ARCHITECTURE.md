@@ -8,7 +8,7 @@ ADR 0002 selects the versioned SDK boundary, ADR 0003 selects Tauri 2, ADRs 0004
 define transaction and project-creation safety, and
 [ADR 0006](adr/0006-scene-authoring-source-and-media-boundary.md) defines the bounded
 Scene/source/media boundary. The production application lives in `app/`; Phase 1F is
-implemented on its review branch and later milestones remain separately gated.
+accepted by final review, with integration tracked in CURRENT/HANDOVER; later milestones remain separately gated.
 
 ## Production scaffold boundary
 

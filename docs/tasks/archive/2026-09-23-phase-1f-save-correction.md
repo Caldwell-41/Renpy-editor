@@ -1,10 +1,10 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** build #90 packages verified; Windows and macOS native F4 A/B/C user-reported PASS (section 7.28); final Phase 1F closeout review remains. Phase 1F is not accepted or integrated.
-**Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
+**State:** accepted by final closeout review (section 7.29); PR #14 integration pending publication. This archived ledger preserves earlier failures and checkpoint restrictions as historical evidence.
+**Parent milestone:** [Phase 1F Source synchronisation](2026-09-23-phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
-**Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
+**Branch / PR:** `feature/phase-1f-source-synchronisation`, PR #14. Final integration follows section 7.29.
 **Historical application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`, production #87 passed. Corrected candidate/evidence are recorded in section 7.23.
 **Publication state:** the current correction publishes bounded implementation, regressions and documentation on the existing branch/PR.
 Original 1F-SAVE `a720ea3f` and #84 candidate `85e44e92` remain historical evidence,
@@ -1096,7 +1096,7 @@ Preflight job `106692103651`. Build completion and uploaded packages are not yet
 claimed. Upload uses `continue-on-error`, so verify actual package artifact presence,
 identity and expiry in addition to successful target jobs before claiming delivery.
 
-The [native P3 checklist](phase-1f-native-p3-checklist.md) provides setup, six required
+The [native P3 checklist](2026-09-23-phase-1f-native-p3-checklist.md) provides setup, six required
 native checks, observable outcomes, handling for an unobservable clean Flush, optional
 adjacent checks and separate target result records. It deliberately does not claim a
 manual test can count internal IPC calls. Native P3 remains untested on both targets.
@@ -1907,3 +1907,93 @@ passes from build #87 remain intact without repetition. The next bounded step is
 independent Phase 1F closeout review against current PR head and acceptance criteria.
 PR #14 stays draft; Phase 1F remains unaccepted/unmerged until that decision. No
 branch cleanup or Phase 1G in this evidence-recording checkpoint.
+
+### 7.29 Final Phase 1F closeout review
+
+**Date:** 2026-09-23. **Decision:** acceptance satisfied; integration authorised.
+**Authority:** the user's final Phase 1F closeout goal explicitly selects independent
+current-head review and the repository's conditional integration/handover rules.
+This supersedes the evidence-only checkpoint's no-merge restriction. Phase 1G
+implementation remains excluded. No application changes or production dispatch.
+
+#### Current head, ownership and exact evidence identity
+
+Reviewed PR #14 head `0075d98f80a680588b7eb3f49ab437c71b48a237` and main
+`75a91c5f72cd0eac8586faf2be036ec5021a939d`. A fresh clean checkout had one local
+worktree and no other visible local executor. Fresh PR/refs matched the checkout;
+main is already an ancestor. Other hosts' worktree/ownership state is not observable.
+Open PRs #10/#11 (dependencies) and #12 (abandoned unique history) are preserved.
+
+Run **35787284261, attempt 1**, on `88dc6286944d4b96cfb96968f88aa6e87dacc447`
+is the production run called **#90** in section 7.28 and the user reports. Fresh GitHub
+REST metadata returns `run_number: 91`; the stable run ID, head SHA, jobs and package
+artifact IDs all match. This display-number discrepancy does not identify a different
+build. Use the run ID and full SHA for provenance; do not silently relabel historical
+user reports. The reviewed head is two documentation commits later, changing only
+CURRENT, HANDOVER and section 7.28. Application, test, dependency, workflow and script
+inputs are byte-identical to this successful production candidate. The closeout and
+archive changes are documentation only; no generic cross-commit CI reuse is claimed.
+
+Fresh job metadata and complete logs were inspected: Preflight `106947052023`, Windows
+`106947331869`, macOS `106947331932`, all successful. Preflight passed 42 frontend
+cases and the real Chrome selection probe (`pending=false`, `disabled=false`, hidden
+stale notice, two observations, one Apply Both). Core suites passed Windows 147 and
+macOS 153, zero failed, four ignored subprocess workers each. The explicit archive-
+backed SDK lifecycle and download-handoff gates, real-service Source persistence,
+desktop boundary, packaged smoke, secret scans, licence inventories and package
+uploads passed. Cache-hit SDK download skips are not substituted for SDK executions.
+Both final packaged reports have every required boolean true and complete Source
+command traces; all five checkpoints exist (final-report-start 803 ms Windows and
+3,286 ms macOS). Synthetic modifier events remain distinct from native input.
+
+Fresh artifact metadata confirms both section 7.28 package IDs, sizes and SHA-256
+values, exact run/SHA association and unexpired status. Section 7.28 retains the
+independent archive/CRC/installer checks; this review does not claim another native
+install or a second package download. No missing artifact or failed gate was inferred
+from a green badge alone.
+
+#### Acceptance disposition
+
+| Requirement | Current evidence and decision |
+| --- | --- |
+| Supported Source/Scene edits, minimal patches, opaque bytes and stable mappings | Current target core and real-service lifecycle cases pass; Source/Scene history, BOM/CRLF, exact reorder/ambiguous identity and adjacent opaque preservation covered. |
+| Invalid, dirty, external, missing, encoding and resource states | Current source tests cover no-write refusal/draft retention, same-file guards with unrelated editing, clean refresh/stale projection, missing/scope/mapped-definition refusal, invalid UTF-8, file/count/aggregate limits and UTF-16/UTF-8 positions. Pass. |
+| Save All, navigation, leave, local versus committed undo, sessions/recovery | Current core plus frontend matrix covers preflight all-or-none refusal, one committed history action, retained drafts, modal choices, late completions, barriers and recovery precedence. L1-L16 correction evidence is complete; historical partial rows remain historical. |
+| P1/P2 packaged Save and routing | Both current final reports prove visible Save, dirty Source synthetic Save, clean Flush and non-Source Flush with phase-local counts and no failure fallback. Pass. |
+| P3 native Save | All six build #87 user-reported Windows Ctrl+S/macOS Cmd+S passes remain PASS without repetition. Later bounded correction changes Apply Both/Scene behavior; the current packaged Save regressions pass. No new physical Save run is claimed. |
+| P4 real persistence / P5 full gate | Both explicit real-service Source target markers and complete packaged/security/inventory gates pass on the exact production SHA. Pass. |
+| F1 reviewed combination identity | Renderer compares the displayed identity before/after retention; core checks base/draft/external/combined text and uses reviewed external bytes as transaction preconditions. JSON refusal/persistence/reopen and production commit-race cases pass. Closed. |
+| F2 insertion / F3 preview state | Selected-Beat insertion and Background clearing have retained actual-control/pure-state plus core persistence coverage. No extra native F2/F3 gate was required. Closed. |
+| F4 settled selection | Inspected the post-retention refresh with current-generation/path/latest-input guards; failures, newer input, barriers and review binding remain enforced. Four DOM regressions and hosted/current-production Chrome probe pass. Windows 11 Pro and macOS 27 A/B/C user reports from the identified run/artifacts complete the focused native gate. Closed. |
+
+No new blocking issue was found in the inspected correction, acceptance coverage and
+current-head delta. This is a final bounded acceptance review, not a fresh audit of
+every parser/transaction path. The prior inline F4 review thread can now be resolved
+against the fix and linked evidence; its historical failure report remains preserved.
+
+Native results are user-observed, not independently witnessed. Windows numeric build,
+MSI-versus-NSIS choice, exact local installer hashes and per-step screenshots were not
+supplied; macOS was reported as 27 without a numeric build/local DMG hash. The user
+identified each run and target artifact. This is sufficient for the recorded manual
+acceptance; no exact local-binary hash or OS build is invented. The six earlier Save
+passes retain their original #87 provenance and macOS 26.6.2 report. DIST-MAC-01
+(signing/notarisation and normal downloaded-app launch) stays outside Phase 1 scope.
+The old local Python SDK `os.killpg` permission failure remains historical; explicit
+supported-target SDK gates pass. No unavailable local tool is counted as a pass.
+
+#### Closure and next action
+
+Archive this ledger, the parent 1F brief and native checklist without removing unique
+failure evidence. Canonical TESTING retains the review-binding, selection-retention
+and JSON contract lessons. Update INDEX, architecture, roadmap, parent milestone and
+the existing CURRENT/HANDOVER; keep 1G.1 and all later checkpoints `not_started`.
+Merge the reviewed documentation closeout through PR #14, verify main's application
+inputs remain identical to the tested candidate, and retire only proven unused refs.
+The four older integrated branches remain retained because cross-host usage is not
+confirmed; open dependency/abandoned-history branches and tags are untouched.
+Phase 1G.1 (shared flow projection and Branches) becomes eligible after integration,
+but requires explicit user selection in a later chat. No implementation branch exists.
+
+Closeout documentation validation: `python3 scripts/validate.py` passed for 223 files;
+relative links/privacy checks and `git diff --check` passed. No application suite,
+package matrix or physical native case was repeated for this documentation-only work.

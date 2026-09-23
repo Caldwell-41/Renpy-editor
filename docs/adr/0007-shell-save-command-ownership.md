@@ -3,7 +3,7 @@
 **Date:** 2026-09-21.
 **Status:** Accepted design for the bounded Phase 1F correction; implementation and
 supported-target acceptance are tracked separately in the
-[1F-SAVE brief](../tasks/active/phase-1f-save-correction.md).
+[1F-SAVE brief](../tasks/archive/2026-09-23-phase-1f-save-correction.md).
 **Extends:** ADRs 0003, 0004 and 0006 without replacing their runtime, transaction,
 source-authority or media boundaries.
 
@@ -112,7 +112,7 @@ matrix and gates. Green mocked UI results cannot certify durable Source writes.
 
 ## Evidence and references
 
-The [1F-SAVE diagnosis](../tasks/active/phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis)
+The [1F-SAVE diagnosis](../tasks/archive/2026-09-23-phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis)
 records the failed candidates, reduced experiment, uncertainty and reproduction recipe.
 Relevant implementation paths are [shell](../../app/src/main.ts),
 [Source UI](../../app/src/source-ui.ts), [packaged smoke](../../app/src-tauri/src/smoke_probe.js),

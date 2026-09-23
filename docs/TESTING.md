@@ -390,6 +390,26 @@ truth, media cache cancellation/disposal, accessible reordering, responsive coll
 and reduced motion. Exact final run/job/artifact results belong in the archived Phase
 1E execution ledger after both supported targets pass.
 
+## Phase 1F accepted regression contract
+
+[Final closeout review](tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review)
+records exact current production evidence and preserves the earlier native Save passes.
+Keep the frontend L1-L16, real-service Source tests, packaged P1/P2/P5 and separately
+reported native P3 evidence distinct. A documentation-only delta does not imply a new
+package or native execution.
+
+Apply Both must bind confirmation to the displayed base/draft/external/combined text
+identity in renderer and core, using the reviewed external revision as the transaction
+precondition. Selection-only retention must refresh controls after cleanup for the
+live document/latest input; failures, pending newer input and barriers still block.
+Keep the retained DOM and real-browser regression in normal production gates. Test
+literal renderer JSON through the real IPC/service boundary, including persistence
+and reopening, so enum-field casing cannot silently invalidate all Scene operations.
+Retain the actual Preview insertion-anchor and Background/Character state regressions.
+A packaged probe must construct its terminal report on success and guarded failure;
+lexical-scope/report errors must fail a retained full-probe test, not prompt timeout
+increases or unsupported causal claims about application Save routing.
+
 ## Required quality gate by change type
 
 | Change | Minimum gate |

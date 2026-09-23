@@ -2,16 +2,15 @@
 
 Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
-[`tasks/active`](tasks/active/). Follow the
+[`tasks/active`](tasks/active). Follow the
 [repository-first delivery workflow](WORKFLOW.md): detail and handover state live
 here; chat prompts select one checkpoint rather than repeat the implementation plan.
 
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
-PR #8's UI follow-up. The active application milestone is
-[Phase 1F: Source synchronisation](tasks/active/phase-1f-source-synchronisation.md),
-on [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14); its
-[closeout review](tasks/active/phase-1f-save-correction.md#722-independent-closeout-review)
-blocks acceptance pending a bounded Source reconciliation correction.
+PR #8's UI follow-up. [Phase 1F](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md)
+is accepted by [final review 7.29](tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
+Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) is pending;
+CURRENT/HANDOVER own the verified result.
 Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
 and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
 integrated documentation, with implementation unstarted and separately gated.
@@ -27,8 +26,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Concern | Canonical document |
 | --- | --- |
 | Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
-| Phase 1F Source editing, synchronisation and partial-visual handling | [tasks/active/phase-1f-source-synchronisation.md](tasks/active/phase-1f-source-synchronisation.md) |
-| Phase 1F Save correction, precise regressions and target acceptance | [tasks/active/phase-1f-save-correction.md](tasks/active/phase-1f-save-correction.md) |
+| Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
+| Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
 | Planned Phase 1G Branches, runtime/diagnostics and local Git checkpoints | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
 | Planned Phase 1H integrated acceptance, full twelve-case matrix | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
@@ -73,7 +72,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Repository/privacy audit | [audits/2026-09-10-repository-and-privacy.md](audits/2026-09-10-repository-and-privacy.md) |
 | Public-release readiness audit | [audits/2026-09-14-public-release-readiness.md](audits/2026-09-14-public-release-readiness.md) |
 | Phase 1A dependency/licence review | [dependencies/phase-1a.md](dependencies/phase-1a.md) |
-| Decision records | [`adr/`](adr/) |
+| Decision records | [`adr/`](adr) |
 
 Archive completed task briefs after their acceptance/integration requirements are
 resolved. Abandoned tasks must retain an explicit disposition and historical evidence,

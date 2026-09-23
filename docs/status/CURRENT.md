@@ -1,57 +1,28 @@
 # Current status
 
-**Updated:** 2026-09-23 (Australia/Brisbane).
-**Integrated application:** Phase 0 and corrected Phase 1A–1E; CI-SIMPLE PR #13.
-**Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`, including planning PR #15.
-**Active milestone:** [Phase 1F](../tasks/active/phase-1f-source-synchronisation.md), **not accepted / unmerged**.
-**Selected checkpoint:** F4 corrected packages verified; Windows and macOS native A/B/C user-reported PASS; closeout review pending.
-**Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Application candidate:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
-**Evidence:** [build #90 and native F4 results 7.28](../tasks/active/phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence); F4 review in 7.27, correction in 7.26.
+**Updated:** 2026-09-23.
+**Integrated baseline:** Phase 0, corrected Phase 1A-1E, CI-SIMPLE and 1G/1H planning;
+main at review entry `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
+**Phase 1F:** accepted; PR #14 integration pending publication.
+**Selected checkpoint:** final closeout and authorised integration only.
+**Reviewed head:** `0075d98f80a680588b7eb3f49ab437c71b48a237`.
+**Tested production commit:** `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
+**Evidence:** [final review 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review),
+[packages/native F4 7.28](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence).
 **Continuation:** [HANDOVER](HANDOVER.md).
 
-Apply Both binds confirmation to the displayed draft/base/external revision and
-combined text; stale reviews refuse. Preview retains the selected insertion anchor.
-Background clears visible Characters and their default-layer uncertainty. Earlier
-F1–F3 regressions passed, including real JSON/core persistence and races.
-Independent review found F4: unchanged selection retention left Apply Both disabled
-after input settled. The bounded controller fix refreshes controls after retention
-cleanup under document/current-input guards. DOM regression and 42/42 frontend tests
-pass. Hosted Chrome [quality run #378](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35782023645)
-passed the corrected F4 selection regression on CI commit `74ce3487…` using a
-selection-only service double. Independent bounded review found no new code issue.
-F1 core safeguards and F2/F3 remain covered. Corrected build #90 packages are verified;
-Windows and macOS F4 A/B/C are user-reported PASS; closeout review remains.
+Production [35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
+attempt 1 (called #90 in the native reports; fresh GitHub metadata labels it #91),
+passed Preflight and both supported target jobs. The reviewed head changes documentation
+only after that tested commit. Frontend 42, Windows core 147 and macOS core 153 passed;
+four ignored subprocess workers per core suite are not extra passing tests. Explicit
+SDK/real-service persistence, desktop, packaged smoke, scans, inventories and uploads
+passed. F1-F4 are closed. Windows 11 Pro and macOS 27 native F4 A/B/C are user-reported
+PASS; the six original native Save passes remain PASS on #87 without repetition.
+Native local installer hashes/exact OS builds were not supplied; reports retain their
+actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-[Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
-attempt 1, passed on the earlier F1–F3 candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653`: Preflight `106762105167`, Windows
-`106762349561`, macOS `106762349306`. Core totals: Windows 147 / macOS 153 passed,
-0 failed, 4 ignored subprocess workers each. Explicit SDK, desktop, packaging/smoke,
-scans/inventories and uploads passed. Both packages and both evidence archives were
-downloaded and verified against GitHub size/hash metadata, with valid ZIP contents.
-No redispatch; #88 predates the F4 application candidate and does not validate it.
-#87 stays historical evidence.
-
-[Production #90 / 35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
-attempt 1, passed on current PR head `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
-Preflight, Windows and macOS jobs passed, with the F4 browser regression and both
-package uploads. Both package ZIPs were downloaded, SHA-256/size checked against
-GitHub artifact metadata, and CRC-tested; installer contents and hashes are recorded
-in [ledger 7.28](../tasks/active/phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence).
-The user reported Windows 11 Pro A/B/C PASS from the Windows package artifact.
-Numeric OS build, chosen MSI versus NSIS installer and local installer hash were not
-reported. This is user-reported native evidence, not an independently observed run.
-The user also reported macOS 27 A/B/C PASS using the macOS package artifact, with
-no unexpected behavior or error text. Actual installer filename and local hash were
-not supplied. Both reports remain user-observed native evidence.
-
-All six native P3 Save cases remain user-reported PASS on build #87. User confirmed
-macOS 26.6.2 and Windows “the latest windows version”; numeric Windows build remains
-unspecified. No native #88/F1–F3 observation is claimed. Review requires no additional
-native F2/F3 gate. Focused native F4 availability and stale-review refusal were reported PASS on both
-targets using build #90 artifacts. Final Phase 1F closeout review remains. The local legacy Python
-SDK subprocess-permission error remains a recorded limitation. DIST-MAC-01 signing/
-notarisation/normal download-launch remains outside Phase 1 scope.
-
-No merge, branch deletion or Phase 1G implementation is authorised. Keep PR #14 draft
-and the 1F records active pending final closeout review. Existing 1G/1H planning is integrated.
+**Next eligible application checkpoint:** [Phase 1G.1](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches),
+shared flow projection and Branches, after verified integration and explicit user
+selection. Every 1G/1H checkpoint remains `not_started`; no implementation branch is
+created. Phase 2 planning is preserved. No automatic progression into implementation.

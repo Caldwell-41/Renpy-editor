@@ -19,15 +19,15 @@ macOS 26.6.2; Windows was described as “the latest windows version”, without
 version/build. This is user-reported package provenance, not independent binary
 inspection. Do not invent screenshots, per-step observations or installer hashes, or
 repeat unchanged native Save tests. Exact Windows version/build remains unspecified.
-Phase 1F acceptance is blocked by [independent review finding F4](phase-1f-save-correction.md#725-independent-correction-review--f4-blocks-closeout).
+Phase 1F is accepted by [final review 7.29](2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review), with focused F4 A/B/C user-reported PASS on both targets in section 7.28. The instructions below retain the historical #87 procedure and evidence; do not repeat unchanged Save cases.
 Signing/notarisation remains the later DIST-MAC-01 limitation, not a native Save failure.
 
 
 **Prepared:** 2026-09-22.
-**State:** six user-reported native passes recorded above; build #87 and macOS 26.6.2 confirmed by the user; numeric Windows build unspecified. Corrected-candidate #88 validation passed; independent review found F4 (P2), with all six Save passes preserved.
-Do not use #85. See [the verified evidence](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
+**State:** complete; six user-reported #87 native Save passes preserved. F4 subsequently closed with corrected production and native evidence; see final review 7.29.
+Do not use #85. See [the verified evidence](2026-09-23-phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 **Scope:** the three required native Save contexts on Windows x64 and macOS ARM64.
-**Branch / PR:** `feature/phase-1f-source-synchronisation`, draft PR #14.
+**Historical branch / PR:** `feature/phase-1f-source-synchronisation`, PR #14.
 **Validated application candidate:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 **Replacement package build ref:** `0b9ea0f0c23f843b3324cd63a524a642a2399f2e`.
 This corrects the Scene/Beat JSON contract defect in the previous #85 packages.
@@ -48,7 +48,7 @@ Phase 1G or new automation is selected.
 The historical #87 procedure/results below remain intact. Corrected build #88
 (`35732725675`, attempt 1, `f452d0a8c1599b05650ae2e835d14d9f86f14653`) passed both
 automated targets. Package/evidence ZIP hashes and contents were verified; downloads
-and installer hashes are in [ledger section 7.24](phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
+and installer hashes are in [ledger section 7.24](2026-09-23-phase-1f-save-correction.md#724-build-88-corrected-candidate-verification).
 No native #88 installation or manual F1–F3 pass is claimed. Preserve all six #87 native
 Save passes. Independent review found F4: selection retention leaves Apply Both disabled.
 No extra native F2/F3 gate is required for the targeted review. After an authorised F4
@@ -73,7 +73,7 @@ On the run page, scroll to **Artifacts** and download the applicable package arc
 Do not use the similarly named `phase-1-production-evidence-*` archives as installers.
 Artifacts require repository access and have seven-day retention; download and keep
 the original archive locally. Both expire on **29 September 2026**. Exact archive/installer hashes are in
-[the verification ledger](phase-1f-save-correction.md#719-build-87-replacement-package-verification).
+[the verification ledger](2026-09-23-phase-1f-save-correction.md#719-build-87-replacement-package-verification).
 These are pre-acceptance development packages, not a stable release or an Intel Mac
 build. Signing/notarisation is not configured in the current packaging configuration.
 
