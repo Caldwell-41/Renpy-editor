@@ -4,10 +4,10 @@
 **Integrated application:** Phase 0 and corrected Phase 1A–1E; CI-SIMPLE PR #13.
 **Verified main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d`, including planning PR #15.
 **Active milestone:** [Phase 1F](../tasks/active/phase-1f-source-synchronisation.md), **not accepted / unmerged**.
-**Selected checkpoint:** independent F4 review complete; hosted Chrome regression passed; corrected packages and native F4 evidence pending.
+**Selected checkpoint:** F4 corrected packages verified; Windows native A/B/C user-reported PASS; macOS native F4 pending.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Application candidate:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
-**Evidence:** [F4 review/evidence ledger 7.27](../tasks/active/phase-1f-save-correction.md#727-independent-f4-evidence-review--browser-passed-native-pending); correction in 7.26, prior findings in 7.25 and build evidence in 7.23–7.24.
+**Evidence:** [build #90 and Windows native results 7.28](../tasks/active/phase-1f-save-correction.md#728-corrected-packages-and-windows-native-f4-evidence); F4 review in 7.27, correction in 7.26.
 **Continuation:** [HANDOVER](HANDOVER.md).
 
 Apply Both binds confirmation to the displayed draft/base/external revision and
@@ -20,8 +20,8 @@ cleanup under document/current-input guards. DOM regression and 42/42 frontend t
 pass. Hosted Chrome [quality run #378](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35782023645)
 passed the corrected F4 selection regression on CI commit `74ce3487…` using a
 selection-only service double. Independent bounded review found no new code issue.
-F1 core safeguards and F2/F3 remain covered; F4 requires corrected packages and
-native evidence on both platforms.
+F1 core safeguards and F2/F3 remain covered. Corrected build #90 packages are verified;
+Windows F4 A/B/C are user-reported PASS, while macOS native F4 remains pending.
 
 [Production #88 / 35732725675](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35732725675),
 attempt 1, passed on the earlier F1–F3 candidate `f452d0a8c1599b05650ae2e835d14d9f86f14653`: Preflight `106762105167`, Windows
@@ -32,14 +32,24 @@ downloaded and verified against GitHub size/hash metadata, with valid ZIP conten
 No redispatch; #88 predates the F4 application candidate and does not validate it.
 #87 stays historical evidence.
 
+[Production #90 / 35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
+attempt 1, passed on current PR head `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
+Preflight, Windows and macOS jobs passed, with the F4 browser regression and both
+package uploads. Both package ZIPs were downloaded, SHA-256/size checked against
+GitHub artifact metadata, and CRC-tested; installer contents and hashes are recorded
+in [ledger 7.28](../tasks/active/phase-1f-save-correction.md#728-corrected-packages-and-windows-native-f4-evidence).
+The user reported Windows 11 Pro A/B/C PASS from the Windows package artifact.
+Numeric OS build, chosen MSI versus NSIS installer and local installer hash were not
+reported. This is user-reported native evidence, not an independently observed run.
+macOS native F4 remains outstanding.
+
 All six native P3 Save cases remain user-reported PASS on build #87. User confirmed
 macOS 26.6.2 and Windows “the latest windows version”; numeric Windows build remains
 unspecified. No native #88/F1–F3 observation is claimed. Review requires no additional
-native F2/F3 gate. After corrected packages are verified, focus native follow-up on Apply Both
-availability and stale-review refusal with corrected packages. The local legacy Python
+native F2/F3 gate. The remaining native follow-up is macOS Apply Both availability and stale-review
+refusal with the verified build #90 package. The local legacy Python
 SDK subprocess-permission error remains a recorded limitation. DIST-MAC-01 signing/
 notarisation/normal download-launch remains outside Phase 1 scope.
 
 No merge, branch deletion or Phase 1G implementation is authorised. Keep PR #14 draft
-and the 1F records active pending browser regression, independent review, corrected
-packages and focused native Apply Both checks. Existing 1G/1H planning is integrated.
+and the 1F records active pending focused macOS Apply Both checks. Existing 1G/1H planning is integrated.

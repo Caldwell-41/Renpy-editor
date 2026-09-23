@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** F4 correction `review_ready` (section 7.26); browser and native evidence remain open. Phase 1F is not accepted or integrated.
+**State:** build #90 packages verified; Windows native F4 A/B/C user-reported PASS (section 7.28); macOS F4 native evidence remains open. Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1866,3 +1866,37 @@ it is not a native WebView, real disk-I/O, or package acceptance result.
 
 PR #14 remains draft; Phase 1F remains unaccepted/unmerged. Corrected packages and
 native F4 observations are outstanding. DIST-MAC-01 remains outside this checkpoint.
+
+### 7.28 Corrected packages and Windows native F4 evidence
+
+**Authority:** user-submitted Windows A/B/C outcomes and request for focused F4
+verification. [Production #90 / 35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
+attempt 1, workflow_dispatch on PR #14 branch head
+`88dc6286944d4b96cfb96968f88aa6e87dacc447`, completed successfully. Preflight
+`106947052023`, Windows `106947331869` and macOS `106947331932` all passed. Preflight
+ran 42/42 frontend tests and the F4 Chrome regression (`pending=false`,
+`disabled=false`, hidden stale notice, two observations, one Apply Both). Both platform
+jobs passed their browser check, core suite (Windows 147, macOS 153; zero failed,
+four ignored each), official SDK/desktop gates, packaged WebView smoke and package
+uploads. The cache-hit SDK download steps were skipped as intended.
+
+Both package archives were downloaded independently; sizes and SHA-256 matched
+GitHub metadata, and ZIP CRC checks found no errors:
+
+| Target | Artifact ID and size | ZIP SHA-256 | Installer contents and SHA-256 |
+| --- | --- | --- | --- |
+| Windows x64 | `phase-1-production-package-windows-2025`, `10719979576`, 7,584,329 bytes | `8b0d96ec1ade653336b9ff8147a09a3c8013631412c281848c3e6438f27b0f8e` | `msi/Loomlight_0.1.0_x64_en-US.msi`: `28a4c46e340e7205dd8044dc95ecd44572dd61a5d448b88cebbb0dcb79b92fc1`; `nsis/Loomlight_0.1.0_x64-setup.exe`: `2124989edc5976367a4e1546f7e9238173a860971add0bcf9fd67384d39a57fd` |
+| macOS ARM64 | `phase-1-production-package-macos-26`, `10720514421`, 9,644,954 bytes | `c5e47f261a2516924be9a45d5a58a4be383bccc32ac4b7512fff9bbf8d3a2914` | `dmg/Loomlight_0.1.0_aarch64.dmg`: `fb2afc5b8e5c3e8fb4a1d4c79e6bc64cd353dba442fc8af60216fba0318c67ed` |
+
+The user reported **Windows 11 Pro** native F4 Test A (settled selection re-enables
+and successfully applies the reviewed combination), Test B (changed draft refused),
+and Test C (changed external revision refused): **PASS / PASS / PASS**, using the
+Windows package artifact from this run. No unexpected behavior or error text was
+reported. The numeric Windows build, choice of MSI versus NSIS, local installer
+filename/hash and per-step screenshots were not supplied; do not invent them. This
+is user-observed native evidence, distinct from our independent archive verification.
+
+**Outstanding:** perform the same focused A/B/C checks on macOS ARM64 using the
+verified build #90 artifact and record actual results. The six prior native Save
+passes from build #87 remain intact without repetition. PR #14 stays draft; Phase 1F
+remains unaccepted/unmerged. No branch cleanup or Phase 1G.

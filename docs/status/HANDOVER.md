@@ -1,12 +1,12 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-23 (Australia/Brisbane). **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** independent F4 evidence review, browser passed; corrected packages/native F4 pending. Phase 1F remains unaccepted.
+**Checkpoint:** corrected F4 packages verified; Windows native A/B/C user-reported PASS; macOS native F4 pending. Phase 1F remains unaccepted.
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, draft [#14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Application candidate:** `845c60cde837862cf1f9f4302e959da129ed1d4a`.
 **Main:** `75a91c5f72cd0eac8586faf2be036ec5021a939d` at entry.
-**Authority:** user's F4 checkpoint only; no production dispatch, merge, deletion or Phase 1G.
-**Canonical detail:** [review/evidence ledger 7.27](../tasks/active/phase-1f-save-correction.md#727-independent-f4-evidence-review--browser-passed-native-pending); [correction 7.26](../tasks/active/phase-1f-save-correction.md#726-f4-settled-selection-correction--review-ready).
+**Authority:** user-submitted Windows F4 outcomes; record verified build #90 evidence. No merge, deletion or Phase 1G.
+**Canonical detail:** [build #90 and Windows result 7.28](../tasks/active/phase-1f-save-correction.md#728-corrected-packages-and-windows-native-f4-evidence); [review 7.27](../tasks/active/phase-1f-save-correction.md#727-independent-f4-evidence-review--browser-passed-native-pending).
 
 After a retention completes, the controller removes its pending entry and refreshes
 controls only for the live matching document and latest input. It keeps the review
@@ -26,17 +26,19 @@ browser regression, not native acceptance evidence. Rust/SDK and native WebView
 checks were not run locally.
 
 All six user-reported native Save cases from build #87 remain PASS without repetition.
-Build #88 predates F4 and does not validate it. No native F4, corrected package, or
-new production result is claimed. DIST-MAC-01 remains outside scope.
+Build #88 predates F4. [Production #90 / 35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
+attempt 1, passed all three jobs on current PR head `88dc6286…`; both package ZIPs
+were downloaded and verified against GitHub size/digest and CRC. The user reported
+Windows 11 Pro A/B/C PASS using the Windows package artifact. The numeric OS build,
+choice of MSI or NSIS, and local installer hash were not reported. macOS native F4
+is still outstanding. DIST-MAC-01 remains outside scope.
 
-**Next bounded action:** obtain verified corrected Windows/macOS packages through
-one exact-SHA production run, then check native Apply Both selection re-enabling and
-stale draft/external refusal on both targets. Follow the precise plan in ledger
-7.27. Keep PR #14 draft and Phase 1F unaccepted until those gates are resolved.
-Do not repeat the six unchanged native Save cases, merge, delete branches, or begin
-Phase 1G. Production dispatch requires an explicit checkpoint decision and
-ownership check.
+**Next bounded action:** install the verified build #90 macOS package and perform
+focused native F4 selection re-enabling, changed-draft refusal and changed-external
+refusal. Record OS version, artifact/installer identity and actual results. Do not
+repeat the six unchanged native Save cases or the Windows F4 cases. Keep PR #14 draft
+and Phase 1F unaccepted until macOS evidence is reviewed. No merge, branch deletion
+or Phase 1G.
 
-**Publication:** application commit above, passing focused CI probe `74ce3487…`,
-and removal of its temporary quality job `aa39e2fa…` are published. The F4 browser
-script remains in production gates. Verify this review ledger/handover on the remote.
+**Publication:** build #90 and the Windows user report are recorded in ledger 7.28;
+verify this updated handover and ledger on the remote.
