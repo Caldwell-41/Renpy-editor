@@ -2022,3 +2022,49 @@ was triggered by the merge's application paths, not a manual dispatch or docs-on
 matrix. Its result remains outstanding and is not inferred from prior acceptance.
 The single HANDOVER records manual-resume review of this exact run before 1G. No
 model polling, repeated dispatch or hypothetical automatic continuation is used.
+
+### 7.30 Post-merge production evidence closeout
+
+**Date:** 2026-09-23. **Authority:** the user requested review and evidence closeout
+of the existing post-merge run only, with no redispatch and no Phase 1G implementation.
+No application, workflow or dependency input changed in this checkpoint.
+
+[Production run 35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),
+run number 92, attempt 1, completed **successfully** on the exact merge commit
+`973e3565d7cf41c6dca936df088ced10969821ac`. It was the automatic `push` run recorded
+in section 7.29, not a manual dispatch or retry. Fresh terminal metadata and complete
+job logs confirm all three jobs passed:
+
+- Preflight `107054377077`: 42/42 frontend tests passed, Rust formatting passed and
+  the real-browser Source/F4 probes passed. The settled-selection result was
+  `pending=false`, `disabled=false`, stale notice hidden, two observations and one
+  Apply Both request.
+- Windows x64 `107054543325`: core 147 passed, zero failed and four ignored subprocess
+  workers. The explicit lifecycle/SDK and download-handoff gates, desktop boundary,
+  production packaging, packaged WebView smoke, secret scan, dependency/licence
+  inventory and lightweight evidence upload passed.
+- macOS ARM64 `107054543438`: core 153 passed, zero failed and four ignored subprocess
+  workers, with the same explicit target gates and evidence stages passing.
+
+Both packaged-smoke final reports identify the expected target and have every required
+boundary boolean true, `sourceAuthoringStage: complete`, a passing Source command
+trace and successful single-instance evidence. The cache-hit official-SDK download
+steps were skipped as designed; the archive-backed SDK executions themselves passed.
+The manual-package upload step was also skipped as designed for this automatic push
+run, so this run created evidence artifacts rather than replacement installers.
+
+The two unexpired evidence artifacts were independently downloaded and inspected.
+Their downloaded ZIP hashes match GitHub metadata and `unzip -t` reports no errors;
+each contains the packaged-smoke report, transaction log, single-instance log,
+lifecycle log, SDK handoff log and dependency inventory:
+
+| Target | Artifact ID and name | Size | ZIP SHA-256 |
+| --- | --- | ---: | --- |
+| Windows x64 | `10733402780`, `phase-1-production-evidence-windows-2025` | 12,561 bytes | `b4f881836ffa2e3dffcd5d4225f5c0c304dc1f44a8b86348592bf729ce637162` |
+| macOS ARM64 | `10733676895`, `phase-1-production-evidence-macos-26` | 12,561 bytes | `1c3f87ae161b2dfdac57b94259b10119bb5e8459fb4e0afa83aa559dc3bdb8c9` |
+
+This inspection closes the outstanding post-merge verification. It does not claim a
+new installer, physical keyboard/native run or replacement for the accepted pre-merge
+package and native evidence in sections 7.28-7.29. No failure, missing gate or new
+acceptance blocker was found. No workflow was dispatched, no branch or PR metadata was
+changed and Phase 1G remains unstarted pending an explicit later selection.

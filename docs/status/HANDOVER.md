@@ -1,13 +1,14 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-23. **Repository:** `Caldwell-41/Renpy-editor`.
-**State:** Phase 1F accepted, integrated and archived; Phase 1G implementation unstarted.
+**State:** Phase 1F accepted, integrated, archived and post-merge verified; Phase 1G implementation unstarted.
 **Continuation branch:** `main`. **Merged PR:** [#14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified merge:** `973e3565d7cf41c6dca936df088ced10969821ac`.
 **Reviewed closeout:** `e225dee19c6f772f409c4fe76ac0493b769adefd`.
 **Production candidate:** `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
-**Authority:** final 1F review/integration completed; no 1G execution selected.
-**Canonical detail:** [final decision 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
+**Authority:** existing post-merge evidence closeout completed; no 1G execution selected.
+**Canonical detail:** [post-merge verification 7.30](../tasks/archive/2026-09-23-phase-1f-save-correction.md#730-post-merge-production-evidence-closeout)
+and [final decision 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
 
 F1-F4 are closed. Production run `35787284261`, attempt 1, passed every required
 automated target gate. Historical reports call it #90; fresh GitHub metadata says
@@ -22,19 +23,22 @@ inline review thread is resolved; PR #14 is closed/merged. This follow-up record
 actual integration and resets continuation, rather than chasing its own commit SHA.
 Repository/link/privacy/whitespace checks pass. No acceptance blocker remains.
 
-## Outstanding automatic post-merge operation
+## Post-merge production verification
 
 Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
 passed. The merge automatically triggered production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),
-attempt 1, on the merge SHA above. At handoff Preflight `107054377077` passed;
-Windows `107054543325` and macOS `107054543438` were in progress. This new run is
-not a claimed pass and no manual dispatch/retry occurred. State is `awaiting_ci` for
-post-merge verification only; accepted pre-merge production/native evidence is intact.
+run number 92, attempt 1, on the merge SHA above. Terminal inspection confirms
+Preflight `107054377077`, Windows `107054543325` and macOS `107054543438` all passed.
+Frontend 42/42 and the F4 browser probe passed; core results were Windows 147 and
+macOS 153 with zero failures and four ignored subprocess workers per target. Explicit
+SDK/desktop/package-smoke/security/inventory gates passed. The two lightweight evidence
+ZIPs were downloaded: their SHA-256 values match GitHub metadata and CRC checks pass.
+The automatic push run intentionally did not upload replacement installer artifacts.
+No manual dispatch/retry or new physical test occurred; accepted pre-merge package and
+native evidence remains authoritative. The `awaiting_ci` state is closed.
 
-**Immediate next bounded action:** inspect that existing run's terminal evidence on
-manual resume, record any failure without redispatch, and stop. Do not start 1G while
-this check remains unresolved. Follow the no-polling/manual-resume workflow; no qualified
-same-thread watcher exists on this host. No automatic wake-up is claimed.
+**Immediate next bounded action:** none for Phase 1F. Phase 1G.1 is eligible only after
+explicit user selection in a later chat; do not begin it automatically.
 
 ## Branch disposition
 
@@ -53,8 +57,8 @@ No host worktree was removed. Branch retirement is housekeeping, not a 1G entry 
 ## Next bounded checkpoint
 
 [1G.1 — shared flow projection and Branches](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches)
-is the next application checkpoint after terminal post-merge verification and explicit
-user selection in a later chat. All 1G/1H checkpoints
+is the next application checkpoint after explicit user selection in a later chat.
+All 1G/1H checkpoints
 remain `not_started`; Phase 2 planning is unchanged. No 1G implementation branch/PR exists.
 
 On selection, read AGENTS, WORKFLOW, CURRENT, this handover, the parent Phase 1 plan and
