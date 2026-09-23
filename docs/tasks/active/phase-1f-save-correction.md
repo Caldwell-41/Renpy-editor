@@ -1,7 +1,7 @@
 # Phase 1F — bounded Save correction (1F-SAVE)
 
 **Prepared:** 2026-09-21 after the independent Source-save architecture review.
-**State:** build #90 packages verified; Windows native F4 A/B/C user-reported PASS (section 7.28); macOS F4 native evidence remains open. Phase 1F is not accepted or integrated.
+**State:** build #90 packages verified; Windows and macOS native F4 A/B/C user-reported PASS (section 7.28); final Phase 1F closeout review remains. Phase 1F is not accepted or integrated.
 **Parent milestone:** [Phase 1F Source synchronisation](phase-1f-source-synchronisation.md).
 **Decision:** [ADR 0007](../../adr/0007-shell-save-command-ownership.md).
 **Branch / PR:** `feature/phase-1f-source-synchronisation`, existing draft PR #14.
@@ -1867,7 +1867,7 @@ it is not a native WebView, real disk-I/O, or package acceptance result.
 PR #14 remains draft; Phase 1F remains unaccepted/unmerged. Corrected packages and
 native F4 observations are outstanding. DIST-MAC-01 remains outside this checkpoint.
 
-### 7.28 Corrected packages and Windows native F4 evidence
+### 7.28 Corrected packages and native F4 evidence
 
 **Authority:** user-submitted Windows A/B/C outcomes and request for focused F4
 verification. [Production #90 / 35787284261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35787284261),
@@ -1896,7 +1896,14 @@ reported. The numeric Windows build, choice of MSI versus NSIS, local installer
 filename/hash and per-step screenshots were not supplied; do not invent them. This
 is user-observed native evidence, distinct from our independent archive verification.
 
-**Outstanding:** perform the same focused A/B/C checks on macOS ARM64 using the
-verified build #90 artifact and record actual results. The six prior native Save
-passes from build #87 remain intact without repetition. PR #14 stays draft; Phase 1F
-remains unaccepted/unmerged. No branch cleanup or Phase 1G.
+The user also reported **macOS 27** native F4 A/B/C **PASS / PASS / PASS** using
+`phase-1-production-package-macos-26` from the same run, with no unexpected
+behavior or error text. This is a user report; the actual DMG filename/local hash,
+per-step screenshots and exact macOS build were not supplied. The independent archive
+check above establishes artifact integrity, not which local file was installed.
+
+Both target-native F4 result sets are now reported PASS. The six prior native Save
+passes from build #87 remain intact without repetition. The next bounded step is
+independent Phase 1F closeout review against current PR head and acceptance criteria.
+PR #14 stays draft; Phase 1F remains unaccepted/unmerged until that decision. No
+branch cleanup or Phase 1G in this evidence-recording checkpoint.
