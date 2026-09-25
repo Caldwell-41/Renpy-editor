@@ -826,7 +826,7 @@ No production application files or dependencies changed.
 
 ### Published early-proof handover — awaiting CI
 
-**State:** `awaiting_ci` for the prerequisite SDK probe; 1G.2a/R1 is not complete or
+**State at original publication (superseded by the inspected PASS results below):** `awaiting_ci` for the prerequisite SDK probe; 1G.2a/R1 is not complete or
 review-ready. Production foundation implementation remains outstanding as listed above.
 **Published candidate:** `c72b4f675605cdf09cf01b4558a5c1bf69f2f852`.
 **Verified candidate tree:** `8038b28ef428ad6548fb8eb53b77ecc83d0279e5`, exactly equal
@@ -972,3 +972,28 @@ and fresh remote head `8ab3063`, without restarting or discarding work. The init
 publication tree matched the local tree exactly but no branch ref had advanced. Native
 production R1 uses a **new workflow file**, `runtime-foundation-r1.yml`; the completed
 feasibility workflow remains byte-for-byte unchanged and is not dispatched again.
+
+
+### Native candidate publication and fixture correction
+
+Published production candidate `5513213904aadf8921e0b1e3f14edbe350a42fcd`, exact tree
+`ce556e32db68ad4a02d3cc7dbd43ccba0cba1a83`, on PR #17. Repository quality run
+`36135946972`, attempt 1, passed. Separate native R1 run `36135942863`, attempt 1,
+started Windows job `108073910373` and macOS job `108073910786`; no terminal result was
+claimed at inspection. The feasibility workflow was unchanged and did not run again.
+
+Final target-path review then identified a fixture-only defect before treating any
+native result as evidence: direct process tests supplied an uncanonicalized temporary
+root to the strict transaction registration API. Windows extended path prefixes and
+macOS temporary-directory aliases require canonicalization, just as existing transaction
+fixtures already do. Corrected both fixture entry points, and made the short real-process
+validation deadline 2 s to allow native worker startup. Application code is unchanged.
+The original production run is **superseded**, not passed or silently erased; preserve its
+actual outcome/logs. The corrected candidate needs its own exact native test evidence.
+
+
+The correction passed repository/whitespace checks. Its local Rust rerun could not start:
+the previously available portable Rust/Cargo dependency directory disappeared from the
+host after the in-flight continuation. No result is claimed for that attempted rerun.
+Earlier completed production/SDK/core results remain recorded on their actual inputs;
+the fixture-only correction is gated by the new native workflow's format/build/tests.

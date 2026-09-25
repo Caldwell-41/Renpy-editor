@@ -64,12 +64,13 @@ fn wait_for(mut predicate: impl FnMut() -> bool, limit: Duration) {
     }
 }
 fn start_process(mode: &str, root: &Path) -> RuntimeProcess {
+    let root = fs::canonicalize(root).unwrap();
     fs::create_dir_all(root.join("game")).unwrap();
     let service = TransactionService::default();
-    let id = service.register_trusted_project(root).unwrap();
+    let id = service.register_trusted_project(&root).unwrap();
     let gate = service.reserve_execution(&id).unwrap();
     RuntimeProcess::spawn_commands(
-        vec![worker(mode, root)],
+        vec![worker(mode, &root)],
         None,
         RuntimeKind::Run,
         gate,
@@ -145,14 +146,15 @@ fn runtime_validation_deadline_terminates_the_real_tree() {
     let temp = tempfile::tempdir().unwrap();
     fs::create_dir(temp.path().join("game")).unwrap();
     let service = TransactionService::default();
-    let id = service.register_trusted_project(temp.path()).unwrap();
+    let root = fs::canonicalize(temp.path()).unwrap();
+    let id = service.register_trusted_project(&root).unwrap();
     let gate = service.reserve_execution(&id).unwrap();
     let process = RuntimeProcess::spawn_commands(
         vec![worker("play", temp.path())],
         None,
         RuntimeKind::Validate,
         gate,
-        Duration::from_millis(250),
+        Duration::from_secs(2),
     )
     .unwrap();
     wait_for(|| !process.active(), Duration::from_secs(8));
