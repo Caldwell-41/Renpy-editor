@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: renderer cancellation finding corrected; replacement native R1 recheck outstanding (2026-09-26).
+Status: implemented and native R1 evidence verified; R1-B1/B2 closed, user acceptance separate (2026-09-26).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -101,5 +101,12 @@ Windows x64 and macOS ARM64 with checked artifacts and all 60 input hashes per t
 Independent review then identified the renderer completion branch bypassing receipt
 cancellation. Candidate `c12d953` corrects that branch, with a red/green actual-helper
 regression for completion/abort or stale view under competing ownership. R1-B2 remains
-resolved. Replacement native run `36148942247`, attempt 1, must be inspected before
-closing R1; existing native successes retain their original inputs and provenance.
+resolved. Replacement native run `36148942247`, attempt 1, passed on this exact
+candidate. Both complete logs, six-file artifacts, ZIP size/SHA-256/CRC and all 60
+input hashes per target were verified; frontend 50, runtime core Windows 17/macOS 18,
+explicit SDK 1 and desktop 1 passed per target. The two ignored core entries are the
+separately executed SDK gate and child-process fixture. R1 technical findings are
+closed; 1G.2a is review-ready, not user-accepted. See the
+[final-source closure](../tasks/active/phase-1g-branches-runtime-git.md#final-source-r1-recheck-and-closure--2026-09-26).
+Existing native successes retain their original inputs and provenance; 1G.2b remains
+unstarted and separately selected.

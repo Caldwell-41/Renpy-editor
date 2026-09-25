@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (renderer cancellation corrected; replacement native recheck running); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `not_started`. User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (renderer corrected; native recheck outstanding) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1600,3 +1600,108 @@ WORKFLOW require a published manual-resume handover and ending active polling; n
 qualified same-thread external-event continuation is configured here. Next bounded
 action: inspect this exact run, assess R1 closure and, only if no blocker remains, give
 the user the prompt for 1G.2b. Do not implement 1G.2b, merge or request physical testing.
+
+
+### Final-source R1 recheck and closure — 2026-09-26
+
+**Decision: R1 technical gate PASS; R1-B1 and R1-B2 closed. 1G.2a is
+`review_ready`, not user-accepted or merged.** The user selected only the final
+1G.2a recheck from AGENTS/HANDOVER at `6be09a1`, including run `36148942247`,
+attempt 1, both targets' complete logs and artifacts, closure if no blocker remains,
+and a next-chat prompt for 1G.2b. No physical testing, merge or 1G.2b implementation
+was authorised or performed.
+
+#### Identity and integrity
+
+Fresh remote refs and open draft PR #17 agreed on entry head
+`6be09a1f629a73b8eaba9f0e8960e02efcec52a3`, branch
+`feature/phase-1g-branches-runtime`, base/main
+`924619def6f624f336032c3ebc8499ccfcc662f0`. The existing isolated checkout was
+clean and reused; unrelated work was preserved. Application candidate remains
+**`c12d953548992adc60b38682d0dcfda8cdeb9f94`**, tree
+**`3f8f6e769672572b008b2ffb4f283888afecfc31`**. The entry handover and this closure
+change documentation only after that candidate.
+
+[Native R1 36148942247](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247),
+**attempt 1**, completed successfully. Run metadata, attempt-specific job metadata,
+both logged checkouts, artifact metadata and reports all identify the exact candidate.
+Windows job [108117024512](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247/job/108117024512)
+and macOS job [108117024959](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247/job/108117024959)
+passed every required gate and uploaded evidence. The only skipped step was SDK
+download after a cache hit; archive verification and the explicit SDK/service test ran.
+
+Both complete job logs and all six files in each ZIP were inspected:
+`runtime-foundation-report.json`, `runtime-core.log`, `runtime-desktop.log`,
+`runtime-frontend.log`, `runtime-sdk-service.log`, and `runtime-source-browser.log`.
+All five artifact log bodies agree with their full job logs. Both reports have
+`targetPassed: true` and CORE/SDK/DESKTOP/FRONTEND outcomes `success`.
+
+| Artifact | ID | ZIP bytes | Verified SHA-256 |
+| --- | --- | --- | --- |
+| `runtime-foundation-windows-2025` | `10870961403` | 8,818 | `7c21464cea63cd7fe18c2ee4bc2ab46ac7b38869fd26f9a052088c8116f73cf0` |
+| `runtime-foundation-macos-26` | `10870129746` | 8,265 | `de885762b461acb6d57448847f80da8a1e340bc21b910052cda44312651e50d8` |
+
+Downloaded sizes and SHA-256 match GitHub metadata and upload logs; both ZIP CRC
+checks pass. All **60 input hashes per target** match candidate Git blob bytes,
+including the changed helper and regression. Report paths were normalised only for
+Windows separators. The reported path sets exactly match the workflow's expected
+input set, with no missing or extra inputs. No logs, ZIPs or SDKs are committed.
+
+#### Actual gate results and limits
+
+| Gate | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Runtime-filter core, release/locked | 17 passed, 0 failed, 2 ignored; 158 filtered; 13.67 s | 18 passed, 0 failed, 2 ignored; 164 filtered; 9.71 s |
+| Explicit official SDK/service, exact/ignored | 1 passed, 0 failed/ignored; 176 filtered; 109.16 s | 1 passed, 0 failed/ignored; 183 filtered; 122.45 s |
+| Frontend typecheck/tests | 50 passed, 0 failed/cancelled/skipped/todo | 50 passed, 0 failed/cancelled/skipped/todo |
+| Source Save/selection browser and production build | PASS | PASS |
+| Rust formatting; desktop compile/smoke-report unit test | PASS; 1 passed, 0 failed/ignored | PASS; 1 passed, 0 failed/ignored |
+
+The two ignored runtime-filter entries are the separately executed official-SDK gate
+and child-process fixture, not two additional passes or missing required tests. The
+Source browser's legacy red reproduction is an intentional passing assertion; faithful
+Save and selection/Apply Both pass. These are targeted native suites, not a claim that
+all filtered-out core tests ran. The desktop unit test validates smoke-report handling;
+it is not a packaged UI smoke run.
+
+Hosts report Windows Server 2025 `10.0.26100` AMD64 and macOS `26.6.2` (`25G83`)
+arm64. Logs show Node `24.19.0`, successful installation of pinned npm `11.9.0`, and
+Rust `1.98.1` on the native target triples. Nonblocking warnings are the Windows
+unused `runtime_handle` method and Actions/Node deprecations. No job error annotation
+or required-gate failure was found.
+
+The corrected actual-helper/Source-controller regression passes on both targets for
+Run/Validate crossed with abort/stale-view completion. Bounded source recheck confirms
+it cancels using the captured receipt outside the released Source lease/coordinator,
+retains input, and performs no Save/start. The native
+`runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion`
+test also passes on both targets: cancellation while a competing owner holds the
+service is accepted in under 250 ms, old receipts are refused, and owner return releases
+the reservation. This closes the reopened R1-B1 finding. The injected frontend port
+and real ApplicationHost test remain complementary evidence, not one renderer-to-native
+end-to-end test.
+
+R1-B2 lifecycle/descendant/history cases pass again on this exact candidate. The
+[prior requirement assessment](#requirement-to-evidence-assessment) and its limits
+remain applicable: failed cleanup confirmation is injected after real process-tree
+cleanup, kernel I/O is cooperatively bounded, and native keyboard/packaged runtime UI
+were not exercised. No new source blocker was found in this bounded recheck.
+Exact-candidate [repository quality 36148947574](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148947574),
+attempt 1, was independently confirmed successful.
+
+#### Publication and next checkpoint
+
+This documentation-only closure updates CURRENT, HANDOVER, the parent plan and ADR
+evidence status. Local `python3 scripts/validate.py` passed for 243 repository files;
+`git diff --check` passed. Application/native/package tests are not rerun for unchanged inputs. Preserve
+all historical failed, superseded and successful evidence under its actual candidate;
+`36144974132` remains evidence for `07f23b6`, not the changed frontend. No run was
+dispatched or retried, and no native operation remains outstanding.
+
+Publish non-forced on the existing branch, verify remote head/tree/content, and keep
+PR #17 draft/open with its evidence summary current. The next eligible checkpoint is
+**1G.2b — Runtime UI and navigable diagnostics**, section 6, only when the user selects
+the provided next-chat prompt. It remains `not_started`. Printing that prompt grants
+no execution or acceptance by itself. Final G1/R1/R2 review, packaged target evidence
+and human acceptance remain under sections 8–9 and TESTING. No merge, physical testing,
+optional Git, Phase 2 or 1G.2b implementation is part of this closure.
