@@ -1,13 +1,13 @@
 # Current status
 
-**Updated:** 2026-09-25 (planning amendment only).
+**Updated:** 2026-09-25 (1G.1 implementation started).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.1 eligible and `not_started`; planning review complete.
+**Current checkpoint:** Phase 1G.1 `in_progress` on `feature/phase-1g-branches-runtime`; explicitly selected by the user.
 **Planning integration:** [PR #16](https://github.com/Caldwell-41/Renpy-editor/pull/16)
 merged at `5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`; merge tree exactly matches reviewed
-head `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`. Continuation is `main`.
+head `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`. Implementation continues on `feature/phase-1g-branches-runtime`.
 **Scope decision:** new Git work is [optional/deferred](../tasks/active/optional-local-git.md),
 not a Phase 1/1H or Phase 2-entry requirement. 1G has three checkpoints; editing during
 play is script-only, with Stop required before asset mutations. Agent-run
@@ -32,9 +32,7 @@ Native local installer hashes/exact OS builds were not supplied; reports retain 
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
 **Next eligible application checkpoint:** [Phase 1G.1](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches),
-shared flow projection and Branches, after explicit user
-selection. Every 1G/1H checkpoint remains `not_started`; no implementation branch is
-created. Phase 2 planning is preserved. No automatic progression into implementation.
+shared flow projection and Branches, selected by the user. 1G.1 is selected and in progress; later 1G/1H checkpoints remain `not_started`. Phase 2 planning is preserved. No automatic progression into implementation.
 
 Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
 passed. The automatic post-merge production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),

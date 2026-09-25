@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** all three checkpoints `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `in_progress`; 1G.2a/1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 Implementation still requires selection of one checkpoint.
@@ -40,7 +40,7 @@ performance evidence, not a production renderer or layout acceptance.
 
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
-| 1G.1 | Shared flow projection and Branches | `not_started` | Integrated 1F and explicit selection |
+| 1G.1 | Shared flow projection and Branches | `in_progress` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `not_started` | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
@@ -440,3 +440,36 @@ quality run `36101165196` passed for the reviewed head. PR #16 merged at
 candidate. CURRENT/HANDOVER now continue from main to separately selected 1G.1.
 No production dispatch, application changes, branch deletion or implementation occurred.
 The active 1G/1H/optional Git briefs remain active because their implementation is unstarted.
+
+## 12. 1G.1 execution ledger
+
+### Entry and test contract — 2026-09-25
+
+Authority: user selected Phase 1G.1 only, including implementation, targeted automated
+checks, bounded review fixes and checkpoint publication. No merge, runtime, optional
+Git, Phase 2, full package matrix or user physical testing is selected.
+
+Baseline: freshly verified main `924619def6f624f336032c3ebc8499ccfcc662f0`.
+No matching implementation branch/PR existed in the remote inventory. This isolated
+checkout owns `feature/phase-1g-branches-runtime`; no other local worktree or changes
+were present. Cross-host worktrees cannot be inspected from here; no conflicting
+published ownership was found. Historical branches and abandoned PR #12 are preserved.
+
+Before implementation, use these named scenarios and budgets. Implementing agent owns
+all development evidence on Linux x86-64; Windows/macOS WebView/native measurements
+remain explicitly deferred to final 1G. Exact candidate and results follow below.
+
+| Scenario | Expected observation | Command/layer |
+| --- | --- | --- |
+| G1-flow | Production shared projection: routes/reconvergence, duplicate options, cycles, Jump/Return, missing/unknown/partial choices; unchanged source bytes | `cargo test -p loomlight-core --locked flow` / real service + unit |
+| G1-edit | Existing Scene operations change/create destinations, reject referenced deletion, undo/redo and reopen with literal renderer JSON | focused core IPC tests |
+| G1-navigation | Source/Scene/Branches retain drafts/caret, refuse stale mapping, ignore old-session completions | `npm run check` / rendered DOM |
+| G1-bounds | Explicit over-limit state, bounded deterministic layout and keyboard pan/zoom/fit; external refresh invalidates selection | focused core + DOM/browser |
+| 1F-regression | Existing Save, Apply Both and literal Scene wire cases stay passing | core suite, `npm run check`, `npm run test:source-browser` |
+
+Declared limits before measurement: 500 mapped Scenes / 2,000 edges; label inventory
+at most 2,048 source files, 32 MiB aggregate UTF-8 source and 16 MiB per file, within
+the existing transaction inventory traversal bound. Incomplete inventory never proves
+absence. Initial projection/layout target 2 s; accepted update target 250 ms;
+input/pan p95 target 100 ms. Measurements will name fixture/host/layer; Linux results
+cannot certify either supported target. Graph layout is session-only convenience.
