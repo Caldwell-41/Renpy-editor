@@ -1,11 +1,12 @@
 # Current status
 
-**Updated:** 2026-09-25 (1G.1 targeted checkpoint complete).
+**Updated:** 2026-09-25 (1G.2a early SDK proof awaiting CI).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.2a runtime/trust foundation, `in_progress`, on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`; targeted Linux tests passed, final Windows/macOS evidence deferred. Not merged or finally accepted.
+**Current checkpoint:** Phase 1G.2a runtime/trust foundation, `awaiting_ci` for its early SDK proof, on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+**Preserved 1G.1 application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`; targeted Linux tests passed, final Windows/macOS evidence deferred. Not merged or finally accepted.
+**1G.2a prerequisite candidate:** `c72b4f675605cdf09cf01b4558a5c1bf69f2f852`; Linux SDK-only proof passed. Hosted Windows/macOS run [36126490939](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36126490939), attempt 1, was running at initial inspection. Runtime/trust/service implementation and full R1 remain incomplete; see [ledger 13](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
 **Continuation review:** head `f925a3cde28fc3105b861b159ef75d7e1df513a9` reviewed with no blocker to separately selected 1G.2a; independent frontend/validator checks and exact-head GitHub quality passed. Final target acceptance remains deferred; see ledger section 12.
 **Planning integration:** [PR #16](https://github.com/Caldwell-41/Renpy-editor/pull/16)
 merged at `5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`; merge tree exactly matches reviewed
@@ -33,10 +34,10 @@ PASS; the six original native Save passes remain PASS on #87 without repetition.
 Native local installer hashes/exact OS builds were not supplied; reports retain their
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-**Next eligible application checkpoint:** [Phase 1G.2a](../tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation), runtime/trust/revision/process foundation,
-selected by the user. Early R1 target access is blocked; SDK feasibility is in progress. 1G.2b and 1H remain `not_started`; Phase 2 planning
+**Selected application checkpoint to resume:** [Phase 1G.2a](../tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation), runtime/trust/revision/process foundation,
+selected by the user. Hosted target access is established; early SDK feasibility awaits the recorded CI result. R1 is incomplete. 1G.2b and 1H remain `not_started`; Phase 2 planning
 is preserved. No automatic progression. The [1G.1 ledger](../tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
-records exact scope, candidate, targeted results, observed limits and deferred native evidence.
+records exact 1G.1 scope, candidate, targeted results, observed limits and deferred native evidence. Resume 1G.2a from ledger 13; do not advance to 1G.2b.
 
 Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
 passed. The automatic post-merge production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),

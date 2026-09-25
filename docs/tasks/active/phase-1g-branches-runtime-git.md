@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress`; 1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (early proof only); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (early proof only) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -823,3 +823,46 @@ The publication then adds report provenance and handles Windows taskkill invocat
 failure while still reaping the parent; those are reviewed bounded changes. They do
 not create a Windows pass, and exact published-head target execution is required.
 No production application files or dependencies changed.
+
+### Published early-proof handover — awaiting CI
+
+**State:** `awaiting_ci` for the prerequisite SDK probe; 1G.2a/R1 is not complete or
+review-ready. Production foundation implementation remains outstanding as listed above.
+**Published candidate:** `c72b4f675605cdf09cf01b4558a5c1bf69f2f852`.
+**Verified candidate tree:** `8038b28ef428ad6548fb8eb53b77ecc83d0279e5`, exactly equal
+to local probe/workflow/contracts candidate `799a949`. Earlier entry publication was
+`e5ed02e7f4c1d6c12dcf6ac35df80ff7c712cef3`. Connector Git objects use the account's
+noreply identity, with fast-forward ref updates and no rewritten remote history.
+
+Publishing the branch-triggered workflow successfully established a hosted execution
+path; it supersedes the initial unavailable-direct-host inventory. No manual dispatch,
+rerun or production package run occurred. Targeted run
+[36126490939](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36126490939),
+**attempt 1**, started on the exact published candidate. At the single initial
+job inspection, both checkout and pinned SDK cache restoration had succeeded and
+both actual SDK fixture steps were `in_progress`:
+
+- macOS ARM64 job `108043687197` on `macos-26`.
+- Windows x64 job `108043687466` on `windows-2025`.
+
+No terminal result or artifact is inferred. Artifacts, when available, are named
+`runtime-sdk-feasibility-macos-26` and `runtime-sdk-feasibility-windows-2025`; each must
+contain the exact candidate/probe digest, expected platform/architecture, both cases
+and all required observations. These results would establish only SDK feasibility,
+not the missing production service or full R1 evidence. Missing/failed target proof
+remains blocked and is not transferred to user physical testing.
+
+Current-candidate repository quality
+[36126493914](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36126493914),
+attempt 1, completed successfully. A later documentation handover quality run is
+separate; do not manufacture its result. The documentation-only follow-up does not
+trigger another SDK run. This checkpoint updates PR #17 metadata to reflect the
+incomplete runtime foundation and retains the draft/open state.
+
+`AGENTS.md`/`WORKFLOW.md` require a published manual-resume handover rather than
+repeated model polling when a qualified same-thread event continuation is unavailable.
+No such continuation is configured here. This is that required stop, not checkpoint
+acceptance. Do not redispatch while the above operation is outstanding. Resume by
+reading its existing jobs/logs/artifacts, resolve bounded probe findings if any, then
+continue only the remaining 1G.2a production slice and R1 gates. The branch/PR remain
+unchanged; main is not merged.
