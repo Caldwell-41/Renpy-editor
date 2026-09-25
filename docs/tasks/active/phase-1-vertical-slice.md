@@ -1,10 +1,11 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-22 (remaining Phase 1 planning)<br>
+**Updated:** 2026-09-25 (Git deferral and testing revision)<br>
 **Status:** Phase 1A-1E and CI-SIMPLE are integrated. Phase 1F is accepted by
 [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
-PR #14 integration is complete. 1G/1H planning is integrated through PR #15, with all
-implementation checkpoints unstarted and separately selected. CURRENT/HANDOVER own
+PR #14 integration is complete. Original 1G/1H planning is integrated through PR #15;
+the September 25 scope/testing amendment is recorded here with all implementation
+checkpoints unstarted and separately selected. CURRENT/HANDOVER own
 actual integration state.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
@@ -16,7 +17,8 @@ Each milestone requires explicit user approval and a bounded execution brief. Th
 
 ## Product target and fixed decisions
 
-A user can create a conventional Ren'Py project, select/install and pin the supported SDK, configure resolution, safely persist/close/reopen, create Characters/Appearances/Assets/basic Variables, visually author a small branching VN, use Scene/Source/Branches, validate/run, checkpoint locally in Git, and continue after restart.
+A user can create a conventional Ren'Py project, select/install and pin the supported SDK, configure resolution, safely persist/close/reopen, create Characters/Appearances/Assets/basic Variables, visually author a small branching VN, use Scene/Source/Branches, validate/run, and continue after restart. New Git status/diff/checkpoint work is an
+[optional later milestone](optional-local-git.md), not a Phase 1 requirement.
 
 - Targets are Windows x86-64 and macOS Apple Silicon ARM64. Tauri 2 is the production shell; Phase 0 spikes remain evidence, not production services.
 - `.rpy` bytes are authoritative. Editor metadata stores stable identity, mappings and convenience state; it is not a second runnable document. The game runs without `.renpy-editor/`; arbitrary existing-project import and reconstruction after metadata deletion remain deferred.
@@ -26,9 +28,9 @@ A user can create a conventional Ren'Py project, select/install and pin the supp
 - Placement, transitions and audio are extensible references/events. Initial controls expose Left/Centre/Right, None/Dissolve/Fade, play/stop music and play SFX. Variables support bool/int/string and simple representable assignments, not arbitrary Python expressions.
 - All accepted edits use one transaction/history path. Natural typing bursts may be buffered briefly; automatic persistence and Ctrl/Cmd+S flush share the same boundary. Saved/Saving/Pending validation/Conflict/Recovery required are meaningful states. Undo/redo never overwrites external revisions.
 - Unsupported/custom code remains exact, visible and protected. The embedded preview reconstructs only supported scene-local state and marks unknown/runtime-dependent effects; the official SDK is the fidelity authority. Normal Run Game is included; correct Run From Here is deferred.
-- Scene, Source and Branches are major workspaces; Characters, Assets, Variables, Diagnostics/Runtime, Git and setup are supporting surfaces. Use [Quiet Studio Dark](../../UI.md), semantic tokens and accessible interactions, not independent feature-specific visual languages.
+- Scene, Source and Branches are major workspaces; Characters, Assets, Variables, Diagnostics/Runtime and setup are supporting surfaces. Use [Quiet Studio Dark](../../UI.md), semantic tokens and accessible interactions, not independent feature-specific visual languages.
 - Scene file operations must handle obsolete `.rpyc` derivatives through the approved transaction contract when an old `.rpy` path is removed. Never leave executable ghost scripts after supported move/delete.
-- Phase 1 excludes the UI Designer, Timeline, advanced state/reachability analysis, arbitrary transforms/ATL, LLM assistance, GitHub remotes, plugin infrastructure, arbitrary project import, and signing/notarisation.
+- Phase 1 excludes the UI Designer, Timeline, advanced state/reachability analysis, arbitrary transforms/ATL, LLM assistance, new Git status/diff/checkpoints, GitHub remotes, plugin infrastructure, arbitrary project import, and signing/notarisation.
 
 ## Scene UX baseline
 
@@ -132,15 +134,15 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 **Gate:** golden no-op/minimal-patch cases, actual Source → Scene and Scene → Source updates, opaque/invalid regions, selection mapping, undo grouping, external edit races and restart behavior pass without collateral changes. Demonstrate both safe file-local isolation and mandatory project-level blocking for unresolved recovery.
 
-### 1G — Branches, validation/run, diagnostics, and local Git
+### 1G — Branches, validation/run and diagnostics
 
 **Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
-[1G execution brief](phase-1g-branches-runtime-git.md) subdivides the three capability
-gates into five checkpoint chats: 1G.1, 1G.2a, 1G.2b, 1G.3a and 1G.3b. All are
-unstarted. Its approved behaviours include existing-command graph editing, continued
-authoring during play with targeted restrictions, explicit session trust and preservation
-of unrelated staged Git changes. Technical strategies must pass their owning proof
-gates before UI completion; this is not one broad implementation claim.
+[1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
+and 1G.2b, all unstarted. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
+supported script editing/saving during play and usable diagnostics. Asset mutations
+require Stop; live asset refresh is excluded. Existing Scene/Source/Save
+services are reused. Agent-run tests own development checks; user physical testing is
+reserved for one final 1G session under [TESTING](../../TESTING.md#phase-1g-testing-ownership-and-cadence).
 
 #### 1G.1 — Branches
 
@@ -156,13 +158,13 @@ Flush the intended accepted revision before execution; refuse unresolved recover
 
 **Gate:** actual SDK compile/lint failure and diagnostic navigation, correct source revision, explicit trust refusal, normal run/stop, output bounds and lifecycle/session races pass. Process launch alone does not prove the authored route ran.
 
-#### 1G.3 — Local Git checkpoint
+#### Optional local Git — outside Phase 1
 
-Implement only local status, diff and user-confirmed checkpoint. Specify which files are included, how an existing staged index is preserved, how external edits between preview and commit are handled, and how identity/missing Git are reported. Do not use blind `git add .` or silently include unrelated staged/private files. Project-controlled hooks, filters, external diff and configuration require an explicit non-execution/trust policy; a local Git operation is not automatically inert.
-
-Keep subprocess/path/session safeguards and distinguish a Git checkpoint from journalled editor recovery. Reset, checkout/restore, destructive clean, remotes, authentication and force-push remain outside 1G.
-
-**Gate:** actual status/diff/checkpoint match the user-reviewed file set, leave unrelated index/worktree changes intact, reject stale changes, and demonstrate hostile configuration handling on both targets. Extend Quiet Studio Dark consistently across technical surfaces.
+Former 1G.3a/1G.3b requirements are preserved as GIT.1/GIT.2 in
+[optional-local-git.md](optional-local-git.md). They require explicit later selection
+and never block 1G/1H, Phase 1 closure or Phase 2 entry. Existing optional project-creation
+Git init and its regressions remain unchanged. Product deferral does not change the
+repository development/publishing workflow.
 
 ### 1H — Vertical-slice acceptance
 
@@ -173,14 +175,14 @@ acceptance of implemented capabilities, not a place to hide missing feature work
 
 Run the following with synthetic, repository-safe content from fresh checkouts on Windows x64 and macOS ARM64:
 
-1. Create a project with local Git and verify standard Ren'Py menu/save/load behavior.
+1. Create a project with and without the existing optional Git init and verify standard Ren'Py menu/save/load behavior.
 2. Create two Characters and Appearances; import backgrounds, character images, music and SFX; define bool/int/string values including an exact large integer.
 3. Author multiple Chapters/Scenes, dialogue, staging, appearance/placement, audio and assignments; assert the intended source and runtime values/assets, not only entity counts.
 4. Create an unconditional Choice and two destinations. Run both routes and verify their outcomes and common semantic edges.
 5. Reorder and edit beats, undo and redo repeatedly; verify source, metadata, views and committed revisions agree.
 6. After compilation, move/delete a disposable Scene safely. Verify incoming-reference policy, inverse behavior, close/reopen and no orphan `.rpyc`/duplicate-label execution.
 7. Edit supported Source and observe Scene/Branches synchronization; introduce unsupported/incomplete/external content and prove lossless protection, truthful stale/partial states and controlled reconciliation.
-8. Validate, navigate real diagnostics, perform explicit normal run/stop, and create a Git checkpoint containing exactly the reviewed changes.
+8. Validate, navigate real diagnostics, perform explicit normal run/stop, and verify revision/trust status during authoring.
 9. Close/reopen and continue with valid workspace selection. Run a copy without `.renpy-editor/`.
 10. Interrupt mixed transactions and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
 11. Exercise failed project switches, old-session requests, delayed/reordered successes/errors, cancelled import and rapid navigation. Prove no wrong-session effects, obsolete navigation or false Saved state.
@@ -190,7 +192,7 @@ Run the following with synthetic, repository-safe content from fresh checkouts o
 
 ## Ownership and scope discipline
 
-The completed 1A–1D follow-up repaired existing operations. 1E.1 owns the integrated multi-Scene/schema/source/file-lifecycle/history prerequisites; 1E.2 owns minimum recovery UX; 1E.3 owns media presentation/preview. 1F owns the full Source workspace and broader external reconciliation. 1G owns Branches, explicit SDK runtime/diagnostics and local Git. 1H verifies them. Advanced recovery and full analysis remain Phase 3/4 work.
+The completed 1A–1D follow-up repaired existing operations. 1E.1 owns the integrated multi-Scene/schema/source/file-lifecycle/history prerequisites; 1E.2 owns minimum recovery UX; 1E.3 owns media presentation/preview. 1F owns the full Source workspace and broader external reconciliation. 1G owns Branches and explicit SDK runtime/diagnostics. 1H verifies them. Optional Git owns later local status/diff/checkpoints. Advanced recovery and full analysis remain Phase 3/4 work.
 
 Resolve detailed schemas, limits, references, deletion policy, dependencies and test fixtures in the owning bounded brief before implementation. Preserve the approved source/security architecture and document material changes with ADRs where needed. Do not implement an earlier milestone with an unsafe shortcut merely because a later milestone will add a larger subsystem.
 

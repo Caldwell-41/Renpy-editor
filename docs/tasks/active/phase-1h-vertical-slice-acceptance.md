@@ -1,7 +1,7 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Prepared:** 2026-09-22.
-**Planning:** approved for documentation publication and review.
+**Updated:** 2026-09-25; Git deferral and testing ownership.
+**Planning:** revised by explicit September 25 user direction; documentation publication authorised.
 **Execution state:** `not_started`.
 **Entry:** Phase 1G closure and integration, accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
@@ -12,8 +12,8 @@ explicit user selection of 1H. Planning publication/merge does not authorise exe
 
 ## 1. Purpose and preparation
 
-Verify the implemented workflow from new project through real play and a reviewed local
-Git checkpoint, on Windows x64 and macOS ARM64. This is acceptance, not permission to
+Verify the implemented workflow from new project through real play, diagnostics and
+restart, on Windows x64 and macOS ARM64. This is acceptance, not permission to
 hide missing features in the test milestone. Assign demonstrated missing behaviour to
 its owning milestone and return with a bounded correction request. Preserve failed
 evidence; never weaken an assertion to close the phase.
@@ -29,25 +29,31 @@ manifest. Reuse [existing fixture intent](../../fixtures/REPRESENTATIVE_GAME.md)
 prior regressions where suitable, but demonstrate authoring through real production
 services/UI. Handwriting a finished fixture alone does not prove the authoring workflow.
 The manifest fixes expected source/metadata, route outcomes, values, media identities,
-history effects and checkpoint file set. Record asset provenance/licences.
+history effects and revision/trust observations. Record asset provenance/licences.
 
 Normal Run Game begins at standard entry. A synthetic automation driver may exercise
 choices and record outcomes, but must run the authored source and assert observable
 dialogue/state/assets; launch success, screenshots alone, labels and entity counts do
 not prove route correctness. Keep any test instrumentation isolated from shipped games.
 
-## 2. Required matrix — all twelve parent cases retained
+New Git status/diff/checkpoint acceptance is removed from H01/H08/H10/H11 and preserved
+in [optional Git](optional-local-git.md). Existing init regression remains automated.
+The implementing agent owns every H01-H12 scenario and fault/hostile/race matrix; the
+user does not reproduce this matrix manually. Human interaction rows alone follow
+[TESTING ownership/reuse](../../TESTING.md#phase-1g-testing-ownership-and-cadence).
+
+## 2. Required matrix — twelve IDs retained with Git scope revised
 
 | ID | Scenario | Required observable evidence |
 | --- | --- | --- |
-| H01 | Create with local Git and pinned SDK | Successful staged creation; normal menu, save/load, preferences and history/rollback remain functional; failure does not expose a half-created project |
+| H01 | Create with pinned SDK and existing optional Git init | Successful staged creation with/without optional init (regression only); normal menu, save/load, preferences and history/rollback remain functional; failure does not expose a half-created project |
 | H02 | Supporting authoring | Two Characters and Appearances, copied backgrounds/character images/music/SFX, bool/int/string definitions including an exact integer beyond JavaScript safe-integer precision; source, reload and runtime preserve intended values |
 | H03 | Multiple Chapters/Scenes and Beats | Dialogue/narration, background/staging, appearance, Left/Centre/Right, supported transitions, music play/stop, SFX and assignments produce intended source and runtime state/assets |
 | H04 | Unconditional Choice and two destinations | Both routes execute from normal entry to distinct expected outcomes; Choice/Jump/Return and common Scene/Source/Branches semantic edges agree; tree order does not change flow |
 | H05 | Reorder/edit/history | Repeated undo/redo returns expected source, metadata, all projections and committed revisions; failed inverses/external boundaries do not overwrite newer bytes |
 | H06 | Compiled Scene lifecycle | Compile, then safely move/delete a disposable Scene; incoming/unknown-reference policy, inverse operations and close/reopen hold; no orphan `.rpyc` or duplicate-label execution |
 | H07 | Source and partial/external content | Supported edits synchronise Scene/Branches; opaque/incomplete/unmapped content stays exact; drafts, stale/partial state, safe Apply Both and refused overlap remain truthful; selection never guesses |
-| H08 | Diagnostics, play and Git | Real compile/lint failures navigate safely; explicit trust and normal Run/Stop work; reviewed checkpoint tree contains exactly selected accepted changes with unrelated staging preserved |
+| H08 | Diagnostics and play | Real compile/lint failures navigate safely; explicit trust and normal Run/Stop work; supported script editing/saving retains input and shows truthful launch-revision status; asset mutations require Stop |
 | H09 | Restart and metadata independence | Close/reopen and continue editing with valid selection and durable accepted content; a copy runs without `.renpy-editor/`; editor reconstruction without metadata remains out of scope |
 | H10 | Interrupted mixed transactions and recovery | Retain accepted and competing external bytes; inspect blocked state without executing project; explicitly resolve safe cases and continue; ambiguity remains blocked without deleting evidence |
 | H11 | Session and completion races | Failed switch preserves current project; old-session requests, delayed/reordered success/error, cancelled import and rapid navigation cause no wrong-session write, obsolete selection or false Saved state |
@@ -55,24 +61,23 @@ not prove route correctness. Keep any test instrumentation isolated from shipped
 
 For each row record scenario/test name, exact expected/actual observations, command,
 candidate, target, outcome and evidence location. A skip or unavailable target remains
-open. Prior evidence can support unchanged requirements only under actual repository
-policy; it cannot substitute for the integrated workflow on the final candidate.
+open. Prior human evidence may cover unchanged interactions under the narrow policy in
+TESTING; automated integrated workflow evidence must still cover the final candidate.
+No general cross-SHA automated gate waiver is introduced.
 
 ## 3. Additional integration cases from the planning review
 
 | Area | Required cases | Parent mapping |
 | --- | --- | --- |
 | Graph | Missing versus unknown targets with proven absence, incomplete/ambiguous label inventory, partial Choice, duplicate option text, self-loop, reconvergence, source navigation both directions, stale selection after deletion, declared size limit | H04, H07, H11, H12 |
-| Draft preparation | Save All and continue, explicitly use saved revision, Cancel, refused Save All retains all input, dirty Source remains Pending validation | H07, H08, H11 |
+| Draft preparation | Source Save All, explicit existing Scene Commit, use saved revision with form/draft retained, Cancel, refusal starts zero processes, dirty Source remains Pending validation | H07, H08, H11 |
 | Trust | Untrusted open/preview/import/typing has zero SDK launch; reject stale grant after root/SDK or relevant executable change; revocation and copied-UUID rejection | H08, H11 |
-| Runtime | Play beyond smoke timeout, continued authoring and launch-revision status including later reads of changed assets, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
+| Runtime | Play beyond smoke timeout, script editing/saving and launch-revision status, asset mutation/inverse refusal with no writes and retry after Stop, launch-versus-import race, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
 | Diagnostics | Multiline SDK failures, Unicode/spaces/BOM/newlines, absent location, deleted/out-of-scope file, stale revision, inert output, bounds/truncation and empty parsed list after failure | H07, H08, H11 |
-| Git | First commit, no repo, missing executable/identity, binary/add/delete, source/metadata dependencies, selected partial staging, unrelated staging preserved, stale HEAD/index/review | H01, H08, H11 |
-| Git failures | Hostile hooks/filters/config/helpers remain unexecuted; interruption around HEAD/index publication preserves evidence and recognises already-created commit | H08, H10, H11 |
 
 Use deterministic fault injection and real process-termination tests where the owning
-contract requires them. UI stubs alone cannot prove disk durability, process cleanup,
-native keyboard delivery or Git contents.
+contract requires them. UI stubs alone cannot prove disk durability, process cleanup or
+native keyboard delivery.
 
 ## 4. Cross-cutting release-of-phase gates
 
@@ -81,12 +86,15 @@ native keyboard delivery or Git contents.
 - Transaction/recovery and single-instance boundaries, safe media presentation,
   hostile path/substitution denial, narrow IPC and packaged unauthorised-WebView
   probes pass with no new privilege/CSP exceptions.
-- Review real rendered Scene/Source/Branches and supporting Runtime/Diagnostics/Git
+- Review real rendered Scene/Source/Branches and supporting Runtime/Diagnostics
   surfaces on both platforms against Quiet Studio Dark. Check keyboard-only operation,
   native Ctrl/Cmd shortcuts, accessible names, focus restoration, reduced motion,
   display scaling and narrow-window resize; no overlap/overflow or unreadable controls.
-  Record any manual assistive-technology limitations explicitly; never call an
-  unavailable accessibility check passed or silently transfer a mandatory gate later.
+  Automate semantics/focus/resize/reduced-motion assertions and review rendered output
+  as the agent. Reuse applicable end-of-1G native human evidence under TESTING; request
+  only a specific changed or previously uncovered interaction if needed. Record manual
+  assistive-technology limitations without claiming a screen-reader pass or adding an
+  unplanned exhaustive human accessibility matrix.
 - Bounded graph/diff/output work remains responsive; synthetic graph-spike numbers
   do not establish production scale. Test declared limits and refusal behaviour.
 - Privacy/secret scan and dependency/licence inventory finish successfully after
@@ -123,7 +131,10 @@ actual implementation/acceptance branch, PR and exact outstanding operation. Sto
 Phase 2 are separate decisions. On authorised integration, verify main, consolidate
 canonical lessons and archive completed plans while preserving unique failed evidence.
 
-## 6. Planning publication record
+## 6. Historical September 22 planning publication record
+
+This historical record is superseded for Git scope and test ownership by the September
+25 decision. CURRENT/HANDOVER own the active documentation branch and actual status.
 
 This brief and the [1G planning record](phase-1g-branches-runtime-git.md#10-planning-coverage-and-review-record)
 form one documentation checkpoint on `docs/phase-1g-1h-planning`. All acceptance rows

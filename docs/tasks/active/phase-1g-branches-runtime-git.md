@@ -1,29 +1,17 @@
-# Phase 1G — Branches, runtime, diagnostics and local Git
+# Phase 1G — Branches, runtime and diagnostics
 
-**Prepared:** 2026-09-22.
-**Planning state:** agreed product decisions; documentation publication authorised.
-**Implementation state:** `not_started` for every checkpoint below.
-**Authority:** The user approved the corrected plan, including existing-command graph
-editing, continued authoring during play with targeted restrictions, session-scoped
-executable trust, and preservation of unrelated staged Git changes. The user then
-requested a separate planning PR and a review against the conversation. This is not
-authority to implement, dispatch production gates, merge this PR or advance Phase 2.
-**Planning branch:** `docs/phase-1g-1h-planning`, based on main
-`60a800a83f50e73f4a2244bb194d55b7b19f3c72` (including Phase 2 planning).
-**Entry:** Phase 1F accepted and integrated, actual main/refs checked, and explicit
-selection of ONE checkpoint. Reuse an existing matching implementation branch/PR;
-otherwise record the new implementation branch in the live handover at entry.
+**Updated:** 2026-09-25. **Implementation:** all three checkpoints `not_started`.
+**Authority:** the user approved the planning corrections and minimal physical testing,
+and removed new Git work from Phase 1. This authorises documentation publication only.
+**Planning branch:** `docs/phase-1g-scope-testing`, from main
+`f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own publication state.
+**Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
+checkpoint. No application work or production dispatch is authorised by this update.
 
-## Closeout preparation — 2026-09-23
-
-Planning PR #15 is integrated in main `75a91c5f72cd0eac8586faf2be036ec5021a939d`.
-The planning-branch/authority text above is historical. Phase 1F acceptance is now
-satisfied by [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
-PR #14 is merged at `973e3565d7cf41c6dca936df088ced10969821ac`. F1-F4 and the focused native
-gates are closed, with earlier Save passes preserved. CURRENT/HANDOVER own the actual
-integration result. Every checkpoint below remains `not_started`; 1G.1 becomes eligible
-after integration and explicit user selection. No duplicate plan or implementation
-branch is created by this handover.
+Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
+Planning PR #15 is integrated. New Git work is preserved as the deferred
+[optional Git milestone](optional-local-git.md), not a 1G/1H/Phase 1 or Phase 2 prerequisite.
+The historical filename is retained for existing links; it does not retain Git scope.
 
 ## 1. Ownership and existing foundations
 
@@ -34,20 +22,13 @@ handover from the actual implementation branch, the [parent plan](phase-1-vertic
 The integrated 1F Source brief and shell-Save ADR govern drafts and Save; do not copy
 or replace their controller, transaction, recovery or session authority.
 
-The planning review inspected PR #14 at `1d5704b738de25a1b95197cc0866f866ae52826d`;
-publication observed its newer head `85e44e926399ae7ad8431c948e1751db04dcde35`.
-Neither is an accepted 1F baseline or an instruction to reset. The branch owner retains
-the active 1F handover and correction ledger. This planning PR deliberately does not
-edit those files or CURRENT; the user approved that separation. No parallel live
-HANDOVER is created. This brief owns the planning record until implementation entry.
-
 | Area | Reuse | Work still required |
 | --- | --- | --- |
 | Flow | `scene.rs` Scene IDs, Choice/Jump/Return, guarded lifecycle and history | Shared unresolved/unknown-flow projection and Branches surface |
 | Source | Integrated 1F draft, mapping, Save and session coordination | Revision-aware consumers, without another document truth |
 | SDK | `renpy.rs` pinned SDK, safe arguments, bounded execution and creation validation | Explicit user execution, long-lived process ownership, usable diagnostics |
 | Desktop | Narrow protocol and lifecycle authority | Nonblocking operation ownership and cancellation |
-| Git | `lifecycle.rs` private-stage init only | Status, diff and exact reviewed checkpoints |
+| Git | Existing optional private-stage init and regressions | New work deferred to optional Git; no Phase 1 deliverable |
 | Tests | Existing core, DOM, packaged/security and SDK fixtures | New behavioural evidence and integrated 1H coverage |
 
 The eight-second `smoke_run` and severity/message-only diagnostics are foundations,
@@ -61,16 +42,14 @@ performance evidence, not a production renderer or layout acceptance.
 | 1G.1 | Shared flow projection and Branches | `not_started` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `not_started` | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
-| 1G.3a | Local Git safety and checkpoint foundation | `not_started` | Reviewed 1G.2b and explicit selection |
-| 1G.3b | Git status/diff/checkpoint UI | `not_started` | Proven 1G.3a and explicit selection |
 
-These subdivide the parent's three capability gates; they do not create five separate
-product milestones. Use one checkpoint per chat, retaining the implementation branch/PR
-and its evidence across chats. All three capabilities must pass before 1G closes.
+These subdivide the parent's two capabilities into three checkpoint chats. Use one
+checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
+G1/R1/R2 and final acceptance must pass before 1G closes; Git V1/V2 are excluded.
 
 Excluded: conditions/calls authoring, arbitrary parser expansion, graph connection
 dragging, mature minimap/search/large-story layout, reachability/state simulation,
-Run From Here, arbitrary project import, destructive Git restore/reset/clean, remotes,
+Run From Here, arbitrary project import, new Git status/diff/checkpoint work, remotes,
 authentication, LLM work, plugins, signing/notarisation and CI wait/wake redesign.
 No renderer filesystem/process capability or CSP relaxation is allowed.
 
@@ -79,7 +58,7 @@ No renderer filesystem/process capability or CSP relaxation is allowed.
 ### Drafts, persistence and operation preparation
 
 Source buffers, accepted disk content and derived views remain distinct. Before
-Validate, Run or Git checkpoint preview, settle the captured current editor input
+Validate or Run, settle the captured current editor input
 through the existing controller/operation lease. Where drafts remain, offer explicit
 Save All and continue / Use saved revision / Cancel, explaining that saved revision
 excludes drafts. Do not silently save, discard or journal drafts. Cancel writes nothing.
@@ -97,6 +76,21 @@ manifest and view generation. Recheck before acting and discard stale UI complet
 Use hashes/identities, not timestamps alone. Async results must not retarget a new
 project or overwrite newer persistence state. External edits can still race execution;
 record launch-time evidence and staleness, never claim an immutable filesystem snapshot.
+
+### One preparation path, including Scene input
+
+Extend the existing Source controller/operation lease, not a second Save service.
+Capture pending Source input and uncommitted Scene form input before choosing a revision.
+For Source, reuse Save All preflight and its recoverable multi-mutation transaction.
+For an uncommitted Scene form, offer its existing explicit Commit action before retrying
+preparation, Use saved revision (retain the form), or Cancel. Do not silently auto-commit
+Scene forms or promise one atomic transaction spanning unrelated UI buffers. A refused
+commit/save retains input and starts no SDK process. Recheck all revisions after an
+explicit commit; switching panels must not discard the captured form/draft.
+
+Use the same preparation result for Validate and Run, with current input captured under
+a short lease. Add literal renderer JSON through the real handler/service tests for all
+new requests, including successful disk/reopen observations and stale/malformed refusal.
 
 ### Trust and process policy
 
@@ -153,12 +147,26 @@ Display process text as inert bounded text; no active HTML or arbitrary file/URL
    responsive. Record concrete node/edge limits and latency budgets before measurement,
    with an honest over-limit state. Do not silently truncate or import spike scale claims.
 
+**Initial production budget:** at most 500 mapped Scenes and 2,000 displayed flow edges;
+bound the project label inventory separately before implementing it. Use an unchanged
+representative fixture and record host/measurement method before measuring: accepted
+projection update target 250 ms, input/pan response p95 100 ms, initial build/layout 2 s.
+These are starting acceptance budgets to validate on both targets, not measured claims.
+If infeasible, report a bounded finding and propose a budget change before acceptance;
+never silently raise a limit. Over-limit input shows an explicit state with navigation
+back to Source and no silent truncation. 10k/50k spike workloads are not 1G requirements.
+
+**Foundation-first:** current Scene parsing may stop at an unmapped menu destination.
+Prove shared missing/unknown/partial-choice semantics before rendering; retain known
+edges without implying completeness, and preserve opaque bytes/Scene edit safeguards.
+
 **G1 gate:** shared-service and rendered tests prove two routes, reconvergence, duplicate
 options, self-loop/cycle, Jump/Return, destination creation/removal refusal, missing and
 unknown flow, mixed understood/opaque choices, source minimality and history. Verify
 Scene/Source/Branches navigation both directions, selection after deletion, draft retention,
-external invalidation, session races, bounded layout and keyboard/focus/resize on both
-packaged targets. A graph built from test-only edges does not satisfy this gate.
+external invalidation, session races and bounded layout. The agent owns automated
+keyboard/focus/resize and packaged-target checks; final human checks follow section 9.
+A graph built from test-only edges does not satisfy this gate.
 
 ## 5. 1G.2a — Runtime and trust foundation
 
@@ -173,7 +181,8 @@ including cancellation and failure from each relevant intermediate state.
 | Duplicate Run/Validate | One owned SDK operation at a time; explicit busy result, no duplicate spawn |
 | Preparation | Drain/flush/recheck under a short coordination lease; never hold lifecycle mutex through child lifetime |
 | Validation | Temporarily block writes that invalidate the validation manifest; bounded timeout/cancellation; external change marks results stale |
-| Running game | Allow ordinary authoring; display launch revision and Started from an earlier revision after relevant edits |
+| Running game | Allow supported script editing/saving; display launch revision and Started from an earlier revision after script edits |
+| Asset mutation | Import/replace/move/rename/delete assets only after Stop; refuse mixed commands and history inverses that mutate assets while running |
 | Runtime reload | Verify and control SDK automatic reload so editing does not silently execute a new revision under the old Run action |
 | Move/delete/undo | Reject only operations conflicting with live source/compiled-file ownership, including relevant history inverses; show Stop action |
 | Switch/close/exit | Offer Stop and continue / Cancel; finish child cleanup before invalidating session; then honour existing draft leave flow |
@@ -182,16 +191,30 @@ including cancellation and failure from each relevant intermediate state.
 | Output flood | Bounded memory/backpressure and visible truncation; no silent success or unbounded pipe readers |
 
 Record a mutation-versus-execution compatibility table, including assets/definitions,
-source saves, file lifecycle, history, recovery and Git checkpoints. Runtime-conflicting
+source saves, file lifecycle, history and recovery. Optional Git compatibility is
+owned by that later milestone. Runtime-conflicting
 operations may offer Stop and retry; do not impose a whole-session editor lock as an
 unannounced scope reduction. If safe continued authoring or reload control cannot be
 proven, stop with a specific design finding for user review.
 
-Launch provenance is not a promise that every later runtime read uses those same bytes.
-The live game can load an updated asset or other file after an editor/external change.
-Explain that distinction when changes occur; do not present the runtime as an immutable
-copy or proof of the newly edited revision. Route acceptance uses a controlled unchanged
-fixture, while a separate live-read test verifies truthful status during authoring.
+**Script-only editing during play (user clarification, 2026-09-25):** use Ren'Py's
+existing loaded-script/reload behaviour; do not implement live asset updates. Supported
+Scene/Source edits and their required metadata writes may continue, including changing
+script references to assets already present. Media import, replacement, move/rename,
+deletion and any compound command/history inverse that changes asset files or inventory
+require Stop first. Browsing/previewing existing assets remains available.
+
+Enforce that boundary in the core mutation path, not only disabled UI controls. Drain
+in-flight asset mutations before launch and recheck runtime ownership before mutation;
+a queued import or undo must not race the start of play. Refusal leaves files/history
+unchanged and offers Stop and retry. Retain existing source/compiled-file lifecycle
+restrictions as well; script-only scope does not authorise unsafe Scene move/delete.
+
+Launch provenance is not a filesystem snapshot. External tools or project Python can
+still change files; ordinary external-change/trust safeguards and truthful status remain,
+without promising isolation or supporting live asset refresh. Route acceptance uses
+unchanged assets. Replace the earlier planned asset live-read case with an automated
+asset-mutation refusal/no-write case and successful retry after Stop.
 
 Cover environment/argument safety, root/SDK revalidation, spawn/cleanup races, bounded
 reader shutdown even when descendants retain pipes, cancellation during preparation,
@@ -206,13 +229,56 @@ material runtime decisions, explicitly distinguishing validation deadlines from 
 
 **R1 gate:** production-service tests plus supported-target child-process evidence prove
 zero spawn on refusal/cancel, correct revision preparation, trust revocation/replacement,
-SDK mismatch, duplicate actions, long-running game, authoring/reload behaviour, move/delete
-and inverse blocking, natural exit/crash, cancellation/Stop/output flood and lifecycle
+SDK mismatch, duplicate actions, long-running game, script editing/reload behaviour,
+asset-mutation refusal/retry, launch-versus-import race, move/delete and inverse blocking, natural exit/crash, cancellation/Stop/output flood and lifecycle
 races. Test actual process-tree cleanup on both targets, not only a fake process port.
+
+### Editing during play: bounded proof before UI completion
+
+This is part of 1G.2a/R1, not an additional milestone or a hot-reload feature. Implement
+and prove a narrow end-to-end slice using the pinned SDK before broad runtime wiring:
+
+1. Prepare the deliberately chosen saved revision, grant session trust, launch normally
+   and keep the game alive beyond the old eight-second smoke limit.
+2. Release the lifecycle mutex after short preparation. A core-owned runtime supervisor
+   retains operation/session/process identity independently; Stop/status can run while
+   authoring requests continue. Do not keep a request holding the lifecycle lock for
+   the game's lifetime. Reuse existing path/environment/SDK checks.
+3. Edit and save dialogue while the game runs. The editor remains usable and status
+   shows that play started from an earlier revision. Saving must not automatically
+   restart/reload the game or claim that the new dialogue has executed.
+4. Verify the pinned SDK mechanism for suppressing automatic script reload and define
+   the policy for runtime reload shortcuts. Record observed behaviour; no hypothetical
+   launch flag counts as proof. Stop then Run is the Phase 1 way to deliberately run
+   the latest saved revision. No live state migration or Run From Here is required.
+5. Attempt an asset mutation during play and assert refusal with no file/history change;
+   then Stop and retry successfully. Include an asset-changing compound command/history
+   inverse and the launch-versus-import race in automated coverage. Do not build or test
+   successful live asset refresh. Existing-asset selection that edits only script
+   references remains allowed under the ordinary script-edit contract.
+6. Prove targeted refusals for move/delete and history inverses that conflict with
+   runtime file ownership; offer Stop and retry. Supported script edits remain available.
+   Publish the compatibility table before expanding beyond this slice.
+7. Test natural exit, Stop, crash, app shutdown and project switch/cancel, including
+   descendants retaining pipes. Cleanup has bounded deadlines and releases ownership;
+   an old callback cannot change the next project or runtime operation.
+
+Agent-run Windows/macOS process evidence is required at R1. No user physical testing
+is requested here. Missing host access leaves R1 blocked; it is not substituted with
+browser-only evidence or passed on to the user. A failure to control reload or allow
+safe supported script edits is a specific design finding for review, not permission to freeze
+the whole editor or quietly introduce project snapshots.
 
 ## 6. 1G.2b — Runtime UI and navigable diagnostics
 
-Wire Validate to pinned compile/lint and Run Game to standard game entry. A validation
+Wire Validate to pinned compile/lint and Run Game to standard game entry.
+Validate is an explicit bounded compile-then-lint operation; compile failure stops that
+validation sequence, lint uses its documented failure exit policy, and warnings alone
+remain warnings. Run performs preparation/trust checks then the pinned SDK's normal
+launch (including compilation it normally performs); it does not silently launch an
+extra lint/Validate cycle. Known prior diagnostics remain revision-qualified and do
+not masquerade as a fresh validation pass. Launch/runtime failure is shown as failure.
+Any later combined Validate-and-Run action needs its own explicit reviewed contract. A validation
 failure has a distinct terminal result from timeout, cancellation, stale result or
 unavailable SDK; warnings are not errors. Run and Validate remain deliberate actions;
 document required preflight and do not introduce hidden background project execution.
@@ -236,92 +302,22 @@ columns, paths containing spaces, deleted files and unparseable diagnostics.
 **R2 gate:** real SDK compile and lint failures navigate correctly; trusted normal play
 runs both authored routes to asserted dialogue/state/assets; Stop works after a session
 longer than the smoke limit. Verify saved-revision versus draft choices, refused Save All,
-runtime authoring/staleness, runtime errors, static/SDK separation, output bounds and
+script editing/staleness and asset-mutation refusal, runtime errors, static/SDK separation, output bounds and
 keyboard/focus/resize in actual Windows/macOS packages. DOM/browser tests supplement
 native evidence and cannot replace it.
 
-## 7. 1G.3a — Local Git checkpoint safety
+## 7. Deferred optional Git
 
-Deliver core-owned local status, inert diff and checkpoint operations with opaque session
-and review tokens. Preserve the existing `git init` option. A project without a repository
-shows Git unavailable for that project; it remains authorable. Do not silently initialise,
-install Git, change global identity/configuration or run authentication/network commands.
-Report missing executable/identity actionably; an explicitly entered checkpoint identity
-is validated and scoped locally. Record the supported Git version/capabilities.
+Former 1G.3a/1G.3b and V1/V2 now belong to [optional Git](optional-local-git.md).
+Existing project-creation Git init remains; new Git work is not required for Phase 1.
 
-### Review and file inclusion
+## 8. Capability closure
 
-Default candidates are conventional game source, copied game assets, project-owned GUI
-resources and durable editor metadata (`project.json`, `authoring.json`, `source-map.json`
-where present). Inspect actual schemas at entry: exclude transient fields/files, recovery
-journals, credentials, machine paths, SDKs, logs, saves, caches, `.rpyc`, distributions
-and build output. Ignored/private files do not become candidates just because already
-tracked. Never use blind `git add .`. Display exclusions with reasons.
-
-The user selects full files and reviews additions/modifications/deletions, text diffs
-or binary hash/size summaries, identity and commit message. Detect source/metadata
-dependencies; require review of needed companion changes or refuse an incoherent set,
-never silently include them. Preview is bounded/cancellable. Checkpoint includes only
-the exact reviewed bytes; drafts are excluded unless explicitly accepted first.
-
-### Index, concurrency and crash contract
-
-Preserve unrelated staged index entries and worktree bytes on success and failure.
-Do not globally refuse checkpoint merely because unrelated files are staged. Detect
-partially staged selected paths: show staged versus working content and refuse ambiguous
-same-path intent until the user resolves/reviews it; do not silently consume that staging.
-Phase 1 does not add a general staging editor or hunk selection.
-
-Bind preview to canonical repository/project identity, HEAD/ref, selected file bytes,
-relevant metadata and captured index state. Recheck at commit; stale HEAD/index/selected
-content requires a fresh review. Safe unrelated changes may remain untouched, but must
-not be included. Handle an unborn HEAD/first commit, no-op selection, additions, deletions,
-binary files, unusual filenames and concurrent external Git processes. Unsupported merge,
-rebase, unmerged index, detached/worktree/submodule/redirected configurations must be
-identified; support only proven cases, otherwise refuse with no modification.
-
-Before UI work, choose and prove the index strategy (for example an isolated temporary
-index plus guarded ref/index reconciliation). An example is not an approved algorithm.
-Document selected-path post-commit index semantics and recovery across object creation,
-HEAD publication and index reconciliation; these are not magically atomic together.
-Never overwrite an external index/HEAD to repair a partial result. Reopening must detect
-a published commit after a lost response and avoid duplicate checkpoints. Preserve
-ambiguous state with instructions; Git recovery is separate from editor journals.
-
-### No project-controlled command execution
-
-Use argument arrays, bounded subprocess/output, safe path handling and an allowlisted
-environment. Prove hooks, clean/smudge/process filters, external diff/text conversion,
-fsmonitor, signing helpers, pagers, config includes/redirects and attributes cannot run
-unexpected commands or redirect writes. Do not assume a local status/diff is inert.
-Unsupported transformations are refused, not silently bypassed with different bytes.
-No remote fetch/push, credential lookup or project-controlled executable invocation.
-Record the security/index decision in a focused ADR and tests before checkpoint writes.
-
-**V1 gate:** actual Git repositories on both targets prove exact commit-tree content,
-first commit, text/binary/deletion behaviour, identity handling, unrelated staged/worktree
-preservation, partially staged selected-path refusal, stale review rejection, hostile
-configuration non-execution, symlink/path substitution, external index/HEAD races and
-interruption at each publication boundary. A successful exit code alone is insufficient.
-If the contract cannot be proven, report `blocked` here; do not substitute blanket
-staged-index refusal or a UI that claims the safety foundation is complete.
-
-## 8. 1G.3b — Git UI and capability closure
-
-Add the supporting Git surface: unavailable/clean/changed states, separate staged and
-working changes, selection, inert bounded diff, binary summary, exclusions/dependency
-messages, identity/message entry and explicit checkpoint confirmation. Use the V1 review
-token; stale/busy/failure outcomes preserve user selection/message and require refresh
-where appropriate. Show resulting commit identity and exact included file list only after
-the verified result. Keep Git state independent of persistence/recovery indicators.
-
-**V2 gate:** real service plus UI and packaged tests demonstrate the reviewed set equals
-the actual commit, unrelated staging survives, stale confirmation is refused, missing
-Git/identity/no-repo are usable, drafts are truthful, cancellation/session replacement
-cannot commit to another project, and success-after-lost-response is recognised. Include
-keyboard/focus/resize and hostile output rendering. Then review G1/R1/R2/V1/V2 evidence
-on the final candidate; 1G remains unaccepted until its supported-target gate and user
-review are complete. [1H](phase-1h-vertical-slice-acceptance.md) needs separate selection.
+At the end of 1G.2b review G1/R1/R2 on the final candidate, including a small real-service
+packaged workflow and the final human session defined in TESTING. Keep implementation,
+automated proof and human acceptance separate. No checkpoint earlier in 1G requires
+routine user physical testing. 1G remains unaccepted until the supported-target final
+matrix and user review are complete. 1H remains separately selected integrated acceptance.
 
 ## 9. Verification and checkpoint handoff
 
@@ -331,6 +327,10 @@ and, from `app/`, `npm run check`, `npm run build`, `cargo fmt --check --all` an
 retain the repository's SDK/source regression commands where affected. Desktop/package
 commands and the existing supported-target workflow remain governed by
 [TESTING](../../TESTING.md). Do not invent a parallel CI controller or widen privileges.
+
+[Testing ownership and cadence](../../TESTING.md#phase-1g-testing-ownership-and-cadence)
+is authoritative for this revision: agent-run development/native evidence, one focused
+human session at the end of 1G, and no automatic duplicate physical pass in 1H.
 
 Name new scenarios and expected outcomes before implementation. Bound and independently
 report them with stage timings and reliable failure reports, including cleanup failures.
@@ -345,6 +345,12 @@ Update canonical UI/data/architecture/security/testing docs with implemented beh
 Merge/archive only after the relevant review and integration authorisation.
 
 ## 10. Planning coverage and review record
+
+The September 22 record below preserves original decisions. Git entries are superseded
+by the September 25 scope decision and now belong exclusively to optional Git. The
+old live-asset-read requirement is superseded by script-only editing and asset-mutation
+refusal in section 5. Old
+section numbers and V1/V2 references describe that historical plan, not current gates.
 
 | Agreed claim or review correction | Owning requirement / gate |
 | --- | --- |
@@ -387,3 +393,33 @@ CURRENT/HANDOVER, active 1F files, code/workflows and Phase 2 content preserved.
 The local repository validator passed for 208 files and staged whitespace checks passed.
 Git safety and runtime coordination remain unimplemented proof gates, not unresolved
 planning omissions. This review makes no native acceptance or merge claim.
+
+## 11. September 25 planning amendment
+
+**Authority:** user requested optional later Git, accepted the review fixes/testing and
+authorised documentation updates. **State:** documentation `review_ready`; every
+application checkpoint stays `not_started`.
+
+Reviewed main `f6c269278aa1d8955876ca45bac98a92940e1c5e`, remote branches/open PRs,
+AGENTS/WORKFLOW/status, 1G/1H/parent plans, canonical docs and relevant implementation.
+No matching active planning or implementation PR existed; the older planning branch is
+already integrated. A fresh isolated checkout owns this documentation checkpoint.
+
+Changes: GIT.1/GIT.2 are deferred; 1G retains three checkpoints; shared flow/operation
+preparation and diagnostics contracts are clarified; R1 front-loads editing-during-play
+proof; TESTING assigns automated/native/human ownership, real-service package coverage,
+final manual acceptance and bounded 1H reuse. Phase 2 implementation and accepted 1F
+results are unchanged. Historical Git/security requirements survive in optional Git.
+
+Validation/publication results are recorded in the single live HANDOVER; no application,
+SDK, package or physical test is claimed by a documentation check. Next action is review
+of this documentation PR; implementation requires separate checkpoint selection.
+
+### Script-only play clarification
+
+The user confirmed supported script editing/saving during play and excluded asset
+updates. Section 5 now requires Stop before asset mutations, with core refusal and
+race/history coverage; the former live-asset-read acceptance case is removed. Existing
+asset references can still be edited in scripts. No custom hot reload, runtime snapshot
+or new manual test session is introduced. This amends documentation PR #16 from
+`b9226360165fe2a8c22244f5e5812fe0a713bd5f`; implementation remains unstarted.
