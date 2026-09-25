@@ -592,3 +592,33 @@ Next eligible checkpoint after user selection: **1G.2a only**, the runtime/trust
 process foundation, following section 5 and TESTING. First verify agent-accessible
 Windows/macOS hosts for R1: missing host access is a blocked automated gate, not a
 request for user physical testing. Do not begin 1G.2b, optional Git or Phase 2.
+
+### Independent continuation review — 2026-09-25
+
+Authority: user requested a blocker review of 1G.1 and a next-checkpoint goal if clear.
+Reviewed PR #17 head `f925a3cde28fc3105b861b159ef75d7e1df513a9` against main
+`924619def6f624f336032c3ebc8499ccfcc662f0`, the accepted scope and testing cadence.
+Inspected all changed production code, retained test changes, evidence and continuation
+contracts in an isolated clean checkout. No other local worktree or published review
+thread/change request was present; cross-host ownership is not independently visible.
+
+No blocking finding was identified for progression to separately selected 1G.2a.
+The projection retains bounded, conservative missing/unknown semantics; graph navigation
+checks revisions and preserves existing Scene/Source write authority. The refined
+accepted-edit timing case now measures after an actual Scene transaction. Existing
+native evidence deferrals are allowed by the checkpoint contract, not newly waived gates.
+
+Independent checks: locked npm install, `npm run check` (typecheck plus 46 tests,
+zero failures/skips), repository validator (228 files) and whitespace passed on Linux
+with Node 24.19.0/npm 11.9.0. Current-head GitHub Repository quality
+[36124066077](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36124066077),
+attempt 1, succeeded on that exact head. Rust was unavailable in this review environment;
+core, SDK, browser performance and native results above were inspected, not independently
+rerun. No new process/native capability is certified by this review.
+
+This review publishes documentation only and does not merge, mark final G1/1G acceptance,
+dispatch CI, or start runtime work. Continue the same branch/PR for 1G.2a after user
+selection. Establish agent-run Windows/macOS R1 access first; retain a blocked automated
+gate if unavailable, with no request for user physical testing. Preserve 1F/1G.1 safeguards,
+scripts-only authoring during play, Stop before asset mutation and deliberate Stop/Run
+for the latest revision. Stop before 1G.2b, optional Git or Phase 2.

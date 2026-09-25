@@ -6,6 +6,7 @@
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
 **Current checkpoint:** Phase 1G.1 implemented/self-reviewed, `review_ready`, on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`; targeted Linux tests passed, final Windows/macOS evidence deferred. Not merged or finally accepted.
+**Continuation review:** head `f925a3cde28fc3105b861b159ef75d7e1df513a9` reviewed with no blocker to separately selected 1G.2a; independent frontend/validator checks and exact-head GitHub quality passed. Final target acceptance remains deferred; see ledger section 12.
 **Planning integration:** [PR #16](https://github.com/Caldwell-41/Renpy-editor/pull/16)
 merged at `5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`; merge tree exactly matches reviewed
 head `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`. Implementation continues on `feature/phase-1g-branches-runtime`.
