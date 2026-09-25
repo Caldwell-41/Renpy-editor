@@ -7,7 +7,8 @@
 **Current checkpoint:** 1G scope/testing documentation amendment `review_ready` on
 `docs/phase-1g-scope-testing`; Phase 1F remains closed and 1G.1 unstarted.
 **Scope decision:** new Git work is [optional/deferred](../tasks/active/optional-local-git.md),
-not a Phase 1/1H or Phase 2-entry requirement. 1G has three checkpoints. Agent-run
+not a Phase 1/1H or Phase 2-entry requirement. 1G has three checkpoints; editing during
+play is script-only, with Stop required before asset mutations. Agent-run
 build-phase checks precede one final human 1G session; 1H does not automatically repeat it.
 **Planning baseline:** main `f6c269278aa1d8955876ca45bac98a92940e1c5e`; no application changes.
 **Reviewed head:** `0075d98f80a680588b7eb3f49ab437c71b48a237`.

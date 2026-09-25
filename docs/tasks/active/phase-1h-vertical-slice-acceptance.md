@@ -53,7 +53,7 @@ user does not reproduce this matrix manually. Human interaction rows alone follo
 | H05 | Reorder/edit/history | Repeated undo/redo returns expected source, metadata, all projections and committed revisions; failed inverses/external boundaries do not overwrite newer bytes |
 | H06 | Compiled Scene lifecycle | Compile, then safely move/delete a disposable Scene; incoming/unknown-reference policy, inverse operations and close/reopen hold; no orphan `.rpyc` or duplicate-label execution |
 | H07 | Source and partial/external content | Supported edits synchronise Scene/Branches; opaque/incomplete/unmapped content stays exact; drafts, stale/partial state, safe Apply Both and refused overlap remain truthful; selection never guesses |
-| H08 | Diagnostics and play | Real compile/lint failures navigate safely; explicit trust and normal Run/Stop work; continued authoring retains input and shows truthful launch-revision/live-read status |
+| H08 | Diagnostics and play | Real compile/lint failures navigate safely; explicit trust and normal Run/Stop work; supported script editing/saving retains input and shows truthful launch-revision status; asset mutations require Stop |
 | H09 | Restart and metadata independence | Close/reopen and continue editing with valid selection and durable accepted content; a copy runs without `.renpy-editor/`; editor reconstruction without metadata remains out of scope |
 | H10 | Interrupted mixed transactions and recovery | Retain accepted and competing external bytes; inspect blocked state without executing project; explicitly resolve safe cases and continue; ambiguity remains blocked without deleting evidence |
 | H11 | Session and completion races | Failed switch preserves current project; old-session requests, delayed/reordered success/error, cancelled import and rapid navigation cause no wrong-session write, obsolete selection or false Saved state |
@@ -72,7 +72,7 @@ No general cross-SHA automated gate waiver is introduced.
 | Graph | Missing versus unknown targets with proven absence, incomplete/ambiguous label inventory, partial Choice, duplicate option text, self-loop, reconvergence, source navigation both directions, stale selection after deletion, declared size limit | H04, H07, H11, H12 |
 | Draft preparation | Source Save All, explicit existing Scene Commit, use saved revision with form/draft retained, Cancel, refusal starts zero processes, dirty Source remains Pending validation | H07, H08, H11 |
 | Trust | Untrusted open/preview/import/typing has zero SDK launch; reject stale grant after root/SDK or relevant executable change; revocation and copied-UUID rejection | H08, H11 |
-| Runtime | Play beyond smoke timeout, continued authoring and launch-revision status including later reads of changed assets, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
+| Runtime | Play beyond smoke timeout, script editing/saving and launch-revision status, asset mutation/inverse refusal with no writes and retry after Stop, launch-versus-import race, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
 | Diagnostics | Multiline SDK failures, Unicode/spaces/BOM/newlines, absent location, deleted/out-of-scope file, stale revision, inert output, bounds/truncation and empty parsed list after failure | H07, H08, H11 |
 
 Use deterministic fault injection and real process-termination tests where the owning

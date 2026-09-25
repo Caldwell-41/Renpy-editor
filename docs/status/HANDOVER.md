@@ -9,7 +9,9 @@
 **Authority:** September 25 user requested Git deferral, accepted the review/testing
 fixes and authorised documentation updates; no implementation or merge selected.
 **Planning baseline:** main `f6c269278aa1d8955876ca45bac98a92940e1c5e`.
-**Planning PR:** publication tracked by the branch; locate its matching PR, do not create a duplicate.
+**Planning PR:** [#16](https://github.com/Caldwell-41/Renpy-editor/pull/16), open/unmerged.
+**Reviewed planning candidate:** `b9226360165fe2a8c22244f5e5812fe0a713bd5f`; this
+follow-up narrows editing during play to scripts under the user's clarification.
 **Canonical detail:** [post-merge verification 7.30](../tasks/archive/2026-09-23-phase-1f-save-correction.md#730-post-merge-production-evidence-closeout)
 and [final decision 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
 
@@ -34,7 +36,11 @@ existing init regressions. Flow/draft/diagnostic boundaries and editing-during-p
 are concrete in the [1G brief](../tasks/active/phase-1g-branches-runtime-git.md).
 [TESTING](../TESTING.md#phase-1g-testing-ownership-and-cadence) owns agent-run tests,
 real-service package coverage, early R1 native automation, one final human 1G session,
-narrow 1H human-evidence reuse and honest workflow cost limits.
+narrow 1H human-evidence reuse and honest workflow cost limits. The subsequent user
+clarification permits script editing/saving during play only. Asset mutation requires
+Stop, enforced in core including imports/history/races. The earlier live-asset-read
+test is replaced by automated refusal/no-write and retry-after-Stop coverage; the
+physical testing schedule is unchanged. No hot-reload or snapshot subsystem is added.
 
 **Validation:** `python3 scripts/validate.py` passed for 224 repository files; staged
 `git diff --check` passed. Reviewed Phase 1/Git scope references, local Markdown anchors

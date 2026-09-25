@@ -507,10 +507,13 @@ required Git panel or checkpoint step to the Phase 1 authoring flow.
 Validate and Run use one input/revision preparation path: retain Source drafts and
 uncommitted Scene forms; explicitly save/commit through existing commands, use the
 saved revision with input retained, or cancel. Run does not add a hidden lint cycle.
-During play ordinary safe authoring continues; saving does not automatically restart
-or reload the game. Show launch revision separately from persistence/diagnostic state,
-including when later asset reads may see changed files. Stop then Run deliberately
-starts the latest saved revision. Conflicting file lifecycle/history operations offer
+During play supported script editing/saving continues; saving does not automatically
+restart or reload the game. Show launch revision separately from persistence/diagnostic
+state. Changing script references to existing assets is allowed; importing, replacing,
+moving/renaming or deleting asset files requires Stop first, including asset-changing
+undo/redo or compound operations. Existing asset browsing/preview stays available.
+Do not offer live asset refresh. Stop then Run deliberately starts the latest saved
+script revision; external file changes do not become a promise of isolated runtime input. Conflicting file lifecycle/history operations offer
 Stop and retry; do not lock the entire editor for the duration of play. The detailed
 [1G.2a proof](tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation)
 is required before claiming this behaviour works.

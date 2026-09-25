@@ -181,7 +181,8 @@ including cancellation and failure from each relevant intermediate state.
 | Duplicate Run/Validate | One owned SDK operation at a time; explicit busy result, no duplicate spawn |
 | Preparation | Drain/flush/recheck under a short coordination lease; never hold lifecycle mutex through child lifetime |
 | Validation | Temporarily block writes that invalidate the validation manifest; bounded timeout/cancellation; external change marks results stale |
-| Running game | Allow ordinary authoring; display launch revision and Started from an earlier revision after relevant edits |
+| Running game | Allow supported script editing/saving; display launch revision and Started from an earlier revision after script edits |
+| Asset mutation | Import/replace/move/rename/delete assets only after Stop; refuse mixed commands and history inverses that mutate assets while running |
 | Runtime reload | Verify and control SDK automatic reload so editing does not silently execute a new revision under the old Run action |
 | Move/delete/undo | Reject only operations conflicting with live source/compiled-file ownership, including relevant history inverses; show Stop action |
 | Switch/close/exit | Offer Stop and continue / Cancel; finish child cleanup before invalidating session; then honour existing draft leave flow |
@@ -196,11 +197,24 @@ operations may offer Stop and retry; do not impose a whole-session editor lock a
 unannounced scope reduction. If safe continued authoring or reload control cannot be
 proven, stop with a specific design finding for user review.
 
-Launch provenance is not a promise that every later runtime read uses those same bytes.
-The live game can load an updated asset or other file after an editor/external change.
-Explain that distinction when changes occur; do not present the runtime as an immutable
-copy or proof of the newly edited revision. Route acceptance uses a controlled unchanged
-fixture, while a separate live-read test verifies truthful status during authoring.
+**Script-only editing during play (user clarification, 2026-09-25):** use Ren'Py's
+existing loaded-script/reload behaviour; do not implement live asset updates. Supported
+Scene/Source edits and their required metadata writes may continue, including changing
+script references to assets already present. Media import, replacement, move/rename,
+deletion and any compound command/history inverse that changes asset files or inventory
+require Stop first. Browsing/previewing existing assets remains available.
+
+Enforce that boundary in the core mutation path, not only disabled UI controls. Drain
+in-flight asset mutations before launch and recheck runtime ownership before mutation;
+a queued import or undo must not race the start of play. Refusal leaves files/history
+unchanged and offers Stop and retry. Retain existing source/compiled-file lifecycle
+restrictions as well; script-only scope does not authorise unsafe Scene move/delete.
+
+Launch provenance is not a filesystem snapshot. External tools or project Python can
+still change files; ordinary external-change/trust safeguards and truthful status remain,
+without promising isolation or supporting live asset refresh. Route acceptance uses
+unchanged assets. Replace the earlier planned asset live-read case with an automated
+asset-mutation refusal/no-write case and successful retry after Stop.
 
 Cover environment/argument safety, root/SDK revalidation, spawn/cleanup races, bounded
 reader shutdown even when descendants retain pipes, cancellation during preparation,
@@ -215,8 +229,8 @@ material runtime decisions, explicitly distinguishing validation deadlines from 
 
 **R1 gate:** production-service tests plus supported-target child-process evidence prove
 zero spawn on refusal/cancel, correct revision preparation, trust revocation/replacement,
-SDK mismatch, duplicate actions, long-running game, authoring/reload behaviour, move/delete
-and inverse blocking, natural exit/crash, cancellation/Stop/output flood and lifecycle
+SDK mismatch, duplicate actions, long-running game, script editing/reload behaviour,
+asset-mutation refusal/retry, launch-versus-import race, move/delete and inverse blocking, natural exit/crash, cancellation/Stop/output flood and lifecycle
 races. Test actual process-tree cleanup on both targets, not only a fake process port.
 
 ### Editing during play: bounded proof before UI completion
@@ -237,11 +251,13 @@ and prove a narrow end-to-end slice using the pinned SDK before broad runtime wi
    the policy for runtime reload shortcuts. Record observed behaviour; no hypothetical
    launch flag counts as proof. Stop then Run is the Phase 1 way to deliberately run
    the latest saved revision. No live state migration or Run From Here is required.
-5. Separately change a synthetic asset and demonstrate truthful reporting if the live
-   game reads it later. Launch provenance is not an immutable copy. The UI must not
-   claim every file read comes from the original launch revision.
+5. Attempt an asset mutation during play and assert refusal with no file/history change;
+   then Stop and retry successfully. Include an asset-changing compound command/history
+   inverse and the launch-versus-import race in automated coverage. Do not build or test
+   successful live asset refresh. Existing-asset selection that edits only script
+   references remains allowed under the ordinary script-edit contract.
 6. Prove targeted refusals for move/delete and history inverses that conflict with
-   runtime file ownership; offer Stop and retry. Ordinary safe edits remain available.
+   runtime file ownership; offer Stop and retry. Supported script edits remain available.
    Publish the compatibility table before expanding beyond this slice.
 7. Test natural exit, Stop, crash, app shutdown and project switch/cancel, including
    descendants retaining pipes. Cleanup has bounded deadlines and releases ownership;
@@ -250,7 +266,7 @@ and prove a narrow end-to-end slice using the pinned SDK before broad runtime wi
 Agent-run Windows/macOS process evidence is required at R1. No user physical testing
 is requested here. Missing host access leaves R1 blocked; it is not substituted with
 browser-only evidence or passed on to the user. A failure to control reload or allow
-safe ordinary edits is a specific design finding for review, not permission to freeze
+safe supported script edits is a specific design finding for review, not permission to freeze
 the whole editor or quietly introduce project snapshots.
 
 ## 6. 1G.2b — Runtime UI and navigable diagnostics
@@ -286,7 +302,7 @@ columns, paths containing spaces, deleted files and unparseable diagnostics.
 **R2 gate:** real SDK compile and lint failures navigate correctly; trusted normal play
 runs both authored routes to asserted dialogue/state/assets; Stop works after a session
 longer than the smoke limit. Verify saved-revision versus draft choices, refused Save All,
-runtime authoring/staleness, runtime errors, static/SDK separation, output bounds and
+script editing/staleness and asset-mutation refusal, runtime errors, static/SDK separation, output bounds and
 keyboard/focus/resize in actual Windows/macOS packages. DOM/browser tests supplement
 native evidence and cannot replace it.
 
@@ -331,7 +347,9 @@ Merge/archive only after the relevant review and integration authorisation.
 ## 10. Planning coverage and review record
 
 The September 22 record below preserves original decisions. Git entries are superseded
-by the September 25 scope decision and now belong exclusively to optional Git. Old
+by the September 25 scope decision and now belong exclusively to optional Git. The
+old live-asset-read requirement is superseded by script-only editing and asset-mutation
+refusal in section 5. Old
 section numbers and V1/V2 references describe that historical plan, not current gates.
 
 | Agreed claim or review correction | Owning requirement / gate |
@@ -396,3 +414,12 @@ results are unchanged. Historical Git/security requirements survive in optional 
 Validation/publication results are recorded in the single live HANDOVER; no application,
 SDK, package or physical test is claimed by a documentation check. Next action is review
 of this documentation PR; implementation requires separate checkpoint selection.
+
+### Script-only play clarification
+
+The user confirmed supported script editing/saving during play and excluded asset
+updates. Section 5 now requires Stop before asset mutations, with core refusal and
+race/history coverage; the former live-asset-read acceptance case is removed. Existing
+asset references can still be edited in scripts. No custom hot reload, runtime snapshot
+or new manual test session is introduced. This amends documentation PR #16 from
+`b9226360165fe2a8c22244f5e5812fe0a713bd5f`; implementation remains unstarted.

@@ -423,7 +423,7 @@ It changes scheduling and evidence ownership, not correctness or platform requir
 | --- | --- | --- |
 | Every changed checkpoint | Implementing agent: targeted core, renderer, literal IPC and relevant existing regressions | Assert changed contracts cheaply; no user physical testing |
 | 1G.1 / G1 | Agent: real shared flow service plus rendered UI, limits and navigation tests | Production source/Scene edges and draft retention, not test-only edges; actual target WebView checks by final 1G closure |
-| 1G.2a / R1 | Agent: real pinned SDK and child-process integration on both supported OSes | Early reload/editing/Stop/cleanup proof before 1G.2b; a mock process is insufficient; no user physical testing |
+| 1G.2a / R1 | Agent: real pinned SDK and child-process integration on both supported OSes | Early script-edit/reload/Stop/cleanup and asset-refusal/race proof before 1G.2b; a mock process is insufficient; no user physical testing |
 | 1G.2b / R2 and final 1G | Agent: real-service packaged workflow on both targets, complete final supported-target gate | Visible controls through actual IPC/service/disk/reopen; real SDK failures, both authored routes and normal Run/Stop |
 | Final 1G interaction acceptance | User: one prepared focused session per supported OS | Genuine native keyboard, focus/usability and visual review described below; agent prepares fixtures/instructions and collates results |
 | 1H / H01-H12 | Agent: integrated automation and rendered-output review on final candidate | Reuse applicable final-1G human evidence; request only a specific uncovered or changed interaction |
@@ -460,11 +460,13 @@ Prepare one reproducible project and short expected-result checklist, aiming for
 
 1. Navigate Scene/Source/Branches and change a mapped destination; check native keyboard
    operation, focus restoration and preservation of pending input.
-2. Run the authored routes; edit/save during play, observe earlier-launch status, Stop
+2. Run the authored routes; edit/save scripts during play, observe earlier-launch status, Stop
    and rerun the latest saved work. The automated route oracle owns exhaustive outcomes.
 3. Trigger one known SDK diagnostic and navigate to its current source safely.
 4. Check ordinary resize/display scaling, relevant shortcuts, close/reopen and usability.
 
+Asset mutation refusal, no-write/history assertions, launch-versus-import races and
+retry after Stop are agent-run automated cases; live asset refresh is excluded.
 No Git checkpoint case, crash injection, hostile configuration, exhaustive edge/race
 matrix or repeat of the accepted 1F manual suite is assigned to the user. Automated
 1F regressions remain. A changed Save/native-input path may justify a focused repeat;

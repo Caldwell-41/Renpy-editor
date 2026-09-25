@@ -367,8 +367,10 @@ September 25 planning amendment, not implemented behaviour: 1G extends existing 
 Source, transaction and SDK services. One short operation-preparation lease captures
 input/revisions and reuses existing explicit acceptance commands. A core-owned runtime
 supervisor then owns process identity/output/cancellation without holding the lifecycle
-mutex for the child's lifetime. Ordinary safe authoring continues; targeted file/history
-conflicts require Stop. Prove pinned-SDK reload control and process-tree cleanup on both
+mutex for the child's lifetime. Supported script editing/saving continues; asset file
+or inventory mutations (including imports, compound commands and history inverses) and
+targeted source/compiled-file conflicts require Stop. Core ownership checks prevent
+launch-versus-mutation races. No custom asset hot reload or runtime snapshot is planned. Prove pinned-SDK reload control and process-tree cleanup on both
 platforms before runtime UI closure. Launch provenance does not guarantee immutable
 later file reads. Material implementation decisions still require the owning runtime ADR.
 
