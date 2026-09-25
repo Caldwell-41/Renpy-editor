@@ -1,13 +1,13 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `in_progress`; 1G.2a/1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a/1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
-Implementation still requires selection of one checkpoint.
+The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
-`f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on main.
+`f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. No application work or production dispatch is authorised by this update.
+checkpoint. The current execution selection authorises 1G.1 only, without production dispatch.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -40,7 +40,7 @@ performance evidence, not a production renderer or layout acceptance.
 
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
-| 1G.1 | Shared flow projection and Branches | `in_progress` | Integrated 1F and explicit selection |
+| 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `not_started` | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
@@ -473,3 +473,122 @@ the existing transaction inventory traversal bound. Incomplete inventory never p
 absence. Initial projection/layout target 2 s; accepted update target 250 ms;
 input/pan p95 target 100 ms. Measurements will name fixture/host/layer; Linux results
 cannot certify either supported target. Graph layout is session-only convenience.
+
+### Implemented checkpoint and bounded review
+
+**State:** `review_ready`, implementation and targeted development checks complete;
+not merged, not user-accepted and not final cross-platform G1/1G acceptance.
+**Branch/PR:** `feature/phase-1g-branches-runtime`, [draft PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+**Application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`.
+**Verified application tree:** `7828cc1fd1739e741b5cb40f272b2ff81c86efa7`.
+The local tested implementation commit was `01c9f1a`; connector publication produced
+an exactly equal tree with the remote ownership commit as parent. This closeout adds
+only test-evidence refinement and documentation; production code remains that candidate.
+
+Implemented the core `scene::flow` projection and narrow `flow.list` session-checked
+IPC; shared lexical boundaries/canonical choice recognition; proven entry from accepted
+`start`; revision/range/Beat identity; resolved/missing/unmapped/dynamic/terminal states;
+partial choices retaining proven later routes; bounded inventory and graph limits.
+Branches provides directed deterministic layout, Scene/route selection, pointer and
+keyboard pan, zoom/fit, Source/origin/destination navigation and existing Scene editing.
+No independent edge persistence, new Save owner, source exporter or renderer privilege
+was introduced. Layout is view-local. Source drafts/carets and uncommitted Scene form
+guards remain authoritative. Old-session completions are disposed; observations and
+navigation recheck current flow. Unchanged refresh retains focus; ambiguity clears selection.
+
+Self-review findings fixed within 1G.1:
+
+- Mixed menus previously stopped exposing routes at unmapped destinations. The shared
+  read-only projection now retains later proven routes and labels the incomplete boundary.
+- Duplicate captions need range/revision-qualified option identities, not text keys.
+- Incomplete, malformed, tabbed/multiline or duplicate-label inventories cannot prove
+  absence/uniqueness. Lexical scanning excludes labels inside multiline strings.
+- Project entry cannot be inferred from metadata after runnable `start` changes.
+- Accepted byte offsets cannot select a range in retained dirty/stale Source text.
+- Inventory/reads need finite entry/byte limits, including empty directories and oversized
+  source. Added bounded variants retaining existing transaction caller behavior. The
+  graph also caps enumeration at 8,192 entries (existing depth/file limits still apply).
+- Async navigation must not update status after disposal. Periodic unchanged observations
+  must not destroy focus. Failed inventory/refresh retains a labelled stale last view.
+- Rendered edges need visible direction and routes that do not visually imply traversal
+  through intervening alphabetical nodes. Arrowed arcs and selected-route styling added.
+- Timing a warm reread alone is not accepted-edit refresh evidence. The retained budget
+  test now commits a Choice caption through the actual Scene command before timing refresh.
+
+No unresolved blocking finding remains in the targeted implementation self-review.
+Conservative unknown-flow handling and basic grid layout are deliberate Phase 1 limits,
+not claims of complete Ren'Py analysis or mature layout. Original 1F/F4/native acceptance
+is preserved; its automated regressions were rerun without reopening physical tests.
+
+### Executed evidence and provenance
+
+Owner: implementing agent. Host: Linux 6.18.44 x86-64, Ubuntu 24.04, AMD EPYC 9V74
+(9 exposed CPUs). Node 24.19.0 / npm 11.9.0; Rust 1.90.0 + rustfmt; locked dependencies.
+Commands run from `app/` unless marked repository root. No SDK archive was supplied.
+
+| Evidence | Actual result |
+| --- | --- |
+| `npm ci --ignore-scripts` | PASS; locked install, no manifest/lockfile changes |
+| `npm run check` | PASS; typecheck and 46 frontend/DOM tests, zero failures/skips |
+| `CARGO_INCREMENTAL=0 cargo test -p loomlight-core --locked` | PASS; Cargo reports 161 passed / 4 ignored / zero failures. Two of the 161 are official-SDK environment-gated wrappers which returned without running their SDK cases; thus 159 substantive ordinary tests, not 161 SDK-capable passes. Four ignored workers are subprocess helpers, not extra passes |
+| `cargo test --release -p loomlight-core --locked flow -- --nocapture` (incremental disabled) | PASS; 8 targeted flow/service/literal-IPC cases, zero failures/ignores; 157 unrelated cases filtered |
+| Refined `cargo test --release -p loomlight-core --locked flow_budget_fixture -- --nocapture` | PASS; one changed timing test, 164 filtered. Real accepted Scene edit confirmed before refresh measurement |
+| `npm run test:source-browser` | PASS; production build, expected legacy red demonstration, faithful Source Save green, settled-selection Apply Both green |
+| `node tests/branches.browser.mjs` | PASS; actual service-produced 500/2,000 graph, distinct routes, origin editing navigation, synthetic keyboard pan/zoom/fit, 640px no horizontal page overflow, zero browser errors |
+| Rendered output inspection | PASS in Linux Chromium at 1280x800 plus automated 640px resize; quiet tokens, visible focus/selection, directed routes and responsive controls. Small subview used only for visual inspection after full-scale checks |
+| `cargo fmt --check --all`, root `python3 scripts/validate.py`, `git diff --check` | PASS; repository validator checks 228 files including links/privacy/secrets |
+| GitHub repository quality | PASS for application candidate: [36123522202](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36123522202), run 395. A follow-up docs/test-head run is separate, not inferred passed |
+
+The browser was Chromium 138.0.7204.0 from an isolated `@sparticuz/chromium` 138.0.2
+installation, driven by the locked Playwright. The normal Playwright browser download
+failed with an invalid/truncated archive; the explicit executable override was used
+and recorded rather than claiming the expected bundled browser. No runtime dependency
+or lock was changed. This is real browser rendering with synthetic keyboard events,
+not packaged IPC, supported-target WebViews or native OS input.
+
+The unchanged full-size workload is generated by `flow_budget_fixture_500_scenes_2000_edges`:
+500 canonical Scene files, four unconditional options each, self-loops/cycles and a
+canonical `start` trampoline. Browser input is that real-service JSON via temporary
+`LOOMLIGHT_FLOW_EVIDENCE`, not hand-authored test-only edges. For the accepted-update
+measurement, one Choice caption changes through the production Scene transaction while
+Scene/edge count and topology remain unchanged. Performance observations (not statistically
+representative platform certification):
+
+| Measurement | Observed | Declared budget |
+| --- | --- | --- |
+| Core initial, optimized | 113.55 ms | 2 s initial build/layout |
+| Core warm unchanged refresh, optimized | 110.76 ms | reported separately |
+| Core refresh after accepted Scene edit, optimized | 113.30 ms | 250 ms |
+| Chromium initial layout through two animation frames | 54.70 ms | 2 s initial build/layout |
+| Chromium synthetic pan through next frame, p95 of 30 samples | 17.50 ms | 100 ms |
+
+Initial debug observations were 276.15 ms initial / 256.57 ms unchanged refresh; these
+are retained, not relabelled optimized passes. Production-profile measurement resolved
+the local budget concern without changing a limit. An intermediate debug compile failed
+with undefined hidden linker symbols; a nonincremental build passed the full suite.
+Later the isolated compiler itself returned SIGBUS on `rustc -vV`; reinstalling its
+pinned rustc component restored it, and the refined accepted-update test then passed.
+These are retained execution failures, not successful tests or a proven application defect.
+The DOM harness initially needed explicit aria-label attributes and the protocol allowlist
+expectation updated; both now pass. A shell test fixture initially changed text it had
+already replaced; its pending-input setup was corrected and the retained test passed.
+
+### Deferred evidence, publication and next action
+
+DEFERRED to final 1G: actual Windows x64/macOS ARM64 packaged WebView graph edit → disk
+→ reopen, target rendering/focus/keyboard/resize and the stated graph performance
+measurements. The two SDK gates are SKIPPED here, not target evidence. Full package
+matrix, new runtime process proof and user physical testing were NOT RUN at 1G.1.
+No final G1/1G native acceptance or supported-target latency pass is claimed from Linux.
+
+Publication uses the GitHub connector because this checkout has authenticated reads
+but no Git push credentials. Published application tree was compared exactly with the
+locally tested tree; commit author and committer use the account's noreply identity.
+Local evidence commits remain preserved. No force push, reset, merge, branch deletion,
+workflow change, package dispatch, optional Git or Phase 2 work occurred. Main stays
+at the inspected baseline; PR #17 is retained across the 1G checkpoints.
+
+Next eligible checkpoint after user selection: **1G.2a only**, the runtime/trust/revision/
+process foundation, following section 5 and TESTING. First verify agent-accessible
+Windows/macOS hosts for R1: missing host access is a blocked automated gate, not a
+request for user physical testing. Do not begin 1G.2b, optional Git or Phase 2.

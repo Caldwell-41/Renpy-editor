@@ -4576,7 +4576,37 @@ mod tests {
             .unwrap();
         let update = start.elapsed();
         assert_eq!(graph.revision, again.revision);
-        println!("G1 budget fixture (real service; profile recorded by caller): initial={initial:?}; update={update:?}; 500 Scenes / 2000 edges");
+        let workspace = fixture.workspace();
+        let origin = &workspace.scenes[0];
+        let BeatPayload::Choice { mut options } = origin.beats[0].payload.clone() else {
+            panic!("choice fixture");
+        };
+        options[0].text = "Route A".into();
+        fixture
+            .apply(
+                &workspace,
+                SceneCommand::UpdateBeat {
+                    scene_id: origin.id.clone(),
+                    expected_source_revision: origin.source_revision.clone(),
+                    beat_id: origin.beats[0].id.clone(),
+                    beat: BeatPayload::Choice { options },
+                },
+            )
+            .unwrap();
+        let start = std::time::Instant::now();
+        let changed = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let accepted_update = start.elapsed();
+        assert_ne!(graph.revision, changed.revision);
+        assert_eq!(changed.edges.len(), 2000);
+        assert!(changed.edges.iter().any(|edge| edge.text == "Route A"));
+        loaded = fixture
+            .service
+            .load(&fixture.project, &fixture.project_id)
+            .unwrap();
+        println!("G1 budget fixture (real service; profile recorded by caller): initial={initial:?}; warm_refresh={update:?}; accepted_update={accepted_update:?}; 500 Scenes / 2000 edges");
         if let Ok(path) = std::env::var("LOOMLIGHT_FLOW_EVIDENCE") {
             fs::write(path, serde_json::to_vec(&graph).unwrap()).unwrap();
         }

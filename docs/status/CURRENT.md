@@ -1,10 +1,11 @@
 # Current status
 
-**Updated:** 2026-09-25 (1G.1 implementation started).
+**Updated:** 2026-09-25 (1G.1 targeted checkpoint complete).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.1 `in_progress` on `feature/phase-1g-branches-runtime`; explicitly selected by the user.
+**Current checkpoint:** Phase 1G.1 implemented/self-reviewed, `review_ready`, on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+**Application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`; targeted Linux tests passed, final Windows/macOS evidence deferred. Not merged or finally accepted.
 **Planning integration:** [PR #16](https://github.com/Caldwell-41/Renpy-editor/pull/16)
 merged at `5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`; merge tree exactly matches reviewed
 head `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`. Implementation continues on `feature/phase-1g-branches-runtime`.
@@ -31,8 +32,10 @@ PASS; the six original native Save passes remain PASS on #87 without repetition.
 Native local installer hashes/exact OS builds were not supplied; reports retain their
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-**Next eligible application checkpoint:** [Phase 1G.1](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches),
-shared flow projection and Branches, selected by the user. 1G.1 is selected and in progress; later 1G/1H checkpoints remain `not_started`. Phase 2 planning is preserved. No automatic progression into implementation.
+**Next eligible application checkpoint:** [Phase 1G.2a](../tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation), runtime/trust/revision/process foundation,
+after explicit user selection. 1G.2a/1G.2b and 1H remain `not_started`; Phase 2 planning
+is preserved. No automatic progression. The [1G.1 ledger](../tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
+records exact scope, candidate, targeted results, observed limits and deferred native evidence.
 
 Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
 passed. The automatic post-merge production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),
