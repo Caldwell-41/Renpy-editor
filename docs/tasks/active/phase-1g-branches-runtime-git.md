@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (R1-B1/B2 resolved; replacement native evidence verified); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `blocked` (independent review reopened R1-B1 for renderer cancellation; R1-B2 resolved); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (replacement native evidence verified) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `blocked` (renderer cancellation finding; native evidence preserved) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1419,3 +1419,103 @@ branch, verify remote head/tree and exact handover/PR contents, and retain draft
 status. Follow AGENTS/WORKFLOW for any still-running automatic documentation quality
 check; do not model-poll. The next bounded action is independent review of 1G.2a only,
 with acceptance a separate decision. No merge, 1G.2b, optional Git or Phase 2.
+
+
+### Independent 1G.2a review — 2026-09-26
+
+**Decision: R1 is not closed; R1-B1 reopened, R1-B2 closure supported. 1G.2a
+`blocked`, not accepted.** The user selected review of Phase 1G.2a only in
+`Caldwell-41/Renpy-editor`, branch `feature/phase-1g-branches-runtime`, with AGENTS
+and HANDOVER at `b1e15b8`, explicitly excluding physical testing, merge and 1G.2b.
+This review changes documentation only; it does not implement the finding.
+
+Fresh fetched branch and PR #17 metadata agreed on
+`b1e15b8d39976196addf3398d2c3f27c8e388b57`, open/draft, base
+`924619def6f624f336032c3ebc8499ccfcc662f0`. The reviewed application remains
+`07f23b61d46511848d2b09db57ba1d5a696cabe0`, tree
+`614931107db78f61c5b864a099ca2737ab546bd8`; subsequent commits change only docs.
+The existing local Phase 1F checkout was preserved; review used an isolated checkout.
+
+#### R1-B1 remaining finding — P2: cancel a completed ticket through its receipt
+
+At the reviewed candidate, `app/src/runtime-preparation.ts:57-60` receives a
+completed preparation from `awaitRuntimeRequest`, then checks for cancellation.
+If AbortSignal fires while the status response is in flight, that helper returns
+the successful result before checking the signal (`:70-76`). The outer helper
+then sends `runtime.cancelPreparation`, although it still has the request receipt.
+
+The Source lease and authoring coordinator have already been released. An ordinary
+Source inventory or draft-retention request can therefore hold the service at this
+point. `ApplicationHost::dispatch` routes `cancelPreparation` through
+`with_service` (`dispatch.rs:310-311`); checkout failure returns `RUNTIME_BUSY`
+before calling the lifecycle cancellation method. There is no deferred cleanup,
+retry or returned preparation handle from the rejected helper. The preparation and
+execution reservation remain, so later preparation, writes and project close/switch
+can remain blocked even after the competing request returns. No process need spawn.
+
+The final core fix in `07f23b6` already supports this exact contention through
+`runtime.cancelRequest` (`dispatch.rs:160-185`), including deferred cleanup when the
+service owner returns. The frontend completion branch bypasses that fix. Keep the
+receipt for cancellation after completion and exercise this race through the real
+helper plus the held-service control path. Preserve draft retention and session/token
+isolation; do not broaden the runtime UI scope.
+
+**Deterministic local observation:** compiled the unchanged candidate with
+`npm run check`, then invoked the actual exported `prepareRuntimeInput` with its
+injected request port. The port returned a completed successful status while aborting
+the signal and modeled a competing service checkout by rejecting `cancelPreparation`
+with `RUNTIME_BUSY`; its `cancelRequest` route was available. The helper rejected with
+`RUNTIME_BUSY` and never called `cancelRequest`. Observed sequence:
+
+```text
+source.list -> runtime.prepare -> runtime.requestStatus -> runtime.cancelPreparation
+```
+
+The injected-port probe demonstrates actual renderer control flow; it is not claimed
+as a new native IPC/process test. Reservation retention follows from the inspected
+production checkout/refusal path. The existing native completed-receipt test calls
+`cancelRequest` directly and passes; the existing frontend cancellation test returns
+`pending: true` before cancellation and does not exercise a completed first response.
+Those successful tests therefore do not close this remaining case.
+
+#### Evidence accepted and limits
+
+Independently inspected both complete job logs and downloaded both six-file artifacts
+for `36144974132`, attempt 1. Logged checkout, report candidate/run/attempt and GitHub
+artifact metadata agree on `07f23b6`. All **60 input hashes per target** match the
+reviewed tree. ZIP sizes, SHA-256 and CRC independently match the preceding closeout:
+Windows 8,780 bytes / `afb30ebbb2fce4695af4487514936923ddd85e6d465f4da1c79c8f0e9ca13bdb`;
+macOS 8,211 bytes / `058690b8982fc8126c3bce8ca33c92c34829251fd3be1d08ed0ed713f4bf50b0`.
+Both target reports and required job steps passed. Cached SDK download was skipped;
+archive verification and the explicit SDK test ran successfully.
+
+| Gate | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Runtime-filter core | 17 passed, 2 ignored | 18 passed, 2 ignored |
+| Explicit official SDK/service | 1 passed, 0 ignored | 1 passed, 0 ignored |
+| Frontend | 49 passed, 0 skipped | 49 passed, 0 skipped |
+| Source browser/build; format | PASS | PASS |
+| Desktop compile/smoke-report test | 1 passed | 1 passed |
+
+R1-B2 closure is supported by the inspected production lifecycle/process code and
+assertions for actual service switch refusal/Stop/retry, service shutdown/Drop,
+starting/validation cancellation, descendants with inherited and closed output,
+PID liveness, and real Scene history/file-lifecycle refusal/no-write/Stop/retry.
+Failed-cleanup confirmation remains an injection after real tree cleanup; it proves
+reservation retention, not an observed OS termination failure. No further blocking
+finding was identified in this bounded review.
+
+Local `npm run check` passed typecheck and **49 tests, 0 failed/skipped** on Node
+26.8.1/npm 11.19.0; these differ from the pinned native toolchain and do not replace
+its evidence. Local Rust was unavailable and was not installed or rerun. No SDK,
+package, native keyboard or physical test was repeated. The runtime helper probe above
+is additional review evidence, not part of the 49-test count. Repository documentation
+validation passed for 243 files in this isolated checkout; `git diff --check` passed.
+
+Preserve all historical successful, failed and superseded runs with their actual
+provenance. No native operation is outstanding and no run was dispatched/retried.
+Publish this documentation review non-forced on the existing branch; keep PR #17
+draft/open. Next bounded action, if separately selected: correct only this R1-B1
+renderer cancellation case, add completion/abort/held-owner regression coverage and
+validate the changed candidate under existing R1 policy. Do not merge, request physical
+testing, or begin 1G.2b, optional Git or Phase 2. Review is not user acceptance.

@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: corrected foundation; replacement native R1 evidence verified, review-ready (2026-09-26).
+Status: corrected foundation; replacement native evidence verified, R1 blocked by renderer cancellation review finding (2026-09-26).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -95,6 +95,10 @@ R1-B1/B2 implementation and automated cases are in the
 [1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
 Replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on Windows x64
 and macOS ARM64; its logs, artifact integrity and all 60 recorded input hashes per
-target were checked. R1-B1/B2 are resolved and the foundation is review-ready, not
-user-accepted. Existing native successes remain evidence on their original inputs.
-See the ledger closeout for exact provenance, counts and limits.
+target were checked. Independent review subsequently reopened R1-B1: the renderer's
+post-completion cancellation uses service-bound `cancelPreparation` instead of the
+receipt's independent `cancelRequest`, so a competing checkout can refuse cleanup.
+R1-B2 remains resolved; the foundation is blocked, not user-accepted. The receipt
+contract above remains the intended behavior. Existing native successes remain evidence
+on their original inputs. See the ledger's independent review for the bounded finding
+and the preceding closeout for exact provenance, counts and limits.
