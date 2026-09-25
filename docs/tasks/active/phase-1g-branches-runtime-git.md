@@ -1856,3 +1856,27 @@ Save All and deliberate saved-revision play. Local compile/lint/runtime-error pa
 remain development evidence; final CI reruns all five cases on the coherent inputs.
 Frontend final: **58 passed, 0 failed/cancelled/skipped**. No local test process remains.
 The final production matrix and G1/R1/R2 assessment remain required before review_ready.
+
+### Published candidate and awaiting-CI handoff
+
+Application commit **`931684dd59ce319bd98f0028df98a3023ced7740`**, tree
+**`b6432353974e8a7f8818a8e8f91fadca1b29ccb9`**, was published non-forced on the existing
+branch. Remote head and draft/open PR #17 matched before dispatch. Exactly one final
+[production run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
+**attempt 1**, was dispatched on that candidate with package upload requested. Created
+`2026-09-25T21:56:19Z`; initial inspection reports **in_progress**, no conclusion.
+This subsequent handover update is documentation-only and does not need a package run.
+
+State remains **in_progress / awaiting CI, manual resume**, not review_ready or accepted.
+No supported-target pass is inferred from dispatch. AGENTS/WORKFLOW require stopping
+active polling until a new bounded task resumes; no automatic continuation is qualified
+on this host and none is claimed. No duplicate run, retry, physical testing, acceptance,
+merge, optional Git or Phase 2 was performed. Final input report covers **93 tracked
+application/workflow files** per target; verify every hash, candidate/tree, toolchain,
+executable and all actual scenario reports, job logs and artifact digests/CRC as specified
+in HANDOVER. Preserve earlier R1/G1 evidence on its own candidates and separately assess
+G1/R1/R2 on this final candidate. Failure/skipped/unavailable evidence is not a pass.
+
+Next bounded action: inspect that run/attempt and complete its artifact/source assessment;
+resolve only evidenced 1G.2b findings if necessary, publish the final checkpoint record,
+and stop again before physical testing, acceptance or merge. No next checkpoint begins.

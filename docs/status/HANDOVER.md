@@ -5,8 +5,13 @@
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Entry:** `78f051e382b048f1e8ee73f5add7a8072608e474`.
 **Verified main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
-**Application candidate:** the coherent implementation commit containing this entry;
-the following publication record will identify its full SHA/tree and final matrix run.
+**Application candidate:** `931684dd59ce319bd98f0028df98a3023ced7740`.
+**Candidate tree:** `b6432353974e8a7f8818a8e8f91fadca1b29ccb9`.
+**Final production run:** [36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
+**attempt 1**, manually dispatched once with package upload requested; exact head SHA
+matches the candidate. Created `2026-09-25T21:56:19Z`; initial inspection: **in_progress**,
+no conclusion. **Awaiting CI / manual resume.** No automatic watcher is claimed.
+This publication update changes documentation only after the application candidate.
 
 ## Authority and implemented behavior
 
@@ -34,11 +39,28 @@ use the actual WebView, visible controls, real IPC/service and pinned SDK; their
 DOM events are not native keyboard or human acceptance evidence. Do not substitute
 browser mocks or official-SDK wrapper skip markers for a required gate.
 
-Publish this implementation non-forced on the existing branch, then dispatch the existing
-`production-scaffold.yml` once at that exact application candidate. Record its
-run/attempt/SHA in this handover and ledger. AGENTS/WORKFLOW require a manual-resume
-handoff if CI is pending; no repeated model polling or duplicate dispatch. Retain failed
-and superseded evidence. Keep PR #17 draft/open. No acceptance, physical test or merge.
+The application candidate was committed and pushed non-forced on the existing branch;
+remote head and PR #17's matching SHA/draft/open state were verified before dispatch.
+No duplicate matrix or R1-only run was launched. The combined production workflow owns
+final full core, explicit SDK/R1/R2, actual package cases and legacy boundary smoke.
+The older R1 branch trigger is now manual-only to avoid duplicate expensive runs.
+
+**Next action:** inspect this exact run/attempt, complete job logs and both
+`phase-1-production-evidence-*` artifacts, plus requested package artifacts. Verify ZIP
+size/digest/CRC and each `runtime-ui-inputs.json` candidate/tree, target, executable hash
+and all 93 input hashes against Git blob bytes. Require each of the five
+`runtime-ui-{compile,lint,route-a,route-b,runtime-error}` JSON/log pairs to have passed,
+no timeout, exit 0 and confirmed cleanup. Check full core counts/ignored wrappers,
+explicit SDK markers, Branches budgets, renderer focus/resize and the legacy smoke
+independently. A synthetic key event is not OS-native key delivery; that remains the
+later human session under TESTING, which is not authorised in this checkpoint.
+
+If a required gate fails, record the exact failed evidence and fix only the bounded
+1G.2b finding before a justified replacement run. If still pending, preserve this
+manual-resume record and stop; AGENTS/WORKFLOW prohibit repeated model polling.
+Do not dispatch again or run packages solely for this documentation publication.
+Keep PR #17 draft/open and publish the evidence assessment after review. No local
+verification process remains, and no application edit is left unpublished.
 
 The next bounded task is to inspect the recorded final run and its artifacts, resolve
 only evidenced 1G.2b findings, and publish the G1/R1/R2 assessment. Stop again before

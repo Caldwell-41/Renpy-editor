@@ -10,7 +10,10 @@ physical testing, acceptance, merge, optional Git and Phase 2 excluded. Runtime 
 trust/revision choice and bounded revision-qualified Source navigation are implemented.
 Local checks and failed/corrected package attempts are recorded in
 [ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger).
-The final Windows/macOS production matrix remains required; no R2 pass is claimed.
+Application candidate `931684dd59ce319bd98f0028df98a3023ced7740`, tree `b6432353974e8a7f8818a8e8f91fadca1b29ccb9`, is published.
+Final [Windows/macOS production run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
+attempt 1, is **in_progress / awaiting CI, manual resume** on that exact candidate.
+No R2 closure is claimed; do not duplicate dispatch or actively poll.
 Use [HANDOVER](HANDOVER.md) for the exact candidate/run and next bounded action.
 Continue on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Preserved R1 closure:** candidate `c12d953548992adc60b38682d0dcfda8cdeb9f94`, tree
