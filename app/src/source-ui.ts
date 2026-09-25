@@ -56,6 +56,7 @@ export interface SourceDocument {
 }
 
 export interface SourceTarget {
+  readonly expectedRevision?: string;
   readonly path: string;
   readonly selectionStart?: number;
   readonly selectionEnd?: number;
@@ -958,6 +959,7 @@ export function renderSourceWorkspace(
     path: target.path,
     selectionStart: "selectionStart" in target ? target.selectionStart : undefined,
     selectionEnd: "selectionEnd" in target ? target.selectionEnd : undefined,
+    expectedRevision: "expectedRevision" in target ? target.expectedRevision : undefined,
     byteStart: "byteStart" in target ? target.byteStart : undefined,
     byteEnd: "byteEnd" in target ? target.byteEnd : undefined,
   });

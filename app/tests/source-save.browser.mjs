@@ -16,7 +16,7 @@ try {
   try {
     browser = await chromium.launch({ channel: "chrome", headless: true });
   } catch {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, ...(process.env.LOOMLIGHT_BROWSER_EXECUTABLE ? { executablePath: process.env.LOOMLIGHT_BROWSER_EXECUTABLE } : {}) });
   }
   const exercise = async (model) => {
     const page = await browser.newPage();

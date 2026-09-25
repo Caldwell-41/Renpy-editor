@@ -618,3 +618,24 @@ executing the project. It lists affected paths and retained evidence, offers onl
 core-proven resolutions, requires confirmation for destructive resolution, and
 revalidates the project before returning to Scene authoring. Ambiguous recovery stays
 blocked; acknowledging a warning or deleting a journal is not an available resolution.
+
+### 1G.1 Branches interaction contract
+
+Branches displays accepted core flow with an alphabetical deterministic grid, directed
+routes, an entry badge only when runnable `start` proves it, and separate partial/stale
+notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
+or labelled selectors; duplicate option text remains separate. Arrow keys pan the
+focused graph, +/- zoom, Home fits; equivalent buttons remain available. Pointer pan
+is optional. Refresh and visible desktop observation refresh accepted flow; unchanged
+observations preserve focus and changed/deleted mappings clear ambiguous selection.
+
+Edit Choice / Jump opens the existing mapped Scene controls, including their existing
+Create New Scene action. Source navigation carries exact bytes/revision and retains
+an existing draft/caret rather than applying accepted offsets to dirty or stale text.
+Uncommitted Scene forms retain their existing commit/cancel navigation guard. No graph
+write path, layout metadata or new Save owner exists. Failed refresh labels the last
+projection stale. Over-limit graphs show an explicit Source escape without truncation.
+
+The current limits are 500 Scenes and 2,000 edges. Layout, pan and zoom live only in the
+view. Large-story layout/search/minimap and execution from graph nodes remain deferred.
+Supported-target and final human evidence remains in the active 1G ledger.

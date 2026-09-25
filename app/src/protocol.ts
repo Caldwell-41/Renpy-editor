@@ -31,6 +31,7 @@ export const CORE_OPERATIONS = [
   "variable.create",
   "variable.update",
   "scene.list",
+  "flow.list",
   "scene.apply",
   "scene.recovery",
   "scene.resolveRecovery",

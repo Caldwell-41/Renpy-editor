@@ -54,6 +54,7 @@ pub const OPERATIONS: &[&str] = &[
     "variable.create",
     "variable.update",
     "scene.list",
+    "flow.list",
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",
@@ -438,6 +439,12 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
+        "flow.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.flow_workspace())
+                .and_then(to_value)
+        }
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))

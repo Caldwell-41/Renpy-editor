@@ -588,6 +588,13 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    pub fn flow_workspace(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .flow_workspace(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
@@ -3804,6 +3811,7 @@ mod tests {
         let accepted_before_source = fs::read_to_string(&source_file).unwrap();
         let opened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: Some(0),
                 selection_end: Some(0),
@@ -3924,6 +3932,7 @@ mod tests {
         assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
         let reopened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: None,
                 selection_end: None,
@@ -4022,5 +4031,74 @@ mod tests {
         println!("phase-1c-target-gate: passed");
         println!("phase-1d-target-gate: passed");
         println!("phase-1d-corrective-target-gate: passed");
+    }
+    #[test]
+    fn flow_literal_ipc_edits_destination_creates_scene_and_reopens_without_new_write_authority() {
+        use serde_json::json;
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("flow-project");
+        make_openable_project(&root, "Flow fixture");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let session = opened.session_id;
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId": session}));
+        assert_eq!(graph["ok"], true, "{graph}");
+        for payload in [
+            json!({"sessionId":"stale"}),
+            json!({"sessionId":session,"unexpected":true}),
+            json!({}),
+        ] {
+            assert_eq!(
+                closeout_ipc(&mut service, "flow.list", payload)["ok"],
+                false
+            );
+        }
+        let model =
+            closeout_ipc(&mut service, "scene.list", json!({"sessionId":session}))["value"].clone();
+        let entry = &model["scenes"][0];
+        let source_path = entry["sourcePath"].as_str().unwrap().to_owned();
+        let before = fs::read_to_string(root.join(&source_path)).unwrap();
+        let updated = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"insertBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"beforeBeatId":null,
+                "beat":{"type":"choice","options":[{"text":"Again","destinationSceneId":entry["id"]}]}}}),
+        );
+        assert_eq!(updated["ok"], true, "{updated}");
+        let model = &updated["value"];
+        let entry = &model["scenes"][0];
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        let edge = &graph["value"]["edges"][0];
+        assert_eq!(edge["destination"]["sceneId"], entry["id"]);
+        assert_eq!(edge["editable"], true);
+        let created = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"createSceneFromChoice","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"choiceBeatId":edge["beatId"],"optionText":"New destination","chapterId":entry["chapterId"],"displayName":"Destination"}}),
+        );
+        assert_eq!(created["ok"], true, "{created}");
+        let accepted = fs::read_to_string(root.join(&source_path)).unwrap();
+        assert!(accepted.contains("New destination"));
+        assert!(accepted.starts_with(before.split("    return").next().unwrap()));
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        assert_eq!(graph["value"]["edges"].as_array().unwrap().len(), 3);
+        service.close().unwrap();
+        drop(service);
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let graph = closeout_ipc(
+            &mut service,
+            "flow.list",
+            json!({"sessionId":opened.session_id}),
+        );
+        assert_eq!(graph["value"]["nodes"].as_array().unwrap().len(), 2);
+        assert_eq!(
+            fs::read_to_string(root.join(&source_path)).unwrap(),
+            accepted
+        );
     }
 }

@@ -45,6 +45,7 @@ test("frontend operation list contains only bounded Phase 1C through 1F operatio
     "variable.create",
     "variable.update",
     "scene.list",
+    "flow.list",
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",

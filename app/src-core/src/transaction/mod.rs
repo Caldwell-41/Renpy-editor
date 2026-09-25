@@ -779,6 +779,15 @@ impl TransactionService {
         project: &ProjectId,
         path: RelativePath,
     ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
+        self.snapshot_bounded(project, path, MAX_MUTATION_BYTES)
+    }
+
+    pub(crate) fn snapshot_bounded(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+        maximum: usize,
+    ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let target = resolve_target(&approved.anchor, &path, true)
@@ -789,7 +798,7 @@ impl TransactionService {
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         let identity = identity_for_file(&file)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        let bytes = read_bytes_bounded(&mut file, MAX_MUTATION_BYTES)
+        let bytes = read_bytes_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES))
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         Ok((
             bytes.clone(),
@@ -824,6 +833,15 @@ impl TransactionService {
         project: &ProjectId,
         path: RelativePath,
     ) -> Result<Option<(u64, Revision)>, PublicDiagnostic> {
+        self.inspect_file_bounded(project, path, MAX_IMPORT_BYTES)
+    }
+
+    pub(crate) fn inspect_file_bounded(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+        maximum: u64,
+    ) -> Result<Option<(u64, Revision)>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let target = resolve_target(&approved.anchor, &path, false)
@@ -835,7 +853,7 @@ impl TransactionService {
         {
             return Ok(None);
         }
-        let file = target
+        let mut file = target
             .parent_anchor
             .open_file(&target.name)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
@@ -843,7 +861,7 @@ impl TransactionService {
             .metadata()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?
             .len();
-        read_revision_file(file)
+        read_revision_file_bounded(&mut file, maximum.min(MAX_IMPORT_BYTES))
             .map(|revision| Some((count, revision)))
             .map_err(|code| PublicDiagnostic::new(code, None))
     }
@@ -852,6 +870,15 @@ impl TransactionService {
         &self,
         project: &ProjectId,
         directory: &str,
+    ) -> Result<Vec<String>, PublicDiagnostic> {
+        self.inventory_files_bounded(project, directory, usize::MAX)
+    }
+
+    pub(crate) fn inventory_files_bounded(
+        &self,
+        project: &ProjectId,
+        directory: &str,
+        mut remaining_entries: usize,
     ) -> Result<Vec<String>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
@@ -862,7 +889,7 @@ impl TransactionService {
                 .map_err(|code| PublicDiagnostic::new(code, None))?;
         }
         let mut files = Vec::new();
-        inventory_directory(&anchor, directory, 0, &mut files)
+        inventory_directory(&anchor, directory, 0, &mut files, &mut remaining_entries)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         Ok(files)
     }
@@ -1593,12 +1620,16 @@ fn inventory_directory(
     prefix: &str,
     depth: usize,
     files: &mut Vec<String>,
+    remaining_entries: &mut usize,
 ) -> Result<(), ErrorCode> {
     if depth > 16 || files.len() > 4096 {
         return Err(ErrorCode::UnsafePath);
     }
     anchor.validate_chain()?;
     for entry in fs::read_dir(anchor.path()).map_err(|_| ErrorCode::IoFailure)? {
+        *remaining_entries = remaining_entries
+            .checked_sub(1)
+            .ok_or(ErrorCode::InvalidProposal)?;
         let entry = entry.map_err(|_| ErrorCode::IoFailure)?;
         let name = entry
             .file_name()
@@ -1611,7 +1642,7 @@ fn inventory_directory(
         let relative = format!("{prefix}/{name}");
         if metadata.is_dir() {
             let child = anchor.open_child(std::ffi::OsStr::new(&name), false)?;
-            inventory_directory(&child, &relative, depth + 1, files)?;
+            inventory_directory(&child, &relative, depth + 1, files, remaining_entries)?;
         } else if metadata.is_file() {
             files.push(relative);
             if files.len() > 4096 {

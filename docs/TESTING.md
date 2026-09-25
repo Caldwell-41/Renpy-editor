@@ -541,3 +541,27 @@ lifecycle/project, verify accepted bytes and reopened projection, and retain ref
 checks for stale revisions and malformed payloads. These tests run in the normal core
 suite on both packaged targets. Synthetic UI routing still does not replace native
 keyboard acceptance.
+
+## Retained 1G.1 development evidence
+
+The active [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
+records candidate, exact results and deferred supported-target evidence. Retained cases
+live in `scene.rs` (`flow_*`), `lifecycle.rs` (literal `flow.list` and existing Scene
+commands through the real handler), `source.rs` (revision-qualified navigation),
+`branches.dom.test.ts` and the existing shell Save/navigation regression.
+
+Run from `app/`: `cargo test -p loomlight-core --locked flow`, `npm run check`, and
+`npm run test:source-browser`. For the unchanged budget workload, set
+`LOOMLIGHT_FLOW_EVIDENCE` to an agent-owned temporary JSON path and run
+`cargo test --release -p loomlight-core --locked flow_budget_fixture -- --nocapture`;
+then run `node tests/branches.browser.mjs` with the same variable. The latter requires
+500 Scenes / 2,000 edges produced by the actual service, reports build/layout and
+synthetic pan/frame timing, checks 640px resize and verifies origin editing navigation.
+Optional `LOOMLIGHT_BRANCHES_SCREENSHOT` records the rendered review surface. A small
+subview of the same fixture is used only for the screenshot, after full-scale assertions.
+
+Browser scripts accept optional `LOOMLIGHT_BROWSER_EXECUTABLE` for an already installed
+Chromium. Record its actual version: this is a development browser, not proof of the
+packaged Windows/macOS WebView or OS-native key delivery. No browser binary, SDK,
+measurement output or absolute machine path belongs in Git. Final 1G still owns the
+real packaged graph edit/disk/reopen scenario and both supported-target measurements.

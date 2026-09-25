@@ -381,3 +381,20 @@ locations and revision/session freshness through the existing SDK adapter. See t
 New Git status/diff/checkpoint services are deferred to
 [optional Git](tasks/active/optional-local-git.md); only existing optional creation-time
 init remains in Phase 1. No Git implementation is implied by the general adapter table.
+
+### Implemented 1G.1 flow boundary
+
+The read-only `flow.list` IPC reuses Lifecycle session authority, Source reconciliation,
+Scene mappings/canonical choice spelling, the shared lexical scanner and anchored
+transaction reads. It does not evaluate Python, run the SDK, mutate graph files or
+introduce renderer filesystem privileges. Existing Scene commands own all destination
+changes, creation, deletion refusal and history. The Branches renderer is disposable;
+old-session completions cannot navigate, alter status or revive a detached view.
+
+Flow caps 500 mapped Scenes / 2,000 displayed edges; source inventory caps 2,048 `.rpy`
+files / 32 MiB aggregate / 16 MiB per file and 8,192 enumerated directory entries.
+Existing traversal depth/file limits remain tighter where applicable. Bounded read
+variants share the transaction implementation and leave existing caller limits intact.
+Incomplete inventory yields unknown flow; resource refusal never silently truncates.
+Revision-qualified Source navigation uses optional `expectedRevision` and preserves
+retained draft selection on mismatch. No capability, CSP or mutation authority changes.

@@ -1,3 +1,4 @@
+import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
 import { requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   focusSceneDraft,
@@ -33,9 +34,9 @@ interface Asset { id: string; kind: AssetKind; displayName: string; relativePath
 interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
-type ProjectSurface = "story" | "source" | "characters" | "assets" | "variables";
+type ProjectSurface = "story" | "source" | "branches" | "characters" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
-interface SceneTarget { readonly sceneId: string; readonly beatId: string }
+interface SceneTarget { readonly sceneId: string; readonly beatId: string; readonly expectedSourceRevision?: string }
 type ProjectTarget = SourceTarget | SceneTarget;
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
@@ -55,6 +56,7 @@ let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
 let disposeSceneView: (() => void) | undefined;
+let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
 let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
@@ -97,6 +99,8 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  disposeBranchesView?.();
+  disposeBranchesView = undefined;
   disposeSceneView?.();
   disposeSceneView = undefined;
   disposeSourceView?.();
@@ -329,8 +333,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
   sidebar.append(projectName, sectionLabel);
-  (["story", "source", "characters", "assets", "variables"] as const).forEach((name) => {
-    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", characters: "Characters", assets: "Assets", variables: "Variables" };
+  (["story", "source", "branches", "characters", "assets", "variables"] as const).forEach((name) => {
+    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
     if (surface === name) nav.ariaCurrent = "page";
     nav.addEventListener("click", () => {
@@ -341,10 +345,19 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   });
   const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story" || surface === "source") sidebar.append(tree);
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
-  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : "supporting-workspace";
+  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : "supporting-workspace";
   layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
+  else if (surface === "branches") {
+    disposeBranchesView = renderBranches(workspace, {
+      load: () => projectValue<FlowWorkspace>(project, "flow.list"),
+      source: (location) => { void requestProjectNavigation(project, "source", location ? { path: location.path, byteStart: location.byteStart, byteEnd: location.byteEnd, expectedRevision: location.revision } : undefined); },
+      scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: node.location?.revision }); },
+      status: setStatus,
+    });
+    void refreshPersistenceStatus(project, generation);
+  }
   else void renderAuthoringSurface(workspace, project, surface, generation);
 }
 
@@ -435,6 +448,14 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     }
     let model = await projectValue<SceneWorkspace>(project, "scene.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+    if (target?.expectedSourceRevision) {
+      const scene = model.scenes.find((item) => item.id === target.sceneId);
+      if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !scene.beats.some((beat) => beat.id === target.beatId))) {
+        setStatus("The mapped origin changed. Return to Branches and refresh the selection.", "error");
+        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); workspace.append(back);
+        return;
+      }
+    }
     if (target && model.lastOpen.sceneId !== target.sceneId) {
       model = await projectValue<SceneWorkspace>(project, "scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type: "selectScene", sceneId: target.sceneId } });
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
@@ -557,7 +578,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
   }
 }
 
-async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source">, generation: number): Promise<void> {
+async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number): Promise<void> {
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
   workspace.append(eyebrow, title);
