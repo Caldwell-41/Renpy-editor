@@ -731,7 +731,21 @@ fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_compl
             "STALE_RUNTIME"
         );
         assert!(host.with_service(|service| service.runtime.busy()).unwrap());
-        // Completion raced cancellation: cancelling the current receipt releases only it.
+        // Completion raced cancellation and a separate authoring request now owns
+        // the service. Cancellation must still be accepted without waiting for it.
+        let held_host = host.clone();
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let (resume_tx, resume_rx) = mpsc::channel();
+        let held = thread::spawn(move || {
+            held_host
+                .with_service(|_| {
+                    entered_tx.send(()).unwrap();
+                    resume_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                })
+                .unwrap()
+        });
+        entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        let cancel_started = Instant::now();
         assert_eq!(
             host_call(
                 &host,
@@ -741,6 +755,13 @@ fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_compl
             )["ok"],
             true
         );
+        assert!(cancel_started.elapsed() < Duration::from_millis(250));
+        assert_eq!(
+            host_result(&host, &session, &next)["error"]["code"],
+            "RUNTIME_CANCELLED"
+        );
+        resume_tx.send(()).unwrap();
+        held.join().unwrap();
         assert!(!host.with_service(|service| service.runtime.busy()).unwrap());
         host.shutdown();
     }

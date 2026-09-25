@@ -1262,3 +1262,31 @@ remain PASS on their original inputs; failed/superseded `36135942863` stays FAIL
 its skipped gates preserved. No rerun of any existing run. R1 stays incomplete until the
 replacement target outcomes, logs and artifacts are inspected. If outstanding, publish
 its exact identity and use the mandated manual-resume handover, with no model polling.
+
+
+### Published candidate and completed-receipt cancellation correction — 2026-09-26
+
+Published `fd4ffca38373790f730818bbf9e6c8a388dac92f`, tree
+`523c5f7665a9d90d4522b7a355d5ca12c62d5d07`, after all local results above passed.
+Remote PR #17 was verified at that head, still OPEN/draft. Repository quality
+`36144604896` passed. Push-triggered native R1 `36144599144` was observed in progress;
+no terminal outcome/artifact pass was claimed. No manual dispatch or rerun occurred.
+
+Final review then found a bounded completed-receipt race: after preparation finished,
+a different authoring request could check out the service before its receipt was
+cancelled. That cancellation set the flag but returned Busy without arranging deferred
+cleanup. The corrected control path now accepts cancellation immediately, signals any
+owned process, clears published trust and defers preparation teardown to the returning
+session-bound owner. Its receipt reports cancellation while the reservation stays owned
+until that work returns. The regression holds the real service after completed preparation
+and proves responsive cancellation, cancelled receipt, and released preparation after
+the owner returns, for the prepare/grant/start test sequences.
+
+This changes two core files and requires a new candidate/run, not an unchanged retry.
+`36144599144` is superseded as acceptance evidence; preserve its eventual actual outcome.
+The existing historical successful runs remain untouched. The previous candidate's
+full core/SDK/frontend/desktop evidence above is kept on its actual inputs. The receipt
+correction passed the targeted release runtime suite: 18 passed, 0 failed, 2 ignored,
+9.32 s. Repository validation (244 files), format and whitespace passed. Replacement
+native gates validate the final source; the prior full/SDK passes are not relabelled as
+exact-source passes for this correction.

@@ -162,10 +162,14 @@ impl ApplicationHost {
                     if pending.result.is_some() {
                         // Cancel can race the completion response. The same receipt
                         // still owns its result; newer requests replace this token.
-                        let Some(service) = state.service.as_mut() else {
-                            return busy(id);
-                        };
-                        service.runtime_abort_request();
+                        if let Some(control) = &state.control {
+                            control.stop();
+                        }
+                        if let Some(service) = state.service.as_mut() {
+                            service.runtime_abort_request();
+                        } else {
+                            state.revoked_session = state.session.clone();
+                        }
                         state.trust = None;
                         state.request.as_mut().unwrap().result = Some(
                             serde_json::to_value(CoreResponse::failure(
