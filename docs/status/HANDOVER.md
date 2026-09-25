@@ -1,60 +1,63 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-26. **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Independent Phase 1G.2a review complete; R1 `blocked`.
-**Finding:** R1-B1 reopened for renderer completed-receipt cancellation; R1-B2 resolved.
+**Checkpoint:** Phase 1G.2a remaining R1-B1 correction and recheck, `awaiting_ci`.
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Reviewed head:** `b1e15b8d39976196addf3398d2c3f27c8e388b57`.
-**Application candidate:** `07f23b61d46511848d2b09db57ba1d5a696cabe0`.
-**Candidate tree:** `614931107db78f61c5b864a099ca2737ab546bd8`.
+**Entry review:** `e9d029a53a6b7a6d06098cad15172572ceffbe62`.
+**Corrected application candidate:** `c12d953548992adc60b38682d0dcfda8cdeb9f94`.
+**Candidate tree:** `3f8f6e769672572b008b2ffb4f283888afecfc31`.
 **Verified PR base:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
-This review changes documentation only; application/workflow inputs remain unchanged.
+This follow-up changes documentation only after the corrected application candidate.
 
-## Review decision
+## Completed correction and local recheck
 
-R1 cannot close yet. If cancellation arrives with a successful preparation status,
-`prepareRuntimeInput` uses service-bound `runtime.cancelPreparation`. A concurrent
-Source request can make it return `RUNTIME_BUSY`, leaving the preparation reservation
-held. The existing core correction supports deferred cancellation through the receipt's
-independent `runtime.cancelRequest`; the renderer completion branch bypasses it.
+The user authorised the remaining R1-B1 correction and recheck, with a next-phase
+prompt only if no blockers remain. `prepareRuntimeInput` now uses its captured
+`runtime.cancelRequest` receipt when cancellation races successful completion. That
+control remains available during competing authoring ownership and defers teardown
+until the owner returns. Source/Scene input remains retained; no broader runtime UI,
+Rust, trust, protocol or workflow change was needed. R1-B2 closure stands.
 
-[Ledger 13 independent review](../tasks/active/phase-1g-branches-runtime-git.md#independent-1g2a-review--2026-09-26)
-records the P2 finding at `app/src/runtime-preparation.ts:57-60`, production ownership
-trace, deterministic actual-helper/injected-port observation, evidence and limits.
-The probe is renderer control-flow evidence, not a native IPC/process reproduction.
-No application fix was made in this review. R1-B2's service/descendant/history evidence
-supports closure; no additional blocking finding was identified in this bounded review.
+The actual helper/Source controller regression failed on the previous implementation
+with `RUNTIME_BUSY`, then passed for Run/Validate crossed with abort/stale-view cases.
+It checks captured receipt identity, released lease/coordinator, no Save/start and
+retained Source/Scene input. The existing native held-owner test proves core deferred
+cleanup and stale-token isolation; the new frontend test uses an injected request port.
+No new end-to-end renderer/native claim is made.
 
-## Independently verified evidence
+Local typecheck and **50 frontend tests passed, 0 failed/skipped**; production build
+and preserved Source Save/selection browser checks passed. Local Node 26.8.1/npm
+11.19.0 differ from the native pin. Rust remains unavailable locally; unchanged Rust
+is checked by the native workflow. Repository validation and whitespace passed before
+publication. [Exact-candidate quality 36148947574](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148947574),
+attempt 1, passed. Bounded source recheck identified no further blocker.
 
-[36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132),
-attempt 1, passed on the exact application candidate. Both complete job logs and all
-six files per artifact were inspected. Both ZIP sizes/SHA-256/CRC and all **60 input
-hashes per target** matched. Windows runtime core 17/macOS 18 passed, each 2 ignored;
-explicit SDK 1, frontend 49, Source browser/build, desktop 1 and format passed per target.
-The SDK cache download skip did not skip archive verification or SDK execution.
+## Outstanding final-source evidence
 
-Existing native tests cover direct receipt cancellation under held service ownership;
-the frontend test covers pending cancellation. Neither covers the renderer's completed
-response/abort/contention combination. Their passes remain valid on their tested cases.
-Local typecheck/frontend: 49 passed, 0 failed/skipped (Node 26.8.1/npm 11.19.0, distinct
-from pinned native toolchain). No local Rust test rerun; Rust was unavailable.
-No native/package run was dispatched. All historical results and provenance remain
-in the ledger, including superseded successful `36144599144` and failed `36135942863`.
-No outstanding native R1 operation. Physical/native-keyboard/final human acceptance
-remains outside this review; failed-cleanup evidence retains its injection limitation.
+[Native R1 36148942247](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247),
+**attempt 1**, exact candidate above, was **in_progress** at identity inspection.
+Windows job `108117024512` and macOS job `108117024959` were still running; no
+artifacts were available at final inspection. No target pass is claimed yet. Inspect both complete job logs and the six files in
+`runtime-foundation-windows-2025` and `runtime-foundation-macos-26`: match checkout,
+run/attempt/candidate, required gate outcomes, actual counts/skips, ZIP size/SHA-256/CRC
+and every reported input hash. Expected frontend count is 50 with zero skipped.
+
+Historical `36144974132` remains PASS on `07f23b6`; it does not validate changed
+frontend inputs. All other successful, failed and superseded runs retain their ledger
+provenance. No duplicate dispatch or rerun. See the
+[correction ledger](../tasks/active/phase-1g-branches-runtime-git.md#renderer-completed-receipt-correction--2026-09-26).
 
 ## Publication and next bounded action
 
-Publish the review ledger and consistent live status/ADR/parent-plan state on the same
-branch, using fresh ancestry checks and a non-forced push; verify remote contents.
-Preserve the existing local checkout and PR draft/open status. Repository validation passed for 243 files and
-whitespace checks passed. Any automatic documentation quality run is
-separate from native evidence; follow AGENTS/WORKFLOW and do not actively poll it.
+The application candidate is published on the existing branch. Publish this coherent
+documentation follow-up non-forced, verify remote head/tree/content and retain draft/open
+PR #17. No local-only application change remains. This documentation does not trigger
+another native runtime matrix; any automatic quality check is separate.
 
-If separately selected, correct **only the remaining R1-B1 renderer cancellation case**,
-retain receipt-based cancellation through completion and prove abort/completion under
-competing service ownership, draft retention and stale-token isolation. Validate the
-changed candidate under the existing R1 policy; do not repeat unchanged evidence.
-Do not request physical testing, merge, start 1G.2b, optional Git or Phase 2. User
-acceptance remains a separate decision.
+AGENTS/WORKFLOW require manual resume and ending active polling while the external run
+is outstanding; no qualified same-thread external-event continuation is configured.
+Resume **only the final 1G.2a evidence review** for the exact run above. If both targets
+and provenance pass and no blocker remains, close R1's technical findings and give the
+requested next-chat prompt for **1G.2b — Runtime UI and navigable diagnostics**.
+Do not start 1G.2b in this checkpoint. No merge, physical testing, optional Git or
+Phase 2. User acceptance remains separate from implemented and tested status.

@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (renderer cancellation correction; replacement native evidence required); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (renderer cancellation corrected; replacement native recheck running); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` (renderer correction and recheck) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (renderer corrected; native recheck outstanding) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1562,3 +1562,41 @@ job logs, artifacts, ZIP integrity and all reported input hashes. Historical nat
 `36144974132` remains PASS on `07f23b6`, not evidence for changed frontend inputs.
 Follow AGENTS/WORKFLOW if a manual-resume handover is needed. Only after final recheck
 finds no blocker may the next-chat prompt select 1G.2b; do not begin that phase here.
+
+
+#### Corrected candidate publication and native recheck
+
+Candidate **`c12d953548992adc60b38682d0dcfda8cdeb9f94`**, tree
+**`3f8f6e769672572b008b2ffb4f283888afecfc31`**, was published non-forced on the same
+branch. Local Source browser checks also passed: the expected legacy failing
+reproduction and faithful Save passed their assertions, followed by selection/Apply
+Both. They used installed Chrome via the existing executable override; no physical
+interaction or package run. Exact-candidate repository quality
+[36148947574](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148947574),
+attempt 1, passed.
+
+**Outstanding:** [native R1 36148942247](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247),
+**attempt 1**, exact candidate above, was `in_progress` at identity inspection. This is
+the single automatic push-triggered run for changed frontend inputs. No historical
+run was retried, no manual duplicate was dispatched, and no target pass is inferred
+from the local checks. Expected artifacts: `runtime-foundation-windows-2025` and
+`runtime-foundation-macos-26`; verify complete logs, required steps, ZIP size/hash/CRC
+and every one of the recorded input hashes against this candidate. Final bounded
+inspection found Windows job `108117024512` in core and macOS job `108117024959` in
+desktop, both still running, with no artifacts yet. Frontend steps had succeeded on
+both targets; that is not a full target pass. End active polling and resume manually.
+
+Recheck found no further source blocker in the bounded change: cancellation uses the
+same captured receipt as status, outside the released lease/coordinator; the production
+control path validates session and receipt before either immediate or deferred teardown.
+Its existing native regression proves old receipt refusal and owner-return reservation
+release. The new frontend regression covers four completed-response combinations in one
+reported test. Neither suite is claimed as a single renderer-to-native end-to-end test.
+R1 closure and the requested 1G.2b prompt remain conditional on final native evidence.
+
+This follow-up updates only the live handover/status and canonical contract; it does
+not dispatch another runtime job. If the existing run is still outstanding, AGENTS and
+WORKFLOW require a published manual-resume handover and ending active polling; no
+qualified same-thread external-event continuation is configured here. Next bounded
+action: inspect this exact run, assess R1 closure and, only if no blocker remains, give
+the user the prompt for 1G.2b. Do not implement 1G.2b, merge or request physical testing.

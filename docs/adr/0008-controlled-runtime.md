@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: corrected foundation; replacement native evidence verified, R1 blocked by renderer cancellation review finding (2026-09-26).
+Status: renderer cancellation finding corrected; replacement native R1 recheck outstanding (2026-09-26).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -83,7 +83,10 @@ control lane stays reachable. An atomic cancellation/spawn commitment determines
 cancellation prevents every spawn attempt or stops an already committed launch. Cleanup
 must complete before the reservation can be released. Source preparation retains current
 input under its short lease, releases it when the work receipt arrives, then observes or
-cancels work outside both the lease and the authoring coordinator.
+cancels work outside both the lease and the authoring coordinator. Cancellation after a
+successful ticket completion retains that receipt and uses `cancelRequest`, so a competing
+authoring checkout cannot refuse preparation teardown. Preparation-ID cancellation is
+retained only for the non-ticket response compatibility path.
 
 Process cleanup does not perform terminal freshness hashing. Unix confirms process-group
 disappearance independently of pipe EOF; Windows waits for the owned job to empty. A
@@ -93,12 +96,10 @@ containment of deliberately escaping project Python.
 
 R1-B1/B2 implementation and automated cases are in the
 [1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
-Replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on Windows x64
-and macOS ARM64; its logs, artifact integrity and all 60 recorded input hashes per
-target were checked. Independent review subsequently reopened R1-B1: the renderer's
-post-completion cancellation uses service-bound `cancelPreparation` instead of the
-receipt's independent `cancelRequest`, so a competing checkout can refuse cleanup.
-R1-B2 remains resolved; the foundation is blocked, not user-accepted. The receipt
-contract above remains the intended behavior. Existing native successes remain evidence
-on their original inputs. See the ledger's independent review for the bounded finding
-and the preceding closeout for exact provenance, counts and limits.
+Historical replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on
+Windows x64 and macOS ARM64 with checked artifacts and all 60 input hashes per target.
+Independent review then identified the renderer completion branch bypassing receipt
+cancellation. Candidate `c12d953` corrects that branch, with a red/green actual-helper
+regression for completion/abort or stale view under competing ownership. R1-B2 remains
+resolved. Replacement native run `36148942247`, attempt 1, must be inspected before
+closing R1; existing native successes retain their original inputs and provenance.

@@ -138,9 +138,9 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 **Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
 [1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
-and 1G.2b. 1G.1 is `review_ready`; 1G.2a is `blocked` after independent review
-reopened R1-B1 for a renderer completed-receipt cancellation race. R1-B2 remains resolved
-and replacement Windows/macOS evidence verified; 1G.2b remains `not_started`. The 1G ledger records targeted evidence and deferred final native evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
+and 1G.2b. 1G.1 is `review_ready`; 1G.2a is `awaiting_ci` after correction of the
+remaining renderer completed-receipt cancellation race. R1-B2 remains resolved; final-source
+replacement Windows/macOS evidence is required; 1G.2b remains `not_started`. The 1G ledger records targeted evidence and deferred final native evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
 supported script editing/saving during play and usable diagnostics. Asset mutations
 require Stop; live asset refresh is excluded. Existing Scene/Source/Save
 services are reused. Agent-run tests own development checks; user physical testing is
