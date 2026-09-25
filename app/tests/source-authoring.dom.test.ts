@@ -715,3 +715,63 @@ test("Apply Both refuses a changed external revision returned while settling the
   assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.value, model.text);
   controller.dispose();
 });
+
+test("runtime preparation retains current Source input and Scene forms under the existing lease", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  for (const choice of ["cancel", "saved", "saveAll", "commitScene"] as const) {
+    installDom();
+    let model = documentModel();
+    const calls: string[] = [];
+    const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+      open: async () => model,
+      reloadInventory: async () => inventory(model.state, model.dirty),
+      update: async (request) => { calls.push("retain"); model = { ...model, text: request.text, dirty: true, state: "dirty", draftVersion: model.draftVersion + 1 }; return model; },
+    }));
+    await tick();
+    const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+    editor.value = editor.value.replace("Hello", "Pending"); // Deliberately before input event.
+    const scene = document.createElement("section");
+    if (choice === "commitScene" || choice === "saved") { scene.className = "scene-draft"; scene.dataset.unsubmitted = "true"; scene.innerHTML = '<input value="uncommitted">'; document.body.append(scene); }
+    const preparation = await prepareRuntimeInput("run", "sdk-capability", {
+      controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(),
+      choose: async ({ sourceDrafts, pendingScene }) => { assert.equal(sourceDrafts, 1); assert.equal(pendingScene, choice === "saved" || choice === "commitScene"); return choice; },
+      request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+        calls.push(operation);
+        if (operation === "source.saveAll") model = { ...model, dirty: false, state: "clean", baseRevision: "b".repeat(64) };
+        if (operation === "source.list" || operation === "source.saveAll") return inventory(model.state, model.dirty) as T;
+        assert.equal(operation, "runtime.prepare");
+        assert.equal(editor.readOnly, true);
+        return { preparationId: "prepared", savedRevision: "saved", draftCount: model.dirty ? 1 : 0, trustId: null } as T;
+      },
+    });
+    assert.equal(calls[0], "retain");
+    assert.equal(Boolean(preparation), choice === "saved" || choice === "saveAll");
+    assert.equal(calls.includes("source.saveAll"), choice === "saveAll");
+    assert.match(model.text!, /Pending/);
+    assert.equal(model.dirty, choice !== "saveAll");
+    if (scene.isConnected) assert.equal(scene.querySelector("input")?.value, "uncommitted");
+    assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.readOnly, false);
+    controller.dispose();
+  }
+});
+
+test("runtime Save All failure releases the Source lease and never prepares execution", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  installDom();
+  const model = documentModel({ dirty: true, state: "dirty" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({ open: async () => model }));
+  await tick();
+  const calls: string[] = [];
+  await assert.rejects(prepareRuntimeInput("validate", "sdk", {
+    controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(), choose: async () => "saveAll",
+    request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+      calls.push(operation);
+      if (operation === "source.list") return inventory("dirty", true) as T;
+      throw new Error("Save refused");
+    },
+  }), /Save refused/);
+  assert.deepEqual(calls, ["source.list", "source.saveAll"]);
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.readOnly, false);
+  assert.equal(model.dirty, true);
+  controller.dispose();
+});

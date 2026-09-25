@@ -1,0 +1,145 @@
+name: Phase 1G.2a runtime foundation
+
+on:
+  push:
+    branches: [feature/phase-1g-branches-runtime]
+    paths:
+      - .github/workflows/runtime-foundation-r1.yml
+      - app/src-core/**
+      - app/src-tauri/src/main.rs
+      - app/src/runtime-preparation.ts
+      - app/src/source-ui.ts
+      - app/src/protocol.ts
+      - app/tests/source-authoring.dom.test.ts
+      - app/Cargo.lock
+      - app/Cargo.toml
+      - app/rust-toolchain.toml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  runtime-foundation:
+    name: ${{ matrix.name }} production runtime foundation
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Select locked Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm toolchain
+        run: npm install --global npm@11.9.0
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: "false"
+      - name: Frontend preparation and preserved Source gates
+        id: frontend
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --ignore-scripts
+          npm run check 2>&1 | tee "$RUNNER_TEMP/runtime-frontend.log"
+          npm run test:source-browser 2>&1 | tee "$RUNNER_TEMP/runtime-source-browser.log"
+      - name: Core service and native process-tree regressions
+        id: core
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo fmt --check --all
+          cargo test -p loomlight-core --release --locked runtime_ -- --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-core.log"
+      - name: Desktop shutdown boundary compiles and tests
+        id: desktop
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-desktop --release --locked 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-desktop.log"
+      - name: Restore official pinned SDK archive
+        id: sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Download official SDK on cache miss
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
+            --max-time 180 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" \
+            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+          mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+      - name: Verify archive and exercise production service with real SDK
+        id: sdk
+        working-directory: app
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked \
+            lifecycle::runtime_tests::runtime_official_sdk_service_gate -- --exact --ignored --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-sdk-service.log"
+          grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
+      - name: Record exact target outcomes
+        if: always()
+        shell: bash
+        env:
+          CORE_RESULT: ${{ steps.core.outcome }}
+          SDK_RESULT: ${{ steps.sdk.outcome }}
+          DESKTOP_RESULT: ${{ steps.desktop.outcome }}
+          FRONTEND_RESULT: ${{ steps.frontend.outcome }}
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            report_python=python
+          else
+            report_python=python3
+          fi
+          "$report_python" - <<'PY'
+          import hashlib, json, os, platform
+          from pathlib import Path
+          outcomes = {name: os.environ.get(name + "_RESULT", "unavailable") for name in ("CORE", "SDK", "DESKTOP", "FRONTEND")}
+          report = {"candidate": os.environ["GITHUB_SHA"], "runId": os.environ["GITHUB_RUN_ID"],
+                    "attempt": os.environ["GITHUB_RUN_ATTEMPT"], "platform": platform.platform(),
+                    "architecture": platform.machine(), "outcomes": outcomes,
+                    "targetPassed": all(value == "success" for value in outcomes.values()),
+                    "nativeKeyboard": "not exercised; actual SDK default callback exercised",
+                    "packagedUi": "not exercised; 1G.2b excluded",
+                    "inputs": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                               for path in sorted(Path("app/src-core/src").rglob("*.rs"))}}
+          (Path(os.environ["RUNNER_TEMP"]) / "runtime-foundation-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          PY
+      - name: Retain bounded target evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-foundation-${{ matrix.runner }}
+          path: |
+            ${{ runner.temp }}/runtime-foundation-report.json
+            ${{ runner.temp }}/runtime-*.log
+          if-no-files-found: error
+          retention-days: 7

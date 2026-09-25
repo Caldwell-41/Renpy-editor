@@ -484,8 +484,15 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![core_request])
-        .run(tauri::generate_context!())
-        .expect("Loomlight desktop runtime failed");
+        .build(tauri::generate_context!())
+        .expect("Loomlight desktop runtime failed")
+        .run(|app, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                if let Ok(mut service) = app.state::<DesktopState>().0.lock() {
+                    if let Some(service) = service.as_mut() { service.runtime_shutdown(); }
+                }
+            }
+        });
 }
 
 #[cfg(test)]

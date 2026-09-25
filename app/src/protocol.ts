@@ -44,6 +44,14 @@ export const CORE_OPERATIONS = [
   "source.applyBoth",
   "source.saveAll",
   "source.discardAll",
+  "runtime.installPolicy",
+  "runtime.prepare",
+  "runtime.grantTrust",
+  "runtime.cancelPreparation",
+  "runtime.start",
+  "runtime.stop",
+  "runtime.status",
+  "runtime.revokeTrust",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

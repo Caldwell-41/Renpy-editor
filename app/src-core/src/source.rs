@@ -168,6 +168,7 @@ pub(crate) struct SourceSessions {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SourceError {
+    RuntimeBusy,
     InvalidPayload,
     UnknownFile,
     InvalidUtf8,
@@ -1370,6 +1371,7 @@ fn sha256(bytes: &[u8]) -> String {
 
 fn transaction_error(error: crate::transaction::PublicDiagnostic) -> SourceError {
     match error.code {
+        ErrorCode::RuntimeBusy => SourceError::RuntimeBusy,
         ErrorCode::RecoveryRequired => SourceError::RecoveryRequired,
         ErrorCode::Conflict
         | ErrorCode::StaleRevision
@@ -1382,6 +1384,7 @@ fn transaction_error(error: crate::transaction::PublicDiagnostic) -> SourceError
 
 fn scene_source_error(error: SceneError) -> SourceError {
     match error {
+        SceneError::RuntimeBusy => SourceError::RuntimeBusy,
         SceneError::UnsupportedSource
         | SceneError::InvalidMetadata
         | SceneError::InvalidPayload => SourceError::InvalidSource,

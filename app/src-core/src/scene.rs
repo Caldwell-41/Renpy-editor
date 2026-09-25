@@ -295,6 +295,7 @@ pub enum SceneCommand {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
+    RuntimeBusy,
     InvalidPayload,
     InvalidMetadata,
     UnsupportedSource,
@@ -2611,6 +2612,7 @@ fn sha256(bytes: &[u8]) -> String {
 
 fn diagnostic_error(value: crate::transaction::PublicDiagnostic) -> SceneError {
     match value.code {
+        ErrorCode::RuntimeBusy => SceneError::RuntimeBusy,
         ErrorCode::Conflict => SceneError::Conflict,
         ErrorCode::RecoveryRequired => SceneError::RecoveryRequired,
         ErrorCode::HistoryBoundary

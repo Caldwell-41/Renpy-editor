@@ -88,7 +88,8 @@ export interface SourceTransitionHandle {
 export interface SourceWorkspaceController {
   readonly captureSaveIntent: (origin: "keyboard" | "toolbar", requireEditingContext: boolean) => SourceSaveCapture;
   readonly executeSave: (intent: SourceSaveIntent, flushClean: () => Promise<void>) => Promise<SourceSaveOutcome>;
-  readonly prepareTransition: (reason: "navigation" | "leave") => Promise<SourceTransitionHandle | undefined>;
+  readonly prepareTransition: (reason: "navigation" | "leave" | "runtime") => Promise<SourceTransitionHandle | undefined>;
+  readonly refreshAccepted: () => Promise<void>;
   readonly hasUnretainedInput: () => boolean;
   readonly setModalBlocked: (blocked: boolean) => void;
   readonly dispose: () => void;
@@ -531,7 +532,7 @@ export function renderSourceWorkspace(
     }
   };
 
-  const prepareTransition = async (_reason: "navigation" | "leave"): Promise<SourceTransitionHandle | undefined> => {
+  const prepareTransition = async (_reason: "navigation" | "leave" | "runtime"): Promise<SourceTransitionHandle | undefined> => {
     if (disposed) return undefined;
     const barrier = beginBarrier();
     const snapshot = captureSnapshot(false);
@@ -937,6 +938,19 @@ export function renderSourceWorkspace(
     captureSaveIntent,
     executeSave,
     prepareTransition,
+    refreshAccepted: async () => {
+      if (disposed || !current || barriers.size === 0 || hasLocalInput()) return;
+      const generation = documentGeneration;
+      const path = current.path;
+      const next = await actions.open({ path, selectionStart: current.selectionStart, selectionEnd: current.selectionEnd });
+      if (!identityMatches(generation, path)) return;
+      current = next;
+      latestSnapshot = undefined;
+      latestRetentionFailure = undefined;
+      await refreshInventory();
+      drawDocument();
+      actions.refreshPersistence();
+    },
     hasUnretainedInput: hasLocalInput,
     setModalBlocked: (blocked) => { modalBlocked = blocked; },
     dispose: () => {

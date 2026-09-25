@@ -5,6 +5,10 @@
 //! target is retained and checked after each exchange, so a writer that wins the final
 //! validation window is preserved and surfaced instead of being silently overwritten.
 
+mod execution;
+mod manifest;
+pub(crate) use execution::ExecutionGate;
+pub(crate) use manifest::{execution_manifest, ExecutionManifest};
 mod history;
 mod identity;
 mod journal;
@@ -119,6 +123,7 @@ pub enum ErrorCode {
     AlreadyExists,
     RecoveryRequired,
     HistoryBoundary,
+    RuntimeBusy,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -148,6 +153,7 @@ impl PublicDiagnostic {
             ErrorCode::Conflict => "A competing file revision was preserved for recovery.",
             ErrorCode::AlreadyExists => "A file already exists at the selected project location.",
             ErrorCode::RecoveryRequired => "The file operation requires recovery.",
+            ErrorCode::RuntimeBusy => "Stop the runtime operation before changing these files.",
             ErrorCode::HistoryBoundary => "Undo or redo stopped at an external revision boundary.",
         };
         Self {
@@ -262,6 +268,8 @@ impl FaultInjector for NoFault {
 pub struct TransactionService {
     projects: Mutex<HashMap<ProjectId, ApprovedProject>>,
     serial: Mutex<()>,
+    executions: Mutex<HashMap<ProjectId, Arc<ExecutionGate>>>,
+    execution_consent: Mutex<HashMap<ProjectId, ExecutionManifest>>,
 }
 
 impl TransactionService {
@@ -308,6 +316,18 @@ impl TransactionService {
     }
 
     pub fn unregister_trusted_project(&self, project: &ProjectId) {
+        let Ok(_serial) = self.serial.lock() else {
+            return;
+        };
+        if self.require_no_execution(project).is_err() {
+            return;
+        }
+        if let Ok(mut gates) = self.executions.lock() {
+            gates.remove(project);
+        }
+        if let Ok(mut consent) = self.execution_consent.lock() {
+            consent.remove(project);
+        }
         if let Ok(mut projects) = self.projects.lock() {
             projects.remove(project);
         }
@@ -374,6 +394,9 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return rejected(ErrorCode::IoFailure),
         };
+        if let Err(diagnostic) = self.require_no_execution(project) {
+            return CommitOutcome::Rejected { diagnostic };
+        }
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(error) => return CommitOutcome::Rejected { diagnostic: error },
@@ -768,6 +791,7 @@ impl TransactionService {
         if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
             return recovery(&txid);
         }
+        self.advance_execution_consent(project, &journal.mutations, &revisions);
         CommitOutcome::Committed {
             transaction_id: txid,
             revisions,
@@ -911,6 +935,8 @@ impl TransactionService {
         if blocking_recovery_code(&approved).is_some() {
             return Err(PublicDiagnostic::new(ErrorCode::RecoveryRequired, None));
         }
+        let allow_create = self.require_no_execution(project).is_ok()
+            || self.permits_script_directory(project, directory);
         let relative =
             RelativePath::new(directory).map_err(|code| PublicDiagnostic::new(code, None))?;
         let mut anchor = approved.anchor.as_ref().clone();
@@ -918,9 +944,16 @@ impl TransactionService {
             let std::path::Component::Normal(name) = component else {
                 return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
             };
-            anchor = anchor
-                .open_child(name, true)
-                .map_err(|code| PublicDiagnostic::new(code, None))?;
+            anchor = anchor.open_child(name, allow_create).map_err(|code| {
+                PublicDiagnostic::new(
+                    if !allow_create {
+                        ErrorCode::RuntimeBusy
+                    } else {
+                        code
+                    },
+                    None,
+                )
+            })?;
         }
         anchor
             .validate_chain()
@@ -937,6 +970,9 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return rejected(ErrorCode::IoFailure),
         };
+        if let Err(diagnostic) = self.check_execution_mutations(project, &proposal.mutations) {
+            return CommitOutcome::Rejected { diagnostic };
+        }
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(error) => return CommitOutcome::Rejected { diagnostic: error },
@@ -1297,6 +1333,8 @@ impl TransactionService {
         if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
             return recovery(&txid);
         }
+        self.accepted_execution_edit(project);
+        self.advance_execution_consent(project, &journal.mutations, &revisions);
         CommitOutcome::Committed {
             transaction_id: txid,
             revisions,
@@ -1334,6 +1372,7 @@ impl TransactionService {
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
+        self.require_no_execution(project)?;
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let store = JournalStore::open(&approved.anchor, transaction_id)
@@ -1372,6 +1411,7 @@ impl TransactionService {
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
+        self.require_no_execution(project)?;
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let store = JournalStore::open(&approved.anchor, transaction_id)

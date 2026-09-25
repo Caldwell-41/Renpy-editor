@@ -398,3 +398,21 @@ variants share the transaction implementation and leave existing caller limits i
 Incomplete inventory yields unknown flow; resource refusal never silently truncates.
 Revision-qualified Source navigation uses optional `expectedRevision` and preserves
 retained draft selection on mismatch. No capability, CSP or mutation authority changes.
+
+## Controlled runtime foundation (Phase 1G.2a)
+
+[ADR 0008](adr/0008-controlled-runtime.md) defines explicit saved-revision preparation,
+session trust, the controlled-play policy and independent process supervision. The
+Source controller's existing input barrier also supports runtime preparation; the
+shared coordinator retains pending Scene input and never commits it implicitly.
+The core owns prepare/grant/start/cancel/Stop/status/revoke capabilities, SDK/project
+manifests and the transaction reservation. Broad runtime/Diagnostics UI is still 1G.2b.
+
+Play releases script editing after the SDK's policy readiness callback. Accepted script
+changes mark the launch as an earlier revision. Assets/inventory and conflicting loaded
+source/compiled lifecycle changes require Stop. Output is bounded inert text; a terminal
+manifest comparison conservatively marks changed output/source stale. Unknown SDK cache
+or save provenance requires renewed consent; no `.rpyc` suffix is trusted automatically.
+Desktop exit explicitly shuts down the supervisor. Core close/switch refuse until
+preparation is cancelled or Stop cleanup finishes, then use existing draft safeguards.
+Target acceptance remains recorded in the live Phase 1G ledger, not inferred here.

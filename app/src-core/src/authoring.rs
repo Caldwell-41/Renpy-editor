@@ -288,6 +288,7 @@ fn validate_source_definition(
 
 #[derive(Debug)]
 pub enum AuthoringError {
+    RuntimeBusy,
     NoOpenProject,
     RecoveryRequired,
     InvalidPayload,
@@ -1412,6 +1413,7 @@ fn committed(outcome: CommitOutcome) -> Result<(), AuthoringError> {
         CommitOutcome::RecoveryRequired { .. } => Err(AuthoringError::RecoveryRequired),
         CommitOutcome::Conflict { .. } => Err(AuthoringError::SourceConflict),
         CommitOutcome::Rejected { diagnostic } => match diagnostic.code {
+            crate::transaction::ErrorCode::RuntimeBusy => Err(AuthoringError::RuntimeBusy),
             crate::transaction::ErrorCode::AlreadyExists => Err(AuthoringError::PathCollision),
             crate::transaction::ErrorCode::RecoveryRequired => {
                 Err(AuthoringError::RecoveryRequired)

@@ -1,3 +1,4 @@
+pub mod runtime;
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
@@ -126,6 +127,7 @@ pub enum LifecycleError {
     CreatedNotOpened,
     RecoveryRequired,
     StaleSession,
+    Runtime(runtime::RuntimeError),
     Authoring(AuthoringError),
     Scene(SceneError),
     Source(SourceError),
@@ -160,6 +162,7 @@ pub struct LifecycleService {
     sdks: HashMap<String, ValidatedSdk>,
     current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
     authoring: AuthoringService,
+    runtime: runtime::RuntimeState,
 }
 
 struct InspectedProject {
@@ -216,6 +219,7 @@ impl LifecycleService {
             sdks: HashMap::new(),
             current: None,
             authoring: AuthoringService::default(),
+            runtime: runtime::RuntimeState::default(),
         })
     }
 
@@ -298,6 +302,9 @@ impl LifecycleService {
         &mut self,
         request: CreateProjectRequest,
     ) -> Result<CreationResult, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         validate_title(&request.title)?;
         validate_folder_name(&request.folder_name)?;
         let resolution = Resolution {
@@ -407,6 +414,9 @@ impl LifecycleService {
     }
 
     pub fn close(&mut self) -> Result<(), LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -414,6 +424,7 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
+        self.runtime = runtime::RuntimeState::default();
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
@@ -427,6 +438,9 @@ impl LifecycleService {
         &mut self,
         mut inspected: InspectedProject,
     ) -> Result<OpenProject, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -460,6 +474,7 @@ impl LifecycleService {
             self.authoring.unregister_project(&authority);
             return Err(error);
         }
+        self.runtime = runtime::RuntimeState::default();
         let activated = inspected.project.clone();
         let previous = self
             .current
@@ -1879,7 +1894,7 @@ fn promote_no_replace(
 mod tests {
     use super::*;
 
-    fn make_openable_project(root: &Path, title: &str) {
+    pub(super) fn make_openable_project(root: &Path, title: &str) {
         let folder = root.file_name().unwrap().to_str().unwrap();
         fs::create_dir_all(root.join("game/definitions")).unwrap();
         fs::create_dir_all(root.join("game/chapters/chapter_01")).unwrap();
@@ -1943,7 +1958,7 @@ mod tests {
             .unwrap()
     }
 
-    fn closeout_ipc(
+    pub(super) fn closeout_ipc(
         service: &mut LifecycleService,
         operation: &str,
         payload: serde_json::Value,
@@ -4102,3 +4117,6 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod runtime_tests;

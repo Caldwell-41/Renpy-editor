@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (early proof only); 1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (production candidate; native R1 pending); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (early proof only) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` (production candidate; native R1 pending) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -866,3 +866,109 @@ acceptance. Do not redispatch while the above operation is outstanding. Resume b
 reading its existing jobs/logs/artifacts, resolve bounded probe findings if any, then
 continue only the remaining 1G.2a production slice and R1 gates. The branch/PR remain
 unchanged; main is not merged.
+
+### Resumed production foundation — 2026-09-25
+
+User selected continuation of 1G.2a, preserving the same branch/PR and excluding
+physical testing, merge and later checkpoints. Fresh refs match published head
+`8ab3063d283423dcda1135630315645c1320b959`; the owned checkout is clean at entry.
+The existing run `36126490939`, attempt 1, completed successfully; no duplicate was
+started. Both logs and artifact reports were inspected. ZIP CRCs and SHA-256 match
+GitHub: macOS `a1a7d390bf15d98beb6a812072bc7d8bbecbead39c02da48c0d740b399ab11d3`;
+Windows `99f9e8496a3d6aba3d27a2b8b1dfaeef2a42607d63b403bd2862ce5a50ce5d5c`.
+Both name candidate `c72b4f675605cdf09cf01b4558a5c1bf69f2f852`, pinned SDK version
+`8.5.3.26051504` and probe digest
+`f4ac6ab8710ede77053dd816bfde53ea2d76644e2a407ad59c3fbf5bf12c79dd`.
+Windows AMD64 developer-on/off play intervals were 10.000/10.016 s; Darwin arm64
+10.055/10.060 s. Both cases passed on each target. This closes the SDK feasibility
+prerequisite only: production service, native keyboard and descendant cleanup remain
+explicitly NOT RUN in those reports.
+
+Implementation begins with the serialized transaction reservation/barrier: prepare
+drains in-flight transactions, validation blocks invalidating writes, play permits
+script edits and required metadata while refusing asset/file-lifecycle conflicts,
+and Stop retains the barrier until cleanup. Test the actual transaction/import/history
+paths, not only a policy predicate. No broad runtime UI is selected.
+
+### Production foundation candidate and bounded review — 2026-09-25
+
+Implemented the selected 1G.2a slice on the existing branch/PR after inspecting the
+successful, unchanged prerequisite run. No duplicate of run `36126490939` was created.
+Fresh refs and PR #17 remained at `8ab3063d283423dcda1135630315645c1320b959`; main remained
+`924619def6f624f336032c3ebc8499ccfcc662f0`. Older checkouts/local evidence were preserved.
+
+**Production changes:** `LifecycleService` now owns explicit preparation, inspectable
+session trust, token-bound cancellation/start/Stop/status/revoke and independent process
+supervision. Requests reject unknown keys and stale session/preparation/operation IDs.
+Prepare binds the selected approved `sdkId`, kind and `saveAll|saved|cancel` choice;
+Save All calls the existing Source owner. `runtime.cancelPreparation` is token-bound:
+a stale cancel/grant cannot release a newer preparation. Renderer coordination extends
+the existing Source input lease, retains pending Scene forms, and directs explicit
+Scene Commit before retry; it never auto-commits forms. Broad Run/Diagnostics controls
+remain excluded as 1G.2b.
+
+Trust inventories use identities and SHA-256 across project executable/data inputs and
+the full SDK, including `environment.txt`, interpreter/modules, archives, orphan compiled
+files, caches and saves. Accepted transactions advance consent only from recorded bases.
+Unknown generated-output provenance conservatively requires renewed consent. Close/reopen,
+root replacement, SDK mismatch and external executable changes cannot inherit a grant.
+The policy, limits and decisions are in [ADR 0008](../../adr/0008-controlled-runtime.md).
+
+`runtime.installPolicy {sessionId}` explicitly creates the reviewed policy script through
+the transaction layer, refusing a different existing script. Controlled Run uses standard
+entry, disables developer/console/default reload paths, and directs default saves into
+inventoried `game/saves` with the actual pinned SDK `--savedir` option. Script writes stay
+reserved until the policy's display-start readiness callback. Startup/validation are
+bounded at 180 s; established play has no duration timeout. Trust is not sandboxing;
+project Python can deliberately override policies/access external resources.
+
+The transaction reservation shares the commit/import serialization lock: it drains
+in-flight asset work, refuses new imports before reading/staging, and checks every
+compound mutation/history inverse before journal changes. Script replacement/new scripts,
+required metadata and chapter directories remain available during established play.
+Assets/inventory, loaded script/compiled lifecycle conflicts and the policy script require
+Stop. Refusal leaves files/history unchanged; retry succeeds after cleanup.
+
+The worker retains process ownership independently of the lifecycle request mutex. Unix
+uses a process group with an unreaped leader to prevent PID reuse; Windows assigns a
+kill-on-close job before resuming the suspended initial thread. Natural exit/crash also
+clean descendants and pipes. Output retains at most 2 MiB, paged in 32 KiB byte windows,
+with visible truncation. Readiness detection continues after retention truncates.
+Stop allows 1 s graceful response, 5 s forced cleanup and 1 s pipe shutdown; failure keeps
+the reservation blocked. Desktop exit explicitly calls runtime shutdown. Core close/switch
+refuse active preparation/cleanup, then retain the existing draft leave flow. Status carries
+launch digest, accepted-edit earlier-revision state and conservative terminal manifest
+staleness; generated output is not silently attributed to the SDK.
+
+**Bounded findings fixed:** startup writes before script loading; case-insensitive loaded
+path ownership/policy matching; Unix save paths relative to the anchored working directory; readiness hidden by output truncation; overly broad new
+chapter-directory refusal; stale grant cancelling newer preparation; consent advancement
+for streaming transactions; reader shutdown after natural exit with retained descendant
+pipes. Invalid identity/recovery checks remain fail-closed. No newer remote work was replaced.
+
+| Local gate | Result and evidence scope |
+| --- | --- |
+| `cargo test -p loomlight-core --locked` | 173 passed, 0 failed, 6 ignored (four existing subprocess workers, new runtime subprocess worker, explicitly invoked SDK gate). Preserves existing hostile race/recovery and 1F/1G.1 tests. Old SDK wrappers without their archive environment are not target evidence. |
+| Targeted `runtime_` tests | 13 passed, 2 explicitly ignored entry points: subprocess worker and separately invoked official SDK gate. Real child tests cover 9+ s play, responsive Stop, shutdown, natural exit/crash, descendant-held pipes, flood/truncation and a shortened validation deadline through the production worker. |
+| Explicit official SDK service gate, release | PASS on Linux x64, verified official 8.5.3 archive. Final run 46.57 s, 1 passed, 0 ignored. Real literal handler/service requests prove saved/Save All/cancel, SDK mismatch, external project/SDK changes before spawn, stale grant isolation, long play, script Save/earlier revision, no automatic/default-callback reload, asset Undo refusal/no-write/retry, Stop/Run latest, stale Stop, revoke/reopen and compile/lint. Main menu is skipped only in test environment; production argv remains standard entry. |
+| `npm run check` | 48 passed; no skips. Includes real Source controller lease tests for pending Source/Scene, saved choice, explicit Commit routing, Save All success/failure and input retention. |
+| `npm run build` | PASS. |
+| `npm run test:source-browser` | PASS using available local Chromium through the existing executable override. Legacy regression reproduces dirty-after-Save; faithful model stays clean (one Save, zero Flush), and selection/Apply Both regression passes. Initial default browser launch failed because its binary was absent; Playwright's bundled installer then failed on truncated ZIPs. Neither failed attempt is a pass; existing Chromium completed the actual tests. |
+| Windows job implementation cross-typecheck | Exact `platform/windows.rs` typechecked for `x86_64-pc-windows-msvc` against locked windows-sys. This is compile evidence only, not native execution. |
+| Repository validation/format/whitespace | PASS; repository validator inspected 240 files, including the staged candidate. |
+
+**Target gate:** the separate `runtime-foundation-r1.yml` workflow runs production core/native child tests,
+explicit official-SDK service gate, frontend/Source regression and desktop boundary tests
+on Windows x64 and macOS ARM64. It reuses the official archive cache, retains outcome/input
+hash reports and bounded logs for seven days, and leaves the original feasibility workflow unchanged. It does not build/upload packages or rerun
+the unchanged synthetic probe. Native keyboard and packaged runtime UI are not claimed.
+Full R1 remains BLOCKED pending inspection of this candidate's target evidence. Missing,
+failed or skipped steps must remain blocked. No merge, 1G.2b, optional Git, Phase 2 or user
+physical testing is authorised by this publication.
+
+
+The user's in-flight continuation update was reconciled against local commit `f340ec3`
+and fresh remote head `8ab3063`, without restarting or discarding work. The initial
+publication tree matched the local tree exactly but no branch ref had advanced. Native
+production R1 uses a **new workflow file**, `runtime-foundation-r1.yml`; the completed
+feasibility workflow remains byte-for-byte unchanged and is not dispatched again.
