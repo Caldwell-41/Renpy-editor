@@ -1,70 +1,75 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-25. **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Phase 1G.2a runtime/trust foundation — `awaiting_ci`; R1 BLOCKED.
-Production foundation implemented; not review-ready, accepted or merged.
+**Checkpoint:** Phase 1G.2a runtime/trust foundation — `blocked`; R1 NOT ACCEPTED.
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Corrected candidate:** `ad2627c4a0347261098f12883419672ecffc6e29`.
-**Verified tree:** `381829ad05445ef6d0f385b84a1d9eec02e7bff0`.
-**Main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
+**Reviewed publication:** `e2d5c886dfe4b981971dba214da5ecb8318500db`.
+**Unchanged production candidate:** `ad2627c4a0347261098f12883419672ecffc6e29`.
+**Candidate tree:** `381829ad05445ef6d0f385b84a1d9eec02e7bff0`.
+**Verified main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
 
-## Delivered and reviewed
+## Existing native run is complete
 
-The in-flight user update was reconciled against current local work and fresh remote
-refs, without restarting. Local evidence commits/branches, older work, PR #12, accepted
-1F safeguards and 1G.1 work were preserved. No merge, 1G.2b, optional Git, Phase 2 or
-user physical testing occurred.
+[Production 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
+**attempt 1**, passed on the exact production candidate. Both complete job logs and
+artifacts were inspected; ZIP SHA-256/CRC/size, candidate/run/attempt and all 26 core
+Rust input hashes per target match. No rerun or duplicate dispatch occurred.
 
-Implemented typed preparation/trust/control IPC, project/SDK identity/hash inventories,
-existing Source Save All/renderer lease reuse, explicit controlled-play policy installation,
-serialized asset/file/history barriers, independent process supervision and desktop exit
-cleanup. Script editing/saving continues after SDK readiness; Stop/Run deliberately loads
-saved edits. See [ADR 0008](../adr/0008-controlled-runtime.md) and
-[ledger 13](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger)
-for contracts, bounded findings/fixes and exact tests. Broad runtime UI remains 1G.2b.
+| Target | Job | Inspected result |
+| --- | --- | --- |
+| Windows x64 | `108075623934` | Core 12 passed, 2 ignored; explicit SDK 1 passed/0 ignored; frontend 48 passed; Source browser and format PASS; desktop 1 passed |
+| macOS ARM64 | `108075624153` | Core 13 passed, 2 ignored; explicit SDK 1 passed/0 ignored; frontend 48 passed; Source browser and format PASS; desktop 1 passed |
 
-## Proven evidence and preserved failure
+The ignored entries are the re-executed child fixture and separately invoked SDK gate.
+Artifacts `10864982957` / `10864657289` expire 2026-10-02. Exact hashes, OS versions,
+timings, coverage and acceptance matrix are in [ledger 13](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger),
+latest entry **Native evidence assessment and remaining R1 blockers**.
 
-Prerequisite [36126490939](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36126490939),
-attempt 1, passed Windows/macOS. Both artifacts were CRC/hash checked and inspected.
-That workflow remains unchanged and was not rerun. Its SDK-only proof is not R1.
+Prerequisite `36126490939`, attempt 1, remains PASS for SDK/reload feasibility only.
+Superseded production `36135942863` remains FAILED; its skipped desktop/SDK gates are
+not promoted to passes. Earlier local application results and 1F/1G.1 safeguards remain
+preserved. Native keyboard/packaged runtime UI and final human 1G acceptance are deferred.
 
-Local application evidence: 173 core tests passed (6 ignored entry points), 48 frontend
-tests passed, Source Save/selection browser regressions passed, and the explicitly invoked
-verified SDK production-service gate passed (1 test, 0 ignored, 46.57 s). It covers literal
-requests, saved/Save All/cancel, trust/SDK changes, long play, Save without reload, asset
-refusal/retry, Stop/Run latest, revoke/reopen and compile/lint. Actual local child tests cover
-natural exit/crash, descendants retaining pipes, output flood, Stop, timeout and shutdown.
-These are Linux results, not native acceptance. Native keyboard/packaged runtime UI are
-not claimed. Initial browser/tooling failures and their actual scope are retained in the ledger.
+## Why R1 remains blocked
 
-First production candidate `5513213`, run
-[36135942863](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36135942863), attempt 1,
-FAILED both native core jobs. Windows: 8 passed/4 failed/2 ignored; macOS: 9/4/2. Logs confirm
-all four failures at uncanonicalized temporary-root registration, before process tests.
-Native frontend/Source browser gates passed; desktop/SDK gates were skipped. The fixture
-roots and short startup allowance are corrected in `ad2627c`; application code is unchanged.
-The portable local Rust dependency directory disappeared after the in-flight continuation,
-so no local rerun of this fixture correction is claimed. Its native build/test gate is pending.
-Repository/whitespace checks pass (241 files). Exact-candidate quality `36136473094` passed.
+**R1-B1 — request/control ownership:** preparation hashes the project/full SDK before
+returning its cancellation token while holding the shared lifecycle mutex. Grant/start
+rechecks use that mutex too. Stop/status/cancel and blocking native file dialogs share
+it, so the direct worker Stop timing test does not prove responsive production IPC.
+The renderer lease spans preparation. Terminal freshness hashing precedes worker join
+completion and is outside the advertised process/pipe deadlines. See the exact source
+paths, limits and correction contract in ledger 13 and [ADR 0008](../adr/0008-controlled-runtime.md).
+This is an architectural correction within 1G.2a, not a CI retry or permission to weaken
+identity, trust, serialization or retained-input safeguards.
 
-## Outstanding operation and next bounded action
+**R1-B2 — missing service lifecycle/history evidence:** native descendant tests exercise
+worker Drop, not `runtime_shutdown`, service Drop or project switching with descendants.
+The desktop test only validates smoke-report acceptance. Add actual service cases for
+Cancel/Stop/switch/shutdown, starting/validation cancellation, cleanup failure and stale
+callbacks. Check descendant liveness, including closed output handles, and actual history
+Undo/Redo/file-lifecycle refusal/no-write/Stop/retry. Low-level proposals labelled Undo/Redo
+are evidence for the barrier, not the whole user history path. No orphan or corruption
+is asserted to have been observed; these cases are missing.
 
-Separate production R1 [run 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
-**attempt 1**, runs the exact corrected candidate above. At entry inspection:
-Windows job `108075623934` and macOS job `108075624153` were in progress.
-Expected seven-day artifacts: `runtime-foundation-windows-2025` and
-`runtime-foundation-macos-26`. The workflow runs production service/native child tests,
-frontend/browser and desktop boundary checks, with no package matrix.
+## Next bounded action and ownership
 
-Inspect that existing run's outcomes/logs and verify artifact ZIP hashes/CRC and input-hash
-reports. Resolve only bounded 1G.2a findings, complete R1 evidence review, publish the ledger
-and this handover, then stop. Missing/failed/skipped evidence stays blocked; do not infer
-an R1 pass from feasibility or frontend success. Do not duplicate this run.
+Continue **1G.2a only**, resolve R1-B1/B2 on this same branch/PR. Inspect fresh refs and
+execution ownership first. The continuation checkout was clean at entry; older local
+worktrees/unpublished 1G.1 review docs and local evidence branches were inspected and
+preserved. No competing local executor was observed; cross-host ownership is not visible.
+This review changed documentation only and stopped at the specific architectural blocker
+allowed by the user's goal. No production fix or replacement native pass is claimed.
 
-`AGENTS.md` and `WORKFLOW.md` require manual resume instead of repeated model polling while
-CI is outstanding; no qualified event continuation is configured here. This is the stopping
-boundary. Restore a portable toolchain only if additional local Rust work is needed.
-Continue the same branch/PR. Do not merge or begin 1G.2b, optional Git or Phase 2, and do not
-request user physical testing. Candidate publication was verified tree-for-tree; this final
-documentation-only update does not trigger another production runtime run.
+Restore a portable local Rust toolchain if needed (currently absent; official distribution
+endpoint reachable). Implement the smallest cohesive request/supervisor correction and
+deterministic targeted regressions first; obtain one replacement native R1 run for the
+changed candidate. Do not rerun the unchanged successful run or feasibility workflow.
+If the replacement run is outstanding, follow AGENTS/WORKFLOW: publish its exact
+run/attempt/candidate and stop active polling; no qualified automatic continuation exists.
+
+Publication scope: this handover, CURRENT, ledger 13, parent-plan state and ADR limitations.
+Repository validation (241 files) and whitespace checks passed. Commit/publish together
+and verify remote content; do not create a receipt-only commit
+chasing this documentation commit's own SHA. No application/workflow files changed.
+No outstanding native operation needs polling. No user physical testing, merge, 1G.2b,
+optional Git, Phase 2 or unrelated refactoring. Advance only after R1 is review-ready.

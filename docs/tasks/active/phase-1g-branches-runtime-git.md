@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (corrected production candidate; R1 blocked); 1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `blocked` (native run passed; R1-B1/B2 remain); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (corrected production candidate; R1 blocked) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `blocked` (native run passed; R1-B1/B2 remain) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1014,7 +1014,7 @@ attempt 1, passed on that candidate. Application code is identical to `5513213`;
 only native fixtures and their ledger changed. Local evidence commits `f340ec3`,
 `f443ff6` and `6ae7d34` are preserved under local evidence branches; no work was reset.
 
-**Outstanding production R1:** [run 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
+**Historical outstanding production R1 (superseded by the review below):** [run 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
 **attempt 1**, exact corrected candidate above. At the single entry inspection,
 Windows job `108075623934` and macOS job `108075624153` were in progress.
 Expected artifacts: `runtime-foundation-windows-2025` and
@@ -1023,7 +1023,7 @@ logs, ZIP hashes/CRC and outcome/input-hash reports; a green frontend alone is n
 No terminal production result is claimed here. The original feasibility run remains
 PASS on both targets and was neither rerun nor replaced by this production workflow.
 
-**Current checkpoint state:** `awaiting_ci` / R1 BLOCKED, not review-ready or accepted.
+**State at that publication (superseded below):** `awaiting_ci` / R1 BLOCKED, not review-ready or accepted.
 Repository validation passed for 241 files and whitespace passed after the fixture
 correction. Its attempted local Rust rerun was unavailable as recorded above; native
 format/build/tests remain the correction's gate. The earlier completed application
@@ -1037,3 +1037,144 @@ host. Stop active polling. Resume only this exact run's evidence review and boun
 currently available portable toolchain rather than assuming the vanished dependency
 location remains usable. Publication is verified by exact tree equality; this final
 documentation update does not trigger another production runtime run.
+
+
+### Native evidence assessment and remaining R1 blockers — 2026-09-25
+
+**Current state: `blocked`, not review-ready or accepted.** The user selected resume
+and close 1G.2a only, explicitly allowing a stop at a specific remaining blocker.
+This review closes the outstanding-run inspection, not R1. Production is unchanged;
+no replacement/duplicate run, merge, 1G.2b, optional Git, Phase 2 or physical testing.
+
+Fresh Git fetch/ls-remote and PR metadata agreed on head
+`e2d5c886dfe4b981971dba214da5ecb8318500db`, main
+`924619def6f624f336032c3ebc8499ccfcc662f0`, open draft PR #17. Its diff after
+`ad2627c4a0347261098f12883419672ecffc6e29` is documentation only. The clean continuation
+checkout and existing local evidence branches were retained. An older worktree has
+unpublished 1G.1 review documentation already represented in the published ledger;
+it was inspected and left untouched. No local competing executor was observed;
+cross-host ownership is not independently observable. Other open PRs are unchanged.
+
+#### Verified existing run and artifact provenance
+
+Production [36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
+**attempt 1**, ran candidate **`ad2627c4a0347261098f12883419672ecffc6e29`**, tree
+**`381829ad05445ef6d0f385b84a1d9eec02e7bff0`**. Both complete job logs and all six
+files in each artifact were inspected. Checkout log, artifact metadata and report
+candidate/run/attempt agree. ZIP byte size, SHA-256 and CRC pass. Every one of the
+26 core Rust input hashes in each report matches `git show` at the candidate (Windows
+path separators normalized for lookup). That report covers core Rust files only;
+frontend/desktop/workflow provenance comes from the exact logged checkout, not an
+invented all-input hash manifest.
+
+| Target | Job / artifact | Results |
+| --- | --- | --- |
+| Windows x64, Windows Server 2025 build 26100 / AMD64 | `108075623934` / `10864982957`, `runtime-foundation-windows-2025` | Core 12 passed, 0 failed, 2 ignored; explicit SDK 1 passed, 0 ignored (99.40 s); frontend 48 passed; Source browser PASS; desktop 1 passed; format PASS |
+| macOS ARM64, macOS 26.6.2 / arm64 | `108075624153` / `10864657289`, `runtime-foundation-macos-26` | Core 13 passed, 0 failed, 2 ignored; explicit SDK 1 passed, 0 ignored (95.04 s); frontend 48 passed; Source browser PASS; desktop 1 passed; format PASS |
+
+Windows ZIP: 11,106 bytes, SHA-256
+`4ed51f10e5e4a62e361918bd40192c2a01d33e89865f2ed8e175b8957368a168`.
+macOS ZIP: 10,514 bytes, SHA-256
+`bc525c165cd6769531e59807b685c65bbb6189bc298dbf30f063a52dfb2b84c3`.
+Both expire 2026-10-02. The two ignored entries are the explicitly invoked SDK gate
+and re-executed child fixture, not passing tests in the filtered core count. macOS
+has one extra Unix-only manifest/link/root-replacement test. The skipped download
+step is a verified SDK cache hit, not a skipped SDK gate. Native keyboard and
+packaged runtime UI remain explicitly unexercised and belong to later 1G acceptance.
+
+Prerequisite `36126490939` remains PASS on its own candidate, with the previously
+verified artifacts/hashes preserved above. Superseded `36135942863` remains FAILED
+with skipped desktop/SDK gates; the corrected successful run does not erase it.
+
+#### R1 requirement assessment
+
+PASS here means the named bounded case is evidenced, not acceptance of the whole gate.
+
+| Requirement | Assessment at this candidate |
+| --- | --- |
+| Literal production IPC, malformed/stale refusals, zero spawn | PASS for retained handler/service cases; cancellation **during** preparation is missing (R1-B1) |
+| Saved / Save All / Cancel, Source and Scene input retention | PASS for tested preparation choices and renderer lease cases; uncommitted Scene routes to explicit Commit, never auto-commits |
+| Session trust, SDK mismatch/external edits, orphan bytecode, revoke/reopen | PASS for retained service/manifest cases; conservative renewed consent for unknown generated output; Windows root replacement is not the Unix-only test |
+| Long play, script saving, launch/earlier revision, no default reload, Stop then Run latest | PASS through real pinned SDK/service on both targets; no live assets or immutable snapshot claim |
+| Asset/compound/file-lifecycle barriers, refusal/no-write and retry | PASS at transaction/service boundary for tested cases; real user history-stack and move/Stop/retry combinations need completion under R1-B2 |
+| Launch versus import / queued writer race | PASS for serialized in-flight asset transaction drain, late refusal and streaming-import refusal/retry; no live asset refresh tested |
+| Independent worker, responsive Stop/status | PARTIAL: direct worker Stop is timed, but production IPC shares the blocking lifecycle mutex (R1-B1) |
+| Output flood, truncation, validation deadline, natural exit/crash | PASS for actual native child fixtures; 2 MiB retention and 32 KiB byte pages; timed validation is not a play deadline |
+| Preparation/start/validation cancellation and lifecycle races | PARTIAL: completed-preparation cancellation, stale tokens and worker timeout covered; in-progress preparation/control contention and boundary cancellation cases missing |
+| Actual descendant cleanup across Stop/exit/crash/project switch/shutdown | PARTIAL: native worker fixtures retain descendant pipes and assert heartbeat stops; project switch and service shutdown are not exercised with those descendants (R1-B2) |
+| Preservation of 1F and 1G.1 | No application changes in this review; native frontend/Source regressions passed; prior core/G1 evidence retained, final packaged/native 1G acceptance still deferred |
+
+#### R1-B1 — request ownership prevents in-progress cancellation and responsive control
+
+This is a source-confirmed implementation gap, not a failed CI assertion or a measured
+latency claim. `core_request` in `app/src-tauri/src/main.rs` holds `DesktopState.0`
+through the complete handler and blocking native file dialogs. Every `runtime.stop`,
+`runtime.status` and `runtime.cancelPreparation` request needs that same lock.
+`LifecycleService::runtime_prepare` synchronously inventories the project and full SDK
+before assigning/returning a preparation ID. `runtime_grant_trust` and `runtime_start`
+repeat full manifest scans under the same request lock. Inventory byte/entry limits
+are not cancellation or wall-clock bounds. The renderer also retains its Source input
+lease across the awaited prepare request. Therefore a preparation cannot be cancelled
+while the scan is running; a still-open asset picker during play can defer Stop/status
+until the dialog returns. The `<100 ms` worker Stop assertion does not cover this path.
+
+The worker also performs its terminal manifest scan before setting `cleaned`, releasing
+the gate and returning; `RuntimeProcess::drop` joins it synchronously. The documented
+process/pipe deadlines consequently do not bound the complete shutdown path when that
+scan stalls. No measured large-project shutdown pass is claimed.
+
+**Required correction within 1G.2a:** return a session-bound operation/preparation
+handle before long work; put cancellable/bounded inventory and rechecks outside the
+shared lifecycle lock and long renderer lease; retain short, serialized final identity/
+revision/reservation checks and zero spawn on cancellation. Make token-checked control
+reachable independently of dialogs/long authoring work, with stale-session revalidation
+when those tasks finish. Bound or cancel terminal freshness work separately from child
+cleanup. Add deterministic slow-work/held-dialog-equivalent barriers that prove Cancel,
+Stop and status responsiveness through production dispatch, including stale completion
+and retained drafts. Do not weaken manifests, consent or mutation serialization.
+
+This requires a coordinated request/supervisor ownership correction, not a safe
+receipt-only or single-guard closeout fix. Stop at this specific architectural blocker;
+do not mark R1 passed or start 1G.2b while it remains.
+
+#### R1-B2 — service lifecycle and history evidence is incomplete
+
+`runtime_long_play_responsive_stop_and_shutdown` calls `drop(RuntimeProcess)` and checks
+its descendant heartbeat. It does not invoke `LifecycleService::runtime_shutdown`, a
+real service drop, or a project switch. The SDK gate tests busy close/open and later
+close/reopen, but its game has no descendant fixture. The sole desktop test is
+`only_successful_smoke_reports_enter_the_accepted_path`: it compiles the shutdown hook
+but does not exercise it. Thus all these green tests together are still short of the
+explicit service-lifecycle cases in section 5.
+
+Transaction tests construct proposals labelled Undo/Redo; they prove the low-level
+barrier but do not prove real history stacks remain unchanged after a refused inverse
+and retry once after Stop. Loaded script/bytecode deletion refusal is covered, but a
+real move/delete plus history and successful Stop/retry combination is not established.
+
+**Required evidence:** add actual child/descendant service tests for switch Cancel,
+Stop then switch, `runtime_shutdown` and service drop; retain old-session/callback
+isolation and drafts. Exercise starting/validation cancellation and cleanup failures
+without releasing the reservation. Use explicit process-liveness observations as well
+as heartbeat/pipe closure, including descendants that close inherited output. Unix
+cleanup currently checks leader exit and pipe EOF rather than independently waiting
+for group emptiness; inspect/fix any early-release finding exposed by those probes.
+Exercise actual authoring history Undo/Redo and file lifecycle no-write/refusal/retry.
+These are missing cases, not a claim that an orphan or history corruption was observed.
+
+#### Continuation and publication boundary
+
+No application/workflow change or new native dispatch is part of this review. Bounded
+documentation corrections update live status, handover, parent-plan state and ADR
+limitations; the full evidence and failure history remain in this ledger. Documentation checks PASS: `python3 scripts/validate.py` (241 files) and
+`git diff --check`. Publish on the same branch/PR and verify remote contents. No
+application test rerun or build/package matrix for documentation.
+
+Next action: **resolve R1-B1/B2 within 1G.2a only**, starting from this preserved candidate.
+Read the ownership code before choosing the smallest cohesive correction; use targeted
+regressions first, then one replacement native R1 run for the changed candidate. Inspect
+that run's exact artifacts rather than rerunning `36136466567` or the prerequisite.
+Follow the existing manual-resume CI policy if it is still running; no model polling.
+The local Rust toolchain is currently absent, but the official distribution endpoint is
+reachable; restore a portable toolchain if doing implementation. Existing compiled test
+binaries are historical artifacts, not a way to validate new source.

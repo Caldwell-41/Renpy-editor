@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: proposed implementation, Phase 1G.2a; supported-target R1 required.
+Status: implemented foundation, R1 blocked after native evidence review (2026-09-25).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -52,3 +52,15 @@ validation/result freshness and consent must not infer ownership of SDK-generate
 
 The broad runtime and Diagnostics UI remains Phase 1G.2b. This ADR does not accept R1;
 exact test results and missing evidence are maintained in the Phase 1G task ledger.
+
+
+## Evidence review limitations
+
+The existing native production workflow passed on both targets, but R1 is not accepted.
+Preparation and trust/start manifest scans still execute under the shared lifecycle
+request lock, so cancellation during preparation and responsive production Stop/status
+under competing work are not established. Terminal manifest work also sits outside the
+stated process/pipe cleanup time budgets. Worker-drop evidence does not substitute for
+service shutdown/project-switch descendant tests. The correction and missing evidence
+are R1-B1/B2 in the [1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
+Keep the invariants above; do not interpret this ADR as a waiver of those gates.
