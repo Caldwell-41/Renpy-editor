@@ -21,13 +21,13 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is complete and CURRENT/HANDOVER own its verified state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines five checkpoint chats across its three capability gates; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) preserves all twelve acceptance cases. Each needs accepted/integrated prerequisites and explicit execution selection.
+**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is complete and CURRENT/HANDOVER own its verified state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines three checkpoint chats across Branches and runtime/diagnostics; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) retains twelve acceptance IDs with new Git work removed. Each needs accepted/integrated prerequisites and explicit execution selection.
 
-**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, local Git checkpoint, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
+**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
-Phase 1 includes conventional staged project creation; distinct title/folder identity, selected parent, compatible pinned SDK, configurable resolution and optional local Git initialization; modular source and editor-only metadata; safe persistence/reopen; Characters with extensible Appearances; copied Assets and bool/int/string Variables; the bounded visual beat set; Scene/Source/Branches workspaces; scene-local partial preview; lossless Custom Code; shared transactions, coherent history, minimum usable recovery; explicit SDK validation/normal run; and a local Git checkpoint.
+Phase 1 includes conventional staged project creation; distinct title/folder identity, selected parent, compatible pinned SDK, configurable resolution and optional local Git initialization; modular source and editor-only metadata; safe persistence/reopen; Characters with extensible Appearances; copied Assets and bool/int/string Variables; the bounded visual beat set; Scene/Source/Branches workspaces; scene-local partial preview; lossless Custom Code; shared transactions, coherent history, minimum usable recovery; explicit SDK validation/normal run and continued editing during play. New Git status/diff/checkpoint work is optional later scope.
 
-The bounded beat set remains background/scene, show/hide and appearance changes, Left/Centre/Right placement references, dialogue/narration, simple assignments, unconditional choices/jumps/return, music/SFX and a small transition set. Advanced conditions/calls, freeform transforms/ATL, UI Designer, Timeline, general import, Run From Here, LLM, GitHub remotes, plugins and release signing are not Phase 1 implementation.
+The bounded beat set remains background/scene, show/hide and appearance changes, Left/Centre/Right placement references, dialogue/narration, simple assignments, unconditional choices/jumps/return, music/SFX and a small transition set. Advanced conditions/calls, freeform transforms/ATL, UI Designer, Timeline, general import, Run From Here, LLM, new Git status/diff/checkpoints, GitHub remotes, plugins and release signing are not Phase 1 implementation.
 
 ### Dependency checkpoints
 
@@ -38,7 +38,7 @@ The bounded beat set remains background/scene, show/hide and appearance changes,
 | 1E.2 | Functional Scene/Story authoring and minimum recovery UX | Explicit beats and choices; safe inspection/resolution of supported recovery states, not evidence deletion |
 | 1E.3 | Preview, session-scoped media presentation and Scene polish | Truthful partial state, safe thumbnails/audition, keyboard/accessibility and visual-conformance evidence |
 | 1F | Full Source workspace, broader mapping and direct/external reconciliation | Lossless bytes, explicit invalid-buffer/stale-view policy, correct local conflict versus global recovery blocking |
-| 1G.1, 1G.2a–b, 1G.3a–b | Branches; runtime foundation and UI; Git foundation and UI | Five checkpoints proving the three capability gates: shared semantic truth, executable trust/runtime ownership and reviewed checkpoint contents |
+| 1G.1, 1G.2a–b | Branches; runtime foundation and UI/diagnostics | Three checkpoints proving shared flow, executable trust/runtime ownership and editing during play |
 | 1H | Integrated acceptance | Real authoring, both runtime routes, failure/recovery paths and continued editing on both targets |
 
 These subdivisions do not add a new product scope or bypass milestone approval. The minimum source service is required by 1E; the general Source workspace remains 1F. Minimum usable recovery belongs before the 1E authoring gate; advanced recovery tooling stays later. Ordinary external file divergence can be isolated when safe, while incomplete/ambiguous multi-file recovery retains the central write block.
@@ -46,12 +46,24 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 **Exit criteria:**
 
 - Production Gate E and the integrated corrective gate pass before later authoring is declared safe.
-- Fresh-checkout Windows x64/macOS ARM64 runs complete create → author → save → close → reopen → edit → validate → run → local Git checkpoint, including multi-Scene lifecycle, both choice routes and repeated undo/redo.
+- Fresh-checkout Windows x64/macOS ARM64 runs complete create → author → save → close → reopen → edit → validate → run, including multi-Scene lifecycle, both choice routes and repeated undo/redo.
 - Generated projects remain ordinary editable Ren'Py and run without `.renpy-editor/`.
 - Golden tests prove no-op fidelity and minimal supported changes, including Unicode/newlines and opaque/custom source.
 - Crashes and external conflicts preserve accepted and competing data. Supported recovery can be resolved explicitly through the minimum UI and editing can continue; ambiguity is not concealed.
 - Scene/Source/Branches remain projections of shared source/semantic transactions. Preview and diagnostics show unknown/stale state honestly.
 - Behavioral, packaged-security, accessibility, visual-system, capacity/precision and safe media/discovery checks pass. Label presence, file existence or an SDK-skipped wrapper is not sufficient evidence.
+
+## Optional milestone — Local Git checkpoints (deferred)
+
+**Decision:** 2026-09-25. [Optional Git](tasks/active/optional-local-git.md) preserves the
+former 1G.3a/1G.3b requirements as GIT.1 safety and GIT.2 UI. No date or automatic start;
+the user may select it later. It is not required for 1G/1H, Phase 1 closure or Phase 2
+entry. Existing project-creation Git init remains. Later GitHub integration depends on
+this foundation if selected; it must not assume Phase 1 delivered status/diff/checkpoints.
+
+The remaining Phase 1 test cadence is agent-run development and early native process
+proof, one final human session at 1G closure, and automated 1H acceptance with narrowly
+reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-cadence) owns it.
 
 ## Phase 2 — Initial LLM assistance
 
@@ -81,7 +93,7 @@ State simulation/Run From Here remain Phase 3; broader reachability/state and na
 | 3B — Supported screen designer | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
 | 3C — VN animation/audio Timeline | Reviewed Ren'Py event/transform/channel subset with explicit timing, source mapping, undo and runtime tests. No general non-linear video editor or unrestricted ATL promise. |
 | 3D — Supported state simulation and Run From Here | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
-| 3E — Workflow and GitHub maturity | Asset/diagnostic/recovery usability and safe supported GitHub authentication/remotes, with explicit review and non-destructive defaults. Builds on Phase 1's minimum recovery and Phase 2's credential boundary; it does not retroactively supply those prerequisites. |
+| 3E — Workflow and GitHub maturity | Asset/diagnostic/recovery usability and safe supported GitHub authentication/remotes, with explicit review and non-destructive defaults. Builds on Phase 1's minimum recovery, Phase 2's credential boundary and the separately selected optional Git foundation for GitHub work; it does not retroactively supply those prerequisites. |
 | 3F — Distribution and release acceptance | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
 
 These are dependency-planning boundaries; each execution brief must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.

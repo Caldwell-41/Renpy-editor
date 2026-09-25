@@ -1,10 +1,15 @@
 # Current status
 
-**Updated:** 2026-09-23.
+**Updated:** 2026-09-25 (planning amendment only).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1F and its post-merge production verification closed; Phase 1G.1 unstarted.
+**Current checkpoint:** 1G scope/testing documentation amendment `review_ready` on
+`docs/phase-1g-scope-testing`; Phase 1F remains closed and 1G.1 unstarted.
+**Scope decision:** new Git work is [optional/deferred](../tasks/active/optional-local-git.md),
+not a Phase 1/1H or Phase 2-entry requirement. 1G has three checkpoints. Agent-run
+build-phase checks precede one final human 1G session; 1H does not automatically repeat it.
+**Planning baseline:** main `f6c269278aa1d8955876ca45bac98a92940e1c5e`; no application changes.
 **Reviewed head:** `0075d98f80a680588b7eb3f49ab437c71b48a237`.
 **Tested production commit:** `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
 **Evidence:** [post-merge verification 7.30](../tasks/archive/2026-09-23-phase-1f-save-correction.md#730-post-merge-production-evidence-closeout),

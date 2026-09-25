@@ -262,7 +262,7 @@ pass.
 | Golden | Byte-identical no-op round trips and minimal source-range patches over representative `.rpy` files |
 | Property/fuzz | Parser recovery, indentation/strings, path normalization, archive entries, transaction sequences |
 | Integration | Pinned official SDK compile, lint `--error-code`, tests, run harness, diagnostics, distributions |
-| Desktop E2E | Project create/save/close/reopen, Scene edit, source sync, external conflict, preview/run, Git checkpoint |
+| Desktop E2E | Project create/save/close/reopen, Scene edit, source sync, external conflict, preview/run; Git checkpoint in optional Git |
 | Cross-platform | Windows and macOS file watching, paths, subprocesses, credential store, package/install/launch |
 | Security/privacy | IPC denial, traversal/symlinks, hostile projects, redacted logs, fixture/package PII scan |
 | Performance | Large scripts/assets/graphs, incremental parse, patch latency, preview responsiveness, memory budgets |
@@ -284,8 +284,8 @@ quality-gated rather than one large feature branch:
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
 | 1F Source | Partial CST/range mapping, no-op/minimal-patch golden tests, direct source→Scene sync, exact custom-code preservation, external conflicts |
-| 1G completion | Branch graph from shared edges, authoritative SDK diagnostics/run, local Git status/diff/checkpoint, technical-surface design consistency |
-| 1H acceptance | Fresh end-to-end Windows/macOS create→author→save→close→reopen→validate→run→Git workflow plus transaction, source, privacy/security, packaged app, accessibility, and visual-system gates |
+| 1G completion | Branch graph from shared edges, authoritative SDK diagnostics/run, continued authoring during play, technical-surface design consistency |
+| 1H acceptance | Fresh end-to-end Windows/macOS create→author→save→close→reopen→validate→run workflow plus transaction, source, privacy/security, packaged app, accessibility, and visual-system gates |
 
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
@@ -410,6 +410,94 @@ A packaged probe must construct its terminal report on success and guarded failu
 lexical-scope/report errors must fail a retained full-probe test, not prompt timeout
 increases or unsupported causal claims about application Save routing.
 
+## Phase 1G testing ownership and cadence
+
+**User decision, 2026-09-25:** no routine physical testing by the user during 1G build
+checkpoints. Plan one focused final session on Windows x64 and macOS ARM64 after the
+agent's automated gates pass. New Git work/testing is deferred to
+[optional Git](tasks/active/optional-local-git.md); existing init remains a regression.
+This section governs 1G and 1H test ownership over older unspecific native-gate wording.
+It changes scheduling and evidence ownership, not correctness or platform requirements.
+
+| Stage / gate | Owner and layer | Required evidence / human involvement |
+| --- | --- | --- |
+| Every changed checkpoint | Implementing agent: targeted core, renderer, literal IPC and relevant existing regressions | Assert changed contracts cheaply; no user physical testing |
+| 1G.1 / G1 | Agent: real shared flow service plus rendered UI, limits and navigation tests | Production source/Scene edges and draft retention, not test-only edges; actual target WebView checks by final 1G closure |
+| 1G.2a / R1 | Agent: real pinned SDK and child-process integration on both supported OSes | Early reload/editing/Stop/cleanup proof before 1G.2b; a mock process is insufficient; no user physical testing |
+| 1G.2b / R2 and final 1G | Agent: real-service packaged workflow on both targets, complete final supported-target gate | Visible controls through actual IPC/service/disk/reopen; real SDK failures, both authored routes and normal Run/Stop |
+| Final 1G interaction acceptance | User: one prepared focused session per supported OS | Genuine native keyboard, focus/usability and visual review described below; agent prepares fixtures/instructions and collates results |
+| 1H / H01-H12 | Agent: integrated automation and rendered-output review on final candidate | Reuse applicable final-1G human evidence; request only a specific uncovered or changed interaction |
+
+Each new scenario must name its expected observation, test command, owner, platform,
+layer (mock DOM, real browser, packaged WebView, real service, native input or human),
+candidate and evidence path before implementation. Report PASS/FAIL/BLOCKED/SKIPPED
+separately. Checkpoint review/selection is not a request to physically test software.
+Missing automated target access is a blocked gate with an explicit host requirement;
+do not silently turn the user's machines into a manual substitute or call Linux a
+Windows/macOS pass. Agent-accessible local hosts may provide native evidence if the
+exact toolchain/SDK/candidate/commands and results are retained; access is not assumed.
+
+### Real-service and native-input coverage
+
+The existing packaged authoring probe installs a mock requester and dispatches synthetic
+DOM events. Keep it for rendering/race coverage. Add small named 1G scenarios through
+real production IPC/services in an isolated synthetic project: graph destination edit
+and reopened source; Validate failure and location; Run/Stop with captured revision.
+Prove accepted bytes and outcomes. Extend literal renderer-JSON handler tests for all
+new request variants, success/refusal and reopened state; Rust type-only or mock tests
+cannot catch renderer/core casing mismatches. Reuse existing safe fixture/harness entry
+points; no general renderer filesystem/process privilege or CSP relaxation.
+
+Synthetic KeyboardEvent dispatch is not OS key delivery. Automated native input counts
+only after the driver is proven to reach the packaged application on that target and
+its evidence is labelled accurately; otherwise the small final human session owns that
+remaining check. No new general desktop-automation platform is required for 1G.
+
+### Final human session and narrow evidence reuse
+
+Prepare one reproducible project and short expected-result checklist, aiming for roughly
+15–20 minutes per platform (an estimate, not a substitute for completing required cases):
+
+1. Navigate Scene/Source/Branches and change a mapped destination; check native keyboard
+   operation, focus restoration and preservation of pending input.
+2. Run the authored routes; edit/save during play, observe earlier-launch status, Stop
+   and rerun the latest saved work. The automated route oracle owns exhaustive outcomes.
+3. Trigger one known SDK diagnostic and navigate to its current source safely.
+4. Check ordinary resize/display scaling, relevant shortcuts, close/reopen and usability.
+
+No Git checkpoint case, crash injection, hostile configuration, exhaustive edge/race
+matrix or repeat of the accepted 1F manual suite is assigned to the user. Automated
+1F regressions remain. A changed Save/native-input path may justify a focused repeat;
+name the change and affected interaction rather than reopening all earlier acceptance.
+Manual screen-reader/signing/reputation limitations stay honestly recorded, not added
+as an unplanned build-phase test matrix or claimed passes.
+
+Record exact candidate, package hashes, OS/architecture, cases, results and limitations
+for the final human session. 1H links those results instead of automatically requesting
+a second broad session. On an identical candidate, reuse mapped human cases directly.
+If the candidate changes, the agent records relevant code/test/workflow/dependency diffs
+and an impact assessment for each reused interaction; missing or affected evidence stays
+open and only that case is repeated. This is a narrow human-evidence policy, not a
+cross-SHA automated package-check waiver. Final integrated automated 1H gates still run
+as required. Neither a previous green status nor a docs-only amendment is new execution.
+
+### Cost and harness discipline
+
+Use targeted tests during development and early platform process tests at R1. Reserve
+the full package matrix for the coherent final candidate, plus materially affected
+corrections. Do not dispatch a full matrix for each checkpoint or documentation change.
+Do not append every scenario to one smoke; report independent stages, monotonic timing,
+cleanup outcomes and reliable terminal failure reports.
+
+Current `production-scaffold.yml` supports manual dispatch and automatically packages
+relevant main pushes. It does not implement pre/post-merge evidence deduplication. Before
+scheduling an expensive final pre-merge run, record the intended integration/run strategy
+and any bounded workflow amendment needed to avoid an automatic duplicate. A trigger
+change must be implemented/reviewed before relying on it; documentation never suppresses
+an actual trigger or permits bypassing required checks. Prefer a small explicit trigger
+policy over reviving OPT-1A or adding a general evidence controller. This documentation
+update changes no workflow and dispatches no production matrix.
+
 ## Required quality gate by change type
 
 | Change | Minimum gate |
@@ -435,8 +523,8 @@ to isolate and fix, not gates to retry indefinitely.
 Phase 0 established initial bounded evidence; production Phase 1 should remeasure where
 the real implementation could materially differ. Starting targets to test, rather than
 silently assume, are visible edit feedback within 100 ms, incremental source mapping
-within 250 ms for a typical Scene file, responsive pan/filter on a 10,000-node graph
-through virtualization where that graph work is in scope, and no UI-thread blocking
+within 250 ms for a typical Scene file, responsive pan/filter at the declared production graph limit (1G initially 500 Scenes /
+2,000 flow edges; 10,000-node virtualization remains later scope), and no UI-thread blocking
 during SDK or Git operations.
 
 

@@ -10,7 +10,8 @@ Panels are keyboard reachable, resizable, collapsible, and compatible with
 screen-reader semantics where the chosen desktop/webview stack permits them.
 
 Phase 1 makes Scene, Source, and Branches the functional centre workspaces. Characters,
-Assets, Variables, project setup, Diagnostics/Runtime, and Git are supporting surfaces.
+Assets, Variables, project setup and Diagnostics/Runtime are supporting surfaces.
+Git status/diff/checkpoint is a deferred optional supporting surface, outside Phase 1.
 UI Designer and Timeline are later major workspaces and must not appear as functional
 Phase 1 features; they may be omitted or clearly labelled as future work.
 
@@ -178,11 +179,11 @@ quality rather than decoration.
 
 | Region | Phase 1 contents |
 | --- | --- |
-| Top toolbar | Project · persistence state · undo/redo · validate · run game · Git state |
+| Top toolbar | Project · persistence state · undo/redo · validate · run game |
 | Left sidebar | Story (chapters/scenes) · Characters · Variables · Assets |
 | Centre tabs | Scene · Source · Branches |
 | Right inspector | Selected-beat/staging properties and contextual asset/character information |
-| Bottom panel | Diagnostics · runtime · Git changes |
+| Bottom panel | Diagnostics · runtime |
 
 The centre owns flexible space. Side and bottom panels collapse. When room becomes
 constrained, preserve a usable Beats editor first: collapse/shorten bottom diagnostics,
@@ -499,7 +500,20 @@ authoritative compile/lint diagnostics and navigation.
 Phase 1 provides normal `Run Game` from the project's standard entry point. Correct
 `Run From Here` is deferred until state simulation can establish effective prior state.
 A local Git repository may be initialised during project creation (checked by default),
-and Phase 1 exposes basic status/diff/checkpoint without GitHub remote integration.
+but new status/diff/checkpoint controls belong to the deferred
+[optional Git milestone](tasks/active/optional-local-git.md), not Phase 1. Do not add a
+required Git panel or checkpoint step to the Phase 1 authoring flow.
+
+Validate and Run use one input/revision preparation path: retain Source drafts and
+uncommitted Scene forms; explicitly save/commit through existing commands, use the
+saved revision with input retained, or cancel. Run does not add a hidden lint cycle.
+During play ordinary safe authoring continues; saving does not automatically restart
+or reload the game. Show launch revision separately from persistence/diagnostic state,
+including when later asset reads may see changed files. Stop then Run deliberately
+starts the latest saved revision. Conflicting file lifecycle/history operations offer
+Stop and retry; do not lock the entire editor for the duration of play. The detailed
+[1G.2a proof](tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation)
+is required before claiming this behaviour works.
 
 If an external change affects one Scene file, block unsafe writes/reconciliation for
 that file/Scene rather than freezing unrelated project files when they can remain safe.

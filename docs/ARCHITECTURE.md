@@ -360,3 +360,22 @@ Every asynchronous UI completion also carries its originating view, operation, a
 session generation. Late success, failure, cancellation, close/open, status, and
 mutation callbacks therefore cannot restore an obsolete project or overwrite newer
 persistence feedback.
+
+## Planned Phase 1G runtime boundary
+
+September 25 planning amendment, not implemented behaviour: 1G extends existing Scene,
+Source, transaction and SDK services. One short operation-preparation lease captures
+input/revisions and reuses existing explicit acceptance commands. A core-owned runtime
+supervisor then owns process identity/output/cancellation without holding the lifecycle
+mutex for the child's lifetime. Ordinary safe authoring continues; targeted file/history
+conflicts require Stop. Prove pinned-SDK reload control and process-tree cleanup on both
+platforms before runtime UI closure. Launch provenance does not guarantee immutable
+later file reads. Material implementation decisions still require the owning runtime ADR.
+
+Shared flow projection must preserve known routes and explicit missing/unknown/partial
+boundaries without a second parser/document authority. Diagnostics gain structured
+locations and revision/session freshness through the existing SDK adapter. See the
+[1G brief](tasks/active/phase-1g-branches-runtime-git.md) for budgets and proof gates.
+New Git status/diff/checkpoint services are deferred to
+[optional Git](tasks/active/optional-local-git.md); only existing optional creation-time
+init remains in Phase 1. No Git implementation is implied by the general adapter table.

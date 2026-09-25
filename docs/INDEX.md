@@ -13,7 +13,9 @@ Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14
 CURRENT/HANDOVER own the verified result.
 Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
 and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
-integrated documentation, with implementation unstarted and separately gated.
+originally integrated documentation, with implementation unstarted and separately gated.
+The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
+contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
 acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
@@ -29,8 +31,9 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
-| Planned Phase 1G Branches, runtime/diagnostics and local Git checkpoints | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
-| Planned Phase 1H integrated acceptance, full twelve-case matrix | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
+| Planned Phase 1G Branches and runtime/diagnostics | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
+| Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |

@@ -48,6 +48,15 @@ The initial user is one visual-novel creator managing multiple games. They need 
 7. Edit synchronized source; represent unsupported constructs as custom-code blocks.
 8. Validate, preview/run from an inspectable state, and create a Git checkpoint.
 
+### Phase 1 subset and optional Git
+
+Phase 1 ends with the authoring/source/Branches/validation/play/reopen workflow.
+New local Git status/diff/checkpoint work is deferred to an
+[optional milestone](tasks/active/optional-local-git.md), selected separately at a later
+date. It is not required for Phase 1 acceptance or Phase 2 entry. Existing optional Git
+initialization during project creation remains. The broader initial-release workflows
+above describe later product scope; they do not restore Git as a Phase 1 prerequisite.
+
 ### LLM-assisted authoring
 
 The user explicitly invokes an action: generate/continue a scene, rewrite selected
