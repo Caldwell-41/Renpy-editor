@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (production candidate; native R1 pending); 1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (corrected production candidate; R1 blocked); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` (production candidate; native R1 pending) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `awaiting_ci` (corrected production candidate; R1 blocked) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -997,3 +997,43 @@ the previously available portable Rust/Cargo dependency directory disappeared fr
 host after the in-flight continuation. No result is claimed for that attempted rerun.
 Earlier completed production/SDK/core results remain recorded on their actual inputs;
 the fixture-only correction is gated by the new native workflow's format/build/tests.
+
+### Published correction and native evidence handover
+
+The superseded native run `36135942863`, attempt 1, **FAILED on both targets**. Full job
+logs were inspected. Windows: 8 passed, 4 failed, 2 ignored; macOS: 9 passed, 4 failed,
+2 ignored. All four failures stopped at strict root registration with `UnsafePath`,
+confirming the fixture defect above, before native process cleanup could be exercised.
+Frontend and preserved Source browser gates passed on both targets. Desktop and real-SDK
+service gates were **skipped**, not passed. No other failure was observed in those logs.
+
+The corrected candidate is **`ad2627c4a0347261098f12883419672ecffc6e29`**, exact tree
+**`381829ad05445ef6d0f385b84a1d9eec02e7bff0`**, published on the same branch/PR with
+non-forced updates. Repository quality [36136473094](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136473094),
+attempt 1, passed on that candidate. Application code is identical to `5513213`;
+only native fixtures and their ledger changed. Local evidence commits `f340ec3`,
+`f443ff6` and `6ae7d34` are preserved under local evidence branches; no work was reset.
+
+**Outstanding production R1:** [run 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567),
+**attempt 1**, exact corrected candidate above. At the single entry inspection,
+Windows job `108075623934` and macOS job `108075624153` were in progress.
+Expected artifacts: `runtime-foundation-windows-2025` and
+`runtime-foundation-macos-26`, seven-day retention. Inspect actual step outcomes,
+logs, ZIP hashes/CRC and outcome/input-hash reports; a green frontend alone is not R1.
+No terminal production result is claimed here. The original feasibility run remains
+PASS on both targets and was neither rerun nor replaced by this production workflow.
+
+**Current checkpoint state:** `awaiting_ci` / R1 BLOCKED, not review-ready or accepted.
+Repository validation passed for 241 files and whitespace passed after the fixture
+correction. Its attempted local Rust rerun was unavailable as recorded above; native
+format/build/tests remain the correction's gate. The earlier completed application
+and SDK results are not promoted into a native pass.
+
+`AGENTS.md` and `WORKFLOW.md` require a published manual-resume handover instead of
+model polling when no qualified event continuation exists; none is configured on this
+host. Stop active polling. Resume only this exact run's evidence review and bounded
+1G.2a fixes. Do not duplicate dispatch, request user physical testing, merge, or begin
+1G.2b, optional Git or Phase 2. If further local Rust work is needed, first establish a
+currently available portable toolchain rather than assuming the vanished dependency
+location remains usable. Publication is verified by exact tree equality; this final
+documentation update does not trigger another production runtime run.
