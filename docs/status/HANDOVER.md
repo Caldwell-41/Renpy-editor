@@ -1,65 +1,69 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-26. **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Phase 1G.2a R1-B1/B2 correction — `awaiting_ci`; R1 incomplete, not accepted.
+**Checkpoint:** Phase 1G.2a R1-B1/B2 — resolved, `review_ready`; not user-accepted.
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Final application candidate:** `07f23b61d46511848d2b09db57ba1d5a696cabe0`.
+**Tested application candidate:** `07f23b61d46511848d2b09db57ba1d5a696cabe0`.
 **Candidate tree:** `614931107db78f61c5b864a099ca2737ab546bd8`.
+**Entry handover:** `90629baf4c343d3521fa7f7ed136f57f22f11d8d`; this follow-up changes documentation only.
 **Verified main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
 
-## Exact native operations to resume
+## Completed correction and evidence
 
-| Run / attempt | Candidate | Observed state and use |
+`ApplicationHost` separates exclusive service checkout from session/token-bound
+Stop/status/revoke and cancellable preparation receipts. Source releases its lease on
+receipt and retains drafts; stale dialog completions cannot mutate a replacement session.
+Cancellation reaches inventories and supervisor startup with an atomic spawn boundary.
+Terminal cleanup performs no inventory and conservatively reports stale revision.
+Unix checks group disappearance independently of pipes; failed cleanup retains ownership.
+The final receipt-race correction also accepts cancellation during competing authoring
+ownership and defers teardown to the returning session-bound owner.
+
+Replacement [36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132),
+**attempt 1, SUCCESS**, matches the exact application candidate above. Complete job logs,
+each artifact's six files, ZIP size/SHA-256/CRC and **all 60 input hashes per target**
+were verified. Every required gate actually ran and passed; cached SDK download was
+skipped, but archive verification and the explicit SDK test ran.
+
+| Target | Job / artifact | Verified results |
 | --- | --- | --- |
-| [36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132) / 1 | `07f23b61d46511848d2b09db57ba1d5a696cabe0` | Pending at identity inspection; final replacement R1 evidence required |
-| [36144599144](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144599144) / 1 | `fd4ffca38373790f730818bbf9e6c8a388dac92f` | In progress at inspection; superseded by a completed-receipt cancellation race fix; preserve actual eventual outcome |
+| Windows x64 | `108104157804` / `10868999163` | Runtime core 17 passed/2 ignored; explicit SDK 1 passed/0 ignored (79.93 s); frontend 49/0 skipped; Source browser/build, desktop 1 and format passed |
+| macOS ARM64 | `108104157482` / `10868604900` | Runtime core 18 passed/2 ignored; explicit SDK 1 passed/0 ignored (118.24 s); frontend 49/0 skipped; Source browser/build, desktop 1 and format passed |
 
-Both are push-triggered runs on different application inputs, not duplicate dispatches.
-The later run waits for the earlier branch concurrency owner. No target pass is claimed.
-Expected final artifacts: `runtime-foundation-windows-2025`,
-`runtime-foundation-macos-26`, seven-day retention. Inspect complete step outcomes/logs,
-actual test counts, ZIP SHA-256/CRC/size and all expanded input hashes against the exact
-candidate. Failed, skipped or missing evidence is not a pass.
+Ignored core entries are the separately invoked SDK gate and child fixture, not extra
+passes. Production-dispatch cancellation/held-ownership, real service switch/shutdown/
+Drop, closed-output descendants/PID liveness, failed-cleanup ownership and actual Scene
+history/file-lifecycle refusal/no-write/Stop/retry cases passed on both targets.
 
-## What changed and what passed locally
+[Ledger 13 closeout](../tasks/active/phase-1g-branches-runtime-git.md#replacement-native-evidence-and-r1-b1b2-closeout--2026-09-26)
+contains the requirement assessment, exact hashes/sizes/expiry, run provenance and limits.
+[ADR 0008](../adr/0008-controlled-runtime.md) owns the durable control/cancellation contract.
+Kernel I/O cancellation is cooperative; failed cleanup confirmation is injected after
+actual tree cleanup. Desktop's one test is smoke-report validation; lifecycle behavior
+is evidenced in core. No native keyboard, packaged runtime UI or final human acceptance
+is claimed. Those remain later 1G gates, not missing evidence for this bounded correction.
 
-`ApplicationHost` separates exclusive service checkout from token-bound Stop/status/
-revoke and cancellable long-work receipts. Source releases its lease on receipt;
-drafts remain retained. Dialog completion validates the captured session. Cancellation
-reaches inventory/hash and supervisor startup with an atomic cancellation/spawn boundary.
-Terminal cleanup no longer hashes the filesystem; results stay conservatively stale
-until full new preparation. Unix checks group disappearance independently of pipes.
-Failed cleanup retains its owner/reservation across repeated shutdown.
+## Preserved work and publication
 
-Production dispatch tests cover held prepare/grant/start inventories, zero spawn
-attempts, stale receipts, competing authoring work, completed-receipt cancellation and
-stale dialog completion. Real service switch/Cancel/Stop/shutdown/Drop tests include
-child descendants with inherited and closed output handles, PID liveness, starting/
-validation cancellation and injected cleanup-confirmation failure. Real Scene history
-and move/delete cases prove refusal/no-write and Stop/retry. See
-[ledger 13](../tasks/active/phase-1g-branches-runtime-git.md#final-correction-publication-and-native-manual-resume-handover--2026-09-26)
-and [ADR 0008](../adr/0008-controlled-runtime.md).
+Superseded `36144599144`, attempt 1 on `fd4ffca`, actually **succeeded** on both targets;
+its complete logs/outcomes were inspected and retained in the ledger. It is superseded
+by the final receipt-race fix and is not final-source acceptance evidence. Historical
+production `36136466567` and feasibility `36126490939` retain their verified PASS results;
+failed `36135942863` retains its failures/skipped gates. No duplicate dispatch or rerun.
+Final-source quality `36144979086` and entry-handover quality `36145345911` passed.
 
-Final `07f23b6`: release runtime 18 passed/2 ignored, format/whitespace and repository
-validation (244 files) passed. Exact-candidate repository quality `36144979086` passed.
-Initial correction `fd4ffca`: full core 178 passed/6 ignored, explicit official SDK
-1 passed/0 ignored (117.37 s), frontend 49/0 skipped, Source browser/build and desktop
-1 passed. The final receipt correction changes two core files; those earlier broad
-passes are not relabelled exact-final-source evidence. The final native run supplies it.
+The isolated checkout preserves prior local worktrees/evidence branches. Fresh refs
+showed no newer branch commit; publication uses non-forced ancestry checks. This
+assessment is documentation only; repository validation passed for 244 files and
+whitespace checks passed;
+it triggers no native runtime/package matrix. Verify remote head/tree, handover and PR
+body after publishing. No local-only implementation remains. Any automatic quality
+check for this documentation commit is separate from the completed native evidence;
+follow AGENTS/WORKFLOW and stop active polling if it is outstanding.
 
-## Preserved evidence, ownership and next boundary
+## Next bounded action
 
-Historical production `36136466567` attempt 1 remains PASS on `ad2627c`; prerequisite
-`36126490939` remains PASS for SDK/reload feasibility. Already inspected hashes/results
-remain in ledger 13. Neither was rerun. Failed/superseded `36135942863` remains FAILED
-with its skipped gates. The new superseded run above does not erase any earlier result.
-
-The isolated continuation checkout preserves older worktrees/evidence branches. Visible
-prior Renpy tasks were idle; cross-host ownership is not independently observable.
-All updates use fresh non-forced ancestry checks. Keep PR #17 draft/open.
-
-**Manual resume required by AGENTS/WORKFLOW:** no qualified automatic same-thread
-continuation exists. Stop active polling. Resume only the exact runs above, assess
-final R1-B1/B2 evidence and resolve bounded findings, then publish/verify the assessment
-and handover. Do not dispatch duplicates or request user physical testing. No merge,
-1G.2b, optional Git or Phase 2. This docs-only follow-up triggers no runtime rerun.
+No outstanding native R1 operation and no unresolved R1-B1/B2 finding in this assessment.
+Independently review **1G.2a only** from this candidate, ledger and handover; acceptance
+is a separate decision. Keep PR #17 draft/open. Do not request physical testing, merge,
+start 1G.2b, optional Git or Phase 2 without a new explicit scope selection.

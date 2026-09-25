@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (R1-B1/B2 correction published; replacement run pending); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (R1-B1/B2 resolved; replacement native evidence verified); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `blocked` (native run passed; R1-B1/B2 remain) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (replacement native evidence verified) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1327,3 +1327,95 @@ continuation exists on this host. Next bounded action: inspect these exact runs,
 final-candidate R1-B1/B2 evidence, address only actual bounded findings, then publish the
 assessment and updated handover. Do not dispatch a duplicate run, merge, request physical
 testing, or advance to 1G.2b, optional Git or Phase 2.
+
+
+### Replacement native evidence and R1-B1/B2 closeout — 2026-09-26
+
+**Assessment: R1-B1 and R1-B2 resolved; 1G.2a `review_ready`, not user-accepted or
+merged.** The user resumed after quality run `36145345911` completed. Fresh refs
+confirmed clean published handover `90629baf4c343d3521fa7f7ed136f57f22f11d8d`,
+unchanged main `924619def6f624f336032c3ebc8499ccfcc662f0`, and open draft PR #17.
+No newer branch work was overwritten. This assessment changes documentation only;
+all application/workflow inputs remain those of the final candidate below.
+
+#### Final candidate and verified native evidence
+
+[Run 36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132),
+**attempt 1, SUCCESS**, tested **`07f23b61d46511848d2b09db57ba1d5a696cabe0`**, tree
+**`614931107db78f61c5b864a099ca2737ab546bd8`**. Both complete job logs and each artifact's
+six files were inspected. Logged checkout, report candidate/run/attempt and GitHub
+metadata agree. Each ZIP's byte size and SHA-256 match GitHub metadata; CRC and safe
+member checks pass. **All 60 recorded input hashes on each target match the candidate**,
+including core, frontend/tests, desktop, workflow and dependency/toolchain manifests
+(Windows separators normalized for lookup). Both reports say `targetPassed: true`;
+all required steps and explicit SDK gates succeeded.
+
+| Target | Job / artifact | Actual result |
+| --- | --- | --- |
+| Windows x64, Server 2025 build 26100 / AMD64 | `108104157804` / `10868999163`, `runtime-foundation-windows-2025` | Runtime-filter core 17 passed, 0 failed, 2 ignored (11.02 s); explicit SDK 1 passed, 0 ignored (79.93 s); frontend 49 passed, 0 skipped; Source browser/build PASS; desktop 1 passed; format PASS |
+| macOS ARM64, macOS 26.6.2 / arm64 | `108104157482` / `10868604900`, `runtime-foundation-macos-26` | Runtime-filter core 18 passed, 0 failed, 2 ignored (9.76 s); explicit SDK 1 passed, 0 ignored (118.24 s); frontend 49 passed, 0 skipped; Source browser/build PASS; desktop 1 passed; format PASS |
+
+Windows ZIP: **8,780 bytes**, SHA-256
+`afb30ebbb2fce4695af4487514936923ddd85e6d465f4da1c79c8f0e9ca13bdb`,
+expires `2026-10-02T14:10:02Z`.
+macOS ZIP: **8,211 bytes**, SHA-256
+`058690b8982fc8126c3bce8ca33c92c34829251fd3be1d08ed0ed713f4bf50b0`,
+expires `2026-10-02T14:09:39Z`.
+
+The two ignored core entries are the separately invoked official-SDK gate and the
+re-executed child fixture; neither is added to the passing count. macOS includes the
+extra Unix-only manifest/link/root-replacement test. The only skipped SDK download is
+a cache hit; archive verification and the real SDK/service test actually ran. Source
+browser logs retain the expected failing legacy reproduction and passing faithful Save,
+plus selection/Apply Both. The desktop count is its smoke-report test and compilation
+of production wiring; actual service/control/lifecycle behavior is tested in core.
+Windows emits an unused `runtime_handle` warning; runner action deprecation notices
+also remain. Neither is a failed gate. No package matrix was run for documentation.
+
+#### Requirement-to-evidence assessment
+
+These findings combine the final native logs with inspection of the production paths
+and assertions; a green job alone is not the basis for closure.
+
+| Finding / required behavior | Final evidence and assessment |
+| --- | --- |
+| R1-B1: receipt before long prepare/grant/start work; cancellable inventory; zero spawn | `runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion` holds each actual inventory boundary through `ApplicationHost`, receives a token, measures status/cancel under 250 ms, asserts zero spawn attempts, duplicate refusal and retained source draft/files. PASS on both targets. |
+| R1-B1: completed-receipt race, stale completion and session isolation | The same test holds a competing service checkout after completion, accepts cancellation promptly, exposes a cancelled receipt and verifies deferred teardown after the owner returns. Old receipts cannot cancel the next preparation. `runtime_dialog_completion_cannot_mutate_replacement_session` proves the actual dialog completion helper rejects stale session identity before its callback. PASS on both targets. |
+| R1-B1: Stop/status independent of authoring/dialog ownership; Source lease release | `runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants` holds service ownership while production dispatch status/Stop finish under 250 ms. Native dialogs hold no service checkout. Frontend preparation tests prove lease/coordinator release after the receipt and draft retention. PASS on both targets. |
+| R1-B1: bounded/cancelled preparation and terminal freshness ownership | Cooperative 180 s request budget checks every directory entry and at most 1 MiB per hash chunk; cancellation reaches launcher revalidation and atomic spawn commitment. Cleanup performs no terminal scan and reports conservatively stale until next full preparation. Native cancellation, output, deadline and real SDK tests pass. Kernel I/O itself is not forcibly interruptible. |
+| R1-B2: real switch Cancel, Stop then switch, service shutdown/Drop, startup/validation cancellation | The service lifecycle test invokes actual service/host methods with child and grandchild fixtures in both inherited-output and closed-output modes. It checks refusal preserves the old session, then Stop/cleanup and successful switch; stale operation/session controls are refused. PID liveness and stopped heartbeat corroborate cleanup. PASS on both targets. |
+| R1-B2: descendant ownership independent of EOF; fail-closed cleanup | Unix independently waits for group disappearance; Windows waits for job emptiness. Existing natural-exit/crash, long-play, flood and deadline tests plus the service cases pass. Injected failed cleanup confirmation retains the process owner/reservation across repeated shutdown and refuses replacement/mutation; the injection follows actual tree cleanup, not an observed OS termination failure. |
+| R1-B2: actual history, asset/compound and file-lifecycle refusal/no-write/Stop/retry | `runtime_real_history_asset_compound_refusal_preserves_stack_then_stop_retry` uses the production history owner and real Scene Undo/Redo. `runtime_scene_move_delete_and_real_inverse_refusal_stop_retry` exercises move/delete and inverses, unchanged workspace/content on refusal, and successful retry after real child Stop. PASS on both targets. Undo-delete of an unloaded path remains permitted during play by design; its all-write refusal is exercised during validation. |
+| Retained R1 foundation and 1F/1G.1 regressions | Literal protocol/refusal, trust/manifests, transaction drain/import races, bounded output and actual official-SDK service/host tests pass. Frontend 49 and preserved Source browser gates pass. Broader local core 178/6 ignored remains correctly attributed to `fd4ffca`; it is not relabelled a full native suite at `07f23b6`. |
+
+No missing R1-B1/B2 evidence remains in this bounded assessment. Native keyboard,
+packaged runtime UI and final human acceptance remain later 1G gates. The runtime
+controls trusted project code; this is not containment of malicious escaping processes.
+No physical testing is requested, and review-ready does not select 1G.2b or permit merge.
+
+#### Preserved runs and publication boundary
+
+Superseded [36144599144](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144599144),
+attempt 1, **SUCCESS** on `fd4ffca38373790f730818bbf9e6c8a388dac92f` (tree
+`523c5f7665a9d90d4522b7a355d5ca12c62d5d07`). Complete logs/step outcomes were inspected:
+Windows job `108102483886`, runtime 17 passed/2 ignored (10.63 s), explicit SDK
+1 passed/0 ignored (76.47 s); macOS job `108102484116`, runtime 18 passed/2 ignored
+(9.72 s), explicit SDK 1 passed/0 ignored (108.28 s). Both passed frontend 49,
+Source browser/build, desktop 1 and format. Its artifacts were not independently
+revalidated in this closeout; final acceptance evidence uses the verified replacement
+above. This successful run remains superseded by the completed-receipt race correction,
+not relabelled failed or silently substituted for final-source evidence.
+
+Historical production `36136466567` and prerequisite `36126490939` retain their verified
+PASS results and original provenance; failed `36135942863` retains its failures and
+skipped gates. None was duplicated. Final-source quality `36144979086` and docs-handover
+quality [36145345911](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36145345911)
+(attempt 1, `90629ba`) passed. There are no outstanding native R1 operations.
+
+This closeout updates CURRENT, HANDOVER, parent-plan state, ADR evidence status and PR
+assessment only. `python3 scripts/validate.py` passed for 244 repository files and
+`git diff --check` passed; no new application/native dispatch is needed. Publish non-forced to the same
+branch, verify remote head/tree and exact handover/PR contents, and retain draft/open
+status. Follow AGENTS/WORKFLOW for any still-running automatic documentation quality
+check; do not model-poll. The next bounded action is independent review of 1G.2a only,
+with acceptance a separate decision. No merge, 1G.2b, optional Git or Phase 2.

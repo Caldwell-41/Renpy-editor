@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: corrected foundation; replacement native R1 evidence pending (2026-09-25).
+Status: corrected foundation; replacement native R1 evidence verified, review-ready (2026-09-26).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -93,5 +93,8 @@ containment of deliberately escaping project Python.
 
 R1-B1/B2 implementation and automated cases are in the
 [1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
-Existing native successes remain historical evidence on their original inputs. The
-changed candidate requires its replacement native R1 run before review-ready status.
+Replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on Windows x64
+and macOS ARM64; its logs, artifact integrity and all 60 recorded input hashes per
+target were checked. R1-B1/B2 are resolved and the foundation is review-ready, not
+user-accepted. Existing native successes remain evidence on their original inputs.
+See the ledger closeout for exact provenance, counts and limits.
