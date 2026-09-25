@@ -1,13 +1,13 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a/1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress`; 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The current execution selection authorises 1G.1 only, without production dispatch.
+checkpoint. The current execution selection authorises 1G.2a only; see section 13.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `not_started` | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -622,3 +622,40 @@ selection. Establish agent-run Windows/macOS R1 access first; retain a blocked a
 gate if unavailable, with no request for user physical testing. Preserve 1F/1G.1 safeguards,
 scripts-only authoring during play, Stop before asset mutation and deliberate Stop/Run
 for the latest revision. Stop before 1G.2b, optional Git or Phase 2.
+
+## 13. 1G.2a execution ledger
+
+### Entry and early R1 feasibility — 2026-09-25
+
+Authority: the user selected 1G.2a only: runtime/trust foundation, agent-run target
+evidence, bounded review fixes and publication. No merge, 1G.2b, optional Git, Phase 2
+or user physical testing. Entry head `3c42f7e51b51f2cec930a72d3c3ef702ad516482`;
+main `924619def6f624f336032c3ebc8499ccfcc662f0`; draft PR #17 remains open.
+Fresh remote refs, open PRs and local worktrees were inspected. Older local checkouts,
+including uncommitted review documentation, are preserved. This execution owns an
+isolated checkout of the published head; no conflicting published runtime work exists.
+Cross-host ownership cannot be inspected.
+
+State: `in_progress`, beginning with the section 5 bounded SDK proof before privileged
+wiring. The current host is Linux x86-64; no Windows/macOS remote execution capability
+is exposed. Existing production CI is a full package matrix, not a targeted R1 gate;
+the available connector has read/rerun operations but no workflow dispatch operation.
+Shell Git reads work; shell Git write authentication is not established. No automated
+target pass is inferred from previous 1F runs or from Linux. R1 target access is BLOCKED
+until an agent can run the retained narrow proof on Windows x64 and macOS ARM64.
+
+The official pinned SDK archive has been downloaded and its SHA-256 matches the
+repository pin. Extraction uses the existing checksum-first containment-checked SDK
+installer. It and synthetic execution evidence stay outside Git.
+
+Before broad wiring, investigate the actual pinned reload path and publish observations.
+The existing `smoke_run` is explicitly insufficient: eight-second timeout and blocking
+pipe-reader joins are not long-lived supervisor/cleanup evidence.
+
+| Scenario | Expected observation | Owner/layer and planned evidence |
+| --- | --- | --- |
+| R1-reload-proof | Game outlives 8 s; disk script edit does not silently execute; SDK reload shortcut policy is demonstrable; Stop/Run loads saved revision | Implementing agent, actual pinned SDK, synthetic fixture; Linux feasibility first, Windows/macOS required separately |
+| R1-service | Short preparation lease, session trust/revision checks, asset refusal/no-write/retry, history and launch/import race | Production service plus literal JSON; must follow the SDK proof, never replaced by a standalone Python probe |
+| R1-cleanup | Natural exit, Stop, crash, retained descendant pipes, bounded cleanup | Actual child processes on both targets; unavailable until host path exists |
+
+This entry is an ownership/proof contract, not an implementation or acceptance claim.
