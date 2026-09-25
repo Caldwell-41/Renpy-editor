@@ -814,3 +814,70 @@ test("runtime inventory ticket releases Source lease before cancellable long wor
   assert.equal(model.dirty, true);
   controller.dispose();
 });
+
+test("runtime completion cancellation keeps its receipt while authoring owns the service", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  for (const kind of ["run", "validate"] as const) {
+    for (const cancellation of ["abort", "staleView"] as const) {
+      installDom();
+      let model = documentModel({ dirty: true, state: "dirty" });
+      const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
+        open: async () => model,
+        update: async (request) => { model = { ...model, text: request.text, draftVersion: model.draftVersion + 1 }; return model; },
+      }));
+      await tick();
+      const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+      editor.value += "\n# retained across completed cancellation";
+      const scene = document.createElement("section");
+      scene.className = "scene-draft"; scene.dataset.unsubmitted = "true";
+      scene.innerHTML = '<input value="retained Scene input">'; document.body.append(scene);
+      const abort = new AbortController();
+      let current = true;
+      let coordinating = false;
+      let serviceHeld = false;
+      const observed = deferred<void>();
+      const completed = deferred<unknown>();
+      const calls: { operation: string; payload: Readonly<Record<string, unknown>> | undefined }[] = [];
+      try {
+        const preparing = prepareRuntimeInput(kind, "sdk", {
+          controller, sceneRoot: document, current: () => current, signal: abort.signal,
+          coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
+          choose: async () => "saved",
+          request: async <T>(operation: import("../src/protocol.js").CoreOperation, payload?: Readonly<Record<string, unknown>>) => {
+            calls.push({ operation, payload });
+            if (operation === "source.list") return inventory("dirty", true) as T;
+            if (operation === "runtime.prepare") return { pending: true, requestToken: "captured-receipt" } as T;
+            assert.equal(coordinating, false);
+            assert.equal(editor.readOnly, false);
+            if (operation === "runtime.requestStatus") {
+              observed.resolve();
+              return await completed.promise as T;
+            }
+            // Match the production dispatch distinction: receipt controls remain
+            // available while an authoring request has checked the service out.
+            if (operation === "runtime.cancelPreparation" && serviceHeld) throw new Error("RUNTIME_BUSY");
+            assert.equal(operation, "runtime.cancelRequest");
+            assert.equal(serviceHeld, true);
+            assert.deepEqual(payload, { requestToken: "captured-receipt" });
+            return { cancelled: true, cleanupPending: true } as T;
+          },
+        });
+        await observed.promise;
+        serviceHeld = true;
+        if (cancellation === "abort") abort.abort(); else current = false;
+        completed.resolve({ pending: false, response: { ok: true, value: {
+          preparationId: "completed-preparation", savedRevision: "saved", draftCount: 1, trustId: null,
+        } } });
+        assert.equal(await preparing, undefined);
+        assert.deepEqual(calls.map(call => call.operation), [
+          "source.list", "runtime.prepare", "runtime.requestStatus", "runtime.cancelRequest",
+        ]);
+        assert.deepEqual(calls[2]!.payload, { requestToken: "captured-receipt" });
+        assert.match(editor.value, /retained across completed cancellation/);
+        assert.match(model.text!, /retained across completed cancellation/);
+        assert.equal(model.dirty, true);
+        assert.equal(scene.querySelector("input")?.value, "retained Scene input");
+      } finally { controller.dispose(); }
+    }
+  }
+});

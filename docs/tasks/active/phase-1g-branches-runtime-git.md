@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `blocked` (independent review reopened R1-B1 for renderer cancellation; R1-B2 resolved); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (renderer cancellation correction; replacement native evidence required); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -41,7 +41,7 @@ performance evidence, not a production renderer or layout acceptance.
 | Checkpoint | Deliverable | State | Dependency |
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
-| 1G.2a | Runtime/trust/revision/process foundation | `blocked` (renderer cancellation finding; native evidence preserved) | Reviewed 1G.1 checkpoint and explicit selection |
+| 1G.2a | Runtime/trust/revision/process foundation | `in_progress` (renderer correction and recheck) | Reviewed 1G.1 checkpoint and explicit selection |
 | 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
@@ -1519,3 +1519,46 @@ draft/open. Next bounded action, if separately selected: correct only this R1-B1
 renderer cancellation case, add completion/abort/held-owner regression coverage and
 validate the changed candidate under existing R1 policy. Do not merge, request physical
 testing, or begin 1G.2b, optional Git or Phase 2. Review is not user acceptance.
+
+
+### Renderer completed-receipt correction — 2026-09-26
+
+**Authority:** the user selected correction of the remaining R1-B1 finding and recheck,
+with a next-phase prompt only if no blockers remain. Work stays within 1G.2a; no merge,
+physical testing or 1G.2b execution. Entry head `e9d029a53a6b7a6d06098cad15172572ceffbe62`
+was fetched and matched open draft PR #17 on `feature/phase-1g-branches-runtime`.
+The existing isolated checkout is reused; earlier work remains preserved.
+
+**Correction:** `prepareRuntimeInput` retains the captured request receipt when an abort
+or stale view races a successful completion and calls `runtime.cancelRequest`. This
+uses the existing independently available control path and its deferred teardown when
+an authoring request owns the service. No Rust, protocol, trust, process or workflow
+change is required; the original preparation-ID fallback remains for non-ticket
+responses. Neither cancellation path saves, grants trust or starts execution.
+
+**Regression:** `runtime completion cancellation keeps its receipt while authoring owns
+the service` exercises the actual helper and Source controller across Run/Validate and
+AbortSignal/stale-view cases. A deferred first status response completes successfully
+while the injected port represents a competing service checkout. It refuses
+`cancelPreparation` with `RUNTIME_BUSY` but accepts the captured receipt's cancellation.
+Assertions cover the exact receipt, no Save/start request, released Source lease and
+coordinator, undefined result and retained Source/Scene input. This regression failed
+on unchanged implementation with `RUNTIME_BUSY`, then passed with the correction.
+It complements, rather than replaces, the existing real `ApplicationHost` held-service
+regression that proves prompt receipt acceptance, stale-token isolation and reservation
+release when the owner returns. Both run in the existing native R1 workflow.
+
+**Local validation:** typecheck and 50 frontend tests passed, 0 failed/skipped; production
+build passed. Node 26.8.1/npm 11.19.0 differ from the pinned native toolchain, so these
+results do not replace supported-target evidence. Rust/process sources are unchanged;
+local Rust remains unavailable. Initial targeted red test is retained as intentional
+regression evidence, not a failure of the corrected candidate. Repository validation
+passed for 243 files and whitespace checks passed before publication.
+
+**State:** implementation corrected; final-source native evidence required before R1
+closure. Publish this candidate once to trigger the existing R1 workflow, with no manual
+duplicate or historical rerun. Record its exact SHA/run/attempt and inspect both full
+job logs, artifacts, ZIP integrity and all reported input hashes. Historical native
+`36144974132` remains PASS on `07f23b6`, not evidence for changed frontend inputs.
+Follow AGENTS/WORKFLOW if a manual-resume handover is needed. Only after final recheck
+finds no blocker may the next-chat prompt select 1G.2b; do not begin that phase here.

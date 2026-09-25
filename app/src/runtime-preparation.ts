@@ -56,7 +56,8 @@ export async function prepareRuntimeInput(kind: RuntimeKind, sdkId: string, acti
   if (!("requestToken" in accepted)) return accepted;
   const result = await awaitRuntimeRequest<RuntimePreparation>(accepted, actions);
   if (result && (!actions.current() || actions.signal?.aborted)) {
-    await actions.request("runtime.cancelPreparation", { preparationId: result.preparationId });
+    // The receipt still owns this completion, even while authoring owns the service.
+    await actions.request("runtime.cancelRequest", { requestToken: accepted.requestToken });
     return undefined;
   }
   return result;
