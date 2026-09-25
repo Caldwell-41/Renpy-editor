@@ -775,3 +775,42 @@ test("runtime Save All failure releases the Source lease and never prepares exec
   assert.equal(model.dirty, true);
   controller.dispose();
 });
+
+test("runtime inventory ticket releases Source lease before cancellable long work", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  installDom();
+  let model = documentModel({ dirty: true, state: "dirty" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
+    open: async () => model,
+    update: async (request) => { model = { ...model, text: request.text, draftVersion: model.draftVersion + 1 }; return model; },
+  }));
+  await tick();
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value += "\n# retained during preparation";
+  const abort = new AbortController();
+  let coordinating = false;
+  let cancelled = false;
+  let observed = false;
+  const result = await prepareRuntimeInput("run", "sdk", {
+    controller, sceneRoot: document, current: () => true, signal: abort.signal,
+    coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
+    choose: async () => "saved",
+    request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+      if (operation === "source.list") return inventory("dirty", true) as T;
+      if (operation === "runtime.prepare") return { pending: true, requestToken: "ticket" } as T;
+      assert.equal(coordinating, false);
+      assert.equal(editor.readOnly, false);
+      if (operation === "runtime.cancelRequest") { cancelled = true; return { cancelled: true } as T; }
+      assert.equal(operation, "runtime.requestStatus");
+      observed = true; abort.abort();
+      return (cancelled ? { pending: false, response: { ok: false, error: { code: "RUNTIME_CANCELLED" } } } : { pending: true, response: null }) as T;
+    },
+  });
+  assert.equal(result, undefined);
+  assert.equal(observed, true);
+  assert.equal(cancelled, true);
+  assert.match(editor.value, /retained during preparation/);
+  assert.match(model.text!, /retained during preparation/);
+  assert.equal(model.dirty, true);
+  controller.dispose();
+});

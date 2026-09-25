@@ -17,7 +17,11 @@ fn runtime_process_worker() {
     }
     let mut descendant = worker("grandchild", &root);
     descendant.stdout(Stdio::inherit()).stderr(Stdio::inherit());
-    let _child = descendant.spawn().unwrap();
+    if mode == "closed" {
+        descendant.stdout(Stdio::null()).stderr(Stdio::null());
+    }
+    let child = descendant.spawn().unwrap();
+    fs::write(root.join("descendant.pid"), child.id().to_string()).unwrap();
     while !root.join("heartbeat").exists() {
         thread::sleep(Duration::from_millis(5));
     }
@@ -37,7 +41,7 @@ fn runtime_process_worker() {
                 thread::sleep(Duration::from_millis(20));
             }
         }
-        "play" => loop {
+        "play" | "closed" => loop {
             thread::sleep(Duration::from_millis(20));
         },
         _ => panic!("unexpected worker mode"),
@@ -75,6 +79,7 @@ fn start_process(mode: &str, root: &Path) -> RuntimeProcess {
         RuntimeKind::Run,
         gate,
         VALIDATION_DEADLINE,
+        false,
     )
     .unwrap()
 }
@@ -121,7 +126,7 @@ fn runtime_long_play_responsive_stop_and_shutdown() {
         || temp.path().join("ready").exists(),
         Duration::from_secs(5),
     );
-    drop(process); // Same ownership path as application shutdown.
+    drop(process); // Worker Drop only; service lifecycle coverage lives in lifecycle/runtime_tests.
     stopped_heartbeat(temp.path());
 }
 #[test]
@@ -155,6 +160,7 @@ fn runtime_validation_deadline_terminates_the_real_tree() {
         RuntimeKind::Validate,
         gate,
         Duration::from_secs(2),
+        false,
     )
     .unwrap();
     wait_for(|| !process.active(), Duration::from_secs(8));
@@ -162,4 +168,61 @@ fn runtime_validation_deadline_terminates_the_real_tree() {
     assert_eq!(status.phase, "timedOut");
     assert!(status.cleanup_complete);
     stopped_heartbeat(temp.path());
+}
+
+pub(crate) fn service_process(
+    root: &Path,
+    gate: Arc<ExecutionGate>,
+    kind: RuntimeKind,
+    starting: bool,
+    closed: bool,
+    cleanup_failure: bool,
+) -> RuntimeProcess {
+    for name in ["ready", "heartbeat", "descendant.pid"] {
+        let _ = fs::remove_file(root.join(name));
+    }
+    let mut command = worker(if closed { "closed" } else { "play" }, root);
+    if cleanup_failure {
+        command.env("LOOMLIGHT_RUNTIME_TEST_CLEANUP_FAILURE", "1");
+    }
+    let process = RuntimeProcess::spawn_commands(
+        vec![command],
+        None,
+        kind,
+        gate,
+        VALIDATION_DEADLINE,
+        starting,
+    )
+    .unwrap();
+    wait_for(|| root.join("ready").exists(), Duration::from_secs(5));
+    process
+}
+pub(crate) fn assert_descendant_dead(root: &Path) {
+    let pid: u32 = fs::read_to_string(root.join("descendant.pid"))
+        .unwrap()
+        .parse()
+        .unwrap();
+    #[cfg(unix)]
+    assert_eq!(
+        unsafe { libc::kill(pid as i32, 0) },
+        -1,
+        "descendant remains present"
+    );
+    #[cfg(windows)]
+    unsafe {
+        use windows_sys::Win32::{
+            Foundation::CloseHandle,
+            System::Threading::{OpenProcess, WaitForSingleObject, PROCESS_SYNCHRONIZE},
+        };
+        let handle = OpenProcess(PROCESS_SYNCHRONIZE, 0, pid);
+        if !handle.is_null() {
+            assert_eq!(
+                WaitForSingleObject(handle, 0),
+                0,
+                "descendant remains alive"
+            );
+            CloseHandle(handle);
+        }
+    }
+    stopped_heartbeat(root);
 }

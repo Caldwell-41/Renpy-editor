@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `blocked` (native run passed; R1-B1/B2 remain); 1G.2b `not_started`.
+**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (R1-B1/B2 correction; replacement evidence pending); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -1178,3 +1178,87 @@ Follow the existing manual-resume CI policy if it is still running; no model pol
 The local Rust toolchain is currently absent, but the official distribution endpoint is
 reachable; restore a portable toolchain if doing implementation. Existing compiled test
 binaries are historical artifacts, not a way to validate new source.
+
+
+### R1-B1/B2 correction and replacement-candidate assessment — 2026-09-25
+
+The user selected only R1-B1/B2 from `15f6d1b`, including correction, targeted regression,
+replacement native R1 evidence, and publication. No physical testing, merge, 1G.2b,
+optional Git or Phase 2. Fresh clone/remote refs and PR metadata agreed on
+`15f6d1b07916a9e29ffdc820b871063acfaf5d44` and main
+`924619def6f624f336032c3ebc8499ccfcc662f0`; PR #17 remains open/draft. An isolated
+macOS checkout preserves prior worktrees and evidence branches. Visible prior Renpy tasks
+were idle; cross-host writers cannot be independently ruled out. Fresh refs are rechecked
+before publication. Other open PRs (#10/#11/#12) remain untouched.
+
+**R1-B1 correction:** `ApplicationHost` checks the lifecycle service out under a short
+publication lock and runs long work outside it. Preparation/grant/start return a
+session-bound cancellable request receipt first; source/SDK inventories and rechecks
+retain all prior identity, content, consent, transaction-drain and final capability
+checks. Directory/hash checkpoints enforce cancellation and a cooperative 180 s budget;
+1 MiB hash chunks are the maximum interval between hash checks. Kernel I/O calls are
+not forcibly interruptible. The process supervisor inherits the request cancellation
+capability; an atomic spawn commitment makes pre-boundary cancellation zero-spawn and
+post-boundary cancellation Stop/cleanup. Stop/status/revoke have independent controls.
+Dialogs own no service checkout and reject stale-session results. Source releases its
+input/coordinator lease on receipt, retaining drafts while inventory continues.
+
+Terminal cleanup no longer hashes the filesystem. Freshness is conservatively stale
+until the next complete preparation/recheck; no unknown generated file is attributed to
+the SDK. Unix independently waits for group disappearance after reaping, including
+closed-output descendants. Cleanup failure retains its process owner/reservation across
+repeated shutdown. The concrete IPC/ownership contract is in ADR 0008.
+
+**R1-B2 evidence added:** literal production-host tests hold actual inventory boundaries
+in prepare, grant and start, assert responsive status/cancel and zero spawn attempts,
+then verify retained drafts, duplicate refusal and stale-receipt isolation. Service tests
+exercise switch Cancel, Stop then switch, shutdown and Drop, starting and validating
+cancellation, and failure to confirm cleanup. Every lifecycle case uses real child and
+descendant processes with both inherited and closed outputs, plus explicit PID liveness
+and stopped-heartbeat checks. Cleanup-failure injection happens after real tree cleanup;
+it proves fail-closed ownership, not an observed OS termination failure. Held service work
+proves Stop/status do not wait for authoring ownership. The desktop's actual dialog
+completion helper rejects a replacement session without invoking its mutation callback.
+
+Real Scene history tests exercise move/delete, Undo/Redo, unchanged files/workspace/history
+on refusal, and one successful retry after actual child Stop. Undo-delete creating an
+unloaded path is allowed during play by design; its all-write refusal is tested during
+validation. Asset/compound entries are seeded through the production history owner and
+then traversed through real Scene Undo/Redo, rather than proposals merely labelled Undo.
+Imports do not gain a new UI history feature. Existing transaction race/barrier cases and
+Source/Scene/Save regressions remain. The real SDK gate additionally exercises the exact
+new desktop host prepare/grant/start/status/revoke/shutdown path.
+
+**Final local candidate validation:**
+
+| Gate | Result |
+| --- | --- |
+| `cargo test -p loomlight-core --release --locked` | 178 passed, 0 failed, 6 ignored; includes existing transaction/crash/history/1F/1G.1 safeguards |
+| Release `runtime_` filter | 18 passed, 0 failed, 2 ignored (subprocess fixture and separately invoked official SDK gate), 9.32 s |
+| Explicit release `runtime_official_sdk_service_gate --exact --ignored` | 1 passed, 0 failed, 0 ignored, 117.37 s; official archive checksum verified by installer; includes actual new host dispatch and revoke/shutdown |
+| `npm run check` | 49 passed, 0 skipped; includes released Source lease and retained drafts during cancellable inventory |
+| `npm run test:source-browser` | PASS; legacy dirty-after-Save reproduction stays red, faithful Source Save stays clean; selection/Apply Both passes |
+| `npm run build` | PASS |
+| `cargo test -p loomlight-desktop --locked` | 1 passed; compilation of real wiring plus existing smoke-report test. Actual lifecycle/control cases execute in the core suite, not in this desktop test |
+| Format / repository validator / whitespace | PASS; validator inspected 244 files |
+
+Initial frontend allowlist regression failed because its expected list omitted the two
+new typed operations; corrected without widening the deny-by-default boundary. Initial
+desktop compilation failed because frontend `dist` had not been built; build and final
+desktop test passed. An earlier full debug suite passed 177/6 ignored before the final
+dialog case, and an earlier SDK run passed 1/0 ignored in 132.15 s. Final-source results
+above supersede those local intermediate passes. No failed attempt is native evidence.
+
+The local host is macOS ARM64, Rust 1.90.0 restored portably inside the task workspace.
+Local Node 26.8.1/npm 11.19.0 differ from the repository pin; the native workflow keeps
+its locked Node 24.19.0/npm 11.9.0 gate. Local Source browser evidence uses installed
+Chrome through the existing executable override. No packages or real user projects.
+
+**Replacement evidence policy:** one push-triggered `runtime-foundation-r1.yml` run for
+this changed candidate, no manual duplicate. Its report now hashes core, frontend, tests,
+desktop, workflow and dependency/toolchain manifests in addition to exact checkout/run/
+attempt identity. The prerequisite `36126490939` and production success `36136466567`
+remain PASS on their original inputs; failed/superseded `36135942863` stays FAILED with
+its skipped gates preserved. No rerun of any existing run. R1 stays incomplete until the
+replacement target outcomes, logs and artifacts are inspected. If outstanding, publish
+its exact identity and use the mandated manual-resume handover, with no model polling.

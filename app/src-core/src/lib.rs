@@ -1,9 +1,11 @@
 pub mod authoring;
+pub mod dispatch;
 pub mod lifecycle;
 pub mod media;
 pub mod metadata;
 pub mod ports;
 pub mod renpy;
+mod runtime_work;
 pub mod scene;
 pub mod source;
 pub mod transaction;
@@ -69,6 +71,8 @@ pub const OPERATIONS: &[&str] = &[
     "source.discardAll",
     "runtime.installPolicy",
     "runtime.prepare",
+    "runtime.requestStatus",
+    "runtime.cancelRequest",
     "runtime.grantTrust",
     "runtime.cancelPreparation",
     "runtime.start",

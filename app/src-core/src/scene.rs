@@ -4695,4 +4695,181 @@ mod tests {
             .inventory_files_bounded(&fixture.project, "game", 1)
             .is_err());
     }
+    #[test]
+    fn runtime_real_history_asset_compound_refusal_preserves_stack_then_stop_retry() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let paths = ["game/images/history.png", "game/history.rpy"];
+        fixture
+            .service
+            .commit_history(
+                &fixture.project,
+                TransactionProposal {
+                    intent: TransactionIntent::Edit,
+                    mutations: paths
+                        .iter()
+                        .map(|path| FileMutation {
+                            path: RelativePath::new(*path).unwrap(),
+                            kind: MutationKind::CreateNew,
+                            base: Revision::expected_absence(),
+                            expected_bytes: vec![],
+                            proposed: b"# synthetic history content\n".to_vec(),
+                        })
+                        .collect(),
+                },
+            )
+            .unwrap();
+        let mut workspace = fixture.workspace();
+        for redo in [false, true] {
+            let gate = fixture
+                .service
+                .transactions
+                .reserve_execution(&fixture.project)
+                .unwrap();
+            let child_root = fixture.root.join(".git/runtime-fixture");
+            fs::create_dir_all(&child_root).unwrap();
+            let process = crate::renpy::runtime::tests::service_process(
+                &child_root,
+                gate,
+                crate::renpy::runtime::RuntimeKind::Run,
+                false,
+                true,
+                false,
+            );
+            let before = serde_json::to_value(&workspace).unwrap();
+            let command = if redo {
+                SceneCommand::Redo
+            } else {
+                SceneCommand::Undo
+            };
+            assert!(matches!(
+                fixture.apply(&workspace, command),
+                Err(SceneError::RuntimeBusy)
+            ));
+            assert_eq!(serde_json::to_value(fixture.workspace()).unwrap(), before);
+            for path in paths {
+                assert_eq!(fixture.root.join(path).exists(), !redo);
+            }
+            process.stop();
+            drop(process); // actual child cleanup releases the transaction gate
+            workspace = fixture
+                .apply(
+                    &workspace,
+                    if redo {
+                        SceneCommand::Redo
+                    } else {
+                        SceneCommand::Undo
+                    },
+                )
+                .unwrap();
+            for path in paths {
+                assert_eq!(fixture.root.join(path).exists(), redo);
+            }
+            assert_eq!(workspace.can_undo, redo);
+            assert_eq!(workspace.can_redo, !redo);
+        }
+    }
+
+    #[test]
+    fn runtime_scene_move_delete_and_real_inverse_refusal_stop_retry() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let mut workspace = fixture
+            .apply(
+                &fixture.workspace(),
+                SceneCommand::CreateChapter {
+                    display_name: "Second".into(),
+                },
+            )
+            .unwrap();
+        let chapter = workspace.chapters.last().unwrap().id.clone();
+        let first_chapter = workspace.chapters[0].id.clone();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateScene {
+                    chapter_id: first_chapter,
+                    display_name: "Movable".into(),
+                },
+            )
+            .unwrap();
+        let scene_id = workspace.scenes.last().unwrap().id.clone();
+        for step in [
+            "move",
+            "undoMove",
+            "redoMove",
+            "delete",
+            "undoDelete",
+            "redoDelete",
+        ] {
+            let scene = workspace.scenes.iter().find(|s| s.id == scene_id).cloned();
+            let command = || match step {
+                "move" => SceneCommand::MoveScene {
+                    scene_id: scene_id.clone(),
+                    chapter_id: chapter.clone(),
+                    direction: None,
+                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                },
+                "delete" => SceneCommand::DeleteScene {
+                    scene_id: scene_id.clone(),
+                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                },
+                "undoMove" | "undoDelete" => SceneCommand::Undo,
+                _ => SceneCommand::Redo,
+            };
+            let gate = fixture
+                .service
+                .transactions
+                .reserve_execution(&fixture.project)
+                .unwrap();
+            // Undo-delete creates a new, unloaded path; it is deliberately allowed
+            // by script-only play. Validation reserves all writes for this case.
+            let kind = if step == "undoDelete" {
+                crate::renpy::runtime::RuntimeKind::Validate
+            } else {
+                crate::renpy::runtime::RuntimeKind::Run
+            };
+            let child_root = fixture.root.join(".git/runtime-fixture");
+            fs::create_dir_all(&child_root).unwrap();
+            let process = crate::renpy::runtime::tests::service_process(
+                &child_root,
+                gate,
+                kind,
+                false,
+                true,
+                false,
+            );
+            let before = serde_json::to_value(&workspace).unwrap();
+            let manifest_snapshot = || {
+                fixture
+                    .service
+                    .transactions
+                    .execution_snapshot(&fixture.project)
+                    .unwrap()
+                    .1
+                    .into_iter()
+                    .filter(|(p, _)| {
+                        !matches!(p.as_str(), "ready" | "heartbeat" | "descendant.pid")
+                    })
+                    .collect::<std::collections::BTreeMap<_, _>>()
+            };
+            let manifest = manifest_snapshot();
+            assert!(
+                matches!(
+                    fixture.apply(&workspace, command()),
+                    Err(SceneError::RuntimeBusy)
+                ),
+                "{step}"
+            );
+            assert_eq!(
+                serde_json::to_value(fixture.workspace()).unwrap(),
+                before,
+                "{step}"
+            );
+            assert_eq!(manifest_snapshot(), manifest, "{step}");
+            process.stop();
+            drop(process);
+            workspace = fixture.apply(&workspace, command()).unwrap();
+        }
+    }
 }

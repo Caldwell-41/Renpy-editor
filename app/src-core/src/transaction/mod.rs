@@ -1594,6 +1594,7 @@ fn hash_revision_reader(
     let mut buffer = [0_u8; 1024 * 1024];
     let mut count = 0_u64;
     loop {
+        crate::runtime_work::check()?;
         let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
         if read == 0 {
             break;
@@ -1666,10 +1667,12 @@ fn inventory_directory(
         return Err(ErrorCode::UnsafePath);
     }
     anchor.validate_chain()?;
+    crate::runtime_work::check()?;
     for entry in fs::read_dir(anchor.path()).map_err(|_| ErrorCode::IoFailure)? {
         *remaining_entries = remaining_entries
             .checked_sub(1)
             .ok_or(ErrorCode::InvalidProposal)?;
+        crate::runtime_work::check()?;
         let entry = entry.map_err(|_| ErrorCode::IoFailure)?;
         let name = entry
             .file_name()
@@ -1715,6 +1718,7 @@ fn copy_hash_bounded(
     let mut count = 0_u64;
     let mut buffer = [0_u8; 1024 * 1024];
     loop {
+        crate::runtime_work::check()?;
         let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
         if read == 0 {
             break;

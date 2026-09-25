@@ -148,6 +148,13 @@ impl OwnedChild {
         }
         let status = self.child.wait()?;
         self.reaped = true;
+        #[cfg(unix)]
+        while unsafe { libc::kill(-(self.child.id() as i32), 0) } == 0 {
+            if started.elapsed() >= deadline {
+                return Err(io::Error::other("process group cleanup timeout"));
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
         let readers = Instant::now();
         while !self.drain(observation)? {
             if readers.elapsed() >= Duration::from_secs(1) {

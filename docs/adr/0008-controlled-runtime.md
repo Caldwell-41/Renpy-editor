@@ -1,6 +1,6 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: implemented foundation, R1 blocked after native evidence review (2026-09-25).
+Status: corrected foundation; replacement native R1 evidence pending (2026-09-25).
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -47,20 +47,51 @@ During established play only supported script replacements/creates and required
 metadata changes are permitted; media bytes/inventory, mixed mutations and conflicting
 loaded script/compiled lifecycle operations require Stop. The same check covers history
 inverses under transaction serialization. The runtime policy script itself is protected.
-Status includes the launch digest and a terminal full-manifest comparison. Generated output also makes that comparison stale; it is never silently attributed to the SDK. Launch evidence is not a filesystem snapshot. External writers can race execution;
+Status includes the launch digest. Terminal results conservatively report revision stale; cleanup performs no filesystem inventory. The next preparation performs full project/SDK inventories and consent comparison. Unknown output is never silently attributed to the SDK. Launch evidence is not a filesystem snapshot. External writers can race execution;
 validation/result freshness and consent must not infer ownership of SDK-generated files.
 
 The broad runtime and Diagnostics UI remains Phase 1G.2b. This ADR does not accept R1;
 exact test results and missing evidence are maintained in the Phase 1G task ledger.
 
 
-## Evidence review limitations
+## Request and control ownership correction
 
-The existing native production workflow passed on both targets, but R1 is not accepted.
-Preparation and trust/start manifest scans still execute under the shared lifecycle
-request lock, so cancellation during preparation and responsive production Stop/status
-under competing work are not established. Terminal manifest work also sits outside the
-stated process/pipe cleanup time budgets. Worker-drop evidence does not substitute for
-service shutdown/project-switch descendant tests. The correction and missing evidence
-are R1-B1/B2 in the [1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
-Keep the invariants above; do not interpret this ADR as a waiver of those gates.
+The desktop uses `ApplicationHost` in the core. A short mutex protects an exclusive
+service checkout and capability publication, never inventories, authoring I/O, dialogs,
+child lifetime or worker joining. Competing authoring requests get an explicit busy
+result while an existing request owns the service; ordinary script authoring remains
+available throughout established play. Stop, status and trust revocation use a cloned
+control capability bound to the captured session and operation, independently of that
+checkout. Native dialogs capture a session before opening and revalidate it through
+`complete_dialog` after returning, before registering a choice or changing projects.
+
+`runtime.prepare`, `runtime.grantTrust` and `runtime.start` validate their closed payload
+and capability before returning `{pending: true, requestToken}`. The session-bound
+`runtime.requestStatus {sessionId, requestToken}` returns `{pending, response}` where
+`response` is the original core result envelope when complete. Only one work item and
+one retained result exist. `runtime.cancelRequest {sessionId, requestToken}` cancels
+that work, including a completion racing the response. A newer request replaces the
+receipt, so old callbacks cannot cancel its preparation. Completed preparation IDs
+remain single-use; `runtime.cancelPreparation` is still supported. Start remains bound
+to the current preparation and trust. No renderer paths, argv or manifests are accepted.
+
+Inventory and recheck work has a 180-second cooperative budget, checked at directory
+entries and hash chunks (at most 1 MiB). Cancellation is request-local and reaches SDK
+launcher revalidation too. Filesystem calls themselves depend on the operating system;
+this is not a hard interruption guarantee for a stalled kernel I/O call. The separate
+control lane stays reachable. An atomic cancellation/spawn commitment determines whether
+cancellation prevents every spawn attempt or stops an already committed launch. Cleanup
+must complete before the reservation can be released. Source preparation retains current
+input under its short lease, releases it when the work receipt arrives, then observes or
+cancels work outside both the lease and the authoring coordinator.
+
+Process cleanup does not perform terminal freshness hashing. Unix confirms process-group
+disappearance independently of pipe EOF; Windows waits for the owned job to empty. A
+cleanup failure retains both the failed process owner and the reservation, even if service
+shutdown is called again. Preparation/trust are cleared on shutdown. This does not claim
+containment of deliberately escaping project Python.
+
+R1-B1/B2 implementation and automated cases are in the
+[1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
+Existing native successes remain historical evidence on their original inputs. The
+changed candidate requires its replacement native R1 run before review-ready status.

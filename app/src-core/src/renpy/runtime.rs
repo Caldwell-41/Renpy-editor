@@ -47,11 +47,20 @@ struct Observation {
     marker_tail: Vec<u8>,
 }
 
+#[derive(Clone)]
+pub(crate) struct RuntimeControl {
+    pub(crate) id: String,
+    launch_revision: Option<String>,
+    gate: Arc<ExecutionGate>,
+    cancel: Arc<crate::runtime_work::Cancellation>,
+    observation: Arc<Mutex<Observation>>,
+}
+
 pub(crate) struct RuntimeProcess {
     pub(crate) id: String,
     launch_revision: Option<String>,
     gate: Arc<ExecutionGate>,
-    cancel: Arc<AtomicBool>,
+    cancel: Arc<crate::runtime_work::Cancellation>,
     observation: Arc<Mutex<Observation>>,
     worker: Option<thread::JoinHandle<()>>,
 }
@@ -121,6 +130,7 @@ impl RuntimeProcess {
             kind,
             gate,
             VALIDATION_DEADLINE,
+            kind == RuntimeKind::Run,
         )
     }
 
@@ -134,6 +144,7 @@ impl RuntimeProcess {
         kind: RuntimeKind,
         gate: Arc<ExecutionGate>,
         validation_deadline: Duration,
+        readiness_required: bool,
     ) -> Result<Self, RenpyError> {
         let launch_revision = context.as_ref().map(|(_, _, manifest)| {
             format!(
@@ -141,10 +152,10 @@ impl RuntimeProcess {
                 Sha256::digest(serde_json::to_vec(manifest).unwrap_or_default())
             )
         });
-        let readiness_required = context.is_some() && kind == RuntimeKind::Run;
         gate.begin(kind == RuntimeKind::Run && !readiness_required)
             .map_err(|_| RenpyError::ProcessFailed)?;
-        let cancel = Arc::new(AtomicBool::new(false));
+        let cancel = crate::runtime_work::current()
+            .unwrap_or_else(|| Arc::new(crate::runtime_work::Cancellation::default()));
         let observation = Arc::new(Mutex::new(Observation {
             phase: "starting",
             exit: None,
@@ -161,108 +172,129 @@ impl RuntimeProcess {
         let worker = thread::Builder::new()
             .name("loomlight-runtime".into())
             .spawn(move || {
-                let started = Instant::now();
-                let mut outcome = "exited";
-                let mut cleanup_ok = true;
-                for mut command in commands {
-                    if worker_cancel.load(Ordering::Acquire) {
-                        outcome = "cancelled";
-                        break;
-                    }
-                    if context.as_ref().is_some_and(|(sdk, anchor, _)| {
-                        sdk.revalidate(false).is_err() || anchor.validate_chain().is_err()
-                    }) {
-                        outcome = "identityChanged";
-                        break;
-                    }
-                    let anchor = context.as_ref().map(|(_, anchor, _)| anchor);
-                    let mut child = match platform::OwnedChild::spawn(&mut command, anchor) {
-                        Ok(value) => value,
-                        Err(_) => {
-                            outcome = "spawnFailed";
+                crate::runtime_work::scoped(worker_cancel.clone(), || {
+                    let started = Instant::now();
+                    let mut outcome = "exited";
+                    let mut cleanup_ok = true;
+                    for mut command in commands {
+                        #[cfg(test)]
+                        let force_cleanup_failure = command.get_envs().any(|(k, v)| {
+                            k == "LOOMLIGHT_RUNTIME_TEST_CLEANUP_FAILURE" && v.is_some()
+                        });
+                        if worker_cancel.cancelled() {
+                            outcome = "cancelled";
                             break;
                         }
-                    };
-                    set_phase(
-                        &worker_observation,
-                        if kind == RuntimeKind::Run {
-                            if readiness_required {
-                                "starting"
-                            } else {
-                                "running"
-                            }
-                        } else {
-                            "validating"
-                        },
-                    );
-                    let mut stop_started = None;
-                    let mut ready = !readiness_required;
-                    loop {
-                        if child.drain(&worker_observation).is_err() {
-                            outcome = "outputFailed";
+                        if context.as_ref().is_some_and(|(sdk, anchor, _)| {
+                            sdk.revalidate(false).is_err() || anchor.validate_chain().is_err()
+                        }) {
+                            outcome = "identityChanged";
                             break;
                         }
-                        if !ready && worker_observation.lock().is_ok_and(|state| state.ready) {
-                            ready = true;
-                            worker_gate.playing();
-                            set_phase(&worker_observation, "running");
+                        let anchor = context.as_ref().map(|(_, anchor, _)| anchor);
+                        // Atomic cancellation/spawn boundary: cancellation that wins
+                        // before this commitment spawns nothing; later cancellation
+                        // stops/reaps the owned tree through this same worker.
+                        if !worker_cancel.commit_spawn() {
+                            outcome = "cancelled";
+                            break;
                         }
-                        match child.exited() {
-                            Ok(true) => break,
+                        #[cfg(test)]
+                        worker_cancel.record_spawn();
+                        let mut child = match platform::OwnedChild::spawn(&mut command, anchor) {
+                            Ok(value) => value,
                             Err(_) => {
-                                outcome = "processFailed";
+                                outcome = "spawnFailed";
                                 break;
                             }
-                            Ok(false) => {}
-                        }
-                        let cancelled = worker_cancel.load(Ordering::Acquire);
-                        let timed_out = (kind == RuntimeKind::Validate || !ready)
-                            && started.elapsed() >= validation_deadline;
-                        if (cancelled || timed_out) && stop_started.is_none() {
-                            worker_gate.stopping();
-                            set_phase(&worker_observation, "stopping");
-                            outcome = if cancelled { "cancelled" } else { "timedOut" };
-                            child.graceful();
-                            stop_started = Some(Instant::now());
-                        }
-                        if stop_started.is_some_and(|time: Instant| time.elapsed() >= GRACE) {
-                            break;
-                        }
-                        thread::sleep(Duration::from_millis(10));
-                    }
-                    worker_gate.stopping();
-                    match child.cleanup(CLEANUP_DEADLINE, &worker_observation) {
-                        Ok(exit) => {
-                            if let Ok(mut state) = worker_observation.lock() {
-                                state.exit = exit;
-                            }
-                            if outcome != "exited" || exit != Some(0) {
-                                if outcome == "exited" {
-                                    outcome = "failed";
+                        };
+                        set_phase(
+                            &worker_observation,
+                            if kind == RuntimeKind::Run {
+                                if readiness_required {
+                                    "starting"
+                                } else {
+                                    "running"
                                 }
+                            } else {
+                                "validating"
+                            },
+                        );
+                        let mut stop_started = None;
+                        let mut ready = !readiness_required;
+                        loop {
+                            if child.drain(&worker_observation).is_err() {
+                                outcome = "outputFailed";
+                                break;
+                            }
+                            if !ready && worker_observation.lock().is_ok_and(|state| state.ready) {
+                                ready = true;
+                                worker_gate.playing();
+                                set_phase(&worker_observation, "running");
+                            }
+                            match child.exited() {
+                                Ok(true) => break,
+                                Err(_) => {
+                                    outcome = "processFailed";
+                                    break;
+                                }
+                                Ok(false) => {}
+                            }
+                            let cancelled = worker_cancel.cancelled();
+                            let timed_out = (kind == RuntimeKind::Validate || !ready)
+                                && started.elapsed() >= validation_deadline;
+                            if (cancelled || timed_out) && stop_started.is_none() {
+                                worker_gate.stopping();
+                                set_phase(&worker_observation, "stopping");
+                                outcome = if cancelled { "cancelled" } else { "timedOut" };
+                                child.graceful();
+                                stop_started = Some(Instant::now());
+                            }
+                            if stop_started.is_some_and(|time: Instant| time.elapsed() >= GRACE) {
+                                break;
+                            }
+                            thread::sleep(Duration::from_millis(10));
+                        }
+                        worker_gate.stopping();
+                        match child.cleanup(CLEANUP_DEADLINE, &worker_observation) {
+                            Ok(exit) => {
+                                #[cfg(test)]
+                                if force_cleanup_failure {
+                                    outcome = "cleanupFailed";
+                                    cleanup_ok = false;
+                                    break;
+                                }
+                                if let Ok(mut state) = worker_observation.lock() {
+                                    state.exit = exit;
+                                }
+                                if outcome != "exited" || exit != Some(0) {
+                                    if outcome == "exited" {
+                                        outcome = "failed";
+                                    }
+                                    break;
+                                }
+                            }
+                            Err(_) => {
+                                outcome = "cleanupFailed";
+                                cleanup_ok = false;
                                 break;
                             }
                         }
-                        Err(_) => {
-                            outcome = "cleanupFailed";
-                            cleanup_ok = false;
-                            break;
-                        }
+                        // Validation proceeds to lint only after successful compilation.
                     }
-                    // Validation proceeds to lint only after successful compilation.
-                }
-                let stale = context.as_ref().map(|(_, anchor, manifest)| {
-                    crate::transaction::execution_manifest(anchor, true)
-                        .map_or(true, |current| current != *manifest)
-                });
-                if let Ok(mut state) = worker_observation.lock() {
-                    state.stale = stale;
-                    state.phase = outcome;
-                    state.cleaned = cleanup_ok;
-                }
-                if cleanup_ok {
-                    worker_gate.finish();
-                }
+                    // Cleanup must never wait for filesystem freshness work. The next
+                    // preparation performs the full inventory; until then freshness is
+                    // conservatively stale, including unknown SDK-generated output.
+                    let stale = context.as_ref().map(|_| true);
+                    if let Ok(mut state) = worker_observation.lock() {
+                        state.stale = stale;
+                        state.phase = outcome;
+                        state.cleaned = cleanup_ok;
+                    }
+                    if cleanup_ok {
+                        worker_gate.finish();
+                    }
+                })
             })
             .map_err(|_| {
                 gate.finish();
@@ -278,12 +310,36 @@ impl RuntimeProcess {
         })
     }
 
+    pub(crate) fn shutdown(&mut self) -> bool {
+        self.stop();
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
+        !self.active()
+    }
+    pub(crate) fn control(&self) -> RuntimeControl {
+        RuntimeControl {
+            id: self.id.clone(),
+            launch_revision: self.launch_revision.clone(),
+            gate: self.gate.clone(),
+            cancel: self.cancel.clone(),
+            observation: self.observation.clone(),
+        }
+    }
     pub(crate) fn stop(&self) {
-        self.cancel.store(true, Ordering::Release);
-        self.gate.stopping();
+        self.control().stop();
     }
     pub(crate) fn active(&self) -> bool {
         self.gate.active()
+    }
+    pub(crate) fn status(&self, after: usize) -> Result<RuntimeStatus, RenpyError> {
+        self.control().status(after)
+    }
+}
+impl RuntimeControl {
+    pub(crate) fn stop(&self) {
+        self.cancel.cancel();
+        self.gate.stopping();
     }
     pub(crate) fn status(&self, after: usize) -> Result<RuntimeStatus, RenpyError> {
         let state = self
@@ -311,10 +367,7 @@ impl RuntimeProcess {
 
 impl Drop for RuntimeProcess {
     fn drop(&mut self) {
-        self.stop();
-        if let Some(worker) = self.worker.take() {
-            let _ = worker.join();
-        }
+        self.shutdown();
     }
 }
 
@@ -347,4 +400,4 @@ fn retain(observation: &Mutex<Observation>, bytes: &[u8]) -> io::Result<()> {
 }
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

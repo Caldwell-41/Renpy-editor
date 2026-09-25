@@ -118,10 +118,64 @@ fn input_error(_: impl std::fmt::Debug) -> LifecycleError {
 }
 
 impl LifecycleService {
-    pub fn runtime_shutdown(&mut self) {
+    pub(crate) fn runtime_request_capability(
+        &self,
+        operation: &str,
+        payload: &serde_json::Map<String, Value>,
+    ) -> Result<(), LifecycleError> {
+        let mut payload = payload.clone();
+        payload.remove("sessionId");
+        let payload = Value::Object(payload);
+        let invalid = |_| err(RuntimeError::InvalidPayload);
+        match operation {
+            "runtime.prepare" => {
+                let _: PrepareRequest = serde_json::from_value(payload).map_err(invalid)?;
+                if self.runtime.busy() {
+                    return Err(err(RuntimeError::Busy));
+                }
+            }
+            "runtime.grantTrust" => {
+                let request: PreparationRequest =
+                    serde_json::from_value(payload).map_err(invalid)?;
+                self.runtime_require_preparation(&request.preparation_id)?;
+            }
+            "runtime.start" => {
+                let request: StartRequest = serde_json::from_value(payload).map_err(invalid)?;
+                self.runtime_require_preparation(&request.preparation_id)?;
+                if self
+                    .runtime
+                    .trust
+                    .as_ref()
+                    .is_none_or(|t| t.id != request.trust_id)
+                {
+                    return Err(err(RuntimeError::TrustRequired));
+                }
+            }
+            _ => return Err(err(RuntimeError::InvalidPayload)),
+        }
+        Ok(())
+    }
+    pub(crate) fn runtime_trust_id(&self) -> Option<String> {
+        self.runtime.trust.as_ref().map(|t| t.id.clone())
+    }
+    pub(crate) fn runtime_control(&self) -> Option<crate::renpy::runtime::RuntimeControl> {
+        self.runtime.process.as_ref().map(RuntimeProcess::control)
+    }
+    pub(crate) fn runtime_abort_request(&mut self) {
         self.runtime.preparation = None;
         self.runtime.trust = None;
+        if let Some(process) = &self.runtime.process {
+            process.stop();
+        }
+    }
+    pub fn runtime_shutdown(&mut self) -> bool {
+        self.runtime.preparation = None;
+        self.runtime.trust = None;
+        if self.runtime.process.as_mut().is_some_and(|p| !p.shutdown()) {
+            return false;
+        }
         self.runtime.process = None;
+        true
     }
     pub fn runtime_cancel_preparation(
         &mut self,
@@ -170,6 +224,7 @@ impl LifecycleService {
         Ok(json!({"installed": true, "changed": true}))
     }
     pub fn runtime_prepare(&mut self, request: PrepareRequest) -> Result<Value, LifecycleError> {
+        crate::runtime_work::check().map_err(input_error)?;
         if request.revision_choice == RevisionChoice::Cancel {
             if self.runtime.preparation.is_some() {
                 return Err(err(RuntimeError::Busy));
@@ -309,6 +364,7 @@ impl LifecycleService {
             self.runtime.trust = None;
             return Err(error);
         }
+        crate::runtime_work::check().map_err(input_error)?;
         let p = self.runtime.preparation.as_ref().unwrap();
         let trust = Trust {
             id: uuid::Uuid::new_v4().to_string(),
@@ -338,6 +394,7 @@ impl LifecycleService {
             self.runtime.trust = None;
             return Err(error);
         }
+        crate::runtime_work::check().map_err(input_error)?;
         let mut p = self.runtime.preparation.take().unwrap();
         let gate = p.gate.take().unwrap();
         let process = match RuntimeProcess::start(

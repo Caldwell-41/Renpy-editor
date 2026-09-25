@@ -46,6 +46,8 @@ export const CORE_OPERATIONS = [
   "source.discardAll",
   "runtime.installPolicy",
   "runtime.prepare",
+  "runtime.requestStatus",
+  "runtime.cancelRequest",
   "runtime.grantTrust",
   "runtime.cancelPreparation",
   "runtime.start",

@@ -60,6 +60,8 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
     "source.discardAll",
     "runtime.installPolicy",
     "runtime.prepare",
+    "runtime.requestStatus",
+    "runtime.cancelRequest",
     "runtime.grantTrust",
     "runtime.cancelPreparation",
     "runtime.start",
@@ -68,7 +70,7 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
     "runtime.revokeTrust",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
-  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {

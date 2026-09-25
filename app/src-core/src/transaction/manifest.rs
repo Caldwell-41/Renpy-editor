@@ -9,6 +9,9 @@ pub(crate) fn execution_manifest(
     anchor: &DirectoryAnchor,
     project: bool,
 ) -> Result<ExecutionManifest, ErrorCode> {
+    #[cfg(test)]
+    crate::runtime_work::inventory_hook();
+    crate::runtime_work::check()?;
     let mut manifest = BTreeMap::new();
     let mut entries = if project { 8192 } else { 65536 };
     let mut bytes = 2 * 1024 * 1024 * 1024_u64;
@@ -21,6 +24,7 @@ pub(crate) fn execution_manifest(
         &mut bytes,
         &mut manifest,
     )?;
+    crate::runtime_work::check()?;
     anchor.validate_chain()?;
     Ok(manifest)
 }
@@ -36,8 +40,10 @@ fn walk(
     if depth > 32 {
         return Err(ErrorCode::UnsafePath);
     }
+    crate::runtime_work::check()?;
     anchor.validate_chain()?;
     for entry in fs::read_dir(anchor.path()).map_err(|_| ErrorCode::IoFailure)? {
+        crate::runtime_work::check()?;
         *entries = entries.checked_sub(1).ok_or(ErrorCode::InvalidProposal)?;
         let entry = entry.map_err(|_| ErrorCode::IoFailure)?;
         let name = entry.file_name();

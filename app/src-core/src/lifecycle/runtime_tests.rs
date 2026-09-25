@@ -508,5 +508,442 @@ fn runtime_official_sdk_service_gate() {
         fs::read_to_string(root.join("game/custom.rpy")).unwrap(),
         fixture("new")
     );
+    let session = reopened.session_id;
+    let host = crate::dispatch::ApplicationHost::new(service);
+    let p = host_result(
+        &host,
+        &session,
+        &host_call(
+            &host,
+            &session,
+            "runtime.prepare",
+            json!({"kind":"run","revisionChoice":"saved","sdkId":sdk_id}),
+        ),
+    );
+    assert_eq!(p["ok"], true, "{p}");
+    let t = host_result(
+        &host,
+        &session,
+        &host_call(
+            &host,
+            &session,
+            "runtime.grantTrust",
+            json!({"preparationId":p["value"]["preparationId"]}),
+        ),
+    );
+    assert_eq!(t["ok"], true, "{t}");
+    let running = host_result(
+        &host,
+        &session,
+        &host_call(
+            &host,
+            &session,
+            "runtime.start",
+            json!({"preparationId":p["value"]["preparationId"],"trustId":t["value"]["trustId"]}),
+        ),
+    );
+    assert_eq!(running["ok"], true, "{running}");
+    let id = running["value"]["operationId"].clone();
+    wait_for(
+        || {
+            host_call(
+                &host,
+                &session,
+                "runtime.status",
+                json!({"operationId":id,"afterSequence":0}),
+            )["value"]["phase"]
+                == "running"
+        },
+        30,
+    );
+    assert_eq!(
+        host_call(
+            &host,
+            &session,
+            "runtime.revokeTrust",
+            json!({"trustId":t["value"]["trustId"]})
+        )["ok"],
+        true
+    );
+    wait_for(
+        || {
+            host_call(
+                &host,
+                &session,
+                "runtime.status",
+                json!({"operationId":id,"afterSequence":0}),
+            )["value"]["cleanupComplete"]
+                == true
+        },
+        8,
+    );
+    host.shutdown();
     println!("phase-1g-runtime-service-gate: passed; saved edit, no reload, asset refusal/retry, renewed consent, Stop/Run latest, stale token, revoke and reopen");
+}
+
+fn host_call(
+    host: &crate::dispatch::ApplicationHost,
+    session: &str,
+    operation: &str,
+    mut payload: Value,
+) -> Value {
+    payload["sessionId"] = json!(session);
+    serde_json::to_value(host.dispatch(json!({"protocolVersion":1,"requestId":"runtime-test","operation":operation,"payload":payload}), false)).unwrap()
+}
+fn host_result(host: &crate::dispatch::ApplicationHost, session: &str, ticket: &Value) -> Value {
+    let mut response = Value::Null;
+    wait_for(
+        || {
+            let status = host_call(
+                host,
+                session,
+                "runtime.requestStatus",
+                json!({"requestToken":ticket["value"]["requestToken"]}),
+            );
+            assert_eq!(status["ok"], true, "{status}");
+            response = status["value"]["response"].clone();
+            status["value"]["pending"] == false
+        },
+        180,
+    );
+    response
+}
+fn synthetic_inventory_sdk(root: &Path) -> ValidatedSdk {
+    fs::create_dir_all(root.join("gui")).unwrap();
+    fs::create_dir_all(root.join("lib/py3-windows-x86_64")).unwrap();
+    for name in ["renpy.py", "renpy.sh", "lib/py3-windows-x86_64/python.exe"] {
+        fs::write(root.join(name), b"not executable: inventory fixture only").unwrap();
+    }
+    crate::renpy::inspect_sdk(&fs::canonicalize(root).unwrap()).unwrap()
+}
+#[test]
+fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion() {
+    use std::sync::{mpsc, Arc, Mutex};
+    for stage in ["runtime.prepare", "runtime.grantTrust", "runtime.start"] {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("project");
+        make_openable_project(&root, "Cancellation");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let sdk = synthetic_inventory_sdk(&temp.path().join("sdk"));
+        let sdk_id = service.remember_sdk(sdk, "synthetic-inventory-only").id;
+        let session = service.open_path(&root).unwrap().session_id;
+        call(&mut service, &session, "runtime.installPolicy", json!({}));
+        let opened = call(
+            &mut service,
+            &session,
+            "source.open",
+            json!({"path":"game/script.rpy"}),
+        );
+        call(
+            &mut service,
+            &session,
+            "source.updateDraft",
+            json!({"path":"game/script.rpy","expectedBaseRevision":opened["baseRevision"],"text":"# retained draft","selectionStart":2,"selectionEnd":2}),
+        );
+        let before = fs::read(root.join("game/script.rpy")).unwrap();
+        let host = crate::dispatch::ApplicationHost::new(service);
+        let prepare = json!({"kind":"run","revisionChoice":"saved","sdkId":sdk_id});
+        let mut payload = prepare.clone();
+        if stage != "runtime.prepare" {
+            let prepared = host_result(
+                &host,
+                &session,
+                &host_call(&host, &session, "runtime.prepare", prepare.clone()),
+            );
+            assert_eq!(prepared["ok"], true, "{prepared}");
+            payload = json!({"preparationId":prepared["value"]["preparationId"]});
+            if stage == "runtime.start" {
+                let grant = host_result(
+                    &host,
+                    &session,
+                    &host_call(&host, &session, "runtime.grantTrust", payload.clone()),
+                );
+                assert_eq!(grant["ok"], true, "{grant}");
+                payload["trustId"] = grant["value"]["trustId"].clone();
+            }
+        }
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let (resume_tx, resume_rx) = mpsc::channel();
+        let resume_rx = Mutex::new(resume_rx);
+        host.hold_inventory(Arc::new(move || {
+            entered_tx.send(()).unwrap();
+            resume_rx
+                .lock()
+                .unwrap()
+                .recv_timeout(Duration::from_secs(5))
+                .unwrap();
+        }));
+        let ticket = host_call(&host, &session, stage, payload);
+        assert_eq!(ticket["ok"], true, "{ticket}");
+        entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        let now = Instant::now();
+        let status = host_call(
+            &host,
+            &session,
+            "runtime.requestStatus",
+            json!({"requestToken":ticket["value"]["requestToken"]}),
+        );
+        assert_eq!(status["value"]["pending"], true);
+        let cancel = host_call(
+            &host,
+            &session,
+            "runtime.cancelRequest",
+            json!({"requestToken":ticket["value"]["requestToken"]}),
+        );
+        assert_eq!(cancel["ok"], true);
+        assert!(
+            now.elapsed() < Duration::from_millis(250),
+            "control waited for held inventory"
+        );
+        assert_eq!(
+            host_call(&host, &session, "runtime.prepare", prepare.clone())["error"]["code"],
+            "RUNTIME_BUSY"
+        );
+        resume_tx.send(()).unwrap();
+        assert_eq!(
+            host_result(&host, &session, &ticket)["error"]["code"],
+            "RUNTIME_CANCELLED"
+        );
+        assert_eq!(
+            host.request_spawns(),
+            0,
+            "cancellation must precede every spawn attempt"
+        );
+        host.with_service(|service| {
+            assert!(
+                service.runtime.process.is_none(),
+                "cancelled boundary spawned a process"
+            );
+            assert!(!service.runtime.busy());
+            assert_eq!(service.source_inventory().unwrap().dirty_count, 1);
+        })
+        .unwrap();
+        assert_eq!(fs::read(root.join("game/script.rpy")).unwrap(), before);
+        let next = host_call(&host, &session, "runtime.prepare", prepare);
+        assert_eq!(host_result(&host, &session, &next)["ok"], true);
+        assert_eq!(
+            host_call(
+                &host,
+                &session,
+                "runtime.cancelRequest",
+                json!({"requestToken":ticket["value"]["requestToken"]})
+            )["error"]["code"],
+            "STALE_RUNTIME"
+        );
+        assert!(host.with_service(|service| service.runtime.busy()).unwrap());
+        // Completion raced cancellation: cancelling the current receipt releases only it.
+        assert_eq!(
+            host_call(
+                &host,
+                &session,
+                "runtime.cancelRequest",
+                json!({"requestToken":next["value"]["requestToken"]})
+            )["ok"],
+            true
+        );
+        assert!(!host.with_service(|service| service.runtime.busy()).unwrap());
+        host.shutdown();
+    }
+}
+
+fn attach_child(
+    service: &mut LifecycleService,
+    root: &Path,
+    kind: crate::renpy::runtime::RuntimeKind,
+    starting: bool,
+    closed: bool,
+    fail: bool,
+) -> String {
+    let (authority, _) = service.authoring_context().unwrap();
+    let gate = service
+        .authoring
+        .transactions
+        .reserve_execution(&authority)
+        .unwrap();
+    let process =
+        crate::renpy::runtime::tests::service_process(root, gate, kind, starting, closed, fail);
+    let id = process.id.clone();
+    service.runtime.process = Some(process);
+    wait_for(|| root.join("ready").exists(), 5);
+    id
+}
+#[test]
+fn runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants() {
+    use crate::renpy::runtime::{tests::assert_descendant_dead, RuntimeKind};
+    for closed in [false, true] {
+        for action in [
+            "switch",
+            "shutdown",
+            "drop",
+            "starting",
+            "validating",
+            "cleanupFailure",
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = temp.path().join("old");
+            let next = temp.path().join("next");
+            make_openable_project(&root, "Old session");
+            make_openable_project(&next, "Next session");
+            let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+            let session = service.open_path(&root).unwrap().session_id;
+            let kind = if action == "validating" {
+                RuntimeKind::Validate
+            } else {
+                RuntimeKind::Run
+            };
+            let id = attach_child(
+                &mut service,
+                &root,
+                kind,
+                action == "starting",
+                closed,
+                action == "cleanupFailure",
+            );
+            if action == "drop" {
+                drop(service);
+                assert_descendant_dead(&root);
+                continue;
+            }
+            if action == "shutdown" {
+                service.runtime_shutdown();
+                assert_descendant_dead(&root);
+                continue;
+            }
+            // A cancelled project switch/close leaves this session and child owned.
+            assert!(matches!(
+                service.open_path(&next),
+                Err(LifecycleError::Runtime(runtime::RuntimeError::Busy))
+            ));
+            assert_eq!(service.current().unwrap().session_id, session);
+            let host = crate::dispatch::ApplicationHost::new(service);
+            let held_host = host.clone();
+            let (entered_tx, entered_rx) = std::sync::mpsc::channel();
+            let (resume_tx, resume_rx) = std::sync::mpsc::channel();
+            let held = thread::spawn(move || {
+                held_host
+                    .with_service(|_| {
+                        entered_tx.send(()).unwrap();
+                        resume_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                    })
+                    .unwrap()
+            });
+            entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+            let now = Instant::now();
+            assert_eq!(
+                host_call(
+                    &host,
+                    &session,
+                    "runtime.status",
+                    json!({"operationId":id,"afterSequence":0})
+                )["ok"],
+                true
+            );
+            assert_eq!(
+                host_call(&host, &session, "runtime.stop", json!({"operationId":id}))["ok"],
+                true
+            );
+            assert!(
+                now.elapsed() < Duration::from_millis(250),
+                "control waited for competing service ownership"
+            );
+            resume_tx.send(()).unwrap();
+            held.join().unwrap();
+            if action == "cleanupFailure" {
+                wait_for(
+                    || {
+                        host_call(
+                            &host,
+                            &session,
+                            "runtime.status",
+                            json!({"operationId":id,"afterSequence":0}),
+                        )["value"]["phase"]
+                            == "cleanupFailed"
+                    },
+                    8,
+                );
+                host.with_service(|service| {
+                    assert!(service.runtime.busy());
+                    assert!(!service.runtime_shutdown());
+                    assert!(
+                        service.runtime.busy(),
+                        "failed cleanup owner must survive shutdown"
+                    );
+                    assert!(service.open_path(&next).is_err());
+                    let (authority, _) = service.authoring_context().unwrap();
+                    assert!(service
+                        .authoring
+                        .transactions
+                        .require_no_execution(&authority)
+                        .is_err());
+                })
+                .unwrap();
+            } else {
+                wait_for(
+                    || {
+                        host_call(
+                            &host,
+                            &session,
+                            "runtime.status",
+                            json!({"operationId":id,"afterSequence":0}),
+                        )["value"]["cleanupComplete"]
+                            == true
+                    },
+                    8,
+                );
+                let new_session = host
+                    .with_service(|service| service.open_path(&next).unwrap().session_id)
+                    .unwrap();
+                assert_eq!(
+                    host_call(&host, &session, "runtime.stop", json!({"operationId":id}))["error"]
+                        ["code"],
+                    "STALE_PROJECT_SESSION"
+                );
+                assert_eq!(
+                    host_call(
+                        &host,
+                        &new_session,
+                        "runtime.stop",
+                        json!({"operationId":id})
+                    )["error"]["code"],
+                    "STALE_RUNTIME"
+                );
+            }
+            assert_descendant_dead(&root);
+            host.shutdown();
+        }
+    }
+}
+
+#[test]
+fn runtime_dialog_completion_cannot_mutate_replacement_session() {
+    let temp = tempfile::tempdir().unwrap();
+    let first = temp.path().join("first");
+    let second = temp.path().join("second");
+    make_openable_project(&first, "First");
+    make_openable_project(&second, "Second");
+    let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+    let before = service.open_path(&first).unwrap().session_id;
+    let host = crate::dispatch::ApplicationHost::new(service);
+    // The picker remains outstanding while normal service requests continue.
+    let next = host
+        .with_service(|service| service.open_path(&second).unwrap().session_id)
+        .unwrap();
+    let mut invoked = false;
+    let response = host
+        .complete_dialog("dialog-result".into(), Some(before), |_| {
+            invoked = true;
+            crate::CoreResponse::success("dialog-result".into(), json!({}))
+        })
+        .unwrap();
+    assert!(!invoked);
+    assert_eq!(
+        serde_json::to_value(response).unwrap()["error"]["code"],
+        "STALE_PROJECT_SESSION"
+    );
+    assert_eq!(
+        host.with_service(|service| service.current().unwrap().session_id)
+            .unwrap(),
+        next
+    );
+    host.shutdown();
 }

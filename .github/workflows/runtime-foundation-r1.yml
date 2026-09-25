@@ -11,6 +11,7 @@ on:
       - app/src/source-ui.ts
       - app/src/protocol.ts
       - app/tests/source-authoring.dom.test.ts
+      - app/tests/protocol.test.ts
       - app/Cargo.lock
       - app/Cargo.toml
       - app/rust-toolchain.toml
@@ -71,7 +72,7 @@ jobs:
           cargo fmt --check --all
           cargo test -p loomlight-core --release --locked runtime_ -- --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-core.log"
-      - name: Desktop shutdown boundary compiles and tests
+      - name: Desktop request and shutdown boundary compiles and tests
         id: desktop
         working-directory: app
         shell: bash
@@ -130,7 +131,13 @@ jobs:
                     "nativeKeyboard": "not exercised; actual SDK default callback exercised",
                     "packagedUi": "not exercised; 1G.2b excluded",
                     "inputs": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
-                               for path in sorted(Path("app/src-core/src").rglob("*.rs"))}}
+                               for path in sorted(set(Path("app/src-core/src").rglob("*.rs"))
+                                   | set(Path("app/src").glob("*.ts"))
+                                   | set(Path("app/tests").glob("*"))
+                                   | {Path(p) for p in ("app/src-tauri/src/main.rs", "app/src-core/Cargo.toml",
+                                       "app/src-tauri/Cargo.toml", "app/Cargo.toml", "app/Cargo.lock",
+                                       "app/rust-toolchain.toml", "app/package.json", "app/package-lock.json",
+                                       ".github/workflows/runtime-foundation-r1.yml")}) if path.is_file()}}
           (Path(os.environ["RUNNER_TEMP"]) / "runtime-foundation-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - name: Retain bounded target evidence
