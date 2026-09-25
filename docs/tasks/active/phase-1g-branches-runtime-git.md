@@ -2,9 +2,10 @@
 
 **Updated:** 2026-09-25. **Implementation:** all three checkpoints `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
-and removed new Git work from Phase 1. This authorises documentation publication only.
-**Planning branch:** `docs/phase-1g-scope-testing`, from main
-`f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own publication state.
+and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
+Implementation still requires selection of one checkpoint.
+**Historical planning branch:** `docs/phase-1g-scope-testing`, from main
+`f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on main.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
 checkpoint. No application work or production dispatch is authorised by this update.
 
@@ -397,7 +398,8 @@ planning omissions. This review makes no native acceptance or merge claim.
 ## 11. September 25 planning amendment
 
 **Authority:** user requested optional later Git, accepted the review fixes/testing and
-authorised documentation updates. **State:** documentation `review_ready`; every
+authorised documentation updates and then review/integration. **State:** documentation
+accepted/integrated through PR #16; every
 application checkpoint stays `not_started`.
 
 Reviewed main `f6c269278aa1d8955876ca45bac98a92940e1c5e`, remote branches/open PRs,
@@ -412,8 +414,8 @@ final manual acceptance and bounded 1H reuse. Phase 2 implementation and accepte
 results are unchanged. Historical Git/security requirements survive in optional Git.
 
 Validation/publication results are recorded in the single live HANDOVER; no application,
-SDK, package or physical test is claimed by a documentation check. Next action is review
-of this documentation PR; implementation requires separate checkpoint selection.
+SDK, package or physical test is claimed by a documentation check. Planning review is
+closed; implementation requires separate checkpoint selection.
 
 ### Script-only play clarification
 
@@ -423,3 +425,18 @@ race/history coverage; the former live-asset-read acceptance case is removed. Ex
 asset references can still be edited in scripts. No custom hot reload, runtime snapshot
 or new manual test session is introduced. This amends documentation PR #16 from
 `b9226360165fe2a8c22244f5e5812fe0a713bd5f`; implementation remains unstarted.
+
+### Final review and integration
+
+The September 25 user requested review against this conversation and merge if clear.
+Reviewed head `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`: no blocking discrepancy
+in scope, script-only editing during play, Git deferral, automated/native test ownership,
+final human testing or 1H evidence reuse. The initial graph budgets remain hypotheses
+to measure, and runtime feasibility is a proof gate rather than an implementation claim.
+
+Repository validation (224 files), whitespace and local anchor checks passed. GitHub
+quality run `36101165196` passed for the reviewed head. PR #16 merged at
+`5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`; its tree exactly matches the reviewed
+candidate. CURRENT/HANDOVER now continue from main to separately selected 1G.1.
+No production dispatch, application changes, branch deletion or implementation occurred.
+The active 1G/1H/optional Git briefs remain active because their implementation is unstarted.

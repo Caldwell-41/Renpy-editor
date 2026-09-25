@@ -1,98 +1,79 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-25. **Repository:** `Caldwell-41/Renpy-editor`.
-**State:** scope/testing documentation amendment `review_ready`; Phase 1F remains accepted/integrated/post-merge verified; Phase 1G implementation unstarted.
-**Continuation branch:** `docs/phase-1g-scope-testing`. **Prior merged PR:** [#14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
-**Verified merge:** `973e3565d7cf41c6dca936df088ced10969821ac`.
-**Reviewed closeout:** `e225dee19c6f772f409c4fe76ac0493b769adefd`.
-**Production candidate:** `88dc6286944d4b96cfb96968f88aa6e87dacc447`.
-**Authority:** September 25 user requested Git deferral, accepted the review/testing
-fixes and authorised documentation updates; no implementation or merge selected.
-**Planning baseline:** main `f6c269278aa1d8955876ca45bac98a92940e1c5e`.
-**Planning PR:** [#16](https://github.com/Caldwell-41/Renpy-editor/pull/16), open/unmerged.
-**Reviewed planning candidate:** `b9226360165fe2a8c22244f5e5812fe0a713bd5f`; this
-follow-up narrows editing during play to scripts under the user's clarification.
-**Canonical detail:** [post-merge verification 7.30](../tasks/archive/2026-09-23-phase-1f-save-correction.md#730-post-merge-production-evidence-closeout)
-and [final decision 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
+**State:** Phase 1G planning amendment reviewed, accepted and integrated; implementation
+of all three 1G checkpoints remains `not_started`. Phase 1F is closed.
+**Continuation branch:** `main`.
+**Merged planning PR:** [#16](https://github.com/Caldwell-41/Renpy-editor/pull/16).
+**Verified merge:** `5266e55f2a93f2e2df5564c87c6738fd0ef3e2d8`.
+**Reviewed planning head:** `f8e8e9b7407c0201997aa8dd0e3ecdabc1cde801`.
+**Verified tree:** `48499e2af744bff8e5a40eda0996cbdbd082c7e3`, identical on the reviewed
+head and merge. This status closeout changes documentation only after that merge.
+**Authority:** the user requested review against our chat decisions, merge if clear,
+and a prompt to start 1G. No implementation was selected for this review turn.
 
-F1-F4 are closed. Production run `35787284261`, attempt 1, passed every required
-automated target gate. Historical reports call it #90; fresh GitHub metadata says
-#91, with identical stable ID/SHA/artifacts. Both native F4 A/B/C sets are user-reported
-PASS and all six #87 native Save passes remain PASS without repetition. Native local
-hashes/exact OS builds were not supplied; the archive retains those evidence limits
-and DIST-MAC-01. No new application change, package run or physical test was performed.
+## Review outcome and retained scope
 
-The closeout tree `ae81ddfcfdf6ada7f756f1d8bd9bf46474f731a2` exactly matches the
-merge tree. Repository quality `35821483373` passed the published closeout. The F4
-inline review thread is resolved; PR #14 is closed/merged. This follow-up records
-actual integration and resets continuation, rather than chasing its own commit SHA.
-Repository/link/privacy/whitespace checks pass. No acceptance blocker remains.
+No blocking discrepancy remained in the twelve-path documentation PR. Reviewed the
+whole planning delta against the accepted decisions and checked actual refs, PR state,
+reviews/comments, local ownership, canonical scope and testing contracts.
 
-## September 25 scope/testing amendment
+- New Git status/diff/checkpoints are deferred as optional GIT.1/GIT.2; not a Phase 1
+  or Phase 2-entry requirement. Existing optional project-creation init remains.
+- 1G contains 1G.1 Branches, 1G.2a runtime foundation, 1G.2b runtime UI/diagnostics.
+- During play, supported script edits/saves and references to existing assets are
+  allowed; asset file/inventory mutations require Stop, including compound/history
+  operations. Use Ren'Py's supported reload behaviour; no asset hot reload or snapshot.
+- Shared flow, existing Save/input preparation, revision-aware diagnostics, bounded
+  graph work and real-service IPC/package tests remain explicit requirements.
+- Agents own development tests and early R1 Windows/macOS process proof. One focused
+  human session per platform is reserved for final 1G; 1H reuses mapped human evidence
+  under TESTING rather than automatically requesting another complete session.
+- Preserve accepted 1F Save/F4 evidence and automated regressions. Phase 2 plan unchanged.
 
-The isolated documentation branch revises 1G to three checkpoints, preserves new Git
-work as optional GIT.1/GIT.2, and removes Git acceptance from Phase 1/1H without removing
-existing init regressions. Flow/draft/diagnostic boundaries and editing-during-play proof
-are concrete in the [1G brief](../tasks/active/phase-1g-branches-runtime-git.md).
-[TESTING](../TESTING.md#phase-1g-testing-ownership-and-cadence) owns agent-run tests,
-real-service package coverage, early R1 native automation, one final human 1G session,
-narrow 1H human-evidence reuse and honest workflow cost limits. The subsequent user
-clarification permits script editing/saving during play only. Asset mutation requires
-Stop, enforced in core including imports/history/races. The earlier live-asset-read
-test is replaced by automated refusal/no-write and retry-after-Stop coverage; the
-physical testing schedule is unchanged. No hot-reload or snapshot subsystem is added.
+Canonical detail: [1G brief](../tasks/active/phase-1g-branches-runtime-git.md),
+[optional Git](../tasks/active/optional-local-git.md),
+[TESTING ownership/cadence](../TESTING.md#phase-1g-testing-ownership-and-cadence), and
+[1H](../tasks/active/phase-1h-vertical-slice-acceptance.md).
 
-**Validation:** `python3 scripts/validate.py` passed for 224 repository files; staged
-`git diff --check` passed. Reviewed Phase 1/Git scope references, local Markdown anchors
-and the documentation-only diff. No application or platform tests were run.
-**Publication:** this branch is the publication target; no application/SDK/package/native
-execution, workflow dispatch, CI trigger change or integration is part of this checkpoint.
-**Next bounded action:** review the documentation amendment. After authorised integration,
-select 1G.1 separately; use the existing implementation-branch rules below. Optional Git
-has no implementation branch and needs a later explicit selection. Phase 2 plan unchanged.
+## Validation and integration
 
-Historical 1F results and branch dispositions below remain evidence, not new test claims.
+`python3 scripts/validate.py` passed for 224 repository files; complete PR whitespace
+and local Markdown anchor checks passed. GitHub Validate repository succeeded for the
+reviewed head: [run 36101165196](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36101165196),
+job `107963755342`. There were no open review comments or submitted change requests.
+Merged with the expected head bound to the request and verified the exact resulting
+tree on main. No application, SDK, package or physical tests were run, no production
+workflow was dispatched, and no CI trigger change was made. Automatic repository-quality
+runs on main are separate executions, not inferred passes from the PR result.
 
-## Post-merge production verification
+This closeout updates live status and continuation after actual integration; it does
+not chase its own SHA. No branches or tags were deleted. Unrelated open PRs/history
+and cross-host worktrees remain preserved. A historical planning branch is not the
+implementation branch for 1G.
 
-Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
-passed. The merge automatically triggered production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),
-run number 92, attempt 1, on the merge SHA above. Terminal inspection confirms
-Preflight `107054377077`, Windows `107054543325` and macOS `107054543438` all passed.
-Frontend 42/42 and the F4 browser probe passed; core results were Windows 147 and
-macOS 153 with zero failures and four ignored subprocess workers per target. Explicit
-SDK/desktop/package-smoke/security/inventory gates passed. The two lightweight evidence
-ZIPs were downloaded: their SHA-256 values match GitHub metadata and CRC checks pass.
-The automatic push run intentionally did not upload replacement installer artifacts.
-No manual dispatch/retry or new physical test occurred; accepted pre-merge package and
-native evidence remains authoritative. The `awaiting_ci` state is closed.
+## Accepted application baseline
 
-**Phase 1F next action:** none; its evidence remains closed. Phase 1G.1 is eligible only after
-explicit user selection in a later chat; do not begin it automatically.
-
-## Branch disposition
-
-No remote branches or tags were deleted. The 1F remote branch is fully integrated,
-but the connected API has no branch-deletion operation and shell Git has no write
-credential (the attempted documentation push failed before the successful API
-publication). It can be retired from an authenticated host after confirming no other
-executor uses it. Do not restore or modify it merely to finish housekeeping.
-
-Older `corrective/phase-1a-1d-integrated`, `corrective/phase-1d-ui-operation-race`,
-`feature/phase-1e-scene-authoring` and `docs/phase-1g-1h-planning` are ancestry-proven
-integrated but retained because cross-host worktree/dependency use is unconfirmed.
-Preserve open Dependabot PRs #10/#11, abandoned unique history PR #12 and archive tags.
-No host worktree was removed. Branch retirement is housekeeping, not a 1G entry blocker.
+Phase 1F remains integrated through PR #14 at
+`973e3565d7cf41c6dca936df088ced10969821ac`. Original Save passes on #87 and native
+F4 A/B/C on Windows/macOS remain accepted, with their recorded provenance limits.
+Post-merge production `35821582755` passed and is closed. The archived
+[final review 7.29](../tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review)
+and [post-merge evidence 7.30](../tasks/archive/2026-09-23-phase-1f-save-correction.md#730-post-merge-production-evidence-closeout)
+retain exact candidates/results, failures and branch dispositions. DIST-MAC-01 remains
+a later distribution limitation. Do not reopen 1F or repeat its manual suite by default.
 
 ## Next bounded checkpoint
 
-[1G.1 — shared flow projection and Branches](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches)
-is the next application checkpoint after explicit user selection in a later chat.
-All 1G/1H checkpoints
-remain `not_started`; Phase 2 planning is unchanged. No 1G implementation branch/PR exists.
+Select [1G.1 — shared flow projection and Branches](../tasks/active/phase-1g-branches-runtime-git.md#4-1g1--shared-flow-projection-and-branches)
+only. Read AGENTS, WORKFLOW, CURRENT, this handover, the parent plan and 1G brief.
+Inspect fresh main/refs/PRs/worktree ownership; reuse matching newer work if present,
+otherwise create `feature/phase-1g-branches-runtime` from verified main. No matching
+implementation branch/PR existed at this review. Record actual ownership on entry.
 
-On selection, read AGENTS, WORKFLOW, CURRENT, this handover, the parent Phase 1 plan and
-the 1G brief. Inspect actual main/refs/ownership; reuse a matching branch/PR if present,
-otherwise create `feature/phase-1g-branches-runtime` from verified main and record
-it here. Complete only 1G.1/G1, preserving Source Save, review identity and draft/session/
-recovery authority. Publish its evidence/handover and stop before runtime or Git work.
+Implement/review the shared projection and Branches using existing Scene commands,
+Source mapping and transaction authority. Preserve drafts, Source Save, review identity,
+recovery and session guards. Follow targeted agent-run G1 checks and TESTING cadence;
+record deferred final native evidence honestly, without requesting user physical tests
+or dispatching a full package matrix for this checkpoint. Do not implement runtime,
+optional Git or Phase 2. Publish the checkpoint ledger and this handover, then stop.
