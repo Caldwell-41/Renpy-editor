@@ -1,4 +1,5 @@
 pub mod runtime;
+mod runtime_probe;
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,

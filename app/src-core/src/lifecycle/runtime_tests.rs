@@ -860,6 +860,33 @@ fn runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants(
                 true
             );
             assert_eq!(
+                host_call(
+                    &host,
+                    &session,
+                    "runtime.diagnostics",
+                    json!({"operationId":id})
+                )["ok"],
+                true
+            );
+            assert_eq!(
+                host_call(
+                    &host,
+                    "old-session",
+                    "runtime.diagnostics",
+                    json!({"operationId":id})
+                )["error"]["code"],
+                "STALE_PROJECT_SESSION"
+            );
+            assert_eq!(
+                host_call(
+                    &host,
+                    &session,
+                    "runtime.diagnostics",
+                    json!({"operationId":id,"path":"game/custom.rpy"})
+                )["error"]["code"],
+                "INVALID_PAYLOAD"
+            );
+            assert_eq!(
                 host_call(&host, &session, "runtime.stop", json!({"operationId":id}))["ok"],
                 true
             );
@@ -967,4 +994,63 @@ fn runtime_dialog_completion_cannot_mutate_replacement_session() {
         next
     );
     host.shutdown();
+}
+
+#[test]
+#[ignore = "explicit official SDK diagnostics gate; missing archive fails"]
+fn runtime_diagnostics_sdk_gate() {
+    let archive =
+        std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("official SDK archive required");
+    let temp = tempfile::tempdir().unwrap();
+    let sdk = crate::renpy::install_supported_sdk_from_archive(
+        &temp.path().join("sdk"),
+        Path::new(&archive),
+    )
+    .unwrap();
+    for (case, source, origin) in [
+        ("compile", "\u{feff}label diagnostic_case:\r\n    this is not a statement !!!\r\n", "compile"),
+        ("lint", "\u{feff}label diagnostic_case:\r\n    show loomlight_image_that_does_not_exist\r\n    return\r\n", "lint"),
+    ] {
+        let stage = Instant::now();
+        let root = temp.path().join(case);
+        make_openable_project(&root, "Diagnostic fixture");
+        let path = "game/雪 diagnostic.rpy";
+        fs::write(root.join(path), source).unwrap();
+        let mut service = LifecycleService::new(temp.path().join(format!("state-{case}"))).unwrap();
+        let sdk_id = service.remember_sdk(sdk.clone(), "verified-official").id;
+        let session = service.open_path(&root).unwrap().session_id;
+        let prep = call(&mut service,&session,"runtime.prepare",json!({"kind":"validate","revisionChoice":"saved","sdkId":sdk_id}));
+        let trust = call(&mut service,&session,"runtime.grantTrust",json!({"preparationId":prep["preparationId"]}));
+        let start = call(&mut service,&session,"runtime.start",json!({"preparationId":prep["preparationId"],"trustId":trust["trustId"]}));
+        let id = start["operationId"].as_str().unwrap();
+        let mut status;
+        loop {
+            status = call(&mut service,&session,"runtime.status",json!({"operationId":id,"afterSequence":0}));
+            if status["cleanupComplete"] == true { break; }
+            assert!(stage.elapsed() < Duration::from_secs(190)); thread::sleep(Duration::from_millis(30));
+        }
+        assert_eq!(status["phase"],"failed", "{case}: {status}");
+        let report = call(&mut service,&session,"runtime.diagnostics",json!({"operationId":id}));
+        let records = report["diagnostics"].as_array().unwrap();
+        let diagnostic = records.iter().find(|d| d["path"] == path).unwrap_or_else(|| panic!("{case}: {report}\n{status}"));
+        assert_eq!(diagnostic["origin"],origin); assert_eq!(diagnostic["line"],2);
+        assert_eq!(diagnostic["sessionId"],session); assert_eq!(diagnostic["operationId"],id);
+        if case == "compile" { assert!(records.iter().all(|d| d["origin"] != "lint")); }
+        let target = call(&mut service,&session,"runtime.resolveDiagnostic",json!({"operationId":id,"diagnosticId":diagnostic["id"]}));
+        let opened = call(&mut service,&session,"source.open",target.clone());
+        assert_eq!(opened["baseRevision"],diagnostic["sourceRevision"]);
+        let selected = opened["selectionStart"].as_u64().unwrap() as usize;
+        assert_eq!(selected, "label diagnostic_case:\r\n".encode_utf16().count());
+        for payload in [json!({"sessionId":session,"operationId":id,"diagnosticId":diagnostic["id"],"path":"/host/file"}),json!({"sessionId":"old","operationId":id,"diagnosticId":diagnostic["id"]})] {
+            assert_eq!(closeout_ipc(&mut service,"runtime.resolveDiagnostic",payload)["ok"],false);
+        }
+        fs::rename(root.join(path),root.join("saved-original")).unwrap();
+        fs::write(root.join(path),source).unwrap(); // Equal bytes, different file identity.
+        assert_eq!(closeout_ipc(&mut service,"runtime.resolveDiagnostic",json!({"sessionId":session,"operationId":id,"diagnosticId":diagnostic["id"]}))["ok"],false);
+        fs::remove_file(root.join(path)).unwrap();
+        assert_eq!(closeout_ipc(&mut service,"runtime.resolveDiagnostic",json!({"sessionId":session,"operationId":id,"diagnosticId":diagnostic["id"]}))["ok"],false);
+        service.close().unwrap(); service.open_path(&root).unwrap();
+        assert_eq!(fs::read(root.join("saved-original")).unwrap(),source.as_bytes());
+        println!("runtime-diagnostics-sdk-{case}: passed; elapsed_ms={}",stage.elapsed().as_millis());
+    }
 }

@@ -65,7 +65,7 @@ jobs:
           - name: macOS ARM64
             runner: macos-26
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: app
@@ -104,7 +104,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --release --locked -- --nocapture \
+          LOOMLIGHT_FLOW_EVIDENCE="$RUNNER_TEMP/runtime-flow.json" cargo test -p loomlight-core --release --locked -- --nocapture \
             | tee "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'recent_crash_checkpoints_restart_from_a_complete_store' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
@@ -112,6 +112,15 @@ jobs:
           grep 'parent_substitution_after_validation_cannot_redirect_stage_creation' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'project_open_metadata_substitution_is_never_followed' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
+      - name: Runtime and Branches rendered focus, resize, and budgets
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+          LOOMLIGHT_RUNTIME_SCREENSHOT_DIR: ${{ runner.temp }}
+        run: |
+          set -o pipefail
+          node tests/runtime-ui.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-ui-browser.log"
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-branches-browser.log"
       - name: Restore pinned Ren'Py SDK archive
         id: phase-1c-sdk-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -156,10 +165,34 @@ jobs:
             renpy::reconciliation_tests::official_sdk_download_handoff_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
           grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+      - name: Runtime foundation and real SDK diagnostics gates
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked runtime_official_sdk_service_gate -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-sdk-service.log"
+          grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
+          cargo test -p loomlight-core --release --locked runtime_diagnostics_sdk_gate -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold
         run: npm exec -- tauri build -- --locked
+      - name: Real-service packaged runtime UI scenarios
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          TARGET_OS: ${{ runner.os }}
+        run: |
+          if [ "$TARGET_OS" = "Windows" ]; then
+            python scripts/record-runtime-inputs.py target/release/loomlight.exe "$RUNNER_TEMP/runtime-ui-inputs.json"
+            python scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP"
+          else
+            python3 scripts/record-runtime-inputs.py target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight "$RUNNER_TEMP/runtime-ui-inputs.json"
+            python3 scripts/run-runtime-ui-probes.py target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight "$RUNNER_TEMP"
+          fi
       - name: Run packaged WebView boundary smoke
         shell: bash
         env:
@@ -256,6 +289,13 @@ jobs:
             ${{ runner.temp }}/phase-1c-project-lifecycle.log
             ${{ runner.temp }}/phase-1c-sdk-download-handoff.log
             ${{ runner.temp }}/dependency-inventory.json
+            ${{ runner.temp }}/runtime-sdk-service.log
+            ${{ runner.temp }}/runtime-diagnostics-sdk.log
+            ${{ runner.temp }}/runtime-ui-*.log
+            ${{ runner.temp }}/runtime-ui-*.json
+            ${{ runner.temp }}/runtime-flow.json
+            ${{ runner.temp }}/runtime-branches-browser.log
+            ${{ runner.temp }}/runtime-*.png
           if-no-files-found: warn
           retention-days: 7
       - name: Upload packaged application for manual runs

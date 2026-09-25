@@ -1,10 +1,22 @@
 # Current status
 
-**Updated:** 2026-09-26 (final-source native recheck verified; R1 technical findings closed).
+**Updated:** 2026-09-26 (1G.2b implementation and agent verification).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.2a runtime/trust foundation, `review_ready`. R1 technical gate passed and R1-B1/B2 are closed on candidate `c12d953548992adc60b38682d0dcfda8cdeb9f94`, tree `3f8f6e769672572b008b2ffb4f283888afecfc31`. [Native run 36148942247](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36148942247), attempt 1, passed both targets: complete logs, six-file artifacts, ZIP size/SHA-256/CRC and all 60 input hashes per target verified. Frontend 50, core Windows 17/macOS 18 (each 2 ignored), explicit SDK 1 and desktop 1 passed per target; Source browser/build and format passed. Exact-candidate quality `36148947574` passed. See the [final-source closure](../tasks/active/phase-1g-branches-runtime-git.md#final-source-r1-recheck-and-closure--2026-09-26). No native operation remains outstanding. Continue on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). User acceptance remains separate; 1G.2b is eligible only upon explicit selection.
+**Current checkpoint:** Phase 1G.2b Runtime UI and navigable diagnostics, `in_progress`.
+The user selected implementation and required agent verification from `78f051e`, with
+physical testing, acceptance, merge, optional Git and Phase 2 excluded. Runtime controls,
+trust/revision choice and bounded revision-qualified Source navigation are implemented.
+Local checks and failed/corrected package attempts are recorded in
+[ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger).
+The final Windows/macOS production matrix remains required; no R2 pass is claimed.
+Use [HANDOVER](HANDOVER.md) for the exact candidate/run and next bounded action.
+Continue on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+**Preserved R1 closure:** candidate `c12d953548992adc60b38682d0dcfda8cdeb9f94`, tree
+`3f8f6e769672572b008b2ffb4f283888afecfc31`, native run `36148942247`, attempt 1,
+passed both targets with complete logs, artifacts and all 60 input hashes verified.
+R1-B1/B2 remain closed on those inputs; final-source regression is part of 1G.2b.
 **Preserved 1G.1 application candidate:** `fde8cdafd77fe807f2307fb607fc7546ca66ffec`; targeted Linux tests passed, final Windows/macOS evidence deferred. Not merged or finally accepted.
 **Preserved earlier R1-B1/B2 correction candidate:** `07f23b61d46511848d2b09db57ba1d5a696cabe0`, tree `614931107db78f61c5b864a099ca2737ab546bd8`. Replacement [run 36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132), attempt 1, passed Windows x64 and macOS ARM64. Complete logs, both ZIP hashes/CRC/size and all 60 input hashes per target were verified. Runtime core: Windows 17/macOS 18 passed, each 2 ignored; explicit SDK 1, frontend 49, Source browser/build and desktop 1 passed per target. Superseded correction run `36144599144` also succeeded on its actual candidate. Final-source quality `36144979086` and docs quality `36145345911` passed. See the [closeout assessment](../tasks/active/phase-1g-branches-runtime-git.md#replacement-native-evidence-and-r1-b1b2-closeout--2026-09-26). No outstanding native operation; no duplicate run.
 **Preserved 1G.2a production candidate:** `ad2627c4a0347261098f12883419672ecffc6e29`, tree `381829ad05445ef6d0f385b84a1d9eec02e7bff0`. Existing [run 36136466567](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36136466567), attempt 1, passed Windows x64 and macOS ARM64. Both logs/artifacts, ZIP SHA-256/CRC and all 26 recorded core-input hashes per target were verified. No duplicate run. That earlier review found R1-B1 (cancellable preparation and responsive production control) and R1-B2 (service lifecycle/descendant and history coverage) as documented in [ledger 13](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger). The subsequent R1-B1/B2 correction adds independent request/control ownership, cancellable inventory, service/descendant/history regressions, and conservative terminal freshness. See the latest ledger entry and HANDOVER for replacement-candidate evidence.
@@ -36,7 +48,10 @@ PASS; the six original native Save passes remain PASS on #87 without repetition.
 Native local installer hashes/exact OS builds were not supplied; reports retain their
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-**Checkpoint handoff:** [Phase 1G.2a](../tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation) implementation and final-source R1 recheck are complete, `review_ready`, not user-accepted or merged. No blocker remains in the bounded R1 assessment. The next eligible checkpoint is [1G.2b — Runtime UI and navigable diagnostics](../tasks/active/phase-1g-branches-runtime-git.md#6-1g2b--runtime-ui-and-navigable-diagnostics), only if the user selects it; this closure does not start it. 1G.2b and 1H remain `not_started`; Phase 2 planning is preserved. Final packaged/native UI evidence and human acceptance remain deferred under TESTING. The [1G.1 ledger](../tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger) retains its exact scope and deferred final evidence.
+**Checkpoint handoff:** 1G.2b implementation and verification are active; final G1/R1/R2
+review is not complete. 1G is not accepted or merged. No physical testing is requested.
+1H remains separately selected and Phase 2/optional Git remain outside this checkpoint.
+Preserve the earlier 1G.1 and R1 evidence under their actual candidates.
 
 Main repository quality [35821582664](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582664)
 passed. The automatic post-merge production [35821582755](https://github.com/Caldwell-41/Renpy-editor/actions/runs/35821582755),

@@ -1,5 +1,7 @@
+import { RequestLane } from "./request-lane.ts";
+import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
-import { requestCore as desktopRequestCore } from "./bridge.ts";
+import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   focusSceneDraft,
   hasSceneDraft,
@@ -61,12 +63,14 @@ let disposeSourceView: (() => void) | undefined;
 let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
+let runtimeWorkspace: RuntimeWorkspace | undefined;
 
 declare global {
   interface Window {
     __loomlightScaffoldSmokeMode?: boolean;
     __loomlightInstallSmokeRequester?: (requester: typeof desktopRequestCore) => () => void;
     __loomlightReadSaveTrace?: () => readonly string[];
+    __loomlightRequestApplicationClose?: () => void;
   }
 }
 
@@ -99,6 +103,7 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
   disposeSceneView?.();
@@ -206,8 +211,19 @@ function button(label: string, className = "button secondary"): HTMLButtonElemen
 function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
   const status = document.querySelector<HTMLElement>("#app-status"); if (status) { status.textContent = message; status.dataset.kind = kind; }
 }
+const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
-  const response = await coreRequester<T>(operation, payload); if (!response.ok) throw new Error(response.error.message); return response.value;
+  const capturedView = viewGeneration;
+  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "flow.list", "runtime.resolveDiagnostic"].includes(operation);
+  for (let attempt = 0; ; attempt += 1) {
+    const requester = coreRequester;
+    const response = await requestLane.run(operation, () => requester<T>(operation, payload));
+    if (response.ok) return response.value;
+    // The host has not checked out the service for this refusal. Retry only reads;
+    // writes, trust and process starts are never replayed after an ambiguous result.
+    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw new Error(response.error.message);
+    await new Promise(resolve => setTimeout(resolve,25));
+  }
 }
 async function projectValue<T>(project: OpenProject, operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");
@@ -346,7 +362,18 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story" || surface === "source") sidebar.append(tree);
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : "supporting-workspace";
-  layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
+  layout.append(sidebar, workspace); shell(layout);
+  runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
+    request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
+    current: () => currentProject?.sessionId === project.sessionId,
+    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), sceneRoot: root, current: () => capturedGeneration === viewGeneration }; },
+    coordinate: task => runAuthoringOperation(project, runtimeWorkspace!, task),
+    navigate: target => requestProjectNavigation(project, "source", target),
+    refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
+  });
+  document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
+  document.querySelector(".app-shell")?.append(runtimeWorkspace.panel);
+  setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
   else if (surface === "branches") {
@@ -515,6 +542,8 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
   if (document.querySelector(".leave-source-dialog")) return;
+  try { if (runtimeWorkspace && !await runtimeWorkspace.beforeClose()) return; }
+  catch (error) { setStatus(message(error, "Runtime cleanup failed"), "error"); return; }
   const controller = currentSourceController(project);
   let transition: Awaited<ReturnType<SourceWorkspaceController["prepareTransition"]>>;
   let inventory: SourceInventory;
@@ -744,6 +773,7 @@ function installListeners(): void {
 }
 
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
+  runtimeWorkspace?.dispose(); runtimeWorkspace = undefined;
   coreRequester = requester;
   saveCommandTrace.length = 0;
   viewGeneration = 0;
@@ -769,3 +799,11 @@ export function requestApplicationExit(closeWindow: () => Promise<void>): boolea
   void requestProjectClose(project, closeWindow);
   return true;
 }
+
+// Native close/quit enters the same runtime cleanup and Source leave flow.
+window.__loomlightRequestApplicationClose = () => {
+  if (!allowSceneNavigation() || hasBlockingModal()) return;
+  const project=currentProject;
+  const finish=async () => { await showWelcome(); await completeApplicationClose(); };
+  void (project ? requestProjectClose(project,finish) : completeApplicationClose()).catch(error=>setStatus(message(error,"Application close could not finish"),"error"));
+};

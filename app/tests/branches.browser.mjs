@@ -11,7 +11,7 @@ const server = await createServer({ root: fileURLToPath(new URL("..", import.met
 let browser;
 try {
   await server.listen();
-  browser = await chromium.launch({ headless: true, ...(process.env.LOOMLIGHT_BROWSER_EXECUTABLE ? { executablePath: process.env.LOOMLIGHT_BROWSER_EXECUTABLE } : {}) });
+  browser = await chromium.launch({ channel: "chrome", headless: true, ...(process.env.LOOMLIGHT_BROWSER_EXECUTABLE ? { executablePath: process.env.LOOMLIGHT_BROWSER_EXECUTABLE } : {}) });
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
   const errors = []; page.on("pageerror", error => errors.push(error.message));
   await page.route("**/__branches", route => route.fulfill({ contentType: "text/html", body: '<!doctype html><html><head><link rel="stylesheet" href="/src/styles.css"></head><body><main class="branches-workspace" id="host"></main></body></html>' }));
@@ -49,5 +49,5 @@ try {
   assert.deepEqual(errors,[]);
   assert.ok(timing<2000,`Initial layout ${timing}ms exceeds 2000ms`);
   assert.ok(p95<100,`Pan/frame p95 ${p95}ms exceeds 100ms`);
-  console.log(JSON.stringify({browser:await browser.version(),layer:"Linux Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input",nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,resize640:"pass",pageErrors:errors}));
+  console.log(JSON.stringify({browser:await browser.version(),layer:`${process.platform} Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input`,nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,resize640:"pass",pageErrors:errors}));
 } finally { await browser?.close(); await server.close(); }

@@ -344,3 +344,20 @@ ambiguous entry does not fall back to metadata or tree ordering.
 Observation hashes cover metadata and the accepted source inventory. Dirty Source
 buffers are excluded. Revision/identity changes invalidate observations; commands
 continue to enforce current Scene/Source transaction preconditions independently.
+
+
+## Runtime diagnostic projection (1G.2b)
+
+A runtime diagnostic carries origin (`compile`, `lint`, `runtime`), severity, bounded
+message, optional proven project-relative path and one-based line, optional column,
+source content revision, operation/session identity and freshness. Column stays absent
+when the pinned format does not establish it. Core retains the launch file identities;
+`runtime.resolveDiagnostic` accepts only operation ID and diagnostic ordinal, never
+renderer-supplied paths or ranges. It verifies identity and revision and returns a
+revision-qualified Source byte range. BOM, CRLF and Unicode conversion remains in the
+existing Source controller. Failed/unknown freshness is distinct from process outcome.
+
+The projection is limited to 256 records and at most 4 KiB per message; raw output
+retains the existing 2 MiB limit with 32 KiB pages. Known pinned SDK compile/traceback
+and lint locations are recognised; all other text remains bounded fallback output.
+No diagnostic is independent document truth or authority to mutate/open arbitrary files.

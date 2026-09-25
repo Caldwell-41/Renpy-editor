@@ -53,6 +53,8 @@ export const CORE_OPERATIONS = [
   "runtime.start",
   "runtime.stop",
   "runtime.status",
+  "runtime.diagnostics",
+  "runtime.resolveDiagnostic",
   "runtime.revokeTrust",
 ] as const;
 

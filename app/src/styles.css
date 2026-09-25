@@ -290,3 +290,21 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .branches-lines marker path { fill: var(--text-secondary); stroke: none; }
 
 .branches-controls select { padding: 8px 10px; min-height: 38px; color: var(--text-primary); background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: var(--radius-small); }
+
+.runtime-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.app-header:has(.runtime-toolbar) { flex-wrap: wrap; gap: 10px; }
+.runtime-panel { border-top: 1px solid var(--border-normal); padding: 12px 24px; min-width: 0; max-height: 36vh; overflow: auto; }
+.runtime-panel h2 { font-size: 14px; margin: 0 0 8px; }
+.runtime-panel p { margin: 6px 0; }
+.runtime-panel pre, .runtime-revision, .runtime-dialog pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
+.runtime-output { max-height: 180px; overflow: auto; font-size: 12px; }
+.runtime-diagnostics { display: grid; gap: 8px; }
+.runtime-diagnostics article { padding: 8px; border: 1px solid var(--border-normal); }
+.runtime-diagnostics button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.runtime-diagnostics span { display: block; font-size: 12px; }
+.runtime-dialog section { max-height: 85vh; overflow: auto; }
+.runtime-dialog pre { max-height: 45vh; overflow: auto; font: inherit; }
+@media (max-width: 700px) { .runtime-panel { padding: 8px; } .runtime-toolbar { margin-left: 0; } }
+
+.app-shell:has(.runtime-panel) { grid-template-rows: auto minmax(300px, 1fr) auto; }
+.app-header:has(.runtime-toolbar) { min-height: 54px; padding-block: 8px; }

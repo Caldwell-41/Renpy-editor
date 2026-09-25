@@ -113,6 +113,7 @@ impl ApplicationHost {
                 | "runtime.cancelRequest"
                 | "runtime.stop"
                 | "runtime.status"
+                | "runtime.diagnostics"
                 | "runtime.revokeTrust"
         ) {
             let mut state = self.0.state.lock().unwrap();
@@ -123,6 +124,24 @@ impl ApplicationHost {
                     id,
                     "STALE_PROJECT_SESSION",
                     "The project session changed.",
+                );
+            }
+            if op == "runtime.diagnostics" {
+                if payload.len() != 2 || !payload.get("operationId").is_some_and(Value::is_string) {
+                    return invalid(id);
+                }
+                let Some(control) = state
+                    .control
+                    .clone()
+                    .filter(|c| payload["operationId"].as_str() == Some(c.id.as_str()))
+                else {
+                    return stale(id);
+                };
+                let session = state.session.clone().unwrap();
+                drop(state); // Parse bounded retained output without checking out the authoring service.
+                return CoreResponse::success(
+                    id,
+                    json!({"diagnostics":control.diagnostics(&session),"limit":256}),
                 );
             }
             if op == "runtime.revokeTrust" {
@@ -326,7 +345,7 @@ impl ApplicationHost {
     pub(crate) fn hold_inventory(&self, hook: Arc<dyn Fn() + Send + Sync>) {
         self.0.state.lock().unwrap().work_hook = Some(hook);
     }
-    pub fn shutdown(&self) {
+    pub fn shutdown(&self) -> bool {
         let mut state = self.0.state.lock().unwrap();
         state.closing = true;
         if let Some(pending) = &state.request {
@@ -340,10 +359,11 @@ impl ApplicationHost {
         }
         let mut service = state.service.take().unwrap();
         drop(state);
-        service.runtime_shutdown();
+        let cleaned = service.runtime_shutdown();
         let mut state = self.0.state.lock().unwrap();
         state.control = None;
         state.service = Some(service);
+        cleaned
     }
 }
 fn invalid(id: String) -> CoreResponse {

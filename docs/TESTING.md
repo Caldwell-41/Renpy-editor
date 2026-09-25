@@ -565,3 +565,31 @@ Chromium. Record its actual version: this is a development browser, not proof of
 packaged Windows/macOS WebView or OS-native key delivery. No browser binary, SDK,
 measurement output or absolute machine path belongs in Git. Final 1G still owns the
 real packaged graph edit/disk/reopen scenario and both supported-target measurements.
+
+
+### 1G.2b named packaged scenarios
+
+The existing production workflow now includes the explicit R1 SDK service and R2
+compile/lint navigation tests, plus five independent real-service package cases:
+`compile`, `lint`, `route-a`, `route-b`, and `runtime-error`. The native-only fixture
+setup creates a fresh synthetic project before opening the UI. The injected driver
+uses visible runtime/Source/Branches controls and the real requester; it never installs
+the older mock smoke requester. Compile/lint select their actual Unicode/BOM/CRLF
+failing line. Route cases edit/restore a destination, assert selected dialogue/state/
+asset, save a script during normal play, observe staleness, Stop after the smoke limit,
+and verify accepted source on reopen. The 640px route-b case also retains an invalid
+mapped draft through Cancel and refused Save All, then deliberately runs the saved
+revision. Runtime failure remains separate.
+
+`app/scripts/run-runtime-ui-probes.py` records each case, elapsed time, process exit,
+timeout and cleanup result. Failure in one case does not hide later cases. The existing
+legacy boundary smoke remains independently reported. Evidence includes every case log
+and JSON, exact Git inputs/target/executable digest, core/SDK logs and package artifacts
+when requested. Both supported targets must pass on the coherent candidate. No
+native-keyboard or human acceptance claim is inferred from synthetic DOM events.
+
+R1's old automatic branch trigger is retired into this combined final gate; explicit
+manual R1 dispatch remains available for bounded future corrections. Final production
+verification is manually dispatched once on the implementation branch. Main's existing
+automatic production trigger remains unchanged; no cross-SHA/pre-post-merge reuse is
+claimed. Integration and its run strategy require separate authorisation.

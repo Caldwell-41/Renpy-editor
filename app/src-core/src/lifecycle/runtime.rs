@@ -77,6 +77,13 @@ pub struct TrustRequest {
     pub trust_id: String,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DiagnosticRequest {
+    pub operation_id: String,
+    pub diagnostic_id: usize,
+}
+
 struct Preparation {
     id: String,
     kind: RuntimeKind,
@@ -439,6 +446,85 @@ impl LifecycleService {
         )
         .map_err(input_error)
     }
+    pub fn runtime_diagnostics(&self, request: OperationRequest) -> Result<Value, LifecycleError> {
+        let process = self
+            .runtime
+            .process
+            .as_ref()
+            .filter(|p| p.id == request.operation_id)
+            .ok_or_else(|| err(RuntimeError::Stale))?;
+        let session = self
+            .current()
+            .ok_or_else(|| err(RuntimeError::Stale))?
+            .session_id;
+        Ok(json!({"diagnostics": process.diagnostics(&session), "limit": 256}))
+    }
+    pub fn runtime_resolve_diagnostic(
+        &self,
+        request: DiagnosticRequest,
+    ) -> Result<Value, LifecycleError> {
+        let process = self
+            .runtime
+            .process
+            .as_ref()
+            .filter(|p| p.id == request.operation_id)
+            .ok_or_else(|| err(RuntimeError::Stale))?;
+        let session = self
+            .current()
+            .ok_or_else(|| err(RuntimeError::Stale))?
+            .session_id;
+        let diagnostic = process
+            .diagnostics(&session)
+            .into_iter()
+            .find(|d| d.id == request.diagnostic_id)
+            .ok_or_else(|| err(RuntimeError::Stale))?;
+        let path = diagnostic.path.ok_or_else(|| err(RuntimeError::Stale))?;
+        let expected = process
+            .manifest
+            .get(&path)
+            .ok_or_else(|| err(RuntimeError::Stale))?;
+        let (authority, _) = self.authoring_context()?;
+        let (bytes, revision) = self
+            .authoring
+            .transactions
+            .snapshot(
+                &authority,
+                RelativePath::new(path.clone()).map_err(input_error)?,
+            )
+            .map_err(input_error)?;
+        if &revision != expected {
+            return Err(err(RuntimeError::Stale));
+        }
+        let (start, end) =
+            crate::renpy::runtime::diagnostics::line_range(&bytes, diagnostic.line.unwrap_or(1))
+                .ok_or_else(|| err(RuntimeError::Stale))?;
+        let document = self.source_open(crate::source::SourceOpenRequest {
+            path: path.clone(),
+            expected_revision: Some(revision.sha256.clone()),
+            selection_start: None,
+            selection_end: None,
+            byte_start: None,
+            byte_end: None,
+        })?;
+        if document.dirty
+            || document
+                .live_revision
+                .as_ref()
+                .is_some_and(|r| r != &revision.sha256)
+            || document.base_revision != revision.sha256
+            || matches!(
+                document.state,
+                crate::source::SourceFileState::Conflict
+                    | crate::source::SourceFileState::Unavailable
+            )
+        {
+            return Err(err(RuntimeError::Stale));
+        }
+        Ok(
+            json!({"path": path, "expectedRevision": revision.sha256, "byteStart": start, "byteEnd": end}),
+        )
+    }
+
     pub fn runtime_revoke_trust(&mut self, request: TrustRequest) -> Result<Value, LifecycleError> {
         if self
             .runtime

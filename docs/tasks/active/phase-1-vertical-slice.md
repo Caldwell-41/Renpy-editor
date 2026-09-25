@@ -140,8 +140,9 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 [1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
 and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'
 complete logs, artifacts and all 60 input hashes per target were verified for candidate
-`c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; 1G.2b remains
-`not_started` and requires explicit selection. The 1G ledger records targeted evidence
+`c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; the user selected 1G.2b from `78f051e`.
+It is `in_progress`, with implementation and local verification recorded in ledger 14;
+final supported-target evidence and G1/R1/R2 review remain required. The 1G ledger records targeted evidence
 and deferred final packaged/native UI evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
 supported script editing/saving during play and usable diagnostics. Asset mutations
 require Stop; live asset refresh is excluded. Existing Scene/Source/Save

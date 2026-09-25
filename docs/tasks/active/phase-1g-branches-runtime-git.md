@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `not_started`. User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress`. User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `not_started` | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -1705,3 +1705,154 @@ the provided next-chat prompt. It remains `not_started`. Printing that prompt gr
 no execution or acceptance by itself. Final G1/R1/R2 review, packaged target evidence
 and human acceptance remain under sections 8–9 and TESTING. No merge, physical testing,
 optional Git, Phase 2 or 1G.2b implementation is part of this closure.
+
+
+## 14. 1G.2b execution ledger
+
+### Entry and agent-owned verification contract — 2026-09-26
+
+Authority: the user explicitly selected only Runtime UI and navigable diagnostics,
+including required agent-run verification and checkpoint publication. Stop before
+physical testing, acceptance or merge; optional Git and Phase 2 remain excluded.
+Entry branch/head and open draft PR #17 were freshly verified at
+`78f051e382b048f1e8ee73f5add7a8072608e474`; main remains `924619d`.
+The clean existing implementation checkout is reused. R1 evidence is preserved.
+
+Named scenarios (implementing agent owns each; results must identify actual layer):
+
+| Scenario | Expected observation | Gate/layer |
+| --- | --- | --- |
+| R2-controls | Explicit revision choice, refused Save All/Cancel zero-spawn, inspectable trust/revoke, independent Stop and status, retained Scene/Source input | frontend DOM and literal IPC |
+| R2-diagnostics | Known compile/lint/runtime multiline output, bounded fallback, severity/origin and operation identity; safe current source navigation; Unicode/BOM/CRLF, spaces, absent columns, deleted/replaced files | core and renderer |
+| R2-lifecycle | Running/earlier-revision/terminal/cancel/failure, close Stop-and-continue, stale session isolation, bounded inert output | frontend + existing native R1 |
+| R2-package | Real visible controls → IPC/service → accepted disk/reopen, SDK compile/lint failures, both authored routes, Run beyond eight seconds and Stop, resize/focus | supported Windows x64/macOS ARM64 packages |
+| G1-final | Real graph destination edit/reopen, current mapping and declared layout budgets | final supported-target gate |
+| Regression | Existing Source Save, runtime cleanup/reload/assets/history, full core, source/SDK spikes | existing commands/workflows |
+
+Local host: macOS ARM64; Node/npm installed, Rust initially unavailable. Local DOM
+evidence does not substitute for the two packaged target gates. New diagnostics are
+bounded to 256 records, 4 KiB message each, approved game `.rpy` locations, and the
+existing 2 MiB output retention. No arbitrary path/argv IPC. The later native-close wiring adds only a main-window,
+payload-free guarded exit permission; no filesystem or process-launch capability.
+Final packaging uses the existing production workflow, once for a coherent candidate;
+no merge is selected and no automatic post-merge run is implied. Waiting follows
+AGENTS/WORKFLOW: publish manual-resume state if a required external run remains pending.
+
+### Implementation and local evidence
+
+RuntimeWorkspace retains operation/session ownership across authoring views. Deliberate
+Validate/Run capture Source input through the existing controller and short coordinator;
+Save All refusal and Cancel retain drafts. Trust text shows the verified SDK, project,
+revision and bounded inventory. The controlled-play helper is a separate explicit saved
+transaction. Stop/revoke/close use core-owned process cleanup. Diagnostic IPC accepts
+operation and diagnostic IDs, never a renderer-supplied host path. Navigation rechecks
+manifest identity, hash, session, current draft/conflict state and UTF-8 line range.
+Unproven locations remain inert. Diagnostic retrieval uses the independent control lane,
+so output polling does not take the authoring service. Fixed read requests retry only an
+explicit pre-dispatch RUNTIME_BUSY, bounded to one second and the captured view; writes,
+trust and process starts are never automatically replayed.
+
+Real package checks exposed CRLF normalization: textarea LF offsets could select the
+wrong position or manufacture a Source draft. The Source adapter now translates offsets
+and retains unchanged newline bytes, with a Unicode/mixed-newline regression. Parser
+messages stop appending at 4 KiB (rather than repeatedly truncating long continuations);
+UTF-8 output pages do not split scalar values. Modal choices serialize, default to Cancel,
+trap focus and restore it when the owning control remains connected.
+
+| Local agent check | Actual result and limits |
+| --- | --- |
+| Frontend typecheck/tests | 58 passed, 0 failed/cancelled/skipped; includes six Runtime UI scenarios, newline and request-ordering regressions |
+| Full core release/locked | 179 passed, 0 failed, 7 ignored; two existing official-SDK wrappers returned without SDK, so 177 substantive ordinary passes. Five child fixtures and two explicit runtime SDK gates are ignored entry points, not extra passes |
+| Targeted runtime core after parser/control changes | 19 passed, 0 failed, 3 ignored, 164 filtered; 9.29 s. Includes held-authoring-owner diagnostics/Stop and malformed/stale refusal |
+| Explicit real SDK diagnostic gate | 1 passed, 0 failed/ignored; real compile and lint errors navigate to Unicode/BOM/CRLF source; replaced/deleted/stale locations refused; 263.23 s debug including fresh SDK setup |
+| Desktop boundary unit test | 1 passed; report handling only, not a packaged workflow |
+| Source production browser/build | Legacy red assertion, faithful Save and selection/Apply Both passed; rerun after newline fix |
+| Source/SDK spikes | 26 and 24 passed with supported bundled Python and canonical temporary directory; source benchmark 620,000 bytes / 40,000 nodes, median 56.48 ms, seven samples |
+| Rendered Runtime UI | Chrome, injected requester; 1100/640 widths, focus trap, no overflow/page errors; final screenshot QA generated |
+| Branches budget | Actual service fixture 500 Scenes / 2,000 edges; Chrome 154.0.8037.57, initial layout 31.9 ms, pan p95 34.9 ms, 640px resize passed; supplemental browser evidence |
+| Repository | Structure/link/privacy validation passed for 254 files before final publication docs; whitespace and Rust formatting passed |
+
+Local host is macOS ARM64, Rust 1.90.0 from the checked-in toolchain, Node 26.8.1 /
+npm 11.19.0. This is not the pinned CI Node/npm environment. Initial Python 3.9 spike
+execution and noncanonical temporary paths failed; rerunning with the available bundled
+Python and canonical temporary root passed without weakening the tests. Initial local
+full packaging failed in `bundle_dmg.sh`; the real `.app` bundle subsequently built and
+ran. Full installer packaging remains a supported-target CI gate, not a local pass.
+No downloaded SDK, generated logs, screenshots, private project or host paths are in Git.
+
+### Preserved local packaged failures and corrections
+
+All cases create disposable projects and use the pinned verified Ren'Py 8.5.3 SDK.
+They are independent processes with reliable exit/report/cleanup checks and bounded
+watchdogs. Stage timings and every failure are retained in agent temporary output;
+the final workflow publishes durable exact-candidate logs and JSON. Synthetic WebView
+input is reported honestly and does not assert OS-native key delivery.
+
+- Initial attempt: compile assertion ran before terminal state; lint/route reads collided
+  with active service work; runtime-error waiting did not recognize an exception while
+  Ren'Py's error window stayed alive. These were failures, not successful route evidence.
+- Corrected attempt: lint and runtime-error passed; compile exposed newline comparison;
+  both routes reached asserted dialogue/state/asset output but failed before Source Save.
+  All owned cleanup was confirmed. Error reporting now exits nonzero, checks actual
+  shutdown, and includes stage/state/output on failure.
+- Next package attempt: compile passed (26.968 s), lint passed (25.174 s), runtime-error
+  passed (26.399 s). Both routes again reached their oracle but timed out at Source Save
+  (217.859 / 219.456 s); they remain failed. Diagnostics were moved to the control lane;
+  remaining read contention and test-driver readiness were corrected and rechecked below.
+
+No R2 closure is inferred from these partial successes. Final candidate testing must
+include all five cases on both supported targets, full core/SDK gates, packaged boundary,
+input/executable hashes and final G1/R1/R2 review. OS-native keyboard delivery remains explicitly unverified and belongs to the later
+focused human session under TESTING; synthetic events exercise packaged handlers only.
+
+The read-retry-only package recheck also failed: route-a at Source Save (218.752 s),
+route-b at draft-choice preparation (212.581 s), with cleanup confirmed. A bounded
+Source request lane now serializes retention/observation and project status/flush without
+blocking runtime control. Its regression holds a read, proves Stop remains immediate,
+then releases the read failure and observes exactly one Source write. An initial broader
+lane broke the existing simultaneous-picker regression; it was narrowed to the actual
+Source/persistence boundary and all 58 frontend tests pass. The final Source browser
+legacy/faithful Save and selection/Apply Both checks pass again. Package-driver readiness
+now waits for editable controls rather than clicking during a Source barrier, and failure
+reports include stage, runtime/persistence status, bounded output and the existing Save trace.
+
+After the bounded request-ordering correction, local route-a PASS: 32.805 s including
+fresh SDK fixture setup; the authored route oracle, Source Save during play, earlier
+launch revision, >8 s lifetime, Stop/cleanup and accepted bytes after reopen all passed.
+This is real packaged macOS WebView/IPC/service/SDK evidence, not Windows evidence.
+Final Rust formatting and desktop report unit test pass (1 passed, 0 failed/ignored).
+Repository validation now covers 256 files. Final 640px screenshot was visually inspected:
+controls wrap, content remains readable, and the diagnostics panel scrolls independently.
+
+The strengthened route-b case initially failed at draft preparation (214.440 s), then
+its narrowed 15 s UI bound exposed the actual pre-dispatch busy error (38.231 s including
+setup). SDK discovery had raced Source retention before preparation acquired its lease.
+Discovery and short runtime submissions now share the Source request lane; runtime
+status/Stop/revoke/receipt controls remain independent. The driver does not alter the
+production requester. All 58 frontend tests still pass after the native-close wiring.
+Native window close/quit now enters the same runtime and Source leave flow; a no-payload
+main-window command permits exit only after the core project is closed and cleanup is
+confirmed. Package routes explicitly test rejection while open and Cancel through the
+native-close renderer entry point. This is not OS-native input delivery evidence.
+
+With SDK/submission ordering fixed, both route cases passed graph edits, their real game
+oracles and live Source Save. Route-b additionally passed Cancel, refused invalid mapped
+Save All and deliberate saved-revision launch. The added native-close assertion then
+failed (32.465 / 32.282 s): the new command had not yet been granted a Tauri capability.
+That is retained as a failed package attempt. The corrected build declares only
+`allow-application-close` for the local main WebView, updates the exact capability test,
+and still rejects an open project before any exit. No general window/filesystem/shell
+permission was added; frontend remains 58 passed, no failures/skips.
+
+### Local package correction closeout
+
+Final affected-case macOS recheck PASS: route-a **33.318 s**, route-b **32.441 s**,
+exit 0, no timeout and `cleanupComplete: true` for both. Each proved authored graph
+destination edit/restore, selected dialogue/state/asset oracle, Source Save while running,
+earlier launch revision, >8 s play, rejection of native exit with an open core project,
+Cancel through the native-close renderer entry point, Stop and saved bytes after reopen.
+The 640px route-b case additionally passed retained draft/Cancel, refused invalid mapped
+Save All and deliberate saved-revision play. Local compile/lint/runtime-error passes above
+remain development evidence; final CI reruns all five cases on the coherent inputs.
+Frontend final: **58 passed, 0 failed/cancelled/skipped**. No local test process remains.
+The final production matrix and G1/R1/R2 assessment remain required before review_ready.

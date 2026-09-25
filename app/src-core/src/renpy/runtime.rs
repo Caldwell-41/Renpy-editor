@@ -5,6 +5,7 @@ use crate::transaction::{DirectoryAnchor, ExecutionGate};
 use serde::Deserialize;
 use std::process::{ChildStderr, ChildStdout};
 
+pub(crate) mod diagnostics;
 mod platform;
 
 const READY_MARKER: &[u8] = b"LOOMLIGHT_RUNTIME_READY_V1";
@@ -45,12 +46,14 @@ struct Observation {
     stale: Option<bool>,
     ready: bool,
     marker_tail: Vec<u8>,
+    stages: Vec<(usize, &'static str)>,
 }
 
 #[derive(Clone)]
 pub(crate) struct RuntimeControl {
     pub(crate) id: String,
     launch_revision: Option<String>,
+    manifest: Arc<crate::transaction::ExecutionManifest>,
     gate: Arc<ExecutionGate>,
     cancel: Arc<crate::runtime_work::Cancellation>,
     observation: Arc<Mutex<Observation>>,
@@ -63,6 +66,7 @@ pub(crate) struct RuntimeProcess {
     cancel: Arc<crate::runtime_work::Cancellation>,
     observation: Arc<Mutex<Observation>>,
     worker: Option<thread::JoinHandle<()>>,
+    pub(crate) manifest: Arc<crate::transaction::ExecutionManifest>,
 }
 
 impl RuntimeProcess {
@@ -146,6 +150,10 @@ impl RuntimeProcess {
         validation_deadline: Duration,
         readiness_required: bool,
     ) -> Result<Self, RenpyError> {
+        let manifest = context
+            .as_ref()
+            .map(|(_, _, manifest)| manifest.clone())
+            .unwrap_or_default();
         let launch_revision = context.as_ref().map(|(_, _, manifest)| {
             format!(
                 "{:x}",
@@ -165,6 +173,7 @@ impl RuntimeProcess {
             stale: None,
             ready: false,
             marker_tail: vec![],
+            stages: vec![],
         }));
         let worker_cancel = cancel.clone();
         let worker_observation = observation.clone();
@@ -176,7 +185,20 @@ impl RuntimeProcess {
                     let started = Instant::now();
                     let mut outcome = "exited";
                     let mut cleanup_ok = true;
-                    for mut command in commands {
+                    for (stage, mut command) in commands.into_iter().enumerate() {
+                        if let Ok(mut state) = worker_observation.lock() {
+                            let offset = state.bytes.len();
+                            state.stages.push((
+                                offset,
+                                if kind == RuntimeKind::Run {
+                                    "runtime"
+                                } else if stage == 0 {
+                                    "compile"
+                                } else {
+                                    "lint"
+                                },
+                            ));
+                        }
                         #[cfg(test)]
                         let force_cleanup_failure = command.get_envs().any(|(k, v)| {
                             k == "LOOMLIGHT_RUNTIME_TEST_CLEANUP_FAILURE" && v.is_some()
@@ -307,7 +329,12 @@ impl RuntimeProcess {
             cancel,
             observation,
             worker: Some(worker),
+            manifest: Arc::new(manifest),
         })
+    }
+
+    pub(crate) fn diagnostics(&self, session: &str) -> Vec<diagnostics::RuntimeDiagnostic> {
+        self.control().diagnostics(session)
     }
 
     pub(crate) fn shutdown(&mut self) -> bool {
@@ -321,6 +348,7 @@ impl RuntimeProcess {
         RuntimeControl {
             id: self.id.clone(),
             launch_revision: self.launch_revision.clone(),
+            manifest: self.manifest.clone(),
             gate: self.gate.clone(),
             cancel: self.cancel.clone(),
             observation: self.observation.clone(),
@@ -337,6 +365,38 @@ impl RuntimeProcess {
     }
 }
 impl RuntimeControl {
+    pub(crate) fn diagnostics(&self, session: &str) -> Vec<diagnostics::RuntimeDiagnostic> {
+        let Ok(state) = self.observation.lock() else {
+            return vec![];
+        };
+        let mut result = Vec::new();
+        for (index, (start, origin)) in state.stages.iter().enumerate() {
+            let end = state
+                .stages
+                .get(index + 1)
+                .map(|s| s.0)
+                .unwrap_or(state.bytes.len());
+            let mut bytes = &state.bytes[*start..end];
+            if !state.cleaned && index + 1 == state.stages.len() {
+                // A partial location header must not expose an ordinal that later retargets.
+                bytes = bytes
+                    .iter()
+                    .rposition(|b| *b == b'\n')
+                    .map(|last| &bytes[..=last])
+                    .unwrap_or(&[]);
+            }
+            diagnostics::parse(
+                &String::from_utf8_lossy(bytes),
+                origin,
+                &self.id,
+                session,
+                &self.manifest,
+                &mut result,
+            );
+        }
+        result
+    }
+
     pub(crate) fn stop(&self) {
         self.cancel.cancel();
         self.gate.stopping();
@@ -349,7 +409,11 @@ impl RuntimeControl {
         if after > state.bytes.len() {
             return Err(RenpyError::ProcessFailed);
         }
-        let end = (after + PAGE_BYTES).min(state.bytes.len());
+        let mut end = (after + PAGE_BYTES).min(state.bytes.len());
+        // Keep valid UTF-8 scalars intact across pages (invalid SDK bytes stay lossy).
+        while end > after && state.bytes.get(end).is_some_and(|byte| byte & 0xc0 == 0x80) {
+            end -= 1;
+        }
         Ok(RuntimeStatus {
             operation_id: self.id.clone(),
             phase: state.phase.into(),

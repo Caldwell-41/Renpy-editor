@@ -1,20 +1,7 @@
 name: Phase 1G.2a runtime foundation
 
 on:
-  push:
-    branches: [feature/phase-1g-branches-runtime]
-    paths:
-      - .github/workflows/runtime-foundation-r1.yml
-      - app/src-core/**
-      - app/src-tauri/src/main.rs
-      - app/src/runtime-preparation.ts
-      - app/src/source-ui.ts
-      - app/src/protocol.ts
-      - app/tests/source-authoring.dom.test.ts
-      - app/tests/protocol.test.ts
-      - app/Cargo.lock
-      - app/Cargo.toml
-      - app/rust-toolchain.toml
+  # R1 is included in the final 1G production candidate gate. Historical reruns stay explicit.
   workflow_dispatch:
 
 permissions:

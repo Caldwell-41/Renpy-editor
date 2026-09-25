@@ -67,6 +67,8 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
     "runtime.start",
     "runtime.stop",
     "runtime.status",
+    "runtime.diagnostics",
+    "runtime.resolveDiagnostic",
     "runtime.revokeTrust",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
@@ -187,7 +189,8 @@ test("desktop manifest grants one local capability and only the host single-inst
   assert.equal(capability.local, true);
   assert.deepEqual(capability.webviews, ["main"]);
   assert.equal("windows" in capability, false);
-  assert.deepEqual(capability.permissions, ["allow-loomlight-core"]);
+  assert.deepEqual(capability.permissions, ["allow-loomlight-core", "allow-application-close"]);
+  assert.match(permission, /commands\.allow = \["complete_application_close"\]/);
   assert.match(permission, /commands\.allow = \["core_request"\]/);
   assert.match(host, /#\[tauri::command\(async\)\]/);
   assert.match(host, /window\.label\(\) != "main"/);

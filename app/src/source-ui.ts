@@ -1,3 +1,4 @@
+import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
 export type SourceFileState = "clean" | "dirty" | "conflict" | "invalid" | "readOnly" | "unavailable";
 
 export interface SourceFileSummary {
@@ -251,12 +252,13 @@ export function renderSourceWorkspace(
 
   const captureSnapshot = (advance: boolean): InputSnapshot | undefined => {
     if (!current || !editor || !current.editable) return undefined;
+    const wire = sourceTextareaSnapshot(current, editor);
     const changed = !latestSnapshot
       || latestSnapshot.documentGeneration !== documentGeneration
       || latestSnapshot.path !== current.path
-      || latestSnapshot.text !== editor.value
-      || latestSnapshot.selectionStart !== editor.selectionStart
-      || latestSnapshot.selectionEnd !== editor.selectionEnd;
+      || latestSnapshot.text !== wire.text
+      || latestSnapshot.selectionStart !== wire.selectionStart
+      || latestSnapshot.selectionEnd !== wire.selectionEnd;
     if (advance || changed) inputSequence += 1;
     if (!latestSnapshot || advance || changed) {
       latestSnapshot = {
@@ -265,9 +267,7 @@ export function renderSourceWorkspace(
         sequence: inputSequence,
         path: current.path,
         expectedBaseRevision: current.baseRevision,
-        text: editor.value,
-        selectionStart: editor.selectionStart,
-        selectionEnd: editor.selectionEnd,
+        ...wire,
       };
     }
     return latestSnapshot;
@@ -373,7 +373,7 @@ export function renderSourceWorkspace(
     value !== undefined && review.path === value.path
     && review.baseRevision === value.baseRevision && review.draftVersion === value.draftVersion
     && review.liveRevision === value.liveRevision && review.combinedPreview === value.combinedPreview
-    && review.text === value.text && editor?.value === review.text
+    && review.text === value.text && editor?.value === textareaText(review.text ?? "")
     && value.canApplyBoth && typeof review.liveRevision === "string"
     && typeof review.combinedPreview === "string";
 
@@ -729,8 +729,8 @@ export function renderSourceWorkspace(
         if (!identityMatches(generation, observed.path) || sequence !== inputSequence || barriers.size > 0) return;
         const next = await actions.open({
           path: observed.path,
-          selectionStart: control.selectionStart,
-          selectionEnd: control.selectionEnd,
+          selectionStart: sourceTextareaSnapshot(observed, control).selectionStart,
+          selectionEnd: sourceTextareaSnapshot(observed, control).selectionEnd,
         });
         if (!identityMatches(generation, observed.path) || sequence !== inputSequence || barriers.size > 0) return;
         const changed = next.state !== current?.state
@@ -795,7 +795,7 @@ export function renderSourceWorkspace(
     discard.addEventListener("click", () => confirmDiscard(false));
     const refresh = button("Refresh");
     refresh.addEventListener("click", () => {
-      if (current) void openFile({ path: current.path, selectionStart: editor?.selectionStart, selectionEnd: editor?.selectionEnd });
+      if (current) { const selection = editor ? sourceTextareaSnapshot(current,editor) : current; void openFile({ path: current.path, selectionStart: selection.selectionStart, selectionEnd: selection.selectionEnd }); }
     });
     toolbar.append(save, discard, refresh);
     host.append(toolbar);
@@ -871,11 +871,11 @@ export function renderSourceWorkspace(
     text.className = "source-editor";
     text.spellcheck = false;
     text.wrap = "off";
-    text.value = current.text ?? "";
+    text.value = textareaText(current.text ?? "");
     text.readOnly = barriers.size > 0 || !current.editable;
     text.ariaLabel = `Source editor for ${current.path}`;
-    text.selectionStart = Math.min(current.selectionStart, text.value.length);
-    text.selectionEnd = Math.min(current.selectionEnd, text.value.length);
+    text.selectionStart = Math.min(textareaOffset(current.text ?? "",current.selectionStart), text.value.length);
+    text.selectionEnd = Math.min(textareaOffset(current.text ?? "",current.selectionEnd), text.value.length);
     text.addEventListener("scroll", () => { gutter.scrollTop = text.scrollTop; });
     text.addEventListener("input", () => {
       if (barriers.size > 0) return;
@@ -894,9 +894,7 @@ export function renderSourceWorkspace(
       sequence: inputSequence,
       path: current.path,
       expectedBaseRevision: current.baseRevision,
-      text: text.value,
-      selectionStart: text.selectionStart,
-      selectionEnd: text.selectionEnd,
+      ...sourceTextareaSnapshot(current,text),
     };
     editorShell.append(gutter, text);
     host.append(editorShell);
@@ -916,7 +914,7 @@ export function renderSourceWorkspace(
       const select = button(range.protected ? `Custom Code · ${range.kind}` : range.kind, range.protected ? "source-range opaque" : "source-range supported");
       select.addEventListener("click", () => {
         text.focus();
-        text.setSelectionRange(range.editorStart, range.editorEnd);
+        text.setSelectionRange(textareaOffset(current?.text ?? "",range.editorStart), textareaOffset(current?.text ?? "",range.editorEnd));
         recordEditorEvent();
       });
       mapping.append(select);

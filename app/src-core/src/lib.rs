@@ -78,6 +78,8 @@ pub const OPERATIONS: &[&str] = &[
     "runtime.start",
     "runtime.stop",
     "runtime.status",
+    "runtime.diagnostics",
+    "runtime.resolveDiagnostic",
     "runtime.revokeTrust",
 ];
 
@@ -611,6 +613,28 @@ pub fn handle_application_request(
                     })
             })
             .and_then(|payload| lifecycle.runtime_status(payload)),
+        "runtime.diagnostics" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::OperationRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_diagnostics(payload)),
+        "runtime.resolveDiagnostic" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::DiagnosticRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_resolve_diagnostic(payload)),
         "runtime.revokeTrust" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
