@@ -1,0 +1,66 @@
+name: Phase 1G.2a SDK feasibility
+
+on:
+  push:
+    branches: [feature/phase-1g-branches-runtime]
+    paths:
+      - .github/workflows/runtime-foundation-proof.yml
+      - spikes/renpy-sdk/runtime_reload_probe.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sdk-feasibility:
+    name: ${{ matrix.name }} SDK feasibility (not full R1)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Restore official pinned SDK archive
+        id: sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Download official SDK on cache miss
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
+            --max-time 180 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" \
+            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+          mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+      - name: Verify archive and exercise synthetic SDK fixture
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            probe_python=python
+          else
+            probe_python=python3
+          fi
+          "$probe_python" spikes/renpy-sdk/runtime_reload_probe.py \
+            --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" \
+            --report "$RUNNER_TEMP/runtime-reload-report.json"
+      - name: Retain bounded feasibility report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-sdk-feasibility-${{ matrix.runner }}
+          path: ${{ runner.temp }}/runtime-reload-report.json
+          if-no-files-found: error
+          retention-days: 3

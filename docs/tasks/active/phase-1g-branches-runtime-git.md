@@ -643,6 +643,8 @@ the available connector has read/rerun operations but no workflow dispatch opera
 Shell Git reads work; shell Git write authentication is not established. No automated
 target pass is inferred from previous 1F runs or from Linux. R1 target access is BLOCKED
 until an agent can run the retained narrow proof on Windows x64 and macOS ARM64.
+A later entry below records the branch-triggered targeted workflow fallback; the
+initial capability inventory is not a permanent assertion that GitHub cannot run it.
 
 The official pinned SDK archive has been downloaded and its SHA-256 matches the
 repository pin. Extraction uses the existing checksum-first containment-checked SDK
@@ -659,3 +661,165 @@ pipe-reader joins are not long-lived supervisor/cleanup evidence.
 | R1-cleanup | Natural exit, Stop, crash, retained descendant pipes, bounded cleanup | Actual child processes on both targets; unavailable until host path exists |
 
 This entry is an ownership/proof contract, not an implementation or acceptance claim.
+
+### Foundation contracts before privileged wiring
+
+These are implementation constraints/proposals for this selected checkpoint, not
+implemented APIs. No renderer capability has been added. The first SDK probe must
+succeed before adopting a production reload policy; its developer-off variant is a
+candidate, not a silent change to users' game configuration.
+
+| Mutation/operation | Preparing or validating | Running | Stopping/recovery |
+| --- | --- | --- | --- |
+| Source draft typing, existing-media browsing, graph navigation | Retain input; reads available | Allowed | Retain input; no SDK spawn |
+| Accepted replacement of existing script dialogue/definitions plus required metadata | Short preparation lease; validation refuses invalidating writes | Allowed through existing transaction owner; mark earlier launch revision | Wait for bounded cleanup before conflicting writes |
+| Existing-asset selection that changes only script references | Same script rule | Allowed | Same script rule |
+| Asset import/replacement/rename/move/delete; inventory-changing metadata; mixed command | Drain before launch and recheck under core serialization | Refuse before journal/file/history changes; Stop/retry | Refuse until cleanup finishes |
+| Source/compiled-file creation, deletion, move or rename | Recheck ownership and revisions | Refuse conflicts with loaded file/bytecode ownership | Stop/retry |
+| Undo/redo | Classify the actual inverse mutation set, not command name | Script-only replacement allowed; asset/file-lifecycle inverse refused | No inverse committed before conflict clears |
+| Recovery resolution, project switch/close, trust revoke | Cancel preparation/validation, finish cleanup | Stop/continue or Cancel, then existing draft flow | Never unregister root/session before cleanup; unresolved recovery blocks next spawn |
+
+Core integration points: `TransactionService::commit_with_injector` and
+`commit_streaming_import_with_injector` hold the existing serialization guard;
+`ensure_directory` can create directories before an import and needs the same barrier.
+History routes through the ordinary transaction owner. A UI-disabled import button
+or a check solely in `LifecycleService::authoring_import_asset` would not cover all
+paths. Runtime reservation must share this serialization boundary so a queued import
+cannot pass a check and then race launch. Do not hold the lifecycle mutex through play.
+
+Proposed narrow envelope operations (existing version/request ID/session conventions;
+unknown keys rejected): `runtime.prepare {sessionId, kind, revisionChoice}`,
+`runtime.grantTrust {sessionId, preparationId}`, `runtime.start {sessionId,
+preparationId, trustId}`, `runtime.stop {sessionId, operationId}`,
+`runtime.status {sessionId, operationId, afterSequence}`, and
+`runtime.revokeTrust {sessionId, trustId}`. Kind is `validate|run`; revision choice is
+`saveAll|saved|cancel`. Preparation IDs are core-issued, single-use and revision-bound;
+no roots, arbitrary argv, executable paths or renderer-supplied manifests are accepted.
+Renderer preparation must first settle Source under the existing lease and present
+pending Scene Commit/saved/Cancel as specified in section 3; the core validates accepted
+bytes and cannot silently save renderer buffers. Concrete schema remains to be implemented
+and proven with literal JSON, including malformed/stale/refusal cases.
+
+Candidate supervisor limits to validate: one operation per session; 180 s total
+compile/lint deadline, no play deadline; 2 MiB retained combined output with visible
+truncation and monotonically sequenced 32 KiB status pages; 1 s graceful stop, 5 s forced
+cleanup, 1 s reader shutdown. Long-lived bounded readers must continue draining or
+explicitly cancel with a failure, never unboundedly join after natural parent exit.
+Windows needs owned job/process-tree lifetime evidence; reusing `taskkill` alone after
+parent exit is not an established descendant-ownership design. Unix process groups
+likewise do not imply malicious-process containment.
+
+Trust inventory must include `.rpy`, `.rpym`, Python/native modules, orphan `.rpyc`/
+`.rpymc`, executable caches/archives and relevant loader/environment inputs, not only
+mapped Scenes. Retain root/session/SDK identities and content digests. Unknown file
+provenance or incomplete inventory refuses execution pending renewed inspection/consent.
+Accepted editor transactions can advance consent; external executable changes cannot.
+Compile/cache output is not benign merely because its suffix is `.rpyc`; capture before/
+after manifests and retain uncertainty when SDK output cannot be distinguished from
+an external writer. Save/persistent data may also be executable when loaded; do not
+blindly exempt it. A conservative renewed-consent result is preferable to falsely
+attributing every cache/save change to the owned process. No trust grant is a sandbox.
+SDK revalidation must account for its loaded interpreter/modules and `environment.txt`,
+not rely solely on the existing launcher's small fingerprint when claiming full identity.
+
+### Retained SDK feasibility probe and targeted host path
+
+Added `spikes/renpy-sdk/runtime_reload_probe.py`, reusing the existing safe archive
+installer and closed SDK argument builder. The probe verifies the exact archive digest
+and version, creates synthetic temporary projects, and invokes the actual pinned SDK.
+It never changes a real user's project. Report fields explicitly distinguish actual
+SDK callbacks from native keyboard, production-service and descendant-cleanup evidence.
+The probe is a prerequisite experiment, not the runtime implementation or R1 pass.
+
+Declared probe bounds: 30 s per startup/observation, 10 s demonstrated play before
+each disk edit, 3 s post-edit observation, 512 KiB retained process output, bounded
+cleanup and a structured terminal report on failure. The short probe observation
+window is not the production game lifetime limit. Two variants use Ren'Py's existing
+`config.autoreload = False`, with developer mode enabled and disabled. They test
+loaded-script retention after a disk edit, the engine's actual `_reload_game` callback,
+and a fresh process loading the new dialogue. The developer-on case also quits naturally.
+The developer-off case is a possible policy only: it also removes development features,
+and a production adapter must explicitly establish/revalidate it without silently
+changing project configuration or treating trusted Python as sandboxed.
+
+Initial local failures are retained as failures:
+
+- The downloaded archive matched the pin; the first extracted Linux runtime library
+  was truncated (19,922,944 bytes versus archive member 39,827,720), causing SIGBUS.
+  Restoring it from the checksum-verified archive in the same execution restored
+  `Ren'Py 8.5.3.26051504`. This is an environment failure, not a runtime pass.
+- SDL offscreen was unavailable. The process stayed alive on an error path; that
+  observation was rejected. Linux feasibility uses explicit dummy video/software
+  rendering and is never reported as supported-target rendering.
+- Probe development fixed an incorrect imported helper name and an invalid synthetic
+  `gl_test_image = None`. The probe now rejects errors/tracebacks even while alive.
+- SIGTERM reached Ren'Py's quit-confirmation path in the minimal fixture and produced
+  an absent-confirmation-screen error. Harness teardown now uses forced termination;
+  it does not certify production graceful Stop. R1 must account for a game-controlled
+  confirmation and bounded escalation.
+
+Pinned source review: `renpy/common/00keymap.rpy` makes `config.autoreload = False`
+perform a single reload; it does not disable Shift+R. The default `_reload_game` and
+`_developer` callbacks check `config.developer`. The developer menu also exposes a
+direct reload action. Clearing only a reload key binding would therefore be incomplete.
+No supported reload-disable CLI flag was found in the pinned argument parser.
+
+The narrowly scoped `.github/workflows/runtime-foundation-proof.yml` is intended to
+establish agent-run Windows x64/macOS ARM64 access. It triggers only on this branch's
+probe/workflow changes (or deliberate manual dispatch), reuses the pinned SDK cache,
+has two ten-minute jobs, and uploads only bounded JSON with three-day retention.
+No npm install, Rust build, packaged application or full package matrix is included.
+It grants only `contents: read`, pins existing reviewed action SHAs, and does not alter
+production CI or its integration trigger. Publishing the workflow may queue native
+feasibility jobs; publication/queue/running/success must be recorded distinctly.
+
+Local commands (no machine-specific paths needed):
+
+```bash
+python3 spikes/renpy-sdk/runtime_reload_probe.py --archive "$SDK_ARCHIVE" --headless --report "$PROBE_REPORT"
+python3 -m unittest discover -s spikes/renpy-sdk/tests -q
+python3 -m py_compile spikes/renpy-sdk/runtime_reload_probe.py
+python3 scripts/validate.py
+git diff --check
+```
+
+On the two supported targets omit `--headless`; use `python` on Windows if needed.
+The required existing SDK fixture tests passed: 24 tests, zero failures/skips. The
+repository validator passed for 230 files; Python syntax and whitespace checks passed.
+Final local probe and publication results follow in the closeout below. Production
+core/renderer tests are not rerun because no production application file changed.
+
+### Remaining 1G.2a work and gate boundary
+
+R1 is INCOMPLETE. No new production commands, trust grants, preparation controller,
+runtime supervisor, mutation barriers, history enforcement or lifecycle wiring have
+been implemented. Asset refusal/retry, launch/import race, stale/session/malformed
+literal IPC, SDK replacement/revocation, validation cancellation/output flood, process
+descendant cleanup, app shutdown and project switch/cancel still need production
+implementation and both-target evidence. The SDK-only probe cannot close those gates.
+All 1F/1G.1 production code and safeguards are unchanged.
+
+Continue **this same 1G.2a checkpoint**, not 1G.2b. First inspect the exact targeted
+workflow result and artifacts (or resolve publication/access failure). Once the
+prerequisite is sound, implement the narrow production slice using section 5 and the
+contracts above, record a focused runtime ADR when its mechanism is evidenced, and
+complete the actual R1 service/target gates. Do not duplicate an outstanding run.
+No user physical testing, merge, optional Git or Phase 2 is requested.
+
+### Local feasibility result and publication candidate
+
+Linux SDK-only result: PASS, two variants, exact `Ren'Py 8.5.3.26051504`.
+Developer-on/off remained healthy for 10.004/10.046 s before editing; both kept the
+old loaded revision after the disk edit and loaded new dialogue on a fresh Run.
+Developer-on's real reload callback reinitialised from new bytes despite autoreload
+being false; developer-off's callback returned without reload. Natural quit returned
+zero; forced harness teardown reaped each child and closed its output reader in
+approximately 0.003 s. No descendants were created, so this is NOT process-tree R1
+evidence. Linux used dummy SDL/software rendering, not native visual/input evidence.
+
+The tested probe hash was
+`6d4886954653eeb14127611213279f8d6987ad4a8c8c44aa769fb4917423506a`.
+The publication then adds report provenance and handles Windows taskkill invocation
+failure while still reaping the parent; those are reviewed bounded changes. They do
+not create a Windows pass, and exact published-head target execution is required.
+No production application files or dependencies changed.
