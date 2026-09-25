@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-25. **Implementation:** 1G.1 `review_ready`; 1G.2a `in_progress` (R1-B1/B2 correction; replacement evidence pending); 1G.2b `not_started`.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `awaiting_ci` (R1-B1/B2 correction published; replacement run pending); 1G.2b `not_started`.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -1290,3 +1290,40 @@ correction passed the targeted release runtime suite: 18 passed, 0 failed, 2 ign
 9.32 s. Repository validation (244 files), format and whitespace passed. Replacement
 native gates validate the final source; the prior full/SDK passes are not relabelled as
 exact-source passes for this correction.
+
+
+### Final correction publication and native manual-resume handover — 2026-09-26
+
+**State: `awaiting_ci`; R1 incomplete, not review-ready/accepted.** Final correction
+candidate is `07f23b61d46511848d2b09db57ba1d5a696cabe0`, tree
+`614931107db78f61c5b864a099ca2737ab546bd8`. Published with a non-forced update on the
+same branch/draft PR #17 after fresh ancestry checks. Remote commit/tree was verified.
+Its targeted release runtime gate passed 18/0 failed/2 ignored (9.32 s), format and
+whitespace passed, repository validation passed (244 files). Repository quality
+[36144979086](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144979086)
+passed on this exact candidate. Earlier full core/SDK/frontend/desktop results remain
+explicitly attributed to `fd4ffca`; final-source native gates are outstanding.
+
+**Outstanding final R1:** [36144974132](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144974132),
+**attempt 1**, exact candidate above. At the identity inspection it was **pending**,
+behind the branch concurrency owner; no target job/artifact pass is claimed. Expected
+artifacts are `runtime-foundation-windows-2025` and `runtime-foundation-macos-26`, with
+seven-day retention. Verify complete steps/logs, actual passed/ignored counts, ZIP
+SHA-256/CRC/size and every reported input hash against the exact candidate. Input
+coverage now includes frontend/test/desktop/workflow/dependency manifests as well as
+core Rust; do not compare using only the old 26-core-file inventory.
+
+**Outstanding superseded run:** [36144599144](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36144599144),
+**attempt 1**, `fd4ffca38373790f730818bbf9e6c8a388dac92f`, still **in_progress** at its
+identity inspection. Preserve its eventual actual result, including any failed/skipped
+gates. It is superseded because of the completed-receipt race, not relabelled failed
+or passed and not rerun. Both runs were automatic pushes of different application
+inputs; neither historical successful run nor the feasibility workflow was duplicated.
+
+The final publication changes documentation and PR assessment only, and will not trigger
+another runtime run. Verify remote documentation after publication. AGENTS/WORKFLOW
+require ending active polling and manual resume because no qualified same-thread event
+continuation exists on this host. Next bounded action: inspect these exact runs, assess
+final-candidate R1-B1/B2 evidence, address only actual bounded findings, then publish the
+assessment and updated handover. Do not dispatch a duplicate run, merge, request physical
+testing, or advance to 1G.2b, optional Git or Phase 2.
