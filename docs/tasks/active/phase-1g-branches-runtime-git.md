@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress` (failed replacement reviewed; G1-V1/V2 corrections verified locally). User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `awaiting_ci` (G1-V1/V2 follow-up published; exact replacement pending). User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` (G1-V1/V2 correction) | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `awaiting_ci` (G1-V1/V2 replacement) | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -2296,3 +2296,37 @@ to the user's explicit failed-run review/fix request and materially changes both
 failed paths; do not rerun the unchanged failed SHA. Preserve manual-resume identity
 if pending, publish assessment/ledger/handover, and stop before physical testing,
 acceptance, merge, optional Git or Phase 2.
+
+
+#### Published follow-up and exact manual-resume handover
+
+Correction **`ec6a76adbf78bc09baf7daba067d70eedbc38699`**, tree
+**`d0e749915cc69006821dc2d52506afe666c6a8b4`**, is published; remote branch and draft/open
+PR #17 were checked and match. A fresh run inventory found no pending production or
+R1-only verification. Exactly one replacement was manually dispatched with package
+upload; no unchanged-SHA rerun, workflow change, R1-only run or duplicate was launched.
+
+[Run 36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651),
+**attempt 1**, was created **2026-09-26T02:03:45Z**, exact candidate `ec6a76a` above,
+branch `feature/phase-1g-branches-runtime`. Dispatch returned the URL and the exact-run
+endpoint confirmed its SHA/attempt. At bounded inspection: **in_progress**, conclusion
+null; Preflight **`108315757962` in_progress**; no target jobs or complete logs yet;
+artifact endpoint **0 artifacts**. The candidate still has **94** application/workflow
+inputs, with **0/94 per-target hashes verified** and no executable/package hashes yet.
+
+**G1:** both local corrections and unchanged service/rendered gates pass; Windows/macOS
+budget and packaged graph evidence remain pending. **R1:** final-source local ordinary
+regressions pass; explicit supported-target SDK/process proof pending. **R2:** local
+frontend/browser passes; all five final packaged real-service cases and legacy smoke
+pending. No final capability, physical or acceptance pass is claimed. Preserve the
+complete failed `f37635e` assessment and older evidence on their actual inputs.
+
+State **awaiting_ci / manual resume**. This documentation-only follow-up publishes the
+assessment, ledger and live handover; no package matrix is requested for it. No local
+verification remains pending, no watcher/automatic wake-up is configured and no repeated
+model polling is performed. Next action: inspect this existing run when complete and
+verify both full logs plus ZIP integrity, all 94 input hashes, candidate/tree/target/
+executable, explicit SDK markers, isolated/rendered budgets, five runtime UI JSON/log
+pairs and legacy smoke independently. If still pending, preserve this identity and
+stop. Publish assessment/ledger/handover; stop before physical testing, acceptance,
+merge, optional Git or Phase 2. Do not duplicate pending verification.

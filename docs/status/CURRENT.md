@@ -1,10 +1,10 @@
 # Current status
 
-**Updated:** 2026-09-26 (failed 1G.2b replacement reviewed; bounded G1 corrections).
+**Updated:** 2026-09-26 (G1-V1/V2 follow-up published; replacement verification pending).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.2b agent verification, `in_progress`.
+**Current checkpoint:** Phase 1G.2b agent verification, `awaiting_ci` (manual resume).
 
 [Run 36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
 attempt 1, on `f37635e` **failed** Windows isolated refresh (489.453 ms >250 ms) and
@@ -23,8 +23,14 @@ frontend **58 passed**, accepted refresh **91.395 ms**, rendered pan/frame p95
 **17.7 ms**; Source/runtime/browser/build and repository checks pass. Target proof is
 still required. The unchanged Phase 0 Python cleanup finding remains recorded.
 
-Publish this correction and launch one justified replacement after a fresh pending-run
-check. Preserve all earlier failures and R1 closure under their actual inputs.
+Correction candidate `ec6a76adbf78bc09baf7daba067d70eedbc38699`, tree
+`d0e749915cc69006821dc2d52506afe666c6a8b4`, is published. Exactly one replacement
+[run 36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651),
+attempt 1, was dispatched with package upload on that SHA after a no-pending-run check.
+At exact-run inspection it and Preflight `108315757962` were in progress; no target
+jobs or artifacts existed. All 94 per-target input/executable hashes and final
+G1/R1/R2 evidence remain pending. Do not duplicate verification or poll repeatedly.
+Preserve all earlier failures and R1 closure under their actual inputs.
 See [ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#failed-replacement-review-and-bounded-g1-continuation--2026-09-26)
 and [HANDOVER](HANDOVER.md). Continue on `feature/phase-1g-branches-runtime`,
 draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
