@@ -1,68 +1,78 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-26. **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Phase 1G.2b Runtime UI and navigable diagnostics, `in_progress`.
+**Checkpoint:** Phase 1G.2b Runtime UI and navigable diagnostics, **blocked**.
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Entry:** `78f051e382b048f1e8ee73f5add7a8072608e474`.
+**Resumed entry:** `13311e41ecaa3f84ee616fa3b6c73771b227dd57`.
 **Verified main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
-**Application candidate:** `931684dd59ce319bd98f0028df98a3023ced7740`.
-**Candidate tree:** `b6432353974e8a7f8818a8e8f91fadca1b29ccb9`.
-**Final production run:** [36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
-**attempt 1**, manually dispatched once with package upload requested; exact head SHA
-matches the candidate. Created `2026-09-25T21:56:19Z`; initial inspection: **in_progress**,
-no conclusion. **Awaiting CI / manual resume.** No automatic watcher is claimed.
-This publication update changes documentation only after the application candidate.
+**Original application candidate:** `931684dd59ce319bd98f0028df98a3023ced7740`, tree
+`b6432353974e8a7f8818a8e8f91fadca1b29ccb9`.
+**Verification correction candidate:** `6c7efad4e260484423a244aa835506e74faa45f3`, tree
+`20ac713fb9373ff1edd796498f2776bc9c651db0` (tests/workflow and assessment; no application
+behavior or permission change). This follow-up changes live status/handover only.
 
-## Authority and implemented behavior
+## Authority and completed assessment
 
-Complete only 1G.2b and agent-run verification. The user explicitly excludes physical
-testing, acceptance, merge, optional Git and Phase 2. R1 history remains preserved.
-Read [active plan section 6 and ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger),
-then its final G1/R1/R2 contract and [TESTING](../TESTING.md#phase-1g-testing-ownership-and-cadence).
+The user selected outstanding 1G.2b agent verification only. Read
+[active plan section 6](../tasks/active/phase-1g-branches-runtime-git.md#6-1g2b--runtime-ui-and-navigable-diagnostics),
+[the resumed ledger assessment](../tasks/active/phase-1g-branches-runtime-git.md#resumed-exact-run-assessment-and-bounded-correction--2026-09-26)
+and [TESTING](../TESTING.md#phase-1g-testing-ownership-and-cadence).
+Stop before physical testing, acceptance or merge. Optional Git and Phase 2 are excluded.
 
-The toolbar and Diagnostics/Runtime panel now provide explicit Validate (compile then
-lint), normal Run, responsive Stop, inspectable/revocable session consent and deliberate
-Source revision choice. SDK locations bind to the launch manifest and are rechecked in
-the core before Source navigation. Output, diagnostic count and messages are bounded;
-static findings and prior validation are distinguished. Script edits can continue during
-play; ownership restrictions remain core-enforced. CRLF Source selection translation and
-independent diagnostic reads and ordered Source/SDK submissions address failures found
-by real packaged verification. Native close/quit enters the same Stop/draft flow; its
-no-payload main-window exit command requires no open project and confirmed cleanup.
+[Run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
+**attempt 1**, completed **FAIL** on `931684d`. Preflight passed; Windows job
+`108266324216` and macOS job `108266324332` both failed the stale Rust capability
+assertion. Both complete target logs and evidence ZIPs were inspected. Artifact
+`10889700592` (Windows) and `10889595467` (macOS) passed exact size, SHA-256 and CRC
+verification. The ledger retains digests, counts, skips and timing observations.
 
-## Verification and next bounded action
+Each artifact contains only the core log and real-service flow fixture. Explicit SDK,
+renderer focus/resize, desktop/package, all five runtime UI cases and legacy boundary
+smoke were skipped. No package or `runtime-ui-inputs.json` was generated: **0/93
+per-target input hashes and no executable hash can be verified**. Do not substitute
+checkout identity, local hashes, prior candidates or wrapper skip markers for these gates.
 
-Local results, earlier failures, layer limits and corrections are in ledger 14. R2 and
-final capability review remain pending until the coherent candidate's supported-target
-matrix, complete logs/artifacts and input hashes are inspected. The five packaged cases
-use the actual WebView, visible controls, real IPC/service and pinned SDK; their synthetic
-DOM events are not native keyboard or human acceptance evidence. Do not substitute
-browser mocks or official-SDK wrapper skip markers for a required gate.
+**Assessment:** G1 FAIL/incomplete (budget overruns and missing final UI evidence);
+R1 final-source regression incomplete (ordinary regressions pass, explicit SDK skipped);
+R2 BLOCKED (no final packaged cases). Preserve R1-B1/B2 closure on `c12d953`, run
+`36148942247` attempt 1, and earlier G1/local package evidence on their actual inputs.
+No final 1G capability or human acceptance pass is claimed.
 
-The application candidate was committed and pushed non-forced on the existing branch;
-remote head and PR #17's matching SHA/draft/open state were verified before dispatch.
-No duplicate matrix or R1-only run was launched. The combined production workflow owns
-final full core, explicit SDK/R1/R2, actual package cases and legacy boundary smoke.
-The older R1 branch trigger is now manual-only to avoid duplicate expensive runs.
+## Bounded correction and remaining finding
 
-**Next action:** inspect this exact run/attempt, complete job logs and both
-`phase-1-production-evidence-*` artifacts, plus requested package artifacts. Verify ZIP
-size/digest/CRC and each `runtime-ui-inputs.json` candidate/tree, target, executable hash
-and all 93 input hashes against Git blob bytes. Require each of the five
-`runtime-ui-{compile,lint,route-a,route-b,runtime-error}` JSON/log pairs to have passed,
-no timeout, exit 0 and confirmed cleanup. Check full core counts/ignored wrappers,
-explicit SDK markers, Branches budgets, renderer focus/resize and the legacy smoke
-independently. A synthetic key event is not OS-native key delivery; that remains the
-later human session under TESTING, which is not authorised in this checkpoint.
+R2-C1 is fixed in `6c7efad`: parse capability JSON semantically, require the exact local
+main-WebView/two-permission allowlist, and check both already-approved command
+registrations. Exact Rust test **1 passed**, frontend/typecheck **58 passed**,
+Rust formatting and repository structure/link/privacy/whitespace checks passed.
 
-If a required gate fails, record the exact failed evidence and fix only the bounded
-1G.2b finding before a justified replacement run. If still pending, preserve this
-manual-resume record and stop; AGENTS/WORKFLOW prohibit repeated model polling.
-Do not dispatch again or run packages solely for this documentation publication.
-Keep PR #17 draft/open and publish the evidence assessment after review. No local
-verification process remains, and no application edit is left unpublished.
+**G1-V1 remains open.** The prior core fixture printed timings but never enforced its
+limits. It now has an isolated release gate in the existing production workflow,
+retaining `runtime-flow-budget.log` and requiring a success marker. Limits remain
+2 s initial projection and 250 ms accepted update, with 500 Scenes / 2,000 edges.
+The local isolated macOS test **failed**: initial 870.770 ms, accepted update 864.470 ms;
+0 passed / 1 failed, 185 filtered. Original CI observations also exceed the update
+budget on both targets, and Windows initial projection exceeds 2 s. Full-suite
+contention cannot be assumed to explain the finding. No budget or workload was relaxed.
 
-The next bounded task is to inspect the recorded final run and its artifacts, resolve
-only evidenced 1G.2b findings, and publish the G1/R1/R2 assessment. Stop again before
-physical testing, acceptance, merge, optional Git or Phase 2. A failed/skipped/missing
-required gate leaves this checkpoint incomplete.
+No replacement production or R1-only run was dispatched: the local prerequisite is
+known to fail. No production verification, watcher or local test process remains pending.
+Keep PR #17 draft/open. Do not run a package matrix for this documentation publication.
+
+## Next bounded action
+
+Continue **1G.2b agent verification, G1-V1 only**: profile the unchanged fixture and
+resolve projection latency with a bounded correction that preserves source identity,
+external invalidation, draft truth and safe bounded I/O. A broader cache/consistency
+redesign or budget change requires an explicit decision. Do not silently raise limits.
+
+After applicable local gates pass, publish the coherent correction candidate and
+manually dispatch exactly one justified replacement production run with package upload.
+Check for an existing pending run first. Record run/attempt/SHA and use the repository's
+manual-resume policy if it remains pending; no repeated model polling.
+
+On completion, verify both full job logs, ZIP size/digest/CRC, every recorded input
+hash against Git blob bytes, candidate/tree/target/executable, all five runtime UI
+JSON/log pairs (PASS, no timeout, exit 0, confirmed cleanup), explicit SDK markers,
+G1 isolated and rendered budgets, focus/resize and legacy smoke independently. Publish
+the updated G1/R1/R2 assessment, ledger and this handover. Stop again before physical
+testing, acceptance, merge, optional Git or Phase 2.

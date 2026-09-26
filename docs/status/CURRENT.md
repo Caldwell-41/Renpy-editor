@@ -1,21 +1,29 @@
 # Current status
 
-**Updated:** 2026-09-26 (1G.2b implementation and agent verification).
+**Updated:** 2026-09-26 (1G.2b failed-run assessment and bounded verification corrections).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.2b Runtime UI and navigable diagnostics, `in_progress`.
-The user selected implementation and required agent verification from `78f051e`, with
-physical testing, acceptance, merge, optional Git and Phase 2 excluded. Runtime controls,
-trust/revision choice and bounded revision-qualified Source navigation are implemented.
-Local checks and failed/corrected package attempts are recorded in
-[ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger).
-Application candidate `931684dd59ce319bd98f0028df98a3023ced7740`, tree `b6432353974e8a7f8818a8e8f91fadca1b29ccb9`, is published.
-Final [Windows/macOS production run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
-attempt 1, is **in_progress / awaiting CI, manual resume** on that exact candidate.
-No R2 closure is claimed; do not duplicate dispatch or actively poll.
-Use [HANDOVER](HANDOVER.md) for the exact candidate/run and next bounded action.
+**Current checkpoint:** Phase 1G.2b Runtime UI and navigable diagnostics, `blocked`.
+The authorised continuation inspected [production run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
+attempt 1, on application candidate `931684dd59ce319bd98f0028df98a3023ced7740`, tree
+`b6432353974e8a7f8818a8e8f91fadca1b29ccb9`. Both target jobs **failed** the stale
+Rust capability assertion before packaging. Both complete logs and evidence ZIPs were
+inspected; size/SHA-256/CRC passed. Package artifacts and the 93-input manifests were
+never generated, so no per-target input/executable hashes or packaged R2 passes can be
+claimed. G1 budget overruns were also found; final-source R1 regression is incomplete.
+
+Verification correction candidate `6c7efad4e260484423a244aa835506e74faa45f3`, tree
+`20ac713fb9373ff1edd796498f2776bc9c651db0`, fixes the configuration test and adds an
+isolated release budget gate without changing application behavior or permissions.
+The capability test and 58 frontend tests pass locally. **G1-V1 remains open:** isolated
+accepted projection refresh is 864.470 ms against the unchanged 250 ms target.
+No replacement matrix was dispatched with that known failing prerequisite; no production
+verification is pending. The G1/R1/R2 assessment, exact failures and correction evidence are in
+[ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#resumed-exact-run-assessment-and-bounded-correction--2026-09-26).
+Use [HANDOVER](HANDOVER.md) for the next bounded G1-V1 correction within 1G.2b verification.
 Continue on `feature/phase-1g-branches-runtime`, draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+Physical testing, acceptance, merge, optional Git and Phase 2 remain excluded.
 **Preserved R1 closure:** candidate `c12d953548992adc60b38682d0dcfda8cdeb9f94`, tree
 `3f8f6e769672572b008b2ffb4f283888afecfc31`, native run `36148942247`, attempt 1,
 passed both targets with complete logs, artifacts and all 60 input hashes verified.
@@ -51,8 +59,9 @@ PASS; the six original native Save passes remain PASS on #87 without repetition.
 Native local installer hashes/exact OS builds were not supplied; reports retain their
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-**Checkpoint handoff:** 1G.2b implementation and verification are active; final G1/R1/R2
-review is not complete. 1G is not accepted or merged. No physical testing is requested.
+**Checkpoint handoff:** 1G.2b is blocked on G1-V1 and incomplete final target verification.
+The published G1/R1/R2 assessment is failed/incomplete; 1G is not accepted or merged.
+No physical testing is requested.
 1H remains separately selected and Phase 2/optional Git remain outside this checkpoint.
 Preserve the earlier 1G.1 and R1 evidence under their actual candidates.
 

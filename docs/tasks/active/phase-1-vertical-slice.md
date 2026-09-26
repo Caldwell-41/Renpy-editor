@@ -141,8 +141,10 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'
 complete logs, artifacts and all 60 input hashes per target were verified for candidate
 `c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; the user selected 1G.2b from `78f051e`.
-It is `in_progress`, with implementation and local verification recorded in ledger 14;
-final supported-target evidence and G1/R1/R2 review remain required. The 1G ledger records targeted evidence
+It is `blocked`: the existing final run failed both core gates; the stale capability
+test is corrected, but G1-V1 projection latency remains over budget. Ledger 14 records
+the failed/incomplete G1/R1/R2 assessment. Correct the bounded finding before a justified
+replacement run; final supported-target evidence remains required. The 1G ledger records targeted evidence
 and deferred final packaged/native UI evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
 supported script editing/saving during play and usable diagnostics. Asset mutations
 require Stop; live asset refresh is excluded. Existing Scene/Source/Save
