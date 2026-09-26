@@ -70,7 +70,7 @@ PASS; the six original native Save passes remain PASS on #87 without repetition.
 Native local installer hashes/exact OS builds were not supplied; reports retain their
 actual provenance. DIST-MAC-01 remains a later distribution limitation.
 
-**Checkpoint handoff:** 1G.2b G1-V1 is corrected locally; final target verification remains incomplete.
+**Checkpoint handoff:** 1G.2b G1-V1/V2 are corrected locally; final target verification remains incomplete.
 No final G1/R1/R2 or acceptance pass is claimed; 1G is not merged.
 No physical testing is requested.
 1H remains separately selected and Phase 2/optional Git remain outside this checkpoint.

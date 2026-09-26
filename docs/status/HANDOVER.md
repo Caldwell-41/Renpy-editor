@@ -63,9 +63,9 @@ were verified; no retry or duplicate run.
 
 At bounded inspection: **in_progress**, conclusion null; Preflight job
 **`108315757962` in_progress**; no target jobs or complete logs yet; **0 artifacts**.
-Candidate has **94** application/workflow inputs; **0/94 per-target hashes**, ZIP
-integrity and executable/package digests can be verified yet. Do not substitute local
-hashes or prior artifacts for missing target evidence.
+Candidate has **94** application/workflow inputs; **0/94 per-target hashes** are
+verified. ZIP integrity and executable/package digests are unavailable until artifacts
+exist. Do not substitute local hashes or prior artifacts for missing target evidence.
 
 **G1:** local G1-V1/V2 corrections pass; supported-target budgets/package proof pending.
 **R1:** local ordinary regression pass with SDK skips; final-source native proof pending.
