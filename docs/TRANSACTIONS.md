@@ -329,3 +329,20 @@ identity, or hash. The retained selected handle supplies every imported byte; pa
 pathname identity, count, and hash are revalidated, so ancestor substitution,
 same-path replacement, or same-file mutation cannot redirect or silently change the
 copy.
+
+## Runtime compatibility reservation
+
+Phase 1G.2a reserves execution under the same serial lock as transaction commit and
+streaming import. Launch therefore drains prior imports; later imports are refused
+before reading or staging. Preparation/validation/cleanup block invalidating mutations.
+During established play, script replacement/new scripts and required metadata are
+allowed; new chapter directories are allowed. Assets/inventory, mixed mutations, and
+loaded script/compiled move/delete or history inverses require Stop. Checks occur before
+journal/history changes, cover Undo/Redo and preserve all prior revision/recovery guards.
+The exact runtime policy script is protected while executing. Accepted transactions can
+advance session consent only from its recorded base identities and hashes.
+
+Runtime cleanup failure retains its reservation. A project cannot be unregistered
+while an execution reservation remains active. See [ADR 0008](adr/0008-controlled-runtime.md)
+and the [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger)
+for resource bounds, implementation status and native evidence.

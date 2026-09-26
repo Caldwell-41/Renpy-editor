@@ -618,3 +618,61 @@ executing the project. It lists affected paths and retained evidence, offers onl
 core-proven resolutions, requires confirmation for destructive resolution, and
 revalidates the project before returning to Scene authoring. Ambiguous recovery stays
 blocked; acknowledging a warning or deleting a journal is not an available resolution.
+
+### 1G.1 Branches interaction contract
+
+Branches displays accepted core flow with an alphabetical deterministic grid, directed
+routes, an entry badge only when runnable `start` proves it, and separate partial/stale
+notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
+or labelled selectors; duplicate option text remains separate. Arrow keys pan the
+focused graph, +/- zoom, Home fits; equivalent buttons remain available. Pointer pan
+is optional. Refresh and visible desktop observation refresh accepted flow; unchanged
+observations preserve focus and changed/deleted mappings clear ambiguous selection.
+
+Edit Choice / Jump opens the existing mapped Scene controls, including their existing
+Create New Scene action. Source navigation carries exact bytes/revision and retains
+an existing draft/caret rather than applying accepted offsets to dirty or stale text.
+Uncommitted Scene forms retain their existing commit/cancel navigation guard. No graph
+write path, layout metadata or new Save owner exists. Failed refresh labels the last
+projection stale. Over-limit graphs show an explicit Source escape without truncation.
+
+The current limits are 500 Scenes and 2,000 edges. Layout, pan and zoom live only in the
+view. Large-story layout/search/minimap and execution from graph nodes remain deferred.
+Supported-target and final human evidence remains in the active 1G ledger.
+
+
+### Runtime UI and safe diagnostic navigation (1G.2b)
+
+The session toolbar provides Validate, Run Game, Stop, inspect/revoke execution consent,
+Choose SDK, and a separate explicit controlled-play helper installation. Inspection and
+editing never execute the project. Validate compiles then lints only if compilation
+succeeds; Run invokes normal entry without an extra lint pass. The existing Source
+lease captures input; Save All / Use saved revision / Cancel remains explicit. Pending
+Scene input offers Return to Scene Commit / Use saved revision / Cancel. No implicit
+Scene commit or draft discard occurs. Choosing a browsed SDK is explicit executable
+validation; runtime preparation checks the pinned version and identities again.
+
+Runtime controls and the bottom Diagnostics / Runtime panel survive editor navigation.
+Runtime state, launch/test revision, filesystem freshness and persistence status have
+separate labels. Script edits remain available during play. Stop then Run selects new
+saved work. Close offers Stop and continue / Cancel and waits for confirmed cleanup
+before the ordinary Source leave dialog. Cleanup failure keeps the project open.
+
+SDK output is inert, bounded text; no output becomes HTML, a URL or a host file opener.
+Diagnostic location buttons recheck the current operation, source identity and revision
+through the core, then use the existing Source navigation path. Dirty, deleted, replaced
+or stale files do not select a nearby Beat. Locations outside approved game `.rpy`
+Source scope remain non-navigable. Static Source/Branches findings stay separate from
+SDK validation, and an empty diagnostic list cannot turn process failure into success.
+
+Diagnostic navigation also translates retained Source CRLF/UTF-16 offsets to the
+textarea's LF offsets. Selection-only observations preserve original text, including
+mixed line endings; changed input retains untouched prefixes/suffixes. This uses the
+existing Source controller and does not silently accept or rewrite source on navigation.
+
+Native main-window close and application quit route into the same Runtime Stop/Cancel
+and existing Source draft leave flow as Close Project. The narrow desktop-only
+`complete_application_close` command accepts no payload, rejects other windows and
+requires the core service to have no open project plus confirmed process cleanup before
+exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
+retain their existing independent harness behavior. OS termination still uses shutdown.

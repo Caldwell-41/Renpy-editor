@@ -1,9 +1,11 @@
 pub mod authoring;
+pub mod dispatch;
 pub mod lifecycle;
 pub mod media;
 pub mod metadata;
 pub mod ports;
 pub mod renpy;
+mod runtime_work;
 pub mod scene;
 pub mod source;
 pub mod transaction;
@@ -54,6 +56,7 @@ pub const OPERATIONS: &[&str] = &[
     "variable.create",
     "variable.update",
     "scene.list",
+    "flow.list",
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",
@@ -66,6 +69,18 @@ pub const OPERATIONS: &[&str] = &[
     "source.applyBoth",
     "source.saveAll",
     "source.discardAll",
+    "runtime.installPolicy",
+    "runtime.prepare",
+    "runtime.requestStatus",
+    "runtime.cancelRequest",
+    "runtime.grantTrust",
+    "runtime.cancelPreparation",
+    "runtime.start",
+    "runtime.stop",
+    "runtime.status",
+    "runtime.diagnostics",
+    "runtime.resolveDiagnostic",
+    "runtime.revokeTrust",
 ];
 
 const INVALID_REQUEST_ID: &str = "invalid-request";
@@ -438,6 +453,12 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
+        "flow.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.flow_workspace())
+                .and_then(to_value)
+        }
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))
@@ -531,6 +552,102 @@ pub fn handle_application_request(
                 .and_then(|session| lifecycle.require_session(&session))
                 .and_then(|_| lifecycle.source_discard_all())
                 .and_then(to_value)
+        }
+        "runtime.prepare" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::PrepareRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.runtime_prepare(payload)),
+        "runtime.cancelPreparation" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::PreparationRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_cancel_preparation(payload)),
+        "runtime.grantTrust" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::PreparationRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_grant_trust(payload)),
+        "runtime.start" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::StartRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.runtime_start(payload)),
+        "runtime.stop" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::OperationRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_stop(payload)),
+        "runtime.status" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::StatusRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.runtime_status(payload)),
+        "runtime.diagnostics" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::OperationRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_diagnostics(payload)),
+        "runtime.resolveDiagnostic" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::DiagnosticRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| {
+                    LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                })
+            })
+            .and_then(|payload| lifecycle.runtime_resolve_diagnostic(payload)),
+        "runtime.revokeTrust" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<lifecycle::runtime::TrustRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Runtime(lifecycle::runtime::RuntimeError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.runtime_revoke_trust(payload)),
+        "runtime.installPolicy" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.runtime_install_policy())
         }
         "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
             return CoreResponse::failure(
@@ -635,6 +752,15 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
         LifecycleError::Scene(error) => return scene_failure(request_id, error),
         LifecycleError::Source(error) => return source_failure(request_id, error),
         LifecycleError::Media(error) => return media_failure(request_id, error),
+        LifecycleError::Runtime(error) => match error {
+            lifecycle::runtime::RuntimeError::Busy => ("RUNTIME_BUSY", "Stop the runtime operation and wait for cleanup before continuing."),
+            lifecycle::runtime::RuntimeError::InvalidPayload => ("INVALID_PAYLOAD", "The runtime request is invalid."),
+            lifecycle::runtime::RuntimeError::Stale => ("STALE_RUNTIME", "Prepare the current revision again before continuing."),
+            lifecycle::runtime::RuntimeError::TrustRequired => ("RUNTIME_TRUST_REQUIRED", "Review this project and SDK and grant session trust before execution."),
+            lifecycle::runtime::RuntimeError::PolicyRequired => ("RUNTIME_POLICY_REQUIRED", "Controlled play requires the reviewed Loomlight runtime policy script. Install it explicitly before preparing Run."),
+            lifecycle::runtime::RuntimeError::UnsafeInputs => ("RUNTIME_INPUTS_CHANGED", "Runtime inputs changed, are unsafe or exceed inspection limits. Prepare and review them again."),
+            lifecycle::runtime::RuntimeError::Failed => ("RUNTIME_FAILED", "The runtime operation could not be completed."),
+        },
         LifecycleError::Io => ("LIFECYCLE_ERROR", GENERIC_ERROR),
     };
     CoreResponse::failure(request_id, code, message)
@@ -674,6 +800,7 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
 fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     use scene::SceneError::*;
     let (code, message) = match error {
+        RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         InvalidMetadata => (
             "INVALID_SCENE_METADATA",
@@ -724,6 +851,7 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
 fn source_failure(request_id: String, error: source::SourceError) -> CoreResponse {
     use source::SourceError::*;
     let (code, message) = match error {
+        RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Source request is invalid."),
         UnknownFile => ("UNKNOWN_SOURCE", "The selected project source is unavailable."),
         InvalidUtf8 => ("INVALID_UTF8", "Invalid UTF-8 source is preserved read-only."),
@@ -764,6 +892,10 @@ fn source_failure(request_id: String, error: source::SourceError) -> CoreRespons
 fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> CoreResponse {
     use authoring::AuthoringError::*;
     let (code, message) = match error {
+        RuntimeBusy => (
+            "RUNTIME_BUSY",
+            "Stop the runtime operation before changing these files.",
+        ),
         NoOpenProject => ("NO_OPEN_PROJECT", "Open a Loomlight project first."),
         RecoveryRequired => (
             "RECOVERY_REQUIRED",
@@ -993,7 +1125,8 @@ mod tests {
     #[test]
     fn configuration_has_one_narrow_main_window_capability() {
         let config = include_str!("../../src-tauri/tauri.conf.json");
-        let capability = include_str!("../../src-tauri/capabilities/main.json");
+        let capability: Value =
+            serde_json::from_str(include_str!("../../src-tauri/capabilities/main.json")).unwrap();
         let permission = include_str!("../../src-tauri/permissions/core-request.toml");
         let build = include_str!("../../src-tauri/build.rs");
         assert!(config.contains("connect-src ipc: http://ipc.localhost"));
@@ -1002,14 +1135,18 @@ mod tests {
         assert!(config.contains("base-uri 'none'"));
         assert!(config.contains("form-action 'none'"));
         assert!(config.contains("\"capabilities\": [\"main-local-only\"]"));
-        assert!(capability.contains("\"webviews\": [\"main\"]"));
-        assert!(!capability.contains("\"windows\""));
-        assert!(capability.contains("allow-loomlight-core"));
+        assert_eq!(capability["identifier"], "main-local-only");
+        assert_eq!(capability["local"], true);
+        assert_eq!(capability["webviews"], json!(["main"]));
+        assert!(capability.get("windows").is_none());
+        assert!(capability.get("remote").is_none());
+        assert_eq!(
+            capability["permissions"],
+            json!(["allow-loomlight-core", "allow-application-close"])
+        );
         assert!(permission.contains("commands.allow = [\"core_request\"]"));
-        assert!(build.contains("commands(&[\"core_request\"])"));
-        for forbidden in ["shell:", "fs:", "http:", "opener:", "process:"] {
-            assert!(!capability.contains(forbidden));
-        }
+        assert!(permission.contains("commands.allow = [\"complete_application_close\"]"));
+        assert!(build.contains("commands(&[\"core_request\", \"complete_application_close\"])"));
     }
 
     #[test]

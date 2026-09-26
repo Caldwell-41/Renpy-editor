@@ -715,3 +715,169 @@ test("Apply Both refuses a changed external revision returned while settling the
   assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.value, model.text);
   controller.dispose();
 });
+
+test("runtime preparation retains current Source input and Scene forms under the existing lease", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  for (const choice of ["cancel", "saved", "saveAll", "commitScene"] as const) {
+    installDom();
+    let model = documentModel();
+    const calls: string[] = [];
+    const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+      open: async () => model,
+      reloadInventory: async () => inventory(model.state, model.dirty),
+      update: async (request) => { calls.push("retain"); model = { ...model, text: request.text, dirty: true, state: "dirty", draftVersion: model.draftVersion + 1 }; return model; },
+    }));
+    await tick();
+    const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+    editor.value = editor.value.replace("Hello", "Pending"); // Deliberately before input event.
+    const scene = document.createElement("section");
+    if (choice === "commitScene" || choice === "saved") { scene.className = "scene-draft"; scene.dataset.unsubmitted = "true"; scene.innerHTML = '<input value="uncommitted">'; document.body.append(scene); }
+    const preparation = await prepareRuntimeInput("run", "sdk-capability", {
+      controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(),
+      choose: async ({ sourceDrafts, pendingScene }) => { assert.equal(sourceDrafts, 1); assert.equal(pendingScene, choice === "saved" || choice === "commitScene"); return choice; },
+      request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+        calls.push(operation);
+        if (operation === "source.saveAll") model = { ...model, dirty: false, state: "clean", baseRevision: "b".repeat(64) };
+        if (operation === "source.list" || operation === "source.saveAll") return inventory(model.state, model.dirty) as T;
+        assert.equal(operation, "runtime.prepare");
+        assert.equal(editor.readOnly, true);
+        return { preparationId: "prepared", savedRevision: "saved", draftCount: model.dirty ? 1 : 0, trustId: null } as T;
+      },
+    });
+    assert.equal(calls[0], "retain");
+    assert.equal(Boolean(preparation), choice === "saved" || choice === "saveAll");
+    assert.equal(calls.includes("source.saveAll"), choice === "saveAll");
+    assert.match(model.text!, /Pending/);
+    assert.equal(model.dirty, choice !== "saveAll");
+    if (scene.isConnected) assert.equal(scene.querySelector("input")?.value, "uncommitted");
+    assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.readOnly, false);
+    controller.dispose();
+  }
+});
+
+test("runtime Save All failure releases the Source lease and never prepares execution", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  installDom();
+  const model = documentModel({ dirty: true, state: "dirty" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({ open: async () => model }));
+  await tick();
+  const calls: string[] = [];
+  await assert.rejects(prepareRuntimeInput("validate", "sdk", {
+    controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(), choose: async () => "saveAll",
+    request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+      calls.push(operation);
+      if (operation === "source.list") return inventory("dirty", true) as T;
+      throw new Error("Save refused");
+    },
+  }), /Save refused/);
+  assert.deepEqual(calls, ["source.list", "source.saveAll"]);
+  assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.readOnly, false);
+  assert.equal(model.dirty, true);
+  controller.dispose();
+});
+
+test("runtime inventory ticket releases Source lease before cancellable long work", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  installDom();
+  let model = documentModel({ dirty: true, state: "dirty" });
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
+    open: async () => model,
+    update: async (request) => { model = { ...model, text: request.text, draftVersion: model.draftVersion + 1 }; return model; },
+  }));
+  await tick();
+  const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  editor.value += "\n# retained during preparation";
+  const abort = new AbortController();
+  let coordinating = false;
+  let cancelled = false;
+  let observed = false;
+  const result = await prepareRuntimeInput("run", "sdk", {
+    controller, sceneRoot: document, current: () => true, signal: abort.signal,
+    coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
+    choose: async () => "saved",
+    request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
+      if (operation === "source.list") return inventory("dirty", true) as T;
+      if (operation === "runtime.prepare") return { pending: true, requestToken: "ticket" } as T;
+      assert.equal(coordinating, false);
+      assert.equal(editor.readOnly, false);
+      if (operation === "runtime.cancelRequest") { cancelled = true; return { cancelled: true } as T; }
+      assert.equal(operation, "runtime.requestStatus");
+      observed = true; abort.abort();
+      return (cancelled ? { pending: false, response: { ok: false, error: { code: "RUNTIME_CANCELLED" } } } : { pending: true, response: null }) as T;
+    },
+  });
+  assert.equal(result, undefined);
+  assert.equal(observed, true);
+  assert.equal(cancelled, true);
+  assert.match(editor.value, /retained during preparation/);
+  assert.match(model.text!, /retained during preparation/);
+  assert.equal(model.dirty, true);
+  controller.dispose();
+});
+
+test("runtime completion cancellation keeps its receipt while authoring owns the service", async () => {
+  const { prepareRuntimeInput } = await import("../src/runtime-preparation.js");
+  for (const kind of ["run", "validate"] as const) {
+    for (const cancellation of ["abort", "staleView"] as const) {
+      installDom();
+      let model = documentModel({ dirty: true, state: "dirty" });
+      const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory("dirty", true), sourceActions({
+        open: async () => model,
+        update: async (request) => { model = { ...model, text: request.text, draftVersion: model.draftVersion + 1 }; return model; },
+      }));
+      await tick();
+      const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+      editor.value += "\n# retained across completed cancellation";
+      const scene = document.createElement("section");
+      scene.className = "scene-draft"; scene.dataset.unsubmitted = "true";
+      scene.innerHTML = '<input value="retained Scene input">'; document.body.append(scene);
+      const abort = new AbortController();
+      let current = true;
+      let coordinating = false;
+      let serviceHeld = false;
+      const observed = deferred<void>();
+      const completed = deferred<unknown>();
+      const calls: { operation: string; payload: Readonly<Record<string, unknown>> | undefined }[] = [];
+      try {
+        const preparing = prepareRuntimeInput(kind, "sdk", {
+          controller, sceneRoot: document, current: () => current, signal: abort.signal,
+          coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
+          choose: async () => "saved",
+          request: async <T>(operation: import("../src/protocol.js").CoreOperation, payload?: Readonly<Record<string, unknown>>) => {
+            calls.push({ operation, payload });
+            if (operation === "source.list") return inventory("dirty", true) as T;
+            if (operation === "runtime.prepare") return { pending: true, requestToken: "captured-receipt" } as T;
+            assert.equal(coordinating, false);
+            assert.equal(editor.readOnly, false);
+            if (operation === "runtime.requestStatus") {
+              observed.resolve();
+              return await completed.promise as T;
+            }
+            // Match the production dispatch distinction: receipt controls remain
+            // available while an authoring request has checked the service out.
+            if (operation === "runtime.cancelPreparation" && serviceHeld) throw new Error("RUNTIME_BUSY");
+            assert.equal(operation, "runtime.cancelRequest");
+            assert.equal(serviceHeld, true);
+            assert.deepEqual(payload, { requestToken: "captured-receipt" });
+            return { cancelled: true, cleanupPending: true } as T;
+          },
+        });
+        await observed.promise;
+        serviceHeld = true;
+        if (cancellation === "abort") abort.abort(); else current = false;
+        completed.resolve({ pending: false, response: { ok: true, value: {
+          preparationId: "completed-preparation", savedRevision: "saved", draftCount: 1, trustId: null,
+        } } });
+        assert.equal(await preparing, undefined);
+        assert.deepEqual(calls.map(call => call.operation), [
+          "source.list", "runtime.prepare", "runtime.requestStatus", "runtime.cancelRequest",
+        ]);
+        assert.deepEqual(calls[2]!.payload, { requestToken: "captured-receipt" });
+        assert.match(editor.value, /retained across completed cancellation/);
+        assert.match(model.text!, /retained across completed cancellation/);
+        assert.equal(model.dirty, true);
+        assert.equal(scene.querySelector("input")?.value, "retained Scene input");
+      } finally { controller.dispose(); }
+    }
+  }
+});

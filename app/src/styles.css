@@ -266,3 +266,45 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 @media (max-width: 680px) { .welcome { grid-template-columns: 1fr; gap: 16px; margin-block: 32px; } .wizard-layout { grid-template-columns: 1fr; gap: 24px; width: calc(100% - 32px); } .step-rail { grid-template-columns: repeat(4, 1fr); } .step-rail span { padding-inline: 5px; } .project-shell { grid-template-columns: 1fr; } .story-sidebar { max-height: 240px; overflow: auto; border-right: 0; border-bottom: 1px solid var(--border-normal); } .story-sidebar h2 { padding-bottom: 12px; } .scene-stack { display: block; height: auto; } .preview-region { max-height: none; } .beats-region { max-height: none; overflow: visible; } .beats-tools .field { display: none; } .scene-header, .source-header { align-items: start; } .choice-option { grid-template-columns: 1fr; } .preview-surround { min-height: 180px; padding: 10px; } .source-editor-shell { height: 460px; } }
 @media (min-width: 681px) and (max-width: 800px) { .welcome { grid-template-columns: 1fr; gap: 16px; margin-block: 32px; } .wizard-layout { grid-template-columns: 1fr; gap: 24px; } .step-rail { grid-template-columns: repeat(4, 1fr); } .step-rail span { padding-inline: 5px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; } }
+
+/* Branches uses shared tokens; coordinates are session-only convenience. */
+.branches-workspace { min-width: 0; padding: 20px; overflow: auto; }
+.branches-workspace h2 { margin-top: 0; }
+.branches-toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.branches-notice { color: var(--text-secondary); overflow-wrap: anywhere; }
+.branches-viewport { height: clamp(240px, 48vh, 620px); overflow: hidden; position: relative; border: 1px solid var(--border-normal); background: var(--surface-app); touch-action: none; }
+.branches-canvas { transform-origin: 0 0; position: relative; will-change: transform; }
+.branches-lines { position: absolute; pointer-events: none; overflow: visible; }
+.branches-lines path { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; opacity: .55; }
+.branch-node { position: absolute; width: 200px; min-height: 60px; padding: 10px; overflow-wrap: anywhere; border: 1px solid var(--border-normal); background: var(--surface-panel); color: var(--text-primary); border-radius: 4px; text-align: left; }
+.branch-node.selected { border-color: var(--accent-primary); }
+.branches-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 16px; }
+.branches-controls select { min-width: 0; width: 100%; }
+.branches-details { grid-column: 1 / -1; overflow-wrap: anywhere; }
+.branches-details button { margin: 0 8px 8px 0; }
+@media (max-width: 760px) { .branches-controls { grid-template-columns: minmax(0, 1fr); } .branches-workspace { padding: 12px; } }
+
+.branches-viewport:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.branches-lines path.selected { stroke: var(--accent-primary); stroke-width: 3; opacity: 1; }
+.branches-lines marker path { fill: var(--text-secondary); stroke: none; }
+
+.branches-controls select { padding: 8px 10px; min-height: 38px; color: var(--text-primary); background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: var(--radius-small); }
+
+.runtime-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.app-header:has(.runtime-toolbar) { flex-wrap: wrap; gap: 10px; }
+.runtime-panel { border-top: 1px solid var(--border-normal); padding: 12px 24px; min-width: 0; max-height: 36vh; overflow: auto; }
+.runtime-panel h2 { font-size: 14px; margin: 0 0 8px; }
+.runtime-panel p { margin: 6px 0; }
+.runtime-panel pre, .runtime-revision, .runtime-dialog pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
+.runtime-output { max-height: 180px; overflow: auto; font-size: 12px; }
+.runtime-diagnostics { display: grid; gap: 8px; }
+.runtime-diagnostics article { padding: 8px; border: 1px solid var(--border-normal); }
+.runtime-diagnostics button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.runtime-diagnostics span { display: block; font-size: 12px; }
+.runtime-dialog section { max-height: 85vh; overflow: auto; }
+.runtime-dialog pre { max-height: 45vh; overflow: auto; font: inherit; }
+@media (max-width: 700px) { .runtime-panel { padding: 8px; } .runtime-toolbar { margin-left: 0; } }
+
+.app-shell:has(.runtime-panel) { grid-template-rows: auto minmax(300px, 1fr) auto; }
+.app-header:has(.runtime-toolbar) { min-height: 54px; padding-block: 8px; }

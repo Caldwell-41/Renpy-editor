@@ -31,6 +31,7 @@ export const CORE_OPERATIONS = [
   "variable.create",
   "variable.update",
   "scene.list",
+  "flow.list",
   "scene.apply",
   "scene.recovery",
   "scene.resolveRecovery",
@@ -43,6 +44,18 @@ export const CORE_OPERATIONS = [
   "source.applyBoth",
   "source.saveAll",
   "source.discardAll",
+  "runtime.installPolicy",
+  "runtime.prepare",
+  "runtime.requestStatus",
+  "runtime.cancelRequest",
+  "runtime.grantTrust",
+  "runtime.cancelPreparation",
+  "runtime.start",
+  "runtime.stop",
+  "runtime.status",
+  "runtime.diagnostics",
+  "runtime.resolveDiagnostic",
+  "runtime.revokeTrust",
 ] as const;
 
 export type CoreOperation = (typeof CORE_OPERATIONS)[number];

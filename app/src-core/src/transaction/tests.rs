@@ -1353,8 +1353,247 @@ fn corrupt_record_beyond_the_former_history_boundary_blocks_real_writes() {
 }
 
 #[test]
+fn observation_batches_preserve_order_total_budget_and_current_revisions() {
+    let fixture = Fixture::new();
+    let paths = (0_u32..256)
+        .map(|index| {
+            let path = format!("game/batch-{index}.rpy");
+            fs::write(fixture.root.join(&path), index.to_le_bytes()).unwrap();
+            path
+        })
+        .collect::<Vec<_>>();
+    let snapshots = fixture
+        .service
+        .observation_snapshots(&fixture.project, &paths, 4, 1024)
+        .unwrap();
+    for (index, snapshot) in snapshots.iter().enumerate() {
+        assert_eq!(snapshot.as_ref().unwrap().0, (index as u32).to_le_bytes());
+    }
+    let observed = paths
+        .iter()
+        .zip(&snapshots)
+        .map(|(path, snapshot)| (path.as_str(), &snapshot.as_ref().unwrap().1))
+        .collect::<Vec<_>>();
+    assert!(fixture
+        .service
+        .observations_still_current(&fixture.project, &observed, 4)
+        .unwrap());
+    fs::write(fixture.root.join(&paths[1]), 999_u32.to_le_bytes()).unwrap();
+    assert!(!fixture
+        .service
+        .observations_still_current(&fixture.project, &observed, 4)
+        .unwrap());
+
+    let limited = fixture
+        .service
+        .observation_snapshots(&fixture.project, &paths, 4, 512)
+        .unwrap();
+    assert_eq!(
+        limited
+            .iter()
+            .filter_map(|item| item.as_ref().ok())
+            .map(|(bytes, _)| bytes.len())
+            .sum::<usize>(),
+        512
+    );
+    assert_eq!(limited.iter().filter(|item| item.is_err()).count(), 128);
+    assert!(limited
+        .iter()
+        .filter_map(|item| item.as_ref().err())
+        .all(|error| error.code == ErrorCode::InvalidProposal));
+
+    let cancelled = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+    cancelled.cancel();
+    crate::runtime_work::scoped(cancelled, || {
+        let results = fixture
+            .service
+            .observation_snapshots(&fixture.project, &paths, 4, 1024)
+            .unwrap();
+        assert!(results
+            .iter()
+            .all(|result| result.as_ref().unwrap_err().code == ErrorCode::RuntimeBusy));
+        assert!(!fixture
+            .service
+            .observations_still_current(&fixture.project, &observed, 4)
+            .unwrap());
+    });
+    assert!(fixture
+        .service
+        .observation_snapshots(&fixture.project, &vec![paths[0].clone(); 2049], 4, 8196)
+        .is_err());
+}
+
+#[test]
+fn observation_reader_rereads_content_identity_and_bounds() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .observation_reader(&fixture.project)
+        .unwrap();
+    let (bytes, original) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), original);
+    let changed = b"label one:\n    xxxx\n";
+    assert_eq!(bytes.len(), changed.len());
+    fs::write(fixture.root.join(path.as_str()), changed).unwrap();
+    let (observed, modified) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(observed, changed);
+    assert_ne!(modified.sha256, original.sha256);
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), modified);
+
+    let replacement = fixture.root.join("game/replacement.tmp");
+    fs::write(&replacement, changed).unwrap();
+    fs::rename(replacement, fixture.root.join(path.as_str())).unwrap();
+    let (_, replaced) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(replaced.sha256, modified.sha256);
+    assert_ne!(replaced.identity, modified.identity);
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), replaced);
+    assert_eq!(
+        reader.snapshot_bounded(&path, 4).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 4).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    fs::remove_file(fixture.root.join(path.as_str())).unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+
+    let huge = fs::File::create(fixture.root.join(path.as_str())).unwrap();
+    huge.set_len(17 * 1024 * 1024).unwrap();
+    assert_eq!(
+        reader.snapshot_bounded(&path, usize::MAX).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, u64::MAX).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    let cancelled = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+    cancelled.cancel();
+    crate::runtime_work::scoped(cancelled, || {
+        assert_eq!(
+            reader.snapshot_bounded(&path, 64).unwrap_err().code,
+            ErrorCode::RuntimeBusy
+        );
+    });
+    fixture.service.unregister_trusted_project(&fixture.project);
+    assert_eq!(
+        reader.snapshot_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::UnknownProject
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::UnknownProject
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn observation_reader_rejects_retained_parent_and_root_substitution() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .observation_reader(&fixture.project)
+        .unwrap();
+    reader.snapshot_bounded(&path, 64).unwrap();
+    fs::rename(
+        fixture.root.join("game"),
+        fixture.root.join("original-game"),
+    )
+    .unwrap();
+    fs::create_dir(fixture.root.join("game")).unwrap();
+    fs::write(fixture.root.join(path.as_str()), b"substitute").unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+
+    let moved = fixture.root.with_extension("observation-moved");
+    fs::rename(&fixture.root, &moved).unwrap();
+    fs::create_dir(&fixture.root).unwrap();
+    assert_eq!(
+        reader.snapshot_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::RootIdentityChanged
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::RootIdentityChanged
+    );
+    fs::remove_dir(&fixture.root).unwrap();
+    fs::rename(moved, &fixture.root).unwrap();
+}
+
+#[cfg(windows)]
+#[test]
+fn observation_reader_pins_retained_parent_namespace() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .observation_reader(&fixture.project)
+        .unwrap();
+    let (_, revision) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert!(fs::rename(fixture.root.join("game"), fixture.root.join("moved-game")).is_err());
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), revision);
+    drop(reader);
+    fs::rename(fixture.root.join("game"), fixture.root.join("moved-game")).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn observation_reader_rejects_leaf_and_parent_symlink_substitution() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    fs::write(outside.path().join("one.rpy"), b"outside").unwrap();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .observation_reader(&fixture.project)
+        .unwrap();
+    reader.snapshot_bounded(&path, 64).unwrap();
+    fs::remove_file(fixture.root.join(path.as_str())).unwrap();
+    symlink(
+        outside.path().join("one.rpy"),
+        fixture.root.join(path.as_str()),
+    )
+    .unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+    fs::rename(
+        fixture.root.join("game"),
+        fixture.root.join("original-game"),
+    )
+    .unwrap();
+    symlink(outside.path(), fixture.root.join("game")).unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+    assert_eq!(
+        fs::read(outside.path().join("one.rpy")).unwrap(),
+        b"outside"
+    );
+}
+
+#[test]
 fn revision_hashing_rejects_oversized_and_growing_inputs_with_bounded_work() {
     use std::io::{Cursor, Read};
+
+    for bytes in [
+        vec![],
+        b"small source".to_vec(),
+        vec![b'x'; 1024 * 1024 + 3],
+    ] {
+        let mut reader = Cursor::new(&bytes);
+        assert_eq!(
+            hash_revision_reader(&mut reader, bytes.len() as u64, bytes.len() as u64).unwrap(),
+            (bytes.len() as u64, sha256(&bytes))
+        );
+    }
+    assert_eq!(
+        hash_revision_reader(&mut Cursor::new(b"x"), 0, 8),
+        Err(ErrorCode::InvalidProposal)
+    );
 
     let mut oversized = Cursor::new(vec![0_u8; 9]);
     assert_eq!(

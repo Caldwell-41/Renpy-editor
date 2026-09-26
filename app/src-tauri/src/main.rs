@@ -1,5 +1,5 @@
 use loomlight_core::{
-    handle_application_request, lifecycle::LifecycleService, validate_request, CoreResponse,
+    dispatch::ApplicationHost, lifecycle::LifecycleService, validate_request, CoreResponse,
 };
 use serde_json::{json, Value};
 use std::{
@@ -13,7 +13,9 @@ use std::{
 };
 use tauri::{Manager, WebviewUrl};
 
-struct DesktopState(Mutex<Option<LifecycleService>>);
+struct DesktopState(Mutex<Option<ApplicationHost>>);
+
+static APPLICATION_CLOSE_CONFIRMED: AtomicBool = AtomicBool::new(false);
 
 static SMOKE_REPORT_RECEIVED: AtomicBool = AtomicBool::new(false);
 static POPUP_DENIAL_OBSERVED: AtomicBool = AtomicBool::new(false);
@@ -95,6 +97,36 @@ fn handle_second_instance(app: &tauri::AppHandle) {
     }
 }
 
+fn scripted_smoke_exit() -> bool {
+    std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1")
+}
+
+#[tauri::command(async)]
+fn complete_application_close(
+    window: tauri::WebviewWindow,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, DesktopState>,
+) -> Result<(), &'static str> {
+    if window.label() != "main" {
+        return Err("Unauthorised window.");
+    }
+    let host = state
+        .0
+        .lock()
+        .map_err(|_| "Service unavailable.")?
+        .clone()
+        .ok_or("Service unavailable.")?;
+    if !host.with_service(|service| service.current().is_none())? {
+        return Err("Close the project through its runtime and draft flow first.");
+    }
+    if !host.shutdown() {
+        return Err("Runtime cleanup is incomplete.");
+    }
+    APPLICATION_CLOSE_CONFIRMED.store(true, Ordering::SeqCst);
+    app.exit(0);
+    Ok(())
+}
+
 #[tauri::command(async)]
 fn core_request(
     window: tauri::WebviewWindow,
@@ -104,6 +136,37 @@ fn core_request(
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
+    }
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").is_ok()
+        && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
+    {
+        let payload = request.get("payload").cloned().unwrap_or(Value::Null);
+        if !payload.is_object() || payload.to_string().len() > 32 * 1024 {
+            return Err("Invalid bounded probe report.");
+        }
+        let passed = payload.get("passed").and_then(Value::as_bool) == Some(true);
+        let host = state
+            .0
+            .lock()
+            .map_err(|_| "probe state")?
+            .clone()
+            .ok_or("probe host")?;
+        let cleaned = host.shutdown();
+        println!(
+            "{}",
+            json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "details":payload})
+        );
+        let _ = std::io::stdout().flush();
+        let code = if passed && cleaned { 0 } else { 1 };
+        // Terminate after the report is flushed and owned process cleanup is confirmed.
+        thread::spawn(move || {
+            thread::sleep(Duration::from_millis(100));
+            std::process::exit(code);
+        });
+        return Ok(CoreResponse::success(
+            "runtime-ui-report".into(),
+            json!({"recorded":true}),
+        ));
     }
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
     let operation = request.get("operation").and_then(Value::as_str);
@@ -203,94 +266,95 @@ fn core_request(
             .get("sessionId")
             .and_then(Value::as_str)
             .map(str::to_owned);
-        let mut guard = state
+        let host = state
             .0
             .lock()
-            .map_err(|_| "Desktop lifecycle state is unavailable.")?;
-        let lifecycle = guard
-            .as_mut()
+            .map_err(|_| "Desktop lifecycle state is unavailable.")?
+            .as_ref()
+            .cloned()
             .ok_or("Desktop lifecycle state is unavailable.")?;
-        match operation.as_str() {
-            "project.chooseParent" if payload_empty => match rfd::FileDialog::new()
-                .set_title("Choose project location")
-                .pick_folder()
-            {
-                Some(path) => match lifecycle.register_parent(&path) {
-                    Ok(choice) => CoreResponse::success(
-                        request_id,
-                        serde_json::to_value(choice).unwrap_or(Value::Null),
-                    ),
-                    Err(_) => CoreResponse::failure(
-                        request_id,
-                        "INVALID_PARENT",
-                        "Choose an existing safe parent folder.",
-                    ),
-                },
-                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
-            },
-            "sdk.browse" if payload_empty => match rfd::FileDialog::new()
-                .set_title("Choose Ren'Py 8.5.3 SDK")
-                .pick_folder()
-            {
-                Some(path) => match lifecycle.register_sdk(&path, "browsed") {
-                    Ok(sdk) => CoreResponse::success(
-                        request_id,
-                        serde_json::to_value(sdk).unwrap_or(Value::Null),
-                    ),
-                    Err(_) => CoreResponse::failure(
-                        request_id,
-                        "UNSUPPORTED_SDK",
-                        "The selected folder is not a supported Ren'Py SDK.",
-                    ),
-                },
-                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
-            },
-            "project.openPicker" if payload_empty => match rfd::FileDialog::new()
-                .set_title("Open Loomlight project")
-                .pick_folder()
-            {
-                Some(path) => match lifecycle.open_path(&path) {
-                    Ok(project) => CoreResponse::success(
-                        request_id,
-                        serde_json::to_value(project).unwrap_or(Value::Null),
-                    ),
-                    Err(error) => loomlight_core::lifecycle_failure(request_id, error),
-                },
-                None => CoreResponse::success(request_id, json!({ "cancelled": true })),
-            },
-            "asset.chooseImport"
-                if validated.payload.len() == 1 && session_id.as_deref().is_some() =>
-            {
-                let session_id = session_id.expect("guarded session id");
-                if let Err(error) = lifecycle.require_session(&session_id) {
-                    return Ok(loomlight_core::lifecycle_failure(request_id, error));
-                }
-                match rfd::FileDialog::new()
+        if matches!(
+            operation.as_str(),
+            "project.chooseParent" | "sdk.browse" | "project.openPicker" | "asset.chooseImport"
+        ) {
+            let asset = operation == "asset.chooseImport";
+            if !(if asset {
+                validated.payload.len() == 1 && session_id.is_some()
+            } else {
+                payload_empty
+            }) {
+                return Ok(CoreResponse::failure(
+                    request_id,
+                    "INVALID_PAYLOAD",
+                    "Payload does not match the operation schema.",
+                ));
+            }
+            let before = host
+                .with_service(|service| {
+                    if asset {
+                        service.require_session(session_id.as_ref().unwrap())?;
+                    }
+                    Ok::<_, loomlight_core::lifecycle::LifecycleError>(
+                        service.current().map(|p| p.session_id),
+                    )
+                })
+                .map_err(|_| "Another request is in progress.")?;
+            let before = match before {
+                Ok(session) => session,
+                Err(error) => return Ok(loomlight_core::lifecycle_failure(request_id, error)),
+            };
+            // Native UI never owns the lifecycle service while waiting for a choice.
+            let path = match operation.as_str() {
+                "asset.chooseImport" => rfd::FileDialog::new()
                     .set_title("Choose image or audio asset")
                     .add_filter(
                         "Supported media",
                         &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
                     )
-                    .pick_file()
-                {
-                    Some(path) => match lifecycle.authoring_select_import(&path) {
-                        Ok(choice) => CoreResponse::success(
-                            request_id,
-                            serde_json::to_value(choice).unwrap_or(Value::Null),
-                        ),
-                        Err(error) => loomlight_core::lifecycle_failure(request_id, error),
-                    },
-                    None => CoreResponse::success(request_id, json!({ "cancelled": true })),
+                    .pick_file(),
+                "project.chooseParent" => rfd::FileDialog::new()
+                    .set_title("Choose project location")
+                    .pick_folder(),
+                "sdk.browse" => rfd::FileDialog::new()
+                    .set_title("Choose Ren'Py 8.5.3 SDK")
+                    .pick_folder(),
+                _ => rfd::FileDialog::new()
+                    .set_title("Open Loomlight project")
+                    .pick_folder(),
+            };
+            host.complete_dialog(request_id.clone(), before, |lifecycle| {
+                let Some(path) = path else {
+                    return CoreResponse::success(request_id.clone(), json!({"cancelled": true}));
+                };
+                let result = match operation.as_str() {
+                    "project.chooseParent" => lifecycle
+                        .register_parent(&path)
+                        .map(|v| serde_json::to_value(v).unwrap()),
+                    "sdk.browse" => lifecycle
+                        .register_sdk(&path, "browsed")
+                        .map(|v| serde_json::to_value(v).unwrap()),
+                    "project.openPicker" => lifecycle
+                        .open_path(&path)
+                        .map(|v| serde_json::to_value(v).unwrap()),
+                    _ => lifecycle
+                        .require_session(session_id.as_ref().unwrap())
+                        .and_then(|_| lifecycle.authoring_select_import(&path))
+                        .map(|v| serde_json::to_value(v).unwrap()),
+                };
+                match result {
+                    Ok(value) => CoreResponse::success(request_id.clone(), value),
+                    Err(error) => loomlight_core::lifecycle_failure(request_id.clone(), error),
                 }
-            }
-            "project.chooseParent" | "sdk.browse" | "project.openPicker" | "asset.chooseImport" => {
+            })
+            .unwrap_or_else(|_| {
                 CoreResponse::failure(
                     request_id,
-                    "INVALID_PAYLOAD",
-                    "Payload does not match the operation schema.",
+                    "RUNTIME_BUSY",
+                    "Another request is in progress.",
                 )
-            }
-            _ => handle_application_request(request, smoke_enabled, lifecycle),
+            })
+        } else {
+            host.dispatch(request, smoke_enabled)
         }
     };
     let report_disposition = smoke_report_disposition(smoke_enabled, is_smoke_report, &response);
@@ -377,12 +441,16 @@ fn main() {
                 .path()
                 .app_data_dir()
                 .map_err(|_| "application data path is unavailable")?;
-            let lifecycle = LifecycleService::new(data_root)
-                .map_err(|_| "project lifecycle service could not start")?;
+            let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
+                let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("probe SDK archive required")?;
+                let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
+                if data.exists() { return Err("probe destination already exists".into()); }
+                LifecycleService::prepare_runtime_ui_probe(data, std::path::Path::new(&archive), &case).map_err(std::io::Error::other)?
+            } else { LifecycleService::new(data_root).map_err(|_| "project lifecycle service could not start")? };
             *app.state::<DesktopState>()
                 .0
                 .lock()
-                .map_err(|_| "project lifecycle state is unavailable")? = Some(lifecycle);
+                .map_err(|_| "project lifecycle state is unavailable")? = Some(ApplicationHost::new(lifecycle));
             let config = app
                 .config()
                 .app
@@ -419,6 +487,22 @@ fn main() {
                 let _ = std::io::stdout().flush();
             }
 
+            if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
+                let main = app.get_webview_window("main").ok_or("probe main window missing")?;
+                if case == "route-b" { main.set_size(tauri::LogicalSize::new(640.0,720.0)).map_err(std::io::Error::other)?; }
+                let probe_host = app.state::<DesktopState>().0.lock().unwrap().clone().ok_or("probe host missing")?;
+                let started = Instant::now();
+                thread::spawn(move || {
+                    thread::sleep(Duration::from_secs(2));
+                    main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
+                    main.eval(include_str!("runtime_ui_probe.js")).expect("runtime probe injection");
+                    while started.elapsed() < Duration::from_secs(300) { thread::sleep(Duration::from_secs(1)); }
+                    let cleaned = probe_host.shutdown();
+                    println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));
+                    let _ = std::io::stdout().flush();
+                    std::process::exit(1);
+                });
+            }
             if std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1") {
                 let denied = Arc::clone(&unauthorised_denied);
                 let unauthorised = tauri::WebviewWindowBuilder::new(
@@ -483,9 +567,33 @@ fn main() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![core_request])
-        .run(tauri::generate_context!())
-        .expect("Loomlight desktop runtime failed");
+        .on_window_event(|window,event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if window.label() == "main" && !scripted_smoke_exit() && !APPLICATION_CLOSE_CONFIRMED.load(Ordering::SeqCst) {
+                    api.prevent_close();
+                    if let Some(main)=window.app_handle().get_webview_window("main") {
+                        let _=main.eval("window.__loomlightRequestApplicationClose?.()");
+                    }
+                }
+            }
+        })
+        .invoke_handler(tauri::generate_handler![core_request, complete_application_close])
+        .build(tauri::generate_context!())
+        .expect("Loomlight desktop runtime failed")
+        .run(|app, event| {
+            if let tauri::RunEvent::ExitRequested { api, .. } = &event {
+                if !scripted_smoke_exit() && !APPLICATION_CLOSE_CONFIRMED.load(Ordering::SeqCst) {
+                    api.prevent_exit();
+                    if let Some(main)=app.get_webview_window("main") {
+                        let _=main.eval("window.__loomlightRequestApplicationClose?.()");
+                    }
+                }
+            }
+            if matches!(event, tauri::RunEvent::Exit) {
+                let host = app.state::<DesktopState>().0.lock().ok().and_then(|state| state.clone());
+                if let Some(host) = host { host.shutdown(); }
+            }
+        });
 }
 
 #[cfg(test)]

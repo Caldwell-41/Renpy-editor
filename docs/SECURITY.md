@@ -199,3 +199,25 @@ diagnostic record.
 - **Complete:** This threat model reflects the selected Tauri capability boundary and
   locked dependency evidence. Release signing and physical OS reputation UX remain
   later gates.
+
+
+### Runtime diagnostics and packaged verification
+
+Diagnostic output never grants path authority. The core resolves only a retained
+operation's diagnostic ordinal, checks the original file identity/content against a
+contained transaction snapshot, and limits navigation to the existing approved game
+`.rpy` Source surface. Runtime text is inert and bounded; absolute paths, traversal,
+unproven locations and other file types have no navigation action.
+
+The native packaged Runtime UI probe is opt-in through an explicit launch environment,
+uses a fresh synthetic temporary project and verified official SDK archive, and grants
+no fixture-writing renderer operation. Its test report handler is available only in
+that mode and the main window; production requests retain their deny-by-default
+capabilities. Synthetic DOM input proves the packaged UI/IPC path, not OS key delivery.
+
+Native main-window close and application quit route into the same Runtime Stop/Cancel
+and existing Source draft leave flow as Close Project. The narrow desktop-only
+`complete_application_close` command accepts no payload, rejects other windows and
+requires the core service to have no open project plus confirmed process cleanup before
+exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
+retain their existing independent harness behavior. OS termination still uses shutdown.

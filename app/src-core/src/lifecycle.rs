@@ -1,3 +1,5 @@
+pub mod runtime;
+mod runtime_probe;
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
@@ -126,6 +128,7 @@ pub enum LifecycleError {
     CreatedNotOpened,
     RecoveryRequired,
     StaleSession,
+    Runtime(runtime::RuntimeError),
     Authoring(AuthoringError),
     Scene(SceneError),
     Source(SourceError),
@@ -160,6 +163,7 @@ pub struct LifecycleService {
     sdks: HashMap<String, ValidatedSdk>,
     current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
     authoring: AuthoringService,
+    runtime: runtime::RuntimeState,
 }
 
 struct InspectedProject {
@@ -216,6 +220,7 @@ impl LifecycleService {
             sdks: HashMap::new(),
             current: None,
             authoring: AuthoringService::default(),
+            runtime: runtime::RuntimeState::default(),
         })
     }
 
@@ -298,6 +303,9 @@ impl LifecycleService {
         &mut self,
         request: CreateProjectRequest,
     ) -> Result<CreationResult, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         validate_title(&request.title)?;
         validate_folder_name(&request.folder_name)?;
         let resolution = Resolution {
@@ -407,6 +415,9 @@ impl LifecycleService {
     }
 
     pub fn close(&mut self) -> Result<(), LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -414,6 +425,7 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
+        self.runtime = runtime::RuntimeState::default();
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
@@ -427,6 +439,9 @@ impl LifecycleService {
         &mut self,
         mut inspected: InspectedProject,
     ) -> Result<OpenProject, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -460,6 +475,7 @@ impl LifecycleService {
             self.authoring.unregister_project(&authority);
             return Err(error);
         }
+        self.runtime = runtime::RuntimeState::default();
         let activated = inspected.project.clone();
         let previous = self
             .current
@@ -586,6 +602,13 @@ impl LifecycleService {
         self.authoring
             .repair_asset_compatibility(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn flow_workspace(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .flow_workspace(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
     }
 
     pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
@@ -1872,7 +1895,7 @@ fn promote_no_replace(
 mod tests {
     use super::*;
 
-    fn make_openable_project(root: &Path, title: &str) {
+    pub(super) fn make_openable_project(root: &Path, title: &str) {
         let folder = root.file_name().unwrap().to_str().unwrap();
         fs::create_dir_all(root.join("game/definitions")).unwrap();
         fs::create_dir_all(root.join("game/chapters/chapter_01")).unwrap();
@@ -1936,7 +1959,7 @@ mod tests {
             .unwrap()
     }
 
-    fn closeout_ipc(
+    pub(super) fn closeout_ipc(
         service: &mut LifecycleService,
         operation: &str,
         payload: serde_json::Value,
@@ -3804,6 +3827,7 @@ mod tests {
         let accepted_before_source = fs::read_to_string(&source_file).unwrap();
         let opened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: Some(0),
                 selection_end: Some(0),
@@ -3924,6 +3948,7 @@ mod tests {
         assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
         let reopened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: None,
                 selection_end: None,
@@ -4023,4 +4048,76 @@ mod tests {
         println!("phase-1d-target-gate: passed");
         println!("phase-1d-corrective-target-gate: passed");
     }
+    #[test]
+    fn flow_literal_ipc_edits_destination_creates_scene_and_reopens_without_new_write_authority() {
+        use serde_json::json;
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("flow-project");
+        make_openable_project(&root, "Flow fixture");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let session = opened.session_id;
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId": session}));
+        assert_eq!(graph["ok"], true, "{graph}");
+        for payload in [
+            json!({"sessionId":"stale"}),
+            json!({"sessionId":session,"unexpected":true}),
+            json!({}),
+        ] {
+            assert_eq!(
+                closeout_ipc(&mut service, "flow.list", payload)["ok"],
+                false
+            );
+        }
+        let model =
+            closeout_ipc(&mut service, "scene.list", json!({"sessionId":session}))["value"].clone();
+        let entry = &model["scenes"][0];
+        let source_path = entry["sourcePath"].as_str().unwrap().to_owned();
+        let before = fs::read_to_string(root.join(&source_path)).unwrap();
+        let updated = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"insertBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"beforeBeatId":null,
+                "beat":{"type":"choice","options":[{"text":"Again","destinationSceneId":entry["id"]}]}}}),
+        );
+        assert_eq!(updated["ok"], true, "{updated}");
+        let model = &updated["value"];
+        let entry = &model["scenes"][0];
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        let edge = &graph["value"]["edges"][0];
+        assert_eq!(edge["destination"]["sceneId"], entry["id"]);
+        assert_eq!(edge["editable"], true);
+        let created = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"createSceneFromChoice","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"choiceBeatId":edge["beatId"],"optionText":"New destination","chapterId":entry["chapterId"],"displayName":"Destination"}}),
+        );
+        assert_eq!(created["ok"], true, "{created}");
+        let accepted = fs::read_to_string(root.join(&source_path)).unwrap();
+        assert!(accepted.contains("New destination"));
+        assert!(accepted.starts_with(before.split("    return").next().unwrap()));
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        assert_eq!(graph["value"]["edges"].as_array().unwrap().len(), 3);
+        service.close().unwrap();
+        drop(service);
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let graph = closeout_ipc(
+            &mut service,
+            "flow.list",
+            json!({"sessionId":opened.session_id}),
+        );
+        assert_eq!(graph["value"]["nodes"].as_array().unwrap().len(), 2);
+        assert_eq!(
+            fs::read_to_string(root.join(&source_path)).unwrap(),
+            accepted
+        );
+    }
 }
+
+#[cfg(test)]
+mod runtime_tests;

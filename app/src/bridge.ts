@@ -12,3 +12,6 @@ export async function requestCore<T>(
   }
   return response as CoreResponse<T>;
 }
+
+/** Desktop verifies the project is already closed before allowing application exit. */
+export async function completeApplicationClose(): Promise<void> { await invoke("complete_application_close"); }

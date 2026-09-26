@@ -1,3 +1,4 @@
+pub(crate) mod runtime;
 use bzip2::read::BzDecoder;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -353,7 +354,7 @@ impl RenpyAdapter {
     }
 }
 
-fn inspect_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
+pub(crate) fn inspect_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
     let selected = fs::symlink_metadata(path).map_err(|_| RenpyError::InvalidSdk)?;
     if !selected.is_dir() || crate::transaction::is_link_or_reparse(&selected) {
         return Err(RenpyError::InvalidSdk);
@@ -1352,6 +1353,7 @@ fn sha256_file(path: &Path) -> Result<String, RenpyError> {
     let mut digest = Sha256::new();
     let mut buffer = [0_u8; 1024 * 1024];
     loop {
+        crate::runtime_work::check().map_err(|_| RenpyError::Io)?;
         let count = file.read(&mut buffer).map_err(|_| RenpyError::Io)?;
         if count == 0 {
             break;

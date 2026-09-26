@@ -1,4 +1,7 @@
-import { requestCore as desktopRequestCore } from "./bridge.ts";
+import { RequestLane } from "./request-lane.ts";
+import { RuntimeWorkspace } from "./runtime-ui.ts";
+import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
+import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   focusSceneDraft,
   hasSceneDraft,
@@ -33,9 +36,9 @@ interface Asset { id: string; kind: AssetKind; displayName: string; relativePath
 interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
-type ProjectSurface = "story" | "source" | "characters" | "assets" | "variables";
+type ProjectSurface = "story" | "source" | "branches" | "characters" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
-interface SceneTarget { readonly sceneId: string; readonly beatId: string }
+interface SceneTarget { readonly sceneId: string; readonly beatId: string; readonly expectedSourceRevision?: string }
 type ProjectTarget = SourceTarget | SceneTarget;
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
@@ -55,16 +58,19 @@ let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
 let disposeSceneView: (() => void) | undefined;
+let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
 let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
+let runtimeWorkspace: RuntimeWorkspace | undefined;
 
 declare global {
   interface Window {
     __loomlightScaffoldSmokeMode?: boolean;
     __loomlightInstallSmokeRequester?: (requester: typeof desktopRequestCore) => () => void;
     __loomlightReadSaveTrace?: () => readonly string[];
+    __loomlightRequestApplicationClose?: () => void;
   }
 }
 
@@ -97,6 +103,9 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
+  disposeBranchesView?.();
+  disposeBranchesView = undefined;
   disposeSceneView?.();
   disposeSceneView = undefined;
   disposeSourceView?.();
@@ -202,8 +211,19 @@ function button(label: string, className = "button secondary"): HTMLButtonElemen
 function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
   const status = document.querySelector<HTMLElement>("#app-status"); if (status) { status.textContent = message; status.dataset.kind = kind; }
 }
+const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
-  const response = await coreRequester<T>(operation, payload); if (!response.ok) throw new Error(response.error.message); return response.value;
+  const capturedView = viewGeneration;
+  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "flow.list", "runtime.resolveDiagnostic"].includes(operation);
+  for (let attempt = 0; ; attempt += 1) {
+    const requester = coreRequester;
+    const response = await requestLane.run(operation, () => requester<T>(operation, payload));
+    if (response.ok) return response.value;
+    // The host has not checked out the service for this refusal. Retry only reads;
+    // writes, trust and process starts are never replayed after an ambiguous result.
+    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw new Error(response.error.message);
+    await new Promise(resolve => setTimeout(resolve,25));
+  }
 }
 async function projectValue<T>(project: OpenProject, operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");
@@ -329,8 +349,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
   sidebar.append(projectName, sectionLabel);
-  (["story", "source", "characters", "assets", "variables"] as const).forEach((name) => {
-    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", characters: "Characters", assets: "Assets", variables: "Variables" };
+  (["story", "source", "branches", "characters", "assets", "variables"] as const).forEach((name) => {
+    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
     if (surface === name) nav.ariaCurrent = "page";
     nav.addEventListener("click", () => {
@@ -341,10 +361,30 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   });
   const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story" || surface === "source") sidebar.append(tree);
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
-  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : "supporting-workspace";
-  layout.append(sidebar, workspace); shell(layout); setStatus("Checking saved state…");
+  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : "supporting-workspace";
+  layout.append(sidebar, workspace); shell(layout);
+  runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
+    request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
+    current: () => currentProject?.sessionId === project.sessionId,
+    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), sceneRoot: root, current: () => capturedGeneration === viewGeneration }; },
+    coordinate: task => runAuthoringOperation(project, runtimeWorkspace!, task),
+    navigate: target => requestProjectNavigation(project, "source", target),
+    refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
+  });
+  document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
+  document.querySelector(".app-shell")?.append(runtimeWorkspace.panel);
+  setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
+  else if (surface === "branches") {
+    disposeBranchesView = renderBranches(workspace, {
+      load: () => projectValue<FlowWorkspace>(project, "flow.list"),
+      source: (location) => { void requestProjectNavigation(project, "source", location ? { path: location.path, byteStart: location.byteStart, byteEnd: location.byteEnd, expectedRevision: location.revision } : undefined); },
+      scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: node.location?.revision }); },
+      status: setStatus,
+    });
+    void refreshPersistenceStatus(project, generation);
+  }
   else void renderAuthoringSurface(workspace, project, surface, generation);
 }
 
@@ -435,6 +475,14 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     }
     let model = await projectValue<SceneWorkspace>(project, "scene.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
+    if (target?.expectedSourceRevision) {
+      const scene = model.scenes.find((item) => item.id === target.sceneId);
+      if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !scene.beats.some((beat) => beat.id === target.beatId))) {
+        setStatus("The mapped origin changed. Return to Branches and refresh the selection.", "error");
+        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); workspace.append(back);
+        return;
+      }
+    }
     if (target && model.lastOpen.sceneId !== target.sceneId) {
       model = await projectValue<SceneWorkspace>(project, "scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type: "selectScene", sceneId: target.sceneId } });
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
@@ -494,6 +542,8 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
   if (document.querySelector(".leave-source-dialog")) return;
+  try { if (runtimeWorkspace && !await runtimeWorkspace.beforeClose()) return; }
+  catch (error) { setStatus(message(error, "Runtime cleanup failed"), "error"); return; }
   const controller = currentSourceController(project);
   let transition: Awaited<ReturnType<SourceWorkspaceController["prepareTransition"]>>;
   let inventory: SourceInventory;
@@ -557,7 +607,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
   }
 }
 
-async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source">, generation: number): Promise<void> {
+async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number): Promise<void> {
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
   workspace.append(eyebrow, title);
@@ -723,6 +773,7 @@ function installListeners(): void {
 }
 
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
+  runtimeWorkspace?.dispose(); runtimeWorkspace = undefined;
   coreRequester = requester;
   saveCommandTrace.length = 0;
   viewGeneration = 0;
@@ -748,3 +799,11 @@ export function requestApplicationExit(closeWindow: () => Promise<void>): boolea
   void requestProjectClose(project, closeWindow);
   return true;
 }
+
+// Native close/quit enters the same runtime cleanup and Source leave flow.
+window.__loomlightRequestApplicationClose = () => {
+  if (!allowSceneNavigation() || hasBlockingModal()) return;
+  const project=currentProject;
+  const finish=async () => { await showWelcome(); await completeApplicationClose(); };
+  void (project ? requestProjectClose(project,finish) : completeApplicationClose()).catch(error=>setStatus(message(error,"Application close could not finish"),"error"));
+};
