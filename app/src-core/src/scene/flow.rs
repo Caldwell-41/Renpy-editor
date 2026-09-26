@@ -120,9 +120,22 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<FlowWorkspace, SceneError> {
+        let profile_enabled = std::env::var("LOOMLIGHT_PROFILE_FLOW").as_deref() == Ok("1");
+        let profile_started = std::time::Instant::now();
+        let mut profile_last = profile_started;
+        let mut profile_stages = Vec::new();
+        let mut profile_mark = |name: &'static str| {
+            if profile_enabled {
+                let now = std::time::Instant::now();
+                profile_stages.push((name, now.duration_since(profile_last)));
+                profile_last = now;
+            }
+        };
         self.source_refresh_project(project, project_id)
             .map_err(|_| SceneError::SourceConflict)?;
+        profile_mark("source_refresh");
         let loaded = self.load(project, project_id)?;
+        profile_mark("load_metadata");
         let mut result = FlowWorkspace {
             revision: String::new(),
             entry_scene_id: loaded
@@ -160,6 +173,7 @@ impl AuthoringService {
                 return Ok(result);
             }
         };
+        profile_mark("inventory");
         if paths.len() > MAX_FILES {
             return Ok(over_limit(result));
         }
@@ -173,6 +187,7 @@ impl AuthoringService {
             .transactions
             .observation_snapshots(project, &paths, MAX_FILE_BYTES as usize, MAX_BYTES)
             .map_err(diagnostic_error)?;
+        profile_mark("snapshot_read_hash");
         for (path, snapshot) in paths.iter().zip(snapshots) {
             let (bytes, revision) = match snapshot {
                 Ok(value) => value,
@@ -191,6 +206,7 @@ impl AuthoringService {
             collect_labels(path, &bytes, &revision.sha256, &mut inventory);
             files.insert(path.clone(), (bytes, revision));
         }
+        profile_mark("label_inventory");
         for scene in &loaded.project.scenes {
             let file = files.get(&scene.source_path);
             let stored = loaded
@@ -217,6 +233,7 @@ impl AuthoringService {
                 stale,
             });
         }
+        profile_mark("node_projection");
         // Runnable entry comes from the unique accepted `start` declaration,
         // never from Chapter order or stale convenience metadata.
         result.entry_scene_id.clear();
@@ -298,6 +315,7 @@ impl AuthoringService {
             result.partial |= partial;
             result.edges.extend(edges);
         }
+        profile_mark("edge_projection");
         // Observation only; the UI never acquires a write precondition from this.
         let observed = files
             .iter()
@@ -310,6 +328,7 @@ impl AuthoringService {
         {
             result.stale = true;
         }
+        profile_mark("freshness_read_hash");
         if self
             .transactions
             .inventory_files_bounded(project, "game", 8192)
@@ -324,6 +343,7 @@ impl AuthoringService {
         {
             result.stale = true;
         }
+        profile_mark("inventory_recheck");
         let mut reader = self
             .transactions
             .observation_reader(project)
@@ -342,6 +362,7 @@ impl AuthoringService {
                 result.stale = true;
             }
         }
+        profile_mark("metadata_recheck");
         result.partial |= !inventory.complete || result.stale;
         let mut hash = Sha256::new();
         hash.update(loaded.project_revision.sha256.as_bytes());
@@ -360,6 +381,21 @@ impl AuthoringService {
         } else if result.partial {
             result.notice =
                 "Partial flow: custom, dynamic or unmapped source remains unknown.".into();
+        }
+        profile_mark("finalize");
+        if profile_enabled {
+            let stages = profile_stages
+                .iter()
+                .map(|(name, elapsed)| format!("{name}={:.3}", elapsed.as_secs_f64() * 1000.0))
+                .collect::<Vec<_>>()
+                .join(";");
+            eprintln!(
+                "phase-1g-flow-profile: total_ms={:.3};files={};scenes={};edges={};{stages}",
+                profile_started.elapsed().as_secs_f64() * 1000.0,
+                files.len(),
+                result.nodes.len(),
+                result.edges.len()
+            );
         }
         Ok(result)
     }
