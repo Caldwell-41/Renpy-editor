@@ -1,6 +1,27 @@
 # Current status
 
-**Updated:** 2026-09-26 (G1-V1/V2 follow-up published; replacement verification pending).
+**Updated:** 2026-09-26 (replacement failed Windows G1-V1; bounded profiler published).
+**Current checkpoint:** Phase 1G.2b G1-V1 Windows profiling, **blocked on one manual workflow dispatch**.
+
+Replacement production run [36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651),
+attempt 1 on `ec6a76adbf78bc09baf7daba067d70eedbc38699`, completed **FAIL**.
+macOS ARM64 passed the complete production job, including isolated accepted projection
+**66.483 ms**, rendered pan p95 **58 ms**, SDK/runtime/package and all five packaged
+real-service cases. Windows passed core **176/0/7** but isolated projection remained
+**616.686 ms >250 ms** (initial 646.337 ms, warm 639.328 ms); downstream Windows
+package/runtime gates were therefore skipped. G1 remains failed/incomplete; no final
+1G acceptance or merge is claimed.
+
+The retained compositor correction appears effective for G1-V2. The remaining G1-V1
+problem is platform-specific projection cost. Env-gated stage instrumentation and a
+manual-only Windows/macOS isolated profiling workflow are published through
+`94481e0e83442e63db3ac43810d29326bfeb523b`. It records source refresh/load,
+inventory, snapshot read/hash, parsing/projection, freshness read/hash and final
+rechecks without changing normal behavior, budgets or security authority. Do not
+rerun the full production matrix yet. Dispatch **Phase 1G flow profile** once on
+`feature/phase-1g-branches-runtime`, then use measured Windows stage costs to select
+the smallest correction. See ledger section 15 and HANDOVER.
+
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
