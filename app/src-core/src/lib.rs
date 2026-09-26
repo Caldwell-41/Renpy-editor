@@ -1125,7 +1125,8 @@ mod tests {
     #[test]
     fn configuration_has_one_narrow_main_window_capability() {
         let config = include_str!("../../src-tauri/tauri.conf.json");
-        let capability = include_str!("../../src-tauri/capabilities/main.json");
+        let capability: Value =
+            serde_json::from_str(include_str!("../../src-tauri/capabilities/main.json")).unwrap();
         let permission = include_str!("../../src-tauri/permissions/core-request.toml");
         let build = include_str!("../../src-tauri/build.rs");
         assert!(config.contains("connect-src ipc: http://ipc.localhost"));
@@ -1134,14 +1135,18 @@ mod tests {
         assert!(config.contains("base-uri 'none'"));
         assert!(config.contains("form-action 'none'"));
         assert!(config.contains("\"capabilities\": [\"main-local-only\"]"));
-        assert!(capability.contains("\"webviews\": [\"main\"]"));
-        assert!(!capability.contains("\"windows\""));
-        assert!(capability.contains("allow-loomlight-core"));
+        assert_eq!(capability["identifier"], "main-local-only");
+        assert_eq!(capability["local"], true);
+        assert_eq!(capability["webviews"], json!(["main"]));
+        assert!(capability.get("windows").is_none());
+        assert!(capability.get("remote").is_none());
+        assert_eq!(
+            capability["permissions"],
+            json!(["allow-loomlight-core", "allow-application-close"])
+        );
         assert!(permission.contains("commands.allow = [\"core_request\"]"));
-        assert!(build.contains("commands(&[\"core_request\"])"));
-        for forbidden in ["shell:", "fs:", "http:", "opener:", "process:"] {
-            assert!(!capability.contains(forbidden));
-        }
+        assert!(permission.contains("commands.allow = [\"complete_application_close\"]"));
+        assert!(build.contains("commands(&[\"core_request\", \"complete_application_close\"])"));
     }
 
     #[test]

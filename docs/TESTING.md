@@ -588,6 +588,15 @@ and JSON, exact Git inputs/target/executable digest, core/SDK logs and package a
 when requested. Both supported targets must pass on the coherent candidate. No
 native-keyboard or human acceptance claim is inferred from synthetic DOM events.
 
+The production workflow measures the unchanged real-service 500-Scene/2,000-edge
+fixture separately from the full core suite. It sets `LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`
+and runs the exact `scene::tests::flow_budget_fixture_500_scenes_2000_edges` test in
+release mode. Initial projection must remain below 2 s and refresh after an accepted
+Scene edit below 250 ms. `runtime-flow-budget.log` retains timings, assertion output
+and the required `phase-1g-flow-budget-gate: passed` marker; `runtime-flow.json` feeds
+the existing rendered checks. Full-suite timings are supplemental and do not silently
+pass an exceeded budget. Failure blocks later package steps and keeps G1 open.
+
 R1's old automatic branch trigger is retired into this combined final gate; explicit
 manual R1 dispatch remains available for bounded future corrections. Final production
 verification is manually dispatched once on the implementation branch. Main's existing

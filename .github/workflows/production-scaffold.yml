@@ -104,7 +104,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          LOOMLIGHT_FLOW_EVIDENCE="$RUNNER_TEMP/runtime-flow.json" cargo test -p loomlight-core --release --locked -- --nocapture \
+          cargo test -p loomlight-core --release --locked -- --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'recent_crash_checkpoints_restart_from_a_complete_store' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
@@ -112,6 +112,16 @@ jobs:
           grep 'parent_substitution_after_validation_cannot_redirect_stage_creation' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'project_open_metadata_substitution_is_never_followed' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
+      - name: Isolated real-service Branches projection budgets
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-flow-budget.log"
+          grep 'phase-1g-flow-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
       - name: Runtime and Branches rendered focus, resize, and budgets
         shell: bash
         env:
@@ -294,6 +304,7 @@ jobs:
             ${{ runner.temp }}/runtime-ui-*.log
             ${{ runner.temp }}/runtime-ui-*.json
             ${{ runner.temp }}/runtime-flow.json
+            ${{ runner.temp }}/runtime-flow-budget.log
             ${{ runner.temp }}/runtime-branches-browser.log
             ${{ runner.temp }}/runtime-*.png
           if-no-files-found: warn

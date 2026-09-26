@@ -4612,6 +4612,23 @@ mod tests {
         if let Ok(path) = std::env::var("LOOMLIGHT_FLOW_EVIDENCE") {
             fs::write(path, serde_json::to_vec(&graph).unwrap()).unwrap();
         }
+        // The full suite also checks this fixture's behavior, but target latency
+        // gates run it alone so concurrent crash/I/O tests do not own the timing.
+        if std::env::var("LOOMLIGHT_ENFORCE_FLOW_BUDGETS").as_deref() == Ok("1") {
+            assert!(
+                !cfg!(debug_assertions),
+                "G1 target budgets require the release profile"
+            );
+            assert!(
+                initial < std::time::Duration::from_secs(2),
+                "G1 initial projection {initial:?} exceeds 2 s"
+            );
+            assert!(
+                accepted_update < std::time::Duration::from_millis(250),
+                "G1 accepted projection update {accepted_update:?} exceeds 250 ms"
+            );
+            println!("phase-1g-flow-budget-gate: passed");
+        }
         let mut excess = template;
         excess.id = uuid::Uuid::new_v4().to_string();
         excess.technical_label = "excess".into();

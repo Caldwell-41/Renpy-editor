@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress`. User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `blocked` (G1-V1 projection latency; final target verification incomplete). User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `blocked` (G1-V1) | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -1880,3 +1880,131 @@ G1/R1/R2 on this final candidate. Failure/skipped/unavailable evidence is not a 
 Next bounded action: inspect that run/attempt and complete its artifact/source assessment;
 resolve only evidenced 1G.2b findings if necessary, publish the final checkpoint record,
 and stop again before physical testing, acceptance or merge. No next checkpoint begins.
+
+### Resumed exact-run assessment and bounded correction — 2026-09-26
+
+The user selected outstanding 1G.2b agent verification only, starting at `13311e4`.
+Fresh refs and draft/open PR #17 still match that entry; main remains `924619d`.
+No newer or pending production verification exists. No physical testing, acceptance,
+merge, optional Git or Phase 2 is authorised.
+
+Run `36194188820`, attempt 1, is completed **FAIL**, on candidate `931684d`, tree
+`b6432353974e8a7f8818a8e8f91fadca1b29ccb9`. Both full job logs and retained evidence
+were inspected. Both targets fail the same capability assertion before packaging.
+R2-C1: the Rust configuration test assumes single-line JSON and the old one-command
+build registration, although 1G.2b added the guarded close command and the frontend
+configuration test already reflects it. Correct only that test: parse capability JSON,
+require the exact local main-WebView/two-permission allowlist, reject remote/window
+scope, and check both existing command registrations. No production permission change.
+
+G1-V1: the real-service fixture reports budget overruns while returning success; it
+currently asserts graph correctness but not elapsed limits. Preserve the original
+measurements below. A bounded verification correction will run the same unchanged
+500-Scene/2,000-edge fixture separately in release mode, without concurrent core tests,
+and enforce the existing 2 s initial / 250 ms accepted-update limits. This is a new
+measurement, not grounds to erase the failed observations or raise a limit. Ordinary
+full-suite timings remain supplemental. The implementing agent owns this check on
+Windows x64/macOS ARM64; retain `runtime-flow-budget.log` independently and use its
+real-service graph JSON in the existing rendered checks. Any isolated overrun leaves
+G1 open and requires a bounded performance finding, not a green-status inference.
+
+Local correction checks: exact Rust capability test, isolated release budget fixture,
+Rust formatting, existing frontend protocol suite, repository structure/link/privacy
+validation and whitespace. Only after these pass may one justified replacement of the
+failed production run be dispatched on the published corrected candidate. Preserve
+manual-resume identity and stop active polling if it remains pending.
+
+#### Failed run identity, artifact integrity and missing inputs
+
+[Production run 36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820)
+was manually dispatched once at `2026-09-25T21:56:19Z` and completed at
+`2026-09-25T22:02:16Z`, attempt **1**, on full candidate
+`931684dd59ce319bd98f0028df98a3023ced7740`. Checkout lines in all three complete
+job logs agree with the run and artifact metadata. Preflight job `108266135203`
+passed. Target jobs `108266324216` (Windows x64) and `108266324332` (macOS ARM64)
+failed with exit 101. No later pending production run was found on resumption.
+
+Both evidence ZIPs were downloaded and independently checked against GitHub's exact
+size and SHA-256; every ZIP entry passed CRC and path checks:
+
+| Target / artifact | Bytes | Verified ZIP SHA-256 |
+| --- | ---: | --- |
+| Windows x64 / `10889700592` | 118782 | `b4c62ea58c48bb698b3074205de304a8a1e013e6f8957af308b43eaff625a19a` |
+| macOS ARM64 / `10889595467` | 118746 | `9d68970498d0c6354a2468776afab92f9a1d57d1049b56bd0527557f9a98ed45` |
+
+Each ZIP contains only `phase-1b-transactions.log` and `runtime-flow.json`. The latter
+contains 500 real-service nodes and 2,000 edges, with partial/stale/over-limit all false.
+No requested package artifact, executable, `runtime-ui-inputs.json`, five runtime UI
+JSON/log pairs, explicit SDK logs, renderer reports or legacy boundary report exists.
+Their owning steps were **SKIPPED after core failure**. The candidate has 93 tracked
+application/workflow inputs, but **0/93 per-target input hashes can be verified**:
+there is no input manifest to compare with Git blob bytes. Executable hash verification
+is likewise unavailable. A verified checkout or ZIP digest does not replace those
+missing attestations. Do not manufacture hashes from the local checkout and label
+them target evidence.
+
+| Existing run gate | Observed result |
+| --- | --- |
+| Preflight | PASS: structure/link/privacy, frontend typecheck and 58 tests, Source browser/build and Rust formatting |
+| Windows full release core | FAIL: 171 passed / 1 failed / 7 ignored, 144.97 s; the two official-SDK wrappers returned without SDK, leaving 169 substantive ordinary passes |
+| macOS full release core | FAIL: 178 passed / 1 failed / 7 ignored, 39.47 s; the same two wrapper skips leave 176 substantive ordinary passes |
+| Ignored entry points | Five subprocess workers plus two explicit runtime SDK gates; not seven extra passes |
+| Source production browser on each target | PASS: faithful Save and selection/Apply Both; legacy red assertion remains the expected regression control |
+| Explicit SDK lifecycle/download, R1 and R2 | SKIPPED; no final-candidate official-SDK gate executed |
+| Renderer focus/resize/Branches browser budgets | SKIPPED |
+| Desktop/package and five real-service UI cases | SKIPPED |
+| Legacy packaged boundary, package scan/inventory/upload | SKIPPED |
+
+CI used Node 24.19.0, npm 11.9.0 and Rust 1.90.0 on `windows-2025` x64 and
+`macos-26` ARM64. G1 and runtime ordinary behavioral regressions passed within the
+failed core suites, including flow boundaries/history/navigation and runtime receipt,
+cancel, service switch/Stop/shutdown/descendant tests. These retain their actual layer;
+they do not substitute for the skipped explicit SDK or packaged cases.
+
+#### G1/R1/R2 assessment and remaining blocker
+
+| Capability | Assessment on `931684d` |
+| --- | --- |
+| G1 | **FAIL / incomplete**: shared-service behavior passed, but the recorded budget overruns below fail the declared performance targets. Rendered and packaged final-source evidence is absent. Earlier 1G.1 evidence remains on its recorded candidate. |
+| R1 | **Final-source regression incomplete**: ordinary process/service regressions passed; explicit pinned-SDK regression was skipped. Preserve R1-B1/B2 closure on `c12d953`, run `36148942247` attempt 1; do not transfer it to this candidate. |
+| R2 | **BLOCKED**: the core capability assertion failed and all five packaged real-service cases were skipped. Local development cases in this ledger remain supplemental; no final R2 pass is claimed. |
+
+| Real-service workload / release measurement | Initial | Warm unchanged | Accepted update | Assessment |
+| --- | ---: | ---: | ---: | --- |
+| Failed run, Windows full-suite measurement | 2673.049 ms | 2844.572 ms | 2843.304 ms | Initial > 2 s and update > 250 ms |
+| Failed run, macOS full-suite measurement | 765.481 ms | 928.671 ms | 722.015 ms | Update > 250 ms |
+| Resumed local macOS isolated core test | 870.770 ms | 873.297 ms | 864.470 ms | Update > 250 ms; enforced gate exits 101 |
+
+Local reproduction uses the same real-service 500-Scene/2,000-edge topology, accepted
+Choice-caption transaction and pinned Rust 1.90.0 release build. No other core test ran
+concurrently. It rules out treating full-suite contention as an adequate explanation;
+it does not establish a particular production bottleneck. The initial below-2-second
+local result does not close Windows initial latency or rendered layout. No performance
+limit or workload was relaxed. The added workflow step retains its own log and requires
+a success marker; full-suite logs now also retain stderr so assertion failures survive
+artifact upload.
+
+**R2-C1 is corrected locally:** exact configuration test 1 passed / 0 failed / 0 ignored,
+185 filtered; capability JSON is tested semantically with exact permissions, local-only
+scope and both registered commands. The corrected test changes no production capability.
+Frontend typecheck and **58 tests passed**, with no failures/cancellations/skips; Rust
+formatting, repository structure/link/privacy validation and whitespace passed. Local
+Node 26.8.1/npm 11.19.0 are development tooling, not CI's pinned Node/npm. An initial
+short-name invocation with `--exact` selected zero tests; it is not counted as evidence.
+
+**G1-V1 remains open.** Its now-enforced local budget test is **0 passed / 1 failed**,
+185 filtered, 4.06 s; failure is the accepted-update assertion. Correcting the stale
+configuration check cannot resolve this performance finding. The safe next scope is
+profiling and a bounded correction of projection refresh while preserving current
+source identity, external invalidation and bounded path/read checks. A broader cache
+or consistency redesign or budget change requires an explicit decision; none is made
+in this verification continuation.
+
+Checkpoint state is **blocked**, not review_ready or accepted. No replacement matrix
+was dispatched because a required local prerequisite is already red. There is no
+pending verification to duplicate and no watcher or local verification process remains.
+Publish these test/workflow corrections and this assessment on the existing branch,
+then update the live handover with the resulting correction candidate. Next action:
+resolve only G1-V1 under unchanged limits, then run one justified coherent replacement
+production matrix and inspect both targets' complete evidence before final assessment.
+Physical testing, acceptance, merge, optional Git and Phase 2 remain outside authority.
