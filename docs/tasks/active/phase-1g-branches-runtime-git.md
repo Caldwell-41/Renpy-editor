@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress` (G1-V1 corrected locally; replacement target verification outstanding). User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `awaiting_ci` (G1-V1 corrected locally; exact replacement run pending). User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` (replacement verification) | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `awaiting_ci` (replacement verification) | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -2102,7 +2102,7 @@ registration review correction. Commands run from `app/` with pinned Rust 1.90.0
 | `node tests/branches.browser.mjs` with that flow JSON | PASS: Chrome 154.0.8037.57, initial layout 62.3 ms, pan/frame p95 33.1 ms, 640px resize, zero page errors. Supplemental synthetic-input browser layer. |
 | `node tests/runtime-ui.browser.mjs` | PASS: 1100/640px, focus pass, no overflow/page errors; injected requester, not packaged IPC. |
 | Lossless Source Python regression / benchmark | PASS: 26 tests; Python 3.12.14, 620,000 bytes/40,000 nodes, seven-sample parse median 107.78 ms. |
-| Rust formatting, repository structure/link/privacy and whitespace | PASS; 258 tracked repository files before staging the new reader module. |
+| Rust formatting, repository structure/link/privacy and whitespace | PASS; validator reported 258 repository files. |
 | Unchanged Python SDK spike | 23 passed / 1 repeated-signal cleanup error; retained separately above, not counted as a pass or final SDK evidence. |
 
 Self-review checked the full implementation diff, source/metadata final rechecks,
@@ -2114,3 +2114,44 @@ plus the prior `6c7efad` capability-test/budget-gate correction. It must use pac
 upload, after publication and a fresh no-pending-run check. No R1-only run, retry,
 workflow change or main integration is authorised here. If pending, record exact
 run/attempt/SHA and stop under the repository manual-resume policy.
+
+
+#### Published correction and exact replacement-run assessment
+
+Correction candidate **`f37635e0d2acce61022f9bf4e21c923499fcf786`**, tree
+**`5590e513e8163a9b0db7267ac67a85e61a700f39`**, is committed and published on the
+existing branch; `ls-remote` and draft/open PR #17 agree. Fresh pre-dispatch inspection
+found no pending production or R1-only run. Exactly one manual production dispatch
+requested `upload_packages=true`; no workflow trigger was changed and no retry or
+second verification was launched.
+
+[Replacement run 36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
+**attempt 1**, was created at **2026-09-26T01:44:25Z** for that exact candidate and
+branch. The dispatch returned its run URL. The immediately following list endpoint
+had not indexed it yet; the exact-run endpoint verified the SHA/attempt, so no retry
+was warranted. At the bounded inspection the run was **queued**, conclusion null;
+Preflight job **`108312714429`** was queued. No target jobs or complete logs existed,
+and the artifact endpoint reported **0 artifacts**.
+
+| Capability on `f37635e` | Available evidence and assessment |
+| --- | --- |
+| G1 | G1-V1 corrected locally: isolated service budget, behavioral/safety regressions and supplemental rendered budgets pass. Supported Windows/macOS isolated/rendered and real packaged graph/edit/reopen proof **pending**. No final G1 pass. |
+| R1 | Local ordinary production-core/process regressions pass with explicit SDK skips identified. Final-source supported-target SDK/process regression **pending**; earlier R1 closure stays on `c12d953` and its verified run. |
+| R2 | Frontend/Source and supplemental browser evidence passes locally. Both targets' five real-service packaged cases, diagnostic/SDK evidence and legacy package smoke **pending**. No final R2 pass. |
+
+There are **94** tracked candidate application/workflow inputs (the added reader
+module increases the previous 93). With no target artifact, **0/94 input hashes per
+target**, no ZIP digest/size/CRC and no package/executable digest can yet be verified.
+Local Git bytes and run identity are not substituted for target attestations.
+The previous failed run `36194188820` and its exact failed/superseded evidence remain
+unchanged. The supplemental Phase 0 Python cleanup error remains recorded above.
+
+State: **awaiting_ci, manual resume**. No watcher/automatic continuation is configured
+or claimed, no local verification remains running, and no repeated model polling is
+performed. This follow-up publishes only status/assessment/ledger/handover; it does
+not request another package matrix. Next bounded action is to inspect this existing
+run when complete, verify both full logs and all available artifact/input/executable,
+SDK, G1 and five-case R2 evidence, then publish an honest G1/R1/R2 assessment. If still
+pending, retain this identity and stop. Stop before physical testing, acceptance,
+merge, optional Git or Phase 2. A failed target gate requires a bounded finding;
+this pending handover does not authorise a duplicate/retry or a wider redesign.
