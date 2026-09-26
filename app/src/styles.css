@@ -273,7 +273,7 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .branches-toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
 .branches-notice { color: var(--text-secondary); overflow-wrap: anywhere; }
 .branches-viewport { height: clamp(240px, 48vh, 620px); overflow: hidden; position: relative; border: 1px solid var(--border-normal); background: var(--surface-app); touch-action: none; }
-.branches-canvas { transform-origin: 0 0; position: relative; }
+.branches-canvas { transform-origin: 0 0; position: relative; will-change: transform; }
 .branches-lines { position: absolute; pointer-events: none; overflow: visible; }
 .branches-lines path { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; opacity: .55; }
 .branch-node { position: absolute; width: 200px; min-height: 60px; padding: 10px; overflow-wrap: anywhere; border: 1px solid var(--border-normal); background: var(--surface-panel); color: var(--text-primary); border-radius: 4px; text-align: left; }

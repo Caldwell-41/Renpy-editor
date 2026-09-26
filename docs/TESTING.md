@@ -602,7 +602,13 @@ file identity replacement, deletion, oversize rejection and cancellation. Unix c
 replace the retained parent/root and substitute symlinks; Windows proves retained
 parent namespace pinning. Existing flow inventory/history/external-invalidation and
 Source draft/caret tests remain required. Directory-handle reuse is limited to one
-observation and never permits reuse of source content or revision hashes.
+observation and never permits reuse of source content or revision hashes. Batched
+read tests prove stable result order, a shared aggregate byte budget, fresh final
+revisions, cancellation and inheritance of the original deadline. Empty, small,
+chunk-boundary and growing-file revision tests retain exact digest/length semantics.
+The rendered gate keeps the full 500/2,000 workload, 30 samples and unchanged limits;
+it emits the measurements even when a budget assertion fails. Compositor-backed
+panning retains every node/edge and the existing navigation/selection controls.
 
 R1's old automatic branch trigger is retired into this combined final gate; explicit
 manual R1 dispatch remains available for bounded future corrections. Final production

@@ -1592,7 +1592,10 @@ fn hash_revision_reader(
         return Err(ErrorCode::InvalidProposal);
     }
     let mut digest = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    // Small source files should not clear a 1 MiB buffer for every recheck.
+    // Keep a growth-detection byte even for empty files and the same maximum
+    // chunk/cancellation interval for large files.
+    let mut buffer = vec![0_u8; expected_len.saturating_add(1).min(1024 * 1024) as usize];
     let mut count = 0_u64;
     loop {
         crate::runtime_work::check()?;

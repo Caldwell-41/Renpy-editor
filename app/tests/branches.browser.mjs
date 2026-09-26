@@ -47,7 +47,7 @@ try {
   await page.setViewportSize({width:640,height:800});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   assert.deepEqual(errors,[]);
+  console.log(JSON.stringify({browser:await browser.version(),layer:`${process.platform} Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input`,nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,panFrameSamplesMs:samples,budgetStatus:timing<2000&&p95<100?"pass":"fail",resize640:"pass",pageErrors:errors}));
   assert.ok(timing<2000,`Initial layout ${timing}ms exceeds 2000ms`);
   assert.ok(p95<100,`Pan/frame p95 ${p95}ms exceeds 100ms`);
-  console.log(JSON.stringify({browser:await browser.version(),layer:`${process.platform} Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input`,nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,resize640:"pass",pageErrors:errors}));
 } finally { await browser?.close(); await server.close(); }

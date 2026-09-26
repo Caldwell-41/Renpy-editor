@@ -1,75 +1,68 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-26. **Repository:** `Caldwell-41/Renpy-editor`.
-**Checkpoint:** Phase 1G.2b agent verification, **awaiting_ci / manual resume**.
+**Checkpoint:** Phase 1G.2b agent verification, **in_progress**.
 **Branch:** `feature/phase-1g-branches-runtime`. **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Resumed entry:** `5b0b443c30c1eb3bf36b9897eb6cab78839a2d79`.
+**Resumed entry:** `9fc24502a7ec22006c5a486c2d98b46c5b979a5f`.
 **Verified main:** `924619def6f624f336032c3ebc8499ccfcc662f0`.
-**Published correction candidate:** `f37635e0d2acce61022f9bf4e21c923499fcf786`.
-**Candidate tree:** `5590e513e8163a9b0db7267ac67a85e61a700f39`.
-This follow-up changes assessment/status/handover only; it is not another test candidate.
+This correction commit contains the reviewed G1-V1/V2 follow-up and local evidence;
+its published candidate will be recorded with the one replacement run.
 
-## Authority and correction
+## Authority and failed-run assessment
 
-The user selected only 1G.2b agent verification: profile/correct G1-V1 under unchanged
-budgets and safety, publish after applicable local gates, then launch one justified
-replacement production run. Read [ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#g1-v1-profiling-and-bounded-correction--2026-09-26)
+The user reported the failed run and authorised review/fix plus another handover.
+Continue only 1G.2b agent verification under unchanged budgets and safety. Read
+[the latest ledger assessment](../tasks/active/phase-1g-branches-runtime-git.md#failed-replacement-review-and-bounded-g1-continuation--2026-09-26)
 and [TESTING](../TESTING.md#phase-1g-testing-ownership-and-cadence).
 Stop before physical testing, acceptance, merge, optional Git or Phase 2.
 
-Profiling attributes about 817 of 839 ms to file acquisition and final rechecks.
-A core-private observation reader reuses only one parent directory handle chain per
-call. It revalidates registration/root/parent on every read, rejects links/reparse
-points, checks lengths/identities around bounded reads, and retains all final source,
-metadata and inventory checks. No persistent content/revision cache or privilege change.
+Run [36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
+**attempt 1**, on `f37635e0d2acce61022f9bf4e21c923499fcf786`, tree
+`5590e513e8163a9b0db7267ac67a85e61a700f39`, completed **FAIL**. Preflight passed;
+Windows job `108312932935` failed isolated refresh **489.453 ms >250 ms**; macOS job
+`108312932845` passed isolated refresh **154.944 ms**, then failed rendered pan/frame
+p95 **120 ms >100 ms**. Both full logs and evidence ZIPs were verified against exact
+size/SHA-256/CRC; details/digests remain in the ledger.
 
-Final local release fixture: **180.470 ms initial / 181.026 ms accepted update**, within
-unchanged 2 s / 250 ms limits, 500 Scenes / 2,000 edges. Required marker present.
-Core **182 passed / 0 failed / 7 ignored** includes two no-archive wrapper skips;
-explicit SDK gates remain target work. Frontend **58**, Source browser/build, graph
-and runtime browser checks, 26 Source spike tests, formatting and repository checks
-pass. Supplemental unchanged Python SDK spike: **23 passed / 1 error** from a repeated
-SIGKILL/EPERM cleanup race; preserved in the ledger, not an SDK pass or scope expansion.
-G1-V1 is corrected locally; supported-target proof remains required.
+Both full core suites passed (Windows 174/macOS 182, each 7 ignored and two no-archive
+wrapper skips), including the corrected capability assertion. macOS runtime browser
+passed. Explicit SDK, packages, all five real-service UI cases and legacy smoke were
+skipped; there is no manifest/executable, so **0/94 input hashes per target** can be
+verified. G1 FAIL/incomplete, R1 final-source regression incomplete, R2 BLOCKED on that
+candidate. Preserve prior R1 closure on `c12d953`/run `36148942247`, attempt 1, and all
+earlier failures under their actual inputs. No final capability/acceptance pass.
 
-## Exact pending run and available assessment
+## Bounded correction and local gates
 
-[Replacement production run 36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
-**attempt 1**, was manually dispatched exactly once with `upload_packages=true`,
-created **2026-09-26T01:44:25Z** on the exact candidate above. Fresh checks before
-dispatch found no pending production/R1 run. Dispatch returned the URL; the exact-run
-endpoint verified SHA/attempt after the list endpoint initially lagged. No retry.
+Large observations use at most four scoped readers, one shared byte allowance,
+unchanged per-open registration/root/parent/leaf safety and final source/metadata/
+inventory checks. Workers inherit the exact cancellation token/deadline and join
+before return. No content/revision cache or persistent worker is introduced. Small
+files use bounded hash buffers; the maximum 1 MiB cancellation interval is unchanged.
+The graph canvas uses compositor-backed transforms to avoid repeated subtree paints;
+all nodes/edges and existing navigation/keyboard/selection remain. Browser measurements
+now survive a budget assertion failure. No workload, assertion, budget or privilege
+was relaxed.
 
-At the bounded inspection: **queued**, conclusion null; Preflight job
-**`108312714429` queued**; no target jobs, complete logs or artifacts. Artifact count
-is **0**. Candidate has **94** application/workflow inputs, but **0/94 per-target
-input hashes** and no ZIP/package/executable hashes can be verified yet. Do not
-substitute local hashes, checkout identity or earlier artifacts for target evidence.
-
-**G1:** corrected local budget and safety/rendered evidence; final target proof pending.
-**R1:** local ordinary core/process pass with SDK skips; final-source target regression pending.
-**R2:** local frontend/browser evidence; all final packaged cases and SDK evidence pending.
-No final capability pass, physical test, acceptance or merge is claimed.
-
-Failed run [36194188820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36194188820),
-attempt 1, on `931684d` remains FAIL with both capability-assertion failures and budget
-overruns. No final package/input hashes existed. R2-C1 was corrected in `6c7efad`;
-that revision also enforced the unchanged isolated budget gate. Preserve earlier R1
-closure on `c12d953`, run `36148942247`, attempt 1, under its actual inputs.
+Final local core **184 passed / 0 failed / 7 ignored** includes two SDK-wrapper skips;
+frontend **58 passed**. Isolated fixture: **92.112 ms initial / 91.395 ms accepted
+update**, required marker present, 500 Scenes/2,000 edges. Rendered initial **67.8 ms**,
+p95 **17.7 ms**, with all 30 samples retained (one 145.9 ms maximum). Source/runtime
+browser, build, formatting and structure/link/privacy/whitespace checks pass. These
+are local development results; target/native package proof remains required.
+The unchanged Phase 0 Python repeated-signal cleanup error stays open in the ledger.
 
 ## Next bounded action
 
-Continue **1G.2b agent verification of existing run `36209430831`, attempt 1 only**.
-Do not duplicate pending verification, dispatch R1-only or retry. If still pending,
-record the unchanged identity and stop. No watcher or automatic continuation is
-configured; no local verification remains running. Follow the repository's manual-
-resume policy, not repeated model polling.
+Publish this material correction, check for pending verification, then dispatch exactly
+one replacement `production-scaffold.yml` with `upload_packages=true` on that candidate.
+Do not rerun the unchanged failed SHA, dispatch R1-only or duplicate pending work.
+Record run/attempt/SHA; if pending, stop under the manual-resume policy. No watcher or
+automatic continuation is configured or claimed.
 
-When complete, verify both full job logs, artifact size/SHA-256/CRC, all **94** recorded
-input hashes against exact candidate Git blob bytes, candidate/tree/target/executable,
-all five runtime UI JSON/log pairs (PASS, no timeout, exit 0, confirmed cleanup),
-explicit SDK markers, isolated/rendered G1 budgets, focus/resize and legacy smoke
-independently. Publish the G1/R1/R2 assessment, ledger and this handover. Missing,
-failed or skipped evidence remains open; a green workflow alone is insufficient.
-Stop before physical testing, acceptance, merge, optional Git or Phase 2. A target
-failure needs a bounded finding; no wider cache redesign or budget change is authorised.
+When complete, verify both full logs, ZIP size/SHA-256/CRC, all 94 manifest input hashes
+against candidate Git blob bytes, candidate/tree/target/executable, all five runtime UI
+JSON/log pairs (PASS, no timeout, exit 0, confirmed cleanup), explicit SDK markers,
+isolated/rendered budgets, focus/resize and legacy smoke independently. Publish the
+G1/R1/R2 assessment, ledger and this handover. Missing/failed/skipped gates stay open.
+Stop before physical testing, acceptance, merge, optional Git or Phase 2.

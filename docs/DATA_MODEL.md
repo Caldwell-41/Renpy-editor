@@ -346,14 +346,19 @@ buffers are excluded. Revision/identity changes invalidate observations; command
 continue to enforce current Scene/Source transaction preconditions independently.
 
 Each flow observation rereads source bytes and rehashes every observed file at the
-end, then rechecks the inventory and metadata. Its bounded reader retains only the
-most recently used parent directory handle chain for that call; no source bytes,
+end, then rechecks the inventory and metadata. Large inventories use at most four
+scoped read workers, each retaining only its most recent parent directory chain.
+Results preserve input order; one shared byte allowance is reserved before reads,
+so concurrency cannot multiply the 32 MiB inventory limit. Workers inherit the exact
+request cancellation token/deadline and join before the observation returns. No bytes,
 revisions or directory handles survive into the next observation. Each file open
-revalidates the approved root and full parent chain and refuses links/reparse points.
-Snapshot reads check the file length before I/O, bound growth by that length, and
-recheck length and identity afterwards. Limits remain 16 MiB/file, 32 MiB/inventory,
-2,048 source files, 500 Scenes and 2,000 edges. This observation grants no new write
-or runtime authority and does not claim an immutable filesystem snapshot.
+revalidates project registration, approved root and full parent chain and refuses
+links/reparse points. Snapshot reads check length before I/O, bound growth by that
+length and recheck length/identity afterwards. Revision hashing sizes its buffer to
+the observed file plus one growth-detection byte, capped at the unchanged 1 MiB
+cancellation interval. Limits remain 16 MiB/file, 32 MiB/inventory, 2,048 source files,
+500 Scenes and 2,000 edges. This observation grants no new write or runtime authority
+and does not claim an immutable filesystem snapshot.
 
 
 ## Runtime diagnostic projection (1G.2b)

@@ -42,6 +42,22 @@ pub(crate) fn current() -> Option<Arc<Cancellation>> {
     WORK.with(|w| w.borrow().as_ref().map(|(c, _)| c.clone()))
 }
 thread_local! { static WORK: RefCell<Option<(Arc<Cancellation>, Instant)>> = const { RefCell::new(None) }; }
+// Capture on the request thread, then install on a scoped I/O worker. Carry the
+// exact deadline; creating a worker must never restart the request's 180 s budget.
+pub(crate) fn inherited<T>(task: impl FnOnce() -> T) -> impl FnOnce() -> T {
+    let context = WORK.with(|work| work.borrow().clone());
+    move || {
+        struct Restore(Option<(Arc<Cancellation>, Instant)>);
+        impl Drop for Restore {
+            fn drop(&mut self) {
+                WORK.with(|work| *work.borrow_mut() = self.0.take());
+            }
+        }
+        let previous = WORK.with(|work| work.replace(context));
+        let _restore = Restore(previous);
+        task()
+    }
+}
 pub(crate) fn scoped<T>(cancel: Arc<Cancellation>, task: impl FnOnce() -> T) -> T {
     struct Reset;
     impl Drop for Reset {
@@ -75,4 +91,38 @@ pub(crate) fn inventory_hook() {
             hook();
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inherited_worker_keeps_original_deadline_and_cancellation() {
+        let cancel = Arc::new(Cancellation::default());
+        scoped(cancel.clone(), || {
+            let expired = Instant::now() - Duration::from_secs(1);
+            WORK.with(|work| work.borrow_mut().as_mut().unwrap().1 = expired);
+            std::thread::scope(|scope| {
+                let work = inherited(|| {
+                    assert_eq!(WORK.with(|work| work.borrow().as_ref().unwrap().1), expired);
+                    assert!(check().is_err());
+                });
+                scope
+                    .spawn(move || {
+                        assert!(check().is_ok());
+                        work();
+                        assert!(check().is_ok());
+                    })
+                    .join()
+                    .unwrap();
+            });
+        });
+        scoped(cancel.clone(), || {
+            let work = inherited(|| assert!(check().is_err()));
+            cancel.cancel();
+            std::thread::scope(|scope| scope.spawn(work).join().unwrap());
+        });
+        assert!(check().is_ok());
+    }
 }

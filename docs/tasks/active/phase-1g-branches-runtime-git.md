@@ -1,6 +1,6 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `awaiting_ci` (G1-V1 corrected locally; exact replacement run pending). User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress` (failed replacement reviewed; G1-V1/V2 corrections verified locally). User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `awaiting_ci` (replacement verification) | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` (G1-V1/V2 correction) | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -2155,3 +2155,144 @@ SDK, G1 and five-case R2 evidence, then publish an honest G1/R1/R2 assessment. I
 pending, retain this identity and stop. Stop before physical testing, acceptance,
 merge, optional Git or Phase 2. A failed target gate requires a bounded finding;
 this pending handover does not authorise a duplicate/retry or a wider redesign.
+
+
+### Failed replacement review and bounded G1 continuation — 2026-09-26
+
+The user reported the failed replacement and authorised review/fix plus another
+handover. Entry `9fc2450`, draft/open PR #17 and main `924619d` are unchanged; fresh
+inspection found no pending verification. Remain within 1G.2b agent verification,
+unchanged workloads/budgets/safety and no physical testing, acceptance, merge,
+optional Git or Phase 2. Work is in progress.
+
+Run `36209430831`, attempt 1, on `f37635e` completed FAIL. Both core suites and
+Preflight passed. Windows isolated accepted update 489.453 ms fails 250 ms;
+macOS isolated update 154.944 ms passes, but rendered pan/frame p95 120 ms fails
+100 ms. Explicit SDK and package steps were skipped on both targets. Review both
+full logs/artifacts before correcting these two material G1 findings. Named checks:
+bounded source-read concurrency with unchanged per-open safety and aggregate bytes,
+retained cancellation/deadline, identity/inventory/draft regressions, and full-scale
+rendered pan/zoom/selection/focus/resize without truncation or a timing waiver.
+
+
+#### Verified failed-run evidence
+
+The full 1,746-line run log (including both complete target jobs), step metadata and
+both uploaded ZIPs were inspected. All checkout SHAs agree with `f37635e`, candidate
+tree `5590e513e8163a9b0db7267ac67a85e61a700f39`. Preflight `108312714429` passed;
+Windows job `108312932935` and macOS job `108312932845` failed. Both artifacts match
+GitHub's exact size and SHA-256 and pass every ZIP entry CRC/path/symlink check:
+
+| Target / artifact | Bytes | Verified ZIP SHA-256 |
+| --- | ---: | --- |
+| Windows / `10895435524` | 120088 | `869cc071362a8b176de74983f4865887c7a07fe36d8d87b61784236dedcbfc36` |
+| macOS / `10895295762` | 223013 | `c1eeb26084a9e3ce3abae1c462eb7ecb1b396b84210eb54c0218912d48fe73ec` |
+
+Both contain complete core and isolated budget logs plus the actual 500-node/2,000-edge
+flow JSON (partial/stale/over-limit false). macOS additionally contains the runtime
+browser success log, 1100/640px screenshots and Branches assertion log. Windows stopped
+before those rendered checks. No package, executable, `runtime-ui-inputs.json`, explicit
+SDK output, five real-service packaged UI cases or legacy package smoke was generated.
+The input-manifest gate therefore remains **0/94 verified hashes per target**, with no
+executable attestation. ZIP integrity and checkout identity do not replace those gates.
+
+| Gate on failed `f37635e` | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Full release core | 174 passed / 0 failed / 7 ignored, 119.55 s | 182 passed / 0 failed / 7 ignored, 50.79 s |
+| Substantive ordinary core results after two no-archive wrapper skips | 172 passed | 180 passed |
+| Isolated initial projection | 489.794 ms (<2 s) | 126.715 ms (<2 s) |
+| Isolated warm refresh (supplemental) | 487.613 ms | 198.364 ms |
+| Isolated accepted update | **489.453 ms, FAIL** (>250 ms), 0 passed/1 failed | **154.944 ms, PASS**, 1 passed |
+| Runtime rendered focus/resize | SKIPPED | PASS at 1100/640px; injected requester and synthetic events |
+| Branches pan/frame p95 | SKIPPED | **120 ms, FAIL** (>100 ms) |
+| SDK, desktop/package, five real-service cases, legacy smoke | SKIPPED | SKIPPED |
+
+Seven ignored entries remain five subprocess workers and two explicit SDK gates, not
+additional passes. Source production-browser regression/build passed on both targets;
+Preflight frontend typecheck/58 tests and repository/format checks passed. R2-C1's
+semantic capability assertion now passes on both targets. The macOS Branches script
+reached the p95 assertion after its layout bound, route-navigation, subview resize and
+page-error checks, but did not print its successful timing JSON; exact initial layout
+and individual frame samples are unavailable for that run. Do not invent them.
+
+**Assessment on the failed candidate:** G1 FAIL/incomplete (Windows G1-V1 plus rendered
+G1-V2); R1 final-source regression incomplete (explicit SDK skipped); R2 BLOCKED (no
+final packages or five-case proof). Preserve prior R1 closure on its actual `c12d953`
+inputs and both earlier production failures. Repository quality `36209417219` passed
+on `f37635e` and `36209513943` passed on `9fc2450`; neither is a production pass.
+
+#### Bounded corrections and review
+
+G1-V1 follow-up: run large source acquisition and final rechecks through at most four
+scoped I/O workers; small inventories remain serial. Each worker uses the same fully
+validated reader, at most one retained parent chain, and fresh source bytes/hashes.
+Ordered results preserve deterministic assembly. A single atomic byte allowance is
+reserved before allocation/read and shared by every worker; successful bytes remain
+charged, failed reads release their reservations. No fourfold memory allowance or
+content cache is introduced. All workers join before returning, and each inherits
+the exact original cancellation token and deadline (no fresh 180 s budget).
+
+Root/registration/parent/leaf checks, file identity/length/growth checks, final
+source/metadata/inventory validation and independent write preconditions remain.
+Revision hashing now allocates only the observed file length plus one growth-detection
+byte, capped at the unchanged 1 MiB chunk/cancellation interval. Empty and growing files
+remain checked. This avoids repeatedly clearing 1 MiB for tiny source files and adds
+no metadata-only shortcut. Limits and the real accepted-edit fixture are unchanged.
+
+G1-V2: the existing graph changes only its transform while panning but repeatedly
+paints its SVG/node subtree. A compositor hint on the bounded graph canvas retains
+all 500 nodes/2,000 edges and the existing DOM, layout, keyboard, selection and source
+navigation. No culling, graph truncation, timing waiver or test sampling change.
+The browser gate now prints all 30 samples and budget status before assertions so a
+future failure retains measurements; the same <2 s and <100 ms assertions still fail.
+
+Temporary local diagnostic tracing at 4x CPU slowdown (Chrome 154.0.8037.57, macOS
+26.6.2 ARM64, same real-service fixture) recorded **176 Paint events before / 7 after**;
+pan/frame p95 **41.6 ms / 12.8 ms**, initial layout **316.9 ms / 296.6 ms**. This is
+mechanism evidence, not reproduction of the runner's exact 120 ms or native acceptance.
+Tracing/CPU slowdown helpers were removed; final gates use the ordinary unchanged
+measurement conditions. Initial local parallel fixture: accepted update 92.895 ms;
+with bounded small-file hashing: 90.626 ms. Final-candidate gates follow separately.
+
+Added regressions prove ordered 256-file results, an aggregate allowance shared across
+workers, changed-source detection in final rechecks, cancellation, the unchanged file
+count limit and exact deadline inheritance/restoration. Existing hostile reader and
+flow/Source/history tests remain. Empty, small, >1 MiB and growing-file hashes are
+checked against exact expected digests/counts. Review found no privilege/CSP, source
+truth or transaction change. The unmodified Phase 0 Python repeated-signal cleanup
+finding remains recorded in the preceding assessment; it is not silently closed.
+
+
+#### Final local verification and publication decision
+
+| Final local gate | Observed result |
+| --- | --- |
+| Full production release core (`cargo test --release -p loomlight-core --locked -- --nocapture`) | **184 passed / 0 failed / 7 ignored**, 124.61 s. Two official-SDK wrappers printed no-archive skips, leaving 182 substantive ordinary passes. Explicit SDK gates remain native target work. |
+| Isolated unchanged release budget fixture with enforcement and fresh flow JSON | **1 passed**, 190 filtered, 1.79 s; initial **92.112 ms**, warm **88.167 ms**, accepted update **91.395 ms**; required success marker present. No concurrent core test. |
+| Frontend typecheck and protocol/DOM suite (`npm run check`) | **58 passed**, zero failed/cancelled/skipped. |
+| Frontend build and Source production-browser regressions | PASS; faithful clean-after-Save, preserved legacy red control, selection/Apply Both. |
+| Full-size Branches browser against the new service fixture | PASS; Chrome 154.0.8037.57, initial **67.8 ms**, p95 **17.7 ms**; all 30 samples retained, including one **145.9 ms** maximum. The unchanged p95 rule, not a maximum rule, passes. 500 nodes/2,000 edges, source/edit navigation and subview 640px resize checks pass, no page errors. |
+| Runtime browser | PASS; 1100/640px, focus pass, no overflow/page errors; injected requester/synthetic input. |
+| Rust formatting, structure/link/privacy validator, whitespace | PASS; validator reports 258 repository files. |
+
+Final conditions: macOS 26.6.2 build 25G83 ARM64, Rust/Cargo 1.90.0, development Node
+26.8.1/npm 11.19.0. The final browser measurement uses no CPU throttling or trace.
+The readable five-Scene screenshot was visually inspected only after full-scale
+assertions; it is not represented as a full-size or packaged screenshot. No local
+verification process remains. Unchanged Phase 0 evidence/its previously diagnosed
+Python helper error is retained without rerunning an unrelated failing spike to
+manufacture a pass.
+
+Self-review covered the complete diff, scoped-worker lifetime/failure cleanup,
+registration and path revalidation, one aggregate byte allowance, unchanged final
+source/metadata/inventory checks, exact cancellation/deadline inheritance, small-file
+hash edge cases and the unchanged browser workload/assertions. New platform authority,
+cache/consistency redesign, budgets, dependencies and workflow triggers are excluded.
+G1-V1/V2 are corrected locally, **pending target proof**, not finally closed.
+
+Publish the coherent correction on the existing branch, then check pending runs and
+dispatch one justified replacement production run with package upload. This responds
+to the user's explicit failed-run review/fix request and materially changes both
+failed paths; do not rerun the unchanged failed SHA. Preserve manual-resume identity
+if pending, publish assessment/ledger/handover, and stop before physical testing,
+acceptance, merge, optional Git or Phase 2.

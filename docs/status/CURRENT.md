@@ -1,30 +1,31 @@
 # Current status
 
-**Updated:** 2026-09-26 (1G.2b G1-V1 correction published; replacement verification pending).
+**Updated:** 2026-09-26 (failed 1G.2b replacement reviewed; bounded G1 corrections).
 **Integrated application:** Phase 0, corrected Phase 1A-1F and CI-SIMPLE.
 **Phase 1F:** accepted and merged through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14).
 **Verified integration:** `973e3565d7cf41c6dca936df088ced10969821ac`; its tree exactly matches the reviewed closeout.
-**Current checkpoint:** Phase 1G.2b agent verification, `awaiting_ci` (manual resume).
-The G1-V1 profile isolated repeated path traversal/read/recheck cost. A bounded reader
-retains only one parent handle chain within each observation and still revalidates
-registration/root/parent, rereads accepted bytes and performs final revision/identity,
-inventory and metadata checks. No persistent cache, budget or permission change.
-Final local release measurements: initial **180.470 ms**, accepted update **181.026 ms**
-on the unchanged 500-Scene/2,000-edge workload. Production-scope local gates pass:
-core 182/0/7 (two no-archive wrapper skips), frontend 58, Source browser/build,
-rendered Branches/runtime, formatting and repository checks. Supplemental unchanged
-Phase 0 Python SDK helper remains 23/24 with a repeated-signal cleanup error.
+**Current checkpoint:** Phase 1G.2b agent verification, `in_progress`.
 
-G1-V1 is corrected locally; final supported-target G1/R1/R2 verification remains open.
-Correction candidate `f37635e0d2acce61022f9bf4e21c923499fcf786`, tree
-`5590e513e8163a9b0db7267ac67a85e61a700f39`, is published. Exactly one replacement
-[production run 36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
-attempt 1, was dispatched with package upload on that SHA. Exact-run inspection found
-it queued, Preflight `108312714429` queued, no target jobs and zero artifacts. No
-complete target logs, 94-input manifests or executable hashes are available; no
-final capability pass is claimed. Do not duplicate this pending run or poll repeatedly. Preserve failed run `36194188820`, attempt 1,
-on `931684d` and correction `6c7efad`; no failure is erased or relabelled a pass.
-See [ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#g1-v1-profiling-and-bounded-correction--2026-09-26)
+[Run 36209430831](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36209430831),
+attempt 1, on `f37635e` **failed** Windows isolated refresh (489.453 ms >250 ms) and
+macOS rendered pan/frame p95 (120 ms >100 ms). Both complete logs and ZIPs were
+verified, including exact size/SHA-256/CRC. Both core suites passed (Windows 174,
+macOS 182, each 7 ignored and two no-archive wrapper skips). macOS isolated core budget
+and runtime browser passed. Explicit SDK, packages, five real-service cases and legacy
+smoke were skipped; no input manifest/executable exists, **0/94 hashes per target**.
+
+The bounded follow-up uses at most four scoped readers with one shared byte allowance,
+unchanged per-open path/identity checks and final rechecks, and exact inherited
+cancellation/deadline. Small-file hash buffers retain the 1 MiB maximum chunk.
+Compositor-backed graph panning preserves every node/edge and all existing controls.
+Budgets/workloads/permissions remain unchanged. Local final results: core **184/0/7**,
+frontend **58 passed**, accepted refresh **91.395 ms**, rendered pan/frame p95
+**17.7 ms**; Source/runtime/browser/build and repository checks pass. Target proof is
+still required. The unchanged Phase 0 Python cleanup finding remains recorded.
+
+Publish this correction and launch one justified replacement after a fresh pending-run
+check. Preserve all earlier failures and R1 closure under their actual inputs.
+See [ledger 14](../tasks/active/phase-1g-branches-runtime-git.md#failed-replacement-review-and-bounded-g1-continuation--2026-09-26)
 and [HANDOVER](HANDOVER.md). Continue on `feature/phase-1g-branches-runtime`,
 draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 Physical testing, acceptance, merge, optional Git and Phase 2 remain excluded.

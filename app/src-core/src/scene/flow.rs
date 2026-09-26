@@ -169,15 +169,12 @@ impl AuthoringService {
         };
         let mut files = BTreeMap::new();
         let mut total = 0_usize;
-        let mut reader = self
+        let snapshots = self
             .transactions
-            .observation_reader(project)
+            .observation_snapshots(project, &paths, MAX_FILE_BYTES as usize, MAX_BYTES)
             .map_err(diagnostic_error)?;
-        for path in &paths {
-            let relative = RelativePath::new(path).map_err(|_| SceneError::Io)?;
-            let (bytes, revision) = match reader
-                .snapshot_bounded(&relative, (MAX_BYTES - total).min(MAX_FILE_BYTES as usize))
-            {
+        for (path, snapshot) in paths.iter().zip(snapshots) {
+            let (bytes, revision) = match snapshot {
                 Ok(value) => value,
                 Err(error) if error.code == ErrorCode::InvalidProposal => {
                     return Ok(over_limit(result))
@@ -302,16 +299,16 @@ impl AuthoringService {
             result.edges.extend(edges);
         }
         // Observation only; the UI never acquires a write precondition from this.
-        for (path, (_, revision)) in &files {
-            if !reader
-                .revision_bounded(
-                    &RelativePath::new(path).map_err(|_| SceneError::Io)?,
-                    MAX_FILE_BYTES,
-                )
-                .is_ok_and(|current| current == *revision)
-            {
-                result.stale = true;
-            }
+        let observed = files
+            .iter()
+            .map(|(path, (_, revision))| (path.as_str(), revision))
+            .collect::<Vec<_>>();
+        if !self
+            .transactions
+            .observations_still_current(project, &observed, MAX_FILE_BYTES)
+            .unwrap_or(false)
+        {
+            result.stale = true;
         }
         if self
             .transactions
@@ -327,6 +324,10 @@ impl AuthoringService {
         {
             result.stale = true;
         }
+        let mut reader = self
+            .transactions
+            .observation_reader(project)
+            .map_err(diagnostic_error)?;
         for (path, revision) in [
             (PROJECT_PATH, &loaded.project_revision),
             (SOURCE_MAP_PATH, &loaded.source_map_revision),

@@ -1353,6 +1353,77 @@ fn corrupt_record_beyond_the_former_history_boundary_blocks_real_writes() {
 }
 
 #[test]
+fn observation_batches_preserve_order_total_budget_and_current_revisions() {
+    let fixture = Fixture::new();
+    let paths = (0_u32..256)
+        .map(|index| {
+            let path = format!("game/batch-{index}.rpy");
+            fs::write(fixture.root.join(&path), index.to_le_bytes()).unwrap();
+            path
+        })
+        .collect::<Vec<_>>();
+    let snapshots = fixture
+        .service
+        .observation_snapshots(&fixture.project, &paths, 4, 1024)
+        .unwrap();
+    for (index, snapshot) in snapshots.iter().enumerate() {
+        assert_eq!(snapshot.as_ref().unwrap().0, (index as u32).to_le_bytes());
+    }
+    let observed = paths
+        .iter()
+        .zip(&snapshots)
+        .map(|(path, snapshot)| (path.as_str(), &snapshot.as_ref().unwrap().1))
+        .collect::<Vec<_>>();
+    assert!(fixture
+        .service
+        .observations_still_current(&fixture.project, &observed, 4)
+        .unwrap());
+    fs::write(fixture.root.join(&paths[1]), 999_u32.to_le_bytes()).unwrap();
+    assert!(!fixture
+        .service
+        .observations_still_current(&fixture.project, &observed, 4)
+        .unwrap());
+
+    let limited = fixture
+        .service
+        .observation_snapshots(&fixture.project, &paths, 4, 512)
+        .unwrap();
+    assert_eq!(
+        limited
+            .iter()
+            .filter_map(|item| item.as_ref().ok())
+            .map(|(bytes, _)| bytes.len())
+            .sum::<usize>(),
+        512
+    );
+    assert_eq!(limited.iter().filter(|item| item.is_err()).count(), 128);
+    assert!(limited
+        .iter()
+        .filter_map(|item| item.as_ref().err())
+        .all(|error| error.code == ErrorCode::InvalidProposal));
+
+    let cancelled = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+    cancelled.cancel();
+    crate::runtime_work::scoped(cancelled, || {
+        let results = fixture
+            .service
+            .observation_snapshots(&fixture.project, &paths, 4, 1024)
+            .unwrap();
+        assert!(results
+            .iter()
+            .all(|result| result.as_ref().unwrap_err().code == ErrorCode::RuntimeBusy));
+        assert!(!fixture
+            .service
+            .observations_still_current(&fixture.project, &observed, 4)
+            .unwrap());
+    });
+    assert!(fixture
+        .service
+        .observation_snapshots(&fixture.project, &vec![paths[0].clone(); 2049], 4, 8196)
+        .is_err());
+}
+
+#[test]
 fn observation_reader_rereads_content_identity_and_bounds() {
     let fixture = Fixture::new();
     let path = RelativePath::new("game/one.rpy").unwrap();
@@ -1507,6 +1578,22 @@ fn observation_reader_rejects_leaf_and_parent_symlink_substitution() {
 #[test]
 fn revision_hashing_rejects_oversized_and_growing_inputs_with_bounded_work() {
     use std::io::{Cursor, Read};
+
+    for bytes in [
+        vec![],
+        b"small source".to_vec(),
+        vec![b'x'; 1024 * 1024 + 3],
+    ] {
+        let mut reader = Cursor::new(&bytes);
+        assert_eq!(
+            hash_revision_reader(&mut reader, bytes.len() as u64, bytes.len() as u64).unwrap(),
+            (bytes.len() as u64, sha256(&bytes))
+        );
+    }
+    assert_eq!(
+        hash_revision_reader(&mut Cursor::new(b"x"), 0, 8),
+        Err(ErrorCode::InvalidProposal)
+    );
 
     let mut oversized = Cursor::new(vec![0_u8; 9]);
     assert_eq!(

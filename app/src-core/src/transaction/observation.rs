@@ -1,5 +1,9 @@
 //! Fresh bounded reads for one observation; no bytes or revisions are cached.
 use super::*;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+const MAX_OBSERVATION_FILES: usize = 2048;
+const MAX_READERS: usize = 4;
 
 pub(crate) struct ObservationReader<'a> {
     service: &'a TransactionService,
@@ -10,6 +14,80 @@ pub(crate) struct ObservationReader<'a> {
 }
 
 impl TransactionService {
+    /// Bounded scoped I/O, with ordered results and one shared byte allowance.
+    /// Each worker retains at most one parent and runs the same per-open checks.
+    pub(crate) fn observation_snapshots(
+        &self,
+        project: &ProjectId,
+        paths: &[String],
+        maximum_file: usize,
+        maximum_total: usize,
+    ) -> Result<Vec<Result<(Vec<u8>, Revision), PublicDiagnostic>>, PublicDiagnostic> {
+        let remaining = AtomicUsize::new(maximum_total);
+        self.with_observation_readers(project, paths, |reader, path| {
+            let path = RelativePath::new(path).map_err(diagnostic)?;
+            reader.snapshot_with_budget(&path, maximum_file, Some(&remaining))
+        })
+    }
+
+    pub(crate) fn observations_still_current(
+        &self,
+        project: &ProjectId,
+        files: &[(&str, &Revision)],
+        maximum: u64,
+    ) -> Result<bool, PublicDiagnostic> {
+        self.with_observation_readers(project, files, |reader, (path, expected)| {
+            RelativePath::new(*path)
+                .map_err(diagnostic)
+                .and_then(|path| reader.revision_bounded(&path, maximum))
+                .is_ok_and(|current| current == **expected)
+        })
+        .map(|results| results.into_iter().all(|current| current))
+    }
+
+    fn with_observation_readers<I: Sync, R: Send>(
+        &self,
+        project: &ProjectId,
+        items: &[I],
+        read: impl Fn(&mut ObservationReader<'_>, &I) -> R + Sync,
+    ) -> Result<Vec<R>, PublicDiagnostic> {
+        if items.len() > MAX_OBSERVATION_FILES {
+            return Err(diagnostic(ErrorCode::InvalidProposal));
+        }
+        let workers = items.len().div_ceil(128).clamp(1, MAX_READERS);
+        if workers == 1 {
+            let mut reader = self.observation_reader(project)?;
+            return Ok(items.iter().map(|item| read(&mut reader, item)).collect());
+        }
+        std::thread::scope(|scope| {
+            let mut handles = Vec::new();
+            for chunk in items.chunks(items.len().div_ceil(workers)) {
+                let read = &read;
+                let work = crate::runtime_work::inherited(move || {
+                    let mut reader = self.observation_reader(project)?;
+                    Ok::<Vec<R>, PublicDiagnostic>(
+                        chunk.iter().map(|item| read(&mut reader, item)).collect(),
+                    )
+                });
+                handles.push(
+                    std::thread::Builder::new()
+                        .name("flow-observation".into())
+                        .spawn_scoped(scope, work)
+                        .map_err(|_| diagnostic(ErrorCode::IoFailure))?,
+                );
+            }
+            let mut results = Vec::with_capacity(items.len());
+            for handle in handles {
+                results.extend(
+                    handle
+                        .join()
+                        .map_err(|_| diagnostic(ErrorCode::IoFailure))??,
+                );
+            }
+            Ok(results)
+        })
+    }
+
     pub(crate) fn observation_reader(
         &self,
         project: &ProjectId,
@@ -56,10 +134,20 @@ impl ObservationReader<'_> {
             .map_err(diagnostic)
     }
 
+    #[cfg(test)]
     pub(crate) fn snapshot_bounded(
         &mut self,
         path: &RelativePath,
         maximum: usize,
+    ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
+        self.snapshot_with_budget(path, maximum, None)
+    }
+
+    fn snapshot_with_budget(
+        &mut self,
+        path: &RelativePath,
+        maximum: usize,
+        remaining: Option<&AtomicUsize>,
     ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
         let mut file = self.open(path)?;
         let maximum = maximum.min(MAX_MUTATION_BYTES);
@@ -71,6 +159,9 @@ impl ObservationReader<'_> {
         if length > maximum as u64 {
             return Err(diagnostic(ErrorCode::InvalidProposal));
         }
+        // Reserve before allocation/I/O across all workers. Failed reads release
+        // their reservation; successful bytes remain charged until this batch ends.
+        let mut reservation = ByteReservation::new(remaining, length as usize)?;
         // Bound growth by the observed length, not merely the overall limit.
         let bytes = read_bytes_bounded(&mut file, length as usize).map_err(diagnostic)?;
         let final_length = file
@@ -86,6 +177,7 @@ impl ObservationReader<'_> {
             sha256: sha256(&bytes),
             identity,
         };
+        reservation.retained = true;
         Ok((bytes, revision))
     }
 
@@ -97,6 +189,39 @@ impl ObservationReader<'_> {
         let mut file = self.open(path)?;
         read_revision_file_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES as u64))
             .map_err(diagnostic)
+    }
+}
+
+struct ByteReservation<'a> {
+    remaining: Option<&'a AtomicUsize>,
+    length: usize,
+    retained: bool,
+}
+
+impl<'a> ByteReservation<'a> {
+    fn new(remaining: Option<&'a AtomicUsize>, length: usize) -> Result<Self, PublicDiagnostic> {
+        if let Some(remaining) = remaining {
+            remaining
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |bytes| {
+                    bytes.checked_sub(length)
+                })
+                .map_err(|_| diagnostic(ErrorCode::InvalidProposal))?;
+        }
+        Ok(Self {
+            remaining,
+            length,
+            retained: false,
+        })
+    }
+}
+
+impl Drop for ByteReservation<'_> {
+    fn drop(&mut self) {
+        if !self.retained {
+            if let Some(remaining) = self.remaining {
+                remaining.fetch_add(self.length, Ordering::Relaxed);
+            }
+        }
     }
 }
 
