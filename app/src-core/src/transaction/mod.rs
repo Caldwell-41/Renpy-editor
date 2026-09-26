@@ -5,6 +5,11 @@
 //! target is retained and checked after each exchange, so a writer that wins the final
 //! validation window is preserved and surfaced instead of being silently overwritten.
 
+mod execution;
+mod manifest;
+mod observation;
+pub(crate) use execution::ExecutionGate;
+pub(crate) use manifest::{execution_manifest, ExecutionManifest};
 mod history;
 mod identity;
 mod journal;
@@ -119,6 +124,7 @@ pub enum ErrorCode {
     AlreadyExists,
     RecoveryRequired,
     HistoryBoundary,
+    RuntimeBusy,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -148,6 +154,7 @@ impl PublicDiagnostic {
             ErrorCode::Conflict => "A competing file revision was preserved for recovery.",
             ErrorCode::AlreadyExists => "A file already exists at the selected project location.",
             ErrorCode::RecoveryRequired => "The file operation requires recovery.",
+            ErrorCode::RuntimeBusy => "Stop the runtime operation before changing these files.",
             ErrorCode::HistoryBoundary => "Undo or redo stopped at an external revision boundary.",
         };
         Self {
@@ -262,6 +269,8 @@ impl FaultInjector for NoFault {
 pub struct TransactionService {
     projects: Mutex<HashMap<ProjectId, ApprovedProject>>,
     serial: Mutex<()>,
+    executions: Mutex<HashMap<ProjectId, Arc<ExecutionGate>>>,
+    execution_consent: Mutex<HashMap<ProjectId, ExecutionManifest>>,
 }
 
 impl TransactionService {
@@ -308,6 +317,18 @@ impl TransactionService {
     }
 
     pub fn unregister_trusted_project(&self, project: &ProjectId) {
+        let Ok(_serial) = self.serial.lock() else {
+            return;
+        };
+        if self.require_no_execution(project).is_err() {
+            return;
+        }
+        if let Ok(mut gates) = self.executions.lock() {
+            gates.remove(project);
+        }
+        if let Ok(mut consent) = self.execution_consent.lock() {
+            consent.remove(project);
+        }
         if let Ok(mut projects) = self.projects.lock() {
             projects.remove(project);
         }
@@ -374,6 +395,9 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return rejected(ErrorCode::IoFailure),
         };
+        if let Err(diagnostic) = self.require_no_execution(project) {
+            return CommitOutcome::Rejected { diagnostic };
+        }
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(error) => return CommitOutcome::Rejected { diagnostic: error },
@@ -768,6 +792,7 @@ impl TransactionService {
         if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
             return recovery(&txid);
         }
+        self.advance_execution_consent(project, &journal.mutations, &revisions);
         CommitOutcome::Committed {
             transaction_id: txid,
             revisions,
@@ -779,6 +804,15 @@ impl TransactionService {
         project: &ProjectId,
         path: RelativePath,
     ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
+        self.snapshot_bounded(project, path, MAX_MUTATION_BYTES)
+    }
+
+    pub(crate) fn snapshot_bounded(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+        maximum: usize,
+    ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let target = resolve_target(&approved.anchor, &path, true)
@@ -789,7 +823,7 @@ impl TransactionService {
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         let identity = identity_for_file(&file)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        let bytes = read_bytes_bounded(&mut file, MAX_MUTATION_BYTES)
+        let bytes = read_bytes_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES))
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         Ok((
             bytes.clone(),
@@ -824,6 +858,15 @@ impl TransactionService {
         project: &ProjectId,
         path: RelativePath,
     ) -> Result<Option<(u64, Revision)>, PublicDiagnostic> {
+        self.inspect_file_bounded(project, path, MAX_IMPORT_BYTES)
+    }
+
+    pub(crate) fn inspect_file_bounded(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+        maximum: u64,
+    ) -> Result<Option<(u64, Revision)>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let target = resolve_target(&approved.anchor, &path, false)
@@ -835,7 +878,7 @@ impl TransactionService {
         {
             return Ok(None);
         }
-        let file = target
+        let mut file = target
             .parent_anchor
             .open_file(&target.name)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
@@ -843,7 +886,7 @@ impl TransactionService {
             .metadata()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?
             .len();
-        read_revision_file(file)
+        read_revision_file_bounded(&mut file, maximum.min(MAX_IMPORT_BYTES))
             .map(|revision| Some((count, revision)))
             .map_err(|code| PublicDiagnostic::new(code, None))
     }
@@ -852,6 +895,15 @@ impl TransactionService {
         &self,
         project: &ProjectId,
         directory: &str,
+    ) -> Result<Vec<String>, PublicDiagnostic> {
+        self.inventory_files_bounded(project, directory, usize::MAX)
+    }
+
+    pub(crate) fn inventory_files_bounded(
+        &self,
+        project: &ProjectId,
+        directory: &str,
+        mut remaining_entries: usize,
     ) -> Result<Vec<String>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
@@ -862,7 +914,7 @@ impl TransactionService {
                 .map_err(|code| PublicDiagnostic::new(code, None))?;
         }
         let mut files = Vec::new();
-        inventory_directory(&anchor, directory, 0, &mut files)
+        inventory_directory(&anchor, directory, 0, &mut files, &mut remaining_entries)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
         Ok(files)
     }
@@ -884,6 +936,8 @@ impl TransactionService {
         if blocking_recovery_code(&approved).is_some() {
             return Err(PublicDiagnostic::new(ErrorCode::RecoveryRequired, None));
         }
+        let allow_create = self.require_no_execution(project).is_ok()
+            || self.permits_script_directory(project, directory);
         let relative =
             RelativePath::new(directory).map_err(|code| PublicDiagnostic::new(code, None))?;
         let mut anchor = approved.anchor.as_ref().clone();
@@ -891,9 +945,16 @@ impl TransactionService {
             let std::path::Component::Normal(name) = component else {
                 return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
             };
-            anchor = anchor
-                .open_child(name, true)
-                .map_err(|code| PublicDiagnostic::new(code, None))?;
+            anchor = anchor.open_child(name, allow_create).map_err(|code| {
+                PublicDiagnostic::new(
+                    if !allow_create {
+                        ErrorCode::RuntimeBusy
+                    } else {
+                        code
+                    },
+                    None,
+                )
+            })?;
         }
         anchor
             .validate_chain()
@@ -910,6 +971,9 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return rejected(ErrorCode::IoFailure),
         };
+        if let Err(diagnostic) = self.check_execution_mutations(project, &proposal.mutations) {
+            return CommitOutcome::Rejected { diagnostic };
+        }
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(error) => return CommitOutcome::Rejected { diagnostic: error },
@@ -1270,6 +1334,8 @@ impl TransactionService {
         if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
             return recovery(&txid);
         }
+        self.accepted_execution_edit(project);
+        self.advance_execution_consent(project, &journal.mutations, &revisions);
         CommitOutcome::Committed {
             transaction_id: txid,
             revisions,
@@ -1307,6 +1373,7 @@ impl TransactionService {
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
+        self.require_no_execution(project)?;
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let store = JournalStore::open(&approved.anchor, transaction_id)
@@ -1345,6 +1412,7 @@ impl TransactionService {
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
+        self.require_no_execution(project)?;
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let store = JournalStore::open(&approved.anchor, transaction_id)
@@ -1524,9 +1592,13 @@ fn hash_revision_reader(
         return Err(ErrorCode::InvalidProposal);
     }
     let mut digest = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    // Small source files should not clear a 1 MiB buffer for every recheck.
+    // Keep a growth-detection byte even for empty files and the same maximum
+    // chunk/cancellation interval for large files.
+    let mut buffer = vec![0_u8; expected_len.saturating_add(1).min(1024 * 1024) as usize];
     let mut count = 0_u64;
     loop {
+        crate::runtime_work::check()?;
         let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
         if read == 0 {
             break;
@@ -1593,12 +1665,18 @@ fn inventory_directory(
     prefix: &str,
     depth: usize,
     files: &mut Vec<String>,
+    remaining_entries: &mut usize,
 ) -> Result<(), ErrorCode> {
     if depth > 16 || files.len() > 4096 {
         return Err(ErrorCode::UnsafePath);
     }
     anchor.validate_chain()?;
+    crate::runtime_work::check()?;
     for entry in fs::read_dir(anchor.path()).map_err(|_| ErrorCode::IoFailure)? {
+        *remaining_entries = remaining_entries
+            .checked_sub(1)
+            .ok_or(ErrorCode::InvalidProposal)?;
+        crate::runtime_work::check()?;
         let entry = entry.map_err(|_| ErrorCode::IoFailure)?;
         let name = entry
             .file_name()
@@ -1611,7 +1689,7 @@ fn inventory_directory(
         let relative = format!("{prefix}/{name}");
         if metadata.is_dir() {
             let child = anchor.open_child(std::ffi::OsStr::new(&name), false)?;
-            inventory_directory(&child, &relative, depth + 1, files)?;
+            inventory_directory(&child, &relative, depth + 1, files, remaining_entries)?;
         } else if metadata.is_file() {
             files.push(relative);
             if files.len() > 4096 {
@@ -1644,6 +1722,7 @@ fn copy_hash_bounded(
     let mut count = 0_u64;
     let mut buffer = [0_u8; 1024 * 1024];
     loop {
+        crate::runtime_work::check()?;
         let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;
         if read == 0 {
             break;

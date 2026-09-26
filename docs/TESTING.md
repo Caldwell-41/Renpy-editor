@@ -541,3 +541,77 @@ lifecycle/project, verify accepted bytes and reopened projection, and retain ref
 checks for stale revisions and malformed payloads. These tests run in the normal core
 suite on both packaged targets. Synthetic UI routing still does not replace native
 keyboard acceptance.
+
+## Retained 1G.1 development evidence
+
+The active [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
+records candidate, exact results and deferred supported-target evidence. Retained cases
+live in `scene.rs` (`flow_*`), `lifecycle.rs` (literal `flow.list` and existing Scene
+commands through the real handler), `source.rs` (revision-qualified navigation),
+`branches.dom.test.ts` and the existing shell Save/navigation regression.
+
+Run from `app/`: `cargo test -p loomlight-core --locked flow`, `npm run check`, and
+`npm run test:source-browser`. For the unchanged budget workload, set
+`LOOMLIGHT_FLOW_EVIDENCE` to an agent-owned temporary JSON path and run
+`cargo test --release -p loomlight-core --locked flow_budget_fixture -- --nocapture`;
+then run `node tests/branches.browser.mjs` with the same variable. The latter requires
+500 Scenes / 2,000 edges produced by the actual service, reports build/layout and
+synthetic pan/frame timing, checks 640px resize and verifies origin editing navigation.
+Optional `LOOMLIGHT_BRANCHES_SCREENSHOT` records the rendered review surface. A small
+subview of the same fixture is used only for the screenshot, after full-scale assertions.
+
+Browser scripts accept optional `LOOMLIGHT_BROWSER_EXECUTABLE` for an already installed
+Chromium. Record its actual version: this is a development browser, not proof of the
+packaged Windows/macOS WebView or OS-native key delivery. No browser binary, SDK,
+measurement output or absolute machine path belongs in Git. Final 1G still owns the
+real packaged graph edit/disk/reopen scenario and both supported-target measurements.
+
+
+### 1G.2b named packaged scenarios
+
+The existing production workflow now includes the explicit R1 SDK service and R2
+compile/lint navigation tests, plus five independent real-service package cases:
+`compile`, `lint`, `route-a`, `route-b`, and `runtime-error`. The native-only fixture
+setup creates a fresh synthetic project before opening the UI. The injected driver
+uses visible runtime/Source/Branches controls and the real requester; it never installs
+the older mock smoke requester. Compile/lint select their actual Unicode/BOM/CRLF
+failing line. Route cases edit/restore a destination, assert selected dialogue/state/
+asset, save a script during normal play, observe staleness, Stop after the smoke limit,
+and verify accepted source on reopen. The 640px route-b case also retains an invalid
+mapped draft through Cancel and refused Save All, then deliberately runs the saved
+revision. Runtime failure remains separate.
+
+`app/scripts/run-runtime-ui-probes.py` records each case, elapsed time, process exit,
+timeout and cleanup result. Failure in one case does not hide later cases. The existing
+legacy boundary smoke remains independently reported. Evidence includes every case log
+and JSON, exact Git inputs/target/executable digest, core/SDK logs and package artifacts
+when requested. Both supported targets must pass on the coherent candidate. No
+native-keyboard or human acceptance claim is inferred from synthetic DOM events.
+
+The production workflow measures the unchanged real-service 500-Scene/2,000-edge
+fixture separately from the full core suite. It sets `LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`
+and runs the exact `scene::tests::flow_budget_fixture_500_scenes_2000_edges` test in
+release mode. Initial projection must remain below 2 s and refresh after an accepted
+Scene edit below 250 ms. `runtime-flow-budget.log` retains timings, assertion output
+and the required `phase-1g-flow-budget-gate: passed` marker; `runtime-flow.json` feeds
+the existing rendered checks. Full-suite timings are supplemental and do not silently
+pass an exceeded budget. Failure blocks later package steps and keeps G1 open.
+
+The G1 observation-reader regressions exercise same-length external edits, same-byte
+file identity replacement, deletion, oversize rejection and cancellation. Unix cases
+replace the retained parent/root and substitute symlinks; Windows proves retained
+parent namespace pinning. Existing flow inventory/history/external-invalidation and
+Source draft/caret tests remain required. Directory-handle reuse is limited to one
+observation and never permits reuse of source content or revision hashes. Batched
+read tests prove stable result order, a shared aggregate byte budget, fresh final
+revisions, cancellation and inheritance of the original deadline. Empty, small,
+chunk-boundary and growing-file revision tests retain exact digest/length semantics.
+The rendered gate keeps the full 500/2,000 workload, 30 samples and unchanged limits;
+it emits the measurements even when a budget assertion fails. Compositor-backed
+panning retains every node/edge and the existing navigation/selection controls.
+
+R1's old automatic branch trigger is retired into this combined final gate; explicit
+manual R1 dispatch remains available for bounded future corrections. Final production
+verification is manually dispatched once on the implementation branch. Main's existing
+automatic production trigger remains unchanged; no cross-SHA/pre-post-merge reuse is
+claimed. Integration and its run strategy require separate authorisation.

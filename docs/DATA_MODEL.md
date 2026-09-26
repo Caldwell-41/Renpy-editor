@@ -322,3 +322,57 @@ values outside signed 64-bit range; strings remain a distinct typed value.
 Raw string values are limited to 10,000 UTF-8 bytes, complete generated statements to
 64 KiB, and the serialized authoring document to 1 MiB, so every accepted value remains
 reloadable after escaping.
+
+## Shared flow projection (1G.1)
+
+`flow.list` returns a core-derived observation of accepted source, never a second
+runnable graph. Nodes reference existing Scene IDs/labels. Choice/Jump routes and
+Return terminals carry their originating Scene, proven Beat ID where available,
+exact source range and revision. Choice identity includes the source revision and
+option ordinal/range so duplicate captions do not collapse; mapped Jump/Return IDs
+retain their proven Beat identity. Unknown ranges never select a nearby Beat.
+
+Destinations distinguish a uniquely resolved mapped Scene, proven absent static label,
+unresolved/custom destination (with Source navigation only when proven), and terminal
+Return. A bounded project-wide lexical inventory must be complete before absence or
+uniqueness is claimed. Conditional/dynamic source remains opaque; proven canonical
+options after an unknown destination are retained with an explicit incomplete boundary.
+Additional labels remain unmapped, not invented Scenes. The unique accepted `start`
+label's canonical unconditional jump establishes the entry badge; custom/missing/
+ambiguous entry does not fall back to metadata or tree ordering.
+
+Observation hashes cover metadata and the accepted source inventory. Dirty Source
+buffers are excluded. Revision/identity changes invalidate observations; commands
+continue to enforce current Scene/Source transaction preconditions independently.
+
+Each flow observation rereads source bytes and rehashes every observed file at the
+end, then rechecks the inventory and metadata. Large inventories use at most four
+scoped read workers, each retaining only its most recent parent directory chain.
+Results preserve input order; one shared byte allowance is reserved before reads,
+so concurrency cannot multiply the 32 MiB inventory limit. Workers inherit the exact
+request cancellation token/deadline and join before the observation returns. No bytes,
+revisions or directory handles survive into the next observation. Each file open
+revalidates project registration, approved root and full parent chain and refuses
+links/reparse points. Snapshot reads check length before I/O, bound growth by that
+length and recheck length/identity afterwards. Revision hashing sizes its buffer to
+the observed file plus one growth-detection byte, capped at the unchanged 1 MiB
+cancellation interval. Limits remain 16 MiB/file, 32 MiB/inventory, 2,048 source files,
+500 Scenes and 2,000 edges. This observation grants no new write or runtime authority
+and does not claim an immutable filesystem snapshot.
+
+
+## Runtime diagnostic projection (1G.2b)
+
+A runtime diagnostic carries origin (`compile`, `lint`, `runtime`), severity, bounded
+message, optional proven project-relative path and one-based line, optional column,
+source content revision, operation/session identity and freshness. Column stays absent
+when the pinned format does not establish it. Core retains the launch file identities;
+`runtime.resolveDiagnostic` accepts only operation ID and diagnostic ordinal, never
+renderer-supplied paths or ranges. It verifies identity and revision and returns a
+revision-qualified Source byte range. BOM, CRLF and Unicode conversion remains in the
+existing Source controller. Failed/unknown freshness is distinct from process outcome.
+
+The projection is limited to 256 records and at most 4 KiB per message; raw output
+retains the existing 2 MiB limit with 32 KiB pages. Known pinned SDK compile/traceback
+and lint locations are recognised; all other text remains bounded fallback output.
+No diagnostic is independent document truth or authority to mutate/open arbitrary files.

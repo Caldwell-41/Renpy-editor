@@ -31,6 +31,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
+| Controlled runtime, trust and process ownership | [ADR 0008](adr/0008-controlled-runtime.md) |
 | Planned Phase 1G Branches and runtime/diagnostics | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
 | Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |

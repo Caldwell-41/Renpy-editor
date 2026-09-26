@@ -288,6 +288,7 @@ fn validate_source_definition(
 
 #[derive(Debug)]
 pub enum AuthoringError {
+    RuntimeBusy,
     NoOpenProject,
     RecoveryRequired,
     InvalidPayload,
@@ -1412,6 +1413,7 @@ fn committed(outcome: CommitOutcome) -> Result<(), AuthoringError> {
         CommitOutcome::RecoveryRequired { .. } => Err(AuthoringError::RecoveryRequired),
         CommitOutcome::Conflict { .. } => Err(AuthoringError::SourceConflict),
         CommitOutcome::Rejected { diagnostic } => match diagnostic.code {
+            crate::transaction::ErrorCode::RuntimeBusy => Err(AuthoringError::RuntimeBusy),
             crate::transaction::ErrorCode::AlreadyExists => Err(AuthoringError::PathCollision),
             crate::transaction::ErrorCode::RecoveryRequired => {
                 Err(AuthoringError::RecoveryRequired)
@@ -1648,6 +1650,22 @@ fn verify_mapped_statements<'a>(
 /// context. Multi-line logical statements and indented Ren'Py/Python blocks remain
 /// opaque. The whole file is still checked so appending after unfinished syntax fails.
 fn lexical_statements(source: &[u8]) -> Result<Vec<(usize, usize)>, AuthoringError> {
+    lexical_lines(source, true)
+}
+
+/// Shared lexical boundary for read-only consumers; never evaluates source.
+pub(crate) fn lexical_lines(
+    source: &[u8],
+    top_only: bool,
+) -> Result<Vec<(usize, usize)>, AuthoringError> {
+    lexical_ranges(source, top_only, true)
+}
+
+pub(crate) fn lexical_ranges(
+    source: &[u8],
+    top_only: bool,
+    single_only: bool,
+) -> Result<Vec<(usize, usize)>, AuthoringError> {
     let text = std::str::from_utf8(source).map_err(|_| AuthoringError::UnsupportedSource)?;
     let bytes = text.as_bytes();
     let mut ranges = Vec::new();
@@ -1748,7 +1766,7 @@ fn lexical_statements(source: &[u8]) -> Result<Vec<(usize, usize)>, AuthoringErr
         let complete =
             triple.is_none() && quote.is_none() && bracket_depth == 0 && !explicit_continuation;
         if complete {
-            if logical_top_level && logical_lines == 1 {
+            if (!top_only || logical_top_level) && (!single_only || logical_lines == 1) {
                 ranges.push((logical_start, line_end));
             }
             logical_lines = 0;
