@@ -59,13 +59,8 @@ jobs:
           LOOMLIGHT_PROFILE_FLOW: "1"
         run: |
           set -o pipefail
-          : > "$RUNNER_TEMP/runtime-flow-profile.log"
-          for readers in 1 2 4 8 16; do
-            echo "phase-1g-flow-profile-readers: $readers" | tee -a "$RUNNER_TEMP/runtime-flow-profile.log"
-            LOOMLIGHT_PROFILE_FLOW_READERS="$readers" \
-              cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
-              | tee -a "$RUNNER_TEMP/runtime-flow-profile.log"
-          done
+          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
       - name: Upload flow profile
         if: always()
