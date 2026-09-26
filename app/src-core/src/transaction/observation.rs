@@ -3,7 +3,20 @@ use super::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const MAX_OBSERVATION_FILES: usize = 2048;
-const MAX_READERS: usize = 4;
+const DEFAULT_MAX_READERS: usize = 4;
+const ABSOLUTE_MAX_READERS: usize = 16;
+
+fn observation_reader_limit() -> usize {
+    if std::env::var("LOOMLIGHT_PROFILE_FLOW").as_deref() != Ok("1") {
+        return DEFAULT_MAX_READERS;
+    }
+    std::env::var("LOOMLIGHT_PROFILE_FLOW_READERS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .filter(|value| matches!(value, 1 | 2 | 4 | 8 | 16))
+        .unwrap_or(DEFAULT_MAX_READERS)
+        .min(ABSOLUTE_MAX_READERS)
+}
 
 pub(crate) struct ObservationReader<'a> {
     service: &'a TransactionService,
@@ -54,7 +67,10 @@ impl TransactionService {
         if items.len() > MAX_OBSERVATION_FILES {
             return Err(diagnostic(ErrorCode::InvalidProposal));
         }
-        let workers = items.len().div_ceil(128).clamp(1, MAX_READERS);
+        let workers = items
+            .len()
+            .div_ceil(128)
+            .clamp(1, observation_reader_limit());
         if workers == 1 {
             let mut reader = self.observation_reader(project)?;
             return Ok(items.iter().map(|item| read(&mut reader, item)).collect());
