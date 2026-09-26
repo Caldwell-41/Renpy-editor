@@ -2391,3 +2391,55 @@ if another stage dominates, correct that measured stage instead. Preserve full
 root/parent/leaf identity safety, stale fail-closed behavior, cancellation/deadline,
 32 MiB/2,048-file limits and the unchanged 250 ms accepted-update budget. Any cache or
 consistency-model redesign requires explicit review before implementation.
+
+
+### 16. Windows secure-observation concurrency result and G1-V1 design blocker — 2026-09-26
+
+Manual [Repository quality run 36218397984](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36218397984),
+attempt 1, exact head `7e4234a041b446d01ad5244002f1ce945d58046d`, completed PASS for both
+profiling jobs; normal repository validation was intentionally skipped. This was a
+diagnostic run only and does not satisfy production G1/R1/R2.
+
+Windows x64 accepted-update results by requested secure-observation reader count:
+**1 = 508.416 ms; 2 = 536.401 ms; 4 = 749.559 ms; 8 = 784.488 ms; 16 = 501.102 ms**.
+Initial/warm results follow the same broad range. macOS ARM64:
+**1 = 105.763 ms; 2 = 92.560 ms; 4 = 67.187 ms; 8 = 58.416 ms; 16 = 68.651 ms**.
+On Windows, increasing concurrency is non-monotonic and commonly worse. Even the best
+observed accepted update remains about twice the unchanged 250 ms budget.
+
+The stage profiles continue to locate nearly all Windows time in the two secure
+per-file observation/hash passes. At the 1-reader accepted update, snapshot/hash was
+**240.157 ms** and freshness/hash **199.032 ms**; parsing/projection remained small.
+At 16 readers, snapshot/hash **227.808 ms** and freshness/hash **214.601 ms**. Therefore
+worker-count tuning cannot close G1-V1. The current consistency model performs roughly
+503 secure opens/hashes twice per refresh and is itself the Windows budget blocker.
+
+Self-review rejected replacing the second hash with identity/length alone: same-file
+in-place writes may retain file identity and length, so this would silently weaken
+stale detection. It also cannot solve the budget because one complete Windows secure
+snapshot pass is already approximately the whole 250 ms allowance.
+
+Temporary reader-count overrides were removed after evidence capture by
+`66af29abbea467cd55aae3e1569e4fdcf2fbc799`; the concurrency sweep was removed from
+the feature workflow by `225781a634bb771387995582eabb951920600e5e`. Normal production
+remains at the original bounded four-reader policy. Stage instrumentation remains
+env-gated for future diagnosis.
+
+**Design blocker / next plan:** do not dispatch another production matrix and do not
+relax the budget. G1-V1 now requires a correctness-preserving observation redesign
+that reduces the number of full secure content hashes on an ordinary refresh while
+still detecting external in-place edits, replacements, inventory changes and
+root/parent/leaf substitution. Before implementation, specify and adversarially review
+the consistency contract. Preferred direction to investigate is a project-scoped
+source observation index owned by the core (not renderer) with secure initial hashes,
+cheap OS metadata/change signals for unchanged files, mandatory re-hash on any signal
+or ambiguity, explicit invalidation after Loomlight transactions, and periodic/full
+verification boundaries. It must fail closed when signals are unavailable or
+inconsistent and must not become write authority. Alternatives such as a platform
+directory watcher may be used only as invalidation hints, never sole correctness
+authority. The design must include Windows/macOS semantics and hostile race tests.
+
+State: **blocked on G1-V1 observation-design checkpoint**. G1-V2 compositor work is
+retained; R1 prior closure is preserved under its own candidate; final R2 and 1G
+acceptance remain incomplete. Stop before implementing the consistency redesign
+without a reviewed plan.
