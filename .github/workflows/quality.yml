@@ -89,6 +89,10 @@ jobs:
           } 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           safety=${PIPESTATUS[0]}
           if [ "$safety" -ne 0 ]; then exit "$safety"; fi
+          if grep -q 'g1-o1-safety-counterexample:' "$RUNNER_TEMP/runtime-flow-profile.log"; then
+            echo 'G1-O1 rejected: known safety counterexample; profiling cannot qualify this candidate.'
+            exit 1
+          fi
           set +e
           failed=0
           for sample in 1 2 3; do

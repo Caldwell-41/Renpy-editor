@@ -1,20 +1,26 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** Phase 1G.2b **G1-O1 verified-candidate feasibility proof**,
-`in_progress`; G1-V1 remains `blocked` until safety and native feasibility qualify.
+**Current checkpoint:** Phase 1G.2b **G1-O1 verified-candidate feasibility proof**:
+investigation complete, **NO-GO**. G1-O1/G1-V1 remain `blocked`; G1-O2 is not eligible.
 Continue `feature/phase-1g-branches-runtime`, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 Read [HANDOVER](HANDOVER.md),
 [ledger 18](../tasks/active/phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
 and [ADR 0009](../adr/0009-flow-observation-candidates.md).
 
-The test-only candidate prototype and compound secure reader preserve mandatory
-full post-projection verification. Local macOS tests establish 1,006 / 503 / 504
-source-pass counts and preliminary <250 ms timings. Native qualification and
-explicit proof gaps remain open; production flow/write paths are not wired.
-The accepted-update budget remains **<250 ms** and initial projection **<2 s**.
-No G1-O2, package matrix, physical acceptance or merge is authorized.
+Test-only native candidate `b3d696533290d91bc2ff7d4eb65562d2c68642e1`, run
+[36278262505](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36278262505),
+attempt 1, completed **FAILURE**. Windows accepted samples **563.983 / 574.858 /
+586.393 ms** exceed the unchanged **<250 ms** limit. macOS accepted samples
+**98.776 / 63.796 / 66.989 ms** pass timing. Cold samples pass **<2 s** on both.
+Final review additionally reproduced **G1-O1-S1**: same-byte leaf replacement after
+open can return a fresh graph with the old file identity. Counterexample tests and
+explicit resource/coverage gaps are retained. No production flow/write paths changed.
+
+No native operation remains pending; no retry or package matrix. The next separately
+selected action is **G1-O1-R**, review the failed safety boundary and Windows cost
+model before deciding on any corrected prototype. No G1-O2, physical acceptance or merge.
 
 ## Completed evidence and current blockers
 
@@ -30,7 +36,7 @@ historical failure and prior pass under its actual inputs in
 [ledger 14–16](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger).
 No new package, executable/hash verification or user acceptance is claimed.
 
-G1-O1 must prove the secure reader and timing before production integration. G1-O2
+G1-O1 did not prove the secure reader or Windows timing; production integration remains blocked. G1-O2
 must wire dependency-complete metadata, central mutation invalidation and actual
 Branches cancellation/session ownership, then pass the enforced native real-service
 budget gate. The diagnostic workflow alone does not enforce that budget.

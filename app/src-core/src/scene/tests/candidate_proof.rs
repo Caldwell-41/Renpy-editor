@@ -489,3 +489,58 @@ fn g1_o1_windows_mapped_write_without_notifications() {
     assert_ne!(unsafe { UnmapViewOfFile(mapped) }, 0);
     assert_ne!(unsafe { CloseHandle(mapping) }, 0);
 }
+
+// Negative feasibility evidence: green execution means the NO-GO counterexample
+// reproduced, not that this reader qualifies for production.
+#[test]
+fn g1_o1_counterexample_projection_accepts_replaced_leaf_identity() {
+    use crate::transaction::candidate::Point;
+    use std::sync::atomic::{AtomicBool, Ordering};
+    let f = small();
+    let mut index = Index::default();
+    observe(&f, &mut index, |_, _| {}).unwrap();
+    let first = f
+        .service
+        .transactions
+        .inventory_files_bounded(&f.project, "game", 8192)
+        .unwrap()
+        .into_iter()
+        .find(|p| p.ends_with(".rpy"))
+        .unwrap();
+    let path = RelativePath::new(first).unwrap();
+    let (bytes, expected) = f
+        .service
+        .transactions
+        .snapshot(&f.project, path.clone())
+        .unwrap();
+    let replacement = f.root.join("candidate-replacement.tmp");
+    fs::write(&replacement, bytes).unwrap();
+    let leaf = f.root.join(path.as_str());
+    let once = AtomicBool::new(false);
+    let probe = Arc::new(Probe {
+        hook: Some(Arc::new(move |point| {
+            if point == Point::LeafOpened && !once.swap(true, Ordering::SeqCst) {
+                fs::rename(&replacement, &leaf).unwrap();
+            }
+        })),
+        ..Probe::default()
+    });
+    let graph = candidate::observe(
+        &f.service,
+        &f.project,
+        &f.project_id,
+        1,
+        &mut index,
+        probe,
+        |_, _| {},
+    )
+    .unwrap();
+    let (_, current) = f.service.transactions.snapshot(&f.project, path).unwrap();
+    assert_ne!(expected.identity, current.identity);
+    assert_eq!(expected.sha256, current.sha256);
+    assert!(
+        !graph.stale,
+        "counterexample no longer reproduces: reassess qualification"
+    );
+    println!("g1-o1-safety-counterexample: fresh graph after verifier pathname replacement; NO-GO");
+}

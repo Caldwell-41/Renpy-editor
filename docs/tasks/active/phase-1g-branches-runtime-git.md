@@ -2625,7 +2625,8 @@ dispatched work. Stop and offer only G1-O1 as the next checkpoint.
 
 **Authority:** the user explicitly selected G1-O1 implementation, adversarial proof,
 and one cheap Windows/macOS profiling pair, followed by publication and stop.
-**State:** `in_progress`. Production flow/write wiring, package matrices, acceptance
+**Outcome:** investigation complete, **NO-GO**; G1-O1/G1-V1 remain `blocked`.
+Production flow/write wiring, package matrices, acceptance
 and G1-O2 remain excluded. The <250 ms update / <2 s cold limits are unchanged.
 
 Fresh fetched branch and draft/open PR #17 match entry
@@ -2715,3 +2716,131 @@ with a poisoned index are not all newly exercised. These are explicit proof gaps
 not silent passes. Native Windows in-place reparse and mapped-write cases are included
 but cannot be claimed until their actual runner logs pass. A native timing pass alone
 would not close these gaps or authorize G1-O2.
+
+
+#### Native result and verified evidence — NO-GO
+
+Exactly one [run 36278262505](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36278262505),
+**attempt 1**, tested **`b3d696533290d91bc2ff7d4eb65562d2c68642e1`**.
+The run completed **FAILURE**: macOS job **108505073353** succeeded; Windows job
+**108505073512** failed the unchanged timing gate. No retry, reader sweep or package
+matrix was dispatched. Repository-quality job in this manual route was intentionally
+skipped; the separate ordinary PR quality run is not performance evidence.
+
+Both targets used Rust **1.90.0** (`1159e78c4747b02ef996e55082b704c09b970588`),
+release/locked. macOS ARM64 **26.6.2 / APFS**; Windows x64 **Server 2025 Datacenter
+10.0.26100**. Windows filesystem type is **not established by the captured output**:
+PowerShell formatted the volume objects under the preceding OS table and omitted
+their fields. Do not assume a recorded NTFS confirmation or rerun solely to repair it.
+
+| Target / sample | Cold ms (<2,000) | Warm ms (<250) | Accepted edit ms (<250) | Verdict |
+| --- | ---: | ---: | ---: | --- |
+| Windows 1 | 1,136.219 | 570.423 | 563.983 | FAIL |
+| Windows 2 | 1,048.433 | 584.464 | 574.858 | FAIL |
+| Windows 3 | 1,088.252 | 581.168 | 586.393 | FAIL |
+| macOS 1 | 104.270 | 74.369 | 98.776 | timing PASS |
+| macOS 2 | 88.218 | 62.342 | 63.796 | timing PASS |
+| macOS 3 | 97.321 | 67.714 | 66.989 | timing PASS |
+
+Slowest cold/warm/accepted: Windows **1,136.219 / 584.464 / 586.393 ms**;
+macOS **104.270 / 74.369 / 98.776 ms**. All samples are retained, not averaged.
+Windows aborts at the warm assertion after recording the accepted timing too; all
+three accepted timings independently exceed 250 ms. macOS emitted all three actual
+terminal markers; Windows emitted none. Each graph was successful/nonstale with
+500 nodes, 2,000 edges and Route A, so failure is not substituted by stale/timeout.
+
+Native safety suite before samples: Windows **10 passed / 0 failed / 0 ignored**
+(9.28 s), including mapped writes and same-identity parent reparse conversion at
+all five reader hooks; macOS **11 passed / 0 failed / 0 ignored** (2.51 s).
+Those tests did not include the later leaf-path counterexamples below.
+
+Every sequence measured **1,006 / 503 / 504** source hashes; cold/warm/accepted
+hashed bytes **211,254 / 105,627 / 105,838**. Peak source-batch bytes including
+scratch: Windows **106,051**, macOS **106,263**; maximum readers **4**, live readers
+and scratch **0** at each completed request. The recorded descriptor **upper bound
+25** covers source chains/leaves/transient validators; it is not an OS-wide peak.
+Loader/project/projection allocation and traversal descriptors remain separate gaps.
+
+Windows accepted verifier wall time **481.803 / 491.848 / 503.131 ms** dominates;
+metadata/load **19.565 / 19.468 / 19.616**, pre-inventory **16.882 / 17.264 / 16.972**,
+dirty acquisition **2.785 / 2.753 / 2.964**, edge projection **10.875 / 11.127 / 11.093**,
+post-inventory **17.242 / 17.562 / 17.292**, metadata recheck **6.954 / 6.916 / 7.213**.
+The accepted compound reader makes **504 leaf opens**, **1,512 canonical-root checks**,
+**6,036 chain-component checks**, and **7,044 handle samples**, plus original
+parent-acquisition work. In sample 3 these overlapping worker totals are respectively
+35.778 / 465.349 / 1,177.205 / 158.117 ms; bytes/hash is 10.373 ms. This conservative
+consolidation did not eliminate enough native work; added chain-boundary checks cost
+more than the removed duplicate root/leaf metadata queries. The <=240 ms engineering
+allocation is also plainly missed. No claim that SHA arithmetic is the bottleneck.
+
+Read complete logs from both jobs and downloaded both evidence ZIPs. Verified exact
+API size, SHA-256 and every ZIP CRC; each contains `runtime-flow-profile.log`:
+
+| Target / artifact ID | ZIP bytes | SHA-256 |
+| --- | ---: | --- |
+| Windows `10918230888` | 7,199 | `a8ec20931ec07d5025da4bea828cc20b58c7f8f73553a053d6d950ab483d9f13` |
+| macOS `10917925783` | 8,127 | `b9727e0a968f1bea3fa1e4cd5df283c5257bcf886f81be0ab12507702dac1b9e` |
+
+The complete input is the exact committed candidate above (including Cargo.lock,
+pinned toolchain, reader, fixture and workflow); no package/input-manifest or executable
+hash verification is claimed. Archives have seven-day retention. Logs/archives remain
+outside Git; the durable sample/counter/failure evidence is this ledger.
+
+#### Adversarial counterexample discovered during final review
+
+**G1-O1-S1 — leaf pathname identity is not rebound after the content read.**
+A deterministic barrier immediately after leaf open replaces that pathname with
+identical bytes on a new file identity. The verifier hashes/samples its already-open
+old object, so both hash and handle identity still equal the cached candidate. Parent
+chain/inventory/metadata checks do not bind that leaf name back to the opened object.
+
+Two additional **local macOS** counterexample tests reproduce this at the reader and
+whole candidate projection boundaries:
+
+- `transaction::tests::g1_o1_counterexample_same_byte_replacement_after_leaf_open`:
+  returned revision equals the old candidate while an independent current snapshot
+  has the same hash and a different identity.
+- `scene::tests::candidate_proof::g1_o1_counterexample_projection_accepts_replaced_leaf_identity`:
+  selects the inventory's actual first verifier file, replaces it at the leaf-open
+  hook, and observes an incorrectly nonstale graph. Do not assume directory traversal
+  order; targeting an arbitrary Scene instead correctly became stale and was not a
+  reproducer. The deterministic test now binds to the actual first open.
+
+Exact focused run: **2 counterexamples reproduced**, no ignored tests. Their passing
+assertions document the rejected behavior and explicitly print **NO-GO**, not safety
+acceptance. They are a follow-up to native candidate `b3d6965`; the native results do
+not include them. No reader behavior changed after native dispatch.
+
+This is earlier than the allowed final-window race *after* a file's final comparison:
+the replacement occurs immediately after opening, before the verifier reads/hashes
+content. It does not call for an atomic multi-file snapshot. A future reader needs an
+explicit final pathname-to-object identity boundary (and its race tests), without
+weakening no-follow/root/chain/content checks or adding a metadata lease. The existing
+production reader is untouched; no claim is made that this test-only proof repairs
+all pre-existing observation races. The prototype is **not safe to promote**.
+
+#### Final disposition and next bounded action
+
+G1-O1 investigation is complete with **NO-GO**. Its capability gate remains `blocked`
+on **both G1-O1-S1 and Windows timing**, plus the explicitly listed proof gaps.
+Do not select G1-O2, reduce checks, relax 250 ms, introduce watcher-only freshness,
+retry profiles to select a winner, or dispatch packages. Preserve prior G1/R1/R2
+state and historical failures. PR #17 stays draft/open and unmerged.
+
+Next separately selected checkpoint: **G1-O1-R — review the failed feasibility proof**.
+Review a final leaf pathname binding and a credible Windows secure-open cost model
+against these exact counters; decide whether a bounded corrected prototype can
+qualify the same contract or needs another design. No implementation/CI is approved
+by printing that next-chat selector. No operation from the native pair remains pending.
+Final publication includes the two counterexamples, ADR disposition, ledger, CURRENT
+and the single HANDOVER; verify the remote head rather than chasing a self-SHA.
+
+
+Final guard: the proof selector now refuses a `g1-o1-safety-counterexample:` marker
+before further profiling, so successful execution of a negative reproducer cannot
+produce a green qualification run. This workflow-only follow-up was not dispatched;
+it does not change or supersede the recorded native candidate/timings. Final
+`cargo fmt --check --all`, workflow shell syntax, `python3 scripts/validate.py`
+(**264 files**) and staged whitespace checks pass. The final code delta after the
+profile candidate is only the two negative reproducers and this no-go workflow guard;
+no reader/projection implementation was changed or profiled again.

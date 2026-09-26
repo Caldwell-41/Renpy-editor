@@ -2311,3 +2311,40 @@ fn g1_o1_windows_same_identity_reparse_at_open_boundaries() {
         );
     }
 }
+
+// Deliberate counterexample, not a successful safety assertion. G1-O1 is NO-GO:
+// final handle sampling checks the opened object, not the leaf's current pathname.
+#[test]
+fn g1_o1_counterexample_same_byte_replacement_after_leaf_open() {
+    use std::sync::atomic::{AtomicBool, Ordering};
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+        .unwrap();
+    let (bytes, expected) = reader.snapshot_bounded(&path, 64).unwrap();
+    let leaf = fixture.root.join(path.as_str());
+    let replacement = fixture.root.join("game/new.tmp");
+    fs::write(&replacement, &bytes).unwrap();
+    let once = AtomicBool::new(false);
+    reader.probe.live_readers.fetch_sub(1, Ordering::Relaxed);
+    reader.probe = Arc::new(candidate::Probe {
+        live_readers: std::sync::atomic::AtomicUsize::new(1),
+        hook: Some(Arc::new(move |point| {
+            if point == candidate::Point::LeafOpened && !once.swap(true, Ordering::SeqCst) {
+                fs::rename(&replacement, &leaf).unwrap();
+            }
+        })),
+        ..candidate::Probe::default()
+    });
+    let returned = reader.revision_bounded(&path, 64).unwrap();
+    let current = fixture.service.snapshot(&fixture.project, path).unwrap().1;
+    assert_eq!(
+        returned, expected,
+        "counterexample no longer reproduces: reassess safety claim"
+    );
+    assert_ne!(returned.identity, current.identity);
+    assert_eq!(returned.sha256, current.sha256);
+    println!("g1-o1-safety-counterexample: opened identity passed while pathname identity changed; NO-GO");
+}

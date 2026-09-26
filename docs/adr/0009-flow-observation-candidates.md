@@ -1,6 +1,6 @@
 # ADR 0009: Cached flow candidates with fresh content verification
 
-**Status:** Reviewed proposal; native feasibility and implementation unproved.
+**Status:** Reviewed proposal; G1-O1 prototype rejected (safety / Windows latency).
 **Date:** 2026-09-27.
 **Scope:** Phase 1G.2b G1-V1 observation only. Complements ADRs 0001/0004/0008;
 does not replace their source, transaction, recovery or runtime authority.
@@ -260,3 +260,21 @@ These support API limits, not measured Loomlight performance or a portable cache
 - Microsoft [CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew): sharing lasts for handle lifetime; delete sharing controls rename/delete access.
 - Microsoft [SetFileTime](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfiletime): file times are mutable, not content revision tokens.
 - Microsoft [Opportunistic Locks](https://learn.microsoft.com/en-us/windows/win32/fileio/opportunistic-locks): a distinct cache-coordination mechanism, not a property of ordinary reads.
+
+
+## G1-O1 feasibility disposition — 2026-09-27
+
+The test-only prototype in `b3d696533290d91bc2ff7d4eb65562d2c68642e1` does not
+qualify this decision for production. [Ledger 18](../tasks/active/phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
+records the exact native run, all samples, integrity-checked evidence and gaps.
+Windows warm/accepted samples were 570–586 ms against <250 ms; macOS timing passed.
+Mandatory content verification and the 250 ms requirement are unchanged.
+
+Final adversarial review also demonstrated **G1-O1-S1**: a same-byte replacement
+immediately after verifier leaf open leaves the old handle's identity/hash intact,
+while the current pathname names a different object. Both reader and candidate-flow
+counterexamples reproduce locally. A future compound reader must bind the final
+leaf pathname back to the observed object, preserving all no-follow/chain checks.
+This is not permission to claim atomic snapshots or eliminate the unavoidable race
+after the final comparison. Do not promote the current test-only reader/index.
+G1-O2 is blocked; separately review the safety boundary and Windows cost model first.
