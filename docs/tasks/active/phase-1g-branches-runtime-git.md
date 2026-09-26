@@ -2330,3 +2330,64 @@ executable, explicit SDK markers, isolated/rendered budgets, five runtime UI JSO
 pairs and legacy smoke independently. If still pending, preserve this identity and
 stop. Publish assessment/ledger/handover; stop before physical testing, acceptance,
 merge, optional Git or Phase 2. Do not duplicate pending verification.
+
+
+### 15. Completed replacement assessment and Windows G1-V1 profiling checkpoint — 2026-09-26
+
+User-authorised continuation after adversarial review of head `0d105d3`: preserve the
+existing Phase 1G.2b branch/PR, assess completed replacement evidence, implement the
+next bounded diagnostic step, update the repository handover, and stop before a wider
+architectural correction, physical testing, acceptance, merge, optional Git or Phase 2.
+
+Replacement production run
+[36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651),
+attempt 1, exact application candidate
+`ec6a76adbf78bc09baf7daba067d70eedbc38699`, completed **FAIL**. Preflight passed.
+macOS ARM64 job `108315855809` passed all production steps: isolated real-service
+projection accepted update **66.483 ms <250 ms**, rendered graph p95 **58 ms <100 ms**,
+official SDK/runtime diagnostics, desktop/package, all five real-service packaged UI
+cases, legacy packaged smoke, scans/inventory and uploads passed. This closes neither
+G1 nor final R2 because supported-target completion is conjunctive.
+
+Windows x64 job `108315855860` passed the full release core suite (**176 passed,
+0 failed, 7 ignored**) but failed the isolated projection gate. Its isolated fixture
+reported initial **646.337 ms**, warm **639.328 ms**, accepted update **616.686 ms**,
+then failed the unchanged 250 ms assertion. Downstream rendered/SDK/package/runtime
+steps were skipped by job failure. The lightweight Windows evidence artifact was
+uploaded, but there is no Windows executable/package or final 94-input manifest from
+this run. Preserve the earlier accepted R1 evidence under its own candidates; do not
+substitute the macOS package for missing Windows final-source evidence.
+
+Assessment: the compositor-backed G1-V2 correction is supported by the macOS target
+result and remains the retained implementation. G1-V1 is **not corrected cross-platform**.
+The four-reader observation change preserves bounded/security semantics but does not
+reduce enough work on Windows; the same candidate is ~66 ms accepted update on macOS
+and ~617 ms on Windows. The flow path still performs source refresh/load, inventory,
+secure snapshot read/hash, parsing/projection, a second secure revision/hash pass,
+inventory recheck and metadata revision rechecks. The next correction must be driven
+by measured stage cost rather than another thread-count guess or budget relaxation.
+
+#### Profiling implementation and gates
+
+Published diagnostic commits:
+- `77f2c452d5279dda687b4d773e8f402b1fb0a0df` — env-gated
+  `LOOMLIGHT_PROFILE_FLOW=1` stage timings in the real `flow_workspace` path.
+- `94481e0e83442e63db3ac43810d29326bfeb523b` — manual-only
+  `.github/workflows/flow-profile.yml`, Windows x64 + macOS ARM64, isolated release
+  fixture only, 15-minute ceiling, retained profile log; no SDK/package/browser matrix.
+
+The profiler records: source refresh, metadata load, inventory, secure snapshot
+read/hash, label inventory, node projection, edge projection, freshness read/hash,
+inventory recheck, metadata recheck, finalize and total. Instrumentation is inactive
+unless the explicit environment variable is set; it adds no cache, authority,
+persistent worker, filesystem mutation, budget change or production behavior.
+
+**Next bounded action:** manually dispatch **Phase 1G flow profile** once on this branch.
+Do not rerun production `36210484651` and do not dispatch another package matrix.
+When the two profile jobs complete, inspect exact logs/artifacts and compare stage
+timings. If Windows `snapshot_read_hash` and/or `freshness_read_hash` dominate,
+design the smallest correctness-preserving reduction in duplicate observation work;
+if another stage dominates, correct that measured stage instead. Preserve full
+root/parent/leaf identity safety, stale fail-closed behavior, cancellation/deadline,
+32 MiB/2,048-file limits and the unchanged 250 ms accepted-update budget. Any cache or
+consistency-model redesign requires explicit review before implementation.
