@@ -47,9 +47,12 @@ filesystem safety or change normal Loomlight behavior.
 
 ## Next bounded action
 
-**Manual action required:** dispatch the GitHub Actions workflow **Phase 1G flow profile**
-once against `feature/phase-1g-branches-runtime`. I do not have a workflow-dispatch
-action in the available GitHub connector, so no run has been started from this chat.
+**Manual action required:** open GitHub Actions → **Repository quality** → **Run workflow**.
+Select `feature/phase-1g-branches-runtime`, enable **Run the bounded Phase 1G flow profiler
+instead of repository quality**, then run it once. The discoverable dispatch harness is
+published on main at `4d7ba0333c48d60242a9a42d3e079fea499a5531`; it contains no
+Phase 1G application changes. I do not have a workflow-dispatch action in the available
+GitHub connector, so no run has been started from this chat.
 
 After it completes, resume this checkpoint and inspect both exact jobs/logs/artifacts.
 Compare `snapshot_read_hash`, `freshness_read_hash`, inventory, parsing/projection
