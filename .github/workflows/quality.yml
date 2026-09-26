@@ -5,12 +5,19 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      phase1g_flow_profile:
+        description: Run the bounded Phase 1G flow profiler instead of repository quality
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   validate:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.phase1g_flow_profile }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -19,3 +26,48 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+
+
+  phase1g-flow-profile:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile }}
+    name: Phase 1G flow profile — ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2025
+          - name: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: "false"
+      - name: Profile isolated Branches projection
+        shell: bash
+        env:
+          LOOMLIGHT_PROFILE_FLOW: "1"
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
+      - name: Upload flow profile
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phase-1g-flow-profile-${{ matrix.runner }}
+          path: ${{ runner.temp }}/runtime-flow-profile.log
+          if-no-files-found: error
+          retention-days: 7
