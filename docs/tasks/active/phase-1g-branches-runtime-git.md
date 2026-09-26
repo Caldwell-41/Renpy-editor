@@ -2443,3 +2443,179 @@ State: **blocked on G1-V1 observation-design checkpoint**. G1-V2 compositor work
 retained; R1 prior closure is preserved under its own candidate; final R2 and 1G
 acceptance remain incomplete. Stop before implementing the consistency redesign
 without a reviewed plan.
+
+### 17. G1-V1 observation redesign review — 2026-09-27
+
+**Authority:** user selected an adversarial design review and publication of
+documentation only. No implementation, physical testing, merge, optional Git,
+Phase 2 or production/package dispatch is authorised in this checkpoint.
+**Outcome:** design review `review_ready`; G1-V1 remains `blocked` on native
+feasibility. The next separately selected implementation checkpoint is **G1-O1**.
+
+#### Entry, ownership and evidence
+
+Fresh branch head was `f1e24d5f3a22ccbaa4a0978ab03fdcae508daf43`, matching the supplied
+handover. PR #17 is open/draft with no review comments. A new isolated checkout was
+clean, with one local worktree and no unpublished work; no newer implementation
+was present. Cross-host unpublished work/ownership is not independently observable.
+Main is `4d7ba0333c48d60242a9a42d3e079fea499a5531`; its unique commit adds the bounded
+quality-workflow dispatch, already present in the feature branch's workflow. No
+merge/reset/rebase is needed for this review. Recheck the remote before pushing.
+
+Read AGENTS, WORKFLOW, CURRENT, HANDOVER, sections 15–16 and relevant 1G/transaction
+contracts, ADRs 0001/0004/0008, flow, observation/platform/identity/path readers,
+metadata loaders, Source refresh, mutation boundary, request cancellation and fixture.
+There are no nested AGENTS files in this checkout. Repository changes are docs only.
+
+Re-fetched jobs/artifact metadata for all three completed runs and read both target
+production logs and all four profiling logs. This pass did not redownload/recheck
+archive CRCs or claim new executable/input-hash verification. Preserve earlier
+provenance and missing evidence exactly as recorded in sections 15–16.
+
+| Run / attempt / exact input | Evidence used | Interpretation |
+| --- | --- | --- |
+| [36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651), 1, `ec6a76adbf78bc09baf7daba067d70eedbc38699` | Windows isolated update 616.6855 ms; macOS 66.483333 ms. Windows downstream package gates skipped; macOS production job passed. | Production FAIL; unchanged 250 ms gate; no final G1/R2 closure. |
+| [36213357271](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36213357271), 1, `8303d4e057b2b137c770d65f7ab660bfbc5b1285` | Windows internal accepted total 588.068 ms: snapshot 286.449 + verifier 266.781 ms (~94.1%). Whole-call update 588.5857 ms; macOS 63.221125 ms. | Diagnostic localization, not a production pass. Secure open/path/read/hash costs are grouped; no evidence that SHA-256 arithmetic is the culprit. |
+| [36218397984](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36218397984), 1, `7e4234a041b446d01ad5244002f1ce945d58046d` | Windows readers 1/2/4/8/16: 508.416 / 536.401 / 749.559 / 784.488 / 501.102 ms; macOS 105.763 / 92.560 / 67.187 / 58.416 / 68.651 ms. | Concurrency cannot close Windows G1-V1; both diagnostic jobs succeeding does not mean latency passed. |
+
+The profile workflow currently sets `LOOMLIGHT_PROFILE_FLOW=1` but does **not** set
+`LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`. A green diagnostic run must never be treated as
+the prerequisite performance pass. G1-O1/G1-O2 must distinguish feasibility timings
+from the enforced production-path marker. The old reader override/sweep stays retired.
+
+#### Reviewed architecture and adversarial disposition
+
+[ADR 0009](../../adr/0009-flow-observation-candidates.md) is the canonical reviewed
+proposal, including the full threat/consistency matrix, ownership, platform limits,
+resource bounds, references, alternatives and performance calculation.
+
+Recommend a core-owned **candidate** index: securely acquire/hash once when cold,
+reacquire dirty/new source entries, project cached bytes, then freshly open/hash **all**
+source files and recheck inventories/metadata before returning fresh. Cached candidates
+never certify current disk state. Keep transaction/runtime write/trust authority
+independent. No watcher or persistent handle/index is required.
+
+This deliberately rejects the unproved portion of section 16's preferred direction:
+metadata/change signals plus periodic hashing cannot prove current content without
+a false-fresh window. Stable same-length edits with restored timestamps are detected
+by the mandatory verifier even with notifications absent. Full verification is per
+request, not an eventual audit. Microsoft documents repeated-write USN coalescing and
+notification overflow; Apple's events are advisory. Primary references are in the ADR.
+
+| Finding | Disposition |
+| --- | --- |
+| Metadata/watchers silently substitute for content verification | Unsafe; rejected. No identity/mtime-only or watcher-only cache hit. |
+| One full old Windows pass is still too slow | Partially satisfied by index only. Require separate secure-reader syscall reduction and native proof before integration. No timing promise based solely on fewer hashes. |
+| Broad oplock/USN/retained-handle subsystem | Credible research alternatives but unnecessary complexity before the smaller proof; not selected. No external-editor locks or new privileges. |
+| Invalidating all candidates after each successful transaction | Safe but defeats the goal. Record touched paths before/after mutation; preserve unaffected candidates. Unknown failures/recovery invalidate all. |
+| Invalidation only after successful Source Save | Incomplete. Cover all central mutations, partial failures, recovery, Scene, undo/redo and runtime-policy installation; verifier catches missing hooks. |
+| Metadata dependency coverage | `load()` consumes authoring state, while flow's final loop checks only project/source-map files. Capture authoring presence/revision and all actual projection dependencies. Treat unenumerated dependencies as a wiring blocker. |
+| Cancellation already solved by existing calls to `runtime_work::check()` | Unproved for ordinary flow dispatch: no context means no check. Bind the actual Branches request/session and absolute deadline; verify disposal reaches core work. |
+| Cached observations reused for Source Save, trust or runtime launch | Prohibited. Existing exact bytes/identity, displaced-backup checks, retention and full runtime preparation remain independent. |
+| Atomic snapshot / no race whatsoever | Not supplied by the current read model either. Document per-file optimistic verification and final-window limits; never describe the cache as a lease. |
+| CURRENT still requests completed dispatches | Corrected in this docs checkpoint; historical ledgers retain the actual past instructions/results. PR description is historical and live continuation remains HANDOVER. |
+
+Expected normal source hashes: cold 1,006; warm 503; accepted one-Scene edit 504,
+plus unchanged metadata/dependency work and inventories. About half of secure full-file
+passes disappear without skipping final verification. ADR 0009 quantifies the remaining
+Windows requirement: target <=175 ms verifier + <=65 ms other work, <=240 ms total
+engineering allocation against the unchanged **<250 ms** actual success gate.
+This requires ~34% improvement in the four-reader verifier; unmeasured and conditional.
+macOS already demonstrates adequate margin. The ordinary fixed fixture is ~105.5 KB
+of generated Scene scripts plus support files, not a 32 MiB throughput benchmark.
+
+#### Implementation checkpoints
+
+Each row is a separate user-selected checkpoint; this review implements none of them.
+
+| Checkpoint | Bounded implementation and exit gate |
+| --- | --- |
+| **G1-O1 — verified-candidate feasibility proof (next)** | Implement a core-private candidate-index prototype and post-projection full verifier, reachable only through a test harness initially. Reuse real secure readers and the same fixture/Scene transaction to test cold/warm/one-source invalidation. Add operation counters/timings for root/chain validation, leaf open, handle metadata, bytes/hash and inventory. Qualify only a narrow observation-reader consolidation of duplicate syscalls at the same safety boundaries; do not change public transaction reads/writes or production `flow_workspace`. Test generation/dirty events directly; this does not establish production hook coverage. Prove equivalence with the old reader and native hostile cases below. Run one cheap Windows/macOS profile of this proof. Exit `review_ready` only if correctness passes, cold <2 s and all recorded successful warm/accepted samples <250 ms with plausible margin. If unsafe, above budget or blocked by native APIs, publish findings and stop; no production wiring. |
+| **G1-O2 — production ownership and flow integration** | Only after reviewed G1-O1 feasibility, wire central before/after mutation invalidation, dependency-complete metadata, request/session cancellation and bounded index lifetime into real flow. Reuse existing Source/Scene/transaction authority; no new scheduler or write capability. Preserve one-file granularity. Run focused flow/Source/history/transaction/runtime-control regressions, then cheap native **production-path** isolated fixture with budgets enforced and terminal marker required. Failure/stale/timeout cannot pass. Stop after evidence/handover; no package matrix in this checkpoint. |
+| **G1-O3 — supported-target readiness review** | Review O2 candidate and exact input hashes, adversarial coverage and both native performance logs. Run only missing relevant regressions and rendered G1-V2 checks. If every prerequisite passes, publish a concrete justification and exact candidate for one separately selected full production/package run. Otherwise remain blocked; do not dispatch speculatively. |
+
+G1-O1 must not claim to close G1 because it is a prototype path. Keep the existing
+production fixture as the later authority; reuse its setup/accepted Choice-caption
+operation without changing counts, topology, timing boundaries or old assertions.
+No hidden prewarm between the accepted mutation and the measured refresh; include
+invalidation/acquisition/verification costs and separately report mutation-hook overhead.
+No successful stale graph, delayed refresh or UI-only measurement can satisfy latency.
+
+#### Adversarial tests and cheap native gates
+
+Use deterministic barriers at acquisition, projection, each verification boundary and
+publication rather than probabilistic sleeps. Add focused tests for new invariants;
+reuse existing hostile transaction/Source tests. Required cases:
+
+1. Cold index and unchanged refresh; one-Scene accepted update proves **504** source
+   hashes (503 final) rather than a full reacquisition. All 500 nodes/2,000 edges and
+   changed caption remain correct. Empty cache/eviction/unknown invalidation is honest.
+2. External same-length write after candidate creation and during projection, restored
+   mtime, repeated writes through one unclosed handle, mapped write where supported,
+   write in an unrelated/unmapped `.rpy`, zero notifications. No fresh old projection.
+3. Same-byte/different-identity replace-on-save; remove/recreate, rename, case-only
+   rename, add a duplicate label or whole subtree, remove an observed source. Compare
+   inventories and identities; never follow an old persistent leaf descriptor.
+4. Root/parent/leaf symlink or Windows reparse substitution at each secure-open
+   boundary, including same-identity in-place reparse changes; Unix retained-directory
+   rename and Windows pinned-directory refusal. Existing-hostile tests must remain
+   meaningful for the new reader. Missing platform support is a recorded gap, not PASS.
+5. Mutation before/after invalidation, partial commit/conflict/recovery, Source/Scene,
+   undo/redo, create/delete and runtime policy. Generation changes during projection
+   or just before publication refuse freshness; no lock inversion. Production hooks
+   are O2 gates; explicit harness invalidation in O1 is not equivalent evidence.
+6. Project/source-map/**authoring** metadata changed or replaced, authoring absent then
+   created, unchanged source bytes but changed mapping/dependency; preserve dirty
+   Source text/caret and review identity/retention barriers. Do not autoaccept drafts.
+7. Cancellation and original deadline through each worker, mid-read/hash, final checks,
+   project switch/reopen with same disk UUID, drop/unregistration and late completion.
+   No candidate promotion after cancellation. Actual flow context wiring is an O2 gate.
+8. Exact file/byte/Scene/edge/inventory/depth limits, one beyond, large source growth,
+   unreadable/special files, descriptor/allocation failure, dirty-set overflow and
+   repeated reopen. Assert source-blob/descriptor peaks and eventual release.
+9. Poison/expire the index then invoke real Scene/Source/history/flush/runtime prepare:
+   independent current-state checks still refuse stale writes, preserve competing
+   bytes and require existing execution consent. Preserve final-window race evidence.
+
+For O1, add a named isolated feasibility test and run focused safety tests first.
+On each target run three sequential fresh-process samples of the fixed cold/warm/edit
+sequence in one job (no reader sweep, no reruns of failures to select a winner).
+Record every sample and slowest, exact commit, toolchain/OS/filesystem, total source
+bytes, counts/counters, memory/handle peaks and per-stage/whole-call times. A 15-minute
+job ceiling on the existing Windows x64/macOS ARM64 runners is sufficient scope;
+no Node/browser/SDK/package dependencies. Use the existing quality workflow's manual
+`phase1g_flow_profile` route, with a bounded proof selector when implemented, rather
+than adding another workflow. Keep logs on failure and require the proof marker.
+
+For O2, use the actual isolated release gate in `app/`:
+
+```bash
+LOOMLIGHT_PROFILE_FLOW=1 LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1 cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture
+```
+
+Require `phase-1g-flow-budget-gate: passed` and successful process exit on both targets.
+Preserve all three sequential measurements; do not replace the actual <250 ms limit
+with an average. These repetitions assess obvious variability, not a statistical p95
+claim. Include the warm success gate in the proof as a design sanity check; the
+unchanged accepted-update and initial production assertions remain authoritative.
+Do not dispatch any workflow in this documentation review. Future dispatches require
+exact candidate/no-pending-run inspection and the existing manual-resume handover if
+automatic continuation is unavailable. Never duplicate an ambiguous/pending operation.
+
+#### Remaining risks, validation and handoff
+
+Windows syscall consolidation may not provide the necessary margin, especially with
+antivirus/filesystem variance; no faster reader has been implemented or benchmarked.
+Its per-boundary path proof is the first go/no-go condition. Exact transitive loader
+dependencies, production mutation-hook coverage and Branches cancellation ownership
+are O2 obligations, not assumed solved. Existing optimistic final-window limitations
+remain; neither this review nor a cache establishes atomic filesystem snapshots.
+
+Documentation gates: `python3 scripts/validate.py` **PASS (258 files)**,
+`git diff --cached --check` **PASS**; local links, five-file docs-only scope and
+manual adversarial review passed. No application tests or physical tests are warranted for
+this docs-only change; no target performance pass is newly claimed. Publication
+contains this ledger, ADR/index, corrected CURRENT and the single HANDOVER. Verify
+remote fast-forward/head/content before reporting the actual documentation SHA; do
+not create a follow-up commit to record the commit's own hash. No outstanding
+dispatched work. Stop and offer only G1-O1 as the next checkpoint.
