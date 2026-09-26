@@ -64,3 +64,28 @@ explicit review.
 
 Stop before physical testing, acceptance, merge, optional Git or Phase 2. No local
 process or external run is currently pending.
+
+
+## Profiling result and second bounded experiment
+
+Manual dispatch [36213357271](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36213357271),
+attempt 1, exact head `8303d4e057b2b137c770d65f7ab660bfbc5b1285`, completed PASS for both
+profiling jobs. Windows accepted update **588.586 ms**: secure snapshot read/hash
+**286.449 ms** plus secure freshness read/hash **266.781 ms** (~94% of total); edge
+projection **7.791 ms**. macOS accepted update **63.221 ms**: snapshot **23.033 ms**,
+freshness **16.125 ms**, edge projection **8.360 ms**. The Windows blocker is therefore
+secure per-file observation/hash cost, not graph parsing/layout.
+
+A proposed identity-only final check was rejected during self-review: same-file
+in-place rewrites can retain file identity, so removing the second content check would
+weaken stale detection; moreover the first Windows snapshot pass alone exceeds 250 ms.
+
+Published diagnostic head `eee8343ac6c1af5c34db52491c839dba1feeb31e` keeps normal
+production at four readers but, only under both profiling environment variables, runs
+the same fixture at requested **1/2/4/8/16** reader limits. No production concurrency,
+budget, consistency or authority changes are made.
+
+**Next action:** dispatch **Repository quality** once more on this branch with the Phase
+1G profiling checkbox enabled. This is a bounded concurrency experiment, not a package
+run. Inspect Windows/macOS stage timings by reader count before implementing the
+architectural correction.
