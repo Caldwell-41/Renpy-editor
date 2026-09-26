@@ -67,10 +67,14 @@ impl TransactionService {
         if items.len() > MAX_OBSERVATION_FILES {
             return Err(diagnostic(ErrorCode::InvalidProposal));
         }
-        let workers = items
-            .len()
-            .div_ceil(128)
-            .clamp(1, observation_reader_limit());
+        let limit = observation_reader_limit();
+        let workers = if std::env::var("LOOMLIGHT_PROFILE_FLOW").as_deref() == Ok("1")
+            && std::env::var("LOOMLIGHT_PROFILE_FLOW_READERS").is_ok()
+        {
+            items.len().clamp(1, limit)
+        } else {
+            items.len().div_ceil(128).clamp(1, limit)
+        };
         if workers == 1 {
             let mut reader = self.observation_reader(project)?;
             return Ok(items.iter().map(|item| read(&mut reader, item)).collect());
