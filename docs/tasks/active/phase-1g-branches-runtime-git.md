@@ -1,13 +1,13 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `blocked` (G1-V1 projection latency; final target verification incomplete). User acceptance remains separate.
+**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `in_progress` (G1-V1 corrected locally; replacement target verification outstanding). User acceptance remains separate.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The current execution selection authorises 1G.2a only; see section 13.
+checkpoint. The current execution selection authorises 1G.2b agent verification only; see section 14.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -42,7 +42,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `blocked` (G1-V1) | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI | `in_progress` (replacement verification) | Proven 1G.2a and explicit selection |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -2008,3 +2008,109 @@ then update the live handover with the resulting correction candidate. Next acti
 resolve only G1-V1 under unchanged limits, then run one justified coherent replacement
 production matrix and inspect both targets' complete evidence before final assessment.
 Physical testing, acceptance, merge, optional Git and Phase 2 remain outside authority.
+
+
+### G1-V1 profiling and bounded correction — 2026-09-26
+
+The user selected only continued 1G.2b agent verification from `5b0b443`: profile
+and resolve G1-V1 under unchanged budgets/safety, publish after local gates, then
+launch exactly one justified replacement production run with packages. Fresh refs
+confirm the entry, main `924619d`, draft/open PR #17 and no pending verification.
+Physical testing, acceptance, merge, optional Git and Phase 2 remain excluded.
+
+Named checks recorded before implementation: unchanged isolated release
+500-Scene/2,000-edge fixture (initial <2 s, accepted update <250 ms); fresh external
+source/identity and inventory invalidation; retained Source drafts and Scene/history
+regressions; safe bounded read/path regressions. Profile phases before selecting a
+bounded correction; no persistent cache or consistency redesign is authorised.
+
+
+#### Profile and bounded implementation
+
+Temporary phase timers around the actual release `flow_workspace` call located the
+cost before editing: initial **844.705 ms**, warm **841.246 ms**, accepted-update
+**839.349 ms** (enforced FAIL, 0 passed/1 failed). On that accepted update, cumulative
+load/inventory completed at 11.426 ms, file acquisition at 553.561 ms, projection at
+564.191 ms and final rechecks at 838.845 ms. File acquisition and rechecks consume
+about 817 ms; projection itself about 11 ms. This is repeated safe path traversal and
+file I/O, not evidence for a parser cache or a relaxed consistency contract.
+
+The bounded correction introduces a core-private `ObservationReader` used only for
+one flow observation. It retains at most one most-recent parent directory chain,
+revalidates project registration, canonical root and the full parent chain on every
+open, and still rejects leaf links/reparse points. It caches no bytes or revisions.
+The initial snapshot checks metadata size before reading, bounds reads by observed
+length and the remaining inventory limit, then verifies length/identity afterwards;
+this removes the redundant first content-hashing read. Every observed source is
+still reopened and rehashed for final identity/revision comparison, with unchanged
+final metadata and file-inventory checks. Handles expire at the end of the call.
+No transaction, Source acceptance, draft, trust, permission, CSP or execution behavior
+changes; commands retain their independent current-state checks.
+
+Only one retained directory chain bounds descriptors even for many distinct source
+parents. There is no cross-request cache, no timestamp shortcut, no new source truth,
+and no wider cache/consistency redesign. Limits remain 500 Scenes/2,000 edges, 2,048
+source files/32 MiB total/16 MiB per file, <2 s initial and <250 ms accepted update.
+The fixture topology, accepted Choice-caption edit and gate assertions are unchanged.
+
+With the temporary timers, the corrected isolated release call measured initial
+**180.142 ms**, warm **175.657 ms**, accepted update **178.537 ms** (1 pass, marker
+present). The timers were removed before final gates. Local host: macOS 26.6.2 build
+25G83, ARM64, Rust/Cargo 1.90.0; Node 26.8.1/npm 11.19.0 are supplemental development
+tooling, distinct from CI's pinned Node 24.19.0/npm 11.9.0.
+
+Review added an explicit registration check on each read so unregistration cannot
+leave an observation with continuing authority. New low-level tests exercise fresh
+same-length content, same-byte/different-identity replacement, deletion, oversize
+rejection, cancellation and unregistration. Unix tests replace retained parent/root
+identities and substitute leaf/parent symlinks; Windows has an explicit retained-parent
+namespace-pinning test. The Source navigation test now projects accepted content
+while a draft exists and proves disk bytes, draft text and caret remain unchanged.
+Existing flow/history/inventory and hostile transaction regressions remain required.
+
+#### Supplemental Phase 0 limitation
+
+The unchanged Python SDK spike suite reports **23 passed / 1 error**, not a pass:
+`test_process_output_is_bounded` receives `EPERM` on a repeated process-group kill.
+A temporary diagnostic wrapper which rethrows every error recorded first SIGKILL
+success, then errno 1 for the same group. This is consistent with a cleanup race;
+it is not proof that the first signal lacked permission. It reproduces using bundled
+Python 3.12.14 and system Python 3.9 with canonical temporary paths and host execution.
+No helper processes remain. Initial noncanonical temporary-path assertions were
+resolved by using a canonical temporary root; no test assertion was weakened.
+
+The spike sources are byte-identical to entry `5b0b443`. This supplemental issue is
+outside the selected G1-V1 read-observation correction; no Python process change is
+made or pass claimed. Applicable production core/process, isolated budget, frontend,
+source and repository gates remain mandatory before dispatch; the replacement matrix
+retains all explicit SDK and native process gates. This is not an SDK/package waiver.
+
+
+#### Final local gates and replacement-run justification
+
+All production-scope local prerequisites pass after removal of profiling and the
+registration review correction. Commands run from `app/` with pinned Rust 1.90.0;
+`--release` matches the existing production core gate.
+
+| Gate | Final observed result |
+| --- | --- |
+| `cargo test --release -p loomlight-core --locked -- --nocapture` | PASS: 182 passed, 0 failed, 7 ignored, 126.44 s; two no-archive wrappers printed skip markers, leaving 180 substantive ordinary passes. Five ignored subprocess entry points and two ignored explicit SDK gates are not passes. |
+| `LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1 cargo test --release -p loomlight-core --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture` | PASS: 1 passed, 188 filtered, 2.04 s; initial **180.470 ms**, warm **181.755 ms**, accepted update **181.026 ms**; required marker present. No other local core test ran concurrently. |
+| Real-service flow JSON | 500 nodes/2,000 edges; partial/stale/over-limit false; feeds the browser unchanged. |
+| `npm run check` | PASS: typecheck and 58 tests, zero failures/cancellations/skips. |
+| `npm run test:source-browser` (includes build) | PASS: legacy red control, faithful clean-after-Save and selection/Apply Both. Local loopback browser execution required host access. |
+| `node tests/branches.browser.mjs` with that flow JSON | PASS: Chrome 154.0.8037.57, initial layout 62.3 ms, pan/frame p95 33.1 ms, 640px resize, zero page errors. Supplemental synthetic-input browser layer. |
+| `node tests/runtime-ui.browser.mjs` | PASS: 1100/640px, focus pass, no overflow/page errors; injected requester, not packaged IPC. |
+| Lossless Source Python regression / benchmark | PASS: 26 tests; Python 3.12.14, 620,000 bytes/40,000 nodes, seven-sample parse median 107.78 ms. |
+| Rust formatting, repository structure/link/privacy and whitespace | PASS; 258 tracked repository files before staging the new reader module. |
+| Unchanged Python SDK spike | 23 passed / 1 repeated-signal cleanup error; retained separately above, not counted as a pass or final SDK evidence. |
+
+Self-review checked the full implementation diff, source/metadata final rechecks,
+registration revocation, bounded directory ownership and unchanged workloads/gates.
+No application capability or runtime privilege changed. G1-V1 is corrected **locally**;
+Windows/macOS supported-target latency and final G1/R1/R2 evidence remain open.
+A single replacement production run is justified by this material read-path correction
+plus the prior `6c7efad` capability-test/budget-gate correction. It must use package
+upload, after publication and a fresh no-pending-run check. No R1-only run, retry,
+workflow change or main integration is authorised here. If pending, record exact
+run/attempt/SHA and stop under the repository manual-resume policy.

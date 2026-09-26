@@ -169,30 +169,15 @@ impl AuthoringService {
         };
         let mut files = BTreeMap::new();
         let mut total = 0_usize;
+        let mut reader = self
+            .transactions
+            .observation_reader(project)
+            .map_err(diagnostic_error)?;
         for path in &paths {
             let relative = RelativePath::new(path).map_err(|_| SceneError::Io)?;
-            let size = match self.transactions.inspect_file_bounded(
-                project,
-                relative.clone(),
-                MAX_FILE_BYTES,
-            ) {
-                Ok(Some((size, _))) => size,
-                Err(error) if error.code == ErrorCode::InvalidProposal => {
-                    return Ok(over_limit(result))
-                }
-                _ => {
-                    inventory.complete = false;
-                    continue;
-                }
-            };
-            if size > MAX_FILE_BYTES || total.saturating_add(size as usize) > MAX_BYTES {
-                return Ok(over_limit(result));
-            }
-            let (bytes, revision) = match self.transactions.snapshot_bounded(
-                project,
-                relative,
-                (MAX_BYTES - total).min(MAX_FILE_BYTES as usize),
-            ) {
+            let (bytes, revision) = match reader
+                .snapshot_bounded(&relative, (MAX_BYTES - total).min(MAX_FILE_BYTES as usize))
+            {
                 Ok(value) => value,
                 Err(error) if error.code == ErrorCode::InvalidProposal => {
                     return Ok(over_limit(result))
@@ -318,16 +303,12 @@ impl AuthoringService {
         }
         // Observation only; the UI never acquires a write precondition from this.
         for (path, (_, revision)) in &files {
-            if !self
-                .transactions
-                .inspect_file_bounded(
-                    project,
-                    RelativePath::new(path).map_err(|_| SceneError::Io)?,
+            if !reader
+                .revision_bounded(
+                    &RelativePath::new(path).map_err(|_| SceneError::Io)?,
                     MAX_FILE_BYTES,
                 )
-                .ok()
-                .flatten()
-                .is_some_and(|(_, current)| current == *revision)
+                .is_ok_and(|current| current == *revision)
             {
                 result.stale = true;
             }
@@ -350,16 +331,12 @@ impl AuthoringService {
             (PROJECT_PATH, &loaded.project_revision),
             (SOURCE_MAP_PATH, &loaded.source_map_revision),
         ] {
-            if !self
-                .transactions
-                .inspect_file_bounded(
-                    project,
-                    RelativePath::new(path).map_err(|_| SceneError::Io)?,
+            if !reader
+                .revision_bounded(
+                    &RelativePath::new(path).map_err(|_| SceneError::Io)?,
                     MAX_FILE_BYTES,
                 )
-                .ok()
-                .flatten()
-                .is_some_and(|(_, current)| current == *revision)
+                .is_ok_and(|current| current == *revision)
             {
                 result.stale = true;
             }

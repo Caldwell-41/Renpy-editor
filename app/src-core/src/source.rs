@@ -2198,6 +2198,17 @@ mod tests {
                 },
             )
             .unwrap();
+        let accepted = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(!accepted.stale);
+        assert_eq!(accepted.edges.len(), 1);
+        assert_eq!(accepted.edges[0].location.revision, original.base_revision);
+        assert_eq!(
+            fs::read(fixture.root.join(&fixture.scene_path)).unwrap(),
+            b"label scene_one:\n    \"Hello\"\n    return\n"
+        );
         let target = SourceOpenRequest {
             path: fixture.scene_path.clone(),
             expected_revision: Some(original.base_revision.clone()),

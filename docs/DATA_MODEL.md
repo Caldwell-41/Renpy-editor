@@ -345,6 +345,16 @@ Observation hashes cover metadata and the accepted source inventory. Dirty Sourc
 buffers are excluded. Revision/identity changes invalidate observations; commands
 continue to enforce current Scene/Source transaction preconditions independently.
 
+Each flow observation rereads source bytes and rehashes every observed file at the
+end, then rechecks the inventory and metadata. Its bounded reader retains only the
+most recently used parent directory handle chain for that call; no source bytes,
+revisions or directory handles survive into the next observation. Each file open
+revalidates the approved root and full parent chain and refuses links/reparse points.
+Snapshot reads check the file length before I/O, bound growth by that length, and
+recheck length and identity afterwards. Limits remain 16 MiB/file, 32 MiB/inventory,
+2,048 source files, 500 Scenes and 2,000 edges. This observation grants no new write
+or runtime authority and does not claim an immutable filesystem snapshot.
+
 
 ## Runtime diagnostic projection (1G.2b)
 

@@ -7,6 +7,7 @@
 
 mod execution;
 mod manifest;
+mod observation;
 pub(crate) use execution::ExecutionGate;
 pub(crate) use manifest::{execution_manifest, ExecutionManifest};
 mod history;

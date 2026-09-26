@@ -597,6 +597,13 @@ and the required `phase-1g-flow-budget-gate: passed` marker; `runtime-flow.json`
 the existing rendered checks. Full-suite timings are supplemental and do not silently
 pass an exceeded budget. Failure blocks later package steps and keeps G1 open.
 
+The G1 observation-reader regressions exercise same-length external edits, same-byte
+file identity replacement, deletion, oversize rejection and cancellation. Unix cases
+replace the retained parent/root and substitute symlinks; Windows proves retained
+parent namespace pinning. Existing flow inventory/history/external-invalidation and
+Source draft/caret tests remain required. Directory-handle reuse is limited to one
+observation and never permits reuse of source content or revision hashes.
+
 R1's old automatic branch trigger is retired into this combined final gate; explicit
 manual R1 dispatch remains available for bounded future corrections. Final production
 verification is manually dispatched once on the implementation branch. Main's existing
