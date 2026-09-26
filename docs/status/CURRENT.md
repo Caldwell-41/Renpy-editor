@@ -1,24 +1,20 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** Phase 1G.2b G1-V1 observation redesign review is
-`review_ready`; G1-V1 remains `blocked` on native feasibility. No implementation
-was performed in this design-review checkpoint.
-
+**Current checkpoint:** Phase 1G.2b **G1-O1 verified-candidate feasibility proof**,
+`in_progress`; G1-V1 remains `blocked` until safety and native feasibility qualify.
 Continue `feature/phase-1g-branches-runtime`, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-Read [HANDOVER](HANDOVER.md) and
-[ledger 17](../tasks/active/phase-1g-branches-runtime-git.md#17-g1-v1-observation-redesign-review--2026-09-27).
-The reviewed proposal is [ADR 0009](../adr/0009-flow-observation-candidates.md).
-The next separately selected implementation checkpoint is **G1-O1: verified-candidate
-feasibility proof**, before production wiring. No CI dispatch is pending from this review.
+Read [HANDOVER](HANDOVER.md),
+[ledger 18](../tasks/active/phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
+and [ADR 0009](../adr/0009-flow-observation-candidates.md).
 
-Recommend a core-owned candidate index that removes duplicate acquisition of unchanged
-source bytes while retaining fresh secure full-content verification of every source
-on every refresh. A one-Scene edit would require 504 source hashes rather than 1,006.
-Metadata/watchers/periodic audits cannot replace this verifier. Windows still needs a
-proved reduction in duplicated secure-open work; index-only performance is unproved.
+The test-only candidate prototype and compound secure reader preserve mandatory
+full post-projection verification. Local macOS tests establish 1,006 / 503 / 504
+source-pass counts and preliminary <250 ms timings. Native qualification and
+explicit proof gaps remain open; production flow/write paths are not wired.
 The accepted-update budget remains **<250 ms** and initial projection **<2 s**.
+No G1-O2, package matrix, physical acceptance or merge is authorized.
 
 ## Completed evidence and current blockers
 

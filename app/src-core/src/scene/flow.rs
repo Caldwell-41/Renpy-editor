@@ -640,3 +640,6 @@ fn entry_jump(bytes: &[u8], start: &FlowLocation) -> Option<String> {
     let label = line.strip_prefix("    jump ")?;
     identifier(label).then(|| label.to_owned())
 }
+
+#[cfg(test)]
+pub(super) mod candidate;

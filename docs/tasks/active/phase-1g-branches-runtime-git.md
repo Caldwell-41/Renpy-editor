@@ -2619,3 +2619,99 @@ contains this ledger, ADR/index, corrected CURRENT and the single HANDOVER. Veri
 remote fast-forward/head/content before reporting the actual documentation SHA; do
 not create a follow-up commit to record the commit's own hash. No outstanding
 dispatched work. Stop and offer only G1-O1 as the next checkpoint.
+
+
+### 18. G1-O1 verified-candidate feasibility proof — 2026-09-27
+
+**Authority:** the user explicitly selected G1-O1 implementation, adversarial proof,
+and one cheap Windows/macOS profiling pair, followed by publication and stop.
+**State:** `in_progress`. Production flow/write wiring, package matrices, acceptance
+and G1-O2 remain excluded. The <250 ms update / <2 s cold limits are unchanged.
+
+Fresh fetched branch and draft/open PR #17 match entry
+`1c87e2c952e67c6e39b02cf6ba6990881f9a347d`. The existing implementation worktree was
+clean and fast-forwarded; no reset or rebase. Visible related tasks were idle; no
+other active repository writer was found. Unpublished cross-host work remains
+independently unobservable. Main is `4d7ba0333c48d60242a9a42d3e079fea499a5531`;
+its profiling route already exists on this branch. Read AGENTS, WORKFLOW, CURRENT,
+HANDOVER, ledger 17 and ADR 0009; no nested AGENTS.
+
+
+#### Prototype and safety map
+
+All new executable paths are `cfg(test)`: `scene/flow/candidate.rs`,
+`transaction/candidate.rs`, `transaction/platform/candidate.rs`, their harnesses,
+and an absolute-deadline test context. Production `flow_workspace`, public readers,
+write paths, runtime inventories and IPC are unchanged. The fixed fixture is copied
+unchanged from the production gate; projection uses the existing label/edge/mapping
+helpers. A small-fixture exact JSON comparison checks parity with production.
+
+The harness retains one owned byte vector per candidate, no leaf handles. Explicit
+before/after dirty events remove the one touched source; unknown events clear all.
+One owner key contains registered ProjectId, session number and root identity. A
+request takes the candidates out of the index, projects them, then freshly reads all
+sources. Any verification/generation/registration failure prevents promotion and
+removes edge editability. No retries, watchers or background results. The request
+installs a two-second absolute ceiling capped by any earlier inherited deadline.
+
+| Existing boundary | Prototype owner / proof |
+| --- | --- |
+| Approved registration, canonical root and root identity | Registration lookup on every read and final publication; fresh canonical root and pathname identity in the complete compound chain, before open, after open and after read. Initial/changed-parent resolution still uses the original reader's root/path checks. |
+| Every parent identity, directory type and reparse/symlink refusal | `candidate_validate` freshly checks path metadata, opens each directory with original platform flags, and compares one native handle sample with each retained identity. It never treats directory pinning as content immutability. |
+| Leaf path/type/no-follow/sharing | Original `open_file_at` flags and path metadata checks retained. Fresh leaf sample rejects directories/special/reparse objects. A second chain check before bytes prevents a substituted parent from authorizing an outside read. |
+| Before/after identity and length, bounded full bytes and hash | One native sample per leaf boundary combines identity/type/length; every read/hash checks cancellation at <=1 MiB, checks growth/short read, and samples again after bytes. Final chain/registration validation also retained. |
+| Same-byte replacement and external writes | Fresh leaf handles; hash AND identity comparison after projection. Restored mtime/open-handle writes, unmapped source, rename/add/remove, macOS mapped write and same-byte replacement covered. No timestamp shortcut. |
+| Metadata / authority | Captures project, map, authoring presence/revision and assets-source presence plus empty media inventories. O1 deliberately refuses nonempty authoring content/media: complete transitive dependency support is O2. Real stale Scene command test refuses a competing writer after index invalidation. |
+| Resource bounds | Four scoped readers, 2,048 files, 16 MiB/file, shared 32 MiB acquisition allowance. Near the source byte ceiling, release blobs after projection before verifier scratch and leave the next request cold. Source-batch scratch/readers counted; descriptor upper bound includes full chains, leaf and validation handle, without claiming an OS-wide measured peak. |
+
+This consolidation combines native handle queries at a boundary and eliminates the
+redundant standalone root check when the retained parent already supplies that same
+root check. It conservatively adds post-open/post-read chain checks. Whether that
+net syscall balance can satisfy Windows is deliberately left to measurement.
+Operation durations are summed worker costs (overlapping), not additive wall time.
+Counters cover candidate acquisition/verifier source passes; the unchanged metadata
+loaders also read support sources, separately charged to metadata stages.
+
+#### Local gates before native dispatch
+
+macOS ARM64 26.6.2 (25G83), pinned Rust 1.90.0, release/locked:
+
+- Focused proof suite: **12 passed**, no failed/ignored (8.05 s), including original
+  reader hostile cases repeated against the new reader, deterministic read boundaries,
+  growth/shortening, chunk cancellation and inherited expired deadline.
+- Full core regression before the final resource-counter-only/Windows-test additions:
+  **196 passed / 7 ignored**, no failed (137.67 s); crash/recovery, Source/Scene/history
+  and runtime controls remain intact. Ignored official SDK gates are not passes.
+- Isolated enforced local fixture: cold **78.826 ms**, warm **53.248 ms**, accepted
+  **57.001 ms** including **0.003 ms** explicit invalidation overhead. Counts
+  **1,006 / 503 / 504**; 503 files, **105,627 source bytes**, 500 nodes, 2,000 edges,
+  changed Route A caption. These preliminary timings precede the final resource
+  instrumentation and are not the supported-target three-sample qualification.
+- Formatter, diff whitespace, repository link/privacy validation pass (264 files).
+  No frontend/package changes or SDK/browser work are needed for this test-only path.
+
+Native route: existing `quality.yml`, `phase1g_flow_profile=true` and new bounded
+`phase1g_candidate_proof=true`; one Windows-2025/macOS-26 pair, 15 minutes each.
+Safety precedes three fresh-process fixed samples; every sample keeps its result,
+including failures, and requires `phase-1g-candidate-proof: passed`. The unchanged
+<250 ms warm/accepted and <2 s cold rules are enforced. No reader-count sweep or
+package workflow. Exact dispatch receipt/outcome will be recorded below.
+
+#### Limits requiring explicit disposition
+
+This is not production hook coverage or final G1 acceptance. The prototype refuses
+nonempty authoring/media dependencies instead of generalizing their loader contract.
+Mutation/partial failure/recovery/session events are harness-driven; real Source,
+undo/redo/runtime invalidation wiring remains O2. The original authority/regression
+suite is preserved, not replaced by a poisoned-cache shortcut.
+
+Coverage remains narrower than ledger 17's entire qualification matrix: source-batch
+memory and a descriptor bound are instrumented, not allocator-failure injection or a
+whole-process peak including loader allocations; 32 MiB exact / one-byte-under allowance
+is proven at the compound batch reader, not yet at every loader/projection allocation.
+OS-level descriptor exhaustion, every special-file kind, exact traversal-depth/entry
+and every scene/edge boundary on the copied prototype, and live Source caret/retention
+with a poisoned index are not all newly exercised. These are explicit proof gaps,
+not silent passes. Native Windows in-place reparse and mapped-write cases are included
+but cannot be claimed until their actual runner logs pass. A native timing pass alone
+would not close these gaps or authorize G1-O2.

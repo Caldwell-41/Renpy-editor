@@ -1,3 +1,5 @@
+#[cfg(test)]
+pub(crate) mod candidate;
 use super::{identity::identity_for_file, path::is_link_or_reparse, ErrorCode, FileIdentity};
 use serde::{Deserialize, Serialize};
 use std::{

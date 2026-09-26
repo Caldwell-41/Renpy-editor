@@ -126,3 +126,28 @@ mod tests {
         assert!(check().is_ok());
     }
 }
+
+/// Test harness supplies an absolute deadline; an existing caller can only tighten it.
+#[cfg(test)]
+pub(crate) fn proof_scoped<T>(
+    cancel: Arc<Cancellation>,
+    deadline: Instant,
+    task: impl FnOnce() -> T,
+) -> T {
+    let previous = WORK.with(|work| work.borrow().clone());
+    let deadline = previous
+        .as_ref()
+        .map(|(_, d)| (*d).min(deadline))
+        .unwrap_or(deadline);
+    // Preserve the caller's cancellation owner as well as its earlier deadline.
+    let cancel = previous.as_ref().map(|(c, _)| c.clone()).unwrap_or(cancel);
+    struct Restore(Option<(Arc<Cancellation>, Instant)>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            WORK.with(|w| *w.borrow_mut() = self.0.take());
+        }
+    }
+    WORK.with(|work| *work.borrow_mut() = Some((cancel, deadline)));
+    let _restore = Restore(previous);
+    task()
+}

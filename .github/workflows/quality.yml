@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      phase1g_candidate_proof:
+        description: Select G1-O1 safety and three fixed feasibility samples (requires flow profile)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -54,6 +59,7 @@ jobs:
           workspaces: app -> target
           cache-bin: "false"
       - name: Profile isolated Branches projection
+        if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
         env:
           LOOMLIGHT_PROFILE_FLOW: "1"
@@ -62,6 +68,37 @@ jobs:
           cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
+      - name: Prove isolated verified candidates
+        if: ${{ inputs.phase1g_candidate_proof }}
+        shell: bash
+        env:
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+        run: |
+          set -o pipefail
+          {
+            git rev-parse HEAD
+            rustc -Vv
+            if [ "$RUNNER_OS" = "Windows" ]; then
+              powershell -NoProfile -Command 'Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,OSArchitecture; Get-Volume | Select-Object DriveLetter,FileSystemType'
+            else
+              sw_vers
+              df "$RUNNER_TEMP"
+              diskutil info /
+            fi
+            cargo test -p loomlight-core --release --locked g1_o1 -- --skip g1_o1_feasibility --test-threads=1 --nocapture
+          } 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          safety=${PIPESTATUS[0]}
+          if [ "$safety" -ne 0 ]; then exit "$safety"; fi
+          set +e
+          failed=0
+          for sample in 1 2 3; do
+            echo "g1-o1-sample: $sample" | tee -a "$RUNNER_TEMP/runtime-flow-profile.log"
+            cargo test -p loomlight-core --release --locked scene::tests::candidate_proof::g1_o1_feasibility -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/g1-o1-sample-$sample.log"
+            status=${PIPESTATUS[0]}
+            cat "$RUNNER_TEMP/g1-o1-sample-$sample.log" >> "$RUNNER_TEMP/runtime-flow-profile.log"
+            if [ "$status" -ne 0 ] || ! grep -q 'phase-1g-candidate-proof: passed' "$RUNNER_TEMP/g1-o1-sample-$sample.log"; then failed=1; fi
+          done
+          test "$failed" -eq 0
       - name: Upload flow profile
         if: always()
         continue-on-error: true

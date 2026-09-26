@@ -1873,3 +1873,441 @@ fn public_errors_never_contain_paths_or_file_bytes() {
     assert!(!serialized.contains("/private"));
     assert!(!serialized.contains("label one"));
 }
+
+#[test]
+fn g1_o1_reader_rereads_content_identity_and_bounds() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+        .unwrap();
+    let (bytes, original) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), original);
+    let changed = b"label one:\n    xxxx\n";
+    assert_eq!(bytes.len(), changed.len());
+    fs::write(fixture.root.join(path.as_str()), changed).unwrap();
+    let (observed, modified) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(observed, changed);
+    assert_ne!(modified.sha256, original.sha256);
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), modified);
+
+    let replacement = fixture.root.join("game/replacement.tmp");
+    fs::write(&replacement, changed).unwrap();
+    fs::rename(replacement, fixture.root.join(path.as_str())).unwrap();
+    let (_, replaced) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert_eq!(replaced.sha256, modified.sha256);
+    assert_ne!(replaced.identity, modified.identity);
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), replaced);
+    assert_eq!(
+        reader.snapshot_bounded(&path, 4).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 4).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    fs::remove_file(fixture.root.join(path.as_str())).unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+
+    let huge = fs::File::create(fixture.root.join(path.as_str())).unwrap();
+    huge.set_len(17 * 1024 * 1024).unwrap();
+    assert_eq!(
+        reader.snapshot_bounded(&path, usize::MAX).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, u64::MAX).unwrap_err().code,
+        ErrorCode::InvalidProposal
+    );
+    let cancelled = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+    cancelled.cancel();
+    crate::runtime_work::scoped(cancelled, || {
+        assert_eq!(
+            reader.snapshot_bounded(&path, 64).unwrap_err().code,
+            ErrorCode::RuntimeBusy
+        );
+    });
+    fixture.service.unregister_trusted_project(&fixture.project);
+    assert_eq!(
+        reader.snapshot_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::UnknownProject
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::UnknownProject
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn g1_o1_reader_rejects_retained_parent_and_root_substitution() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+        .unwrap();
+    reader.snapshot_bounded(&path, 64).unwrap();
+    fs::rename(
+        fixture.root.join("game"),
+        fixture.root.join("original-game"),
+    )
+    .unwrap();
+    fs::create_dir(fixture.root.join("game")).unwrap();
+    fs::write(fixture.root.join(path.as_str()), b"substitute").unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+
+    let moved = fixture.root.with_extension("observation-moved");
+    fs::rename(&fixture.root, &moved).unwrap();
+    fs::create_dir(&fixture.root).unwrap();
+    assert_eq!(
+        reader.snapshot_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::RootIdentityChanged
+    );
+    assert_eq!(
+        reader.revision_bounded(&path, 64).unwrap_err().code,
+        ErrorCode::RootIdentityChanged
+    );
+    fs::remove_dir(&fixture.root).unwrap();
+    fs::rename(moved, &fixture.root).unwrap();
+}
+
+#[cfg(windows)]
+#[test]
+fn g1_o1_reader_pins_retained_parent_namespace() {
+    let fixture = Fixture::new();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+        .unwrap();
+    let (_, revision) = reader.snapshot_bounded(&path, 64).unwrap();
+    assert!(fs::rename(fixture.root.join("game"), fixture.root.join("moved-game")).is_err());
+    assert_eq!(reader.revision_bounded(&path, 64).unwrap(), revision);
+    drop(reader);
+    fs::rename(fixture.root.join("game"), fixture.root.join("moved-game")).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn g1_o1_reader_rejects_leaf_and_parent_symlink_substitution() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let outside = tempfile::tempdir().unwrap();
+    fs::write(outside.path().join("one.rpy"), b"outside").unwrap();
+    let path = RelativePath::new("game/one.rpy").unwrap();
+    let mut reader = fixture
+        .service
+        .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+        .unwrap();
+    reader.snapshot_bounded(&path, 64).unwrap();
+    fs::remove_file(fixture.root.join(path.as_str())).unwrap();
+    symlink(
+        outside.path().join("one.rpy"),
+        fixture.root.join(path.as_str()),
+    )
+    .unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+    fs::rename(
+        fixture.root.join("game"),
+        fixture.root.join("original-game"),
+    )
+    .unwrap();
+    symlink(outside.path(), fixture.root.join("game")).unwrap();
+    assert!(reader.snapshot_bounded(&path, 64).is_err());
+    assert!(reader.revision_bounded(&path, 64).is_err());
+    assert_eq!(
+        fs::read(outside.path().join("one.rpy")).unwrap(),
+        b"outside"
+    );
+}
+
+#[test]
+fn g1_o1_reader_equivalence_growth_shortening_and_chunk_cancellation() {
+    use candidate::{Point, Probe};
+    for point in [
+        Point::ChainValidated,
+        Point::LeafMetadata,
+        Point::LeafOpened,
+        Point::BeforeRead,
+        Point::Chunk,
+        Point::AfterRead,
+    ] {
+        let fixture = Fixture::new();
+        let path = RelativePath::new("game/one.rpy").unwrap();
+        let cancel = Arc::new(crate::runtime_work::Cancellation::default());
+        let c = cancel.clone();
+        let probe = Arc::new(Probe {
+            hook: Some(Arc::new(move |p| {
+                if p == point {
+                    c.cancel()
+                }
+            })),
+            ..Probe::default()
+        });
+        crate::runtime_work::scoped(cancel, || {
+            let mut reader = fixture
+                .service
+                .candidate_reader(&fixture.project, probe)
+                .unwrap();
+            assert!(reader.snapshot_bounded(&path, 64).is_err());
+        });
+    }
+    for retain in [false, true] {
+        for grow in [false, true] {
+            let fixture = Fixture::new();
+            let path = RelativePath::new("game/one.rpy").unwrap();
+            let leaf = fixture.root.join(path.as_str());
+            let probe = Arc::new(Probe {
+                hook: Some(Arc::new(move |p| {
+                    if p == Point::AfterRead {
+                        let f = fs::OpenOptions::new().write(true).open(&leaf).unwrap();
+                        f.set_len(if grow { 100 } else { 1 }).unwrap();
+                    }
+                })),
+                ..Probe::default()
+            });
+            let mut reader = fixture
+                .service
+                .candidate_reader(&fixture.project, probe)
+                .unwrap();
+            assert!(reader
+                .read(
+                    &path,
+                    128,
+                    &std::sync::atomic::AtomicUsize::new(128),
+                    retain
+                )
+                .is_err());
+        }
+    }
+    let fixture = Fixture::new();
+    for size in [0, 1, 1024 * 1024 + 1, 16 * 1024 * 1024] {
+        let bytes = vec![b'#'; size];
+        fs::write(fixture.root.join("game/one.rpy"), &bytes).unwrap();
+        let path = RelativePath::new("game/one.rpy").unwrap();
+        let old = fixture
+            .service
+            .observation_reader(&fixture.project)
+            .unwrap()
+            .snapshot_bounded(&path, size)
+            .unwrap();
+        let mut new = fixture
+            .service
+            .candidate_reader(&fixture.project, Arc::new(Probe::default()))
+            .unwrap();
+        assert_eq!(old, new.snapshot_bounded(&path, size).unwrap());
+        assert_eq!(old.1, new.revision_bounded(&path, size as u64).unwrap());
+    }
+}
+#[test]
+fn g1_o1_reader_total_bytes_files_and_expired_deadline() {
+    let fixture = Fixture::new();
+    let bytes = vec![b'#'; 16 * 1024 * 1024];
+    for p in ["game/one.rpy", "game/two.rpy"] {
+        fs::write(fixture.root.join(p), &bytes).unwrap();
+    }
+    let paths = vec!["game/one.rpy".into(), "game/two.rpy".into()];
+    for (budget, ok) in [(32 * 1024 * 1024, true), (32 * 1024 * 1024 - 1, false)] {
+        assert_eq!(
+            fixture
+                .service
+                .candidate_batch(
+                    &fixture.project,
+                    &paths,
+                    16 * 1024 * 1024,
+                    &std::sync::atomic::AtomicUsize::new(budget),
+                    true,
+                    Arc::new(candidate::Probe::default())
+                )
+                .is_ok(),
+            ok
+        );
+    }
+    let paths = vec!["game/one.rpy".into(); 2049];
+    assert!(fixture
+        .service
+        .candidate_batch(
+            &fixture.project,
+            &paths,
+            1,
+            &std::sync::atomic::AtomicUsize::new(0),
+            true,
+            Arc::new(candidate::Probe::default())
+        )
+        .is_err());
+    crate::runtime_work::proof_scoped(
+        Arc::new(crate::runtime_work::Cancellation::default()),
+        std::time::Instant::now() - std::time::Duration::from_secs(1),
+        || {
+            assert!(fixture
+                .service
+                .candidate_batch(
+                    &fixture.project,
+                    &vec!["game/one.rpy".into(); 503],
+                    16 * 1024 * 1024,
+                    &std::sync::atomic::AtomicUsize::new(32 * 1024 * 1024),
+                    false,
+                    Arc::new(candidate::Probe::default())
+                )
+                .is_err());
+        },
+    );
+}
+#[cfg(unix)]
+#[test]
+fn g1_o1_reader_substitution_at_each_open_boundary() {
+    use candidate::{Point, Probe};
+    use std::sync::atomic::{AtomicBool, Ordering};
+    for point in [
+        Point::ChainValidated,
+        Point::LeafMetadata,
+        Point::LeafOpened,
+        Point::BeforeRead,
+        Point::AfterRead,
+    ] {
+        let fixture = Fixture::new();
+        let root = fixture.root.clone();
+        let once = AtomicBool::new(false);
+        let probe = Arc::new(Probe {
+            hook: Some(Arc::new(move |p| {
+                if p == point && !once.swap(true, Ordering::SeqCst) {
+                    fs::rename(root.join("game"), root.join("old-game")).unwrap();
+                    fs::create_dir(root.join("game")).unwrap();
+                    fs::write(root.join("game/one.rpy"), b"outside").unwrap();
+                }
+            })),
+            ..Probe::default()
+        });
+        let mut reader = fixture
+            .service
+            .candidate_reader(&fixture.project, probe)
+            .unwrap();
+        assert!(reader
+            .snapshot_bounded(&RelativePath::new("game/one.rpy").unwrap(), 64)
+            .is_err());
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn g1_o1_windows_same_identity_reparse_at_open_boundaries() {
+    use std::{
+        os::windows::{fs::OpenOptionsExt, io::AsRawHandle},
+        sync::atomic::{AtomicBool, Ordering},
+    };
+    use windows_sys::Win32::Storage::FileSystem::{
+        FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_READ, FILE_SHARE_WRITE,
+    };
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn DeviceIoControl(
+            handle: *mut std::ffi::c_void,
+            code: u32,
+            input: *const std::ffi::c_void,
+            input_size: u32,
+            output: *mut std::ffi::c_void,
+            output_size: u32,
+            returned: *mut u32,
+            overlapped: *mut std::ffi::c_void,
+        ) -> i32;
+    }
+    fn reparse(path: &std::path::Path, target: Option<&std::path::Path>) {
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+            .open(path)
+            .unwrap();
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&0xA0000003u32.to_le_bytes());
+        let code = if let Some(target) = target {
+            let target = fs::canonicalize(target)
+                .unwrap()
+                .to_string_lossy()
+                .trim_start_matches(r"\\?\")
+                .to_owned();
+            let name = format!(r"\??\{target}").encode_utf16().collect::<Vec<_>>();
+            let name_bytes = (name.len() * 2) as u16;
+            bytes.extend_from_slice(&(8u16 + name_bytes + 4).to_le_bytes());
+            bytes.extend_from_slice(&0u16.to_le_bytes());
+            for value in [0u16, name_bytes, name_bytes + 2, 0] {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+            for unit in name {
+                bytes.extend_from_slice(&unit.to_le_bytes());
+            }
+            bytes.extend_from_slice(&[0; 4]);
+            0x000900A4
+        } else {
+            bytes.extend_from_slice(&[0; 4]);
+            0x000900AC
+        };
+        let mut returned = 0;
+        assert_ne!(
+            unsafe {
+                DeviceIoControl(
+                    file.as_raw_handle(),
+                    code,
+                    bytes.as_ptr().cast(),
+                    bytes.len() as u32,
+                    std::ptr::null_mut(),
+                    0,
+                    &mut returned,
+                    std::ptr::null_mut(),
+                )
+            },
+            0,
+            "native reparse setup/removal unavailable: {}",
+            std::io::Error::last_os_error()
+        );
+    }
+    for point in [
+        candidate::Point::ChainValidated,
+        candidate::Point::LeafMetadata,
+        candidate::Point::LeafOpened,
+        candidate::Point::BeforeRead,
+        candidate::Point::AfterRead,
+    ] {
+        let fixture = Fixture::new();
+        let outside = tempfile::tempdir().unwrap();
+        fs::write(outside.path().join("one.rpy"), b"outside untouched").unwrap();
+        let parent = fixture.root.join("game");
+        let original = identity::identity_for_path(&parent).unwrap();
+        let path = RelativePath::new("game/one.rpy").unwrap();
+        let mut reader = fixture
+            .service
+            .candidate_reader(&fixture.project, Arc::new(candidate::Probe::default()))
+            .unwrap();
+        reader.snapshot_bounded(&path, 64).unwrap();
+        // SET_REPARSE_POINT requires an empty directory. The retained anchor is
+        // unchanged and remains pinned without DELETE sharing while its attributes change.
+        let hook_parent = parent.clone();
+        let hook_outside = outside.path().to_owned();
+        let once = AtomicBool::new(false);
+        reader.probe.live_readers.fetch_sub(1, Ordering::Relaxed);
+        reader.probe = Arc::new(candidate::Probe {
+            live_readers: std::sync::atomic::AtomicUsize::new(1),
+            hook: Some(Arc::new(move |p| {
+                if p == point && !once.swap(true, Ordering::SeqCst) {
+                    for entry in fs::read_dir(&hook_parent).unwrap() {
+                        fs::remove_file(entry.unwrap().path()).unwrap();
+                    }
+                    reparse(&hook_parent, Some(&hook_outside));
+                }
+            })),
+            ..candidate::Probe::default()
+        });
+        assert!(reader.snapshot_bounded(&path, 64).is_err());
+        assert_eq!(identity::identity_for_path(&parent).unwrap(), original);
+        reparse(&parent, None);
+        assert_eq!(
+            fs::read(outside.path().join("one.rpy")).unwrap(),
+            b"outside untouched"
+        );
+    }
+}

@@ -2650,6 +2650,7 @@ impl BoolNot for bool {
 
 #[cfg(test)]
 mod tests {
+    mod candidate_proof;
     use super::*;
     use crate::authoring::{
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,

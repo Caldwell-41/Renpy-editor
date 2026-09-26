@@ -5,6 +5,8 @@
 //! target is retained and checked after each exchange, so a writer that wins the final
 //! validation window is preserved and surfaced instead of being silently overwritten.
 
+#[cfg(test)]
+pub(crate) mod candidate;
 mod execution;
 mod manifest;
 mod observation;
