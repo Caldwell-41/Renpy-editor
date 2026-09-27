@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-D1 diagnosis/review `review_ready` (ledger 28); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-M1 probe correction/local proof `review_ready` (ledger 29); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -59,9 +59,18 @@ ledger 28: the probe times dispatch-to-rAF
 rather than confirmed presentation and pans the graph offscreen after its second
 input. Local tracing demonstrates browser/compositor waits without new input; exact
 causation of the historical CI stalls remains unproven. Original 109.9 ms failure
-and unchanged 100 ms budget remain. The proposed measurement correction and hosted
-proof require separate approval; no application/test/workflow correction or dispatch
-occurred during D1.
+and unchanged 100 ms budget remain. MAC-M1's approved probe correction is now implemented in candidate
+`86466aea1d02ed2534ab404939a85b7a7f15ee54`; see ledger 29. It retains the original
+30-sample <100 ms gate, adds 30 visibly bounded inputs and separate first/second-rAF
+diagnostics, and records geometry, source identity, captures and optional trace.
+Exactly two local Chrome 154 launches passed: original p95 16.8/17.3 ms, visible
+second-rAF p95 33.6/33.6 ms. All full-workload/navigation/refresh/resize assertions
+passed; all input samples and graphics waits remain retained. Trace/captures show
+transformed rendering but do not prove physical presentation at the endpoint or
+qualify historical Chrome 152 CI. Both sessions are closed. WIN-F1, renderer/CSS,
+workflows and dependencies are unchanged; no tool installation or CI dispatch.
+Next is R2-P1-MAC-H1 scope review only; workflow changes and a single macOS/browser
+hosted diagnostic require explicit approval. No acceptance or budget change follows.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

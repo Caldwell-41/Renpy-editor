@@ -5,7 +5,8 @@ supported-target qualification, `blocked` after the failed matrix (ledger 23). G
 `review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 is `review_ready`
 (ledger 26); the user approved R2-P1-WIN-F1's two-buffer correction and local testing
 (ledger 27, `review_ready`), then narrowed testing to exclude aggressive/hostile work.
-R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28); no correction or
+R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28). User-approved
+R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29); no new
 qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
 24–25. Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
@@ -17,9 +18,10 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instructions select macOS frame-budget diagnosis/review only
-(section 28): no implementation, budget relaxation, redispatch, conflict resolution,
-merge, hostile/crash testing or unapproved tooling installation.
+checkpoint. The latest user instructions approve R2-P1-MAC-M1 only (section 29), following
+ledger 28: bounded probe correction and two local checks. No CI dispatch, budget
+relaxation, renderer changes, hostile/crash tests or unapproved tooling installation.
+WIN-F1 is preserved; no conflict resolution or merge is authorized.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -4149,3 +4151,159 @@ D1 ends with a reviewable diagnosis and the above smallest justified correction/
 plan. Missing exact CI stall attribution and all failed/skipped qualification remain
 explicit. No operation is awaiting completion; further implementation, diagnostics
 on CI and final acceptance require their own approved scope.
+
+### 29. R2-P1-MAC-M1 probe correction and local proof — 2026-09-27
+
+**Authority/disposition:** user explicitly approved R2-P1-MAC-M1, bounded to ledger
+28's probe correction and fixed local proof, and requested review, blocker correction
+and publication. M1 is `review_ready`; R2-P1 remains `blocked`. WIN-F1 is preserved.
+No CI dispatch, budget relaxation, production renderer/CSS change, hostile/crash test,
+installation, package/core build, merge or conflict resolution occurred.
+
+#### Entry and reviewed candidate
+
+Clean local/remote `97d520b01e574335f309e125965c192c544d77c7`, existing branch
+`feature/phase-1g-branches-runtime`, draft/open/conflicting PR #17. Fresh fetch
+confirmed main `4d7ba0333c48d60242a9a42d3e079fea499a5531`. Related tasks were idle;
+no concurrent checkpoint writer was found. Original failed CI evidence and ledger
+27's WIN-F1 remain unchanged. Application/test candidate:
+**`86466aea1d02ed2534ab404939a85b7a7f15ee54`**. Its only application-tree delta from
+entry is `app/tests/branches.browser.mjs`; TESTING documents the measurement contract.
+The accompanying checkpoint documentation does not alter those tested inputs.
+
+Reports identify the pre-commit Git base plus exact tested source hashes; the probe
+SHA-256 is `77a79fbaa0a8546de51473f0fa0f2fb5671903294ad025aad3da2fb73707b8fe`.
+A post-run audit confirmed both launches used identical fixture/probe/renderer/CSS/lock
+bytes and that candidate source still matches all reported hashes. No test was rerun
+just to change the Git-head label. The retained service fixture hash remains
+`8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196`.
+
+#### Bounded implementation and review
+
+- Retains the original 30 ArrowRight inputs, ordered raw samples, nearest-rank p95
+  and <100 ms gate. Existing `panFrame*` fields remain aliases, explicitly named
+  dispatch-to-first-rAF continuation. The historical offscreen path is comparison
+  evidence, not a claim of sustained visible panning.
+- Adds 30 alternating ArrowLeft/ArrowRight inputs at fitted x=40/0 during held
+  refresh. Every input must change the transform, retain all 500 nodes/2,000 paths,
+  maintain visibility/focus and positive clipped graph/first-node intersection.
+  Outside timing, three representative IDs, positions and dimensions and the viewport
+  must match baseline plus the expected 40-pixel translation; no renderer changes.
+- Separately records first-rAF and second-rAF rendering-opportunity diagnostics with
+  the same <100 ms p95 objective. Neither is guaranteed presentation. Original <2 s
+  initial and core <250 ms/<2 s budgets are unchanged; core was not rerun.
+- Optional evidence directory stores reports and two clipped frame captures after
+  visible samples 0/1. Optional trace adds rendering/GPU/User Timing/screenshot events
+  and one fixed 30-sample no-input control after Fit. Ordered timer boundaries,
+  browser/host/GPU mode, focus/visibility, source identity and trace/capture wall costs
+  are retained. The original population is not pooled with either added population.
+- A 60-second page deadline bounds collection. On assertion failure, `finally`
+  independently attempts trace saving and browser/server cleanup and writes partial
+  samples/errors. Review corrected deadline teardown to close the page first, keeping
+  the browser available to save the trace. Abrupt browser/process loss can still lose
+  trace evidence; no failure-injection/crash launch was performed or claimed tested.
+- Existing held-refresh navigation, release/completion, small visual subview, 640px
+  resize and zero-page-error assertions remain. No warm-up delay, sample removal,
+  scheduler subtraction, browser flag/graphics override, percentile change or retry.
+
+#### Exactly two fixed local launches
+
+Existing Node **24.19.0**, locked Playwright **1.63.0**, installed Chrome
+**154.0.8037.57**; ARM64 macOS **26.6.2 / 25G83**, Apple M4. GPU report identifies
+ANGLE Metal Apple M4 with GPU compositing/rasterization enabled. Runner image fields
+are null on this local host. No download or additional tooling was needed.
+
+From `app/`, each invocation ran `node tests/branches.browser.mjs`, using the existing
+pinned Node on PATH and `LOOMLIGHT_FLOW_EVIDENCE` pointing to D1's retained
+`runtime-flow.json`. `LOOMLIGHT_BRANCHES_EVIDENCE_DIR` selected distinct ignored
+`untraced`/`traced` directories; `LOOMLIGHT_BRANCHES_TRACE` was `0` then `1`. The
+controller would stop on a failed invocation, with no retry. Both exited **0**.
+
+| Measurement | Untraced full probe | Traced diagnostic |
+| --- | --- | --- |
+| Whole invocation | 4.023 s | 4.704 s |
+| Initial layout (<2 s) | 42.8 ms | 142.9 ms |
+| Original 30 dispatch-to-rAF p95 / max | 16.8 / 17.5 ms | 17.3 / 23.3 ms |
+| Visible 30 dispatch-to-rAF p95 / max | 16.9 / 75.6 ms | 16.9 / 76.5 ms |
+| Visible second-rAF diagnostic p95 / max | 33.6 / 80.6 ms | 33.6 / 79.7 ms |
+| Maximum original / visible synchronous dispatch | 0.3 / 0.2 ms | 0.2 / 0.2 ms |
+| No-input second-rAF p95 / max | Not selected | 32.1 / 32.4 ms |
+| Full-workload, geometry, focus, held refresh, navigation, resize, page errors | PASS | PASS |
+
+All **120 input intervals** and **30 no-input intervals** are preserved. All 60
+visible inputs retained graph intersection **25,403 CSS px²** and first-node
+intersection **30 CSS px²**. The last representative node remains vertically below
+the clipped viewport, as expected at the production fit floor; its stable geometry
+is checked, not falsely called visible. The original sequence ended with zero graph
+intersection in both launches. Full horizontal extent remains visible in the added
+path; this does not claim every one of the 500 nodes fits vertically.
+
+The two frame captures were visually inspected for each launch. They show graph
+content at x=40 then x=0 within the viewport; corresponding captures have identical
+SHA-256s across the two launches. Capture wall times were **223.9/190.3 ms** untraced
+and **214.7/189.5 ms** traced, outside input timers. Captures and geometry reads can
+perturb later browser work and are not latency endpoints; no time was subtracted.
+No-input uses the same per-sample CDP/two-rAF/geometry structure but no explicit
+captures; Fit can leave work pending. These controls are not identical populations.
+
+#### Trace interpretation, overhead and causal limits
+
+Trace saved successfully: **8,981,690 bytes**, **42,696 events**, **450 user marks**
+and **49 trace screenshots**. The 360 backdated start/dispatch/rAF/end marks agree
+with report clock deltas within 0.01 ms (this checks correlation, not clock accuracy).
+Trace SHA-256:
+`6df14ba91c59dcb6d47f6f9b4356c19857eb52a2c198f50f0d2200eb98be0611`.
+
+Original sample #1 ends at +23.3 ms; its first Paint starts at +24.206 ms, again
+showing that this timer can end before paint. In visible sample #1, first rAF ends
+at +5.0 ms, Paint starts +5.239 ms, GPU DrawAndSwap +10.793 ms, and the second rAF
+ends +21.5 ms; additional paint follows at +21.630 ms. This plus separate captures
+demonstrates transformed graph rendering, not guaranteed physical presentation at
+the second callback. No native WKWebView/input or human acceptance claim follows.
+
+The longest visible interval is sample #4: **80.6 ms** untraced / **79.7 ms** traced.
+The traced interval overlaps **74.801 ms** GPU
+`IOSurfaceImageBacking::WaitForCommandsToBeScheduled`, with first callback at
++76.432 ms. Nested wait/swap events overlap and must not be summed. Both cases are
+below the unchanged objective and follow the explicit screenshot pair. This is
+browser/graphics contribution evidence, potentially affected by instrumentation;
+it does not attribute the historical CI intervals or exclude graph-triggered work.
+
+Trace setup/teardown costs were **34.0/263.4 ms**, outside input timers. Traced initial
+layout was 100.1 ms longer and original p95 0.5 ms longer; visible p95 was unchanged.
+One pair cannot isolate trace overhead from startup/scheduling variation, so no
+correction factor or pooled acceptance is applied. No >100 ms input sample reproduced;
+historical Chrome 152 CI causation remains unresolved, not retroactively accepted.
+
+#### Gates, preservation, publication and next boundary
+
+`node --check app/tests/branches.browser.mjs`, `python3 scripts/validate.py`
+(**270 files**) and `git diff --check` passed. Review checked gate/endpoint semantics,
+all 150 intervals, nearest-rank calculation, per-input geometry, capture identity,
+trace correlation, source hashes, failure cleanup structure and diff scope. Both
+reports have no page errors, passed navigation/resize, and browser/server closed.
+Independent OS/socket checks found all **14 recorded browser process IDs absent**
+and both server ports closed. **Two launches used; none pending; no retry.**
+
+Ignored evidence lives in `.toolchains/reports/r2-p1-mac-m1` (12 files hashed by
+`manifest.json`, including both reports/logs/launch receipts, four PNGs, trace and
+audit). D1 raw evidence remains untouched. No raw log, trace, SDK, capture, absolute
+host path or personal data is committed. WIN-F1 `renpy.rs`, Branches renderer/CSS,
+lockfiles and workflows compare unchanged against the reviewed Windows candidate.
+No broad DOM/core/hostile/crash suite, SDK/package build or native human check ran.
+The original failed run **36293797731**, attempt **1**, candidate `f1a0f14`, and its
+macOS **109.9 ms** p95 remain failed; skipped macOS SDK/package gates remain missing.
+
+Publish candidate plus this ledger, CURRENT and the existing HANDOVER on the same
+branch/PR. Publication commits use `[skip ci]` to avoid triggering PR CI under the
+user's no-dispatch boundary; skipped CI is not passing qualification. Resolve the
+actual documentation head after push without a receipt-only commit.
+
+**Next bounded goal — R2-P1-MAC-H1 scope review only:** review this local evidence and
+prepare the concrete one-run macOS/browser-only diagnostic proposal from ledger 28,
+including exact workflow selector/change, workload, trace artifacts and stopping rule.
+The existing quality profile is a two-target ordinary-suite matrix and cannot simply
+be described as macOS-only. Workflow implementation and a single hosted dispatch need
+explicit approval; no production matrix, automatic retry, tool installation, budget
+relaxation, renderer work, crash tests, conflict resolution or merge is authorized.
+Final supported-target/package/native-human acceptance remains open. M1 stops here.
