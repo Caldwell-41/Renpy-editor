@@ -33,6 +33,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
 | Controlled runtime, trust and process ownership | [ADR 0008](adr/0008-controlled-runtime.md) |
 | Planned Phase 1G Branches and runtime/diagnostics | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/active/phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
 | Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |

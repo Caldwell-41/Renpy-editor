@@ -2348,3 +2348,6 @@ fn g1_o1_counterexample_same_byte_replacement_after_leaf_open() {
     assert_eq!(returned.sha256, current.sha256);
     println!("g1-o1-safety-counterexample: opened identity passed while pathname identity changed; NO-GO");
 }
+
+#[cfg(windows)]
+mod native_boundary;

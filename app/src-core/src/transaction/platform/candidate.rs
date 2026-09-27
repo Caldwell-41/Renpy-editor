@@ -124,3 +124,6 @@ impl DirectoryAnchor {
         self.chain.len()
     }
 }
+
+#[cfg(windows)]
+pub(crate) mod native;

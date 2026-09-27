@@ -2917,3 +2917,65 @@ identity and the existing branch/PR. Resolve the actual
 published head from Git/PR; do not create a receipt-only self-SHA commit. Production,
 test code, workflow guard and historical checkout remain unchanged. No native or
 package CI dispatch; ordinary PR documentation checks may run on publication.
+
+### 20. G1-O1-N native observation-boundary experiment — 2026-09-27
+
+**Authority:** user selected G1-O1-N only: bounded safety/cost experiment,
+historical preservation and findings/handover publication; no production or CI dispatch.
+**State:** review_ready investigation complete; capability **NO-GO**.
+Entry 79f2f84792f46a39140e81b33c5a569fc2e3a56f; branch
+feature/phase-1g-branches-runtime, draft/open PR #17. Fresh fetch/advertised refs
+matched this feature head and main 4d7ba0333c48d60242a9a42d3e079fea499a5531.
+Feature checkout was clean; prior repository chats idle, no active repository
+build/benchmark writer found. Historical detached checkout remained clean.
+
+The [pre-registration and findings](phase-1g-g1-o1-n-experiment.md) own exact
+input/diff/binary/log hashes, ordered cases, native flags, safety map, cost
+disposition and later proof gaps. The source is test-only (cfg(test)/Windows);
+the existing candidate/negative controls and production paths are unchanged.
+One ignored-by-default manual safety selector was built release/locked/offline
+using the existing local Windows tools; explicit native invocation ran once.
+
+Partial assertions passed: ordinary bytes/current identity, invalid/missing/type
+refusal, existing writer/mapping with fresh mapped content, eight same/different
+restored-time replacements after open/mid-read/after bytes/before binding.
+The first hostile leaf-symlink setup failed **Win32 1314**, a required privilege
+not held. Terminal exit **101**, **0 test functions passed / 1 failed / 0 ignored /
+196 filtered**. Remaining native cases were not executed. Missing-capability stop
+was honored: no retry, flag switch, security/privilege change or timing batch.
+
+This is a capability gap, not proof of unsafe link acceptance or rejection of all
+relative-I/O designs. There is no new verifier/whole-request latency or descriptor
+peak evidence. Conservatively retained 162.344 ms other work leaves 67.656 ms at
+the 230 ms engineering ceiling. Zero instrumented/uninstrumented/metadata sequences;
+missing safety makes a cost rescue experiment ineligible. No full corrected
+candidate, G1-O2, production-reader fix, changed contract/cadence/target, package
+matrix, physical acceptance, merge, optional Git or Phase 2.
+
+Next decision: separately selected read-only follow-up review of qualification
+capability and retained composition before authorizing any new experiment.
+Historical run 36278262505 attempt 1, local samples/state/logs and all preceding
+ledgers remain under their real inputs. No operation is pending.
+
+#### Publication gates and preservation audit
+
+Compilation succeeded without repair. Formatting check passed with
+cargo fmt --manifest-path app/Cargo.toml --all -- --check. The repository structural/
+link/privacy validator passed for **266 files**; whitespace review caught one
+documentation trailing blank line, which was removed before the final check.
+No broader native suite was run after the stop condition.
+
+All **52** pre-existing historical report/state/log files matched their pre-run
+SHA-256 inventory. All **five** diagnostic source files matched the executed
+input records. The historical worktree remained clean at the original candidate,
+and terminal state plus process inspection found no native/build work pending.
+Changed-path review covers only the five test-only source files and six documentation
+files; production and quality workflow are unchanged. Existing negative-reproducer
+bodies are byte-for-byte preserved in the diff; their execution was not repeated.
+Raw logs/state and machine paths remain outside Git.
+
+Use the existing repository-local noreply identity to publish this coherent
+diagnostic/findings checkpoint on the existing branch/PR, then verify advertised
+remote head and draft/open state. Resolve publication SHA from Git/PR, not a
+receipt-only follow-up commit. Ordinary PR validation may run on publication; no
+workflow_dispatch or package matrix was requested.

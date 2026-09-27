@@ -284,3 +284,33 @@ impl Reader<'_> {
 fn diag(code: ErrorCode) -> PublicDiagnostic {
     PublicDiagnostic::new(code, None)
 }
+
+// Separate G1-O1-N harness; historical Reader and candidate index unchanged.
+#[cfg(windows)]
+impl TransactionService {
+    pub(crate) fn native_boundary_read(
+        &self,
+        project: &ProjectId,
+        path: &RelativePath,
+        maximum: usize,
+        hook: &mut impl FnMut(platform::candidate::native::Boundary) -> Result<(), ErrorCode>,
+    ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
+        let approved = self.approved(project)?;
+        self.candidate_session(project)?;
+        let target = resolve_target(&approved.anchor, path, false).map_err(diag)?;
+        let result = platform::candidate::native::read(
+            &target.parent_anchor,
+            &approved.root,
+            &approved.identity,
+            &target.name,
+            maximum,
+            hook,
+        )
+        .map_err(diag)?;
+        if self.candidate_session(project)? != approved.identity {
+            return Err(diag(ErrorCode::RootIdentityChanged));
+        }
+        crate::runtime_work::check().map_err(diag)?;
+        Ok(result)
+    }
+}

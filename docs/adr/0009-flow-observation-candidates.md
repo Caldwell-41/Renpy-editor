@@ -308,3 +308,20 @@ synchronization is a product/ADR decision, not an optimization satisfying today'
 gate. Kernel-coordinated caching needs a separate lifetime/break/fallback proof and
 does not currently justify its complexity. No freshness contract, cadence, authority
 boundary, fixture or timing target changes here. G1-O2 remains ineligible.
+
+## G1-O1-N bounded native experiment disposition — 2026-09-27
+
+The [pre-registered one-file experiment](../tasks/active/phase-1g-g1-o1-n-experiment.md)
+is complete with **NO-GO** for missing safety qualification. Local native relative
+opening/final binding passed ordinary/writer/mapping and eight restored-time
+replacement assertions, then hostile leaf-symlink setup was denied (Win32 1314).
+The ordered test failed; no retry, elevation/security change, timing batch or CI
+dispatch occurred. Remaining hostile/cancellation/resource/graph proofs are missing.
+
+The adapter remains an unqualified test artifact; production readers and the
+historical counterexamples remain unchanged. This result neither demonstrates full
+S1 correction nor rules out native relative I/O on a capable environment. No new
+complete-request cost is available, and the 230 ms conditional model remains
+unproved. Any next experiment needs separate selection and pre-registration after
+reviewing missing capability/composition. All freshness, authority, cadence and
+supported-target acceptance requirements above remain unchanged.
