@@ -1,12 +1,13 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-TEST-P2 Chrome timing policy `review_ready` (ledger 33),
-explicitly approved after reviewing MAC-N1. Chrome timings become diagnostics while
-functional/evidence failures stay blocking. Native MAC-N1 remains `review_ready`;
-H1 and the original matrix remain historical FAIL. Missing supported-target package
-qualification and final human acceptance remain open; Chrome timing alone is no
-longer a prospective macOS acceptance blocker. No CI/build/launch is authorized.
+**Current checkpoint:** R2-P1-Q0 remaining qualification scope review `review_ready`
+([ledger 34](../tasks/active/phase-1g-branches-runtime-git.md#34-r2-p1-q0--remaining-qualification-scope-review--2026-09-27)).
+Proposed Q1: bounded ordinary-test separation and trigger/evidence preparation, then
+one Windows/macOS package matrix. Execution is not approved. TEST-P2 remains in force;
+MAC-N1/WIN-F1 remain supporting evidence, not replacement package qualification.
+Historical failed runs, final native/human acceptance and integration remain open.
+No CI/build/launch is authorized; no operation is pending.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open

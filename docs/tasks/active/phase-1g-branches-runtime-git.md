@@ -13,7 +13,7 @@ then approved combining H1 scope review with one hosted macOS diagnostic executi
 requested a separate agent for local packaged macOS assessment (ledger 32). Final
 1G acceptance remains open. The user subsequently approved TEST-P2 (ledger 33):
 Chrome timing becomes diagnostic after native evidence review; functional failures
-remain blocking. This is the current bounded checkpoint.
+remain blocking. Remaining qualification scope review is recorded in ledger 34.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -23,9 +23,9 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction approves the explicit Chrome diagnostic timing policy
-(section 33), informed by the completed native assessment (section 32). Thresholds
-and raw evidence remain; functional checks retain their gate. No CI dispatch,
+checkpoint. The latest user instruction selects review of the minimum remaining R2-P1
+qualification and a bounded execution proposal (section 34), not execution. TEST-P2
+(section 33) and native assessment (section 32) remain supporting evidence. No CI dispatch,
 package build/app launch, renderer change, hostile/crash test, unapproved tooling,
 conflict resolution or merge. WIN-F1 remains preserved.
 
@@ -5099,3 +5099,125 @@ human acceptance. PR #17 conflicts/integration remain a later approved step.
 select the minimum supported-target run, accounting for WIN-F1 and MAC-N1 evidence.
 Planning/review only until its exact execution scope is selected; no automatic matrix,
 new native launch, conflict resolution or merge follows from TEST-P2 approval.
+
+
+## 34. R2-P1-Q0 — remaining qualification scope review — 2026-09-27
+
+**Authority/state:** user requested continuation of the existing branch, review of
+minimum remaining R2-P1 qualification work and a bounded execution proposal.
+Planning/repository inspection only; `review_ready`. R2-P1 itself remains incomplete.
+No CI, build, browser/app launch, SDK execution or implementation change occurred.
+
+**Entry:** clean `699395de23e27a992d734a9cc920686c16bdc02d`, matching fetched origin
+and draft/open PR #17; main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
+PR remains conflicting. Only this checkout is registered. Latest feature production
+run remains terminal failed 36293797731, attempt 1; no new production run was found.
+No other local edits or pending operation were found. This review changes only the
+ledger and CURRENT/HANDOVER, published together with `[skip ci]`.
+
+### Coverage disposition
+
+| Evidence / requirement | What carries forward | Minimum remaining work |
+| --- | --- | --- |
+| WIN-F1 (27) | Two heap buffers; six focused SDK checks; all five local executable cases, both route durations/reopens and cleanup | Standard packaged candidate on Windows. F1 used a distinct identity/profile and no installer packaging; it is not a cross-SHA package waiver. Do not spend its unused build allowance automatically. |
+| MAC-N1 (32) | Physical-M4 WKWebView full-workload proxy timings and bounded native observations, with fixture/measurement/procedural limits | No repeat macOS performance experiment. It ran no SDK/game and cannot fill skipped compile/lint/routes/runtime-error gates. Preserve native input/final human limits. |
+| G1-OBS / original R2-P1 | Successful fixed core samples and historical ordinary regressions | Keep their actual candidates/results. Current policy does not waive automated coherent-candidate gates; run the selected ordinary gate once in qualification, not an extra profiling matrix. |
+| TEST-P2 (33) | Locally verified timing-only diagnostic policy; functional/evidence failures still block | Exercise that policy through the qualification's existing browser steps; no separate hosted Chrome diagnosis. |
+| Supported package proof | Neither target has complete standard package evidence for the corrected coherent candidate | Both targets: all five real-service cases, real SDK service/diagnostic gates and retained ordinary package regressions. Two macOS route launches alone would leave compile/lint/runtime-error and Windows package identity unqualified. |
+| Remaining final acceptance | No new acceptance from this review | Windows native responsiveness/input evidence, final user session on both platforms, conflicts/integration and integrated 1H stay separately open. Synthetic package scenarios do not close G1-V2. |
+
+TESTING's narrow reuse rule concerns human evidence, not cross-SHA automated package
+checks. Carrying WIN-F1/MAC-N1 forward avoids repeating those diagnostic experiments;
+it does not relabel old failures/skips or remove the supported package requirement.
+Diff from MAC-N1 package candidate 22fbf65 to entry changes browser test/policy,
+package test command, workflow comments/message and docs; no production renderer,
+core, native probe or dependency/lockfile changes. WIN-F1 is retained in `renpy.rs`.
+
+### Concrete prerequisite found in the existing workflow
+
+An unchanged `production-scaffold.yml` dispatch is **not** the recommended scope.
+Its unrestricted core invocation explicitly requires Recent Projects crash and real
+process-termination markers. More subtly,
+`lifecycle::tests::official_sdk_phase_1c_target_gate` calls
+`crash_managed_sdk_install` twice and includes anchored/inflight stage replacements
+inside the same test as ordinary authoring/reopen. Ignoring already-classified
+specialist tests does not remove those embedded exercises. This conflicts with the
+user's later no-aggressive/hostile testing limit (27). Preserve the tests and historical
+evidence; do not silently run them, remove write protections or claim excluded cases pass.
+
+The workflow also automatically packages relevant main pushes and implements no
+pre/post-merge deduplication. A green branch run cannot by itself justify suppressing
+required integration checks or claiming acceptance for a changed merged tree.
+
+### Proposed R2-P1-Q1 — explicit selection required
+
+One bounded **qualification preparation and one supported-target matrix**, with these
+conditions and limits included in the selection:
+
+1. Test/workflow preparation only: separate the embedded deliberate crash/timed
+   namespace fixtures from ordinary lifecycle/SDK/authoring assertions; preserve
+   their specialist entry points and historical evidence. Audit the routine core
+   selector and exact excluded names before dispatch. Retain ordinary external-writer
+   conflicts, interrupted-save recovery using existing non-crashing fault/state
+   fixtures, baseline path/link refusal, Source/drafts/session/process ownership,
+   SDK hash controls and existing Save/Scene regressions. No blanket exclusion of
+   all tests containing `race`, and no weakening production transaction/recovery code.
+   If this needs a product change or substantial harness redesign, stop for a new
+   decision before building/dispatching. Report the narrower executed coverage honestly.
+2. Keep the existing production workflow and blocking ordinary gates. Retain locked
+   frontend/type/protocol/Source browser checks, routine core and desktop boundary,
+   one enforced three-sample G1-U2 invocation per target, Runtime/Branches browser
+   functional checks under TEST-P2, verified official 8.5.3 SDK setup/handoff,
+   ordinary lifecycle/authoring target assertions, explicit R1 service and real
+   compile/lint diagnostics. Excluded crash/namespace markers must not remain required
+   or be emitted as passed by the ordinary gate. SDK skip markers are not evidence.
+3. Make the expensive production workflow **manual-dispatch only** as a small explicit
+   trigger policy, and update TESTING before relying on it. Keep normal quality checks
+   and repository-required checks; verify their actual requirements before dispatch.
+   No evidence controller or cross-SHA waiver. Later integration must assess its exact
+   tree and run any required/affected gates, including final integrated 1H; no automatic
+   identical matrix solely because of a merge event. If branch protection requires an
+   incompatible trigger/check, stop and report rather than bypass it. This trigger
+   amendment is part of the proposal, not implemented or approved by this review.
+4. After cheap syntax/selector/marker/outcome/trigger checks and review, publish one
+   immutable candidate and dispatch `production-scaffold.yml` **once**, both existing
+   Windows x64 and macOS ARM64 jobs, `upload_packages=true`. Use the existing pinned
+   toolchains and verified SDK; allow their normal hosted installation/build steps.
+   No local package build or native performance launch. Cap at one Tauri package-build
+   invocation per target (two total), with normal Rust test compilation prerequisites.
+5. Each built package runs exactly the five existing independent cases: `compile`,
+   `lint`, `route-a`, `route-b`, `runtime-error`, once each (ten total). Both route
+   reports must prove changed destination/source/revision and graph after a new
+   session, selected route output plus Running for the declared 9.5 s observation
+   window (retain measured `runningObservedMs` and existing >8 s assertion), live
+   Save/stale revision, Stop, saved-disk reopen and cleanup. Retain route-b draft
+   refusal. Follow with the existing boundary/single-instance smoke (primary plus
+   secondary, two app starts per target), artifact secret scan and dependency inventory.
+   Thus at most seven top-level Loomlight starts per target; SDK/game child processes
+   belong to the named existing cases, not extra app/performance experiments.
+6. Preserve exact run/attempt/SHA/tree, selected/excluded counts, logs, every case report,
+   source and tested-executable hashes, package artifacts and cleanup. Audit both
+   archives and every input hash; independently rehash the retained tested executable.
+   Ensure that exact executable is uploaded even on a later gate failure (bounded
+   evidence-upload amendment); success-only installers remain distinct from failure
+   evidence. Recheck archive availability rather than trusting a successful upload step.
+7. No rerun/retry after failure, timeout, cancellation or ambiguous dispatch. Preserve
+   findings; application fixes need a new bounded decision. If running at handoff,
+   publish exact operation identity and `blocked/manual-resume` continuation, then stop
+   active polling under WORKFLOW. Audit on explicit resume. Complete evidence makes
+   this qualification review-ready, not final human acceptance or permission to merge.
+
+This is the minimum recommended coherent package qualification with the current
+acceptance policy, not the fewest possible app launches. A macOS-only run or direct
+reuse of F1 as Windows final qualification would require an additional acceptance
+policy not currently implemented. No fresh native-performance experiment, renderer
+change, hostile/crash execution, conflict resolution, optional Git, human test or
+merge is included. Preparation and the single dispatch are still **unapproved**.
+
+### Review validation and publication
+
+Reviewed live docs, exact workflow/runner/provenance scripts, embedded SDK test setup,
+relevant candidate diffs, fetched refs, PR state and recent production run identities.
+Repository validation passed for **273 files** and `git diff --check` passed; these
+are the only execution gates for this docs-only checkpoint. Resolve publication
+head from Git; no receipt-only commit. Next action is user selection/amendment of Q1.
