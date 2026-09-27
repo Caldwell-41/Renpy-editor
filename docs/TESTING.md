@@ -606,8 +606,12 @@ setup creates a fresh synthetic project before opening the UI. The injected driv
 uses visible runtime/Source/Branches controls and the real requester; it never installs
 the older mock smoke requester. Compile/lint select their actual Unicode/BOM/CRLF
 failing line. Route cases edit/restore a destination, assert selected dialogue/state/
-asset, save a script during normal play, observe staleness, Stop after the smoke limit,
-and verify accepted source on reopen. The 640px route-b case also retains an invalid
+asset, assert exactly two choice edges and verify the changed destination source
+text/revision plus graph after project close/reopen before restoring routes. During play,
+they save a script, observe staleness, and measure at least 9.5 seconds from observed
+route output plus Running state before Stop; preparation/trust time is excluded.
+The case report records `runningObservedMs`. Accepted script bytes are checked again
+on reopen after Stop. The 640px route-b case also retains an invalid
 mapped draft through Cancel and refused Save All, then deliberately runs the saved
 revision. Runtime failure remains separate.
 

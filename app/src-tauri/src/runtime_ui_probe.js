@@ -42,7 +42,7 @@
     await until(() => find("Run Game")); await settled();
     assert(!/Running|Validating/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"Opening must not execute");
     const project = await read("project.current");
-    const sessionId = project.sessionId;
+    let sessionId = project.sessionId;
     if (mode === "compile" || mode === "lint") {
       checkpoint("validate-and-navigate"); await click("Validate"); await trust();
       await until(() => [...document.querySelectorAll('.runtime-diagnostics button')].some(b => b.textContent.includes("雪 diagnostic.rpy:2")));
@@ -71,7 +71,31 @@
         destinations[0].value=initial[1]; destinations[0].dispatchEvent(new Event("change",{bubbles:true}));
         await click("Commit Beat"); await settled();
         let flow = await read("flow.list",{sessionId});
-        assert(flow.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice").every(e=>e.destination.sceneId===initial[1]),"accepted graph reflects destination edit");
+        const assertChangedDestinations = graph => {
+          const choices = graph.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice");
+          assert(choices.length === 2,"Graph retains exactly two authored choice edges");
+          assert(choices.every(e=>e.destination.kind === "resolved" && e.destination.sceneId===initial[1]),"Both accepted choice destinations reflect the edit");
+        };
+        assert(initial[0] !== initial[1],"Fixture starts with distinct route destinations");
+        assertChangedDestinations(flow);
+        const origin = flow.nodes.find(node=>node.sceneId===project.sceneId);
+        const destination = flow.nodes.find(node=>node.sceneId===initial[1]);
+        assert(origin?.location?.path && destination?.label,"Edited route has a proven source and destination label");
+        const accepted = await read("source.open",{sessionId,path:origin.location.path});
+        assert(accepted.state === "clean" && !accepted.dirty && typeof accepted.text === "string","Destination edit is accepted Source text");
+        const jumps = accepted.text.split(/\r?\n/).map(line=>line.trim()).filter(line=>line.startsWith("jump "));
+        assert(jumps.length === 2 && jumps.every(line=>line===`jump ${destination.label}`),"Accepted source contains both changed destinations");
+        checkpoint("branches-close-reopen");
+        await click("Close Project"); await click("Runtime UI fixture");
+        await until(() => find("Run Game")); await settled();
+        const reopenedProject = await read("project.current");
+        assert(reopenedProject.sessionId !== sessionId && reopenedProject.sceneId === project.sceneId,"Graph reopen uses a new session for the same entry Scene");
+        sessionId = reopenedProject.sessionId;
+        const reopenedOrigin = await read("source.open",{sessionId,path:origin.location.path});
+        assert(reopenedOrigin.state === "clean" && !reopenedOrigin.dirty && reopenedOrigin.text === accepted.text && reopenedOrigin.baseRevision === accepted.baseRevision,"Changed destination bytes and revision survive project reopen");
+        flow = await read("flow.list",{sessionId,refresh:true});
+        assertChangedDestinations(flow);
+        checkpoint("branches-destination-reopen-passed");
         await click("Branches"); await until(() => document.querySelectorAll('.branch-node').length === 3);
         const sceneSelect = document.querySelector('select[aria-label="Selected Scene"]'); sceneSelect.value=project.sceneId; sceneSelect.dispatchEvent(new Event("change"));
         const routeSelect = document.querySelector('select[aria-label="Selected route"]'); routeSelect.value=[...routeSelect.options].find(o=>o.value)?.value; routeSelect.dispatchEvent(new Event("change"));
@@ -99,7 +123,7 @@
         assert((await read("source.open",{sessionId,path:draftPath})).dirty,"Refused draft remains recoverable");
         checkpoint("draft-cancel-save-refusal-passed");
       }
-      checkpoint("normal-run"); const launched=performance.now(); await click("Run Game");
+      checkpoint("normal-run"); await click("Run Game");
       if (draftPath) await click("Use saved revision");
       await trust();
       if (mode === "runtime-error") {
@@ -111,7 +135,9 @@
         const route=mode === "route-b" ? "b" : "a";
         await until(() => document.querySelector('.runtime-output').textContent.includes(`R2_ROUTE_${route}_DIALOGUE_STATE_ASSET_PASS`));
         assert(!document.querySelector('.runtime-output').textContent.includes(`R2_ROUTE_${route === "a" ? "b" : "a"}_`),"Only selected route ran");
-        assert(performance.now()-launched >= 0,"monotonic launch timing");
+        await until(() => /^Running/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
+        const runningObservedAt = performance.now();
+        checkpoint("route-running-observed");
         if (draftPath) {
           await click("Discard Draft");
           await until(()=>document.querySelector('.source-discard-confirmation'));
@@ -121,8 +147,13 @@
         checkpoint("script-save-during-play");
         await editSource("game/雪 diagnostic.rpy",text=>text+"# Saved while running.\n");
         await until(() => document.querySelector('.runtime-revision').textContent.includes("Started from an earlier revision"));
-        await delay(Math.max(0,9500-(performance.now()-launched)));
-        assert(/Running/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"normal play survives smoke duration");
+        while (performance.now()-runningObservedAt < 9500) {
+          assert(/^Running/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"Normal play stays running after route readiness");
+          await delay(Math.min(100,9500-(performance.now()-runningObservedAt)));
+        }
+        const runningObservedMs = performance.now()-runningObservedAt;
+        assert(runningObservedMs >= 9500 && /^Running/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"Normal play survives at least 9.5 seconds after observed route readiness");
+        stages.push({stage:"long-run-duration-passed",elapsedMs:Math.round(performance.now()-started),runningObservedMs});
         let exitRefused=false;
         try { await window.__TAURI_INTERNALS__.invoke("complete_application_close"); } catch(error) { exitRefused=String(error).includes("Close the project through its runtime and draft flow first."); }
         assert(exitRefused,"native exit refuses an open project");

@@ -1,7 +1,8 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-27. **Current checkpoint:** G1-OBS implementation and automated
-qualification complete, `review_ready` (ledger 22). Final 1G acceptance remains open.
+**Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
+supported-target qualification, `in_progress` (ledger 23). G1-OBS remains
+`review_ready` (ledger 22). Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -11,7 +12,7 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction selects G1-OBS implementation under section 21 / ADR 0010.
+checkpoint. The latest user instruction accepts the tightened R2-P1 checkpoint in section 23.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -3350,3 +3351,77 @@ architecture/data/UI/testing documents retain the behavior and durable lessons.
 Next selection is a bounded review/planning pass for remaining 1G.2b; no next
 implementation, package run, SDK download or merge is authorized by this handover.
 No CI or task-created local writer/watch process remains outstanding.
+
+
+### 23. R2-P1 packaged proof correction and qualification — 2026-09-27
+
+**Authority:** after a read-only review, the user accepted the tightened proposal:
+correct only the packaged proof, run one existing supported-target production matrix,
+audit/publish the results and stop. Application defects require a new bounded decision
+before production changes. No performance tuning, CI redesign, merge-conflict work,
+new native automation, human testing or merge is selected.
+**State:** `in_progress`. Entry `d180f0bb4840fa57e9144a94b3d9987a408a2ebb`, clean and
+matching the fetched feature branch and draft/open PR #17. Main is `4d7ba03`;
+GitHub reports a PR conflict, left for later integration. No production run is active.
+G1-OBS qualification and the earlier failed production runs remain preserved.
+
+#### Selected scenarios and gate plan
+
+Implementing agent owns these corrections in the existing `runtime_ui_probe.js`.
+Both route cases use real packaged WebView controls, IPC/services and the pinned SDK,
+with synthetic DOM input; they do not claim native keyboard or human acceptance.
+
+| Scenario | Required observation | Command / evidence |
+| --- | --- | --- |
+| R2-P1-duration | Start measurement after selected route output and Running state are observed; remain running for at least 9.5 seconds thereafter, record measured duration, then Stop/cleanup | Existing `run-runtime-ui-probes.py` route-a/route-b; each case JSON/log |
+| R2-P1-graph-reopen | Assert exactly two expected choice edges, persist the changed destination, close/reopen into a new session, verify exact accepted source text/revision and refreshed graph before restoring the authored routes | Same two packaged cases and their stage records |
+| R2-P1-qualification | One coherent candidate, Windows x64/macOS ARM64: retained G1 budgets, explicit SDK/R1/diagnostic gates, all five packaged cases, legacy boundary/regression gates | Existing `production-scaffold.yml`; exact run/attempt/SHA, input/executable hashes, logs and per-case cleanup |
+
+The core SDK test already waits nine seconds after game activity. This correction
+closes a packaged-probe evidence gap; it does not diagnose a runtime product defect.
+Cheap gates first: probe JavaScript syntax, repository validation, whitespace, existing
+frontend checks/build. No Rust production code changes are selected; full core/SDK/
+desktop tests and package checks run through the existing production workflow.
+Optional package uploads preserve the tested binaries; missing uploads are an artifact
+availability issue, not an extra product acceptance gate. No workflow changes.
+One dispatch only after local gates/review and publication. If it fails, preserve and
+report the finding; no automatic replacement matrix or production fix is authorized.
+If still running at handoff, record the exact operation and use manual resume under
+AGENTS/WORKFLOW. This checkpoint does not close final human acceptance or integration.
+
+
+#### Implemented proof and local checks
+
+Changes are confined to the existing packaged JavaScript probe and its testing/status
+records. Both route cases assert two resolved choice edges, read the accepted source,
+verify both changed jump destinations, close/reopen to a different session, and compare
+exact source text plus byte revision and refreshed graph before restoring the routes.
+The mutable captured session is updated only after proving the reopened entry Scene.
+The play timer begins after the selected route oracle and Running state; it records
+`runningObservedMs >= 9500` before Stop. Preparation/trust no longer counts as play.
+The existing cleanup, runtime-error, draft-refusal and post-Stop Source checks remain.
+
+| Local check | Result and scope |
+| --- | --- |
+| `node --check app/src-tauri/src/runtime_ui_probe.js` | Passed; syntax only, not packaged execution |
+| `python scripts/validate.py` | Passed, 268 repository files |
+| `git diff --check` | Passed |
+| Existing frontend typecheck / test build / Node tests | 60 passed, zero failed/cancelled/skipped |
+| Existing production frontend TypeScript / Vite build | Passed; 21 modules |
+
+Local environment: Windows x64, Node 24.19.0; existing installed dependencies were
+used without installation. `npm` was unavailable on PATH, so its unchanged scripts
+were executed directly from `app/`: `node node_modules/typescript/bin/tsc -p
+tsconfig.json --noEmit`, `node node_modules/typescript/bin/tsc -p tsconfig.tests.json`,
+`node --test --test-concurrency=1 dist-tests/tests/*.test.js`, then
+`node node_modules/typescript/bin/tsc -p tsconfig.json` and
+`node node_modules/vite/bin/vite.js build`. The first validator invocation could not
+find Python inside the read-only sandbox; it passed through the approved host command.
+No local Rust/core/SDK/package pass is claimed for these probe changes. The new route
+assertions require the selected production matrix. No production Rust/TypeScript,
+dependency, workflow, permission or product contract changed.
+
+Self-review checked the literal request fields against current Flow/Source serialization,
+new-session ownership, fixture jump text and Running status, as well as exact changed-path
+scope. No application defect was identified locally. Next: publish this candidate and
+dispatch the existing production workflow once with optional package retention enabled.

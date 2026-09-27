@@ -1,12 +1,12 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** G1-OBS `review_ready`; implementation and automated qualification complete.
+**Current checkpoint:** R2-P1 `in_progress`; packaged proof corrections and one supported-target qualification selected. G1-OBS remains `review_ready`.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
-**Qualification candidate:** a6063080006769613733de20fcd82265bf96b632.
-**Native qualification:** corrected [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085), attempt 1, both target jobs passed and artifacts verified. Earlier 36289951468 passed under unpinned npm; its results and frame outlier are preserved in ledger 22.
+**G1-OBS implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
+**G1-OBS qualification candidate:** a6063080006769613733de20fcd82265bf96b632.
+**G1-OBS native qualification:** corrected [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085), attempt 1, both target jobs passed and artifacts verified. Earlier 36289951468 passed under unpinned npm; its results and frame outlier are preserved in ledger 22.
 Read [HANDOVER](HANDOVER.md), [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md)
 and [ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27).
 
@@ -26,10 +26,11 @@ Each target passed 60 UI tests and ordinary core/write/recovery cases. Ledger 22
 records SDK skips, historical exclusions, exact measurements and verified archives.
 These are core/Chromium results; final packaged/native human acceptance remains open.
 
-G1-OBS is complete at its selected boundary. Next: review the checkpoint and plan the
-remaining 1G.2b/R2 and final acceptance work, with execution separately selected.
-No CI or local writer is outstanding. Packaging, optional Git, Phase 2 and merge are
-outside this selection. Historical worktree and raw evidence remain preserved.
+G1-OBS is complete at its selected boundary. The user accepted R2-P1: strengthen the
+existing duration/graph-reopen package proof, run one production matrix and audit
+results; see ledger 23. No run has been dispatched yet. Application fixes, human
+acceptance, merge-conflict resolution, optional Git and Phase 2 remain outside scope.
+Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure
 
