@@ -1,11 +1,12 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** G1-OBS qualification correction; observed Branches implemented.
+**Current checkpoint:** G1-OBS `awaiting_ci`; observed Branches implemented.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
-**Native qualification:** [36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468), attempt 1, both target jobs passed; artifact audit found an omitted npm pin.
+**Qualification candidate:** a6063080006769613733de20fcd82265bf96b632.
+**Native qualification:** corrected [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085), attempt 1, pending/manual resume. Earlier 36289951468 passed under unpinned npm; its results and frame outlier are preserved in ledger 22.
 Read [HANDOVER](HANDOVER.md), [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md)
 and [ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27).
 
@@ -20,8 +21,8 @@ path/link, external-writer, recovery, session and process/privacy regressions re
 Local release Windows G1-U2 passed three fixed samples: accepted updates 41.25–44.76 ms,
 initial/explicit refresh 242.97–253.91 ms. Chromium interaction p95 was 3.6 ms during a
 pending refresh. Local core/Source/renderer checks are recorded in ledger 22 with
-capability/SDK exclusions. Supported-target qualification is still pending; no native
-CI pass, package result, final human acceptance or integration is inferred.
+capability/SDK exclusions. Pinned-toolchain target qualification is pending; no package result, final human
+acceptance or integration is inferred from the first bounded CI pass.
 
 G1-OBS remains the only selected checkpoint. After its bounded Windows/macOS run,
 collect results and publish the handover, then stop. R2/final 1G package and human work,

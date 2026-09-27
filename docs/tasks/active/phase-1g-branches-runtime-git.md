@@ -3233,3 +3233,21 @@ files), whitespace checks and the unchanged full browser workload. Chromium
 153.0.8010.53 recorded initial 64.9 ms, frame p95 3.7 ms, maximum synchronous input
 0.2 ms, visible document, resize pass and no page errors. Core/application code and
 locked dependencies are unchanged by this correction.
+
+
+#### Corrected qualification dispatch and manual-resume handover
+
+Published bounded correction `a6063080006769613733de20fcd82265bf96b632`; local,
+remote branch and draft/open PR #17 head equality verified. Repository validator
+passed for 268 files and whitespace checks passed. Exactly one corrected dispatch:
+[36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085),
+attempt 1, this exact SHA, `phase1g_flow_profile=true`,
+`phase1g_candidate_proof=false`. Initial identity check at 2026-09-27 03:29 UTC found
+Windows **108542473937** and macOS **108542473845** in progress restoring caches.
+The dispatch validator was intentionally skipped. No target success is claimed yet.
+
+State is `awaiting_ci` / manual resume per AGENTS/WORKFLOW. Inspect this exact
+operation and its artifacts next; no duplicate dispatch, model polling loop or
+hypothetical automatic wake-up. No task-created local writer/watch process remains.
+After evidence review, publish final G1-OBS findings/handover and stop. Packaging,
+SDK/runtime/diagnostic final 1G work, native human acceptance and merge remain separate.
