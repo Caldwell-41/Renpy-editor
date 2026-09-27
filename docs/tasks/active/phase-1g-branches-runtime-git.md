@@ -2844,3 +2844,76 @@ it does not change or supersede the recorded native candidate/timings. Final
 (**264 files**) and staged whitespace checks pass. The final code delta after the
 profile candidate is only the two negative reproducers and this no-go workflow guard;
 no reader/projection implementation was changed or profiled again.
+
+### 19. G1-O1-R Windows feasibility review — 2026-09-27
+
+**State:** `review_ready`; investigation complete, capability **NO-GO**.
+The user selected investigation, bounded diagnostics if decision-relevant, and
+publication of findings/next-step planning only. No production implementation,
+changed freshness contract, G1-O2, timing-limit change or CI dispatch is authorized.
+
+The canonical [G1-O1-R review and next implementation plan](phase-1g-g1-o1-r-review.md)
+contains the sanitized nine-sample comparison, complete sequential stage model,
+native operation interpretation, A/B/C comparison, checked Microsoft API guarantees,
+S1 safety map, inspected UI/production findings and all remaining integration proofs.
+
+#### Entry, ownership and evidence preservation
+
+Entry feature and freshly verified remote head:
+`94128d3d5104f2716d5996d9f4a0492c923054b6`. Main advertised by Git is still
+`4d7ba0333c48d60242a9a42d3e079fea499a5531`. The PR API's base SHA field differs;
+fresh fetch plus `ls-remote` establish the branch refs used here. No reset, rebase,
+merge or history rewrite. PR #17 is draft/open. Other open PRs are unrelated
+dependency updates and the retained abandoned CI work; none was modified.
+
+The existing feature checkout was clean at entry. The detached historical checkout
+is clean at `b3d696533290d91bc2ff7d4eb65562d2c68642e1`. The prior local comparison
+chat is idle and no active benchmark/build process was found; no other visible
+repository writer was identified. Unpublished cross-host work cannot be independently
+observed. AGENTS, WORKFLOW, CURRENT, HANDOVER, ledger 18, ADR 0009 and relevant code
+were read; no nested AGENTS exist in this checkout.
+
+Reused the portable environment and dot-sourced `enter-local.ps1` in fresh shells.
+Its default compiler lookup failed under the sandbox; `-SkipVerify` permitted
+read-only inspection. Git network access required the ordinary host account after
+the sandbox TLS credential failure. No elevated build/test, bootstrap, package,
+dependency, power, affinity or security change was made. Documentation validation
+uses an already-installed Python. This does not reopen the completed setup task.
+
+Located and inspected local comparison/full-breakdown reports, all CSV tables,
+raw sample/prerequisite/native job/artifact logs and state/provenance records.
+All three local sample log hashes match their state records. Source-pass/count and
+stage arithmetic were cross-checked against those existing records. No new trace,
+probe or timing sample was necessary; no benchmark command was executed. Completion
+state/raw evidence remains local, untouched and uncommitted.
+
+#### Findings and next recommendation
+
+- Local accepted **460.195 / 464.211 / 456.588 ms**, median **460.195**, versus
+  hosted **574.858**: about 20% lower elapsed time, still all failures. Source fixture
+  stays 503 files / 105,627 bytes / 500 nodes / 2,000 edges; 1,006/503/504 passes.
+  No CPU-specific explanation or uniform speed multiplier follows.
+- Local verification **299–302 ms** and other accepted work **158–162 ms** invalidate
+  the prior 175+65 allocation. The review's conditional 230 ms complete-request
+  model includes final leaf binding and requires independent metadata/inventory
+  gains. It is not measured feasibility and is not substituted for CI acceptance.
+- G1-O1-S1 remains confirmed. Shared production readers have an analogous missing
+  final pathname binding by code inspection; transaction/runtime consequences are
+  not newly reproduced. Plan a separate scoped correction, not a transaction rewrite.
+- Confirmed Branches silent-click/focus gaps and production metadata dependency
+  omission are distinguished from unverified integration/race requirements. Full
+  Source/history/runtime authority, cancellation, resource and hook proofs remain.
+- **Recommended next checkpoint: G1-O1-N only**, native observation-boundary safety
+  and cost feasibility, with early stops and no full corrected prototype or production
+  wiring. Option B needs explicit product/ADR approval; option C is deferred.
+  No later checkpoint is authorized merely by this recommendation.
+
+#### Validation and publication
+
+Reviewed documentation-only changes. `python scripts/validate.py` passed for
+**263 repository files** using the existing Python 3.13; `git diff --check` and
+changed-path scope review passed. The publication uses repository-local noreply
+identity and the existing branch/PR. Resolve the actual
+published head from Git/PR; do not create a receipt-only self-SHA commit. Production,
+test code, workflow guard and historical checkout remain unchanged. No native or
+package CI dispatch; ordinary PR documentation checks may run on publication.

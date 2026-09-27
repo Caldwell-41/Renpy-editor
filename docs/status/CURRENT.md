@@ -1,12 +1,13 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** Phase 1G.2b **G1-O1 verified-candidate feasibility proof**:
-investigation complete, **NO-GO**. G1-O1/G1-V1 remain `blocked`; G1-O2 is not eligible.
+**Current checkpoint:** **G1-O1-R Windows feasibility review** complete, `review_ready`.
+Capability remains **NO-GO**. G1-O1/G1-V1 remain `blocked`; G1-O2 is not eligible.
 Continue `feature/phase-1g-branches-runtime`, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 Read [HANDOVER](HANDOVER.md),
-[ledger 18](../tasks/active/phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
+[ledger 19](../tasks/active/phase-1g-branches-runtime-git.md#19-g1-o1-r-windows-feasibility-review--2026-09-27),
+[review and next-checkpoint plan](../tasks/active/phase-1g-g1-o1-r-review.md)
 and [ADR 0009](../adr/0009-flow-observation-candidates.md).
 
 Test-only native candidate `b3d696533290d91bc2ff7d4eb65562d2c68642e1`, run
@@ -18,9 +19,18 @@ Final review additionally reproduced **G1-O1-S1**: same-byte leaf replacement af
 open can return a fresh graph with the old file identity. Counterexample tests and
 explicit resource/coverage gaps are retained. No production flow/write paths changed.
 
-No native operation remains pending; no retry or package matrix. The next separately
-selected action is **G1-O1-R**, review the failed safety boundary and Windows cost
-model before deciding on any corrected prototype. No G1-O2, physical acceptance or merge.
+Completed local comparison: accepted **460.195 / 464.211 / 456.588 ms**, median
+**460.195 ms**, about 20% below hosted Windows but all above 250 ms. Verification
+takes 299–302 ms; other accepted work takes 158–162 ms. The prior 175+65 allocation
+is withdrawn. This shows environment sensitivity, not a CPU-specific cause.
+
+No native operation remains pending; no retry or package matrix. Recommended next
+separately selected action: **G1-O1-N**, a bounded native observation-boundary and
+whole-request cost experiment before a complete corrected candidate. Fresh final
+leaf binding, metadata/inventory costs and all safety checks must be included.
+The revision-display alternative needs explicit product/ADR approval; it is unadopted.
+No production implementation, changed cadence/contract/target, G1-O2, physical
+acceptance or merge was performed by this documentation checkpoint.
 
 ## Completed evidence and current blockers
 

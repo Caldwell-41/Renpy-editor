@@ -1,6 +1,7 @@
 # ADR 0009: Cached flow candidates with fresh content verification
 
 **Status:** Reviewed proposal; G1-O1 prototype rejected (safety / Windows latency).
+G1-O1-R complete; native-boundary experiment recommended, not implemented/adopted.
 **Date:** 2026-09-27.
 **Scope:** Phase 1G.2b G1-V1 observation only. Complements ADRs 0001/0004/0008;
 does not replace their source, transaction, recovery or runtime authority.
@@ -221,7 +222,7 @@ no execution grant and no authority over assets or compiled files.
 | One newly read snapshot followed by identity/mtime checks | Reject. Same-length edits between projection and final check are missed; one old Windows snapshot pass also consumes nearly the budget. |
 | Reader-count tuning / faster parser or graph cache | Reject as primary fix. Completed sweep failed Windows; parsing/projection is small. Keep the existing four-reader cap. |
 | Immutable copy/snapshot, exclusive editor ownership, filesystem driver | Reject for current scope. Adds storage/platform/permission or external-editor constraints and cannot replace live-source write authority. |
-| Mandatory verifier plus candidate index | Recommended smallest next proof. Portable correctness using existing hashes; native performance is explicitly unproved. |
+| Mandatory verifier plus candidate index | G1-O1 rejected on S1 and Windows latency. G1-O1-R recommends a smaller native-boundary/cost experiment before a complete corrected candidate. |
 
 ## Expected work and acceptance
 
@@ -238,13 +239,13 @@ out of 588.068 ms internal total (about 94%). Keeping the old verification alone
 still be roughly **302 ms**, so **index-only is not a proven fix**. The single-reader
 experiment's 199.032 ms verifier plus about 68.6 ms other work also lacks margin.
 
-Working engineering allocation (hypothesis, not evidence): final secure verification
-<=175 ms, metadata/inventories/projection/final checks <=55 ms, dirty acquisition and
-bookkeeping <=10 ms: <=240 ms with 10 ms reserve to the unchanged limit. Reaching
-175 ms requires ~34% improvement over the 266.781 ms four-reader verifier. Eliminating
-repeated root/handle queries within each of 503 opens is a plausible route; only
-operation-level Windows measurement and race tests can establish it. macOS's observed
-~63–67 ms total provides margin without a new filesystem mechanism.
+The earlier hypothetical 175 ms verifier + 65 ms other-work allocation is **withdrawn
+as a credible forecast** by G1-O1-R. The completed local comparison measured about
+159–162 ms of other work and 299–302 ms verification, still without final leaf binding.
+The [updated whole-request model](../tasks/active/phase-1g-g1-o1-r-review.md#whole-request-cost-model)
+sets out a conditional 230 ms estimate with explicit binding cost and separate
+metadata/inventory reductions; it is a requirement for a new proof, not a performance
+result. No uniform local-to-hosted speed multiplier or CPU-specific cause is established.
 
 The [ledger implementation checkpoints](../tasks/active/phase-1g-branches-runtime-git.md#implementation-checkpoints)
 require safety proof and native feasibility before production integration, and an
@@ -278,3 +279,32 @@ leaf pathname back to the observed object, preserving all no-follow/chain checks
 This is not permission to claim atomic snapshots or eliminate the unavoidable race
 after the final comparison. Do not promote the current test-only reader/index.
 G1-O2 is blocked; separately review the safety boundary and Windows cost model first.
+
+## G1-O1-R review disposition — 2026-09-27
+
+The [completed review and next-checkpoint plan](../tasks/active/phase-1g-g1-o1-r-review.md)
+preserve this contract and the unchanged timing gate. Local Windows accepted median
+460.195 ms versus hosted 574.858 ms confirms environment sensitivity and continued
+NO-GO. Historical run 36278262505 attempt 1 and negative reproductions remain evidence
+of failure. No new benchmark, production implementation or corrected prototype was run.
+
+Recommend separately selecting **G1-O1-N**, a test-only directory-relative Windows
+open/final-binding experiment and complete-request cost assessment. Current Windows
+`open_file_at` uses an absolute path despite its parent-handle argument. Native
+relative opening is documented, but neither retained parent handles nor no-delete
+sharing establish current namespace/reparse state. Keep fresh canonical root, chain,
+content, identity and registration checks. Final leaf binding requires a new secure
+name open compared with the object actually read; querying that old handle again is
+insufficient. The review maps boundaries and required Windows/macOS positive regressions.
+
+Code inspection found an analogous gap in shared production snapshot/observation
+readers. Its caller audit/correction is a separate prerequisite to safety acceptance,
+not authorization for a transaction rewrite. Dependency-complete loader observations,
+central mutation invalidation, real flow cancellation/deadlines, Branches action/focus
+feedback and resource/poisoned-index proofs also remain required before acceptance.
+
+**Unadopted alternatives:** revision-based display with explicit external
+synchronization is a product/ADR decision, not an optimization satisfying today's
+gate. Kernel-coordinated caching needs a separate lifetime/break/fallback proof and
+does not currently justify its complexity. No freshness contract, cadence, authority
+boundary, fixture or timing target changes here. G1-O2 remains ineligible.
