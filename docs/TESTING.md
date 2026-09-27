@@ -614,16 +614,48 @@ real packaged graph edit/disk/reopen scenario and both supported-target measurem
 
 ### Branches timing interpretation
 
-The current browser probe times synthetic dispatch through the next rAF callback,
-not confirmed frame presentation. Its one-way pan sequence also moves the fitted
-graph outside the viewport after two inputs; DOM counts alone do not establish visible
-pan coverage. [MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
-records the source/geometry/trace proof and a proposed correction, not an implemented
-replacement. Preserve the existing failure and <100 ms limit. Any corrected evidence
-must retain visible geometry, ordered raw timings and clear callback/render/presentation
-semantics; fast synchronous dispatch or a local browser pass cannot waive a failed
-frame gate. Attribute long intervals with trace evidence before choosing a renderer
-or environment correction. Browser measurements remain separate from native WebView.
+The browser probe retains the original 30 one-way inputs and nearest-rank p95
+<100 ms gate under the explicit **dispatch-to-first-rAF continuation** name (legacy
+`panFrame*` output fields remain aliases). That path moves the fitted graph offscreen;
+it is historical comparison, not sustained visible-pan coverage. A separate fixed
+30-input sequence alternates ArrowLeft/ArrowRight at fitted x=40/0. Every input must
+change the transform, retain 500 nodes/2,000 paths, stay visible/focused and maintain
+positive clipped graph/representative-node intersection. Representative IDs, positions,
+dimensions and viewport geometry are checked outside the timing interval.
+
+The visible sequence reports both first-rAF and **second-rAF rendering-opportunity**
+intervals against the unchanged <100 ms p95 objective; initial layout remains <2 s.
+Neither callback proves physical presentation. Rendering opportunities can include
+previous browser work; fast synchronous dispatch cannot waive a failed gate. Review
+the endpoint/trace evidence before treating this diagnostic as rendered-input acceptance.
+The separate core <250 ms/<2 s budgets are unchanged and not measured by this probe.
+[MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
+retains the original defect/failure; [MAC-M1 ledger 29](tasks/active/phase-1g-branches-runtime-git.md#29-r2-p1-mac-m1-probe-correction-and-local-proof--2026-09-27)
+records the correction and fixed local proof, not retrospective CI qualification.
+
+Set `LOOMLIGHT_BRANCHES_EVIDENCE_DIR` to an ignored output directory to save the full
+report and two clipped frame captures, taken after visible inputs 0 and 1. Captures
+are outside timing, retain the graph's transform and can perturb subsequent browser
+work; their wall time is recorded, never subtracted. They prove the two rendered
+states separately, not that either state was physically presented at the timer endpoint.
+Set `LOOMLIGHT_BRANCHES_TRACE=1` as well for bounded Chromium rendering/GPU/User Timing
+and screenshot trace output plus a fixed 30-sample no-input control after Fit. There
+is no warm-up or sample trimming. All sequences use per-sample CDP calls; the control
+also reads geometry, but omits the two explicit captures. Fit can leave graphics work
+pending, so this is not a pure idle-host benchmark. A 60-second page deadline bounds
+the run; `finally` attempts trace saving and both cleanups independently, retaining
+partial samples and errors on failure. Abrupt process/browser loss can still prevent
+trace recovery and must be reported as missing evidence.
+
+Reports retain ordered page-clock boundaries, raw distributions, browser/GPU mode,
+focus/visibility, Node/Playwright/runner identity, Git base and exact fixture/source
+SHA-256s. Trace start/stop overhead is recorded separately. Compare traced/untraced
+fixed launches without pooling or subtracting scheduler/instrumentation time; their
+difference is not an isolated estimate of trace overhead. No automatic retry or tool
+installation follows from a failure. Browser results remain separate from native
+WebView, supported-runner and human acceptance. Attribute stalls using trace brackets
+before choosing a renderer or environment correction; lack of reproduction cannot
+waive historical failed/skipped gates.
 
 ### 1G.2b named packaged scenarios
 
