@@ -36,10 +36,16 @@ the candidate. No executable artifact is available for independent rehash. Windo
 SDK/service tests passed, but all five packaged cases exited with main-thread stack
 overflow before reporting. macOS skipped downstream SDK/package gates after its
 frame-budget failure. The new duration/reopen assertions remain unqualified.
-No operation is pending. Next selection proposed: bounded Windows startup diagnosis;
-macOS budget diagnosis remains separate. No investigation execution, application fix,
+No operation is pending. R2-P1-WIN-D1 stopped at unavailable local prerequisites
+(ledger 24). The subsequent user-selected R2-P1-WIN-TOOLS setup is `review_ready`
+(ledger 25): signed Microsoft x64 CDB/WinDbg 10.0.26100.9169 and the official,
+checksum-verified Ren'Py 8.5.3 SDK are prepared outside Git. CDB process/stack smoke,
+SDK version and fresh-shell environment checks passed. Workspace `enter-debug.ps1`
+exposes the prerequisites. Zero Loomlight builds/launches occurred; overflow location
+and ordinary-launch impact remain unknown. Next user selection is to resume the
+same capped Windows comparison and propose a correction. No application fix,
 redispatch, human acceptance, merge-conflict resolution, optional Git or Phase 2 is
-authorized by this assessment.
+authorized. macOS budget diagnosis remains separate.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

@@ -1,9 +1,13 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1, `blocked`; completed run assessed, qualification failed.
-**Authority:** user selected exact-run artifact assessment/publication only; no
-redispatch, production-code change or merge.
+**Checkpoint:** R2-P1-WIN-TOOLS, `review_ready`; local debugger/SDK setup verified.
+R2-P1 qualification remains `blocked`.
+**Authority:** the latest user request selects local debugger/SDK preparation only.
+It supersedes the earlier installation stop for these prerequisites. The prior
+R2-P1-WIN-D1 investigation retains its 90-minute active-work, one-baseline-build,
+one-diagnostic-build and four-launch caps; diagnosis was not resumed in this setup.
+No production fix, CI dispatch or merge is authorized.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
 conflicting against main. Integration is outside scope.
@@ -45,13 +49,39 @@ Raw logs/API records, original ZIPs, extracted files, verification manifest and 
 assessment are preserved outside Git at workspace `reports/r2-p1-ci-36293797731`.
 G1-OBS's previous qualification and 126 ms/1,058.6 ms frame outliers remain in ledger 22.
 
-## Next bounded decision
+## Prepared local tools and next bounded decision
 
-No CI operation or task-created local writer/watch process remains outstanding.
-This assessment made documentation changes only; no redispatch, production fix or merge.
-R2-P1 remains blocked. Proposed next checkpoint: identify the Windows packaged-startup
-stack overflow and determine whether it affects the probe path or ordinary launch,
-then propose the smallest supported correction. That investigation needs user selection.
-Keep the macOS budget failure open for a separate bounded diagnosis/decision.
-Do not rerun the matrix, relax budgets, change production code, add native automation,
-request human acceptance, resolve merge conflicts or merge from this handover alone.
+Read [ledger 24](../tasks/active/phase-1g-branches-runtime-git.md#24-r2-p1-win-d1-local-startup-diagnosis--2026-09-27)
+for the interrupted diagnosis and
+[ledger 25](../tasks/active/phase-1g-branches-runtime-git.md#25-r2-p1-win-tools-local-debugger-and-sdk-prerequisites--2026-09-27)
+for setup provenance, checks and exact workspace-relative paths.
+Entry head was `5773eb920e1dad3c9a3b1bca6b904240e897f040`; its app/workflow inputs
+remain identical to the tested candidate. The prior uncommitted diagnosis record is
+preserved in ledger 24 and included in this documentation publication.
+
+Microsoft x64 CDB/WinDbg 10.0.26100.9169 is extracted beneath workspace `.tools`;
+installer, selected MSI and debugger/engine signatures verify as Microsoft.
+CDB passed a disposable command-process launch, breakpoint and stack-output smoke
+check. Ren'Py 8.5.3 archive matches the repository pin and published SHA-256; its
+extracted Windows interpreter reports `Ren'Py 8.5.3.26051504`.
+From a fresh PowerShell at the workspace root (parent of `repo`), dot-source
+`. ./enter-debug.ps1`. It prepares existing Rust/MSVC, debugger PATH, SDK archive
+environment variables, a separate diagnosis build directory and local symbol cache.
+The script verifies the archive again and changes only this shell's environment.
+Downloaded/extracted tools, script and raw verification evidence remain outside Git;
+local report: `reports/r2-p1-win-tools/verification.json`.
+
+Self-review corrected a missing symbol-cache directory and repeated that smoke check
+successfully. No Loomlight build/launch or game execution occurred. CDB's smoke used
+exported symbols; matching application PDBs and the failure stack remain diagnosis
+work. No task-created debugger, SDK, application or download process remains running.
+Counters remain 0/1 baseline builds, 0/1 diagnostic builds, 0/4 application launches.
+The original CI binary remains unavailable; a local rebuild is diagnostic evidence.
+
+Next user-selected action: resume R2-P1-WIN-D1 within its existing caps, compare
+ordinary/probe startup with disposable app data, capture the exception/stack and
+propose the smallest supported correction. Account for prior active investigation
+time; do not reset its caps. Overflow location and ordinary-launch impact remain
+unknown; tool availability does not qualify R2-P1. Keep the macOS budget failure
+open separately. Do not redispatch, relax budgets, change production code, add native
+automation, request human acceptance, resolve merge conflicts or merge.

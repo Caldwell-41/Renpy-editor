@@ -2,7 +2,9 @@
 
 **Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
 supported-target qualification, `blocked` after the failed matrix (ledger 23). G1-OBS remains
-`review_ready` (ledger 22). Final 1G acceptance remains open.
+`review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 stopped at prerequisites
+(ledger 24); subsequent local tools setup is `review_ready` (ledger 25). Final 1G
+acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -12,7 +14,8 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction selects assessment/publication of the existing R2-P1 run only (section 23); no redispatch, production changes or merge.
+checkpoint. The latest user instruction selects local debugger/SDK preparation only
+(section 25); no redispatch, production fix or merge.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -3576,3 +3579,144 @@ passed for 268 files; whitespace passed. Changed paths are limited to this ledge
 CURRENT and the existing HANDOVER. Application and workflow inputs remain identical
 to the tested candidate. Commit/push publication is verified against the remote ref;
 no receipt-only commit is required to record its own SHA.
+
+### 24. R2-P1-WIN-D1 local startup diagnosis — 2026-09-27
+
+**Authority:** following a review-only plan, the user said "go ahead" to a bounded
+local Windows investigation. Limit: 90 minutes active work, one baseline build,
+one diagnostic build and four application launches. Compare ordinary/probe startup,
+locate the overflow and propose the smallest supported correction; no production fix,
+CI dispatch, macOS diagnosis, native automation, conflict resolution or merge.
+The accepted plan explicitly stops if necessary tools are unavailable.
+
+**Entry:** clean `feature/phase-1g-branches-runtime` at
+`5773eb920e1dad3c9a3b1bca6b904240e897f040`. Fetch and PR inspection confirmed the
+same published head, with PR #17 still draft/open/conflicting. Compared with tested
+candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`, only the three existing
+status/ledger documents differ. No historical checkout or branch reset was needed.
+Application/workflow inputs remain unchanged during this checkpoint.
+
+**Environment result:** the existing workspace environment script initially failed
+to expose MSVC in the sandbox. Repeating environment discovery with approved
+outside-sandbox access confirmed Rust/Cargo 1.90.0 (x86_64-pc-windows-msvc), MSVC
+14.50.35717 and Windows SDK 10.0.26100.0. Compiler, linker and dumpbin are available.
+CDB, WinDbg and LLDB were absent from the prepared PATH; standard Windows SDK/LLVM
+debugger locations and the WinDbg Store-package glob returned no installed debugger.
+The Windows SDK directory has no Debuggers subdirectory. Visual Studio remote
+debugger components exist, but no usable local crash-debugging frontend was found;
+no service was started or alternative automation implemented. No pinned Ren'Py SDK
+archive or Loomlight executable/PDB was found in the workspace cache/download/temp
+inventory. The original CI executable remains unavailable as recorded in ledger 23.
+These are scoped discovery results, not an exhaustive search of private user storage.
+
+Raw environment/tool paths, Rust version, archive inventory and zero-launch counters
+are retained outside Git at workspace `reports/r2-p1-win-d1/environment.json`.
+No Loomlight process was present at discovery. No task-created writer/watch process
+or CI operation remains outstanding.
+
+**Static review, not diagnosis:** native `main` constructs the Tauri builder, with
+the single-instance plugin before setup. Setup selects either ordinary
+`LifecycleService::new` or `prepare_runtime_ui_probe`, constructs `ApplicationHost`,
+then creates the main WebView. Probe JavaScript evaluation is scheduled after a
+two-second sleep, while prior CI exits occurred in 15–47 ms. This prioritizes native
+startup in a future trace; it does not establish the failing function, exclude a
+shared startup failure, or prove that ordinary launch works. Recursion, large native
+stack frames and dependency initialization remain untested hypotheses.
+
+**Disposition: blocked at the agreed unavailable-tools stop condition.** Zero
+baseline builds, zero diagnostic builds and zero application launches; no SDK
+execution, tool installation, dependency change or production modification. No native
+stack, normal/probe comparison or correction was obtained. R2-P1 remains blocked;
+all previous failures and unqualified gates stand. The macOS budget finding is separate.
+
+**Next bounded selection:** provide/authorize a usable Windows crash debugger and
+the official checksum-verified pinned Ren'Py archive, or select an already equipped
+Windows host. Then resume the same candidate comparison with disposable app data,
+no pre-existing instance, captured exception/stack and recorded cleanup. Any rebuild
+must be labelled diagnostic evidence, not the missing original CI binary. Retain
+the one-baseline/one-diagnostic/four-launch caps and stop with a correction proposal;
+installation, CI fallback, fixes and qualification require their own explicit scope.
+
+Publication gates for the documentation-only checkpoint: repository structural/link/
+privacy validation and whitespace check. The diagnosis chat was interrupted before
+publication; its notes are preserved and validated with the prerequisite setup in
+ledger 25.
+
+### 25. R2-P1-WIN-TOOLS local debugger and SDK prerequisites — 2026-09-27
+
+**Authority and boundary:** the user requested the local repository be updated with
+"debuggedr tools and sdk". This selects prerequisite setup only and supersedes the
+prior no-installation boundary for these tools. Prepare an official Windows crash
+debugger and the pinned checksum-verified Ren'Py SDK; verify usability and document
+how the next diagnosis can find them. No production change, application build/launch,
+CI dispatch, expanded investigation or merge belongs to this setup checkpoint.
+
+**Entry:** `5773eb920e1dad3c9a3b1bca6b904240e897f040`, matching fetched branch/PR
+head; PR #17 remains draft/open/conflicting. The interrupted diagnosis chat was idle;
+its uncommitted ledger 24 and status notes are preserved and carried forward.
+The original failed CI binary is still unavailable. Tool setup does not replace
+R2-P1 qualification or locate the overflow. Setup state: `review_ready`.
+
+
+**Prepared tools:** used Microsoft's official Windows SDK 10.0.26100.9169
+[download entry](https://learn.microsoft.com/en-us/windows/apps/windows-sdk/downloads)
+and [debugger component guidance](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools).
+The installer source is `https://go.microsoft.com/fwlink/?linkid=2376216`.
+Downloaded only `OptionId.WindowsDesktopDebuggers` via installer `/layout`, then
+administratively extracted `X64 Debuggers And Tools-x64_en-us.msi` using `msiexec /a`
+with `/qn /norestart` and a workspace target. Both operations exited 0. No full SDK
+upgrade, system-wide debugger registration, persistent PATH change or reboot.
+Installer, selected MSI, CDB, WinDbg, dbgeng and dbghelp Authenticode signatures were
+valid Microsoft signatures. CDB reports **10.0.26100.9169**, AMD64. WinDbg is present
+and signed; interactive GUI operation was not tested.
+
+All paths below are relative to the local workspace root, the parent of `repo`:
+
+- Debugger: `.tools/windows-debuggers-26100.9169/Windows Kits/10/Debuggers/x64/cdb.exe`
+  (WinDbg and its engine are adjacent).
+- Pinned archive: `.downloads/renpy-8.5.3-sdk.tar.bz2`, **153,611,590 bytes**.
+- Extracted SDK: `.tools/renpy/renpy-8.5.3-sdk`.
+- Environment: `enter-debug.ps1`; dot-source `. ./enter-debug.ps1` in a fresh
+  workspace-root PowerShell. It reuses `enter-local.ps1` for Rust/MSVC, exposes CDB/
+  WinDbg and both `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` / `LOOMLIGHT_PHASE1C_SDK_ARCHIVE`,
+  and sets `RENPY_SDK_DIR`. Build output is `.cache/target-r2-p1-win-d1`, isolated from
+  the historical comparison. Symbols use `.cache/symbols` and Microsoft's symbol
+  server. During diagnosis, add the rebuilt executable's matching PDB directory.
+  No build or application launch is embedded in the environment script.
+- Evidence: `reports/r2-p1-win-tools/verification.json`, installer/extraction logs,
+  initial/corrected CDB smoke logs and `renpy-version.txt`; downloads, extracted
+  binaries, local script and machine-specific paths stay outside Git.
+
+**SDK verification:** downloaded the exact archive from the repository's official
+URL. SHA-256 **eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45**
+matches both `app/src-core/src/renpy.rs` and the
+[published checksums](https://www.renpy.org/dl/8.5.3/checksums.txt).
+The archive contains 3,529 entries, no links, and the Windows x64 launcher. Python
+`tarfile` with its `data` filter extracted it beneath `.tools`; the SDK
+Windows interpreter invoked with `renpy.py --version` exited 0 and reported
+**Ren'Py 8.5.3.26051504**. No project/game was executed.
+
+**Self-review and verification:** CDB launched a disposable `cmd.exe`, stopped at
+its initial breakpoint, emitted the smoke marker and native stack, and quit with
+exit 0. The first smoke exposed a missing local symbol-cache directory; created it
+and repeated that check successfully, preserving both logs. The smoke used exported
+symbols and does not establish application PDB resolution or the crash's location.
+A PowerShell package-inspection variable collision was corrected before extraction;
+it caused no installation change. The environment script passed PowerShell parsing
+and fresh-shell execution, resolving CDB, WinDbg, Rust/Cargo 1.90.0, MSVC tools and
+the verified archive. Existing MSVC 14.50.35717 and SDK 10.0.26100.0 are retained.
+No task-created tool/download/SDK/Loomlight process remained after verification.
+
+**Disposition:** prerequisites are ready for the user's next selection. No Loomlight
+build/launch, production change, CI dispatch or merge occurred; diagnosis counters
+remain 0/1 baseline, 0/1 diagnostic and 0/4 launches. The interrupted ledger 24 notes
+are preserved in this publication. R2-P1 is still blocked, the original CI binary
+is unavailable, and macOS frame failure remains separate. Resume only the same
+bounded Windows comparison, account for earlier active investigation time and stop
+with an evidenced correction proposal. Setup does not approve a production fix.
+
+Publication checks: repository structural/link/privacy validation passed for 268
+files; whitespace passed. The reviewed Git diff contains only CURRENT, HANDOVER and
+this ledger, including the preserved interrupted diagnosis record. Application and
+workflow trees are unchanged from the tested candidate. Tool binaries and local
+setup evidence remain outside the repository. No production matrix was dispatched.
