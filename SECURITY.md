@@ -33,6 +33,12 @@ The repository intentionally treats Ren'Py projects and LLM output as untrusted.
 Opening a project for inspection must not execute project Python; actions that can
 execute project-controlled code require an explicit trust boundary.
 
+The initial-release scope is a local single-user hobby editor. Ordinary data-loss,
+path/input, privacy and execution boundaries remain priorities. Deliberately timed
+filesystem attacks by another process already running as the same user are outside
+the initial acceptance model; existing defenses are retained. See
+[ADR 0010](docs/adr/0010-local-project-safety-and-observed-flow.md).
+
 ## Secrets
 
 Never submit real API keys, GitHub tokens, signing identities, personal credentials,

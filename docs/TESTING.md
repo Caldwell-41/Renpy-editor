@@ -1,5 +1,33 @@
 # Testing strategy
 
+## Current scope: proportionate hobby-editor acceptance
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) governs new work.
+Routine gates prioritize save/reopen/undo, external in-place and replace-on-save
+conflicts, interrupted-save recovery, draft/session retention, malformed input,
+basic path/link refusal, explicit execution and usable response times.
+Use deterministic ordinary writer interleavings where they protect against lost work.
+
+Deliberately timed same-user root/parent/reparse attacks and the G1-O native-reader
+experiments are specialist historical tests, not blockers for last-observed Branches.
+Preserve them and their failures; do not acquire symlink privileges or change security
+settings to pass a hobby-editor gate. Existing robust write/recovery code remains.
+Historical corrective evidence below keeps its actual result.
+
+G1-OBS must update production code, test classification/selectors and the real-service
+workflow gate together. The existing selectors still run the old full-verification
+contract; this documentation does not suppress them. Classify before selecting a
+suite, explicitly report specialist exclusions and keep baseline path, ordinary
+conflict/recovery and session/process/privacy regressions required.
+
+Branches acceptance is G1-U1 observed-state behavior, G1-U2 <250 ms accepted-model
+update and <2 s initial/explicit disk refresh, plus the retained G1-V2 rendered
+interaction gate and data-loss/authority regressions in ADR 0010. Same fixture,
+three fixed successful samples per supported target; changed semantics require new
+evidence. A quickly returned unchanged graph cannot pass an accepted-edit case.
+No second complete source pass, final leaf-binding matrix, 230 ms verifier allocation
+or fixed 1,006/503/504 source-pass count is required.
+
 ## Current production scaffold and Phase 0 regression commands
 
 From `app/`, the Phase 1A production checks are:
@@ -264,7 +292,7 @@ pass.
 | Integration | Pinned official SDK compile, lint `--error-code`, tests, run harness, diagnostics, distributions |
 | Desktop E2E | Project create/save/close/reopen, Scene edit, source sync, external conflict, preview/run; Git checkpoint in optional Git |
 | Cross-platform | Windows and macOS file watching, paths, subprocesses, credential store, package/install/launch |
-| Security/privacy | IPC denial, traversal/symlinks, hostile projects, redacted logs, fixture/package PII scan |
+| Security/privacy | Narrow IPC, malformed input, traversal and ordinary unsupported-link refusal, explicit execution, redacted logs and package privacy; specialist OS attack experiments separate |
 | Performance | Large scripts/assets/graphs, incremental parse, patch latency, preview responsiveness, memory budgets |
 
 Phase 2 LLM-specific schema/adversarial/context/consent tests are intentionally not a
@@ -279,7 +307,7 @@ quality-gated rather than one large feature branch:
 | Milestone | Minimum evidence before proceeding |
 | --- | --- |
 | 1A scaffold | Locked fresh install/build/test; command/capability denial; CSP/navigation/network/ambient host denial; privacy/licence checks; packaged Windows x64/macOS ARM64 smoke; semantic theme tokens/reduced-motion foundation |
-| 1B transactions | External-writer races, stale revisions, path/file/recovery identity and symlink substitution, crash-point recovery, durability semantics, undo/redo conflict boundaries on both targets |
+| 1B transactions | Ordinary external-writer conflicts, stale revisions, path refusal, interrupted-save recovery, durability semantics and undo/redo on both targets; retained historical defenses remain |
 | 1C project lifecycle | New-project staging/failure cleanup; parent/stage child-process and promotion races; restart-safe verified SDK installation/provenance; crash-safe Recent Projects; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
@@ -506,7 +534,7 @@ update changes no workflow and dispatches no production matrix.
 | --- | --- |
 | Documentation/governance | Validator, link/privacy scan, `git diff --check` |
 | Source model/serializer | Unit + golden + targeted fuzz + fixture SDK lint |
-| Files/SDK/process | Unit + hostile-path/archive/transaction tests + platform integration |
+| Files/SDK/process | Unit + ordinary path/archive/conflict/recovery tests + affected platform integration; specialist hostile-OS tests only when explicitly scoped |
 | Scene/file lifecycle | Reference checks + transaction/recovery + stale `.rpyc` cleanup + SDK lint/run |
 | UI workflow | Unit/component + keyboard/accessibility + changed-path desktop E2E + visual-token conformance |
 | Generated Ren'Py | Official pinned SDK compile + lint + relevant automated test + standard-template smoke |
@@ -588,27 +616,24 @@ and JSON, exact Git inputs/target/executable digest, core/SDK logs and package a
 when requested. Both supported targets must pass on the coherent candidate. No
 native-keyboard or human acceptance claim is inferred from synthetic DOM events.
 
-The production workflow measures the unchanged real-service 500-Scene/2,000-edge
-fixture separately from the full core suite. It sets `LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`
-and runs the exact `scene::tests::flow_budget_fixture_500_scenes_2000_edges` test in
-release mode. Initial projection must remain below 2 s and refresh after an accepted
-Scene edit below 250 ms. `runtime-flow-budget.log` retains timings, assertion output
-and the required `phase-1g-flow-budget-gate: passed` marker; `runtime-flow.json` feeds
-the existing rendered checks. Full-suite timings are supplemental and do not silently
-pass an exceeded budget. Failure blocks later package steps and keeps G1 open.
+### Existing flow gate and required transition
 
-The G1 observation-reader regressions exercise same-length external edits, same-byte
-file identity replacement, deletion, oversize rejection and cancellation. Unix cases
-replace the retained parent/root and substitute symlinks; Windows proves retained
-parent namespace pinning. Existing flow inventory/history/external-invalidation and
-Source draft/caret tests remain required. Directory-handle reuse is limited to one
-observation and never permits reuse of source content or revision hashes. Batched
-read tests prove stable result order, a shared aggregate byte budget, fresh final
-revisions, cancellation and inheritance of the original deadline. Empty, small,
-chunk-boundary and growing-file revision tests retain exact digest/length semantics.
-The rendered gate keeps the full 500/2,000 workload, 30 samples and unchanged limits;
-it emits the measurements even when a budget assertion fails. Compositor-backed
-panning retains every node/edge and the existing navigation/selection controls.
+The current production workflow selects
+scene::tests::flow_budget_fixture_500_scenes_2000_edges with
+LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1. It measures the old full-verification refresh.
+Its runtime-flow-budget.log marker and existing failed runs describe that original
+contract. G1-OBS must replace the selected assertions/timers with ADR 0010's
+observed-state contract in the same change as the implementation. Keep old
+measurements/counterexamples as historical evidence; do not merely remove an
+assertion or mark its prior failure passed.
+
+Retain the real 500-Scene/2,000-edge workload, rendered 30-sample interaction check,
+ordinary external changes (including same-length content edits and normal file
+replacement), additions/deletions, metadata invalidation, Source draft/caret, session
+cancellation and resource-bound tests. Explicit Refresh reads current content even
+if timestamps are unchanged. A completed display observation is allowed to age
+until the next trigger; deliberately timed namespace attacks are not display gates.
+No native-open microbenchmark or full corrected ADR 0009 candidate is a prerequisite.
 
 R1's old automatic branch trigger is retired into this combined final gate; explicit
 manual R1 dispatch remains available for bounded future corrections. Final production

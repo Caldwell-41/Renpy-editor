@@ -141,11 +141,12 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'
 complete logs, artifacts and all 60 input hashes per target were verified for candidate
 `c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; the user selected 1G.2b from `78f051e`.
-It is `blocked`: the existing final run failed both core gates; the stale capability
-test is corrected, but G1-V1 projection latency remains over budget. Ledger 14 records
-the failed/incomplete G1/R1/R2 assessment. Correct the bounded finding before a justified
-replacement run; final supported-target evidence remains required. The 1G ledger records targeted evidence
-and deferred final packaged/native UI evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
+Final 1G acceptance remains incomplete. The user approved
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md): last-observed
+Branches, ordinary external-edit/data-loss protection and proportionate local-project
+scope. G1-OBS replaces the retired G1-O native-proof program and old G1-V1 display
+freshness gate. Historical failures stay in the 1G ledger; current code and tests
+still need the replacement contract and both supported targets' evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
 supported script editing/saving during play and usable diagnostics. Asset mutations
 require Stop; live asset refresh is excluded. Existing Scene/Source/Save
 services are reused. Agent-run tests own development checks; user physical testing is
@@ -155,7 +156,10 @@ reserved for one final 1G session under [TESTING](../../TESTING.md#phase-1g-test
 
 Render the basic Scene/label/choice graph from the same semantic edges as Scene. Navigate to source Choice/Jump and destination Scene. Define terminal/return behavior and visible dangling destinations; graph operations use the shared transaction model. Do not add a parallel graph truth, conditional authoring, advanced reachability/state analysis, mature minimap/search or Run From Here.
 
-**Gate:** two routes, jumps/returns, destination creation/removal policy, dangling references and bidirectional navigation stay coherent across Scene, Source and Branches on both targets.
+**Gate:** two routes, jumps/returns, destination creation/removal policy, dangling
+references and bidirectional navigation stay coherent across Scene, Source and Branches
+on both targets. ADR 0010's G1-U1/U2 observed-state, responsiveness and retained
+G1-V2 interaction gates apply; graph display cannot authorize a write or execution.
 
 #### 1G.2 — Explicit SDK validation, normal Run Game and diagnostics
 

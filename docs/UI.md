@@ -626,15 +626,22 @@ routes, an entry badge only when runnable `start` proves it, and separate partia
 notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
 or labelled selectors; duplicate option text remains separate. Arrow keys pan the
 focused graph, +/- zoom, Home fits; equivalent buttons remain available. Pointer pan
-is optional. Refresh and visible desktop observation refresh accepted flow; unchanged
-observations preserve focus and changed/deleted mappings clear ambiguous selection.
+is optional. Under [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md),
+Branches displays the last observed saved state, including accepted app edits.
+Open/focus/Refresh checks disk; coalesce triggers and avoid mandatory two-second
+full scans. Show Checking disk, Checked at <time>, Updated from saved edits, or
+Could not refresh/conflict. These status changes are selected behavior pending G1-OBS.
+Preserve focus/selection/pan for valid targets; clear ambiguous deleted mappings.
+An enabled navigation click must be processed or visibly refused during refresh.
 
 Edit Choice / Jump opens the existing mapped Scene controls, including their existing
 Create New Scene action. Source navigation carries exact bytes/revision and retains
 an existing draft/caret rather than applying accepted offsets to dirty or stale text.
 Uncommitted Scene forms retain their existing commit/cancel navigation guard. No graph
-write path, layout metadata or new Save owner exists. Failed refresh labels the last
-projection stale. Over-limit graphs show an explicit Source escape without truncation.
+write path, layout metadata or new Save owner exists. Failed refresh retains the
+last usable graph with a visible failure/conflict status. Navigation independently
+checks current source and gives a clear changed-target message instead of guessing
+offsets. Over-limit graphs show an explicit Source escape without truncation.
 
 The current limits are 500 Scenes and 2,000 edges. Layout, pan and zoom live only in the
 view. Large-story layout/search/minimap and execution from graph nodes remain deferred.

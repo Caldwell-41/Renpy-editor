@@ -14,6 +14,26 @@ and clear UI state. Ren'Py's own
 [security guidance](https://www.renpy.org/doc/html/security.html) warns that safe mode
 does not stop Python from changing files, so it is not an application sandbox.
 
+## Proportionate initial-release scope
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) sets the accepted
+single-user hobby-editor threat model. Prioritize protecting authored work during
+ordinary edits, external-editor saves, missing/moved files and interruption.
+Keep basic containment/link refusal, input/IPC validation, safe downloads/archives,
+privacy and explicit code execution.
+
+A malicious process already running as the same user and deliberately changing
+filesystem names/reparse state at individual I/O boundaries is outside initial
+acceptance. Branches may display the last observed saved state; it is not a
+continuous disk-freshness certificate. No specialist symlink-creation privilege,
+native reader experiment or exhaustive namespace-race matrix is required for that
+display. Existing transaction/recovery protections remain; this policy does not
+erase their evidence or authorize wholesale removal.
+
+Detailed implemented mechanisms and historical corrective results below describe
+retained defenses, not an instruction to reproduce every hostile case for every
+change. New acceptance follows ADR 0010 and the change-based TESTING policy.
+
 ## Protected assets
 
 - Game scripts, images, audio, lore, drafts, summaries, and route/state history.
@@ -27,11 +47,11 @@ does not stop Python from changing files, so it is not an application sandbox.
 | Boundary/threat | Example | Required mitigation |
 | --- | --- | --- |
 | UI → privileged core | Injected/untrusted content invokes filesystem or shell | Typed allowlisted commands, schema validation, deny-by-default capabilities, sender/origin checks, CSP |
-| Project → filesystem | `../`, absolute paths, parent/target/recovery substitution, symlink/reparse swaps, case collisions | Canonicalize and retain approved-root/component/recovery handle chains; use no-follow descriptor-relative I/O and anchored recovery enumeration on macOS; pin Windows directory handles without delete sharing; keep artifacts in anchored recovery; fail closed on identity/path change |
+| Project → filesystem | Traversal, absolute paths, unsupported links, accidental writes outside the project | Core-owned approved roots, validated relative paths, containment and ordinary symlink/reparse refusal; existing anchored transaction/recovery implementation remains. Deliberately timed same-user namespace attacks are outside initial acceptance. |
 | Archive → SDK root | Zip-slip, symlink/hardlink escape, overwrite, decompression bomb | Validate every entry/type/size/path before extraction; stage privately; atomic promote; no overwrite |
 | Core → child process | Script/filename becomes shell syntax or environment leak | Direct executable plus argument array, minimal environment, bounded output/time, no shell strings |
 | Project → Ren'Py runtime | Embedded Python executes with user privileges | Inspection never runs; explicit trust/run boundary; redacted preview; future sandbox research not implied protection |
-| Watcher/external writer → transaction | TOCTOU or external edit lost during save | Debounced anchored reads and content revisions, plus the reviewed platform transaction/recovery protocol; preserve base/draft/external bytes; expose Apply Both only for exact non-overlap; revalidate root/path/file/recovery identity at the latest safe point; never claim portable CAS from check-then-replace alone |
+| Watcher/external writer → transaction | External editor saves or replaces a file while Loomlight holds a draft or saves | Exact current-byte/revision preconditions, preserve base/draft/external and displaced bytes, explicit conflicts and recoverable transactions; no graph cache or watcher event authorizes a write |
 | Network → SDK/update | Tampered binary or downgrade | Official HTTPS origin allowlist, published checksum, version pin, staged verification, explicit upgrade |
 | LLM provider | Private/adult content exfiltration or malicious structured output | User-initiated send, locality disclosure/warning, minimal context, TLS, schema/path/identifier validation, reviewed diff |
 | Git/GitHub | Credential leak, destructive restore/push | OS credential flow, no token logs, safe defaults, recoverable restore, no force push, private repo default |

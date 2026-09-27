@@ -21,13 +21,20 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is complete and CURRENT/HANDOVER own its verified state. Remaining 1G/1H planning is approved, with implementation unstarted. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines three checkpoint chats across Branches and runtime/diagnostics; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) retains twelve acceptance IDs with new Git work removed. Each needs accepted/integrated prerequisites and explicit execution selection.
+**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is complete and CURRENT/HANDOVER own its verified state. Phase 1G implementation remains incomplete; Phase 1H execution is not started. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines three checkpoint chats across Branches and runtime/diagnostics; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) retains twelve acceptance IDs with new Git work removed. Each needs accepted/integrated prerequisites and explicit execution selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
 Phase 1 includes conventional staged project creation; distinct title/folder identity, selected parent, compatible pinned SDK, configurable resolution and optional local Git initialization; modular source and editor-only metadata; safe persistence/reopen; Characters with extensible Appearances; copied Assets and bool/int/string Variables; the bounded visual beat set; Scene/Source/Branches workspaces; scene-local partial preview; lossless Custom Code; shared transactions, coherent history, minimum usable recovery; explicit SDK validation/normal run and supported script editing/saving during play; asset mutations require Stop. New Git status/diff/checkpoint work is optional later scope.
 
 The bounded beat set remains background/scene, show/hide and appearance changes, Left/Centre/Right placement references, dialogue/narration, simple assignments, unconditional choices/jumps/return, music/SFX and a small transition set. Advanced conditions/calls, freeform transforms/ATL, UI Designer, Timeline, general import, Run From Here, LLM, new Git status/diff/checkpoints, GitHub remotes, plugins and release signing are not Phase 1 implementation.
+
+The 2026-09-27 [scope reset](adr/0010-local-project-safety-and-observed-flow.md)
+prioritizes data-loss prevention, ordinary external-edit handling and responsive
+last-observed Branches. Phase 1G implementation is underway and incomplete;
+G1-OBS replaces the retired native observation proof. Deliberate same-user filesystem
+attacks are outside initial acceptance. Historical failures remain preserved,
+and final supported-target/user acceptance is still required.
 
 ### Dependency checkpoints
 

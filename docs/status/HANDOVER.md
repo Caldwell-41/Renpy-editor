@@ -1,80 +1,76 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** G1-O1-N native observation-boundary experiment.
-**Outcome:** investigation complete, review_ready; capability **NO-GO**.
-G1-O1/G1-V1 remain blocked; G1-O2 is ineligible.
+**Checkpoint:** G1-RESET — hobby-editor scope and acceptance reset, complete.
+**Decision:** accepted by the user's instruction to execute the proposed refocus.
+**Implementation status:** pending G1-OBS; no product-code changes in this checkpoint.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged.
-**Entry:** 79f2f84792f46a39140e81b33c5a569fc2e3a56f.
-**Measured diagnostic:** entry plus exact pre-run patch SHA-256
-f3bee7f50eb0706e6d3e74224521a972a8d2bd082eb68027d5f811c7eab7f1b0.
-Resolve final publication head from Git/PR; do not make a self-SHA receipt commit.
+**Entry and unchanged code head:** 4f05e57fba66493afaa436b9ba0332210dcecf58.
+Resolve publication head from Git/PR; do not create a self-SHA receipt commit.
 
-## Findings and exact continuation
+## Current contract
 
-Read [ledger 20](../tasks/active/phase-1g-branches-runtime-git.md#20-g1-o1-n-native-observation-boundary-experiment--2026-09-27)
-and the [pre-registration, results and evidence hashes](../tasks/active/phase-1g-g1-o1-n-experiment.md).
-The [prior review](../tasks/active/phase-1g-g1-o1-r-review.md) retains the full contract,
-cost model and later acceptance obligations.
+Read [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md) and
+[ledger 21](../tasks/active/phase-1g-branches-runtime-git.md#21-g1-reset-hobby-editor-scope-and-acceptance--2026-09-27).
+The user explicitly rejected disproportionate hostile-system hardening for this
+single-user hobby editor and approved the product/scope reset.
 
-The user selected only the bounded experiment and publication. A separate test-only
-native Windows adapter and one-file compound harness were added; historical reader/
-candidate code and negative controls remain unchanged. The new adapter freshly
-rewalks validated names from the canonical root, checks retained attributes and
-fresh identities, reads/hashes bounded chunks, opens the leaf again and compares
-both live handles with a final chain bracket. It is **not qualified for production**.
+Protect save/reopen/undo, ordinary competing editor writes, interrupted-save recovery,
+drafts and custom source. Keep basic containment/unsupported-link checks, narrow IPC,
+safe SDK/archive/process handling, privacy and deliberate Validate/Run consent.
+Existing write/recovery mechanisms stay in place; no blanket security-check removal
+or transaction rewrite is selected.
 
-One pre-registered release safety sequence ran, exit 101: 0 test functions passed,
-1 failed, 0 ignored, 196 filtered. Before failure, ordinary read/current identity,
-path/type/missing refusal, existing writer/writable mapping and eight same/different
-restored-time replacements at four read boundaries passed their assertions.
-Hostile leaf-symlink setup then failed with **Win32 1314 (required privilege not held)**.
-This is missing test capability, not a demonstrated unsafe successful read.
-The early stop was honored; no retry or privilege/security change.
+Branches shows the last observed saved state, updated after accepted app edits.
+Open/focus/Refresh acquires disk observations and reconciles ordinary changes.
+Show check/pending/error status; preserve usable graph, focus and drafts.
+Navigation checks its target; graph data never authorizes a write or execution.
 
-Remaining link/parent/root/reparse, cancellation/failure/resource and whole-graph
-proofs were not established. **Zero timing or metadata/inventory sequences** ran.
-No corrected complete-candidate performance claim, supported-target acceptance,
-G1-O2 wiring or production-reader correction follows. The 230 ms model remains
-unproved; retained 162.344 ms other work leaves only 67.656 ms verifier margin before
-additional corrections. Do not rerun the historical comparison.
+ADR 0009's all-source fresh verification and G1-O native continuation are superseded.
+The denied symlink privilege is not a blocker for this new display contract.
+Historical tests/results are preserved and explicitly historical. Do not resume
+the native experiment or request privilege/security changes.
 
-## Validation and preservation
+## Next bounded implementation: G1-OBS
 
-Pinned portable Windows tools/caches and the existing fresh-shell entry script
-were reused, ordinary non-elevated account, Rust/Cargo 1.90.0, release/locked/offline,
-MSVC 14.50.35717, Windows SDK 10.0.26100.0. Compilation succeeded without repair;
-the existing unused runtime_handle warning remains. Exact commands and digests are
-in the experiment record. Publication gates are recorded in ledger 20.
+The product direction is decided. The next checkpoint implements it; no further
+native feasibility review is required. Follow the file-level plan and gates in
+ledger 21 and ADR 0010:
 
-The pre-run patch, input hashes, binary hash, complete safety log and terminal
-completion record are local under state/g1-o1-n and logs/g1-o1-n outside Git.
-Do not delete, replace or resume their one-shot started marker. The process is
-terminal, no benchmark/build/native operation is pending. Historical reports,
-CSVs, logs and state were hash-inventoried separately and preserved.
+- Introduce session-owned observed inputs/status in production flow, update them after
+  accepted mutations, and coalesce open/focus/explicit disk refresh.
+- Reuse existing source/project services, graph projection, transaction and runtime
+  owners. Remove the display-only full verification requirement, not write safeguards.
+- Make status and refresh/navigation feedback truthful; retain focus, selection,
+  pan/zoom and dirty Source buffers; discard old-session work.
+- Update production tests and workflow selection to the new semantics in the same
+  implementation. Retain specialist historical experiments without making them
+  routine acceptance blockers. No selector-only removal of a failing assertion.
+- Prove ordinary external edits, save/history/recovery/authority and fixed-fixture
+  responsiveness. G1-U2 is <250 ms accepted-model update and <2 s initial/disk refresh;
+  retain G1-V2 rendered input/pan p95 <100 ms. No measured pass exists yet.
 
-Historical worktree remains detached/clean at
-b3d696533290d91bc2ff7d4eb65562d2c68642e1. Keep run
-[36278262505](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36278262505)
-attempt 1 FAILURE and ledgers 13–19 under their actual candidates. Fixed future
-fixture stays 503 sources / 105,627 bytes / 500 nodes / 2,000 edges and 1,006/503/504
-content passes. Original counterexample guard, quality workflow and production
-paths were not changed. No CI dispatch, package matrix, merge or physical acceptance.
+Keep this checkpoint bounded to observed-flow integration and relevant regressions.
+No SDK/runtime redesign, graph renderer replacement, package matrix, merge, optional
+Git or Phase 2. Native/CI execution must have a concrete changed-input justification
+and the applicable checkpoint authorization; this handover does not dispatch anything.
 
-## One next bounded decision
+## Validation, evidence and publication
 
-Separately select a **read-only G1-O1-N follow-up review**: inspect the retained
-composition and missing safety/cost proof, then decide whether a new pre-registered
-experiment on an already capable environment is justified. This does not approve
-a rerun, elevation/security changes, hosted dispatch, full corrected candidate or
-production integration. Keep the Windows/macOS positive reader/graph obligations,
-production-reader caller audit, dependency/invalidation/cancellation/resource/
-authority proofs and Branches feedback/focus work as prerequisites to later acceptance.
-Revision display remains an unadopted product/ADR alternative.
+This scope reset is documentation/governance only, including AGENTS, product/security,
+architecture/data/UI, testing/phase plans, the superseding ADR and current status.
+The repository validator, link/privacy scan and whitespace/scope review qualify
+publication; they do not qualify the pending product implementation.
 
-## Publication
+Existing feature checkout was clean on entry; fresh fetched/advertised feature
+matched 4f05e57, main 4d7ba0333c48d60242a9a42d3e079fea499a5531.
+Prior repository chats were idle and no active build/native writer was found.
+Historical worktree stays clean at b3d696533290d91bc2ff7d4eb65562d2c68642e1.
+Keep local comparison/full-breakdown, CSVs, raw logs/state and G1-O1-N one-shot markers.
+No benchmark, test executable, setup, dependency/security change or CI dispatch ran.
+No process or external operation is pending.
 
-Commit and push only this diagnostic/findings scope to the existing feature branch,
-verify advertised remote head, retain draft/open PR. Use repository-local noreply
-identity. Stop after publication; no next checkpoint execution in this chat.
+Publish this coherent decision on the existing branch using repository-local noreply
+identity; retain draft/open PR. Verify remote publication, then stop at the scope-reset
+checkpoint. Final 1G acceptance remains open; next-chat selection is G1-OBS.

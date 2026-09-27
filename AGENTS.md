@@ -15,8 +15,14 @@ version-pinned staged project creation.
 - Preserve comments, formatting, custom syntax, embedded Python, and unsupported
   regions; patch the smallest safe source range. Never rewrite scripts with regex.
 - All editing surfaces and LLM proposals use one transactional change layer.
-- Treat projects and LLM output as untrusted. Parsing does not make a project safe
-  to run; running Ren'Py code can execute Python.
+- Treat project text and LLM output as untrusted data. Opening/inspection never runs
+  project code; deliberate Ren'Py execution can run Python with user privileges.
+- Follow the proportionate local hobby-project scope in
+  [ADR 0010](docs/adr/0010-local-project-safety-and-observed-flow.md): prioritize
+  data-loss prevention, ordinary external edits and responsive observed views.
+  Deliberate same-user filesystem attack races are not routine acceptance gates.
+  Preserve existing write/recovery protections; do not resume retired native
+  observation experiments without a separately selected task.
 - Use official Ren'Py SDK downloads, verify published checksums, pin per project,
   and isolate version-specific CLI behavior behind an adapter.
 - Do not send project content to an LLM until the user initiates an operation.
@@ -64,9 +70,11 @@ cargo test -p loomlight-desktop --locked  # supported desktop build environment
 npm exec -- tauri build -- --locked
 ```
 
-The core test command includes the Phase 1B hostile-race and real process-termination
-recovery suite. See [TRANSACTIONS](docs/TRANSACTIONS.md). An official-SDK wrapper with
-a skip marker is not target evidence.
+The core suite retains historical Phase 1B race and real process-termination
+recovery tests. Scope new gates using [TESTING](docs/TESTING.md) and ADR 0010;
+do not expand specialist attack experiments into a prerequisite for routine
+hobby-editor work. Keep ordinary external-writer and interrupted-save coverage.
+An official-SDK wrapper with a skip marker is not target evidence.
 
 Retain the Phase 0 regression commands:
 
@@ -108,7 +116,9 @@ gates are not passes. Preserve exact failed/superseded run evidence.
 ## Security and Git
 
 - Use argument arrays for subprocesses; never interpolate project content into shell commands.
-- Apply canonical path, containment, symlink, and archive-entry checks before I/O.
+- Keep approved-root/relative-path containment, straightforward unsupported-link
+  refusal and archive-entry checks. Read-only display does not require a fresh
+  hostile-namespace proof at every syscall; writes retain their transaction contract.
 - Keep renderer/webview privileges deny-by-default and expose typed, narrow IPC.
 - Use the account's noreply identity; configure local Git identity only in this repository.
 - Never rewrite history, force-push, change repository visibility, or discard work.

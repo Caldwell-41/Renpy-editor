@@ -399,6 +399,22 @@ Incomplete inventory yields unknown flow; resource refusal never silently trunca
 Revision-qualified Source navigation uses optional `expectedRevision` and preserves
 retained draft selection on mismatch. No capability, CSP or mutation authority changes.
 
+### Selected observed-flow direction — implementation pending
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) replaces ADR 0009.
+Reuse the shared projector and Source/Scene/transaction owners with one bounded
+session-owned observation cache. Accepted app mutations update/invalidate changed
+inputs; open/focus/Refresh requests reconcile disk. A disk refresh acquires current
+bounded source/metadata once; no second all-source verification or native final
+name-binding experiment is required for display. Coalesce work and discard old-session
+results. Existing full-verification code has not yet been replaced.
+
+Graph status describes the last observed saved state. Keep navigation validation,
+transaction preconditions/recovery and runtime preparation independent. UI feedback,
+focus/draft retention and ordinary external-edit regressions are the integration
+priorities. Production code, tests and workflow selectors must change together under
+G1-OBS; this architecture decision is not an implemented performance pass.
+
 ## Controlled runtime foundation (Phase 1G.2a)
 
 [ADR 0008](adr/0008-controlled-runtime.md) defines explicit saved-revision preparation,

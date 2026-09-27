@@ -1,5 +1,9 @@
 # G1-O1-N native observation-boundary experiment
 
+> Historical evidence: the user superseded this continuation and its display
+> acceptance requirements with [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md).
+> Preserve the recorded results; do not resume the native experiment or old G1-O plan.
+
 **State:** review_ready investigation; capability **NO-GO**. **Authority:** user selected G1-O1-N only on 2026-09-27.
 **Input:** 79f2f84792f46a39140e81b33c5a569fc2e3a56f, feature/phase-1g-branches-runtime,
 draft/open [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).

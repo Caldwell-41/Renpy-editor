@@ -13,7 +13,7 @@ Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14
 CURRENT/HANDOVER own the verified result.
 Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
 and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
-originally integrated documentation, with implementation unstarted and separately gated.
+tracked in the live handover; 1G is implemented in part and 1H remains separately gated.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
@@ -33,7 +33,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
 | Controlled runtime, trust and process ownership | [ADR 0008](adr/0008-controlled-runtime.md) |
 | Planned Phase 1G Branches and runtime/diagnostics | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
-| G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/active/phase-1g-g1-o1-n-experiment.md) |
+| Local hobby-project scope, observed Branches and replacement acceptance | [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) |
+| Historical G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/active/phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
 | Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |

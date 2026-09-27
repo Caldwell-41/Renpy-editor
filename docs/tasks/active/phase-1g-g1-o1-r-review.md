@@ -1,5 +1,9 @@
 # G1-O1-R: Windows feasibility review and next checkpoint
 
+> Historical evidence: the user superseded this continuation and its display
+> acceptance requirements with [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md).
+> Preserve the recorded results; do not resume the native experiment or old G1-O plan.
+
 **Date:** 2026-09-27. **State:** `review_ready` investigation; capability **NO-GO**.
 **Entry:** `94128d3d5104f2716d5996d9f4a0492c923054b6`, branch
 `feature/phase-1g-branches-runtime`, draft/open [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).

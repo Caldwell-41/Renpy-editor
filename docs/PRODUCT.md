@@ -32,6 +32,22 @@ The initial user is one visual-novel creator managing multiple games. They need 
 - use Git locally and with private GitHub repositories;
 - request local or remote LLM assistance as inspectable, reviewable proposals.
 
+## Reliability and responsive observed views
+
+The initial release prioritizes a hobby creator's work: reliable save/reopen,
+undo/recovery, external-edit conflicts, preserved custom source and useful responsive
+tools. Opening a project never executes its Python. Basic path/input/privacy and SDK
+protections remain; resisting deliberate same-user filesystem attack races is outside
+initial acceptance.
+
+Branches shows the last observed saved project state, updated after accepted app
+edits. It may lag external changes until open, focus or explicit Refresh. Show when
+disk is being checked, when it was last checked and any conflict/refresh failure;
+preserve the last usable view and drafts. Navigation and writes check their own
+current target/preconditions. Do not require a full hostile filesystem proof for
+every display update. The selected contract and measurable gates are in
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md); implementation is pending.
+
 ## Core workflows
 
 ### Initial authoring release

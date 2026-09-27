@@ -1,60 +1,54 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** **G1-O1-N native observation-boundary experiment** complete,
-review_ready investigation; capability **NO-GO**. G1-O1/G1-V1 remain blocked,
-G1-O2 ineligible. Continue feature/phase-1g-branches-runtime, draft/open
+**Current checkpoint:** G1-RESET complete: accepted hobby-editor product/scope reset.
+**Implementation:** last-observed Branches and replacement gates are pending G1-OBS.
+**Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+Entry/code head for this documentation checkpoint:
+4f05e57fba66493afaa436b9ba0332210dcecf58.
 Read [HANDOVER](HANDOVER.md),
-[ledger 20](../tasks/active/phase-1g-branches-runtime-git.md#20-g1-o1-n-native-observation-boundary-experiment--2026-09-27),
-[pre-registration and findings](../tasks/active/phase-1g-g1-o1-n-experiment.md),
-the [prior review](../tasks/active/phase-1g-g1-o1-r-review.md) and
-[ADR 0009](../adr/0009-flow-observation-candidates.md).
+[ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md) and
+[ledger 21](../tasks/active/phase-1g-branches-runtime-git.md#21-g1-reset-hobby-editor-scope-and-acceptance--2026-09-27).
 
-The isolated Windows native primitive passed ordinary-file, external writer/mapping
-and eight restored-time same/different-byte replacement assertions. The one ordered
-safety test then **failed** because hostile leaf-symlink setup was denied with
-Win32 1314. The missing-capability stop fired: **no retry, timing batch, metadata/
-inventory probe, security change or CI dispatch**. Hostile parent/reparse,
-remaining link, cancellation/error/resource and whole-graph evidence is missing.
-This is incomplete safety qualification, not proof that native relative I/O cannot work.
-The primitive stays test-only and unqualified; no production wiring was made.
+## Selected direction
 
-No native process remains pending. The next separately selected action is a
-read-only follow-up review of the missing qualification capability and retained
-composition before any newly authorized experiment. No automatic retry or later
-checkpoint is authorized. Freshness, cadence and <250 ms successful refresh /
-<2 s cold gates remain unchanged.
+Prioritize protecting hobby creators' work: save/reopen, undo, ordinary external
+editor conflicts, interrupted-save recovery, preserved drafts/custom source and
+responsive views. Keep basic containment/unsupported-link refusal, narrow IPC,
+privacy/download safety and explicit project-code execution.
 
-Historical test-only candidate b3d696533290d91bc2ff7d4eb65562d2c68642e1 and native
-run [36278262505](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36278262505),
-attempt 1, remain **FAILURE**. Windows accepted 563.983 / 574.858 / 586.393 ms;
-local Windows 460.195 / 464.211 / 456.588 ms; all exceed 250 ms.
-macOS 98.776 / 63.796 / 66.989 ms passes historical timing only, not corrected safety.
-The original S1 counterexamples and workflow guard remain intact. The local
-162.344 ms maximum other-work cost leaves at most 67.656 ms for a corrected verifier
-at the 230 ms engineering ceiling; no new verifier timing exists.
+Branches will show the last observed saved state, updated after accepted app edits.
+Open/focus/Refresh checks disk; clear check/error status replaces a continuous
+freshness claim. Navigation, writes and execution keep their own current-state
+checks. Deliberate same-user filesystem attack races are outside initial acceptance.
 
-## Completed evidence and current blockers
+ADR 0009 and the G1-O1/O2/O3 native/full-verifier continuation are **retired**.
+The G1-O1-N missing symlink privilege is no longer a prerequisite for display work.
+No further native-reader experiment or security-setting change is needed.
+Historical failures remain failures, not newly accepted product evidence.
 
-| Evidence | Current assessment |
-| --- | --- |
-| Production [36210484651](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36210484651), attempt 1, `ec6a76adbf78bc09baf7daba067d70eedbc38699` | FAIL: Windows isolated accepted update 616.686 ms; downstream Windows package/runtime gates skipped. macOS full production job passed, accepted update 66.483 ms, rendered pan p95 58 ms, all five packaged real-service cases passed. |
-| Profile [36213357271](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36213357271), attempt 1, `8303d4e057b2b137c770d65f7ab660bfbc5b1285` | Completed diagnostic: ~94% of Windows accepted-update time in secure source acquisition and verification. This is not a latency pass. |
-| Concurrency [36218397984](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36218397984), attempt 1, `7e4234a041b446d01ad5244002f1ce945d58046d` | Completed diagnostic: Windows 501–784 ms across 1/2/4/8/16 readers. Tuning cannot close G1-V1. Temporary reader override/sweep retired; ordinary four-reader bound retained. |
+The next bounded implementation checkpoint is **G1-OBS**: production observed-state
+flow, mutation invalidation and disk refresh, status/focus/navigation behavior,
+ordinary reliability regressions, and coherently updated test/workflow selectors.
+G1-U1/U2 replace the old G1-V1 contract; retain G1-V2 interaction and runtime/diagnostic
+obligations. Budgets are <250 ms accepted observed-model update, <2 s initial/explicit
+disk refresh and rendered input/pan p95 <100 ms on the unchanged fixture.
 
-G1 remains failed/incomplete. G1-V2 compositor work is retained with macOS evidence;
-final cross-platform G1/R1/R2 and 1G acceptance remain incomplete. Preserve every
-historical failure and prior pass under its actual inputs in
-[ledger 14–16](../tasks/active/phase-1g-branches-runtime-git.md#14-1g2b-execution-ledger).
-No new package, executable/hash verification or user acceptance is claimed.
+## Actual implementation and evidence
 
-G1-O1 did not prove the secure reader or Windows timing; production integration remains blocked. G1-O2
-must wire dependency-complete metadata, central mutation invalidation and actual
-Branches cancellation/session ownership, then pass the enforced native real-service
-budget gate. The diagnostic workflow alone does not enforce that budget.
-Physical testing, merge, optional Git, Phase 2 and another full production/package
-matrix remain outside the current checkpoint.
+This reset changes documentation only. The current app and workflow still implement
+the old verification behavior; no revised performance or safety acceptance is claimed.
+Do not run old native proof selectors as qualification for the new contract.
+Final 1G/R1/R2 integration, supported-target evidence and the final human session
+remain incomplete. No CI dispatch, package run, merge or background work is pending.
+
+Preserve ledgers 13–20, the clean historical worktree and local reports/state/logs.
+Historical production run 36210484651 failed Windows at 616.686 ms; candidate run
+36278262505 attempt 1 failed Windows at 563.983 / 574.858 / 586.393 ms; local comparison
+was 460.195 / 464.211 / 456.588 ms. G1-O1-N's one ordered safety test stopped with
+Win32 1314 after partial positive assertions. These results belong to their original
+inputs/contracts. New observed-state evidence is required.
 
 ## Preserved baseline and earlier closure
 

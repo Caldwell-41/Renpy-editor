@@ -1,7 +1,10 @@
 # ADR 0009: Cached flow candidates with fresh content verification
 
-**Status:** Reviewed proposal; G1-O1 prototype rejected (safety / Windows latency).
-G1-O1-R complete; native-boundary experiment recommended, not implemented/adopted.
+**Status:** Superseded by [ADR 0010](0010-local-project-safety-and-observed-flow.md)
+on 2026-09-27 following the user's hobby-editor scope reset.
+The text below preserves the historical proposal, experiments and failures.
+Its mandatory verification, native-proof and continuation requirements are retired;
+do not treat them as current instructions. No historical failure is relabelled a pass.
 **Date:** 2026-09-27.
 **Scope:** Phase 1G.2b G1-V1 observation only. Complements ADRs 0001/0004/0008;
 does not replace their source, transaction, recovery or runtime authority.

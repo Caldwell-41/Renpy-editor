@@ -3,6 +3,15 @@
 **Applies from:** Phase 1B<br>
 **Supported targets:** Windows x86-64 and macOS Apple Silicon ARM64
 
+## Scope after the hobby-editor reset
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) changes read-only display
+freshness and the initial threat model. The implemented write/recovery guarantees
+below remain in place because they protect accepted work and ordinary competing
+editor saves. There is no transaction rewrite in the reset. Historical hostile
+defense tests remain evidence; new routine gates focus on ordinary external edits,
+interruption and recovery rather than expanding adversarial namespace proofs.
+
 ## Guarantee
 
 All later Loomlight source-authoring writes must pass through the core transaction

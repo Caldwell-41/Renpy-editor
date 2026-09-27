@@ -1,13 +1,17 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-26. **Implementation:** 1G.1 `review_ready`; 1G.2a `review_ready` (final-source native evidence verified; R1-B1/B2 closed); 1G.2b `awaiting_ci` (G1-V1/V2 follow-up published; exact replacement pending). User acceptance remains separate.
+**Updated:** 2026-09-27. **Current checkpoint:** G1-RESET product/scope decision complete;
+production observed-state behavior pending G1-OBS. Final 1G acceptance remains open.
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
+G1-O observation program and old G1-V1 full-verification latency contract.
+Sections 12–20 retain historical evidence and superseded next-step instructions.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The current execution selection authorises 1G.2b agent verification only; see section 14.
+checkpoint. The latest user instruction authorizes the proportionate scope reset in section 21.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -42,7 +46,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI | `awaiting_ci` (G1-V1/V2 replacement) | Proven 1G.2a and explicit selection |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI; observed-state Branches completion | incomplete; G1-OBS next | ADR 0010 and existing R1 foundation |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -142,20 +146,18 @@ Display process text as inert bounded text; no active HTML or arbitrary file/URL
    still uses the existing incoming-reference/opaque-ownership refusal. No direct graph
    file writes or independent edge persistence. Layout is non-authoritative convenience
    state, isolated from source/history and validated if persisted.
-6. Invalidate from accepted transactions, undo/redo and reconciled external changes;
-   label last-valid projections stale/partial. Do not render an unsaved draft as accepted.
-   Bound graph building/layout, support cancellation on session switch and keep UI input
-   responsive. Record concrete node/edge limits and latency budgets before measurement,
-   with an honest over-limit state. Do not silently truncate or import spike scale claims.
+6. Follow ADR 0010's last-observed saved-state contract: update affected inputs after
+   accepted transactions/undo/redo, reconcile disk on open/focus/Refresh, and show
+   check/pending/error status. Do not render unsaved drafts as accepted. Retain session
+   cancellation, bounded work, focus/draft preservation and honest over-limit state.
+   A whole-project freshness proof is no longer required before each display update.
 
-**Initial production budget:** at most 500 mapped Scenes and 2,000 displayed flow edges;
-bound the project label inventory separately before implementing it. Use an unchanged
-representative fixture and record host/measurement method before measuring: accepted
-projection update target 250 ms, input/pan response p95 100 ms, initial build/layout 2 s.
-These are starting acceptance budgets to validate on both targets, not measured claims.
-If infeasible, report a bounded finding and propose a budget change before acceptance;
-never silently raise a limit. Over-limit input shows an explicit state with navigation
-back to Source and no silent truncation. 10k/50k spike workloads are not 1G requirements.
+**Selected production budgets:** the fixed 500-Scene / 2,000-edge / 503-source
+fixture remains. G1-U2 measures accepted app-edit to updated observed model <250 ms,
+initial and explicit disk refresh <2 s. G1-V2 retains rendered input/pan p95 <100 ms.
+ADR 0010 defines exact timer boundaries, output assertions and three samples per target.
+The old G1-V1 full-current-disk verification requirement is retired, not passed.
+Over-limit input remains explicit with Source navigation; no silent truncation.
 
 **Foundation-first:** current Scene parsing may stop at an unmapped menu destination.
 Prove shared missing/unknown/partial-choice semantics before rendering; retain known
@@ -2979,3 +2981,84 @@ diagnostic/findings checkpoint on the existing branch/PR, then verify advertised
 remote head and draft/open state. Resolve publication SHA from Git/PR, not a
 receipt-only follow-up commit. Ordinary PR validation may run on publication; no
 workflow_dispatch or package matrix was requested.
+
+### 21. G1-RESET hobby-editor scope and acceptance — 2026-09-27
+
+**Authority:** after the explanation of G1-O1-N's denied symlink test, the user
+requested a proportionate local hobby-editor focus and approved executing the proposed
+product/scope reset. This explicitly supersedes prior requirements for a continuously
+fresh graph and the G1-O native-proof continuation.
+**State:** product decision accepted; scope-reset checkpoint complete; implementation
+pending **G1-OBS**. Final 1G acceptance remains incomplete.
+Entry/code head 4f05e57fba66493afaa436b9ba0332210dcecf58, existing feature branch,
+draft/open PR #17. Fresh Git refs matched entry and main
+4d7ba0333c48d60242a9a42d3e079fea499a5531; no ownership conflict or active work found.
+
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) owns the accepted
+contract. Protect work against ordinary mistakes/external saves/interruption, preserve
+Source authority and explicit execution, and make Branches a responsive last-observed
+saved-state view. Retain basic path/link/IPC/privacy/download protections and existing
+transaction/recovery mechanisms. Deliberate same-user namespace/reparse attack races
+are outside initial hobby-editor acceptance.
+
+#### Requirement disposition
+
+| Prior requirement | Current disposition |
+| --- | --- |
+| Every display refresh hashes all sources after projection and rebinds every leaf | Retired for display; explicit disk refresh acquires current bounded content once |
+| Native boundary proof, hostile symlink privilege and G1-O1/O2/O3 sequence | Retired continuation; preserve historical code/tests/results without resuming |
+| G1-V1 <250 ms fully verified current-disk result; 230 ms verifier allocation; fixed source pass counts | Superseded by G1-U1/U2 observed-state behavior and distinct accepted-update/disk-refresh measurements |
+| Source authority, ordinary conflicts, save/history/recovery, draft retention | Retained; graph/cache cannot authorize mutations |
+| SDK/project execution consent, process control, bounded output and privacy | Retained; opening/refreshing runs no project code |
+| Missing/unknown/partial labels, bounded full graph, session cancellation, focus/navigation | Retained and prioritized for normal authoring |
+| Windows/macOS behavior, useful rendered UI and final user acceptance | Retained; no old failure relabelled or new pass inferred |
+
+AGENTS, product/security, architecture/data/UI, testing, parent/1G/1H plans,
+roadmap/index and live status now route to this decision. ADR 0009 and old review/
+experiment documents have explicit historical/superseded notices. Their findings
+and ledger 13–20 evidence remain intact. No production/test/workflow code changed.
+
+#### Next implementation checkpoint — G1-OBS
+
+1. In app/src-core/src/scene/flow.rs and its AuthoringService ownership, implement a
+   bounded session-owned observed-input model, dependency/inventory status and
+   accepted-mutation invalidation. Reuse the existing projector/source reconciliation;
+   do not transplant the unqualified test-only native adapter. Capture source and
+   consumed metadata/authoring/media dependencies at acquisition; uncertain app
+   invalidation requests disk refresh rather than claiming an updated model.
+2. Route observed-model requests versus explicit disk refresh through the existing
+   typed flow.list service/IPC in app/src-core/src/lib.rs and lifecycle session owner,
+   updating app/src/bridge.ts result/request types as needed. Keep one bounded owner,
+   coalesce triggers and discard cancelled/old-session publication.
+3. In app/src/branches-ui.ts and its main/controller callbacks, update after accepted
+   edits, refresh on open/focus/button, remove mandatory periodic full scans, and show
+   the ADR's simple statuses. Fix silent enabled clicks while loading and lost focus.
+   Independently validate navigation targets; preserve drafts and explicit conflicts.
+4. Update real-service fixtures in app/src-core/src/scene.rs, lifecycle IPC tests,
+   and Branches DOM/rendered tests for G1-U1/U2/V2. Change the selected production
+   workflow gate coherently with implementation; retain old diagnostic tests/evidence,
+   classify specialist OS attacks separately and do not silently skip baseline
+   containment, ordinary external-write/recovery or execution/privacy checks.
+5. Run relevant local checks first; then the concrete supported-target qualification
+   authorized for that checkpoint. Record three fixed successful cold/explicit-refresh/
+   accepted-edit samples per target against ADR 0010's distinct limits, actual changed
+   graph contents and rendered interaction evidence. No package matrix merely to
+   explore timings. Publish findings/handover and stop before final package/integration.
+
+The normal workflow acceptance examples are: create/open a project; edit a choice and
+see its routes update; edit/replace/delete a source in another editor and Refresh;
+preserve a dirty draft through navigation/conflict; save/undo/reopen without lost work;
+recover an interrupted save; open/refresh without Python execution; Validate/Run only
+by explicit action and Stop reliably. Keep the existing fixed graph/resource fixture.
+There is no new native microbenchmark, kernel caching, watcher framework, transaction
+rewrite, alternative renderer, SDK/runtime redesign or Phase 2 work in G1-OBS.
+
+#### Scope-reset validation and publication
+
+Repository structural/link/privacy validation passes for 267 files; whitespace and
+documentation-only changed-path review qualify this publication. No Rust/UI/native
+suite or performance experiment is appropriate to a documentation-only reset.
+No CI dispatch, package run, setup, security change, merge or history rewrite occurred.
+The existing historical checkout and local evidence remain preserved. Publish to the
+existing branch/PR with repository-local noreply identity and verify remote head;
+resolve publication SHA from Git/PR without a receipt-only commit.

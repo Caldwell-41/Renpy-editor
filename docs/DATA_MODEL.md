@@ -341,24 +341,28 @@ Additional labels remain unmapped, not invented Scenes. The unique accepted `sta
 label's canonical unconditional jump establishes the entry badge; custom/missing/
 ambiguous entry does not fall back to metadata or tree ordering.
 
-Observation hashes cover metadata and the accepted source inventory. Dirty Source
-buffers are excluded. Revision/identity changes invalidate observations; commands
-continue to enforce current Scene/Source transaction preconditions independently.
+Under the selected [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md)
+contract, observation identity describes source bytes, inventory and metadata actually
+used by that graph. Dirty Source buffers are excluded. Retain consumed dependencies,
+including relevant authoring/media presence and inventory; app edits invalidate
+affected inputs and disk Refresh rebuilds from current reads. The cache is session
+scoped and disposable. A graph revision never certifies that disk is still identical.
 
-Each flow observation rereads source bytes and rehashes every observed file at the
-end, then rechecks the inventory and metadata. Large inventories use at most four
-scoped read workers, each retaining only its most recent parent directory chain.
-Results preserve input order; one shared byte allowance is reserved before reads,
-so concurrency cannot multiply the 32 MiB inventory limit. Workers inherit the exact
-request cancellation token/deadline and join before the observation returns. No bytes,
-revisions or directory handles survive into the next observation. Each file open
-revalidates project registration, approved root and full parent chain and refuses
-links/reparse points. Snapshot reads check length before I/O, bound growth by that
-length and recheck length/identity afterwards. Revision hashing sizes its buffer to
-the observed file plus one growth-detection byte, capped at the unchanged 1 MiB
-cancellation interval. Limits remain 16 MiB/file, 32 MiB/inventory, 2,048 source files,
-500 Scenes and 2,000 edges. This observation grants no new write or runtime authority
-and does not claim an immutable filesystem snapshot.
+Carry observation/check status separately from partial source recognition, persistence
+and execution state. Record the last completed disk check and subsequent accepted
+app-edit generation so the UI can distinguish checked content from later saved edits.
+No persistence schema migration or graph-owned write authority is required.
+
+Navigation checks current target/range independently; commands retain exact current
+Scene/Source transaction preconditions. Limits remain 16 MiB/file, 32 MiB aggregate,
+2,048 source files, 500 Scenes and 2,000 edges with existing traversal guards.
+Keep at most four readers, bounded buffers and session cancellation; no file-handle
+cache between requests. One disk acquisition is sufficient for observed display;
+no immutable filesystem snapshot or mandatory second hash pass is promised.
+
+Implementation is pending: the current production flow still rereads/verifies sources.
+G1-OBS must update its result/status contract and tests coherently before claiming
+these behaviors or timings.
 
 
 ## Runtime diagnostic projection (1G.2b)

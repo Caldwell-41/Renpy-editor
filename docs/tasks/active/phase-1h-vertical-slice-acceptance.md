@@ -38,8 +38,12 @@ not prove route correctness. Keep any test instrumentation isolated from shipped
 
 New Git status/diff/checkpoint acceptance is removed from H01/H08/H10/H11 and preserved
 in [optional Git](optional-local-git.md). Existing init regression remains automated.
-The implementing agent owns every H01-H12 scenario and fault/hostile/race matrix; the
-user does not reproduce this matrix manually. Human interaction rows alone follow
+The implementing agent owns H01-H12 and the relevant ordinary conflict, failure and
+recovery cases; the user does not reproduce them manually.
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) removes deliberate
+same-user hostile filesystem races from initial acceptance and defines last-observed
+Branches. Existing historical tests/evidence remain; no specialist privilege setup
+is required for phase closure. Human interaction rows alone follow
 [TESTING ownership/reuse](../../TESTING.md#phase-1g-testing-ownership-and-cadence).
 
 ## 2. Required matrix — twelve IDs retained with Git scope revised
@@ -84,7 +88,7 @@ native keyboard delivery.
 - Golden-source no-op/minimal patches, exact Unicode/BOM/newlines, custom code and
   metadata unknown-field preservation remain intact.
 - Transaction/recovery and single-instance boundaries, safe media presentation,
-  hostile path/substitution denial, narrow IPC and packaged unauthorised-WebView
+  ordinary path/unsupported-link refusal, narrow IPC and packaged unauthorised-WebView
   probes pass with no new privilege/CSP exceptions.
 - Review real rendered Scene/Source/Branches and supporting Runtime/Diagnostics
   surfaces on both platforms against Quiet Studio Dark. Check keyboard-only operation,
