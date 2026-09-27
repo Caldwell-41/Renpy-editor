@@ -4703,3 +4703,114 @@ observed about interaction; (3) remaining uncertainty and the smallest justified
 step. Results apply to the recorded macOS host only; Windows and final human acceptance
 remain open. A favourable result does not erase H1 or change Chrome gating. Any future
 acceptance-policy revision is an explicit decision after reviewing native evidence.
+
+### N1 execution declaration — 2026-09-27
+
+Status: `in_progress`. Independent executor starts at verified published
+`c96836b90482c7994663cfa7584702e54c163649`; previous writer finished. Origin/PR #17
+match; main and the open/conflicting draft are unchanged. No nested AGENTS applies.
+
+Hypothesis: the physical macOS ARM64 package can respond within the existing
+objectives even though hosted Chrome failed; native measurements cannot explain or
+waive that failure. Use the unchanged production renderer and IPC with an explicit
+`branches-performance` native fixture/probe case, plus `branches-interactive` for
+the single native-input session. Generate the exact 503 `.rpy` / 105,627-byte fixture
+from `scene.rs`, with 500 Scenes and 2,000 real service edges. Retain a sorted source
+hash manifest and package/input identities under ignored
+`.toolchains/reports/r2-p1-mac-n1`. Metadata contains fresh disposable UUIDs.
+
+Initial release build attempt comprises the selected existing release core fixture
+test and Tauri app packaging, using installed tools only:
+`source .toolchains/enter-macos.sh`; from `app/`,
+`LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1 cargo test -p loomlight-core --release --locked --offline flow_observed_budget_fixture_500_scenes_2000_edges -- --nocapture`
+then `npm exec -- tauri build --bundles app -- --locked --offline`. At most one
+bounded repair attempt is available. No broad suite, SDK execution or CI. Before
+building: JS/Python syntax, rustfmt, repository validation and focused fixture proof.
+
+Automated launch command (once, unless a bounded harness defect needs repair):
+`python3 app/scripts/run-runtime-ui-probes.py app/target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight-desktop .toolchains/reports/r2-p1-mac-n1/automated branches-performance`.
+Correct the executable basename from the built bundle if necessary. Predeclare
+30 alternating Left/Right synthetic keys, full graph visibly intersecting, focused
+foreground viewport; record synchronous dispatch and dispatch-to-first/second-rAF
+callback continuation, geometry after each sample, p95 nearest rank, max and all
+>=100 ms samples. Thirty no-input two-rAF samples follow separately. No screenshots
+or trace during either series. rAF is a callback/rendering-opportunity proxy, never
+a physical presentation endpoint. Opening-to-ready and Refresh-click-to-checked UI
+timers include IPC/rendering; separate direct flow IPC request/response timers are
+not core-only G1-U2. One visible ordinary Choice caption edit and disk reopen verify
+accepted content. Core fixture's three fixed release samples separately retain exact
+<2 s initial/refresh and <250 ms accepted-update endpoints. No pooled populations.
+
+After automation, one `branches-interactive` package session (up to 15 minutes)
+uses the available Codex native app driver for verified pan/navigation, Scene/Source,
+focus and resize observations. Capture only outside measurements. Report observations
+as agent-operated, without human or physical-latency claims. Stop on unresolved
+prerequisite, exhausted cap or completed fixed evidence. Preserve every failed attempt.
+WIN-F1 allowance, renderer, thresholds and previous failures remain untouched.
+
+### N1 preflight interruption — fixture contract blocker
+
+Status: `blocked`, **assessment not executed**. No measurement or usability pass is
+claimed. Release build attempts **0/2**, automated packaged launches **0/3**,
+interactive sessions **0/1**. No operation remains running. The native driver is
+available, but no Loomlight UI session was started.
+
+Independent review found the exact approved core fixture is not a valid packaged
+lifecycle project. The new focused ordinary test reached real `open_path` and failed
+with `probe open: InvalidMetadata`. Inspection located the cause in
+`lifecycle.rs::inspect_valid_project_with_hook`: opening requires `game/script.rpy`,
+`game/options.rpy`, `game/gui.rpy`, and `game/screens.rpy`. The unchanged core fixture
+contains 500 chapter Scene sources, the entry script, and the two authoring definition
+sources (503 files), but lacks the other three required root scripts. Metadata also
+requires each Scene to remain under its Chapter directory. Do not bypass production
+inspection or move Scene scripts to fake equivalence.
+
+Proposed bounded adjustment: retain every original source byte/path and add three
+empty required scripts: **506 sources / 105,627 bytes / 500 Scenes / 2,000 edges**.
+That is a disclosed superset, not exact 503-file qualification. No threshold or
+failed-gate waiver is proposed. The user was asked to approve this fixture adjustment
+or stop with this finding; **no answer had arrived at publication**. This required
+decision remains pending. Do not execute the dependent experiment until answered.
+
+Preflight evidence: `cargo check --workspace --locked --offline` passed;
+`npm run check` passed typecheck and **60/60 tests**, zero skips; JS and Python syntax,
+`cargo fmt --check --all`, repository validation (**271 working-tree files**) and
+`git diff --check` passed. The focused fixture test first failed before compilation
+because offline `getrandom 0.4.3` was unavailable. The user explicitly approved
+downloading the missing locked Rust test dependencies; the subsequent focused test
+compiled but failed as above (**0 passed, 1 failed, 212 filtered out**). No broad
+hostile/crash suite, SDK/project execution, Chrome comparison, release build, CI
+dispatch, renderer change or WIN-F1 change occurred. These failures are preserved;
+neither is a responsiveness result.
+
+Host: physical MacBook Pro `Mac16,1`, Apple M4 (10 CPU / 10 GPU cores), 16 GB RAM;
+macOS **26.6.2 (25G83)** ARM64; built-in Retina display 3024×1964 pixels, reported
+1512×982 logical at **120 Hz**. WebKit bundle **21624.5.1.11.3**. Installed Node
+24.19.0, npm 11.9.0, Rust/Cargo 1.90.0. No runtime foreground or presentation
+measurement exists. The app candidate remains entry head
+`c96836b90482c7994663cfa7584702e54c163649`; there is no N1 package candidate.
+
+Local unfinished probe support remains in the working tree, deliberately unpublished
+until its fixture contract is resolved: `app/src-core/src/lifecycle/runtime_probe.rs`,
+`app/src-tauri/src/main.rs`, new `app/src-tauri/src/branches_ui_probe.js`, and
+`app/scripts/run-runtime-ui-probes.py`. It implements the declared isolated fixture,
+probe and report path, but its new test currently fails on the documented prerequisite.
+It is **not review-ready**. Do not discard it or mistake it for a working qualification
+harness. Its preserved patch permits exact review; the docs-only interruption commit
+publishes the decision/evidence without adding a known failing test to the branch.
+
+Ignored local evidence: `.toolchains/reports/r2-p1-mac-n1/`, with
+`preflight-manifest.json` recording these SHA-256 digests:
+
+| File | SHA-256 |
+| --- | --- |
+| `fixture-test.log` (offline prerequisite failure) | `3168f4f387b61d293e57942f8c20f839b3cbbb99c70c7d3f086fea4007222a07` |
+| `fixture-test-with-deps.log` (actual fixture refusal) | `e919e4b64617dcb36ba8329a17ef674b4e6bd21e4d510fe1e695364001b799a0` |
+| `frontend-check.log` | `d91b2825747d877390d124a04bc3c7a311be8fa53745e343b2ae0d6f7eb2a199` |
+| `environment.json` | `24c027d42cb71fb3c35dd9cc59e258f94e02bdc3ecd6d21859cc4b5b0581144e` |
+| `unpublished-probe-support.patch` | `da20a7aedbb2c953249700845bb566c86813d7da10b760fff54b2ccea451d3c3` |
+
+Answer at this interruption: measured responsiveness **unassessed**; perceived
+usability **unassessed**. Smallest next action is the fixture decision, followed only
+if approved by the same bounded MAC-N1 assessment. H1 remains FAIL; R2-P1 remains
+blocked and final human/Windows acceptance remains open.

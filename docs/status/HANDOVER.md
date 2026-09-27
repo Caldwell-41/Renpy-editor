@@ -1,49 +1,57 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1-TEST-P1 testing correction `review_ready`; next is the
-user-requested separate-agent **R2-P1-MAC-N1** local packaged assessment.
+**Checkpoint:** **R2-P1-MAC-N1** independent packaged assessment `blocked` at
+preflight; no responsiveness or usability assessment has run. TEST-P1 remains
+`review_ready`; R2-P1 remains blocked.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
 conflicting against main. No conflict resolution or merge authorized.
-**Entry head:** `2085f35f899820e1c05d02dfb9a314d8bb0b9661`.
-**Application/probe candidate:** `86466aea1d02ed2534ab404939a85b7a7f15ee54`, unchanged
-by TEST-P1. Main: `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
-Resolve the verified publication head from Git; do not make a receipt-only commit.
+**Entry/application candidate:** `c96836b90482c7994663cfa7584702e54c163649`.
+**Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
+Resolve this docs-only interruption publication head from Git; do not chase its SHA
+with a receipt-only commit. No N1 release package exists.
 
-## Approved continuation
+## Required next decision
 
-Read [ledger 31](../tasks/active/phase-1g-branches-runtime-git.md#31-r2-p1-test-p1--testing-correction--2026-09-27),
-then [MAC-N1 brief, ledger 32](../tasks/active/phase-1g-branches-runtime-git.md#32-r2-p1-mac-n1--independent-packaged-responsiveness-assessment)
-and [TESTING](../TESTING.md#supported-runtime-responsiveness-and-diagnostic-boundaries).
-The user approved the reviewed testing updates, then explicitly requested another
-agent to assess whether packaged Loomlight actually feels and measures slow on its
-supported platform. MAC-E1's hosted Chrome pair is no longer the selected next action.
+Read [ledger 32](../tasks/active/phase-1g-branches-runtime-git.md#32-r2-p1-mac-n1--independent-packaged-responsiveness-assessment),
+including its preflight interruption, and
+[TESTING](../TESTING.md#supported-runtime-responsiveness-and-diagnostic-boundaries).
+The unchanged 503-source core fixture lacks three scripts required by ordinary
+packaged project opening: `options.rpy`, `gui.rpy`, and `screens.rpy`. The actual
+fixture test failed `probe open: InvalidMetadata`; this is a fixture incompatibility,
+not evidence of application slowness. Do not bypass the lifecycle guard.
 
-TEST-P1 keeps both browser gates and their thresholds. Runtime and Branches steps
-record separate outcomes; a mandatory final gate fails unless both succeeded, after
-allowing independent SDK/package checks to proceed. Other prerequisite failures still
-retain normal dependent-step behavior. Triggers and success-only package upload remain
-unchanged. Local YAML/shell validation passed: 26 shell blocks, 25 outcome combinations
-and four controlled pipeline cases, plus unchanged-step/trigger checks. Repository
-validation passed 270 files and whitespace/self-review passed. Raw local validation
-and hashes are recorded in ledger 31. This workflow amendment has not been exercised
-in hosted CI. No package was built and no performance pass is claimed here.
+A user decision is pending: approve retaining all original contents plus three empty
+required files (**506 sources, unchanged 105,627 bytes / 500 Scenes / 2,000 edges**),
+explicitly leaving exact-fixture qualification open, or stop with this blocker.
+No answer had arrived at publication. No dependent release build or launch is
+authorized under the changed fixture until that answer arrives. The user separately
+approved downloading missing locked Rust test dependencies; that permission persists.
 
-MAC-N1 owns the smallest full-workload packaged probe extension and its independent
-assessment on the available macOS ARM64 host. Existing runtime probes have a small
-three-node fixture, not an equivalent 500-node native performance check. Use real
-WKWebView/IPC/services and disposable synthetic data, preserve the full workload and
-budgets, predeclare endpoints and retain all samples. rAF endpoints are proxies, not
-proof of physical presentation. Agent-observed usability, native input and final human
-acceptance must remain distinguishable. Do not claim Windows evidence from this Mac.
+## Local work and proof
 
-**MAC-N1 allowance:** at most two local release build attempts, three automated
-packaged launches and one agent-operated interactive session up to 15 minutes; see
-ledger 32 for the precise measurement/stop contract. Use existing tools and ask before
-installing more. No renderer/product fixes, CI dispatch, hostile/crash testing, budget
-relaxation, Chrome-gate waiver, conflict resolution or merge. Do not spend WIN-F1's
-unused build allowance. Publish the result and live handover, then stop.
+Four probe-support files remain **local and uncommitted**, not review-ready:
+`app/src-core/src/lifecycle/runtime_probe.rs`, `app/src-tauri/src/main.rs`,
+new `app/src-tauri/src/branches_ui_probe.js`, and
+`app/scripts/run-runtime-ui-probes.py`. Preserve them. The new focused test currently
+fails on the fixture prerequisite above; source support was not published as working
+code. Exact patch and failure evidence are retained under ignored
+`.toolchains/reports/r2-p1-mac-n1/`, with hashes in ledger 32.
+
+Workspace compile, 60/60 frontend tests (zero skips), syntax, format, repository
+validation and whitespace checks passed. The focused test first encountered a
+missing offline test dependency; after the approved download it compiled and failed
+on invalid fixture metadata (0 passed / 1 failed / 212 filtered). No broad hostile/
+crash tests or project code ran. Native UI driver and physical M4 macOS host are
+available. Environment identity is in the ledger; no native observation is claimed.
+
+**Unused allowance:** release build attempts **0/2**, automated package launches
+**0/3**, native interactive sessions **0/1** (up to 15 minutes). No operation is
+pending. Do not spend WIN-F1 allowance. Preserve the originally fixed samples,
+endpoints and budgets. No renderer fixes, Chrome comparison, CI dispatch, gate
+waiver, merge or later checkpoint. If the fixture is approved, resume only MAC-N1,
+publish its assessment/handover, then stop.
 
 ## Retained failures and missing acceptance
 
