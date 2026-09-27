@@ -9,7 +9,9 @@ R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28). User-approved
 R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29). The user
 then approved combining H1 scope review with one hosted macOS diagnostic execution
 (ledger 30, audit `review_ready` after terminal failure); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
-24–25. Final 1G acceptance remains open.
+24–25. The approved testing correction is recorded in ledger 31; the user also
+requested a separate agent for local packaged macOS assessment (ledger 32). Final
+1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -19,10 +21,11 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction combines R2-P1-MAC-H1 review and execution (section 30):
-one scoped macOS/browser diagnostic dispatch and evidence assessment. No production
-matrix, retry, budget relaxation, renderer changes, hostile/crash tests or additional
-unapproved tooling. WIN-F1 is preserved; no conflict resolution or merge is authorized.
+checkpoint. The latest user instruction approves the reviewed testing-policy/workflow correction
+(section 31), then a separate agent to assess actual packaged responsiveness on the
+supported local macOS platform (section 32). No CI dispatch, gate waiver, budget
+relaxation, renderer changes, hostile/crash tests, unapproved tooling, conflict
+resolution or merge. WIN-F1 remains preserved.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -4585,3 +4588,118 @@ new execution, browser/backend/runner changes or tooling need explicit authoriza
 If the baseline is already slow, choose a qualified execution environment rather than
 optimizing the graph to hide host frame delivery; any such acceptance-host decision
 requires its own reviewed evidence and unchanged responsiveness objective.
+
+
+## 31. R2-P1-TEST-P1 — testing correction — 2026-09-27
+
+**Authority:** after reviewing the native-first recommendation and its weaknesses,
+the user approved the updates and requested another agent to answer whether packaged
+Loomlight actually feels and measures slow on its supported platform. This checkpoint
+implements the policy/workflow correction; the requested separate agent owns the
+minimal packaged measurement and assessment in section 32. This supersedes MAC-E1 as
+the selected next action, without deleting its proposal or the failed H1 evidence.
+
+**Entry:** clean `feature/phase-1g-branches-runtime` at
+`2085f35f899820e1c05d02dfb9a314d8bb0b9661`, equal to origin; draft PR #17 remains
+open/conflicting against main `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
+No reset, merge or conflict resolution. Status: `review_ready` after local validation.
+
+Changes: TESTING distinguishes supported-runtime evidence, rAF proxies and native
+input/observed usability; fixes workload, raw-sample reporting, predeclared experiment
+allowances and explicit gate-review boundaries. The production workflow splits Runtime
+and Branches browser checks and defers only their failures until after SDK/package
+checks. Its mandatory `always()` gate requires both original step outcomes to be
+`success`, preserving failure and preventing success-only package upload. No acceptance
+threshold, browser implementation, renderer, SDK buffer fix or dependency changes.
+Other prerequisite failures can still stop their dependent work. Triggers are unchanged.
+
+Validation: Ruby's existing YAML parser accepted the workflow; **26 shell blocks**
+passed `bash -n`. The exact final-gate shell passed all **25 combinations** of success,
+failure, cancelled, skipped and missing outcomes: only success/success passed. Four
+controlled pipeline cases (two scripts × success/failure) confirmed `pipefail` preserves
+a browser process failure through `tee`. Structural checks confirmed unchanged triggers,
+preflight and all unrelated steps, final-gate placement after package checks and before
+uploads, `always()` evidence upload and success-only package upload. These are local
+structure/shell simulations, not a hosted Actions execution. They do not test platform
+packages or produce a new performance result.
+
+`python3 scripts/validate.py` passed **270 files**; `git diff --check` and self-review
+passed. Review confirmed the final gate reads `outcome`, not normalized `conclusion`,
+that no missing/skipped result can turn green, and that only the two intended browser
+failures are deferred. Five changed files: workflow, TESTING, CURRENT, existing HANDOVER
+and this ledger. No app/renderer/probe/dependency changes, package build, CI dispatch,
+hostile/crash tests or new tooling. WIN-F1 is untouched.
+
+Replay: `python3 .toolchains/reports/r2-p1-test-policy/check_workflow.py`; retained ignored
+script SHA-256 `573f3c2a8a901ca99c8784ae1ab6800e2b8c3a5bf143b7ed5e74ac13aa9f23c5`, report `validation.json`
+SHA-256 `c432484379d6fe702f2a0701aa2d74656bd1013200e405f226d0f69b4bc41832`. Publish this coherent checkpoint on the existing branch with
+`[skip ci]`, verify remote contents, then hand ledger 32 to the requested separate agent.
+Resolve the publication head from Git without a receipt-only commit. H1 remains FAIL
+and R2-P1 remains blocked; hosted validation and final acceptance are still outstanding.
+
+## 32. R2-P1-MAC-N1 — independent packaged responsiveness assessment
+
+**Selected by the user; execution follows publication of section 31 in a separate
+agent task.** Question: does the actual packaged Loomlight feel and measure slow on
+the available supported macOS ARM64 host? Assess evidence independently, including
+whether the proposed measurements can answer that question. This is one bounded
+investigation, not final 1G/1H acceptance or a Chrome-gate replacement decision.
+
+Start from CURRENT/HANDOVER, section 31 and the supported-runtime responsiveness
+contract in TESTING. Reuse the recorded branch/PR after its previous writer stops.
+Inspect existing packaged probes (`runtime_ui_probe.js`, the explicit native fixture
+entry in `main.rs`, `lifecycle/runtime_probe.rs` and `run-runtime-ui-probes.py`) and
+the full fixture in `scene.rs`. Existing runtime probes use a small three-node graph;
+they are not already a full-workload performance harness. Reuse these paths and real
+IPC/services; add only the fixture/probe/reporting support needed for this assessment.
+No new application privilege, frontend renderer change or general automation system.
+
+### Plan and fixed execution allowance
+
+Before execution, record a short hypothesis and exact commands/endpoints in this
+section, including candidate/source/package/fixture identity and raw evidence location.
+Use installed tooling and the already available verified pinned SDK if required.
+Ask before installing anything; inability to obtain a native host or adequate driver
+is a specific evidence limit, not authority to substitute Chrome or manual user labour.
+
+- At most **two local release build attempts** (initial plus one bounded harness/build
+  repair), **three automated packaged launches**, and **one agent-operated interactive
+  session up to 15 minutes**, using disposable synthetic data. These are maxima, not
+  required repetitions; do not rerun unchanged validated cases without a reason.
+- Preserve ADR 0010's **500 Scenes / 2,000 edges / 503 sources / 105,627 bytes** workload;
+  verify actual service output and visible graph. Keep a small-project observation
+  separately if useful. Record any fixture mismatch as unqualified, never silently
+  substitute an easier workload. Do not execute project code merely to open/inspect it.
+- For full-graph interaction use a fixed **30 visibly bounded alternating inputs**,
+  recording dispatch, first-rAF and second-rAF intervals separately. Retain every sample,
+  nearest-rank p95, maximum and count over **100 ms**; both proxy distributions retain
+  the <100 ms objective. Verify focus, transform and visible geometry per input. Collect
+  no-input cadence separately as context, without subtracting it or calling it a pass.
+  Keep captures/tracing outside measurement series; default to no tracing.
+- Record opening/refresh and an ordinary accepted edit separately, with real service
+  completion and visible feedback clearly distinguished. Existing G1-U2 limits remain
+  **<2 s** disk observation/refresh and **<250 ms** accepted-update model response.
+  End-to-end UI durations cannot be presented as those core-only timers. Run only
+  relevant ordinary checks; do not launch the broad historical hostile/crash suite.
+- Observe graph navigation/pan, focus, resize and Scene/Source switching in the actual
+  package, plus responsiveness during refresh if practicable. Use native input only
+  when existing tooling can demonstrably deliver it to this application. Label agent
+  observations and synthetic events accurately; neither is a human acceptance session.
+  If native input or visual observation cannot be obtained, answer the measurable part
+  and mark the perceived-usability part unassessed, not pass or failure.
+
+Stop after the fixed evidence set or an unresolved prerequisite/cap. Resolve bounded
+harness defects within the stated allowance; retain failed attempts and identify their
+cause. Do not turn product findings into unapproved renderer fixes or use the remaining
+Windows F1 allowance. No CI dispatch, new Chrome comparison, threshold relaxation,
+hostile/crash tests, tooling installation without approval, merge or gate waiver.
+
+### Deliverable
+
+Publish this ledger and the existing HANDOVER with exact inputs/commands, raw evidence
+hashes, measured distributions, functional/cleanup outcomes and limits. Answer separately:
+(1) measured slow or within objective for each operation; (2) what the agent actually
+observed about interaction; (3) remaining uncertainty and the smallest justified next
+step. Results apply to the recorded macOS host only; Windows and final human acceptance
+remain open. A favourable result does not erase H1 or change Chrome gating. Any future
+acceptance-policy revision is an explicit decision after reviewing native evidence.

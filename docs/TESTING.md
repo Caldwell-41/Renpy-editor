@@ -498,6 +498,65 @@ only after the driver is proven to reach the packaged application on that target
 its evidence is labelled accurately; otherwise the small final human session owns that
 remaining check. No new general desktop-automation platform is required for 1G.
 
+### Supported-runtime responsiveness and diagnostic boundaries
+
+Platform responsiveness claims require the packaged production frontend and real
+IPC/service on that platform: WKWebView on macOS ARM64, WebView2 on Windows x64.
+Chrome remains useful for portable frontend regression and browser diagnostics;
+its timing alone cannot establish that the packaged application is slow or fast.
+Record the exact hardware, physical/virtual host, OS/build, runtime version where
+available, display/scale/refresh settings, foreground/focus state, candidate, package
+and fixture hashes, toolchains and instrumentation. Mark unavailable identity fields
+as unknown. Evidence from a physical Mac does not explain a virtual Mac's failure,
+and macOS evidence does not qualify Windows.
+
+Before a performance experiment, declare the hypothesis, workload, timer boundaries,
+sample count, limits, build/launch allowance and stop rule. Retain all fixed samples,
+nearest-rank p95, maximum, overruns, timeouts, functional failures and cleanup results.
+Separate cold opening, steady interaction, refresh and accepted-edit measurements;
+do not pool them. Use the ADR 0010 full fixture and unchanged budgets. A smaller
+project may supply an additional usability baseline, never replace the full fixture.
+Prefer ordinary untraced native measurements first; tracing or screenshots during a
+series can perturb later samples. Collect visual evidence outside timing populations
+and disclose any remaining instrumentation. No subtraction of idle/control time,
+trimming outliers, retry-until-green or automatic allowance increase.
+
+Name endpoints honestly. Dispatch-to-first-rAF measures callback availability after
+synthetic input; a second rAF supplies another rendering opportunity. Neither proves
+pixels reached the display, OS input latency, or perceived responsiveness. Verify the
+intended graph transform, visible intersection, focus and full 500-node/2,000-edge
+workload, and retain both intervals separately. Native WebView rAF evidence improves
+runtime relevance but does not make this a physical-presentation timer. Report each
+p95 against the unchanged <100 ms objective as a labelled proxy, separately from
+observed usability; it does not redefine or alone close G1-V2. Genuine native-input
+observations need a verified driver and visible results, and the final human session
+remains separate. If a reliable presentation endpoint is unavailable, state the limit
+instead of inventing one or claiming a complete end-to-end pass.
+
+Investigate an overrun at its observed layer before changing production code. A new
+bounded experiment must distinguish a concrete hypothesis; a failure is not permission
+for indefinite browser/graphics tuning. Collect trustworthy supported-runtime evidence
+before proposing a different role for a Chrome timing gate. Such a gate change needs
+an explicit reviewed decision; diagnostic evidence or a favourable local run cannot
+waive an existing failure. Preserve the original run, attempt, SHA and unavailable or
+skipped evidence when changing future policy.
+
+### Independent browser outcomes in the production workflow
+
+The production workflow records Runtime and Branches browser steps separately. Only
+these two steps defer failure with `continue-on-error`; the mandatory final browser
+gate inspects their original `outcome`, not the success-normalized `conclusion`.
+Both must be `success`. Failure, cancellation, skipped or missing results cannot pass.
+This lets subsequent SDK, desktop and packaged checks run despite a browser failure,
+while the overall production job and success-only package upload remain blocked.
+Other genuine prerequisite failures retain normal fail-fast step behavior. This is
+bounded failure deferral, not a promise that every unrelated check survives every
+kind of failure. Evidence upload still runs on failure. Workflow edits receive syntax
+and outcome-path checks locally; no package matrix solely to verify this policy.
+The existing Chrome timing threshold and acceptance role remain in force pending the
+separate native evidence review. No supported-target acceptance is inferred from a
+workflow edit, and the workflow has not been remotely exercised merely by publication.
+
 ### Final human session and narrow evidence reuse
 
 Prepare one reproducible project and short expected-result checklist, aiming for roughly
@@ -542,8 +601,9 @@ scheduling an expensive final pre-merge run, record the intended integration/run
 and any bounded workflow amendment needed to avoid an automatic duplicate. A trigger
 change must be implemented/reviewed before relying on it; documentation never suppresses
 an actual trigger or permits bypassing required checks. Prefer a small explicit trigger
-policy over reviving OPT-1A or adding a general evidence controller. This documentation
-update changes no workflow and dispatches no production matrix.
+policy over reviving OPT-1A or adding a general evidence controller. The independent
+browser change above leaves these triggers unchanged and does not authorize a
+production dispatch.
 
 ## Required quality gate by change type
 

@@ -121,14 +121,25 @@ jobs:
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-budget.log"
           grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
-      - name: Runtime and Branches rendered focus, resize, and budgets
+      # Browser failures are reasserted by the mandatory gate below, after the
+      # independent SDK/package checks. Use outcome, never conclusion, there.
+      - name: Runtime browser focus and resize
+        id: runtime-browser
+        continue-on-error: true
         shell: bash
         env:
-          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
           LOOMLIGHT_RUNTIME_SCREENSHOT_DIR: ${{ runner.temp }}
         run: |
           set -o pipefail
           node tests/runtime-ui.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-ui-browser.log"
+      - name: Branches browser workload, navigation, and timing
+        id: branches-browser
+        continue-on-error: true
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+        run: |
+          set -o pipefail
           node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-branches-browser.log"
       - name: Restore pinned Ren'Py SDK archive
         id: phase-1c-sdk-cache
@@ -285,6 +296,19 @@ jobs:
           node scripts/dependency-inventory.mjs \
             --cargo-metadata "$RUNNER_TEMP/cargo-metadata.json" \
             --output "$RUNNER_TEMP/dependency-inventory.json"
+      - name: Enforce deferred browser results
+        if: always()
+        shell: bash
+        env:
+          RUNTIME_BROWSER_OUTCOME: ${{ steps.runtime-browser.outcome }}
+          BRANCHES_BROWSER_OUTCOME: ${{ steps.branches-browser.outcome }}
+        run: |
+          echo "Runtime browser: ${RUNTIME_BROWSER_OUTCOME:-not-run}"
+          echo "Branches browser: ${BRANCHES_BROWSER_OUTCOME:-not-run}"
+          if [ "$RUNTIME_BROWSER_OUTCOME" != "success" ] || [ "$BRANCHES_BROWSER_OUTCOME" != "success" ]; then
+            echo "Browser evidence is failed, cancelled, skipped, or missing; production qualification has not passed." >&2
+            exit 1
+          fi
       - name: Upload lightweight production evidence
         if: always()
         continue-on-error: true

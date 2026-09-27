@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-H1 audit `review_ready` after terminal diagnostic FAIL (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-TEST-P1 testing-policy/workflow correction `review_ready` (ledger 31), followed by user-requested separate-agent R2-P1-MAC-N1 packaged macOS assessment (ledger 32). H1 remains FAIL; R2-P1 stays `blocked`. G1-OBS and WIN-F1 retain their evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -79,9 +79,12 @@ were verified. Trace shows long GPU command-scheduling waits and late frame deli
 with no new rendering work on Chrome 152 / virtual M1. Exact browser/host/instrumentation
 causation remains unresolved; no justified repository fix was found. The user's resumed
 fix-if-possible request produced a diagnosis, not speculative renderer/flag/budget changes.
-No operation is pending. H1 audit is review-ready; R2-P1 stays blocked. Proposed MAC-E1
-is a fixed hosted untraced/traced comparison with pre-graph cadence controls; it requires
-explicit approval, with no redispatch or broader qualification automatically authorized.
+No H1 operation is pending. H1 audit is review-ready; R2-P1 stays blocked. The user
+subsequently selected the testing correction and independent native packaged
+assessment in ledgers 31–32, superseding MAC-E1 as the next action. Chrome failures
+remain blocking overall, but will no longer suppress the independent SDK/package steps
+through their normal failure path. Native measurement and observed usability remain
+separate evidence; no new CI run or gate waiver is authorized.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure
