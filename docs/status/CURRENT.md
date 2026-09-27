@@ -1,9 +1,9 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1 `awaiting_ci` / manual resume; packaged proof corrections published. G1-OBS remains `review_ready`.
+**Current checkpoint:** R2-P1 `blocked`; completed production run failed on both targets. G1-OBS retains its earlier `review_ready` evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
-**R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, production matrix in progress; no target acceptance yet.
+**R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **G1-OBS implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
@@ -30,8 +30,16 @@ These are core/Chromium results; final packaged/native human acceptance remains 
 
 G1-OBS is complete at its selected boundary. The user accepted R2-P1: strengthen the
 existing duration/graph-reopen package proof, run one production matrix and audit
-results; see ledger 23. Exactly one production matrix is in progress. Application fixes, human
-acceptance, merge-conflict resolution, optional Git and Phase 2 remain outside scope.
+results; see ledger 23. That matrix is terminal and its artifacts are audited. Both
+archives and all 29 extracted files were verified; all 101 Windows input hashes match
+the candidate. No executable artifact is available for independent rehash. Windows
+SDK/service tests passed, but all five packaged cases exited with main-thread stack
+overflow before reporting. macOS skipped downstream SDK/package gates after its
+frame-budget failure. The new duration/reopen assertions remain unqualified.
+No operation is pending. Next selection proposed: bounded Windows startup diagnosis;
+macOS budget diagnosis remains separate. No investigation execution, application fix,
+redispatch, human acceptance, merge-conflict resolution, optional Git or Phase 2 is
+authorized by this assessment.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

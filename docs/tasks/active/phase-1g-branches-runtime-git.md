@@ -1,7 +1,7 @@
 # Phase 1G — Branches, runtime and diagnostics
 
 **Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
-supported-target qualification, `awaiting_ci` / manual resume (ledger 23). G1-OBS remains
+supported-target qualification, `blocked` after the failed matrix (ledger 23). G1-OBS remains
 `review_ready` (ledger 22). Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
@@ -12,7 +12,7 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction accepts the tightened R2-P1 checkpoint in section 23.
+checkpoint. The latest user instruction selects assessment/publication of the existing R2-P1 run only (section 23); no redispatch, production changes or merge.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -3360,7 +3360,7 @@ correct only the packaged proof, run one existing supported-target production ma
 audit/publish the results and stop. Application defects require a new bounded decision
 before production changes. No performance tuning, CI redesign, merge-conflict work,
 new native automation, human testing or merge is selected.
-**State:** `awaiting_ci` / manual resume; exact operation below. Entry `d180f0bb4840fa57e9144a94b3d9987a408a2ebb`, clean and
+**State:** `blocked`; completed-run assessment below, no operation pending. Entry `d180f0bb4840fa57e9144a94b3d9987a408a2ebb`, clean and
 matching the fetched feature branch and draft/open PR #17. Main is `4d7ba03`;
 GitHub reports a PR conflict, left for later integration. No production run was active at entry.
 G1-OBS qualification and the earlier failed production runs remain preserved.
@@ -3454,3 +3454,125 @@ outliers and all historical failures. No duplicate dispatch, automatic retry, ne
 production fix, human testing, merge-conflict resolution or merge is selected. Report
 any application finding and seek a bounded decision before changing production code.
 Publish the final evidence assessment and CURRENT/HANDOVER, then stop at R2-P1.
+
+
+#### Completed-run assessment and artifact audit — 2026-09-27
+
+**Authority:** user selected assessment of run 36293797731 attempt 1, artifact
+verification and publication only; explicitly no redispatch, production-code change
+or merge. Entry `9a4b62de88c4f355d2e834e30fc0f496ce29e84b` was clean and matched
+fetched remote/PR head. PR #17 remains draft/open and conflicting; main unchanged.
+Only documentation changed in this assessment. No tests, SDK execution, package
+launch or workflow dispatch was performed; repository validation is recorded below.
+
+**Terminal result: FAIL**, exact candidate
+`f1a0f148445f34f8af1a57d0f69e2d27eb543b11`, tree
+`0ceb10f9530a1e28ce436e88f9fdcf50186c3f3a`, attempt 1.
+Preflight **108548761361** passed; macOS ARM64 **108548848384** failed at rendered
+Branches budgets; Windows x64 **108548848419** failed at packaged Runtime UI scenarios.
+The last target job completed 2026-09-27 04:32:03 UTC; the run is terminal, no longer awaiting CI.
+Later branch commits contain status/evidence only; application/workflow input equality
+with the tested candidate was checked. Full logs confirm Node 24.19.0, npm 11.9.0,
+Rust/Cargo 1.90.0 on both targets. Windows manifest reports Python 3.12.10.
+
+Artifact API identity binds both archives to this candidate and run. Archive byte
+lengths/SHA-256 matched GitHub; ZIP CRC checks and all 29 extracted-file byte comparisons
+passed (7 macOS, 22 Windows). Windows `runtime-ui-inputs.json` includes exactly the
+101 tracked app/production-workflow inputs at the candidate; every hash was compared
+to its Git blob, with matching candidate/tree/run/attempt. No input mismatch exists.
+
+| Target / artifact ID | Archive bytes | Verified SHA-256 |
+| --- | ---: | --- |
+| macOS / 10923840024 | 224142 | `82580f0178840ebc413767622ef7bdd7076de05f2bdcc95dfe756f826940961b` |
+| Windows / 10923338259 | 179610 | `09bcb566b6fba400cc8f82969504ed865ea9ab94182ba50b70209ddeee248568` |
+
+Windows recorded executable SHA-256
+`3b8bb4cb41df99ff0bb6d9998ff1126ccedc71e0ddf68d23825c3692d494d6aa`.
+It cannot be independently rehashed: conditional package upload was skipped after
+failure, and neither archive contains an executable. Windows MSI/NSIS build passed;
+that does not establish usable packaged behavior. macOS never reached package build
+or the input/executable manifest. Missing package artifacts are an availability limit;
+the substantive failed gates independently prevent acceptance.
+
+Raw run/API records, original archives, verified extracted files, hash manifest and
+computed assessment are preserved outside Git under workspace
+`reports/r2-p1-ci-36293797731`. Four Runtime UI screenshots (1100/640 widths, both
+OSes) were visually inspected: readable wrapped controls and diagnostics. They are
+injected-requester Chromium screenshots, not images of successful packaged scenarios.
+
+| Gate / actual layer | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Preflight frontend / repository / formatting | Shared preflight PASS: 60 tests, no failures/skips, Source browser regression and formatting | Same preflight |
+| Full core release/locked | 172 reported passes, 30 ignored; two no-SDK wrapper skips within pass count, so 170 executed cases | 177 reported passes, 33 ignored; two wrapper skips, so 175 executed cases |
+| Isolated G1-U2 | PASS, all three fixed samples | PASS, all three fixed samples |
+| Runtime browser focus/resize | PASS, 1100/640, no overflow/page errors | PASS, same coverage |
+| Branches browser G1-V2 | PASS: p95 15.6 ms | FAIL: p95 109.9 ms exceeds 100 ms |
+| Explicit lifecycle/SDK handoff | PASS: actual official-SDK wrapper gates run after archive restore | SKIPPED after G1-V2 failure |
+| Explicit R1 service / real compile-lint diagnostics | PASS: one service test and one diagnostics test; both compile/lint markers present | SKIPPED |
+| Desktop Rust / package build | PASS: one boundary test, MSI/NSIS build | SKIPPED |
+| Five real-service packaged cases | FAIL: all five exit with stack overflow; no report/cleanup proof | SKIPPED |
+| Legacy packaged boundary, secret scan, dependency inventory | SKIPPED after packaged failure | SKIPPED |
+| Optional package upload | SKIPPED, binary unavailable | SKIPPED, package not built |
+
+The full core includes the budget fixture once without enforced sample repetition;
+three enforced samples run separately. Ignored specialist/worker/explicit-SDK tests
+are not passes. Windows's two regular-suite SDK skip markers are superseded only by
+its separate explicit successful SDK executions; macOS has no such final-candidate
+execution. Earlier R1 closure remains tied to its original candidate.
+
+All fixed G1-U2 samples (milliseconds):
+
+| Target / sample | Initial (<2,000) | Explicit refresh (<2,000) | Accepted update (<250) |
+| --- | ---: | ---: | ---: |
+| Windows 1 | 394.2694 | 409.3750 | 29.8679 |
+| Windows 2 | 386.5103 | 376.7609 | 29.7351 |
+| Windows 3 | 377.2339 | 384.5417 | 29.1834 |
+| macOS 1 | 40.592750 | 42.867375 | 15.673708 |
+| macOS 2 | 40.393292 | 35.308125 | 16.685291 |
+| macOS 3 | 44.646083 | 38.046917 | 22.130584 |
+
+Both JSON graphs have 500 nodes/2,000 edges, completed `checked`/non-cache status
+and false partial/stale/over-limit flags. Browser p95 was recalculated from each
+ordered 30-frame sample set. Windows Chromium 153.0.8010.53 initial/p95/max frame:
+158.0 / 15.6 / 15.6 ms; maximum synchronous dispatch 0.2 ms. macOS Chromium
+152.0.7977.83: 91.9 / 109.9 / 860.3 ms; maximum synchronous dispatch 0.3 ms.
+Both documents were visible; held-refresh navigation, 640px resize and no-page-error
+assertions completed before the budget assertion. All ordered samples remain retained.
+
+**Finding R2-P1-WIN: packaged startup stack overflow.** Every Windows case log contains
+`thread 'main' has overflowed its stack`. Each process exited with code **3221225725**,
+no timeout and an empty report list. Elapsed seconds: compile **0.047**, lint **0.015**,
+route-a **0.032**, route-b **0.015**, runtime-error **0.031**. No stage or cleanup report
+was emitted; cleanup cannot be certified. Neither `branches-destination-reopen-passed`
+nor `long-run-duration-passed` was reached in reported evidence. The five attempts
+were independent cases within the one matrix, not retries. The evidence does not
+locate the overflowing call or establish whether normal non-probe launch is affected;
+no SDK, probe, Tauri or application root cause is claimed.
+
+**Finding R2-P1-MAC: rendered budget failure.** The 109.9 ms p95 is a real failure of
+the selected <100 ms gate; the 860.3 ms maximum is preserved. Short synchronous input
+dispatch does not negate a frame-latency failure. The current evidence cannot attribute
+it to renderer work, browser or runner scheduling. Earlier G1-OBS passing measurements
+and its 126 ms/1,058.6 ms outliers remain unchanged; none substitutes for this failed
+final-candidate run. No threshold relaxation, rerun or performance correction occurred.
+
+**Disposition:** R2-P1 is `blocked`, not review-ready or accepted. Proof corrections
+are implemented but their packaged assertions are unqualified. Final G1 is blocked
+by macOS G1-V2 and missing final packaged interaction; final-source R1 is incomplete
+on macOS; R2 is failed/unqualified on Windows and skipped on macOS. Human acceptance
+and integration remain separate. The run is terminal; no CI or local writer/watch
+process remains outstanding. Assessment/publication can complete without claiming
+that the capability checkpoint passed.
+
+**Proposed next selection, not authorization:** one bounded Windows packaged-startup
+investigation to identify the overflow location and determine probe versus ordinary
+launch impact, then propose the smallest evidenced correction. Keep the macOS budget
+failure recorded for a separately selected diagnosis/decision. No new matrix, production
+fix, native experiment, privilege change, human test or merge is authorized here.
+
+
+Publication checks for this assessment: repository structural/link/privacy validation
+passed for 268 files; whitespace passed. Changed paths are limited to this ledger,
+CURRENT and the existing HANDOVER. Application and workflow inputs remain identical
+to the tested candidate. Commit/push publication is verified against the remote ref;
+no receipt-only commit is required to record its own SHA.

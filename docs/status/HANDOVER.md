@@ -1,53 +1,57 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1, `awaiting_ci` / manual resume; target evidence pending.
-**Authority:** user accepted the tightened reviewed plan in this chat.
+**Checkpoint:** R2-P1, `blocked`; completed run assessed, qualification failed.
+**Authority:** user selected exact-run artifact assessment/publication only; no
+redispatch, production-code change or merge.
 **Branch:** feature/phase-1g-branches-runtime.
-**Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged.
-**Candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
-**Exact run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), **attempt 1**,
-`production-scaffold.yml`, `upload_packages=true`. Candidate/remote/PR equality verified.
-Later documentation commits do not change the tested inputs; resolve published head from Git.
+**Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
+conflicting against main. Integration is outside scope.
+**Tested candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
+**Exact run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731),
+**attempt 1**, terminal **FAIL**; last target job completed 2026-09-27 04:32:03 UTC.
+Later commits contain documentation only; resolve published head from Git.
 
-## Completed changes and checks
+## Verified outcome
 
-Read [ledger 23](../tasks/active/phase-1g-branches-runtime-git.md#23-r2-p1-packaged-proof-correction-and-qualification--2026-09-27).
-The existing packaged route probe asserts two choice edges, verifies accepted changed
-jump destinations, closes/reopens into a new session, checks exact source text/revision
-and refreshed graph, then restores routes. Normal play timing starts only after route
-output plus Running state; measured `runningObservedMs >= 9500` is required before Stop.
-Only the probe and testing/status documentation changed; no product or workflow changes.
-Local Node 24.19.0 checks passed: typecheck, all 60 frontend tests, frontend build,
-probe syntax, repository validation (268 files), whitespace. npm was absent on PATH;
-its existing scripts ran through installed tsc/Node/Vite directly. These are not package
-passes. Existing core SDK duration proof remains valid at its original layer/candidate.
+Read [ledger 23](../tasks/active/phase-1g-branches-runtime-git.md#23-r2-p1-packaged-proof-correction-and-qualification--2026-09-27)
+for exact measurements, gate dispositions, hashes and failure evidence.
+Preflight **108548761361** passed (60 frontend tests, Source browser, repo/format).
+Windows **108548848419** passed core, three G1-U2 samples, rendered budgets, explicit
+SDK/R1/diagnostics, desktop test and MSI/NSIS build. All five packaged cases then
+exited with code 3221225725 and `thread 'main' has overflowed its stack`, in
+0.015–0.047 seconds, no timeout and no reports. Scenario stages/cleanup are unproven.
+The overflow location and normal-launch impact remain unknown.
 
-## Outstanding operation and limits
+macOS ARM64 **108548848384** passed core and three G1-U2 samples, then failed the
+Branches browser frame gate: p95 **109.9 ms** against <100 ms, maximum **860.3 ms**.
+Synchronous dispatch maximum was 0.3 ms; it does not excuse the frame failure.
+Cause is unproven. Downstream SDK/desktop/package/scenario gates were skipped.
+Windows p95 was 15.6 ms. Both retained ordinary core protections and browser resize/
+navigation checks. Neither target qualifies the new graph-reopen/duration assertions.
+Legacy packaged boundary, secret scan and dependency inventory were skipped on both.
+Final G1/R1/R2 and human acceptance remain incomplete; earlier evidence is preserved.
 
-Exactly one dispatch was made. Direct lookup confirmed this candidate/run in progress.
-At the last inspection (about 04:16 UTC), preflight **108548761361** had passed repository,
-pinned Node/npm, frontend and Source browser checks and was running Rust formatting.
-Target jobs were not yet listed. No final target/SDK/package/new-probe pass is claimed.
-No task-created local writer/watch process remains. Follow AGENTS/WORKFLOW manual resume;
-there is no qualified automatic same-thread continuation and no active polling loop.
+## Artifact integrity and limits
 
-G1-OBS remains `review_ready`: candidate `a6063080006769613733de20fcd82265bf96b632`,
-run [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085),
-attempt 1, both targets passed. [Ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27)
-preserves hashes, all samples, SDK skips and browser/native limitations, including
-macOS p95 94.2 ms/max 126 ms and the earlier 1,058.6 ms outlier. Prior R1 closure and
-failed production evidence remain preserved. PR #17 reports conflicts against main;
-no integration action is selected. Human acceptance remains separate.
+Both GitHub archive digests/lengths, ZIP CRCs and all 29 extracted files verified
+(7 macOS, 22 Windows). All 101 Windows app/workflow input hashes matched the tested
+Git tree, with exact candidate/run/attempt identity. Windows executable digest is
+recorded in the ledger but cannot be independently rehashed: package uploads were
+skipped and no binary is available. macOS never generated that manifest or package.
+Four Runtime browser screenshots were inspected; these use an injected requester
+and synthetic input, not successful packaged/native interaction.
+Raw logs/API records, original ZIPs, extracted files, verification manifest and computed
+assessment are preserved outside Git at workspace `reports/r2-p1-ci-36293797731`.
+G1-OBS's previous qualification and 126 ms/1,058.6 ms frame outliers remain in ledger 22.
 
-## Next bounded action
+## Next bounded decision
 
-Resume evidence assessment of **36293797731 / attempt 1 / candidate above**. Verify
-both targets' full logs, archive/input/executable hashes and all five case outcomes,
-including cleanup. For each route require `branches-destination-reopen-passed` and
-`long-run-duration-passed` with `runningObservedMs >= 9500`. Publish the exact G1/R1/R2
-assessment, failures/skips and final handover; stop at R2-P1. Preserve pending status
-if the run is still live. No duplicate dispatch or automatic retry.
-Application defects need a separate bounded decision before production changes.
-No performance tuning, CI redesign, merge-conflict resolution, native automation,
-human testing, new feature work or merge is authorized. Keep PR draft/open.
+No CI operation or task-created local writer/watch process remains outstanding.
+This assessment made documentation changes only; no redispatch, production fix or merge.
+R2-P1 remains blocked. Proposed next checkpoint: identify the Windows packaged-startup
+stack overflow and determine whether it affects the probe path or ordinary launch,
+then propose the smallest supported correction. That investigation needs user selection.
+Keep the macOS budget failure open for a separate bounded diagnosis/decision.
+Do not rerun the matrix, relax budgets, change production code, add native automation,
+request human acceptance, resolve merge conflicts or merge from this handover alone.
