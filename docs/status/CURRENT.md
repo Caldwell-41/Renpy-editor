@@ -1,12 +1,12 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** G1-OBS `awaiting_ci`; observed Branches implemented.
+**Current checkpoint:** G1-OBS `review_ready`; implementation and automated qualification complete.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
 **Qualification candidate:** a6063080006769613733de20fcd82265bf96b632.
-**Native qualification:** corrected [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085), attempt 1, pending/manual resume. Earlier 36289951468 passed under unpinned npm; its results and frame outlier are preserved in ledger 22.
+**Native qualification:** corrected [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085), attempt 1, both target jobs passed and artifacts verified. Earlier 36289951468 passed under unpinned npm; its results and frame outlier are preserved in ledger 22.
 Read [HANDOVER](HANDOVER.md), [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md)
 and [ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27).
 
@@ -18,16 +18,18 @@ The Branches timer/all-source verification pass is removed. Historical native/ti
 namespace experiments remain preserved and explicitly specialist, with ordinary
 path/link, external-writer, recovery, session and process/privacy regressions retained.
 
-Local release Windows G1-U2 passed three fixed samples: accepted updates 41.25–44.76 ms,
-initial/explicit refresh 242.97–253.91 ms. Chromium interaction p95 was 3.6 ms during a
-pending refresh. Local core/Source/renderer checks are recorded in ledger 22 with
-capability/SDK exclusions. Pinned-toolchain target qualification is pending; no package result, final human
-acceptance or integration is inferred from the first bounded CI pass.
+Corrected Windows/macOS G1-U2 passed all three fixed samples per target: accepted
+updates 14.60–30.76 ms, disk observation/refresh 32.07–393.87 ms. Full browser pan p95
+was 15.6 ms Windows / 94.2 ms macOS; macOS retained one 126 ms frame and the earlier
+run's 1,058.6 ms outlier. Synchronous dispatch stayed below 1 ms during held refresh.
+Each target passed 60 UI tests and ordinary core/write/recovery cases. Ledger 22
+records SDK skips, historical exclusions, exact measurements and verified archives.
+These are core/Chromium results; final packaged/native human acceptance remains open.
 
-G1-OBS remains the only selected checkpoint. After its bounded Windows/macOS run,
-collect results and publish the handover, then stop. R2/final 1G package and human work,
-optional Git, Phase 2 and merge are outside this selection. Existing historical
-worktree and local G1-O1/O1-N raw evidence remain preserved.
+G1-OBS is complete at its selected boundary. Next: review the checkpoint and plan the
+remaining 1G.2b/R2 and final acceptance work, with execution separately selected.
+No CI or local writer is outstanding. Packaging, optional Git, Phase 2 and merge are
+outside this selection. Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure
 

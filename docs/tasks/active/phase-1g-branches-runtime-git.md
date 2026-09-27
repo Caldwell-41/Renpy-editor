@@ -1,7 +1,7 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-27. **Current checkpoint:** G1-RESET product/scope decision complete;
-G1-OBS observed-state implementation is under qualification (ledger 22). Final 1G acceptance remains open.
+**Updated:** 2026-09-27. **Current checkpoint:** G1-OBS implementation and automated
+qualification complete, `review_ready` (ledger 22). Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -11,7 +11,7 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction authorizes the proportionate scope reset in section 21.
+checkpoint. The latest user instruction selects G1-OBS implementation under section 21 / ADR 0010.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -46,7 +46,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI; observed-state Branches completion | G1-OBS qualification in progress | ADR 0010 and existing R1 foundation |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI; observed-state Branches completion | G1-OBS `review_ready`; R2/final 1G separate | ADR 0010 and existing R1 foundation |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -3067,8 +3067,9 @@ resolve publication SHA from Git/PR without a receipt-only commit.
 ### 22. G1-OBS observed Branches implementation — 2026-09-27
 
 **Authority:** the user selected G1-OBS through the active goal/next-chat instruction.
-**State:** implementation complete; local qualification recorded below; supported-target
-qualification pending. This is not final 1G acceptance, packaging or integration.
+**State:** `review_ready`; implementation, local and supported-target automated
+qualification complete. Final evidence is below; earlier pending entries are historical.
+This is not final 1G acceptance, packaging or integration.
 **Entry:** clean `76ebadb2dd59506c7bc57c066e421fbfac17fd2a`, matching freshly fetched
 feature branch and open draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`. Resolve publication head from
@@ -3251,3 +3252,101 @@ operation and its artifacts next; no duplicate dispatch, model polling loop or
 hypothetical automatic wake-up. No task-created local writer/watch process remains.
 After evidence review, publish final G1-OBS findings/handover and stop. Packaging,
 SDK/runtime/diagnostic final 1G work, native human acceptance and merge remain separate.
+
+
+#### Corrected target results and G1-OBS completion audit
+
+Run [36291545085](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36291545085),
+**attempt 1**, completed **successfully** on exact corrected candidate
+`a6063080006769613733de20fcd82265bf96b632`. Windows job **108542473937** and macOS
+ARM64 job **108542473845** passed all selected steps. Full logs confirm Node
+**24.19.0**, npm **11.9.0**, Rust **1.90.0**, release/locked core and locked npm install.
+The candidate-proof step and dispatch-validator job were intentionally skipped.
+No application, dependency or qualification input changed after this candidate;
+subsequent commits only record status and evidence.
+
+| Regression gate | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Regular core, reported | 171 passed / 30 ignored / 1 filtered | 176 passed / 33 ignored / 1 filtered |
+| Actually executed regular cases | 169; two SDK wrappers emitted explicit skip markers | 174; two SDK wrappers emitted explicit skip markers |
+| UI checks | 60 passed, zero failed/skipped | 60 passed, zero failed/skipped |
+| Isolated G1-U2 fixture | Passed; three fixed samples | Passed; three fixed samples |
+| Baseline path/link, ordinary writer/recovery | Passed; locally unavailable baseline capabilities exercised here | Passed |
+
+The one filtered core case is the separately executed budget fixture. Ignored cases
+retain specialist/history and subprocess-worker classifications; they are not passes.
+Official-SDK wrappers are not SDK acceptance. Logs explicitly confirm real process
+termination/recovery, competing writes, mapped-source reconciliation, Source Save and
+stale-range/draft/caret behavior; existing runtime consent/ownership cases also passed.
+
+Fixed real-service measurements in milliseconds, each against its own limit:
+
+| Target / sample | Initial disk (<2,000) | Explicit refresh (<2,000) | Accepted update (<250) |
+| --- | ---: | ---: | ---: |
+| Windows 1 | 381.5482 | 393.8655 | 30.7608 |
+| Windows 2 | 388.7512 | 393.2107 | 30.0870 |
+| Windows 3 | 371.0597 | 392.6911 | 30.0521 |
+| macOS 1 | 33.696750 | 33.880042 | 20.142959 |
+| macOS 2 | 41.859750 | 56.836084 | 14.596792 |
+| macOS 3 | 33.882167 | 32.072000 | 14.606541 |
+
+The test was inspected at the candidate: real `build_command` / `commit_history`,
+acceptance timestamp before invalidation, production `flow_observed`, changed
+`Route A`, 2,000 edges and `savedEdits` are asserted. Disk results assert completed
+`checked` provenance; original inventory is 503 files / 105,627 bytes. Core response
+timers do not measure transaction duration, IPC or rendering.
+
+| Browser evidence | Windows | macOS |
+| --- | ---: | ---: |
+| Chromium version | 153.0.8010.53 | 152.0.7977.83 |
+| Full 500-node / 2,000-edge initial layout, ms | 722.2 | 112.2 |
+| 30-frame pan p95, ms (<100) | 15.6 | 94.2 |
+| Maximum frame, ms | 16.5 | 126.0 |
+| Maximum synchronous input dispatch, ms | 0.1 | 0.7 |
+| Held-refresh navigation / 640px resize / page errors | Pass / pass / none | Pass / pass / none |
+
+Both documents were visible. Pan, selection and enabled route editing completed
+while refresh was deliberately unresolved. Ordered frame and dispatch samples are
+retained in full. macOS p95 passed with limited margin and one 126 ms frame; the first
+run's 1,058.6 ms frame also remains a finding. No claim that all frames are below
+100 ms, that scheduling caused an outlier, or that these are native WebView/keyboard
+measurements. The probe verifies that input does not wait on the refresh promise;
+final packaged/human interaction remains separately required. No further rerun or
+performance tuning was used to hide variation.
+
+Both screenshots were visually reviewed: readable graph, controls, selected Scene,
+route and checked-time status. They intentionally show a five-node subview after the
+full-workload assertions; they are not screenshots of all 500 nodes.
+
+Verified corrected-run artifact archives:
+
+| Target | Artifact ID | Bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Windows | 10923095066 | 175641 | `2b4a9bc0d7f05b111ce744edba9124326142c367dc0b337df50f26e02a8ed5a9` |
+| macOS | 10922173317 | 197800 | `2fdb7ff468abaabb89fbb83028ecfbb974a4bd90a080851de8ba75d107a44156` |
+
+API metadata binds both archives to the candidate/run. Downloaded SHA-256 matched
+GitHub digests; all six files per target matched archive bytes. Both JSON graphs
+contain 500 nodes, 2,000 edges, `checked`/non-cache observations and false
+partial/stale/over-limit flags. Full run log, JSON metadata, archives, six extracted
+files per target and verification manifest remain under workspace
+`reports/g1-obs-ci-36291545085` outside Git. Earlier evidence remains preserved.
+
+Completion audit against the five selected implementation steps in section 21:
+
+| Required deliverable | Evidence and disposition |
+| --- | --- |
+| 1. Bounded session cache/dependencies and accepted invalidation | Production service/cache ownership and `commit_observed` reviewed; observed lifecycle, history and dependency tests pass on both targets. Complete. |
+| 2. Typed observed/disk IPC, session cancellation | Literal IPC tests reject malformed/stale requests; cancelled/session cache tests pass; no new display authority. Complete. |
+| 3. Open/focus/button refresh, status, useful navigation | DOM regressions cover coalescing, cached open, focus/pan, incomplete/error retention and disposal; rendered held-refresh navigation passes; Source draft/caret/range regressions pass. Complete. |
+| 4. Real fixtures, routine protection and coherent workflow selectors | Benchmark/renderer assertions inspected; production selectors and specialist dispositions updated; ordinary path, competing-write and interrupted-save cases passed. Complete. |
+| 5. Local then supported-target evidence, findings and handover | Local checks and exact target results above, artifact hashes/screenshots reviewed; final CURRENT/HANDOVER published on the existing branch/PR. Complete upon publication verification. |
+
+**Outcome:** G1-OBS implementation and automated qualification are complete and
+`review_ready`. User acceptance of the overall product is not inferred. This Phase 1G
+ledger remains active because R2/final packaging/runtime/diagnostic completion,
+native-keyboard/human acceptance and integration remain open. ADR 0010 and canonical
+architecture/data/UI/testing documents retain the behavior and durable lessons.
+Next selection is a bounded review/planning pass for remaining 1G.2b; no next
+implementation, package run, SDK download or merge is authorized by this handover.
+No CI or task-created local writer/watch process remains outstanding.
