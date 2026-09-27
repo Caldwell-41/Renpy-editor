@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-N1 independent packaged macOS assessment `in_progress` (ledger 32). The user approved the 506-source superset required by packaged opening; focused lifecycle/full-graph proof passed. TEST-P1 remains `review_ready` (ledger 31). H1 remains FAIL; R2-P1 remains blocked and final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-N1 independent packaged macOS assessment `review_ready` (ledger 32), final probe/package `22fbf65d1c9db712d574657c53638b413436dee8`. Approved 506-source native superset: final WKWebView pan first/second-rAF p95 17/34 ms, no >=100 ms samples; native observations found no sustained freeze, with opening/save waits and framing limitations recorded. Two earlier native-probe failures remain preserved. All planned allowances exhausted; two incidental normal-app starts from the driver exceeded the strict launch allowance and are disclosed in the ledger. No operation pending. TEST-P1 remains `review_ready`; H1 remains FAIL; R2-P1 stays blocked and final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open

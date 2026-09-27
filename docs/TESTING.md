@@ -549,7 +549,13 @@ budget fixture remains **503 sources / 105,627 bytes**; report these populations
 separately and do not claim exact fixture equivalence. `branches-interactive` prepares
 the same disposable workload for the separately bounded native-input observation.
 Neither case installs an SDK or runs game code. Default packaged runtime scenarios
-are unchanged; select the performance case explicitly.
+are unchanged; select the performance case explicitly. The performance probe requires
+a native-driver click on its Start control within 60 seconds, removes that control,
+then waits a fixed five seconds before measurements and requires visible/focused
+state. Finish AX/capture work before that settling interval ends; leave measurement
+populations unobserved by capture/trace. App-driver attachment can create another
+instance when multiple registered packages share an identifier: verify the exact
+running fixture window, preserve targeting failures and audit process cleanup.
 
 ### Independent browser outcomes in the production workflow
 

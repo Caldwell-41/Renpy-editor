@@ -4870,3 +4870,157 @@ driver. This tests the concrete foreground-prerequisite hypothesis, without chan
 renderer, budgets, timed endpoints or sample counts. Release attempt **2/2** rebuilds
 the package only; unchanged validated core samples are reused, not rerun. First-launch
 failure remains in `automated-1/`; next evidence goes to `automated-2/`.
+
+### N1 completed bounded assessment — review-ready
+
+Status: **`review_ready` for the assessment**, not accepted 1G and not a Chrome-gate
+waiver. Final probe/package candidate
+**`22fbf65d1c9db712d574657c53638b413436dee8`**; initial candidate and failed launches
+remain above. Both release attempts succeeded. **Three scheduled automated probes**
+and **one interactive session** were used; release allowance **2/2** is exhausted.
+Native-driver attachment also created **two unplanned normal app instances**, a
+procedural deviation beyond the strict total-process launch allowance. Those extra
+starts supplied no measurement and are disclosed below; do not hide them in the
+three-probe count.
+No further experiment is authorized here. There is no pending operation.
+
+Final ARM64 executable SHA-256
+`8d4f57be4426960ce63ba01881d3ec9a6a97f897a3a5dcb72d5d62b6a93191e3`; package-file
+manifest SHA-256 `9a0854f541fa877a0ee4a241780ddbe04a10c7927c08c52d748c5e88c24ee225`.
+All **102** recorded application/workflow source hashes match the candidate/current
+inputs. Only the probe JS differs between the two builds; production renderer/CSS,
+core services, WIN-F1 buffers, dependencies and workflow are unchanged. The original
+503-file core sample results are therefore reused without another expensive run.
+
+**Launch 2** exited 1 after **64.060 s** at `foreground-gate`: the native driver's
+exact-path app attachment took 64.988 s and returned a normal welcome window after
+the 60-second Start deadline. Failure state was `visible`, focused, no graph yet.
+The gate was never clicked; no timing samples exist. Three registered app paths
+shared the bundle identifier, and bare-identifier binding was explicitly ambiguous.
+Exact timing/targeting causation is not proven. The normal empty window was closed;
+no private project was opened. This failure remains a failure, not an application
+latency measurement. The later run reused an existing exact-path native binding
+instead of asking the driver to launch/attach another instance.
+
+**Launch 3** (same final candidate as launch 2) completed successfully in **32.252 s**,
+exit 0, supervisor timeout false, report cleanup true. The native driver verified
+the disposable fixture's Start button and clicked it; its final AX observation
+finished within 0.875 s, before the declared five-second premeasurement settling
+interval ended. No screenshot, trace or further native-driver call occurred during
+the measurement populations. Project open began with document visible/focused; all
+30 pan and 30 no-input geometry/focus checks passed. Independent audit recomputed
+all p95/max/overrun values and checked the alternating 40-pixel transforms, unchanged
+viewport/dimensions, representative nodes, graph intersection and full **500 nodes /
+2,000 edges** per sample. Original sources plus the three empty scripts passed an
+independently reconstructed **506-file / 105,627-byte** manifest audit.
+
+| Final native population (30 each) | Nearest-rank p95 | Maximum | Samples >=100 ms | Meaning |
+| --- | --- | --- | --- | --- |
+| Synthetic pan synchronous dispatch | 1 ms | 1 ms | 0 | Event-handler work |
+| Synthetic pan dispatch to first rAF continuation | 17 ms | 17 ms | 0 | Callback proxy; <100 ms objective met |
+| Synthetic pan dispatch to second rAF continuation | 34 ms | 34 ms | 0 | Rendering-opportunity proxy; <100 ms objective met |
+| No-input first rAF continuation | 17 ms | 17 ms | 0 | Context only, not an acceptance gate |
+| No-input second rAF continuation | 34 ms | 34 ms | 0 | Context only; never subtracted from pan |
+
+Floating-point residuals below 0.000001 ms are rounded only in this table; every raw
+sample is retained. Runtime reported DPR **2**, viewport **1100×688**, screen
+**1512×982** (available height 863). The physical display reported 120 Hz; observed
+callback cadence is about 17 ms. Do not equate those two rates or claim physical
+presentation. WKWebView's compatibility user agent says MacIntel/605.1.15; native
+host and Mach-O executable are verified ARM64, with installed WebKit bundle identity
+recorded above. No browser-version inference is made from that compatibility string.
+
+| Separate packaged operation (one successful sample each) | Duration | Endpoint |
+| --- | --- | --- |
+| Project open | 1,368 ms | Recent-project click to Scene controls and Saved status |
+| Initial Branches view | 302 ms | Branches click to full checked graph plus two rAF callbacks |
+| Explicit real flow refresh | 45 ms | Direct IPC request to complete real-service model response |
+| Visible Refresh feedback | 83 ms | Refresh click to checked graph plus two rAF callbacks |
+| Ordinary Choice caption edit | 467 ms | Commit Beat click to Saved and closed editor plus two rAF callbacks |
+| Post-edit observed graph | 15 ms | Separate IPC request/response after save feedback |
+| Return to Branches | 220 ms | Branches click to checked graph plus two rAF callbacks |
+
+The ordinary edit changed Route 0 to Route A through Scene controls. The real model
+reported `savedEdits`, retained all 2,000 edges and the accepted caption. A new
+project session and explicit disk refresh retained the caption; Source displayed
+the accepted bytes. A separate pan dispatched after Refresh showed the expected
+transform, synchronous dispatch 0 ms and first/second callbacks 16/32 ms; checked
+feedback completed. This is ordinary refresh responsiveness evidence, not a claim
+that every subsequent callback ran while disk work remained outstanding.
+
+These UI/IPC intervals **are not** the core <2 s / <250 ms timers. Only the separately
+reported original-fixture core samples above qualify those exact endpoints. In
+particular, 467 ms of visible edit feedback is a noticeable wait but is not a failed
+250 ms core-model sample; no end-to-end edit limit was declared. Initial open uses
+a new UI session after native fixture preparation and OS cache warming, not a
+cold-machine startup benchmark. Do not pool any of these operations or populations.
+
+**Agent-operated usability:** the single interactive probe lasted **289.803 s**,
+exited 0 and used disposable data. Initial mouse observations overlapped the user's
+own interaction; the user confirmed this and released the window. Those attempts
+remain inconclusive. Subsequent uncontested native actions visibly confirmed:
+reopen into Scene 000; Branches; twelve Zoom in clicks yielding readable cards;
+Left/Right pan reversal; refresh with a new Checked time and preserved zoom/selection;
+Open Scene to Scene 018; View in Source to the matching clean `.rpy` and selected
+Choice lines; native resize from 2200×1440 to 1744×1184 screenshot pixels (DPR 2)
+with toolbar wrapping/Source selection retained; return to Branches; Close Project
+and Quit. No sustained freeze was observed in these actions. Brief jank cannot be
+excluded at the tool's capture cadence. The fitted 500-node overview is tiny and the
+minimum zoom can leave part of its height outside the viewport; reading requires
+zoom/pan. That is a usability limitation, not demonstrated latency. No renderer fix
+was attempted. Screenshots are visible in this chat's native-tool evidence; they
+were not exported to hashed local image files. This is not final human acceptance.
+
+Native attachment produced two extra empty normal-app instances (after launch 2
+and the interactive probe), which were closed without opening any private project.
+These unplanned starts exceeded the strict launch allowance even though no extra
+timing run was collected. This is a disclosed procedure deviation, not retroactive
+authorization; no further launch is permitted. Final process audit found no Loomlight
+or known owned process remaining; all three automated reports confirm shutdown
+cleanup, and the interactive process exited 0. Disposable fixture profiles remain
+on disk for evidence; cleanup here means process ownership, not deletion of those
+profiles. There was no SDK installation/run or project Python execution.
+
+**Assessment:** on this physical M4 Mac, sampled full-workload graph interaction
+measured comfortably within both labelled <100 ms callback objectives and appeared
+usable in the uncontested native observations. There is no evidence here of general
+sluggish panning. Opening (~1.37 s) and save feedback (~0.47 s) have perceptible waits;
+this assessment does not claim instant interaction or a measured physical-input
+latency. It also does not explain the historical virtual-M1 Chrome failure, qualify
+Windows, prove exact 503-file packaged equivalence, or close G1-V2/final acceptance.
+
+Validation/review: corrected fixture 1/1; existing frontend 60/60; selected release
+core test 1/1 with three successful samples; both release builds; final packaged
+functional/proxy run; independent 506-source hash and 60-sample audit; exact input
+integrity; process cleanup; syntax/format/repository/whitespace checks. Earlier
+missing-cache/fixture refusal, rAF timeout and gate timeout are preserved. An audit
+script path typo was corrected without rerunning any measurement. No broad
+hostile/crash tests, new Chrome comparison, CI dispatch, budget relaxation, gate
+waiver, conflict resolution, merge or further checkpoint occurred.
+
+Replay audit only (no launches):
+`python3 .toolchains/reports/r2-p1-mac-n1/audit_n1.py automated-3` and
+`python3 .toolchains/reports/r2-p1-mac-n1/final_audit.py`. Each launch uses the declared
+runner command with basename `loomlight` and output `automated-1`, `automated-2` or
+`automated-3`; the interactive supervisor directly launched that same executable
+with `LOOMLIGHT_RUNTIME_UI_PROBE=branches-interactive`. All logs, original samples,
+fixture manifests, exact inputs, environment, replay scripts and audit outputs remain
+under ignored `.toolchains/reports/r2-p1-mac-n1/`. **38 payload files** are hashed in
+`manifest.json`, SHA-256
+`9570c4756c70b74cd0b56bdbefc490c7222c5776523503f7d1bc11a71dda1a68`.
+
+| Key retained evidence | SHA-256 |
+| --- | --- |
+| Failed launch 1 JSON | `0c0283f74aaf0bbbdcdf63e899b835a85c643f6d0fcd21bc645e0473350176f1` |
+| Failed launch 2 JSON | `5e3c5159cde222f2ccd8b53d0aac7c6cb5bdc812a06cce92ef5cd85ef5b5ad42` |
+| Successful launch 3 JSON | `f1a785b4c9c667459708ee0dd30e64869743b990ae5c412adcbd6e179810265d` |
+| Successful launch audit | `12bcacc2f151b676b34883e7bf625aab244c8048aa02f3415c5b71d76f16445a` |
+| Native observations | `751cde323ccc5eb00f5540c22c12705748f5fd638056c9227a88650663e7be46` |
+| Process cleanup audit | `a255e2737d15a3d568dfe13f498dcd2a235bddcea5fd4df51ef2a20f0260d642` |
+| Exact-input/final geometry audit | `08554f278b86caadcf1e86945f511cb801ded3cc1525f057ea347b7907b94db1` |
+
+Next bounded action: **review this native evidence and explicitly select the next
+qualification/acceptance-policy step**. H1 stays FAIL and R2-P1 stays blocked. There
+is no justified product performance fix from this evidence alone. Any Chrome gate
+role change, further launch/build, CI qualification or final human acceptance needs
+its own explicit reviewed decision; none is silently authorized by this assessment.
