@@ -8,6 +8,7 @@ import { arch, cpus, release } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "playwright";
+import { classifyBranchesTiming } from "./branches-timing-policy.mjs";
 
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const p95 = values => [...values].sort((a, b) => a - b)[Math.ceil(values.length * .95) - 1];
@@ -21,17 +22,17 @@ assert.equal(fixture.nodes.length, 500); assert.equal(fixture.edges.length, 2000
 if (evidenceDir) await mkdir(evidenceDir, { recursive: true });
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
 const sourceHashes = {};
-for (const name of ["tests/branches.browser.mjs", "src/branches-ui.ts", "src/styles.css", "package-lock.json"]) {
+for (const name of ["tests/branches.browser.mjs", "tests/branches-timing-policy.mjs", "src/branches-ui.ts", "src/styles.css", "package-lock.json"]) {
   sourceHashes[name] = sha256(await readFile(join(appRoot, name)));
 }
 const report = {
-  schemaVersion: 2, status: "in_progress", traced, fixtureSha256: sha256(fixtureBytes), sourceHashes,
+  schemaVersion: 3, status: "in_progress", timingPolicy: "diagnostic-only", traced, fixtureSha256: sha256(fixtureBytes), sourceHashes,
   gitHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: appRoot, encoding: "utf8" }).trim(),
   environment: { platform: process.platform, arch: arch(), osRelease: release(), cpu: cpus()[0]?.model,
     node: process.version, playwright: JSON.parse(await readFile(join(appRoot, "node_modules/playwright/package.json"))).version,
     runnerImage: process.env.ImageOS ?? null, runnerImageVersion: process.env.ImageVersion ?? null },
   layer: "Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input",
-  endpoints: { original: "dispatch-to-first-rAF continuation (legacy gate)",
+  endpoints: { original: "dispatch-to-first-rAF continuation (legacy population, diagnostic)",
     visible: "dispatch-to-first-rAF and dispatch-to-second-rAF continuation (rendering-opportunity diagnostic, not guaranteed presentation)" },
   nodes: 500, edges: 2000, original: [], visible: [], noInput: [], captures: [], pageErrors: [], cleanup: {},
 };
@@ -198,12 +199,12 @@ try {
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   report.resize640 = "pass";
   assert.deepEqual(report.pageErrors,[]);
-  report.budgetStatus = report.initialLayoutMs < 2000 && report.panFrameP95Ms < 100 && report.visibleDispatchToRafP95Ms < 100 && report.visibleRenderingOpportunityP95Ms < 100 ? "pass" : "fail";
-  assert.ok(report.initialLayoutMs < 2000, `Initial layout ${report.initialLayoutMs}ms exceeds 2000ms`);
-  assert.ok(Math.max(...report.original.concat(report.visible).map(value => value.dispatchMs)) < 100, "Synchronous input dispatch blocked during held refresh");
-  assert.ok(report.panFrameP95Ms < 100, `Original dispatch-to-rAF p95 ${report.panFrameP95Ms}ms exceeds 100ms`);
-  assert.ok(report.visibleDispatchToRafP95Ms < 100, `Visible dispatch-to-rAF p95 ${report.visibleDispatchToRafP95Ms}ms exceeds 100ms`);
-  assert.ok(report.visibleRenderingOpportunityP95Ms < 100, `Visible rendering-opportunity diagnostic p95 ${report.visibleRenderingOpportunityP95Ms}ms exceeds 100ms`);
+  Object.assign(report, classifyBranchesTiming(report));
+  if (report.budgetStatus === "fail") {
+    const overruns = report.timingMetrics.filter(value => value.status === "fail")
+      .map(value => `${value.metric}=${value.valueMs}ms (requires <${value.limitMs}ms)`).join("; ");
+    console.warn(`${process.env.GITHUB_ACTIONS === "true" ? "::warning::" : ""}Chrome timing diagnostic overrun: ${overruns}. Packaged platform evidence determines responsiveness acceptance.`);
+  }
   report.status = "pass";
 } catch (error) {
   report.status = "fail"; report.failure = String(error); process.exitCode = 1;

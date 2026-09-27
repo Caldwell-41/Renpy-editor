@@ -121,8 +121,10 @@ jobs:
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-budget.log"
           grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
-      # Browser failures are reasserted by the mandatory gate below, after the
-      # independent SDK/package checks. Use outcome, never conclusion, there.
+      # Browser functional/evidence failures are reasserted below; Chrome timing
+      # overruns remain visible diagnostics in the report and warning annotations.
+      # The mandatory gate follows independent SDK/package checks and reads
+      # outcome, never the success-normalized conclusion.
       - name: Runtime browser focus and resize
         id: runtime-browser
         continue-on-error: true
@@ -306,7 +308,7 @@ jobs:
           echo "Runtime browser: ${RUNTIME_BROWSER_OUTCOME:-not-run}"
           echo "Branches browser: ${BRANCHES_BROWSER_OUTCOME:-not-run}"
           if [ "$RUNTIME_BROWSER_OUTCOME" != "success" ] || [ "$BRANCHES_BROWSER_OUTCOME" != "success" ]; then
-            echo "Browser evidence is failed, cancelled, skipped, or missing; production qualification has not passed." >&2
+            echo "Browser functional/evidence check is failed, cancelled, skipped, or missing; production qualification has not passed." >&2
             exit 1
           fi
       - name: Upload lightweight production evidence

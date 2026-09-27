@@ -536,10 +536,11 @@ instead of inventing one or claiming a complete end-to-end pass.
 Investigate an overrun at its observed layer before changing production code. A new
 bounded experiment must distinguish a concrete hypothesis; a failure is not permission
 for indefinite browser/graphics tuning. Collect trustworthy supported-runtime evidence
-before proposing a different role for a Chrome timing gate. Such a gate change needs
-an explicit reviewed decision; diagnostic evidence or a favourable local run cannot
-waive an existing failure. Preserve the original run, attempt, SHA and unavailable or
-skipped evidence when changing future policy.
+before proposing a different role for a Chrome timing gate. The user explicitly
+approved that change in [TEST-P2](tasks/active/phase-1g-branches-runtime-git.md#33-r2-p1-test-p2--chrome-timing-acceptance-role--2026-09-27)
+after reviewing MAC-N1.
+Historical failed runs remain failed; this prospective policy does not rerun them or
+fill skipped gates. Preserve the original run, attempt, SHA and unavailable evidence.
 
 The explicit packaged `branches-performance` probe uses the original 500-Scene /
 2,000-edge source content plus empty `game/options.rpy`, `game/gui.rpy` and
@@ -569,9 +570,24 @@ Other genuine prerequisite failures retain normal fail-fast step behavior. This 
 bounded failure deferral, not a promise that every unrelated check survives every
 kind of failure. Evidence upload still runs on failure. Workflow edits receive syntax
 and outcome-path checks locally; no package matrix solely to verify this policy.
-The existing Chrome timing threshold and acceptance role remain in force pending the
-separate native evidence review. No supported-target acceptance is inferred from a
-workflow edit, and the workflow has not been remotely exercised merely by publication.
+Chrome Branches timing now has a **diagnostic-only** acceptance role on both hosts.
+Retain the strict <2,000 ms initial-layout and <100 ms synchronous-dispatch maximum,
+original first-rAF p95, visible first-rAF p95 and visible second-rAF p95 thresholds.
+An overrun retains `budgetStatus: "fail"`, the metric/value/limit entries, every raw
+sample and a console/Actions warning, but alone does not fail the browser process.
+Schema 3 `status` describes the blocking functional/evidence result; it is not a
+platform performance verdict. The separate no-input population remains context only.
+The diagnostic policy helper is hashed with the browser script in its source identity.
+
+Full workload, geometry, visibility/focus, navigation, refresh, resize and page-error
+assertions remain blocking, as do invalid evidence, timeouts, startup and cleanup
+errors. The final workflow gate still requires both browser process outcomes to pass;
+there is no blanket waiver of browser failures. Real-service/core timing gates retain
+their acceptance role and thresholds. Packaged WKWebView/macOS and WebView2/Windows
+measurements plus observed usability determine platform responsiveness under the
+contract above; a browser diagnostic pass cannot substitute for them. The M4 native
+result does not qualify Windows, all Macs or final human acceptance. No supported-
+target acceptance is inferred from this edit; publication is not hosted validation.
 
 ### Final human session and narrow evidence reuse
 

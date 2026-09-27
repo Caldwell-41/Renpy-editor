@@ -1,7 +1,12 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-N1 independent packaged macOS assessment `review_ready` (ledger 32), final probe/package `22fbf65d1c9db712d574657c53638b413436dee8`. Approved 506-source native superset: final WKWebView pan first/second-rAF p95 17/34 ms, no >=100 ms samples; native observations found no sustained freeze, with opening/save waits and framing limitations recorded. Two earlier native-probe failures remain preserved. All planned allowances exhausted; two incidental normal-app starts from the driver exceeded the strict launch allowance and are disclosed in the ledger. No operation pending. TEST-P1 remains `review_ready`; H1 remains FAIL; R2-P1 stays blocked and final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-TEST-P2 Chrome timing policy `review_ready` (ledger 33),
+explicitly approved after reviewing MAC-N1. Chrome timings become diagnostics while
+functional/evidence failures stay blocking. Native MAC-N1 remains `review_ready`;
+H1 and the original matrix remain historical FAIL. Missing supported-target package
+qualification and final human acceptance remain open; Chrome timing alone is no
+longer a prospective macOS acceptance blocker. No CI/build/launch is authorized.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -81,10 +86,12 @@ causation remains unresolved; no justified repository fix was found. The user's 
 fix-if-possible request produced a diagnosis, not speculative renderer/flag/budget changes.
 No H1 operation is pending. H1 audit is review-ready; R2-P1 stays blocked. The user
 subsequently selected the testing correction and independent native packaged
-assessment in ledgers 31–32, superseding MAC-E1 as the next action. Chrome failures
-remain blocking overall, but will no longer suppress the independent SDK/package steps
-through their normal failure path. Native measurement and observed usability remain
-separate evidence; no new CI run or gate waiver is authorized.
+assessment in ledgers 31–32, superseding MAC-E1 as the next action. Under TEST-P1, Chrome failures remained blocking overall while no longer suppressing
+independent SDK/package steps through their normal failure path. The user subsequently
+approved TEST-P2 (ledger 33): only timing overruns become diagnostics; Chrome functional
+and evidence failures remain blocking. Native measurements and observed usability
+remain separate evidence. This changes future acceptance policy, preserves historical
+failed statuses and does not authorize CI or confer final platform acceptance.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

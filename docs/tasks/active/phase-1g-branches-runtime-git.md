@@ -11,7 +11,9 @@ then approved combining H1 scope review with one hosted macOS diagnostic executi
 (ledger 30, audit `review_ready` after terminal failure); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
 24–25. The approved testing correction is recorded in ledger 31; the user also
 requested a separate agent for local packaged macOS assessment (ledger 32). Final
-1G acceptance remains open.
+1G acceptance remains open. The user subsequently approved TEST-P2 (ledger 33):
+Chrome timing becomes diagnostic after native evidence review; functional failures
+remain blocking. This is the current bounded checkpoint.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -21,11 +23,11 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction approves the reviewed testing-policy/workflow correction
-(section 31), then a separate agent to assess actual packaged responsiveness on the
-supported local macOS platform (section 32). No CI dispatch, gate waiver, budget
-relaxation, renderer changes, hostile/crash tests, unapproved tooling, conflict
-resolution or merge. WIN-F1 remains preserved.
+checkpoint. The latest user instruction approves the explicit Chrome diagnostic timing policy
+(section 33), informed by the completed native assessment (section 32). Thresholds
+and raw evidence remain; functional checks retain their gate. No CI dispatch,
+package build/app launch, renderer change, hostile/crash test, unapproved tooling,
+conflict resolution or merge. WIN-F1 remains preserved.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -5024,3 +5026,76 @@ qualification/acceptance-policy step**. H1 stays FAIL and R2-P1 stays blocked. T
 is no justified product performance fix from this evidence alone. Any Chrome gate
 role change, further launch/build, CI qualification or final human acceptance needs
 its own explicit reviewed decision; none is silently authorized by this assessment.
+
+## 33. R2-P1-TEST-P2 — Chrome timing acceptance role — 2026-09-27
+
+**State:** `review_ready` after local validation. The user approved the explicit recommendation with “sounds
+good”: Chrome timing becomes diagnostic after reviewing MAC-N1 native evidence;
+Chrome functional regressions remain blocking, with packaged WKWebView/WebView2
+responsiveness evidence assessed per supported platform. This checkpoint changes
+that policy and its test implementation only. No CI dispatch, package build, app
+launch, renderer tuning, dependency installation, conflict resolution or merge.
+Existing historical failures and missing qualification remain recorded.
+
+**Entry:** clean published `0f0ec69c30fe1ee9e64d68da872e4facd8c5f810`, existing
+`feature/phase-1g-branches-runtime`, draft/open PR #17 (conflicting). Main remains
+`4d7ba0333c48d60242a9a42d3e079fea499a5531`. Local implementation and review are complete. Publish this coherent checkpoint with
+`[skip ci]` and resolve its exact candidate from Git; no receipt-only follow-up.
+
+
+### Decision and implementation
+
+MAC-N1 measured the supported packaged WKWebView runtime on a physical M4: 30 pan
+samples, first/second-rAF p95 17/34 ms, full workload and functional assertions passed.
+The separate native-input session found no sustained freeze, with measurement limits,
+opening/save waits and fixture/procedural deviations retained in ledger 32. H1's virtual
+M1 Chrome 152 timings (123.6/181.6 ms, idle 148.8 ms) do not establish a macOS product
+performance defect. Their precise upstream cause remains unknown. Further renderer
+changes to satisfy that browser/host result are not justified by the available evidence.
+
+Prospectively, all five existing Chrome Branches timing thresholds become diagnostics
+on both hosts. Preserve every sample, strict <2 s layout / <100 ms dispatch and frame
+limits, failed `budgetStatus`, metric values and warning annotations. Browser report
+schema 3 explicitly labels `timingPolicy: diagnostic-only`; overall `status` describes
+functional/evidence success. The helper is included in source hashes. No-input timing
+remains separate context. Thresholds, populations and production renderer are unchanged.
+
+Functional, workload, geometry, focus, navigation, refresh, resize, page-error,
+malformed-evidence, deadline and cleanup failures still fail the process. The existing
+mandatory workflow gate still rejects any non-success browser outcome after independent
+SDK/package checks. Core/service budgets stay blocking. Packaged WKWebView/WebView2
+performance and observed usability remain platform-specific acceptance evidence; this
+policy is not Windows qualification, proof for every Mac or final human acceptance.
+TESTING owns the durable policy. Historical sections 23/30/31 retain their exact states
+and previous policy; no old FAIL is rewritten into PASS or skipped gate filled in.
+
+### Validation and review
+
+- `source .toolchains/enter-macos.sh`; `node --check app/tests/branches.browser.mjs`
+  passed; `npm --prefix app run check` passed typecheck and **64/64 tests, zero skips**
+  (60 existing plus four timing-policy tests). Each strict threshold, retained failed
+  diagnostic, unchanged historical report and malformed evidence path was checked.
+- Local replay of the actual browser completion/catch/cleanup source passed **nine
+  cases**: ordinary success, timing-only warning/success, page error, malformed timing,
+  injected functional/deadline error, trace failure and both cleanup failures. These
+  are controlled harness paths, not new browser or platform measurements.
+- Existing workflow checker copied into this checkpoint's ignored evidence directory:
+  YAML parsed; **26 shell blocks**, **25 final-gate outcome combinations** and **four
+  pipeline exit cases** passed. Other workflow steps/triggers remain unchanged. This
+  is local shell/structure validation, not hosted Actions execution.
+- `python3 scripts/validate.py` passed **273 files**; `git diff --check` and self-review
+  passed. Production code, native probe, dependencies/lockfiles and WIN-F1 are unchanged.
+  No package build, browser/app launch, CI dispatch or hostile/crash test occurred.
+
+Raw local logs and replay scripts: ignored `.toolchains/reports/r2-p1-test-p2/`.
+The 7-file local evidence manifest SHA-256 is
+`0c9c1d78ffada1ec03adad272fdc1a58c5c7bd12ef411657881eb35dec726a9d`.
+The diagnostic helper tests run in the ordinary frontend suite. No operation remains
+pending. The Chrome timing-only acceptance blocker is removed prospectively; R2-P1
+still lacks complete supported-target duration/reopen package qualification and final
+human acceptance. PR #17 conflicts/integration remain a later approved step.
+
+**Next bounded action:** review the remaining R2-P1 package qualification coverage and
+select the minimum supported-target run, accounting for WIN-F1 and MAC-N1 evidence.
+Planning/review only until its exact execution scope is selected; no automatic matrix,
+new native launch, conflict resolution or merge follows from TEST-P2 approval.
