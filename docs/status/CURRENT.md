@@ -35,17 +35,27 @@ archives and all 29 extracted files were verified; all 101 Windows input hashes 
 the candidate. No executable artifact is available for independent rehash. Windows
 SDK/service tests passed, but all five packaged cases exited with main-thread stack
 overflow before reporting. macOS skipped downstream SDK/package gates after its
-frame-budget failure. The new duration/reopen assertions remain unqualified.
-No operation is pending. R2-P1-WIN-D1 stopped at unavailable local prerequisites
-(ledger 24). The subsequent user-selected R2-P1-WIN-TOOLS setup is `review_ready`
-(ledger 25): signed Microsoft x64 CDB/WinDbg 10.0.26100.9169 and the official,
-checksum-verified Ren'Py 8.5.3 SDK are prepared outside Git. CDB process/stack smoke,
-SDK version and fresh-shell environment checks passed. Workspace `enter-debug.ps1`
-exposes the prerequisites. Zero Loomlight builds/launches occurred; overflow location
-and ordinary-launch impact remain unknown. Next user selection is to resume the
-same capped Windows comparison and propose a correction. No application fix,
-redispatch, human acceptance, merge-conflict resolution, optional Git or Phase 2 is
-authorized. macOS budget diagnosis remains separate.
+frame-budget failure. Supported-target qualification of the new duration/reopen
+assertions remains incomplete; later local Windows evidence is recorded below.
+No operation is pending. Resumed R2-P1-WIN-D1 is `review_ready` (ledger 26): one
+baseline and one symbol-enabled release build, four launches, and an offline dump
+review locate the failure in `renpy::sha256_file`. Its 1 MiB stack buffer creates a
+1,049,000-byte frame exceeding the Windows executable's 1,048,576-byte main-thread
+reserve. Ordinary startup with an empty disposable profile survives a 15-second
+window observation; the same baseline's compile probe reproduces exit 3221225725.
+Normal SDK operations share the hashing code, so this is not a probe-only defect.
+The original four-launch D1 cap is exhausted. Earlier prerequisite/setup records
+remain in ledgers 24–25; prepared tools sufficed and no new tool was installed.
+The user then approved R2-P1-WIN-F1 (ledger 27): both SDK hashing buffers are now
+heap-allocated, with ordinary hashing/control regressions. Six selected SDK checks,
+the fixed local release build and all five existing application scenarios passed,
+with cleanup confirmed. Both routes passed graph/disk reopen and >8 s runtime
+assertions locally. F1 is `review_ready`; three of four additional build runs were
+used. The user excluded aggressive/hostile testing; the initial deliberate-crash
+harness was removed and no
+broad hostile/race suite was run. No redispatch, human acceptance, merge-conflict
+resolution, optional Git or Phase 2 is authorized. macOS budget diagnosis remains
+separate.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

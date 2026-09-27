@@ -2,9 +2,11 @@
 
 **Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
 supported-target qualification, `blocked` after the failed matrix (ledger 23). G1-OBS remains
-`review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 stopped at prerequisites
-(ledger 24); subsequent local tools setup is `review_ready` (ledger 25). Final 1G
-acceptance remains open.
+`review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 is `review_ready`
+(ledger 26); the user approved R2-P1-WIN-F1's two-buffer correction and local testing
+(ledger 27, `review_ready`), then narrowed testing to exclude aggressive/hostile work.
+Earlier prerequisite interruption/setup remain in ledgers 24–25. Final 1G acceptance
+remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -14,8 +16,8 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction selects local debugger/SDK preparation only
-(section 25); no redispatch, production fix or merge.
+checkpoint. The latest user instructions approve the bounded Windows fix/testing
+(section 27), with no aggressive/hostile tests, redispatch or merge.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -3720,3 +3722,242 @@ files; whitespace passed. The reviewed Git diff contains only CURRENT, HANDOVER 
 this ledger, including the preserved interrupted diagnosis record. Application and
 workflow trees are unchanged from the tested candidate. Tool binaries and local
 setup evidence remain outside the repository. No production matrix was dispatched.
+
+### 26. R2-P1-WIN-D1 resumed local startup diagnosis — 2026-09-27
+
+**Authority/state:** the user selected resumption using prepared tools, within the
+existing limits; diagnosis `review_ready`, correction unapproved. No production fix, redispatch or merge. Additional
+tools require demonstrated necessity and explicit installation approval first.
+After diagnosis, the user allowed four additional build runs if needed. All four
+remain unused; no further build was necessary. The four-launch cap and production
+fix approval boundary remain unchanged.
+Entry is clean `cc93b90b3acc04acbe9f6f44cd05d928da794313`, matching fetched remote
+and draft/open/conflicting PR #17. Application/workflow inputs match `f1a0f14`.
+The interrupted investigation turn lasted 537,904 ms; charge a conservative nine
+minutes against the original 90-minute active budget (81 minutes remain at resume).
+Build/launch counters enter at 0/1 baseline, 0/1 diagnostic and 0/4 launches.
+The original CI executable is unavailable; local rebuilds are diagnostic evidence.
+
+**Environment/build identity:** Windows 11 build 26200, Rust/Cargo 1.90.0 x64 MSVC,
+MSVC 14.50.35717, Windows SDK 10.0.26100.0, Node 24.19.0, CDB 10.0.26100.9169;
+the prepared Ren'Py 8.5.3 archive was rehashed by `enter-debug.ps1`. No additional
+tool was installed or requested. The first shell command used a wrong setup-script
+relative path and never started Cargo. The first offline Cargo invocation stopped
+at missing `adler2` before compilation. `cargo fetch --locked --target
+x86_64-pc-windows-msvc` populated the existing workspace dependency cache; lockfiles
+and dependency versions stayed unchanged. These failures remain in the local record.
+One baseline compilation then passed in 2m46s, and one diagnostic compilation with
+`CARGO_PROFILE_RELEASE_DEBUG=2` passed in 2m51s. Both used:
+
+```text
+cargo build --release --locked --offline -p loomlight-desktop --features tauri/custom-protocol
+```
+
+The existing TypeScript and Vite executables built the frontend directly through
+Node (npm was absent from this shell). Installers were not built. Production source
+was unchanged; a build-time `TAURI_CONFIG` override selected the unique disposable
+identifier `app.loomlight.r2p1wind1`. Its Roaming data directory started absent and
+was created empty. Self-review found that the attempted absolute `dataDirectory`
+override is ignored by Tauri's config path handling; WebView instead used the new
+identifier's separate Local `EBWebView` profile, verified on disk. The ordinary
+product identifier/data was not used. Preserve this configuration difference when
+interpreting the local results. Temporary probe roots are under each launch's
+disposable TEMP directory. No pre-existing Loomlight instance was present at launch.
+
+All **101** tracked app/workflow inputs match the tested Git candidate after accounting
+for **13 CRLF/LF-only working-tree differences**; raw hashes and those exact paths
+are retained. The initial raw-hash mismatch report is preserved beside the corrected
+assessment. This is source equivalence with stated local differences, not exact
+CI-binary identity. Both executables have PE stack reserve `0x100000` (1,048,576 bytes)
+and commit `0x1000` (4,096 bytes); stack settings were never increased.
+
+| Local build | Executable SHA-256 | PDB SHA-256 |
+| --- | --- | --- |
+| Baseline, 13,668,864 bytes | `0c1b976dcc115b92d31d05f090c299c63c661cb941a6fe098c3a96a8c76dd7a5` | `e3f814ffd9ced05214e0a3130be9b49b6340650fa3644a3abd33338d81e32deb` |
+| Diagnostic, 13,716,480 bytes | `6d5b595d9d0e4588cf41b63de8242cc9c539c057654f509424a221725f6eaf56` | `0c4db0c5e716e6a3d73f2f5089265b5c6bc0c7b832358f9d3f480e8ba6eb867c` |
+
+**Four launches, no more remaining:**
+
+| Launch | Observation | Exit/cleanup and limit |
+| --- | --- | --- |
+| 1: baseline ordinary, smoke/probe variables cleared | Survived 15 seconds; nonzero main-window handle, title Loomlight, OS `Responding=true`; empty console | Observation ended deliberately; task-owned process tree terminated successfully (16.168 s including observation/cleanup). Forced exit 1 is not a startup failure or graceful-close pass. No native UI interaction or human acceptance. |
+| 2: same baseline, `compile` under CDB | First- and second-chance `0xc00000fd`; `__chkstk`, SDK archive verification, `rax=0x1001a8` | Initial dump command failed because backslashes were interpreted inside CDB's quoted event command. Missing second-chance continuation left it stopped; bounded 90 s controller terminated its tree successfully (91.019 s including cleanup). Stack remains valid; no dump or natural exit-code claim for this launch. |
+| 3: saved same baseline, `compile` without debugger | `thread 'main' has overflowed its stack`; no scenario report | Natural exit **3221225725**, 0.695 s. Recovers the undebugged exit evidence missing in launch 2; local elapsed time is not comparable with CI timing. |
+| 4: symbol-enabled diagnostic, `compile` under corrected CDB capture | Same exception and stack-frame request; exact private function and source resolved; dump successfully written | Terminal controller code 3221225725, 1.188 s; no timeout. Probe still fails; no scenario or SDK execution pass. |
+
+**Located cause:** the full-symbol stack is `__chkstk` →
+`loomlight_core::renpy::sha256_file+0x16` → `install_verified_archive` →
+`install_supported_sdk_from_archive` → `LifecycleService::prepare_runtime_ui_probe`
+→ the Tauri setup closure. The function at `app/src-core/src/renpy.rs:1351` contains
+`let mut buffer = [0_u8; 1024 * 1024]` at line 1354. Its machine-code prologue loads
+`eax=0x1001a8` (**1,049,000 bytes**) and calls `__chkstk` before subtracting the frame
+from RSP. That frame alone exceeds the executable's whole main-thread stack reserve,
+before caller usage. The captured fault is its guard-page probe, not recursive calls.
+Archive verification invokes it at line 1083, before archive extraction or WebView
+probe injection. This explains the locally reproduced early compile-probe failure
+and is consistent with CI's five failures; no original-CI dump exists to prove all
+five exact native stacks independently.
+
+Ordinary startup with an empty isolated profile reaches a responsive window. This
+does not prove all normal SDK operations safe: the same hashing function serves
+archive installation and launcher fingerprints. `hash_regular_tree` also has a 1 MiB
+stack buffer at line 1481, reached through template fingerprinting. That sibling
+hazard is source evidence, not a second observed crash; its separate optimized symbol
+did not resolve in the initial offline review. Do not report it as a captured frame.
+
+**Self-review/corrections:** retained the setup/dependency failures, raw-hash mismatch
+assessment, first CDB transcript/dump failure, forced-cleanup outcome and initial
+offline review. Corrected CDB capture uses forward-slash dump paths and explicit
+second-chance continuation. Reopened the successful dump without launching the app:
+private matching PDB symbols loaded, exception/short stack/prologue rechecked, exit 0.
+The initial nearest public symbol incorrectly made `sha256_file` look like a distant
+offset in `install_verified_archive`; full symbols resolve that ambiguity. The
+successful ordinary observation establishes OS window responsiveness, not rendered
+content correctness or graceful lifecycle cleanup. The ignored WebView path override
+is documented above; actual disposable profile isolation was checked explicitly.
+Debugger commands follow Microsoft's [CDB options](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/cdb-command-line-options)
+and [exception control](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/sx--sxd--sxe--sxi--sxn--sxr--sx---set-exceptions-).
+
+**Proposed R2-P1-WIN-F1 correction — approval required, not implemented:**
+
+1. In `renpy.rs`, replace the two 1 MiB stack arrays in `sha256_file` and
+   `hash_regular_tree` with directly heap-allocated byte buffers, for example
+   `vec![0_u8; 1024 * 1024]`. Keep chunk size, digest framing/order, deadline/cancellation
+   checks, file/path checks and errors unchanged. Avoid constructing a large array
+   on the stack before boxing it. Do not increase the executable/thread stack limit
+   or change Tauri threading to mask this allocation.
+2. Add focused child-process regression coverage that invokes file and tree hashing
+   on an explicitly small stack, so stack-overflow abort is reported as a failed
+   child instead of killing the parent test runner. Verify expected hashes across
+   multiple chunks and retained cancellation/error behavior; show the test fails
+   before the correction and passes afterward. Reuse existing fixtures/helpers.
+3. Run formatting, repository checks, relevant SDK/hash/archive tests and the retained
+   ordinary core suite; then one local Windows release build with the default stack
+   reserve and all five existing packaged Runtime UI cases using disposable data.
+   Record each result/cleanup honestly and stop at any newly exposed blocker instead
+   of broadening the fix. This proposal grants no CI dispatch, macOS diagnosis,
+   performance-budget change, human acceptance, conflict resolution or merge.
+
+The proposed follow-up is a separate checkpoint. R2-P1 remains **blocked** until
+correction and supported-target qualification; macOS p95 109.9 ms remains open.
+No duration/graph-reopen, final G1/R1/R2 or human acceptance gate is newly qualified.
+
+**Preserved evidence/publication:** workspace `reports/r2-p1-win-d1` contains build
+logs, identity/hash/config records, launch controller and four-launch ledger,
+console/CDB logs, baseline executable/PDB, diagnostic dump and offline review.
+The matching diagnostic executable/PDB remains under the prepared target directory.
+Machine paths, downloaded dependencies, binaries, raw logs and dump stay outside Git.
+Disposable profile/probe directories remain preserved. Final counters are **one
+baseline compilation, one diagnostic compilation, 4/4 launches**, plus **0/4** of
+the later additional build allowance. No further launch is authorized under D1.
+Cleanup inspection at 06:23:50 UTC found zero remaining Loomlight, CDB/WinDbg,
+disposable-profile WebView or workspace Ren'Py processes. No build/CI operation is
+pending. Charge a conservative **25 minutes** for this resumed investigation through
+that cleanup (including local build/capture waits), plus **nine minutes** for the
+interrupted turn: **34/90 minutes**, before documentation review/publication.
+
+### 27. R2-P1-WIN-F1 SDK hashing stack correction — 2026-09-27
+
+**Authority/state:** after receiving the concrete D1 finding/proposal, the user said
+"I approval, apply the fix and test". This explicitly selects the follow-up in the
+same chat; now `review_ready`. The additional four-build allowance is available for F1.
+Approve only the two heap buffers, focused regression and existing local Windows
+gates proposed in ledger 26. F1's five existing packaged cases are separate from the
+completed four-launch D1 investigation. No redispatch, macOS diagnosis, budget
+relaxation, native automation, conflict resolution or merge.
+
+**Testing-scope correction:** the user subsequently reported an interface message
+"This content cant be shown" and requested no aggressive/hostile testing. Testing
+was stopped while checking: the two pre-fix small-stack child tests had already
+finished (both reproduced stack overflow); no test process remained, and a scoped
+recent Defender-event query returned no matching detections. The interface message's
+cause is unknown; it must not be called a confirmed security detection. Remove the
+deliberate-crash child harness from the final patch. Use ordinary multi-chunk/empty/
+missing-input hash checks, retained cancellation/deadline checks, focused non-hostile
+SDK regressions and the approved application scenarios. Do not run the broad core
+suite's historical race/process-crash experiments. One additional build run was
+used for the pre-fix experiment; three remain before further compilation.
+
+**Implemented:** only the two production array initializers in `renpy.rs` changed
+to `vec![0_u8; 1024 * 1024]`. Hash chunk size, framing/order, cancellation/deadline
+checks and filesystem behavior remain intact. Two ordinary unit tests cover
+multi-chunk/empty/missing inputs, known expected hashes and request controls. The
+initial small-stack subprocess tests are absent from the final source. The durable
+lesson and ordinary regression entry points are in `docs/TESTING.md`.
+
+**Local validation so far:** the second additional build compiled the final tests
+in 35.58 s; six individually selected tests each passed (one test per invocation,
+203 filtered). No broad core run or hostile/race/process-crash suite was selected.
+Passed selectors in `renpy::tests`:
+
+- `sdk_hashes_match_multichunk_empty_and_missing_inputs`
+- `sdk_file_hash_retains_cancellation_and_deadline`
+- `checksum_failure_and_existing_destination_never_overwrite`
+- `invalid_extracted_payload_is_cleaned_without_promotion`
+- `exact_version_parser_rejects_incompatible_sdk`
+- `child_environment_allowlist_excludes_injection_variables`
+
+The third additional build produced the fixed release executable in 38.78 s, using
+the same locked/offline custom-protocol command as D1 and default release settings
+(no debug/profile or stack override). PE stack reserve/commit remain 1,048,576/4,096
+bytes. Executable **13,669,376 bytes**, SHA-256
+`76d6fd49f0ac1c6e90eb1560097254235f804fa55a83aa662995082aaba246cd`;
+PDB SHA-256 `cdb73f3e34cbc0b4e50d15b579a94b504ac54257df06a8722c445050646ecdd6`.
+Build-time configuration uses unique identifier `app.loomlight.r2p1winf1` and a
+valid relative WebView data directory. These isolation overrides and lack of
+installer packaging limit the result to a local release executable, not CI identity
+or final supported-target qualification. All 101 input hashes and the app diff hash
+are retained in `f1-identity.json`; only `renpy.rs` differs substantively from the
+original candidate. Diagnostic executable/PDB were preserved under local report
+subdirectory `diagnostic` before F1 replaced the target-directory output.
+
+**Existing application cases — all passed locally:** each invocation used
+`app/scripts/run-runtime-ui-probes.py` with exactly one case; the controller would
+stop before the next case on failure. Every result has exit 0, no timeout, one
+passing report, stage `complete`, and `cleanupComplete=true`.
+
+| Case | Whole invocation | Additional retained evidence |
+| --- | --- | --- |
+| compile | 54.704 s | Real compile diagnostics and source navigation passed |
+| lint | 53.782 s | Real lint diagnostics and source navigation passed |
+| route-a | 64.891 s | Graph destination edit/close/reopen, live script Save, Stop and saved-disk reopen passed; observed running interval **9,510.5 ms** |
+| route-b | 65.359 s | Same graph/runtime/reopen proof plus draft Cancel/Save All refusal; observed running interval **9,501.7 ms** |
+| runtime-error | 52.140 s | Real runtime failure display passed |
+
+The two observed running intervals exceed the retained >8 s assertion. Both reports
+contain `branches-destination-reopen-passed` and `disk-reopen-passed`. These now have
+local Windows real-service/SDK evidence, with synthetic DOM input; no native keyboard
+or human acceptance claim. No new native automation was introduced. Route B's log
+also contains a WebView shutdown warning, `Failed to unregister class
+Chrome_WidgetWin_0`, error 1411. Preserve it: the report/exit succeeded and the final
+OS process check found no retained process; its internal cause was not investigated.
+
+**Final review and gates:** the assessment re-read all five JSON results and six
+unit logs, checked report counts/terminal states/cleanup, verified both duration and
+reopen assertions, and confirmed the tested source still matches its recorded digest:
+`e3e38e879e1b9551cebb2a86f4e1587442979c001bc38028417b1b049019e856`.
+The app diff SHA-256 is
+`472a7ede6dbce8ddc9ec7e605da75e3118dd82189d282f0b693735c01d79f6b1`.
+All **56 retained evidence files** were hashed in local `integrity.json`; extracted
+SDK trees and disposable browser profile contents are not part of that inventory.
+At **06:47:03 UTC**, the OS check found no remaining Loomlight, debugger,
+disposable-profile WebView or workspace SDK process. No build or CI operation is
+pending. **Three of four additional build runs used; one unused.** F1 executed the
+five approved application cases. D1's four launches and earlier failures remain
+separate, preserved evidence.
+
+`cargo fmt --check --all`, `python scripts/validate.py` (270 files), and
+`git diff --check` passed. The final application diff is the two buffer initializers
+plus two ordinary tests. Only TESTING, CURRENT, HANDOVER and this ledger accompany
+it. No deliberate-crash harness, hostile/race tests, stack-size override, downloaded
+tool, raw log, dump or machine-specific path is committed. Existing tests outside
+the six selected SDK checks were **not run**; installer packaging, CI, macOS,
+full G1 budgets, legacy boundary/secret-scan/dependency gates and human acceptance
+were not rerun or claimed passed.
+
+**Disposition/next selection:** R2-P1-WIN-F1 is `review_ready` locally. R2-P1 remains
+`blocked` because this is not a replacement supported-target qualification and the
+macOS 109.9 ms frame-budget failure remains open. Publish the reviewed source and
+checkpoint docs on the existing branch/PR; do not redispatch or merge. The next
+bounded selection is **review and plan only** for the remaining macOS frame-budget
+failure, using existing evidence, with no execution or budget change implied.

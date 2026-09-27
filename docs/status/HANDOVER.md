@@ -1,87 +1,75 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1-WIN-TOOLS, `review_ready`; local debugger/SDK setup verified.
-R2-P1 qualification remains `blocked`.
-**Authority:** the latest user request selects local debugger/SDK preparation only.
-It supersedes the earlier installation stop for these prerequisites. The prior
-R2-P1-WIN-D1 investigation retains its 90-minute active-work, one-baseline-build,
-one-diagnostic-build and four-launch caps; diagnosis was not resumed in this setup.
-No production fix, CI dispatch or merge is authorized.
+**Checkpoint:** R2-P1-WIN-F1, `review_ready`; fix and local verification complete.
+Completed Windows diagnosis R2-P1-WIN-D1 is also `review_ready`.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
-conflicting against main. Integration is outside scope.
-**Tested candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
-**Exact run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731),
-**attempt 1**, terminal **FAIL**; last target job completed 2026-09-27 04:32:03 UTC.
-Later commits contain documentation only; resolve published head from Git.
+conflicting against main. Do not redispatch, resolve conflicts or merge.
+**Authority:** the user approved the concrete two-buffer fix and testing after D1,
+then requested no aggressive/hostile testing. The deliberate-crash child harness
+was removed. Use ordinary checks and the existing application scenarios only.
+The four additional build runs cover F1: three used, one unused.
+**Entry source:** `cc93b90b3acc04acbe9f6f44cd05d928da794313`; original failed CI
+candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`. Only `renpy.rs` changed in the
+application. Resolve the final published commit from Git; no receipt-only commit.
 
-## Verified outcome
+## Fix and reviewed diagnosis
 
-Read [ledger 23](../tasks/active/phase-1g-branches-runtime-git.md#23-r2-p1-packaged-proof-correction-and-qualification--2026-09-27)
-for exact measurements, gate dispositions, hashes and failure evidence.
-Preflight **108548761361** passed (60 frontend tests, Source browser, repo/format).
-Windows **108548848419** passed core, three G1-U2 samples, rendered budgets, explicit
-SDK/R1/diagnostics, desktop test and MSI/NSIS build. All five packaged cases then
-exited with code 3221225725 and `thread 'main' has overflowed its stack`, in
-0.015–0.047 seconds, no timeout and no reports. Scenario stages/cleanup are unproven.
-The overflow location and normal-launch impact remain unknown.
+Read [ledger 26](../tasks/active/phase-1g-branches-runtime-git.md#26-r2-p1-win-d1-resumed-local-startup-diagnosis--2026-09-27)
+for the four-launch diagnosis and [ledger 27](../tasks/active/phase-1g-branches-runtime-git.md#27-r2-p1-win-f1-sdk-hashing-stack-correction--2026-09-27)
+for approval, the testing-scope correction, hashes and final verification.
 
-macOS ARM64 **108548848384** passed core and three G1-U2 samples, then failed the
-Branches browser frame gate: p95 **109.9 ms** against <100 ms, maximum **860.3 ms**.
-Synchronous dispatch maximum was 0.3 ms; it does not excuse the frame failure.
-Cause is unproven. Downstream SDK/desktop/package/scenario gates were skipped.
-Windows p95 was 15.6 ms. Both retained ordinary core protections and browser resize/
-navigation checks. Neither target qualifies the new graph-reopen/duration assertions.
-Legacy packaged boundary, secret scan and dependency inventory were skipped on both.
-Final G1/R1/R2 and human acceptance remain incomplete; earlier evidence is preserved.
+`sha256_file`'s 1 MiB stack array produced a **1,049,000-byte frame**, exceeding the
+Windows main thread's **1,048,576-byte reserve**. Matching private PDB symbols and
+offline dump review locate the exception in `__chkstk` at that function's prologue,
+called by probe SDK archive verification. The baseline ordinary empty-profile launch
+survived a 15-second observation; its compile probe exited **3221225725**.
 
-## Artifact integrity and limits
+The approved fix directly heap-allocates the 1 MiB buffers in `sha256_file` and
+`hash_regular_tree`. Hash chunking/framing, request controls and filesystem behavior
+are unchanged. The default executable stack remains unchanged. Two new ordinary
+unit tests cover multi-chunk/empty/missing inputs and cancellation/deadline behavior.
+No new tool, dependency version, workflow, native automation or broader redesign.
+The durable lesson is in [TESTING](../TESTING.md#sdk-hashing-regression).
 
-Both GitHub archive digests/lengths, ZIP CRCs and all 29 extracted files verified
-(7 macOS, 22 Windows). All 101 Windows app/workflow input hashes matched the tested
-Git tree, with exact candidate/run/attempt identity. Windows executable digest is
-recorded in the ledger but cannot be independently rehashed: package uploads were
-skipped and no binary is available. macOS never generated that manifest or package.
-Four Runtime browser screenshots were inspected; these use an injected requester
-and synthetic input, not successful packaged/native interaction.
-Raw logs/API records, original ZIPs, extracted files, verification manifest and computed
-assessment are preserved outside Git at workspace `reports/r2-p1-ci-36293797731`.
-G1-OBS's previous qualification and 126 ms/1,058.6 ms frame outliers remain in ledger 22.
+## Verification and evidence
 
-## Prepared local tools and next bounded decision
+Six selected ordinary SDK tests passed; formatting and repository checks passed.
+The final release and **all five existing real-service application cases passed**:
+compile, lint, route-a, route-b and runtime-error. Every case exited 0 without timeout
+and confirmed cleanup. Both routes passed graph-destination/disk reopen and observed
+about 9.5 seconds running. Exact results and the retained Route B WebView shutdown
+warning are recorded in ledger 27. Final OS inspection found no task-created
+application/debugger/WebView/SDK process; no operation is outstanding.
+No broad core, hostile/race or deliberate process-crash suite was run after the
+user narrowed scope. Earlier intentional crash results remain local evidence, not
+part of the final test harness. The reported interface text "This content cant be
+shown" has no confirmed cause; no matching recent Defender detection was found.
 
-Read [ledger 24](../tasks/active/phase-1g-branches-runtime-git.md#24-r2-p1-win-d1-local-startup-diagnosis--2026-09-27)
-for the interrupted diagnosis and
-[ledger 25](../tasks/active/phase-1g-branches-runtime-git.md#25-r2-p1-win-tools-local-debugger-and-sdk-prerequisites--2026-09-27)
-for setup provenance, checks and exact workspace-relative paths.
-Entry head was `5773eb920e1dad3c9a3b1bca6b904240e897f040`; its app/workflow inputs
-remain identical to the tested candidate. The prior uncommitted diagnosis record is
-preserved in ledger 24 and included in this documentation publication.
+Fixed executable SHA-256:
+`76d6fd49f0ac1c6e90eb1560097254235f804fa55a83aa662995082aaba246cd`.
+Tested `renpy.rs` SHA-256:
+`e3e38e879e1b9551cebb2a86f4e1587442979c001bc38028417b1b049019e856`.
+All 101 tracked input hashes, build config and app diff hash are retained locally.
+These are local custom-protocol release results with a disposable identifier/profile,
+not installer packaging, original-CI binary identity or native human acceptance.
 
-Microsoft x64 CDB/WinDbg 10.0.26100.9169 is extracted beneath workspace `.tools`;
-installer, selected MSI and debugger/engine signatures verify as Microsoft.
-CDB passed a disposable command-process launch, breakpoint and stack-output smoke
-check. Ren'Py 8.5.3 archive matches the repository pin and published SHA-256; its
-extracted Windows interpreter reports `Ren'Py 8.5.3.26051504`.
-From a fresh PowerShell at the workspace root (parent of `repo`), dot-source
-`. ./enter-debug.ps1`. It prepares existing Rust/MSVC, debugger PATH, SDK archive
-environment variables, a separate diagnosis build directory and local symbol cache.
-The script verifies the archive again and changes only this shell's environment.
-Downloaded/extracted tools, script and raw verification evidence remain outside Git;
-local report: `reports/r2-p1-win-tools/verification.json`.
+Workspace `reports/r2-p1-win-d1` preserves D1 and F1 logs, identities, launch records,
+baseline/diagnostic executable-PDB pairs, diagnostic dump and successful offline
+review. Fixed output is in `.cache/target-r2-p1-win-d1/release`. Raw evidence, SDKs,
+disposable data and machine paths stay outside Git. Prepared tools remain available
+through workspace `enter-debug.ps1`; no installation is required for continuation.
 
-Self-review corrected a missing symbol-cache directory and repeated that smoke check
-successfully. No Loomlight build/launch or game execution occurred. CDB's smoke used
-exported symbols; matching application PDBs and the failure stack remain diagnosis
-work. No task-created debugger, SDK, application or download process remains running.
-Counters remain 0/1 baseline builds, 0/1 diagnostic builds, 0/4 application launches.
-The original CI binary remains unavailable; a local rebuild is diagnostic evidence.
+## Remaining qualification and next bounded decision
 
-Next user-selected action: resume R2-P1-WIN-D1 within its existing caps, compare
-ordinary/probe startup with disposable app data, capture the exception/stack and
-propose the smallest supported correction. Account for prior active investigation
-time; do not reset its caps. Overflow location and ordinary-launch impact remain
-unknown; tool availability does not qualify R2-P1. Keep the macOS budget failure
-open separately. Do not redispatch, relax budgets, change production code, add native
-automation, request human acceptance, resolve merge conflicts or merge.
+Original [run 36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731),
+attempt 1, remains terminal **FAIL**; see ledger 23. The macOS Branches frame p95
+**109.9 ms** against <100 ms is still unexplained; downstream package gates were
+skipped. R2-P1 and final G1/R1/R2/human acceptance remain incomplete.
+
+The next selection should be a review and plan for the remaining macOS frame-budget
+failure. That planning step grants no implementation, CI dispatch, package rerun,
+budget relaxation, hostile testing,
+human acceptance, conflict resolution or merge. Preserve the failed CI evidence
+and the now-corrected Windows diagnosis rather than automatically rerunning CI.

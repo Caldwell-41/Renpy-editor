@@ -1351,7 +1351,7 @@ fn find_sdk_root(payload: &Path) -> Result<PathBuf, RenpyError> {
 fn sha256_file(path: &Path) -> Result<String, RenpyError> {
     let mut file = File::open(path).map_err(|_| RenpyError::Io)?;
     let mut digest = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    let mut buffer = vec![0_u8; 1024 * 1024];
     loop {
         crate::runtime_work::check().map_err(|_| RenpyError::Io)?;
         let count = file.read(&mut buffer).map_err(|_| RenpyError::Io)?;
@@ -1478,7 +1478,7 @@ fn hash_regular_tree(root: &Path) -> Result<String, RenpyError> {
         digest.update(relative.to_string_lossy().as_bytes());
         digest.update([0]);
         let mut file = File::open(&path).map_err(|_| RenpyError::InvalidSdk)?;
-        let mut buffer = [0_u8; 1024 * 1024];
+        let mut buffer = vec![0_u8; 1024 * 1024];
         loop {
             let count = file.read(&mut buffer).map_err(|_| RenpyError::InvalidSdk)?;
             if count == 0 {
@@ -1560,6 +1560,65 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
 mod tests {
     use super::*;
     use std::io::Cursor;
+
+    #[test]
+    fn sdk_hashes_match_multichunk_empty_and_missing_inputs() {
+        let fixture = tempfile::tempdir().unwrap();
+        let root = fixture.path();
+        let bytes: Vec<u8> = (0..2 * 1024 * 1024 + 31)
+            .map(|index| (index % 251) as u8)
+            .collect();
+        fs::write(root.join("a.bin"), &bytes).unwrap();
+        fs::write(root.join("z-empty"), []).unwrap();
+        assert_eq!(
+            sha256_file(&root.join("a.bin")).unwrap(),
+            hex::encode(Sha256::digest(&bytes))
+        );
+        assert_eq!(
+            sha256_file(&root.join("z-empty")).unwrap(),
+            hex::encode(Sha256::digest([]))
+        );
+        // Fixed filename order and explicit framing, independent of traversal.
+        let mut expected = Sha256::new();
+        expected.update(b"a.bin\0");
+        expected.update(&bytes);
+        expected.update([0xff]);
+        expected.update(b"z-empty\0");
+        expected.update([0xff]);
+        assert_eq!(
+            hash_regular_tree(root).unwrap(),
+            hex::encode(expected.finalize())
+        );
+        assert!(matches!(
+            sha256_file(&root.join("absent")),
+            Err(RenpyError::Io)
+        ));
+        assert!(matches!(
+            hash_regular_tree(&root.join("absent")),
+            Err(RenpyError::InvalidSdk)
+        ));
+    }
+
+    #[test]
+    fn sdk_file_hash_retains_cancellation_and_deadline() {
+        let fixture = tempfile::tempdir().unwrap();
+        let path = fixture.path().join("file");
+        fs::write(&path, b"sdk hash input").unwrap();
+        let cancel = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+        cancel.cancel();
+        assert!(matches!(
+            crate::runtime_work::scoped(cancel, || sha256_file(&path)),
+            Err(RenpyError::Io)
+        ));
+        assert!(matches!(
+            crate::runtime_work::proof_scoped(
+                std::sync::Arc::new(crate::runtime_work::Cancellation::default()),
+                std::time::Instant::now() - std::time::Duration::from_secs(1),
+                || sha256_file(&path),
+            ),
+            Err(RenpyError::Io)
+        ));
+    }
 
     fn archive(path: &Path, members: &[(&str, &[u8])]) {
         let file = File::create(path).unwrap();

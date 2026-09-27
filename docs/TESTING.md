@@ -30,6 +30,21 @@ evidence. A quickly returned unchanged graph cannot pass an accepted-edit case.
 No second complete source pass, final leaf-binding matrix, 230 ms verifier allocation
 or fixed 1,006/503/504 source-pass count is required.
 
+## SDK hashing regression
+
+Keep large SDK hashing buffers on the heap. The Windows release main thread has a
+1 MiB stack reserve; a 1 MiB local array plus the function frame can overflow before
+any hashing begins, even when the ordinary empty-profile startup works. A passing
+test-harness thread does not prove the same allocation fits the desktop main thread.
+
+`renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs` covers exact
+file/tree digests and framing across chunk boundaries, empty files and missing
+inputs. `sdk_file_hash_retains_cancellation_and_deadline` preserves request controls.
+Use ordinary correctness checks and the existing disposable application scenarios
+for this regression. Deliberate crash reproduction was local diagnostic evidence;
+it is not a new routine test or a reason to run hostile filesystem/race experiments.
+See the active Phase 1G ledger for the scoped Windows evidence and remaining gates.
+
 ## Current production scaffold and Phase 0 regression commands
 
 From `app/`, the Phase 1A production checks are:
