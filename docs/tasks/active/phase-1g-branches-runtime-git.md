@@ -3146,3 +3146,26 @@ manual-resume waiting rule if it is not terminal; do not claim qualification fro
 queue acceptance. Once results are collected, publish findings and this handover,
 then stop at G1-OBS. Final 1G/R2 packaged WebView/runtime/diagnostic completion, final
 human interaction acceptance and integration need separate checkpoint selection.
+
+
+#### Publication and exact pending native operation
+
+Published implementation candidate `1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`;
+remote feature and PR head equality verified, PR draft/open. Final local UI rerun
+(`npm run check`) passed all 60 after adding successful-retry notice clearing.
+The additional `flow_observed_authoring` test passed. Formatting, whitespace and
+repository structural/link/privacy validation passed for 268 files at publication.
+
+Dispatched exactly one bounded native qualification:
+[36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468),
+attempt 1, exact candidate above, `phase1g_flow_profile=true`,
+`phase1g_candidate_proof=false`. Jobs Windows **108538000239** and macOS ARM64
+**108538000117** were verified in progress after checkout/restoring cache at
+2026-09-27 02:56 UTC. The native result is pending, not passing. The separate PR
+validator is independent; the dispatch intentionally skips its validator job.
+
+Handover is `awaiting_ci`/manual resume with this exact operation, per AGENTS/WORKFLOW.
+Do not dispatch a duplicate, resume the native experiment, package, merge, or advance
+into R2. There is no task-created local process still running. G1-OBS cannot be
+marked achieved until target artifacts and outcomes have been inspected and final
+findings/handover published. Historical failures and raw evidence remain preserved.

@@ -1,12 +1,13 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** G1-OBS, implementation complete; supported-target qualification pending.
+**Checkpoint:** G1-OBS, `awaiting_ci`; implementation/local checks complete.
 **Authority:** user selected G1-OBS through the active goal/next-chat instruction.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged.
 **Entry:** 76ebadb2dd59506c7bc57c066e421fbfac17fd2a, verified clean and matching remote.
-Resolve published implementation candidate from Git/PR; do not create self-SHA receipts.
+**Published implementation candidate:** `1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`.
+Push and remote/PR head equality verified; keep the PR draft/open.
 
 ## Implemented and verified locally
 
@@ -27,19 +28,29 @@ not final packaged WebView/native keyboard or official SDK acceptance.
 
 ## Next bounded action and publication
 
-Publish the coherent implementation, then dispatch exactly one bounded `quality.yml`
-run on that feature candidate with `phase1g_flow_profile=true` and
-`phase1g_candidate_proof=false`. This changed-input qualification is selected by
-G1-OBS: ordinary core/UI, three fixed U2 samples and rendered interaction on both
-supported targets, including baseline symlink cases unavailable locally. It does not
-package or download an SDK. Record run/attempt/SHA here immediately after dispatch.
-No native CI run has been dispatched at the time this implementation record is written.
+The single bounded `quality.yml` dispatch is live:
+[36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468), attempt **1**, exact candidate
+`1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`, inputs
+`phase1g_flow_profile=true`, `phase1g_candidate_proof=false`.
+Windows job **108538000239** and macOS ARM64 job **108538000117** were verified
+`in_progress` after checkout on 2026-09-27 at 02:56 UTC. Both were restoring the
+Rust cache; no completed native result is claimed. The validator job is intentionally
+skipped in this dispatch; the separate pull-request validator owns that check.
 
-If the run remains active, publish its exact identity and use manual resume per
-AGENTS/WORKFLOW. Do not redispatch on a timeout or infer completion from queueing.
-Collect target logs/artifacts and inspect results before closing G1-OBS. Publish the
-findings/handover, then stop. Final R2/1G package/runtime/diagnostic completion, human
-interaction acceptance and integration remain separate and unapproved here.
+**Outstanding operation:** this exact run/attempt. No local build/test process or
+second dispatch is outstanding. No automatic same-thread watcher is claimed.
+
+**Manual-resume action (G1-OBS only):** inspect this exact run, collect native logs and
+artifacts when terminal, verify all three cold/explicit-refresh/accepted samples,
+core/UI results and rendered input/pan evidence on both targets. Include baseline
+symlink cases filtered locally; distinguish SDK wrappers/explicit ignored specialist
+cases from passes. Preserve failure/overrun evidence; do not redispatch on observation
+timeout. Publish final findings and handover, then stop at G1-OBS.
+
+The repository waiting rule applies: use manual resume while native work runs;
+no repeated model polling, hypothetical watcher or premature checkpoint completion.
+Final R2/1G package/runtime/diagnostic completion, native-keyboard/human acceptance
+and integration remain separate and unapproved here.
 
 No security/privilege settings changed, no historical native experiment resumed,
 no package matrix or merge. Preserve the historical checkout and local raw evidence.

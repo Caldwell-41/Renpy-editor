@@ -1,10 +1,11 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** G1-OBS observed Branches implementation; qualification in progress.
+**Current checkpoint:** G1-OBS `awaiting_ci`; observed Branches implemented.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Entry:** 76ebadb2dd59506c7bc57c066e421fbfac17fd2a.
+**Implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
+**Native qualification:** [36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468), attempt 1, both targets verified running.
 Read [HANDOVER](HANDOVER.md), [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md)
 and [ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27).
 
