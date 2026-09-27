@@ -1,7 +1,7 @@
 # Phase 1G — Branches, runtime and diagnostics
 
 **Updated:** 2026-09-27. **Current checkpoint:** G1-RESET product/scope decision complete;
-production observed-state behavior pending G1-OBS. Final 1G acceptance remains open.
+G1-OBS observed-state implementation is under qualification (ledger 22). Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -46,7 +46,7 @@ performance evidence, not a production renderer or layout acceptance.
 | --- | --- | --- | --- |
 | 1G.1 | Shared flow projection and Branches | `review_ready` | Integrated 1F and explicit selection |
 | 1G.2a | Runtime/trust/revision/process foundation | `review_ready` (R1 technical findings closed) | Reviewed 1G.1 checkpoint and explicit selection |
-| 1G.2b | Validate, Run/Stop and Diagnostics UI; observed-state Branches completion | incomplete; G1-OBS next | ADR 0010 and existing R1 foundation |
+| 1G.2b | Validate, Run/Stop and Diagnostics UI; observed-state Branches completion | G1-OBS qualification in progress | ADR 0010 and existing R1 foundation |
 
 These subdivide the parent's two capabilities into three checkpoint chats. Use one
 checkpoint per chat, retaining the implementation branch/PR and evidence across chats.
@@ -3062,3 +3062,87 @@ No CI dispatch, package run, setup, security change, merge or history rewrite oc
 The existing historical checkout and local evidence remain preserved. Publish to the
 existing branch/PR with repository-local noreply identity and verify remote head;
 resolve publication SHA from Git/PR without a receipt-only commit.
+
+
+### 22. G1-OBS observed Branches implementation — 2026-09-27
+
+**Authority:** the user selected G1-OBS through the active goal/next-chat instruction.
+**State:** implementation complete; local qualification recorded below; supported-target
+qualification pending. This is not final 1G acceptance, packaging or integration.
+**Entry:** clean `76ebadb2dd59506c7bc57c066e421fbfac17fd2a`, matching freshly fetched
+feature branch and open draft [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
+Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`. Resolve publication head from
+Git/PR; a later evidence amendment will name the implementation candidate.
+
+#### Implementation and requirement evidence
+
+| Requirement | Implementation / regression |
+| --- | --- |
+| Session-owned last observation | `AuthoringService.observed_flow` owns bounded source bytes/revisions, model and pending paths. All authoring/Source/history commits invalidate through `commit_observed`; streaming imports and explicit recovery discard uncertain cache state. Unregister clears it. No transaction precondition/recovery protocol changes. |
+| Accepted edits and history | `flow_observed` reacquires changed sources and consumed metadata/media state, reuses unchanged source observations and reprojects. Real Scene create/delete/undo/redo and Source Save tests assert changed output; unsaved drafts do not appear. |
+| Ordinary disk changes | Explicit refresh enumerates source inventory and hashes bounded current reads, including unchanged timestamps. It uses existing Source reconciliation for changed mapped files, retaining dirty conflicts. In-place/replacement edits, additions/deletions, metadata, authoring/media dependencies, missing files and malformed metadata have production-service coverage. |
+| Observation provenance | Literal `flow.list` accepts only `sessionId` and optional boolean `refresh`; default returns observed inputs, true requests disk. `checked`/`savedEdits`/`incomplete`, last completed `checkedAt` and `fromCache` are separate from graph partiality. Hashes include consumed authoring/media state. |
+| Responsive UI and target authority | Open shows observed data then checks disk for cached/saved-edit results. Focus/button triggers coalesce into one follow-up; no Branches timer. Enabled navigation uses existing captured revision/range checks without an all-project scan. Focused nodes/details/selectors, selection, pan and zoom survive valid redraws. Errors/incomplete scans retain the last usable graph with visible status. |
+| Source/privacy/execution | Source draft/caret tests include external conflict during refresh; literal IPC rejects stale sessions/malformed refresh. Cancelled work cannot publish, closed authority cannot reuse cache, and observation cancellation tokens record zero process spawns. Existing Source/Scene write preconditions, runtime grant and process ownership remain independent. |
+| Bounded inputs and historical disposition | Same 500 Scenes / 2,000 edges / 503 sources / 105,627 bytes. Existing source/traversal limits retained; no native adapter promoted. Historical G1-O tests and 17 timed transaction/lifecycle namespace substitutions are explicitly specialist/ignored. Baseline link/path refusal, ordinary writer races and real termination/recovery remain routine. |
+
+The old fully verified display assertion is replaced together with production behavior,
+not removed alone. The selected benchmark asserts the changed caption, all fixture
+counts and successful observation provenance. Timing starts immediately after the
+real transaction succeeds, before changed-path invalidation, includes history and
+production observed projection, and ends on its core response. Transaction duration,
+IPC and renderer timing are not included in that number. Disk timing starts before
+request entry. There is no end-to-end latency claim.
+
+#### Local Windows x64 evidence
+
+Existing MSVC 14.50.35717 / SDK 10.0.26100.0 / Rust 1.90.0 release environment reused;
+Node 24.19.0 and npm 11.9.0, locked frontend dependencies installed with scripts disabled.
+No privilege, symlink capability, security, power or persistent toolchain setting changed.
+Synthetic fixtures only; local raw logs/JSON/screenshot stay outside Git.
+
+| Check | Result |
+| --- | --- |
+| Focused `cargo test -p loomlight-core --release --locked flow -- --skip flow_observed_budget --nocapture` | 11 passed before the additional dependency fixture; no failures. Source Save, draft/caret/conflict, history/reopen, lifecycle literal IPC and observed behavior included. |
+| Additional `flow_observed_authoring` dependency fixture | 1 passed after correcting invalid fixture metadata; covers Character acceptance, import fallback, media removal, authoring metadata change and missing mapped source. |
+| Broader core suite, release/locked | 171 reported passes, 26 ignored, 4 filtered; two official-SDK wrappers explicitly skipped because no archive was supplied (not SDK passes). Four filters were the separately timed fixture and three unsupported local symlink-capability tests. This run preceded the final lifecycle specialist classification; those previously passing tests are now explicitly historical. |
+| Local baseline capability exclusions | `no_replace_promotion_refuses_empty_directory_and_symlink_destinations`, `recent_reparse_substitution_fails_closed_without_touching_target`, `managed_sdk_directory_reparse_fails_closed_without_touching_target`. Required in native CI; no silent capability skip added to code. |
+| `npm run check` | 60 passed, zero failures/skips; includes queued refresh, cached-open refresh, enabled navigation during pending refresh, focus/pan retention, errors and old-session disposal. |
+| `npm run test:source-browser` | Build passed; historical false re-dirty reproduced, corrected accepted-text Save remained clean, selection/Apply Both regression passed. |
+| Chromium 153.0.8010.53 Branches | Full service-produced 500/2,000 workload: initial layout 82.4 ms; 30-sample pan/frame p95 3.6 ms while refresh deliberately pending; route editing, 640px resize and zero page errors passed. Synthetic DOM/browser evidence, not packaged IPC or native keyboard. Rendered screenshot reviewed. |
+| Repository validation / whitespace | Validator passed for 268 repository files before final ledger amendment; rerun at publication. |
+
+Three fixed local G1-U2 samples (milliseconds):
+
+| Sample | Initial disk observation (<2,000) | Explicit disk refresh (<2,000) | Accepted observed update (<250) |
+| --- | ---: | ---: | ---: |
+| 1 | 242.9685 | 253.9133 | 41.2492 |
+| 2 | 245.3859 | 246.0471 | 43.9419 |
+| 3 | 250.3105 | 243.5073 | 44.7632 |
+
+All three passed and asserted `Route A` in the changed 2,000-edge graph. Local files:
+`logs/g1-obs-budget.log`, `logs/g1-obs-core.log`, `logs/g1-obs-flow.log`,
+`logs/g1-obs-ui.log`, `logs/g1-obs-source-browser.log`,
+`logs/g1-obs-branches-browser.log`, `reports/g1-obs-flow.json` and
+`reports/g1-obs-branches.png` under the agent workspace (not repository artifacts).
+An added authoring/media test initially changed a Character display name without its
+matching authoritative declaration; metadata validation correctly refused it. The
+fixture correction uses a valid preserved extension field for the external metadata
+change. This was test-fixture diagnosis, not a relaxed metadata guard.
+
+#### Supported-target qualification and stopping boundary
+
+Changed inputs justify exactly one bounded `quality.yml` dispatch on the published
+feature candidate: `phase1g_flow_profile=true`, `phase1g_candidate_proof=false`.
+It runs ordinary core/UI tests, three fixed G1-U2 samples and rendered G1-V2 evidence
+on Windows x64 and macOS ARM64. It includes the baseline capability cases excluded
+locally. The production package workflow selects the same new benchmark/marker, but
+no package matrix, official SDK download, native experiment, merge or next checkpoint
+is selected here. Historical candidate proof remains separately selected with its
+counterexample refusal intact; the G1-O1-N one-shot test is explicitly excluded.
+
+Record exact run/attempt/candidate in HANDOVER after dispatch. Follow the repository's
+manual-resume waiting rule if it is not terminal; do not claim qualification from
+queue acceptance. Once results are collected, publish findings and this handover,
+then stop at G1-OBS. Final 1G/R2 packaged WebView/runtime/diagnostic completion, final
+human interaction acceptance and integration need separate checkpoint selection.

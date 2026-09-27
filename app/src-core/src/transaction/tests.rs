@@ -758,6 +758,7 @@ fn changed_parent_identity_fails_closed() {
 }
 
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn parent_delete_recreate_after_prepared_keeps_artifacts_inside_root() {
     let fixture = Fixture::new();
     let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
@@ -795,6 +796,7 @@ fn parent_delete_recreate_after_prepared_keeps_artifacts_inside_root() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn parent_replaced_after_prepared_cannot_redirect_artifact_creation() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -834,6 +836,7 @@ fn parent_replaced_after_prepared_cannot_redirect_artifact_creation() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn recovery_directory_substitution_cannot_redirect_artifact_creation() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -867,6 +870,7 @@ fn recovery_directory_substitution_cannot_redirect_artifact_creation() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn windows_recovery_directory_is_pinned_before_artifact_creation() {
     let fixture = Fixture::new();
     let outside = tempfile::tempdir().unwrap();
@@ -895,6 +899,7 @@ fn windows_recovery_directory_is_pinned_before_artifact_creation() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn parent_replaced_at_exchange_boundary_is_rejected_before_exchange() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -931,6 +936,7 @@ fn parent_replaced_at_exchange_boundary_is_rejected_before_exchange() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn windows_parent_namespace_is_pinned_at_exchange_boundary() {
     let fixture = Fixture::new();
     let outside = tempfile::tempdir().unwrap();
@@ -957,6 +963,7 @@ fn windows_parent_namespace_is_pinned_at_exchange_boundary() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn target_symlink_substitution_at_exchange_never_changes_external_bytes() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -984,6 +991,7 @@ fn target_symlink_substitution_at_exchange_never_changes_external_bytes() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn windows_target_symlink_substitution_at_exchange_never_changes_external_bytes() {
     use std::os::windows::fs::symlink_file;
     let fixture = Fixture::new();
@@ -1015,6 +1023,7 @@ fn windows_target_symlink_substitution_at_exchange_never_changes_external_bytes(
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn symlink_substitution_is_denied_without_touching_outside() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -1044,6 +1053,7 @@ fn symlink_substitution_is_denied_without_touching_outside() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
 fn reparse_or_symlink_substitution_is_denied_without_touching_outside() {
     use std::os::windows::fs::symlink_file;
     let fixture = Fixture::new();
@@ -1875,6 +1885,7 @@ fn public_errors_never_contain_paths_or_file_bytes() {
 }
 
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_rereads_content_identity_and_bounds() {
     let fixture = Fixture::new();
     let path = RelativePath::new("game/one.rpy").unwrap();
@@ -1942,6 +1953,7 @@ fn g1_o1_reader_rereads_content_identity_and_bounds() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_rejects_retained_parent_and_root_substitution() {
     let fixture = Fixture::new();
     let path = RelativePath::new("game/one.rpy").unwrap();
@@ -1977,6 +1989,7 @@ fn g1_o1_reader_rejects_retained_parent_and_root_substitution() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_pins_retained_parent_namespace() {
     let fixture = Fixture::new();
     let path = RelativePath::new("game/one.rpy").unwrap();
@@ -1993,6 +2006,7 @@ fn g1_o1_reader_pins_retained_parent_namespace() {
 
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_rejects_leaf_and_parent_symlink_substitution() {
     use std::os::unix::fs::symlink;
     let fixture = Fixture::new();
@@ -2027,6 +2041,7 @@ fn g1_o1_reader_rejects_leaf_and_parent_symlink_substitution() {
 }
 
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_equivalence_growth_shortening_and_chunk_cancellation() {
     use candidate::{Point, Probe};
     for point in [
@@ -2105,6 +2120,7 @@ fn g1_o1_reader_equivalence_growth_shortening_and_chunk_cancellation() {
     }
 }
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_total_bytes_files_and_expired_deadline() {
     let fixture = Fixture::new();
     let bytes = vec![b'#'; 16 * 1024 * 1024];
@@ -2160,6 +2176,7 @@ fn g1_o1_reader_total_bytes_files_and_expired_deadline() {
 }
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_reader_substitution_at_each_open_boundary() {
     use candidate::{Point, Probe};
     use std::sync::atomic::{AtomicBool, Ordering};
@@ -2195,6 +2212,7 @@ fn g1_o1_reader_substitution_at_each_open_boundary() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_windows_same_identity_reparse_at_open_boundaries() {
     use std::{
         os::windows::{fs::OpenOptionsExt, io::AsRawHandle},
@@ -2315,6 +2333,7 @@ fn g1_o1_windows_same_identity_reparse_at_open_boundaries() {
 // Deliberate counterexample, not a successful safety assertion. G1-O1 is NO-GO:
 // final handle sampling checks the opened object, not the leaf's current pathname.
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_counterexample_same_byte_replacement_after_leaf_open() {
     use std::sync::atomic::{AtomicBool, Ordering};
     let fixture = Fixture::new();

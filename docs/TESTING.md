@@ -14,11 +14,13 @@ Preserve them and their failures; do not acquire symlink privileges or change se
 settings to pass a hobby-editor gate. Existing robust write/recovery code remains.
 Historical corrective evidence below keeps its actual result.
 
-G1-OBS must update production code, test classification/selectors and the real-service
-workflow gate together. The existing selectors still run the old full-verification
-contract; this documentation does not suppress them. Classify before selecting a
-suite, explicitly report specialist exclusions and keep baseline path, ordinary
-conflict/recovery and session/process/privacy regressions required.
+G1-OBS updates production code, test classification/selectors and real-service gates
+together. Historical `g1_o1` tests and seventeen named timed namespace substitutions use
+explicit specialist `#[ignore]` attributes; ordinary writer interleavings, baseline
+path/link rejection, recovery, session/process/privacy remain routine. The one-shot
+G1-O1-N native test remains separately ignored and is never selected by routine CI.
+Use `--ignored --exact <test>` only for a separately selected specialist task; report
+all exclusions and target capability limits honestly.
 
 Branches acceptance is G1-U1 observed-state behavior, G1-U2 <250 ms accepted-model
 update and <2 s initial/explicit disk refresh, plus the retained G1-V2 rendered
@@ -581,7 +583,7 @@ commands through the real handler), `source.rs` (revision-qualified navigation),
 Run from `app/`: `cargo test -p loomlight-core --locked flow`, `npm run check`, and
 `npm run test:source-browser`. For the unchanged budget workload, set
 `LOOMLIGHT_FLOW_EVIDENCE` to an agent-owned temporary JSON path and run
-`cargo test --release -p loomlight-core --locked flow_budget_fixture -- --nocapture`;
+`cargo test --release -p loomlight-core --locked flow_observed_budget_fixture -- --nocapture`;
 then run `node tests/branches.browser.mjs` with the same variable. The latter requires
 500 Scenes / 2,000 edges produced by the actual service, reports build/layout and
 synthetic pan/frame timing, checks 640px resize and verifies origin editing navigation.
@@ -616,16 +618,24 @@ and JSON, exact Git inputs/target/executable digest, core/SDK logs and package a
 when requested. Both supported targets must pass on the coherent candidate. No
 native-keyboard or human acceptance claim is inferred from synthetic DOM events.
 
-### Existing flow gate and required transition
+### Observed-flow qualification
 
-The current production workflow selects
-scene::tests::flow_budget_fixture_500_scenes_2000_edges with
-LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1. It measures the old full-verification refresh.
-Its runtime-flow-budget.log marker and existing failed runs describe that original
-contract. G1-OBS must replace the selected assertions/timers with ADR 0010's
-observed-state contract in the same change as the implementation. Keep old
-measurements/counterexamples as historical evidence; do not merely remove an
-assertion or mark its prior failure passed.
+The production workflow and the bounded `quality.yml` flow-profile dispatch select
+`scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges` with
+`LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`. The test creates three independent fixed fixtures,
+asserts 503 sources / 105,627 bytes / 500 Scenes / 2,000 edges, and measures initial
+and explicit refresh (<2 s each) separately from accepted update (<250 ms). The
+accepted timer starts at the production wrapper's successful transaction return,
+before invalidation, and includes history and production observed projection. It
+asserts the changed caption and completed/saved-edit statuses. No IPC, transaction
+duration or rendering latency is inferred from this timer. Completion marker:
+`phase-1g-observed-budget-gate: passed (3 samples)`.
+
+The bounded dispatch runs ordinary core/UI regressions and Chromium rendering on
+Windows x64/macOS ARM64 without packaging or SDK download. The browser's 30 pan
+samples run while a refresh response is deliberately pending; navigation remains
+usable. Chromium/synthetic events do not replace final packaged WebView/native input
+acceptance. Historical full-verification timings keep their original failures.
 
 Retain the real 500-Scene/2,000-edge workload, rendered 30-sample interaction check,
 ordinary external changes (including same-length content edits and normal file

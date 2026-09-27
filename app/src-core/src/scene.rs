@@ -403,7 +403,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::InvalidMetadata)?;
         let proposed_project = json_bytes(&metadata)?;
         let proposed_map = json_bytes(&source_map)?;
-        match self.transactions.commit(
+        match self.commit_observed(
             project,
             TransactionProposal {
                 mutations: vec![
@@ -535,6 +535,7 @@ impl AuthoringService {
         project_id: &str,
         request: RecoveryResolveRequest,
     ) -> Result<RecoveryReport, SceneError> {
+        self.clear_observed_flow(project);
         self.transactions
             .resolve_recovery(project, &request.transaction_id, request.resolution)
             .map_err(diagnostic_error)?;
@@ -1327,7 +1328,7 @@ impl AuthoringService {
         proposal: TransactionProposal,
     ) -> Result<Vec<Revision>, SceneError> {
         let snapshot = proposal.mutations.clone();
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed {
                 transaction_id,
                 revisions,
@@ -1369,7 +1370,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::DirtySource)?;
         let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.undo_proposal(&current).map_err(history_error)?;
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
                 .accepted_undo_with_revisions(&revisions)
                 .map_err(history_error),
@@ -1387,7 +1388,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::DirtySource)?;
         let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.redo_proposal(&current).map_err(history_error)?;
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
                 .accepted_redo_with_revisions(&revisions)
                 .map_err(history_error),
@@ -2651,6 +2652,7 @@ impl BoolNot for bool {
 #[cfg(test)]
 mod tests {
     mod candidate_proof;
+    mod observed;
     use super::*;
     use crate::authoring::{
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,
@@ -4473,8 +4475,12 @@ mod tests {
             .service
             .flow_workspace(&fixture.project, &fixture.project_id)
             .unwrap();
-        assert!(stale.stale);
-        assert!(stale.edges.iter().all(|edge| !edge.editable));
+        assert!(stale.partial);
+        assert!(stale
+            .edges
+            .iter()
+            .filter(|edge| edge.scene_id == entry.id)
+            .all(|edge| !edge.editable));
     }
 
     #[test]
@@ -4499,7 +4505,20 @@ mod tests {
     }
 
     #[test]
-    fn flow_budget_fixture_500_scenes_2000_edges() {
+    fn flow_observed_budget_fixture_500_scenes_2000_edges() {
+        let samples = if std::env::var("LOOMLIGHT_ENFORCE_FLOW_BUDGETS").as_deref() == Ok("1") {
+            3
+        } else {
+            1
+        };
+        for sample in 1..=samples {
+            flow_observed_budget_sample(sample);
+        }
+        if samples == 3 {
+            println!("phase-1g-observed-budget-gate: passed (3 samples)");
+        }
+    }
+    fn flow_observed_budget_sample(sample: usize) {
         let fixture = Fixture::new(b"label scene_one:\n    return\n");
         fixture.migrate();
         fs::write(
@@ -4563,6 +4582,22 @@ mod tests {
             b"label start:\n    jump scene_000\n",
         )
         .unwrap();
+        let fixture_paths = fixture
+            .service
+            .transactions
+            .inventory_files_bounded(&fixture.project, "game", 8192)
+            .unwrap()
+            .into_iter()
+            .filter(|path| path.ends_with(".rpy"))
+            .collect::<Vec<_>>();
+        assert_eq!(fixture_paths.len(), 503);
+        assert_eq!(
+            fixture_paths
+                .iter()
+                .map(|path| fs::metadata(fixture.root.join(path)).unwrap().len())
+                .sum::<u64>(),
+            105_627
+        );
         let start = std::time::Instant::now();
         let graph = fixture
             .service
@@ -4585,9 +4620,14 @@ mod tests {
             panic!("choice fixture");
         };
         options[0].text = "Route A".into();
-        fixture
-            .apply(
-                &workspace,
+        let proposal = fixture
+            .service
+            .build_command(
+                &fixture.project,
+                fixture
+                    .service
+                    .load(&fixture.project, &fixture.project_id)
+                    .unwrap(),
                 SceneCommand::UpdateBeat {
                     scene_id: origin.id.clone(),
                     expected_source_revision: origin.source_revision.clone(),
@@ -4596,12 +4636,22 @@ mod tests {
                 },
             )
             .unwrap();
-        let start = std::time::Instant::now();
+        fixture
+            .service
+            .commit_history(&fixture.project, proposal)
+            .unwrap();
+        let start = flow::ACCEPTED_AT
+            .get()
+            .expect("real successful transaction timestamp");
         let changed = fixture
             .service
-            .flow_workspace(&fixture.project, &fixture.project_id)
+            .flow_observed(&fixture.project, &fixture.project_id)
             .unwrap();
         let accepted_update = start.elapsed();
+        assert_eq!(graph.observation.status, "checked");
+        assert!(graph.observation.checked_at.is_some());
+        assert_eq!(again.observation.status, "checked");
+        assert_eq!(changed.observation.status, "savedEdits");
         assert_ne!(graph.revision, changed.revision);
         assert_eq!(changed.edges.len(), 2000);
         assert!(changed.edges.iter().any(|edge| edge.text == "Route A"));
@@ -4609,7 +4659,7 @@ mod tests {
             .service
             .load(&fixture.project, &fixture.project_id)
             .unwrap();
-        println!("G1 budget fixture (real service; profile recorded by caller): initial={initial:?}; warm_refresh={update:?}; accepted_update={accepted_update:?}; 500 Scenes / 2000 edges");
+        println!("G1-U2 sample {sample} (real service; timing from transaction acceptance, includes invalidation/history/projection): initial={initial:?}; warm_refresh={update:?}; accepted_update={accepted_update:?}; 500 Scenes / 2000 edges");
         if let Ok(path) = std::env::var("LOOMLIGHT_FLOW_EVIDENCE") {
             fs::write(path, serde_json::to_vec(&graph).unwrap()).unwrap();
         }
@@ -4628,7 +4678,10 @@ mod tests {
                 accepted_update < std::time::Duration::from_millis(250),
                 "G1 accepted projection update {accepted_update:?} exceeds 250 ms"
             );
-            println!("phase-1g-flow-budget-gate: passed");
+            assert!(
+                update < std::time::Duration::from_secs(2),
+                "G1 disk refresh {update:?} exceeds 2 s"
+            );
         }
         let mut excess = template;
         excess.id = uuid::Uuid::new_v4().to_string();

@@ -360,9 +360,12 @@ Keep at most four readers, bounded buffers and session cancellation; no file-han
 cache between requests. One disk acquisition is sufficient for observed display;
 no immutable filesystem snapshot or mandatory second hash pass is promised.
 
-Implementation is pending: the current production flow still rereads/verifies sources.
-G1-OBS must update its result/status contract and tests coherently before claiming
-these behaviors or timings.
+`FlowWorkspace.observation` carries `status` (`checked`, `savedEdits`, or
+`incomplete`), `checkedAt` (UTC epoch milliseconds of the last completed scan, or
+null), and `fromCache`. `fromCache` requests a background disk check when opening a
+previous view; it is not write authority. Partial custom syntax is distinct from a
+failed scan. The renderer keeps the last usable model with visible failure status.
+The graph hash includes consumed authoring/media state as well as source and metadata.
 
 
 ## Runtime diagnostic projection (1G.2b)

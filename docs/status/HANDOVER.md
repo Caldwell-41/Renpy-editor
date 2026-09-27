@@ -1,76 +1,45 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** G1-RESET — hobby-editor scope and acceptance reset, complete.
-**Decision:** accepted by the user's instruction to execute the proposed refocus.
-**Implementation status:** pending G1-OBS; no product-code changes in this checkpoint.
+**Checkpoint:** G1-OBS, implementation complete; supported-target qualification pending.
+**Authority:** user selected G1-OBS through the active goal/next-chat instruction.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged.
-**Entry and unchanged code head:** 4f05e57fba66493afaa436b9ba0332210dcecf58.
-Resolve publication head from Git/PR; do not create a self-SHA receipt commit.
+**Entry:** 76ebadb2dd59506c7bc57c066e421fbfac17fd2a, verified clean and matching remote.
+Resolve published implementation candidate from Git/PR; do not create self-SHA receipts.
 
-## Current contract
+## Implemented and verified locally
 
 Read [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md) and
-[ledger 21](../tasks/active/phase-1g-branches-runtime-git.md#21-g1-reset-hobby-editor-scope-and-acceptance--2026-09-27).
-The user explicitly rejected disproportionate hostile-system hardening for this
-single-user hobby editor and approved the product/scope reset.
+[ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27)
+for the requirement/test map and exact evidence. Session-owned observed inputs,
+changed-path invalidation, ordinary Source reconciliation, explicit disk refresh and
+status, coalesced UI requests and independent target navigation are implemented.
+Dirty Source/caret, focus/selection/pan and the last usable graph survive refresh.
+The Branches timer and second all-source verification pass are removed; transaction,
+recovery, execution and baseline path/privacy safeguards remain.
 
-Protect save/reopen/undo, ordinary competing editor writes, interrupted-save recovery,
-drafts and custom source. Keep basic containment/unsupported-link checks, narrow IPC,
-safe SDK/archive/process handling, privacy and deliberate Validate/Run consent.
-Existing write/recovery mechanisms stay in place; no blanket security-check removal
-or transaction rewrite is selected.
+Local Windows release samples passed: accepted model 41.25–44.76 ms; initial/explicit
+refresh 242.97–253.91 ms on the unchanged full fixture. Chromium pan p95 3.6 ms with
+refresh pending; 60 UI tests, Source browser/build and broader core regressions pass.
+The ledger reports all ignored, SDK-skipped and capability-filtered cases. These are
+not final packaged WebView/native keyboard or official SDK acceptance.
 
-Branches shows the last observed saved state, updated after accepted app edits.
-Open/focus/Refresh acquires disk observations and reconciles ordinary changes.
-Show check/pending/error status; preserve usable graph, focus and drafts.
-Navigation checks its target; graph data never authorizes a write or execution.
+## Next bounded action and publication
 
-ADR 0009's all-source fresh verification and G1-O native continuation are superseded.
-The denied symlink privilege is not a blocker for this new display contract.
-Historical tests/results are preserved and explicitly historical. Do not resume
-the native experiment or request privilege/security changes.
+Publish the coherent implementation, then dispatch exactly one bounded `quality.yml`
+run on that feature candidate with `phase1g_flow_profile=true` and
+`phase1g_candidate_proof=false`. This changed-input qualification is selected by
+G1-OBS: ordinary core/UI, three fixed U2 samples and rendered interaction on both
+supported targets, including baseline symlink cases unavailable locally. It does not
+package or download an SDK. Record run/attempt/SHA here immediately after dispatch.
+No native CI run has been dispatched at the time this implementation record is written.
 
-## Next bounded implementation: G1-OBS
+If the run remains active, publish its exact identity and use manual resume per
+AGENTS/WORKFLOW. Do not redispatch on a timeout or infer completion from queueing.
+Collect target logs/artifacts and inspect results before closing G1-OBS. Publish the
+findings/handover, then stop. Final R2/1G package/runtime/diagnostic completion, human
+interaction acceptance and integration remain separate and unapproved here.
 
-The product direction is decided. The next checkpoint implements it; no further
-native feasibility review is required. Follow the file-level plan and gates in
-ledger 21 and ADR 0010:
-
-- Introduce session-owned observed inputs/status in production flow, update them after
-  accepted mutations, and coalesce open/focus/explicit disk refresh.
-- Reuse existing source/project services, graph projection, transaction and runtime
-  owners. Remove the display-only full verification requirement, not write safeguards.
-- Make status and refresh/navigation feedback truthful; retain focus, selection,
-  pan/zoom and dirty Source buffers; discard old-session work.
-- Update production tests and workflow selection to the new semantics in the same
-  implementation. Retain specialist historical experiments without making them
-  routine acceptance blockers. No selector-only removal of a failing assertion.
-- Prove ordinary external edits, save/history/recovery/authority and fixed-fixture
-  responsiveness. G1-U2 is <250 ms accepted-model update and <2 s initial/disk refresh;
-  retain G1-V2 rendered input/pan p95 <100 ms. No measured pass exists yet.
-
-Keep this checkpoint bounded to observed-flow integration and relevant regressions.
-No SDK/runtime redesign, graph renderer replacement, package matrix, merge, optional
-Git or Phase 2. Native/CI execution must have a concrete changed-input justification
-and the applicable checkpoint authorization; this handover does not dispatch anything.
-
-## Validation, evidence and publication
-
-This scope reset is documentation/governance only, including AGENTS, product/security,
-architecture/data/UI, testing/phase plans, the superseding ADR and current status.
-The repository validator, link/privacy scan and whitespace/scope review qualify
-publication; they do not qualify the pending product implementation.
-
-Existing feature checkout was clean on entry; fresh fetched/advertised feature
-matched 4f05e57, main 4d7ba0333c48d60242a9a42d3e079fea499a5531.
-Prior repository chats were idle and no active build/native writer was found.
-Historical worktree stays clean at b3d696533290d91bc2ff7d4eb65562d2c68642e1.
-Keep local comparison/full-breakdown, CSVs, raw logs/state and G1-O1-N one-shot markers.
-No benchmark, test executable, setup, dependency/security change or CI dispatch ran.
-No process or external operation is pending.
-
-Publish this coherent decision on the existing branch using repository-local noreply
-identity; retain draft/open PR. Verify remote publication, then stop at the scope-reset
-checkpoint. Final 1G acceptance remains open; next-chat selection is G1-OBS.
+No security/privilege settings changed, no historical native experiment resumed,
+no package matrix or merge. Preserve the historical checkout and local raw evidence.

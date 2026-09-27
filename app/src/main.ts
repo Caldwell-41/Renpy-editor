@@ -378,7 +378,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
   else if (surface === "branches") {
     disposeBranchesView = renderBranches(workspace, {
-      load: () => projectValue<FlowWorkspace>(project, "flow.list"),
+      load: (refresh) => projectValue<FlowWorkspace>(project, "flow.list", { refresh }),
       source: (location) => { void requestProjectNavigation(project, "source", location ? { path: location.path, byteStart: location.byteStart, byteEnd: location.byteEnd, expectedRevision: location.revision } : undefined); },
       scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: node.location?.revision }); },
       status: setStatus,

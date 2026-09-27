@@ -154,6 +154,11 @@ fn observe_inner(
     profile_mark("load_metadata");
     let mut result = FlowWorkspace {
         revision: String::new(),
+        observation: FlowObservation {
+            status: "historical".into(),
+            from_cache: false,
+            checked_at: None,
+        },
         entry_scene_id: loaded
             .project
             .entry_scene_id

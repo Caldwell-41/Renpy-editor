@@ -87,6 +87,7 @@ fn observe(
     )
 }
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_feasibility() {
     let f = fixed_fixture();
     let mut index = Index::default();
@@ -200,6 +201,7 @@ fn refused(result: Result<flow::FlowWorkspace, SceneError>) {
     }
 }
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_external_bytes_identity_and_inventory() {
     use std::io::{Seek, SeekFrom, Write};
     for boundary in [
@@ -268,6 +270,7 @@ fn g1_o1_external_bytes_identity_and_inventory() {
 }
 #[cfg(unix)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_mapped_write_without_notifications() {
     use std::os::fd::AsRawFd;
     let f = small();
@@ -301,6 +304,7 @@ fn g1_o1_mapped_write_without_notifications() {
     assert_eq!(unsafe { libc::munmap(mapped, length) }, 0);
 }
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_generation_metadata_cancellation_and_session() {
     for boundary in [
         Boundary::Metadata,
@@ -371,6 +375,7 @@ fn g1_o1_generation_metadata_cancellation_and_session() {
     assert_eq!(index.retained(), 0);
 }
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_absent_authoring_and_poisoned_index_cannot_authorize_scene_write() {
     let f = small();
     fs::remove_file(f.root.join(".renpy-editor/authoring.json")).unwrap();
@@ -406,6 +411,7 @@ fn g1_o1_absent_authoring_and_poisoned_index_cannot_authorize_scene_write() {
 }
 
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_graph_equivalence_eviction_limits_and_recovery_events() {
     let f = small();
     let mut index = Index::default();
@@ -434,6 +440,7 @@ fn g1_o1_graph_equivalence_eviction_limits_and_recovery_events() {
 
 #[cfg(windows)]
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_windows_mapped_write_without_notifications() {
     use std::os::windows::io::AsRawHandle;
     #[link(name = "kernel32")]
@@ -493,6 +500,7 @@ fn g1_o1_windows_mapped_write_without_notifications() {
 // Negative feasibility evidence: green execution means the NO-GO counterexample
 // reproduced, not that this reader qualifies for production.
 #[test]
+#[ignore = "specialist historical ADR 0009 experiment; superseded by ADR 0010"]
 fn g1_o1_counterexample_projection_accepts_replaced_leaf_identity() {
     use crate::transaction::candidate::Point;
     use std::sync::atomic::{AtomicBool, Ordering};

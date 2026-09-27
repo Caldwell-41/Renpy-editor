@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       phase1g_flow_profile:
-        description: Run the bounded Phase 1G flow profiler instead of repository quality
+        description: Run bounded G1-OBS core, rendered interaction and three-sample budgets (no package)
         required: false
         type: boolean
         default: false
@@ -58,16 +58,42 @@ jobs:
           key: phase-1b-${{ matrix.runner }}
           workspaces: app -> target
           cache-bin: "false"
-      - name: Profile isolated Branches projection
+      - name: Set up pinned Node for observed UI gates
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Ordinary reliability and UI regressions
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --ignore-scripts
+          npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
+          cargo test -p loomlight-core --release --locked -- --skip flow_observed_budget_fixture --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+      - name: Three isolated real-service observed-flow samples
         if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
         env:
-          LOOMLIGHT_PROFILE_FLOW: "1"
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
-            | tee "$RUNNER_TEMP/runtime-flow-profile.log"
-          grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
+          git rev-parse HEAD
+          rustc -Vv
+          cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep 'phase-1g-observed-budget-gate: passed (3 samples)' "$RUNNER_TEMP/runtime-flow-profile.log"
+      - name: Rendered interaction during refresh
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+          LOOMLIGHT_BRANCHES_SCREENSHOT: ${{ runner.temp }}/observed-branches.png
+        run: |
+          set -o pipefail
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/observed-browser.log"
       - name: Prove isolated verified candidates
         if: ${{ inputs.phase1g_candidate_proof }}
         shell: bash
@@ -85,7 +111,7 @@ jobs:
               df "$RUNNER_TEMP"
               diskutil info /
             fi
-            cargo test -p loomlight-core --release --locked g1_o1 -- --skip g1_o1_feasibility --test-threads=1 --nocapture
+            cargo test -p loomlight-core --release --locked g1_o1 -- --ignored --skip g1_o1_n_ordered_safety --skip g1_o1_feasibility --test-threads=1 --nocapture
           } 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           safety=${PIPESTATUS[0]}
           if [ "$safety" -ne 0 ]; then exit "$safety"; fi
@@ -97,7 +123,7 @@ jobs:
           failed=0
           for sample in 1 2 3; do
             echo "g1-o1-sample: $sample" | tee -a "$RUNNER_TEMP/runtime-flow-profile.log"
-            cargo test -p loomlight-core --release --locked scene::tests::candidate_proof::g1_o1_feasibility -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/g1-o1-sample-$sample.log"
+            cargo test -p loomlight-core --release --locked scene::tests::candidate_proof::g1_o1_feasibility -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/g1-o1-sample-$sample.log"
             status=${PIPESTATUS[0]}
             cat "$RUNNER_TEMP/g1-o1-sample-$sample.log" >> "$RUNNER_TEMP/runtime-flow-profile.log"
             if [ "$status" -ne 0 ] || ! grep -q 'phase-1g-candidate-proof: passed' "$RUNNER_TEMP/g1-o1-sample-$sample.log"; then failed=1; fi
@@ -109,6 +135,10 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: phase-1g-flow-profile-${{ matrix.runner }}
-          path: ${{ runner.temp }}/runtime-flow-profile.log
+          path: |
+            ${{ runner.temp }}/runtime-flow-profile.log
+            ${{ runner.temp }}/runtime-flow.json
+            ${{ runner.temp }}/observed-*.log
+            ${{ runner.temp }}/observed-branches.png
           if-no-files-found: error
           retention-days: 7

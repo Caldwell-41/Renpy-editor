@@ -453,10 +453,24 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
-        "flow.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
-            session_only(validated.payload)
-                .and_then(|session| lifecycle.require_session(&session))
-                .and_then(|_| lifecycle.flow_workspace())
+        "flow.list" => {
+            #[derive(serde::Deserialize)]
+            #[serde(rename_all = "camelCase", deny_unknown_fields)]
+            struct FlowRequest {
+                session_id: String,
+                #[serde(default)]
+                refresh: bool,
+            }
+            serde_json::from_value::<FlowRequest>(Value::Object(validated.payload.clone()))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+                .and_then(|request| {
+                    lifecycle.require_session(&request.session_id)?;
+                    if request.refresh {
+                        lifecycle.flow_workspace()
+                    } else {
+                        lifecycle.flow_observed()
+                    }
+                })
                 .and_then(to_value)
         }
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {

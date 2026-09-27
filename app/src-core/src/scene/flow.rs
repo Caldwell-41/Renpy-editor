@@ -2,6 +2,8 @@
 use super::*;
 use crate::authoring::{lexical_lines, lexical_ranges};
 use std::collections::BTreeMap;
+#[cfg(test)]
+thread_local! { pub(super) static ACCEPTED_AT: std::cell::Cell<Option<std::time::Instant>> = const { std::cell::Cell::new(None) }; }
 pub const MAX_FLOW_SCENES: usize = 500;
 pub const MAX_FLOW_EDGES: usize = 2_000;
 const MAX_FILES: usize = 2_048;
@@ -61,6 +63,7 @@ pub struct FlowEdge {
 #[serde(rename_all = "camelCase")]
 pub struct FlowWorkspace {
     pub revision: String,
+    pub observation: FlowObservation,
     pub entry_scene_id: String,
     pub entry_location: Option<FlowLocation>,
     pub entry_notice: String,
@@ -70,6 +73,71 @@ pub struct FlowWorkspace {
     pub stale: bool,
     pub over_limit: bool,
     pub notice: String,
+}
+/// Display provenance, never a write revision or freshness lease.
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FlowObservation {
+    pub status: String,
+    pub from_cache: bool,
+    pub checked_at: Option<u64>,
+}
+pub(crate) struct ObservedFlow {
+    files: BTreeMap<String, (Vec<u8>, Revision)>,
+    model: FlowWorkspace,
+    pending: BTreeMap<String, bool>,
+}
+impl AuthoringService {
+    pub(crate) fn clear_observed_flow(&self, project: &ProjectId) {
+        if let Ok(mut cache) = self.observed_flow.lock() {
+            cache.remove(project);
+        }
+    }
+    // All authoring mutations (including Source reconciliation and history) share
+    // this invalidation boundary. Transaction preconditions/recovery are unchanged.
+    pub(crate) fn commit_observed(
+        &self,
+        project: &ProjectId,
+        proposal: TransactionProposal,
+    ) -> CommitOutcome {
+        let changed = proposal
+            .mutations
+            .iter()
+            .map(|m| {
+                (
+                    m.path.as_str().to_owned(),
+                    m.kind != MutationKind::DeleteExisting,
+                )
+            })
+            .collect::<Vec<_>>();
+        let outcome = self.transactions.commit(project, proposal);
+        #[cfg(test)]
+        if matches!(outcome, CommitOutcome::Committed { .. }) {
+            ACCEPTED_AT.set(Some(std::time::Instant::now()));
+        }
+        if let Ok(mut cache) = self.observed_flow.lock() {
+            if matches!(outcome, CommitOutcome::Committed { .. }) {
+                if let Some(observed) = cache.get_mut(project) {
+                    observed.pending.extend(changed);
+                    if observed.pending.len() > MAX_FILES {
+                        cache.remove(project);
+                    }
+                }
+            } else {
+                cache.remove(project);
+            }
+        }
+        outcome
+    }
+    /// Returns the session's last observation, incorporating accepted app edits.
+    /// An absent/incomplete cache falls back to a bounded disk observation.
+    pub fn flow_observed(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+    ) -> Result<FlowWorkspace, SceneError> {
+        self.flow_request(project, project_id, false)
+    }
 }
 #[derive(Default)]
 struct Inventory {
@@ -120,6 +188,36 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<FlowWorkspace, SceneError> {
+        self.flow_request(project, project_id, true)
+    }
+    fn flow_request(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        disk: bool,
+    ) -> Result<FlowWorkspace, SceneError> {
+        crate::runtime_work::check().map_err(|_| SceneError::Io)?;
+        // Reconciliation may commit source-map metadata, so it precedes cache locking.
+        let needs_disk = disk
+            || !self
+                .observed_flow
+                .lock()
+                .map_err(|_| SceneError::Io)?
+                .contains_key(project);
+        if needs_disk {
+            self.source_refresh_project(project, project_id)
+                .map_err(|_| SceneError::SourceConflict)?;
+        }
+        let mut cache = self.observed_flow.lock().map_err(|_| SceneError::Io)?;
+        crate::runtime_work::check().map_err(|_| SceneError::Io)?;
+        if !needs_disk {
+            if let Some(observed) = cache.get(project).filter(|item| item.pending.is_empty()) {
+                let mut model = observed.model.clone();
+                model.observation.from_cache = true;
+                return Ok(model);
+            }
+        }
+        let previous = cache.remove(project);
         let profile_enabled = std::env::var("LOOMLIGHT_PROFILE_FLOW").as_deref() == Ok("1");
         let profile_started = std::time::Instant::now();
         let mut profile_last = profile_started;
@@ -131,13 +229,18 @@ impl AuthoringService {
                 profile_last = now;
             }
         };
-        self.source_refresh_project(project, project_id)
-            .map_err(|_| SceneError::SourceConflict)?;
         profile_mark("source_refresh");
-        let loaded = self.load(project, project_id)?;
+        let mut loaded = self.load(project, project_id)?;
         profile_mark("load_metadata");
         let mut result = FlowWorkspace {
             revision: String::new(),
+            observation: FlowObservation {
+                from_cache: false,
+                status: if needs_disk { "checked" } else { "savedEdits" }.into(),
+                checked_at: previous
+                    .as_ref()
+                    .and_then(|p| p.model.observation.checked_at),
+            },
             entry_scene_id: loaded
                 .project
                 .entry_scene_id
@@ -155,23 +258,65 @@ impl AuthoringService {
         if loaded.project.scenes.len() > MAX_FLOW_SCENES {
             return Ok(over_limit(result));
         }
-        let paths = match self
-            .transactions
-            .inventory_files_bounded(project, "game", 8192)
-        {
-            Ok(paths) => paths
+        let mut files = if needs_disk {
+            BTreeMap::new()
+        } else {
+            previous
+                .as_ref()
+                .map(|p| p.files.clone())
+                .unwrap_or_default()
+        };
+        let mut changed = previous
+            .as_ref()
+            .map(|p| p.pending.clone())
+            .unwrap_or_default();
+        // Source reconciliation can accept an external edit by changing its map only.
+        for mapping in &loaded.source_map.scene_mappings {
+            if files
+                .get(&mapping.path)
+                .is_some_and(|(_, rev)| rev.sha256 != mapping.source_revision)
+            {
+                changed.insert(mapping.path.clone(), true);
+            }
+        }
+        let paths = if needs_disk {
+            match self
+                .transactions
+                .inventory_files_bounded(project, "game", 8192)
+            {
+                Ok(paths) => paths
+                    .into_iter()
+                    .filter(|path| path.ends_with(".rpy"))
+                    .collect::<Vec<_>>(),
+                Err(error) if error.code == ErrorCode::InvalidProposal => {
+                    return Ok(over_limit(result))
+                }
+                Err(_) => {
+                    result.partial = true;
+                    result.stale = true;
+                    result.observation.status = "incomplete".into();
+                    result.notice = "Source inventory unavailable; open Source to inspect.".into();
+                    return Ok(result);
+                }
+            }
+        } else {
+            for (path, exists) in &changed {
+                if path.ends_with(".rpy") && !exists {
+                    files.remove(path);
+                }
+            }
+            files
+                .keys()
+                .cloned()
+                .chain(
+                    changed
+                        .iter()
+                        .filter(|(path, exists)| path.ends_with(".rpy") && **exists)
+                        .map(|(path, _)| path.clone()),
+                )
+                .collect::<std::collections::BTreeSet<_>>()
                 .into_iter()
-                .filter(|path| path.ends_with(".rpy"))
-                .collect::<Vec<_>>(),
-            Err(error) if error.code == ErrorCode::InvalidProposal => {
-                return Ok(over_limit(result))
-            }
-            Err(_) => {
-                result.partial = true;
-                result.stale = true;
-                result.notice = "Source inventory unavailable; open Source to inspect.".into();
-                return Ok(result);
-            }
+                .collect::<Vec<_>>()
         };
         profile_mark("inventory");
         if paths.len() > MAX_FILES {
@@ -181,14 +326,27 @@ impl AuthoringService {
             complete: true,
             ..Inventory::default()
         };
-        let mut files = BTreeMap::new();
-        let mut total = 0_usize;
+        let reads = paths
+            .iter()
+            .filter(|path| needs_disk || changed.contains_key(*path))
+            .cloned()
+            .collect::<Vec<_>>();
+        for path in &reads {
+            files.remove(path);
+        }
+        let retained_bytes = files.values().map(|(bytes, _)| bytes.len()).sum::<usize>();
+        let mut total = retained_bytes;
         let snapshots = self
             .transactions
-            .observation_snapshots(project, &paths, MAX_FILE_BYTES as usize, MAX_BYTES)
+            .observation_snapshots(
+                project,
+                &reads,
+                MAX_FILE_BYTES as usize,
+                MAX_BYTES.saturating_sub(retained_bytes),
+            )
             .map_err(diagnostic_error)?;
         profile_mark("snapshot_read_hash");
-        for (path, snapshot) in paths.iter().zip(snapshots) {
+        for (path, snapshot) in reads.iter().zip(snapshots) {
             let (bytes, revision) = match snapshot {
                 Ok(value) => value,
                 Err(error) if error.code == ErrorCode::InvalidProposal => {
@@ -203,9 +361,53 @@ impl AuthoringService {
             if bytes.len() > MAX_FILE_BYTES as usize || total > MAX_BYTES {
                 return Ok(over_limit(result));
             }
-            collect_labels(path, &bytes, &revision.sha256, &mut inventory);
             files.insert(path.clone(), (bytes, revision));
         }
+        if needs_disk {
+            let reconcile = loaded
+                .project
+                .scenes
+                .iter()
+                .filter(|scene| {
+                    files.get(&scene.source_path).is_some_and(|(_, revision)| {
+                        loaded
+                            .source_map
+                            .scene_mappings
+                            .iter()
+                            .find(|m| m.scene_id == scene.id)
+                            .is_some_and(|m| m.source_revision != revision.sha256)
+                    })
+                })
+                .map(|scene| scene.source_path.clone())
+                .collect::<Vec<_>>();
+            if !reconcile.is_empty() {
+                // Lifecycle serializes requests. Release the observation mutex before
+                // Source's existing transactional metadata reconciliation invalidates it.
+                drop(cache);
+                for path in reconcile {
+                    crate::runtime_work::check().map_err(|_| SceneError::Io)?;
+                    self.source_open(
+                        project,
+                        project_id,
+                        crate::source::SourceOpenRequest {
+                            path,
+                            expected_revision: None,
+                            selection_start: None,
+                            selection_end: None,
+                            byte_start: None,
+                            byte_end: None,
+                        },
+                    )
+                    .map_err(|_| SceneError::SourceConflict)?;
+                }
+                loaded = self.load(project, project_id)?;
+                cache = self.observed_flow.lock().map_err(|_| SceneError::Io)?;
+            }
+        }
+        for (path, (bytes, revision)) in &files {
+            collect_labels(path, bytes, &revision.sha256, &mut inventory);
+        }
+        inventory.complete &= files.len() == paths.len();
         profile_mark("label_inventory");
         for scene in &loaded.project.scenes {
             let file = files.get(&scene.source_path);
@@ -316,57 +518,15 @@ impl AuthoringService {
             result.edges.extend(edges);
         }
         profile_mark("edge_projection");
-        // Observation only; the UI never acquires a write precondition from this.
-        let observed = files
-            .iter()
-            .map(|(path, (_, revision))| (path.as_str(), revision))
-            .collect::<Vec<_>>();
-        if !self
-            .transactions
-            .observations_still_current(project, &observed, MAX_FILE_BYTES)
-            .unwrap_or(false)
-        {
-            result.stale = true;
-        }
-        profile_mark("freshness_read_hash");
-        if self
-            .transactions
-            .inventory_files_bounded(project, "game", 8192)
-            .ok()
-            .map(|items| {
-                items
-                    .into_iter()
-                    .filter(|path| path.ends_with(".rpy"))
-                    .collect::<Vec<_>>()
-            })
-            != Some(paths)
-        {
-            result.stale = true;
-        }
-        profile_mark("inventory_recheck");
-        let mut reader = self
-            .transactions
-            .observation_reader(project)
-            .map_err(diagnostic_error)?;
-        for (path, revision) in [
-            (PROJECT_PATH, &loaded.project_revision),
-            (SOURCE_MAP_PATH, &loaded.source_map_revision),
-        ] {
-            if !reader
-                .revision_bounded(
-                    &RelativePath::new(path).map_err(|_| SceneError::Io)?,
-                    MAX_FILE_BYTES,
-                )
-                .is_ok_and(|current| current == *revision)
-            {
-                result.stale = true;
-            }
-        }
-        profile_mark("metadata_recheck");
+        // One acquisition describes the bytes read, not an atomic disk snapshot.
+        // No second all-source read or final namespace proof for display (ADR 0010).
         result.partial |= !inventory.complete || result.stale;
         let mut hash = Sha256::new();
         hash.update(loaded.project_revision.sha256.as_bytes());
         hash.update(loaded.source_map_revision.sha256.as_bytes());
+        hash.update(
+            serde_json::to_vec(&loaded.authoring).map_err(|_| SceneError::InvalidMetadata)?,
+        );
         for (path, (_, revision)) in &files {
             hash.update(path.as_bytes());
             hash.update(revision.sha256.as_bytes());
@@ -397,12 +557,34 @@ impl AuthoringService {
                 result.edges.len()
             );
         }
+        if !inventory.complete || result.stale {
+            result.observation.status = "incomplete".into();
+        } else if needs_disk {
+            result.observation.checked_at = Some(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map_err(|_| SceneError::Io)?
+                    .as_millis() as u64,
+            );
+        }
+        crate::runtime_work::check().map_err(|_| SceneError::Io)?;
+        if inventory.complete && !result.stale && !result.over_limit {
+            cache.insert(
+                project.clone(),
+                ObservedFlow {
+                    files,
+                    model: result.clone(),
+                    pending: BTreeMap::new(),
+                },
+            );
+        }
         Ok(result)
     }
 }
 fn over_limit(mut result: FlowWorkspace) -> FlowWorkspace {
     result.nodes.clear();
     result.edges.clear();
+    result.observation.status = "incomplete".into();
     result.over_limit = true;
     result.partial = true;
     result.notice = "Graph limit exceeded (500 Scenes / 2,000 edges; inventory 2,048 files / 32 MiB). Open Source to continue.".into();

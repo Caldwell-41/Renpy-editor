@@ -1047,7 +1047,7 @@ impl AuthoringService {
         source_map
             .validate(project_id)
             .map_err(|_| SourceError::InvalidSource)?;
-        let outcome = self.transactions.commit(
+        let outcome = self.commit_observed(
             project,
             TransactionProposal {
                 mutations: vec![FileMutation {
@@ -1574,6 +1574,30 @@ mod tests {
                 },
             )
         }
+    }
+
+    #[test]
+    fn flow_observed_source_save_preserves_draft_then_updates_saved_projection() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        let original = f.open(&f.scene_path);
+        let before = f.service.flow_observed(&f.project, &f.project_id).unwrap();
+        let draft = f.draft(&original, "label scene_one:\n    jump scene_one\n");
+        assert_eq!(
+            f.service
+                .flow_observed(&f.project, &f.project_id)
+                .unwrap()
+                .revision,
+            before.revision
+        );
+        f.save(&draft).unwrap();
+        let after = f.service.flow_observed(&f.project, &f.project_id).unwrap();
+        assert_eq!(after.observation.status, "savedEdits");
+        assert_ne!(after.revision, before.revision);
+        assert!(matches!(
+            after.edges[0].destination,
+            crate::scene::flow::FlowDestination::Resolved { .. }
+        ));
+        assert!(!f.open(&f.scene_path).dirty);
     }
 
     #[test]
@@ -2224,6 +2248,27 @@ mod tests {
         assert_eq!(retained.text.as_deref(), Some(draft));
         assert_eq!(retained.selection_start, 22);
         assert_eq!(retained.selection_end, 24);
+        fs::write(
+            fixture.root.join(&fixture.scene_path),
+            b"label scene_one:\n    \"External\"\n    return\n",
+        )
+        .unwrap();
+        let conflict = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert_eq!(conflict.observation.status, "incomplete");
+        let retained = fixture
+            .service
+            .source_open(&fixture.project, &fixture.project_id, target.clone())
+            .unwrap();
+        assert_eq!(retained.text.as_deref(), Some(draft));
+        assert_eq!((retained.selection_start, retained.selection_end), (22, 24));
+        assert!(retained
+            .external_text
+            .as_deref()
+            .unwrap()
+            .contains("External"));
         fixture
             .service
             .source_discard(

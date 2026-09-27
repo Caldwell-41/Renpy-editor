@@ -39,9 +39,10 @@ jobs:
         shell: bash
         env:
           LOOMLIGHT_PROFILE_FLOW: "1"
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
+          cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
       - name: Upload flow profile

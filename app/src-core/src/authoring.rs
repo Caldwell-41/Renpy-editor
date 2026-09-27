@@ -397,6 +397,7 @@ struct ImportAuthority {
 pub struct AuthoringService {
     pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
+    pub(crate) observed_flow: Mutex<HashMap<ProjectId, crate::scene::flow::ObservedFlow>>,
     pub(crate) scene_history: Mutex<HashMap<ProjectId, crate::transaction::HistoryStack>>,
     pub(crate) source_sessions: Mutex<crate::source::SourceSessions>,
 }
@@ -435,6 +436,7 @@ impl AuthoringService {
 
     pub fn unregister_project(&mut self, id: &ProjectId) {
         self.clear_source_project(id);
+        self.clear_observed_flow(id);
         self.transactions.unregister_trusted_project(id);
         self.imports.retain(|_, authority| &authority.project != id);
         if let Ok(mut history) = self.scene_history.lock() {
@@ -890,6 +892,7 @@ impl AuthoringService {
             &authority.sha256,
             companions,
         );
+        self.clear_observed_flow(project);
         committed(outcome)?;
         Ok(metadata)
     }
@@ -919,7 +922,7 @@ impl AuthoringService {
             mutations: vec![metadata_file_mutation(snapshot, &metadata)?],
             intent: TransactionIntent::Edit,
         };
-        committed(self.transactions.commit(project, proposal))?;
+        committed(self.commit_observed(project, proposal))?;
         Ok(metadata)
     }
 
@@ -978,7 +981,7 @@ impl AuthoringService {
             });
         }
         mutations.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
-        committed(self.transactions.commit(
+        committed(self.commit_observed(
             project,
             TransactionProposal {
                 mutations,
@@ -1375,7 +1378,7 @@ impl AuthoringService {
             ],
             intent: TransactionIntent::Edit,
         };
-        committed(self.transactions.commit(project, proposal))?;
+        committed(self.commit_observed(project, proposal))?;
         Ok(metadata)
     }
 }

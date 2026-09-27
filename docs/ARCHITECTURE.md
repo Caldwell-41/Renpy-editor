@@ -399,7 +399,7 @@ Incomplete inventory yields unknown flow; resource refusal never silently trunca
 Revision-qualified Source navigation uses optional `expectedRevision` and preserves
 retained draft selection on mismatch. No capability, CSP or mutation authority changes.
 
-### Selected observed-flow direction — implementation pending
+### Observed-flow implementation (G1-OBS)
 
 [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) replaces ADR 0009.
 Reuse the shared projector and Source/Scene/transaction owners with one bounded
@@ -407,13 +407,19 @@ session-owned observation cache. Accepted app mutations update/invalidate change
 inputs; open/focus/Refresh requests reconcile disk. A disk refresh acquires current
 bounded source/metadata once; no second all-source verification or native final
 name-binding experiment is required for display. Coalesce work and discard old-session
-results. Existing full-verification code has not yet been replaced.
+results. `AuthoringService` owns the cache and routes all accepted authoring/history
+commits through changed-path invalidation. Streaming imports/recovery clear the cache
+when a precise dependency update is unavailable. Metadata and media dependencies are
+reacquired for projection; unchanged source observations are reused after app edits.
 
 Graph status describes the last observed saved state. Keep navigation validation,
 transaction preconditions/recovery and runtime preparation independent. UI feedback,
 focus/draft retention and ordinary external-edit regressions are the integration
-priorities. Production code, tests and workflow selectors must change together under
-G1-OBS; this architecture decision is not an implemented performance pass.
+priorities. `flow.list` accepts an optional `refresh` boolean (default false); true
+requests disk acquisition. Opening Branches shows the observed model then coalesces a
+disk check if it came from cache or saved edits. Focus/Refresh acquire disk; the old
+periodic scan is removed. Source reconciliation handles external mapped edits and
+preserves dirty buffers. See the active checkpoint ledger for qualification evidence.
 
 ## Controlled runtime foundation (Phase 1G.2a)
 

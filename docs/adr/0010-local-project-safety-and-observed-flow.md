@@ -1,6 +1,6 @@
 # ADR 0010: Local-project safety and last-observed Branches
 
-**Status:** Accepted product/scope decision; implementation pending.
+**Status:** Accepted; G1-OBS implementation, qualification recorded in the active task ledger.
 **Date:** 2026-09-27.
 **Authority:** after reviewing G1-O1-N, the user approved refocusing the hobby editor
 on protecting work, ordinary external edits, explicit execution and responsiveness:
@@ -119,7 +119,7 @@ Historical timings cannot qualify these changed semantics.
 
 ## Implementation and test disposition
 
-Next implementation checkpoint: G1-OBS, bounded production observed-state flow and
+Implementation checkpoint: G1-OBS, bounded production observed-state flow and
 UI integration with the acceptance rows above. Reuse the existing Source/Scene/
 transaction services and graph renderer; do not promote the unqualified native
 adapter or build a full corrected ADR 0009 candidate.
@@ -128,11 +128,11 @@ Keep historical native experiments, counterexamples and raw evidence intact.
 They no longer gate observed-state display. Classify deliberate hostile-OS
 experiments as explicitly selected specialist tests; baseline path rejection,
 ordinary external changes, recovery, session ownership and process/privacy tests
-remain routine. Existing test/workflow selectors still express the old contract
-until G1-OBS updates them coherently with code. Do not dispatch them as if this
-document had already changed their behavior; do not delete a guard to relabel an
-old failure as a new pass.
+remain routine. G1-OBS updates production code, tests and workflow selectors together.
+Retired candidate/timed hostile-namespace experiments are explicitly ignored by
+default and retain their named specialist selectors and historical failure evidence.
+Baseline path/link rejection, ordinary conflicts and recovery remain routine.
 
-This decision changes requirements, not implemented behavior. Final Windows/macOS
-evidence, runtime/diagnostic completion, the final human session and integration
-remain required. No CI dispatch, production rewrite or merge occurs in this reset.
+The original scope reset changed requirements only. G1-OBS implements this contract;
+its ledger owns current evidence. Final Windows/macOS package evidence,
+runtime/diagnostic completion, the final human session and integration remain separate.

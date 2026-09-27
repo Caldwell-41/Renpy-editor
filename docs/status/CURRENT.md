@@ -1,54 +1,31 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** G1-RESET complete: accepted hobby-editor product/scope reset.
-**Implementation:** last-observed Branches and replacement gates are pending G1-OBS.
+**Current checkpoint:** G1-OBS observed Branches implementation; qualification in progress.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-Entry/code head for this documentation checkpoint:
-4f05e57fba66493afaa436b9ba0332210dcecf58.
-Read [HANDOVER](HANDOVER.md),
-[ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md) and
-[ledger 21](../tasks/active/phase-1g-branches-runtime-git.md#21-g1-reset-hobby-editor-scope-and-acceptance--2026-09-27).
+**Entry:** 76ebadb2dd59506c7bc57c066e421fbfac17fd2a.
+Read [HANDOVER](HANDOVER.md), [ADR 0010](../adr/0010-local-project-safety-and-observed-flow.md)
+and [ledger 22](../tasks/active/phase-1g-branches-runtime-git.md#22-g1-obs-observed-branches-implementation--2026-09-27).
 
-## Selected direction
+Branches now uses session-owned observed source inputs with accepted-mutation
+invalidation. Open/focus/Refresh acquires disk observations, Source reconciliation
+retains drafts/conflicts, and status distinguishes last check, saved edits and failed
+refresh. Graph navigation, writes and execution keep their independent authority.
+The Branches timer/all-source verification pass is removed. Historical native/timed
+namespace experiments remain preserved and explicitly specialist, with ordinary
+path/link, external-writer, recovery, session and process/privacy regressions retained.
 
-Prioritize protecting hobby creators' work: save/reopen, undo, ordinary external
-editor conflicts, interrupted-save recovery, preserved drafts/custom source and
-responsive views. Keep basic containment/unsupported-link refusal, narrow IPC,
-privacy/download safety and explicit project-code execution.
+Local release Windows G1-U2 passed three fixed samples: accepted updates 41.25–44.76 ms,
+initial/explicit refresh 242.97–253.91 ms. Chromium interaction p95 was 3.6 ms during a
+pending refresh. Local core/Source/renderer checks are recorded in ledger 22 with
+capability/SDK exclusions. Supported-target qualification is still pending; no native
+CI pass, package result, final human acceptance or integration is inferred.
 
-Branches will show the last observed saved state, updated after accepted app edits.
-Open/focus/Refresh checks disk; clear check/error status replaces a continuous
-freshness claim. Navigation, writes and execution keep their own current-state
-checks. Deliberate same-user filesystem attack races are outside initial acceptance.
-
-ADR 0009 and the G1-O1/O2/O3 native/full-verifier continuation are **retired**.
-The G1-O1-N missing symlink privilege is no longer a prerequisite for display work.
-No further native-reader experiment or security-setting change is needed.
-Historical failures remain failures, not newly accepted product evidence.
-
-The next bounded implementation checkpoint is **G1-OBS**: production observed-state
-flow, mutation invalidation and disk refresh, status/focus/navigation behavior,
-ordinary reliability regressions, and coherently updated test/workflow selectors.
-G1-U1/U2 replace the old G1-V1 contract; retain G1-V2 interaction and runtime/diagnostic
-obligations. Budgets are <250 ms accepted observed-model update, <2 s initial/explicit
-disk refresh and rendered input/pan p95 <100 ms on the unchanged fixture.
-
-## Actual implementation and evidence
-
-This reset changes documentation only. The current app and workflow still implement
-the old verification behavior; no revised performance or safety acceptance is claimed.
-Do not run old native proof selectors as qualification for the new contract.
-Final 1G/R1/R2 integration, supported-target evidence and the final human session
-remain incomplete. No CI dispatch, package run, merge or background work is pending.
-
-Preserve ledgers 13–20, the clean historical worktree and local reports/state/logs.
-Historical production run 36210484651 failed Windows at 616.686 ms; candidate run
-36278262505 attempt 1 failed Windows at 563.983 / 574.858 / 586.393 ms; local comparison
-was 460.195 / 464.211 / 456.588 ms. G1-O1-N's one ordered safety test stopped with
-Win32 1314 after partial positive assertions. These results belong to their original
-inputs/contracts. New observed-state evidence is required.
+G1-OBS remains the only selected checkpoint. After its bounded Windows/macOS run,
+collect results and publish the handover, then stop. R2/final 1G package and human work,
+optional Git, Phase 2 and merge are outside this selection. Existing historical
+worktree and local G1-O1/O1-N raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure
 

@@ -604,6 +604,13 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    pub fn flow_observed(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .flow_observed(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn flow_workspace(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
@@ -2400,6 +2407,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn inspected_root_substitution_cannot_activate_or_replace_current() {
         let temp = tempfile::tempdir().unwrap();
         let old_root = temp.path().join("old-project");
@@ -2921,6 +2929,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn substitution_after_final_validation_never_survives_as_final() {
         let temp = tempfile::tempdir().unwrap();
         let requested_parent = temp.path().join("projects");
@@ -2965,6 +2974,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn overlay_writes_cannot_follow_stage_path_substitution() {
         let temp = tempfile::tempdir().unwrap();
         let requested_parent = temp.path().join("projects");
@@ -3016,6 +3026,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn stage_pin_blocks_substitution_during_privileged_work() {
         let temp = tempfile::tempdir().unwrap();
         let parent_path = temp.path().join("projects");
@@ -3036,6 +3047,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn parent_symlink_substitution_fails_closed() {
         use std::os::unix::fs::symlink;
         let temp = tempfile::tempdir().unwrap();
@@ -3058,6 +3070,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn parent_substitution_after_validation_cannot_redirect_stage_creation() {
         let temp = tempfile::tempdir().unwrap();
         let requested = temp.path().join("projects");
@@ -3090,6 +3103,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn project_open_metadata_substitution_is_never_followed() {
         let temp = tempfile::tempdir().unwrap();
         let root = temp.path().join("project");
@@ -4059,7 +4073,16 @@ mod tests {
         let session = opened.session_id;
         let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId": session}));
         assert_eq!(graph["ok"], true, "{graph}");
+        assert_eq!(graph["value"]["observation"]["status"], "checked");
+        let checked = closeout_ipc(
+            &mut service,
+            "flow.list",
+            json!({"sessionId":session,"refresh":true}),
+        );
+        assert_eq!(checked["value"]["observation"]["status"], "checked");
         for payload in [
+            json!({"sessionId":session,"refresh":"true"}),
+            json!({"sessionId":"stale","refresh":true}),
             json!({"sessionId":"stale"}),
             json!({"sessionId":session,"unexpected":true}),
             json!({}),
@@ -4086,6 +4109,7 @@ mod tests {
         let model = &updated["value"];
         let entry = &model["scenes"][0];
         let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        assert_eq!(graph["value"]["observation"]["status"], "savedEdits");
         let edge = &graph["value"]["edges"][0];
         assert_eq!(edge["destination"]["sceneId"], entry["id"]);
         assert_eq!(edge["editable"], true);

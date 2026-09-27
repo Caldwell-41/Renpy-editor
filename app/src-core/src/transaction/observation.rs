@@ -30,6 +30,7 @@ impl TransactionService {
         })
     }
 
+    #[cfg(test)]
     pub(crate) fn observations_still_current(
         &self,
         project: &ProjectId,
@@ -152,10 +153,10 @@ impl ObservationReader<'_> {
         let mut file = self.open(path)?;
         let maximum = maximum.min(MAX_MUTATION_BYTES);
         let identity = identity_for_file(&file).map_err(|_| diagnostic(ErrorCode::IoFailure))?;
-        let length = file
+        let before = file
             .metadata()
-            .map_err(|_| diagnostic(ErrorCode::IoFailure))?
-            .len();
+            .map_err(|_| diagnostic(ErrorCode::IoFailure))?;
+        let length = before.len();
         if length > maximum as u64 {
             return Err(diagnostic(ErrorCode::InvalidProposal));
         }
@@ -164,14 +165,18 @@ impl ObservationReader<'_> {
         let mut reservation = ByteReservation::new(remaining, length as usize)?;
         // Bound growth by the observed length, not merely the overall limit.
         let bytes = read_bytes_bounded(&mut file, length as usize).map_err(diagnostic)?;
-        let final_length = file
+        let after = file
             .metadata()
-            .map_err(|_| diagnostic(ErrorCode::IoFailure))?
-            .len();
+            .map_err(|_| diagnostic(ErrorCode::IoFailure))?;
+        let final_length = after.len();
         let final_identity =
             identity_for_file(&file).map_err(|_| diagnostic(ErrorCode::IoFailure))?;
-        if bytes.len() as u64 != length || final_length != length || final_identity != identity {
-            return Err(diagnostic(ErrorCode::InvalidProposal));
+        if bytes.len() as u64 != length
+            || final_length != length
+            || final_identity != identity
+            || before.modified().ok() != after.modified().ok()
+        {
+            return Err(diagnostic(ErrorCode::StaleRevision));
         }
         let revision = Revision {
             sha256: sha256(&bytes),
@@ -181,6 +186,7 @@ impl ObservationReader<'_> {
         Ok((bytes, revision))
     }
 
+    #[cfg(test)]
     pub(crate) fn revision_bounded(
         &mut self,
         path: &RelativePath,

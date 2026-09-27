@@ -630,7 +630,9 @@ is optional. Under [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md
 Branches displays the last observed saved state, including accepted app edits.
 Open/focus/Refresh checks disk; coalesce triggers and avoid mandatory two-second
 full scans. Show Checking disk, Checked at <time>, Updated from saved edits, or
-Could not refresh/conflict. These status changes are selected behavior pending G1-OBS.
+Could not refresh/conflict. G1-OBS implements these statuses. Failed/incomplete
+refresh keeps the last usable graph, labelled as such; navigation still checks its
+captured target independently. Reopening a cached view shows it before checking disk.
 Preserve focus/selection/pan for valid targets; clear ambiguous deleted mappings.
 An enabled navigation click must be processed or visibly refused during refresh.
 
