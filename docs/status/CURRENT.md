@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-N1 independent packaged macOS assessment `blocked` at preflight (ledger 32): the exact 503-source core fixture cannot open through the real packaged lifecycle. Approval for a disclosed 506-source superset is pending; no N1 release build or package launch occurred. TEST-P1 remains `review_ready` (ledger 31). H1 remains FAIL; R2-P1 stays `blocked`. G1-OBS and WIN-F1 retain their evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-N1 independent packaged macOS assessment `in_progress` (ledger 32). The user approved the 506-source superset required by packaged opening; focused lifecycle/full-graph proof passed. TEST-P1 remains `review_ready` (ledger 31). H1 remains FAIL; R2-P1 remains blocked and final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open

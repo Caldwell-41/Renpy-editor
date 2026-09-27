@@ -4814,3 +4814,27 @@ Answer at this interruption: measured responsiveness **unassessed**; perceived
 usability **unassessed**. Smallest next action is the fixture decision, followed only
 if approved by the same bounded MAC-N1 assessment. H1 remains FAIL; R2-P1 remains
 blocked and final human/Windows acceptance remains open.
+
+### N1 resumed — approved lifecycle fixture superset
+
+The user approved adding the three missing files, validating them as needed, and
+continuing autonomously if no issue remains. The native fixture now preserves the
+original 503 source files byte-for-byte and adds empty `options.rpy`, `gui.rpy` and
+`screens.rpy`: **506 sources / 105,627 bytes / 500 Scenes / 2,000 edges**. Empty files
+are valid for this inspection-only operation; real lifecycle open, complete flow and
+Source inventory are the relevant proof. This does not claim a runnable game or SDK
+validation, and does not qualify the original exact 503-file native fixture.
+
+Resume at `8cb54a8c4ee6616fece23eb9f9696061a6b964b2`, verified equal to origin and
+PR #17. Preserve both failed preflight attempts above. Status `in_progress`; fixed
+build/launch allowances and declared endpoints remain unchanged, with none used at
+resumption. Correct packaged executable basename is `loomlight`. The existing core
+release test retains its exact 503-file fixture and separately labelled timings.
+
+The adjusted focused test passed **1/1**, 212 filtered, zero skips, in 1.94 s:
+`cargo test -p loomlight-core --locked --offline branches_native_fixture_has_full_workload_without_sdk_or_execution`.
+It uses real open/close, complete flow, independent disk enumeration, exact aggregate
+bytes, Source inventory and empty-file assertions. No SDK or project code executed.
+Static self-review confirmed probe-only changes, default runtime case set unchanged,
+report bounds retained, no added IPC privilege, and full per-sample geometry/focus
+assertions. The first release attempt now proceeds with this support candidate.

@@ -1,8 +1,8 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** **R2-P1-MAC-N1** independent packaged assessment `blocked` at
-preflight; no responsiveness or usability assessment has run. TEST-P1 remains
+**Checkpoint:** **R2-P1-MAC-N1** independent packaged assessment resumed `in_progress`.
+The user approved the disclosed 506-source lifecycle fixture and autonomous continuation. TEST-P1 remains
 `review_ready`; R2-P1 remains blocked.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
@@ -12,7 +12,7 @@ conflicting against main. No conflict resolution or merge authorized.
 Resolve this docs-only interruption publication head from Git; do not chase its SHA
 with a receipt-only commit. No N1 release package exists.
 
-## Required next decision
+## Approved continuation
 
 Read [ledger 32](../tasks/active/phase-1g-branches-runtime-git.md#32-r2-p1-mac-n1--independent-packaged-responsiveness-assessment),
 including its preflight interruption, and
@@ -22,36 +22,27 @@ packaged project opening: `options.rpy`, `gui.rpy`, and `screens.rpy`. The actua
 fixture test failed `probe open: InvalidMetadata`; this is a fixture incompatibility,
 not evidence of application slowness. Do not bypass the lifecycle guard.
 
-A user decision is pending: approve retaining all original contents plus three empty
-required files (**506 sources, unchanged 105,627 bytes / 500 Scenes / 2,000 edges**),
-explicitly leaving exact-fixture qualification open, or stop with this blocker.
-No answer had arrived at publication. No dependent release build or launch is
-authorized under the changed fixture until that answer arrives. The user separately
-approved downloading missing locked Rust test dependencies; that permission persists.
+The user has now approved retaining all original contents plus three empty required
+files (**506 sources, unchanged 105,627 bytes / 500 Scenes / 2,000 edges**), validating
+them and continuing MAC-N1 autonomously. Exact 503-file native qualification remains
+separate. Locked dependency download approval also persists. Read ledger 32's resumed
+entry and preserve its earlier failures.
 
-## Local work and proof
+## Work and proof
 
-Four probe-support files remain **local and uncommitted**, not review-ready:
-`app/src-core/src/lifecycle/runtime_probe.rs`, `app/src-tauri/src/main.rs`,
-new `app/src-tauri/src/branches_ui_probe.js`, and
-`app/scripts/run-runtime-ui-probes.py`. Preserve them. The new focused test currently
-fails on the fixture prerequisite above; source support was not published as working
-code. Exact patch and failure evidence are retained under ignored
-`.toolchains/reports/r2-p1-mac-n1/`, with hashes in ledger 32.
+The minimal native fixture/probe/report support is ready for the first release
+build attempt. The corrected fixture test passed 1/1 (212 filtered, zero skips),
+including real opening, 500 nodes / 2,000 edges, all 506 Source entries and 105,627
+bytes. Earlier offline-cache and invalid-fixture failures remain in ledger 32.
+Previous workspace compile, 60/60 frontend tests, syntax/format and repository
+checks passed; renderer and SDK hashing code are unchanged.
 
-Workspace compile, 60/60 frontend tests (zero skips), syntax, format, repository
-validation and whitespace checks passed. The focused test first encountered a
-missing offline test dependency; after the approved download it compiled and failed
-on invalid fixture metadata (0 passed / 1 failed / 212 filtered). No broad hostile/
-crash tests or project code ran. Native UI driver and physical M4 macOS host are
-available. Environment identity is in the ledger; no native observation is claimed.
-
-**Unused allowance:** release build attempts **0/2**, automated package launches
-**0/3**, native interactive sessions **0/1** (up to 15 minutes). No operation is
-pending. Do not spend WIN-F1 allowance. Preserve the originally fixed samples,
-endpoints and budgets. No renderer fixes, Chrome comparison, CI dispatch, gate
-waiver, merge or later checkpoint. If the fixture is approved, resume only MAC-N1,
-publish its assessment/handover, then stop.
+The release attempt runs the declared selected release core test (original
+503-file fixture, three samples) then packages the Tauri app. The native probe uses
+the approved 506-file superset; report these populations separately. Allowance
+remains at most two release attempts, three automated launches, one native-input
+session up to 15 minutes. No renderer fixes, Chrome comparison, CI dispatch, gate
+waiver, merge or later checkpoint. Publish MAC-N1 findings and stop.
 
 ## Retained failures and missing acceptance
 

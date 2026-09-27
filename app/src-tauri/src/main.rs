@@ -141,7 +141,14 @@ fn core_request(
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
         let payload = request.get("payload").cloned().unwrap_or(Value::Null);
-        if !payload.is_object() || payload.to_string().len() > 32 * 1024 {
+        let report_limit = if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
+            == Ok("branches-performance")
+        {
+            128 * 1024
+        } else {
+            32 * 1024
+        };
+        if !payload.is_object() || payload.to_string().len() > report_limit {
             return Err("Invalid bounded probe report.");
         }
         let passed = payload.get("passed").and_then(Value::as_bool) == Some(true);
@@ -442,10 +449,14 @@ fn main() {
                 .app_data_dir()
                 .map_err(|_| "application data path is unavailable")?;
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
-                let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("probe SDK archive required")?;
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
                 if data.exists() { return Err("probe destination already exists".into()); }
-                LifecycleService::prepare_runtime_ui_probe(data, std::path::Path::new(&archive), &case).map_err(std::io::Error::other)?
+                if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                    LifecycleService::prepare_branches_ui_probe(data).map_err(std::io::Error::other)?
+                } else {
+                    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("probe SDK archive required")?;
+                    LifecycleService::prepare_runtime_ui_probe(data, std::path::Path::new(&archive), &case).map_err(std::io::Error::other)?
+                }
             } else { LifecycleService::new(data_root).map_err(|_| "project lifecycle service could not start")? };
             *app.state::<DesktopState>()
                 .0
@@ -495,8 +506,15 @@ fn main() {
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(2));
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
-                    main.eval(include_str!("runtime_ui_probe.js")).expect("runtime probe injection");
-                    while started.elapsed() < Duration::from_secs(300) { thread::sleep(Duration::from_secs(1)); }
+                    if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                        main.show().expect("probe show");
+                        main.set_focus().expect("probe focus");
+                        main.eval(include_str!("branches_ui_probe.js")).expect("branches probe injection");
+                    } else {
+                        main.eval(include_str!("runtime_ui_probe.js")).expect("runtime probe injection");
+                    }
+                    let limit = if case == "branches-interactive" { 900 } else { 300 };
+                    while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
                     let cleaned = probe_host.shutdown();
                     println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));
                     let _ = std::io::stdout().flush();

@@ -541,6 +541,16 @@ an explicit reviewed decision; diagnostic evidence or a favourable local run can
 waive an existing failure. Preserve the original run, attempt, SHA and unavailable or
 skipped evidence when changing future policy.
 
+The explicit packaged `branches-performance` probe uses the original 500-Scene /
+2,000-edge source content plus empty `game/options.rpy`, `game/gui.rpy` and
+`game/screens.rpy`, which ordinary lifecycle opening requires. This approved
+inspection-only superset has **506 sources / 105,627 bytes**. The existing core
+budget fixture remains **503 sources / 105,627 bytes**; report these populations
+separately and do not claim exact fixture equivalence. `branches-interactive` prepares
+the same disposable workload for the separately bounded native-input observation.
+Neither case installs an SDK or runs game code. Default packaged runtime scenarios
+are unchanged; select the performance case explicitly.
+
 ### Independent browser outcomes in the production workflow
 
 The production workflow records Runtime and Branches browser steps separately. Only
