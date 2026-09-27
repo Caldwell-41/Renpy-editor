@@ -657,6 +657,23 @@ WebView, supported-runner and human acceptance. Attribute stalls using trace bra
 before choosing a renderer or environment correction; lack of reproduction cannot
 waive historical failed/skipped gates.
 
+For an explicitly approved hosted diagnostic, `quality.yml` provides the manual
+`phase1g_macos_browser_diagnostic=true` selector. Keep `phase1g_flow_profile=false`
+and `phase1g_candidate_proof=false`; conflicting selection fails before tool setup.
+Only one `macos-26` job runs. It uses existing pinned Node/npm/locked dependencies and
+the runner's installed Chrome, verifies archived R2-P1 artifact 10923840024 and its
+exact service fixture, and launches this probe once with tracing. There is no core,
+SDK or package build, broad suite, Windows job or automatic retry. This fixture reuse
+is diagnostic input reuse, not acceptance reuse; an expired/unavailable artifact is
+a blocker, never permission to substitute a new workload silently. The artifact
+`r2-p1-macos-browser-diagnostic` retains report, trace, captures, identity, cleanup audit
+and a SHA-256 inventory for seven days, including on failure. Job timeout is ten
+minutes; the probe retains its 60-second page deadline and all measurement budgets.
+Missing reports/traces/cleanup evidence fail the audit. A hosted pass does not accept
+the historical run, core budgets, native WebView or final packages. Ledger 30 owns the
+approved single dispatch and result; no continuing authorization follows from this
+workflow selector. Follow the repository manual-resume rule while external CI runs.
+
 ### 1G.2b named packaged scenarios
 
 The existing production workflow now includes the explicit R1 SDK service and R2

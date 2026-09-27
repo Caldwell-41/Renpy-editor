@@ -6,8 +6,9 @@ supported-target qualification, `blocked` after the failed matrix (ledger 23). G
 (ledger 26); the user approved R2-P1-WIN-F1's two-buffer correction and local testing
 (ledger 27, `review_ready`), then narrowed testing to exclude aggressive/hostile work.
 R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28). User-approved
-R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29); no new
-qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
+R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29). The user
+then approved combining H1 scope review with one hosted macOS diagnostic execution
+(ledger 30, `in_progress`); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
 24–25. Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
@@ -18,10 +19,10 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instructions approve R2-P1-MAC-M1 only (section 29), following
-ledger 28: bounded probe correction and two local checks. No CI dispatch, budget
-relaxation, renderer changes, hostile/crash tests or unapproved tooling installation.
-WIN-F1 is preserved; no conflict resolution or merge is authorized.
+checkpoint. The latest user instruction combines R2-P1-MAC-H1 review and execution (section 30):
+one scoped macOS/browser diagnostic dispatch and evidence assessment. No production
+matrix, retry, budget relaxation, renderer changes, hostile/crash tests or additional
+unapproved tooling. WIN-F1 is preserved; no conflict resolution or merge is authorized.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -4307,3 +4308,69 @@ be described as macOS-only. Workflow implementation and a single hosted dispatch
 explicit approval; no production matrix, automatic retry, tool installation, budget
 relaxation, renderer work, crash tests, conflict resolution or merge is authorized.
 Final supported-target/package/native-human acceptance remains open. M1 stops here.
+
+### 30. R2-P1-MAC-H1 combined review and hosted diagnostic — 2026-09-27
+
+**Authority/state:** user asked to do the current scope-review prompt and item 1
+(scoped workflow implementation, one hosted macOS diagnostic and assessment) in the
+same go. This explicitly combines those steps into one checkpoint, `in_progress`,
+and supersedes M1's no-dispatch boundary for this one diagnostic only. No Windows,
+production matrix, retry, budget relaxation, renderer change, hostile/crash test,
+additional profiler/browser installation, conflict resolution or merge.
+
+**Entry:** clean published `61429a8db7e3a2b6e26473bb80c27bce296b2b03`, existing
+`feature/phase-1g-branches-runtime`, draft/open/conflicting PR #17; fresh fetch
+confirms main `4d7ba0333c48d60242a9a42d3e079fea499a5531`. No running branch workflow
+was found. M1 source and WIN-F1 are retained unchanged.
+
+**Reviewed execution scope:** add a manual-only, isolated macOS-26 browser diagnostic
+selector/job to `quality.yml`. Use the existing pinned Node/npm/locked dependencies
+and installed runner Chrome; no added browser, Rust/core build, SDK or package.
+Download only artifact 10923840024 from failed run 36293797731 for the exact retained
+service fixture, checking metadata, archive and fixture SHA-256 before use. This is
+fixture reuse for diagnosis, not reuse of acceptance. Run the unchanged M1 probe once
+with tracing, 30 legacy inputs, 30 visible inputs and 30 no-input controls. Retain
+all budgets, inputs and raw evidence; upload reports/trace/captures even on failure.
+The selector excludes the existing two-target profile and unrelated validation job;
+conflicting manual selectors fail before installing dependencies or launching Chrome.
+
+**Stop rule:** one dispatch, one browser launch, no retry. A failed/inconclusive
+result is a finding, not permission to change renderer/budgets or rerun. Check the
+returned exact SHA/run/attempt, publish the pending-operation handover, then assess
+if already terminal. Otherwise follow AGENTS/WORKFLOW's manual-resume rule; no model
+polling or unqualified automatic wake-up. Final two-target/package/human qualification
+remains outside H1.
+
+#### Reviewed workflow and pre-dispatch gates
+
+Only `quality.yml` adds the default-false manual selector and isolated diagnostic
+job. Existing profile/validation selection excludes that mode; a guard rejects
+conflicting profile/candidate selectors before Node setup or a browser launch. Normal
+push/PR and prior manual profile behavior remains unchanged. New job is `macos-26`,
+10-minute cap, no matrix, with job-local `contents: read` and `actions: read` for the
+retained artifact. Standard existing Node 24.19.0/npm 11.9.0/locked npm setup is reused;
+no additional local tool or runner browser/profiler is installed. The one browser step
+has a two-minute runner cap around M1's unchanged 60-second page deadline.
+
+The download verifies artifact ID/run/source SHA, unexpired metadata, exact 224142-byte
+archive and published SHA-256, then reads only the exact `runtime-flow.json` entry
+without extracting archive paths. It requires the known fixture hash and 500/2,000
+counts. Fresh API metadata confirmed the archive unexpired until 2026-10-04. Missing
+or changed input stops execution; no synthetic/new-core substitution is authorized.
+
+The always-run audit writes a manifest and requires saved trace, reported closed
+browser/server, absent recorded browser PIDs and a closed server port. Artifact upload
+also runs on failure and does not tolerate upload failure. Missing early-start fields
+are recorded as unavailable instead of breaking inventory generation. Raw fixture,
+input metadata, identity, probe log/report, trace, captures, cleanup and manifest are
+retained for seven days under `r2-p1-macos-browser-diagnostic`. No raw evidence enters Git.
+
+Offline checks passed: Ruby's existing YAML parser; **24** event/selector combinations;
+**6** shell blocks with `bash -n`; **2** embedded Python blocks compiled and executed
+against retained fixture/M1 evidence; unchanged existing jobs except their selection;
+repository validation **270 files**; whitespace/diff review. `actionlint` and PyYAML
+were unavailable and were not installed. No new local browser/core/SDK launch occurred.
+The local check receipt is ignored `.toolchains/reports/r2-p1-mac-h1/workflow-local-checks.json`.
+M1 probe/renderer/CSS/locks and WIN-F1 compare byte-identical to entry. TESTING records
+the selector and evidence semantics. Publication uses `[skip ci]` to avoid unrelated
+PR runs; exactly one manual diagnostic will target the verified publication SHA.

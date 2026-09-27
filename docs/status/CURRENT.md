@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-M1 probe correction/local proof `review_ready` (ledger 29); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-H1 combined review/hosted diagnostic `in_progress` (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -69,8 +69,9 @@ passed; all input samples and graphics waits remain retained. Trace/captures sho
 transformed rendering but do not prove physical presentation at the endpoint or
 qualify historical Chrome 152 CI. Both sessions are closed. WIN-F1, renderer/CSS,
 workflows and dependencies are unchanged; no tool installation or CI dispatch.
-Next is R2-P1-MAC-H1 scope review only; workflow changes and a single macOS/browser
-hosted diagnostic require explicit approval. No acceptance or budget change follows.
+The user subsequently approved combining H1 scope review and one macOS/browser
+hosted diagnostic. Its isolated manual workflow path is reviewed and ready for one
+dispatch (ledger 30); no production matrix, retries or acceptance/budget change.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

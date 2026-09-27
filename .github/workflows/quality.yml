@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      phase1g_macos_browser_diagnostic:
+        description: One macOS-only traced Branches probe using the retained R2-P1 service fixture
+        required: false
+        type: boolean
+        default: false
       phase1g_candidate_proof:
         description: Select G1-O1 safety and three fixed feasibility samples (requires flow profile)
         required: false
@@ -22,7 +27,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.phase1g_flow_profile }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -34,7 +39,7 @@ jobs:
 
 
   phase1g-flow-profile:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -145,5 +150,124 @@ jobs:
             ${{ runner.temp }}/runtime-flow.json
             ${{ runner.temp }}/observed-*.log
             ${{ runner.temp }}/observed-branches.png
+          if-no-files-found: error
+          retention-days: 7
+
+  phase1g-macos-browser-diagnostic:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_macos_browser_diagnostic }}
+    name: R2-P1 macOS browser diagnostic
+    runs-on: macos-26
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        working-directory: app
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require isolated diagnostic selection
+        env:
+          FLOW_PROFILE: ${{ inputs.phase1g_flow_profile }}
+          CANDIDATE_PROOF: ${{ inputs.phase1g_candidate_proof }}
+        run: |
+          test "$FLOW_PROFILE" = false
+          test "$CANDIDATE_PROOF" = false
+          command -v gh
+          command -v python3
+      - name: Set up existing pinned Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm and dependencies
+        run: |
+          npm install --global npm@11.9.0
+          npm ci --ignore-scripts
+      - name: Verify retained real-service fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/macos-browser-diagnostic"
+          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024 > "$RUNNER_TEMP/macos-browser-diagnostic/input-artifact.json"
+          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024/zip > "$RUNNER_TEMP/retained-macos.zip"
+          python3 - <<'PYFIXTURE'
+          import hashlib, json, os, pathlib, zipfile
+          root = pathlib.Path(os.environ["RUNNER_TEMP"])
+          output = root / "macos-browser-diagnostic"
+          metadata = json.loads((output / "input-artifact.json").read_text())
+          archive = root / "retained-macos.zip"
+          digest = "82580f0178840ebc413767622ef7bdd7076de05f2bdcc95dfe756f826940961b"
+          assert metadata["id"] == 10923840024 and not metadata["expired"]
+          assert metadata["workflow_run"]["id"] == 36293797731
+          assert metadata["workflow_run"]["head_sha"] == "f1a0f148445f34f8af1a57d0f69e2d27eb543b11"
+          assert archive.stat().st_size == metadata["size_in_bytes"] == 224142
+          assert metadata["digest"] == "sha256:" + digest
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
+          with zipfile.ZipFile(archive) as source:
+              assert source.namelist().count("runtime-flow.json") == 1
+              assert source.getinfo("runtime-flow.json").file_size < 8 * 1024 * 1024
+              fixture = source.read("runtime-flow.json")
+          assert hashlib.sha256(fixture).hexdigest() == "8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196"
+          model = json.loads(fixture)
+          assert len(model["nodes"]) == 500 and len(model["edges"]) == 2000
+          (output / "runtime-flow.json").write_bytes(fixture)
+          print("Verified retained service fixture; no core/SDK execution.")
+          PYFIXTURE
+      - name: Record diagnostic identity
+        run: |
+          {
+            git rev-parse HEAD
+            sw_vers
+            uname -m
+            node --version
+            npm --version
+            shasum -a 256 tests/branches.browser.mjs src/branches-ui.ts src/styles.css package-lock.json ../.github/workflows/quality.yml
+          } > "$RUNNER_TEMP/macos-browser-diagnostic/identity.log"
+      - name: One traced browser launch
+        timeout-minutes: 2
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/macos-browser-diagnostic/runtime-flow.json
+          LOOMLIGHT_BRANCHES_EVIDENCE_DIR: ${{ runner.temp }}/macos-browser-diagnostic
+          LOOMLIGHT_BRANCHES_TRACE: "1"
+        run: |
+          set -o pipefail
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/macos-browser-diagnostic/probe.log"
+      - name: Inventory evidence and verify reported cleanup
+        if: always()
+        run: |
+          python3 - <<'PYAUDIT'
+          import hashlib, json, os, pathlib, socket, subprocess
+          output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "macos-browser-diagnostic"
+          output.mkdir(exist_ok=True)
+          report_path = output / "report.json"
+          audit = {"reportPresent": report_path.exists()}
+          if report_path.exists():
+              report = json.loads(report_path.read_text())
+              audit["cleanup"] = report.get("cleanup")
+              audit["traceSaved"] = report.get("traceSaved", False)
+              pids = [str(process["id"]) for process in report.get("browserProcesses", [])]
+              if pids:
+                  result = subprocess.run(["ps", "-p", ",".join(pids), "-o", "pid=,comm="], capture_output=True, text=True)
+                  audit["browserPidsAbsent"] = result.returncode == 1 and not result.stdout.strip()
+              if "serverPort" in report:
+                  with socket.socket() as connection:
+                      audit["serverPortClosed"] = connection.connect_ex(("127.0.0.1", report["serverPort"])) != 0
+          (output / "cleanup-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
+          inventory = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(output.iterdir()) if path.is_file() and path.name != "manifest.json"}
+          (output / "manifest.json").write_text(json.dumps(inventory, indent=2) + "\n")
+          assert audit.get("cleanup") == {"browser": "closed", "server": "closed"}, audit
+          assert audit.get("browserPidsAbsent") and audit.get("serverPortClosed"), audit
+          assert audit.get("traceSaved") and (output / "trace.json").is_file(), audit
+          PYAUDIT
+      - name: Upload diagnostic evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r2-p1-macos-browser-diagnostic
+          path: ${{ runner.temp }}/macos-browser-diagnostic/
           if-no-files-found: error
           retention-days: 7
