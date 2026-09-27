@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-H1 combined review/hosted diagnostic `in_progress` (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-H1 `awaiting_ci`, manual resume (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -37,7 +37,7 @@ SDK/service tests passed, but all five packaged cases exited with main-thread st
 overflow before reporting. macOS skipped downstream SDK/package gates after its
 frame-budget failure. Supported-target qualification of the new duration/reopen
 assertions remains incomplete; later local Windows evidence is recorded below.
-No operation is pending. Resumed R2-P1-WIN-D1 is `review_ready` (ledger 26): one
+No earlier operation is pending. Resumed R2-P1-WIN-D1 is `review_ready` (ledger 26): one
 baseline and one symbol-enabled release build, four launches, and an offline dump
 review locate the failure in `renpy::sha256_file`. Its 1 MiB stack buffer creates a
 1,049,000-byte frame exceeding the Windows executable's 1,048,576-byte main-thread
@@ -70,8 +70,12 @@ transformed rendering but do not prove physical presentation at the endpoint or
 qualify historical Chrome 152 CI. Both sessions are closed. WIN-F1, renderer/CSS,
 workflows and dependencies are unchanged; no tool installation or CI dispatch.
 The user subsequently approved combining H1 scope review and one macOS/browser
-hosted diagnostic. Its isolated manual workflow path is reviewed and ready for one
-dispatch (ledger 30); no production matrix, retries or acceptance/budget change.
+hosted diagnostic. Reviewed workflow candidate `238aa9fde5bb15243912ae89abdc4bcf2c21af78`
+is published. Exactly one dispatch created [36310107481](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36310107481),
+attempt 1, at that SHA; job 108594276410 was in progress at Node setup, both unrelated
+job paths skipped. No result is claimed. H1 awaits manual resume to audit that run;
+no qualified automatic wake-up exists. No retry, production matrix or acceptance/budget
+change is authorized. See ledger 30 and HANDOVER for exact operation/next action.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

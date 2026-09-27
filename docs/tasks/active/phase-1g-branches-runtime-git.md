@@ -8,7 +8,7 @@ supported-target qualification, `blocked` after the failed matrix (ledger 23). G
 R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28). User-approved
 R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29). The user
 then approved combining H1 scope review with one hosted macOS diagnostic execution
-(ledger 30, `in_progress`); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
+(ledger 30, `awaiting_ci`, manual resume); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
 24–25. Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
@@ -4313,7 +4313,7 @@ Final supported-target/package/native-human acceptance remains open. M1 stops he
 
 **Authority/state:** user asked to do the current scope-review prompt and item 1
 (scoped workflow implementation, one hosted macOS diagnostic and assessment) in the
-same go. This explicitly combines those steps into one checkpoint, `in_progress`,
+same go. This explicitly combines those steps into one checkpoint, now `awaiting_ci`,
 and supersedes M1's no-dispatch boundary for this one diagnostic only. No Windows,
 production matrix, retry, budget relaxation, renderer change, hostile/crash test,
 additional profiler/browser installation, conflict resolution or merge.
@@ -4374,3 +4374,44 @@ The local check receipt is ignored `.toolchains/reports/r2-p1-mac-h1/workflow-lo
 M1 probe/renderer/CSS/locks and WIN-F1 compare byte-identical to entry. TESTING records
 the selector and evidence semantics. Publication uses `[skip ci]` to avoid unrelated
 PR runs; exactly one manual diagnostic will target the verified publication SHA.
+
+#### Published candidate, one dispatch and manual-resume handover
+
+Workflow candidate **`238aa9fde5bb15243912ae89abdc4bcf2c21af78`** was pushed to the
+existing branch, remote ref verified, and its workflow blob freshly matched through
+GitHub's contents API before execution. At **2026-09-27 09:40:14 UTC**, exactly one
+`gh workflow run quality.yml` request selected `feature/phase-1g-branches-runtime`
+with `phase1g_macos_browser_diagnostic=true`, `phase1g_flow_profile=false` and
+`phase1g_candidate_proof=false`. CLI exited **0** and returned the exact URL below.
+The immediate branch run-list response was empty (listing propagation delay); the
+controller stopped rather than dispatching again. One direct read of the returned
+run ID then verified identity and actual execution. This was not a second dispatch.
+
+- Run **[36310107481](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36310107481)**,
+  attempt **1**, `workflow_dispatch`, exact head **238aa9fde5bb15243912ae89abdc4bcf2c21af78**.
+- Created **09:40:16 UTC**; inspected `in_progress`, no conclusion, update time
+  **09:40:27 UTC**. Job **108594276410**, **R2-P1 macOS browser diagnostic**, running.
+  Checkout and isolated-selector guard passed; pinned Node setup was in progress.
+- Existing two-target flow profile job **108594277357** and repository-validation
+  job **108594277391** were **skipped**, confirming diagnostic-only routing. These
+  intentional skips are not acceptance evidence.
+- **One dispatch allowance consumed.** No browser result, trace, artifact digest or
+  budget outcome is yet available/claimed. No automatic retry, rerun or second launch.
+  Local `.toolchains/reports/r2-p1-mac-h1/dispatch.json` retains the CLI receipt;
+  `dispatch-runs.json` preserves the empty list instead of rewriting that observation.
+
+H1 is `awaiting_ci`, with **manual resume required**. The repository has no qualified
+same-thread completion/wake-up mechanism, so autonomous continuation is blocked on
+external completion/user resume. AGENTS/WORKFLOW require recording the exact operation
+and ending active polling. No watcher, automation, helper agent or budget workaround
+was started. The pending result is not a completed checkpoint or a passing gate.
+
+**Next action within existing authorization:** inspect only run 36310107481 attempt 1
+and its exact candidate. Once terminal, verify job results and artifact size/digest,
+extract bounded evidence, match fixture/source hashes, review all raw distributions,
+geometry/captures and trace brackets (including no-input controls), and confirm cleanup.
+Record missing/failed/skipped evidence honestly. A pass without reproduction remains
+inconclusive about the historical Chrome 152 stalls; a failure is a bounded finding.
+Publish the H1 assessment and stop. No new dispatch, fix implementation, renderer or
+budget change, crash tests, production matrix, conflict resolution or merge follows.
+All broader 1G/package/human gates and the original failed run remain open.
