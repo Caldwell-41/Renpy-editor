@@ -1,7 +1,9 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1 `in_progress`; packaged proof corrections and one supported-target qualification selected. G1-OBS remains `review_ready`.
+**Current checkpoint:** R2-P1 `awaiting_ci` / manual resume; packaged proof corrections published. G1-OBS remains `review_ready`.
+**R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
+**R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, production matrix in progress; no target acceptance yet.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **G1-OBS implementation candidate:** 1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88.
@@ -28,7 +30,7 @@ These are core/Chromium results; final packaged/native human acceptance remains 
 
 G1-OBS is complete at its selected boundary. The user accepted R2-P1: strengthen the
 existing duration/graph-reopen package proof, run one production matrix and audit
-results; see ledger 23. No run has been dispatched yet. Application fixes, human
+results; see ledger 23. Exactly one production matrix is in progress. Application fixes, human
 acceptance, merge-conflict resolution, optional Git and Phase 2 remain outside scope.
 Historical worktree and raw evidence remain preserved.
 

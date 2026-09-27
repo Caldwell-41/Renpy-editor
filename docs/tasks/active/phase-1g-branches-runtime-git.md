@@ -1,7 +1,7 @@
 # Phase 1G — Branches, runtime and diagnostics
 
 **Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
-supported-target qualification, `in_progress` (ledger 23). G1-OBS remains
+supported-target qualification, `awaiting_ci` / manual resume (ledger 23). G1-OBS remains
 `review_ready` (ledger 22). Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
@@ -3360,9 +3360,9 @@ correct only the packaged proof, run one existing supported-target production ma
 audit/publish the results and stop. Application defects require a new bounded decision
 before production changes. No performance tuning, CI redesign, merge-conflict work,
 new native automation, human testing or merge is selected.
-**State:** `in_progress`. Entry `d180f0bb4840fa57e9144a94b3d9987a408a2ebb`, clean and
+**State:** `awaiting_ci` / manual resume; exact operation below. Entry `d180f0bb4840fa57e9144a94b3d9987a408a2ebb`, clean and
 matching the fetched feature branch and draft/open PR #17. Main is `4d7ba03`;
-GitHub reports a PR conflict, left for later integration. No production run is active.
+GitHub reports a PR conflict, left for later integration. No production run was active at entry.
 G1-OBS qualification and the earlier failed production runs remain preserved.
 
 #### Selected scenarios and gate plan
@@ -3425,3 +3425,32 @@ Self-review checked the literal request fields against current Flow/Source seria
 new-session ownership, fixture jump text and Running status, as well as exact changed-path
 scope. No application defect was identified locally. Next: publish this candidate and
 dispatch the existing production workflow once with optional package retention enabled.
+
+
+#### Published candidate and exact qualification handoff
+
+Published candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`; local branch,
+remote ref and draft/open PR #17 head equality verified before dispatch. The immediate
+post-push PR API response briefly retained the old head; a subsequent read confirmed
+the candidate. No force push or integration occurred.
+
+Dispatched exactly once: [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731),
+**attempt 1**, `production-scaffold.yml`, exact candidate above, `upload_packages=true`.
+Direct run lookup confirmed `in_progress`. Preflight job **108548761361** was running
+Rust formatting after repository validation, pinned Node/npm setup, frontend checks
+and Source browser regression passed (observed 2026-09-27 around 04:16 UTC).
+Windows/macOS target jobs were not yet present in that response. Initial workflow-list
+indexing lagged the returned dispatch URL; the exact returned run was read directly,
+not redispatched. There is no final target, SDK, package or new-probe pass yet.
+
+This is `awaiting_ci` / manual resume under AGENTS/WORKFLOW. No qualified automatic
+same-thread continuation is available and no watcher/local writer is left running.
+Next, inspect this exact run/attempt/SHA, retrieve all target logs/artifacts and verify
+input/executable/archive hashes, all five case outcomes and cleanup. Require each route's
+`branches-destination-reopen-passed` and `long-run-duration-passed` with measured
+`runningObservedMs >= 9500`; retain every failed/skipped/unavailable gate honestly.
+Audit the existing full G1/R1/R2 matrix at its actual layers. Preserve G1-OBS's browser
+outliers and all historical failures. No duplicate dispatch, automatic retry, new
+production fix, human testing, merge-conflict resolution or merge is selected. Report
+any application finding and seek a bounded decision before changing production code.
+Publish the final evidence assessment and CURRENT/HANDOVER, then stop at R2-P1.
