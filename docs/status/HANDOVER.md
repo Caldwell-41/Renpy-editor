@@ -1,75 +1,63 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1-WIN-F1, `review_ready`; fix and local verification complete.
-Completed Windows diagnosis R2-P1-WIN-D1 is also `review_ready`.
+**Checkpoint:** R2-P1-MAC-D1 diagnosis/review, `review_ready`; R2-P1 remains `blocked`.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged,
-conflicting against main. Do not redispatch, resolve conflicts or merge.
-**Authority:** the user approved the concrete two-buffer fix and testing after D1,
-then requested no aggressive/hostile testing. The deliberate-crash child harness
-was removed. Use ordinary checks and the existing application scenarios only.
-The four additional build runs cover F1: three used, one unused.
-**Entry source:** `cc93b90b3acc04acbe9f6f44cd05d928da794313`; original failed CI
-candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`. Only `renpy.rs` changed in the
-application. Resolve the final published commit from Git; no receipt-only commit.
+conflicting against main. No conflict resolution or merge performed/authorized.
+**Reviewed application candidate:** `4470e3af6f3603f8936eaf442e6d849bb366114b`,
+including completed WIN-F1. This checkpoint changes documentation only; resolve the
+published documentation head from Git. Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
 
-## Fix and reviewed diagnosis
+## Diagnosis and evidence
 
-Read [ledger 26](../tasks/active/phase-1g-branches-runtime-git.md#26-r2-p1-win-d1-resumed-local-startup-diagnosis--2026-09-27)
-for the four-launch diagnosis and [ledger 27](../tasks/active/phase-1g-branches-runtime-git.md#27-r2-p1-win-f1-sdk-hashing-stack-correction--2026-09-27)
-for approval, the testing-scope correction, hashes and final verification.
-
-`sha256_file`'s 1 MiB stack array produced a **1,049,000-byte frame**, exceeding the
-Windows main thread's **1,048,576-byte reserve**. Matching private PDB symbols and
-offline dump review locate the exception in `__chkstk` at that function's prologue,
-called by probe SDK archive verification. The baseline ordinary empty-profile launch
-survived a 15-second observation; its compile probe exited **3221225725**.
-
-The approved fix directly heap-allocates the 1 MiB buffers in `sha256_file` and
-`hash_regular_tree`. Hash chunking/framing, request controls and filesystem behavior
-are unchanged. The default executable stack remains unchanged. Two new ordinary
-unit tests cover multi-chunk/empty/missing inputs and cancellation/deadline behavior.
-No new tool, dependency version, workflow, native automation or broader redesign.
-The durable lesson is in [TESTING](../TESTING.md#sdk-hashing-regression).
-
-## Verification and evidence
-
-Six selected ordinary SDK tests passed; formatting and repository checks passed.
-The final release and **all five existing real-service application cases passed**:
-compile, lint, route-a, route-b and runtime-error. Every case exited 0 without timeout
-and confirmed cleanup. Both routes passed graph-destination/disk reopen and observed
-about 9.5 seconds running. Exact results and the retained Route B WebView shutdown
-warning are recorded in ledger 27. Final OS inspection found no task-created
-application/debugger/WebView/SDK process; no operation is outstanding.
-No broad core, hostile/race or deliberate process-crash suite was run after the
-user narrowed scope. Earlier intentional crash results remain local evidence, not
-part of the final test harness. The reported interface text "This content cant be
-shown" has no confirmed cause; no matching recent Defender detection was found.
-
-Fixed executable SHA-256:
-`76d6fd49f0ac1c6e90eb1560097254235f804fa55a83aa662995082aaba246cd`.
-Tested `renpy.rs` SHA-256:
-`e3e38e879e1b9551cebb2a86f4e1587442979c001bc38028417b1b049019e856`.
-All 101 tracked input hashes, build config and app diff hash are retained locally.
-These are local custom-protocol release results with a disposable identifier/profile,
-not installer packaging, original-CI binary identity or native human acceptance.
-
-Workspace `reports/r2-p1-win-d1` preserves D1 and F1 logs, identities, launch records,
-baseline/diagnostic executable-PDB pairs, diagnostic dump and successful offline
-review. Fixed output is in `.cache/target-r2-p1-win-d1/release`. Raw evidence, SDKs,
-disposable data and machine paths stay outside Git. Prepared tools remain available
-through workspace `enter-debug.ps1`; no installation is required for continuation.
-
-## Remaining qualification and next bounded decision
-
+Read [ledger 28](../tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
+for provenance, findings, trace evidence, limits and the concrete correction/proof plan.
 Original [run 36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731),
-attempt 1, remains terminal **FAIL**; see ledger 23. The macOS Branches frame p95
-**109.9 ms** against <100 ms is still unexplained; downstream package gates were
-skipped. R2-P1 and final G1/R1/R2/human acceptance remain incomplete.
+attempt 1, candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`, remains **FAIL**.
+macOS job **108548848384**, artifact **10923840024** was freshly verified against
+GitHub's size/digest; p95 **109.9 ms**, max **860.3 ms**, four of 30 samples >100 ms.
 
-The next selection should be a review and plan for the remaining macOS frame-budget
-failure. That planning step grants no implementation, CI dispatch, package rerun,
-budget relaxation, hostile testing,
-human acceptance, conflict resolution or merge. Preserve the failed CI evidence
-and the now-corrected Windows diagnosis rather than automatically rerunning CI.
+Confirmed probe defects: the endpoint is dispatch-to-next-rAF rather than confirmed
+presentation; the fixed leftward input sequence moves the fitted graph out of the
+clipped viewport after two inputs, despite retaining every DOM node/path. Panning
+only changes a transform and dispatch is fast; deferred graphics cost is not excluded.
+The renderer/probe/lock are identical to the earlier passing run. Both CI runs used
+Chrome 152.0.7977.83 and the same runner image, without trace/GPU-load evidence.
+
+Two local launches used existing Chrome 154.0.8037.57 on ARM64 macOS 26.6.2, Apple M4.
+Unchanged probe: initial **46.8 ms**, p95 **15.9 ms**. Diagnostic trace shows callback
+before paint and a **104 ms no-input interval** overlapping compositor/GPU waits.
+This supports a browser/graphics contribution mechanism, not exact attribution of
+the historical CI failure or native WKWebView acceptance. Implementation-versus-host
+split remains unresolved; do not call it merely a flake or weaken the 100 ms budget.
+Raw evidence and replayable diagnostic copy: ignored `.toolchains/reports/r2-p1-mac-d1` on this Mac.
+No new tools were needed. Two browser/server sessions terminated; none is pending.
+
+## Preserved Windows and qualification limits
+
+WIN-D1 and WIN-F1 remain `review_ready`; see [ledger 26](../tasks/active/phase-1g-branches-runtime-git.md#26-r2-p1-win-d1-resumed-local-startup-diagnosis--2026-09-27)
+and [ledger 27](../tasks/active/phase-1g-branches-runtime-git.md#27-r2-p1-win-f1-sdk-hashing-stack-correction--2026-09-27).
+The two heap-buffer correction, six ordinary checks and all five local real-service
+application scenarios remain preserved. Three of four F1 build runs were used; the
+remaining allowance does not authorize macOS work. Windows raw evidence remains in
+that host's `reports/r2-p1-win-d1`, fixed output `.cache/target-r2-p1-win-d1/release`.
+Original CI failure, skipped macOS SDK/package gates, unavailable original executable
+and final supported-target/native-human acceptance remain open. No hostile/crash tests.
+
+## Next bounded decision
+
+**Proposed R2-P1-MAC-M1 — approval required:** correct the probe's visible pan coverage
+and timing/evidence semantics, preserving original samples and budgets, then perform
+the two fixed local browser checks described in ledger 28. Keep production renderer,
+CSS and Windows fix unchanged. Local results cannot qualify the historical runner.
+A subsequent single hosted diagnostic run requires explicit review/authorization and
+bounded workflow scope; no production matrix rerun or automatic retry is authorized.
+Ask before downloading/installing a new tool only if existing tools cannot answer a
+specific blocker. No implementation, redispatch, merge/conflict resolution, budget
+relaxation, hostile/crash testing or human acceptance follows from this review alone.
+
+Only ledger, CURRENT, HANDOVER and TESTING measurement guidance accompany publication.
+Repository structure/link/privacy checks passed for 270 files; whitespace and changed-
+path checks passed. Actual pushed head is reported after remote verification, without
+a receipt-only commit.

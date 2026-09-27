@@ -5,8 +5,9 @@ supported-target qualification, `blocked` after the failed matrix (ledger 23). G
 `review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 is `review_ready`
 (ledger 26); the user approved R2-P1-WIN-F1's two-buffer correction and local testing
 (ledger 27, `review_ready`), then narrowed testing to exclude aggressive/hostile work.
-Earlier prerequisite interruption/setup remain in ledgers 24–25. Final 1G acceptance
-remains open.
+R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28); no correction or
+qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
+24–25. Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
 Sections 12–20 retain historical evidence and superseded next-step instructions.
@@ -16,8 +17,9 @@ The user subsequently selected 1G.1 only; its implementation and targeted review
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instructions approve the bounded Windows fix/testing
-(section 27), with no aggressive/hostile tests, redispatch or merge.
+checkpoint. The latest user instructions select macOS frame-budget diagnosis/review only
+(section 28): no implementation, budget relaxation, redispatch, conflict resolution,
+merge, hostile/crash testing or unapproved tooling installation.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
@@ -3961,3 +3963,189 @@ macOS 109.9 ms frame-budget failure remains open. Publish the reviewed source an
 checkpoint docs on the existing branch/PR; do not redispatch or merge. The next
 bounded selection is **review and plan only** for the remaining macOS frame-budget
 failure, using existing evidence, with no execution or budget change implied.
+
+
+### 28. R2-P1-MAC-D1 macOS frame-budget diagnosis/review — 2026-09-27
+
+**Authority/disposition:** user selected diagnosis/review and the smallest correction
+and proof plan only. D1 is `review_ready`; R2-P1 remains `blocked`. No application,
+test, workflow or dependency implementation occurred. No budget relaxation, CI
+dispatch, package build, SDK execution, merge/conflict resolution, hostile/crash test,
+new tool download or installation occurred. This review does not accept G1/R1/R2.
+
+#### Entry, ownership and exact evidence
+
+Fresh fetch, worktree/history, open PR and task inventory found clean published
+`4470e3af6f3603f8936eaf442e6d849bb366114b` on
+`feature/phase-1g-branches-runtime`; draft PR #17 remains open/conflicting.
+Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`. Only this local task was
+active; related Windows/setup tasks were idle. No work was discarded or integrated.
+WIN-F1 and its local evidence (ledger 27) remain intact. The only application delta
+from failed candidate `f1a0f148445f34f8af1a57d0f69e2d27eb543b11` is WIN-F1's
+`renpy.rs` change. Branches UI/CSS/probe and package lock are also identical between
+corrected passing `a6063080006769613733de20fcd82265bf96b632` and failed `f1a0f14`.
+
+GitHub freshly confirms run **36293797731**, attempt **1**, candidate `f1a0f14`,
+terminal **failure**; macOS job **108548848384**. Artifact **10923840024** was
+redownloaded, verified at **224142 bytes**, SHA-256
+`82580f0178840ebc413767622ef7bdd7076de05f2bdcc95dfe756f826940961b`, and ZIP CRC/path
+checks passed. All five JSON/log members were retained along with the entire archive
+(seven members including two screenshots), API metadata and full macOS job log.
+The service fixture is exactly the failed run's 500-node/2,000-edge JSON; no synthetic
+replacement or fresh core build was needed. Ledger 23 retains the complete matrix audit.
+
+Both this failure and corrected passing run **36291545085**, macOS job
+**108542473845**, used image `macos-26-arm64` **20260907.0351.1** and Chrome
+**152.0.7977.83**. The failed host reports macOS **26.6.2 / 25G83**; toolchain
+Node **24.19.0**, npm **11.9.0**, Rust **1.90.0**. Equal image/version does not prove
+equal hardware load, graphics state or scheduling. Neither archived run has a trace,
+per-sample rendering/presentation markers or GPU/CPU-load telemetry.
+
+#### Findings and causal limits
+
+1. **The failure is real under the existing metric.** Recalculation of nearest-rank
+   p95 (sorted sample 29 of 30) gives **109.9 ms**. Four samples exceed 100 ms:
+   **#2 860.3, #5 109.9, #21 100.8, #22 102.0 ms**. This is not a percentile bug
+   or a single removable outlier. Dispatch maximum **0.3 ms** and initial layout
+   **91.9 ms** remain separate measurements. Prior p95 **94.2 ms**, maximum
+   **126 ms**, and the still-earlier **1,058.6 ms** outlier retain their original status.
+2. **Confirmed harness coverage/endpoint defects.** `app/tests/branches.browser.mjs`
+   starts timing inside `page.evaluate`, synchronously dispatches ArrowRight, and
+   ends in the next requestAnimationFrame continuation. It measures dispatch-to-rAF
+   wait, not confirmed presentation. The host/CDP round trip is outside this timer,
+   but determines when each next sample starts relative to rendering. A slow interval
+   may include pending prior rendering/browser work; a short interval may finish
+   before the current transform paints. The [HTML rendering algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering)
+   places animation callbacks before style/layout and later rendering work. Local
+   tracing independently confirms this ordering below. A second rAF would be a
+   broader rendering-opportunity proxy, not a guarantee of displayed pixels.
+3. **Confirmed workload visibility gap.** `fit()` floors zoom at **0.05** for the
+   100-row graph. At the probe's 1280×800 viewport, measured SVG bounds are
+   **66.5×553 px**, left **21**, right **87.5**; viewport left **20**, width **1240**.
+   Each ArrowRight translates left **40 CSS px**. After the second input the graph's
+   horizontal extent is outside the clipped viewport; the end transform is
+   `translate(-1200px, 0px) scale(0.05)`, SVG right **-1112.5**. Layout/path generation
+   also bounds graph content within that horizontal extent. All 500 nodes and 2,000
+   paths remain in the DOM, but samples 2–30 do not sustain visible graph panning.
+   This weakens passing evidence; it does **not** invalidate or excuse a failed gate.
+4. **No demonstrated application hot path for these stalls.** The key handler changes
+   pan coordinates and one canvas transform; it does not reproject, rebuild nodes,
+   read source or wait for the held refresh. The existing `will-change: transform`
+   is present. Fast dispatch rules out a long synchronous handler for the measured
+   events, but does not rule out deferred paint/raster/GPU cost from this graph.
+   WIN-F1's Rust hashing correction cannot affect this injected-fixture browser path.
+5. **Browser/compositor contribution demonstrated locally; exact CI attribution is
+   unresolved.** An unchanged local baseline does not reproduce the failed p95.
+   A traced no-input interval after Fit contains a 104 ms sample overlapping renderer
+   compositor teardown/GPU waits, rather than an application key handler. This proves
+   the timer can capture browser/graphics lifecycle work even without a new pan.
+   It does not prove the historical 860.3/109.9 ms intervals have that cause, nor
+   distinguish a Chrome-version issue, hosted scheduling/load or graph-triggered
+   deferred graphics work on that runner. No claim of a purely environmental flake.
+
+**Classification:** measurement/coverage defects are proven; browser/compositor and
+host-dependent behavior is a supported contributor hypothesis for the CI failure.
+An implementation/rendering contribution remains possible but is not located.
+The missing historical trace prevents a defensible exact implementation-versus-host
+split. The smallest justified next correction is to the measurement/evidence path,
+not speculative renderer optimization. CI remains failed until new approved proof.
+
+#### Bounded local diagnosis using existing tools
+
+Exactly **two** disposable headless Chrome launches, both exited 0 with browser/server
+cleanup in `finally`: (1) unchanged repository probe; (2) an ignored diagnostic copy
+with CDP tracing/metrics and two controls. No source edits, builds, CPU throttling,
+Chrome flags/graphics changes or extra tool installations. Host: native ARM64,
+macOS **26.6.2 / 25G83**, **Apple M4**, installed Chrome **154.0.8037.57**, local
+Node **24.19.0** and locked Playwright **1.63.0**. Trace reports ANGLE Metal Apple M4,
+GPU compositing/rasterization enabled. This differs from CI Chrome 152 and is
+supplemental mechanism evidence, never target acceptance or a replacement run.
+
+| Local observation | Result |
+| --- | --- |
+| Unchanged full probe, original 30-sample metric | PASS; initial 46.8 ms; p95 15.9 ms; max 16.0 ms; dispatch max 0.2 ms; held-refresh navigation/resize/page-error assertions pass |
+| Diagnostic copy, original 30-sample sequence | p95 15.9 ms; zero layouts, 4.3 ms total style recalculation and 0.828 ms total script metric delta over the measurement bracket |
+| Original-sequence trace | Two Paint events, one RasterTask; first FireAnimationFrame at +10.764 ms precedes UpdateLayoutTree +10.952 ms and Paint +11.644 ms |
+| No-input control after Fit, 30 samples | p95 16.9 ms, maximum 104.0 ms at #4; no key dispatch |
+| Alternating left/right control after Fit, 30 samples | p95 17.0 ms, max 17.1 ms, dispatch max 0.2 ms; trace has no Paint or RasterTask within its bracket |
+
+Controls execute in one page-side loop, unlike the original's per-sample CDP calls;
+they are diagnostic, not equivalent acceptance populations. Fit restores the graph
+before each control and can leave rendering pending; the no-input control is not a
+pure idle-host benchmark. Its long sample overlaps **94.97 ms ProxyMain::Stop** on
+the measured page's renderer main thread, **94.01 ms WaitForGetOffset** on its
+compositor, and **88.32 ms IOSurfaceImageBacking::WaitForCommandsToBeScheduled** on
+the GPU thread. These overlapping nested events must not be summed. No native
+WKWebView or physical input claim follows from this Chromium trace.
+
+Raw archive/logs, fixture, diagnostic script, full trace, metrics/GPU/geometry and
+SHA-256 manifest remain outside Git in `.toolchains/reports/r2-p1-mac-d1`. The diagnostic copy
+imports the unchanged real renderer/CSS, keeps the original assertions and adds
+instrumentation/control sections only. It is not a production test correction.
+
+#### Proposed R2-P1-MAC-M1 correction and proof — separate approval required
+
+1. **Limit implementation to the browser probe and its diagnostic evidence plumbing.**
+   Retain full service-produced 500/2,000 counts, held-refresh behavior, navigation,
+   resize and page-error assertions. Keep the original 30 samples and <100 ms gate
+   visible for comparison; no trimming, percentile change, averaging across reruns,
+   scheduler subtraction or dispatch-only substitute. Add a fixed 30-input bounded
+   back-and-forth path, assert transform changes and visible graph intersection on
+   every sample, with stable representative geometry checked outside timing. Retain
+   initial <2 s and core <250 ms/<2 s budgets. Do not change production CSS/renderer.
+2. **Make the endpoint and attribution explicit.** Name existing values dispatch-to-rAF.
+   Preserve ordered start/dispatch/rAF/end timestamps and browser/fixture/source
+   identity. Add trace user marks and bounded rendering/GPU trace output, including
+   on failure; record visibility/focus, browser version, runner image, GPU mode and
+   trace overhead. A rendering-opportunity/presentation-correlated diagnostic must
+   demonstrate the transformed graph's frame, with the same <100 ms objective.
+   Do not silently replace the current gate with a different endpoint. Review its
+   semantics before treating it as rendered-input acceptance. Keep browser/native
+   WebView claims separate. No arbitrary warm-up delay to discard startup stalls.
+3. **First local proof, fixed rather than retry-until-green.** One untraced full probe
+   and one traced diagnostic launch using the already installed tooling and retained
+   service fixture. Verify positive graph intersections, original and visible-path
+   distributions, paint/callback ordering and cleanup. Add only focused probe
+   assertions needed for the corrected contract; no broad core/crash/hostile suite.
+   If it fails, retain evidence and stop for a bounded finding; do not tune endlessly.
+4. **Hosted proof remains an explicit later execution decision.** Local Chrome 154
+   cannot explain/qualify historical Chrome 152. After probe review, propose exactly
+   one macOS diagnostic run with the same workload/launch conditions and captured
+   graphics/timing evidence, retaining all old results and no automatic retry. Reuse
+   `quality.yml`'s bounded browser qualification path where practical; its current
+   matrix runs both OSes and ordinary suites, so any macOS/browser-only selection
+   needs an explicit scoped workflow change. Do not dispatch the full production
+   package matrix just to diagnose this browser gate. Do not run its crash cases
+   under this user's testing exclusion. No dispatch is authorized by this plan.
+5. **Decision rule:** correlate >100 ms samples with trace brackets. Sustained graph
+   paint/raster/layout work calls for one measured renderer fix; long main/GPU waits
+   shared with no-input controls call for a documented browser/runner correction;
+   mixed evidence calls for both. No reproduction is inconclusive, not retroactive
+   acceptance; preserve the run and stop without another attempt. Do not install
+   Chrome 152 or new profilers without explicit tool approval if existing evidence
+   tools prove insufficient. Final supported-target package/human gates stay open.
+
+#### Review, validation and stopping boundary
+
+The review checked exact source equality, original samples/percentile, held-refresh
+control flow, graph geometry, trace ordering and diagnostic limits. Only this ledger,
+CURRENT, the existing HANDOVER and a small TESTING measurement lesson change.
+Initial repository validation found missing final newlines in four ignored raw JSON
+artifacts because the validator scans `.cache`. No evidence bytes were altered: the
+whole diagnostic directory was moved under the existing excluded `.toolchains/reports`
+location. The retained diagnostic copy's relative imports describe its original
+`.cache` location; replay requires placing a copy at that original depth or resolving
+its imports to `app/`. The archived source/trace hashes remain unchanged. Fixture
+SHA-256: `8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196`;
+trace SHA-256: `a3f3ac88c2ca8bbf47f0b93f11d25827f527111f316e8ac8b644db7f610cb02f`.
+`python3 scripts/validate.py` passed for **270 files** after relocation;
+`git diff --check` passed. Changed-path review confirms exactly four documentation
+files and no untracked publication inputs. The traced renderer/GPU PIDs are absent
+on final OS inspection; both browser commands exited 0. No package matrix is needed
+for this documentation checkpoint. Publication resolves
+the new documentation head from Git without a receipt-only commit.
+
+D1 ends with a reviewable diagnosis and the above smallest justified correction/proof
+plan. Missing exact CI stall attribution and all failed/skipped qualification remain
+explicit. No operation is awaiting completion; further implementation, diagnostics
+on CI and final acceptance require their own approved scope.

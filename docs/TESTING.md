@@ -612,6 +612,19 @@ measurement output or absolute machine path belongs in Git. Final 1G still owns 
 real packaged graph edit/disk/reopen scenario and both supported-target measurements.
 
 
+### Branches timing interpretation
+
+The current browser probe times synthetic dispatch through the next rAF callback,
+not confirmed frame presentation. Its one-way pan sequence also moves the fitted
+graph outside the viewport after two inputs; DOM counts alone do not establish visible
+pan coverage. [MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
+records the source/geometry/trace proof and a proposed correction, not an implemented
+replacement. Preserve the existing failure and <100 ms limit. Any corrected evidence
+must retain visible geometry, ordered raw timings and clear callback/render/presentation
+semantics; fast synchronous dispatch or a local browser pass cannot waive a failed
+frame gate. Attribute long intervals with trace evidence before choosing a renderer
+or environment correction. Browser measurements remain separate from native WebView.
+
 ### 1G.2b named packaged scenarios
 
 The existing production workflow now includes the explicit R1 SDK service and R2

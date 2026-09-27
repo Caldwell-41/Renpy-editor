@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1 `blocked`; completed production run failed on both targets. G1-OBS retains its earlier `review_ready` evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-D1 diagnosis/review `review_ready` (ledger 28); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -54,8 +54,14 @@ assertions locally. F1 is `review_ready`; three of four additional build runs we
 used. The user excluded aggressive/hostile testing; the initial deliberate-crash
 harness was removed and no
 broad hostile/race suite was run. No redispatch, human acceptance, merge-conflict
-resolution, optional Git or Phase 2 is authorized. macOS budget diagnosis remains
-separate.
+resolution, optional Git or Phase 2 is authorized. macOS diagnosis is now recorded in
+ledger 28: the probe times dispatch-to-rAF
+rather than confirmed presentation and pans the graph offscreen after its second
+input. Local tracing demonstrates browser/compositor waits without new input; exact
+causation of the historical CI stalls remains unproven. Original 109.9 ms failure
+and unchanged 100 ms budget remain. The proposed measurement correction and hosted
+proof require separate approval; no application/test/workflow correction or dispatch
+occurred during D1.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure
