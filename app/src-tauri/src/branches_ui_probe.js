@@ -50,15 +50,31 @@
   const near = (a, b) => assert(Math.abs(a - b) < .15, `geometry ${a} != ${b}`);
   try {
     report.environment = { userAgent: navigator.userAgent, platform: navigator.platform, devicePixelRatio, viewport: [innerWidth, innerHeight], screen: [screen.width, screen.height, screen.availWidth, screen.availHeight], timeOrigin: performance.timeOrigin };
+    if (window.__loomlightRuntimeProbeCase === "branches-performance") {
+      // A native-driver click establishes a visible foreground window. This gate
+      // and the fixed settling interval are outside every measurement population.
+      report.stage = "foreground-gate";
+      const gate = document.createElement("button");
+      gate.textContent = "Start native measurement"; gate.className = "button";
+      gate.style.position = "fixed"; gate.style.top = "8px"; gate.style.right = "8px"; gate.style.zIndex = "10000";
+      let requested = false;
+      gate.addEventListener("click", () => { requested = true; gate.remove(); }, { once: true });
+      document.body.append(gate);
+      await until(() => requested, 60000);
+      await delay(5000);
+      assert(document.visibilityState === "visible" && document.hasFocus(), "visible foreground prerequisite");
+    }
+    report.stage = "open";
+    report.openState = { visibility: document.visibilityState, focused: document.hasFocus() };
     await until(() => find("Branches performance fixture"));
     let start = performance.now(); await click("Branches performance fixture");
     await until(() => find("Branches") && document.querySelector("#app-status")?.textContent === "Saved");
     report.operations.openToSceneReadyMs = performance.now() - start;
     assert(!/Running|Validating/.test(document.querySelector(".runtime-panel [role=status]")?.textContent ?? ""), "inspection does not execute");
     const project = await call("project.current"); let sessionId = project.sessionId;
-    start = performance.now(); await click("Branches"); await until(graphReady); await frames();
-    report.operations.branchesToCheckedTwoRafMs = performance.now() - start;
-    if (window.__loomlightRuntimeProbeCase === "branches-interactive") return; // Native driver owns the one bounded session.
+    start = performance.now(); await click("Branches"); await until(graphReady);
+    if (window.__loomlightRuntimeProbeCase === "branches-interactive") return; // Native driver observes presentation; no rAF prerequisite ends this session.
+    await frames(); report.operations.branchesToCheckedTwoRafMs = performance.now() - start;
     report.stage = "real-service-refresh";
     start = performance.now(); const flow = await call("flow.list", { sessionId, refresh: true });
     report.operations.flowRefreshIpcMs = performance.now() - start; checkModel(flow);
@@ -117,6 +133,6 @@
     report.stage = "complete";
     report.proxyBudgetStatus = report.stats.visible.firstRafMs.p95 < 100 && report.stats.visible.secondRafMs.p95 < 100 ? "pass" : "fail";
     report.passed = report.proxyBudgetStatus === "pass";
-  } catch (error) { report.passed = false; report.error = String(error); report.appStatus = document.querySelector("#app-status")?.textContent; }
+  } catch (error) { report.passed = false; report.error = String(error); report.appStatus = document.querySelector("#app-status")?.textContent; report.failureState = { visibility: document.visibilityState, focused: document.hasFocus(), activeElement: document.activeElement?.tagName, graph: document.querySelectorAll(".branch-node").length === 500 ? geometry() : null }; }
   await call("probe.runtimeUiReport", report);
 })();

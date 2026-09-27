@@ -4838,3 +4838,35 @@ bytes, Source inventory and empty-file assertions. No SDK or project code execut
 Static self-review confirmed probe-only changes, default runtime case set unchanged,
 report bounds retained, no added IPC privilege, and full per-sample geometry/focus
 assertions. The first release attempt now proceeds with this support candidate.
+
+### N1 first release and launch; bounded harness repair
+
+Release attempt **1/2** succeeded at candidate
+`9b0969416b7924dde1751ca5255bd977b7fba0d7`. Packaged executable SHA-256
+`ba91be1ff8572d2c44dc928872310d89355e21e21678ac2ac14782d80a84e618`; sorted
+package-file manifest SHA-256
+`6de67a85864c3573f460019bb4f4a89c71b972585136e33b0fdde29f13d1727d`.
+The original 503-file core release fixture passed its three fixed samples (ms):
+initial **30.787333 / 28.917166 / 28.118208**; unchanged refresh
+**28.396542 / 27.714208 / 28.129458**; accepted model update
+**15.257250 / 15.041208 / 16.235625**. All are below their unchanged limits.
+This is core service evidence, not native UI latency.
+
+Automated launch **1/3** failed before collecting interaction samples: `rAF timeout:
+open` (five-second callback deadline), after open-to-Scene-ready **1,326 ms**. The
+process exited 1 in 23.09 s, report cleanup true, supervisor timeout false. Full
+506-source fixture manifest passed independent reconstruction/hash audit, with source
+manifest digest `31219c03c041c87ad08a7306c875765ec7c50ce81db9c36feb6e96972de08209`.
+No pan/cadence sample exists. Do not attribute this to rendering or hidden-window
+throttling without evidence: this first probe did not capture visibility at failure.
+
+The single permitted repair adds a probe-only native-driver Start button before any
+measurement, a fixed five-second settling interval after that click, and explicit
+visible/focused prerequisites. Its UI gate is removed before opening/timing. Capture
+and AX inspection finish in this premeasurement interval; no screenshots/trace during
+the populations. Failure reports now preserve document focus/visibility and graph
+geometry. Interactive setup does not require rAF before yielding control to the native
+driver. This tests the concrete foreground-prerequisite hypothesis, without changing
+renderer, budgets, timed endpoints or sample counts. Release attempt **2/2** rebuilds
+the package only; unchanged validated core samples are reused, not rerun. First-launch
+failure remains in `automated-1/`; next evidence goes to `automated-2/`.
