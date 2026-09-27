@@ -29,12 +29,13 @@ try {
   await page.evaluate(() => { window.__holdFlowRefresh = true; });
   await page.getByRole("button", {name:"Refresh flow",exact:true}).click();
   assert.match(await page.locator(".branches-observation").textContent(), /Checking disk/);
-  const samples = [];
+  const samples = []; const dispatchSamples = [];
   await page.locator(".branches-viewport").focus();
   for (let index=0; index<30; index++) {
-    samples.push(await page.evaluate(async () => { const start=performance.now(); document.querySelector(".branches-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight",bubbles:true})); await new Promise(requestAnimationFrame); return performance.now()-start; }));
+    const sample = await page.evaluate(async () => { const start=performance.now(); document.querySelector(".branches-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight",bubbles:true})); const dispatchMs=performance.now()-start; await new Promise(requestAnimationFrame); return {frameMs:performance.now()-start,dispatchMs}; });
+    samples.push(sample.frameMs); dispatchSamples.push(sample.dispatchMs);
   }
-  const p95=samples.sort((a,b)=>a-b)[Math.ceil(samples.length*.95)-1];
+  const p95=[...samples].sort((a,b)=>a-b)[Math.ceil(samples.length*.95)-1];
   await page.getByRole("button",{name:"Zoom in",exact:true}).click();
   await page.getByRole("button",{name:"Fit graph",exact:true}).click();
   await page.getByLabel("Selected Scene",{exact:true}).selectOption(fixture.nodes[0].sceneId);
@@ -52,7 +53,8 @@ try {
   await page.setViewportSize({width:640,height:800});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({browser:await browser.version(),layer:`${process.platform} Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input`,nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,panDuringHeldRefresh:true,panFrameSamplesMs:samples,budgetStatus:timing<2000&&p95<100?"pass":"fail",resize640:"pass",pageErrors:errors}));
+  console.log(JSON.stringify({browser:await browser.version(),layer:`${process.platform} Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input`,nodes:500,edges:2000,initialLayoutMs:timing,panFrameP95Ms:p95,panDuringHeldRefresh:true,panFrameSamplesMs:samples,panDispatchSamplesMs:dispatchSamples,panDispatchMaxMs:Math.max(...dispatchSamples),visibility:await page.evaluate(()=>document.visibilityState),budgetStatus:timing<2000&&p95<100?"pass":"fail",resize640:"pass",pageErrors:errors}));
   assert.ok(timing<2000,`Initial layout ${timing}ms exceeds 2000ms`);
+  assert.ok(Math.max(...dispatchSamples)<100, "Synchronous input dispatch blocked during held refresh");
   assert.ok(p95<100,`Pan/frame p95 ${p95}ms exceeds 100ms`);
 } finally { await browser?.close(); await server.close(); }

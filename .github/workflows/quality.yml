@@ -65,11 +65,16 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
+      - name: Select locked npm toolchain
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        run: npm install --global npm@11.9.0
       - name: Ordinary reliability and UI regressions
         if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
         run: |
           set -o pipefail
+          node --version
+          npm --version
           npm ci --ignore-scripts
           npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
           cargo test -p loomlight-core --release --locked -- --skip flow_observed_budget_fixture --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"

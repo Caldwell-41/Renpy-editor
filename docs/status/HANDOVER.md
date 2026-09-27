@@ -1,7 +1,7 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-27. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** G1-OBS, `awaiting_ci`; implementation/local checks complete.
+**Checkpoint:** G1-OBS, bounded qualification correction in progress.
 **Authority:** user selected G1-OBS through the active goal/next-chat instruction.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/unmerged.
@@ -26,31 +26,26 @@ refresh pending; 60 UI tests, Source browser/build and broader core regressions 
 The ledger reports all ignored, SDK-skipped and capability-filtered cases. These are
 not final packaged WebView/native keyboard or official SDK acceptance.
 
-## Next bounded action and publication
+## Native artifact audit and next bounded action
 
-The single bounded `quality.yml` dispatch is live:
-[36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468), attempt **1**, exact candidate
-`1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`, inputs
-`phase1g_flow_profile=true`, `phase1g_candidate_proof=false`.
-Windows job **108538000239** and macOS ARM64 job **108538000117** were verified
-`in_progress` after checkout on 2026-09-27 at 02:56 UTC. Both were restoring the
-Rust cache; no completed native result is claimed. The validator job is intentionally
-skipped in this dispatch; the separate pull-request validator owns that check.
+Run [36289951468](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36289951468),
+attempt 1, candidate `1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`, completed successfully
+on both targets. Archive digests and all 12 extracted files verified; core/renderer
+measurements and baseline link cases passed. Full logs/screenshots/JSON are retained
+locally and in the run artifacts. See ledger 22 for the audit and limitations.
 
-**Outstanding operation:** this exact run/attempt. No local build/test process or
-second dispatch is outstanding. No automatic same-thread watcher is claimed.
+The artifact review found CI used npm **11.17.0**, not pinned **11.9.0**, and macOS
+recorded one 1,058.6 ms frame despite passing its 59.8 ms p95. Correct the omitted npm
+pin and add synchronous dispatch timing/sample order to the browser evidence without
+changing its workload or p95 gate. These are the only new qualification inputs.
 
-**Manual-resume action (G1-OBS only):** inspect this exact run, collect native logs and
-artifacts when terminal, verify all three cold/explicit-refresh/accepted samples,
-core/UI results and rendered input/pan evidence on both targets. Include baseline
-symlink cases filtered locally; distinguish SDK wrappers/explicit ignored specialist
-cases from passes. Preserve failure/overrun evidence; do not redispatch on observation
-timeout. Publish final findings and handover, then stop at G1-OBS.
+Publish that bounded correction and run exactly one matching Windows/macOS
+`quality.yml` qualification (`phase1g_flow_profile=true`,
+`phase1g_candidate_proof=false`). Record its exact run/attempt/SHA immediately.
+No CI operation is currently outstanding; no local writer is pending. Preserve the
+first run as passed under its actual unpinned npm environment, not final qualification.
 
-The repository waiting rule applies: use manual resume while native work runs;
-no repeated model polling, hypothetical watcher or premature checkpoint completion.
-Final R2/1G package/runtime/diagnostic completion, native-keyboard/human acceptance
-and integration remain separate and unapproved here.
-
-No security/privilege settings changed, no historical native experiment resumed,
-no package matrix or merge. Preserve the historical checkout and local raw evidence.
+After corrected target evidence is inspected, publish findings/handover and stop at
+G1-OBS. Final R2/1G packaging/runtime/diagnostic, native-keyboard/human acceptance and
+integration remain separate. No privilege change, native experiment, package matrix
+or merge is selected. Preserve historical worktree and raw evidence.

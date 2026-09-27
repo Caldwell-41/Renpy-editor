@@ -3169,3 +3169,67 @@ Do not dispatch a duplicate, resume the native experiment, package, merge, or ad
 into R2. There is no task-created local process still running. G1-OBS cannot be
 marked achieved until target artifacts and outcomes have been inspected and final
 findings/handover published. Historical failures and raw evidence remain preserved.
+
+
+#### First native artifact audit and bounded qualification correction
+
+Run 36289951468 attempt 1 completed successfully on both jobs. Downloaded archives
+were verified against GitHub SHA-256 digests, and all six extracted files per target
+matched their archive bytes. Both JSON models contain 500 nodes / 2,000 edges with
+completed check status and no stale/partial/over-limit flags. All three core budget
+samples passed, ordinary core and 60 UI tests passed, and baseline path/link cases
+excluded locally passed on their respective targets. Full results remain preserved.
+
+The audit found the new bounded workflow omitted the existing production workflow's
+explicit npm pin. Both jobs actually used Node 24.19.0, **npm 11.17.0**, Rust 1.90.0;
+`npm ci` emitted EBADENGINE against the declared npm 11.9.0. These remain successful
+runs under their actual toolchain, not pinned-toolchain qualification. Fix the workflow
+to install npm 11.9.0 explicitly; no application/dependency version changes.
+
+The macOS browser passed p95 at 59.8 ms but retained a single **1,058.6 ms** frame
+sample. Windows initial layout was 1,689.2 ms, pan p95 16.1 ms. The frame timer includes
+browser/runner scheduling; the existing log cannot attribute the outlier. Do not
+claim every frame was below 100 ms or erase this evidence. The corrected browser
+probe retains sample order and records synchronous dispatch separately, asserting
+that enabled input is not blocked on the held refresh promise. Original p95/initial
+assertions and full workload remain unchanged.
+
+These concrete workflow/probe changes justify one bounded correction run of the same
+Windows/macOS core-and-browser qualification. No package, SDK download, native
+experiment, broad new performance program or automatic rerun of an unchanged candidate.
+G1-OBS remains open until corrected target evidence and the final handover are verified.
+
+
+First-run release core samples, in milliseconds (all original observations retained):
+
+| Target / sample | Initial disk | Explicit refresh | Accepted update |
+| --- | ---: | ---: | ---: |
+| Windows 1 | 313.2204 | 280.8772 | 25.0612 |
+| Windows 2 | 281.8536 | 303.8981 | 23.5526 |
+| Windows 3 | 307.0926 | 295.3030 | 22.8658 |
+| macOS 1 | 33.538833 | 33.412500 | 14.407333 |
+| macOS 2 | 32.204166 | 37.270833 | 13.382833 |
+| macOS 3 | 31.329375 | 32.480333 | 13.737500 |
+
+Windows core reported 171 passed / 30 ignored / 1 filtered; macOS reported
+176 / 33 / 1. Two official-SDK wrappers per target emitted skip markers within those
+pass counts, so actual executed regular cases are 169 and 174 respectively. The
+filtered budget fixture passed separately with three fixed samples. Each UI suite
+passed all 60. Candidate-proof and dispatch-validator jobs/steps were intentionally
+skipped. Windows Chromium 153.0.8010.53 initial/p95/max frame were
+1,689.2 / 16.1 / 16.5 ms; macOS Chromium 152.0.7977.83 were
+111.5 / 59.8 / 1,058.6 ms. Both held-refresh navigation/resize checks passed with no
+page errors. Both screenshots were visually inspected.
+
+Verified artifact archives for run 36289951468 attempt 1:
+
+| Target | Artifact ID | Bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Windows | 10921744612 | 175503 | `34ffe40e80045dcfe4ce46a777198f9720cb388df1f0cfe6aad2ab313c9953ae` |
+| macOS | 10921644313 | 198024 | `4427646e43d534ac2bf89afedc4e8acb0c93bc51469d39778875e5216a5c0638` |
+
+The bounded correction passed local JavaScript syntax, repository validation (268
+files), whitespace checks and the unchanged full browser workload. Chromium
+153.0.8010.53 recorded initial 64.9 ms, frame p95 3.7 ms, maximum synchronous input
+0.2 ms, visible document, resize pass and no page errors. Core/application code and
+locked dependencies are unchanged by this correction.
