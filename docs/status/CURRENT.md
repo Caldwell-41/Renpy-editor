@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-09-27.
-**Current checkpoint:** R2-P1-MAC-H1 `awaiting_ci`, manual resume (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
+**Current checkpoint:** R2-P1-MAC-H1 audit `review_ready` after terminal diagnostic FAIL (ledger 30); R2-P1 remains `blocked` after the failed production run. G1-OBS and WIN-F1 retain their earlier evidence; final 1G remains unaccepted.
 **R2-P1 candidate:** `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`.
 **R2-P1 run:** [36293797731](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36293797731), attempt 1, terminal FAIL: Windows packaged startup stack overflow; macOS Branches frame p95 109.9 ms >100 ms. See ledger 23.
 **Branch:** feature/phase-1g-branches-runtime, draft/open
@@ -71,11 +71,17 @@ qualify historical Chrome 152 CI. Both sessions are closed. WIN-F1, renderer/CSS
 workflows and dependencies are unchanged; no tool installation or CI dispatch.
 The user subsequently approved combining H1 scope review and one macOS/browser
 hosted diagnostic. Reviewed workflow candidate `238aa9fde5bb15243912ae89abdc4bcf2c21af78`
-is published. Exactly one dispatch created [36310107481](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36310107481),
-attempt 1, at that SHA; job 108594276410 was in progress at Node setup, both unrelated
-job paths skipped. No result is claimed. H1 awaits manual resume to audit that run;
-no qualified automatic wake-up exists. No retry, production matrix or acceptance/budget
-change is authorized. See ledger 30 and HANDOVER for exact operation/next action.
+is published. Its one diagnostic [36310107481](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36310107481),
+attempt 1, is terminal FAIL: original p95 **123.6 ms**, visible second-rAF p95
+**181.6 ms**, no-input control p95 **148.8 ms**. Functional assertions, geometry,
+cleanup and artifact upload passed; archive, nine manifested files and all 90 samples
+were verified. Trace shows long GPU command-scheduling waits and late frame delivery
+with no new rendering work on Chrome 152 / virtual M1. Exact browser/host/instrumentation
+causation remains unresolved; no justified repository fix was found. The user's resumed
+fix-if-possible request produced a diagnosis, not speculative renderer/flag/budget changes.
+No operation is pending. H1 audit is review-ready; R2-P1 stays blocked. Proposed MAC-E1
+is a fixed hosted untraced/traced comparison with pre-graph cadence controls; it requires
+explicit approval, with no redispatch or broader qualification automatically authorized.
 Historical worktree and raw evidence remain preserved.
 
 ## Preserved baseline and earlier closure

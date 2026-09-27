@@ -674,6 +674,16 @@ the historical run, core budgets, native WebView or final packages. Ledger 30 ow
 approved single dispatch and result; no continuing authorization follows from this
 workflow selector. Follow the repository manual-resume rule while external CI runs.
 
+The first hosted H1 trace reproduced both long GPU command-scheduling waits and late
+BeginFrame delivery, including >100 ms controls with no new input or recorded
+layout/paint/raster work. See ledger 30 for exact samples and causal limits. Inspect
+control cadence and browser/GPU waits before choosing a renderer optimization. A
+traced failure remains failure; neither idle-time subtraction nor an unverified
+browser/backend flag is a correction. Pre-graph controls and a matched untraced run
+can separate instrumentation/queued-work effects, but require a bounded approved
+follow-up rather than automatic retry. Keep physical presentation, hosted Chromium
+and packaged WebView evidence distinct.
+
 ### 1G.2b named packaged scenarios
 
 The existing production workflow now includes the explicit R1 SDK service and R2

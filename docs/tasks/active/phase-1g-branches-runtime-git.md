@@ -8,7 +8,7 @@ supported-target qualification, `blocked` after the failed matrix (ledger 23). G
 R2-P1-MAC-D1 diagnosis/review is `review_ready` (ledger 28). User-approved
 R2-P1-MAC-M1 probe correction/local proof is `review_ready` (ledger 29). The user
 then approved combining H1 scope review with one hosted macOS diagnostic execution
-(ledger 30, `awaiting_ci`, manual resume); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
+(ledger 30, audit `review_ready` after terminal failure); no new qualification is claimed. Earlier prerequisite interruption/setup remain in ledgers
 24–25. Final 1G acceptance remains open.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
@@ -4313,7 +4313,8 @@ Final supported-target/package/native-human acceptance remains open. M1 stops he
 
 **Authority/state:** user asked to do the current scope-review prompt and item 1
 (scoped workflow implementation, one hosted macOS diagnostic and assessment) in the
-same go. This explicitly combines those steps into one checkpoint, now `awaiting_ci`,
+same go. This explicitly combines those steps into one checkpoint, now audit `review_ready`
+after the terminal failed diagnostic,
 and supersedes M1's no-dispatch boundary for this one diagnostic only. No Windows,
 production matrix, retry, budget relaxation, renderer change, hostile/crash test,
 additional profiler/browser installation, conflict resolution or merge.
@@ -4415,3 +4416,172 @@ inconclusive about the historical Chrome 152 stalls; a failure is a bounded find
 Publish the H1 assessment and stop. No new dispatch, fix implementation, renderer or
 budget change, crash tests, production matrix, conflict resolution or merge follows.
 All broader 1G/package/human gates and the original failed run remain open.
+
+#### Resumed audit and bounded-fix authority — 2026-09-27
+
+The user resumed H1 to audit run 36310107481 attempt 1, identify the issue and fix it
+if possible. This authorizes an evidence-backed bounded correction, superseding the
+prior audit-only implementation exclusion, but does not authorize another dispatch,
+budget relaxation, production renderer change, new tool installation, hostile/crash
+work or integration. Audit is `review_ready`; the run is terminal FAIL. Entry is clean
+published `3ba1094ec798d9055e1d48c9f1ab426b18973104`; branch/PR/main are unchanged.
+The worktree was clean, with no unrelated edits. Exact run/artifact/source/trace audit
+and correction disposition follow below before publication.
+
+#### Terminal result, provenance and complete artifact audit
+
+Fresh API reads confirm **36310107481**, attempt **1**, candidate
+**238aa9fde5bb15243912ae89abdc4bcf2c21af78**, terminal **failure**, updated
+**2026-09-27 09:41:16 UTC**. Job **108594276410** ran **09:40:26–09:41:15 UTC**.
+Only **One traced browser launch** failed (09:40:45–09:41:07); fixture verification,
+identity, hosted cleanup audit and artifact upload passed. Both unrelated job paths
+were skipped as intended. One hosted launch/dispatch occurred; no operation remains
+pending. No retry or new browser/core/SDK/package run was performed during this audit.
+
+Artifact **10928671828**, `r2-p1-macos-browser-diagnostic`, is **1,366,696 bytes**,
+SHA-256 **478dfc0afb23593c7a086f970fb5849a53ad30eb53a5dcba046e80e232fedafd**.
+Fresh metadata, exact byte size/digest, ZIP CRC and bounded flat regular-member
+checks passed. All **nine manifested payload files** matched their SHA-256s; the
+manifest itself is also retained in the archive/local integrity inventory. Contents:
+input-artifact metadata, retained fixture, identity log, probe log/report, trace,
+two PNG captures and cleanup audit. The raw job log is retained separately.
+
+The report's Git head, all four probe/renderer/CSS/lock hashes and recorded workflow
+hash match the exact dispatched commit. Current app files still match those hashes.
+Fixture remains `8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196`.
+WIN-F1's `renpy.rs`, Branches renderer/CSS and lockfiles remain unchanged from the
+reviewed Windows candidate. No workload substitution or source mismatch explains this
+failure. The assertion that terminated the probe was the original p95 gate, but the
+visible diagnostic also failed its unchanged objective; both outcomes are recorded.
+
+Host: **macOS 26.6.2 / 25G83**, **Apple M1 (Virtual)**, image
+**20260907.0351.1**, Node **24.19.0**, npm **11.9.0**, Playwright **1.63.0**,
+Chrome **152.0.7977.83**. This matches the historical failed run's browser/image
+versions, not necessarily its hardware load or scheduling. CDP reports **Apple
+Paravirtual device**, ANGLE Metal, **GraphiteDawnMetal**, GPU compositing and
+rasterization enabled, multiple raster threads disabled, zero GPU process crashes.
+This is a different graphics environment from local M4/Chrome 154. No unsupported
+claim of an identified upstream Chrome bug or hardware defect follows.
+
+#### Recalculated distributions and functional result
+
+All **90 samples** retained; nearest-rank p95 is sorted sample 29 of each fixed
+population of 30. Initial layout **160.1 ms <2 s**; original/visible maximum
+synchronous dispatch **0.5/0.3 ms**. No trimming, pooling or control subtraction.
+
+| Population / endpoint | p95 | Maximum | Samples >100 ms | Outcome |
+| --- | --- | --- | --- | --- |
+| Original dispatch-to-first-rAF | 123.6 ms | 968.4 ms | 2/30 | FAIL, retained legacy gate |
+| Visible dispatch-to-first-rAF | 116.5 ms | 605.4 ms | 4/30 | FAIL |
+| Visible second-rAF rendering opportunity | 181.6 ms | 621.4 ms | 10/30 | FAIL, diagnostic objective |
+| No-input first-rAF control | 116.9 ms | 122.7 ms | 3/30 | Diagnostic; exceeds input objective without an input |
+| No-input second-rAF control | 148.8 ms | 177.8 ms | 9/30 | Diagnostic; not an input acceptance population |
+
+All visible geometry checks, full **500 nodes/2,000 paths**, stable representative
+IDs/dimensions/translations, focus/visibility, held-refresh navigation, release to
+checked state, 640px resize and zero-page-error assertions passed. Every visible
+sample retains **25,403 CSS px²** graph intersection and **30 CSS px²** first-node
+intersection. Original sequence ends offscreen, as explicitly retained for comparison.
+No-input geometry is unchanged throughout. Captures were visually reviewed; they
+show the graph at x=40 and x=0 and are byte-identical to the corresponding local M1
+captures. This confirms rendered state, not a physical-presentation latency endpoint.
+
+The hosted cleanup audit reports browser/server closed, recorded browser PIDs absent,
+server port closed and trace saved. This is evidence executed on the hosted runner;
+it is not misrepresented as an independent PID check on this local Mac.
+
+#### Trace diagnosis: graphics waits and late frame delivery
+
+Trace: **10,262,344 bytes**, **48,972 events**, **450 user marks**, **47 screenshots**.
+All 360 timer-boundary mark deltas correlate with report timestamps within 0.01 ms
+(a correlation check, not a claim of clock accuracy). Offline analysis examines each
+sample bracket; named-event overlap is merged before reporting wall duration, avoiding
+nested-event double counting. Representative samples are numbered from 1 below.
+
+1. **Long browser graphics waits are directly observed.** Original sample **#2**
+   lasts **968.4 ms**. A GPU `IOSurfaceImageBacking::WaitForCommandsToBeScheduled`
+   event starts at +379.014 ms and lasts **587.240 ms** wall time (recorded thread
+   time **0.164 ms**). Earlier GPU raster-command flushing also overlaps this sample.
+   There is no renderer Layout, UpdateLayoutTree, Paint or RasterTask in its bracket;
+   the key EventDispatch takes **0.042 ms**. The long wait precedes callback delivery.
+   This sample occurs before the two explicit PNG captures, so those captures cannot
+   explain it; tracing and earlier graph/browser graphics work remain contributors.
+2. **The visible maximum shows the same graphics mechanism.** Visible sample **#4**
+   lasts **621.4 ms**, overlapping a **540.498 ms** GPU command-scheduling wait
+   (thread time **0.219 ms**). Its UpdateLayoutTree is **6.137 ms**, EventDispatch
+   **0.056 ms**, with no Layout/Paint/RasterTask. This case follows the explicit
+   captures, whose pending work can affect later samples. It does not isolate
+   application-triggered graphics work from diagnostic/browser overhead.
+3. **The p95 failure is not only those two GPU outliers.** Original sample **#30**
+   is **123.6 ms** with no Layout/UpdateLayoutTree/Paint/RasterTask; EventDispatch
+   **0.043 ms** and no >1 ms named GPU command-scheduling wait. The first recorded
+   Viz ExternalBeginFrame in its bracket arrives at **+123.359 ms**, just before the
+   callback. Visible sample **#6** is **181.6 ms**: UpdateLayoutTree **0.204 ms**,
+   EventDispatch **0.293 ms**, Viz BeginFrames at **+116.162/+178.210 ms**. This
+   shows late frame delivery rather than a long synchronous graph handler.
+4. **Frame delay persists without a new input or graph mutation.** Across all 30
+   no-input sample brackets there are **zero** recorded renderer Layout,
+   UpdateLayoutTree, Paint, RasterTask or EventDispatch events. Control **#1** takes
+   **177.8 ms**, with Viz BeginFrames at **+104.155/+177.181 ms**; **#25** takes
+   **148.8 ms**, with BeginFrames at **+85.591/+148.135 ms**. No >1 ms named GPU wait
+   overlaps these two brackets. BeginFrame metadata still declares a **16.666 ms**
+   interval; that declared interval is not measured delivery cadence. These controls
+   demonstrate browser/host frame-delivery delay in the absence of new application
+   rendering work, not a pure idle-host benchmark or an OS scheduler root-cause proof.
+
+**Classification:** reproduced browser/graphics waits plus late frame delivery on the
+hosted virtual graphics path. The measured failure is not explained by synchronous
+Branches input code. Deferred graph-triggered graphics, Chrome behavior, virtualization,
+host scheduling and instrumentation may contribute; their precise causal split remains
+unresolved. The trace does not include complete OS scheduling/load evidence, and an
+absence of named renderer events is not proof that the entire host was idle. Historical
+860.3/109.9 ms intervals remain separately failed and are not retrospectively attributed
+with certainty from this later run.
+
+Trace start/stop wall costs **102.5/1,024.5 ms** and explicit capture costs
+**893.2/1,281.0 ms** are outside the input timers but can perturb later work. No matching
+untraced launch on this hosted allocation was authorized/run, so tracing overhead is
+not isolated. The local M1 pair is not an equivalent untraced hosted control. All raw
+values stay intact; the no-input distribution cannot be subtracted to manufacture a pass.
+
+#### Fix disposition, validation and next bounded decision
+
+**No evidence-backed repository fix was found within this resumed checkpoint.** The
+probe preserved the full workload, failed honestly, saved all evidence and cleaned up;
+no additional harness malfunction was demonstrated. A speculative renderer change
+would neither explain the no-input delays nor respect the retained renderer exclusion.
+Disabling Graphite/GPU/vsync, changing browser/runner versions, removing the original
+gate, enlarging budgets or subtracting idle/capture times is not a demonstrated fix.
+No such change was made. This is an explicit unresolved browser/environment blocker,
+not a claimed fix or a harmless-flake classification.
+
+H1's **audit is `review_ready`**, with the hosted diagnostic **FAIL** and R2-P1 still
+**`blocked`**. Only this ledger, CURRENT, the live HANDOVER and the durable TESTING
+interpretation lesson change. No app, probe, workflow or dependency change; no new
+runtime test, installation, redispatch, hostile/crash test, merge or conflict resolution.
+
+Local raw audit evidence and replayable `analyze.py` are ignored under
+`.toolchains/reports/r2-p1-mac-h1-audit`. `trace-audit.json` preserves all 90 bracket
+analyses; `integrity.json` hashes 17 retained audit files including the downloaded
+archive, API/job metadata, all extracted files, full job log and analysis/script.
+`python3 .toolchains/reports/r2-p1-mac-h1-audit/analyze.py` passed artifact/source/sample/
+geometry/capture/cleanup checks. Repository structure/link/privacy validation passed
+for **270 files**; `git diff --check` and four-document changed-path review passed.
+No package matrix is warranted
+for this documentation-only audit. Publish on the existing branch with `[skip ci]`
+and verify the remote files. No operation is awaiting completion.
+
+**Proposed next R2-P1-MAC-E1 — approval required:** one bounded environment/instrumentation
+comparison, not another unchanged retry. Use one macOS hosted allocation, existing
+installed Chrome and identical pinned workload, with a fixed untraced/traced pair and
+an additional pre-graph no-input cadence baseline in each. Keep explicit capture
+behavior otherwise identical so trace enablement is the controlled change. Record
+that fresh baseline separately from post-graph controls to distinguish delayed frame
+pacing before graph work from queued graph/capture effects. Preserve all current gates
+and failures; this does not qualify packages or change acceptance policy. Prepare/review
+that minimal probe extension before dispatch, retain both outcomes regardless of result,
+and stop after the pair. This is a proposal only: the prior one-run allowance is spent;
+new execution, browser/backend/runner changes or tooling need explicit authorization.
+If the baseline is already slow, choose a qualified execution environment rather than
+optimizing the graph to hide host frame delivery; any such acceptance-host decision
+requires its own reviewed evidence and unchanged responsiveness objective.
