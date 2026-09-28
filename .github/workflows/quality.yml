@@ -37,7 +37,9 @@ jobs:
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
       - name: Exercise bounded Q1 gate rejection fixtures
-        run: python3 app/scripts/check-q1-prep-gates.py self-test
+        run: |
+          python3 app/scripts/check-q1-prep-gates.py self-test
+          python3 app/scripts/test-q1-package-retention.py
       - name: Audit Q1 selectors and retained cases
         run: python3 app/scripts/check-q1-prep-gates.py source-audit .
 
@@ -55,6 +57,8 @@ jobs:
             runner: macos-26
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
+    env:
+      Q1_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
     defaults:
       run:
         working-directory: app
@@ -84,6 +88,7 @@ jobs:
           set -o pipefail
           node --version
           npm --version
+          "$Q1_PYTHON" --version
           npm ci --ignore-scripts
           npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
           cargo test -p loomlight-core --release --locked -- \
@@ -95,7 +100,7 @@ jobs:
           grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/observed-core.log"
           grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/observed-core.log"
           grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/observed-core.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log" \
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log" \
             transaction::tests::prepared_fault_state_can_be_safely_abandoned \
             transaction::tests::every_persistent_transition_has_bounded_recovery \
             transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
@@ -123,7 +128,7 @@ jobs:
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-profile.log"
           grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-profile.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
           grep 'phase-1g-observed-budget-gate: passed (3 samples)' "$RUNNER_TEMP/runtime-flow-profile.log"
       - name: Rendered interaction during refresh
         if: ${{ !inputs.phase1g_candidate_proof }}

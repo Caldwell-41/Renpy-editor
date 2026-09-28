@@ -27,7 +27,9 @@ jobs:
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
       - name: Exercise bounded Q1 gate rejection fixtures
-        run: python3 app/scripts/check-q1-prep-gates.py self-test
+        run: |
+          python3 app/scripts/check-q1-prep-gates.py self-test
+          python3 app/scripts/test-q1-package-retention.py
       - name: Audit Q1 selectors and retained cases
         run: python3 app/scripts/check-q1-prep-gates.py source-audit .
       - name: Select locked Node toolchain
@@ -64,6 +66,8 @@ jobs:
             runner: macos-26
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
+    env:
+      Q1_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
     defaults:
       run:
         working-directory: app
@@ -86,6 +90,7 @@ jobs:
           npm --version
           rustc --version --verbose
           cargo --version --verbose
+          "$Q1_PYTHON" --version
       - name: Restore Rust dependency cache
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
@@ -115,7 +120,7 @@ jobs:
           grep 'final_window_external_writer_is_preserved_as_conflict .*ok' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log" \
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log" \
             transaction::tests::prepared_fault_state_can_be_safely_abandoned \
             transaction::tests::every_persistent_transition_has_bounded_recovery \
             transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
@@ -141,7 +146,7 @@ jobs:
             | tee "$RUNNER_TEMP/runtime-flow-budget.log"
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-budget.log"
           grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-budget.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
           grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
       # Browser functional/evidence failures are reasserted below; Chrome timing
       # overruns remain visible diagnostics in the report and warning annotations.
@@ -191,7 +196,7 @@ jobs:
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep -E '^test lifecycle::tests::official_sdk_phase_1c_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           if grep -q 'phase-1c-target-gate: skipped' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"; then exit 1; fi
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log" lifecycle::tests::official_sdk_phase_1c_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log" lifecycle::tests::official_sdk_phase_1c_target_gate
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
@@ -212,7 +217,7 @@ jobs:
             | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
           grep -E '^test renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log" renpy::reconciliation_tests::official_sdk_download_handoff_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log" renpy::reconciliation_tests::official_sdk_download_handoff_target_gate
           grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
       - name: Runtime foundation and real SDK diagnostics gates
         shell: bash
@@ -223,12 +228,12 @@ jobs:
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_official_sdk_service_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-sdk-service.log"
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-sdk-service.log"
           grep -E '^test lifecycle::runtime_tests::runtime_official_sdk_service_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-sdk-service.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log" lifecycle::runtime_tests::runtime_official_sdk_service_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log" lifecycle::runtime_tests::runtime_official_sdk_service_gate
           grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_diagnostics_sdk_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep -E '^test lifecycle::runtime_tests::runtime_diagnostics_sdk_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
           grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
       - name: Test desktop Rust boundary
@@ -253,7 +258,8 @@ jobs:
       - name: Require all packaged Runtime reports and cleanup evidence
         if: always()
         shell: bash
-        run: python scripts/check-q1-prep-gates.py runtime-cases "$RUNNER_TEMP"
+        run: |
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py runtime-cases "$RUNNER_TEMP"
       - name: Run packaged WebView boundary smoke
         shell: bash
         env:
@@ -346,7 +352,7 @@ jobs:
           WORKFLOW_SHA: ${{ github.sha }}
           EVIDENCE_DIR: ${{ runner.temp }}/q1-package-evidence
         run: |
-          python scripts/retain-q1-package.py \
+          "$Q1_PYTHON" scripts/retain-q1-package.py \
             --platform "$TARGET_OS" \
             --runner "$TARGET_RUNNER" \
             --package-outcome "${PACKAGE_OUTCOME:-skipped}" \
@@ -373,7 +379,7 @@ jobs:
           set -o pipefail
           echo "Runtime browser: ${RUNTIME_BROWSER_OUTCOME:-not-run}"
           echo "Branches browser: ${BRANCHES_BROWSER_OUTCOME:-not-run}"
-          python scripts/check-q1-prep-gates.py browser-outcomes \
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py browser-outcomes \
             "${RUNTIME_BROWSER_OUTCOME:-missing}" \
             "${BRANCHES_BROWSER_OUTCOME:-missing}" \
             | tee "$RUNNER_TEMP/browser-outcomes.log"

@@ -1,15 +1,16 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** R2-P1-Q1-PREP source alignment, `review_ready` after cheap
-documentation/selector/gate checks; see the [Q1 preparation record](../tasks/active/testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
+**Current checkpoint:** R2-P1-Q1-PREP review and corrections, `review_ready` for
+Q1-EXEC selection; see the [review record](../tasks/active/testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28).
 Four termination parents and both embedded SDK specialist blocks are separated; the
 Prepared recovery regression and both workflow selectors are aligned. No compiled or
 hosted test evidence is claimed. Rules remain in
 [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Audited baseline:** `109417800873a464dd7da5f9d9571c00a9f9c447`.
+**Reviewed preparation:** published `e8dc1fac3c2f2c6844026a70ba34133a70427bb4`;
+the review correction is its successor on this branch.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
 No build, app launch, workflow dispatch or application acceptance is part of this update.
 
@@ -49,9 +50,11 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Next boundary:** stop before Q1-EXEC. Its separate selection would use one standard
+**Next goal:** R2-P1-Q1-EXEC, the automated qualification itself. Selecting it uses one standard
 production dispatch on the existing Windows x64 and macOS ARM64 hosted runners, after
-freshly checking Actions access, repository rules, refs and review comments. Codex may
+rechecking the candidate and access at dispatch. This review found access available,
+no feature-branch rules and no PR comments/reviews; it fixed Python portability,
+Rust formatting, macOS artifact preservation and stale instructions. Codex may
 run on any repository-capable host with Actions coordination access; no physical test
 machine is selected. No package run, app launch or CI dispatch was part of Q1-PREP.
 PR #17 conflicts/integration, Windows native responsiveness, final human sessions and

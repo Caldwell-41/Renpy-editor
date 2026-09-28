@@ -74,6 +74,17 @@ def join_shell_continuations(text):
     return re.sub(r"[ \t]*\\\r?\n[ \t]*", " ", text)
 
 
+def workflow_python_ok(workflow):
+    selection = "Q1_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}"
+    helper_calls = re.findall(
+        r'^\s*(?:run: )?(.*?)\s+scripts/(?:check-q1-prep-gates|retain-q1-package)\.py\b',
+        workflow, re.MULTILINE,
+    )
+    return selection in workflow and bool(helper_calls) and all(
+        command == '"$Q1_PYTHON"' for command in helper_calls
+    )
+
+
 def source_audit(repo):
     transaction = (repo / "app/src-core/src/transaction/tests.rs").read_text(encoding="utf-8")
     lifecycle = (repo / "app/src-core/src/lifecycle.rs").read_text(encoding="utf-8")
@@ -110,6 +121,8 @@ def source_audit(repo):
         "renpy::reconciliation_tests::official_sdk_download_handoff_target_gate",
     )
     for workflow_name, workflow in (("production", production), ("quality", quality)):
+        if not workflow_python_ok(workflow):
+            return False, f"{workflow_name} Q1 helpers must use the target's Python command"
         for selector in exclusions:
             if workflow.count("--skip " + selector) != 1:
                 return False, f"{workflow_name} selector mismatch: {selector}"
@@ -146,7 +159,7 @@ def source_audit(repo):
     for state in ("not-built", "built-but-missing", "available", "withheld-by-scan"):
         if state not in retainer:
             return False, f"package evidence state is not recorded: {state}"
-    if "sha256" not in retainer or "shutil.copytree" not in retainer or "package-evidence.json" not in retainer:
+    if "sha256" not in retainer or "tarfile.open" not in retainer or "package-evidence.json" not in retainer:
         return False, "package hash/retention manifest is incomplete"
     allowed_match = re.search(r"allowed\s*=\s*\[([^]]*)\]", prepared)
     allowed_cases = re.findall(r"\"([^\"]+)\"", allowed_match.group(1)) if allowed_match else []
@@ -156,6 +169,13 @@ def source_audit(repo):
 
 
 def self_test():
+    portable = (
+        "Q1_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}\n"
+        '          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log log test\n'
+    )
+    assert workflow_python_ok(portable)
+    assert not workflow_python_ok(portable.replace('"$Q1_PYTHON"', 'python'))
+    assert not workflow_python_ok(portable.split('\n', 1)[1])
     selector = "lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact"
     multiline = (
         "cargo test -p loomlight-core --release --locked "

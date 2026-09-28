@@ -5297,3 +5297,27 @@ The complete five-step table, check details and unsupported syntax-check limitat
 in the owning testing-policy ledger. No product/test coverage gap requiring production
 changes was encountered. Recheck current Actions access/rules, review comments and exact
 refs when Q1-EXEC is separately selected; do not start that matrix from this checkpoint.
+
+## 37. Q1-PREP review and corrections — 2026-09-28
+
+User selected review and correction of Luna's published preparation `e8dc1fa`.
+The [detailed review](testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28)
+records the retained-regression audit and four findings: target-specific Python
+lookup, three preflight Rust formatting failures, macOS bundle permission loss during
+artifact upload, and stale publication/migration instructions. All are corrected in
+the successor checkpoint on the existing branch/PR; no production behavior changed.
+Mac failure evidence now contains a tar plus archive/executable hashes. Real helper
+tests also reject a mismatched report case in the manifest.
+
+Validation: gate fixtures/source audit, workspace Rust formatting, all 20 explicit
+Bash step syntax checks, repository validator and whitespace checks pass. Retention
+CLI fixtures: seven pass, one POSIX symlink test skipped on Windows and selected in
+Ubuntu preflight. No YAML parser was available; no Rust compilation, package build,
+application/SDK launch, native test, CI dispatch or specialist exercise ran.
+
+Fresh origin/main/PR/access checks are in the detailed review. PR #17 still conflicts;
+no comments/reviews or feature-branch rules were returned. No operation is pending.
+WIN-F1/MAC-N1 retain their limits; original R2-P1/H1 failures and all consumed budgets
+remain unchanged. Q1-PREP is `review_ready` for selection of Q1-EXEC itself, not another
+planning-only checkpoint. Then Windows native/final human acceptance and final review/
+integration remain; integrated 1H is a separate milestone. HANDOVER owns the next prompt.

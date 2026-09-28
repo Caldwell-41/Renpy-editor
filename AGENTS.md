@@ -96,9 +96,10 @@ The core suite retains historical Phase 1B race and real process-termination
 recovery tests. Scope new gates using [TESTING](docs/TESTING.md) and ADR 0010;
 do not expand specialist attack experiments into a prerequisite for routine
 hobby-editor work. Keep ordinary external-writer and interrupted-save coverage.
-Unfiltered core and the embedded Phase 1C SDK gate still conflict with the current
-policy. Follow the [selector audit](docs/tasks/active/testing-policy-alignment.md#selector-disposition)
-before selecting them; the proposed migration is not yet implemented.
+Use the routine broad-core and separate SDK selectors in TESTING; unfiltered core
+is only a command reference and can duplicate archive-backed gates. The
+[selector audit](docs/tasks/active/testing-policy-alignment.md#selector-disposition)
+records the exact specialist exclusions; current evidence belongs in HANDOVER.
 An official-SDK wrapper with a skip marker is not target evidence.
 
 Retain the Phase 0 regression commands:

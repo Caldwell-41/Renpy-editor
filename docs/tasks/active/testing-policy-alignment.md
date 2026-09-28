@@ -475,9 +475,74 @@ other workflow, repository rule or prior raw evidence changed.
   package build, hosted workflow, or CI dispatch ran. These compiled/hosted behaviors
   are unverified and belong to Q1-EXEC after review/selection.
 
-Publish the lightweight Q1-PREP checkpoint on the existing branch with `[skip ci]`;
-its head is resolved from Git after publication. Q1-EXEC needs a separate user selection,
+Published the lightweight Q1-PREP checkpoint as
+`e8dc1fac3c2f2c6844026a70ba34133a70427bb4` with `[skip ci]`, verified on origin
+during the review below. Q1-EXEC needs a separate user selection,
 fresh refs/rules/access review and one Windows x64/macOS ARM64 production dispatch. Open
 questions for that step: confirm current Actions permissions and branch rules, and
 inspect any review comments on the prepared selectors/artifact-retention logic. Existing
 native/human acceptance and PR conflict/integration gaps remain as previously recorded.
+
+## Q1-PREP review and corrections — 2026-09-28
+
+**Authority/state:** the user selected review of Luna's Q1-PREP and fixes to verified
+issues, including the potential macOS blocker. Reviewed published `e8dc1fa` against
+`31fd52c`; this correction is its successor on the same branch/PR, `review_ready`
+for Q1-EXEC selection. No qualification, conflict resolution or merge is executed.
+
+### Findings and disposition
+
+| Finding | Evidence / harm | Correction |
+| --- | --- | --- |
+| P1: macOS Python portability risk | New shared helper calls used bare `python` with no interpreter setup. Existing native Mac probes use `python3`, and the runner documents Python3; command lookup could stop ordinary gates and even failure retention. This is a source-level portability finding, not a reproduced hosted failure. | Both affected matrix jobs select `Q1_PYTHON` from runner OS (`python` Windows / `python3` macOS), log its version and use it for every new shared helper. Source audit and controlled negative fixtures reject the old calls. No interpreter installation or pin change. |
+| P1: deterministic formatting preflight failure | Installed pinned Rust 1.90 rustfmt found three differences in the new lifecycle/transaction test code. Production's preflight runs workspace formatting before either target. | Format only those test-module changes; full workspace `cargo fmt --check --all` passes. No Rust behavior changed. |
+| P2: macOS failure artifact loses executable permissions | A loose `Loomlight.app` copy is uploaded through artifact ZIP, which does not preserve Unix modes. Copying symlinks locally does not protect the uploaded bundle; recovery would not retain the original runnable layout. | Retain the already scanned bundle as `Loomlight.app.tar`, with links/modes/hidden entries; verify the contained executable hash and record the tar hash. Windows retains its exact executable. |
+| P2: stale operational instructions | HANDOVER and the latest prep ledger still instructed publication of an already published commit; AGENTS/TESTING still described an unimplemented selector migration. | Record original publication, distinguish this successor correction, update live command guidance and replace the redundant review-only next prompt with bounded Q1-EXEC execution. |
+
+Primary references: [macOS runner software](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md)
+and [artifact permission limitation](https://github.com/actions/upload-artifact#permission-loss).
+No exact hosted runner image is qualified by those documentation references.
+The package manifest also now checks report case identity before labelling a case
+passed, matching the existing required-case gate. It continues to mark absent reports
+as missing and withhold package bytes after unsuccessful scans.
+
+Review found no further source-level blocker in the retained Prepared recovery
+sequence, SDK split or selected ordinary regressions. Compared the moved SDK bodies
+and preserved crash/namespace assertions; checked ordinary byte/Flush/follow-up-write,
+interrupted-save, external-writer, Recent and SDK hash/cancellation regressions against
+the workflow selectors. Compilation/execution is still unverified, not inferred from
+source inspection. Production logic, dependencies/locks, thresholds, prior failures and
+earlier ledger evidence remain unchanged.
+
+### Validation and fresh remote state
+
+- Controlled gate fixtures and focused source audit pass, including rejection of bare
+  Python helper calls or missing target selection.
+- `test-q1-package-retention.py`: **7 passed, 1 skipped** locally. Runs the real CLI
+  against synthetic files: Windows bytes/hash, macOS tar contents/hash/modes/hidden
+  resource, pre-build failure, missing successful output, partial package output,
+  failed scan and wrong case identity. POSIX symlink creation is the explicit Windows
+  skip; the test is selected in existing Ubuntu preflight. No executable is launched.
+- Pinned Rust 1.90 `cargo fmt --check --all`: passed; initial check demonstrated the
+  three formatting failures before correction. No Rust compile/test/list command ran.
+- Installed Bash `-n`: all **20** explicit Bash steps across both workflows passed,
+  with Actions expressions replaced by placeholders. This is syntax-only evidence,
+  not YAML/schema parsing or hosted execution. No standalone YAML parser was available.
+- Repository structure/link/privacy validator and `git diff --check`: passed.
+- Fresh fetch confirmed origin prep `e8dc1fa`, main `4d7ba03`, no unpublished local
+  edits at entry. PR #17 is draft/open/conflicting with no comments or reviews.
+  Repository permissions include push/admin, production workflow is active, and the
+  feature-branch rules endpoint returned no rules. Recheck these at dispatch.
+
+No CI, package build, app/browser/SDK launch, native measurement or specialist exercise
+was run. Prior problem counters in the budget table remain unchanged; this is one
+source correction of preparation, not a new attempt at the Windows overflow or Mac
+timing hypotheses. No native tooling or dependencies were installed.
+
+**Next:** select R2-P1-Q1-EXEC directly using the amended scope above and live HANDOVER.
+One manual two-target production dispatch with packages, no retries; record a precise
+manual-resume handover if pending. Evidence review remains part of that qualification.
+The remaining 1G stages are coherent automated qualification, Windows native/final
+human acceptance on both platforms, then final review/conflict resolution/integration
+with affected gates. Integrated 1H is subsequent and separately selected. No blanket
+acceptance or cross-SHA evidence waiver follows from these source fixes.

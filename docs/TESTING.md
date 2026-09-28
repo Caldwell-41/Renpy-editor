@@ -59,8 +59,8 @@ See the active Phase 1G ledger for the scoped Windows evidence and remaining gat
 ## Current production scaffold and Phase 0 regression commands
 
 These command references describe the existing scaffold, not a run-all instruction.
-Select changed-scope checks under WORKFLOW. The two unfiltered core/SDK conflicts
-above must be resolved before broad execution; a missing SDK skip does not resolve them.
+Select changed-scope checks under WORKFLOW using the routine selectors below;
+an archive-backed SDK wrapper returning a skip marker is not qualification evidence.
 From `app/`, the Phase 1A production command references are:
 
 ```bash
@@ -95,6 +95,9 @@ always combine it with `--exact`. Specialist persistence/namespace cases stay ex
 The workflow result checker rejects missing/malformed summaries, zero selected tests,
 missing/ignored/filtered required cases and failures. Packaged case evidence must contain
 exactly one successful report per required scenario with cleanup complete.
+The shared Q1 workflow helpers use `python` on Windows and `python3` on macOS via
+the job's `Q1_PYTHON` setting. Gate self-tests and synthetic package-retention CLI
+tests run in preflight; they do not launch or qualify an application.
 
 The full desktop Rust test, package, and injected packaged-WebView probe run separately
 on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
@@ -669,7 +672,10 @@ functional gates. A failure-time evidence artifact retains the exact executable 
 macOS app bundle), digest, source/run identity and incomplete outcome for seven days,
 after scanning the produced package for secrets. Its manifest distinguishes not built,
 built-but-missing, available, and output produced during a failed package step. Installers
-remain success-only. This is not evidence reuse or a cross-SHA waiver, and does not
+remain success-only. The scanned macOS bundle is retained as `Loomlight.app.tar` to
+preserve executable permissions, symlinks and hidden bundle entries through artifact
+upload. Verify both its recorded archive hash and the executable hash inside the tar;
+extract the tar before launching a recovered package. This is not evidence reuse or a cross-SHA waiver, and does not
 authorize a production dispatch during Q1-PREP.
 
 ## Required quality gate by change type

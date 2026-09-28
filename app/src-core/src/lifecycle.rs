@@ -2487,7 +2487,8 @@ mod tests {
 
         let managed_state = temp.path().join("managed-after-promotion");
         crash_managed_sdk_install(&managed_state, archive, "after");
-        let sdk = crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        let sdk =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
         let already_installed =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
@@ -2503,11 +2504,9 @@ mod tests {
             return;
         };
         let temp = tempfile::tempdir().unwrap();
-        let sdk = crate::renpy::install_supported_sdk_from_archive(
-            temp.path(),
-            Path::new(&archive),
-        )
-        .unwrap();
+        let sdk =
+            crate::renpy::install_supported_sdk_from_archive(temp.path(), Path::new(&archive))
+                .unwrap();
         {
             let requested_stage_parent = temp.path().join("anchored-child-test");
             fs::create_dir(&requested_stage_parent).unwrap();

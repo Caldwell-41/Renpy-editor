@@ -1248,10 +1248,7 @@ fn prepared_fault_state_can_be_safely_abandoned() {
     let outcome = fixture
         .service
         .commit_with_injector(&fixture.project, proposal, &mut hook);
-    assert!(matches!(
-        outcome,
-        CommitOutcome::RecoveryRequired { .. }
-    ));
+    assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
 
     let unrelated = fixture.root.join("game/unrelated.rpy");
     fs::write(&unrelated, b"unrelated\n").unwrap();

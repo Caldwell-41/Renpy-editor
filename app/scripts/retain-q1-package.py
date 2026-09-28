@@ -5,14 +5,42 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import tarfile
+
+
+def stream_digest(stream):
+    value = hashlib.sha256()
+    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        value.update(chunk)
+    return value.hexdigest()
 
 
 def digest(path):
-    value = hashlib.sha256()
     with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            value.update(chunk)
-    return value.hexdigest()
+        return stream_digest(stream)
+
+
+def retain_package(executable, bundle, output):
+    expected = digest(executable)
+    if bundle is None:
+        retained = output / "loomlight.exe"
+        shutil.copy2(executable, retained)
+        actual = digest(retained)
+    else:
+        # Artifact ZIP uploads discard Unix permissions and can dereference links.
+        # Keep the whole scanned bundle in a tar before uploading it.
+        retained = output / "Loomlight.app.tar"
+        with tarfile.open(retained, "w", dereference=False) as archive:
+            archive.add(bundle, arcname=bundle.name)
+        with tarfile.open(retained, "r") as archive:
+            member = archive.extractfile("Loomlight.app/Contents/MacOS/loomlight")
+            if member is None:
+                raise RuntimeError("retained archive is missing the executable")
+            with member:
+                actual = stream_digest(member)
+    if actual != expected:
+        raise RuntimeError("retained executable digest does not match the produced executable")
+    return retained
 
 
 def main():
@@ -49,18 +77,12 @@ def main():
     output = args.output
     output.mkdir(parents=True, exist_ok=True)
     retained_files = []
+    retained_hashes = {}
     binary_hash = digest(executable) if executable_present else None
     if executable_present and scan_ok:
-        if bundle is None:
-            retained_binary = output / "loomlight.exe"
-            shutil.copy2(executable, retained_binary)
-            retained_files.append(retained_binary.name)
-        else:
-            retained_bundle = output / "Loomlight.app"
-            shutil.copytree(bundle, retained_bundle, dirs_exist_ok=True, symlinks=True)
-            retained_files.append(retained_bundle.name)
-        if digest((output / retained_files[0]) if bundle is None else (output / "Loomlight.app/Contents/MacOS/loomlight")) != binary_hash:
-            raise SystemExit("retained executable digest does not match the produced executable")
+        retained = retain_package(executable, bundle, output)
+        retained_files.append(retained.name)
+        retained_hashes[retained.name] = digest(retained)
 
     head = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
     tree = subprocess.run(["git", "rev-parse", "HEAD^{tree}"], check=True, capture_output=True, text=True).stdout.strip()
@@ -79,6 +101,7 @@ def main():
         "executablePath": str(executable.relative_to(app_root)).replace("\\", "/"),
         "executableSha256": binary_hash,
         "retainedFiles": retained_files,
+        "retainedSha256": retained_hashes,
         "retentionWithheldByScan": executable_present and not scan_ok,
         "runtimeCases": [],
     }
@@ -93,6 +116,7 @@ def main():
         report = package_reports[0] if isinstance(package_reports, list) and len(package_reports) == 1 else None
         passed = (
             isinstance(record, dict)
+            and record.get("case") == case
             and record.get("passed") is True
             and record.get("exitCode") == 0
             and record.get("timedOut") is False
