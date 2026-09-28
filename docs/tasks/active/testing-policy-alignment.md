@@ -303,6 +303,89 @@ retained executable and verify artifact availability before claiming qualificati
 Missing/skipped gates remain missing/skipped. This supports review-ready qualification,
 not user acceptance, conflict resolution, merge, integrated 1H or a cross-SHA waiver.
 
+### Luna execution brief for Q1-PREP
+
+**Handover amendment, 2026-09-28:** the user requested a suitably scoped handover for
+a Luna-level agent. This authorizes this documentation amendment, not preparation
+implementation or Q1-EXEC. Published audit baseline: `e5b457f79a0589837940bce3b2533bfb5ea722fc`;
+fetch and preserve any newer work. Continue the existing branch/PR, not a new worktree
+or historical candidate. The recommended model is **Luna, medium reasoning** for
+this clear, bounded preparation; this is an engineering judgment, not a guarantee.
+[Official model guidance](https://developers.openai.com/api/docs/guides/model-selection)
+positions Luna for scoped tasks and coordinated updates from clear briefs. A Sol/Astra
+review of the resulting test/workflow diff is recommended at the existing pre-execution
+review boundary, especially for retained recovery assertions and failure-time artifacts.
+Do not spawn reviewers or start another chat automatically.
+
+**Read narrowly:** AGENTS, CURRENT/HANDOVER, WORKFLOW delivery rules, TESTING current
+scope, this task's selector disposition and amended Q1 proposal. Then inspect only the
+named test bodies, their direct helpers and the two workflow steps being changed.
+Sections 12–34 of the Phase 1G ledger are evidence references, not a required reread or
+new instructions. Do not repeat TEST-AUDIT-1 or reopen the native performance diagnosis.
+
+**Expected edit boundary:** test modules in `app/src-core/src/lifecycle.rs` and
+`app/src-core/src/transaction/tests.rs`; `.github/workflows/production-scaffold.yml`
+and `.github/workflows/quality.yml`; relevant command guidance in TESTING; the owning
+ledger and CURRENT/HANDOVER. If necessary, use a small focused helper under
+`app/scripts/` for gate-result/evidence checks, reusing `record-runtime-inputs.py` and
+`scan-artifacts.mjs` where applicable. No production Rust functions, transaction state
+machine, renderer, native probe, dependencies, locks, other workflows or repository
+rules changes. A `.rs` path alone does not make production edits permissible.
+
+Perform these steps in order, reviewing each diff before the next:
+
+1. **Preserve ordinary recovery first.** Add the named Prepared fault/state case using
+   existing hooks/services. Map successful abandonment, unrelated bytes, Flush and a
+   later write back to the old parent assertions. Compare streamed interruption with
+   existing state fixtures; retain required persisted-byte checks. If a missing case
+   needs production changes or an invented journal format, stop and describe the gap.
+2. **Separate specialist execution.** Apply reasoned ignores to the four exact parents;
+   extract only the two SDK crash calls and two timed namespace blocks into the two
+   named ignored tests. Preserve moved assertions and ordinary SDK setup/trust/reuse.
+   Do not delete tests, edit ignored workers, broadly exclude names, or classify the
+   controlled runtime exit/`runtime-error` case as specialist.
+3. **Align selectors and markers.** Apply the documented three broad-core skips in
+   both workflows; select G1-U2 and each SDK gate exactly as specified. Remove only
+   specialist marker requirements. Required ordinary test results must reject zero
+   tests, ignored/skipped results and failures; printed test names alone are insufficient.
+4. **Adjust trigger and retention.** Make only production manual-dispatch-only. Keep
+   both target jobs, pins, functional gates and success-only installers. Collect/hash
+   the exact produced tested executable on later failure with bounded retention;
+   distinguish not built, built-but-missing and available. Preserve the browser final
+   outcome gate; missing artifacts are not successful qualification.
+5. **Check, review, publish and stop.** Use the cheap preparation checks below; record
+   exact command/results and limits. Publish one coherent preparation checkpoint with
+   `[skip ci]`; verify remote head/content, update the existing ledger/handover and stop
+   before qualification. If incomplete, record the remaining item rather than claim
+   review-ready implementation or automatically proceed to execution.
+
+**Definition of done:** a compact before/after table maps each of the five steps to
+changed paths and assertions. Source review proves ordinary gates cannot reach the
+excluded helpers and preserves the ordinary regression list. Controlled text/result
+fixtures prove rejection of zero/ignored/skipped/failed required cases, malformed or
+missing case reports and failed cleanup. Workflow/shell checks cover both browser
+outcomes, push versus manual trigger selection, and failure before/after binary creation.
+Use installed parsers/tools only; unavailable syntax checks remain explicit limitations.
+Run repository validation and `git diff --check`; inspect production/lockfile scope.
+These checks neither compile the new Rust tests nor prove hosted workflow behavior.
+Do not copy the prior audit's counts as new results or depend on its local-only script;
+derive current source checks in this checkout. No Cargo command that compiles/lists/runs
+tests, npm build, app/browser/SDK launch, tooling installation or CI is selected.
+
+**Stop and hand back with evidence** if preserving an ordinary assertion requires
+production changes, a broad harness rewrite, a policy/threshold decision, unavailable
+privileges or conflicting newer work. Name the exact function/assertion, attempted
+bounded approach and smallest unresolved question. Do not weaken coverage to finish.
+Routine in-scope edits need no repeated permission. A model change does not reset any
+problem budget or authorize additional execution. Q1-EXEC and final acceptance remain
+separate selections under the existing workflow.
+
+**Handover-only validation:** repository validator passed for 274 files; whitespace
+and all 14 relative links/anchors in the three changed Markdown files passed. The
+machine/model-labelled next prompt is 641 characters / 77 words. Self-review confirms
+no implementation or acceptance expansion. Fresh refs matched the published audit;
+publish this documentation amendment with `[skip ci]` and verify the remote content.
+
 ### Cumulative problem budget and preserved evidence
 
 These are carried-forward observations, not new allowances. TEST-AUDIT-1 used zero

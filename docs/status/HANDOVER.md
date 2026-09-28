@@ -54,10 +54,19 @@ for this audit; another host's unpublished work remains unavailable to inspect.
 
 ## Validation, publication and next boundary
 
-Complete-checkout document/static selector checks and preservation review are recorded
-in the policy/alignment ledger. No Cargo/npm suite, native build, browser/app/SDK launch
-or CI is claimed. Publish eight Markdown files with `[skip ci]`, verify remote content
-and report the exact published head in chat. Skipped CI is not qualification.
+TEST-AUDIT-1 was published and remote/PR head verified at
+`e5b457f79a0589837940bce3b2533bfb5ea722fc`: eight Markdown files, 274-file repository
+validation and 97 relative link/anchor checks passed. Those counts belong to that audit.
+No Cargo/npm suite, native build, browser/app/SDK launch or CI is claimed.
+
+The user subsequently requested a Luna-scoped handover. Read the
+[Luna execution brief](../tasks/active/testing-policy-alignment.md#luna-execution-brief-for-q1-prep)
+for its fixed read/edit boundary, five ordered steps, acceptance checks and stop rules.
+**Recommended:** Luna with medium reasoning. Recovery redesign, policy decisions and
+qualification are outside that brief; recommend Sol/Astra review of the prepared diff
+at the existing pre-execution boundary. No agent has been started or model switched.
+This handover amendment does not select preparation implementation. Publish/review this
+documentation amendment with `[skip ci]`; resolve its head from Git, not a receipt commit.
 
 **Next proposed selection:** R2-P1-Q1-PREP only. **Codex machine:** any repository-capable
 host; no specific OS. **Test execution:** cheap documentation/selector/gate checks only,
@@ -70,8 +79,9 @@ Actions access and repository rules then. No physical test host is promised.
 /goal — R2-P1-Q1-PREP only
 Repository: Caldwell-41/Renpy-editor
 Branch: feature/phase-1g-branches-runtime
+Model: Luna, medium reasoning.
 Codex machine: Any with repository access; no specific OS required.
 Test execution: Cheap documentation/selector/gate checks only; no native builds, app launches or CI.
 Reason: Align test/workflow source before qualification.
-Read AGENTS.md and docs/status/HANDOVER.md, then the linked amended Q1 proposal. Implement only preparation, preserve newer work and required regressions, review and publish the ledger/handover. Stop before Q1-EXEC or qualification execution.
+Read AGENTS.md and docs/status/HANDOVER.md, then the linked Luna execution brief. Implement only its bounded preparation, preserve newer work and required regressions, verify and publish the ledger/handover. Hand back unresolved scope or recovery questions; stop before Q1-EXEC.
 ```

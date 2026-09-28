@@ -57,4 +57,8 @@ Codex: any repository-capable host. Cheap preparation checks only; no native bui
 app launch or CI. Publish/review preparation before separately selecting Q1-EXEC's
 single standard Windows/macOS matrix. Ledger 34's evidence is preserved; section 35
 records this amendment. Do not dispatch current unrestricted workflows as a shortcut.
+The user's subsequent handover request adds a
+[Luna preparation brief](../tasks/active/testing-policy-alignment.md#luna-execution-brief-for-q1-prep)
+with fixed edit scope, checks and stop rules; Luna/medium is recommended. This is
+handover preparation, not selection of implementation or qualification.
 See [HANDOVER](HANDOVER.md) for publication and the exact stopping boundary.
