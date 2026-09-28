@@ -51,12 +51,34 @@ not in a long chat prompt or an external attachment.
 5. After verifying publication, give one lightweight next-chat prompt naming the
    repository, working branch, checkpoint and handover. Link to detail rather than
    copying it. State any approval boundary; a plan is not blanket execution approval.
+   Every goal prompt must state the Codex machine requirement (or explicitly none),
+   the separate test host(s), and why; follow WORKFLOW, including the 4,000-character cap.
 
 Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in their canonical
 homes and checkpoint evidence in the task ledger. Do not create a new handover file
 for every chat or require the next chat to find an old attachment.
 
+## Proportionate delivery and review
+
+Follow [the seven delivery rules](docs/WORKFLOW.md#proportionate-delivery-rules):
+match guarantees to user actions; prove risky real paths early on affected targets;
+test actual user-action boundaries and rejecting assertions; classify failures before
+fixing; keep cumulative problem budgets; align written policy with executable gates;
+and justify new blockers with evidence and user harm. Two unsuccessful corrections
+of the same hypothesis trigger reassessment, not another automatically renewed goal.
+
+Keep data-loss and ordinary external-edit regressions. Do not resurrect specialist
+hostile/crash experiments, waive genuine failures, or transfer routine verification
+to the user. Development runs where convenient; test hosts follow the requirement,
+not the host running Codex. Use the existing workflow and task ledger, not a new
+orchestrator, mandatory approval framework or duplicate testing system.
+
 ## Commands
+
+These are command references, not a mandate to run every command for every task.
+Use the approved changed-scope selection from WORKFLOW and TESTING. If a command
+still embeds an excluded exercise, stop that command and record the alignment gap;
+do not silently skip required ordinary coverage or run the excluded exercise.
 
 Production scaffold commands run from `app/`:
 
