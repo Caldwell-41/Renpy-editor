@@ -1,18 +1,21 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** R2-P1-Q1-PREP review and corrections, `review_ready` for
-Q1-EXEC selection; see the [review record](../tasks/active/testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28).
+**Current checkpoint:** R2-P1-Q1-EXEC, `blocked`: the single production dispatch
+was rejected with HTTP 422 before creating a run; see the
+[execution record](../tasks/active/testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28).
 Four termination parents and both embedded SDK specialist blocks are separated; the
 Prepared recovery regression and both workflow selectors are aligned. No compiled or
 hosted test evidence is claimed. Rules remain in
 [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Reviewed preparation:** published `e8dc1fac3c2f2c6844026a70ba34133a70427bb4`;
-the review correction is its successor on this branch.
+**Execution candidate:** published `b5de446389145c3da2e3f7d653673591d43d37fa`.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
-No build, app launch, workflow dispatch or application acceptance is part of this update.
+One dispatch request was rejected: unavailable `runner.os` at production job-level
+`env.Q1_PYTHON` (line 70). Quality line 61 has the same source defect. Candidate run
+inventory returned zero runs; no run/attempt or operation is pending. No build,
+app launch or application acceptance occurred. The no-retry boundary was honored.
 
 ## Phase 1G capability status
 
@@ -50,13 +53,13 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Next goal:** R2-P1-Q1-EXEC, the automated qualification itself. Selecting it uses one standard
-production dispatch on the existing Windows x64 and macOS ARM64 hosted runners, after
-rechecking the candidate and access at dispatch. This review found access available,
-no feature-branch rules and no PR comments/reviews; it fixed Python portability,
-Rust formatting, macOS artifact preservation and stale instructions. Codex may
-run on any repository-capable host with Actions coordination access; no physical test
-machine is selected. No package run, app launch or CI dispatch was part of Q1-PREP.
+**Next goal:** separately select the bounded Q1 workflow-context correction and semantic
+validation, without dispatch. Repository/Actions access was available, branch rules
+were empty and PR #17 had no comments/reviews. Passing source/Bash/formatting checks
+did not detect this workflow semantic defect. Codex may use any repository-capable
+host; no native machine/build is needed for the correction. Publish/review it before
+separate authorization of another qualification request. The current single dispatch
+request allowance was consumed; zero runs/builds/launches were accepted or performed.
 PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
 integrated 1H remain open. No historical failure or candidate is reclassified. See
 [HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.

@@ -546,3 +546,68 @@ The remaining 1G stages are coherent automated qualification, Windows native/fin
 human acceptance on both platforms, then final review/conflict resolution/integration
 with affected gates. Integrated 1H is subsequent and separately selected. No blanket
 acceptance or cross-SHA evidence waiver follows from these source fixes.
+
+## R2-P1-Q1-EXEC — standard package qualification — 2026-09-28
+
+**Authority/state:** user selected Q1-EXEC only; `blocked` by dispatch rejection. Candidate
+`b5de446389145c3da2e3f7d653673591d43d37fa`, tree
+`6e496ab05e59f90b6518fe65340028a91ca74ec4`, matches freshly fetched origin and
+draft/open/conflicting PR #17. Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
+The starting worktree was clean. Repository push/admin and Actions workflow access
+are available; production workflow `357322921` is active, feature-branch rules are
+empty, and PR #17 has no comments/reviews. No production run on this candidate or
+pending production run was returned by the pre-dispatch branch inventory.
+
+Selected allowance: one production dispatch with `upload_packages=true`, Windows
+`windows-2025` x64 and `macos-26` ARM64, one Tauri build and five existing Runtime
+cases plus primary/secondary boundary smoke per target. No retry, local package
+build, conflict resolution, merge or 1H. Source audit and controlled Q1 gate fixtures
+pass locally. Rechecked Node 24.19.0, npm 11.9.0, Rust 1.90.0 and Ren'Py 8.5.3,
+archive SHA-256 `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`;
+workflow and source pins agree.
+
+### Dispatch rejection and evidence audit
+
+One invocation of `gh workflow run production-scaffold.yml --repo
+Caldwell-41/Renpy-editor --ref feature/phase-1g-branches-runtime -f
+upload_packages=true` returned exit 1, HTTP 422 from workflow `357322921`'s
+dispatches endpoint. GitHub reported:
+
+```text
+Invalid Argument - failed to parse workflow: (Line: 70, Col: 18):
+Unrecognized named-value: 'runner'. Located at position 1 within expression:
+runner.os == 'Windows' && 'python' || 'python3'
+```
+
+The post-rejection audit on 2026-09-28 at approximately 05:35 UTC found **zero
+Actions runs for the exact candidate SHA**. The production branch inventory was
+unchanged; its newest run remains historical failed `36293797731`, not this
+operation. There is **no new run ID, attempt, job, pending operation or artifact**.
+No executable/package was built by this request, so executable/archive rehashes and
+case/cleanup evidence are unavailable, not passing. Neither target qualified.
+
+**Classification:** confirmed workflow/harness configuration defect before runner
+allocation; not a product/runtime failure. Production job-level `env.Q1_PYTHON`
+uses `runner.os`, rejected by GitHub in that expression location. The identical
+source expression is present in `quality.yml:61`; that workflow was not dispatched.
+The preparation source audit and gate self-test both passed immediately before the
+request, demonstrating that they do not detect this Actions context error. Prior
+Bash/formatting checks likewise did not establish workflow semantic validity.
+
+**Budget:** one dispatch request consumed, zero accepted workflow runs, zero new
+Tauri builds and zero new application starts. No retry or correction was attempted.
+Original R2-P1/H1 failures and all cumulative F1/N1 counters above stay unchanged;
+this failure grants no replacement dispatch allowance.
+
+**Next bounded action (requires separate selection):** correct interpreter selection
+at a permitted job/matrix context in both workflows, update the focused source audit
+to reject this invalid placement, and validate Actions expression-context semantics
+without dispatching. Preserve both target interpreters and all existing gates. Publish
+and review that correction before the user separately authorizes any new qualification
+request. No conflict resolution, merge, 1H or product change is selected.
+
+**Publication/checks:** documentation-only outcome in this checkpoint's commit on the
+existing branch, using `[skip ci]`; resolve its exact published SHA from Git. Source
+audit and gate rejection fixtures passed; repository validation passed for 277 files
+and `git diff --check` passed. No hosted test result is claimed. The live HANDOVER
+and Phase 1G ledger 38 route recovery; no manual resume of a nonexistent run is possible.

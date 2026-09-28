@@ -5321,3 +5321,29 @@ WIN-F1/MAC-N1 retain their limits; original R2-P1/H1 failures and all consumed b
 remain unchanged. Q1-PREP is `review_ready` for selection of Q1-EXEC itself, not another
 planning-only checkpoint. Then Windows native/final human acceptance and final review/
 integration remain; integrated 1H is a separate milestone. HANDOVER owns the next prompt.
+
+## 38. R2-P1-Q1-EXEC — production dispatch rejected — 2026-09-28
+
+User selected one standard two-target production dispatch with `upload_packages=true`
+and no retry. Freshly verified candidate `b5de446389145c3da2e3f7d653673591d43d37fa`
+matched origin and draft/open/conflicting PR #17; main remained `4d7ba03`. Access was
+available, feature-branch rules empty, production workflow active and no prior/pending
+production run existed on this candidate.
+
+The single request to workflow `357322921` failed with HTTP 422: production workflow
+line 70 references unavailable `runner.os` in job-level `env.Q1_PYTHON`. The identical
+expression also exists in quality line 61. This is a confirmed workflow configuration
+defect; no runner or product failure occurred. Post-rejection candidate run inventory
+returned zero runs. No new run/attempt/job/artifact exists and no operation is pending.
+Both targets remain unqualified; executable/archive hashes and case reports are absent.
+
+The [owning Q1 execution record](testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28)
+contains the error, access/pin checks and recovery scope. One dispatch request was
+consumed; zero accepted runs/builds/app starts. Source audit and gate fixtures passed
+but missed this semantic workflow error. No retry, workflow correction, conflict
+resolution, merge or 1H ran. All historical budgets/results are preserved.
+
+Checkpoint state is `blocked`, with the execution outcome documented for review.
+Next selection is a bounded workflow-context correction and semantic validation,
+without dispatch; another qualification request requires separate user authorization.
+The single HANDOVER records that boundary and the documentation publication.

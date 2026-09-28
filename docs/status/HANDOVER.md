@@ -1,81 +1,77 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-28. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1-Q1-PREP review and corrections, `review_ready` for Q1-EXEC selection.
+**Checkpoint:** R2-P1-Q1-EXEC, `blocked`: single production dispatch rejected.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/conflicting.
-**Reviewed publication:** `e8dc1fac3c2f2c6844026a70ba34133a70427bb4`, verified on origin.
-**Correction identity:** the successor commit containing this review record; resolve
-its exact SHA from Git. This is not an instruction to republish the original prep.
+**Candidate:** `b5de446389145c3da2e3f7d653673591d43d37fa`, verified on origin.
+**Candidate tree:** `6e496ab05e59f90b6518fe65340028a91ca74ec4`.
+**Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
+**Publication:** this documentation-only outcome is committed/pushed on the existing
+branch with `[skip ci]`; resolve its exact successor SHA from Git, not as a new tested
+candidate. No receipt-only follow-up commit is required.
 
-**Authority:** the user requested review of Luna's Q1-PREP work and correction of
-issues, including the potential macOS blocker. This checkpoint makes those corrections
-and recommends the next execution goal; no qualification dispatch or merge was selected.
+## Execution outcome
 
-## Review outcome
+The user selected Q1-EXEC only, one `production-scaffold.yml` request with
+`upload_packages=true`, Windows `windows-2025` x64 and `macos-26` ARM64, no retry.
+Fresh refs/access/rules/PR and toolchain/SDK pins were checked. Source selector audit
+and gate rejection fixtures passed. GitHub rejected the single dispatch to workflow
+`357322921` with HTTP 422 before creating a run:
 
-The [detailed review](../tasks/active/testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28)
-and [Phase 1G ledger 37](../tasks/active/phase-1g-branches-runtime-git.md#37-q1-prep-review-and-corrections--2026-09-28)
-record the findings and proof limits:
+```text
+(Line: 70, Col: 18): Unrecognized named-value: 'runner'.
+Located at position 1 within expression:
+runner.os == 'Windows' && 'python' || 'python3'
+```
 
-- Shared workflow helpers select `python` on Windows and `python3` on macOS.
-- Three Rust formatting differences that failed preflight are corrected.
-- Scanned macOS failure evidence uses a tar to preserve bundle permissions, links
-  and hidden entries; both archive and contained executable hashes are recorded.
-- Package manifests reject mismatched case identity; synthetic tests exercise the
-  real retention CLI. Publication status and stale policy-migration claims are fixed.
-- Ordinary recovery/SDK assertions, exact selectors and prior fixes are preserved.
-  No production behavior, dependency, lockfile, budget or historical result changed.
+Production job-level `env.Q1_PYTHON` is invalid; quality line 61 contains the same
+expression. This is a confirmed workflow configuration defect, not a runtime failure.
+The local preparation checks missed Actions expression-context validity.
 
-Fresh remote review: origin matched the reviewed prep; main remains
-`4d7ba0333c48d60242a9a42d3e079fea499a5531`. PR #17 has no comments/reviews and is
-conflicting. Repository access includes push/admin; the production workflow is active;
-no rules were returned for the feature branch. Recheck mutable state before dispatch.
+The post-rejection audit at approximately 05:35 UTC returned **zero Actions runs for
+the candidate SHA**. **No run ID, attempt, job or pending operation exists.** No package,
+executable, archive digest or case report was produced. Both targets remain unqualified.
+The latest production run is still historical failed `36293797731`, not this request.
+No manual resume or polling is applicable to the rejected request.
 
-## Validation and capability
+[Q1 execution evidence](../tasks/active/testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28)
+and [Phase 1G ledger 38](../tasks/active/phase-1g-branches-runtime-git.md#38-r2-p1-q1-exec--production-dispatch-rejected--2026-09-28)
+contain the exact error, pins, access checks, consumed allowance and recovery scope.
+One dispatch request, zero accepted CI runs, zero builds and zero application starts.
+No retry, workflow correction, conflict resolution, merge or 1H was performed.
+Repository validation and whitespace checks pass for this documentation publication.
 
-Gate rejection fixtures and source audit pass. Synthetic retention tests: seven pass,
-one POSIX symlink case skipped on local Windows (selected in Ubuntu preflight).
-Workspace `cargo fmt --check --all` and all 20 explicit Bash step syntax checks pass.
-Repository validation and whitespace checks pass. No standalone YAML/schema parser
-was available. Rust tests were not compiled/run; hosted behavior remains unverified.
-No app/browser/SDK launch, package build, CI dispatch or specialist exercise ran.
+## Capability and preserved evidence
 
 | Capability | Implemented | Automated proof | Native/human acceptance |
 | --- | --- | --- | --- |
 | Branches / G1-OBS | Yes, observed saved-state contract | Prior candidate qualification retained; coherent final gates pending | MAC-N1 supporting assessment retained; Windows native and final acceptance open |
 | Runtime foundation / R1 | Yes, prior fixes retained | Prior closure retained; final-source SDK regression pending | Final packaged/native acceptance open |
-| Runtime UI / R2-P1 | Yes, Windows heap fix retained | Standard two-target package qualification incomplete | Focused final user session on both platforms open |
+| Runtime UI / R2-P1 | Yes, Windows heap fix retained | Standard two-target package qualification incomplete; Q1 dispatch rejected | Focused final user session on both platforms open |
 
 WIN-F1 ledger 27 and MAC-N1 ledger 32 retain their candidate/fixture limits. TEST-P2
 ledger 33 keeps Chrome timing diagnostic and functional/evidence failures blocking.
-R2-P1 `36293797731` and H1 `36310107481`, attempt 1, remain FAIL on their original
-candidates. Their allowances are not renewed. No operation is pending.
+R2-P1 `36293797731`, attempt 1, and H1 `36310107481`, attempt 1, remain FAIL on their
+original candidates. Their allowances are not renewed. The rejected Q1 request does
+not grant an automatic replacement request.
 
-## Next goal and distance to Phase 1G closure
+## Next bounded action
 
-**Next: R2-P1-Q1-EXEC**, the bounded standard automated qualification, not another
-planning-only review. Starting the prompt below selects execution. Follow the
-[Q1 execution scope](../tasks/active/testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected):
-one existing production dispatch with `upload_packages=true`, one Tauri build per
-target, five existing cases plus boundary smoke per target, no retry. Verify exact
-run/attempt/SHA, source/executable/archive hashes and artifact availability. If still
-running, publish its identity and manual-resume handover; do not actively poll.
-
-Implementation is present; three closure stages remain: (1) successful coherent
-Windows/macOS automated qualification, (2) Windows native responsiveness/input and
-focused final human acceptance on both platforms, (3) final review, PR conflict
-resolution/integration and affected gates under their own selection. A new finding
-can require a bounded correction. Integrated 1H is a separate subsequent milestone;
-optional Git and Phase 2 remain excluded. No reliable percentage or elapsed-time
-estimate follows from the current missing evidence.
+Separately select a workflow-context correction only: use a permitted job/matrix
+context for Python selection in both affected workflows, make the focused audit reject
+the invalid placement and validate Actions expression semantics without dispatching.
+Publish/review the correction first. Any new qualification request requires a separate
+user selection; it is not authorized by this handover. No product changes, conflict
+resolution, merge or 1H. Windows native/final human acceptance and integration remain
+later stages. No specific Codex OS or physical test machine is needed for this correction.
 
 ```text
-/goal R2-P1-Q1-EXEC only
+/goal R2-P1-Q1 workflow-context correction only
 Repository: Caldwell-41/Renpy-editor
 Branch: feature/phase-1g-branches-runtime
-Codex machine: Any with repository and Actions access; no specific OS required.
-Test execution: One production workflow dispatch on windows-2025 x64 and macos-26 ARM64, upload_packages=true; no physical machine needed.
-Reason: Qualify the corrected standard packages on both supported targets.
-Read AGENTS.md and docs/status/HANDOVER.md, then execute the linked Q1 scope. Recheck candidate/access, dispatch once, audit evidence and publish the ledger/handover. No retries, conflict resolution, merge or 1H. If pending, record exact operation identity and stop for manual resume.
+Codex machine: Any with repository access; no specific OS required.
+Test execution: Local workflow semantic and gate checks only; no native builds or Actions dispatch.
+Reason: Correct the HTTP 422 rejection before separately authorized qualification.
+Read AGENTS.md and docs/status/HANDOVER.md and the linked Q1 execution ledger. Correct the invalid job-level runner context in both workflows, strengthen validation, publish and review the correction. No dispatch/retry, conflict resolution, merge or 1H.
 ```
