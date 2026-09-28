@@ -1,71 +1,47 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** Q1 terminal evidence audit, automated **PASS**, `review_ready`;
-[run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
-attempt 1, completed success. See the
-[terminal audit](../tasks/active/testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28).
-Four termination parents and both embedded SDK specialist blocks are separated; the
-Prepared recovery regression and both workflow selectors are aligned and exercised by
-the successful hosted qualification. Rules remain in
-[WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Rejected execution candidate:** `b5de446389145c3da2e3f7d653673591d43d37fa`.
-**Active qualification candidate:** `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`,
-verified against the published branch and run API. Documentation successors are not
-the tested candidate.
-**Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
-Both targets passed all required automated gates. Four package/evidence artifacts were
-downloaded and ZIP hashes checked; both retained executables and 107 source inputs per
-target match their manifests and exact candidate. Ten Runtime cases and both boundary
-smokes passed. No operation is pending. No retry or other workflow ran; the earlier
-HTTP 422 rejection remains separate. Native/human acceptance remains open.
+**Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
+
+## Live continuation
+
+The user approved outcome-sized goals with internal checkpoints and manual same-thread
+workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the
+[delivery brief and change record](../tasks/active/phase-1g-review-delivery.md) owns the
+next outcome and this documentation update. The rules no longer require a new chat
+at every checkpoint or CI wait. Actual client pause controls remain user/system-owned;
+no automatic wait/wake or runtime capability was implemented or tested here.
+
+**Next outcome:** provide a reviewable Loomlight build, complete available bounded
+Windows native checks and prepare focused final user review. Select **REVIEW-DELIVERY-1**
+from [HANDOVER](HANDOVER.md). This replaces the older preparation-only next prompt;
+it does not select integration, 1H or new features. No operation is pending.
 
 ## Phase 1G capability status
 
 | Capability | Implemented | Automated proof | Native/human acceptance |
 | --- | --- | --- | --- |
-| Branches / observed saved-state graph | Yes; G1-OBS replaces retired full-verification display | Q1 core budgets, browser functional evidence and packaged destination/source reopen pass on both targets; preserve timer/layer limits | Local Mac assessment is supporting evidence; Windows/native and final acceptance remain open |
-| Runtime foundation (1G.2a) | Yes; R1-B1/B2 corrections retained | Prior R1 closure plus Q1 exact final-source SDK service/diagnostics gates pass on both targets | Final native/human acceptance remains separate |
-| Validate/Run/Stop and navigable diagnostics (1G.2b) | Implemented, including the Windows heap-buffer fix | Coherent standard Windows/macOS Q1 packages and all ten runtime cases pass at `8546dcd` | Final user session on both targets remains open |
-| Integration / 1H | 1G not merged; 1H separately selected | Conflicts and affected integrated-tree gates remain | No new acceptance or automatic duplicate human pass |
+| Branches / G1-OBS | Yes, observed saved-state contract | Q1 core/browser and packaged reopen pass on both targets | MAC-N1 supporting limits retained; Windows/native and final acceptance open |
+| Runtime foundation / R1 | Yes, prior corrections retained | Q1 final-source SDK service/diagnostic gates pass on both targets | Final native/human acceptance open |
+| Runtime UI / R2-P1 | Yes, Windows heap fix retained | Q1 standard packages and ten Runtime cases pass | Focused final user session on each platform open |
+| Integration / 1H | 1G not merged | Conflicts and affected integrated-tree gates remain | Separately selected; no automatic duplicate human pass |
 
-[Optional Git](../tasks/active/optional-local-git.md) stays deferred, not a Phase 1/1H
-or Phase 2-entry requirement. Editing during play is script-only; asset changes need Stop.
+## Evidence baseline, not a new qualification
 
-## Preserved evidence and approval boundary
+Q1 [run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
+attempt 1, passed at candidate `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`.
+The [terminal audit](../tasks/active/testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
+and [1G ledger 41](../tasks/active/phase-1g-branches-runtime-git.md#41-q1-terminal-evidence-audit--automated-pass--2026-09-28)
+retain exact source, executable and artifact identity, measurements and limitations.
+Four artifacts were available/unexpired on this update; expiry is 2026-10-05 UTC.
+Use the original packages as that tested candidate, not as qualification of a later SHA.
 
-[The Phase 1G ledger](../tasks/active/phase-1g-branches-runtime-git.md) retains detailed
-history and exact evidence; historical next-step instructions are not live authority.
-The incoming detailed status remains in Git history, not a new handover snapshot.
-
-- G1-OBS: implementation `1fab71e0e3b1ce18ee3cc5b22ab5940269a2ff88`, qualification
-  `a6063080006769613733de20fcd82265bf96b632`, run `36291545085`, attempt 1. Both targets
-  passed its selected core/Chromium boundary; this is not packaged native-input or SDK acceptance.
-- WIN-F1 (ledger 27): two heap buffers, six focused SDK checks and five local cases
-  passed; isolation overrides/no installer limit the evidence. Do not spend unused allowances.
-- MAC-N1 (ledger 32): package `22fbf65d1c9db712d574657c53638b413436dee8`, physical-Mac
-  native assessment with recorded fixture/procedure limits; no SDK/game qualification.
-- TEST-P2 (ledger 33), `699395d`: Chrome timing-only overruns are diagnostic;
-  functional/evidence failures remain blocking. No historical failure is rewritten.
-- R2-P1 `36293797731`, attempt 1, `f1a0f148445f34f8af1a57d0f69e2d27eb543b11`, remains
-  FAIL, with missing original executable and skipped downstream gates. H1 `36310107481`,
-  attempt 1, `238aa9fde5bb15243912ae89abdc4bcf2c21af78`, remains FAIL; precise upstream
-  graphics cause is unresolved. Neither operation is pending in the incoming handover.
-- Accepted/integrated Phase 0 and corrected 1A-1F remain preserved. Phase 1F closeout
-  `973e3565d7cf41c6dca936df088ced10969821ac`, post-merge run `35821582755`, is closed;
-  the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
-  and later distribution limitation DIST-MAC-01 remain unchanged.
-
-**Next action:** separately prepare the remaining Windows packaged native responsiveness/
-input evidence and focused final user sessions on both targets under TESTING. Codex can
-plan from any repository-capable host; verify actual native host/driver access before
-selecting execution. Reuse these exact packages where applicable; artifacts expire
-2026-10-05 and local copies were retained. No new test execution is selected by this
-audit. Q1 totals: two requests (one rejected, one accepted), zero retries, two Tauri
-builds and fourteen top-level starts. Automated qualification is complete for the
-recorded candidate; documentation successors do not receive a cross-SHA waiver.
-PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
-integrated 1H remain open. No historical failure or candidate is reclassified. See
-[HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.
+Historical R2-P1 run `36293797731` and H1 run `36310107481` remain FAIL; WIN-F1,
+MAC-N1 and TEST-P2 retain their original scope/budget limits in ledger 27/32/33.
+Q1 retains two requests (one HTTP 422 rejection, one accepted run), zero retries,
+two Tauri builds and fourteen top-level starts. This policy change adds zero runs,
+builds or launches and does not reset those totals. Phase 0 and accepted 1A-1F remain
+preserved; optional Git is deferred. Read old ledgers only for relevant evidence, not
+as live next-step authority. HANDOVER and the new selected brief own continuation.

@@ -5,7 +5,7 @@ Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
 
-The user chooses scope and approves checkpoint execution. Repository documents make
+The user chooses scope and approves goal execution. Repository documents make
 those decisions durable; they do not grant themselves additional authority. New user
 instructions take precedence and must be recorded before conflicting work continues.
 
@@ -19,51 +19,74 @@ instructions take precedence and must be recorded before conflicting work contin
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
 
-Prompts select a task/checkpoint and point to the repo. They must not be the only
+Prompts select one coherent approved outcome and point to the repo. They must not be the only
 location of requirements, test commands, unresolved risks or continuation state.
 Avoid independent copies of a plan in attachments, PR comments and several Markdown
 files. PRs link to the canonical plan; comments may record publication/CI receipts.
 
-## Start of each checkpoint chat
+<a id="start-of-each-checkpoint-chat"></a>
 
-Read AGENTS, CURRENT and HANDOVER from the indicated working branch, then the active
-plan sections relevant to this checkpoint. Inspect remote refs, open PRs, recent
-commits and the local worktree. Verify that the recorded candidate is present and
-that no other chat is already writing this checkpoint. Preserve unrelated edits.
-Read relevant code, diffs and directly linked evidence; do not sweep every historical
-ledger unless the selected task requires it.
+## Goal entry and continuation
 
-An existing working branch is authoritative for unfinished checkpoint work. Main is
-the integration baseline, not permission to ignore unmerged progress. If main moved,
-review its delta and reconcile safely without resetting or force-pushing. If HANDOVER
-says no implementation branch exists, create its named branch from freshly verified
-main only after checking that the branch or corresponding PR has not appeared meanwhile.
+At the start of an outcome or a genuine handoff, read AGENTS, CURRENT, HANDOVER and
+only the active-plan sections relevant to that outcome. Inspect remote refs, branch/PR,
+recent changes and available local worktree ownership. Preserve unpublished and unrelated
+work; report unavailable cross-host state. Verify that the recorded candidate exists.
+Read relevant code, diffs and directly linked evidence rather than every historical ledger.
 
-Record the branch/PR and checkpoint-in-progress in the repository early. Before an
-external wait or interruption, publish sufficient state to resume without asking the
-user to reconstruct the previous chat.
+Within the same thread, retain the established plan and decisions. After a pause,
+check the pending operation, fresh refs/relevant diff, local edits and ownership.
+Reread instructions that changed or context that is missing; do not repeat the full
+startup audit merely because CI finished. Conflicting/new work requires reconciliation,
+not a reset or second writer. A new timestamp is not evidence of integration.
 
-## One checkpoint, one chat
+The recorded working branch remains authoritative for unfinished work; main is the
+integration baseline. If main moved, assess its relevant delta without force-pushing
+or discarding work. Create a branch only when HANDOVER calls for one and fresh refs/PRs
+show no matching work. Record the outcome/branch/PR early in the existing task ledger.
 
-The chat performs the selected approved checkpoint, self-reviews its diff, runs the
-specified gates, fixes scope-bounded findings, and troubleshoots that checkpoint with
-the user. It must not continue into a later checkpoint automatically, even if tests
-pass early or the later checkpoint looks easy.
+<a id="one-checkpoint-one-chat"></a>
 
-Run cheap applicable checks before expensive or scarce-runner gates. Push coherent
-checkpoint changes. Report exact test counts, skips and relevant failure excerpts;
-do not paste complete successful logs into handovers or chat.
+## One outcome, internal checkpoints
 
-Checkpoint states are `not_started`, `in_progress`, `awaiting_ci`, `blocked`,
-`review_ready`, and `accepted`. Record implementation/test outcome separately from
-user acceptance. Missing host access or tests means blocked/partial, not passing by
-substitution. A feasibility investigation can finish with a no-go report without
-satisfying its capability gate.
+A goal owns one meaningful, approved outcome, not an entire phase or project. An
+implementation outcome normally includes diagnosis/planning, small coherent changes,
+focused checks, self-review, bounded corrections and publication. These are internal
+checkpoints, not automatically separate chats or approval requests. Required independent
+review remains independent; it is not replaced by self-review.
 
-Before starting, record which user instruction authorises the checkpoint. Approval
-of a plan is not approval to install services, change security settings, incur unrelated
-usage, merge application work or expand scope. A next-chat prompt cannot manufacture
-approval: it selects the bounded checkpoint the user elects to start.
+A checkpoint can be a commit, a test result or a short decision record. Continue to the
+next related checkpoint when it remains within the approved outcome, available host/tool
+capabilities and cumulative budget. Do not require the user to select routine verification
+again. Allow focused compilation/execution of changed tests in implementation goals;
+select expensive package/native gates explicitly. Broader completion scope is not a
+larger test matrix. Run cheap applicable checks first and retain exact skips/failures.
+
+Pause when waiting on an external operation, a material decision/approval, missing
+capability, exhausted budget or a user interruption. State the concrete reason and
+next action. A new plan heading, commit or completed preparatory step is not by itself
+a reason to stop. On an unresolved hypothesis, the two-correction reassessment rule
+below still applies; a pause or continuation does not reset totals.
+
+Default to the same chat for the same outcome. Use a new chat only for a genuinely
+different outcome, deliberate independent review, unavailable/unusable context, a
+host-transfer limitation or explicit user choice. Preserve a compact handover for any
+transfer; keep the same problem identity and budget. Do not keep an entire project in
+one growing thread. Detailed runbooks may guide methods without mandating every step;
+shared invariants and acceptance criteria remain mandatory across models.
+
+Keep existing repository states: `not_started`, `in_progress`, `awaiting_ci`, `blocked`,
+`review_ready`, `accepted`. Use `awaiting_ci` for a confirmed nonterminal CI operation;
+use `blocked` for an actual blocker, recording its cause. Neither is proof that the
+Codex runtime is paused. Separate implementation, evidence and user acceptance.
+
+Record the user instruction authorising the outcome and its real approval boundaries.
+This policy replaces generic one-checkpoint/one-chat requirements, not specific user
+limits. Historical review-only, no-execution/no-retry instructions remain binding for
+that selection unless superseded explicitly. A larger proposed next goal takes effect
+when the user selects it; printing a prompt is not execution approval. No implied
+permission to install services, change security settings, exceed spending limits,
+merge, clear a goal or advance into another feature.
 
 ## Proportionate delivery rules
 
@@ -207,79 +230,120 @@ checkpoint or automatically repeat unchanged human checks in 1H. TESTING's actua
 reuse rule and changed-scope assessment apply. Expected effect: slightly more precise
 early tests, fewer speculative/full-matrix reruns; no quantified saving is claimed.
 
-## Required handover before ending the chat
+<a id="required-handover-before-ending-the-chat"></a>
 
-Update the existing HANDOVER.md and the active plan's ledger. Keep HANDOVER focused;
-put lengthy diagnosis and durable lessons in the ledger/canonical docs and link them.
+## Checkpoint and handover cadence
+
+Record meaningful decisions, completed increments, defects and evidence as they arise.
+Do not rewrite the full handover or create receipt-only commits at each small step.
+Before a genuine pause, transfer or completion, update the existing HANDOVER and task
+ledger once with sufficient recovery state. Keep detailed history in its owning ledger;
+CURRENT/HANDOVER must agree about the live outcome and distinguish evidence from approval.
 
 | Field | Required content |
 | --- | --- |
-| Task/checkpoint and state | Exact identifier, approved scope, implemented versus accepted status. |
-| Continuation location | Repository, branch, PR if any, latest verified baseline/candidate. |
-| Completed work | Relevant commits/files, decisions and regressions; no transcript dump. |
-| Validation | Exact commands, environment and outcomes; run ID, attempt, SHA, jobs/evidence where applicable. |
-| Remaining work | Blockers, failed/skipped/unavailable gates, outstanding operations and safe recovery action. |
-| Lessons | Canonical document/test paths containing lasting learning. |
-| Next action | One bounded checkpoint or recovery step and whether approval is still required. |
-| Machine and tests | Codex machine required/recommended/none, separate evidence hosts, reason and unmet access/tooling needs. |
-| Problem budget | Relevant problem ID, attempted hypotheses and cumulative allowances; link the ledger instead of resetting counters. |
-| Publication | What is committed/pushed; any local-only work and why it could not be published. |
+| Outcome/checkpoint and state | Approved outcome, completed increments, implemented versus accepted status. |
+| Continuation location | Branch/PR, candidate and available ownership/local-only state. |
+| Evidence | Relevant commands/results; exact workflow/run/attempt/SHA and artifacts when applicable. |
+| Pending operation | Last observed status, observation time, unresolved identity/access and artifact expiry. |
+| Remaining work | Next action, relevant paths, blockers, approval boundary and cumulative budget reference. |
+| Resume route | Same thread by default; actual client control or user action needed, not an invented helper. |
+| Machine and tests | Required/recommended/no specific Codex OS, separate evidence hosts and missing capabilities. |
+| Publication | Committed/published versus local-only work; limitations and safe recovery. |
 
-Record the implementation candidate SHA, not an impossible self-referential SHA of
-the handover commit still being written. A docs-only follow-up commit may name a
-preceding candidate. Resolve and report actual published head after committing.
-Do not make another commit solely to chase a document's own hash, and do not create
-receipt-only commits whose only purpose is to record their own publication.
+Commit coherent work and publish a meaningful pause record to the authorised branch;
+verify publication. A docs-only successor may record a preceding implementation/test
+candidate but does not become that candidate. Do not chase the handover commit's own
+SHA. If publication fails, preserve local work and disclose it rather than claim a
+remote handover. Do not trigger a package matrix solely to publish a wait record.
 
-Commit coherent changes, push to the recorded authorised branch, and verify remote
-content before saying the handover is available. If publishing fails, report the
-failure and local-only state; do not give a prompt implying a nonexistent remote
-checkpoint. Keep final chat summaries short but honest about limits.
+<a id="lightweight-next-chat-prompt"></a>
 
-## Lightweight next-chat prompt
+## Lightweight goal and resume prompts
 
-Use a short selector, normally under 100 words and always at most 4,000 characters.
-Every generated goal prompt (including recovery/review/setup prompts) must state these
-fields inside the copyable prompt, and briefly explain any required machine to the user:
+New goals select an outcome with a finish line, verification surface, limits and the
+canonical task path. Keep them short, normally near 100 words where practical and
+always within 4,000 characters. Include, inside the copyable goal:
 
-- **Codex machine:** explicitly no specific OS, or the required OS/architecture and
-  capability; label mere recommendations as recommended rather than required.
-- **Test execution:** local target(s), GitHub Actions target(s), or no native testing,
-  with a short reason. Both-target tests do not automatically mean two local sessions.
-- **Access/prerequisites:** include only material missing capabilities; mark unknown
-  availability instead of inventing a working host, driver or toolchain.
+- **Codex machine:** no specific OS, or the required OS/architecture/capability;
+  distinguish recommended from required.
+- **Test execution and reason:** relevant local/Actions targets or no native tests;
+  both-target evidence does not automatically require two local Codex sessions.
+- **Access/prerequisites:** only material needs; disclose unknown availability.
 
-Resolve placeholders before delivery. A docs-only example is:
+Do not copy the full implementation plan or add blanket maximum reasoning effort.
+Use task-appropriate effort and existing settings; changing account/client configuration
+requires its own authority. Read only what is needed, and use available usage records
+rather than invent savings or measurements.
+
+Template for a bounded documentation outcome (resolve placeholders before delivery):
 
 ```text
-/goal — <checkpoint> only
+/goal Complete <approved documentation outcome>
 Repository: Caldwell-41/Renpy-editor
+Branch: <recorded branch>
 Codex machine: Any with repository access; no specific OS required.
-Test execution: Documentation checks only; no native build or app launch.
-Reason: This checkpoint changes documentation only.
-Continue branch <recorded branch>. Read AGENTS.md and docs/status/HANDOVER.md,
-then the linked active plan. Complete only <checkpoint>, verify it, publish the
-checkpoint ledger and handover, and stop. Give me the short next-chat prompt.
+Test execution: Relevant documentation checks; no native build or app launch.
+Reason: Documentation-only outcome.
+Read AGENTS.md, docs/status/HANDOVER.md and <selected task section>. Implement,
+check, review and publish the approved outcome using internal checkpoints. Pause
+only at a genuine blocker/approval boundary; preserve the same goal and thread.
 ```
 
-For a platform-bound prompt, replace the example machine/test fields with the actual
-required or recommended host and explain why. Do not leave a generic Any claim when
-the selected task needs physical native input, platform debugging or unavailable tools.
-For a blocked checkpoint, select the documented recovery step, not a later milestone.
-For an approval gate, state the pending decision. Do not embed the implementation
-specification or imply that merely printing a prompt has approved its execution.
+A workflow wait gets a short same-thread continuation message, not a new /goal.
+The pause report supplies the recorded operation and host/access requirements; an
+ordinary `Resume the existing goal and audit the recorded workflow run` message
+need not repeat those fields or the plan. This message is steering, not a replacement
+for a client's actual Goal Resume control. At completion, give a next-outcome prompt
+when useful/requested, with any pending approval explicit. For a real transfer, include
+branch, task, handover, pending operation and unchanged budget in the recovery prompt.
 
 ## Waiting without model polling
 
-Record operation identity and continuation state before a long wait. Use an ordinary
-observer and an actually qualified continuation mechanism. Distinguish a queued
-message from a started turn and a claimed event. Never reset a goal or start a second
-executor merely because the external operation has not finished.
+**Default: manual same-thread resume.** A workflow wait pauses execution of the current
+outcome; it does not complete the outcome, create a new one, or require a new chat.
 
-Until automatic waiting is implemented/qualified, use a published manual-resume
-handover and end the working turn. No repeated status-check turns, keep-alive prompts,
-or extra model used as a watcher. Ordinary API polling by a script is permitted.
-A user-requested status check is not an autonomous polling loop.
+1. **Start and record.** Check existing operations, candidate and allowance; dispatch
+   only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,
+   branch, material inputs and last observed status/time. Record the remaining audit
+   and applicable budgets in HANDOVER/the ledger. A successful request without a
+   confirmed run identity is not a confirmed run; a rejected request is not pending
+   CI. Preserve ambiguous dispatch state and resolve it without duplicate dispatch.
+2. **Actually pause.** Publish the checkpoint and end active model polling. For an
+   autonomous Codex Goal, use only a documented, available and authorised lifecycle
+   control and confirm its result. If the agent cannot pause it, tell the user to use
+   the client's actual pause control. In the CLI this is `/goal pause`; use the
+   installed app's verified equivalent rather than assuming identical commands.
+   A prose reply, a Markdown `awaiting_ci` label or an ended turn is not proof of a
+   runtime pause. Never mark unfinished work complete just to stop continuation.
+3. **Resume on user command.** The user returns to the same thread and uses its actual
+   Resume control (`/goal resume` in the CLI), optionally adding `The workflow is
+   complete; audit the recorded run and continue the existing goal.` A normal chat
+   without autonomous Goal mode can continue with that message alone. If the client
+   was closed, reopen/resume the saved thread instead of creating a new goal. Do not
+   clear/reset the goal, install watchers or manipulate private client state.
+4. **Verify and continue.** Read the recorded run/attempt, current terminal status and
+   relevant repository/worktree changes. Treat the user's completion report as the
+   cue to check, not proof of success. If still pending, preserve the identity and
+   pause again; do not start an autonomous check loop. If terminal, audit required
+   jobs/artifacts/identity and continue the remaining authorised work. Missing, expired,
+   failed, cancelled or skipped evidence stays unresolved; a green badge is not enough.
+   Changed refs or a newer attempt do not silently replace the recorded candidate.
+
+Resume never grants a retry, new dispatch, extra build, broader correction or merge.
+Bounded fixes continue only when already covered by the outcome and remaining allowance;
+otherwise name the decision needed. Do not re-audit unrelated history, rewrite unchanged
+wait records or start a second executor just because CI is slow. Respect one writer.
+
+There is no model polling, keep-alive loop, automatic notification or automatic wake-up
+in this policy. A user-requested status check is permitted. W0/OPT-1A automatic wait/wake
+remains abandoned; this does not authorise client-database edits, a scheduler, service,
+new orchestration framework or work on PR #12. No client pause/resume capability is
+claimed validated by a documentation change.
+
+Official references checked 2026-09-28: [Codex Goal commands](https://developers.openai.com/codex/cli/slash-commands/),
+[Goal lifecycle and user/system authority](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex),
+and [one chat per coherent outcome](https://developers.openai.com/codex/learn/best-practices/).
 
 ## Integration and branch cleanup
 
