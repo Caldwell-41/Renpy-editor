@@ -1121,6 +1121,7 @@ fn every_persistent_transition_has_bounded_recovery() {
 }
 
 #[test]
+#[ignore = "specialist process-termination recovery; ADR 0010"]
 fn process_termination_at_each_persistent_boundary_is_recoverable() {
     let points = [
         "prepared",
@@ -1149,6 +1150,7 @@ fn process_termination_at_each_persistent_boundary_is_recoverable() {
 }
 
 #[test]
+#[ignore = "specialist process-termination recovery; ADR 0010"]
 fn streaming_process_termination_at_each_persistent_boundary_is_recoverable() {
     let points = [
         "prepared",
@@ -1186,6 +1188,7 @@ fn streaming_process_termination_at_each_persistent_boundary_is_recoverable() {
 }
 
 #[test]
+#[ignore = "specialist process-termination recovery; ADR 0010"]
 fn prepared_process_termination_can_be_safely_abandoned() {
     let fixture = Fixture::new();
     let status = std::process::Command::new(std::env::current_exe().unwrap())
@@ -1212,6 +1215,67 @@ fn prepared_process_termination_can_be_safely_abandoned() {
         .unwrap();
     assert_eq!(service.flush(&project), FlushOutcome::Flushed);
     assert_eq!(fs::read(&unrelated).unwrap(), b"unrelated\n");
+
+    let relative = RelativePath::new("game/one.rpy").unwrap();
+    let (expected_bytes, base) = service.snapshot(&project, relative.clone()).unwrap();
+    let outcome = service.commit(
+        &project,
+        TransactionProposal {
+            mutations: vec![FileMutation {
+                path: relative,
+                kind: MutationKind::ReplaceExisting,
+                base,
+                expected_bytes,
+                proposed: b"after prepared recovery\n".to_vec(),
+            }],
+            intent: TransactionIntent::Edit,
+        },
+    );
+    assert!(matches!(outcome, CommitOutcome::Committed { .. }));
+}
+
+#[test]
+fn prepared_fault_state_can_be_safely_abandoned() {
+    let fixture = Fixture::new();
+    let proposal = fixture.proposal(vec![fixture.mutation("game/one.rpy", b"accepted\n")]);
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::Prepared {
+            Err(ErrorCode::RecoveryRequired)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture
+        .service
+        .commit_with_injector(&fixture.project, proposal, &mut hook);
+    assert!(matches!(
+        outcome,
+        CommitOutcome::RecoveryRequired { .. }
+    ));
+
+    let unrelated = fixture.root.join("game/unrelated.rpy");
+    fs::write(&unrelated, b"unrelated\n").unwrap();
+    let root = fixture.root.clone();
+    drop(fixture.service);
+
+    let service = TransactionService::default();
+    let project = service.register_trusted_project(&root).unwrap();
+    let report = service.recover(&project);
+    assert_eq!(report.items.len(), 1);
+    assert_eq!(report.items[0].state, JournalState::Prepared);
+    assert_eq!(
+        report.items[0].mutations,
+        vec![RecoveryMutationState::PreparedWithoutStage]
+    );
+    service
+        .finalize_recovery(&project, &report.items[0].transaction_id)
+        .unwrap();
+    assert_eq!(service.flush(&project), FlushOutcome::Flushed);
+    assert_eq!(fs::read(&unrelated).unwrap(), b"unrelated\n");
+    assert_eq!(
+        fs::read(root.join("game/one.rpy")).unwrap(),
+        b"label one:\n    pass\n"
+    );
 
     let relative = RelativePath::new("game/one.rpy").unwrap();
     let (expected_bytes, base) = service.snapshot(&project, relative.clone()).unwrap();

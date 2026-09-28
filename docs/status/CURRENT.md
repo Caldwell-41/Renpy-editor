@@ -1,11 +1,12 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** TEST-AUDIT-1 documentation/selector audit, `review_ready`;
-see the [policy/alignment ledger](../tasks/active/testing-policy-alignment.md).
-The user selected this audit only. Obsolete live testing directions are corrected;
-test/workflow migration and qualification remain unimplemented/unselected.
-Rules remain in [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
+**Current checkpoint:** R2-P1-Q1-PREP source alignment, `review_ready` after cheap
+documentation/selector/gate checks; see the [Q1 preparation record](../tasks/active/testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
+Four termination parents and both embedded SDK specialist blocks are separated; the
+Prepared recovery regression and both workflow selectors are aligned. No compiled or
+hosted test evidence is claimed. Rules remain in
+[WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Audited baseline:** `109417800873a464dd7da5f9d9571c00a9f9c447`.
@@ -48,17 +49,11 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Recommended next action, not yet selected:** R2-P1-Q1-PREP, the bounded test/workflow
-preparation in the [amended Q1 proposal](../tasks/active/testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected).
-Separate four persistence-termination parents and embedded SDK specialist blocks,
-retain ordinary recovery, align selectors/markers, remove duplicate G1-U2 selection
-and prepare manual production dispatch/failure-time binary evidence.
-Codex: any repository-capable host. Cheap preparation checks only; no native build,
-app launch or CI. Publish/review preparation before separately selecting Q1-EXEC's
-single standard Windows/macOS matrix. Ledger 34's evidence is preserved; section 35
-records this amendment. Do not dispatch current unrestricted workflows as a shortcut.
-The user's subsequent handover request adds a
-[Luna preparation brief](../tasks/active/testing-policy-alignment.md#luna-execution-brief-for-q1-prep)
-with fixed edit scope, checks and stop rules; Luna/medium is recommended. This is
-handover preparation, not selection of implementation or qualification.
-See [HANDOVER](HANDOVER.md) for publication and the exact stopping boundary.
+**Next boundary:** stop before Q1-EXEC. Its separate selection would use one standard
+production dispatch on the existing Windows x64 and macOS ARM64 hosted runners, after
+freshly checking Actions access, repository rules, refs and review comments. Codex may
+run on any repository-capable host with Actions coordination access; no physical test
+machine is selected. No package run, app launch or CI dispatch was part of Q1-PREP.
+PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
+integrated 1H remain open. No historical failure or candidate is reclassified. See
+[HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.

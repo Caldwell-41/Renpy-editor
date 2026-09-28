@@ -36,6 +36,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+      - name: Exercise bounded Q1 gate rejection fixtures
+        run: python3 app/scripts/check-q1-prep-gates.py self-test
+      - name: Audit Q1 selectors and retained cases
+        run: python3 app/scripts/check-q1-prep-gates.py source-audit .
 
 
   phase1g-flow-profile:
@@ -82,7 +86,30 @@ jobs:
           npm --version
           npm ci --ignore-scripts
           npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
-          cargo test -p loomlight-core --release --locked -- --skip flow_observed_budget_fixture --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+          cargo test -p loomlight-core --release --locked -- \
+            --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
+            --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
+            --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+            --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/observed-core.log"
+          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/observed-core.log"
+          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/observed-core.log"
+          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/observed-core.log"
+          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log" \
+            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
+            transaction::tests::every_persistent_transition_has_bounded_recovery \
+            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
+            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
+            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
+            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
+            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
+            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
+            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
+            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
+            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
+            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
+            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
+            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
       - name: Three isolated real-service observed-flow samples
         if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
@@ -94,6 +121,9 @@ jobs:
           git rev-parse HEAD
           rustc -Vv
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-profile.log"
+          python scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
           grep 'phase-1g-observed-budget-gate: passed (3 samples)' "$RUNNER_TEMP/runtime-flow-profile.log"
       - name: Rendered interaction during refresh
         if: ${{ !inputs.phase1g_candidate_proof }}

@@ -8,20 +8,22 @@ conflicts, interrupted-save recovery, draft/session retention, malformed input,
 basic path/link refusal, explicit execution and usable response times.
 Use deterministic ordinary writer interleavings where they protect against lost work.
 
-Deliberately timed same-user root/parent/reparse attacks and the G1-O native-reader
-experiments are specialist historical tests, not blockers for last-observed Branches.
+Deliberately timed same-user root/parent/reparse attacks, persistence-process
+termination, SDK-install crash recovery and the G1-O native-reader experiments are
+specialist historical tests, not blockers for last-observed Branches.
 Preserve them and their failures; do not acquire symlink privileges or change security
 settings to pass a hobby-editor gate. Existing robust write/recovery code remains.
 Historical corrective evidence below keeps its actual result.
 
-[WORKFLOW's delivery rules](WORKFLOW.md#proportionate-delivery-rules) also exclude
-deliberate process-crash experiments from routine selection. The
+[WORKFLOW's delivery rules](WORKFLOW.md#proportionate-delivery-rules) exclude deliberate
+process-termination experiments from routine selection. The
 [TEST-AUDIT-1 selector disposition](tasks/active/testing-policy-alignment.md#selector-disposition)
-records remaining executable-policy gaps and the proposed migration. Unfiltered core,
-the production matrix and `quality.yml`'s ordinary flow-profile suite still select
-excluded exercises; do not run those commands until aligned. This is a documentation
-audit, not an implemented selector change. Keep ordinary recovery through non-crashing
-fault/state fixtures; controlled game failure, Stop and descendant cleanup remain required.
+records the rationale and exact specialist cases. The four persistence-termination
+parents and two embedded SDK specialist tests are explicitly ignored. Production and
+quality broad-core selectors skip the separately selected flow fixture and the two
+archive-backed SDK gates; ordinary Prepared recovery now uses a non-crashing fault-state
+fixture. These source selectors are prepared here; this checkpoint does not compile or
+execute them. Controlled game failure, Stop and descendant cleanup remain required.
 
 G1-OBS updates production code, test classification/selectors and real-service gates
 together. Historical `g1_o1` tests and seventeen named timed namespace substitutions use
@@ -72,6 +74,27 @@ cargo test -p loomlight-core --locked
 cargo test -p loomlight-desktop --locked
 npm exec -- tauri build -- --locked
 ```
+
+The unfiltered core line above is a general command reference only. For routine broad
+core coverage, both workflows use the same three exclusions and verify positive Cargo
+summaries plus named ordinary regressions:
+
+```bash
+cargo test -p loomlight-core --release --locked -- \
+  --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
+  --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
+  --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+  --nocapture
+cargo test -p loomlight-core --release --locked \
+  scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture
+```
+
+Run SDK gates separately with their pinned archive and exact test path. Supply `--ignored`
+only for the two runtime SDK gates (ignored because they need an explicit archive), and
+always combine it with `--exact`. Specialist persistence/namespace cases stay excluded.
+The workflow result checker rejects missing/malformed summaries, zero selected tests,
+missing/ignored/filtered required cases and failures. Packaged case evidence must contain
+exactly one successful report per required scenario with cleanup complete.
 
 The full desktop Rust test, package, and injected packaged-WebView probe run separately
 on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
@@ -578,7 +601,7 @@ these two steps defer failure with `continue-on-error`; the mandatory final brow
 gate inspects their original `outcome`, not the success-normalized `conclusion`.
 Both must be `success`. Failure, cancellation, skipped or missing results cannot pass.
 This lets subsequent SDK, desktop and packaged checks run despite a browser failure,
-while the overall production job and success-only package upload remain blocked.
+while the overall production job and success-only installer upload remain blocked.
 Other genuine prerequisite failures retain normal fail-fast step behavior. This is
 bounded failure deferral, not a promise that every unrelated check survives every
 kind of failure. Evidence upload still runs on failure. Workflow edits receive syntax
@@ -640,15 +663,14 @@ corrections. Do not dispatch a full matrix for each checkpoint or documentation 
 Do not append every scenario to one smoke; report independent stages, monotonic timing,
 cleanup outcomes and reliable terminal failure reports.
 
-Current `production-scaffold.yml` supports manual dispatch and automatically packages
-relevant main pushes. It does not implement pre/post-merge evidence deduplication. Before
-scheduling an expensive final pre-merge run, record the intended integration/run strategy
-and any bounded workflow amendment needed to avoid an automatic duplicate. A trigger
-change must be implemented/reviewed before relying on it; documentation never suppresses
-an actual trigger or permits bypassing required checks. Prefer a small explicit trigger
-policy over reviving OPT-1A or adding a general evidence controller. The independent
-browser change above leaves these triggers unchanged and does not authorize a
-production dispatch.
+`production-scaffold.yml` is manual-dispatch-only; pushes to main, including workflow or
+application changes, do not start package qualification. Each target still runs its own
+functional gates. A failure-time evidence artifact retains the exact executable (the
+macOS app bundle), digest, source/run identity and incomplete outcome for seven days,
+after scanning the produced package for secrets. Its manifest distinguishes not built,
+built-but-missing, available, and output produced during a failed package step. Installers
+remain success-only. This is not evidence reuse or a cross-SHA waiver, and does not
+authorize a production dispatch during Q1-PREP.
 
 ## Required quality gate by change type
 
@@ -833,10 +855,9 @@ Windows x64/macOS ARM64 without packaging or SDK download. The browser's 30 pan
 samples run while a refresh response is deliberately pending; navigation remains
 usable. Chromium/synthetic events do not replace final packaged WebView/native input
 acceptance. Historical full-verification timings keep their original failures.
-Its broad core selector currently includes the same deliberate termination parents
-as production; the alignment proposal must update both selectors together. Production
-also currently includes this fixture in broad core before its isolated enforced step;
-exclude it from broad core so qualification measures three fixed samples only once.
+Both broad-core selectors now apply the same three exclusions. Production and quality
+run the exact observed-budget fixture separately with enforcement enabled, so its three
+fixed samples run once per target rather than again inside broad core.
 
 Retain the real 500-Scene/2,000-edge workload, rendered 30-sample interaction check,
 ordinary external changes (including same-length content edits and normal file
@@ -848,6 +869,6 @@ No native-open microbenchmark or full corrected ADR 0009 candidate is a prerequi
 
 R1's old automatic branch trigger is retired into this combined final gate; explicit
 manual R1 dispatch remains available for bounded future corrections. Final production
-verification is manually dispatched once on the implementation branch. Main's existing
-automatic production trigger remains unchanged; no cross-SHA/pre-post-merge reuse is
-claimed. Integration and its run strategy require separate authorisation.
+verification is manually dispatched once on the implementation branch. The production
+workflow has no automatic main-push trigger; no cross-SHA/pre/post-merge reuse is claimed.
+Integration and its run strategy require separate authorisation.

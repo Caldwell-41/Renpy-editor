@@ -5264,3 +5264,36 @@ cross-SHA waiver, replay of Mac diagnosis, unused F1 allowance, conflict resolut
 merge, optional Git or Phase 2. Historical FAIL/skip/candidate evidence is unchanged.
 CURRENT and the single HANDOVER carry the machine-labelled continuation. Resolve the
 published documentation head from Git; no receipt-only commit.
+
+
+## 36. R2-P1-Q1-PREP — source alignment checkpoint — 2026-09-28
+
+**Authority/state:** user selected only bounded test/workflow preparation on the existing
+feature branch. Source preparation is `review_ready`; Q1-EXEC and final acceptance remain
+unselected. Start from the amended scope and five-step record in the
+[TEST-AUDIT/Q1 ledger](testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
+
+All four process-termination parents are reasoned ignored tests; the successful Prepared
+abandon/Flush/unrelated-byte/follow-up-write regression now runs through a non-crashing
+fault-state fixture and fresh service. Both SDK crash checkpoints and both timed stage
+namespace blocks have exact ignored test entry points. The ordinary SDK target gate keeps
+verified install/reuse, trust-before-spawn/provenance checks, static identity refusal and
+Phase 1C–1F authoring/Source/compile/run assertions. Controlled runtime error, Stop and
+descendant cleanup remain ordinary cases.
+
+Production and quality broad-core selectors match the exact three exclusions. Each
+selects G1-U2 separately once; production runs the required exact SDK gates at their
+existing layer and with the archive. Gate checks require positive Cargo summaries and
+actual required test outcomes, all five well-formed packaged case reports, cleanup
+completion, and both browser outcomes. Production no longer triggers on main pushes;
+failure evidence retains the hashed Windows executable or macOS app bundle for seven
+days, separately from success-only installers.
+
+Validation: repository validator passed for **276 files**; `git diff --check`, controlled
+result fixtures and the focused source audit passed. YAML/Bash parsers and standalone
+Rust formatting tools were unavailable. No Cargo/build/test listing, npm build,
+app/browser/SDK launch, package build, CI dispatch or specialist exercise occurred.
+The complete five-step table, check details and unsupported syntax-check limitation are
+in the owning testing-policy ledger. No product/test coverage gap requiring production
+changes was encountered. Recheck current Actions access/rules, review comments and exact
+refs when Q1-EXEC is separately selected; do not start that matrix from this checkpoint.

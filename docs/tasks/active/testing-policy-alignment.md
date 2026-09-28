@@ -431,3 +431,53 @@ archived records and raw evidence are unchanged. No Cargo/npm suite, build, app/
 SDK launch, package qualification, hosted workflow or specialist exercise ran.
 Publish this checkpoint with `[skip ci]`, verify non-forced remote head/content and review
 the published diff. Resolve its publication SHA from Git without a receipt-only commit.
+
+
+## R2-P1-Q1-PREP — test/workflow source alignment — 2026-09-28
+
+**Authority/state:** the user selected Q1-PREP only on the existing
+`feature/phase-1g-branches-runtime` branch, parent `31fd52ca067295f31afacbab04d1ae718ac60dc9`.
+Preparation is `review_ready`; do not compile the new Rust tests, launch an app/browser/
+SDK, build packages, dispatch CI, or start Q1-EXEC. Keep open PR #17 and all newer work.
+
+### Five-step before/after record
+
+| Ordered step | Before | Prepared source and preserved assertions |
+| --- | --- | --- |
+| 1. Ordinary recovery first | The successful Prepared-abandonment assertions lived only under a process-termination parent. | `transaction::tests::prepared_fault_state_can_be_safely_abandoned` uses `FaultPoint::Prepared`, drops/reopens the service, asserts `PreparedWithoutStage`, finalizes and flushes, preserves unrelated/original bytes, then commits a later write. The old subprocess case remains ignored. Streamed recovery, persisted-stage bytes, external writers, Recent pre/postcommit and existing recovery refusal tests remain selected. |
+| 2. Separate specialist execution | Three transaction termination parents, Recent termination and two SDK specialist blocks were selected or embedded in the ordinary Phase 1C gate. | The four exact termination parents and `official_sdk_managed_install_crash_recovery_specialist` / `official_sdk_stage_namespace_specialist` are reasoned `#[ignore]` cases. Both crash calls and both anchored/inflight stage blocks, including their assertions/markers, live in the isolated SDK tests. The ordinary SDK gate retains clean install/reuse, provenance/trust ordering, static identity checks, and its authoring/Source/compile/run assertions. Helpers and specialist workers remain intact. |
+| 3. Align selectors and markers | Production and quality broad core selected the flow fixture or SDK gates; bare-name checks could pass without executing a required test. | Both workflows skip only the exact flow fixture and two archive-backed SDK gates from broad core, then select the 3-sample G1-U2 fixture once. SDK gates use exact names; `--ignored` is limited to the two explicit-archive runtime gates. Cargo summaries plus named test outcomes reject missing/zero/ignored/filtered/failed required cases. Controlled report checks require each of the five package reports and complete cleanup. |
+| 4. Trigger and retention | Production also ran on relevant main pushes, and executable identity was not retained on later failure. | Production is manual-dispatch-only. The two Windows/macOS jobs, independent browser outcome gate, SDK/core/desktop/package gates and success-only installers remain. Always-run scan/evidence steps identify run/attempt/SHA/tree, hash the executable, retain the Windows executable or full macOS app bundle for seven days, and distinguish not-built, built-but-missing, available, scan-withheld and partial output from failed packaging. |
+| 5. Check, review, publish, stop | Prep had no implementation state. | A focused helper exercises controlled Cargo/report/browser/retention outcomes; a source audit checks exact exclusions and retained cases. Documentation, selector, whitespace and repository checks are listed below. Q1-EXEC remains a separate selection. |
+
+Changed paths are limited to the named transaction/lifecycle test modules, the two
+workflows, focused scripts under `app/scripts/`, TESTING and the owning status/ledger
+files. No production Rust, transaction state machine, renderer, dependency/lockfile,
+other workflow, repository rule or prior raw evidence changed.
+
+### Check results and boundary
+
+- `python scripts/validate.py`: passed for **276 repository files**.
+- `git diff --check`: passed. Existing CRLF Rust files show Git's normal LF conversion
+  warning in the working copy; there is no whitespace error.
+- `check-q1-prep-gates.py self-test`: passed controlled zero-pass, missing-summary,
+  ignored/filtered/failed Cargo-result, malformed/missing report, failed-cleanup,
+  browser-outcome, and package-created/not-created state fixtures.
+- `check-q1-prep-gates.py source-audit .`: passed for all four specialist parents,
+  both extracted SDK cases, three matching exclusions in both workflows, manual-only
+  production dispatch, browser gate, and five required package cases.
+- The production workflow's scan/hash/retain path and both target selectors were
+  reviewed against the amended Q1 proposal. No unfiltered core shortcut remains in
+  either workflow's routine selector.
+- Full YAML and Bash syntax parsers and standalone `rustfmt` are unavailable on this
+  host. The workflow YAML/shell were source-reviewed; this limitation is explicit.
+- No Cargo command, Rust compilation/test listing, npm build, app/browser/SDK launch,
+  package build, hosted workflow, or CI dispatch ran. These compiled/hosted behaviors
+  are unverified and belong to Q1-EXEC after review/selection.
+
+Publish the lightweight Q1-PREP checkpoint on the existing branch with `[skip ci]`;
+its head is resolved from Git after publication. Q1-EXEC needs a separate user selection,
+fresh refs/rules/access review and one Windows x64/macOS ARM64 production dispatch. Open
+questions for that step: confirm current Actions permissions and branch rules, and
+inspect any review comments on the prepared selectors/artifact-retention logic. Existing
+native/human acceptance and PR conflict/integration gaps remain as previously recorded.

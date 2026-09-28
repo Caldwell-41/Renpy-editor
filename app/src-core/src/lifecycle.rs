@@ -2471,6 +2471,138 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist SDK install process-termination recovery; ADR 0010"]
+    fn official_sdk_managed_install_crash_recovery_specialist() {
+        let Some(archive) = std::env::var_os("LOOMLIGHT_PHASE1C_SDK_ARCHIVE") else {
+            eprintln!("phase-1c-sdk-crash-specialist: skipped (no official SDK archive)");
+            return;
+        };
+        let temp = tempfile::tempdir().unwrap();
+        let archive = Path::new(&archive);
+        let interrupted_before = temp.path().join("managed-before-promotion");
+        crash_managed_sdk_install(&interrupted_before, archive, "before");
+        let recovered_before =
+            crate::renpy::install_supported_sdk_from_archive(&interrupted_before, archive).unwrap();
+        assert_eq!(recovered_before.version, SUPPORTED_VERSION);
+
+        let managed_state = temp.path().join("managed-after-promotion");
+        crash_managed_sdk_install(&managed_state, archive, "after");
+        let sdk = crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        assert_eq!(sdk.version, SUPPORTED_VERSION);
+        let already_installed =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        assert!(sdk.same_identity(&already_installed));
+        println!("phase-1c-remediation-sdk-recovery: passed");
+    }
+
+    #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
+    fn official_sdk_stage_namespace_specialist() {
+        let Some(archive) = std::env::var_os("LOOMLIGHT_PHASE1C_SDK_ARCHIVE") else {
+            eprintln!("phase-1c-stage-specialist: skipped (no official SDK archive)");
+            return;
+        };
+        let temp = tempfile::tempdir().unwrap();
+        let sdk = crate::renpy::install_supported_sdk_from_archive(
+            temp.path(),
+            Path::new(&archive),
+        )
+        .unwrap();
+        {
+            let requested_stage_parent = temp.path().join("anchored-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-anchored-child-stage");
+            RenpyAdapter::generate_starter_anchored_with_hooks(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+                || Ok(()),
+            )
+            .unwrap();
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
+        }
+
+        {
+            let requested_stage_parent = temp.path().join("inflight-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-inflight-child-stage");
+            RenpyAdapter::generate_starter_anchored_with_hooks(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+                || Ok(()),
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+            )
+            .unwrap();
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
+        }
+        println!("phase-1c-remediation-stage-races: passed");
+    }
+
+    #[test]
     fn folder_generation_is_deterministic_and_validation_is_strict() {
         assert_eq!(
             folder_name_from_title("  The Last Tram!  "),
@@ -2834,6 +2966,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist process-termination recovery; ADR 0010"]
     fn recent_crash_checkpoints_restart_from_a_complete_store() {
         for checkpoint in ["partial", "durable", "committed"] {
             let temp = tempfile::tempdir().unwrap();
@@ -3172,21 +3305,13 @@ mod tests {
         };
         let temp = tempfile::tempdir().unwrap();
         let archive = Path::new(&archive);
-        let interrupted_before = temp.path().join("managed-before-promotion");
-        crash_managed_sdk_install(&interrupted_before, archive, "before");
-        let recovered_before =
-            crate::renpy::install_supported_sdk_from_archive(&interrupted_before, archive).unwrap();
-        assert_eq!(recovered_before.version, SUPPORTED_VERSION);
-
-        let managed_state = temp.path().join("managed-after-promotion");
-        crash_managed_sdk_install(&managed_state, archive, "after");
+        let managed_state = temp.path().join("managed-sdk");
         let sdk =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
         let already_installed =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert!(sdk.same_identity(&already_installed));
-        println!("phase-1c-remediation-sdk-recovery: passed");
         let (embedded_provenance, legacy_provenance) =
             crate::renpy::managed_provenance_paths_for_test(&managed_state);
         assert!(embedded_provenance.is_file());
@@ -3226,99 +3351,6 @@ mod tests {
         fs::remove_dir(&sdk_root).unwrap();
         fs::rename(&moved_sdk, &sdk_root).unwrap();
         sdk.revalidate(true).unwrap();
-
-        {
-            let requested_stage_parent = temp.path().join("anchored-child-test");
-            fs::create_dir(&requested_stage_parent).unwrap();
-            let stage_parent = requested_stage_parent.canonicalize().unwrap();
-            let token = uuid::Uuid::new_v4().to_string();
-            let stage_name = format!(".loomlight-stage-{token}");
-            let stage_path = stage_parent.join(&stage_name);
-            fs::create_dir(&stage_path).unwrap();
-            restrict_directory(&stage_path).unwrap();
-            fs::write(
-                stage_path.join(STAGE_MARKER),
-                format!("loomlight-project-stage-v1\n{token}\n"),
-            )
-            .unwrap();
-            fs::create_dir(stage_path.join("game")).unwrap();
-            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
-            let moved = stage_parent.join("moved-anchored-child-stage");
-            RenpyAdapter::generate_starter_anchored_with_hooks(
-                &sdk,
-                &stage_path,
-                stage_file(&stage).unwrap(),
-                1280,
-                720,
-                || {
-                    #[cfg(unix)]
-                    {
-                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
-                    }
-                    #[cfg(windows)]
-                    assert!(fs::rename(&stage_path, &moved).is_err());
-                    Ok(())
-                },
-                || Ok(()),
-            )
-            .unwrap();
-            #[cfg(unix)]
-            {
-                assert!(moved.join("game/screens.rpy").is_file());
-                assert!(!stage_path.join("game/screens.rpy").exists());
-            }
-            #[cfg(windows)]
-            assert!(stage_path.join("game/screens.rpy").is_file());
-        }
-
-        {
-            let requested_stage_parent = temp.path().join("inflight-child-test");
-            fs::create_dir(&requested_stage_parent).unwrap();
-            let stage_parent = requested_stage_parent.canonicalize().unwrap();
-            let token = uuid::Uuid::new_v4().to_string();
-            let stage_name = format!(".loomlight-stage-{token}");
-            let stage_path = stage_parent.join(&stage_name);
-            fs::create_dir(&stage_path).unwrap();
-            restrict_directory(&stage_path).unwrap();
-            fs::write(
-                stage_path.join(STAGE_MARKER),
-                format!("loomlight-project-stage-v1\n{token}\n"),
-            )
-            .unwrap();
-            fs::create_dir(stage_path.join("game")).unwrap();
-            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
-            let moved = stage_parent.join("moved-inflight-child-stage");
-            RenpyAdapter::generate_starter_anchored_with_hooks(
-                &sdk,
-                &stage_path,
-                stage_file(&stage).unwrap(),
-                1280,
-                720,
-                || Ok(()),
-                || {
-                    #[cfg(unix)]
-                    {
-                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
-                    }
-                    #[cfg(windows)]
-                    assert!(fs::rename(&stage_path, &moved).is_err());
-                    Ok(())
-                },
-            )
-            .unwrap();
-            #[cfg(unix)]
-            {
-                assert!(moved.join("game/screens.rpy").is_file());
-                assert!(!stage_path.join("game/screens.rpy").exists());
-            }
-            #[cfg(windows)]
-            assert!(stage_path.join("game/screens.rpy").is_file());
-        }
-        println!("phase-1c-remediation-stage-races: passed");
 
         let projects = temp.path().join("projects");
         fs::create_dir(&projects).unwrap();

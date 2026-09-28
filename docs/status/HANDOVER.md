@@ -1,40 +1,30 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-28. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** TEST-AUDIT-1 `review_ready`; documentation/selector audit only.
+**Checkpoint:** R2-P1-Q1-PREP `review_ready`; source preparation only.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/conflicting.
-**Audited baseline:** `109417800873a464dd7da5f9d9571c00a9f9c447`.
-**Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
-Resolve the documentation publication commit from Git; no receipt-only self-SHA commit.
+**Parent:** `31fd52ca067295f31afacbab04d1ae718ac60dc9`.
+**Publication:** publish with `[skip ci]`; resolve exact head from Git, without a receipt-only commit.
 
-**Authority:** the user selected TEST-AUDIT-1 only: audit live requests/ledger 34,
-correct documentation, propose required changes, review/publish and stop.
-No test/workflow/product implementation or qualification execution was selected.
-The checkout was fast-forwarded through all 14 newer remote commits; the historical
-G1-O1 worktree, raw reports and other branches/PRs remain untouched.
+**Authority:** the user selected Q1-PREP only. Q1-EXEC, qualification, native/human
+acceptance, conflict resolution, merge and integrated 1H remain separate boundaries.
 
-## Findings and concrete proposal
+## Prepared source
 
-Read [the policy/alignment audit](../tasks/active/testing-policy-alignment.md#test-audit-1--selected-documentation-and-selector-audit)
-for classifications, exact selectors, retained regressions and cumulative budgets.
-[Phase 1G ledger 35](../tasks/active/phase-1g-branches-runtime-git.md#35-test-audit-1--testing-policy-alignment--2026-09-28)
-appends the disposition; ledger 34 and earlier evidence are unchanged.
+The full ordered before/after table, changed paths and check results are in the
+[Q1 preparation ledger](../tasks/active/testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
+[Phase 1G ledger 36](../tasks/active/phase-1g-branches-runtime-git.md#36-r2-p1-q1-prep--source-alignment-checkpoint--2026-09-28)
+records its summary. Production Rust behavior, the transaction state machine, renderer,
+dependencies, lockfiles, other workflows and historical failure evidence are unchanged.
 
-Four persistence-termination parents still run in broad core; the SDK lifecycle gate
-embeds two crash-recovery calls and two timed namespace blocks. Production and quality
-flow selectors need alignment. Production also selects G1-U2 twice, packages relevant
-main pushes, and retains installers only on success. Documentation is corrected;
-executable gaps remain. Controlled runtime failure, Stop, ordinary external writers,
-Source/drafts, heap-buffer/cancellation and non-crashing recovery stay required.
-
-The [amended Q1 plan](../tasks/active/testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected)
-stops after preparation before separately selected execution. Q1-PREP separates tests
-and markers, preserves successful Prepared abandonment with a non-crashing fixture,
-aligns both workflows, makes production manual-only and retains produced binaries on
-failure. Q1-EXEC would run one standard Windows/macOS matrix: two package builds, five
-runtime cases plus primary/secondary smoke per target, no retries. Neither is selected
-by this handover. No diagnostic allowance is renewed or transferred.
+The Prepared abandonment/Flush/unrelated-byte/follow-up-write sequence now uses a
+non-crashing `FaultPoint::Prepared` fixture and fresh service. Four termination parents
+and both embedded SDK specialist blocks have ignored entry points. Production and
+quality use the same three broad-core exclusions and select G1-U2 once separately.
+Required test summaries, package reports/cleanup and both browser outcomes reject
+missing or failed evidence. Production is manual-only and retains hashed executable
+evidence for seven days on failure, separate from success-only installers.
 
 ## Capability and preserved evidence
 
@@ -52,36 +42,33 @@ evidence. PR conflicts, integration and separately selected integrated 1H remain
 Optional Git and Phase 2 remain excluded. No operation was started or remains pending
 for this audit; another host's unpublished work remains unavailable to inspect.
 
-## Validation, publication and next boundary
+## Validation and next boundary
 
-TEST-AUDIT-1 was published and remote/PR head verified at
-`e5b457f79a0589837940bce3b2533bfb5ea722fc`: eight Markdown files, 274-file repository
-validation and 97 relative link/anchor checks passed. Those counts belong to that audit.
-No Cargo/npm suite, native build, browser/app/SDK launch or CI is claimed.
+The repository validator passed for **276 files**, `git diff --check` passed, and the
+focused source audit and controlled gate/report fixtures passed. Standalone workflow
+YAML/Bash parsers and `rustfmt` were unavailable. No Cargo compile/test listing, npm
+build, app/browser/SDK launch, package build, CI dispatch or specialist exercise ran.
+Compiled/hosted behavior is unverified; no package qualification is claimed.
 
-The user subsequently requested a Luna-scoped handover. Read the
-[Luna execution brief](../tasks/active/testing-policy-alignment.md#luna-execution-brief-for-q1-prep)
-for its fixed read/edit boundary, five ordered steps, acceptance checks and stop rules.
-**Recommended:** Luna with medium reasoning. Recovery redesign, policy decisions and
-qualification are outside that brief; recommend Sol/Astra review of the prepared diff
-at the existing pre-execution boundary. No agent has been started or model switched.
-This handover amendment does not select preparation implementation. Publish/review this
-documentation amendment with `[skip ci]`; resolve its head from Git, not a receipt commit.
+WIN-F1 ledger 27 and MAC-N1 ledger 32 retain their identity/fixture limits. TEST-P2
+ledger 33 keeps Chrome timing diagnostic and functional/evidence failures blocking.
+R2-P1 `36293797731` and H1 `36310107481`, attempt 1, remain FAIL with missing evidence.
+Windows native responsiveness, final human sessions on both platforms, PR conflicts/
+integration and integrated 1H remain open. Optional Git and Phase 2 remain excluded.
+No CI operation is pending.
 
-**Next proposed selection:** R2-P1-Q1-PREP only. **Codex machine:** any repository-capable
-host; no specific OS. **Test execution:** cheap documentation/selector/gate checks only,
-no native builds, app/browser/SDK launches or CI; compiled tests remain unexecuted.
-**Reason:** source alignment precedes native qualification. Windows x64/macOS ARM64
-Actions execution and normal hosted dependencies belong to later Q1-EXEC; reverify
-Actions access and repository rules then. No physical test host is promised.
+Before Q1-EXEC is separately selected, recheck refs, PR/review comments, Actions access
+and repository rules. The proposed automated matrix is one existing production dispatch
+on `windows-2025` Windows x64 and `macos-26` ARM64, with one package build per target;
+it cannot provide final human/native keyboard acceptance. No physical test machine is
+required for that automated matrix.
 
 ```text
-/goal — R2-P1-Q1-PREP only
+/goal — R2-P1-Q1-EXEC selection review only
 Repository: Caldwell-41/Renpy-editor
 Branch: feature/phase-1g-branches-runtime
-Model: Luna, medium reasoning.
-Codex machine: Any with repository access; no specific OS required.
-Test execution: Cheap documentation/selector/gate checks only; no native builds, app launches or CI.
-Reason: Align test/workflow source before qualification.
-Read AGENTS.md and docs/status/HANDOVER.md, then the linked Luna execution brief. Implement only its bounded preparation, preserve newer work and required regressions, verify and publish the ledger/handover. Hand back unresolved scope or recovery questions; stop before Q1-EXEC.
+Codex machine: Any host with repository and Actions coordination access; no specific OS.
+Test execution: None until the exact Q1-EXEC scope is separately selected. If selected, one existing production dispatch on Windows x64 and macOS ARM64 hosted runners; no physical test machine.
+Reason: Review the published preparation, current refs/rules/access and comments before the standard package qualification boundary.
+Read AGENTS.md, CURRENT.md, HANDOVER.md and the Q1-PREP ledger. Recheck the exact test/workflow diff and retained regressions. Do not dispatch, merge, resolve PR conflicts or begin integrated 1H without separate selection. Hand back any unresolved recovery, access or scope question.
 ```
