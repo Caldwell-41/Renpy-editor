@@ -1,6 +1,6 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Updated:** 2026-09-25; Git deferral and testing ownership.
+**Updated:** 2026-09-28; TEST-AUDIT-1 testing-policy alignment; execution remains unselected.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
 **Execution state:** `not_started`.
 **Entry:** Phase 1G closure and integration, accepted Phase 1F retained, fresh refs and
@@ -76,12 +76,16 @@ No general cross-SHA automated gate waiver is introduced.
 | Graph | Missing versus unknown targets with proven absence, incomplete/ambiguous label inventory, partial Choice, duplicate option text, self-loop, reconvergence, source navigation both directions, stale selection after deletion, declared size limit | H04, H07, H11, H12 |
 | Draft preparation | Source Save All, explicit existing Scene Commit, use saved revision with form/draft retained, Cancel, refusal starts zero processes, dirty Source remains Pending validation | H07, H08, H11 |
 | Trust | Untrusted open/preview/import/typing has zero SDK launch; reject stale grant after root/SDK or relevant executable change; revocation and copied-UUID rejection | H08, H11 |
-| Runtime | Play beyond smoke timeout, script editing/saving and launch-revision status, asset mutation/inverse refusal with no writes and retry after Stop, launch-versus-import race, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, crash and descendants retaining pipes | H06, H08, H11 |
+| Runtime | Play beyond smoke timeout, script editing/saving and launch-revision status, asset mutation/inverse refusal with no writes and retry after Stop, launch-versus-import race, no silent autoreload, targeted move/delete/inverse block, Stop-and-switch/Cancel, controlled game failure and descendants retaining pipes | H06, H08, H11 |
 | Diagnostics | Multiline SDK failures, Unicode/spaces/BOM/newlines, absent location, deleted/out-of-scope file, stale revision, inert output, bounds/truncation and empty parsed list after failure | H07, H08, H11 |
 
-Use deterministic fault injection and real process-termination tests where the owning
-contract requires them. UI stubs alone cannot prove disk durability, process cleanup or
-native keyboard delivery.
+Use non-crashing fault/state fixtures through real recovery services for H10, retaining
+accepted/displaced bytes, blocked ambiguity, safe resolution and follow-up writes.
+Deliberate application/transaction crash and timed namespace experiments are specialist
+history under WORKFLOW, not routine H01-H12 gates. Controlled runtime nonzero exit,
+ordinary Ren'Py errors and Stop/descendant cleanup remain required; see the
+[selector disposition](testing-policy-alignment.md#selector-disposition).
+UI stubs alone cannot prove disk recovery, process cleanup or native keyboard delivery.
 
 ## 4. Cross-cutting release-of-phase gates
 
@@ -117,6 +121,10 @@ Do not dispatch a packaging matrix for planning changes. During actual acceptanc
 use one complete final matrix per changed candidate; do not rerun unchanged expensive
 gates or use model polling. Capture run ID, attempt, SHA and remaining jobs before an
 awaiting-CI/manual-resume handoff. Failed/skipped/cancelled are distinct from passed.
+The existing production and quality flow selectors still need the migration recorded
+in TEST-AUDIT-1 before routine selection. A future integrated-tree assessment selects
+affected/required gates; it does not automatically repeat an equivalent matrix on merge
+or claim unimplemented cross-SHA evidence reuse.
 
 Partition scenarios so each reports its stage, monotonic timing, actual failure and
 cleanup outcome; preserve a reliable final report even when an earlier assertion fails.

@@ -1,6 +1,8 @@
 # Phase 1G — Branches, runtime and diagnostics
 
-**Updated:** 2026-09-27. **Current checkpoint:** R2-P1 packaged proof correction and
+**Updated:** 2026-09-28. **Current checkpoint:** TEST-AUDIT-1 documentation/selector
+review; see [the policy/alignment ledger](testing-policy-alignment.md) and section 35.
+R2-P1 packaged proof correction and
 supported-target qualification, `blocked` after the failed matrix (ledger 23). G1-OBS remains
 `review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 is `review_ready`
 (ledger 26); the user approved R2-P1-WIN-F1's two-buffer correction and local testing
@@ -16,15 +18,17 @@ Chrome timing becomes diagnostic after native evidence review; functional failur
 remain blocking. Remaining qualification scope review is recorded in ledger 34.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) supersedes the
 G1-O observation program and old G1-V1 full-verification latency contract.
-Sections 12–20 retain historical evidence and superseded next-step instructions.
+Sections 12–34 retain historical evidence and superseded next-step instructions;
+their old dispatch/build allowances do not authorize new execution.
 **Authority:** the user approved the planning corrections and minimal physical testing,
 and removed new Git work from Phase 1. The user subsequently authorised review and merge; PR #16 is integrated.
 The user subsequently selected 1G.1 only; its implementation and targeted review are recorded in section 12. Later checkpoints require separate selection.
 **Historical planning branch:** `docs/phase-1g-scope-testing`, from main
 `f6c269278aa1d8955876ca45bac98a92940e1c5e`. CURRENT/HANDOVER own continuation on the implementation branch.
 **Entry:** accepted/integrated 1F, fresh refs/ownership and explicit selection of one
-checkpoint. The latest user instruction selects review of the minimum remaining R2-P1
-qualification and a bounded execution proposal (section 34), not execution. TEST-P2
+checkpoint. The latest user instruction selects TEST-AUDIT-1 only: audit active testing
+instructions/ledger 34, correct documentation and publish the amended proposal in
+the policy/alignment task. It does not select implementation or qualification. TEST-P2
 (section 33) and native assessment (section 32) remain supporting evidence. No CI dispatch,
 package build/app launch, renderer change, hostile/crash test, unapproved tooling,
 conflict resolution or merge. WIN-F1 remains preserved.
@@ -205,7 +209,7 @@ including cancellation and failure from each relevant intermediate state.
 | Runtime reload | Verify and control SDK automatic reload so editing does not silently execute a new revision under the old Run action |
 | Move/delete/undo | Reject only operations conflicting with live source/compiled-file ownership, including relevant history inverses; show Stop action |
 | Switch/close/exit | Offer Stop and continue / Cancel; finish child cleanup before invalidating session; then honour existing draft leave flow |
-| Natural exit/crash | Capture exit state and bounded output; release ownership and revalidate generated artifacts |
+| Natural exit/game failure | Capture exit state and bounded output; release ownership and revalidate generated artifacts |
 | Stop/revoke | Stop the owned process tree, reap children, release resources; keep Stop responsive and token-bound |
 | Output flood | Bounded memory/backpressure and visible truncation; no silent success or unbounded pipe readers |
 
@@ -249,7 +253,7 @@ material runtime decisions, explicitly distinguishing validation deadlines from 
 **R1 gate:** production-service tests plus supported-target child-process evidence prove
 zero spawn on refusal/cancel, correct revision preparation, trust revocation/replacement,
 SDK mismatch, duplicate actions, long-running game, script editing/reload behaviour,
-asset-mutation refusal/retry, launch-versus-import race, move/delete and inverse blocking, natural exit/crash, cancellation/Stop/output flood and lifecycle
+asset-mutation refusal/retry, launch-versus-import race, move/delete and inverse blocking, natural exit/game failure, cancellation/Stop/output flood and lifecycle
 races. Test actual process-tree cleanup on both targets, not only a fake process port.
 
 ### Editing during play: bounded proof before UI completion
@@ -278,9 +282,13 @@ and prove a narrow end-to-end slice using the pinned SDK before broad runtime wi
 6. Prove targeted refusals for move/delete and history inverses that conflict with
    runtime file ownership; offer Stop and retry. Supported script edits remain available.
    Publish the compatibility table before expanding beyond this slice.
-7. Test natural exit, Stop, crash, app shutdown and project switch/cancel, including
+7. Test natural exit, Stop, controlled game failure, app shutdown and project switch/cancel, including
    descendants retaining pipes. Cleanup has bounded deadlines and releases ownership;
    an old callback cannot change the next project or runtime operation.
+
+Controlled child nonzero exit and ordinary SDK exceptions retain failure/cleanup
+coverage; deliberate application/persistence crashes are separately selected specialist
+experiments under WORKFLOW. See the [selector disposition](testing-policy-alignment.md#selector-disposition).
 
 Agent-run Windows/macOS process evidence is required at R1. No user physical testing
 is requested here. Missing host access leaves R1 blocked; it is not substituted with
@@ -340,9 +348,11 @@ matrix and user review are complete. 1H remains separately selected integrated a
 
 ## 9. Verification and checkpoint handoff
 
-Run relevant cheap checks first: `python3 scripts/validate.py`, `git diff --check`,
-and, from `app/`, `npm run check`, `npm run build`, `cargo fmt --check --all` and
-`cargo test -p loomlight-core --locked`. Use targeted regressions while developing;
+Run relevant cheap checks first: `python3 scripts/validate.py` and `git diff --check`.
+For implementation, select applicable `app/` frontend, formatting and targeted core
+checks under WORKFLOW/TESTING. Unfiltered core and embedded SDK selectors still need
+the [audited alignment](testing-policy-alignment.md#selector-disposition) before use.
+Use targeted regressions while developing;
 retain the repository's SDK/source regression commands where affected. Desktop/package
 commands and the existing supported-target workflow remain governed by
 [TESTING](../../TESTING.md). Do not invent a parallel CI controller or widen privileges.
@@ -5221,3 +5231,36 @@ relevant candidate diffs, fetched refs, PR state and recent production run ident
 Repository validation passed for **273 files** and `git diff --check` passed; these
 are the only execution gates for this docs-only checkpoint. Resolve publication
 head from Git; no receipt-only commit. Next action is user selection/amendment of Q1.
+
+
+## 35. TEST-AUDIT-1 — testing-policy alignment — 2026-09-28
+
+**Authority/state:** user selected documentation/selector audit only; `review_ready`.
+Reviewed fresh `109417800873a464dd7da5f9d9571c00a9f9c447` on the existing branch/PR #17,
+preserving 14 newer commits and historical work/evidence. Main remains `4d7ba03`;
+PR is draft/open/conflicting. No integration, test/workflow implementation, native
+build, app/browser/SDK launch or CI dispatch occurred.
+
+[The owning policy/alignment ledger](testing-policy-alignment.md#test-audit-1--selected-documentation-and-selector-audit)
+contains the active-instruction classification, selector/embedded-call audit, required
+ordinary regressions, cumulative problem record, checks and amended Q1 plan.
+Ledger 34 remains byte-preserved historical review evidence; its proposed next action
+is superseded by this preparation-first proposal, not silently approved.
+
+Corrected live AGENTS/TESTING, parent 1B/1C and 1H termination directions, Chrome
+timing wording and status/continuation. Four persistence-crash parents and embedded
+SDK crash/stage blocks need specialist separation. Production and quality selectors,
+success/skip markers, duplicate G1-U2 selection, automatic main packaging and missing
+failure-time binaries need bounded implementation. Controlled runtime nonzero exit
+and the five existing package cases remain ordinary. Preserve real non-crashing
+recovery, including successful Prepared abandonment/follow-up-write assertions;
+no product protection is weakened.
+
+**Next proposed action:** select R2-P1-Q1-PREP in the
+[amended Q1 proposal](testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected),
+publish/review preparation, then stop before separately selected Q1-EXEC. Both standard
+targets, all five cases, core budgets and required package/native gaps remain. No
+cross-SHA waiver, replay of Mac diagnosis, unused F1 allowance, conflict resolution,
+merge, optional Git or Phase 2. Historical FAIL/skip/candidate evidence is unchanged.
+CURRENT and the single HANDOVER carry the machine-labelled continuation. Resolve the
+published documentation head from Git; no receipt-only commit.

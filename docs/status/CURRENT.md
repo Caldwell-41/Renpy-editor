@@ -1,14 +1,14 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** TEST-POLICY-1 delivery rules and machine-aware prompts,
-`review_ready`; see the [policy/alignment ledger](../tasks/active/testing-policy-alignment.md).
-The user approved implementing the seven retrospective rules and reviewing the commit.
-Rules live in [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules); they do not
-implement or authorize the pending production workflow/test migration.
+**Current checkpoint:** TEST-AUDIT-1 documentation/selector audit, `review_ready`;
+see the [policy/alignment ledger](../tasks/active/testing-policy-alignment.md).
+The user selected this audit only. Obsolete live testing directions are corrected;
+test/workflow migration and qualification remain unimplemented/unselected.
+Rules remain in [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Incoming baseline:** `ba403d38853c5625089216c59c6e175eac741ed6`.
+**Audited baseline:** `109417800873a464dd7da5f9d9571c00a9f9c447`.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
 No build, app launch, workflow dispatch or application acceptance is part of this update.
 
@@ -48,10 +48,13 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Recommended next action, not yet selected:** TEST-AUDIT-1 in the policy/alignment
-ledger: audit active testing instructions, workflow selectors and ledger-34 proposal
-against the new rules before selecting package execution. Codex can run on any machine
-with repository access; no specific OS, native build, app launch or CI dispatch is needed.
-R2-P1-Q0 remains review-ready at its historical boundary. Its Q1 preparation/matrix is
-still unapproved; do not dispatch the existing unrestricted workflow as a shortcut.
-See [HANDOVER](HANDOVER.md) for continuation and evidence limitations of this rules edit.
+**Recommended next action, not yet selected:** R2-P1-Q1-PREP, the bounded test/workflow
+preparation in the [amended Q1 proposal](../tasks/active/testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected).
+Separate four persistence-termination parents and embedded SDK specialist blocks,
+retain ordinary recovery, align selectors/markers, remove duplicate G1-U2 selection
+and prepare manual production dispatch/failure-time binary evidence.
+Codex: any repository-capable host. Cheap preparation checks only; no native build,
+app launch or CI. Publish/review preparation before separately selecting Q1-EXEC's
+single standard Windows/macOS matrix. Ledger 34's evidence is preserved; section 35
+records this amendment. Do not dispatch current unrestricted workflows as a shortcut.
+See [HANDOVER](HANDOVER.md) for publication and the exact stopping boundary.

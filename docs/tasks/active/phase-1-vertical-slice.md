@@ -1,11 +1,11 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-25 (Git deferral and testing revision)<br>
+**Updated:** 2026-09-28 (TEST-AUDIT-1 testing-policy alignment)<br>
 **Status:** Phase 1A-1E and CI-SIMPLE are integrated. Phase 1F is accepted by
 [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
 PR #14 integration is complete. Original 1G/1H planning is integrated through PR #15;
 the September 25 scope/testing amendment is recorded here with all implementation
-checkpoints unstarted and separately selected. CURRENT/HANDOVER own
+checkpoints separately selected. That unstarted state was a planning snapshot; CURRENT/HANDOVER own
 actual integration state.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
@@ -52,7 +52,7 @@ Historical implementation: [transaction brief](../archive/2026-09-14-phase-1-tra
 
 Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The completed follow-up records the resource-limit and correctness repairs; 1E owns the integrated file-lifecycle semantics required by Scenes.
 
-**Gate:** actual stale-write, substitution, non-cooperating-writer, process-termination, evidence-retention and follow-up-write regressions pass on both targets. Bounded resource use must not impose a lifetime limit on successful authoring.
+**Gate:** ordinary stale-write, path/link refusal, competing-writer, interrupted-save recovery, evidence-retention and follow-up-write regressions pass on both targets. Use non-crashing fault/state fixtures for routine recovery. Historical deliberate termination and timed namespace tests remain specialist-only under WORKFLOW; retain their code/evidence and working protections. Bounded resource use must not impose a lifetime limit on successful authoring.
 
 ### 1C — Project lifecycle and SDK foundation
 
@@ -62,7 +62,7 @@ Preserve Welcome/Recent Projects, title/folder/parent/path preview, discovered/i
 
 Retain inspected candidate authority until activation, prepare before replacing the healthy current session, and distinguish session IDs from stable project IDs. Close/switch invalidates the old authority and import selections. Stale requests and UI completions cannot retarget another session.
 
-**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects crash consistency, stage/parent/promotion races, single-instance ownership and metadata-free runtime checks pass on both targets.
+**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The embedded SDK test still needs the [audited split](testing-policy-alignment.md#selector-disposition) before routine execution.
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
@@ -195,7 +195,7 @@ Run the following with synthetic, repository-safe content from fresh checkouts o
 7. Edit supported Source and observe Scene/Branches synchronization; introduce unsupported/incomplete/external content and prove lossless protection, truthful stale/partial states and controlled reconciliation.
 8. Validate, navigate real diagnostics, perform explicit normal run/stop, and verify revision/trust status during authoring.
 9. Close/reopen and continue with valid workspace selection. Run a copy without `.renpy-editor/`.
-10. Interrupt mixed transactions and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
+10. Represent interrupted mixed transactions with non-crashing fault/state fixtures and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
 11. Exercise failed project switches, old-session requests, delayed/reordered successes/errors, cancelled import and rapid navigation. Prove no wrong-session effects, obsolete navigation or false Saved state.
 12. Exercise metadata limits, precision, discovery/case collisions and long terminal history. Confirm accepted data remains reloadable and the project remains writable beyond the former journal-count boundary.
 

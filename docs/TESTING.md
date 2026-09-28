@@ -14,6 +14,15 @@ Preserve them and their failures; do not acquire symlink privileges or change se
 settings to pass a hobby-editor gate. Existing robust write/recovery code remains.
 Historical corrective evidence below keeps its actual result.
 
+[WORKFLOW's delivery rules](WORKFLOW.md#proportionate-delivery-rules) also exclude
+deliberate process-crash experiments from routine selection. The
+[TEST-AUDIT-1 selector disposition](tasks/active/testing-policy-alignment.md#selector-disposition)
+records remaining executable-policy gaps and the proposed migration. Unfiltered core,
+the production matrix and `quality.yml`'s ordinary flow-profile suite still select
+excluded exercises; do not run those commands until aligned. This is a documentation
+audit, not an implemented selector change. Keep ordinary recovery through non-crashing
+fault/state fixtures; controlled game failure, Stop and descendant cleanup remain required.
+
 G1-OBS updates production code, test classification/selectors and real-service gates
 together. Historical `g1_o1` tests and seventeen named timed namespace substitutions use
 explicit specialist `#[ignore]` attributes; ordinary writer interleavings, baseline
@@ -47,7 +56,10 @@ See the active Phase 1G ledger for the scoped Windows evidence and remaining gat
 
 ## Current production scaffold and Phase 0 regression commands
 
-From `app/`, the Phase 1A production checks are:
+These command references describe the existing scaffold, not a run-all instruction.
+Select changed-scope checks under WORKFLOW. The two unfiltered core/SDK conflicts
+above must be resolved before broad execution; a missing SDK skip does not resolve them.
+From `app/`, the Phase 1A production command references are:
 
 ```bash
 npm ci --ignore-scripts
@@ -128,7 +140,7 @@ smoke, secret scan, and dependency/licence inventory. Evidence artifacts are
 `10343096571` (Windows; SHA-256 `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`)
 and `10342841434` (macOS; SHA-256 `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`).
 
-The Phase 1C durability/race correction adds
+Historical Phase 1C durability/race evidence (not current routine authorization) adds
 real subprocess termination before/after managed-SDK final promotion and at partial,
 durable-staged, and committed Recent Projects boundaries. Deterministic tests cover
 missing/corrupt/mismatched provenance, abandoned SDK stages/downloads, app-state and
@@ -325,7 +337,7 @@ quality-gated rather than one large feature branch:
 | --- | --- |
 | 1A scaffold | Locked fresh install/build/test; command/capability denial; CSP/navigation/network/ambient host denial; privacy/licence checks; packaged Windows x64/macOS ARM64 smoke; semantic theme tokens/reduced-motion foundation |
 | 1B transactions | Ordinary external-writer conflicts, stale revisions, path refusal, interrupted-save recovery, durability semantics and undo/redo on both targets; retained historical defenses remain |
-| 1C project lifecycle | New-project staging/failure cleanup; parent/stage child-process and promotion races; restart-safe verified SDK installation/provenance; crash-safe Recent Projects; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
+| 1C project lifecycle | New-project staging/failure cleanup and basic path/link refusal; restart-safe verified SDK installation/provenance and Recent Projects via non-crashing fault/state fixtures; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/`; timed namespace/crash experiments remain specialist history |
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
 | 1F Source | Partial CST/range mapping, no-op/minimal-patch golden tests, direct source→Scene sync, exact custom-code preservation, external conflicts |
@@ -335,15 +347,16 @@ quality-gated rather than one large feature branch:
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
 
-The Phase 1B core suite launches a child copy of the Rust test process and exits it at
+The historical Phase 1B core suite launches a child copy of the Rust test process and exits it at
 prepared, staged, commit-intent, exchanged, verified, committed, and durable journal
 boundaries. A fresh service then classifies the retained state. In-process hooks
 deterministically race external content/identity/path changes before and after the
 platform operation. The latest suite also proves recovery-directory namespace
 substitution cannot convert unresolved recovery into an empty successful scan. The
-production Windows/macOS matrix runs the same platform-appropriate suite in release
-mode and retains its log with the existing packaged-boundary and dependency evidence;
-it is not duplicated in a second expensive matrix.
+current Windows/macOS matrix still selects those termination parents in release mode.
+That is an alignment gap, not routine authority. The proposed migration preserves
+specialist evidence and ordinary recovery assertions in separate selections; no second
+expensive matrix is required to verify a documentation change.
 
 ## Representative source coverage
 
@@ -643,7 +656,7 @@ production dispatch.
 | --- | --- |
 | Documentation/governance | Validator, link/privacy scan, `git diff --check` |
 | Source model/serializer | Unit + golden + targeted fuzz + fixture SDK lint |
-| Files/SDK/process | Unit + ordinary path/archive/conflict/recovery tests + affected platform integration; specialist hostile-OS tests only when explicitly scoped |
+| Files/SDK/process | Unit + ordinary path/archive/conflict/non-crashing recovery tests + affected platform integration; deliberate crash/hostile-OS experiments only when explicitly scoped |
 | Scene/file lifecycle | Reference checks + transaction/recovery + stale `.rpyc` cleanup + SDK lint/run |
 | UI workflow | Unit/component + keyboard/accessibility + changed-path desktop E2E + visual-token conformance |
 | Generated Ren'Py | Official pinned SDK compile + lint + relevant automated test + standard-template smoke |
@@ -707,7 +720,7 @@ real packaged graph edit/disk/reopen scenario and both supported-target measurem
 ### Branches timing interpretation
 
 The browser probe retains the original 30 one-way inputs and nearest-rank p95
-<100 ms gate under the explicit **dispatch-to-first-rAF continuation** name (legacy
+<100 ms diagnostic threshold under the **dispatch-to-first-rAF continuation** name (legacy
 `panFrame*` output fields remain aliases). That path moves the fitted graph offscreen;
 it is historical comparison, not sustained visible-pan coverage. A separate fixed
 30-input sequence alternates ArrowLeft/ArrowRight at fitted x=40/0. Every input must
@@ -718,8 +731,9 @@ dimensions and viewport geometry are checked outside the timing interval.
 The visible sequence reports both first-rAF and **second-rAF rendering-opportunity**
 intervals against the unchanged <100 ms p95 objective; initial layout remains <2 s.
 Neither callback proves physical presentation. Rendering opportunities can include
-previous browser work; fast synchronous dispatch cannot waive a failed gate. Review
-the endpoint/trace evidence before treating this diagnostic as rendered-input acceptance.
+previous browser work. Under TEST-P2 all five Chrome timing thresholds are diagnostic;
+functional/evidence failures still block. Fast dispatch does not erase an overrun or
+close packaged/native rendered-input acceptance. Review the endpoint/layer evidence.
 The separate core <250 ms/<2 s budgets are unchanged and not measured by this probe.
 [MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
 retains the original defect/failure; [MAC-M1 ledger 29](tasks/active/phase-1g-branches-runtime-git.md#29-r2-p1-mac-m1-probe-correction-and-local-proof--2026-09-27)
@@ -766,15 +780,15 @@ the historical run, core budgets, native WebView or final packages. Ledger 30 ow
 approved single dispatch and result; no continuing authorization follows from this
 workflow selector. Follow the repository manual-resume rule while external CI runs.
 
-The first hosted H1 trace reproduced both long GPU command-scheduling waits and late
+The historical H1 trace reproduced both long GPU command-scheduling waits and late
 BeginFrame delivery, including >100 ms controls with no new input or recorded
 layout/paint/raster work. See ledger 30 for exact samples and causal limits. Inspect
-control cadence and browser/GPU waits before choosing a renderer optimization. A
-traced failure remains failure; neither idle-time subtraction nor an unverified
-browser/backend flag is a correction. Pre-graph controls and a matched untraced run
-can separate instrumentation/queued-work effects, but require a bounded approved
-follow-up rather than automatic retry. Keep physical presentation, hosted Chromium
-and packaged WebView evidence distinct.
+ledger 32's completed native assessment and ledger 33's timing decision before any
+new hypothesis. H1 remains FAIL; neither idle-time subtraction nor an unverified
+browser/backend flag is a correction. Its one-dispatch allowance is consumed, and
+the old proposed controls/reruns are historical, not the next routine task. No new
+renderer optimization follows from Chrome timing alone. Keep physical presentation,
+hosted Chromium and packaged WebView evidence distinct.
 
 ### 1G.2b named packaged scenarios
 
@@ -814,11 +828,15 @@ asserts the changed caption and completed/saved-edit statuses. No IPC, transacti
 duration or rendering latency is inferred from this timer. Completion marker:
 `phase-1g-observed-budget-gate: passed (3 samples)`.
 
-The bounded dispatch runs ordinary core/UI regressions and Chromium rendering on
+The bounded dispatch is intended to run ordinary core/UI regressions and Chromium rendering on
 Windows x64/macOS ARM64 without packaging or SDK download. The browser's 30 pan
 samples run while a refresh response is deliberately pending; navigation remains
 usable. Chromium/synthetic events do not replace final packaged WebView/native input
 acceptance. Historical full-verification timings keep their original failures.
+Its broad core selector currently includes the same deliberate termination parents
+as production; the alignment proposal must update both selectors together. Production
+also currently includes this fixture in broad core before its isolated enforced step;
+exclude it from broad core so qualification measures three fixed samples only once.
 
 Retain the real 500-Scene/2,000-edge workload, rendered 30-sample interaction check,
 ordinary external changes (including same-length content edits and normal file
