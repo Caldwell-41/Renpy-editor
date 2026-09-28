@@ -5347,3 +5347,23 @@ Checkpoint state is `blocked`, with the execution outcome documented for review.
 Next selection is a bounded workflow-context correction and semantic validation,
 without dispatch; another qualification request requires separate user authorization.
 The single HANDOVER records that boundary and the documentation publication.
+
+## 39. Q1 workflow-context correction — 2026-09-28
+
+User requested diagnosis and correction after ledger 38's rejected request.
+Both job-level Python selectors now use `matrix.runner`, which is available before
+runner allocation; interpreter choices remain Windows `python` and macOS `python3`.
+The prior focused checker required the invalid `runner.os` expression. It now rejects
+that original error, wrong interpreter mapping/scope, duplicates and bare helper calls.
+
+[The detailed correction record](testing-policy-alignment.md#q1-workflow-context-correction--2026-09-28)
+contains the authoritative context reference, local tool identity and checks. Independent
+actionlint 1.7.12 rejected both original workflows at the expected locations and passes
+both corrected workflows. Gate self-tests/source audit pass. This is `review_ready`
+source correction, not hosted qualification. No product code, pins, targets, gates or
+package scope changed. No dispatch/retry, native build/launch, merge or 1H occurred.
+
+Starting publication was `5e3ac87`; this correction is its successor on the existing
+branch/PR #17. No operation is pending. The single prior rejected request and zero
+accepted Q1 runs/builds/starts remain the totals. Another qualification request requires
+separate user selection; HANDOVER carries the proposed one-request execution prompt.

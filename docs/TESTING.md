@@ -96,7 +96,14 @@ The workflow result checker rejects missing/malformed summaries, zero selected t
 missing/ignored/filtered required cases and failures. Packaged case evidence must contain
 exactly one successful report per required scenario with cleanup complete.
 The shared Q1 workflow helpers use `python` on Windows and `python3` on macOS via
-the job's `Q1_PYTHON` setting. Gate self-tests and synthetic package-retention CLI
+the job's `Q1_PYTHON` setting, selected from `matrix.runner`. Job-level `env` cannot
+use the `runner` context; the focused source audit rejects the original invalid
+expression and incorrect interpreter mappings. For changes to these workflows, run
+`actionlint -shellcheck= -pyflakes= .github/workflows/production-scaffold.yml .github/workflows/quality.yml`
+from the repository root before dispatch. This checks YAML and Actions expression
+semantics independently of the focused source audit (validated with actionlint 1.7.12).
+The disabled integrations are external shellcheck/pyflakes, not workflow rules.
+Gate self-tests and synthetic package-retention CLI
 tests run in preflight; they do not launch or qualify an application.
 
 The full desktop Rust test, package, and injected packaged-WebView probe run separately

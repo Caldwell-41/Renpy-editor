@@ -1,21 +1,23 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** R2-P1-Q1-EXEC, `blocked`: the single production dispatch
-was rejected with HTTP 422 before creating a run; see the
-[execution record](../tasks/active/testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28).
+**Current checkpoint:** Q1 workflow-context correction, `review_ready`; see the
+[correction record](../tasks/active/testing-policy-alignment.md#q1-workflow-context-correction--2026-09-28).
 Four termination parents and both embedded SDK specialist blocks are separated; the
 Prepared recovery regression and both workflow selectors are aligned. No compiled or
 hosted test evidence is claimed. Rules remain in
 [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-**Execution candidate:** published `b5de446389145c3da2e3f7d653673591d43d37fa`.
+**Rejected execution candidate:** `b5de446389145c3da2e3f7d653673591d43d37fa`.
+**Correction baseline:** published `5e3ac871b7bab195223a66222e68777bebe03a35`;
+resolve this correction's exact successor SHA from Git before any selected execution.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
-One dispatch request was rejected: unavailable `runner.os` at production job-level
-`env.Q1_PYTHON` (line 70). Quality line 61 has the same source defect. Candidate run
-inventory returned zero runs; no run/attempt or operation is pending. No build,
-app launch or application acceptance occurred. The no-retry boundary was honored.
+The single prior dispatch request was rejected before run creation. Both affected
+workflows now use valid `matrix.runner` selection for job-level `env.Q1_PYTHON`.
+Independent actionlint reproduced both original errors and passes both corrected files;
+the focused audit now rejects the original expression. No new dispatch, build, app
+launch or acceptance occurred. No operation is pending; hosted qualification is missing.
 
 ## Phase 1G capability status
 
@@ -53,13 +55,12 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Next goal:** separately select the bounded Q1 workflow-context correction and semantic
-validation, without dispatch. Repository/Actions access was available, branch rules
-were empty and PR #17 had no comments/reviews. Passing source/Bash/formatting checks
-did not detect this workflow semantic defect. Codex may use any repository-capable
-host; no native machine/build is needed for the correction. Publish/review it before
-separate authorization of another qualification request. The current single dispatch
-request allowance was consumed; zero runs/builds/launches were accepted or performed.
+**Next goal:** separately select one new Q1 production qualification request after
+rechecking the published correction, refs and access. Codex can use any host with
+repository/Actions access; tests run on Windows x64 and macOS ARM64 hosted runners.
+The correction is locally validated; another dispatch has not been authorized or run.
+The prior request allowance was consumed; zero Q1 runs/builds/launches were accepted
+or performed. A new selection must explicitly authorize the new request, without retry.
 PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
 integrated 1H remain open. No historical failure or candidate is reclassified. See
 [HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.

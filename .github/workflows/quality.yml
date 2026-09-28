@@ -58,7 +58,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     env:
-      Q1_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+      Q1_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
     defaults:
       run:
         working-directory: app

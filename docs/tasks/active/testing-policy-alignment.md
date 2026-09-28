@@ -611,3 +611,52 @@ existing branch, using `[skip ci]`; resolve its exact published SHA from Git. So
 audit and gate rejection fixtures passed; repository validation passed for 277 files
 and `git diff --check` passed. No hosted test result is claimed. The live HANDOVER
 and Phase 1G ledger 38 route recovery; no manual resume of a nonexistent run is possible.
+
+## Q1 workflow-context correction — 2026-09-28
+
+**Authority/state:** after the rejected dispatch, the user requested diagnosis and
+correction in this chat. This selects the bounded correction; `review_ready` after
+local validation. It does not select another qualification dispatch. Starting head
+`5e3ac871b7bab195223a66222e68777bebe03a35` matched freshly fetched origin and PR #17;
+the worktree was clean. Main remains `4d7ba03`; PR #17 is draft/open/conflicting,
+with no comments/reviews. The preceding rejected request remains recorded above.
+
+**Diagnosis:** GitHub's [context availability reference](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)
+allows `matrix` in `jobs.<job_id>.env`, but excludes `runner`. Both workflows used
+the latter to choose Python. The source audit required that exact invalid expression,
+and its positive fixture repeated it; Bash syntax checks cannot detect this semantic
+error. Independent actionlint 1.7.12 reproduced exactly two context errors on the
+unchanged files, production line 70 and quality line 61, before the correction.
+
+**Correction:** both job environments now choose from `matrix.runner ==
+'windows-2025'`, preserving Windows `python` and macOS `python3`. All gates, target
+labels, triggers, pins, budgets and runtime behavior are unchanged. The existing
+focused checker requires one correctly scoped matrix selection, quoted helper calls
+and no overriding Q1 assignment. Its fixtures reject the exact original expression,
+the wrong platform mapping, step-level placement, duplicate assignment, missing job
+environment and bare helper interpreter. TESTING documents the independent workflow
+semantic check before dispatch, separate from the focused source audit.
+
+**Validation:**
+
+- Portable official actionlint **1.7.12**, Windows amd64 archive SHA-256
+  `6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9`, verified against
+  release asset metadata and published checksum; tooling stays outside the repository.
+- `actionlint -shellcheck= -pyflakes= .github/workflows/production-scaffold.yml .github/workflows/quality.yml`:
+  original files rejected with the two expected context errors; corrected files pass
+  without diagnostics or ignored workflow rules. External shellcheck/pyflakes integrations
+  are disabled; YAML and Actions expression checks are active.
+- `python app/scripts/check-q1-prep-gates.py self-test`: pass, including one valid and
+  six invalid Python-selection/helper fixtures, plus all existing result/retention checks.
+- `python app/scripts/check-q1-prep-gates.py source-audit .`: pass. No Rust/native build,
+  app/SDK launch or Actions dispatch was used as a validator. Hosted execution remains
+  unverified; no package or native acceptance is inferred from linting.
+- `python scripts/validate.py`: pass for 277 files; `git diff --check`: pass.
+
+**Budget/next action:** one prior rejected request, zero accepted Q1 runs/builds/starts;
+this correction adds zero dispatches and renews no allowance. Historical R2-P1/H1
+failures and F1/N1 counters remain unchanged. The workflow parse defect is corrected
+locally; coherent automated qualification remains missing. A separately selected new
+Q1 execution may authorize one new request under the existing two-target/five-case
+scope and no-retry rule. No conflict resolution, merge or 1H. Publish this correction
+and live HANDOVER together with `[skip ci]`; resolve the exact successor SHA from Git.
