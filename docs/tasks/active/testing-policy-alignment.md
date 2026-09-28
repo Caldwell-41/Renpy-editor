@@ -732,3 +732,141 @@ HANDOVER with `[skip ci]`; it is not the tested candidate and grants no cross-SH
 acceptance. Resolve publication SHA from Git. Qualification remains incomplete.
 Documentation validation: `python scripts/validate.py` passed for 277 files and
 `git diff --check` passed. Only the four status/ledger Markdown files changed.
+
+## Q1 terminal evidence audit — 2026-09-28
+
+**Authority/outcome:** user resumed the existing operation for evidence audit only;
+no new execution. Automated Q1 qualification is **PASS**, `review_ready`, for candidate
+`8546dcddd5ac95bfe849575fe618f6e990cdd5d4`, tree
+`70ba924580bde3a66678e0ca91e1ae54fc241325`. This is not final native/human acceptance
+or integration. Starting documentation head `142ecb0` matched freshly fetched origin
+and PR #17; clean worktree, main `4d7ba03`, PR draft/open/conflicting with no reviews
+or comments. No candidate source changed during the audit.
+
+### Run and gate outcomes
+
+[Run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
+attempt **1**, completed **success** at `2026-09-28T06:06:35Z` (created 05:49:08Z;
+17m27s elapsed, not billed compute). Run SHA matches the candidate above.
+
+| Job | ID | UTC start–finish | Outcome |
+| --- | --- | --- | --- |
+| Preflight, Ubuntu | `108804103380` | 05:49:11–05:49:54 | PASS |
+| Windows x64, `windows-2025` | `108804257548` | 05:49:56–06:06:34 | PASS |
+| macOS ARM64, `macos-26` | `108804257567` | 05:49:59–06:01:02 | PASS |
+
+Preflight includes 64 frontend tests, zero failures/skips; eight retention fixtures
+passed, including the previously Windows-skipped POSIX symlink fixture; gate rejection
+fixtures, source audit, typecheck, Source Save browser regression and formatting passed.
+Source Save red/green controls and selection regression ran on all three jobs.
+
+| Required evidence | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Broad core | 169 passed, 0 failed, 36 ignored, 3 filtered | 174 passed, 0 failed, 39 ignored, 3 filtered |
+| Isolated G1-U2 fixture | 1 test, three successful fixed samples | 1 test, three successful fixed samples |
+| Lifecycle/authoring SDK gate; download handoff; runtime service; diagnostics SDK | Four separately selected exact tests passed; no ignored/skip marker | Four separately selected exact tests passed; no ignored/skip marker |
+| Desktop boundary Rust test | 1 passed | 1 passed |
+| Packaged compile / lint / route-a / route-b / runtime-error | 5/5 pass, each exit 0, one report, no timeout, cleanup complete | 5/5 pass, each exit 0, one report, no timeout, cleanup complete |
+| Primary/secondary packaged boundary | PASS, primary ready and secondary rejected; all authoring/Source/denial assertions | PASS, same assertions |
+| Runtime browser, Branches browser and final deferred gate | PASS, no page errors, cleanup complete | PASS, no page errors, cleanup complete |
+| Artifact privacy scan / dependency inventory | PASS, six scanned files; 85 npm / 519 Cargo packages | PASS, six scanned files; 85 npm / 519 Cargo packages |
+| Evidence and package uploads | Both available and downloaded | Both available and downloaded |
+
+The broad-core ignored tests retain their specialist/worker/explicit-archive disposition;
+the two ignored runtime SDK gates were then selected and passed separately. The three
+filtered tests ran in their separate required layers. Empty doc-test summaries do not
+stand in for selected tests. All six named Cargo-log checks were reapplied to downloaded
+logs, including ordinary Prepared recovery, external-writer and heap-buffer regressions;
+required SDK/authoring markers were verified. The only skipped workflow steps were the
+official SDK downloads on **cache hit**, not SDK verification or tests. Pinned archive
+verification remains exercised by the SDK service source and its successful target gates.
+
+Route reports retain destination/source/revision survival through a new session, restored
+authored routes, route-specific output, live Save and stale-revision notice, Stop/disk
+reopen; route-b additionally records draft cancel/refused Save All. The audited candidate
+probe asserts these before emitting its completion stages. Observed Running durations:
+Windows route-a **9504.1 ms**, route-b **9500 ms**; Mac **9503 ms** / **9504 ms**.
+Both compile/lint navigation cases and the controlled runtime-error/Stop case passed.
+
+G1-U2 samples, milliseconds `(initial, refresh, accepted update)`:
+
+- Windows: `(288.2709, 276.4482, 23.4201)`, `(303.8758, 275.488, 23.8083)`,
+  `(304.479, 300.6363, 23.0315)`.
+- macOS: `(32.523792, 31.01725, 13.495834)`, `(32.014417, 30.724917, 12.718917)`,
+  `(35.200458, 33.786, 13.785375)`.
+
+All meet their separate 2,000/2,000/250 ms limits. Branches browser uses the full
+500-Scene/2,000-edge fixture, held-refresh pan, navigation/refresh and 640-width checks.
+Chrome pan p95 / visible-first-rAF p95 / rendering-opportunity p95: Windows
+**15.5 / 15.1 / 31.1 ms**, Mac **34.8 / 39.8 / 64.4 ms**; all diagnostic thresholds
+passed. Runtime browser focus/overflow passed at widths 1100/640. These remain
+Chromium/synthetic-input evidence, not native responsiveness or human acceptance.
+
+### Independent identity and artifact audit
+
+All four non-expired artifacts were downloaded and their raw ZIP SHA-256 values
+independently matched the GitHub artifact API digests and upload log records:
+
+| Artifact | ID | ZIP SHA-256 |
+| --- | --- | --- |
+| Q1 evidence Windows | `10953757230` | `bf5ed18e6c3ec3f29ae8a796aa00ad83463e4f995a35b86688cc671f60a56e89` |
+| Production package Windows | `10953334429` | `ed98a5b98db42f34f5c0495f4bd906a4d4423653b835a00287bfdffe0f2c0b6e` |
+| Q1 evidence macOS | `10954175758` | `7e85dd667ec88adc4d133007b17046a75e220bab6a56a5031c0e5ce1f6dac85f` |
+| Production package macOS | `10954061304` | `dfd44960028203259bb4b715086c91d0ea245af296a7986cf38c01d62667659a` |
+
+Remote artifacts expire **2026-10-05**, between **06:00:54Z and 06:06:11Z**. Local
+audit copies include original ZIPs, manifests, reports and complete raw logs for all
+three job IDs. The combined `gh run view --log` output truncated the Mac job; the
+audit used direct job-log downloads to finish the missing sections. Raw logs/binaries
+remain outside Git; this ledger preserves compact results, identity and availability.
+
+Each target's `runtime-ui-inputs.json` contains **107 source inputs**. Every hash and
+the complete path set was independently checked against Git archive bytes at the exact
+candidate, respecting committed CRLF rules for PowerShell/batch files. Both manifests
+agree on run, attempt, SHA/tree and executable identity. All five browser source hashes
+and each generated browser fixture hash also match. Toolchains: Node 24.19.0,
+Rust/Cargo 1.90.0; recorded architectures AMD64 and arm64, Python 3.12.10 and 3.14.7.
+The hosted interpreter-selection correction is now exercised on both targets.
+
+| Retained or distributed file | Independently computed SHA-256 |
+| --- | --- |
+| Windows retained `loomlight.exe` | `9ecf49f4cc60eb9c08696dac92343a8dada7131ad2091b2b340b63c1b3d87312` |
+| macOS `Contents/MacOS/loomlight` inside retained tar | `7eada35e7b0f205f50cf03e217359c5156bc79a9aa1c8c11f2b6f4eb3c035fcf` |
+| macOS `Loomlight.app.tar` | `cc51809450744daf646516da93fe98be3ddd5c7033448c75bfbd864c8aa1ccd4` |
+| Windows `runtime-ui-inputs.json` | `33cbd4ab75f85a41a4543c85ae12c06562b444f47b359a3de231b0c03a962819` |
+| macOS `runtime-ui-inputs.json` | `52209768b10b0bbaac3f62ff7d386916a5085d0d8db6c41a97720b58484a8f28` |
+| `Loomlight_0.1.0_x64_en-US.msi` | `f809ea49a0ca64aa4b5279bc779aae3a00154cb6c4341274c57818d2e24435f8` |
+| `Loomlight_0.1.0_x64-setup.exe` | `38cd0731923d8d919c187900edab46de37ac62f762500dd0aa2ded05118274be` |
+| `Loomlight_0.1.0_aarch64.dmg` | `407bd8743618986970c0d93d96e8886ccf916f31cc38bc78c5da9b234d10e200` |
+
+Retained executable hashes match both manifests; the Mac tar executable retains its
+execute bits and also matches the application in the success-only package artifact.
+Installers are available and hashed, not installed/launched during this audit. Source
+and retained-output scan status is success, with no scan-withheld package evidence.
+
+### Scope, budget and remaining acceptance
+
+The existing attempt performed **two Tauri builds**, **ten packaged Runtime cases**
+and **four primary/secondary boundary starts**: seven top-level Loomlight starts per
+target, within the selected cap. Required SDK/game children belong to their existing
+gates. This audit added zero runs/builds/app launches; Q1 totals remain two requests
+(one prior HTTP 422 rejection and one accepted run), attempt 1, zero retries. No flow/
+R1/H1 matrix, specialist exercise, conflict resolution, merge or 1H was selected.
+Historical R2-P1/H1 failures, F1/N1 budgets and their original candidate limits remain.
+
+Nonblocking logs retain an unused Rust-method warning on Windows and GitHub's Node 20
+Action-runtime deprecation notice; neither caused missing gates or evidence. No source
+correction or new hypothesis was needed. No external operation remains pending.
+
+**Next:** separately select preparation of the remaining Windows packaged native
+responsiveness/input evidence and one focused final user session per supported OS,
+under TESTING's ownership/cadence. Verify native host/driver capabilities before promising
+automation; synthetic input does not close that gap. Preserve MAC-N1's supporting limits.
+Reuse these exact packages where applicable; no duplicate package matrix solely for
+documentation. Final review/conflict resolution/integration and affected integrated-tree
+gates remain separately selected; there is no cross-SHA acceptance waiver.
+
+Publish this audit, CURRENT and the single HANDOVER on the existing branch with
+`[skip ci]`; the documentation successor is not a new tested candidate.
+Local publication checks: `python scripts/validate.py` passed for 277 files;
+`git diff --check` passed. Only the four status/ledger Markdown files changed.

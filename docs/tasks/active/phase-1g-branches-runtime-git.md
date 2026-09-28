@@ -5388,3 +5388,33 @@ Resume this run/attempt only; no dispatch/rerun. Cumulative Q1 requests: two (on
 earlier HTTP 422 rejection, one accepted run), zero retries; actual build/start totals
 remain pending audit. Historical failures/budgets are unchanged. Documentation
 publication does not change the run's candidate; no merge, conflict resolution or 1H.
+
+## 41. Q1 terminal evidence audit — automated PASS — 2026-09-28
+
+User resumed audit only. Run `36383551820`, attempt **1**, candidate
+`8546dcddd5ac95bfe849575fe618f6e990cdd5d4`, completed success at `06:06:35Z`.
+Preflight `108804103380`, Windows `108804257548` and Mac `108804257567` all passed.
+The [detailed terminal audit](testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
+records exact source/tree/binary/archive identities, artifact IDs/expiry, test counts,
+all fixed core samples and route measurements, limits and cumulative budgets.
+
+Automated qualification is **PASS**, `review_ready`: broad core 169/174 passed with
+policy exclusions retained; isolated G1-U2 and all four exact SDK gates passed on
+both targets, as did desktop tests, ten Runtime cases with cleanup, two boundary
+smokes, browser gates, privacy and dependency inventory. Four route Running windows
+measured 9500–9504.1 ms. Two Tauri builds and fourteen top-level starts fit the cap.
+
+All four artifacts were downloaded and their ZIP digests verified. Both retained
+executables were independently rehashed, including Mac tar contents and execute bits;
+107 recorded inputs per target match the exact Git candidate. Mac package executable
+matches retained evidence. Installer and manifest hashes are in the detailed ledger.
+Artifacts expire 2026-10-05; raw local copies/logs stay outside Git. Complete direct
+job logs were used after the combined CLI log truncated Mac output.
+
+No operation remains pending. The audit added zero executions; cumulative Q1 requests
+remain one rejection plus one accepted run, zero retries. Historical failures are not
+reclassified. This closes the standard automated package evidence gap for this candidate,
+not native G1-V2/input/final human acceptance or integration. Next separately prepare
+remaining Windows native evidence and focused final sessions under TESTING; no automatic
+new launches, matrix, conflict resolution, merge or 1H. Publish documentation with
+`[skip ci]`; source/acceptance does not transfer automatically to another SHA.

@@ -1,84 +1,91 @@
 # Current checkpoint handover
 
 **Prepared:** 2026-09-28. **Repository:** Caldwell-41/Renpy-editor.
-**Checkpoint:** R2-P1-Q1-EXEC after workflow-context correction, `awaiting_ci`.
-**Continuation:** manual resume only; active polling stopped at the initial snapshot.
+**Checkpoint:** Q1 terminal evidence audit, automated **PASS**, `review_ready`.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/conflicting.
-**Tested candidate:** `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`.
+**Qualified candidate:** `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`.
 **Candidate tree:** `70ba924580bde3a66678e0ca91e1ae54fc241325`.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
-**Publication:** this documentation-only successor is committed/pushed with `[skip ci]`;
-resolve its exact SHA from Git. The pending run uses the candidate above, not this record.
+**Publication:** this audit is committed/pushed as a documentation-only successor of
+`142ecb0`, with `[skip ci]`; resolve exact publication SHA from Git. This is not a new
+qualification candidate. **No operation remains pending.**
 
-## Exact pending operation
+## Completed qualification
 
-The user selected one new production request after the workflow-context correction.
-Fresh refs, access/rules/PR, pins, workflow semantic lint and source audit were checked.
-One dispatch succeeded with `upload_packages=true`:
+The user resumed evidence audit only. [Run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
+attempt **1**, completed success at **2026-09-28T06:06:35Z**, exact candidate above.
+Preflight job `108804103380`, Windows x64 `108804257548` and macOS ARM64 `108804257567`
+all passed. It ran on `windows-2025` / `macos-26` with `upload_packages=true`.
 
-| Field | Value |
+- Preflight: 64 frontend tests and eight retention fixtures passed, plus source/gate
+  audits, Source Save browser regression and Rust formatting.
+- Broad core: Windows 169 passed / 36 ignored / 3 filtered; Mac 174 / 39 / 3, zero
+  failures. Specialist/worker exclusions remain intentional. The separately required
+  G1-U2 and four exact SDK gates all passed; no required SDK test was skipped.
+- Both desktop tests, ten packaged Runtime cases with complete cleanup and two
+  primary/secondary boundary smokes passed. Route Running windows were 9500–9504.1 ms;
+  destination/source/revision reopen, live Save/stale revision, draft refusal and Stop
+  assertions passed. All six fixed core budget samples passed.
+- Browser functional/evidence outcomes, full Branches fixture, dependency inventories
+  and privacy scans passed. Chrome timing diagnostics were also within their limits;
+  they do not establish native responsiveness or user acceptance.
+- All four non-expired artifacts were downloaded. Raw ZIP digests, both retained
+  executable hashes (including Mac tar contents), source manifests and all 107 source
+  inputs per target were independently verified against the exact candidate. Mac
+  retained executable also matches the success-only application package. Installers
+  are available and hashed, not installed or launched by this audit.
+
+[Full terminal evidence audit](../tasks/active/testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
+contains job times, exact binary/archive/installer hashes, all measurements and scope
+limits. [Phase 1G ledger 41](../tasks/active/phase-1g-branches-runtime-git.md#41-q1-terminal-evidence-audit--automated-pass--2026-09-28)
+summarizes the result. Complete raw job logs were retrieved after combined CLI logs
+truncated the Mac job. Raw downloads/logs stay outside Git. Documentation validation
+and whitespace checks pass.
+
+## Packages, budgets and remaining acceptance
+
+| Artifact | ID |
 | --- | --- |
-| Run | [36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820) |
-| Attempt / run number | **1** / **97** |
-| Workflow | `357322921`, `.github/workflows/production-scaffold.yml` |
-| Event / branch | `workflow_dispatch` / `feature/phase-1g-branches-runtime` |
-| Head SHA | `8546dcddd5ac95bfe849575fe618f6e990cdd5d4` |
-| Created | `2026-09-28T05:49:08Z` |
-| Initial status | `in_progress`, conclusion null; API updated `2026-09-28T05:49:12Z` |
-| Preflight job | `108804103380`, `ubuntu-latest`, started `2026-09-28T05:49:11Z` |
-| Package targets | `windows-2025` x64 and `macos-26` ARM64 after Preflight |
+| Windows Q1 evidence | `10953757230` |
+| Windows production package | `10953334429` |
+| macOS Q1 evidence | `10954175758` |
+| macOS production package | `10954061304` |
 
-Initial jobs snapshot: repository validation, bounded gate/retention fixtures, source
-selector audit and Node/npm setup succeeded. Locked JavaScript dependency installation
-was running. Frontend/protocol, Source Save browser and Rust formatting steps remained
-pending. Windows/macOS dependent jobs were not yet listed. Artifact count was zero.
-These are snapshot facts, not a claim that the run is still at that step when resumed.
-No package/build/start count, executable hash, archive digest or final qualification
-can yet be established from this evidence. Both target outcomes remain unaudited.
+Remote artifacts expire **2026-10-05, 06:00:54–06:06:11 UTC**. Local copies were retained
+on the audit host; use the verified run artifacts for cross-host retrieval before expiry.
+Prefer the retained Mac tar when bundle permissions matter. Package identity belongs
+in any future native/human evidence; availability is not installation/distribution proof.
 
-[Full execution record](../tasks/active/testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28)
-and [Phase 1G ledger 40](../tasks/active/phase-1g-branches-runtime-git.md#40-q1-execution-after-context-correction--awaiting-ci--2026-09-28)
-hold the request, access/pin checks, identity and remaining audit. Repository validation
-and whitespace checks pass for this documentation publication.
-
-## Budget and capability
-
-Q1 totals: two dispatch requests, consisting of the earlier HTTP 422 rejection on
-`b5de446` and this one accepted run, attempt 1; **zero retries**. The current selection
-permits one Tauri build and five ordinary Runtime cases plus two boundary-smoke starts
-per target. Actual counts remain pending audit. No local build or extra matrix ran.
-Historical R2-P1 `36293797731` and H1 `36310107481`, both attempt 1, remain FAIL.
-WIN-F1/MAC-N1 limits and consumed allowances remain unchanged. TEST-P2 keeps Chrome
-timing diagnostic and functional/evidence failures blocking.
+Q1 totals: two requests (the prior HTTP 422 rejection plus one accepted run), attempt 1,
+**zero retries, two Tauri builds, fourteen top-level Loomlight starts** (five cases plus
+primary/secondary per target). This audit added zero executions. Prior R2-P1/H1 failures,
+F1/N1 consumed budgets and candidate limits remain unchanged. No conflict resolution,
+merge or 1H occurred; no automatic acceptance transfer to another SHA.
 
 | Capability | Implemented | Automated proof | Native/human acceptance |
 | --- | --- | --- | --- |
-| Branches / G1-OBS | Yes, observed saved-state contract | Prior candidate qualification retained; coherent final gates pending | MAC-N1 supporting assessment retained; Windows native and final acceptance open |
-| Runtime foundation / R1 | Yes, prior fixes retained | Prior closure retained; final-source SDK regression pending | Final packaged/native acceptance open |
-| Runtime UI / R2-P1 | Yes, Windows heap fix retained | Corrected standard two-target qualification dispatched; result unaudited | Focused final user session on both platforms open |
+| Branches / G1-OBS | Yes, observed saved-state contract | Q1 core/browser and packaged destination/source reopen pass on both targets | MAC-N1 supporting limits retained; Windows native and final acceptance open |
+| Runtime foundation / R1 | Yes, prior fixes retained | Q1 final-source SDK service/diagnostics gates pass on both targets | Final native/human acceptance open |
+| Runtime UI / R2-P1 | Yes, Windows heap fix retained | Coherent standard Q1 packages and all ten cases pass | Focused final user session on both platforms open |
 
-## Manual resume and remaining audit
+## Next bounded selection
 
-Resume **only run 36383551820, attempt 1**. Do not dispatch or rerun. If pending,
-record its current identity and stop again. Once terminal, audit prerequisite and
-both target outcomes, all five case reports and boundary smoke, cleanup, SDK/core/
-browser gates, privacy and dependency inventory. Verify recorded source inputs,
-archive digests, retained executables and artifact availability; independently rehash
-both executables, including the executable inside the macOS tar. Evidence/packages
-have seven-day retention: collect available artifacts promptly after completion.
-Missing, failed, cancelled or skipped gates are not passes; a green run alone is
-insufficient. Preserve failures without retry/correction and publish the final audit.
-No automatic wake-up is configured or claimed. No conflict resolution, merge, native/
-human acceptance or 1H is selected. Codex may audit from any host with repository and
-Actions/artifact access; physical machines are not needed for this automated evidence.
+Prepare the remaining Windows packaged native responsiveness/input evidence and one
+focused final user session per supported OS under TESTING's ownership/cadence. Verify
+available native host/driver access, identify exact packages/fixtures and define the
+bounded checks and stop rules before selecting new execution. Preparation may use any
+repository-capable Codex host; actual Windows native evidence needs Windows x64, and
+final user sessions need each supported platform. No native access is assumed here.
+Reuse qualified packages where applicable; no duplicate matrix for documentation.
+Final review, conflicts/integration and affected gates remain separate; 1H stays excluded.
 
 ```text
-/goal R2-P1-Q1-EXEC evidence audit only
+/goal Phase 1G remaining acceptance preparation only
 Repository: Caldwell-41/Renpy-editor
 Branch: feature/phase-1g-branches-runtime
-Codex machine: Any with repository and Actions/artifact access; no specific OS required.
-Test execution: Audit existing windows-2025 x64 and macos-26 ARM64 run 36383551820, attempt 1; no new execution.
-Reason: Complete qualification evidence review for candidate 8546dcddd5ac95bfe849575fe618f6e990cdd5d4.
-Read AGENTS.md and docs/status/HANDOVER.md. Resume this exact operation only. If pending, record and stop for manual resume; if terminal, audit all linked evidence and publish the ledger/handover. No dispatch, retry, correction, conflict resolution, merge or 1H.
+Codex machine: Any with repository/artifact access; no specific OS required.
+Test execution: Preparation only; no builds, app launches or CI. Future evidence needs Windows x64 native interaction and focused user sessions on Windows x64/macOS ARM64.
+Reason: Q1 automated qualification passed; native and final human acceptance remain.
+Read AGENTS.md and docs/status/HANDOVER.md. Prepare bounded remaining checks using the exact Q1 packages; verify native host/driver capabilities and preserve prior evidence limits. Publish the plan/handover and stop before execution. No repeat matrix, merge or 1H.
 ```

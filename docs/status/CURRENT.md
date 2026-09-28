@@ -1,13 +1,13 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** Q1-EXEC after workflow-context correction, `awaiting_ci`;
+**Current checkpoint:** Q1 terminal evidence audit, automated **PASS**, `review_ready`;
 [run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
-attempt 1. Manual resume only; see the
-[execution record](../tasks/active/testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28).
+attempt 1, completed success. See the
+[terminal audit](../tasks/active/testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28).
 Four termination parents and both embedded SDK specialist blocks are separated; the
-Prepared recovery regression and both workflow selectors are aligned. Full compiled/
-hosted qualification remains incomplete. Rules remain in
+Prepared recovery regression and both workflow selectors are aligned and exercised by
+the successful hosted qualification. Rules remain in
 [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
@@ -16,18 +16,19 @@ hosted qualification remains incomplete. Rules remain in
 verified against the published branch and run API. Documentation successors are not
 the tested candidate.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
-The newly authorized dispatch with `upload_packages=true` was accepted once. Initial
-snapshot: Preflight in progress, zero artifacts; dependent Windows/macOS jobs not yet
-listed. Completed repository/gate/source-audit setup steps are not final qualification.
-No retry or other workflow ran. The earlier HTTP 422 request remains separate.
+Both targets passed all required automated gates. Four package/evidence artifacts were
+downloaded and ZIP hashes checked; both retained executables and 107 source inputs per
+target match their manifests and exact candidate. Ten Runtime cases and both boundary
+smokes passed. No operation is pending. No retry or other workflow ran; the earlier
+HTTP 422 rejection remains separate. Native/human acceptance remains open.
 
 ## Phase 1G capability status
 
 | Capability | Implemented | Automated proof | Native/human acceptance |
 | --- | --- | --- | --- |
-| Branches / observed saved-state graph | Yes; G1-OBS replaces retired full-verification display | Corrected G1-OBS qualification passed at its candidate; preserve exact timer/layer limits | Local Mac assessment is supporting evidence; Windows/native and final acceptance remain open |
-| Runtime foundation (1G.2a) | Yes; R1-B1/B2 corrections retained | R1 closure on `c12d953`, run `36148942247`; final-source regression still required | Final packaged/native acceptance remains separate |
-| Validate/Run/Stop and navigable diagnostics (1G.2b) | Implemented, including the Windows heap-buffer fix | Local Windows cases passed; coherent standard Windows/macOS package qualification incomplete | Final user session on both targets remains open |
+| Branches / observed saved-state graph | Yes; G1-OBS replaces retired full-verification display | Q1 core budgets, browser functional evidence and packaged destination/source reopen pass on both targets; preserve timer/layer limits | Local Mac assessment is supporting evidence; Windows/native and final acceptance remain open |
+| Runtime foundation (1G.2a) | Yes; R1-B1/B2 corrections retained | Prior R1 closure plus Q1 exact final-source SDK service/diagnostics gates pass on both targets | Final native/human acceptance remains separate |
+| Validate/Run/Stop and navigable diagnostics (1G.2b) | Implemented, including the Windows heap-buffer fix | Coherent standard Windows/macOS Q1 packages and all ten runtime cases pass at `8546dcd` | Final user session on both targets remains open |
 | Integration / 1H | 1G not merged; 1H separately selected | Conflicts and affected integrated-tree gates remain | No new acceptance or automatic duplicate human pass |
 
 [Optional Git](../tasks/active/optional-local-git.md) stays deferred, not a Phase 1/1H
@@ -57,13 +58,14 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Next action:** manually resume the audit of run `36383551820`, attempt 1, exact SHA
-above. No dispatch or rerun. If pending, record and stop; if terminal, inspect all
-required gates, retained source/binary/archive identities and artifact availability,
-then publish the outcome. Codex can use any repository/Actions-capable host; existing
-Windows x64 and macOS ARM64 hosted jobs supply automated evidence, not physical/native
-acceptance. Q1 totals: two requests (one rejected, one accepted), zero retries;
-build/start totals and completed qualification remain pending evidence audit.
+**Next action:** separately prepare the remaining Windows packaged native responsiveness/
+input evidence and focused final user sessions on both targets under TESTING. Codex can
+plan from any repository-capable host; verify actual native host/driver access before
+selecting execution. Reuse these exact packages where applicable; artifacts expire
+2026-10-05 and local copies were retained. No new test execution is selected by this
+audit. Q1 totals: two requests (one rejected, one accepted), zero retries, two Tauri
+builds and fourteen top-level starts. Automated qualification is complete for the
+recorded candidate; documentation successors do not receive a cross-SHA waiver.
 PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
 integrated 1H remain open. No historical failure or candidate is reclassified. See
 [HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.
