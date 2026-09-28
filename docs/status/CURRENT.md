@@ -1,23 +1,25 @@
 # Current status
 
 **Updated:** 2026-09-28.
-**Current checkpoint:** Q1 workflow-context correction, `review_ready`; see the
-[correction record](../tasks/active/testing-policy-alignment.md#q1-workflow-context-correction--2026-09-28).
+**Current checkpoint:** Q1-EXEC after workflow-context correction, `awaiting_ci`;
+[run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
+attempt 1. Manual resume only; see the
+[execution record](../tasks/active/testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28).
 Four termination parents and both embedded SDK specialist blocks are separated; the
-Prepared recovery regression and both workflow selectors are aligned. No compiled or
-hosted test evidence is claimed. Rules remain in
+Prepared recovery regression and both workflow selectors are aligned. Full compiled/
+hosted qualification remains incomplete. Rules remain in
 [WORKFLOW](../WORKFLOW.md#proportionate-delivery-rules).
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Rejected execution candidate:** `b5de446389145c3da2e3f7d653673591d43d37fa`.
-**Correction baseline:** published `5e3ac871b7bab195223a66222e68777bebe03a35`;
-resolve this correction's exact successor SHA from Git before any selected execution.
+**Active qualification candidate:** `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`,
+verified against the published branch and run API. Documentation successors are not
+the tested candidate.
 **Main:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration performed.
-The single prior dispatch request was rejected before run creation. Both affected
-workflows now use valid `matrix.runner` selection for job-level `env.Q1_PYTHON`.
-Independent actionlint reproduced both original errors and passes both corrected files;
-the focused audit now rejects the original expression. No new dispatch, build, app
-launch or acceptance occurred. No operation is pending; hosted qualification is missing.
+The newly authorized dispatch with `upload_packages=true` was accepted once. Initial
+snapshot: Preflight in progress, zero artifacts; dependent Windows/macOS jobs not yet
+listed. Completed repository/gate/source-audit setup steps are not final qualification.
+No retry or other workflow ran. The earlier HTTP 422 request remains separate.
 
 ## Phase 1G capability status
 
@@ -55,12 +57,13 @@ The incoming detailed status remains in Git history, not a new handover snapshot
   the [1F evidence](../tasks/archive/2026-09-23-phase-1f-save-correction.md#728-corrected-packages-and-native-f4-evidence)
   and later distribution limitation DIST-MAC-01 remain unchanged.
 
-**Next goal:** separately select one new Q1 production qualification request after
-rechecking the published correction, refs and access. Codex can use any host with
-repository/Actions access; tests run on Windows x64 and macOS ARM64 hosted runners.
-The correction is locally validated; another dispatch has not been authorized or run.
-The prior request allowance was consumed; zero Q1 runs/builds/launches were accepted
-or performed. A new selection must explicitly authorize the new request, without retry.
+**Next action:** manually resume the audit of run `36383551820`, attempt 1, exact SHA
+above. No dispatch or rerun. If pending, record and stop; if terminal, inspect all
+required gates, retained source/binary/archive identities and artifact availability,
+then publish the outcome. Codex can use any repository/Actions-capable host; existing
+Windows x64 and macOS ARM64 hosted jobs supply automated evidence, not physical/native
+acceptance. Q1 totals: two requests (one rejected, one accepted), zero retries;
+build/start totals and completed qualification remain pending evidence audit.
 PR #17 conflicts/integration, Windows native responsiveness, final human sessions and
 integrated 1H remain open. No historical failure or candidate is reclassified. See
 [HANDOVER](HANDOVER.md) for publication status and the next-goal prompt.

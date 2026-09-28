@@ -5367,3 +5367,24 @@ Starting publication was `5e3ac87`; this correction is its successor on the exis
 branch/PR #17. No operation is pending. The single prior rejected request and zero
 accepted Q1 runs/builds/starts remain the totals. Another qualification request requires
 separate user selection; HANDOVER carries the proposed one-request execution prompt.
+
+## 40. Q1 execution after context correction — awaiting CI — 2026-09-28
+
+User explicitly selected one new production request with packages after correction
+`8546dcddd5ac95bfe849575fe618f6e990cdd5d4`. Fresh refs, access, rules, PR state, pins,
+independent workflow lint and source audit were checked. The single request succeeded:
+[run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820),
+attempt **1**, run number **97**, exact candidate above; created `2026-09-28T05:49:08Z`.
+
+Initial API snapshot: `in_progress`, conclusion null; Preflight job `108804103380`
+running dependency installation after successful repository validation, gate fixtures,
+source audit and Node/npm setup. Windows/macOS jobs were not yet listed; zero artifacts
+were available. No package, binary/hash or completed qualification is claimed.
+
+The [owning execution record](testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28)
+holds full identity, scope, snapshot, counters and the terminal audit checklist.
+State is `awaiting_ci` with manual resume: no active polling or automatic wake-up.
+Resume this run/attempt only; no dispatch/rerun. Cumulative Q1 requests: two (one
+earlier HTTP 422 rejection, one accepted run), zero retries; actual build/start totals
+remain pending audit. Historical failures/budgets are unchanged. Documentation
+publication does not change the run's candidate; no merge, conflict resolution or 1H.

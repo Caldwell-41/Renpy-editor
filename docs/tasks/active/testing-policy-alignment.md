@@ -660,3 +660,75 @@ locally; coherent automated qualification remains missing. A separately selected
 Q1 execution may authorize one new request under the existing two-target/five-case
 scope and no-retry rule. No conflict resolution, merge or 1H. Publish this correction
 and live HANDOVER together with `[skip ci]`; resolve the exact successor SHA from Git.
+
+## Q1 execution after workflow-context correction — 2026-09-28
+
+**Authority/state:** the user explicitly selected one new production request after
+the workflow-context correction, with `upload_packages=true`; `awaiting_ci`, manual resume.
+Candidate `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`, tree
+`70ba924580bde3a66678e0ca91e1ae54fc241325`, matches local HEAD, freshly fetched
+origin and PR #17. Starting worktree was clean. Main remains `4d7ba03`; PR #17 is
+draft/open/conflicting, with no comments/reviews. Push/admin access is available,
+feature-branch rules are empty, and production workflow `357322921` is active.
+Pre-dispatch inventory returned zero Actions runs on this candidate and no pending
+production run in the branch's latest five entries.
+
+Independent actionlint 1.7.12 passes both corrected workflows; the focused source
+audit passes. Rechecked runner labels `windows-2025` / `macos-26`, Node 24.19.0,
+npm 11.9.0, Rust 1.90.0 and Ren'Py 8.5.3; the archive pin remains
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The existing Q1 scope remains one Tauri build, five ordinary runtime cases and
+primary/secondary boundary smoke per target; no local build, retry, separate matrix,
+conflict resolution, merge or 1H. The prior HTTP 422 request remains consumed and
+separate. This new explicit selection authorizes exactly one additional request.
+
+### Accepted operation and initial evidence snapshot
+
+`gh workflow run production-scaffold.yml --repo Caldwell-41/Renpy-editor --ref
+feature/phase-1g-branches-runtime -f upload_packages=true` succeeded once and returned
+[run 36383551820](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36383551820).
+The run API independently confirmed:
+
+| Field | Recorded value |
+| --- | --- |
+| Workflow | `357322921`, `.github/workflows/production-scaffold.yml` |
+| Run / number / attempt | `36383551820` / `97` / `1` |
+| Event / ref | `workflow_dispatch` / `feature/phase-1g-branches-runtime` |
+| Candidate SHA | `8546dcddd5ac95bfe849575fe618f6e990cdd5d4` |
+| Created / updated | `2026-09-28T05:49:08Z` / `2026-09-28T05:49:12Z` |
+| Initial run status / conclusion | `in_progress` / null |
+| Preflight job | `108804103380`, `ubuntu-latest`, started `2026-09-28T05:49:11Z` |
+| Initial artifacts | Zero; package/executable/archive evidence not yet available |
+
+The one initial jobs read found Preflight `in_progress`: repository validation,
+bounded gate rejection/retention fixtures, source selector audit and Node/npm setup
+steps completed successfully; locked JavaScript dependency installation was running.
+Frontend/protocol, Source Save browser and Rust formatting steps were pending.
+The Windows/macOS dependent jobs were not yet listed. No package builds or app starts
+were observed at this snapshot; future totals must be audited from this same attempt.
+No target qualification, executable hash, archive digest, case result or artifact
+availability is claimed. Source SHA/tree is confirmed; all produced-input/binary
+identity checks remain outstanding.
+
+**Budget and stop:** this selection used one request, accepted as one workflow run,
+attempt 1. Q1 cumulative requests are two: one prior HTTP 422 rejection plus this
+accepted run; zero retries. Each target remains capped at one Tauri build and seven
+top-level starts under the existing gates. Historical R2-P1/H1/F1/N1 counters remain
+unchanged. No other workflow, local native test, merge or conflict resolution ran.
+
+**Manual resume only:** stop active polling as selected. Resume the exact run and
+attempt; never dispatch or rerun to resume. If still pending, record current identity
+and stop again. Once terminal, inspect both targets and prerequisite/deferred outcomes,
+download available evidence before its seven-day expiry, audit all five case reports
+and boundary smoke, cleanup, SDK/core/browser/dependency/privacy evidence, source
+inputs and archive digests, and independently rehash retained executables (including
+the executable inside the macOS tar). Verify artifact availability even if the run
+is green. Missing/skipped/failed gates are not passes. Preserve any failure without
+retry/correction; publish the final audit and next bounded action separately from
+native/human acceptance, conflict resolution, integration or 1H.
+
+The documentation-only successor publishes this operation identity and the live
+HANDOVER with `[skip ci]`; it is not the tested candidate and grants no cross-SHA
+acceptance. Resolve publication SHA from Git. Qualification remains incomplete.
+Documentation validation: `python scripts/validate.py` passed for 277 files and
+`git diff --check` passed. Only the four status/ledger Markdown files changed.
