@@ -1,6 +1,6 @@
 # UI design review
 
-**Updated:** 2026-09-30. **State:** in_progress, implementation authorised.
+**Updated:** 2026-09-30. **State:** awaiting_ci, implementation published.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
@@ -642,3 +642,28 @@ no integration, automatic retry or expanded feature milestone is selected.
   access has not been established. These are open rows, not proof delegated to the user
   or grounds to withhold an otherwise usable review package. Prior Q1 and failed runs
   keep their original classifications. No merge/conflict resolution is selected.
+
+
+### Qualification dispatch and same-chat wait — 2026-09-30
+
+- Implementation candidate published and verified on origin:
+  `a82e89cf0210af328531727b171d050745216b53`; draft PR 17 updated, still conflicting.
+  Fresh main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`. No merge.
+- One request accepted: workflow `production-scaffold.yml`, `upload_packages=true`,
+  [run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
+  attempt 1, created 2026-09-29 23:47:09 UTC on that exact feature candidate.
+  Observed 23:47:35 UTC: in progress; Preflight repository/privacy/selector/frontend
+  checks passed, Source real-browser step running. Supported target jobs follow.
+- Cumulative refresh allowance: one early Mac debug build and one native launch;
+  zero Windows early proofs; one final production dispatch, zero retries. This run
+  selects six packaged runtime cases per target (including UI refresh) and retained
+  boundary smoke. Actual build/start/artifact totals must be audited, not assumed.
+  Prior Q1 totals are unchanged. No further expensive retry is automatically allowed.
+- Latest comparison also measured normal theme text across principal surfaces: minimum
+  contrast 5.99:1 Dark / 4.50:1 Light; primary button text 7.01:1 / 6.11:1. This does
+  not certify every platform or arbitrary game preview. Final native acceptance stays
+  open. Current browser captures remain ignored local evidence with synthetic content.
+- Publish this meaningful wait record; stop model polling. Resume in the same chat to
+  audit the recorded run, preserve failed/skipped results and inspect packages before
+  delivery. An ended normal turn is not a claimed autonomous Goal pause. Remaining
+  native input/drop/live SDK/create checks and human acceptance are unchanged.

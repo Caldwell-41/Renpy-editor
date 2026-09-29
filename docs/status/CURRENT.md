@@ -8,8 +8,8 @@
 ## Live continuation
 
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
-The user explicitly said “okay build it” on 2026-09-30. Implementation is active on
-the existing feature branch. Accepted references are retained under
+The user explicitly said “okay build it” on 2026-09-30. Implementation is published on
+the existing feature branch and is awaiting the selected qualification run. Accepted references are retained under
 [docs/design/ui-refresh](../design/ui-refresh/README.md). This supersedes the earlier
 planning-only restriction; it does not authorize integration or erase Phase 1G evidence.
 
@@ -18,7 +18,9 @@ wizard progress, CodeMirror Source, Story editing/layout, supporting catalogues 
 staged native asset import, and layered Branches. The candidate is locally implemented and checked, not yet a qualified release.
 Frontend/browser, core/SDK and an early macOS native slice pass at the recorded
 checkpoints; final package qualification and native acceptance remain active. See HANDOVER and the task
-ledger for exact evidence and remaining scope. No hosted CI operation is pending.
+ledger for exact evidence and remaining scope. [Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
+attempt 1, is in progress at candidate `a82e89cf0210af328531727b171d050745216b53`.
+The single final matrix allowance has been consumed; resume the same chat to audit it.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

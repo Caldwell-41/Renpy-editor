@@ -2,15 +2,33 @@
 
 ## UI implementation continuation — 2026-09-30
 
+**State: awaiting_ci.** Published candidate `a82e89cf0210af328531727b171d050745216b53`.
+[Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
+attempt 1, workflow `production-scaffold.yml`, branch `feature/phase-1g-branches-runtime`,
+input `upload_packages=true`. Dispatched once, accepted at 2026-09-29 23:47:09 UTC.
+Observed at 23:47:35 UTC: in progress, Preflight running Source browser checks;
+repository/privacy, selector audit and frontend tests passed. No retry, second
+production dispatch or integration is authorized. The tested SHA is the implementation
+candidate above; this following wait record changes documentation only.
+
+Resume in this same chat with “The workflow is complete; audit the recorded run and
+continue.” Read this exact run/attempt and fresh refs once. If still pending, retain
+the record and wait again without polling. If terminal, audit actual gates, reports,
+package/artifact identity and remaining native evidence, then deliver usable review
+packages. Failed/cancelled/skipped evidence is not a pass; classify a failure before
+any bounded fix and obtain a concrete allowance before another costly dispatch.
+Do not reset the branch or replace this outcome. No autonomous Goal was created, so
+an ordinary same-chat message is sufficient; no client runtime pause is claimed.
+
+
 The user explicitly authorized building the accepted UI. Continue the same outcome
 and chat on `feature/phase-1g-branches-runtime`, starting from `119cc75`. Preserve all
 local changes and prior Phase 1G work. No merge, conflict resolution or new feature
 phase is selected. The [UI task](../tasks/active/ui-design-review.md) and saved
 [mockup index](../design/ui-refresh/README.md) own scope and visual references.
 
-The refresh candidate is implemented and locally verified, ready for the approved
-single final Windows/macOS production dispatch. Publication/dispatch identity will be
-recorded below once confirmed. No merge or integrated-tree qualification is selected.
+The refresh candidate is implemented, locally verified and published. The approved
+single final Windows/macOS production dispatch is recorded above. No merge or integrated-tree qualification is selected.
 
 Local evidence: 67 frontend tests pass; final build/typecheck and Rust formatting pass;
 real Chromium retains the rejecting legacy Source control and passes textarea/CodeMirror
