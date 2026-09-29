@@ -1,15 +1,23 @@
+import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
+import { icon } from "./icons.ts";
+import { catalogue } from "./catalog-ui.ts";
+import { operationProgress } from "./operation-progress.ts";
+import { openSettings } from "./settings-ui.ts";
+import { layoutFor, saveLayout } from "./preferences.ts";
 import { RequestLane } from "./request-lane.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   focusSceneDraft,
+  settleSceneDraft,
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
+  type MediaPresentation,
 } from "./scene-ui.ts";
 import {
   renderSourceWorkspace,
@@ -57,6 +65,7 @@ const sourceActionScopes = new Map<string, object>();
 let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
+let disposeCatalogue: (()=>void) | undefined;
 let disposeSceneView: (() => void) | undefined;
 let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
@@ -64,9 +73,13 @@ let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
 let runtimeWorkspace: RuntimeWorkspace | undefined;
+let lifecycleBusy = false;
+let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
 
 declare global {
   interface Window {
+    __loomlightDropUnavailable?: ()=>void;
+    __loomlightReceiveAssets?: (sessionId:string,batch:ImportBatch)=>void;
     __loomlightScaffoldSmokeMode?: boolean;
     __loomlightInstallSmokeRequester?: (requester: typeof desktopRequestCore) => () => void;
     __loomlightReadSaveTrace?: () => readonly string[];
@@ -103,6 +116,7 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  disposeCatalogue?.();disposeCatalogue=undefined;
   if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
@@ -192,7 +206,7 @@ function hasBlockingModal(): boolean {
 function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error" } {
   if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
-  if (localPending || state === "pendingValidation") return { text: "Pending validation", kind: "normal" };
+  if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -208,8 +222,12 @@ const wizard = {
 function button(label: string, className = "button secondary"): HTMLButtonElement {
   const element = document.createElement("button"); element.type = "button"; element.className = className; element.textContent = label; return element;
 }
+let routineStatusTimer:ReturnType<typeof setTimeout>|undefined;
 function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
-  const status = document.querySelector<HTMLElement>("#app-status"); if (status) { status.textContent = message; status.dataset.kind = kind; }
+  if(routineStatusTimer)clearTimeout(routineStatusTimer);
+  const status=document.querySelector<HTMLElement>("#app-status");
+  const apply=():void=>{if(status?.isConnected&&(status.textContent!==message||status.dataset.kind!==kind)){status.textContent=message;status.title=message;status.dataset.kind=kind;}};
+  if(kind==="normal"&&["Saving…","Checking saved state…"].includes(message))routineStatusTimer=setTimeout(apply,200);else apply();
 }
 const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
@@ -221,7 +239,7 @@ async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], pay
     if (response.ok) return response.value;
     // The host has not checked out the service for this refusal. Retry only reads;
     // writes, trust and process starts are never replayed after an ambiguous result.
-    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw new Error(response.error.message);
+    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), {code:response.error.code});
     await new Promise(resolve => setTimeout(resolve,25));
   }
 }
@@ -232,9 +250,14 @@ async function projectValue<T>(project: OpenProject, operation: Parameters<typeo
 function shell(content: HTMLElement): void {
   const main = document.createElement("main"); main.className = "app-shell";
   const header = document.createElement("header"); header.className = "app-header";
-  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { if (!allowSceneNavigation()) return; const project = currentProject; if (!project) { await showWelcome(); return; } await requestProjectClose(project); })());
+  const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { if (lifecycleBusy || !await allowSceneNavigation()) return; const project = currentProject; if (!project) { await showWelcome(); return; } await requestProjectClose(project); })());
   const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
-  header.append(brand, status); main.append(header, content); root.replaceChildren(main);
+  const projectLabel = document.createElement("span"); projectLabel.className = "header-project"; projectLabel.textContent = currentProject?.title ?? "";
+  brand.prepend(icon("story")); header.append(brand, projectLabel);
+  const footer = document.createElement("footer"); footer.className = "app-footer";
+  const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
+  const settings = button("Settings", "text-button shell-settings"); settings.addEventListener("click", () => openSettings(currentProject ? { ...currentProject, runtime: () => { if(runtimeWorkspace){ runtimeWorkspace.panel.hidden=false; runtimeWorkspace.panel.focus(); } } } : undefined));
+  footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
 async function showWelcome(): Promise<void> {
@@ -242,8 +265,8 @@ async function showWelcome(): Promise<void> {
   const section = document.createElement("section"); section.className = "welcome"; section.setAttribute("aria-labelledby", "welcome-title");
   const intro = document.createElement("div"); intro.className = "welcome-intro";
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Visual Ren'Py authoring";
-  const heading = document.createElement("h1"); heading.id = "welcome-title"; heading.textContent = "Make room for the story.";
-  const summary = document.createElement("p"); summary.className = "lede"; summary.textContent = "Create a conventional Ren'Py project with a quiet, structured workspace around it.";
+  const heading = document.createElement("h1"); heading.id = "welcome-title"; heading.textContent = "Your next story starts here.";
+  const summary = document.createElement("p"); summary.className = "lede"; summary.textContent = "Create a project or pick up where you left off.";
   const actions = document.createElement("div"); actions.className = "actions";
   const create = button("New Project", "button primary"); create.addEventListener("click", () => { resetWizard(); showWizard(); });
   const open = button("Open Loomlight Project"); open.addEventListener("click", () => void openPickedProject()); actions.append(create, open); intro.append(eyebrow, heading, summary, actions);
@@ -252,8 +275,11 @@ async function showWelcome(): Promise<void> {
   try {
     const recents = await value<RecentProject[]>("project.listRecent");
     if (generation !== viewGeneration || currentProject) return;
-    if (!recents.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "Projects you create or open will appear here."; recentSection.append(empty); }
-    recents.forEach((recent) => recentSection.append(recentRow(recent)));
+
+    const search = input("search"); search.className="recent-search"; search.placeholder="Find a project…"; search.ariaLabel="Find a project";
+    const results=document.createElement("div"); const empty=document.createElement("p");empty.className="muted";
+    const filter=():void=>{results.replaceChildren(); const matches=recents.filter(r=>`${r.title} ${r.displayPath}`.toLowerCase().includes(search.value.toLowerCase())); matches.forEach(r=>results.append(recentRow(r))); empty.textContent=recents.length ? "No matching projects." : "Projects you create or open will appear here."; empty.hidden=matches.length>0;};
+    recentSection.append(search,results,empty); search.addEventListener("input",filter);filter();
   } catch (error) { if (generation === viewGeneration && !currentProject) setStatus(message(error, "Recent Projects unavailable"), "error"); }
 }
 
@@ -262,6 +288,7 @@ function recentRow(recent: RecentProject): HTMLElement {
   const open = button(recent.title, "recent-open"); open.disabled = recent.status !== "available"; open.addEventListener("click", () => void openRecent(recent.id));
   const detail = document.createElement("span"); detail.className = "recent-detail"; detail.textContent = recent.status === "available" ? recent.displayPath : `${recent.displayPath} — ${recent.status}`;
   const remove = button("Remove", "text-button"); remove.ariaLabel = `Remove ${recent.title} from Recent Projects`; remove.addEventListener("click", async () => { const token = beginCompletion(undefined, remove); try { await value("project.removeRecent", { recentId: recent.id }); if (completionIsCurrent(token)) await showWelcome(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Recent Project could not be removed"), "error"); } });
+  const last=document.createElement("span");last.className="recent-time";last.textContent=recent.lastOpenedUnixMs ? new Intl.DateTimeFormat(undefined,{dateStyle:"medium"}).format(recent.lastOpenedUnixMs) : ""; open.append(last);
   row.append(open, detail, remove); return row;
 }
 
@@ -282,6 +309,7 @@ function input(type = "text"): HTMLInputElement { const element = document.creat
 function navigation(panel: HTMLElement, next: () => void, disabled = false): void {
   const row = document.createElement("div"); row.className = "wizard-actions";
   if (wizard.step > 1) { const back = button("Back"); back.addEventListener("click", () => { wizard.step -= 1; showWizard(); }); row.append(back); }
+  else { const home=button("Back to home","text-button");home.addEventListener("click",()=>void showWelcome());row.append(home); }
   const proceed = button(wizard.step === 4 ? "Create Project" : "Continue", "button primary"); proceed.disabled = disabled; proceed.addEventListener("click", next); row.append(proceed); panel.append(row);
 }
 
@@ -292,7 +320,7 @@ function renderDetails(panel: HTMLElement): void {
   title.addEventListener("input", async () => { wizard.title = title.value; if (!wizard.folderEdited) { const token = beginCompletion(undefined, operationScopes.wizardDestination); try { const generated = await value<{folderName: string}>("system.folderName", { title: title.value }); if (!completionIsCurrent(token)) return; folder.value = generated.folderName; wizard.folderName = generated.folderName; await refreshDestination(); } catch { /* continue validation reports it */ } } });
   folder.addEventListener("input", () => { wizard.folderEdited = true; wizard.folderName = folder.value; void refreshDestination(); });
   const location = document.createElement("div"); location.className = "location-row"; const locationText = document.createElement("code"); locationText.textContent = wizard.parent?.displayPath ?? "No parent folder selected";
-  const choose = button("Choose…"); choose.addEventListener("click", async () => { const token = beginCompletion(undefined, operationScopes.wizardDestination); try { const selected = await value<ParentChoice>("project.chooseParent"); if (!completionIsCurrent(token)) return; if (!selected.cancelled) { wizard.parent = selected; locationText.textContent = selected.displayPath; await refreshDestination(); } } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Folder unavailable"), "error"); } }); location.append(locationText, choose);
+  const choose = button("Choose…"); choose.ariaLabel = "Choose parent directory"; choose.addEventListener("click", async () => { const token = beginCompletion(undefined, operationScopes.wizardDestination); try { const selected = await value<ParentChoice>("project.chooseParent"); if (!completionIsCurrent(token)) return; if (!selected.cancelled) { wizard.parent = selected; locationText.textContent = selected.displayPath; await refreshDestination(); } } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Folder unavailable"), "error"); } }); location.append(locationText, choose);
   const preview = document.createElement("p"); preview.id = "destination-preview"; preview.className = "path-preview"; preview.textContent = wizard.destination?.displayPath ?? "The exact final path will appear here.";
   panel.append(field("Game title", title), field("Folder name", folder), field("Parent directory", location), preview);
   navigation(panel, () => void (async () => { try { if (!await refreshDestination()) return; if (!wizard.title.trim() || !wizard.destination?.valid) throw new Error(wizard.destination?.message ?? "Complete the project details."); wizard.step = 2; showWizard(); } catch (error) { setStatus(message(error, "Project details are invalid"), "error"); } })());
@@ -312,39 +340,53 @@ async function renderSdk(panel: HTMLElement): Promise<void> {
   const list = document.createElement("div"); list.className = "sdk-list"; panel.append(list);
   const addSdk = (sdk: SdkInfo): void => { const row = document.createElement("label"); row.className = "sdk-row"; const radio = input("radio"); radio.name = "sdk"; radio.disabled = !sdk.compatible; radio.checked = wizard.sdk?.id === sdk.id; radio.addEventListener("change", () => { wizard.sdk = sdk; showWizard(); }); const copy = document.createElement("span"); const strong = document.createElement("strong"); strong.textContent = sdk.displayName; const detail = document.createElement("small"); detail.textContent = `${sdk.source} · ${sdk.explanation}`; copy.append(strong, detail); row.append(radio, copy); list.append(row); };
   const discoveryToken = beginCompletion(undefined, operationScopes.wizardSdk);
-  try { const discovered = await value<SdkInfo[]>("sdk.discover"); if (!completionIsCurrent(discoveryToken)) return; discovered.forEach(addSdk); if (wizard.browsedSdk && !discovered.some((sdk) => sdk.id === wizard.browsedSdk?.id)) addSdk(wizard.browsedSdk); } catch { if (!completionIsCurrent(discoveryToken)) return; if (wizard.browsedSdk) addSdk(wizard.browsedSdk); setStatus("SDK discovery could not be completed", "error"); }
+  try { const discovered = await value<SdkInfo[]>("sdk.discover"); if (!completionIsCurrent(discoveryToken)) return; if(!wizard.sdk && discovered.filter(s=>s.compatible).length===1)wizard.sdk=discovered.find(s=>s.compatible); discovered.forEach(addSdk); if (wizard.browsedSdk && !discovered.some((sdk) => sdk.id === wizard.browsedSdk?.id)) addSdk(wizard.browsedSdk); } catch { if (!completionIsCurrent(discoveryToken)) return; if (wizard.browsedSdk) addSdk(wizard.browsedSdk); setStatus("SDK discovery could not be completed", "error"); }
   if (!list.children.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No compatible managed SDK detected."; list.append(empty); }
   const actions = document.createElement("div"); actions.className = "actions";
-  const install = button("Install verified 8.5.3", "button primary"); install.addEventListener("click", async () => { const token = beginCompletion(undefined, operationScopes.wizardSdk); install.disabled = true; setStatus("Downloading and verifying Ren'Py 8.5.3…"); try { const sdk = await value<SdkInfo>("sdk.install"); if (!completionIsCurrent(token)) return; wizard.sdk = sdk; showWizard(); } catch (error) { if (!completionIsCurrent(token)) return; setStatus(message(error, "SDK installation failed"), "error"); install.disabled = false; } });
+  const install = button("Install verified 8.5.3", wizard.sdk?.compatible ? "button secondary" : "button primary"); install.addEventListener("click", async () => {
+    if(lifecycleBusy)return; lifecycleBusy=true;
+    const token=beginCompletion(undefined,operationScopes.wizardSdk); const controls=[...panel.querySelectorAll<HTMLButtonElement>("button")]; const prior=controls.map(c=>c.disabled);controls.forEach(c=>c.disabled=true);
+    const progress=operationProgress(list,"sdk.install");setStatus("Installing SDK…");
+    try { const sdk=await value<SdkInfo>("sdk.install"); if(!completionIsCurrent(token))return;wizard.sdk=sdk;showWizard();setStatus("SDK ready"); }
+    catch(error){if(completionIsCurrent(token)){progress.fail(message(error,"SDK installation failed"));controls.forEach((c,i)=>c.disabled=prior[i]!);setStatus(message(error,"SDK installation failed"),"error");}}
+    finally {progress.dispose();lifecycleBusy=false;}
+  });
   const browse = button("Browse existing SDK"); browse.addEventListener("click", async () => { const token = beginCompletion(undefined, operationScopes.wizardSdk); try { const sdk = await value<SdkInfo>("sdk.browse"); if (!completionIsCurrent(token)) return; if (!sdk.cancelled) { wizard.browsedSdk = sdk; wizard.sdk = sdk.compatible ? sdk : undefined; } showWizard(); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "SDK is incompatible"), "error"); } }); actions.append(install, browse); panel.append(actions); navigation(panel, () => { if (wizard.sdk?.compatible) { wizard.step = 3; showWizard(); } }, !wizard.sdk?.compatible);
 }
 
 function renderConfiguration(panel: HTMLElement): void {
-  wizardHeading(panel, "New Project · 3 of 4", "Game configuration", "Choose the virtual resolution. Advanced GUI and theme authoring are not part of this step.");
+  wizardHeading(panel, "New Project · 3 of 4", "Game configuration", "Choose the size of your game window. You can use a preset or enter custom dimensions.");
   const preset = document.createElement("select"); [[1920,1080,"Full HD — 1920 × 1080"],[1280,720,"HD — 1280 × 720"],[2560,1440,"QHD — 2560 × 1440"],[0,0,"Custom"]].forEach(([w,h,label]) => { const option = document.createElement("option"); option.value = `${w}x${h}`; option.textContent = String(label); if (w === wizard.resolution.width && h === wizard.resolution.height) option.selected = true; preset.append(option); });
   const width = input("number"); width.min = "640"; width.max = "7680"; width.step = "2"; width.value = String(wizard.resolution.width); const height = input("number"); height.min = "360"; height.max = "4320"; height.step = "2"; height.value = String(wizard.resolution.height);
   const sync = (): void => { wizard.resolution = { width: Number(width.value), height: Number(height.value) }; }; preset.addEventListener("change", () => { const parts = preset.value.split("x"); const w = Number(parts[0] ?? 0); const h = Number(parts[1] ?? 0); if (w && h) { width.value = String(w); height.value = String(h); sync(); } }); width.addEventListener("input", sync); height.addEventListener("input", sync);
-  const dimensions = document.createElement("div"); dimensions.className = "dimension-row"; dimensions.append(field("Width", width), field("Height", height)); panel.append(field("Resolution preset", preset), dimensions);
+  const dimensions = document.createElement("div"); dimensions.className = "dimension-row"; dimensions.append(field("Width", width), field("Height", height));if(!["1920x1080","1280x720","2560x1440"].includes(`${wizard.resolution.width}x${wizard.resolution.height}`))preset.value="0x0";dimensions.hidden=preset.value!=="0x0";preset.addEventListener("change",()=>{dimensions.hidden=preset.value!=="0x0";}); panel.append(field("Resolution preset", preset), dimensions);
   navigation(panel, () => { sync(); const {width: w,height: h} = wizard.resolution; if (w >= 640 && w <= 7680 && h >= 360 && h <= 4320 && w % 2 === 0 && h % 2 === 0) { wizard.step = 4; showWizard(); } else setStatus("Use even dimensions between 640×360 and 7680×4320.", "error"); });
 }
 function renderReview(panel: HTMLElement): void {
-  wizardHeading(panel, "New Project · 4 of 4", "Review & Create", "The final folder remains absent until generation and Ren'Py validation succeed.");
+  wizardHeading(panel, "New Project · 4 of 4", "Review & Create", "Check your project details. Loomlight will create and validate the game, then open it.");
   const summary = document.createElement("dl"); summary.className = "review-list"; const values: ReadonlyArray<readonly [string, string]> = [["Title",wizard.title],["Final path",wizard.destination?.displayPath ?? ""],["SDK",`Ren'Py ${wizard.sdk?.version ?? ""}`],["Resolution",`${wizard.resolution.width} × ${wizard.resolution.height}`]]; values.forEach(([term,description]) => { const row = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = term; const dd = document.createElement("dd"); dd.textContent = description; row.append(dt,dd); summary.append(row); });
-  const git = input("checkbox"); git.checked = wizard.initializeGit; git.addEventListener("change", () => { wizard.initializeGit = git.checked; }); panel.append(summary, field("Initialize local Git repository", git)); navigation(panel, () => void createProject());
+  const gitRow=document.createElement("div");const gitTerm=document.createElement("dt");gitTerm.textContent="Local Git";const gitSummary=document.createElement("dd");gitSummary.textContent=wizard.initializeGit?"Initialize repository":"Not enabled";gitRow.append(gitTerm,gitSummary);summary.append(gitRow);
+  const git = input("checkbox"); git.checked = wizard.initializeGit; git.addEventListener("change", () => { wizard.initializeGit = git.checked;gitSummary.textContent=git.checked?"Initialize repository":"Not enabled"; }); const advanced=document.createElement("details");advanced.className="advanced-options";const advancedLabel=document.createElement("summary");advancedLabel.textContent="Advanced";advanced.append(advancedLabel,field("Initialize local Git repository",git));panel.append(summary,advanced); navigation(panel, () => void createProject());
 }
 async function createProject(): Promise<void> {
-  if (!wizard.parent || !wizard.sdk) return; const panel = document.querySelector<HTMLElement>(".wizard-panel"); if (!panel) return; panel.replaceChildren();
-  wizardHeading(panel, "Creating project", "Preparing a safe workspace", "Loomlight is generating, validating, and finalising the project. The final destination will not be merged or overwritten.");
-  const progress = document.createElement("ol"); progress.className = "progress-list"; ["Preparing private stage","Generating standard Ren'Py project","Initializing local Git (if selected)","Validating with Ren'Py 8.5.3","Finalising without overwrite"].forEach((text,index) => { const item = document.createElement("li"); item.textContent = text; item.dataset.state = index ? "pending" : "active"; progress.append(item); }); panel.append(progress); setStatus("Creating project…");
-  const token = beginCompletion(undefined, operationScopes.projectCreate);
-  try { const result = await value<CreationResult>("project.create", { parentId: wizard.parent.id, title: wizard.title, folderName: wizard.folderName, sdkId: wizard.sdk.id, width: wizard.resolution.width, height: wizard.resolution.height, initializeGit: wizard.initializeGit }); if (!completionIsCurrent(token)) return; if (!result.project) throw new Error("The project was created but did not open."); [...progress.children].forEach((item) => (item as HTMLElement).dataset.state = "complete"); showProject(result.project); }
-  catch (error) { if (!completionIsCurrent(token)) return; [...progress.children].forEach((item) => { if ((item as HTMLElement).dataset.state === "active") (item as HTMLElement).dataset.state = "failed"; }); const failure = document.createElement("p"); failure.className = "error-message"; failure.textContent = message(error, "Project creation failed."); panel.append(failure); const back = button("Back to review"); back.addEventListener("click", showWizard); panel.append(back); setStatus("Creation failed", "error"); }
+  if(lifecycleBusy || !wizard.parent || !wizard.sdk)return;
+  const panel=document.querySelector<HTMLElement>(".wizard-panel");if(!panel)return;
+  lifecycleBusy=true;panel.replaceChildren();wizardHeading(panel,"New project · 4 of 4","Creating your project",wizard.title);
+  const progress=operationProgress(panel,"project.create",wizard.initializeGit);const busy=button("Creating…","button primary");busy.disabled=true;const actions=document.createElement("div");actions.className="wizard-actions";actions.append(busy);panel.append(actions);
+  const token=beginCompletion(undefined,operationScopes.projectCreate);setStatus("Creating project…");
+  try {
+    const result=await value<CreationResult>("project.create",{parentId:wizard.parent.id,title:wizard.title,folderName:wizard.folderName,sdkId:wizard.sdk.id,width:wizard.resolution.width,height:wizard.resolution.height,initializeGit:wizard.initializeGit});
+    if(!completionIsCurrent(token))return;if(!result.project)throw Object.assign(new Error("Project created, but could not open. Open the created folder."),{code:"CREATED_NOT_OPENED"});showProject(result.project);
+  }catch(error){if(!completionIsCurrent(token))return;progress.fail(message(error,"Project creation failed"));actions.replaceChildren();const created=(error as {code?:string}).code==="CREATED_NOT_OPENED";const back=button(created?"Back to home":"Back to review");back.addEventListener("click",()=>{if(created)void showWelcome();else showWizard();});actions.append(back);if(created){const open=button("Open created project…","button primary");open.addEventListener("click",()=>void openPickedProject());actions.append(open);}setStatus(message(error,"Creation failed"),"error");}
+  finally{progress.dispose();lifecycleBusy=false;}
 }
+
 async function openPickedProject(): Promise<void> { const token = beginCompletion(undefined, operationScopes.projectOpen); try { const project = await value<OpenProject>("project.openPicker"); if (completionIsCurrent(token) && !project.cancelled) showProject(project); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be opened"), "error"); } }
 async function openRecent(id: string): Promise<void> { const token = beginCompletion(undefined, operationScopes.projectOpen); try { const project = await value<OpenProject>("project.openRecent", { recentId: id }); if (completionIsCurrent(token)) showProject(project); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be opened"), "error"); } }
 function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
+  const layoutKey=`${project.projectId}:${surface}`; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed);
   const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
@@ -352,6 +394,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   (["story", "source", "branches", "characters", "assets", "variables"] as const).forEach((name) => {
     const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
+    nav.prepend(icon(name));nav.title=labels[name];nav.ariaLabel=labels[name];
     if (surface === name) nav.ariaCurrent = "page";
     nav.addEventListener("click", () => {
       if (surface === name && name === "story") return;
@@ -359,10 +402,15 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     });
     sidebar.append(nav);
   });
-  const tree = document.createElement("div"); tree.className = "story-tree"; if (surface === "story" || surface === "source") sidebar.append(tree);
-  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
+  const collapse=button("Collapse navigation","text-button navigation-toggle"); collapse.ariaLabel="Toggle navigation size";collapse.addEventListener("click",()=>{const collapsed=layout.dataset.navigationCollapsed!=="true";layout.dataset.navigationCollapsed=String(collapsed);saveLayout(layoutKey,{navigationCollapsed:collapsed});collapse.textContent=collapsed?"Expand":"Collapse navigation";});sidebar.append(collapse);
+  const tree = document.createElement("div"); tree.className = "story-tree";
+  const treePanel=document.createElement("aside");treePanel.className="project-tree-panel";treePanel.ariaLabel=surface==="story"?"Scenes":"Project files";treePanel.append(tree);
+  const hasTree=surface==="story"||surface==="source";
+  if(hasTree){layout.classList.add("with-tree");layout.dataset.treeCollapsed=String(layoutFor(layoutKey).treeCollapsed || window.innerWidth<900);const toggle=button("Scenes / files","text-button project-tree-toggle");toggle.ariaLabel="Toggle scene or file list";toggle.addEventListener("click",()=>{layout.dataset.treeCollapsed=String(layout.dataset.treeCollapsed!=="true");saveLayout(layoutKey,{treeCollapsed:layout.dataset.treeCollapsed==="true"});});sidebar.append(toggle);}
+  if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
+  const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : "supporting-workspace";
-  layout.append(sidebar, workspace); shell(layout);
+  layout.append(sidebar);if(hasTree)layout.append(treePanel);layout.append(workspace); shell(layout);
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
@@ -371,13 +419,19 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     navigate: target => requestProjectNavigation(project, "source", target),
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
   });
+  const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>{if(hasBlockingModal())return;const controller=currentSourceController(project);const capture=controller?.captureSaveIntent("toolbar",false);if(controller&&capture?.kind==="captured")void requestSourceSave(project,controller,capture.intent);else if(capture?.kind==="blocked")setStatus(capture.message,"error");else requestProjectFlush(project);});
+  document.querySelector(".app-header")?.append(shellSave);
+  const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");sidebar.insertBefore(settingsButton,close);}
   document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
   document.querySelector(".app-shell")?.append(runtimeWorkspace.panel);
+  runtimeWorkspace.panel.hidden=true;
+  const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
   else if (surface === "branches") {
     disposeBranchesView = renderBranches(workspace, {
+      layoutKey,
       load: (refresh) => projectValue<FlowWorkspace>(project, "flow.list", { refresh }),
       source: (location) => { void requestProjectNavigation(project, "source", location ? { path: location.path, byteStart: location.byteStart, byteEnd: location.byteEnd, expectedRevision: location.revision } : undefined); },
       scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: node.location?.revision }); },
@@ -389,7 +443,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
 }
 
 async function requestProjectNavigation(project: OpenProject, surface: ProjectSurface, target?: ProjectTarget): Promise<void> {
-  if (hasBlockingModal() || !allowSceneNavigation()) return;
+  if (hasBlockingModal()) return;
+  if((hasSceneDraft(root)||hasUnsubmittedInput()) && !await allowSceneNavigation())return;
   const controller = currentSourceController(project);
   if (!controller) {
     showProject(project, surface, target);
@@ -491,7 +546,8 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       status: setStatus,
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
-      viewSource: (path, byteStart, byteEnd) => showProject(project, "source", { path, byteStart, byteEnd }),
+      viewSource: (path, byteStart, byteEnd) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd }); },
+      layoutKey: `${project.projectId}:story`,
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -504,7 +560,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         } finally { finishAuthoringCompletion(operationToken); }
       },
     }, target?.beatId);
-    setStatus(persistence === "pendingValidation" ? "Pending validation" : persistence === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
+    setStatus(persistence === "pendingValidation" ? "Unsaved Source draft" : persistence === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
   }
@@ -516,6 +572,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
     const inventory = await projectValue<SourceInventory>(project, "source.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     const controller = renderSourceWorkspace(workspace, tree, inventory, {
+      layoutKey: `${project.projectId}:source`,
       status: setStatus,
       reloadInventory: () => projectValue<SourceInventory>(project, "source.list"),
       open: (selection) => projectValue<SourceDocument>(project, "source.open", { ...selection }),
@@ -541,7 +598,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 }
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
-  if (document.querySelector(".leave-source-dialog")) return;
+  if (document.querySelector(".leave-source-dialog") || !await allowSceneNavigation()) return;
   try { if (runtimeWorkspace && !await runtimeWorkspace.beforeClose()) return; }
   catch (error) { setStatus(message(error, "Runtime cleanup failed"), "error"); return; }
   const controller = currentSourceController(project);
@@ -610,7 +667,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
 async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number): Promise<void> {
   const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
-  workspace.append(eyebrow, title);
+  workspace.append(title);
   const token = beginCompletion(project, operationScopes.authoringLoad);
   try {
     const model = await projectValue<AuthoringMetadata>(project, "authoring.list");
@@ -625,6 +682,7 @@ async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProje
 function formHeading(text: string): HTMLHeadingElement { const heading = document.createElement("h2"); heading.textContent = text; return heading; }
 function supportingSection(): HTMLElement { const section = document.createElement("section"); section.className = "supporting-section"; return section; }
 function inlineEditor(host: HTMLElement, label: string, controls: HTMLElement[], submitLabel: string, save: (token: CompletionToken) => Promise<boolean | void>): void {
+  host = host.closest(".catalog-body")?.querySelector<HTMLElement>(".catalog-inspector > div") ?? host;
   if (host.querySelector(".inline-editor")) return;
   const editor = document.createElement("div"); editor.className = "inline-editor"; editor.role = "group"; editor.ariaLabel = label;
   const actions = document.createElement("div"); actions.className = "row-actions";
@@ -651,17 +709,30 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
   const color = input("color"); color.value = "#c5c8d0"; color.name = "dialogueColor";
   const submit = button("Create Character", "button primary"); submit.addEventListener("click", async () => { const token = beginAuthoringCompletion(project, submit); if (!token) return; submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "character.create", { technicalName: technical.value, displayName: display.value, dialogueColor: color.value }); if (completionIsCurrent(token)) showProject(project, "characters"); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Character could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token); } });
   create.append(field("Technical variable (fixed after creation)", technical), field("Display name", display), field("Dialogue colour", color), submit); workspace.append(list, create);
+  const rows=[...list.querySelectorAll<HTMLElement>(":scope > .entity-row")];
+  const infos=model.characters.map((character,i)=>{const extra:HTMLElement[]=[];let cursor=rows[i]?.nextElementSibling;while(cursor&&!cursor.classList.contains("entity-row")){const next=cursor.nextElementSibling;extra.push(cursor as HTMLElement);cursor=next;}return {id:character.id,label:character.displayName,assetId:model.appearances.find(a=>a.id===character.defaultAppearanceId)?.assetId??model.appearances.find(a=>a.characterId===character.id)?.assetId,extra};});
+  disposeCatalogue=catalogue(workspace,list,create,"Characters",infos,id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}));
 }
 
 function renderAssets(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Project assets"));
   (["background", "characterAppearance", "music", "sfx"] as AssetKind[]).forEach((kind) => { const heading = document.createElement("h3"); heading.textContent = { background: "Backgrounds", characterAppearance: "Character appearances", music: "Music", sfx: "SFX" }[kind]; list.append(heading); const assets = model.assets.filter((item) => item.kind === kind); if (!assets.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "None imported."; list.append(empty); } assets.forEach((asset) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = asset.displayName; const path = document.createElement("code"); path.textContent = asset.relativePath; const discovery = document.createElement("span"); discovery.textContent = `Ren'Py: ${asset.discoveryName} · ${asset.status}`; row.append(name, path, discovery); list.append(row); }); });
   if (model.assets.some((asset) => asset.status === "compatibilityRequired")) { const repair = button("Repair Ren'Py asset names", "button secondary"); repair.addEventListener("click", async () => { const token = beginAuthoringCompletion(project, repair); if (!token) return; repair.disabled = true; setStatus("Saving compatibility declarations…"); try { await projectValue(project, "asset.repairCompatibility"); if (completionIsCurrent(token)) showProject(project, "assets"); } catch (error) { if (!completionIsCurrent(token)) return; repair.disabled = false; setStatus(message(error, "Asset compatibility could not be repaired"), "error"); repair.focus(); } finally { finishAuthoringCompletion(token); } }); list.append(repair); }
-  const imported = supportingSection(); imported.append(formHeading("Import background or audio"));
-  const kind = document.createElement("select"); [["background","Background"],["music","Music"],["sfx","SFX"]].forEach(([value,label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; kind.append(option); });
-  const technical = input(); const display = input();
-  const choose = button("Choose and import…", "button primary"); choose.addEventListener("click", async () => { const token = beginAuthoringCompletion(project, choose); if (!token) return; choose.disabled = true; try { const selected = await projectValue<ImportChoice>(project, "asset.chooseImport"); if (!completionIsCurrent(token)) return; if (selected.cancelled) { choose.disabled = false; choose.focus(); return; } setStatus("Saving…"); await projectValue(project, "asset.import", { authorityId: selected.authorityId, kind: kind.value, technicalName: technical.value, displayName: display.value, characterId: null, expression: null }); if (completionIsCurrent(token)) showProject(project, "assets"); } catch (error) { if (!completionIsCurrent(token)) return; choose.disabled = false; setStatus(message(error, "Asset could not be imported"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token); } });
-  imported.append(field("Asset kind", kind), field("Technical name", technical), field("Display name", display), choose); workspace.append(list, imported);
+  const imported = supportingSection(); imported.append(formHeading("Import assets"));
+  const importer=assetImport(imported,model.characters,{
+    choose:()=>projectValue<ImportBatch>(project,"asset.chooseImports"),
+    import:async payload=>{await runAuthoringOperation(project,imported,()=>projectValue(project,"asset.import",payload));},
+    complete:()=>{if(currentProject?.sessionId===project.sessionId)showProject(project,"assets");},status:message=>setStatus(message,"error")
+  });stageDroppedAssets=importer.stage;workspace.append(list,imported);
+  const ordered=(["background","characterAppearance","music","sfx"] as AssetKind[]).flatMap(k=>model.assets.filter(a=>a.kind===k));
+  const repair=list.querySelector<HTMLButtonElement>(":scope > button"); if(repair)workspace.append(repair);
+  const disposeCards=catalogue(workspace,list,imported,"Assets",ordered.map(a=>{
+    const kind={background:"Background",characterAppearance:"Character image",music:"Music",sfx:"Sound effect"}[a.kind];
+    const metadata=document.createElement("dl");metadata.className="asset-metadata";
+    for(const [label,value] of [["Type",kind],["Ren’Py name",a.discoveryName],["Project path",a.relativePath],["File size",`${(a.byteCount/1024).toFixed(1)} KB`],["Status",a.status]]){const term=document.createElement("dt");term.textContent=label!;const detail=document.createElement("dd");detail.textContent=value!;metadata.append(term,detail);}
+    return {id:a.id,label:a.displayName,kind,assetId:["background","characterAppearance"].includes(a.kind)?a.id:undefined,extra:[metadata]};
+  }),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}));
+  disposeCatalogue=()=>{disposeCards();importer.dispose();stageDroppedAssets=undefined;};
 }
 
 function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
@@ -670,6 +741,10 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
   model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); const edit = button("Edit default"); edit.addEventListener("click", () => { const control = variable.variableType === "bool" ? document.createElement("select") : input(); if (variable.variableType === "bool") { [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; option.selected = String(variable.defaultValue) === value; control.append(option); }); } else { (control as HTMLInputElement).value = String(variable.defaultValue); (control as HTMLInputElement).inputMode = variable.variableType === "int" ? "numeric" : "text"; } inlineEditor(row, `Edit ${variable.technicalName}`, [field("Default value", control)], "Save Default", async (token) => { const entered = (control as HTMLInputElement | HTMLSelectElement).value; if (variable.variableType === "int" && !validInt64(entered)) throw new Error("Enter a canonical signed 64-bit decimal integer."); const defaultValue: boolean | string = variable.variableType === "bool" ? entered === "true" : entered; await projectValue(project, "variable.update", { id: variable.id, expectedSourceRevision: variable.source.sourceRevision, defaultValue }); if (completionIsCurrent(token)) showProject(project, "variables"); }); }); row.append(name, type, current, edit); list.append(row); });
   const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input(); const boolValue = document.createElement("select"); [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; boolValue.append(option); }); const valueField = field("Default value", boolValue); const syncControl = (): void => { valueField.replaceChildren(document.createElement("span"), type.value === "bool" ? boolValue : defaultValue); valueField.firstElementChild!.textContent = "Default value"; defaultValue.inputMode = type.value === "int" ? "numeric" : "text"; }; type.addEventListener("change", syncControl); syncControl();
   const submit = button("Create Variable", "button primary"); submit.addEventListener("click", async () => { let parsed: boolean | string = defaultValue.value; if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !validInt64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); defaultValue.focus(); return; } const token = beginAuthoringCompletion(project, submit); if (!token) return; submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technical.value, variableType: type.value, defaultValue: parsed }); if (completionIsCurrent(token)) showProject(project, "variables"); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
+  const assignmentPanels=model.variables.map(v=>{const panel=document.createElement("section");panel.className="variable-assignments";const heading=formHeading("Assigned in");const note=document.createElement("p");note.className="muted";note.textContent="Known Set Variable Beats only. Custom code is not included.";const result=document.createElement("div");result.textContent="Loading known assignments…";const declaration=document.createElement("details");const label=document.createElement("summary");label.textContent="View declaration";const code=document.createElement("pre");code.textContent=v.source.statement;declaration.append(label,code);panel.append(heading,note,result,declaration);return {panel,result};});
+  disposeCatalogue=catalogue(workspace,list,create,"Variables",model.variables.map((v,i)=>({id:v.id,label:v.technicalName,kind:{bool:"Boolean",int:"Integer",string:"Text"}[v.variableType],extra:[assignmentPanels[i]!.panel]})),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}));
+  const generation=viewGeneration;
+  void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${String(beat.payload.value)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
 }
 
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
@@ -678,9 +753,34 @@ function hasUnsubmittedInput(): boolean {
   return root.querySelector('[data-unsubmitted="true"]') !== null;
 }
 
-function allowSceneNavigation(): boolean {
+async function allowSceneNavigation(): Promise<boolean> {
   if (hasBlockingModal()) return false;
-  if (!hasSceneDraft(root)) return true;
+  const supporting = root.querySelector(".supporting-workspace");
+  if (supporting?.querySelector('[data-unsubmitted="true"]') && !activeAuthoringOperations.has(currentProject?.sessionId ?? "")) {
+    return new Promise(resolve => {
+      const previous = document.activeElement as HTMLElement | null;
+      const backdrop = document.createElement("div"); backdrop.className = "leave-source-dialog";
+      backdrop.role = "dialog"; backdrop.setAttribute("aria-modal", "true"); backdrop.setAttribute("aria-label", "Unsubmitted changes");
+      const panel = document.createElement("section");
+      const title = document.createElement("h2"); title.textContent = "Keep editing?";
+      const copy = document.createElement("p"); copy.textContent = "This page has unsubmitted changes or staged imports. Stay to finish them, or discard them and leave. Imported originals are unaffected.";
+      const actions = document.createElement("div"); actions.className = "row-actions";
+      const stay = button("Keep editing", "button primary"); const discard = button("Discard and leave", "button danger");
+      const finish = (leave: boolean): void => {
+        backdrop.remove();
+        if (leave) supporting.querySelectorAll<HTMLElement>('[data-unsubmitted="true"]').forEach(el => delete el.dataset.unsubmitted);
+        else previous?.focus();
+        resolve(leave);
+      };
+      stay.addEventListener("click", () => finish(false)); discard.addEventListener("click", () => finish(true));
+      backdrop.addEventListener("keydown", event => {
+        if (event.key === "Escape") { event.preventDefault(); finish(false); }
+        if (event.key === "Tab") { event.preventDefault(); (document.activeElement === stay ? discard : stay).focus(); }
+      });
+      actions.append(stay, discard); panel.append(title, copy, actions); backdrop.append(panel); root.append(backdrop); stay.focus();
+    });
+  }
+  if (!hasSceneDraft(root) || await settleSceneDraft(root)) return true;
   setStatus("Commit or cancel the Scene editor before navigating.", "error");
   focusSceneDraft(root);
   return false;
@@ -726,18 +826,19 @@ function requestProjectFlush(project: OpenProject): void {
 }
 
 function installListeners(): void {
+  if(!listenersInstalled)window.addEventListener("loomlight-reset-layout",()=>{const layout=root.querySelector<HTMLElement>(".project-shell");if(layout){layout.dataset.navigationCollapsed="false";layout.dataset.treeCollapsed=String(window.innerWidth<900);layout.style.setProperty("--tree-width","230px");}const preview=root.querySelector<HTMLInputElement>('input[aria-label="Preview vertical allocation"]');if(preview){preview.value="34";preview.dispatchEvent(new Event("input"));}root.querySelectorAll<HTMLElement>(".scene-context-inspector,.source-mapping,.branches-controls").forEach(panel=>{if(!panel.querySelector('[data-unsubmitted="true"]'))panel.hidden=true;});});
   if (listenersInstalled) return;
   listenersInstalled = true;
   root.addEventListener("input", (event) => {
     const target = event.target;
-    if (target instanceof HTMLElement && target.closest(".supporting-workspace")) {
+    if (target instanceof HTMLElement && target.closest(".inline-editor, .catalog-create")) {
       target.dataset.unsubmitted = "true";
       setStatus("Unsubmitted input");
     }
   });
   root.addEventListener("change", (event) => {
     const target = event.target;
-    if (target instanceof HTMLElement && target.closest(".supporting-workspace")) {
+    if (target instanceof HTMLElement && target.closest(".inline-editor, .catalog-create")) {
       target.dataset.unsubmitted = "true";
       setStatus("Unsubmitted input");
     }
@@ -794,6 +895,7 @@ export function startApplication(requester: typeof desktopRequestCore = desktopR
 }
 
 export function requestApplicationExit(closeWindow: () => Promise<void>): boolean {
+  if(lifecycleBusy){setStatus("Please wait for the current operation to finish before closing.");return true;}
   const project = currentProject;
   if (!project) return false;
   void requestProjectClose(project, closeWindow);
@@ -801,9 +903,13 @@ export function requestApplicationExit(closeWindow: () => Promise<void>): boolea
 }
 
 // Native close/quit enters the same runtime cleanup and Source leave flow.
-window.__loomlightRequestApplicationClose = () => {
-  if (!allowSceneNavigation() || hasBlockingModal()) return;
+window.__loomlightRequestApplicationClose = async () => {
+  if(lifecycleBusy){setStatus("Please wait for the current operation to finish before closing.");return;}
+  if (!await allowSceneNavigation() || hasBlockingModal()) return;
   const project=currentProject;
   const finish=async () => { await showWelcome(); await completeApplicationClose(); };
   void (project ? requestProjectClose(project,finish) : completeApplicationClose()).catch(error=>setStatus(message(error,"Application close could not finish"),"error"));
 };
+
+window.__loomlightDropUnavailable=()=>setStatus("Wait for the current operation to finish, then drop the files again.","error");
+window.__loomlightReceiveAssets=(sessionId,batch)=>{if(currentProject?.sessionId!==sessionId)return;if(stageDroppedAssets)stageDroppedAssets(batch);else setStatus("Open Assets to drop files for import.");};

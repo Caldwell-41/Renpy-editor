@@ -967,19 +967,52 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
         if response.status().is_redirection() {
             return Err(RenpyError::Download);
         }
+        let total = response
+            .headers()
+            .get("content-length")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse::<u64>().ok())
+            .filter(|v| *v > 0 && *v <= MAX_ARCHIVE_BYTES);
         let source = response.into_body().into_reader();
-        let mut source = source.take(MAX_ARCHIVE_BYTES + 1);
         let mut output = OpenOptions::new()
             .create_new(true)
             .write(true)
             .open(archive)
             .map_err(|_| RenpyError::Io)?;
-        let downloaded = io::copy(&mut source, &mut output).map_err(|_| RenpyError::Download)?;
-        if downloaded > MAX_ARCHIVE_BYTES {
-            return Err(RenpyError::Download);
-        }
+        copy_sdk_download(source, &mut output, total)?;
         crate::transaction::flush_open_file(&output).map_err(|_| RenpyError::Io)
     })
+}
+
+fn copy_sdk_download(
+    source: impl Read,
+    output: &mut impl Write,
+    total: Option<u64>,
+) -> Result<(), RenpyError> {
+    crate::progress::report("download", Some(0), total);
+    let mut source = source.take(MAX_ARCHIVE_BYTES + 1);
+    let mut downloaded = 0u64;
+    let mut buffer = vec![0u8; 64 * 1024];
+    let mut last = std::time::Instant::now();
+    loop {
+        let count = source.read(&mut buffer).map_err(|_| RenpyError::Download)?;
+        if count == 0 {
+            break;
+        }
+        output
+            .write_all(&buffer[..count])
+            .map_err(|_| RenpyError::Download)?;
+        downloaded += count as u64;
+        if last.elapsed() >= Duration::from_millis(100) {
+            crate::progress::report("download", Some(downloaded), total);
+            last = std::time::Instant::now();
+        }
+    }
+    crate::progress::report("download", Some(downloaded), total);
+    if downloaded > MAX_ARCHIVE_BYTES {
+        return Err(RenpyError::Download);
+    }
+    Ok(())
 }
 
 // Keep download transport injectable for tests without adding a renderer operation,
@@ -1080,10 +1113,12 @@ pub fn install_verified_archive(
     if destination.exists() {
         return Err(RenpyError::ExistingDestination);
     }
+    crate::progress::stage("verify");
     if sha256_file(archive)? != expected {
         return Err(RenpyError::Checksum);
     }
     validate_archive(archive, limits)?;
+    crate::progress::stage("install");
     let parent = destination.parent().ok_or(RenpyError::Io)?;
     let stage = create_sdk_stage(parent)?;
     let payload = stage.join("payload");

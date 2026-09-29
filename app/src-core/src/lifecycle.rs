@@ -329,11 +329,13 @@ impl LifecycleService {
         ensure_absent(&final_path)?;
         let token = uuid::Uuid::new_v4().to_string();
         let stage_name = format!(".loomlight-stage-{token}");
+        crate::progress::stage("prepare");
         let mut stage = create_project_stage(parent, stage_name, token, || Ok(()))?;
         let prepared = (|| {
             validate_stage_identity(&stage)?;
             sdk.revalidate(true)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            crate::progress::stage("generate");
             RenpyAdapter::generate_starter_anchored(
                 &sdk,
                 &stage.path,
@@ -355,6 +357,7 @@ impl LifecycleService {
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: overlay");
             if request.initialize_git {
+                crate::progress::stage("git");
                 validate_stage_identity(&stage)?;
                 crate::ports::GitPort::initialise_new_repository(
                     &LocalGit {
@@ -369,11 +372,13 @@ impl LifecycleService {
             validate_stage_identity(&stage)?;
             sdk.revalidate(false)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            crate::progress::stage("validate");
             RenpyAdapter::validate_generated_anchored(&sdk, &stage.path, stage_file(&stage)?)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: validated");
             validate_stage_identity(&stage)?;
+            crate::progress::stage("finalise");
             promote_anchored_stage(parent, &mut stage, &request.folder_name)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: promoted");
@@ -387,6 +392,7 @@ impl LifecycleService {
             let _ = cleanup_stage(parent, &mut stage);
         }
         let inspected = prepared?;
+        crate::progress::stage("open");
         let opened = self
             .activate_project(inspected)
             .map_err(|_| LifecycleError::CreatedNotOpened)?;
@@ -804,6 +810,52 @@ impl LifecycleService {
                 schema_version: RECENT_SCHEMA_VERSION,
                 entries: Vec::new(),
             })
+    }
+
+    pub fn read_preferences(&self) -> crate::preferences::Preferences {
+        let read = || -> Option<crate::preferences::Preferences> {
+            let mut file = self
+                .data_anchor
+                .open_file(OsStr::new("ui-preferences.json"))
+                .ok()?;
+            if file.metadata().ok()?.len() > 64 * 1024 {
+                return None;
+            }
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes).ok()?;
+            let prefs: crate::preferences::Preferences = serde_json::from_slice(&bytes).ok()?;
+            prefs.valid().then_some(prefs)
+        };
+        read().unwrap_or_default()
+    }
+
+    pub fn write_preferences(
+        &self,
+        prefs: crate::preferences::Preferences,
+    ) -> Result<crate::preferences::Preferences, LifecycleError> {
+        if !prefs.valid() {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let bytes = serde_json::to_vec(&prefs).map_err(|_| LifecycleError::Io)?;
+        let name = format!(".ui-preferences-{}.tmp", uuid::Uuid::new_v4());
+        let temporary = OsStr::new(&name);
+        let destination = OsStr::new("ui-preferences.json");
+        let result = (|| {
+            let mut file = self
+                .data_anchor
+                .create_new_file(temporary)
+                .map_err(|_| LifecycleError::UnsafePath)?;
+            file.write_all(&bytes).map_err(|_| LifecycleError::Io)?;
+            crate::transaction::flush_open_file(&file).map_err(|_| LifecycleError::Io)?;
+            drop(file);
+            self.data_anchor.flush().map_err(|_| LifecycleError::Io)?;
+            replace_recent_file(&self.data_anchor, temporary, destination)?;
+            verify_recent_commit(&self.data_anchor, destination, &bytes)
+        })();
+        if result.is_err() {
+            let _ = self.data_anchor.remove_file_if_exists(temporary);
+        }
+        result.map(|_| prefs)
     }
 
     fn write_recent(&self, store: &RecentStore) -> Result<(), LifecycleError> {
@@ -1901,6 +1953,34 @@ fn promote_no_replace(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ui_preferences_are_device_local_atomic_and_recover_corrupt_records() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("profile");
+        let service = LifecycleService::new(root.clone()).unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::System
+        ));
+        let mut prefs = crate::preferences::Preferences::default();
+        prefs.theme = crate::preferences::Theme::Light;
+        service.write_preferences(prefs).unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::Light
+        ));
+        assert!(service.current().is_none());
+        fs::write(root.join("ui-preferences.json"), b"broken").unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::System
+        ));
+        assert!(!fs::read_dir(&root).unwrap().any(|e| e
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .ends_with(".tmp")));
+    }
 
     pub(super) fn make_openable_project(root: &Path, title: &str) {
         let folder = root.file_name().unwrap().to_str().unwrap();

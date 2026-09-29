@@ -17,6 +17,8 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
+    "preferences.read",
+    "preferences.write",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
@@ -40,6 +42,7 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
     "character.update",
     "appearance.setDefault",
     "asset.chooseImport",
+  "asset.chooseImports",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",

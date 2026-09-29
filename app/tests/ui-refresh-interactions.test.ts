@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { Window } from 'happy-dom';
+import { assetImport } from '../src/asset-import-ui.js';
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+test('staged import cancellation retains choices; partial failure never retries a successful file',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);
+ let attempt=0;const calls:string[]=[];let complete=0;
+ const ui=assetImport(host,[],{choose:async()=>({choices:[],cancelled:true}),import:async p=>{calls.push(String(p.authorityId));if(p.authorityId==='two'&&attempt++===0)throw Error('File no longer available');},complete:()=>{complete++;},status:()=>{}});
+ ui.stage({choices:[{authorityId:'one',displayName:'one.png',extension:'png',byteCount:1},{authorityId:'two',displayName:'two.ogg',extension:'ogg',byteCount:1}]});
+ const click=(text:string)=>[...host.querySelectorAll('button')].find(b=>b.textContent===text)!.click();
+ click('Choose files…');await tick();assert.equal(host.querySelectorAll('.import-entry').length,2);
+ click('Import selected files');await tick();assert.deepEqual(calls,['one','two']);assert.equal(complete,0);assert.match(host.textContent!,/File no longer available/);
+ click('Import selected files');await tick();assert.deepEqual(calls,['one','two','two']);assert.equal(complete,1);
+ ui.dispose();await browser.happyDOM.close();
+});
+
+test('native request channel keeps progress truthful and ignores events after completion',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const {requestCore}=await import('../src/bridge.js');
+ const {operationProgress}=await import('../src/operation-progress.js');
+ let complete!:(response:unknown)=>void;
+ let channel:{onmessage:(value:unknown)=>void};
+ let requestId='';
+ Object.assign(browser,{__TAURI_INTERNALS__:{transformCallback:()=>1,invoke:async(_command:string,args:{request:{requestId:string};onProgress:typeof channel})=>{channel=args.onProgress;requestId=args.request.requestId;return new Promise(resolve=>complete=resolve);}}});
+ const host=document.createElement('section');document.body.append(host);
+ const ui=operationProgress(host,'sdk.install');const pending=requestCore('sdk.install');
+ const bar=host.querySelector('progress')!;
+ channel!.onmessage({sequence:1,stage:'download',bytes:100,total:400});
+ assert.equal(bar.value,100);assert.equal(bar.max,400);assert.match(host.textContent!,/25%/);
+ channel!.onmessage({sequence:1,stage:'download',bytes:0,total:400});assert.equal(bar.value,100,'duplicate sequence cannot regress progress');
+ channel!.onmessage({sequence:2,stage:'download',bytes:200,total:null});assert.equal(bar.hasAttribute('value'),false,'unknown total stays indeterminate');
+ channel!.onmessage({sequence:3,stage:'verify',bytes:null,total:null});assert.match(host.textContent!,/Verify download/);
+ complete({protocolVersion:1,requestId,ok:false,error:{code:'DOWNLOAD_FAILED',message:'Download failed'}});await pending;
+ ui.fail('Download failed');channel!.onmessage({sequence:4,stage:'install'});
+ assert.equal(host.querySelector('[role="alert"]')?.textContent,'Download failed');
+ assert.equal(host.querySelector('.operation-panel')?.getAttribute('data-failed'),'true');
+ ui.dispose();await browser.happyDOM.close();
+});

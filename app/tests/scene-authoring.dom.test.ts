@@ -6,6 +6,7 @@ import {
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
+  settleSceneDraft,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -97,7 +98,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea"); assert.ok(textarea);
   textarea.value = "First line\nSecond line"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   assert.equal(hasSceneDraft(document), true);
-  textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+  textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
   await tick();
   assert.equal(calls.at(-1)?.type, "continueDialogue");
   assert.equal(calls.at(-1)?.text, "First line\nSecond line");
@@ -254,4 +255,16 @@ test("Background resolves default-layer uncertainty after Custom Code without cl
   assert.equal(actual.variablesUnknown, true);
   assert.equal(actual.partial, true);
   assert.deepEqual(actual.unknownBeatIds, ["custom"]);
+});
+
+
+test("dialogue navigation protects IME and shares one pending commit",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!;host.className="scene-workspace";
+ const original=sceneModel();const pending=deferred<SceneWorkspace>();let calls=0;
+ const dispose=renderSceneAuthoring(host,document.querySelector("#tree")!,original,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{calls++;return pending.promise;}});
+ host.querySelector<HTMLButtonElement>(".beat-select")!.click();const text=host.querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ text.dispatchEvent(new window.Event("compositionstart"));assert.equal(await settleSceneDraft(host),false);assert.equal(calls,0);
+ text.dispatchEvent(new window.Event("compositionend"));const a=settleSceneDraft(host),b=settleSceneDraft(host);assert.equal(calls,1);assert.equal(text.disabled,true);
+ pending.resolve({...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map((beat,j)=>j?beat:{...beat,payload:{type:"dialogue",characterId:"alice",text:"Kept through navigation"}})})});
+ assert.deepEqual(await Promise.all([a,b]),[true,true]);assert.equal(calls,1);assert.match(host.textContent!,/Kept through navigation/);dispose();await browser.happyDOM.close();
 });

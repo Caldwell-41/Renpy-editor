@@ -72,7 +72,10 @@ export class RuntimeWorkspace {
     const note = document.createElement("p"); note.className = "muted"; note.textContent = "Static Source and Branches findings are separate from SDK validation. Only explicit Validate runs compile and lint.";
     this.notice.role = "alert"; this.previous.hidden = true; this.panel.tabIndex = 0;
     this.panel.append(title, this.status, this.notice, this.revision, note, this.previous, this.diagnostics, details);
-    this.toolbar.append(this.validate, this.run, this.stop, this.inspect, this.revoke, this.policy, this.browse);
+    this.run.classList.add("primary");
+    this.toolbar.append(this.validate, this.run, this.stop);
+    const advanced=document.createElement("div");advanced.className="runtime-advanced";advanced.append(this.inspect,this.revoke,this.policy,this.browse);this.panel.prepend(advanced);
+    const close=button("Close runtime panel");close.classList.add("text-button");close.addEventListener("click",()=>{this.panel.hidden=true;});this.panel.prepend(close);
     this.validate.addEventListener("click", () => this.begin("validate"));
     this.run.addEventListener("click", () => this.begin("run"));
     this.stop.addEventListener("click", () => { void this.stopOperation().catch(error => this.fail(error)); });
@@ -98,6 +101,7 @@ export class RuntimeWorkspace {
   }
   private fail(error: unknown): void { if (this.current()) this.notice.textContent = `Runtime action failed: ${error instanceof Error ? error.message : String(error)}`; }
   private begin(kind: RuntimeKind): void {
+    this.panel.hidden = false;
     if (this.active() || document.querySelector('[aria-modal="true"]')) return;
     this.notice.textContent = "";
     this.abort = new AbortController();

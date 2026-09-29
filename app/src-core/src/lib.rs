@@ -4,6 +4,8 @@ pub mod lifecycle;
 pub mod media;
 pub mod metadata;
 pub mod ports;
+pub mod preferences;
+pub mod progress;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
@@ -28,6 +30,8 @@ pub const PROTOCOL_VERSION: u64 = 1;
 pub const OPERATIONS: &[&str] = &[
     "system.health",
     "system.version",
+    "preferences.read",
+    "preferences.write",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
@@ -51,6 +55,7 @@ pub const OPERATIONS: &[&str] = &[
     "character.update",
     "appearance.setDefault",
     "asset.chooseImport",
+    "asset.chooseImports",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
@@ -376,6 +381,15 @@ pub fn handle_application_request(
                 .and_then(|_| lifecycle.authoring_status())
                 .and_then(to_value)
         }
+        "preferences.read" if empty_payload(validated.payload) => {
+            to_value(lifecycle.read_preferences())
+        }
+        "preferences.write" => serde_json::from_value::<preferences::Preferences>(Value::Object(
+            validated.payload.clone(),
+        ))
+        .map_err(|_| LifecycleError::InvalidMetadata)
+        .and_then(|prefs| lifecycle.write_preferences(prefs))
+        .and_then(to_value),
         "sdk.discover" if empty_payload(validated.payload) => to_value(lifecycle.discover_sdks()),
         "sdk.install" if empty_payload(validated.payload) => {
             lifecycle.install_sdk().and_then(to_value)
@@ -663,7 +677,11 @@ pub fn handle_application_request(
                 .and_then(|session| lifecycle.require_session(&session))
                 .and_then(|_| lifecycle.runtime_install_policy())
         }
-        "project.chooseParent" | "project.openPicker" | "sdk.browse" | "asset.chooseImport" => {
+        "project.chooseParent"
+        | "project.openPicker"
+        | "sdk.browse"
+        | "asset.chooseImport"
+        | "asset.chooseImports" => {
             return CoreResponse::failure(
                 request_id,
                 "DESKTOP_MEDIATION_REQUIRED",

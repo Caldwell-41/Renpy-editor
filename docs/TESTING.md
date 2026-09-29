@@ -885,3 +885,28 @@ manual R1 dispatch remains available for bounded future corrections. Final produ
 verification is manually dispatched once on the implementation branch. The production
 workflow has no automatic main-push trigger; no cross-SHA/pre/post-merge reuse is claimed.
 Integration and its run strategy require separate authorisation.
+
+
+## UI refresh verification
+
+The 2026-09-30 refresh adds CodeMirror, both accepted palettes, native progress and
+batch/drop staging. `npm run test:source-browser` now includes
+`tests/ui-refresh.browser.mjs`: all six workspaces in both themes, onboarding/Settings,
+1440p and compact/laptop captures, interface sizes, fixed status/editor geometry and
+exact mixed-newline edit/undo/redo. It executes the shipped smoke interactions against
+real CodeMirror DOM with a stubbed desktop boundary. This is a driver/renderer check,
+not native security, physical keyboard/IME, drop or SDK-download evidence.
+
+Frontend tests retain rejecting Save/conflict/selection assertions and add staged
+import cancellation/partial-failure, dialogue composition/commit ownership, and
+ordered progress/unknown-total/failure checks through the actual frontend channel
+handler. Core tests cover bounded preferences, atomic preference persistence, scoped
+progress, and written-byte download accounting. The two official archive-backed SDK
+gates remain separate from routine core selection; no specialist exercises are added.
+
+The existing packaged runtime runner additionally selects `ui-refresh`, using a
+disposable profile to require native CSP styling, real draft IPC, status geometry,
+Settings return and preference round-trip/cleanup. Its editor input is explicitly
+synthetic. No second qualification matrix or new testing orchestrator is introduced.
+Current exact counts, failed attempts, native capability gaps and remaining human
+acceptance are recorded in the UI task and HANDOVER, not inferred from screenshots.

@@ -11,8 +11,8 @@ executable = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 failed = False
-allowed = ["compile", "lint", "route-a", "route-b", "runtime-error", "branches-performance"]
-cases = sys.argv[3:] or allowed[:5]
+allowed = ["compile", "lint", "route-a", "route-b", "runtime-error", "branches-performance", "ui-refresh"]
+cases = sys.argv[3:] or (allowed[:5] + ["ui-refresh"])
 if any(case not in allowed for case in cases):
     raise SystemExit("Unknown runtime UI case")
 for case in cases:

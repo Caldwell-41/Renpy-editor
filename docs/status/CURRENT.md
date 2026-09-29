@@ -1,11 +1,24 @@
 # Current status
 
-**Updated:** 2026-09-28.
+**Updated:** 2026-09-30.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
 
 ## Live continuation
+
+**Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
+The user explicitly said “okay build it” on 2026-09-30. Implementation is active on
+the existing feature branch. Accepted references are retained under
+[docs/design/ui-refresh](../design/ui-refresh/README.md). This supersedes the earlier
+planning-only restriction; it does not authorize integration or erase Phase 1G evidence.
+
+Local work includes shared themes/shell, device preferences and Settings, Welcome and
+wizard progress, CodeMirror Source, Story editing/layout, supporting catalogues and
+staged native asset import, and layered Branches. The candidate is locally implemented and checked, not yet a qualified release.
+Frontend/browser, core/SDK and an early macOS native slice pass at the recorded
+checkpoints; final package qualification and native acceptance remain active. See HANDOVER and the task
+ledger for exact evidence and remaining scope. No hosted CI operation is pending.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the
@@ -14,7 +27,7 @@ next outcome and this documentation update. The rules no longer require a new ch
 at every checkpoint or CI wait. Actual client pause controls remain user/system-owned;
 no automatic wait/wake or runtime capability was implemented or tested here.
 
-**Next outcome:** provide a reviewable Loomlight build, complete available bounded
+**Prior delivery outcome (not selected by this UI review):** provide a reviewable Loomlight build, complete available bounded
 Windows native checks and prepare focused final user review. Select **REVIEW-DELIVERY-1**
 from [HANDOVER](HANDOVER.md). This replaces the older preparation-only next prompt;
 it does not select integration, 1H or new features. No operation is pending.

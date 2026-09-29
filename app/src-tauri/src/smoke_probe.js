@@ -208,6 +208,7 @@ setTimeout(async () => {
           cacheKey: `${request.payload.assetId}:smoke`,
         };
       }
+      if(request.operation === "asset.chooseImports"){importChoiceCount+=1;value={choices:[],cancelled:true};}
       if (request.operation === "asset.chooseImport") {
         importChoiceCount += 1;
         value = importChoiceCount === 1
@@ -334,16 +335,11 @@ setTimeout(async () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await awaitCall("project.flush");
     click("Assets");
-    await awaitSurface("Choose and import…");
-    supportingAuthoringStage = "cancel-import";
-    const technical = control("Technical name");
-    technical.value = "theme";
-    technical.dispatchEvent(new Event("input", { bubbles: true }));
-    click("Choose and import…");
-    await waitFor(() => importChoiceCount === 2, "cancelled asset choice");
-    await yieldTask();
-    const cancelledPreserved = technical.value === "theme"
-      && [...document.querySelectorAll("button")].find((item) => item.textContent === "Choose and import…")?.disabled === false;
+    await awaitSurface("Choose files…");
+    supportingAuthoringStage="cancel-import";
+    click("Choose files…");
+    await waitFor(()=>importChoiceCount===2,"cancelled asset choice");await yieldTask();
+    const cancelledPreserved=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…")?.disabled===false && document.querySelectorAll('.import-entry').length===0;
     supportingAuthoringStage = "repair-compatibility";
     click("Repair Ren'Py asset names");
     await awaitCall("asset.repairCompatibility");
@@ -378,7 +374,7 @@ setTimeout(async () => {
       && document.body.textContent.includes("Partial / unknown")
       && document.body.textContent.includes("Visible state and provenance");
     const allocation = control("Preview size");
-    const allocationCorrect = allocation.value === "52";
+    const allocationCorrect = allocation.value === "34";
     const accessibleReorder = [...document.querySelectorAll("button")]
       .some((item) => item.ariaLabel === "Move scene Scene 1 down")
       && [...document.querySelectorAll("button")]
@@ -392,7 +388,7 @@ setTimeout(async () => {
     if (!dialogue) throw new Error("Missing expanded Dialogue editor");
     dialogue.value = "Packaged Scene authoring";
     dialogue.dispatchEvent(new Event("input", { bubbles: true }));
-    dialogue.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+    dialogue.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
     await awaitSceneCommit(1, "Dialogue continuation transaction");
     sceneAuthoringStage = "choice-create-scene";
     const choiceButton = [...document.querySelectorAll("button")]
@@ -420,15 +416,15 @@ setTimeout(async () => {
     await waitFor(() => document.querySelector(".source-editor"), "Source editor");
     const sourceSurfaceVisible = document.body.textContent.includes("Mapped ranges")
       && document.body.textContent.includes("Custom Code")
-      && document.querySelectorAll(".source-line-numbers").length === 1;
+      && document.querySelectorAll(".source-line-numbers, .cm-lineNumbers").length === 1;
     sourceAuthoringStage = "retain-button-draft";
-    let sourceEditor = document.querySelector(".source-editor");
+    let sourceEditor = window.__loomlightProbeEditor(document.querySelector(".source-editor"));
     sourceEditor.value = sourceEditor.value.replace("score += 1", "score += 2");
     sourceEditor.dispatchEvent(new Event("input", { bubbles: true }));
     await waitFor(() => sourceDocument.dirty, "Source draft retention");
     await waitFor(() => {
       const save = document.querySelector('button[data-source-action="save"]');
-      return save && !save.disabled && document.querySelector("#app-status")?.textContent === "Pending validation";
+      return save && !save.disabled && document.querySelector("#app-status")?.textContent === "Unsaved Source draft";
     }, "Source dirty UI state");
     const buttonSaveBefore = operationCounts.get("source.save") ?? 0;
     const buttonFlushBefore = operationCounts.get("project.flush") ?? 0;
@@ -438,7 +434,7 @@ setTimeout(async () => {
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
     sourceCommandTrace.push(`button:source:generation-current:completed:saves=1:flushes=${buttonFlushDelta}:saved`);
-    sourceEditor = document.querySelector(".source-editor");
+    sourceEditor = window.__loomlightProbeEditor(document.querySelector(".source-editor"));
     const selectionUpdateBefore = operationCounts.get("source.updateDraft") ?? 0;
     sourceEditor.setSelectionRange(5, 5);
     sourceEditor.dispatchEvent(new Event("select", { bubbles: true }));
@@ -483,7 +479,7 @@ setTimeout(async () => {
     sourceAuthoringStage = "source-clean-flush";
     const cleanFlushBefore = operationCounts.get("project.flush") ?? 0;
     const cleanSaveBefore = operationCounts.get("source.save") ?? 0;
-    sourceEditor = document.querySelector(".source-editor");
+    sourceEditor = window.__loomlightProbeEditor(document.querySelector(".source-editor"));
     sourceEditor.focus();
     const cleanShortcut = new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true });
     sourceEditor.dispatchEvent(cleanShortcut);

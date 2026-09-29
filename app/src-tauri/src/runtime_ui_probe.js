@@ -17,7 +17,7 @@
     const deadline=performance.now()+10000;
     for (;;) { try { return await call(operation,payload); } catch(error) { if (!String(error).includes("RUNTIME_BUSY") || performance.now()>deadline) throw error; await delay(100); } }
   };
-  const settled = async () => until(() => /^(Saved|Pending validation)$/.test(document.querySelector('#app-status')?.textContent ?? ""));
+  const settled = async () => until(() => /^(Saved|Unsaved Source draft)$/.test(document.querySelector('#app-status')?.textContent ?? ""));
   const checkpoint = name => { stages.push({stage:name,elapsedMs:Math.round(performance.now()-started)}); stage=name; };
   const trust = async () => {
     await until(() => document.querySelector('.runtime-dialog') || /Running|Failed|Validation finished|Runtime action failed/.test(document.querySelector('.runtime-panel [role="status"]')?.textContent ?? ""));
@@ -30,9 +30,9 @@
   };
   const editSource = async (path, transform) => {
     checkpoint("source-view-open"); await click("Source"); await until(() => document.querySelector(`button[title="${path}"]`) && !document.querySelector(`button[title="${path}"]`).disabled,20000); document.querySelector(`button[title="${path}"]`).click();
-    await until(() => document.querySelector(`textarea[aria-label="Source editor for ${path}"]`) && !document.querySelector(`textarea[aria-label="Source editor for ${path}"]`).readOnly,20000);
+    await until(() => document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`) && !window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`)).readOnly,20000);
     checkpoint("source-input-ready");
-    const input = document.querySelector(`textarea[aria-label="Source editor for ${path}"]`);
+    const input = window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`));
     input.focus(); input.value = transform(input.value); input.dispatchEvent(new Event("input",{bubbles:true}));
     checkpoint("source-save-click"); await click("Save Source");
     await until(() => document.querySelector('#app-status')?.textContent === "Saved",20000);
@@ -49,9 +49,9 @@
       await until(() => /Failed/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
       assert(/Failed/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"SDK failure remains failure");
       document.querySelector('.runtime-diagnostics button').click();
-      await until(() => document.querySelector('textarea[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
-      const input = document.querySelector('textarea[aria-label="Source editor for game/雪 diagnostic.rpy"]');
-      assert(input.selectionStart === "label diagnostic_case:\n".length,"Exact textarea line start after CRLF normalization");
+      await until(() => document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
+      const input = window.__loomlightProbeEditor(document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
+      assert(input.selectionStart === "label diagnostic_case:\n".length,"Exact editor line start after CRLF normalization");
       assert(input.value.slice(input.selectionStart,input.selectionEnd).includes(mode === "compile" ? "not a statement" : "loomlight_image_that_does_not_exist"),"SDK navigation selected the actual failing line");
       const reopened = await read("source.open",{sessionId,path:"game/雪 diagnostic.rpy"});
       assert(reopened.text.replace(/\r\n?/g,"\n") === input.value,"real service agrees with rendered source");
@@ -111,8 +111,8 @@
         draftPath="game/chapters/chapter_01/scene_001.rpy";
         await click("Source"); await until(()=>document.querySelector(`button[title="${draftPath}"]`) && !document.querySelector(`button[title="${draftPath}"]`).disabled,20000);
         document.querySelector(`button[title="${draftPath}"]`).click();
-        await until(()=>document.querySelector(`textarea[aria-label="Source editor for ${draftPath}"]`) && !document.querySelector(`textarea[aria-label="Source editor for ${draftPath}"]`).readOnly,20000);
-        const input=document.querySelector(`textarea[aria-label="Source editor for ${draftPath}"]`);
+        await until(()=>document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`) && !window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`)).readOnly,20000);
+        const input=window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`));
         input.value="label changed_mapped_label:\n    return\n"; input.dispatchEvent(new Event("input",{bubbles:true}));
         checkpoint("draft-run-cancel"); await click("Run Game"); await click("Cancel");
         await until(()=>!find("Run Game").disabled,15000);

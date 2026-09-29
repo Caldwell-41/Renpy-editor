@@ -32,7 +32,7 @@ try {
         && document.querySelector("#host")?.getAttribute("data-source-busy") === "false",
       );
       const updatesBeforeSelection = await page.evaluate(() => window.__sourceBrowserEvidence.updates);
-      await page.locator(".source-editor").evaluate((element) => {
+      if(model === "rich"){await editor.focus();await editor.press("Home");await editor.press("ArrowRight");}else await page.locator(".source-editor").evaluate((element) => {
         const editor = element;
         editor.focus();
         editor.setSelectionRange(3, 3);
@@ -64,13 +64,15 @@ try {
   assert.ok(legacy.draftVersion > legacy.acceptedVersion);
   process.stdout.write(`source-browser-red: legacy-clean-assertion=false saves=${legacy.saves} flushes=${legacy.flushes} updates=${legacy.updates} dirty=${legacy.dirty}\n`);
 
-  const faithful = await exercise("faithful");
+  for (const mode of ["faithful","rich"]) {
+  const faithful = await exercise(mode);
   assert.match(faithful.acceptedText, /Changed in Chromium/);
   assert.equal(faithful.saves, 1);
   assert.equal(faithful.flushes, 0);
   assert.equal(faithful.dirty, false);
   assert.equal(faithful.draftVersion, faithful.acceptedVersion);
   process.stdout.write(`source-browser-green: faithful-clean-assertion=true saves=${faithful.saves} flushes=${faithful.flushes} updates=${faithful.updates} dirty=${faithful.dirty}\n`);
+  }
 } finally {
   await browser?.close();
   await server.close();

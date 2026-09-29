@@ -472,3 +472,30 @@ and existing Source draft leave flow as Close Project. The narrow desktop-only
 requires the core service to have no open project plus confirmed process cleanup before
 exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
 retain their existing independent harness behavior. OS termination still uses shutdown.
+
+
+## UI refresh: device state and editor adapter
+
+The UI remains vanilla TypeScript/Vite inside Tauri 2. Catalogue, settings, import,
+progress, icons and Source adapter modules separate presentation from the existing
+transaction controller. Bundled CodeMirror supplies selection/history, highlighting
+and search; it does not write files. Its raw-source state retains mixed newline bytes
+in a persistent text tree and restores them with undo effects. The existing Source
+controller still owns draft generations, barriers, explicit acceptance and conflicts.
+CodeMirror style injection uses Tauri's style nonce; CSP is not widened.
+
+Versioned `preferences.read/write` operations use the existing anchored application
+state root and atomic replacement helper, with bounded validated theme/density/font
+and per-project layout fields. They never edit a game. Invalid preference data falls
+back to defaults; failed writes remain visible in Settings.
+
+`core_request` optionally accepts a Tauri progress channel for SDK install/project
+create. A scoped observer publishes ordered actual stage/byte events; the terminal
+response alone owns success/failure. SDK reads use a heap buffer and retain checksum,
+size and extraction protections. Unknown byte totals stay indeterminate.
+
+Multiple-file selection and native drop obtain the same import authorities as the
+single-file picker. The main-window drop captures its project session before worker
+hashing and rechecks ownership before grants are registered. The renderer receives
+opaque grants and display metadata, never authority from a supplied arbitrary path.
+Each staged import still uses the existing typed transaction operation.

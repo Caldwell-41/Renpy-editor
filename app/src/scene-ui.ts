@@ -1,3 +1,4 @@
+import { layoutFor, saveLayout } from "./preferences.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -161,6 +162,7 @@ export interface RecoveryItem {
 export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 
 export interface SceneActions {
+  readonly layoutKey?: string;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
@@ -193,6 +195,7 @@ const beatLabels: Record<BeatPayload["type"], string> = {
   customCode: "Custom Code",
 };
 
+function treeMenu(controls:HTMLElement):HTMLElement {const menu=document.createElement("details");menu.className="tree-menu";const toggle=document.createElement("summary");toggle.textContent="⋯";toggle.ariaLabel="Scene or chapter actions";menu.append(toggle,controls);return menu;}
 function button(label: string, className = "button secondary"): HTMLButtonElement {
   const element = document.createElement("button");
   element.type = "button";
@@ -261,6 +264,12 @@ function presentationUrl(media: MediaPresentation): string {
   return URL.createObjectURL(new Blob([bytes], { type: media.mimeType }));
 }
 
+const draftSettlers = new WeakMap<HTMLElement, () => Promise<boolean>>();
+export async function settleSceneDraft(root: HTMLElement): Promise<boolean> {
+  const host = root.matches(".scene-workspace") ? root : root.querySelector<HTMLElement>(".scene-workspace");
+  return host && draftSettlers.has(host) ? draftSettlers.get(host)!() : !hasSceneDraft(root);
+}
+
 export function renderSceneAuthoring(
   host: HTMLElement,
   treeHost: HTMLElement,
@@ -275,8 +284,22 @@ export function renderSceneAuthoring(
   const pendingImages = new Map<string, Promise<MediaPresentation>>();
   const audioUrls = new Set<string>();
   let disposed = false;
+  let writingFocus = false;
+  const previewObservers:ResizeObserver[]=[];
+  let saveDialogue: (()=>Promise<boolean>) | undefined;
+  let settling: Promise<boolean> | undefined;
+  let composing = false;
+  const settle = (): Promise<boolean> => {
+    if(settling)return settling;
+    if(!hasSceneDraft(host))return Promise.resolve(true);
+    if(composing || !saveDialogue){focusSceneDraft(host);return Promise.resolve(false);}
+    settling=saveDialogue().finally(()=>{settling=undefined;});return settling;
+  };
+  draftSettlers.set(host,settle);
 
   const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void): Promise<void> => {
+    if(disposed)return;
+    if(hasSceneDraft(host)&&["moveBeat","removeBeat","moveScene","deleteScene","deleteChapter","undo","redo"].includes(command.type)){actions.status("Complete or cancel the current edit first.","error");focusSceneDraft(host);return;}
     const before = model;
     actions.status("Saving…");
     try {
@@ -299,6 +322,7 @@ export function renderSceneAuthoring(
   };
 
   const draw = (): void => {
+    saveDialogue = undefined;previewObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
@@ -332,13 +356,13 @@ export function renderSceneAuthoring(
       const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete empty chapter ${chapter.displayName}`;
       remove.disabled = model.chapters.length === 1 || model.scenes.some((scene) => scene.chapterId === chapter.id);
       remove.addEventListener("click", () => confirmAction(chapterGroup, `Delete empty chapter “${chapter.displayName}”?`, () => mutate({ type: "deleteChapter", chapterId: chapter.id })));
-      tools.append(rename, up, down, remove); row.append(name, tools); chapterGroup.append(row);
+      tools.append(rename, up, down, remove); row.append(name, treeMenu(tools)); chapterGroup.append(row);
       const scenes = model.scenes.filter((scene) => scene.chapterId === chapter.id);
       scenes.forEach((scene, sceneIndex) => {
         const sceneRow = document.createElement("div"); sceneRow.className = `tree-scene-row${scene.id === selectedScene.id ? " selected" : ""}`;
         const open = button(scene.displayName, "tree-scene-open");
         if (scene.id === selectedScene.id) open.ariaCurrent = "page";
-        open.addEventListener("click", () => { if (scene.id !== selectedScene.id && draftGuard()) void mutate({ type: "selectScene", sceneId: scene.id }); });
+        open.addEventListener("click",()=>{if(scene.id!==selectedScene.id)void settle().then(ok=>{if(ok)void mutate({type:"selectScene",sceneId:scene.id});else actions.status("Complete or cancel this edit before changing scenes.","error");});});
         const controls = document.createElement("div"); controls.className = "tree-tools";
         const renameScene = button("Rename", "icon-button"); renameScene.ariaLabel = `Rename scene ${scene.displayName}`;
         renameScene.addEventListener("click", () => inlineName(sceneRow, "Scene name", scene.displayName, (displayName) => mutate({ type: "renameScene", sceneId: scene.id, displayName })));
@@ -356,7 +380,7 @@ export function renderSceneAuthoring(
           const move = button("Move", "icon-button"); move.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: target.value, direction: null, expectedSourceRevision: scene.sourceRevision }));
           controls.append(target, move);
         }
-        sceneRow.append(open, controls); chapterGroup.append(sceneRow);
+        sceneRow.append(open, treeMenu(controls)); chapterGroup.append(sceneRow);
       });
       const newScene = button("+ New Scene", "tree-new-scene");
       newScene.addEventListener("click", () => inlineName(chapterGroup, "Scene name", "New Scene", (displayName) => mutate({ type: "createScene", chapterId: chapter.id, displayName })));
@@ -432,10 +456,13 @@ export function renderSceneAuthoring(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind); canvas.append(overlay); }
+    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} canvas.append(overlay); }
     surround.append(canvas); preview.append(header, surround);
+    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);previewObservers.push(observer);}
 
-    const details = document.createElement("div"); details.className = "preview-details";
+    const details = document.createElement("div"); details.className = "preview-details scene-context-inspector";details.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
+    const toggle=button("Scene details");toggle.ariaExpanded=String(!details.hidden);toggle.addEventListener("click",()=>{details.hidden=!details.hidden;toggle.ariaExpanded=String(!details.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!details.hidden});});header.append(toggle);
+    const close=button("Close details");close.addEventListener("click",()=>{details.hidden=true;toggle.ariaExpanded="false";toggle.focus();if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:false});});details.append(close);
     const provenance = document.createElement("div"); provenance.className = "preview-provenance";
     const provenanceHeading = document.createElement("h3"); provenanceHeading.textContent = "Visible state and provenance"; provenance.append(provenanceHeading);
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
@@ -470,7 +497,8 @@ export function renderSceneAuthoring(
     const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd));
     const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "undo" }); });
     const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "redo" }); });
-    history.append(viewSource, undo, redo); header.append(titleBlock, history); host.append(header);
+    const focus = button(writingFocus ? "Show preview" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);focus.textContent=writingFocus?"Show preview":"Writing focus";focus.ariaPressed=String(writingFocus);});
+    history.append(viewSource, focus, undo, redo); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
       const heading = document.createElement("h2"); heading.textContent = "Source projection unavailable";
@@ -487,8 +515,13 @@ export function renderSceneAuthoring(
     const heading = document.createElement("h2"); heading.textContent = "Beats";
     const add = button("Add Beat", "button primary"); add.disabled = scene.sourceConflict;
     add.addEventListener("click", () => openNewBeat(scene));
-    const allocation = document.createElement("input"); allocation.type = "range"; allocation.min = "35"; allocation.max = "70"; allocation.value = "52"; allocation.ariaLabel = "Preview vertical allocation";
-    allocation.addEventListener("input", () => { stack.style.setProperty("--preview-share", `${allocation.value}fr`); stack.style.setProperty("--beats-share", `${100 - Number(allocation.value)}fr`); });
+    const allocation = document.createElement("input"); allocation.type = "range"; allocation.min = "20"; allocation.max = "70"; allocation.value = String(actions.layoutKey ? layoutFor(actions.layoutKey).previewPercent ?? 34 : 34); allocation.ariaLabel = "Preview vertical allocation";
+    const resize=():void=>{stack.style.setProperty("--preview-share",`${allocation.value}fr`);stack.style.setProperty("--beats-share",`${100-Number(allocation.value)}fr`);};resize();
+    allocation.addEventListener("input",resize);allocation.addEventListener("change",()=>{if(actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:Number(allocation.value)});});
+    const divider=document.createElement("div");divider.className="preview-divider";divider.role="separator";divider.tabIndex=0;divider.ariaLabel="Resize scene preview";divider.setAttribute("aria-orientation","horizontal");
+    const adjust=(value:number,remember=false):void=>{allocation.value=String(Math.min(70,Math.max(20,Math.round(value))));resize();divider.setAttribute("aria-valuenow",allocation.value);if(remember&&actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:Number(allocation.value)});};
+    divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(Number(allocation.value)+(e.key==="ArrowUp"?-2:2),true);}});
+    let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(Number(allocation.value),true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
     const tools = document.createElement("div"); tools.className = "beats-tools"; tools.append(labelled("Preview size", allocation), add);
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
@@ -497,7 +530,7 @@ export function renderSceneAuthoring(
       const compact = document.createElement("div"); compact.className = "beat-compact";
       const select = button(`${index + 1}. ${beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
       const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beatSummary(beat.payload, model);
-      select.append(summary); select.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = selectedBeatId === beat.id ? undefined : beat.id; draw(); } });
+      select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
       const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || beat.protected || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
       up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
@@ -519,7 +552,7 @@ export function renderSceneAuthoring(
       protectedPanel.append(explanation, source); card.append(protectedPanel); return;
     }
     const editor = buildBeatEditor(model, beat.payload);
-    const panel = editor.host; panel.classList.add("expanded-beat");
+    const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "choice") {
       const createDestination = button("Create New Scene", "button secondary");
       createDestination.addEventListener("click", () => {
@@ -547,25 +580,32 @@ export function renderSceneAuthoring(
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { selectedBeatId = undefined; draw(); });
     const commit = button("Commit Beat", "button primary"); commit.disabled = scene.sourceConflict;
-    const save = async (continueDialogue: boolean): Promise<void> => {
+    const save = async (continueDialogue: boolean): Promise<boolean> => {
+      if(composing)return false;
+      let saved=false;
       try {
         const payload = editor.read();
+        panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=true);
         if (continueDialogue && payload.type === "dialogue") {
           const oldIds = new Set(model.scenes.find((item) => item.id === scene.id)?.beats.map((item) => item.id));
           await mutate({ type: "continueDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, characterId: payload.characterId, text: payload.text }, (_before, next) => {
-            selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
+            saved=true;selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
           });
         } else {
-          await mutate({ type: "updateBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, beat: payload }, () => { selectedBeatId = undefined; });
+          await mutate({ type: "updateBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, beat: payload }, () => { saved=true;selectedBeatId = undefined; });
         }
       } catch (error) {
         actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
         editor.focus();
       }
+      if(!saved&&panel.isConnected){panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=false);editor.focus();}
+      return saved;
     };
-    commit.addEventListener("click", () => void save(false));
+    if(beat.payload.type==="dialogue")saveDialogue=()=>save(false);
+    editor.primary.addEventListener("compositionstart",()=>{composing=true;});editor.primary.addEventListener("compositionend",()=>{composing=false;});
+    commit.addEventListener("click", () => { if(!settling) { settling=save(false).finally(()=>{settling=undefined;}); } });
     if (beat.payload.type === "dialogue") editor.primary.addEventListener("keydown", (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void save(true); }
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling)settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
@@ -599,6 +639,7 @@ export function renderSceneAuthoring(
   draw();
   return () => {
     disposed = true;
+    draftSettlers.delete(host);previewObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     pendingImages.clear();
     for (const image of imageCache.values()) URL.revokeObjectURL(image.url);

@@ -1,3 +1,6 @@
+import { layoutFor, saveLayout } from "./preferences.ts";
+import { sourceEditor, type SourceEditor } from "./source-editor.ts";
+import type { EditorState } from "@codemirror/state";
 import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
 export type SourceFileState = "clean" | "dirty" | "conflict" | "invalid" | "readOnly" | "unavailable";
 
@@ -97,6 +100,7 @@ export interface SourceWorkspaceController {
 }
 
 export interface SourceActions {
+  readonly layoutKey?: string;
   readonly open: (target: SourceTarget) => Promise<SourceDocument>;
   readonly update: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly text: string; readonly selectionStart: number; readonly selectionEnd: number }) => Promise<SourceDocument>;
   readonly save: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number }) => Promise<SourceDocument>;
@@ -137,12 +141,7 @@ function button(label: string, className = "button secondary"): HTMLButtonElemen
 }
 
 function stateLabel(state: SourceFileState): string {
-  return ({ clean: "Clean", dirty: "Pending validation", conflict: "Conflict", invalid: "Invalid Source · Scene stale", readOnly: "Read-only", unavailable: "Unavailable" })[state];
-}
-
-function lineNumbers(text: string): string {
-  const count = Math.max(1, text.split("\n").length);
-  return Array.from({ length: count }, (_, index) => String(index + 1)).join("\n");
+  return ({ clean: "Clean", dirty: "Unsaved Source draft", conflict: "Conflict", invalid: "Invalid Source · Scene stale", readOnly: "Read-only", unavailable: "Unavailable" })[state];
 }
 
 function focusableWithin(host: HTMLElement): HTMLElement[] {
@@ -184,7 +183,10 @@ export function renderSourceWorkspace(
   const controllerId = ++nextControllerId;
   let inventory = initialInventory;
   let current: SourceDocument | undefined;
-  let editor: HTMLTextAreaElement | undefined;
+  let editor: SourceEditor | undefined;
+  let editorPath: string | undefined;
+  const retainedEditors = new Map<string,EditorState>();
+  const openTabs = new Set<string>();
   let displayedReview: SourceDocument | undefined;
   let disposed = false;
   let documentGeneration = 0;
@@ -278,7 +280,8 @@ export function renderSourceWorkspace(
     const heading = document.createElement("p");
     heading.className = "eyebrow";
     heading.textContent = "Source files";
-    treeHost.append(heading);
+    const search=document.createElement("input");search.type="search";search.placeholder="Find a file…";search.ariaLabel="Find a file";search.addEventListener("input",()=>{treeHost.querySelectorAll<HTMLElement>(".source-file-row").forEach(row=>row.hidden=!(row.textContent??"").toLowerCase().includes(search.value.toLowerCase()));});
+    treeHost.append(heading,search);
     for (const file of inventory.files) {
       const row = document.createElement("div");
       row.className = `source-file-row${current?.path === file.path ? " selected" : ""}`;
@@ -387,7 +390,7 @@ export function renderSourceWorkspace(
     if (reviewNotice) reviewNotice.hidden = !staleReview;
     const badge = host.querySelector<HTMLElement>(".source-document-state");
     if (badge) {
-      badge.textContent = localPending ? "Pending validation" : stateLabel(current.state);
+      badge.textContent = localPending && latestSnapshot?.text !== current.text ? "Unsaved Source draft" : stateLabel(current.state);
       badge.dataset.state = localPending ? "dirty" : current.state;
     }
     const save = host.querySelector<HTMLButtonElement>('button[data-source-action="save"]');
@@ -421,7 +424,7 @@ export function renderSourceWorkspace(
 
   const captureSaveIntent = (origin: "keyboard" | "toolbar", requireEditingContext: boolean): SourceSaveCapture => {
     if (disposed || !current || !editor) return { kind: "notApplicable" };
-    if (requireEditingContext && document.activeElement !== editor) return { kind: "notApplicable" };
+    if (requireEditingContext && !editor.hasFocus()) return { kind: "notApplicable" };
     if (modalBlocked || host.querySelector('[aria-modal="true"]')) return { kind: "blocked", message: "Finish the open dialog before saving." };
     if (barriers.size > 0) return { kind: "blocked", message: "Source persistence is already in progress." };
     const snapshot = captureForSettlement();
@@ -698,6 +701,7 @@ export function renderSourceWorkspace(
           const next = await actions.open(target);
           if (disposed || generation !== documentGeneration) return;
           current = next;
+          openTabs.add(next.path);
           inputSequence += 1;
           acknowledgedSequence = inputSequence;
           latestRetentionFailure = undefined;
@@ -758,6 +762,7 @@ export function renderSourceWorkspace(
   };
 
   const drawDocument = (): void => {
+    if(editor && editorPath){const state=editor.state();if(state)retainedEditors.set(editorPath,state);editor.destroy();}
     host.replaceChildren();
     editor = undefined;
     if (!current) {
@@ -767,6 +772,10 @@ export function renderSourceWorkspace(
       host.append(empty);
       return;
     }
+    const tabs=document.createElement("div");tabs.className="source-tabs";tabs.role="tablist";
+    openTabs.forEach(path=>{const group=document.createElement("div");group.className="source-tab-group";const tab=button(`${path.split("/").at(-1)}${inventory.files.find(f=>f.path===path)?.dirty?" ●":""}`,"source-tab");tab.role="tab";tab.ariaSelected=String(path===current?.path);tab.addEventListener("click",()=>void openFile({path}));
+      const close=button("×","text-button source-tab-close");close.ariaLabel=`Close ${path.split("/").at(-1)} tab; keep its draft`;
+      close.addEventListener("click",()=>void(async()=>{let transition:Awaited<ReturnType<typeof controller.prepareTransition>>;try{transition=await controller.prepareTransition("navigation");if(!transition)return;openTabs.delete(path);if(current?.path===path){const next=[...openTabs].at(-1);if(next){transition.release();await openFile({path:next});return;}current=undefined;}drawDocument();}catch(error){actions.status(error instanceof Error?error.message:"Tab could not close","error");}finally{transition?.release();}})());group.append(tab,close);tabs.append(group);});host.append(tabs);
     const header = document.createElement("header");
     header.className = "source-header";
     const title = document.createElement("div");
@@ -797,7 +806,9 @@ export function renderSourceWorkspace(
     refresh.addEventListener("click", () => {
       if (current) { const selection = editor ? sourceTextareaSnapshot(current,editor) : current; void openFile({ path: current.path, selectionStart: selection.selectionStart, selectionEnd: selection.selectionEnd }); }
     });
-    toolbar.append(save, discard, refresh);
+    const find=button("Find / replace");find.addEventListener("click",()=>editor?.find());
+    const context=button("Scene context");context.ariaExpanded=String(!!actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);context.addEventListener("click",()=>{const mapping=host.querySelector<HTMLElement>(".source-mapping");if(mapping){mapping.hidden=!mapping.hidden;context.ariaExpanded=String(!mapping.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!mapping.hidden});}});
+    toolbar.append(save, discard, refresh, find, context);
     host.append(toolbar);
     const draftWarning = document.createElement("p");
     draftWarning.className = "source-draft-warning";
@@ -863,30 +874,8 @@ export function renderSourceWorkspace(
 
     const editorShell = document.createElement("div");
     editorShell.className = "source-editor-shell";
-    const gutter = document.createElement("pre");
-    gutter.className = "source-line-numbers";
-    gutter.ariaHidden = "true";
-    gutter.textContent = lineNumbers(current.text ?? "");
-    const text = document.createElement("textarea");
-    text.className = "source-editor";
-    text.spellcheck = false;
-    text.wrap = "off";
-    text.value = textareaText(current.text ?? "");
-    text.readOnly = barriers.size > 0 || !current.editable;
-    text.ariaLabel = `Source editor for ${current.path}`;
-    text.selectionStart = Math.min(textareaOffset(current.text ?? "",current.selectionStart), text.value.length);
-    text.selectionEnd = Math.min(textareaOffset(current.text ?? "",current.selectionEnd), text.value.length);
-    text.addEventListener("scroll", () => { gutter.scrollTop = text.scrollTop; });
-    text.addEventListener("input", () => {
-      if (barriers.size > 0) return;
-      gutter.textContent = lineNumbers(text.value);
-      recordEditorEvent();
-    });
-    for (const event of ["select", "keyup", "mouseup"]) {
-      text.addEventListener(event, () => {
-        if (barriers.size === 0) recordEditorEvent();
-      });
-    }
+    const text=sourceEditor(editorShell,{rawText:current.text??"",newline:current.newline,text:textareaText(current.text??""),from:textareaOffset(current.text??"",current.selectionStart),to:textareaOffset(current.text??"",current.selectionEnd),readOnly:barriers.size>0||!current.editable,label:`Source editor for ${current.path}`,change:()=>{if(barriers.size===0)recordEditorEvent();},retained:retainedEditors.get(current.path)});
+    editorPath=current.path;
     editor = text;
     latestSnapshot = {
       controllerId,
@@ -896,11 +885,11 @@ export function renderSourceWorkspace(
       expectedBaseRevision: current.baseRevision,
       ...sourceTextareaSnapshot(current,text),
     };
-    editorShell.append(gutter, text);
     host.append(editorShell);
 
     const mapping = document.createElement("section");
     mapping.className = "source-mapping";
+    mapping.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
     const mappingHeading = document.createElement("h2");
     mappingHeading.textContent = "Mapped ranges";
     mapping.append(mappingHeading);
@@ -954,6 +943,7 @@ export function renderSourceWorkspace(
     dispose: () => {
       if (disposed) return;
       disposed = true;
+      editor?.destroy();retainedEditors.clear();
       documentGeneration += 1;
       unregisterController?.();
       unregisterController = undefined;

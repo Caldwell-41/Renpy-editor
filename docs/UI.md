@@ -1,11 +1,57 @@
 # UI checkpoint
 
+## Accepted redesign direction — 2026-09-29
+
+The [UI design review and implementation plan](tasks/active/ui-design-review.md)
+records the user-accepted replacement designs for the workspace, Settings, Welcome
+and creation wizard. They supersede the initial dark/indigo palette below: Dark uses
+warm charcoal/copper, Light uses paper/deep teal, with Follow system as the default.
+Game preview colours remain independent. The redesign also requires optional
+inspectors, remembered panel layout, truthful operation progress and status feedback
+that does not move editing content. Settings is available without an open project.
+
+The user authorized implementation on 2026-09-30. The implementation now includes
+both palettes, a stable shell/footer, Settings, onboarding progress and the redesigned
+workspaces. Qualification status and exact tested inputs belong in CURRENT/HANDOVER
+and the linked task; implementation does not imply final native/human acceptance.
+
+### Implemented refresh behaviour
+
+- Settings separates Application from Current project. Wide windows use labelled
+  categories; narrow windows use a category dropdown. Theme, interface size, Source
+  size and remembered/reset layouts save in device-local preferences. Current project
+  shows pinned version/resolution and links to the existing SDK/trust controls.
+- The shell keeps Save, Validate, Run and Stop available. Longer runtime state and
+  diagnostics live in an optional drawer. Fixed footer and Source-warning regions
+  preserve editor geometry; routine saving/loading labels are coalesced. Dirty Source
+  says **Unsaved Source draft**, not that validation is repeatedly running.
+- Welcome includes recent-project search, last-opened dates and remove-from-recents.
+  The four-step wizard preserves folder name, custom resolution and optional Git's
+  existing default. SDK downloads show measured bytes/percentage only when total size
+  is known; creation shows actual stages. Failure retains inputs, and a created project
+  that could not open gets an Open action rather than another Create action.
+- Story uses a letterboxed preview above Beats, a keyboard/pointer divider, optional
+  context and writing-focus mode. Dialogue commits on Cmd/Ctrl+Enter; Shift with that
+  shortcut commits and continues. Navigation settles pending dialogue through the
+  existing transaction path; IME composition and failed commits preserve input.
+- Source uses bundled CodeMirror with tabs, Ren'Py highlighting and current-file
+  find/replace. Closing a tab retains its session draft. Selection, mixed newline bytes,
+  grouped undo/redo and explicit Save remain owned by the existing Source controller.
+- Characters and Assets provide filterable grid/list cards and optional details;
+  Variables provides a table and known Set Variable Beat assignments. No general
+  source-reference index or new variable type/rename semantics are implied.
+- Native multiple-file selection/drop stages each file's kind and metadata. Imports
+  use existing grants/transactions sequentially; failed rows remain and successful
+  files are not retried. Leaving unsubmitted catalogue forms/staging asks whether to
+  retain editing or discard those inputs. Already-started operations retain existing
+  session/generation completion rules. New Assets audio preview stays disabled;
+  existing explicit Story audition remains available.
+
 ## Design intent
 
 Project Loomlight is a restrained, professional writing and game-authoring tool.
 Routine VN authoring should be faster in the Scene workspace than by opening modal
-property forms, while the generated source remains visible and ordinary. The initial
-theme is dark with a planned light theme; meaning never depends on colour alone.
+property forms, while the generated source remains visible and ordinary. The editor follows system appearance by default; meaning never depends on colour alone.
 Panels are keyboard reachable, resizable, collapsible, and compatible with
 screen-reader semantics where the chosen desktop/webview stack permits them.
 
@@ -15,11 +61,11 @@ Git status/diff/checkpoint is a deferred optional supporting surface, outside Ph
 UI Designer and Timeline are later major workspaces and must not appear as functional
 Phase 1 features; they may be omitted or clearly labelled as future work.
 
-## Visual design language — Quiet Studio Dark
+## Visual design language — Quiet Studio
 
 Loomlight should look like a carefully designed native creative application, not a
 web dashboard, generic IDE skin, or stylised AI-product mockup. The working visual
-direction is **Quiet Studio Dark**: neutral charcoal surfaces, restrained muted indigo
+direction is **Quiet Studio**: warm charcoal/copper or paper/teal surfaces, a restrained
 accent, medium density, strong typography, subtle separation between regions, and very
 little decorative chrome. Narrative content, the game preview, and the selected Beat
 must dominate attention; branding and shell furniture recede once a project is open.
@@ -32,8 +78,7 @@ independent styling.
 ### Design tokens and theme architecture
 
 Do not hard-code dark-theme colours directly into components. Use semantic tokens from
-the production scaffold so a later light theme can be implemented without rewriting
-components. The initial system should cover at least:
+the shared theme system so either palette works without rewriting components. The initial system should cover at least:
 
 ```text
 surface.app
@@ -61,17 +106,16 @@ status.info
 status.partial
 ```
 
-The initial accent is a muted indigo/blue-violet used sparingly for focus, selection,
+The accent is copper in Dark and deep teal in Light, used sparingly for focus, selection,
 active tabs, links, and rare primary actions. Semantic status colours are reserved for
 meaning such as saved/success, warning/partial state, error/conflict, and information;
 every status also has text and/or an icon so colour is never the sole signal.
 
-Light-theme tokens and component assumptions should exist from the start, but Phase 1
-polishes the dark theme first. The implementation must avoid assumptions such as
+Both accepted palettes are maintained together. The implementation must avoid assumptions such as
 literal white text on literal `#222` backgrounds.
 
 The Phase 1A implementation defines these semantics as CSS custom properties under an
-explicit `data-theme` selector. Both dark and provisional light value sets exist;
+explicit `data-theme` selector. Both dark and light value sets exist;
 components consume semantic variables only. Shared primitives also define the system UI
 stack, `SFMono-Regular`/Consolas/Liberation Mono/Menlo Source stack, 4 px and 6 px
 radii, one restrained preview elevation, visible focus, and a reduced-motion override.
@@ -121,7 +165,7 @@ marketing taglines, and ornamental brand elements should largely disappear.
 Beats are Loomlight's most distinctive recurring component. Do not render every Beat
 as a large independent rounded card. Use compact rows with a restrained type/status
 rail or icon, generous enough line height for dialogue, and stronger expansion only for
-the selected Beat. A selected Beat may use the primary indigo rail/focus treatment;
+the selected Beat. A selected Beat may use the primary accent rail/focus treatment;
 inactive Beats remain neutral.
 
 Different Beat types use consistent line icons and textual labels rather than a rainbow
@@ -316,8 +360,8 @@ Dialogue is the highest-frequency action and must be efficient:
 - speaker is searchable/keyboard accessible;
 - narration is an explicit mode rather than a fake Character;
 - normal `Enter` creates a newline;
-- `Ctrl/Cmd+Enter` commits the current natural edit burst and creates the next Dialogue
-  beat;
+- `Ctrl/Cmd+Enter` commits the current natural edit burst;
+- `Shift+Ctrl/Cmd+Enter` commits and creates the next Dialogue beat;
 - the current speaker may carry forward as a convenience and remains immediately
   changeable;
 - typing is grouped into a short-lived edit buffer so one natural typing burst becomes
@@ -598,8 +642,8 @@ failure; browser prompts are not part of the supporting authoring flow.
 Phase 1E applies the same ordering to Scene editors. A dirty inline Beat buffer has
 explicit Commit/Cancel actions, blocks navigation that would discard it, and makes
 Flush say that editor input remains unsubmitted. Ctrl/Cmd+Enter on Dialogue submits one
-natural semantic operation and creates the next Dialogue; ordinary Enter remains a
-newline. Failed validation retains text and restores focus. Scene switching, workspace
+natural semantic operation; adding Shift continues with the next Dialogue. Ordinary
+Enter remains a newline. Failed validation retains text and restores focus. Scene switching, workspace
 switching, and close cannot silently convert draft text into persisted work.
 
 Phase 1F Source drafts follow the same session/view generation rules but remain
@@ -621,7 +665,7 @@ blocked; acknowledging a warning or deleting a journal is not an available resol
 
 ### 1G.1 Branches interaction contract
 
-Branches displays accepted core flow with an alphabetical deterministic grid, directed
+Branches displays accepted core flow with an deterministic layered layout (with bounded placement for cycles and disconnected scenes), directed
 routes, an entry badge only when runnable `start` proves it, and separate partial/stale
 notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
 or labelled selectors; duplicate option text remains separate. Arrow keys pan the
@@ -675,8 +719,9 @@ Source scope remain non-navigable. Static Source/Branches findings stay separate
 SDK validation, and an empty diagnostic list cannot turn process failure into success.
 
 Diagnostic navigation also translates retained Source CRLF/UTF-16 offsets to the
-textarea's LF offsets. Selection-only observations preserve original text, including
-mixed line endings; changed input retains untouched prefixes/suffixes. This uses the
+editor's normalized LF offsets. Selection-only observations preserve original text,
+including mixed line endings; rich-editor transactions patch only changed ranges and
+persistent raw-text history preserves exact bytes through grouped undo/redo. This uses the
 existing Source controller and does not silently accept or rewrite source on navigation.
 
 Native main-window close and application quit route into the same Runtime Stop/Cancel

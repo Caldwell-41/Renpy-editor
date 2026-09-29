@@ -93,6 +93,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
     else if (operation === "character.create") { const pending = deferred<unknown>(); characterCreates.push(pending); result = await pending.promise; }
     else if (operation === "variable.create" && delayNextVariableCreate) { delayNextVariableCreate = false; const pending = deferred<unknown>(); variableCreates.push(pending); result = await pending.promise; }
     else if (operation === "variable.create" && failVariable) { failVariable = false; return { protocolVersion: 1, requestId: "test", ok: false, error: { code: "INVALID_PAYLOAD", message: "Variable rejected" } }; }
+    else if(operation === "asset.chooseImports"){importChoiceCount+=1;result={choices:[],cancelled:true};}
     else if (operation === "asset.chooseImport") {
       importChoiceCount += 1;
       result = importChoiceCount === 1
@@ -188,6 +189,8 @@ test("supporting authoring ignores stale completions and reports persistence tru
   delayNextStatus = true;
   click("Variables");
   await tick();
+  click("Discard and leave");
+  await tick();
   delayNextVariableCreate = true;
   enter(labelledControl<HTMLInputElement>("Technical name (fixed after creation)"), "overlap_success");
   const flushCountBeforeSuccess = calls.filter((call) => call.operation === "project.flush").length;
@@ -240,18 +243,18 @@ test("supporting authoring ignores stale completions and reports persistence tru
   await tick();
   click("Assets");
   await tick();
+  click("Discard and leave");
+  await tick();
   flushes[1]!.resolve(undefined);
   await tick();
   await tick();
   assert.match(document.querySelector("h1")?.textContent ?? "", /Assets/);
   assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
-  enter(labelledControl<HTMLInputElement>("Technical name"), "theme");
-  enter(labelledControl<HTMLInputElement>("Display name"), "Theme");
-  click("Choose and import…");
-  await tick();
-  const importButton = [...document.querySelectorAll("button")].find((item) => item.textContent === "Choose and import…");
-  assert.equal(importButton?.disabled, false);
-  assert.equal(labelledControl<HTMLInputElement>("Technical name").value, "theme");
+  const importCount=calls.filter(c=>c.operation==="asset.import").length;
+  click("Choose files…");await tick();
+  const importButton=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…");
+  assert.equal(importButton?.disabled,false);
+  assert.equal(calls.filter(c=>c.operation==="asset.import").length,importCount,"cancel does not import anything");
 
   click("Repair Ren'Py asset names");
   await tick();

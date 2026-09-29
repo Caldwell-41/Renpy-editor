@@ -1,5 +1,43 @@
 # Current outcome handover
 
+## UI implementation continuation — 2026-09-30
+
+The user explicitly authorized building the accepted UI. Continue the same outcome
+and chat on `feature/phase-1g-branches-runtime`, starting from `119cc75`. Preserve all
+local changes and prior Phase 1G work. No merge, conflict resolution or new feature
+phase is selected. The [UI task](../tasks/active/ui-design-review.md) and saved
+[mockup index](../design/ui-refresh/README.md) own scope and visual references.
+
+The refresh candidate is implemented and locally verified, ready for the approved
+single final Windows/macOS production dispatch. Publication/dispatch identity will be
+recorded below once confirmed. No merge or integrated-tree qualification is selected.
+
+Local evidence: 67 frontend tests pass; final build/typecheck and Rust formatting pass;
+real Chromium retains the rejecting legacy Source control and passes textarea/CodeMirror
+Save/selection, mapped selection, mixed-newline deletion/grouped undo/redo, shipped smoke
+interactions, both themes, all workspaces and compact/laptop/1440p layouts. Routine core
+passed 177 tests (39 existing ignored, 3 separately selected); the subsequently added
+written-byte progress test passed separately. Desktop boundary test passed 1/0 ignored.
+Official SDK lifecycle and download-handoff gates each passed 1/0 ignored. The first
+lifecycle attempt failed under filesystem sandbox restrictions; retain that failure as
+an environment-limited attempt, not a product pass.
+
+One early macOS debug proof build and one disposable native launch passed CSP styles,
+real draft IPC, stable status geometry, Settings return, preferences and cleanup. It
+predates final refinements and is not final package qualification. Windows interactive
+access is unverified. Native physical keyboard/IME, actual OS drag/drop and live
+first-install/create progress remain explicit evidence gaps; the new offline/channel
+and synthetic native tests do not close those rows. Audit package output before any
+final human acceptance. Existing prior Phase 1G acceptance remains separate.
+
+Toolchains: source `.toolchains/enter-macos.sh` (Node24.19/Rust1.90/pinned SDK8.5.3).
+Temporary captures and logs live under ignored `.toolchains/reports/ui-refresh*`.
+Do not commit host paths/logs/SDKs. Existing mockups are unchanged repository assets.
+The prior delivery handover below is historical scope/evidence, not a stop instruction
+for this approved implementation. Publish coherent code/docs only after verification.
+
+## Preserved Phase 1G delivery handover
+
 **Prepared:** 2026-09-28. **Repository:** Caldwell-41/Renpy-editor.
 **Branch:** feature/phase-1g-branches-runtime.
 **Draft PR:** [#17](https://github.com/Caldwell-41/Renpy-editor/pull/17), open/conflicting.

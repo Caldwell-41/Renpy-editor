@@ -133,6 +133,7 @@ fn core_request(
     app: tauri::AppHandle,
     state: tauri::State<'_, DesktopState>,
     request: Value,
+    on_progress: Option<tauri::ipc::JavaScriptChannelId>,
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
@@ -175,6 +176,8 @@ fn core_request(
             json!({"recorded":true}),
         ));
     }
+    let on_progress = on_progress
+        .map(|id| id.channel_on::<_, loomlight_core::progress::Progress>(window.as_ref().clone()));
     let smoke_enabled = std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1");
     let operation = request.get("operation").and_then(Value::as_str);
     if smoke_enabled && operation == Some("probe.smokeCheckpoint") {
@@ -282,9 +285,16 @@ fn core_request(
             .ok_or("Desktop lifecycle state is unavailable.")?;
         if matches!(
             operation.as_str(),
-            "project.chooseParent" | "sdk.browse" | "project.openPicker" | "asset.chooseImport"
+            "project.chooseParent"
+                | "sdk.browse"
+                | "project.openPicker"
+                | "asset.chooseImport"
+                | "asset.chooseImports"
         ) {
-            let asset = operation == "asset.chooseImport";
+            let asset = matches!(
+                operation.as_str(),
+                "asset.chooseImport" | "asset.chooseImports"
+            );
             if !(if asset {
                 validated.payload.len() == 1 && session_id.is_some()
             } else {
@@ -311,6 +321,35 @@ fn core_request(
                 Err(error) => return Ok(loomlight_core::lifecycle_failure(request_id, error)),
             };
             // Native UI never owns the lifecycle service while waiting for a choice.
+            if operation == "asset.chooseImports" {
+                let paths = rfd::FileDialog::new()
+                    .set_title("Choose assets")
+                    .add_filter(
+                        "Images and audio",
+                        &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
+                    )
+                    .pick_files();
+                return Ok(host
+                    .complete_dialog(request_id.clone(), before, |service| {
+                        let Some(paths) = paths else {
+                            return CoreResponse::success(
+                                request_id.clone(),
+                                json!({"choices":[],"cancelled":true}),
+                            );
+                        };
+                        CoreResponse::success(
+                            request_id.clone(),
+                            register_import_batch(service, &paths),
+                        )
+                    })
+                    .unwrap_or_else(|_| {
+                        CoreResponse::failure(
+                            request_id,
+                            "RUNTIME_BUSY",
+                            "Another request is in progress.",
+                        )
+                    }));
+            }
             let path = match operation.as_str() {
                 "asset.chooseImport" => rfd::FileDialog::new()
                     .set_title("Choose image or audio asset")
@@ -361,7 +400,18 @@ fn core_request(
                 )
             })
         } else {
-            host.dispatch(request, smoke_enabled)
+            if matches!(operation.as_str(), "sdk.install" | "project.create") {
+                loomlight_core::progress::scoped(
+                    move |update| {
+                        if let Some(channel) = &on_progress {
+                            let _ = channel.send(update);
+                        }
+                    },
+                    || host.dispatch(request, smoke_enabled),
+                )
+            } else {
+                host.dispatch(request, smoke_enabled)
+            }
         }
     };
     let report_disposition = smoke_report_disposition(smoke_enabled, is_smoke_report, &response);
@@ -434,6 +484,27 @@ fn core_request(
     Ok(response)
 }
 
+fn register_import_batch(service: &mut LifecycleService, paths: &[std::path::PathBuf]) -> Value {
+    let mut choices = Vec::new();
+    let mut errors = Vec::new();
+    if paths.len() > 32 {
+        errors.push(
+            "Only the first 32 files were selected. Import the remaining files in another batch."
+                .to_owned(),
+        );
+    }
+    for path in paths.iter().take(32) {
+        match service.authoring_select_import(path) {
+            Ok(choice) => choices.push(choice),
+            Err(_) => errors.push(format!(
+                "{} could not be selected. Check its format and availability.",
+                path.file_name().unwrap_or_default().to_string_lossy()
+            )),
+        }
+    }
+    json!({"choices":choices,"errors":errors})
+}
+
 fn main() {
     let unauthorised_denied = Arc::new(AtomicBool::new(false));
     tauri::Builder::default()
@@ -451,7 +522,7 @@ fn main() {
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
                 if data.exists() { return Err("probe destination already exists".into()); }
-                if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                if matches!(case.as_str(), "branches-performance" | "branches-interactive" | "ui-refresh") {
                     LifecycleService::prepare_branches_ui_probe(data).map_err(std::io::Error::other)?
                 } else {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("probe SDK archive required")?;
@@ -506,12 +577,12 @@ fn main() {
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(2));
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
-                    if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                    if case == "ui-refresh" { main.eval(include_str!("ui_refresh_probe.js")).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
                         main.eval(include_str!("branches_ui_probe.js")).expect("branches probe injection");
                     } else {
-                        main.eval(include_str!("runtime_ui_probe.js")).expect("runtime probe injection");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("runtime_ui_probe.js"))).expect("runtime probe injection");
                     }
                     let limit = if case == "branches-interactive" { 900 } else { 300 };
                     while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
@@ -571,7 +642,7 @@ fn main() {
                         "Object.defineProperty(window, '__loomlightScaffoldSmokeMode', { value: true, configurable: false, enumerable: false, writable: false });",
                     )
                     .expect("smoke mode injection must succeed");
-                    main.eval(include_str!("smoke_probe.js"))
+                    main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("smoke_probe.js")))
                         .expect("main smoke probe injection must succeed");
                 });
                 thread::spawn(|| {
@@ -586,6 +657,32 @@ fn main() {
             Ok(())
         })
         .on_window_event(|window,event| {
+            if let tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop {paths,..})=event {
+                if window.label()=="main" {
+                    let host=window.state::<DesktopState>().0.lock().ok().and_then(|s|s.clone());
+                    if let (Some(host), Some(main)) = (host, window.app_handle().get_webview_window("main")) {
+                        match host.with_service(|service| service.current().map(|project| project.session_id)) {
+                            Ok(Some(session)) => {
+                                // Hash media off the UI thread, retaining the project that
+                                // owned the drop rather than granting access to a later one.
+                                let paths = paths.clone();
+                                tauri::async_runtime::spawn_blocking(move || {
+                                    match host.with_service(|service| {
+                                        service.require_session(&session).ok()?;
+                                        Some(register_import_batch(service, &paths))
+                                    }) {
+                                        Ok(Some(batch)) => { let _ = main.eval(format!("window.__loomlightReceiveAssets?.({}, {})", json!(session), batch)); }
+                                        Err(_) => { let _ = main.eval(format!("window.__loomlightReceiveAssets?.({}, {})", json!(session), json!({"choices":[],"errors":["Wait for the current operation to finish, then drop the files again."]}))); }
+                                        Ok(None) => {} // Session changed; no grants created.
+                                    }
+                                });
+                            }
+                            Err(_) => { let _ = main.eval("window.__loomlightDropUnavailable?.()"); }
+                            Ok(None) => {}
+                        }
+                    }
+                }
+            }
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 if window.label() == "main" && !scripted_smoke_exit() && !APPLICATION_CLOSE_CONFIRMED.load(Ordering::SeqCst) {
                     api.prevent_close();

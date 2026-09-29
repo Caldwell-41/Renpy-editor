@@ -8,7 +8,7 @@ import type { CoreResponse } from "../src/protocol.js";
 // Execute the shipped probe unchanged, with the real shell/UI and its own fake
 // authoring requester. Only the desktop/security boundary is stubbed: this is not
 // native keyboard, WebView security, or packaged acceptance evidence.
-const probe = await readFile(new URL("../../src-tauri/src/smoke_probe.js", import.meta.url), "utf8");
+const probe = await readFile(new URL("../../src-tauri/src/native_editor_probe.js", import.meta.url),"utf8")+"\n"+await readFile(new URL("../../src-tauri/src/smoke_probe.js", import.meta.url), "utf8");
 
 test("packaged probe constructs exactly one truthful final report", async (t) => {
   for (const scenario of ["success", "authoring-failure", "incomplete-trace"] as const) {
@@ -78,7 +78,7 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
         assert.equal(reports.length, 1);
         const report = reports[0]!;
         assert.deepEqual(order.slice(-3), ["restore-requester", "final-report-start", "report"]);
-        assert.equal(report.supportingAuthoringUiPassed, true);
+        assert.equal(report.supportingAuthoringUiPassed, true, JSON.stringify(report));
         if (scenario === "authoring-failure") {
           assert.equal(report.sceneAuthoringUiPassed, false);
           assert.equal(report.sourceAuthoringUiPassed, false);

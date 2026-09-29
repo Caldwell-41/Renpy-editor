@@ -3,6 +3,8 @@ export const PROTOCOL_VERSION = 1 as const;
 export const CORE_OPERATIONS = [
   "system.health",
   "system.version",
+  "preferences.read",
+  "preferences.write",
   "probe.denied",
   "probe.redactedError",
   "probe.smokeReport",
@@ -26,6 +28,7 @@ export const CORE_OPERATIONS = [
   "character.update",
   "appearance.setDefault",
   "asset.chooseImport",
+  "asset.chooseImports",
   "asset.import",
   "asset.repairCompatibility",
   "variable.create",

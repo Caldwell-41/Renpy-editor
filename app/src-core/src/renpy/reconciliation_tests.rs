@@ -135,3 +135,43 @@ fn official_sdk_download_handoff_target_gate() {
     assert!(sdk.same_identity(&reused));
     println!("phase-1c-network-handoff-gate: passed");
 }
+
+#[test]
+fn download_progress_counts_written_bytes_and_keeps_unknown_totals_indeterminate() {
+    use std::{cell::RefCell, rc::Rc};
+    let input = vec![0xA5; 150_123];
+    for total in [Some(input.len() as u64), None] {
+        let events = Rc::new(RefCell::new(Vec::new()));
+        let captured = Rc::clone(&events);
+        let mut output = Vec::new();
+        crate::progress::scoped(
+            move |event| captured.borrow_mut().push(event),
+            || {
+                copy_sdk_download(input.as_slice(), &mut output, total).unwrap();
+            },
+        );
+        assert_eq!(output, input);
+        let events = events.borrow();
+        assert_eq!(events.first().unwrap().bytes, Some(0));
+        assert_eq!(events.last().unwrap().bytes, Some(input.len() as u64));
+        assert!(events
+            .iter()
+            .all(|event| event.total == total && event.stage == "download"));
+        assert!(events
+            .windows(2)
+            .all(|pair| pair[0].sequence < pair[1].sequence && pair[0].bytes <= pair[1].bytes));
+    }
+    struct Broken;
+    impl std::io::Write for Broken {
+        fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+            Err(std::io::Error::other("disk unavailable"))
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    assert!(matches!(
+        copy_sdk_download(input.as_slice(), &mut Broken, None),
+        Err(RenpyError::Download)
+    ));
+}
