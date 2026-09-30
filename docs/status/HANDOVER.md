@@ -2,121 +2,85 @@
 
 ## UI implementation continuation — 2026-09-30
 
-**State: awaiting_ci.** The user explicitly approved one Windows/macOS qualification
-after the focused native Mac pass. One dispatch was accepted:
-[run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
-attempt **1**, workflow `production-scaffold.yml`, input `upload_packages=true`, branch
-`feature/phase-1g-branches-runtime`, tested SHA
+**State: automated qualification PASS; review builds ready.** No workflow is pending.
+Continue the same chat and `feature/phase-1g-branches-runtime`, draft/open/conflicting
+[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Main remains
+`4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration/conflict resolution is selected.
+Incoming branch head was `4d759f409bb961d7b07e8ff22a5851c40d1310bf` (wait record).
+This audit changes documentation only; it does not change tested application inputs.
+
+### Exact successful qualification
+
+[Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
+attempt **1**, workflow `production-scaffold.yml`, input `upload_packages=true`, tested
 **d690d7f8ffc08fbc76411c95147f04422620afbc**, tree
-`0948ced672f8c95c16df74c5da52d7c6d9212c77`. Created **2026-09-30 02:52:15 UTC**.
-Observed at **02:52:25 UTC**: in progress; Preflight repository/privacy, rejection
-fixtures and selector audit passed; Node setup running. No supported-target build or
-case count is inferred before terminal audit. This subsequent wait checkpoint is
-docs-only and does not change the tested candidate.
+`0948ced672f8c95c16df74c5da52d7c6d9212c77`. Created 2026-09-30 02:52:15 UTC;
+completed successfully 03:12:29 UTC. Preflight job **109718037425**, macOS ARM64
+**109718361890**, Windows x64 **109718361892** all passed.
 
-Continue the same chat/branch, draft/open/conflicting
-[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). No additional dispatch,
-automatic retry, merge, conflict resolution or new feature phase is authorized.
-Resume with “The workflow is complete; audit run 36661814610 and continue.” Check
-this exact run/attempt and fresh refs once; if still pending, retain the record and
-stop polling. If terminal, audit every required gate, report/cleanup and package
-identity, preserve failures/skips, then continue only remaining authorized work.
-No autonomous Goal exists and no client runtime pause is claimed.
+Both targets passed all **six packaged native cases**: compile, lint, route-a, route-b,
+runtime-error, ui-refresh. Every case has one passing report, exit 0, no timeout and
+confirmed cleanup. Both packaged boundary smoke checks passed, including Source Save,
+recovery/conflict paths, authoring, navigation/webview restrictions and single-instance
+secondary refusal. Other required frontend/browser/core/SDK/desktop/build/privacy/
+dependency-inventory gates passed. SDK fetch alone was skipped due to verified archive
+cache hits, which does not prove live first-install UI progress. Preflight: 70 frontend
+tests; routine core Mac 178 passed/39 ignored/3 separately filtered; Windows 173/36/3.
+Separate flow, lifecycle, SDK handoff, runtime service/diagnostics and desktop gates
+passed 1/0 ignored each. Exact case times, identities and retained limits belong in the
+[terminal audit](../tasks/active/ui-design-review.md#third-qualification-terminal-audit--2026-09-30).
 
-### Terminal evidence and diagnosis
+The previously failing Windows UI-refresh case now passes (11.907 s), as do both
+Windows route cases and Mac route-a. This verifies the corrected behavior on both
+native targets; the original sparse Windows failure report still cannot prove which
+individual correction eliminated its timeout. Earlier failures remain preserved.
+The local 3/3 native Mac proof at `996737c` remains separate supporting evidence.
 
-[Run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
-attempt **1**, `production-scaffold.yml`, `upload_packages=true`, tested
-**d129d9c016517ffecf7276bb04a4bb8e6fe996b1**, tree
-`9b1deccc879d092c6e4323a87615c51d5b28e7c2`. Created 01:01:26 UTC; completed failed
-01:28:10 UTC on 2026-09-30. Mac **5/6** packaged UI cases passed (route-a failed);
-Windows **3/6** passed (route-a, route-b, UI-refresh failed). Both package builds and
-preceding frontend/core/flow/browser/SDK/desktop/source-scan gates passed. Required
-report gates failed; boundary smoke, dependency inventory and normal installer upload
-were skipped. Failure package retention and deferred browser gates passed. All twelve
-case reports confirmed cleanup. Exact jobs/artifacts/hashes and preserved failure
-classification are in the [UI ledger](../tasks/active/ui-design-review.md#second-qualification-failure-and-timing-reassessment--2026-09-30).
+### Review packages and evidence
 
-The route driver treated debounced Saved text as completion while Beat commit still
-held persistence ownership. A 150 ms delayed receipt reproduces the exact native
-refusal locally; the driver now waits for the accepted form to disconnect. Windows
-UI-refresh only reported Timeout at welcome despite several waits sharing that label.
-Its 500-scene/506-file fixture exposed a missing local coverage dimension. A 1200 ms
-initial Story read reproduces an early-Source contention failure; scene/authoring/flow
-reads now share the renderer request lane with Source. Stop remains independent.
-This fixes a real application race; native evidence does not yet prove it was the
-Windows timeout's cause. The probe now reports granular stages and bounded failure
-state. A separate test navigates early to verify the app fix, independently of the
-probe's stable Story-ready setup. Route-b now uses the actual native 640×720 viewport
-and opens the collapsed file tree through its control.
+| Target | Successful package artifact | Evidence artifact |
+| --- | --- | --- |
+| macOS ARM64 | `11075500136` / `phase-1-production-package-macos-26` | `11075380277` |
+| Windows x64 | `11075580402` / `phase-1-production-package-windows-2025` | `11075655302` |
 
-Local verification: **70 frontend tests / zero skipped**, complete Source/browser suite
-including legacy rejecting control, CodeMirror selection/mixed-newline edits, visual
-layouts, smoke, delayed UI-refresh, early navigation and all five shipped runtime
-scripts; Rust formatting and desktop compile check pass. Expected red controls retain
-the original route refusal, startup timeout and request-lane ordering failure. These
-fixture-backed results are not native SDK/process/persistence acceptance. No native
-assertion was weakened and no write is replayed. Logs/captures remain ignored under
-`.toolchains/reports/ui-refresh-ci2-*`; repository/privacy/link and whitespace validation
-are required before publication.
+All four artifacts were available/unexpired at audit; retention ends 2026-10-07 UTC.
+Manifests match candidate/tree/run/attempt; retained binary hashes, Mac tar executable
+and input-manifest digest were verified. Installer hashes are recorded in the ledger
+and local `SHA256SUMS.txt`. Local review copies are under ignored
+`.toolchains/review-builds/ui-refresh-d690d7f/`:
 
-### Approved focused native check — completed
+- `Loomlight_0.1.0_aarch64.dmg` for macOS ARM64.
+- `Loomlight_0.1.0_x64-setup.exe` for Windows x64; MSI alternative alongside it.
 
-The user explicitly approved one local macOS build plus route-a, route-b and UI-refresh,
-then said “Go ahead.” One release app bundle was built from clean candidate
-`996737c0bea196416c11afea7ed5660c61e408ae`, tree
-`adf733cdde3b2f89f400ed66493a183b1764ba29`, on local macOS ARM64 / Darwin 25.6.0.
-Executable SHA-256: `44a09231de931d1ffc41eb1c72e86fc7b179f2029359174820a1653d09d217a6`.
-Recorded source inputs and executable were rechecked after execution and match.
-The initial CLI invocation placed `--bundles` after the cargo argument separator and
-was rejected before native compilation. Its failure log is retained; corrected
-`npm exec -- tauri build --bundles app -- --locked` completed the single native build.
-No native failure was retried and no hosted workflow was dispatched.
+Full downloaded reports/logs/binaries remain in ignored
+`.toolchains/reports/ui-refresh-ci3-audit/`. None of these downloaded binaries was
+installed or launched during this audit. Open the DMG or run the Windows installer
+for review; preserve normal OS distribution limitations already recorded in the project.
+Do not rebuild unchanged validated inputs merely for documentation or delivery.
 
-| Case | Result | Elapsed | Cleanup |
-| --- | --- | --- | --- |
-| route-a | PASS | 89.292 s | confirmed |
-| route-b (640×720) | PASS | 113.265 s | confirmed |
-| ui-refresh | PASS, all five checks | 7.190 s | confirmed |
+### Remaining scope and allowance
 
-Both route cases passed real commit/reopen, controlled play, Source save during play,
-Stop and disk reopen; route-b also passed draft refusal/cancel checks. Observed running
-periods were 9504 ms and 10000 ms. UI-refresh passed native CSP styles, session draft
-retention, fixed editor geometry during status updates, Settings return and device
-preference round trip. These are native WebView/IPC/service/SDK checks with synthetic
-input. This is supporting macOS proof for the correction, not full Windows/macOS
-qualification or physical-input acceptance. The exact Windows timeout cause remains
-unconfirmed. No source change followed the native pass.
+Next step is focused human review of the accepted UI and outstanding actual-device
+checks: physical keyboard/IME, actual OS asset drop, live SDK first-install download
+progress and project-creation progress. Automated/synthetic native evidence does not
+close those rows. The [UI task](../tasks/active/ui-design-review.md) and saved
+[mockups](../design/ui-refresh/README.md) retain approved scope. No merge, conflict
+resolution, new feature phase or new test/build dispatch is authorized. Do not archive
+the task as fully accepted while these rows remain open. Continue this same chat with
+review feedback; no replacement Goal or chat is needed.
 
-Build, input identity, runner logs and three full reports are retained locally under
-ignored `.toolchains/reports/ui-refresh-native-996737c`. The app bundle is under
-`app/target/release/bundle/macos/Loomlight.app`; it was not installed into Applications.
-No existing Loomlight instance was running before the disposable cases started.
+Cumulative refresh: **three hosted dispatches**, attempt 1 each; **seven production
+builds** (six hosted, one local), **39 native scenario starts plus four boundary-smoke
+process starts = 43 top-level starts**, plus the separate early Mac debug build/launch.
+Third run contributed two builds, twelve scenarios and four smoke processes (primary
+and rejected secondary on each target). No attempt rerun, duplicate dispatch or native
+case retry. The rejected local CLI invocation before compilation stays separately
+recorded. All selected allowances are consumed; this audit added no build/launch.
+Prior Q1 counts remain separate. No autonomous Goal or client pause is claimed.
 
-### Allowance and same-chat wait
-
-The user's latest “Yes” authorized exactly the third hosted dispatch recorded above;
-that allowance is now consumed. Cumulative refresh: **three accepted hosted dispatches**,
-each attempt 1; completed pre-dispatch evidence remains **five production builds**
-(four hosted, one local) and **27 top-level native starts**, plus the separate early
-Mac debug build/launch. Audit this run's actual additional builds/starts at completion.
-The rejected local CLI invocation did not compile a native app. No GitHub attempt
-rerun, duplicate dispatch or native case retry occurred; prior Q1 counts stay separate.
-
-The locally tested correction was `996737c`; current candidate `d690d7f` adds only its
-published evidence record. The three native Mac passes support this dispatch without
-proving Windows success. Windows timeout confirmation, all required current-candidate
-packaged cases and the previously skipped boundary smoke remain under audit. No
-further allowance or merge is implied. Publish the wait record and stop model polling.
-
-Physical keyboard/IME, actual OS drag/drop, live first-install/create progress and
-focused human acceptance remain unverified. The accepted
-[mockups](../design/ui-refresh/README.md) and [UI task](../tasks/active/ui-design-review.md)
-own remaining visual scope. Earlier implementation evidence and first failed run
-36647015944 remain in the task ledger; neither failed candidate is a qualified release.
-Both second-run retained executables and Mac archive were hash-verified locally under
-ignored `.toolchains/reports/ui-refresh-ci2-audit`; neither was installed or launched.
-Artifacts expire 2026-10-07 UTC. Toolchain: source `.toolchains/enter-macos.sh`.
+Toolchain: source `.toolchains/enter-macos.sh`. Repository/link/privacy validation and
+whitespace checks pass at publication. Publish this meaningful terminal audit and
+provide the verified review installers; no receipt-only follow-up commit is needed.
 
 ## Preserved Phase 1G delivery handover
 

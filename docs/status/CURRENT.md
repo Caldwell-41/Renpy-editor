@@ -8,49 +8,35 @@
 ## Live continuation
 
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
-The user explicitly said “okay build it” on 2026-09-30. Implementation is published on
-the existing feature branch. Both native qualification attempts failed; the second
-failure audit and bounded timing corrections are recorded in the
-[UI ledger](../tasks/active/ui-design-review.md#second-qualification-failure-and-timing-reassessment--2026-09-30).
-Accepted references remain under [docs/design/ui-refresh](../design/ui-refresh/README.md).
-This does not authorize integration or erase Phase 1G evidence.
-
-The UI refresh is implemented, but **not a qualified release**. Second
-[run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
-attempt 1, tested `d129d9c016517ffecf7276bb04a4bb8e6fe996b1` and completed failed
-2026-09-30 01:28:10 UTC. macOS passed five of six packaged UI cases; Windows passed
-three of six. Earlier selector corrections passed. Route failures raced a delayed
-commit receipt; Windows UI-refresh timed out before editor readiness without enough
-telemetry to identify the exact native cause. Both package builds and other preceding
-gates passed, but required report gates failed and boundary smoke was skipped.
-
-Bounded corrections reproduce the route failure locally, wait for actual commit
-completion and order workspace reads before early Source navigation. The latter
-fixes a separately reproduced application race; it is not yet proof of the Windows
-native timeout cause. Updated local verification passes 70 frontend tests, full
-browser/driver checks, Rust formatting and desktop compile check. Native qualification,
-physical input/drop, live SDK/create progress and human acceptance remain open.
-
-**Focused native macOS check: 3/3 PASS** at correction candidate
-`996737c0bea196416c11afea7ed5660c61e408ae`: route-a, route-b and UI-refresh, each run
-once against one release app bundle with real IPC/service/SDK and confirmed cleanup.
-Synthetic input does not prove physical keyboard/IME. Windows confirmation and full
-current-candidate qualification remain open; the original Windows timeout is not
-conclusively diagnosed by a Mac pass.
-
-**State: awaiting_ci.** The user approved one further Windows/macOS qualification.
+The accepted UI is implemented and **automated qualification now passes on both targets**.
 [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
-attempt 1, tests **d690d7f8ffc08fbc76411c95147f04422620afbc**, input
-`upload_packages=true`. Created 2026-09-30 02:52:15 UTC; observed 02:52:25 UTC in
-Preflight, with repository/privacy, rejection fixtures and selector audit passed.
-No platform result is inferred yet. The allowance is consumed; no automatic retry,
-further dispatch or merge. Resume this same chat to audit that exact run.
+attempt 1, tested **d690d7f8ffc08fbc76411c95147f04422620afbc** and completed successfully
+2026-09-30 03:12:29 UTC. All six packaged native scenarios per target passed with
+cleanup, as did both boundary-smoke checks and all other required gates. SDK fetch
+was skipped on cache hits; live first-install UI progress remains unverified.
 
-Cumulative refresh: three accepted hosted dispatches, each attempt 1. Completed
-pre-dispatch evidence is five production builds (four hosted, one local) and 27 native
-case starts, plus the separate early Mac debug build/launch. Audit this run's actual
-additional build/start totals after completion. The rejected local CLI invocation
-remains recorded separately. Stop model polling; HANDOVER owns exact continuation.
+**State: review_ready; no workflow pending.** Successful macOS/Windows installers and
+retained evidence were downloaded and identities verified. Review copies are under
+ignored `.toolchains/review-builds/ui-refresh-d690d7f/`. Exact artifact IDs, hashes,
+case counts and limits are in [HANDOVER](HANDOVER.md) and the
+[terminal audit](../tasks/active/ui-design-review.md#third-qualification-terminal-audit--2026-09-30).
+The corrected Windows timeout path now passes; its original sparse failure report
+still cannot conclusively identify which individual correction fixed it. Both earlier
+failed qualification attempts remain preserved. No downloaded binary was launched
+or installed during this audit.
+
+Next: focused human UI review and actual-device keyboard/IME, OS asset-drop and live
+SDK download/project-creation progress checks. Accepted references remain under
+[docs/design/ui-refresh](../design/ui-refresh/README.md). Automated native tests use
+synthetic input and do not close those acceptance rows. No merge, conflict resolution,
+new feature phase or further dispatch/build is selected. Continue the same chat.
+
+Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
+builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke
+process starts (43 total), plus the separate early Mac debug build/launch. No automatic
+retry or duplicate; the rejected pre-compilation CLI invocation remains separately
+recorded. This terminal audit adds no builds/launches. Prior Phase 1G/Q1 evidence and
+budgets remain separate.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

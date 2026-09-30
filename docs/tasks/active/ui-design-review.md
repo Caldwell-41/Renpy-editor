@@ -971,3 +971,87 @@ live-progress checks and human acceptance remain open.
   automatic retry, further dispatch, merge or new feature phase. No autonomous Goal
   or client pause is claimed. Native physical input/drop/live progress and human
   acceptance gaps remain separate from this qualification.
+
+
+### Third qualification terminal audit — 2026-09-30
+
+**UI-QUAL-3: PASS on Windows x64 and macOS ARM64; review builds delivered.**
+User resumed the recorded workflow. No new run/build/launch was performed by this
+audit. Branch and main refs matched their previous records; working tree was clean.
+
+- [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
+  attempt **1**, tested **d690d7f8ffc08fbc76411c95147f04422620afbc**, tree
+  **0948ced672f8c95c16df74c5da52d7c6d9212c77**, input `upload_packages=true`.
+  Created 2026-09-30 02:52:15 UTC; completed successful 03:12:29 UTC.
+- Preflight **109718037425**, Mac **109718361890**, Windows **109718361892** passed.
+  Preflight includes 70 frontend tests and full browser regressions. Both targets
+  passed frontend/Source-browser, ordinary core, isolated flow, runtime/Branches
+  browser, official archive lifecycle and handoff, runtime service/diagnostics,
+  desktop, package build, report gate, boundary smoke, privacy, retained package
+  identity, dependency inventory, deferred browser gate and successful installer upload.
+- Core: Mac **178 passed / 39 ignored / 3 separately filtered**; Windows **173 / 36 / 3**.
+  Separate flow, lifecycle, handoff, runtime service, runtime diagnostics and desktop
+  each passed **1 / 0 ignored** per target. SDK download-on-cache-miss was the only
+  conditional gate skipped; archive cache hits do not prove live SDK-download UI.
+
+| Native case | macOS result / seconds | Windows result / seconds |
+| --- | --- | --- |
+| compile | PASS / 47.298 | PASS / 51.718 |
+| lint | PASS / 44.401 | PASS / 50.797 |
+| route-a | PASS / 55.820 | PASS / 60.782 |
+| route-b | PASS / 51.648 | PASS / 61.562 |
+| runtime-error | PASS / 37.757 | PASS / 49.984 |
+| ui-refresh | PASS / 5.295 | PASS / 11.907 |
+
+All twelve case reports have exactly one passing native result, exit 0, no timeout
+and confirmed cleanup. Boundary smoke on both targets additionally confirms Source
+Save command traces, recovery/conflict handling, Scene/supporting authoring, lifecycle,
+navigation/pop-up/webview restrictions and single-instance secondary refusal. Each
+target started a smoke primary and secondary; the latter was rejected before lifecycle
+setup. Physical keyboard/IME is not inferred from synthetic keyboard events.
+
+The previously failing three Windows cases and Mac route-a now pass with real native
+IPC/service/SDK. This verifies the corrected behavior; it cannot retrospectively prove
+which individual correction resolved the old Windows timeout with sparse telemetry.
+Earlier failed runs remain failed evidence, not relabelled passes.
+
+| Artifact | ID | Expiry (UTC, 2026-10-07) |
+| --- | --- | --- |
+| Mac production package | `11075500136` | 03:07:43 |
+| Mac package evidence | `11075380277` | 03:07:41 |
+| Windows production package | `11075580402` | 03:12:18 |
+| Windows package evidence | `11075655302` | 03:12:16 |
+
+All four artifacts were available/unexpired and downloaded. Manifest run/attempt/
+candidate/tree, input-manifest digest, retained bytes and Mac archived executable were
+verified. These are the successfully tested candidate's packages, not rebuilt copies.
+
+| File | SHA-256 |
+| --- | --- |
+| Mac executable | `9f1770707cb344fb4f9f7d4db88e6dc64e96d6c5577038e3d3d2e196431cf8dc` |
+| Mac app tar | `41ff5260f86a2357d89f715978592a8142c711a982b200e77d28a50d52dbad53` |
+| Windows executable | `14eafda7e1fa4a40840f4c39cc798842288d972807f9d501cba98cefce66ed2c` |
+| `Loomlight_0.1.0_aarch64.dmg` | `00439927529891a4773ae885067543665c3577abd3e7005f54619893c944669b` |
+| `Loomlight_0.1.0_x64-setup.exe` | `adb905d7eb69de9f03e1e900020ddd5fc599f43cd436df610d04c72cc104be36` |
+| `Loomlight_0.1.0_x64_en-US.msi` | `f53dd8c4c7280e14e54ddf318f283b9f86c4eeccb961aee512ff3e355fbbc66d` |
+
+Installer digests above identify downloaded workflow artifacts; retained executable
+identity is linked independently through the probe-input/package manifests. No DMG/MSI
+installation or extraction-and-launch was performed by this audit. Review installers,
+README and checksum file are copied under ignored
+`.toolchains/review-builds/ui-refresh-d690d7f/`; full evidence remains under
+`.toolchains/reports/ui-refresh-ci3-audit/`. No host paths/raw logs are committed.
+
+**Cost and continuation.** This run adds two production builds, twelve native scenarios
+and four boundary-smoke process starts. Cumulative refresh: three accepted dispatches,
+attempt 1 each; seven production builds (six hosted, one local); 39 scenario starts
+plus four smoke starts = **43 top-level native starts**, plus the separate early Mac
+debug build/launch. Preserve the rejected local pre-compilation CLI invocation; no
+GitHub attempt rerun, duplicate dispatch or native case retry. Prior Q1 totals remain
+separate. No workflow is pending, and no further build/dispatch or merge is authorized.
+
+State **review_ready**. The UI implementation and automated qualification are complete;
+focused human review, physical input/IME, OS asset drop and live SDK first-install/
+project-creation progress remain open. Do not archive the task as fully accepted or
+merge unreviewed work. Continue this same chat with review feedback. This audit changes
+docs only; repository/link/privacy and whitespace checks pass at publication.
