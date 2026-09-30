@@ -1145,12 +1145,21 @@ parent, final-path placeholder and Back to home/Continue. No fields were changed
 navigation invoked or project created by the agent. Editable Folder name is the
 intentional retained capability absent from the generated four-step reference.
 
-**WIZARD-01 — reviewer-observed layout mismatch, pending user feedback:** the shaded
+**WIZARD-01 — user-confirmed correction, implementation pending:** the shaded
 step rail ends below its four entries, leaving a white lower-left area inside the
 wizard card. The saved `new-project-four-steps.png` shows the rail extending to the
-action-row boundary. Align the rail's background with that boundary if corrected;
-do not infer a breakpoint or logical size from captured screenshot pixels. This is
+action-row boundary. The user explicitly requests that this column extend to the
+**bottom of the entire wizard box**, including beside the right-hand action area.
+Use that full-height background and divider on all four side-by-side wizard steps;
+keep the step labels grouped at the top and preserve the horizontal step rail at
+compact widths. Check both themes, no lower-left white gap and no clipping or added
+scrolling. This user direction controls the exact extent over the generated reference.
+Do not infer a breakpoint or logical size from captured screenshot pixels. This is
 visual evidence only, not validation of title generation, destination selection,
 input preservation, download or creation progress. Next: user reviews this layout,
 types a disposable title, checks generated/editable folder name and chooses a parent
 to inspect the exact final-path preview before continuing.
+
+The user's subsequent screenshot confirms the same gap and selects this correction.
+Only the finding/continuation wording changed; no application code, build, launch or
+dispatch was performed. Continue the existing build review; correction remains pending.

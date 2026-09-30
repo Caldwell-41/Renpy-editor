@@ -39,7 +39,9 @@ in this chat using the existing installer. No new build/dispatch or integration 
 selected; remaining physical input/drop/live progress acceptance stays open.
 The user has now opened wizard step 1; read-only native inspection records
 [WIZARD-01](../tasks/active/ui-design-review.md#project-details-initial-inspection--2026-09-30),
-the step-rail background ending early, pending user feedback. No input/navigation or
+the step-rail background ending early. The user confirmed it should extend to the
+bottom of the entire wizard box, with the labels staying at the top; correction is
+pending implementation. No input/navigation or
 creation was performed by the agent. Next: review Project details, generated folder
 name and exact destination preview with disposable input, then advance to SDK.
 
