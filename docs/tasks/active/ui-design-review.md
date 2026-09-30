@@ -1136,3 +1136,21 @@ agent app launch or dispatch occurred; user review observations are separate fro
 the retained automated-start totals. Continue collecting feedback in this same chat.
 The current installer remains the comparison baseline; implementation/qualification
 of accumulated corrections is not selected by this review-only checkpoint.
+
+### Project details initial inspection — 2026-09-30
+
+The user opened New Project. Read-only inspection of the existing Loomlight window
+confirmed step 1 of 4 in Light theme with blank Game title/Folder name, no selected
+parent, final-path placeholder and Back to home/Continue. No fields were changed,
+navigation invoked or project created by the agent. Editable Folder name is the
+intentional retained capability absent from the generated four-step reference.
+
+**WIZARD-01 — reviewer-observed layout mismatch, pending user feedback:** the shaded
+step rail ends below its four entries, leaving a white lower-left area inside the
+wizard card. The saved `new-project-four-steps.png` shows the rail extending to the
+action-row boundary. Align the rail's background with that boundary if corrected;
+do not infer a breakpoint or logical size from captured screenshot pixels. This is
+visual evidence only, not validation of title generation, destination selection,
+input preservation, download or creation progress. Next: user reviews this layout,
+types a disposable title, checks generated/editable folder name and chooses a parent
+to inspect the exact final-path preview before continuing.
