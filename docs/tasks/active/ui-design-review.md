@@ -1163,3 +1163,19 @@ to inspect the exact final-path preview before continuing.
 The user's subsequent screenshot confirms the same gap and selects this correction.
 Only the finding/continuation wording changed; no application code, build, launch or
 dispatch was performed. Continue the existing build review; correction remains pending.
+
+### Project details user checks and SDK review — 2026-09-30
+
+The user reports all three requested Project details checks work on this Mac:
+title-generated folder name, independent folder-name editing and parent selection
+with the exact final-path preview. Record these as **user-reported PASS** for this
+session, not Windows evidence or blanket physical keyboard/IME acceptance.
+WIZARD-01 remains pending; functional success does not close its layout correction.
+
+Fresh read-only native observation found the user already on step **2 of 4 — Ren'Py
+SDK**, with compatible managed **8.5.3** selected, Install verified 8.5.3 and Browse
+existing SDK available, and Back/Continue controls. No agent click, installation,
+download or new app launch occurred. The same short step-rail background is visible
+here and belongs to WIZARD-01. Continue reviewing SDK presentation, then Game
+configuration using the selected existing SDK. Live network-download progress stays
+open because discovering an installed SDK does not exercise it. No creation occurred.

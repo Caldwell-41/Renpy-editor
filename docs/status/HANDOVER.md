@@ -41,9 +41,11 @@ The user has now opened wizard step 1; read-only native inspection records
 [WIZARD-01](../tasks/active/ui-design-review.md#project-details-initial-inspection--2026-09-30),
 the step-rail background ending early. The user confirmed it should extend to the
 bottom of the entire wizard box, with the labels staying at the top; correction is
-pending implementation. No input/navigation or
-creation was performed by the agent. Next: review Project details, generated folder
-name and exact destination preview with disposable input, then advance to SDK.
+pending implementation. The user reports generated folder name, independent folder
+editing and exact destination preview all work on this Mac. Fresh read-only observation
+finds step 2, compatible managed SDK 8.5.3 selected. Next: review SDK presentation,
+then Game configuration using that selection. No input/navigation, installation or
+creation was performed by the agent; live download and other acceptance remain open.
 
 ### Exact successful qualification
 
