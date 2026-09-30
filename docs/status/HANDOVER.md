@@ -46,6 +46,9 @@ editing and exact destination preview all work on this Mac. Fresh read-only obse
 finds step 2, compatible managed SDK 8.5.3 selected. Next: review SDK presentation,
 then Game configuration using that selection. No input/navigation, installation or
 creation was performed by the agent; live download and other acceptance remain open.
+Latest SDK wording correction: [SDK-01](../tasks/active/ui-design-review.md#sdk-wording-feedback--2026-09-30)
+replaces "Browse existing SDK" with "Select existing SDK…" in the accumulated
+corrections, pending implementation. Selection/validation behaviour stays the same.
 
 ### Exact successful qualification
 

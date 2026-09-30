@@ -1179,3 +1179,15 @@ download or new app launch occurred. The same short step-rail background is visi
 here and belongs to WIZARD-01. Continue reviewing SDK presentation, then Game
 configuration using the selected existing SDK. Live network-download progress stays
 open because discovering an installed SDK does not exercise it. No creation occurred.
+
+### SDK wording feedback — 2026-09-30
+
+**SDK-01 — user-requested wording correction, implementation pending:** the user
+finds "Browse existing SDK" awkward and suggests "Select Existing SDK" or similar.
+Use **"Select existing SDK…"**, matching the other controls' sentence case and using
+an ellipsis to indicate that a folder picker opens. Preserve the existing selection,
+compatibility validation and cancellation behaviour; this is a label correction.
+Review the rendered/accessibility label and any affected wording-based selectors when
+implementing the accumulated corrections. The running qualified build remains
+unchanged. Continue SDK visual review, then Game configuration; live download remains
+open. This feedback record adds no build, launch or dispatch.
