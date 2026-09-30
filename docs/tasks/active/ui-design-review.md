@@ -763,3 +763,29 @@ its totals remain unchanged. Corrected native qualification is still required, a
 are physical keyboard/IME, OS drag/drop, live SDK/create progress and focused human
 acceptance. Next decision: one additional corrected Windows/macOS production dispatch,
 no automatic retry or merge. No workflow is pending.
+
+
+### Corrected qualification dispatch and same-chat wait — 2026-09-30
+
+- User explicitly answered “Yes” to one corrected Windows/macOS qualification with
+  no automatic retry or merge. Published/local branch heads matched
+  `d129d9c016517ffecf7276bb04a4bb8e6fe996b1`; working tree was clean. The prior run was
+  terminal and no competing pending production run was listed before dispatch.
+- Dispatched once: `production-scaffold.yml`, `upload_packages=true`, branch
+  `feature/phase-1g-branches-runtime`. Confirmed
+  [run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
+  attempt **1**, created **2026-09-30 01:01:26 UTC**, tested exact SHA **d129d9c016517ffecf7276bb04a4bb8e6fe996b1**.
+- Last observation **01:01:58 UTC**: in progress. Preflight repository/privacy,
+  rejection fixtures, case/selector audit and frontend checks passed; full browser
+  preflight running. Supported target jobs had not yet been observed. No result or
+  build count for this second run is inferred in advance.
+- Cumulative refresh: two accepted hosted dispatches (initial plus one approved
+  correction), each attempt 1; no attempt rerun or duplicate. First-run totals remain
+  two production Tauri builds/twelve top-level native starts, plus the separate early
+  Mac debug build/launch. Audit second-run totals and artifacts at completion. The
+  added allowance is consumed; further costly retries require a new decision.
+- State **awaiting_ci**. Publish this docs-only wait record, stop model polling and
+  resume the same chat on user command to inspect this exact run/attempt, current refs,
+  all required gates, evidence and package identity. Deliver verified review packages
+  while retaining explicit native input/drop/live progress and human-acceptance gaps.
+  No merge, autonomous Goal, automatic watcher or claimed client runtime pause.

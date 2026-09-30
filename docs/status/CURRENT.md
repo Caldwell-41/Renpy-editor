@@ -10,7 +10,7 @@
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
 The user explicitly said “okay build it” on 2026-09-30. Implementation is published on
 the existing feature branch. The selected qualification run failed; its test-driver
-corrections and downstream audit are now locally verified. Accepted references are retained under
+corrections and downstream audit are locally verified and published as `d129d9c`. Accepted references are retained under
 [docs/design/ui-refresh](../design/ui-refresh/README.md). This supersedes the earlier
 planning-only restriction; it does not authorize integration or erase Phase 1G evidence.
 
@@ -24,8 +24,12 @@ attempt 1, failed on both targets at candidate `a82e89cf0210af328531727b171d0507
 Both packages were built and retained, but neither is qualified. The follow-up corrects
 dated recent-project selectors, CodeMirror selection readiness, hidden controls,
 busy observations and the missing sixth-case evidence contract; preflight now runs
-the shipped drivers before packaging. No workflow is pending. One additional final
-Windows/macOS dispatch needs an explicit allowance; no retry or merge has occurred.
+the shipped drivers before packaging. The user approved one corrected dispatch:
+[run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
+attempt 1, tests `d129d9c016517ffecf7276bb04a4bb8e6fe996b1` with
+`upload_packages=true`. Observed 2026-09-30 01:01:58 UTC: Preflight in progress.
+State is **awaiting_ci**; no further dispatch, automatic retry or merge is authorized.
+Resume in the same chat to audit this recorded run; do not poll.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the
@@ -37,7 +41,7 @@ no automatic wait/wake or runtime capability was implemented or tested here.
 **Prior delivery outcome (not selected by this UI review):** provide a reviewable Loomlight build, complete available bounded
 Windows native checks and prepare focused final user review. Select **REVIEW-DELIVERY-1**
 from [HANDOVER](HANDOVER.md). This replaces the older preparation-only next prompt;
-it does not select integration, 1H or new features. No operation is pending.
+it does not select integration, 1H or new features. The active UI workflow is recorded above.
 
 ## Phase 1G capability status
 
