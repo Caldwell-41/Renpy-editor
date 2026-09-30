@@ -2,92 +2,75 @@
 
 ## UI implementation continuation — 2026-09-30
 
-**State: awaiting_ci.** The user explicitly approved one corrected Windows/macOS
-qualification after the downstream audit. One dispatch was accepted:
-[run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
-attempt **1**, workflow `production-scaffold.yml`, input `upload_packages=true`, branch
-`feature/phase-1g-branches-runtime`, tested SHA
-**d129d9c016517ffecf7276bb04a4bb8e6fe996b1**. Created 2026-09-30 01:01:26 UTC.
-Observed at 01:01:58 UTC: in progress; Preflight repository/privacy, gate rejection,
-selector and frontend checks passed; Source/browser preflight running. Supported
-platform jobs have not yet been observed. The following wait commit is docs-only and
-does not change the tested candidate.
+**State: second native qualification FAILED; bounded corrections locally verified.**
+No workflow is pending. Continue the same chat and existing
+`feature/phase-1g-branches-runtime` branch; draft/open/conflicting
+[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Incoming published head
+was `44d505722de7ad5100c9f84d436d97a1136d4ac6` (wait record). Resolve this correction
+checkpoint's SHA from Git; do not create a receipt-only commit for its own identity.
+No integration, conflict resolution, new feature phase or autonomous Goal is selected.
 
-No further dispatch, automatic retry or merge is authorized. Resume this same chat
-with “The workflow is complete; audit run 36653112288 and continue.” Check this exact
-run/attempt and fresh refs once. If still pending, retain the record and stop polling.
-If terminal, audit every required result, retained reports, package identity and
-remaining native acceptance, then continue the authorized outcome. Preserve failed,
-cancelled, skipped or missing evidence. No autonomous Goal was created; no runtime
-pause is claimed. Normal same-chat continuation is sufficient.
+### Terminal evidence and diagnosis
 
-### Previous qualification and corrected-driver evidence
+[Run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
+attempt **1**, `production-scaffold.yml`, `upload_packages=true`, tested
+**d129d9c016517ffecf7276bb04a4bb8e6fe996b1**, tree
+`9b1deccc879d092c6e4323a87615c51d5b28e7c2`. Created 01:01:26 UTC; completed failed
+01:28:10 UTC on 2026-09-30. Mac **5/6** packaged UI cases passed (route-a failed);
+Windows **3/6** passed (route-a, route-b, UI-refresh failed). Both package builds and
+preceding frontend/core/flow/browser/SDK/desktop/source-scan gates passed. Required
+report gates failed; boundary smoke, dependency inventory and normal installer upload
+were skipped. Failure package retention and deferred browser gates passed. All twelve
+case reports confirmed cleanup. Exact jobs/artifacts/hashes and preserved failure
+classification are in the [UI ledger](../tasks/active/ui-design-review.md#second-qualification-failure-and-timing-reassessment--2026-09-30).
 
-[Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
-attempt 1, tested `a82e89cf0210af328531727b171d050745216b53` and failed on both targets
-at 2026-09-30 00:05:04 UTC. Both packages built; all twelve native UI cases failed
-(ten at the stale recent-project selector; two on busy direct observations). Boundary
-smoke and normal installer upload were skipped. Exact audit, artifacts and hashes
-are in the [UI ledger](../tasks/active/ui-design-review.md#qualification-failure-and-downstream-driver-audit--2026-09-30).
-The original failed evidence is preserved. The newly approved corrected dispatch is
-recorded above and does not replace or relabel that failed candidate.
+The route driver treated debounced Saved text as completion while Beat commit still
+held persistence ownership. A 150 ms delayed receipt reproduces the exact native
+refusal locally; the driver now waits for the accepted form to disconnect. Windows
+UI-refresh only reported Timeout at welcome despite several waits sharing that label.
+Its 500-scene/506-file fixture exposed a missing local coverage dimension. A 1200 ms
+initial Story read reproduces an early-Source contention failure; scene/authoring/flow
+reads now share the renderer request lane with Source. Stop remains independent.
+This fixes a real application race; native evidence does not yet prove it was the
+Windows timeout's cause. The probe now reports granular stages and bounded failure
+state. A separate test navigates early to verify the app fix, independently of the
+probe's stable Story-ready setup. Route-b now uses the actual native 640×720 viewport
+and opens the collapsed file tree through its control.
 
-Bounded corrections plus the user's additional downstream audit are complete locally:
-69 frontend tests, full Source/browser suite (including all five shipped runtime
-scripts, UI-refresh and smoke driver paths), Rust format/check, nine package-retention
-tests, selector/gate rejection controls and repository checks. Driver fixtures are
-explicitly not native SDK/process/persistence/security acceptance. No core source,
-product behavior, native assertion or timing budget was weakened. Optional Branches
-probe compatibility was repaired without executing the retired native performance
-exercise. The validator, runner and retained manifest now share all six ordinary cases.
+Local verification: **70 frontend tests / zero skipped**, complete Source/browser suite
+including legacy rejecting control, CodeMirror selection/mixed-newline edits, visual
+layouts, smoke, delayed UI-refresh, early navigation and all five shipped runtime
+scripts; Rust formatting and desktop compile check pass. Expected red controls retain
+the original route refusal, startup timeout and request-lane ordering failure. These
+fixture-backed results are not native SDK/process/persistence acceptance. No native
+assertion was weakened and no write is replayed. Logs/captures remain ignored under
+`.toolchains/reports/ui-refresh-ci2-*`; repository/privacy/link and whitespace validation
+are required before publication.
 
-The correction checkpoint was published and verified as `d129d9c`; the user's “Yes”
-authorized exactly the corrected production dispatch recorded above. Continue on the
-same branch and chat after the wait; do not infer any further run allowance.
+### Remaining allowance and next decision
 
-Diagnostic copies of the failed candidate are hash-verified locally under ignored
-`.toolchains/review-builds/ui-refresh-a82e89c/{macOS,Windows}`. They retain the old probe
-scripts and are not qualified release installers. Neither was installed or launched
-on this resume. The additional one-run allowance is now consumed. Cumulative refresh totals: one
-early Mac debug build/launch; two hosted dispatches (initial plus one explicitly
-approved correction), each attempt 1. The first produced two Tauri builds/twelve
-native case starts; actual second-run build/start/artifact totals await terminal audit.
-No GitHub attempt rerun or duplicate dispatch occurred. Prior Q1 counts remain separate.
+The user authorized building the accepted UI and one corrected qualification dispatch;
+that dispatch allowance is consumed. Cumulative refresh totals: **two hosted dispatches**,
+each attempt 1, **four production Tauri builds / 24 top-level native case starts**,
+plus the separate early Mac debug build/launch. No attempt rerun or duplicate dispatch.
+This audit added no native build/launch or hosted run. Prior Q1 counts remain separate.
 
+After two qualification failures, do not launch another full matrix on mock-only
+confidence. Proposed next allowance: **one local macOS native build and one start each
+of route-a, route-b and UI-refresh**, no automatic retry or CI dispatch. This proposal
+is not yet authorized. Native Windows confirmation remains open. Read WORKFLOW's
+waiting/budget rule before any new build/dispatch; Resume alone does not grant it.
+Publish this bounded correction checkpoint, then ask for the focused native allowance.
+No merge is authorized.
 
-The user explicitly authorized building the accepted UI. Continue the same outcome
-and chat on `feature/phase-1g-branches-runtime`, starting from `119cc75`. Preserve all
-local changes and prior Phase 1G work. No merge, conflict resolution or new feature
-phase is selected. The [UI task](../tasks/active/ui-design-review.md) and saved
-[mockup index](../design/ui-refresh/README.md) own scope and visual references.
-
-The refresh candidate is implemented and published; its first final qualification failed.
-Corrected test drivers are locally verified; their one approved native requalification
-is in progress as recorded above. No merge or integrated-tree qualification is selected.
-
-Local evidence: 67 frontend tests pass; final build/typecheck and Rust formatting pass;
-real Chromium retains the rejecting legacy Source control and passes textarea/CodeMirror
-Save/selection, mapped selection, mixed-newline deletion/grouped undo/redo, shipped smoke
-interactions, both themes, all workspaces and compact/laptop/1440p layouts. Routine core
-passed 177 tests (39 existing ignored, 3 separately selected); the subsequently added
-written-byte progress test passed separately. Desktop boundary test passed 1/0 ignored.
-Official SDK lifecycle and download-handoff gates each passed 1/0 ignored. The first
-lifecycle attempt failed under filesystem sandbox restrictions; retain that failure as
-an environment-limited attempt, not a product pass.
-
-One early macOS debug proof build and one disposable native launch passed CSP styles,
-real draft IPC, stable status geometry, Settings return, preferences and cleanup. It
-predates final refinements and is not final package qualification. Windows interactive
-access is unverified. Native physical keyboard/IME, actual OS drag/drop and live
-first-install/create progress remain explicit evidence gaps; the new offline/channel
-and synthetic native tests do not close those rows. Audit package output before any
-final human acceptance. Existing prior Phase 1G acceptance remains separate.
-
-Toolchains: source `.toolchains/enter-macos.sh` (Node24.19/Rust1.90/pinned SDK8.5.3).
-Temporary captures and logs live under ignored `.toolchains/reports/ui-refresh*`.
-Do not commit host paths/logs/SDKs. Existing mockups are unchanged repository assets.
-The prior delivery handover below is historical scope/evidence, not a stop instruction
-for this approved implementation. Publish coherent code/docs only after verification.
+Physical keyboard/IME, actual OS drag/drop, live first-install/create progress and
+focused human acceptance remain unverified. The accepted
+[mockups](../design/ui-refresh/README.md) and [UI task](../tasks/active/ui-design-review.md)
+own remaining visual scope. Earlier implementation evidence and first failed run
+36647015944 remain in the task ledger; neither failed candidate is a qualified release.
+Both second-run retained executables and Mac archive were hash-verified locally under
+ignored `.toolchains/reports/ui-refresh-ci2-audit`; neither was installed or launched.
+Artifacts expire 2026-10-07 UTC. Toolchain: source `.toolchains/enter-macos.sh`.
 
 ## Preserved Phase 1G delivery handover
 

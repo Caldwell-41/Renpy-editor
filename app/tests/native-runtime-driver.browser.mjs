@@ -10,7 +10,7 @@ try {
   await server.listen();
   browser=await chromium.launch({channel:'chrome',headless:true});
   for(const mode of process.argv.slice(2).length?process.argv.slice(2):['compile','lint','route-a','route-b','runtime-error']) {
-    const page=await browser.newPage({viewport:{width:1100,height:720}});
+    const page=await browser.newPage({viewport:{width:mode==='route-b'?640:1100,height:720}});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.route('**/driver',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><div id="app"></div>'}));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/driver`);
@@ -32,7 +32,13 @@ try {
       }};
       window.__loomlightRuntimeProbeCase=mode;
       const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
-      const {startApplication}=await import('/src/main.ts');startApplication(fixture.request);
+      const {startApplication}=await import('/src/main.ts');startApplication(async(operation,payload)=>{
+        const response=await fixture.request(operation,payload);
+        // The saved receipt can arrive within the 200 ms status debounce window.
+        // Retain the real renderer's authoring lease until that receipt arrives.
+        if(operation==='scene.apply'&&payload.command.type==='updateBeat')await new Promise(resolve=>setTimeout(resolve,150));
+        return response;
+      });
     },mode);
     await page.addScriptTag({content:await readFile(new URL('../src-tauri/src/native_editor_probe.js',import.meta.url),'utf8')});
     // Reject hidden/disabled synthetic clicks. Native probes must follow the UI.
@@ -44,8 +50,8 @@ try {
       };
     });
     await page.addScriptTag({content:await readFile(new URL('../src-tauri/src/runtime_ui_probe.js',import.meta.url),'utf8')});
-    try { await page.waitForFunction(()=>window.__driverReport,{},{timeout:45000}); } catch(error) { console.log(await page.evaluate(()=>({body:document.body.innerText,calls:window.__driverCalls}))); throw error; }
-    const report=await page.evaluate(()=>window.__driverReport);
+    try { await page.waitForFunction(()=>window.__driverReport||document.querySelector('.runtime-panel [role=alert]')?.textContent.includes('Another persistence operation'),{},{timeout:45000}); } catch(error) { console.log(await page.evaluate(()=>({body:document.body.innerText,calls:window.__driverCalls}))); throw error; }
+    const report=await page.evaluate(()=>window.__driverReport??{passed:false,error:document.querySelector('.runtime-panel [role=alert]')?.textContent});
     if(!report.passed) console.log(await page.evaluate(()=>({active:document.activeElement?.outerHTML.slice(0,300),selection:getSelection()?.toString(),start:window.__loomlightProbeEditor(document.querySelector('.source-editor'))?.selectionStart,text:window.__loomlightProbeEditor(document.querySelector('.source-editor'))?.value,calls:window.__driverCalls})));
     assert.equal(report.passed,true,`${mode}: ${JSON.stringify(report)}`);
     assert.deepEqual(errors,[],mode);

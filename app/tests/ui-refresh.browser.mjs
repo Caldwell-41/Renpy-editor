@@ -110,6 +110,16 @@ try {
  await refresh.goto(`http://127.0.0.1:${address.port}/refresh-probe`);
  await refresh.evaluate(async()=>{
   const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');
+  let loadingScene=false;
+  const request=async(operation,payload={})=>{
+   if(operation==='scene.list'){
+    loadingScene=true;
+    try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
+    finally{loadingScene=false;}
+   }
+   if(loadingScene&&operation==='source.list')return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial scene observation owns the service'}};
+   return visualRequest(operation,payload);
+  };
   let preferences={schemaVersion:1,theme:'system',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
   const busy=new Map([['project.current',2],['source.list',2],['preferences.write',1]]);
   window.__TAURI_INTERNALS__={invoke:async(_command,{request})=>{
@@ -122,7 +132,7 @@ try {
    return {...await visualRequest(request.operation,request.payload),requestId:request.requestId};
   }};
   const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
-  const {startApplication}=await import('/src/main.ts');startApplication(visualRequest);
+  const {startApplication}=await import('/src/main.ts');startApplication(request);
  });
  await refresh.addScriptTag({content:await readFile(new URL('../src-tauri/src/native_editor_probe.js',import.meta.url),'utf8')});
  await refresh.addScriptTag({content:await readFile(new URL('../src-tauri/src/ui_refresh_probe.js',import.meta.url),'utf8')});
@@ -131,5 +141,31 @@ try {
  assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,5);
  assert.deepEqual(await refresh.evaluate(()=>window.__busyRemaining),[0,0,0]);
  await refresh.close();
+ // A user may navigate as soon as the shell appears, before a large Story read
+ // finishes. Verify the application orders that read ahead of Source loading.
+ const early=await browser.newPage({viewport:{width:1100,height:720}});
+ await early.route('**/early-navigation',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><div id="app"></div>'}));
+ await early.goto(`http://127.0.0.1:${address.port}/early-navigation`);
+ await early.evaluate(async()=>{
+  const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');
+  let held=false;window.__earlyContention=0;
+  const request=async(operation,payload={})=>{
+   if(operation==='scene.list'){
+    held=true;window.__earlyReadStarted=true;
+    try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
+    finally{held=false;}
+   }
+   if(operation==='source.list'&&held){window.__earlyContention++;return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial observation owns service'}};}
+   return visualRequest(operation,payload);
+  };
+  const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
+  const {startApplication}=await import('/src/main.ts');startApplication(request);
+ });
+ await early.locator('.recent-open').click();
+ await early.waitForFunction(()=>window.__earlyReadStarted);
+ await early.getByRole('button',{name:'Source',exact:true}).click();
+ await early.locator('.cm-content[contenteditable="true"]').waitFor({timeout:5000});
+ assert.equal(await early.evaluate(()=>window.__earlyContention),0,'Source raced the in-flight Story read');
+ await early.close();
  console.log('PASS: all six workspaces in both themes; onboarding, Settings, minimum/laptop layouts, stable status geometry; mixed-newline rich editor undo; shipped smoke interactions with unavailable-click rejection and UI refresh probe with busy contention. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

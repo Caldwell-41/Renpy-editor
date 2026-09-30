@@ -789,3 +789,102 @@ no automatic retry or merge. No workflow is pending.
   all required gates, evidence and package identity. Deliver verified review packages
   while retaining explicit native input/drop/live progress and human-acceptance gaps.
   No merge, autonomous Goal, automatic watcher or claimed client runtime pause.
+
+### Second qualification failure and timing reassessment — 2026-09-30
+
+**UI-QUAL-2: FAILED; timing gaps reproduced locally, bounded corrections verified.**
+The user resumed after both platform jobs failed and asked why local checks passed.
+The previous fixture tests modeled immediate commits and small project reads; they
+proved selector compatibility but omitted native operation timing and the compact
+route-b viewport. Passing that preflight on both CI hosts did not close those gaps.
+This audit adds no native launch/build or hosted dispatch.
+
+- [Run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
+  attempt **1**, tested **d129d9c016517ffecf7276bb04a4bb8e6fe996b1**, tree
+  **9b1deccc879d092c6e4323a87615c51d5b28e7c2**, input `upload_packages=true`.
+  Created 2026-09-30 01:01:26 UTC; completed failed 01:28:10 UTC.
+- macOS job **109691837741** and Windows job **109691837781** passed preceding
+  frontend/core/isolated-flow/browser/official archive SDK lifecycle and handoff,
+  runtime service/diagnostic SDK, desktop, package build and source-scan gates.
+  Preflight passed 69 frontend tests plus browser checks; those browser checks also
+  passed on both supported targets. SDK cache hits skipped fetch; no live download
+  UI evidence is inferred.
+- Required packaged report gates failed. Boundary smoke, dependency/license inventory
+  and normal success installer upload were skipped. Failure retention and deferred
+  browser gates passed. All twelve reports confirmed cleanup; two Tauri production
+  builds and twelve top-level case starts occurred. No boundary-smoke start occurred.
+
+| Packaged UI case | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| compile | PASS | PASS |
+| lint | PASS | PASS |
+| route-a | FAIL: overlapping persistence | FAIL: overlapping persistence |
+| route-b | PASS | FAIL: overlapping persistence |
+| runtime-error | PASS | PASS |
+| ui-refresh | PASS | FAIL: opening/editor timeout |
+
+**Route failures — exact local reproduction.** Three reports stopped at
+`branches-real-edit-restored`, with app status Saved, runtime idle and notice
+`Runtime action failed: Another persistence operation is still in progress.` The
+status layer intentionally delays Saving/Checking text by 200 ms to prevent flicker.
+The driver waited 30 ms then accepted the previous Saved label, although the commit
+still held authoring ownership. Its next controlled-play installation was correctly
+refused. Existing fixtures returned immediately and hid the race. A 150 ms delayed
+`scene.apply` updateBeat receipt reproduces that exact notice. The driver now waits
+for the original expanded Beat form to disconnect after its accepted receipt before
+continuing. The test keeps the delay. No expected state is written, assertion removed,
+mutation replayed or long-play minimum reduced. Helper-install failures now report
+immediately instead of waiting through a 190-second timeout.
+
+**Windows UI-refresh — application race reproduced, native cause still uncertain.**
+The report had no completed checks and only `stage: welcome` / `Timeout at welcome`;
+that label covered opening, navigation and editor readiness. The native fixture has
+500 scenes, 506 files and 105627 source bytes; the local visual fixture was tiny.
+Initial `scene.list` bypassed the renderer request lane while the Source navigation
+button was already visible. Holding the read for 1200 ms and refusing overlapping
+Source reads reproduces the old timeout. Scene/authoring/flow reads now join the lane,
+with runtime Stop/control still independent. A separate early-navigation test clicks
+Source during the held read and asserts editor readiness with zero overlapping
+Source requests. The UI-refresh probe waits for real initial Story content and records
+separate project/Story/Source stages plus bounded failure state. That additional setup
+wait does not replace the early-navigation application regression. The original
+Windows native report cannot conclusively identify its cause; native confirmation
+remains required. Do not present the reproduced race as complete native diagnosis.
+
+**Compact layout coverage.** The packaged route-b case runs at 640×720, whereas the
+previous browser preflight used 1100×720 for all cases. Preflight now matches both
+native sizes; the driver opens the collapsed Scenes/files tree before selecting a
+Source file. Both route scripts pass with delayed receipts and retained 9.5-second
+observation assertions.
+
+| Retained evidence | Artifact ID / name | Executable SHA-256 |
+| --- | --- | --- |
+| macOS ARM64 | `11071683431` / `phase-1-q1-package-evidence-macos-26` | `dc7883e1ef4e5488c8a698238ce1265591903cacb06d32ed4687a973f0041576` |
+| Windows x64 | `11072380234` / `phase-1-q1-package-evidence-windows-2025` | `9fbdf2ef0110ccd08939d5d2eeb5c0f60af54782c1a81a7b097d3896510eeef4` |
+
+Manifests match run/attempt/candidate/tree and correctly retain all six cases. Retained
+bytes and the Mac archived executable were hash-verified; Mac tar SHA-256
+`799956ccefe2d586ebf7edb76100f50ad5358aae665c602c1a1c5aa87ff07de4`.
+Mac artifact expires 2026-10-07 01:19:56 UTC; Windows 01:28:04 UTC. Both are diagnostic
+packages of a failed candidate. Raw logs, screenshots and reports remain in ignored
+local evidence; no binary was installed or launched during this audit.
+
+**Verification and limits.** Expected failures are retained locally: delayed-save
+route refusal, delayed-startup timeout and ordering-unit failure against the old lane.
+After correction, 70 frontend tests pass with zero skips; full Source/browser suite
+passes its legacy rejecting control, editor/save/selection/undo checks, both-theme
+visual/layout tests, shipped smoke/UI-refresh, separate early navigation and all five
+shipped runtime scripts. Rust formatting and desktop compile check pass. No core or
+package-retention code changed; their preceding results are not a new native pass.
+Repository/link/privacy validation and whitespace checks pass at publication.
+
+**Reassessment and budget.** Two hosted qualification dispatches, each attempt 1,
+have now produced four production Tauri builds and 24 top-level native case starts,
+plus the separate early Mac debug build/launch. No attempt rerun or duplicate occurred;
+prior Q1 totals remain separate. The second allowance is consumed. Avoid another
+full matrix based only on fixtures: propose one focused local macOS build and one
+native start each of route-a, route-b and UI-refresh first. That allowance is not yet
+approved; no new CI dispatch, automatic retry or merge is selected. Publish this
+checkpoint and continue the same chat after the user's decision. Windows native
+confirmation, physical input/drop, live SDK/create progress and human acceptance
+remain open. Neither failed run is superseded into a pass by local corrections.

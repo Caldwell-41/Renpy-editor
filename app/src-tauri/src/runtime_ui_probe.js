@@ -25,9 +25,25 @@
       await click("Trust for this session and continue");
     }
   };
+  const openSource = async path => {
+    await click("Source");
+    await until(() => document.querySelector('.source-workspace'));
+    if(document.querySelector('.project-shell')?.dataset.treeCollapsed === 'true') await click("Scenes / files");
+    await until(() => document.querySelector(`button[title="${path}"]`) && !document.querySelector(`button[title="${path}"]`).disabled,20000);
+    document.querySelector(`button[title="${path}"]`).click();
+    await until(() => document.querySelector(`.source-editor[aria-label="Source editor for ${path}"]`) && !window.__loomlightProbeEditor(document.querySelector(`.source-editor[aria-label="Source editor for ${path}"]`)).readOnly,20000);
+  };
+  const commitBeat = async () => {
+    const form=document.querySelector('.expanded-beat');
+    assert(form, "A selected Beat form must own this commit");
+    await click("Commit Beat");
+    // Status copy is deliberately debounced: Saved may still describe the previous
+    // revision. The actual committed form is removed only after its receipt arrives.
+    await until(() => !form.isConnected,20000);
+    await settled();
+  };
   const editSource = async (path, transform) => {
-    checkpoint("source-view-open"); await click("Source"); await until(() => document.querySelector(`button[title="${path}"]`) && !document.querySelector(`button[title="${path}"]`).disabled,20000); document.querySelector(`button[title="${path}"]`).click();
-    await until(() => document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`) && !window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`)).readOnly,20000);
+    checkpoint("source-view-open"); await openSource(path);
     checkpoint("source-input-ready");
     const input = window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${path}"]`));
     input.focus(); input.value = transform(input.value); input.dispatchEvent(new Event("input",{bubbles:true}));
@@ -68,7 +84,7 @@
         // Swap the destinations using visible authoring controls, then restore them.
         const initial = destinations.map(d => d.value);
         destinations[0].value=initial[1]; destinations[0].dispatchEvent(new Event("change",{bubbles:true}));
-        await click("Commit Beat"); await settled();
+        await commitBeat();
         let flow = await read("flow.list",{sessionId});
         const assertChangedDestinations = graph => {
           const choices = graph.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice");
@@ -99,19 +115,22 @@
         const sceneSelect = document.querySelector('select[aria-label="Selected Scene"]'); sceneSelect.value=project.sceneId; sceneSelect.dispatchEvent(new Event("change"));
         const routeSelect = document.querySelector('select[aria-label="Selected route"]'); routeSelect.value=[...routeSelect.options].find(o=>o.value)?.value; routeSelect.dispatchEvent(new Event("change"));
         await click("Edit Choice / Jump"); await until(() => document.querySelector('select[aria-label="Choice destination Scene"]'));
-        const restore=document.querySelector('select[aria-label="Choice destination Scene"]'); restore.value=initial[0]; restore.dispatchEvent(new Event("change",{bubbles:true})); await click("Commit Beat"); await settled();
+        const restore=document.querySelector('select[aria-label="Choice destination Scene"]'); restore.value=initial[0]; restore.dispatchEvent(new Event("change",{bubbles:true})); await commitBeat();
         checkpoint("branches-real-edit-restored");
       }
+      checkpoint("controlled-play-install");
       if (document.querySelector(".runtime-panel").hidden) await click("Runtime & diagnostics");
       await click("Enable controlled play"); await click("Add controlled play helper");
-      await until(() => /helper saved/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
+      await until(() => {
+        const failure=document.querySelector('.runtime-panel [role="alert"]')?.textContent;
+        if(failure)throw Error(failure);
+        return /helper saved/.test(document.querySelector('.runtime-panel [role="status"]').textContent);
+      },20000);
       let draftPath;
       if (mode === "route-b") {
         checkpoint("draft-refusal-choices");
         draftPath="game/chapters/chapter_01/scene_001.rpy";
-        await click("Source"); await until(()=>document.querySelector(`button[title="${draftPath}"]`) && !document.querySelector(`button[title="${draftPath}"]`).disabled,20000);
-        document.querySelector(`button[title="${draftPath}"]`).click();
-        await until(()=>document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`) && !window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`)).readOnly,20000);
+        await openSource(draftPath);
         const input=window.__loomlightProbeEditor(document.querySelector(` .source-editor[aria-label="Source editor for ${draftPath}"]`));
         input.value="label changed_mapped_label:\n    return\n"; input.dispatchEvent(new Event("input",{bubbles:true}));
         checkpoint("draft-run-cancel"); await click("Run Game"); await click("Cancel");

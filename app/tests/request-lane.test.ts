@@ -16,3 +16,17 @@ test("Source retention, SDK discovery and runtime submission are ordered while S
   await sdk; await prepare;
   assert.deepEqual(calls,["read","stop","write","sdk","prepare"]);
 });
+
+test("workspace observations finish before early Source navigation uses the shared service",async()=>{
+  for(const operation of ["scene.list","authoring.list","flow.list"] as const){
+    const lane=new RequestLane(),calls:string[]=[];
+    let release!:()=>void;
+    const observation=lane.run(operation,async()=>{calls.push(operation);await new Promise<void>(resolve=>{release=resolve;});});
+    await Promise.resolve();
+    const source=lane.run("source.list",async()=>{calls.push("source.list");});
+    await Promise.resolve();
+    try{assert.deepEqual(calls,[operation],"Source must not contend with an unfinished workspace observation");}
+    finally{release();await observation;await source;}
+    assert.deepEqual(calls,[operation,"source.list"]);
+  }
+});

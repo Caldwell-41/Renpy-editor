@@ -9,27 +9,34 @@
 
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
 The user explicitly said “okay build it” on 2026-09-30. Implementation is published on
-the existing feature branch. The selected qualification run failed; its test-driver
-corrections and downstream audit are locally verified and published as `d129d9c`. Accepted references are retained under
-[docs/design/ui-refresh](../design/ui-refresh/README.md). This supersedes the earlier
-planning-only restriction; it does not authorize integration or erase Phase 1G evidence.
+the existing feature branch. Both native qualification attempts failed; the second
+failure audit and bounded timing corrections are recorded in the
+[UI ledger](../tasks/active/ui-design-review.md#second-qualification-failure-and-timing-reassessment--2026-09-30).
+Accepted references remain under [docs/design/ui-refresh](../design/ui-refresh/README.md).
+This does not authorize integration or erase Phase 1G evidence.
 
-Local work includes shared themes/shell, device preferences and Settings, Welcome and
-wizard progress, CodeMirror Source, Story editing/layout, supporting catalogues and
-staged native asset import, and layered Branches. The candidate is locally implemented and checked, not yet a qualified release.
-Frontend/browser, core/SDK and an early macOS native slice pass at the recorded
-checkpoints; final package qualification and native acceptance remain active. See HANDOVER and the task
-ledger for exact evidence and remaining scope. [Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
-attempt 1, failed on both targets at candidate `a82e89cf0210af328531727b171d050745216b53`.
-Both packages were built and retained, but neither is qualified. The follow-up corrects
-dated recent-project selectors, CodeMirror selection readiness, hidden controls,
-busy observations and the missing sixth-case evidence contract; preflight now runs
-the shipped drivers before packaging. The user approved one corrected dispatch:
+The UI refresh is implemented, but **not a qualified release**. Second
 [run 36653112288](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36653112288),
-attempt 1, tests `d129d9c016517ffecf7276bb04a4bb8e6fe996b1` with
-`upload_packages=true`. Observed 2026-09-30 01:01:58 UTC: Preflight in progress.
-State is **awaiting_ci**; no further dispatch, automatic retry or merge is authorized.
-Resume in the same chat to audit this recorded run; do not poll.
+attempt 1, tested `d129d9c016517ffecf7276bb04a4bb8e6fe996b1` and completed failed
+2026-09-30 01:28:10 UTC. macOS passed five of six packaged UI cases; Windows passed
+three of six. Earlier selector corrections passed. Route failures raced a delayed
+commit receipt; Windows UI-refresh timed out before editor readiness without enough
+telemetry to identify the exact native cause. Both package builds and other preceding
+gates passed, but required report gates failed and boundary smoke was skipped.
+
+Bounded corrections reproduce the route failure locally, wait for actual commit
+completion and order workspace reads before early Source navigation. The latter
+fixes a separately reproduced application race; it is not yet proof of the Windows
+native timeout cause. Updated local verification passes 70 frontend tests, full
+browser/driver checks, Rust formatting and desktop compile check. Native qualification,
+physical input/drop, live SDK/create progress and human acceptance remain open.
+
+**No workflow is pending.** The second dispatch allowance is consumed. Cumulative
+refresh: two hosted dispatches, four production Tauri builds and 24 native case starts,
+plus the separate early Mac debug build/launch. Proposed next decision: one focused
+local macOS build and only route-a, route-b and UI-refresh native cases before any
+further matrix. That build/launch allowance, another CI dispatch and merge are not
+authorized. Continue the same branch/chat; see HANDOVER for exact limits.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

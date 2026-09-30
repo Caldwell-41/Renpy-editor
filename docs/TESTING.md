@@ -899,12 +899,18 @@ not native security, physical keyboard/IME, drop or SDK-download evidence.
 
 The same preflight also runs `tests/native-runtime-driver.browser.mjs` against the
 shipped compile/lint/route-a/route-b/runtime-error scripts and real application DOM
-at the packaged viewport. Its strict fixture models service responses and output
-sequence changes, injects temporary busy read refusals, and rejects unknown operations
+at the packaged viewports (640×720 for route-b; 1100×720 otherwise). Its strict fixture
+models service responses and output sequence changes, injects temporary busy read
+refusals and a 150 ms Beat commit receipt delay, and rejects unknown operations
 and hidden/disabled synthetic clicks. It catches dated-recent selectors, optional
 panel/form access, CodeMirror selection synchronization and reopen readiness before
 packaging. `ui-refresh.browser.mjs` also executes the shipped UI refresh probe with
-busy observations; the smoke path rejects unavailable clicks. Unit checks retain an
+busy observations and a 1200 ms initial Story read. A separate early-navigation
+regression switches to Source while that read is held and asserts the application
+queues its Source request without contention. Commit drivers wait for the accepted
+form receipt; debounced status copy is not an operation-completion signal. Native
+UI-refresh reports distinguish opening/Story/Source stages and retain bounded failure
+state. The smoke path rejects unavailable clicks. Unit checks retain an
 ambiguous-prefix negative selector case, non-busy rejection and busy-deadline failure.
 These tests establish driver compatibility only: fixture persistence, runtime output,
 consent and close results are not native service/SDK/security acceptance. The real
