@@ -6,6 +6,8 @@ import re
 import sys
 import tempfile
 
+from runtime_probe_cases import RUNTIME_CASES
+
 
 SUMMARY = re.compile(
     r"^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; "
@@ -13,7 +15,6 @@ SUMMARY = re.compile(
     re.MULTILINE,
 )
 TEST_LINE = re.compile(r"^test\s+(\S+)\s+\.\.\.\s+(ok|ignored|FAILED)$", re.MULTILINE)
-RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error")
 
 
 def cargo_log_ok(text, required_tests):
@@ -57,7 +58,7 @@ def runtime_cases_ok(directory):
             return False, f"missing or malformed case report: {path.name}"
         if not runtime_case_ok(case, record):
             return False, f"failed case or cleanup evidence: {path.name}"
-    return True, "all five packaged Runtime case reports and cleanup results passed"
+    return True, f"all {len(RUNTIME_CASES)} packaged Runtime case reports and cleanup results passed"
 
 
 def package_state(package_outcome, executable_present):
@@ -167,10 +168,12 @@ def source_audit(repo):
             return False, f"package evidence state is not recorded: {state}"
     if "sha256" not in retainer or "tarfile.open" not in retainer or "package-evidence.json" not in retainer:
         return False, "package hash/retention manifest is incomplete"
-    allowed_match = re.search(r"allowed\s*=\s*\[([^]]*)\]", prepared)
-    allowed_cases = re.findall(r"\"([^\"]+)\"", allowed_match.group(1)) if allowed_match else []
-    if tuple(allowed_cases[:5]) != RUNTIME_CASES:
-        return False, "the five ordinary packaged cases changed"
+    if RUNTIME_CASES != ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh"):
+        return False, "ordinary packaged case contract changed"
+    if "from runtime_probe_cases import RUNTIME_CASES" not in prepared or "cases = sys.argv[3:] or RUNTIME_CASES" not in prepared:
+        return False, "runner defaults must use the shared required cases"
+    if "from runtime_probe_cases import RUNTIME_CASES" not in retainer or "for case in RUNTIME_CASES:" not in retainer:
+        return False, "package retention must record every required runtime case"
     return True, "source selectors, specialist split, runtime cases and workflow outcomes aligned"
 
 
@@ -230,6 +233,13 @@ def self_test():
         for name, record in records.items():
             (directory / f"runtime-ui-{name}.json").write_text(json.dumps(record), encoding="utf-8")
         assert runtime_cases_ok(directory)[0]
+        # Five legacy successes must never hide missing/failed UI refresh evidence.
+        ui_path = directory / "runtime-ui-ui-refresh.json"
+        ui_path.unlink()
+        assert not runtime_cases_ok(directory)[0]
+        ui_path.write_text(json.dumps({**records["ui-refresh"], "passed": False}), encoding="utf-8")
+        assert not runtime_cases_ok(directory)[0]
+        ui_path.write_text(json.dumps(records["ui-refresh"]), encoding="utf-8")
         (directory / "runtime-ui-route-b.json").unlink()
         assert not runtime_cases_ok(directory)[0]
         (directory / "runtime-ui-route-b.json").write_text("{malformed", encoding="utf-8")

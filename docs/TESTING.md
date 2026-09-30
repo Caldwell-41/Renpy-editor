@@ -897,6 +897,20 @@ exact mixed-newline edit/undo/redo. It executes the shipped smoke interactions a
 real CodeMirror DOM with a stubbed desktop boundary. This is a driver/renderer check,
 not native security, physical keyboard/IME, drop or SDK-download evidence.
 
+The same preflight also runs `tests/native-runtime-driver.browser.mjs` against the
+shipped compile/lint/route-a/route-b/runtime-error scripts and real application DOM
+at the packaged viewport. Its strict fixture models service responses and output
+sequence changes, injects temporary busy read refusals, and rejects unknown operations
+and hidden/disabled synthetic clicks. It catches dated-recent selectors, optional
+panel/form access, CodeMirror selection synchronization and reopen readiness before
+packaging. `ui-refresh.browser.mjs` also executes the shipped UI refresh probe with
+busy observations; the smoke path rejects unavailable clicks. Unit checks retain an
+ambiguous-prefix negative selector case, non-busy rejection and busy-deadline failure.
+These tests establish driver compatibility only: fixture persistence, runtime output,
+consent and close results are not native service/SDK/security acceptance. The real
+packaged gates and all rejecting assertions remain required. Optional native Branches
+performance probes are not selected or revived by this compatibility audit.
+
 Frontend tests retain rejecting Save/conflict/selection assertions and add staged
 import cancellation/partial-failure, dialogue composition/commit ownership, and
 ordered progress/unknown-total/failure checks through the actual frontend channel
@@ -904,7 +918,10 @@ handler. Core tests cover bounded preferences, atomic preference persistence, sc
 progress, and written-byte download accounting. The two official archive-backed SDK
 gates remain separate from routine core selection; no specialist exercises are added.
 
-The existing packaged runtime runner additionally selects `ui-refresh`, using a
+The runner, report validator and package-evidence manifest share the six required
+cases in `scripts/runtime_probe_cases.py`; missing/failed UI-refresh evidence is
+explicitly rejected and retained. The existing packaged runtime runner selects
+`ui-refresh`, using a
 disposable profile to require native CSP styling, real draft IPC, status geometry,
 Settings return and preference round-trip/cleanup. Its editor input is explicitly
 synthetic. No second qualification matrix or new testing orchestrator is introduced.

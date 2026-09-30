@@ -15,3 +15,24 @@ window.__loomlightProbeEditor = element => {
     focus(){element.focus();},dispatchEvent(event){return element.dispatchEvent(event);},
   };
 };
+
+// Recent-project buttons contain a date as well as their title. Match the title
+// node exactly; do not accidentally select a similarly prefixed project.
+window.__loomlightProbeFindButton = label => [...document.querySelectorAll('button')].find(button => {
+  const text = button.classList.contains('recent-open')
+    ? [...button.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('')
+    : button.textContent;
+  return text === label;
+});
+// Only use for reads or explicitly idempotent preference writes. Busy is a
+// pre-dispatch rejection; other failures and the deadline remain failures.
+window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
+  const deadline = performance.now() + timeoutMs;
+  for (;;) {
+    try { return await task(); }
+    catch (error) {
+      if (error.code !== 'RUNTIME_BUSY' || performance.now() >= deadline) throw error;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+};

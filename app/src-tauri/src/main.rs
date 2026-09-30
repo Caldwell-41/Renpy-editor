@@ -577,10 +577,10 @@ fn main() {
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(2));
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
-                    if case == "ui-refresh" { main.eval(include_str!("ui_refresh_probe.js")).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                    if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
-                        main.eval(include_str!("branches_ui_probe.js")).expect("branches probe injection");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("branches_ui_probe.js"))).expect("branches probe injection");
                     } else {
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("runtime_ui_probe.js"))).expect("runtime probe injection");
                     }

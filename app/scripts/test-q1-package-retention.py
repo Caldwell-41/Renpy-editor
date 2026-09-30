@@ -59,6 +59,19 @@ class PackageRetentionTests(unittest.TestCase):
         self.assertTrue(all(case["state"] == "missing-or-malformed-report"
                             for case in manifest["runtimeCases"]))
 
+    def test_ui_refresh_report_is_retained_alongside_the_five_runtime_cases(self):
+        self.binary("Windows")
+        self.output.parent.mkdir(parents=True)
+        report = {"case": "ui-refresh", "passed": False, "exitCode": 1, "timedOut": False,
+                  "reports": [{"evidence": "runtime-ui-packaged", "passed": False, "cleanupComplete": True}]}
+        (self.output.parent / "runtime-ui-ui-refresh.json").write_text(json.dumps(report))
+        result, manifest = self.retain()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        cases = {case["case"]: case for case in manifest["runtimeCases"]}
+        self.assertEqual(set(cases), {"compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh"})
+        self.assertEqual(cases["ui-refresh"]["state"], "failed-or-incomplete")
+        self.assertTrue(cases["ui-refresh"]["cleanupComplete"])
+
     def test_macos_tar_preserves_bundle_bytes_and_modes(self):
         binary = self.binary("macOS")
         hidden = binary.parent.parent / "Resources/.bundle-data"

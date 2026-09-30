@@ -6,17 +6,14 @@
   const delay = ms => new Promise(resolve => setTimeout(resolve,ms));
   const until = async (condition, limit = 190000) => { const start = performance.now(); while (!condition()) { if (performance.now()-start > limit) throw new Error(`Timeout: ${stage}`); await delay(30); } };
   const assert = (value, message) => { if (!value) throw new Error(message); };
-  const find = label => [...document.querySelectorAll("button")].find(b => b.textContent === label);
+  const find = window.__loomlightProbeFindButton;
   const click = async label => { await until(() => find(label) && !find(label).disabled,15000); find(label).click(); await delay(30); };
   let serial = 0;
   const call = async (operation,payload={}) => {
     const response = await window.__TAURI_INTERNALS__.invoke("core_request",{request:{protocolVersion:1,requestId:`r2-${++serial}`,operation,payload}});
-    if (!response.ok) throw new Error(`${operation}: ${response.error.code}`); return response.value;
+    if (!response.ok) throw Object.assign(new Error(`${operation}: ${response.error.code}`), {code:response.error.code}); return response.value;
   };
-  const read = async (operation,payload={}) => {
-    const deadline=performance.now()+10000;
-    for (;;) { try { return await call(operation,payload); } catch(error) { if (!String(error).includes("RUNTIME_BUSY") || performance.now()>deadline) throw error; await delay(100); } }
-  };
+  const read = (operation,payload={}) => window.__loomlightProbeRetryBusy(() => call(operation,payload));
   const settled = async () => until(() => /^(Saved|Unsaved Source draft)$/.test(document.querySelector('#app-status')?.textContent ?? ""));
   const checkpoint = name => { stages.push({stage:name,elapsedMs:Math.round(performance.now()-started)}); stage=name; };
   const trust = async () => {
@@ -51,6 +48,8 @@
       document.querySelector('.runtime-diagnostics button').click();
       await until(() => document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
       const input = window.__loomlightProbeEditor(document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
+      input.focus(); // CodeMirror synchronizes its retained selection on the next view update.
+      await until(() => input.selectionStart === "label diagnostic_case:\n".length,15000);
       assert(input.selectionStart === "label diagnostic_case:\n".length,"Exact editor line start after CRLF normalization");
       assert(input.value.slice(input.selectionStart,input.selectionEnd).includes(mode === "compile" ? "not a statement" : "loomlight_image_that_does_not_exist"),"SDK navigation selected the actual failing line");
       const reopened = await read("source.open",{sessionId,path:"game/雪 diagnostic.rpy"});
@@ -59,7 +58,7 @@
     } else {
       if (mode !== "runtime-error") {
         checkpoint("branches-destination-edit"); await click("Branches");
-        await until(() => document.querySelectorAll('.branch-node').length === 3);
+        await until(() => document.querySelectorAll('.branch-node').length === 3); await click("Scene details");
         const select = document.querySelector('select[aria-label="Selected Scene"]');
         select.value = project.sceneId; select.dispatchEvent(new Event("change"));
         const routes = document.querySelector('select[aria-label="Selected route"]');
@@ -96,13 +95,14 @@
         flow = await read("flow.list",{sessionId,refresh:true});
         assertChangedDestinations(flow);
         checkpoint("branches-destination-reopen-passed");
-        await click("Branches"); await until(() => document.querySelectorAll('.branch-node').length === 3);
+        await click("Branches"); await until(() => document.querySelectorAll('.branch-node').length === 3); await click("Scene details");
         const sceneSelect = document.querySelector('select[aria-label="Selected Scene"]'); sceneSelect.value=project.sceneId; sceneSelect.dispatchEvent(new Event("change"));
         const routeSelect = document.querySelector('select[aria-label="Selected route"]'); routeSelect.value=[...routeSelect.options].find(o=>o.value)?.value; routeSelect.dispatchEvent(new Event("change"));
         await click("Edit Choice / Jump"); await until(() => document.querySelector('select[aria-label="Choice destination Scene"]'));
         const restore=document.querySelector('select[aria-label="Choice destination Scene"]'); restore.value=initial[0]; restore.dispatchEvent(new Event("change",{bubbles:true})); await click("Commit Beat"); await settled();
         checkpoint("branches-real-edit-restored");
       }
+      if (document.querySelector(".runtime-panel").hidden) await click("Runtime & diagnostics");
       await click("Enable controlled play"); await click("Add controlled play helper");
       await until(() => /helper saved/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
       let draftPath;
@@ -163,6 +163,7 @@
         await until(() => find("Run Game") && !find("Run Game").disabled);
         checkpoint("long-run-save-stop-passed");
         await click("Close Project"); await click("Runtime UI fixture");
+        await until(() => find("Run Game")); await settled();
         const next = await read("project.current"); assert(next.sessionId !== sessionId,"reopen has new session identity");
         const reopened=await read("source.open",{sessionId:next.sessionId,path:"game/雪 diagnostic.rpy"});
         assert(reopened.text.includes("# Saved while running."),"accepted Source bytes survive reopen");

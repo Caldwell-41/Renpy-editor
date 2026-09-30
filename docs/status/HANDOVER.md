@@ -2,23 +2,37 @@
 
 ## UI implementation continuation — 2026-09-30
 
-**State: awaiting_ci.** Published candidate `a82e89cf0210af328531727b171d050745216b53`.
+**State: qualification failed; corrected drivers ready for a new-run decision.**
 [Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
-attempt 1, workflow `production-scaffold.yml`, branch `feature/phase-1g-branches-runtime`,
-input `upload_packages=true`. Dispatched once, accepted at 2026-09-29 23:47:09 UTC.
-Observed at 23:47:35 UTC: in progress, Preflight running Source browser checks;
-repository/privacy, selector audit and frontend tests passed. No retry, second
-production dispatch or integration is authorized. The tested SHA is the implementation
-candidate above; this following wait record changes documentation only.
+attempt 1, tested `a82e89cf0210af328531727b171d050745216b53` and failed on both targets
+at 2026-09-30 00:05:04 UTC. Both packages built; all twelve native UI cases failed
+(ten at the stale recent-project selector; two on busy direct observations). Boundary
+smoke and normal installer upload were skipped. Exact audit, artifacts and hashes
+are in the [UI ledger](../tasks/active/ui-design-review.md#qualification-failure-and-downstream-driver-audit--2026-09-30).
+The original failed evidence is preserved; no rerun has been dispatched.
 
-Resume in this same chat with “The workflow is complete; audit the recorded run and
-continue.” Read this exact run/attempt and fresh refs once. If still pending, retain
-the record and wait again without polling. If terminal, audit actual gates, reports,
-package/artifact identity and remaining native evidence, then deliver usable review
-packages. Failed/cancelled/skipped evidence is not a pass; classify a failure before
-any bounded fix and obtain a concrete allowance before another costly dispatch.
-Do not reset the branch or replace this outcome. No autonomous Goal was created, so
-an ordinary same-chat message is sufficient; no client runtime pause is claimed.
+Bounded corrections plus the user's additional downstream audit are complete locally:
+69 frontend tests, full Source/browser suite (including all five shipped runtime
+scripts, UI-refresh and smoke driver paths), Rust format/check, nine package-retention
+tests, selector/gate rejection controls and repository checks. Driver fixtures are
+explicitly not native SDK/process/persistence/security acceptance. No core source,
+product behavior, native assertion or timing budget was weakened. Optional Branches
+probe compatibility was repaired without executing the retired native performance
+exercise. The validator, runner and retained manifest now share all six ordinary cases.
+
+Continue on the same branch and chat. Publish this correction checkpoint, then ask
+for one additional `production-scaffold.yml` Windows/macOS dispatch with
+`upload_packages=true`, no automatic retry and no merge. On approval, check fresh
+refs/pending operations, dispatch the corrected published candidate once, record its
+run/attempt/SHA, then use the normal same-chat wait. No workflow is currently pending;
+no autonomous Goal was created. Do not dispatch just because the user says Resume.
+
+Diagnostic copies of the failed candidate are hash-verified locally under ignored
+`.toolchains/review-builds/ui-refresh-a82e89c/{macOS,Windows}`. They retain the old probe
+scripts and are not qualified release installers. Neither was installed or launched
+on this resume. The existing one-run allowance is consumed; totals are one early Mac
+debug build/launch plus two final Tauri builds/twelve top-level native probe starts,
+one hosted request/attempt, zero retries. Prior Q1 counts remain separate.
 
 
 The user explicitly authorized building the accepted UI. Continue the same outcome
@@ -27,8 +41,9 @@ local changes and prior Phase 1G work. No merge, conflict resolution or new feat
 phase is selected. The [UI task](../tasks/active/ui-design-review.md) and saved
 [mockup index](../design/ui-refresh/README.md) own scope and visual references.
 
-The refresh candidate is implemented, locally verified and published. The approved
-single final Windows/macOS production dispatch is recorded above. No merge or integrated-tree qualification is selected.
+The refresh candidate is implemented and published; its first final qualification failed.
+Corrected test drivers are locally verified; native requalification remains pending a
+new allowance. No merge or integrated-tree qualification is selected.
 
 Local evidence: 67 frontend tests pass; final build/typecheck and Rust formatting pass;
 real Chromium retains the rejecting legacy Source control and passes textarea/CodeMirror

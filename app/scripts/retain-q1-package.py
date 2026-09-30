@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import tarfile
 
+from runtime_probe_cases import RUNTIME_CASES
+
 
 def stream_digest(stream):
     value = hashlib.sha256()
@@ -105,7 +107,7 @@ def main():
         "retentionWithheldByScan": executable_present and not scan_ok,
         "runtimeCases": [],
     }
-    for case in ("compile", "lint", "route-a", "route-b", "runtime-error"):
+    for case in RUNTIME_CASES:
         report_path = Path(args.output).parent / f"runtime-ui-{case}.json"
         try:
             record = json.loads(report_path.read_text(encoding="utf-8"))

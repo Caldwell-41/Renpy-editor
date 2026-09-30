@@ -7,12 +7,14 @@ import subprocess
 import sys
 import time
 
+from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES
+
 executable = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 failed = False
-allowed = ["compile", "lint", "route-a", "route-b", "runtime-error", "branches-performance", "ui-refresh"]
-cases = sys.argv[3:] or (allowed[:5] + ["ui-refresh"])
+allowed = RUNTIME_CASES + OPTIONAL_CASES
+cases = sys.argv[3:] or RUNTIME_CASES
 if any(case not in allowed for case in cases):
     raise SystemExit("Unknown runtime UI case")
 for case in cases:

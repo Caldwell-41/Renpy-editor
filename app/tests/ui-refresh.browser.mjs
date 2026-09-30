@@ -90,11 +90,46 @@ try {
   const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
   const {startApplication}=await import('/src/main.ts');startApplication(async()=>({protocolVersion:1,requestId:'stub',ok:true,value:[]}));
  });
+ await probe.evaluate(()=>{
+  const original=HTMLButtonElement.prototype.click;
+  HTMLButtonElement.prototype.click=function(){
+   if(this.disabled||!this.checkVisibility({visibilityProperty:true}))throw Error(`Smoke clicked unavailable control: ${this.textContent}`);
+   return original.call(this);
+  };
+ });
  await probe.addScriptTag({content:await readFile(new URL('../src-tauri/src/native_editor_probe.js',import.meta.url),'utf8')});
  await probe.addScriptTag({content:await readFile(new URL('../src-tauri/src/smoke_probe.js',import.meta.url),'utf8')});
  await probe.waitForFunction(()=>window.__reviewProbeReport,{},{timeout:30000});
  const report=await probe.evaluate(()=>window.__reviewProbeReport);
  for(const key of ['supportingAuthoringUiPassed','sceneAuthoringUiPassed','sourceAuthoringUiPassed','sourceCommandTracePassed'])assert.equal(report[key],true,JSON.stringify(report));
  await probe.close();
- console.log('PASS: all six workspaces in both themes; onboarding, Settings, minimum/laptop layouts, stable status geometry; mixed-newline rich editor undo; shipped smoke interactions against CodeMirror. Fixture bridge only; not native SDK or security proof.');
+ // Exercise the shipped UI probe itself, including contention while source input
+ // is being retained. This is a browser/driver regression, not native acceptance.
+ const refresh=await browser.newPage({viewport:{width:1440,height:900}});
+ await refresh.route('**/refresh-probe',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><head><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"></head><body><div id="app"></div></body></html>'}));
+ await refresh.goto(`http://127.0.0.1:${address.port}/refresh-probe`);
+ await refresh.evaluate(async()=>{
+  const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');
+  let preferences={schemaVersion:1,theme:'system',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
+  const busy=new Map([['project.current',2],['source.list',2],['preferences.write',1]]);
+  window.__TAURI_INTERNALS__={invoke:async(_command,{request})=>{
+   const response=value=>({protocolVersion:1,requestId:request.requestId,ok:true,value});
+   if(request.operation==='probe.runtimeUiReport'){window.__refreshReport=request.payload;window.__busyRemaining=[...busy.values()];return response(null);}
+   const remaining=busy.get(request.operation)??0;
+   if(remaining){busy.set(request.operation,remaining-1);return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Observation overlaps draft retention'}};}
+   if(request.operation==='preferences.write'){preferences=request.payload;return response(preferences);}
+   if(request.operation==='preferences.read')return response(preferences);
+   return {...await visualRequest(request.operation,request.payload),requestId:request.requestId};
+  }};
+  const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
+  const {startApplication}=await import('/src/main.ts');startApplication(visualRequest);
+ });
+ await refresh.addScriptTag({content:await readFile(new URL('../src-tauri/src/native_editor_probe.js',import.meta.url),'utf8')});
+ await refresh.addScriptTag({content:await readFile(new URL('../src-tauri/src/ui_refresh_probe.js',import.meta.url),'utf8')});
+ await refresh.waitForFunction(()=>window.__refreshReport,{},{timeout:30000});
+ const refreshReport=await refresh.evaluate(()=>window.__refreshReport);
+ assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,5);
+ assert.deepEqual(await refresh.evaluate(()=>window.__busyRemaining),[0,0,0]);
+ await refresh.close();
+ console.log('PASS: all six workspaces in both themes; onboarding, Settings, minimum/laptop layouts, stable status geometry; mixed-newline rich editor undo; shipped smoke interactions with unavailable-click rejection and UI refresh probe with busy contention. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

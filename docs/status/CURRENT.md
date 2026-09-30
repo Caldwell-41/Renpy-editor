@@ -9,7 +9,8 @@
 
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
 The user explicitly said “okay build it” on 2026-09-30. Implementation is published on
-the existing feature branch and is awaiting the selected qualification run. Accepted references are retained under
+the existing feature branch. The selected qualification run failed; its test-driver
+corrections and downstream audit are now locally verified. Accepted references are retained under
 [docs/design/ui-refresh](../design/ui-refresh/README.md). This supersedes the earlier
 planning-only restriction; it does not authorize integration or erase Phase 1G evidence.
 
@@ -19,8 +20,12 @@ staged native asset import, and layered Branches. The candidate is locally imple
 Frontend/browser, core/SDK and an early macOS native slice pass at the recorded
 checkpoints; final package qualification and native acceptance remain active. See HANDOVER and the task
 ledger for exact evidence and remaining scope. [Production run 36647015944](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36647015944),
-attempt 1, is in progress at candidate `a82e89cf0210af328531727b171d050745216b53`.
-The single final matrix allowance has been consumed; resume the same chat to audit it.
+attempt 1, failed on both targets at candidate `a82e89cf0210af328531727b171d050745216b53`.
+Both packages were built and retained, but neither is qualified. The follow-up corrects
+dated recent-project selectors, CodeMirror selection readiness, hidden controls,
+busy observations and the missing sixth-case evidence contract; preflight now runs
+the shipped drivers before packaging. No workflow is pending. One additional final
+Windows/macOS dispatch needs an explicit allowance; no retry or merge has occurred.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

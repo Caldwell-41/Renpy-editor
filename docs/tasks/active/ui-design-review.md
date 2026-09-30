@@ -667,3 +667,99 @@ no integration, automatic retry or expanded feature milestone is selected.
   audit the recorded run, preserve failed/skipped results and inspect packages before
   delivery. An ended normal turn is not a claimed autonomous Goal pause. Remaining
   native input/drop/live SDK/create checks and human acceptance are unchanged.
+
+
+### Qualification failure and downstream driver audit — 2026-09-30
+
+**UI-QUAL-1: FAILED native qualification, driver defects diagnosed and corrected.**
+User resumed the recorded run, then explicitly requested an audit for similar
+problems downstream. This authorizes the bounded fixes and local regressions here,
+not another expensive qualification dispatch or merge.
+
+- Run **36647015944**, attempt **1**, tested **a82e89cf0210af328531727b171d050745216b53**,
+  tree **99c03b5e099e6b7683ef71b8a1ff97749285eb2f**. Started
+  2026-09-29 23:47:09 UTC; completed failed 2026-09-30 00:05:04 UTC.
+- Preflight passed: repository/privacy, gate rejection controls, selectors, 67 frontend
+  tests, Source/browser suite and Rust formatting. Both targets passed frontend build,
+  ordinary core, separate flow observation, browser, official archive-backed SDK,
+  runtime service/diagnostic SDK, desktop boundary, Tauri package build and source scan.
+  Routine core: Mac **178 passed / 39 ignored / 3 separately filtered**; Windows
+  **173 passed / 36 ignored / 3 separately filtered**. Flow, lifecycle, SDK handoff,
+  runtime service, runtime diagnostics and desktop gates each passed **1 / 0 ignored**
+  on each target. Archive cache hits skipped the conditional fetch step; that is not
+  live first-install/download UI evidence.
+- Both targets failed all six packaged UI reports. The five runtime cases timed out
+  at `open`: the exact whole-button-text selector no longer matched a project title
+  after the new date child was added. UI-refresh reached the native editor then
+  rejected a legitimate service-busy observation (Mac `project.current`, Windows
+  `source.list`) while draft retention owned the service. All twelve reports confirmed
+  cleanup. No successful native acceptance is inferred from these failures.
+- Required-report gates failed. Packaged boundary smoke, dependency/license inventory
+  and normal success-only installer upload were skipped. Failure-time diagnostic
+  package retention and deferred browser gates passed. Two actual Tauri builds and
+  twelve top-level native case starts occurred; boundary smoke did not run.
+
+| Retained evidence | Artifact identity | Executable SHA-256 |
+| --- | --- | --- |
+| macOS ARM64 | `11069123007`, `phase-1-q1-package-evidence-macos-26` | `3fe875fa3855e2c10a291020ebdf6c1444203a0c8146ef537c94027b7ac69657` |
+| Windows x64 | `11068968502`, `phase-1-q1-package-evidence-windows-2025` | `eb78718316f00eb1a1c9f6aa8d637b5f97483b5393154b025d3f67fb40a76d20` |
+
+Both artifacts expire 2026-10-07 UTC. Retrieved manifests match run/attempt/SHA/tree;
+retained bytes and Mac archived executable were hash-verified. Mac tar SHA-256:
+`767e7b92310a68cb6bd4c0fa175af7dfb66cbb92d96d4060ef8b2bfa6454bac4`.
+Ignored local review copies retain the failed candidate, with an explicit unqualified
+README. No binary was installed or launched during this audit. Raw logs, six reports
+per target and screenshots remain in downloaded evidence, not committed host logs.
+
+**Corrections and downstream inspection:**
+
+- Recent titles match exactly without the date child; a similarly prefixed title is
+  rejected. Only busy read observations and explicitly idempotent preference writes
+  receive bounded retries; real errors and expired deadlines still fail. Gameplay
+  mutations, Save, grants and launches are never automatically retried by this helper.
+- The shipped runtime scripts open Branches details and the Runtime panel before using
+  their controls. Diagnostic navigation focuses CodeMirror and waits for its retained
+  DOM selection; exact normalized line start and failing-line contents remain asserted.
+  Final reopen waits for the new rendered project before querying its session.
+- The smoke driver now opens New character, New variable, Import assets and Scene
+  details through visible controls. The optional Branches probe uses the shared recent
+  selector/editor adapter and opens its inspector. This compatibility repair does not
+  select or validate the retired native Branches performance exercise.
+- The existing runner executed six cases, but the standalone report validator and
+  retained package manifest listed only five. All three now import the same ordinary
+  case list. New negative controls reject absent or failed UI-refresh evidence and
+  prove its failure/cleanup state is included in the retained manifest. The original
+  runner already rejected the UI-refresh failure; no earlier failed run is relabelled.
+- A new browser preflight executes the actual shipped five runtime scripts against
+  the real rendered application and CodeMirror at 1100×720, with a strict fixture
+  service and busy read injections. It rejects hidden/disabled synthetic button
+  clicks and unexpected operations. The same check runs before packaging through
+  `npm run test:source-browser`. Existing smoke/UI-refresh browser paths also check
+  unavailable clicks/busy observations. These are driver compatibility checks;
+  fixture runtime output, retention, trust and close results do not prove native
+  execution, filesystem persistence, process ownership, security or physical input.
+
+**Local failures retained and classified:** the first diagnostic browser run exposed
+an unfocused DOM selection; focus alone still raced CodeMirror's next view update.
+Observed post-failure selection had the correct offset/text, so the final driver
+waits for that actual update without setting the expected selection. Compile/lint
+then passed. Both routes passed before the runtime-error fixture timed out: its
+constant output sequence prevented the renderer requesting diagnostics. Correcting
+that fixture to mirror native sequence advancement made the unchanged runtime-error
+script pass. No production semantics or success assertions were relaxed.
+
+**Final local verification:** 69 frontend tests pass, zero skipped; full updated
+`npm run test:source-browser` passes its legacy rejecting control, textarea/CodeMirror
+Save/mapped selection, mixed-newline edits, visual/layout checks, shipped smoke,
+UI-refresh contention and all five runtime driver cases. Both route scripts retain
+9.5-second observation assertions. Rust formatting and desktop compile check pass.
+Package-retention CLI: 9 tests pass; gate self-tests and source selector audit pass.
+Repository/link/privacy validation and whitespace check pass at publication.
+
+Cumulative refresh cost remains one early Mac debug build/launch; one final hosted
+request/attempt, two final Tauri builds and twelve native case starts; **zero retries**.
+Local driver diagnostics added no native launch or hosted run. Prior Q1 evidence and
+its totals remain unchanged. Corrected native qualification is still required, as
+are physical keyboard/IME, OS drag/drop, live SDK/create progress and focused human
+acceptance. Next decision: one additional corrected Windows/macOS production dispatch,
+no automatic retry or merge. No workflow is pending.

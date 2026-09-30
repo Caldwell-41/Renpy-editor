@@ -4,7 +4,7 @@
   const assert = (value, message) => { if (!value) throw new Error(message); };
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
   const until = async (condition, limit = 20000) => { const start = performance.now(); while (!condition()) { if (performance.now() - start > limit) throw new Error(`Timeout: ${report.stage}`); await delay(8); } };
-  const find = label => [...document.querySelectorAll("button")].find(button => button.textContent === label);
+  const find = window.__loomlightProbeFindButton;
   const click = async label => { await until(() => find(label) && !find(label).disabled); find(label).click(); };
   const raf = () => new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`rAF timeout: ${report.stage}`)), 5000);
@@ -14,9 +14,10 @@
   let serial = 0;
   const call = async (operation, payload = {}) => {
     const response = await window.__TAURI_INTERNALS__.invoke("core_request", { request: { protocolVersion: 1, requestId: `n1-${++serial}`, operation, payload } });
-    if (!response.ok) throw new Error(`${operation}: ${response.error.code}`);
+    if (!response.ok) throw Object.assign(new Error(`${operation}: ${response.error.code}`), { code: response.error.code });
     return response.value;
   };
+  const read = (operation, payload = {}) => window.__loomlightProbeRetryBusy(() => call(operation, payload));
   const graphReady = () => document.querySelectorAll(".branch-node").length === 500 && document.querySelectorAll("path[data-edge-id]").length === 2000 && /^Checked at/.test(document.querySelector(".branches-observation")?.textContent ?? "");
   const checkModel = flow => {
     assert(flow.nodes.length === 500 && flow.edges.length === 2000, "full real-service graph");
@@ -71,12 +72,12 @@
     await until(() => find("Branches") && document.querySelector("#app-status")?.textContent === "Saved");
     report.operations.openToSceneReadyMs = performance.now() - start;
     assert(!/Running|Validating/.test(document.querySelector(".runtime-panel [role=status]")?.textContent ?? ""), "inspection does not execute");
-    const project = await call("project.current"); let sessionId = project.sessionId;
+    const project = await read("project.current"); let sessionId = project.sessionId;
     start = performance.now(); await click("Branches"); await until(graphReady);
     if (window.__loomlightRuntimeProbeCase === "branches-interactive") return; // Native driver observes presentation; no rAF prerequisite ends this session.
     await frames(); report.operations.branchesToCheckedTwoRafMs = performance.now() - start;
     report.stage = "real-service-refresh";
-    start = performance.now(); const flow = await call("flow.list", { sessionId, refresh: true });
+    start = performance.now(); const flow = await read("flow.list", { sessionId, refresh: true });
     report.operations.flowRefreshIpcMs = performance.now() - start; checkModel(flow);
     assert(flow.observation.status === "checked", "completed disk response");
     report.workload = { nodes: flow.nodes.length, edges: flow.edges.length, revision: flow.revision };
@@ -109,25 +110,26 @@
     report.operations.refreshClickToCheckedTwoRafMs = performance.now() - start;
     assert(report.refreshPan[0].geometry.transform !== baseline.transform, "pan serviced while refresh requested");
     report.stage = "ordinary-edit";
+    await click("Scene details");
     const select = document.querySelector('select[aria-label="Selected Scene"]'); select.value = project.sceneId; select.dispatchEvent(new Event("change"));
     const routes = document.querySelector('select[aria-label="Selected route"]'); routes.value = [...routes.options].find(option => option.value)?.value; routes.dispatchEvent(new Event("change"));
     await click("Edit Choice / Jump"); await until(() => document.querySelectorAll('input[aria-label="Choice option text"]').length === 4);
     const input = document.querySelector('input[aria-label="Choice option text"]'); input.value = "Route A"; input.dispatchEvent(new Event("input", { bubbles: true }));
     start = performance.now(); await click("Commit Beat"); await until(() => !input.isConnected && document.querySelector("#app-status")?.textContent === "Saved"); await frames();
     report.operations.commitClickToSavedTwoRafMs = performance.now() - start;
-    start = performance.now(); const edited = await call("flow.list", { sessionId });
+    start = performance.now(); const edited = await read("flow.list", { sessionId });
     report.operations.postEditObservedFlowIpcMs = performance.now() - start; checkModel(edited);
     assert(edited.edges.some(edge => edge.sceneId === project.sceneId && edge.text === "Route A"), "accepted caption in model");
     report.postEditObservation = edited.observation;
     start = performance.now(); await click("Branches"); await until(graphReady); await frames();
     report.operations.returnToBranchesCheckedTwoRafMs = performance.now() - start;
     await click("Close Project"); await click("Branches performance fixture"); await until(() => find("Branches") && document.querySelector("#app-status")?.textContent === "Saved");
-    const reopened = await call("project.current"); assert(reopened.sessionId !== sessionId, "new session on reopen"); sessionId = reopened.sessionId;
-    const persisted = await call("flow.list", { sessionId, refresh: true }); checkModel(persisted);
+    const reopened = await read("project.current"); assert(reopened.sessionId !== sessionId, "new session on reopen"); sessionId = reopened.sessionId;
+    const persisted = await read("flow.list", { sessionId, refresh: true }); checkModel(persisted);
     assert(persisted.edges.some(edge => edge.sceneId === project.sceneId && edge.text === "Route A"), "accepted edit survives disk reopen");
     await click("Source"); await until(() => document.querySelector('button[title="game/chapters/chapter_01/scene_000.rpy"]'));
     document.querySelector('button[title="game/chapters/chapter_01/scene_000.rpy"]').click();
-    await until(() => document.querySelector("textarea")?.value.includes('"Route A"'));
+    await until(() => window.__loomlightProbeEditor(document.querySelector(".source-editor"))?.value.includes('"Route A"'));
     report.sourceReopen = "accepted caption visible";
     await click("Close Project");
     report.stage = "complete";

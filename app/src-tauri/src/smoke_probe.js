@@ -299,6 +299,7 @@ setTimeout(async () => {
     click("Characters");
     await awaitSurface("Create Character");
     supportingAuthoringStage = "create-character";
+    click("New character");
     control("Technical variable (fixed after creation)").value = "new_character";
     control("Display name").value = "New Character";
     click("Create Character");
@@ -306,6 +307,7 @@ setTimeout(async () => {
     click("Variables");
     await awaitSurface("Create Variable");
     supportingAuthoringStage = "create-variable";
+    click("New variable");
     control("Technical name (fixed after creation)").value = "maximum";
     const variableType = control("Type");
     variableType.value = "int";
@@ -337,6 +339,7 @@ setTimeout(async () => {
     click("Assets");
     await awaitSurface("Choose files…");
     supportingAuthoringStage="cancel-import";
+    click("Import assets");
     click("Choose files…");
     await waitFor(()=>importChoiceCount===2,"cancelled asset choice");await yieldTask();
     const cancelledPreserved=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…")?.disabled===false && document.querySelectorAll('.import-entry').length===0;
@@ -406,6 +409,7 @@ setTimeout(async () => {
     await awaitSceneCommit(2, "Create New Scene Choice transaction");
     sceneAuthoringStage = "audio-audition";
     const audioBeforeClick = mediaPurposes.filter((purpose) => purpose === "audioAudition").length;
+    if(document.querySelector(".scene-context-inspector").hidden) click("Scene details");
     click("Audition current music");
     await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
     const audioIntentional = audioBeforeClick === 0;
