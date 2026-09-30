@@ -3,10 +3,12 @@
 ## UI implementation continuation — 2026-09-30
 
 **State: automated qualification PASS; review builds ready.** No workflow is pending.
-Continue the same chat and `feature/phase-1g-branches-runtime`, draft/open/conflicting
+The user explicitly requested continuation in a new chat on 2026-09-30. Reuse
+`feature/phase-1g-branches-runtime`, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Main remains
 `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration/conflict resolution is selected.
-Incoming branch head was `4d759f409bb961d7b07e8ff22a5851c40d1310bf` (wait record).
+Published terminal-audit checkpoint: `ad97c6c7388cdf4e866a80e5015a1d22d5e91a98`.
+Inspect fresh refs and preserve newer work; do not reset to this historical checkpoint.
 This audit changes documentation only; it does not change tested application inputs.
 
 ### Exact successful qualification
@@ -66,8 +68,10 @@ progress and project-creation progress. Automated/synthetic native evidence does
 close those rows. The [UI task](../tasks/active/ui-design-review.md) and saved
 [mockups](../design/ui-refresh/README.md) retain approved scope. No merge, conflict
 resolution, new feature phase or new test/build dispatch is authorized. Do not archive
-the task as fully accepted while these rows remain open. Continue this same chat with
-review feedback; no replacement Goal or chat is needed.
+the task as fully accepted while these rows remain open. The next chat should read
+CURRENT, this handover, the relevant UI task sections and saved mockup index, then
+help the user review the existing verified builds. Start with review priorities and
+feedback; transfer alone does not authorize another build, native test or CI run.
 
 Cumulative refresh: **three hosted dispatches**, attempt 1 each; **seven production
 builds** (six hosted, one local), **39 native scenario starts plus four boundary-smoke

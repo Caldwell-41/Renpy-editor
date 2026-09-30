@@ -29,7 +29,9 @@ Next: focused human UI review and actual-device keyboard/IME, OS asset-drop and 
 SDK download/project-creation progress checks. Accepted references remain under
 [docs/design/ui-refresh](../design/ui-refresh/README.md). Automated native tests use
 synthetic input and do not close those acceptance rows. No merge, conflict resolution,
-new feature phase or further dispatch/build is selected. Continue the same chat.
+new feature phase or further dispatch/build is selected. The user explicitly requested
+transfer to a new chat on 2026-09-30; reuse the existing branch and verified builds.
+Published terminal-audit checkpoint is `ad97c6c`; inspect fresh refs rather than reset.
 
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke

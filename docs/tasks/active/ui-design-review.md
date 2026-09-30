@@ -1055,3 +1055,15 @@ focused human review, physical input/IME, OS asset drop and live SDK first-insta
 project-creation progress remain open. Do not archive the task as fully accepted or
 merge unreviewed work. Continue this same chat with review feedback. This audit changes
 docs only; repository/link/privacy and whitespace checks pass at publication.
+
+
+### User-requested new-chat transfer — 2026-09-30
+
+The user explicitly requested a handover prompt and continuation in another chat.
+Published terminal audit is `ad97c6c7388cdf4e866a80e5015a1d22d5e91a98`; qualification
+candidate remains `d690d7f` / run 36661814610 attempt 1, PASS on both targets. Transfer
+changes no code, evidence, budget or authorization. CURRENT/HANDOVER now direct the
+next chat to the existing branch, verified review installers and remaining human/
+actual-device acceptance. No workflow is pending. Inspect fresh refs, preserve newer
+work, reuse validated artifacts and do not start a new build/test dispatch or merge
+merely because the conversation moved. No new task was created automatically.
