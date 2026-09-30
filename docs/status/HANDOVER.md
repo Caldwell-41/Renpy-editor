@@ -50,6 +50,15 @@ Latest SDK wording correction: [SDK-01](../tasks/active/ui-design-review.md#sdk-
 replaces "Browse existing SDK" with "Select existing SDK…" in the accumulated
 corrections, pending implementation. Selection/validation behaviour stays the same.
 
+**Current review position:** Game configuration, step 3. The user accepted
+[CONFIG-01](../tasks/active/ui-design-review.md#accepted-resolution-picker-correction--2026-09-30):
+a larger readable resolution dropdown with a small dynamic aspect-ratio preview and
+retained Custom Width/Height fields. The final mockup is saved/hash-recorded in the
+existing reference set. All six accumulated visual/wording corrections remain pending
+implementation; design approval does not select another build/dispatch. Next: confirm
+preset/Custom input behaviour, then inspect Review & Create and actual creation
+progress on the existing qualified package. Remaining acceptance/budgets are unchanged.
+
 ### Exact successful qualification
 
 [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),

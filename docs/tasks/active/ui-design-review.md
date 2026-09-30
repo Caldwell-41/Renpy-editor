@@ -1191,3 +1191,41 @@ Review the rendered/accessibility label and any affected wording-based selectors
 implementing the accumulated corrections. The running qualified build remains
 unchanged. Continue SDK visual review, then Game configuration; live download remains
 open. This feedback record adds no build, launch or dispatch.
+
+### Accepted resolution-picker correction — 2026-09-30
+
+**CONFIG-01 — accepted design, implementation pending.** Native observation found
+Game configuration, step 3, with Full HD 1920 × 1080 selected. The user reports the
+resolution picker is small and hard to read, requested suggestions and a small mockup,
+then explicitly accepted the proposed larger dropdown with aspect-ratio preview.
+
+- Target a comfortable 44–48 logical-pixel control height, roughly 16-pixel readable
+  text and an approximately 420-pixel maximum width that fits the available panel.
+  Use normal density/scaling rules and generous padding with a clear dropdown arrow;
+  achieve the rendered native control size, not only a nominal CSS declaration.
+- Keep the supported Full HD, HD, QHD and Custom choices, default selection and
+  dimension validation. Show name and dimensions clearly, e.g. Full HD · 1920 × 1080.
+- Below the selector, show a small rectangle computed from the selected valid width
+  and height, with its aspect ratio and the caption "Game resolution, not editor size."
+  Fit the preview within a bounded area while preserving actual proportions. Retain
+  Width/Height fields on Custom and handle incomplete/invalid input without a false
+  ratio. Apply the existing Light/Dark palettes and compact layout rules.
+- This is the resolution-block correction inside the existing wizard shell; the
+  cropped mockup does not redefine the whole wizard or its navigation/actions.
+
+The accepted final image is saved unchanged as
+[game-configuration-resolution-picker.png](../../design/ui-refresh/game-configuration-resolution-picker.png).
+The [reference index](../../design/ui-refresh/README.md) routes to it; the
+[manifest](../../design/ui-refresh/manifest.json) records original name, SHA-256,
+built-in image-generation method and final edit prompt. Original generated images
+remain preserved. Written dimensions/proportions control over approximate raster
+details. This acceptance is design approval, not implementation/native acceptance or
+authorization for another build/CI dispatch.
+
+Six accumulated corrections remain pending: WELCOME-01/02/03, WIZARD-01, SDK-01
+and CONFIG-01. Title/folder/destination checks retain their user-reported Mac pass;
+resolution preset/Custom input checks have not yet been reported passed. Continue
+those checks on the qualified existing build, then Review & Create and actual creation
+progress. Live SDK download, physical keyboard/IME, OS drop and final two-platform
+visual acceptance remain open. This checkpoint changes docs/design references only;
+no application code, build, app launch or dispatch occurred.

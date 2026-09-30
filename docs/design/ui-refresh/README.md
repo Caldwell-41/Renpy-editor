@@ -1,6 +1,7 @@
 # Accepted UI reference set
 
 Saved 2026-09-29 at the user's request for comparison during implementation.
+The accepted resolution-picker detail was added 2026-09-30 during hands-on review.
 These are design references, not working-app screenshots or bundled game assets.
 The [design decisions and build plan](../../tasks/active/ui-design-review.md) own
 behaviour, acceptance criteria and corrections. This index owns image selection only.
@@ -29,6 +30,7 @@ The preferred Settings layout applies to Settings, not every page.
 | Light theme | [Paper and teal](palette-light-paper-teal.png) | Application palette; game preview unaffected |
 | Opening screen | [Both themes](welcome-light-dark.png) | Actions and searchable recent projects |
 | New project | [Four steps](new-project-four-steps.png) | Latest corrected Back labels |
+| Game configuration, resolution | [Accepted picker detail](game-configuration-resolution-picker.png) | Larger readable dropdown and small dynamic aspect-ratio preview; retains Custom fields |
 | Progress | [Download and creation](new-project-progress.png) | Measured download, indeterminate creation stages |
 
 ## Corrections to preserve in comparisons
@@ -39,6 +41,9 @@ The preferred Settings layout applies to Settings, not every page.
   window chrome; differences between boards are not new branding requirements.
 - Preserve existing folder-name editing, custom resolution and Git-init default even
   where mockups omit them or illustrate a different checkbox state.
+- The accepted picker detail controls the resolution block within the existing
+  wizard. Use the selected dimensions to draw a proportionally correct preview;
+  generated geometry, control sizing and typography remain approximate.
 - Progress figures are illustrative. Use one active busy indicator, real stages and
   stable button/status positions. Open project means enter the workspace.
 - Text, counts, sample artwork and story names are illustrative. Use disposable test

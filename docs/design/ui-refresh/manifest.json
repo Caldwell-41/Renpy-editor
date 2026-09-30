@@ -68,5 +68,12 @@
     "file": "new-project-progress.png",
     "generatedOriginal": "exec-04a1ca1b-6322-41f0-80d9-9b6d98ee7fad.png",
     "sha256": "fbbede92b38767ff5f1b4c124e5ab00d05a37cd60075b1fd42e405fff508aaa1"
+  },
+  {
+    "file": "game-configuration-resolution-picker.png",
+    "generatedOriginal": "exec-2102e5d9-547d-40d2-ace1-1eaf91f73656.png",
+    "sha256": "2fad6d00dd18d280311955b4e31d67b0a953731dc70a0e561d6fceb4413874c6",
+    "generationMethod": "built-in image_gen",
+    "finalPrompt": "Edit target: the supplied compact Loomlight Game configuration mockup. Keep all wording, typography, palette, dropdown, panel and footer controls unchanged. Correct ONLY the aspect-ratio preview geometry: the illustrated rectangle labelled 16:9 is currently too wide for its height. Replace it with a smaller centered rectangle with mathematically correct 16:9 proportions (width divided by height is 1.7778), approximately 570 pixels wide by 321 pixels tall within this image. It must be visibly narrower than the resolution dropdown, have a flat very pale teal fill, a thin muted outline, and centered text '16:9'. Keep generous blank space on either side of this preview. Preserve the caption 'Game resolution, not editor size.' below it. Do not stretch this preview to fill the available panel width. No additional controls or annotations."
   }
 ]

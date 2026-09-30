@@ -41,6 +41,9 @@ No installer launch or new human acceptance result is claimed by this preparatio
 The user's first [Welcome findings](../tasks/active/ui-design-review.md#welcome-feedback--2026-09-30)
 record missing Settings affordance, column-tone separation and project-hover feedback.
 All three corrections are pending; continue collecting review feedback in this chat.
+Review is now at wizard step 3. The user accepted the
+[resolution-picker detail](../design/ui-refresh/game-configuration-resolution-picker.png);
+six accumulated visual/wording corrections remain pending implementation in the ledger.
 
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke
