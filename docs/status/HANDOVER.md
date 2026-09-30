@@ -50,14 +50,20 @@ Latest SDK wording correction: [SDK-01](../tasks/active/ui-design-review.md#sdk-
 replaces "Browse existing SDK" with "Select existing SDK…" in the accumulated
 corrections, pending implementation. Selection/validation behaviour stays the same.
 
-**Current review position:** Game configuration, step 3. The user accepted
+The user accepted
 [CONFIG-01](../tasks/active/ui-design-review.md#accepted-resolution-picker-correction--2026-09-30):
 a larger readable resolution dropdown with a small dynamic aspect-ratio preview and
 retained Custom Width/Height fields. The final mockup is saved/hash-recorded in the
-existing reference set. All six accumulated visual/wording corrections remain pending
-implementation; design approval does not select another build/dispatch. Next: confirm
-preset/Custom input behaviour, then inspect Review & Create and actual creation
-progress on the existing qualified package. Remaining acceptance/budgets are unchanged.
+existing reference set. All seven accumulated visual/wording corrections remain pending
+implementation; design approval does not select another build/dispatch. Remaining
+acceptance/budgets are unchanged.
+
+**Current review position:** Review & Create, step 4. The user requests
+[REVIEW-01](../tasks/active/ui-design-review.md#review--create-checkbox-feedback--2026-09-30):
+align the Git checkbox to the left of its label on one row inside Advanced, retaining
+its value/behaviour. No project creation occurred during agent inspection. Next:
+finish summary feedback and observe actual creation progress. Resolution preset/Custom
+input checks are still unreported; reaching step 4 is not inferred acceptance.
 
 ### Exact successful qualification
 

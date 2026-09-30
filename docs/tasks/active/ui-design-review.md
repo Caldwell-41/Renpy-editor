@@ -1229,3 +1229,26 @@ those checks on the qualified existing build, then Review & Create and actual cr
 progress. Live SDK download, physical keyboard/IME, OS drop and final two-platform
 visual acceptance remain open. This checkpoint changes docs/design references only;
 no application code, build, app launch or dispatch occurred.
+
+### Review & Create checkbox feedback — 2026-09-30
+
+Read-only native observation found the user's wizard at step 4, with the summary
+and expanded Advanced section visible and Initialize local Git repository unchecked.
+No agent navigation, selection or project creation occurred. Resolution preset/Custom
+checks are not inferred passed merely because the user reached this step.
+
+**REVIEW-01 — user-requested layout correction, implementation pending:** the Git
+checkbox appears below its label, which the user finds awkward and unpolished.
+Place the checkbox immediately to the left of "Initialize local Git repository" on
+one aligned row inside Advanced. Make the label clickable with the checkbox and
+retain visible keyboard focus. Allow long text to wrap within the label column while
+the checkbox stays aligned with the first line; use the same checkbox-row treatment
+as comparable application controls. Preserve the existing selected value, default,
+Local Git summary update and creation behaviour. The current `field()` form layout
+stacks a label span above its control; this checkbox needs an appropriate horizontal
+row rather than changing the layout of every text-input field.
+
+Seven accumulated corrections now remain pending: WELCOME-01/02/03, WIZARD-01,
+SDK-01, CONFIG-01 and REVIEW-01. Continue reviewing the summary, then observe actual
+project-creation progress in the existing qualified build. This checkpoint changes
+only the review record; no application code, build, agent app launch or dispatch.
