@@ -38,14 +38,19 @@ Synthetic input does not prove physical keyboard/IME. Windows confirmation and f
 current-candidate qualification remain open; the original Windows timeout is not
 conclusively diagnosed by a Mac pass.
 
-**No workflow is pending.** The user explicitly approved this one local build and
-three cases; that allowance is now consumed. Cumulative refresh: two hosted dispatches,
-five production builds (four hosted, one local) and 27 native case starts, plus the
-separate early Mac debug build/launch. One local CLI invocation rejected a misplaced
-option before native compilation; its log is retained separately from the completed
-build. No further build, native case retry, CI dispatch or merge is authorized.
-Next decision: current-candidate hosted qualification; the existing workflow runs
-both Windows and macOS and has no platform selector. Continue the same branch/chat.
+**State: awaiting_ci.** The user approved one further Windows/macOS qualification.
+[Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
+attempt 1, tests **d690d7f8ffc08fbc76411c95147f04422620afbc**, input
+`upload_packages=true`. Created 2026-09-30 02:52:15 UTC; observed 02:52:25 UTC in
+Preflight, with repository/privacy, rejection fixtures and selector audit passed.
+No platform result is inferred yet. The allowance is consumed; no automatic retry,
+further dispatch or merge. Resume this same chat to audit that exact run.
+
+Cumulative refresh: three accepted hosted dispatches, each attempt 1. Completed
+pre-dispatch evidence is five production builds (four hosted, one local) and 27 native
+case starts, plus the separate early Mac debug build/launch. Audit this run's actual
+additional build/start totals after completion. The rejected local CLI invocation
+remains recorded separately. Stop model polling; HANDOVER owns exact continuation.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

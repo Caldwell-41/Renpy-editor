@@ -942,3 +942,32 @@ qualification; the existing workflow includes both platforms and has no target i
 That next allowance and merge are not authorized. No workflow is pending; continue
 in this chat after the user's decision. Windows confirmation, final native input/drop/
 live-progress checks and human acceptance remain open.
+
+
+### Third qualification dispatch and same-chat wait — 2026-09-30
+
+- After the 3/3 native Mac passes, the user explicitly approved one Windows/macOS
+  qualification with no automatic retry. Local/published branch head matched
+  **d690d7f8ffc08fbc76411c95147f04422620afbc** and the working tree was clean. The
+  previous workflow runs were terminal; no pending production run was listed.
+- Dispatched once: `production-scaffold.yml`, `upload_packages=true`, existing branch
+  `feature/phase-1g-branches-runtime`. Confirmed
+  [run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
+  attempt **1**, created **2026-09-30 02:52:15 UTC**, tested SHA **d690d7f8ffc08fbc76411c95147f04422620afbc**,
+  tree **0948ced672f8c95c16df74c5da52d7c6d9212c77**. Candidate differs from locally
+  native-tested `996737c` only in its published evidence documentation.
+- Observed **02:52:25 UTC**: in progress, Preflight job **109718037425**; repository/
+  privacy, gate rejection fixtures and selector audit passed; Node setup in progress.
+  Supported-target jobs/results/build totals have not yet been observed.
+- Cumulative refresh: three accepted hosted dispatches, each attempt 1; no attempt
+  rerun or duplicate. Before this run, five production builds and 27 native case starts,
+  plus the separate early Mac debug build/launch. Preserve the rejected local CLI
+  invocation separately. Audit actual additional builds/starts/artifacts at completion;
+  do not assume success or counts in advance. Prior Q1 totals remain separate.
+- State **awaiting_ci**. Publish this docs-only wait record and stop model polling.
+  Resume the same chat to inspect this exact run/attempt, fresh refs, required gates,
+  all native reports/cleanup and package identity. Failures/skips remain unresolved;
+  local Mac passes do not pre-approve Windows. The new allowance is consumed: no
+  automatic retry, further dispatch, merge or new feature phase. No autonomous Goal
+  or client pause is claimed. Native physical input/drop/live progress and human
+  acceptance gaps remain separate from this qualification.

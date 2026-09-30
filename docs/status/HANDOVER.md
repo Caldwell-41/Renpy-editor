@@ -2,13 +2,26 @@
 
 ## UI implementation continuation — 2026-09-30
 
-**State: focused native macOS correction checks PASS 3/3; Windows qualification open.**
-No workflow is pending. Continue the same chat and existing
-`feature/phase-1g-branches-runtime` branch; draft/open/conflicting
-[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Tested/published correction head is
-`996737c0bea196416c11afea7ed5660c61e408ae`. This subsequent evidence checkpoint changes
-docs only; resolve its SHA from Git without a receipt-only follow-up commit.
-No integration, conflict resolution, new feature phase or autonomous Goal is selected.
+**State: awaiting_ci.** The user explicitly approved one Windows/macOS qualification
+after the focused native Mac pass. One dispatch was accepted:
+[run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
+attempt **1**, workflow `production-scaffold.yml`, input `upload_packages=true`, branch
+`feature/phase-1g-branches-runtime`, tested SHA
+**d690d7f8ffc08fbc76411c95147f04422620afbc**, tree
+`0948ced672f8c95c16df74c5da52d7c6d9212c77`. Created **2026-09-30 02:52:15 UTC**.
+Observed at **02:52:25 UTC**: in progress; Preflight repository/privacy, rejection
+fixtures and selector audit passed; Node setup running. No supported-target build or
+case count is inferred before terminal audit. This subsequent wait checkpoint is
+docs-only and does not change the tested candidate.
+
+Continue the same chat/branch, draft/open/conflicting
+[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). No additional dispatch,
+automatic retry, merge, conflict resolution or new feature phase is authorized.
+Resume with “The workflow is complete; audit run 36661814610 and continue.” Check
+this exact run/attempt and fresh refs once; if still pending, retain the record and
+stop polling. If terminal, audit every required gate, report/cleanup and package
+identity, preserve failures/skips, then continue only remaining authorized work.
+No autonomous Goal exists and no client runtime pause is claimed.
 
 ### Terminal evidence and diagnosis
 
@@ -80,21 +93,21 @@ ignored `.toolchains/reports/ui-refresh-native-996737c`. The app bundle is under
 `app/target/release/bundle/macos/Loomlight.app`; it was not installed into Applications.
 No existing Loomlight instance was running before the disposable cases started.
 
-### Remaining allowance and next decision
+### Allowance and same-chat wait
 
-All approved dispatch/native allowances are consumed. Cumulative refresh totals:
-**two hosted dispatches**, each attempt 1; **five production builds** (four hosted,
-one local), **27 top-level native case starts**, plus the separate early Mac debug
-build/launch. The rejected local CLI invocation is recorded above and did not compile
-a native app. No GitHub attempt rerun, duplicate dispatch or native case retry occurred.
-Prior Q1 counts remain separate. No workflow is pending.
+The user's latest “Yes” authorized exactly the third hosted dispatch recorded above;
+that allowance is now consumed. Cumulative refresh: **three accepted hosted dispatches**,
+each attempt 1; completed pre-dispatch evidence remains **five production builds**
+(four hosted, one local) and **27 top-level native starts**, plus the separate early
+Mac debug build/launch. Audit this run's actual additional builds/starts at completion.
+The rejected local CLI invocation did not compile a native app. No GitHub attempt
+rerun, duplicate dispatch or native case retry occurred; prior Q1 counts stay separate.
 
-Next decision: one current-candidate production qualification through the existing
-workflow (both Windows and macOS; no platform selector exists), with no automatic
-retry. The focused Mac checks now provide real native evidence before considering
-that matrix. Windows native confirmation and the skipped packaged boundary smoke
-remain required. A new dispatch/build allowance is not yet granted; do not dispatch
-or merge on Resume alone. Publish this evidence checkpoint and continue the same chat.
+The locally tested correction was `996737c`; current candidate `d690d7f` adds only its
+published evidence record. The three native Mac passes support this dispatch without
+proving Windows success. Windows timeout confirmation, all required current-candidate
+packaged cases and the previously skipped boundary smoke remain under audit. No
+further allowance or merge is implied. Publish the wait record and stop model polling.
 
 Physical keyboard/IME, actual OS drag/drop, live first-install/create progress and
 focused human acceptance remain unverified. The accepted
