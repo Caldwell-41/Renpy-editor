@@ -888,3 +888,57 @@ approved; no new CI dispatch, automatic retry or merge is selected. Publish this
 checkpoint and continue the same chat after the user's decision. Windows native
 confirmation, physical input/drop, live SDK/create progress and human acceptance
 remain open. Neither failed run is superseded into a pass by local corrections.
+
+
+### Focused native macOS correction proof — 2026-09-30
+
+**UI-NATIVE-1: PASS 3/3; current-candidate Windows qualification remains open.**
+User explicitly approved one local macOS build and one native start each of route-a,
+route-b and UI-refresh, then confirmed “Go ahead.” The branch was clean at correction
+candidate **996737c0bea196416c11afea7ed5660c61e408ae**, tree
+**adf733cdde3b2f89f400ed66493a183b1764ba29**. No existing Loomlight instance was running.
+
+- Built one optimized release app bundle with the existing Tauri configuration and
+  `--locked`, choosing the app bundle without a DMG. First invocation misplaced
+  `--bundles` after the cargo argument separator and was rejected before native
+  compilation; frontend build had succeeded. Preserved that failed log and corrected
+  argument order using local CLI help. The resulting command was
+  `npm exec -- tauri build --bundles app -- --locked`; native compilation/bundling passed.
+  There was one completed native build, not a retried failing native executable.
+- Host: macOS ARM64 / Darwin 25.6.0; Node 24.19.0, Cargo/Rust 1.90.0. Executable SHA-256:
+  **44a09231de931d1ffc41eb1c72e86fc7b179f2029359174820a1653d09d217a6**.
+  Existing input recorder captured all tracked application/workflow hashes before
+  launch; those hashes and executable digest matched again after the cases completed.
+- Existing runner selected exactly `route-a route-b ui-refresh`, one start each,
+  disposable profiles/projects and the pinned SDK archive. No source/driver changes
+  followed this build, no assertions were weakened and no failed case was retried.
+
+| Case | Result | Wall time | Retained native evidence |
+| --- | --- | --- | --- |
+| route-a | PASS / exit 0 | 89.292 s | Branch destination commit/reopen/restore; controlled play; 9504 ms running observation; Source save during play; Stop; disk reopen |
+| route-b | PASS / exit 0 | 113.265 s | Same route boundaries at 640×720 plus draft refusal/cancel; 10000 ms running observation |
+| ui-refresh | PASS / exit 0 | 7.190 s | CSP editor styles; session draft retention; stable editor geometry; Settings return; preference read/write round trip |
+
+All three emitted exactly one passing native report with `cleanupComplete: true`;
+none timed out. Runner exit 0. Real native WebView, IPC, service and route SDK/process
+paths were exercised; editor input remains synthetic, not physical keyboard/IME proof.
+The UI-refresh fixture uses the real 500-scene/506-file native project. This is macOS
+supporting proof only: it cannot establish the exact cause or resolution of the
+original Windows timeout, qualify the three unselected cases at this candidate, or
+replace the previously skipped packaged boundary smoke/dependency inventory.
+
+Full build/runner logs, source/executable identity and three reports remain ignored
+under `.toolchains/reports/ui-refresh-native-996737c`. Bundle remains local under
+`app/target/release/bundle/macos/Loomlight.app`; no Applications installation occurred.
+This evidence update is docs-only; repository/privacy/link validation and whitespace
+checks pass at publication. Earlier failed run evidence remains unchanged.
+
+Cumulative refresh cost: two accepted hosted dispatches (attempt 1 each), five
+production builds (four hosted and this one local), 27 top-level native starts,
+plus the separate early Mac debug build/launch. Retain the rejected pre-compilation
+CLI invocation separately. No new hosted dispatch, attempt rerun or native case retry.
+This allowance is consumed. Next decision is one current-candidate hosted production
+qualification; the existing workflow includes both platforms and has no target input.
+That next allowance and merge are not authorized. No workflow is pending; continue
+in this chat after the user's decision. Windows confirmation, final native input/drop/
+live-progress checks and human acceptance remain open.

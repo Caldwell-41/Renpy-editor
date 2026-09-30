@@ -31,12 +31,21 @@ native timeout cause. Updated local verification passes 70 frontend tests, full
 browser/driver checks, Rust formatting and desktop compile check. Native qualification,
 physical input/drop, live SDK/create progress and human acceptance remain open.
 
-**No workflow is pending.** The second dispatch allowance is consumed. Cumulative
-refresh: two hosted dispatches, four production Tauri builds and 24 native case starts,
-plus the separate early Mac debug build/launch. Proposed next decision: one focused
-local macOS build and only route-a, route-b and UI-refresh native cases before any
-further matrix. That build/launch allowance, another CI dispatch and merge are not
-authorized. Continue the same branch/chat; see HANDOVER for exact limits.
+**Focused native macOS check: 3/3 PASS** at correction candidate
+`996737c0bea196416c11afea7ed5660c61e408ae`: route-a, route-b and UI-refresh, each run
+once against one release app bundle with real IPC/service/SDK and confirmed cleanup.
+Synthetic input does not prove physical keyboard/IME. Windows confirmation and full
+current-candidate qualification remain open; the original Windows timeout is not
+conclusively diagnosed by a Mac pass.
+
+**No workflow is pending.** The user explicitly approved this one local build and
+three cases; that allowance is now consumed. Cumulative refresh: two hosted dispatches,
+five production builds (four hosted, one local) and 27 native case starts, plus the
+separate early Mac debug build/launch. One local CLI invocation rejected a misplaced
+option before native compilation; its log is retained separately from the completed
+build. No further build, native case retry, CI dispatch or merge is authorized.
+Next decision: current-candidate hosted qualification; the existing workflow runs
+both Windows and macOS and has no platform selector. Continue the same branch/chat.
 
 The user approved outcome-sized goals with internal checkpoints and manual same-thread
 workflow resume. [WORKFLOW](../WORKFLOW.md) owns the rules; the

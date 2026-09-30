@@ -2,12 +2,12 @@
 
 ## UI implementation continuation — 2026-09-30
 
-**State: second native qualification FAILED; bounded corrections locally verified.**
+**State: focused native macOS correction checks PASS 3/3; Windows qualification open.**
 No workflow is pending. Continue the same chat and existing
 `feature/phase-1g-branches-runtime` branch; draft/open/conflicting
-[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Incoming published head
-was `44d505722de7ad5100c9f84d436d97a1136d4ac6` (wait record). Resolve this correction
-checkpoint's SHA from Git; do not create a receipt-only commit for its own identity.
+[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17). Tested/published correction head is
+`996737c0bea196416c11afea7ed5660c61e408ae`. This subsequent evidence checkpoint changes
+docs only; resolve its SHA from Git without a receipt-only follow-up commit.
 No integration, conflict resolution, new feature phase or autonomous Goal is selected.
 
 ### Terminal evidence and diagnosis
@@ -47,21 +47,54 @@ assertion was weakened and no write is replayed. Logs/captures remain ignored un
 `.toolchains/reports/ui-refresh-ci2-*`; repository/privacy/link and whitespace validation
 are required before publication.
 
+### Approved focused native check — completed
+
+The user explicitly approved one local macOS build plus route-a, route-b and UI-refresh,
+then said “Go ahead.” One release app bundle was built from clean candidate
+`996737c0bea196416c11afea7ed5660c61e408ae`, tree
+`adf733cdde3b2f89f400ed66493a183b1764ba29`, on local macOS ARM64 / Darwin 25.6.0.
+Executable SHA-256: `44a09231de931d1ffc41eb1c72e86fc7b179f2029359174820a1653d09d217a6`.
+Recorded source inputs and executable were rechecked after execution and match.
+The initial CLI invocation placed `--bundles` after the cargo argument separator and
+was rejected before native compilation. Its failure log is retained; corrected
+`npm exec -- tauri build --bundles app -- --locked` completed the single native build.
+No native failure was retried and no hosted workflow was dispatched.
+
+| Case | Result | Elapsed | Cleanup |
+| --- | --- | --- | --- |
+| route-a | PASS | 89.292 s | confirmed |
+| route-b (640×720) | PASS | 113.265 s | confirmed |
+| ui-refresh | PASS, all five checks | 7.190 s | confirmed |
+
+Both route cases passed real commit/reopen, controlled play, Source save during play,
+Stop and disk reopen; route-b also passed draft refusal/cancel checks. Observed running
+periods were 9504 ms and 10000 ms. UI-refresh passed native CSP styles, session draft
+retention, fixed editor geometry during status updates, Settings return and device
+preference round trip. These are native WebView/IPC/service/SDK checks with synthetic
+input. This is supporting macOS proof for the correction, not full Windows/macOS
+qualification or physical-input acceptance. The exact Windows timeout cause remains
+unconfirmed. No source change followed the native pass.
+
+Build, input identity, runner logs and three full reports are retained locally under
+ignored `.toolchains/reports/ui-refresh-native-996737c`. The app bundle is under
+`app/target/release/bundle/macos/Loomlight.app`; it was not installed into Applications.
+No existing Loomlight instance was running before the disposable cases started.
+
 ### Remaining allowance and next decision
 
-The user authorized building the accepted UI and one corrected qualification dispatch;
-that dispatch allowance is consumed. Cumulative refresh totals: **two hosted dispatches**,
-each attempt 1, **four production Tauri builds / 24 top-level native case starts**,
-plus the separate early Mac debug build/launch. No attempt rerun or duplicate dispatch.
-This audit added no native build/launch or hosted run. Prior Q1 counts remain separate.
+All approved dispatch/native allowances are consumed. Cumulative refresh totals:
+**two hosted dispatches**, each attempt 1; **five production builds** (four hosted,
+one local), **27 top-level native case starts**, plus the separate early Mac debug
+build/launch. The rejected local CLI invocation is recorded above and did not compile
+a native app. No GitHub attempt rerun, duplicate dispatch or native case retry occurred.
+Prior Q1 counts remain separate. No workflow is pending.
 
-After two qualification failures, do not launch another full matrix on mock-only
-confidence. Proposed next allowance: **one local macOS native build and one start each
-of route-a, route-b and UI-refresh**, no automatic retry or CI dispatch. This proposal
-is not yet authorized. Native Windows confirmation remains open. Read WORKFLOW's
-waiting/budget rule before any new build/dispatch; Resume alone does not grant it.
-Publish this bounded correction checkpoint, then ask for the focused native allowance.
-No merge is authorized.
+Next decision: one current-candidate production qualification through the existing
+workflow (both Windows and macOS; no platform selector exists), with no automatic
+retry. The focused Mac checks now provide real native evidence before considering
+that matrix. Windows native confirmation and the skipped packaged boundary smoke
+remain required. A new dispatch/build allowance is not yet granted; do not dispatch
+or merge on Resume alone. Publish this evidence checkpoint and continue the same chat.
 
 Physical keyboard/IME, actual OS drag/drop, live first-install/create progress and
 focused human acceptance remain unverified. The accepted
