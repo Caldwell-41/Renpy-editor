@@ -11,6 +11,24 @@ Published terminal-audit checkpoint: `ad97c6c7388cdf4e866a80e5015a1d22d5e91a98`.
 Inspect fresh refs and preserve newer work; do not reset to this historical checkpoint.
 This audit changes documentation only; it does not change tested application inputs.
 
+### Hands-on review resumed — 2026-09-30
+
+Current chat resumed review on local macOS ARM64. Fresh local/remote feature heads
+matched incoming `b8301f8`; main and PR #17's draft/open/conflicting status were
+confirmed unchanged. All three existing review installers passed their recorded
+SHA-256 checks. Use the `ui-refresh-d690d7f` ARM64 DMG on this Mac; copy its app to
+Applications and launch that copy after closing any older running Loomlight.
+The [hands-on review preparation](../tasks/active/ui-design-review.md#hands-on-review-preparation--2026-09-30)
+records the focused checklist and finding format. Begin Welcome/four-step wizard
+comparison, then Story/Source and the remaining surfaces against the saved references.
+Physical keyboard/IME, OS drop, live download/create progress and final visual feedback
+remain open on the applicable targets; Windows observations require Windows access.
+No installer was launched by this preparation and no acceptance result is inferred.
+No workflow is pending; this docs-only continuation adds zero builds/native starts
+and grants no additional dispatch, implementation, conflict resolution or merge.
+Publish the preparation after repository/whitespace validation; continue in this chat
+with the user's actual observations rather than transfer again.
+
 ### Exact successful qualification
 
 [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),

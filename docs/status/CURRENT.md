@@ -33,6 +33,12 @@ new feature phase or further dispatch/build is selected. The user explicitly req
 transfer to a new chat on 2026-09-30; reuse the existing branch and verified builds.
 Published terminal-audit checkpoint is `ad97c6c`; inspect fresh refs rather than reset.
 
+Hands-on review resumed on local macOS ARM64 at incoming `b8301f8`. Fresh refs/PR
+status are unchanged; all three existing installer checksums pass. The
+[review checklist](../tasks/active/ui-design-review.md#hands-on-review-preparation--2026-09-30)
+starts with the ARM64 DMG and Welcome/four-step wizard comparison in the current chat.
+No installer launch or new human acceptance result is claimed by this preparation.
+
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke
 process starts (43 total), plus the separate early Mac debug build/launch. No automatic

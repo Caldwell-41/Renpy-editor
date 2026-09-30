@@ -1,6 +1,6 @@
 # UI design review
 
-**Updated:** 2026-09-30. **State:** awaiting_ci, implementation published.
+**Updated:** 2026-09-30. **State:** review_ready, automated qualification passed; human acceptance open.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
@@ -1067,3 +1067,47 @@ next chat to the existing branch, verified review installers and remaining human
 actual-device acceptance. No workflow is pending. Inspect fresh refs, preserve newer
 work, reuse validated artifacts and do not start a new build/test dispatch or merge
 merely because the conversation moved. No new task was created automatically.
+
+### Hands-on review preparation — 2026-09-30
+
+The user resumed UI review on local macOS ARM64 and selected the existing qualified
+installers. Fresh remote feature head and clean local HEAD matched transfer checkpoint
+`b8301f8a6357e5ba15c5b1fbb8c6ef4ab7b2364b`; main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`.
+PR #17 was freshly confirmed open/draft/conflicting. Only documentation differs
+between candidate `d690d7f` and the incoming checkpoint. All three local installers
+passed `shasum -a 256 -c SHA256SUMS.txt` against the recorded terminal-audit digests.
+No installer was opened, installed or launched by this preparation; no new visual or
+physical-input result is claimed. The stale top-level `awaiting_ci` label is corrected.
+
+**Install and compare.** On this Mac, open
+`.toolchains/review-builds/ui-refresh-d690d7f/Loomlight_0.1.0_aarch64.dmg`, copy its
+Loomlight app to Applications, then launch that copy. If an older Loomlight is running,
+close it first; the displayed version alone does not distinguish these 0.1.0 builds.
+The x64 setup EXE and MSI are for Windows; Windows physical/native review requires
+a Windows host. Reuse these exact artifacts rather than rebuild.
+
+Use disposable review content and the [saved reference index](../../design/ui-refresh/README.md).
+Compare layout, hierarchy, spacing, density, alignment, colour roles and responsive
+panels; generated sample artwork/text and OS font differences are illustrative.
+Start with Welcome and the four-step wizard, then Story and Source, followed by the
+remaining catalogue/Branches/Settings surfaces. Preserve written corrections over
+generated details. Both themes and the actual laptop window need final feedback.
+
+| Remaining row | Focused hands-on action and expected result | Current evidence |
+| --- | --- | --- |
+| Physical keyboard / IME | In Source and inline Story dialogue, type with the real keyboard and an available IME; finish composition, select/copy/paste, undo/redo and use Cmd/Ctrl+S or dialogue Cmd/Ctrl+Enter. Confirm text is retained, commits occur after composition and status updates do not move caret/editor/footer. | Open; synthetic events do not close this row |
+| OS asset drop | Drag disposable image/audio files from Finder or Windows Explorer into Assets. Indicator appears only during dragging; choose asset type before import, inspect resulting entries and dismiss a staged import without unintended changes. | Open; actual OS gesture required |
+| Live SDK download | At wizard step 2, use Install verified 8.5.3 when a genuine download is needed. Observe measured bytes/total when available, then distinct Verify and Install stages, responsive UI and stable controls. A cache hit does not prove network progress; retain installed SDKs/caches. | Open; prior qualification used cache hits |
+| Project creation | Create a disposable project through all four steps. Observe actual Prepare/Generate/(Git if selected)/Validate/Finalise/Open stages, indeterminate activity and no guessed overall percentage; enter the workspace only after successful completion. | Open; final visual/native progress feedback required |
+| Visual / UX | Compare wide/compact layouts and both themes with the controlling references, including saved-state cues, roughly one-third initial Story preview, writing focus, Source tabs and Settings hierarchy. Record actual size/scaling and any clipping, awkward density or unstable status. | Open on both supported targets |
+
+Record each finding here with platform, installer candidate, surface/theme/window,
+action, expected versus observed behaviour and reproducibility. Keep screenshots/logs
+with personal paths or project content ignored/local; commit only sanitized findings.
+Do not mark an acceptance row passed before the corresponding observation is supplied.
+
+**Continuation:** user installs/opens the verified Mac package and begins Welcome/wizard
+comparison in this same chat. No workflow is pending. No further build, native automated
+scenario, CI dispatch, conflict resolution, merge or new phase is selected. This
+preparation adds zero builds/launches and preserves the cumulative totals above.
+Repository validation and whitespace checks are required before publication.
