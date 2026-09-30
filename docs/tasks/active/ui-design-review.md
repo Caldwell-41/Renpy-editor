@@ -1111,3 +1111,28 @@ comparison in this same chat. No workflow is pending. No further build, native a
 scenario, CI dispatch, conflict resolution, merge or new phase is selected. This
 preparation adds zero builds/launches and preserves the cumulative totals above.
 Repository validation and whitespace checks are required before publication.
+
+### Welcome feedback — 2026-09-30
+
+The user supplied a running macOS Welcome screenshot in Light theme and reported
+three corrections during review of the delivered `d690d7f` candidate. The supplied
+image supports the missing icon and undifferentiated column backgrounds; absent
+hover feedback is a user-observed interaction finding, not something a still image
+proves. Compare with `welcome-light-dark.png`, which shows a cog beside Settings and
+separate tones for the intro/actions and Recent Projects areas. Logical window size
+and display scaling are not inferred from screenshot pixels. The screenshot contains
+personal paths and remains conversation evidence, not a committed repository asset.
+
+| Finding | Observed / source inspection | Requested correction and completion check | State |
+| --- | --- | --- | --- |
+| WELCOME-01: Settings affordance | Footer Settings has no cog and resembles the adjacent passive footer labels. `shell()` creates a text-only `shell-settings` button; its refresh styling only prevents wrapping. | Add a cog consistent with the existing line-icon family beside the Settings label and clear button/hover styling, with a visible keyboard focus state. Keep it at the bottom and distinguish it from Local workspace/Ready without changing footer height. Check both themes and compact width. | Recorded; correction pending |
+| WELCOME-02: Column separation | Intro/actions and Recent Projects share the page background. The refresh rules give neither column its own background. | Use distinct palette surface tones for the two column areas, matching the reference hierarchy: a panel tone behind intro/actions and the main page tone behind recents. Retain a clear boundary and readable contrast in Light/Dark; preserve compact stacking. | Recorded; correction pending |
+| WELCOME-03: Recent-project hover | User reports no colour response when hovering a project. Refresh styles provide a fixed raised card background and no recent-project hover treatment. | Give available project entries a visible hover colour and pointer affordance, with equivalent keyboard focus feedback. Preserve Remove as a separate action and unavailable projects as disabled; hover must accurately indicate the opening action. Check enter/leave without layout shifts. | Recorded; correction pending |
+
+These are concrete visual/interaction findings against the accepted Welcome design;
+they do not reopen the passing automated results or close final Welcome acceptance.
+Only docs changed in this feedback checkpoint. No application correction, build,
+agent app launch or dispatch occurred; user review observations are separate from
+the retained automated-start totals. Continue collecting feedback in this same chat.
+The current installer remains the comparison baseline; implementation/qualification
+of accumulated corrections is not selected by this review-only checkpoint.

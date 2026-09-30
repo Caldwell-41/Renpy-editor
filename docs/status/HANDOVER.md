@@ -29,6 +29,15 @@ and grants no additional dispatch, implementation, conflict resolution or merge.
 Publish the preparation after repository/whitespace validation; continue in this chat
 with the user's actual observations rather than transfer again.
 
+**Latest user feedback:** Welcome in Light theme has three recorded corrections:
+Settings needs a cog and clearer button affordance; intro and Recent Projects need
+distinct background tones; available recent projects need hover colour feedback.
+The [Welcome findings](../tasks/active/ui-design-review.md#welcome-feedback--2026-09-30)
+retain source observations and completion checks. Corrections are pending, not
+implemented or accepted. Continue gathering the user's screen-by-screen feedback
+in this chat using the existing installer. No new build/dispatch or integration is
+selected; remaining physical input/drop/live progress acceptance stays open.
+
 ### Exact successful qualification
 
 [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),

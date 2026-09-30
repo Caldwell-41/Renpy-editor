@@ -38,6 +38,9 @@ status are unchanged; all three existing installer checksums pass. The
 [review checklist](../tasks/active/ui-design-review.md#hands-on-review-preparation--2026-09-30)
 starts with the ARM64 DMG and Welcome/four-step wizard comparison in the current chat.
 No installer launch or new human acceptance result is claimed by this preparation.
+The user's first [Welcome findings](../tasks/active/ui-design-review.md#welcome-feedback--2026-09-30)
+record missing Settings affordance, column-tone separation and project-hover feedback.
+All three corrections are pending; continue collecting review feedback in this chat.
 
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke
