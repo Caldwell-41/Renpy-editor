@@ -1472,3 +1472,36 @@ and restart Story. Existing test-project GUI assets are not repaired by an app u
 its content is preserved for any separately requested repair. Twelve accumulated
 visual corrections and physical input/drop/live-download/final visual acceptance
 remain open. No workflow is pending; PR #17 stays draft/open/conflicting, no merge.
+
+### Bootstrap follow-up verification — 2026-10-02
+
+The user requests double-checking that new Ren’Py games bootstrap correctly after
+the corrected installer. Continue STARTER-GUI-01 with focused verification of the
+existing production lifecycle; no new app build, workflow dispatch, integration or
+visual implementation. Fresh feature refs match `3fad28f`; main is unchanged. The
+separate milestone-planning worktree is preserved. Extend the exact SDK regression
+to cover preset/custom dimensions, optional Git, metadata/reopen, standard menus
+and execution without editor metadata. Record actual results below; do not infer
+Windows or physical-input acceptance from the Mac SDK run.
+
+**Result: PASS.** The exact official-SDK test selected one test, zero failures or
+ignored cases, 221 filtered, **14.59 s**. It creates two projects through the real
+production lifecycle: 1280×720/Git off and custom 1600×1000/Git on. Both complete
+compile/lint and publication, have the expected scripts/metadata/GUI assets, open
+Chapter 1/Scene 1, retain the 8.5.3 adapter/version and reopen with the same project
+and Scene identity. Git-on is a valid repository; Git-off has no `.git` directory.
+Named passing SDK executions assert the actual runtime resolution, title and build
+name; render Preferences, Load and Save; start the first dialogue and return to the
+main menu. The custom game succeeds after removing only its disposable editor
+metadata, preserving the source-authoritative runtime boundary. No new production
+defect or unsuccessful follow-up attempt occurred. Formatting and whitespace checks
+pass; the full ignored report is `.toolchains/reports/starter-bootstrap-follow-up.log`.
+
+Only regression coverage and documentation changed; packaged application inputs
+remain `01d0896`. Reuse that installer. Follow-up adds two successful SDK menu test
+starts (four total including the two earlier successes), zero production builds,
+packaged scenario starts or dispatches. Cumulative package totals remain eight
+builds and 44 starts including boundary primary/secondary. PR #17 was freshly read
+as draft/open/conflicting at `3fad28f`. Windows verification for corrected inputs,
+the twelve visual corrections and remaining physical/live progress acceptance stay
+open. Continue fresh-project Story review in this chat.

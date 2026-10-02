@@ -95,9 +95,13 @@ always combine it with `--exact`. Specialist persistence/namespace cases stay ex
 
 For changes to starter GUI generation, explicitly select the ignored pinned-SDK
 regression `renpy::tests::official_sdk_starter_contains_runtime_gui_assets` with
-`LOOMLIGHT_RENPY_SDK` pointing to the verified 8.5.3 SDK. It creates a disposable
-project through the real lifecycle and requires menu/first-dialogue execution in
-addition to generic GUI asset presence. It is separate from routine core and from
+`LOOMLIGHT_RENPY_SDK` pointing to the verified 8.5.3 SDK. It creates disposable
+projects through the real lifecycle at 1280×720 without Git and custom 1600×1000
+with Git. It checks generated files, SDK metadata, reopening, actual runtime
+dimensions/title/build name, Preferences/Load/Save menus, first dialogue and return
+to the main menu. The custom game runs without editor metadata. Each execution
+requires a positive named SDK test result in addition to generic GUI asset presence.
+It is separate from routine core and from
 the two ignored runtime SDK gates; absence of the SDK is a failure, not a skip pass.
 The workflow result checker rejects missing/malformed summaries, zero selected tests,
 missing/ignored/filtered required cases and failures. Packaged case evidence must contain

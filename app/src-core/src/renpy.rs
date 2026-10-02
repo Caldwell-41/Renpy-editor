@@ -1633,52 +1633,139 @@ mod tests {
             crate::lifecycle::LifecycleService::new(temporary.path().join("profile")).unwrap();
         let parent = lifecycle.register_parent(temporary.path()).unwrap();
         let selected = lifecycle.register_sdk(&root, "gui-test").unwrap();
-        let created = lifecycle
-            .create_project(crate::lifecycle::CreateProjectRequest {
-                parent_id: parent.id,
-                sdk_id: selected.id,
-                title: "GUI startup test".into(),
-                folder_name: "starter".into(),
-                width: 1280,
-                height: 720,
-                initialize_git: false,
-            })
-            .unwrap();
-        assert_eq!(created.status, "complete");
-        lifecycle.close().unwrap();
         let sdk = RenpyAdapter::validate_sdk(&root).unwrap();
-        let stage = temporary.path().join("starter");
-        for asset in [
-            "button/idle_background.png",
-            "button/hover_background.png",
-            "button/check_foreground.png",
-            "bar/left.png",
-            "slider/horizontal_idle_thumb.png",
+        for (folder, width, height, initialize_git) in [
+            ("starter", 1280, 720, false),
+            ("custom-starter", 1600, 1000, true),
         ] {
+            let created = lifecycle
+                .create_project(crate::lifecycle::CreateProjectRequest {
+                    parent_id: parent.id.clone(),
+                    sdk_id: selected.id.clone(),
+                    title: "GUI startup test".into(),
+                    folder_name: folder.into(),
+                    width,
+                    height,
+                    initialize_git,
+                })
+                .unwrap();
+            assert_eq!(created.status, "complete");
+            let opened = created.project.unwrap();
+            assert_eq!(opened.title, "GUI startup test");
+            assert_eq!(opened.folder_name, folder);
+            assert_eq!(opened.sdk_version, SUPPORTED_VERSION);
+            assert_eq!(
+                opened.resolution,
+                crate::metadata::Resolution { width, height }
+            );
+            assert_eq!(opened.chapter_name, "Chapter 1");
+            assert_eq!(opened.scene_name, "Scene 1");
+            lifecycle.close().unwrap();
+            let stage = temporary.path().join(folder);
+            for file in [
+                "game/script.rpy",
+                "game/options.rpy",
+                "game/gui.rpy",
+                "game/screens.rpy",
+                "game/definitions/characters.rpy",
+                "game/definitions/variables.rpy",
+                "game/definitions/transforms.rpy",
+                "game/chapters/chapter_01/scene_001.rpy",
+                ".renpy-editor/project.json",
+                ".renpy-editor/source-map.json",
+                ".renpy-editor/authoring.json",
+            ] {
+                assert!(stage.join(file).is_file(), "missing starter file: {file}");
+            }
+            assert_eq!(stage.join(".git").is_dir(), initialize_git);
+            if initialize_git {
+                let git = Command::new("git")
+                    .arg("-C")
+                    .arg(&stage)
+                    .args(["rev-parse", "--is-inside-work-tree"])
+                    .output()
+                    .unwrap();
+                assert!(git.status.success());
+                assert_eq!(String::from_utf8(git.stdout).unwrap().trim(), "true");
+            }
+            let metadata: crate::metadata::ProjectMetadata = serde_json::from_slice(
+                &fs::read(stage.join(".renpy-editor/project.json")).unwrap(),
+            )
+            .unwrap();
+            assert_eq!(metadata.project_id, opened.project_id);
+            assert_eq!(metadata.sdk.adapter, "renpy-8.5.3");
+            assert_eq!(metadata.sdk.version, SUPPORTED_VERSION);
+            assert_eq!(metadata.resolution, opened.resolution);
+            assert_eq!(metadata.entry_scene_id.as_ref(), Some(&opened.scene_id));
+            let reopened = lifecycle.open_path(&stage).unwrap();
+            assert_eq!(reopened.project_id, opened.project_id);
+            assert_eq!(reopened.scene_id, opened.scene_id);
+            assert_eq!(reopened.resolution, opened.resolution);
+            lifecycle.close().unwrap();
+            for asset in [
+                "button/idle_background.png",
+                "button/hover_background.png",
+                "button/check_foreground.png",
+                "bar/left.png",
+                "bar/right.png",
+                "slider/horizontal_idle_thumb.png",
+            ] {
+                assert!(
+                    stage.join("game/gui").join(asset).is_file(),
+                    "missing runtime GUI asset: {asset}"
+                );
+            }
+            // Runtime checks prove generated configuration and rendered controls, rather
+            // than treating compile/lint or a still-running exception screen as success.
+            fs::write(
+                stage.join("game/loomlight_gui_test.rpy"),
+                format!(
+                    r#"testcase loomlight_gui_startup:
+    assert eval (config.screen_width == {width} and config.screen_height == {height})
+    assert eval (config.name == "GUI startup test" and build.name == "{folder}")
+    assert screen "main_menu"
+    click "Preferences"
+    assert screen "preferences"
+    click "Return"
+    click "Load"
+    assert screen "load"
+    click "Return"
+    click "Start"
+    assert screen "say"
+    click "Save"
+    assert screen "save"
+    click "Return"
+    click "Your story begins here."
+    assert screen "main_menu"
+    exit
+"#
+                ),
+            )
+            .unwrap();
+            // Runnable content must remain independent of editor metadata. Removing
+            // it only from the custom disposable fixture also proves that boundary.
+            if initialize_git {
+                fs::remove_dir_all(stage.join(".renpy-editor")).unwrap();
+            }
+            let args = [
+                command_path(&stage),
+                OsString::from("test"),
+                OsString::from("loomlight_gui_startup"),
+            ];
+            let result = run_bounded(
+                &sdk.root,
+                launcher_args(&sdk.root, &args).unwrap(),
+                Duration::from_secs(30),
+            )
+            .unwrap();
+            assert!(!result.timed_out, "starter menu test timed out");
+            assert_eq!(result.exit_code, Some(0), "{}", result.output);
             assert!(
-                stage.join("game/gui").join(asset).is_file(),
-                "missing runtime GUI asset: {asset}"
+                result.output.contains("loomlight_gui_startup") && result.output.contains("PASSED"),
+                "missing positive named SDK test result: {}",
+                result.output
             );
         }
-        fs::write(stage.join("game/loomlight_gui_test.rpy"), b"testcase loomlight_gui_startup:\n    click \"Start\"\n    click \"Your story begins here.\"\n    exit\n").unwrap();
-        let args = [
-            command_path(&stage),
-            OsString::from("test"),
-            OsString::from("loomlight_gui_startup"),
-        ];
-        let result = run_bounded(
-            &sdk.root,
-            launcher_args(&sdk.root, &args).unwrap(),
-            Duration::from_secs(30),
-        )
-        .unwrap();
-        assert!(!result.timed_out, "starter menu test timed out");
-        assert_eq!(result.exit_code, Some(0), "{}", result.output);
-        assert!(
-            result.output.contains("loomlight_gui_startup") && result.output.contains("PASSED"),
-            "missing positive named SDK test result: {}",
-            result.output
-        );
     }
 
     #[test]

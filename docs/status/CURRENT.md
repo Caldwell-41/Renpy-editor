@@ -28,6 +28,9 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
+The requested bootstrap double-check also passes on Mac: preset/custom resolution,
+Git off/on, metadata/reopen, standard menus/dialogue and execution without editor
+metadata. This follow-up changes tests/docs only; the same `01d0896` installer applies.
 
 Previously qualified macOS/Windows installers and
 retained evidence were downloaded and identities verified. Review copies are under

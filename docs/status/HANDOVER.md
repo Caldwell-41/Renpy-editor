@@ -2,6 +2,20 @@
 
 ## Latest selected correction — 2026-10-02
 
+**Bootstrap follow-up complete:** the user requested double-checking fresh-game
+creation. The strengthened exact official-SDK regression passes on Mac: one selected
+test, zero failures/skips, 221 filtered, 14.59 s; two disposable projects, 1280×720
+without Git and 1600×1000 with Git. Generated files/GUI assets, SDK pin, initial
+Chapter/Scene, valid Git repository and reopening pass. Real SDK execution checks
+dimensions/title/build name, Preferences/Load/Save, starter dialogue and return to
+main menu; the custom game runs with editor metadata removed. No additional defect
+found. Only tests/docs changed; use the same `01d0896` installer below. This adds two
+successful SDK menu test starts (four total), zero packages/packaged starts/dispatches.
+Full log: ignored `.toolchains/reports/starter-bootstrap-follow-up.log`. Fresh feature
+refs matched `3fad28f`, main unchanged, PR #17 still draft/open/conflicting; the
+separate milestone-planning worktree is preserved. Continue fresh-project Story
+review and the remaining acceptance; Windows proof for the fixes remains open.
+
 The user explicitly requested fixing the Character/Background authoring error and
 one new local macOS ARM64 review build, then restarting at Story. They additionally
 reported a game startup exception for missing standard GUI button images; this is
