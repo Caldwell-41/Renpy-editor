@@ -462,7 +462,7 @@ and state still need their own focused visual review before full UI implementati
 
 These are UX proposals within the existing feature boundaries, not extra workspaces
 or a replacement design system. Phase 2's contextual assistance and reference editing
-are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-proposed-uiux-journey).
+are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design).
 
 ## 8. Decisions and planning continuation
 

@@ -444,39 +444,231 @@ generic endpoint field does not imply tested or named Ollama support. No impleme
 exists to remove. Phase 3 scope remains under discussion following the user's request
 for a simpler explanation; its proposed capability list is not accepted scope.
 
-## 18. Proposed UI/UX journey
+## 18. Proposed LLM screen and interaction design
 
-**2026-10-02 design proposal, not implemented.** Keep assistance next to the author's
-current work. Select supported dialogue or a Scene and open an Assist panel with
-the operation and target shown at the top. Review included story context, Character
-cards and lorebook entries before Generate. Show provider/model, context budget and
-maximum response tokens together, with token counts marked estimated where necessary.
-An over-budget request offers explicit reference removal or limit adjustment; it must
-not silently drop selected references. Never generate merely by opening the panel.
+**2026-10-02 design proposal; not accepted or implemented.** The user requested the
+same detailed UX planning and generated-screen treatment as the Phase 3 Story concept.
+The [four screen concepts](../../design/phase-2-llm/README.md) extend the saved actual
+synthetic-fixture Story UI. The host was locked, so no live capture or acceptance of
+current Phase 1 changes is claimed. Written contracts in sections 5–9 take precedence
+over generated details. Reuse the accepted paper/teal and charcoal/copper tokens,
+shared buttons, inputs, spacing and shell; generation does not select a new theme.
 
-Extend Characters with a Character card tab beside existing game-character settings;
-add a searchable Lorebook supporting surface for entries and inclusion rules. Both
-offer ordinary manual editing and “Draft with AI”. Generated cards/entries use the
-same proposed-change review: compare old/new fields, choose supported changes, then
-accept once. Story text generation likewise returns a proposal with its source target
-and before/after content, never directly overwriting the editor. Generation progress,
-Cancel, failure and retry keep the author's inputs visible and reusable.
+### Surface map
 
-Put shared provider/model defaults and prompt templates under Settings → AI. Each
-operation exposes “View/edit system prompt” so the author can inspect the effective
-prompt and its override scope. “Restore baseline” shows the replacement before the
-author applies it; retain the prior custom text through the normal draft/cancel flow.
-The UI must distinguish restored prompt settings, unsaved form input and accepted
-game-source changes. Required provider choices are Unsloth and generic compatible;
-Ollama stays removed. Extra-provider scaffolding must not imply verified support.
+| Surface | Purpose and entry | Main completion action |
+| --- | --- | --- |
+| Story → Assist | Select supported dialogue, a continuation anchor, or a Chapter for a new Scene; prepare a bounded request beside the selection. | Generate proposal after inspecting the send. |
+| Proposal review | Compare semantic operations and exact Source/metadata changes against the captured saved revision. | Accept a dependency-valid selection once, then return to authoring. |
+| Characters → Character card | Write reference text beside the existing Game character tab, or request a reviewed draft/update. | Save as proposed, or explicitly save and approve reviewed text. |
+| Lorebook | Search/filter entries, inspect scope/citations and edit or request drafts/updates. | Save, separately approve/reconfirm, then choose inclusion in Assist. |
+| Settings → AI | Machine-local provider profiles and project-local per-action prompt templates with labelled scope. | Save profile or Save prompt; each invalidates affected send preparation. |
 
-On wide windows the Assist panel sits beside the current selection; on narrow windows
-it can occupy the central workspace with a clear Back action and preserved selection.
-Use the existing palettes, spacing and shared controls. The feeling should be: write,
-ask for a bounded suggestion, compare, accept, continue writing. The same review and
-context controls apply when the suggestion is lore or a Character card.
+Assistance is a contextual action surface, with Prepare and Review changes steps rather
+than a permanent chat workspace. Keep the selected Scene/Beat visible on wide windows;
+opening Assist, Settings, a reference or a proposal never sends content. A single primary
+action completes the current step. Support the five section 1 actions as they become
+implemented; unavailable actions explain their incomplete checkpoint instead of opening
+a nonfunctional composer. Screens, Calls, conditions and other Phase 3 constructs remain
+outside the Phase 2 proposal schema.
 
-Before completing the Phase 2 UI, prove that a user can create a card and lore entry,
-include them in a rewrite, inspect/reset a prompt, adjust both size controls, cancel
-generation, accept a selected proposal and undo it without losing their original work.
-Use actual dispatch and saved-data checks; a rendered mockup is not acceptance.
+### First useful journey: prepare a rewrite
+
+1. Select one or several supported Dialogue/narration Beats and choose Assist → Rewrite
+   dialogue. Show Scene, selection and intended replacement; preserve speaker/order/staging
+   by default. If the target has unsubmitted Scene or Source input, offer Return to editor,
+   use its explicit existing commit/save flow, or Cancel. Do not implicitly submit input
+   or run against a hidden older target. Disclose excluded unrelated drafts.
+2. Enter the task in a labelled multiline field. Retain it during navigation within this
+   project session, provider errors and cancellation. The task is separate from reusable
+   system prompts; a word/Beat target is an instruction, not a promised output count.
+3. Show suggested approved/current linked cards and explicitly chosen approved/current
+   lore entries with checkboxes, type, revision and scope. Suggested card inclusion is
+   visible and removable. Matching lore tags suggest selection but never auto-inject.
+   Proposed, rejected, superseded and stale references cannot quietly become ordinary
+   context; offer View reference / Review or reconfirm / Exclude as applicable.
+4. Show provider, endpoint class, exact model ID, connection location and inference
+   locality separately. Unknown inference locality stays Unknown, even on loopback.
+   Provide Change profile and View/edit system prompt without discarding the task.
+5. Show Context budget and Maximum response together, profile default versus request
+   override, and known server capacity or explicitly configured unverified capacity.
+   The breakdown includes instructions/schema, selected story, cards/lore, other
+   required references, reserved output and estimation margin. Context budget is the
+   **total** allowance. The illustrative image's 3,036 total is arithmetic, not a
+   measured tokenizer result. Over-budget refusal names the excess and offers explicit
+   removal/adjustment; never silently shorten text, drop dependencies or clamp limits.
+6. View complete send exposes effective instructions, immutable ordered context,
+   revisions, allowed mutation scope, destination, exclusions and estimated total.
+   Inspect exact custom text only when explicitly included. Core-owned schema/security
+   constraints are visible but cannot be weakened by editing author prompt text.
+   Generate proposal dispatches that reviewed snapshot once. Changes to targets,
+   relevant references, prompt, profile, credential, model or limits invalidate it
+   and require renewed preview; do not silently refresh and send another payload.
+
+Continue Scene uses an explicit insertion anchor and shows the existing terminal Beat.
+Draft Scene names its Chapter and proposed title; an incoming connection is a separate
+visible operation. Card/lore drafting selects the destination and supporting material;
+Update shows the current revision. Scope controls remain action-specific, avoiding a
+large generic prompt form whose defaults imply unrelated write authority.
+
+### Receiving and proposal review
+
+During sending/receiving/validation, keep task and context visible with a stable Cancel
+request action and plain phase label. Non-streaming has no invented token progress.
+Qualified streaming may show bounded inert progress; partial JSON never becomes an
+applicable edit. Save and unrelated editing stay responsive. One active generation
+per project means a second Generate visibly asks the author to finish/cancel the first.
+Cancellation stops the client request; provider computation may continue. A late result
+from cancellation, a replaced project session or an expired request cannot reopen review.
+
+A valid result opens Review changes; no source or metadata changed merely by generation.
+The [proposal concept](../../design/phase-2-llm/review-rewrite-light-v1.png) shows one
+whole dialogue replacement. For larger proposals, the operation list includes target,
+type, affected files/entities, dependency and uncertainty. Selection units are semantic
+operations or inseparable groups; no arbitrary line checkboxes. A dependent operation
+offers its visible required group or explicit remapping, never hidden auto-selection.
+Changing selection rebuilds the dependency closure and shows a new exact preview.
+
+Story view explains before/proposed content; Source view shows exact patches, including
+multi-file changes and metadata. Show generated Character-card text separately from a
+runnable Character definition and existing Appearance-reference operation. Lore/card
+field groups follow the same review flow. Provider reasoning remains separate from final
+proposal content and is never an applicable operation. All returned text renders inertly.
+
+Accept N changes rechecks the complete captured read/write set and draft generation,
+then commits one semantic transaction and one undo entry. Disable duplicate acceptance
+while in flight. A changed target, reference, prompt or relevant metadata shows
+“Project or context changed; prepare again” with review retained for comparison; no
+automatic rebase. Failed validation writes nothing. Ambiguous persistence/recovery
+uses the established project recovery state and cannot claim success or invite a blind
+retry. On success, identify accepted operations and return to the affected authoring
+surface, retaining focus/selection where valid. Undo uses normal history. The concept footer refers to undoing this new acceptance;
+existing project history is not disabled while reviewing a proposal.
+
+Partial acceptance consumes the original proposal. Remaining suggestions can remain
+visible as a reference, labelled not applied; accepting more needs new preparation.
+Discard proposal clears only the transient suggestion. Project close/switch warns
+before discarding pending task/proposal work; restart does not archive raw requests or
+resume generation. Explicitly saved proposed card/lore records are durable without
+becoming approved. This distinction must remain visible at close/reopen.
+
+### Character cards and Lorebook
+
+Characters retains runnable Game character controls and adds the Character card tab.
+Cards may be unlinked; linking does not create a runnable Character. The editor groups
+description/appearance prose, personality/motivation/background, relationships, speaking
+style/examples, explicit applicability and knowledge notes. Link shared facts to lore
+IDs rather than duplicate canonical text. Card prose does not generate/import images.
+
+Lorebook entry: choose Lorebook in navigation, search/filter and select an entry, then
+Edit to change its labelled title/text/category/tags, scope, links and citations. New
+lore entry opens that same form with empty fields; Save as proposed persists it, explicit
+Approve makes its current revision eligible, and choosing it in Assist controls the
+next send. Cancel retains the accepted record and discards only the author-confirmed
+form change through the existing draft guard. A selected Character-card tab filters
+cards; Lorebook filters lore, despite the concept's illustrative mixed list.
+
+Lorebook uses the same reference editor controls with searchable title/category/tags,
+text, linked entities, explicit Scene/route scope, knowledge annotations and citations.
+Show approved/proposed/rejected/superseded status, current versus stale supporting
+revisions, authored versus inferred provenance and unresolved links with text labels.
+A missing entity retains the record/citation rather than deleting or broadening it.
+
+An idle record is read-only until Edit; no pending edits disables both Save actions.
+Pending edits are visibly separate from the prior approved revision and use explicit
+Save/Cancel. View revisions is bounded saved reference revision/provenance inspection,
+not a persistent archive of raw model requests or replies.
+
+Keep three concepts separate: editor input, approval of a saved revision, and inclusion
+in a particular request. Save as proposed persists an unapproved revision. Manual
+authors may explicitly Save and approve. Generated content remains a proposal until
+reviewed by the author; an explicit Save and approve action may combine persistence
+and approval of the reviewed revision. Save as proposed remains available separately. Save after editing
+approved text requires a newly approved revision before use. Approve/reconfirm displays
+the exact revision and supporting citations; generated updates never approve themselves.
+Reject and Supersede preserve the established undoable lifecycle rather than destroy
+evidence. Approval changes no runnable game variables or definitions.
+
+Draft with AI / Update with AI opens the same Prepare step with destination visible.
+Generation remains transient until explicit semantic acceptance/Save as proposed;
+the image's saved-as-Proposed helper describes that save, not generation alone.
+After Save as proposed the editor displays Proposed and generation provenance,
+then offers explicit review/approval. An explicitly approved acceptance displays
+Approved for that exact reviewed revision; generation alone never approves it. No background updates, contradiction detection,
+automatic keyword injection or whole-book sends. Assist's selection records included
+revision IDs; a reference editor's scope is guidance, not a runtime knowledge claim.
+
+### Settings, prompts and baseline restore
+
+Provider profiles offer only Unsloth Studio and OpenAI-compatible. Show endpoint input
+and normalized destination, credential configured/missing/unavailable status, native
+Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
+settings. No renderer API-key text field or provider buttons implying extra verified
+support. Distinguish Refresh models, synthetic connection/capability tests and a project
+generation; tests do not send project content. Changed configurations are Untested until
+their actual probes pass. Model loading stays an explicit action in Studio.
+
+Use two real tabs, Provider profile and System prompts, with only the selected editor
+shown; the generated simultaneous panes are an overview of both, not the tab behavior.
+Keep machine-local profile defaults distinct from project-local prompt templates.
+Per-action system-prompt editing shows effective scope, baseline version and customized
+status; task instructions and project style notes have their own labels. Save prompt
+is explicit. Restore baseline previews the versioned replacement against current text,
+then applies only that prompt after confirmation. Cancel preserves custom text; applying
+is undoable, with the previous text retained, and saving/reopening preserves the restored
+revision. Restore does not reset references, credentials, other prompts or size limits.
+It invalidates any send using the prior prompt. The image shows the editor before the
+restore preview; the written interaction is authoritative.
+
+### Failure, draft and compact-window behavior
+
+| State | Visible recovery without losing author input |
+| --- | --- |
+| No configured profile/model; key or OS store unavailable | Explain the specific missing item and open its settings/native action; no silent model substitution or plaintext fallback. |
+| Provider unavailable/busy, timeout or interrupted response | Retain task/selected references and show actual known cause; Retry means a new explicit reviewed send, never an automatic request. |
+| Malformed/truncated/unsupported/tool response | No applicable proposal; show bounded inert diagnostics and return to preparation. Do not auto-repair or downgrade modes. |
+| Over budget or stale reference | Name the failing total/revision; explicit correction rebuilds preview and requires review. |
+| Competing target draft, external edit or recovery blocking | Retain proposal/task, explain affected target, return to editor/recovery; safe unrelated editing remains available. |
+| Empty references or new project | Manual New card/New lore entry and useful empty-state guidance; generation requires configured readiness. |
+
+At insufficient width, collapse project/tree rails and use the central workspace for
+Assist or review with Back to Story and the captured target always labelled. Replace
+parallel before/after columns with stacked labelled panels; retain the same operation
+selection, exact Source view and primary action. Reference and settings secondary
+panels become ordered sections. No fixed multi-column min-width or horizontal scrolling
+for form actions; Source diff scrolling remains explicit and localized. At short height,
+scroll content while keeping the primary action and request status accessible without
+covering the focused field. Never hide required context totals or approvals behind hover.
+
+Provide logical keyboard traversal, labelled checkboxes/selectors, visible focus, a
+keyboard operation-selection alternative, multiline text behavior consistent with
+Source/Scene, and focus restoration on Back/error/Cancel. Announce request phases,
+budget refusal and acceptance once; do not announce every streamed token. Color is
+paired with labels; test both themes, text scaling and narrow windows. Generated
+screens establish hierarchy, not exact contrast, geometry, font size or physical-input proof.
+
+### Implementation proof and planning record
+
+Before the UI completion gate, exercise the real boundaries: manually author card/lore,
+explicitly approve and choose revisions, edit/restore/undo/reopen a prompt, inspect the
+exact dispatched payload, refuse an excessive total, cancel and reject late callbacks,
+review whole operation groups, reject stale acceptance, accept a valid subset once,
+undo/redo, and close/reopen with saved references and discarded transient proposals.
+Add narrow/keyboard/error checks to the existing section 11 matrix. Browser evidence
+supports packaged target evidence; mockups do not satisfy these assertions.
+
+Planning scope is docs and four generated concepts on `codex/phase-2-3-planning`,
+continuing from `a18c09e`. Exact prompts, reference hashes, asset hashes and inspection
+limits are stored in the [design index](../../design/phase-2-llm/README.md).
+No application implementation, configured project-provider request, native build, SDK
+execution or CI dispatch is part of this outcome. Image generation used the built-in
+image tool. The parent reviewed the subagent deliverable and handles publication on
+the same planning branch; no merge or new planning PR is selected.
+
+Parent review and verification — 2026-10-02: inspected all four concepts, reconciled
+schematic controls against sections 5–9, and retained explicit author approval without
+requiring separate save and approve clicks for an already reviewed reference. Repaired
+the Phase 3 cross-link after expanding this section. Repository validation passed for
+329 files; whitespace and documentation/image-only scope checks passed. No application
+tests or CI are required for this planning change. Publish this coherent checkpoint on
+the existing planning branch and verify its remote head; then user design review is next.

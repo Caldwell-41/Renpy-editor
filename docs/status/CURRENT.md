@@ -147,3 +147,16 @@ the locked host, so generation used a saved actual synthetic-fixture Story scree
 This is proposed design, not accepted or implemented UI. Continue reviewing these
 interactions and the remaining feature subsets on `codex/phase-2-3-planning`.
 No Phase 1 files, application code, build/SDK/native runs or CI dispatches were added.
+
+LLM screen planning — 2026-10-02: the user delegated equivalent Phase 2 UX planning
+and image generation to a GPT-6.1 Sol subagent. The
+[expanded Phase 2 design](../tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+and [four proposed concepts](../design/phase-2-llm/README.md) cover preparation, semantic
+review, cards/lorebook and AI settings, including cancellation/errors/draft safety and
+compact/accessibility contracts. Total-budget, approval/inclusion, explicit proposed
+reference saves and transient proposal boundaries are preserved. Assets use the saved
+actual synthetic-fixture screenshot; no live capture on the locked host. Exact prompts,
+hashes and schematic corrections are retained. No implementation or Phase 1 changes.
+The parent reviewed the four concepts and written interaction contracts; publication
+uses the existing planning branch;
+no pending CI, provider request, build or new PR. Next: user review of the proposed design after verified publication. Resolve the checkpoint SHA from Git.

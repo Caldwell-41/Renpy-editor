@@ -572,9 +572,13 @@ external revision boundaries rather than overwriting newer work.
 
 ### Proposed Phase 2–3 interaction direction — 2026-10-02
 
-The [Phase 2 interaction journey](tasks/active/phase-2-initial-llm-assistance.md#18-proposed-uiux-journey)
+The [Phase 2 interaction journey](tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
 places reviewed assistance next to writing, extends Characters with cards, introduces
-Lorebook, and exposes prompt/context/response controls. The
+Lorebook, and exposes prompt/context/response controls. Its
+[four generated LLM screen concepts](design/phase-2-llm/README.md) illustrate preparation,
+semantic proposal review, reference editing and AI settings, with explicit schematic
+corrections. Approval and inclusion remain separate, context budget includes output
+and margin, and unaccepted proposals are transient. The
 [Phase 3 Story interaction design](tasks/active/phase-3-initial-wysiwyg-release.md#story-interaction-design)
 keeps the Beat list and adds expandable, labelled conditional bodies, explicit insertion
 parents and continuations, returning Call rows and an honest manual branch preview.

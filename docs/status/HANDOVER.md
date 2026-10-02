@@ -352,3 +352,24 @@ limits the manual preview claim. Publication uses the existing planning branch; 
 merge or planning PR is selected. No application tests are needed for this docs/image
 change. The next action is user review of the proposed interactions and remaining
 Phase 3 subsets, not implementation. Resolve this checkpoint's SHA from Git.
+
+LLM screen planning — 2026-10-02: the user delegated equivalent Phase 2 UX planning
+and image generation to a GPT-6.1 Sol subagent. The
+[expanded Phase 2 design](../tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+and [four proposed concepts](../design/phase-2-llm/README.md) cover preparation, semantic
+review, cards/lorebook and AI settings, including cancellation/errors/draft safety and
+compact/accessibility contracts. Total-budget, approval/inclusion, explicit proposed
+reference saves and transient proposal boundaries are preserved. Assets use the saved
+actual synthetic-fixture screenshot; no live capture on the locked host. Exact prompts,
+hashes and schematic corrections are retained. No implementation or Phase 1 changes.
+The parent reviewed the four concepts and written interaction contracts; publication
+uses the existing planning branch;
+no pending CI, provider request, build or new PR. Next: user review of the proposed design after verified publication. Resolve the checkpoint SHA from Git.
+
+LLM UX verification: repository validation passed for 329 files, whitespace/scope review
+passed, and all four images were visually inspected by the parent. Explicitly reviewed
+reference approval may combine save and approve; no redundant mandatory two-click
+approval step was added. Publication target remains `origin/codex/phase-2-3-planning`.
+The subagent's initial worktree save approval was interrupted before any write; the
+parent completed the same prepared save with worktree authorization. No duplicate
+image generation occurred. Resolve the final checkpoint from Git; no new Goal or CI.

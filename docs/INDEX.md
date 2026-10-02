@@ -33,6 +33,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Accepted UI designs, staged build plan, risks and build-approval boundary | [UI design review](tasks/active/ui-design-review.md) |
 | Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
 | Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |
+| Proposed LLM preparation/review/reference/settings screens, exact prompts and provenance | [Phase 2 LLM concepts](design/phase-2-llm/README.md) |
 | Outcome-sized goals, internal checkpoints, same-thread waiting and handovers | [WORKFLOW.md](WORKFLOW.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
