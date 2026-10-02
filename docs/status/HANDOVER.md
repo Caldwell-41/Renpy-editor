@@ -1,6 +1,34 @@
 # Current outcome handover
 
-## Review corrections complete; awaiting installer selection — 2026-10-02
+## Review audit found incomplete corrections — 2026-10-02
+
+Latest user outcome: compare changes against this chat and saved requirements.
+[Audit A1–A9](../tasks/active/ui-design-review.md#chat-to-implementation-audit--2026-10-02)
+supersedes the earlier full-completion claim. Reproduced: Choice action sizing/
+grouping, Variable discard/type/default mismatch, appearance selection reset,
+former-expression collision, invisible sidebar focus/missing semantics, divider
+reset mismatch and new-Beat pending controls/focus. Media loading/error detail is
+source-inspected; HTML5 Beat dragging conflicts with the configured native drop
+handler on Windows according to pinned/official Tauri docs (no Windows reproduction).
+
+Application source remains `e4013fa`; published audit input `ad6ad7f` matched fresh
+local/remote refs. Main `4d7ba03` and planning worktree `8a9da37` remain unchanged.
+Actual-renderer Chrome audit used synthetic data and deferred receipts; one exact
+release core test with a temporary assertion passed (227 filtered), confirming
+rename-back refuses with DiscoveryCollision. Temporary harness/assertions were
+removed. Audit adds no permanent app/test changes, installer, SDK/native starts,
+workflow dispatch or integration. Ignored logs/JSON/screenshots are under
+`.toolchains/reports/ui-corrections-audit-*` and `ui-refresh/audit-*.png`.
+
+Continue the existing selected correction scope: fix A1–A9 with focused rejecting
+checks before packaging. Preserve native asset-drop ownership when correcting Beat
+dragging; actual Windows verification requires Windows. Installer selection and
+hands-on restart at Story follow correction. Original physical/IME/drop/live-progress/
+final UX acceptance remains open. No manual workflow/automation is pending; PR #17
+remains draft/open with recorded conflicts. Publish this documentation checkpoint;
+do not dispatch a build/CI run or resolve conflicts for this audit.
+
+## Earlier implementation and local evidence (completion claim superseded)
 
 Source implementation checkpoint **`e4013fa76672205b9166bb97752da1aeb8856a86`**, parent
 `27f1fe92bcb857237a627303e8e6f41d99f09769`, on
@@ -9,8 +37,8 @@ coherent documentation closeout on the same branch. Preserve main `4d7ba0333c48d
 and the separate `codex/phase-2-3-planning` worktree at `8a9da37`.
 Fresh PR #17 inspection: OPEN, draft, CONFLICTING; no integration/conflict resolution.
 
-The [completed correction record](../tasks/active/ui-design-review.md#review-corrections-implemented-and-locally-verified--2026-10-02)
-owns the full finding disposition, root causes and limits. Welcome/wizard/button,
+The [implementation record](../tasks/active/ui-design-review.md#review-corrections-implemented-and-locally-verified--2026-10-02)
+owns the original local evidence; the audit above owns remaining omissions. Welcome/wizard/button,
 Story/sidebar/chapters/drag, Source tabs, saved Branches routes, Runtime drawer and
 Characters/Assets/Variables modal/media/name/selection corrections are implemented.
 Appearance editing changes expression and/or image while preserving IDs/defaults,

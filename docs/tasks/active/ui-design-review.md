@@ -2043,8 +2043,9 @@ local automated evidence. A new package will require separate user selection.
 
 ### Review corrections implemented and locally verified — 2026-10-02
 
-Implementation candidate **`e4013fa76672205b9166bb97752da1aeb8856a86`**, parent `27f1fe9`, applies
-all findings selected above. Keep this candidate distinct from installed `01d0896`
+Implementation candidate **`e4013fa76672205b9166bb97752da1aeb8856a86`**, parent `27f1fe9`, implements
+the selected correction paths. The subsequent audit below identifies unmet parts;
+this checkpoint does not complete every finding. Keep it distinct from installed `01d0896`
 and cross-target-qualified `d690d7f`. Canonical behaviour is in UI, DATA_MODEL and
 ARCHITECTURE; testing selection is in TESTING.
 
@@ -2114,3 +2115,78 @@ and detailed creation progress, Windows native checks and final visual/UX approv
 The earlier user-confirmed fresh-project launch remains valid for `01d0896`; existing
 old-project GUI repair is still outside scope. No further operation/automation is
 pending or selected after publication; do not merge or resolve conflicts.
+
+### Chat-to-implementation audit — 2026-10-02
+
+The user requested review against this chat and the saved findings. Audit input is
+published `ad6ad7fcf2b830bd21c1121c3b450696fcb70cf9`; application source remains
+`e4013fa`. Fresh local/remote feature refs matched `ad6ad7f`, main matched `4d7ba03`,
+and the planning worktree remained `8a9da37`. The previous claim that all corrections
+were complete was too strong: passing the main-path tests did not prove all recorded
+acceptance details. No reset, merge or conflict resolution occurred.
+
+**Confirmed omissions/regressions, awaiting correction:** these map to existing
+finding IDs, rather than selecting a new feature phase.
+
+| Audit item / original findings | Evidence and impact | Required follow-up |
+| --- | --- | --- |
+| A1 — STORY-02, BUTTON-01 | Choice creation still puts three fields, Cancel and Create into five separate grid cells (`scene-ui.ts:585`, `ui-refresh.css:310`). At 1440px Create is 178×53px with a wrapped label; Cancel occupies a separate 178px-wide, 15px-high cell. At 560px there are two 150px columns and Create is still 53px tall. Overflow is corrected, but grouped actions/intrinsic button sizing are not. | Separate grouped action row, shared sizing and compact stacking without stretching/wrapping. |
+| A2 — CATALOG-01 | New Variable → int → default 42 → Cancel → Discard → reopen: Type is bool, but Default value is still the numeric input with 42. `catalog-dialog.ts:37` restores values without rebuilding dependent controls; the initially detached text input was never captured. A Boolean save then reads the hidden Boolean selector instead of the visible 42. Footer also remains Unsubmitted input after discard. | Restore complete form state/dependent controls, clear discarded values and refresh truthful status; test each type and reopen/submission. |
+| A3 — CHARACTERS-02 | Select non-default happy → Edit Character → Save unchanged: preview resets to neutral and no appearance is pressed. `CatalogState` retains entity selection, not appearance selection; `main.ts:709` initializes selectors false. | Retain selected appearance identity through redraw/edit/default changes and view restoration while it exists; viewing must not change the default. |
+| A4 — CHARACTERS-03 | Real disposable core fixture: happy → calm → thoughtful succeeds, then thoughtful → calm refuses with DiscoveryCollision. Retained former declarations collide with their own appearance (`authoring.rs:956/1360`), preventing correction/reuse of a former expression with no other owner. | Distinguish owned aliases from genuine collisions while preserving source/files/references; test rename-back and true collision rejection. Protected/stale refusal remains a separate safeguard. |
+| A5 — STORY-05 | Hiding Scenes/files leaves focus on its invisible toggle. Initial tree toggle has no aria-expanded/aria-controls and never updates them; main toggle initializes expanded state only after clicking. These details were explicit in the saved proposal. | Accurate initial/updated panel semantics and focus transfer to visible restore/workspace controls on hide/restore. |
+| A6 — STORY-01 | ArrowDown resizes 34 → 36, then Reset layout changes CSS to 34fr but aria-valuenow remains 36. Reset still queries the hidden range (`main.ts:843`). | One allocation update for pointer/keyboard/reset, keeping persisted/layout/accessibility values synchronized; remove hidden-slider dependency. |
+| A7 — STORY-03 | Deferred creation receipt: Add Beat and Cancel stay enabled. Second confirmation shows Another persistence operation is still in progress.; the operation guard correctly limits actual writes to one. Successful creation leaves a saved collapsed row but focus falls to BODY, with no new-row reveal/focus. | Disable duplicate confirmation/dismissal while pending, restore on failure, reveal/focus the saved collapsed Beat without reopening its editor. |
+| A8 — CHARACTERS-01 | Source inspection: `catalog-ui.ts:21` discards presentation errors, showing only Preview unavailable/Retry preview. Initial requests use the entity label rather than a loading state. Ordering/cache/retry exist, but distinct loading and retained actionable failure information are incomplete. | Explicit loading and bounded useful read error, preserving retry and stale/session guards; never replay writes. |
+| A9 — STORY-06 / ASSETS-02 integration | Beat grips use HTML5 draggable/dragstart/dragover/drop (`scene-ui.ts:548`). The main window is built from configuration with native dragDropEnabled at its default true, and OS asset imports depend on native DragDrop events. The pinned CLI schema and [official Tauri configuration reference](https://v2.tauri.app/reference/config/#dragdropenabled) state that the native handler must be disabled for HTML5 frontend dragging on Windows. This is a source-backed platform incompatibility, not a Windows reproduction. | Make internal Beat dragging coexist with native asset drops, for example using pointer-driven internal reorder. Do not simply disable the native handler and break asset importing. Verify actual gestures on affected targets; Windows needs Windows. |
+
+Coverage reconciliation for the other selected findings:
+
+- WELCOME-01/02/03, WIZARD-01, SDK-01, CONFIG-01 and REVIEW-01: controls, wording,
+  tonal/hover treatment and layout are present; prior fixture screenshots/browser
+  checks support them. Accepted resolution mockup/written decisions remain the
+  reference. Final native visual acceptance remains open.
+- STORY-04: chapter disclosure preserves the selected editor. STORY-06: left grip,
+  insertion markers, bounded reorder/one Undo and protected/stale guards are present;
+  the real transaction was tested previously, but A9 leaves native integration incomplete.
+  Actual macOS WebView dragging and
+  Windows acceptance remain open, not inferred from core/browser tests.
+- SOURCE-01/02: unified tabs, overflow arrows/chooser, active-tab reveal and matching
+  scrollable file-list selection are present, with prior many-tab checks. Physical
+  Source editing acceptance remains separate.
+- BRANCHES-01/02, RUNTIME-01: saved literal routes, closable details, sticky runtime
+  X/expandable sections/error summary are present, with prior rejecting core/DOM/
+  browser checks. Graph pan/zoom refinement was acceptable for now; do not invent
+  unselected graph styling requirements.
+- CHARACTERS-04, ASSETS-01/02, CATALOG-02/03/04, VARIABLES-01: direct Edit,
+  categories/drop strip, creation/edit dialogs, full-card/row selection, inspector X
+  and naming guidance/normalization are present. A2/A5 concern interaction details,
+  not missing entire controls. Actual OS drop and physical capitalization/IME remain
+  unverified.
+- Earlier STARTER-GUI-01/naming/default-colour blockers were corrected in `01d0896`;
+  the user confirmed a fresh project works. Reopening the earlier project does not
+  invalidate that result or authorize silent repair.
+
+Audit evidence: focused Chrome harness using the actual renderer, synthetic data,
+two appearances, discard/reopen and deferred Beat creation confirmed A1/A2/A3/A5/
+A6/A7. One exact release core test with a temporary assertion confirmed A4
+(`Err(DiscoveryCollision)`): **1 passed, 227 filtered**, no SDK/process start. A8 is
+code inspection, not a reproduced native failure. A9 additionally verifies the pinned
+Tauri schema/default, actual builder/drop code and official documentation; it is
+an inference about Windows behaviour, not target evidence. Ignored evidence:
+`.toolchains/reports/ui-corrections-audit-{browser,core}.log`,
+`ui-corrections-audit.json`, `ui-refresh/audit-*.png`. Early harness attempts had an
+incorrect Type-field locator and a click blocked by the intentionally open compact
+tree overlay; the final run used the actual hide control and completed. Temporary
+harness/core assertions were removed; application/test source is unchanged. No
+broad suite was rerun or prior pass relabelled. Earlier 74/185 results still describe
+the candidate, with newly identified coverage gaps.
+
+Continuation: correct A1–A9 with focused regressions before packaging or resuming
+hands-on Story acceptance. This turn records an audit, not application fixes or
+installer selection. Keep the existing implementation selection/branch/PR; no
+hosted CI/package matrix/integration/new phase is selected. Counters remain 8
+packages, 44 native/boundary starts and separately recorded 4 SDK menu starts.
+Physical keyboard/IME, OS drop, live SDK download/detailed creation progress,
+Windows native verification and final UX feedback remain open. No manual workflow
+or automation is pending.

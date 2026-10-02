@@ -7,11 +7,18 @@
 
 ## Live continuation
 
-**State: review corrections implemented; replacement installer not selected.**
-The user requested all suggested fixes in this same chat. Implementation checkpoint
-**`e4013fa76672205b9166bb97752da1aeb8856a86`** completes the
-[selected correction scope](../tasks/active/ui-design-review.md#review-corrections-implemented-and-locally-verified--2026-10-02)
-on the existing branch; canonical behaviour is in UI/DATA_MODEL/ARCHITECTURE.
+**State: review audit found incomplete corrections; replacement installer not selected.**
+The user requested comparison against this chat and the saved findings. The
+[audit record](../tasks/active/ui-design-review.md#chat-to-implementation-audit--2026-10-02)
+supersedes the prior completion claim: **A1–A9 remain** (Choice actions, Variable
+discard/reset, appearance selection/name reuse, sidebar focus/semantics, divider
+reset, new-Beat pending/focus, media state/errors and native drag integration).
+Application checkpoint **`e4013fa76672205b9166bb97752da1aeb8856a86`** is unchanged;
+published audit input was `ad6ad7f`. Six gaps were reproduced in the actual renderer
+with synthetic data, one with a disposable core fixture; media presentation is code
+inspection and Windows drag incompatibility is a documented source-backed inference.
+Correct these before packaging or restarting hands-on acceptance. Canonical behaviour
+and implementation limits are in UI/DATA_MODEL/ARCHITECTURE and the task.
 Local evidence: **74 frontend tests**, **185 routine core tests** (40 ignored,
 3 separately selected), **7 focused review tests**, **1 updated IPC test**, **1 desktop
 test**, production web compilation, format/diff/validator checks and the expanded
@@ -19,7 +26,7 @@ Chrome fixture regression pass. The enforced Branches workload passes all 3 samp
 These are local automated checks; no replacement installer or native Windows evidence
 is claimed for this candidate.
 
-**Next selected review entry: Story, after a new Mac installer is explicitly selected.**
+**Hands-on review resumes at Story after correction and installer selection.**
 Installed/retained `01d0896` is the earlier corrected build and does not contain these
 new UI corrections. Fresh-project bootstrap succeeded in the user's review; old-project
 GUI repair remains outside scope. Physical keyboard/IME, actual OS asset drop, live
