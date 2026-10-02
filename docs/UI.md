@@ -47,6 +47,48 @@ and the linked task; implementation does not imply final native/human acceptance
   session/generation completion rules. New Assets audio preview stays disabled;
   existing explicit Story audition remains available.
 
+### Hands-on review corrections — 2026-10-02
+
+- Welcome distinguishes the introduction from Recent Projects; available projects
+  have a hover/focus treatment. Settings has a cog and a button hover treatment.
+  Wizard steps fill the rail, SDK selection says **Select existing SDK…**, resolution
+  uses a readable 48-pixel picker with aspect preview, and Git has an inline checkbox.
+- Main navigation has its own top icon toggle and a 64-pixel collapsed rail. The
+  Scene/file list has independent hide/restore controls. Chapter disclosure keeps
+  the selected Scene and its editing state. Writing focus hides both sidebars,
+  preview and context; exiting restores the previous panel choices.
+- New Beats save when confirmed once, returning a collapsed row. Choice creation
+  uses a compact action and fields below the editor. The redundant Preview size
+  slider is removed; the accessible preview divider and saved/reset allocation remain.
+  Beat grips reorder supported non-terminal rows in one transaction/Undo; keyboard
+  arrows remain available. Protected regions, pending drafts and stale source refuse.
+- Source groups filename, draft marker and Close in one tab. Overflow exposes scroll
+  controls and an Open files chooser; opening selects and reveals the active tab and
+  corresponding file row. Close continues to retain the session draft.
+- Branches ignores indented screen-language label controls when finding story labels.
+  Saved literal choices and project entry retain their actual routes. Custom/dynamic
+  source stays uncertain. The details popup has a Close X, Escape and focus return.
+- Runtime has a sticky header and visible Close X. Diagnostics, output, launch details
+  and advanced SDK/trust controls expand on demand. A reported runtime error remains
+  visible even when Ren’Py exits zero; closing the drawer does not stop the process.
+- Characters, Assets and Variables use whole-card/row selection, inspector Close X,
+  and consistent create/edit modals with guarded Cancel/Escape and focus return.
+  Character rows have thumbnails and direct Edit. Appearances can be selected for
+  preview and edited by expression and/or replacement image; preview selection does
+  not change the default. Ordered media reads, cache reuse and Retry preview address
+  the initial inspector/default-refresh failure.
+- Assets always shows All, Backgrounds, Character images, Music and Sound effects,
+  plus a visible Drop/Browse area. Native drag state highlights that area; Drop and
+  Browse enter the same staged import modal and require confirmation before writing.
+  Native file-drop acceptance is still separate from browser fixture checks.
+- Technical-name inputs across all three libraries suppress OS capitalization,
+  correction and spelling, and canonicalize uppercase ASCII at blur/submission
+  without changing display names or text values. Focusable naming guidance explains
+  Loomlight's lowercase, letter-first, 64-character contract and descriptive names.
+
+Qualification and remaining native/human review are recorded in CURRENT/HANDOVER;
+these corrections have not yet been delivered as a replacement installer.
+
 ## Design intent
 
 Project Loomlight is a restrained, professional writing and game-authoring tool.

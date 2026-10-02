@@ -944,3 +944,22 @@ Settings return and preference round-trip/cleanup. Its editor input is explicitl
 synthetic. No second qualification matrix or new testing orchestrator is introduced.
 Current exact counts, failed attempts, native capability gaps and remaining human
 acceptance are recorded in the UI task and HANDOVER, not inferred from screenshots.
+
+## Hands-on UI correction regressions
+
+The 2026-10-02 review corrections extend the existing suites rather than selecting a
+new package matrix. `npm run check` includes modal cancellation/staging preservation,
+whole-row selection, composition-safe names, single-confirmation Beat insertion and
+runtime-error/close semantics. `node app/tests/ui-refresh.browser.mjs` additionally
+rejects unavailable control clicks and verifies independent sidebar restoration,
+Chapter disclosure, Choice form bounds, repeatable modal dismissal, fixed categories,
+Source tab overflow/reveal and both palettes/minimum layouts. Its fake bridge is not
+physical IME, OS file-drop, native WebView, SDK or security acceptance.
+
+`cargo test -p loomlight-core --locked review_` selects the saved-route/screen-label,
+Beat reorder/history/protected/stale, Appearance name/image/reference and exact-token
+regressions, alongside an existing Apply Both review test. The routine core selector
+and separately enforced observed-flow fixture remain the broad qualification policy.
+The existing authoring IPC test also rejects renderer paths in `appearance.update`.
+Desktop tests/check compile the native drag-state presentation bridge. Exact evidence
+and installer/native limits belong in the active UI task and HANDOVER.

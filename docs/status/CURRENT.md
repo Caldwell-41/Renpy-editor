@@ -7,6 +7,29 @@
 
 ## Live continuation
 
+**State: review corrections implemented; replacement installer not selected.**
+The user requested all suggested fixes in this same chat. Implementation checkpoint
+**`e4013fa76672205b9166bb97752da1aeb8856a86`** completes the
+[selected correction scope](../tasks/active/ui-design-review.md#review-corrections-implemented-and-locally-verified--2026-10-02)
+on the existing branch; canonical behaviour is in UI/DATA_MODEL/ARCHITECTURE.
+Local evidence: **74 frontend tests**, **185 routine core tests** (40 ignored,
+3 separately selected), **7 focused review tests**, **1 updated IPC test**, **1 desktop
+test**, production web compilation, format/diff/validator checks and the expanded
+Chrome fixture regression pass. The enforced Branches workload passes all 3 samples.
+These are local automated checks; no replacement installer or native Windows evidence
+is claimed for this candidate.
+
+**Next selected review entry: Story, after a new Mac installer is explicitly selected.**
+Installed/retained `01d0896` is the earlier corrected build and does not contain these
+new UI corrections. Fresh-project bootstrap succeeded in the user's review; old-project
+GUI repair remains outside scope. Physical keyboard/IME, actual OS asset drop, live
+SDK download/detailed creation progress, Windows native checks and final visual/UX
+acceptance remain open. No manual workflow/package operation or automation is pending.
+PR #17 remains draft/open/conflicting; no merge/conflict resolution/new phase selected.
+Cumulative package/native/SDK counters and exact evidence remain in HANDOVER/task.
+
+## Earlier UI review record (historical; superseded by the live state above)
+
 **Current user-selected work:** [UI refresh implementation](../tasks/active/ui-design-review.md).
 The accepted UI is implemented and **automated qualification now passes on both targets**.
 [Run 36661814610](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36661814610),
@@ -28,7 +51,12 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
-**Hands-on review stopped for now at the user's request, 2026-10-02.**
+**Review corrections implementation selected, 2026-10-02.** The user requests all
+suggested fixes in this chat, superseding the review-only stop and sidebar/Beat-drag
+approval wait. [Implementation selection](../tasks/active/ui-design-review.md#review-corrections-implementation-selection--2026-10-02)
+owns scope. Implement and verify with focused checks; no new installer/CI/integration
+selected. Earlier review state follows for evidence.
+**Earlier hands-on review stopped at the user's request, 2026-10-02.**
 [Continuation record](../tasks/active/ui-design-review.md#hands-on-review-stopped-for-now--2026-10-02):
 findings are saved; corrections and unreported acceptance remain open. Wait for the
 user to select implementation scope or resume review. No background operation,

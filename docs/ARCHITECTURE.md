@@ -298,6 +298,25 @@ special cases:
 - Scene beats and Branches share one semantic edge/domain model; graph data is not a
   separately generated truth.
 
+### Review correction transaction and presentation paths
+
+The Scene `reorderBeat` command moves a supported Beat to a final index through the
+existing revision-checked proposal/history path. It preserves exact source slices and
+stable IDs, rejects intervening gaps/protected or terminal Beats, and produces one
+Undo entry. Pointer grips and keyboard arrows share that existing authoring owner.
+
+Appearance updates use typed, session-bound IPC. Replacement files use native import
+authorities; expression changes patch recognized token ranges and update mapping
+hashes/IDs. One transaction owns image/declaration/metadata/Scene companions. Unknown
+payload fields, dirty source, stale expected identity and unsafe ownership refuse.
+
+Catalogue dialogs move the existing forms into accessible presentation containers;
+completion, mutation and generation ownership remain in the original handlers.
+Discard resets unsubmitted inputs/staging while completed imports remain saved.
+Media presentation reads now use the existing ordered service lane with busy retries,
+leaving Stop independent; a view-owned bounded cache is reused by cards/inspectors.
+Late completions cannot attach to a different Asset or disposed view.
+
 ## External-change reconciliation
 
 - Watch events are debounced and compared using content hashes, not timestamps only.

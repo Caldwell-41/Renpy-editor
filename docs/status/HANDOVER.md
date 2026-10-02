@@ -1,5 +1,60 @@
 # Current outcome handover
 
+## Review corrections complete; awaiting installer selection — 2026-10-02
+
+Source implementation checkpoint **`e4013fa76672205b9166bb97752da1aeb8856a86`**, parent
+`27f1fe92bcb857237a627303e8e6f41d99f09769`, on
+`feature/phase-1g-branches-runtime`. Publish and verify this checkpoint and the
+coherent documentation closeout on the same branch. Preserve main `4d7ba0333c48d60242a9a42d3e079fea499a5531`
+and the separate `codex/phase-2-3-planning` worktree at `8a9da37`.
+Fresh PR #17 inspection: OPEN, draft, CONFLICTING; no integration/conflict resolution.
+
+The [completed correction record](../tasks/active/ui-design-review.md#review-corrections-implemented-and-locally-verified--2026-10-02)
+owns the full finding disposition, root causes and limits. Welcome/wizard/button,
+Story/sidebar/chapters/drag, Source tabs, saved Branches routes, Runtime drawer and
+Characters/Assets/Variables modal/media/name/selection corrections are implemented.
+Appearance editing changes expression and/or image while preserving IDs/defaults,
+patching recognized source tokens and committing companions together. Protected or
+stale mappings refuse; original and prior imported images remain intact.
+
+Final local checks: frontend **74/74**, routine release core **185 passed/40 ignored/
+3 separately filtered**, focused review **7 passed**, exact authoring IPC **1 passed**,
+macOS desktop check/test (**1 test**), web compilation, Rust format, diff and repository
+validation (**322 files**) pass. Enforced observed-flow fixture passes **3 samples**:
+initial 32.14–49.99 ms, refresh 31.24–38.29 ms, accepted update 20.83–27.37 ms.
+Expanded Chrome regression passes both themes/all six surfaces and rejecting checks
+for sidebar restoration, chapter collapse, Choice/modal bounds, Source active-file
+reveal/overflow, stable geometry, rich-editor Undo, shipped smoke and busy contention.
+Ignored reports/screenshots: `.toolchains/reports/ui-corrections-*` and `ui-refresh/`.
+Browser fixtures and synthetic events are not native WebView/SDK/IME/drop acceptance.
+The web build retains its existing large-chunk advisory; no build failure was waived.
+
+Cumulative expensive totals remain **8 production package builds; 40 native scenario
+starts + 4 boundary starts = 44**. The separately recorded **4 successful explicit SDK
+menu test starts** are unchanged. This implementation adds zero installer builds,
+native/SDK starts or manual CI dispatches. Bootstrap inputs are unchanged; earlier
+SDK evidence is reused only for that path. Installed `/Applications/Loomlight.app`
+remains the checksum-verified `01d0896`; the retained Mac DMG is under ignored
+`.toolchains/review-builds/ui-refresh-01d0896/`. Earlier `d690d7f` both-target acceptance
+and all failed/superseded run records remain below/in the task.
+
+Next step needs user selection of a new corrected Mac installer, then resume at
+**Story** before Source/Branches/Characters/Assets/Variables. Continue physical
+keyboard/IME, OS asset drop, live SDK download/detailed creation progress and final
+visual feedback; Windows native verification requires Windows. Do not use `01d0896`
+to judge these new corrections. No automation/background correction work, manual
+workflow/native package, old-project GUI repair, merge or new phase is selected.
+Repository quality may run automatically on publication; record its actual state
+if relevant without dispatching a duplicate or package matrix. No runtime/client
+Goal pause state is claimed.
+
+## Earlier implementation selection (completed; retained for scope provenance)
+
+The user selected all suggested fixes in this chat, superseding the review-only stop
+and the outstanding sidebar/Beat-drag approval. Incoming published checkpoint
+`27f1fe92bcb857237a627303e8e6f41d99f09769` was preserved. No additional installer,
+manual CI dispatch or integration was included in that implementation selection.
+
 ## User stopped hands-on review for now — 2026-10-02
 
 The user says "i think we are done for now" after Variables feedback. Stop review

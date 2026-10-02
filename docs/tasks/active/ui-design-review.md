@@ -2017,3 +2017,100 @@ draft/open with recorded conflicts; no merge/conflict resolution/new phase or ne
 build/dispatch selected. Next user-directed continuation may select a bounded
 correction implementation outcome or resume remaining checks. This pause record
 changes docs only, adding zero launches, native/SDK cases, builds or dispatches.
+
+### Review corrections implementation selection — 2026-10-02
+
+The user says "i want the fixes i have suggested implemented" and asks whether to
+continue here or another chat. Continue the same chat/branch from published
+`27f1fe92bcb857237a627303e8e6f41d99f09769`. This selects implementation of the
+recorded corrections, including the sidebar/Beat-drag proposal previously awaiting
+approval; no further design permission is required for those proposed behaviours.
+Use internal checkpoints: shared catalogue/name/modal/media and appearance editing;
+Welcome/wizard/buttons; Story/sidebar/reorder; Source/Branches/runtime; focused
+regression checks/self-review and canonical docs/publication. Preserve original
+source/draft/session/transaction safeguards and previously passing tests. Investigate
+functional blockers with rejecting regressions before claiming root causes.
+
+Scope includes WELCOME-01/02/03, WIZARD-01, SDK-01, CONFIG-01, REVIEW-01,
+STORY-01 through 06, BUTTON-01, SOURCE-01/02, BRANCHES-01/02, RUNTIME-01,
+CHARACTERS-01 through 04, ASSETS-01/02, CATALOG-01 through 04 and VARIABLES-01.
+No unsupported metadata/new feature phase, old-project GUI repair, merge/conflict
+resolution, expensive installer/native-package or hosted CI run is selected. Focused
+frontend/core/browser checks and ordinary compilation follow changed-scope policy;
+reuse SDK evidence unless changed boundaries justify a focused SDK regression.
+Keep cumulative counts; physical/native Windows acceptance remains distinct from
+local automated evidence. A new package will require separate user selection.
+
+### Review corrections implemented and locally verified — 2026-10-02
+
+Implementation candidate **`e4013fa76672205b9166bb97752da1aeb8856a86`**, parent `27f1fe9`, applies
+all findings selected above. Keep this candidate distinct from installed `01d0896`
+and cross-target-qualified `d690d7f`. Canonical behaviour is in UI, DATA_MODEL and
+ARCHITECTURE; testing selection is in TESTING.
+
+| Finding group | Implemented correction |
+| --- | --- |
+| WELCOME-01/02/03, WIZARD-01, SDK-01, CONFIG-01, REVIEW-01 | Settings cog/button treatment, tonal split/project hover, full-height steps, SDK label, 48px resolution/aspect preview, inline Git checkbox |
+| STORY-01–06, BUTTON-01 | Redundant slider removed, compact Choice action/responsive fields, one-confirmation insertion, independent top sidebar controls, chapter disclosure, full writing focus, drag grips/one Undo, shared button sizing |
+| SOURCE-01/02 | Integrated filename/Close/draft tabs, overflow controls/chooser, active tab and file-row reveal |
+| BRANCHES-01/02 | Screen-label inventory correction restores known saved routes/entry; details X/Escape/focus return |
+| RUNTIME-01 | Sticky Close header; compact expandable diagnostics/output/evidence/advanced controls; runtime error retained despite exit zero; close preserves process ownership |
+| CHARACTERS-01–04 | Ordered/reused media presentation with retry; immediate current-view reload after mutations, appearance selection and name/image editing, compact rows/direct Edit |
+| ASSETS-01/02, CATALOG-01–04, VARIABLES-01 | Persistent categories/drop area, shared creation/edit modals, full-card/row selection, inspector X, capitalization prevention/canonicalization and naming guidance |
+
+Functional diagnosis and rejecting evidence: indented SDK screen `label` controls
+made the story inventory incomplete; the collector regression first failed, then
+passes along with a real flow-service test proving two saved literal Choice routes
+and project entry. Arbitrary Beat reorder preserves CRLF bytes/IDs and one Undo;
+protected/terminal/stale moves refuse. Appearance editing preserves IDs/defaults and
+updates supported references for name-only, image-only and combined edits; an external
+edit refuses without changing source or metadata. Final rename patches only the
+recognized expression token, including exact spacing/trailing-text/newline retention.
+Original and prior imported images remain untouched; protected mappings and normal
+name collisions still refuse rather than rewriting custom source.
+
+Bounded corrections during qualification: the initial replacement filename exceeded
+an image-token limit (`CorruptMetadata`); one UUID plus an explicit declaration
+corrected it. A stale-reorder test initially used Undo-restored identical bytes; it
+now makes a genuine external edit. Modal attribute/hidden-form test assumptions and
+shipped smoke locators were updated for the actual new affordances; suppression
+still asserts zero overlapping Flush and a recorded modal/authoring reason. Browser
+checks exposed a small-window tree overlay intercepting navigation, an extra grip
+breaking the two-column Beat header, hidden direct Edit specificity, and incorrect
+Source-tab relative offset; each received a bounded correction and rejecting check.
+No failing gate was relabelled as a pass or removed.
+
+Final local evidence (ignored reports under `.toolchains/reports/`):
+
+- Frontend check: **74 passed, 0 failed/skipped**; production web compilation passes
+  (existing large-chunk advisory remains). Rust format and diff checks pass.
+- Routine release core: **185 passed, 40 ignored, 3 separately filtered**, no failure;
+  exclusions match TESTING. Focused `review_`: **7 passed** (six new regressions and
+  the existing Apply Both review test). Exact updated authoring IPC: **1 passed**.
+- Enforced flow fixture: **3 samples**, initial **32.14–49.99 ms**, explicit refresh
+  **31.24–38.29 ms**, accepted update **20.83–27.37 ms**; existing limits pass.
+- macOS desktop compile and test: pass, **1 desktop test**, no package/native launch.
+- Chrome fixture regression passes both themes/all six surfaces, onboarding/Settings,
+  minimum/laptop layouts, sidebar restoration, chapter collapse, Choice/modal bounds,
+  Source overflow/reveal, stable geometry, lossless rich-editor Undo, shipped smoke
+  interactions with unavailable-click rejection, and busy-contention UI probe.
+  Screenshots were inspected for Story, Choice, wizard, Characters/list/modal and
+  Source overflow. Actual macOS WebView/OS gestures and Windows remain unverified.
+- Repository validator: **322 files**, passed. No extra SDK test was selected because
+  starter-generation/bootstrap inputs are unchanged; earlier menu evidence is reused
+  only for that unchanged path, not as qualification of the new correction candidate.
+
+Cumulative expensive counters remain **8 production builds; 40 native scenario starts
+plus 4 boundary starts = 44**, and the separately recorded **4 successful explicit SDK
+menu test starts**. This implementation adds zero installer builds, native/SDK starts
+or manual CI dispatches. PR #17 remains draft/open/conflicting; main `4d7ba03` and the
+separate planning worktree are preserved. Branch publication may trigger the existing
+Repository quality workflow; that does not authorize a packaging dispatch.
+
+Next user-selected step is a corrected Mac installer, then restart at **Story** and
+review the changes before Source/Branches/Characters/Assets/Variables. Remaining
+acceptance includes physical keyboard/IME, actual OS asset drop, live SDK download
+and detailed creation progress, Windows native checks and final visual/UX approval.
+The earlier user-confirmed fresh-project launch remains valid for `01d0896`; existing
+old-project GUI repair is still outside scope. No further operation/automation is
+pending or selected after publication; do not merge or resolve conflicts.

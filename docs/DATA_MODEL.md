@@ -110,6 +110,21 @@ colour, default appearance, and an `Appearances` list. Adding an appearance impo
 copies an image into the project and assigns an expression name; filename inference may
 prefill the name but is never authoritative.
 
+Appearance editing retains the Appearance, Asset and default-selection UUIDs.
+`appearance.update` requires the expected expression and Asset SHA-256, with an
+optional session-bound native selection authority for image replacement. A rename
+patches only the expression token in recognized Show/Change Appearance statements,
+retaining formatting, line endings, Beat IDs and other source bytes. Dirty, stale or
+protected Scene mappings refuse the rename. Character/Variable technical identifiers
+remain immutable; this operation does not introduce general identifier renaming.
+
+Replacement images use a unique lowercase `game/images/ll_<uuid>.<extension>` path
+and a verified explicit image declaration. Image, declaration, authoring metadata
+and any affected Scene/source-map patches commit together. Original selected files
+and previously imported project files remain intact, preserving custom references;
+there is no automatic obsolete-file deletion. Old image names/declarations remain
+available as aliases and participate in normal collision checks.
+
 Phase 1D persists these identities in `.renpy-editor/authoring.json` schema version 1.
 Each Character stores a UUID, immutable creation-time lowercase technical identifier,
 display name, `#rrggbb` dialogue colour, optional default Appearance UUID, and exact
