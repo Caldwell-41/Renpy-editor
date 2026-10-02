@@ -1,6 +1,10 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Planning date:** 2026-10-02. **State:** draft for review; implementation `not_started`.
+**Planning date:** 2026-10-02. **State:** scope clarification requested; implementation `not_started`.
+**Latest direction:** the user reports that the proposed Phase 3 does not yet match
+their intent and requests a simple explanation of what each phase enables. The
+capabilities below remain proposals; do not infer agreement from the earlier
+Story-before-Screens ordering preference.
 **User direction:** plan Phases 2 and 3 alongside ongoing Phase 1G; deliver richer
 Story logic before the screen designer in Phase 3.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;

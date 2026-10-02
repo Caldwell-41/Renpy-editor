@@ -25,7 +25,7 @@ checkpoints early, followed by the remaining actions and provider coverage.
 
 An author can select narrative content, choose an assistance action, inspect the exact proposed context/destination, generate a structured proposal, review semantic and file changes, accept a dependency-valid subset, and undo normally. Runnable truth remains authoritative Ren'Py source. All writes use the existing core transaction, revision, history and recovery boundary.
 
-Three providers are required at launch: **Unsloth Studio**, **Ollama**, and **configurable OpenAI-compatible**. Unsloth is a named product capability with dedicated setup, settings, diagnostics, documentation, fixtures and live acceptance; its wire codec may share tested code with the generic adapter.
+The required provider paths are **Unsloth Studio** and **configurable OpenAI-compatible**. Ollama support was removed by user direction on 2026-10-02; no dedicated adapter, preset, documentation or acceptance gate is planned for it. Unsloth is a named product capability with dedicated setup, settings, diagnostics, documentation, fixtures and live acceptance; its wire codec may share tested code with the generic adapter.
 
 | Action | Bounded initial behavior |
 | --- | --- |
@@ -268,8 +268,8 @@ authorize provider connections or execution.
 
 | Checkpoint | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
-| 2A.0 — Provider qualification and contracts | Bounded synthetic Studio/Ollama/generic probes; version/capability matrix; request/credential/transport ADR; confirm limits and management-API findings. | Record actual success/failure/unknown per provider. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
-| 2A.1 — Settings and credentials | Three provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Native credential round-trip/delete/locked-store behavior, zero secret reflection, no requests on project open, origin binding and profile invalidation. |
+| 2A.0 — Provider qualification and contracts | Bounded synthetic Studio/generic probes; version/capability matrix; request/credential/transport ADR; confirm limits and management-API findings. | Record actual success/failure/unknown per provider. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
+| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Native credential round-trip/delete/locked-store behavior, zero secret reflection, no requests on project open, origin binding and profile invalidation. |
 | 2A.2 — Request service | Background transport, non-streaming and qualified SSE, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test each adapter without project writes. |
 | 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; bounded route cycles; no silent truncation; input/output budget accounting. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
@@ -292,7 +292,7 @@ At each checkpoint, update its ledger and canonical behavior/ADRs, run cheap rel
 | Transactions | Multiple operations touching one file; new Character plus dialogue; partial dependency refusal; terminal beat validity; external edits; Unicode/BOM/newline preservation; undo/redo; failed commit; ordinary interrupted-save/recovery fixtures; metadata limits and reopen. |
 | Security/privacy | Native credentials absent from renderer/project/logs/artifacts; prompt-injection fixtures cannot expand authority; unsafe names/paths/HTML refused; no ambient WebView HTTP/shell privilege; no tool execution; provider retention disclosure. |
 | UX/native | Windows x64 and macOS ARM64 packaged action/context/diff/accept workflow; keyboard/focus; small window/overflow; readable status; cancel/error/retry; authoritative native credential interaction. Browser tests support but do not replace packaged evidence. |
-| Live compatibility | Record exact client commit, provider/version or unknown, model ID/quantization where known, configured context/output, transport and actual results. Test Studio, Ollama and one representative generic endpoint using synthetic content. Do not require identical prose. |
+| Live compatibility | Record exact client commit, provider/version or unknown, model ID/quantization where known, configured context/output, transport and actual results. Test Studio and one representative generic endpoint using synthetic content. Do not require identical prose. |
 | Integrated product | Rewrite with selected cards/lorebook and a customized system prompt, restore baseline, vary context/response limits, continue/create Scene, draft/update Character cards and lorebook, approve references, inspect both diffs, accept subset, undo/redo, close/reopen, explicit SDK validate/run, and execute a copy without editor metadata. |
 
 Both client platforms may connect to the same controlled inference host; GPU inference does not need to run on every CI worker. Deterministic CI uses a bounded fake server. Required live evidence is separately recorded, not replaced by mocks or an unavailable-provider skip. No paid/public-provider calls or GPU downloads occur in routine CI without explicit setup.
@@ -338,15 +338,15 @@ generate a rewrite using a manually authored card and selected lore entry, inspe
 exact changes, accept and undo it. Include prompt editing/reset and size controls.
 Prove that complete
 path early with one qualified provider before expanding to all five actions. This
-orders work; it does not reduce the final three-provider or five-action commitment.
+orders work; it does not reduce the final two-provider or five-action commitment.
 
 | Outcome | Existing checkpoints covered | Reviewable result |
 | --- | --- | --- |
-| Provider feasibility | 2A.0 | Measured compatibility of available Studio/Ollama/generic configurations; credential/request ADR and concrete production plan. |
+| Provider feasibility | 2A.0 | Measured compatibility of available Studio/generic configurations; credential/request ADR and concrete production plan. |
 | First safe rewrite | Necessary parts of 2A.1–2A.2, 2B.1–2B.2 and 2C.1–2C.2 | One complete rewrite using selected manual cards/lorebook, editable/resettable prompts and size controls, with native credentials, revision checks, strict proposal review, one transaction and undo. |
 | Scene and provider completion | Remaining provider coverage plus continue/draft Scene and dependency-valid acceptance | Real authored scenes and selected subsets; no hidden source changes or silent provider fallback. |
 | Character and lore | 2C.3 plus related context/actions | LLM-generated/updated Character cards and lorebook, separate runnable Character proposals, explicit approval, provenance, invalidation and reopen. |
-| Milestone acceptance | 2C.4 | Five actions, three providers and both client targets with honest live evidence and known limitations. |
+| Milestone acceptance | 2C.4 | Five actions, two provider paths and both client targets with honest live evidence and known limitations. |
 
 The first rewrite outcome needs a bounded execution brief after 2A.0; it is not
 permission to implement all transport modes or proposal families at once. Non-streaming
@@ -383,7 +383,7 @@ Phase 2's permitted proposal operations or imply state/reachability knowledge.
 ## 15. Provider expansion recommendation — 2026-10-02
 
 The user asked about more providers and scaffolding without live testing. Recommendation,
-not approval of additional first-class providers: keep required Studio, Ollama and one
+not approval of additional first-class providers: keep required Studio and one
 representative OpenAI-compatible endpoint; implement a small shared provider contract
 and deterministic fixture tests. Additional compatible endpoints may be user-configured
 and labelled unverified until explicit synthetic configuration checks pass. Passing
@@ -435,3 +435,11 @@ no provider test, application build, native launch or production dispatch is sel
 Refinement validation: repository structure/text/privacy/link checks passed across
 315 files; whitespace and eight-document scope review passed. No application files
 changed and no live inference or native gate was run.
+
+## 17. Provider scope correction — 2026-10-02
+
+User direction removes Ollama support. Required configuration and live acceptance
+now cover Unsloth Studio and one representative generic-compatible endpoint. The
+generic endpoint field does not imply tested or named Ollama support. No implementation
+exists to remove. Phase 3 scope remains under discussion following the user's request
+for a simpler explanation; its proposed capability list is not accepted scope.

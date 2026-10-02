@@ -308,3 +308,9 @@ and verify the planning remote head. No app/native tests or production dispatch.
 Refinement evidence: repository validation passed for 315 files; whitespace and
 eight-document scope review passed. Publication target remains the existing planning
 branch, with no merge or additional-provider implementation selected.
+
+Planning correction — 2026-10-02: the user removed Ollama support; Phase 2 now
+requires Unsloth Studio and the generic-compatible provider path. Phase 3 scope is
+unsettled: explain the proposed capabilities plainly and clarify the intended outcome
+before further elaboration or implementation selection. Planning branch remains
+`codex/phase-2-3-planning`; ongoing Phase 1 work and its allowance are unchanged.

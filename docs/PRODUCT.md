@@ -97,7 +97,7 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
 - VN-focused animation/audio timeline that emits valid Ren'Py constructs.
 - Source editor with bidirectional navigation and lossless unsupported regions.
 - Branch-aware characters, variables, lore, state simulation, and run-from-here.
-- First-class Unsloth Studio and Ollama providers, plus configurable OpenAI-compatible adapters, without hardcoded model names. Unsloth Studio has dedicated setup, diagnostics and acceptance tests; see the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
+- First-class Unsloth Studio support plus configurable OpenAI-compatible adapters, without hardcoded model names. Unsloth Studio has dedicated setup, diagnostics and acceptance tests; see the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
 - Local Git workflows and secure supported GitHub authentication.
 
 ## Constraints and principles

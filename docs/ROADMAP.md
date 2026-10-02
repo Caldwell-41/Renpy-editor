@@ -74,7 +74,7 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
-**Outcome:** Unsloth Studio, Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
+**Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
@@ -82,8 +82,7 @@ The October delivery sequence targets a complete reviewed dialogue rewrite early
 using selected manual cards/lorebook and configurable prompts/limits, then Scene/provider
 completion, LLM-generated cards/lorebook and final integrated acceptance.
 [The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
-maps those outcomes to the requirement checkpoints below; it retains all three
-providers and five actions. Checkpoints use internal commits in the same outcome/chat
+maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
 under WORKFLOW, not mandatory chat transfers.
 
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
@@ -99,6 +98,11 @@ Execute separately scoped internal briefs after Phase 1 acceptance and explicit 
 State simulation/Run From Here remain Phase 3; broader reachability/state and narrative inference remain Phase 4. Phase 2 must not claim knowledge those later capabilities have not established.
 
 ## Phase 3 — Initial WYSIWYG release
+
+**Scope discussion reopened — 2026-10-02:** the user reports that this draft does not
+yet match their intent. The capability list below is a proposal for clarification,
+not accepted implementation scope. Story-before-Screens is the earlier preference;
+confirm the overall outcome before expanding or selecting these checkpoints.
 
 **Outcome:** satisfy PRODUCT's initial-release scope through separately gated capabilities, not one large implementation goal. Preserve the accepted source/transaction/authority architecture and exclude arbitrary existing-project import.
 

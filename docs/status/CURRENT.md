@@ -116,3 +116,9 @@ Phase 2 planning now explicitly includes manual/LLM-generated Character cards an
 lorebook for reviewed context, editable system prompts with Restore baseline, and
 context/response size controls. Extra-provider scaffolding is recommended, not selected
 as additional supported-provider scope. See the Phase 2 brief's refinement record.
+
+Planning correction — 2026-10-02: the user removed Ollama support; Phase 2 now
+requires Unsloth Studio and the generic-compatible provider path. Phase 3 scope is
+unsettled: explain the proposed capabilities plainly and clarify the intended outcome
+before further elaboration or implementation selection. Planning branch remains
+`codex/phase-2-3-planning`; ongoing Phase 1 work and its allowance are unchanged.
