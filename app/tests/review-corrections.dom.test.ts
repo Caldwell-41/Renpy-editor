@@ -21,3 +21,14 @@ test('library selection, empty categories and cancelling a staged modal preserve
  const label=document.createElement('label');const caption=document.createElement('span');caption.textContent='Technical name';const input=document.createElement('input');technicalNameInput(input);label.append(caption,input);namingHelp(label,input);document.body.append(label);input.value=' Bec ';input.dispatchEvent(new window.Event('compositionstart'));input.dispatchEvent(new window.Event('blur'));assert.equal(input.value,' Bec ');input.dispatchEvent(new window.Event('compositionend'));input.dispatchEvent(new window.Event('blur'));assert.equal(input.value,'bec');assert.equal(input.autocapitalize,'none');
  dispose();importer.dispose();await browser.happyDOM.close();
 });
+
+test('preview loading, bounded failure and retry preserve stale/session guards',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,MutationObserver:browser.MutationObserver});
+ document.body.innerHTML='<section id="host"><section id="list"><div class="entity-row"><strong>University</strong></div></section></section>';
+ const host=document.querySelector<HTMLElement>('#host')!;let resolve!:()=>void;const pending=new Promise<void>(accept=>resolve=accept);let available=false,reads=0;
+ const dispose=catalogue(host,document.querySelector('#list')!,undefined,'Assets',[{id:'asset',label:'University',kind:'Background',assetId:'asset'}],async()=>{reads++;await pending;if(!available)throw Error('Image was changed outside Loomlight');return {assetId:'asset',dataBase64:'YQ==',mimeType:'image/png',cacheKey:'asset',sha256:'a'.repeat(64),byteCount:1,purpose:'thumbnail'};});
+ assert.equal(host.querySelector('img')!.alt,'Loading preview…');assert.equal(host.querySelector('img')!.getAttribute('aria-busy'),'true');resolve();await tick();
+ assert.match(host.textContent!,/Image was changed outside Loomlight/);assert.equal(host.querySelector('img')!.alt,'Preview unavailable');
+ available=true;[...host.querySelectorAll<HTMLButtonElement>('.media-retry')].forEach(b=>b.click());await tick();assert.equal(reads,3,'one successful read is shared by both retrying previews');assert.equal(host.querySelector('.media-retry'),null);assert.equal(host.querySelector('img')!.alt,'University');assert.equal(host.querySelector('img')!.hasAttribute('aria-busy'),false);assert.ok(host.querySelector('img')!.getAttribute('src'));
+ dispose();await browser.happyDOM.close();
+});

@@ -281,3 +281,36 @@ test("adding a Beat saves once and returns a collapsed row without a second comm
  assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);assert.equal(document.querySelector('.expanded-beat'),null);assert.ok([...document.querySelectorAll('.beat-select')].some(b=>b.textContent?.includes('New text')));
  dispose();await browser.happyDOM.close();
 });
+
+test("new Beat waits for its receipt, restores failure input, and focuses the saved row",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
+ const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}});
+ click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
+ confirm.click();await tick();assert.equal(status,'Source changed');assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
+ fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);
+ const next=structuredClone(model);const beats=[...next.scenes[0]!.beats];beats.splice(1,0,{id:'added',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Keep this text'}});receipt.resolve({...next,scenes:next.scenes.map((scene,i)=>i?scene:{...scene,beats})});await tick();
+ const row=host.querySelector<HTMLElement>('[data-beat-id="added"]')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.beat-select'));assert.equal(row.querySelector('.expanded-beat'),null);assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();
+});
+
+test("preview reset updates the divider and layout without a hidden slider",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;
+ const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()});
+ const divider=host.querySelector<HTMLElement>('.preview-divider')!;divider.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));assert.equal(divider.getAttribute('aria-valuenow'),'36');
+ window.dispatchEvent(new window.Event('loomlight-reset-layout'));assert.equal(divider.getAttribute('aria-valuenow'),'34');assert.equal(host.querySelector<HTMLElement>('.scene-stack')!.style.getPropertyValue('--preview-share'),'34fr');assert.equal(host.querySelector('input[type="range"]'),null);dispose();await browser.happyDOM.close();
+});
+
+test("pointer Beat reorder cancels outside, on Escape and across protected boundaries",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;let model=sceneModel();
+ const beats=[...model.scenes[0]!.beats];beats.splice(1,0,{id:'narration',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Second'}});beats[2]={...beats[2]!,byteStart:40};model={...model,scenes:model.scenes.map((scene,i)=>i?scene:{...scene,beats})};
+ const calls:SceneCommand[]=[];const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async command=>{calls.push(command);return model;}});
+ const grip=host.querySelector<HTMLButtonElement>('.beat-grip')!;const target=host.querySelector<HTMLElement>('[data-beat-id="narration"]')!;
+ let hit:Element|null=target;document.elementFromPoint=()=>hit;
+ const pointer=(type:string,x:number)=>new browser.PointerEvent(type,{button:0,pointerId:1,clientX:x,clientY:20,bubbles:true}) as unknown as Event;
+ grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));assert.ok(target.classList.contains('drop-after'));window.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape'}));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);
+ hit=null;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
+ hit=host.querySelector('[data-beat-id="choice"]');grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
+ hit=target;for(const cancel of ['pointercancel','blur','lostpointercapture']){grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));if(cancel==='lostpointercapture')grip.dispatchEvent(pointer(cancel,30));else window.dispatchEvent(cancel==='blur'?new window.Event('blur'):pointer(cancel,30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);}
+ click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!.click();
+ hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);assert.equal(calls[0]!.type,'reorderBeat');assert.equal(calls[0]!.toIndex,1);assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
+});

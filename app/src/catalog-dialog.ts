@@ -34,7 +34,7 @@ export function catalogDialog(content: HTMLElement, title: string, trigger?: HTM
       const keep=document.createElement('button'); keep.type='button'; keep.className='button'; keep.textContent='Keep editing';
       const discard=document.createElement('button'); discard.type='button'; discard.className='button danger'; discard.textContent='Discard changes';
       keep.onclick=()=>{question.remove();content.querySelector<HTMLElement>('input,select')?.focus();};
-      discard.onclick=()=>{initial.forEach(({control,value,checked})=>{control.value=value;if(checked!==undefined)(control as HTMLInputElement).checked=checked;});content.dispatchEvent(new window.Event('catalog-discard'));content.querySelectorAll<HTMLElement>('[data-unsubmitted]').forEach(e=>delete e.dataset.unsubmitted);finish();};
+      discard.onclick=()=>{initial.forEach(({control,value,checked})=>{control.value=value;if(checked!==undefined)(control as HTMLInputElement).checked=checked;});content.dispatchEvent(new window.Event('catalog-discard'));content.querySelectorAll<HTMLElement>('[data-unsubmitted]').forEach(e=>delete e.dataset.unsubmitted);finish();window.dispatchEvent(new window.Event('loomlight-catalog-discarded'));};
       question.append(copy,keep,discard);panel.append(question);keep.focus();return;
     }
     finish();

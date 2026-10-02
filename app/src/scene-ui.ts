@@ -287,6 +287,10 @@ export function renderSceneAuthoring(
   let writingFocus = false;
   const collapsedChapters=new Set<string>();
   const previewObservers:ResizeObserver[]=[];
+  let resetPreviewAllocation:(()=>void)|undefined;
+  let cancelBeatDrag:(()=>void)|undefined;
+  const resetLayout=():void=>resetPreviewAllocation?.();
+  window.addEventListener("loomlight-reset-layout",resetLayout);
   let saveDialogue: (()=>Promise<boolean>) | undefined;
   let settling: Promise<boolean> | undefined;
   let composing = false;
@@ -298,9 +302,9 @@ export function renderSceneAuthoring(
   };
   draftSettlers.set(host,settle);
 
-  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void): Promise<void> => {
-    if(disposed)return;
-    if(hasSceneDraft(host)&&["reorderBeat","moveBeat","removeBeat","moveScene","deleteScene","deleteChapter","undo","redo"].includes(command.type)){actions.status("Complete or cancel the current edit first.","error");focusSceneDraft(host);return;}
+  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void): Promise<boolean> => {
+    if(disposed)return false;
+    if(hasSceneDraft(host)&&["reorderBeat","moveBeat","removeBeat","moveScene","deleteScene","deleteChapter","undo","redo"].includes(command.type)){actions.status("Complete or cancel the current edit first.","error");focusSceneDraft(host);return false;}
     const before = model;
     actions.status("Saving…");
     try {
@@ -309,9 +313,11 @@ export function renderSceneAuthoring(
       after?.(before, next);
       draw();
       actions.status("Saved");
+      return true;
     } catch (error) {
       actions.status(friendlyError(error, "Scene change could not be saved"), "error");
       focusSceneDraft(host);
+      return false;
     }
   };
 
@@ -323,6 +329,7 @@ export function renderSceneAuthoring(
   };
 
   const draw = (): void => {
+    cancelBeatDrag?.();
     saveDialogue = undefined;previewObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
@@ -517,21 +524,60 @@ export function renderSceneAuthoring(
     const heading = document.createElement("h2"); heading.textContent = "Beats";
     const add = button("Add Beat", "button primary"); add.disabled = scene.sourceConflict;
     add.addEventListener("click", () => openNewBeat(scene));
-    const allocation = document.createElement("input"); allocation.type = "range"; allocation.min = "20"; allocation.max = "70"; allocation.value = String(actions.layoutKey ? layoutFor(actions.layoutKey).previewPercent ?? 34 : 34); allocation.ariaLabel = "Preview vertical allocation";
-    const resize=():void=>{stack.style.setProperty("--preview-share",`${allocation.value}fr`);stack.style.setProperty("--beats-share",`${100-Number(allocation.value)}fr`);};resize();
-    allocation.addEventListener("input",resize);allocation.addEventListener("change",()=>{if(actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:Number(allocation.value)});});
-    const divider=document.createElement("div");divider.className="preview-divider";divider.role="separator";divider.tabIndex=0;divider.ariaLabel="Resize scene preview";divider.setAttribute("aria-orientation","horizontal");divider.setAttribute("aria-valuemin","20");divider.setAttribute("aria-valuemax","70");divider.setAttribute("aria-valuenow",allocation.value);
-    const adjust=(value:number,remember=false):void=>{allocation.value=String(Math.min(70,Math.max(20,Math.round(value))));resize();divider.setAttribute("aria-valuenow",allocation.value);if(remember&&actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:Number(allocation.value)});};
-    divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(Number(allocation.value)+(e.key==="ArrowUp"?-2:2),true);}});
-    let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(Number(allocation.value),true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
-    const tools = document.createElement("div"); tools.className = "beats-tools"; allocation.hidden=true;beatsRegion.append(allocation);tools.append(add);
+    let allocation=actions.layoutKey ? layoutFor(actions.layoutKey).previewPercent ?? 34 : 34;
+    const divider=document.createElement("div");divider.className="preview-divider";divider.role="separator";divider.tabIndex=0;divider.ariaLabel="Resize scene preview";divider.setAttribute("aria-orientation","horizontal");divider.setAttribute("aria-valuemin","20");divider.setAttribute("aria-valuemax","70");
+    const adjust=(value:number,remember=false):void=>{allocation=Math.min(70,Math.max(20,Math.round(value)));stack.style.setProperty("--preview-share",`${allocation}fr`);stack.style.setProperty("--beats-share",`${100-allocation}fr`);divider.setAttribute("aria-valuenow",String(allocation));if(remember&&actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:allocation});};
+    adjust(allocation);resetPreviewAllocation=()=>adjust(34);
+    divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(allocation+(e.key==="ArrowUp"?-2:2),true);}});
+    let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(allocation,true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
+    const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
-    let draggedBeat:string|undefined;
-    const cancelDrag=():void=>{draggedBeat=undefined;list.querySelectorAll(".drop-before,.drop-after,.dragging-beat").forEach(e=>e.classList.remove("drop-before","drop-after","dragging-beat"));};
-    list.addEventListener("keydown",e=>{if(e.key==="Escape")cancelDrag();});
+    let drag:{id:string;from:number;pointerId:number;startX:number;startY:number;x:number;y:number;active:boolean;target?:number;grip:HTMLButtonElement;ghost?:HTMLElement}|undefined;
+    let scrollFrame:number|undefined;
+    const cancelDrag=():void=>{
+      if(scrollFrame!==undefined)window.cancelAnimationFrame(scrollFrame);scrollFrame=undefined;
+      const previous=drag;drag=undefined;previous?.ghost?.remove();
+      if(previous?.grip.hasPointerCapture?.(previous.pointerId))previous.grip.releasePointerCapture(previous.pointerId);
+      list.querySelectorAll(".drop-before,.drop-after,.dragging-beat").forEach(e=>e.classList.remove("drop-before","drop-after","dragging-beat"));
+      window.removeEventListener("pointermove",moveDrag);window.removeEventListener("pointerup",dropDrag);window.removeEventListener("pointercancel",cancelDrag);window.removeEventListener("keydown",escapeDrag);window.removeEventListener("blur",cancelDrag);
+    };
+    cancelBeatDrag=cancelDrag;
+    const updateTarget=():void=>{
+      if(!drag)return;drag.target=undefined;
+      list.querySelectorAll(".drop-before,.drop-after").forEach(e=>e.classList.remove("drop-before","drop-after"));
+      const card=document.elementFromPoint(drag.x,drag.y)?.closest<HTMLElement>(".beat-card");
+      if(!card||!list.contains(card))return;
+      const target=scene.beats.findIndex(b=>b.id===card.dataset.beatId);
+      if(target<0||target===drag.from)return;
+      const interval=scene.beats.slice(Math.min(target,drag.from),Math.max(target,drag.from)+1);
+      if(interval.some(b=>b.protected||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
+      drag.target=target;card.classList.add(target>drag.from?"drop-after":"drop-before");
+    };
+    const scrollDrag=():void=>{
+      if(!drag?.active)return;
+      const bounds=list.getBoundingClientRect();
+      if(drag.x>=bounds.left&&drag.x<=bounds.right&&drag.y>=bounds.top&&drag.y<=bounds.bottom){const delta=drag.y<bounds.top+32?-10:drag.y>bounds.bottom-32?10:0;if(delta){list.scrollTop+=delta;updateTarget();}}
+      scrollFrame=window.requestAnimationFrame(scrollDrag);
+    };
+    const moveDrag=(event:PointerEvent):void=>{
+      if(!drag||event.pointerId!==drag.pointerId)return;
+      drag.x=event.clientX;drag.y=event.clientY;
+      if(!drag.active&&Math.hypot(drag.x-drag.startX,drag.y-drag.startY)<6)return;
+      event.preventDefault();
+      if(!drag.active){drag.active=true;drag.grip.closest(".beat-card")?.classList.add("dragging-beat");const ghost=document.createElement("div");ghost.className="beat-drag-ghost";ghost.textContent=drag.grip.closest(".beat-compact")?.querySelector(".beat-select")?.textContent??"Move Beat";ghost.setAttribute("aria-hidden","true");document.body.append(ghost);drag.ghost=ghost;scrollFrame=window.requestAnimationFrame(scrollDrag);}
+      drag.ghost!.style.left=`${drag.x+12}px`;drag.ghost!.style.top=`${drag.y+12}px`;updateTarget();
+    };
+    const dropDrag=(event:PointerEvent):void=>{
+      if(!drag||event.pointerId!==drag.pointerId)return;
+      drag.x=event.clientX;drag.y=event.clientY;if(drag.active)updateTarget();
+      const {id,target,active,grip}=drag;cancelDrag();
+      if(active&&target!==undefined)void mutate({type:"reorderBeat",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,beatId:id,toIndex:target}).then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
+      else if(grip.isConnected)grip.focus();
+    };
+    const escapeDrag=(event:KeyboardEvent):void=>{if(event.key==="Escape"&&drag){event.preventDefault();const grip=drag.grip;cancelDrag();grip.focus();}};
     scene.beats.forEach((beat, index) => {
-      const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");
+      const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
       const compact = document.createElement("div"); compact.className = "beat-compact";
       const select = button(`${index + 1}. ${beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
       const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beatSummary(beat.payload, model);
@@ -543,10 +589,9 @@ export function renderSceneAuthoring(
       down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
       const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = beat.protected || beat.payload.type === "return" || scene.sourceConflict;
       remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));
-      const grip=button("⠿","icon-button beat-grip");grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.draggable=true;grip.disabled=beat.protected||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
-      grip.addEventListener("dragstart",e=>{if(grip.disabled||hasSceneDraft(host)){e.preventDefault();actions.status("Complete or cancel the current edit first.","error");return;}draggedBeat=beat.id;card.classList.add("dragging-beat");e.dataTransfer?.setData("text/plain",beat.id);if(e.dataTransfer)e.dataTransfer.effectAllowed="move";});grip.addEventListener("dragend",cancelDrag);
-      card.addEventListener("dragover",e=>{if(!draggedBeat||beat.protected||["choice","jump","return"].includes(beat.payload.type))return;e.preventDefault();list.querySelectorAll(".drop-before,.drop-after").forEach(c=>c.classList.remove("drop-before","drop-after"));card.classList.add(scene.beats.findIndex(b=>b.id===draggedBeat)<index?"drop-after":"drop-before");});
-      card.addEventListener("drop",e=>{if(!draggedBeat)return;e.preventDefault();const id=draggedBeat;cancelDrag();if(id!==beat.id)void mutate({type:"reorderBeat",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,beatId:id,toIndex:index});});
+      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=beat.protected||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
+      grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
+      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasSceneDraft(host)||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
       controls.append(up, down, remove); compact.append(grip,select, controls); card.append(compact);
       if (selectedBeatId === beat.id) renderExistingBeat(card, scene, beat, index);
       list.append(card);
@@ -581,7 +626,9 @@ export function renderSceneAuthoring(
             void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") });
           } catch (error) { actions.status(friendlyError(error, "New Scene details are invalid"), "error"); optionText.focus(); }
         });
-        form.append(labelled("Choice text", optionText), labelled("New Scene name", sceneName), labelled("Chapter", chapter), cancelNew, createNew);
+        cancelNew.className="button secondary";
+        const creationActions=document.createElement("div");creationActions.className="row-actions choice-create-actions";creationActions.append(cancelNew,createNew);
+        form.append(labelled("Choice text", optionText), labelled("New Scene name", sceneName), labelled("Chapter", chapter), creationActions);
         dirtyDraft(form, [optionText, sceneName, chapter]); panel.append(form); optionText.focus();
       });
       panel.append(createDestination);
@@ -631,15 +678,25 @@ export function renderSceneAuthoring(
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove());
+    let pending=false;
     const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
+      if(pending)return;
       try {
         const payload = editor.read();
-        await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId, beat: payload }, () => {
+        pending=true;panel.dataset.unsubmitted="true";
+        const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
+        controls.forEach(control=>control.disabled=true);
+        let insertedId:string|undefined;
+        const saved=await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
+          const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
+          insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
         });
+        if(saved&&insertedId){const row=[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===insertedId);row?.scrollIntoView?.({block:"nearest"});row?.querySelector<HTMLElement>(".beat-select")?.focus({preventScroll:true});}
+        if(!saved&&panel.isConnected){controls.forEach(control=>control.disabled=false);editor.focus();}
       } catch (error) {
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
-      }
+      }finally{pending=false;}
     });
     actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, labelled("Beat type", type), editorHost, actionsRow); list.prepend(panel); type.focus();
   };
@@ -647,6 +704,7 @@ export function renderSceneAuthoring(
   draw();
   return () => {
     disposed = true;
+    cancelBeatDrag?.();window.removeEventListener("loomlight-reset-layout",resetLayout);
     draftSettlers.delete(host);previewObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     pendingImages.clear();
@@ -657,7 +715,7 @@ export function renderSceneAuthoring(
   };
 }
 
-function inlineName(host: HTMLElement, label: string, current: string, commit: (value: string) => Promise<void>): void {
+function inlineName(host: HTMLElement, label: string, current: string, commit: (value: string) => Promise<unknown>): void {
   if (host.querySelector(":scope > .tree-inline")) return;
   const panel = document.createElement("div"); panel.className = "tree-inline scene-draft";
   const name = input(current); const save = button("Save", "button primary"); const cancel = button("Cancel", "text-button");
@@ -665,7 +723,7 @@ function inlineName(host: HTMLElement, label: string, current: string, commit: (
   cancel.addEventListener("click", () => panel.remove()); panel.append(labelled(label, name), cancel, save); dirtyDraft(panel, [name]); host.append(panel); name.select();
 }
 
-function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<void>): void {
+function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<unknown>): void {
   if (host.querySelector(":scope > .confirm-row")) return;
   const panel = document.createElement("div"); panel.className = "confirm-row"; const text = document.createElement("span"); text.textContent = copy;
   const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove()); const confirm = button("Confirm delete", "button danger"); confirm.addEventListener("click", () => void commit()); panel.append(text, cancel, confirm); host.append(panel);

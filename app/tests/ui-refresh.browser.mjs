@@ -236,5 +236,83 @@ try {
  await early.locator('.cm-content[contenteditable="true"]').waitFor({timeout:5000});
  assert.equal(await early.evaluate(()=>window.__earlyContention),0,'Source raced the in-flight Story read');
  await early.close();
- console.log('PASS: all six workspaces in both themes; onboarding, Settings, minimum/laptop layouts, stable status geometry; mixed-newline rich editor undo; shipped smoke interactions with unavailable-click rejection and UI refresh probe with busy contention. Fixture bridge only; not native SDK or security proof.');
+ // Audit regressions use the production renderer with explicitly deferred receipts.
+ // Pointer gestures here are browser evidence; native WebView/Explorer drops remain separate.
+ const audit=await browser.newPage({viewport:{width:1440,height:900}});
+ audit.setDefaultTimeout(8000);
+ audit.on('pageerror',e=>errors.push(e.message));
+ await audit.route('**/audit-regressions',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><div id="app"></div>'}));
+ await audit.goto(`http://127.0.0.1:${address.port}/audit-regressions`);
+ await audit.evaluate(async()=>{
+  const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');const {startApplication}=await import('/src/main.ts');
+  let preferences={schemaVersion:1,theme:'light',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
+  window.__TAURI_INTERNALS__={invoke:async(_,{request})=>{if(request.operation==='preferences.write')preferences=structuredClone(request.payload);return {protocolVersion:1,requestId:request.requestId,ok:true,value:preferences};}};
+  const authoring=structuredClone((await visualRequest('authoring.list')).value);
+  authoring.appearances.push({...authoring.appearances[0],id:'bec-happy',label:'happy',assetId:'bec-happy'});authoring.assets.push({...authoring.assets[3],id:'bec-happy',displayName:'Bec happy'});
+  let scene=structuredClone((await visualRequest('scene.list')).value);scene.authoring=authoring;let previous;
+  window.__auditCommands=[];window.__auditVariables=[];
+  const response=value=>({protocolVersion:1,requestId:'fixture',ok:true,value:structuredClone(value)});
+  startApplication(async(op,payload={})=>{
+   if(op==='authoring.list'||op==='character.update')return response(authoring);
+   if(op==='appearance.setDefault'){authoring.characters.find(c=>c.id===payload.characterId).defaultAppearanceId=payload.appearanceId;return response(authoring);}
+   if(op==='variable.create'){window.__auditVariables.push(payload);authoring.variables.push({id:payload.technicalName,source:authoring.variables[0].source,...payload});return response(authoring);}
+   if(op==='scene.list')return response(scene);
+   if(op==='scene.apply'){
+    const command=payload.command;window.__auditCommands.push(command);
+    if(command.type==='reorderBeat'){previous=structuredClone(scene);const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const from=beats.findIndex(b=>b.id===command.beatId);beats.splice(command.toIndex,0,beats.splice(from,1)[0]);scene.canUndo=true;}
+    if(command.type==='undo'){scene=previous;previous=undefined;}
+    if(command.type==='insertBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
+    return response(scene);
+   }
+   return visualRequest(op,payload);
+  });
+ });
+ await audit.locator('.recent-open').click();await audit.locator('.preview-divider').waitFor();
+ const hide=audit.getByRole('button',{name:'Toggle scene or file list',exact:true}),restore=audit.getByRole('button',{name:'Show scene or file list',exact:true});
+ assert.equal(await hide.getAttribute('aria-expanded'),'true');assert.equal(await hide.getAttribute('aria-controls'),'project-tree-panel');
+ assert.equal(await audit.getByRole('button',{name:'Toggle navigation size',exact:true}).getAttribute('aria-expanded'),'true');
+ await hide.click();assert.equal(await audit.locator('.project-tree-toggle').getAttribute('aria-expanded'),'false');assert.equal(await restore.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
+ await restore.click();assert.equal(await hide.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
+ await audit.locator('.preview-divider').focus();await audit.keyboard.press('ArrowDown');assert.equal(await audit.locator('.preview-divider').getAttribute('aria-valuenow'),'36');
+ await audit.evaluate(()=>window.dispatchEvent(new Event('loomlight-reset-layout')));assert.equal(await audit.locator('.preview-divider').getAttribute('aria-valuenow'),'34');assert.equal(await audit.locator('input[type="range"]').count(),0);
+ await audit.locator('.beat-select').nth(3).click();await audit.getByRole('button',{name:'Create New Scene',exact:true}).click();
+ for(const width of [1440,560]){
+  await audit.setViewportSize({width,height:900});
+  const metrics=await audit.locator('.choice-new-scene').evaluate(e=>({overflow:e.scrollWidth>e.clientWidth+1,fields:[...e.querySelectorAll(':scope > .field')].map(f=>f.getBoundingClientRect().x),buttons:[...e.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,parent:b.parentElement.className,whiteSpace:getComputedStyle(b).whiteSpace}))}));
+  assert.equal(metrics.overflow,false);assert.equal(metrics.buttons.length,2);for(const b of metrics.buttons){assert.ok(b.height>=32&&b.height<=40,JSON.stringify(metrics));assert.ok(b.parent.includes('choice-create-actions'));assert.equal(b.whiteSpace,'nowrap');}
+  if(width===560)assert.equal(new Set(metrics.fields.map(x=>Math.round(x))).size,1,'compact Choice fields did not stack');
+ }
+ await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.choice-new-scene').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
+ await audit.getByRole('button',{name:'Exit Writing focus',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
+ await audit.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
+ // Real mouse pointer capture, cancellation and protected-boundary rejection.
+ const drag=async(target,escape=false)=>{const grip=await audit.locator('[data-beat-id="background"] .beat-grip').boundingBox();const box=await target.boundingBox();await audit.mouse.move(grip.x+grip.width/2,grip.y+grip.height/2);await audit.mouse.down();await audit.mouse.move(box.x+box.width/2,box.y+box.height/2,{steps:8});if(escape)await audit.keyboard.press('Escape');await audit.mouse.up();};
+ await drag(audit.locator('[data-beat-id="dialogue"]'),true);assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
+ await drag(audit.locator('[data-beat-id="choice"]'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
+ await drag(audit.locator('.app-header'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
+ await drag(audit.locator('[data-beat-id="dialogue"]'));await audit.waitForFunction(()=>document.activeElement?.closest('.beat-card')?.dataset.beatId==='background');
+ assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').map(c=>c.toIndex)),[2]);assert.equal(await audit.locator('.beat-card').nth(2).getAttribute('data-beat-id'),'background');
+ await audit.getByRole('button',{name:'Undo',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('.beat-card')?.dataset.beatId==='background');
+ await audit.getByRole('button',{name:'Variables',exact:true}).click();
+ const dialog=audit.getByRole('dialog');const type=dialog.locator('.field').filter({has:audit.locator('span:text-is("Type")')}).locator('select');const defaultField=dialog.locator('.field').filter({has:audit.locator('span:text-is("Default value")')});
+ for(const [kind,value] of [['int','42'],['string','Discard this'],['bool','true']]){
+  await audit.getByRole('button',{name:'New variable',exact:true}).click();await type.selectOption(kind);if(kind==='bool')await defaultField.locator('select').selectOption(value);else await defaultField.locator('input').fill(value);
+  await audit.getByRole('button',{name:'Close New variable',exact:true}).click();await audit.getByRole('button',{name:'Discard changes',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('#app-status').textContent==='Saved');
+  await audit.getByRole('button',{name:'New variable',exact:true}).click();assert.equal(await type.inputValue(),'bool');assert.equal(await defaultField.locator('select').inputValue(),'false');assert.equal(await defaultField.locator('input').count(),0);
+  await type.selectOption(kind);if(kind!=='bool')assert.equal(await defaultField.locator('input').inputValue(),'');await audit.keyboard.press('Escape');if(await audit.getByRole('button',{name:'Discard changes',exact:true}).count())await audit.getByRole('button',{name:'Discard changes',exact:true}).click();
+ }
+ await audit.getByRole('button',{name:'New variable',exact:true}).click();await dialog.locator('input').fill('audit_flag');await defaultField.locator('select').selectOption('true');await dialog.getByRole('button',{name:'Create Variable',exact:true}).click();await audit.waitForFunction(()=>window.__auditVariables.length===1);assert.deepEqual(await audit.evaluate(()=>window.__auditVariables.map(v=>[v.variableType,v.defaultValue])),[['bool',true]]);
+ await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).click();
+ const selectedAppearance=async()=>{assert.equal(await audit.locator('.catalog-inspector .inspector-thumbnail').getAttribute('data-asset-id'),'bec-happy');assert.equal(await audit.getByRole('button',{name:'View appearance happy',exact:true}).getAttribute('aria-pressed'),'true');};
+ await audit.getByRole('button',{name:'Edit Bec',exact:true}).click();await audit.getByRole('button',{name:'Save Character',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).waitFor();await selectedAppearance();
+ await audit.locator('.catalog-inspector .appearance-row').filter({has:audit.getByRole('button',{name:'View appearance happy',exact:true})}).getByRole('button',{name:'Set default',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('.appearance-select[data-appearance-id="bec-happy"]')?.dataset.default==='true');await selectedAppearance();
+ await audit.getByRole('button',{name:'Assets',exact:true}).click();await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).waitFor();await selectedAppearance();
+ await audit.waitForFunction(()=>[...document.querySelectorAll('.catalog-inspector .appearance-thumbnail')].every(img=>img.complete&&img.naturalWidth>0));await audit.screenshot({path:output+'audit-fixed-appearance.png'});
+ await audit.getByRole('button',{name:'Story',exact:true}).click();await audit.getByRole('button',{name:'Add Beat',exact:true}).click();await audit.locator('.new-beat select').first().selectOption('narration');await audit.locator('.new-beat textarea').fill('Saved narration');
+ await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).click();await audit.waitForFunction(()=>window.__auditReleaseBeat);
+ assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).isDisabled(),true);assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Cancel',exact:true}).isDisabled(),true);
+ await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBeat').length),1);
+ await audit.evaluate(()=>window.__auditReleaseBeat());await audit.locator('.new-beat').waitFor({state:'detached'});assert.equal(await audit.locator('[data-beat-id="audit-added"] .beat-select').evaluate(e=>document.activeElement===e),true);assert.equal(await audit.locator('[data-beat-id="audit-added"] .expanded-beat').count(),0);
+ assert.deepEqual(errors,[]);await audit.close();
+ console.log('PASS: all six workspaces in both themes; onboarding, Settings, compact layouts, Source undo; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

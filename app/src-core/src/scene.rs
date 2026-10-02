@@ -3304,6 +3304,87 @@ mod tests {
             Some(appearance.id.clone())
         );
         assert_eq!(renamed.assets[0].display_name, "Bec — thoughtful");
+        for (from, to) in [
+            ("thoughtful", "calm"),
+            ("calm", "happy"),
+            ("happy", "thoughtful"),
+        ] {
+            let restored = fixture
+                .service
+                .update_appearance(
+                    &fixture.project,
+                    &fixture.project_id,
+                    UpdateAppearanceRequest {
+                        id: appearance.id.clone(),
+                        expected_expression: from.into(),
+                        expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                        expression: to.into(),
+                        authority_id: None,
+                    },
+                )
+                .expect("this appearance can reuse its former expression");
+            assert_eq!(restored.appearances[0].id, appearance.id);
+            assert_eq!(
+                restored.characters[0].default_appearance_id,
+                Some(appearance.id.clone())
+            );
+            assert_eq!(
+                restored.assets[0].relative_path,
+                renamed.assets[0].relative_path
+            );
+            assert!(String::from_utf8_lossy(
+                &fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap()
+            )
+            .contains(&format!("show bec {to}")));
+        }
+        let definitions = fixture.root.join("game/definitions/assets.rpy");
+        let before_collision = fs::read(&definitions).unwrap();
+        let mut custom = before_collision.clone();
+        custom.extend_from_slice(b"image bec occupied = \"images/custom.png\"\n");
+        fs::write(&definitions, &custom).unwrap();
+        assert!(matches!(
+            fixture.service.update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "occupied".into(),
+                    authority_id: None
+                }
+            ),
+            Err(crate::authoring::AuthoringError::DiscoveryCollision)
+        ));
+        assert_eq!(fs::read(&definitions).unwrap(), custom);
+        fs::write(&definitions, &before_collision).unwrap();
+        let current = fixture
+            .service
+            .list(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let alias = current.assets[0].extra["appearanceAliases"]["bec calm"]
+            .as_str()
+            .unwrap();
+        let changed_alias = String::from_utf8(before_collision.clone())
+            .unwrap()
+            .replace(alias, &format!("{alias} # edited externally"));
+        fs::write(&definitions, changed_alias.as_bytes()).unwrap();
+        assert!(matches!(
+            fixture.service.update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: None
+                }
+            ),
+            Err(crate::authoring::AuthoringError::DiscoveryCollision)
+        ));
+        assert_eq!(fs::read(&definitions).unwrap(), changed_alias.as_bytes());
+        fs::write(&definitions, &before_collision).unwrap();
         assert_eq!(fixture.workspace().scenes[0].beats[0].id, beat_id);
         let before_conflict = fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap();
         let mut external = before_conflict.clone();

@@ -952,12 +952,60 @@ impl AuthoringService {
         let technical = &character.technical_name;
         let renamed = previous.label != request.expression;
         let discovery = format!("{} {}", technical, request.expression);
+        // Only exact declarations previously generated for this asset may be reused.
+        // Retain old aliases for unsupported/custom source, without adopting edits.
+        let mut aliases = match old_asset.extra.get("appearanceAliases") {
+            Some(Value::Object(aliases)) => aliases.clone(),
+            None => Map::new(),
+            _ => return Err(AuthoringError::CorruptMetadata),
+        };
+        let reusable = aliases
+            .get(&discovery)
+            .and_then(Value::as_str)
+            .map(str::to_owned);
+        if let Some(statement) = &reusable {
+            let prefix = format!("image {discovery} = ");
+            let runtime_path: String = statement
+                .strip_prefix(&prefix)
+                .and_then(|quoted| serde_json::from_str(quoted).ok())
+                .ok_or(AuthoringError::CorruptMetadata)?;
+            RelativePath::new(format!("game/{runtime_path}"))
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            if statement
+                != &format!(
+                    "{prefix}{}",
+                    serde_json::to_string(&runtime_path)
+                        .map_err(|_| AuthoringError::CorruptMetadata)?
+                )
+            {
+                return Err(AuthoringError::CorruptMetadata);
+            }
+        }
         if renamed {
-            self.ensure_explicit_name_available(
+            if metadata
+                .assets
+                .iter()
+                .any(|a| a.id != old_asset.id && a.discovery_name == discovery)
+            {
+                return Err(AuthoringError::DiscoveryCollision);
+            }
+            self.ensure_explicit_name_available_except(
                 project,
                 AssetKind::CharacterAppearance,
                 &discovery,
+                reusable.as_deref(),
             )?;
+        }
+        let old_explicit = old_asset
+            .extra
+            .get("discoveryContract")
+            .and_then(Value::as_str)
+            == Some("explicitDeclaration");
+        if old_explicit {
+            aliases.insert(
+                old_asset.discovery_name.clone(),
+                Value::String(asset_declaration(&old_asset)?),
+            );
         }
         let mut selected = if let Some(id) = request.authority_id {
             let authority = self
@@ -1018,15 +1066,14 @@ impl AuthoringService {
             Vec::new()
         };
         let statement = asset_declaration(&metadata.assets[asset_index])?;
-        let declaration = if !renamed
-            && old_asset
-                .extra
-                .get("discoveryContract")
-                .and_then(Value::as_str)
-                == Some("explicitDeclaration")
-        {
+        let replace = if !renamed && old_explicit {
+            Some(asset_declaration(&old_asset)?)
+        } else {
+            reusable
+        };
+        let declaration = if let Some(previous_statement) = replace {
             let (bytes, base) = self.snapshot(project, ASSETS_PATH)?;
-            let proposed = replace_exact_once(&bytes, &asset_declaration(&old_asset)?, &statement)?;
+            let proposed = replace_exact_once(&bytes, &previous_statement, &statement)?;
             FileMutation {
                 path: RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
                 kind: MutationKind::ReplaceExisting,
@@ -1037,6 +1084,13 @@ impl AuthoringService {
         } else {
             self.declaration_mutation(project, &statement)?
         };
+        aliases.insert(
+            metadata.assets[asset_index].discovery_name.clone(),
+            Value::String(statement),
+        );
+        metadata.assets[asset_index]
+            .extra
+            .insert("appearanceAliases".into(), Value::Object(aliases));
         companions.push(declaration);
         companions.push(metadata_file_mutation(snapshot, &metadata)?);
         if let Some(authority) = selected.as_mut() {
@@ -1363,6 +1417,16 @@ impl AuthoringService {
         kind: AssetKind,
         discovery_name: &str,
     ) -> Result<(), AuthoringError> {
+        self.ensure_explicit_name_available_except(project, kind, discovery_name, None)
+    }
+
+    fn ensure_explicit_name_available_except(
+        &self,
+        project: &ProjectId,
+        kind: AssetKind,
+        discovery_name: &str,
+        owned_statement: Option<&str>,
+    ) -> Result<(), AuthoringError> {
         let Some((source, _)) = self
             .transactions
             .snapshot_optional(
@@ -1381,11 +1445,15 @@ impl AuthoringService {
                 DeclarationKey::Audio(discovery_name.to_ascii_lowercase())
             }
         };
+        let mut owners = 0;
         for (start, end) in lexical_statements(&source)? {
             let line = std::str::from_utf8(&source[start..end])
                 .map_err(|_| AuthoringError::UnsupportedSource)?;
             if declaration_key(line).as_ref() == Some(&key) {
-                return Err(AuthoringError::DiscoveryCollision);
+                owners += 1;
+                if owned_statement != Some(line) || owners > 1 {
+                    return Err(AuthoringError::DiscoveryCollision);
+                }
             }
         }
         Ok(())
