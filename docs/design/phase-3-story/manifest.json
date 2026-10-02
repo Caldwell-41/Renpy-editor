@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-02",
+  "status": "proposed, not accepted or implemented",
+  "mode": "built-in image_gen",
+  "useCase": "ui-mockup",
+  "file": "nested-beats-light-v1.png",
+  "sha256": "15a69beb4df5074b085c30b0955d3de8ae45895344b7228fe3da2ac284c346cf",
+  "prompt": "prompt-v1.txt",
+  "reference": {
+    "file": "story-light.png",
+    "kind": "saved actual Story UI screenshot, synthetic The Last Tram fixture",
+    "sha256": "acea17a8cf502f054645812a7dc85adefb2d1d8ebf663b993e740944723278d3"
+  },
+  "generatedOriginal": "exec-5f5f1f3f-7bde-40d2-a647-0ca992833ca9.png"
+}

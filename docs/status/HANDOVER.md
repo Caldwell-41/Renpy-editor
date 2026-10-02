@@ -333,3 +333,22 @@ Implementation-plan validation: repository structure/text/privacy/local-link che
 passed for 315 files; whitespace and eight-document scope review passed. Self-review
 removed the remaining roadmap 3E row and checked that product/release acceptance no
 longer requires Git. No application, SDK or native checks were run for these docs.
+
+UI/UX planning refinement — 2026-10-02: the user requested interaction design and a
+generated image based on the current UI. The Phase 3 brief now includes the nested
+Story Beat journey, insertion/move/draft/preview contracts and a generated paper/teal
+concept, plus the Screens/Timeline/state journeys. Phase 2 now records its assistance,
+reference and settings journey. The [design reference](../design/phase-3-story/README.md)
+retains the prompt/provenance and visual limitations. Live capture was unavailable on
+the locked host, so generation used a saved actual synthetic-fixture Story screenshot.
+This is proposed design, not accepted or implemented UI. Continue reviewing these
+interactions and the remaining feature subsets on `codex/phase-2-3-planning`.
+No Phase 1 files, application code, build/SDK/native runs or CI dispatches were added.
+
+UX planning verification: repository structure/text/privacy/local-link validation
+passed for 319 files, whitespace/scope review passed, and the generated image was
+visually inspected. The written spec corrects the schematic Call return wording and
+limits the manual preview claim. Publication uses the existing planning branch; no
+merge or planning PR is selected. No application tests are needed for this docs/image
+change. The next action is user review of the proposed interactions and remaining
+Phase 3 subsets, not implementation. Resolve this checkpoint's SHA from Git.

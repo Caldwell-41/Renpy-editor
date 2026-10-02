@@ -570,6 +570,21 @@ external revision boundaries rather than overwriting newer work.
 
 ## Later workspaces
 
+### Proposed Phase 2–3 interaction direction — 2026-10-02
+
+The [Phase 2 interaction journey](tasks/active/phase-2-initial-llm-assistance.md#18-proposed-uiux-journey)
+places reviewed assistance next to writing, extends Characters with cards, introduces
+Lorebook, and exposes prompt/context/response controls. The
+[Phase 3 Story interaction design](tasks/active/phase-3-initial-wysiwyg-release.md#story-interaction-design)
+keeps the Beat list and adds expandable, labelled conditional bodies, explicit insertion
+parents and continuations, returning Call rows and an honest manual branch preview.
+Its [generated concept](design/phase-3-story/README.md) uses a saved actual Story UI
+screenshot. The same brief outlines Screens, Timeline and state-panel journeys.
+These are proposed later-phase designs, not accepted replacements for the existing
+Phase 1 shell or proof of implemented behavior. The task briefs own interaction details;
+the accepted theme, shared controls and pending Phase 1 corrections remain authoritative.
+
+
 ### Screen/UI designer
 
 | Component hierarchy | Constraint canvas | Properties/source |

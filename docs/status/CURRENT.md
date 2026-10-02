@@ -136,3 +136,14 @@ Run From Here's initial Scene-entry/empty-call-stack boundary. No implementation
 SDK upgrade, build or dispatch selected. Keep the existing planning worktree/branch;
 the active Phase 1 checkout and all existing budgets remain unchanged. Publication
 target is `origin/codex/phase-2-3-planning`; no merge is selected.
+
+UI/UX planning refinement — 2026-10-02: the user requested interaction design and a
+generated image based on the current UI. The Phase 3 brief now includes the nested
+Story Beat journey, insertion/move/draft/preview contracts and a generated paper/teal
+concept, plus the Screens/Timeline/state journeys. Phase 2 now records its assistance,
+reference and settings journey. The [design reference](../design/phase-3-story/README.md)
+retains the prompt/provenance and visual limitations. Live capture was unavailable on
+the locked host, so generation used a saved actual synthetic-fixture Story screenshot.
+This is proposed design, not accepted or implemented UI. Continue reviewing these
+interactions and the remaining feature subsets on `codex/phase-2-3-planning`.
+No Phase 1 files, application code, build/SDK/native runs or CI dispatches were added.

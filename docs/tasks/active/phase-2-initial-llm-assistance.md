@@ -443,3 +443,40 @@ now cover Unsloth Studio and one representative generic-compatible endpoint. The
 generic endpoint field does not imply tested or named Ollama support. No implementation
 exists to remove. Phase 3 scope remains under discussion following the user's request
 for a simpler explanation; its proposed capability list is not accepted scope.
+
+## 18. Proposed UI/UX journey
+
+**2026-10-02 design proposal, not implemented.** Keep assistance next to the author's
+current work. Select supported dialogue or a Scene and open an Assist panel with
+the operation and target shown at the top. Review included story context, Character
+cards and lorebook entries before Generate. Show provider/model, context budget and
+maximum response tokens together, with token counts marked estimated where necessary.
+An over-budget request offers explicit reference removal or limit adjustment; it must
+not silently drop selected references. Never generate merely by opening the panel.
+
+Extend Characters with a Character card tab beside existing game-character settings;
+add a searchable Lorebook supporting surface for entries and inclusion rules. Both
+offer ordinary manual editing and “Draft with AI”. Generated cards/entries use the
+same proposed-change review: compare old/new fields, choose supported changes, then
+accept once. Story text generation likewise returns a proposal with its source target
+and before/after content, never directly overwriting the editor. Generation progress,
+Cancel, failure and retry keep the author's inputs visible and reusable.
+
+Put shared provider/model defaults and prompt templates under Settings → AI. Each
+operation exposes “View/edit system prompt” so the author can inspect the effective
+prompt and its override scope. “Restore baseline” shows the replacement before the
+author applies it; retain the prior custom text through the normal draft/cancel flow.
+The UI must distinguish restored prompt settings, unsaved form input and accepted
+game-source changes. Required provider choices are Unsloth and generic compatible;
+Ollama stays removed. Extra-provider scaffolding must not imply verified support.
+
+On wide windows the Assist panel sits beside the current selection; on narrow windows
+it can occupy the central workspace with a clear Back action and preserved selection.
+Use the existing palettes, spacing and shared controls. The feeling should be: write,
+ask for a bounded suggestion, compare, accept, continue writing. The same review and
+context controls apply when the suggestion is lore or a Character card.
+
+Before completing the Phase 2 UI, prove that a user can create a card and lore entry,
+include them in a rewrite, inspect/reset a prompt, adjust both size controls, cancel
+generation, accept a selected proposal and undo it without losing their original work.
+Use actual dispatch and saved-data checks; a rendered mockup is not acceptance.
