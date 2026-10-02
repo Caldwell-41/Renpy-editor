@@ -1,5 +1,21 @@
 # Current outcome handover
 
+## User stopped hands-on review for now — 2026-10-02
+
+The user says "i think we are done for now" after Variables feedback. Stop review
+work; no automation or background continuation is selected. Incoming published
+checkpoint: `ab68b098a21fb23fe59a8394343794d8467d844f` on the existing feature branch.
+The [review pause record](../tasks/active/ui-design-review.md#hands-on-review-stopped-for-now--2026-10-02)
+owns outstanding findings and limits. All accumulated corrections remain pending;
+do not mark the UI fully accepted or infer unreported Variables/physical-input/
+OS-drop/live-progress checks passed. Reuse corrected Mac installer `01d0896`.
+No workflow or build is pending; PR #17 remains draft/open with recorded conflicts.
+No merge, conflict resolution, new phase or further build/dispatch is selected.
+Next user-directed continuation: choose correction implementation scope or resume
+remaining review, inspecting fresh refs and preserving both worktrees. This final
+documentation checkpoint adds zero app/SDK/native starts or builds/dispatches.
+No autonomous Goal/client pause state is claimed or changed.
+
 ## Latest Variables findings — 2026-10-02
 
 [VARIABLES-01 and CATALOG-03/04](../tasks/active/ui-design-review.md#variables-naming-and-shared-catalogue-affordances--2026-10-02)

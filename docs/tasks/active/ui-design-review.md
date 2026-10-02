@@ -1984,3 +1984,36 @@ known-assignment navigation remain unreported, not inferred passes. Shared creat
 editing modals and separate Music/Sound effects filters were confirmed previously.
 Only review docs changed; reuse `01d0896`, zero new launches, native/SDK cases,
 builds or dispatches. Existing blockers and sidebar proposal approval remain open.
+
+### Hands-on review stopped for now — 2026-10-02
+
+The user says "i think we are done for now" after recording Variables feedback.
+Stop this hands-on session and preserve its findings; this is not final UI acceptance
+or authorization for unattended implementation. Incoming published checkpoint
+`ab68b098a21fb23fe59a8394343794d8467d844f`, branch
+`feature/phase-1g-branches-runtime`; preserve newer work and the separate planning
+worktree. No workflow/build pending, no automation/Goal/client pause state changed.
+
+Recorded follow-up spans Welcome/wizard/button consistency; Story creation/Choice
+layout/chapters/sidebar controls/Beat dragging/Writing focus; Source tabs/overflow;
+Branches route resolution and popup dismissal; runtime panel presentation; Character
+preview/appearance editing/list polish; Assets categories/drop target; and shared
+catalogue modals, selection, technical-name handling, Close X and naming help.
+Confirmed preferences include separate Music/Sound effects categories, modal creation
+and editing, and appearance name plus image replacement. The earlier sidebar/drag
+proposal still awaits its requested approval. All corrections remain pending.
+
+Preserve positive human observations: fresh corrected project launches successfully;
+Characters search/view switching, editing and default persistence work; Branches
+navigation works and pan/zoom/Fit is acceptable provisionally. These do not close
+the failed preview refresh or missing graph routes. Variables type/default editing,
+persistence and known-assignment navigation are unreported. Physical keyboard/IME,
+actual OS asset drop, live SDK download/progress and detailed creation progress,
+remaining cross-target checks and final visual acceptance stay open.
+
+Reuse installer `01d0896` for Mac continuation; earlier `d690d7f` cross-target
+qualification and all failed/superseded evidence remain preserved. PR #17 is still
+draft/open with recorded conflicts; no merge/conflict resolution/new phase or new
+build/dispatch selected. Next user-directed continuation may select a bounded
+correction implementation outcome or resume remaining checks. This pause record
+changes docs only, adding zero launches, native/SDK cases, builds or dispatches.

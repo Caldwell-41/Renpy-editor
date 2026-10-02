@@ -28,6 +28,11 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
+**Hands-on review stopped for now at the user's request, 2026-10-02.**
+[Continuation record](../tasks/active/ui-design-review.md#hands-on-review-stopped-for-now--2026-10-02):
+findings are saved; corrections and unreported acceptance remain open. Wait for the
+user to select implementation scope or resume review. No background operation,
+new build/dispatch, integration or new phase selected; retain `review_ready`.
 Latest feedback is [Variables](../tasks/active/ui-design-review.md#variables-naming-and-shared-catalogue-affordances--2026-10-02):
 Variable creation bypasses the name helper used by Characters/Assets, explaining
 the capitalization failure. Consistent name handling, shared inspector Close X,
