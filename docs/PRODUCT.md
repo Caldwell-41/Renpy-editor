@@ -81,6 +81,14 @@ provider locality and selected context. Output is untrusted structured data show
 semantic and file diffs with accept, reject, and partial-accept controls. Lore stays
 proposed until approved.
 
+Phase 2 includes persistent Character cards (personality, voice, background and
+relationships) and a lorebook (world/reference entries), both manually editable and
+LLM-generatable through reviewed proposals. Authors choose the approved references
+used for generation. Character cards are separate from runnable Character definitions.
+System prompts are viewable/editable with a Restore baseline setting; context budget
+and maximum response tokens are explicit controls with an inspectable usage estimate.
+These are planned Phase 2 capabilities, not current Phase 1 functionality.
+
 ## Required authoring capabilities
 
 - Scene sequencing and live scene preview/staging.

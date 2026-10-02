@@ -270,8 +270,9 @@ then-unpublished chapter/Writing-focus documentation commit. No feature ref is m
 [Phase 2](../tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
 retains existing requirements with an early complete rewrite outcome and current
 workflow/testing policy. [Phase 3](../tasks/active/phase-3-initial-wysiwyg-release.md)
-is a reviewable draft with proposed subsets and open decisions. Only the planning
-request and Story-before-Screens priority are selected; implementation remains
+is a reviewable draft with proposed subsets and open decisions. The planning request,
+Story-before-Screens priority and the Phase 2 reference/prompt/size requirements
+recorded below are selected; implementation remains
 `not_started`, dependent on accepted Phase 1 through 1H and later bounded selection.
 
 Next in this planning chat: review and refine the proposed subsets. Continue Phase 1G
@@ -287,3 +288,23 @@ six-document scope review passed. Publication target: `origin/codex/phase-2-3-pl
 no planning PR or merge. Verify its head against the local planning commit before
 reporting publication. The primary worktree acquired active Phase 1 edits during this
 session; they remain exclusively with that workstream and were not copied or staged.
+
+### Phase 2 references and controls refinement — 2026-10-02
+
+The user selected Character cards and a lorebook, both manual and LLM-generatable,
+as generation references; editable/viewable system prompts with baseline reset; and
+context/response limits. The Phase 2 brief now puts manual reference editing before
+the first rewrite and LLM draft/update completion in 2C.3. Canonical product/data/UI
+and roadmap descriptions agree. Phase 2 and Phase 3 include plain-language end states.
+Provider expansion is a recommendation: tested extension scaffolding and optional
+unverified compatible profiles, with no new required provider or waived baseline gate.
+Official provider docs were read; no inference request occurred.
+
+Continuation: discuss provider priorities and remaining Phase 3 subsets on this same
+planning branch. Original Phase 1 work remains in its own checkout. Documentation
+validation and whitespace/scope review apply; publish only these documentation edits
+and verify the planning remote head. No app/native tests or production dispatch.
+
+Refinement evidence: repository validation passed for 315 files; whitespace and
+eight-document scope review passed. Publication target remains the existing planning
+branch, with no merge or additional-provider implementation selected.

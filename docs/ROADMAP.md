@@ -74,12 +74,13 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
-**Outcome:** Unsloth Studio, Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
+**Outcome:** Unsloth Studio, Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
 The October delivery sequence targets a complete reviewed dialogue rewrite early,
-then Scene/provider completion, Character/lore and final integrated acceptance.
+using selected manual cards/lorebook and configurable prompts/limits, then Scene/provider
+completion, LLM-generated cards/lorebook and final integrated acceptance.
 [The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
 maps those outcomes to the requirement checkpoints below; it retains all three
 providers and five actions. Checkpoints use internal commits in the same outcome/chat
@@ -89,9 +90,9 @@ Execute separately scoped internal briefs after Phase 1 acceptance and explicit 
 
 | Checkpoint | Scope and gate |
 | --- | --- |
-| 2A — Provider and credential boundary | Core-owned provider configuration, endpoint/locality disclosure, reviewed OS credential adapter, bounded requests/cancellation and redacted errors. Test no renderer/project/log credential leakage, no implicit sends, and safe endpoint/redirect handling. |
-| 2B — Deterministic selected-context assembly | Explicit user-selected Scene/route/slice context with source revisions, provenance, dependency disclosure and size estimate. Route-aware means a selected documented scope, not proof of reachable runtime state. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
-| 2C — Structured proposals and acceptance | Scene/Character/lore actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
+| 2A — Provider and credential boundary | Core-owned provider configuration, explicit context/response limits, endpoint/locality disclosure, reviewed OS credential adapter, bounded requests/cancellation and redacted errors. Test no renderer/project/log credential leakage, no implicit sends, and safe endpoint/redirect handling. |
+| 2B — Deterministic selected-context assembly | Manual Character cards/lorebook, editable system prompts with baseline reset, and explicit user-selected Scene/route/slice/reference context with source revisions, provenance, dependency disclosure and size estimate. Route-aware means a selected documented scope, not proof of reachable runtime state. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
+| 2C — Structured proposals and acceptance | Scene, runnable Character, Character-card and lorebook draft/update actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
 
 **Exit criteria:** every send reveals destination/locality/context/estimated size; remote sensitive-content warnings and explicit consent work; unsupported schemas/paths/identifiers and malicious output are refused; partial acceptance cannot omit required definitions or dependencies; stale/cancelled responses cannot mutate a replacement session. No source or lore becomes canonical without review. Credentials and these safety gates are Phase 2 prerequisites, not deferred Phase 3 release polish.
 

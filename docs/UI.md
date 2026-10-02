@@ -603,6 +603,15 @@ provider, endpoint class, model, local/remote status, selected context/exclusion
 estimated size, and private/adult remote-send warning. Output remains untrusted
 structured data reviewed through semantic/file diffs.
 
+Planned Phase 2 reference editors expose Character cards and a searchable/filterable
+lorebook, manual editing and Generate/Update actions, approval/stale state and explicit
+context inclusion. Settings exposes per-action system-prompt editing and Restore
+baseline, with customized/baseline version indicators. Context budget and maximum
+response tokens are editable per provider/model with visible request overrides.
+Before Send, show the effective prompt, selected card/lore entries and token breakdown;
+over-budget input requires a visible correction. Prompt reset is undoable and does
+not reset references, credentials or size settings. These controls are not Phase 1 UI.
+
 ## Resolution and accessibility checks
 
 - Author at project resolution (default `1920×1080`) while previewing alternative

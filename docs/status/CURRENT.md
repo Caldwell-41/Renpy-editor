@@ -111,3 +111,8 @@ selected Story logic before screen design in Phase 3. The
 and [Phase 3 draft](../tasks/active/phase-3-initial-wysiwyg-release.md) are ready for
 scope discussion. Implementation entry still requires accepted Phase 1 through 1H
 and explicit bounded selection. HANDOVER records branch isolation and continuation.
+
+Phase 2 planning now explicitly includes manual/LLM-generated Character cards and a
+lorebook for reviewed context, editable system prompts with Restore baseline, and
+context/response size controls. Extra-provider scaffolding is recommended, not selected
+as additional supported-provider scope. See the Phase 2 brief's refinement record.

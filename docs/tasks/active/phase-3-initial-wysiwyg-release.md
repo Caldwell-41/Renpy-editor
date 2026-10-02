@@ -36,6 +36,13 @@ Each checkpoint may use internal implementation/review/test commits in the same 
 WORKFLOW governs pauses and independent review; these rows do not mandate a chat per
 commit or authorize the entire phase as one goal.
 
+**At the end of Phase 3:** build a richer playable visual novel using supported
+conditions/calls, editable game screens and timed staging/audio; inspect and launch
+from a supported story state; use local/selected remote Git workflows; and install a
+qualified initial-release editor on Windows x64 and macOS ARM64. Unsupported Ren'Py
+still remains editable as source, with visual limitations shown. Phase 3 builds on
+Phase 2's cards, lorebook and reviewed generation rather than replacing them.
+
 ## 2. Dependencies and compatibility
 
 - 3A establishes shared condition/call semantics before 3D uses them. Branches keeps
