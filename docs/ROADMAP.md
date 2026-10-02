@@ -65,7 +65,8 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 **Decision:** 2026-09-25. [Optional Git](tasks/active/optional-local-git.md) preserves the
 former 1G.3a/1G.3b requirements as GIT.1 safety and GIT.2 UI. No date or automatic start;
 the user may select it later. It is not required for 1G/1H, Phase 1 closure or Phase 2
-entry. Existing project-creation Git init remains. Later GitHub integration depends on
+entry, Phase 3 or initial-release acceptance. The user removed proposed 3E on
+2026-10-02. Existing project-creation Git init remains. Later GitHub integration depends on
 this foundation if selected; it must not assume Phase 1 delivered status/diff/checkpoints.
 
 The remaining Phase 1 test cadence is agent-run development and early native process
@@ -99,19 +100,20 @@ State simulation/Run From Here remain Phase 3; broader reachability/state and na
 
 ## Phase 3 — Initial WYSIWYG release
 
-**Scope discussion reopened — 2026-10-02:** the user reports that this draft does not
-yet match their intent. The capability list below is a proposal for clarification,
-not accepted implementation scope. Story-before-Screens is the earlier preference;
-confirm the overall outcome before expanding or selecting these checkpoints.
+**Implementation planning requested — 2026-10-02:** the user removed 3E and asked
+for implementation plans for the remaining parts. The detailed brief now includes
+source/code seams, staged implementation and proof fixtures based on Ren'Py docs and
+relevant projects. Exact feature inventories remain proposed; no coding is selected.
+Git/GitHub are deferred and absent from Phase 3/release acceptance.
 
 **Outcome:** satisfy PRODUCT's initial-release scope through separately gated capabilities, not one large implementation goal. Preserve the accepted source/transaction/authority architecture and exclude arbitrary existing-project import.
 
 The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) defines
-first usable results, proposed subsets, dependencies, early risk proofs and completion
-gates. The user selected **Story logic first, then screen design** on 2026-10-02.
+first usable results, proposed subsets, dependencies, implementation steps, inspected
+code seams, early risk proofs and completion gates. The user selected **Story logic first, then screen design** on 2026-10-02.
 The remaining order is proposed. This plans ahead alongside Phase 1G; it neither starts
 Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
-entry points, Git remote scope and release audience remain explicit design decisions.
+entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |
 | --- | --- |
@@ -119,12 +121,11 @@ entry points, Git remote scope and release audience remain explicit design decis
 | 3B — Supported screen designer | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
 | 3C — VN animation/audio Timeline | Reviewed Ren'Py event/transform/channel subset with explicit timing, source mapping, undo and runtime tests. No general non-linear video editor or unrestricted ATL promise. |
 | 3D — Supported state simulation and Run From Here | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
-| 3E — Workflow and GitHub maturity | Asset/diagnostic/recovery usability and safe supported GitHub authentication/remotes, with explicit review and non-destructive defaults. Builds on Phase 1's minimum recovery, Phase 2's credential boundary and the separately selected optional Git foundation for GitHub work; it does not retroactively supply those prerequisites. |
 | 3F — Distribution and release acceptance | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
 
 These are dependency-planning boundaries; each execution brief must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.
 
-**Exit criteria:** every capability in PRODUCT's initial-release scope passes its gates and the integrated create/author/source/preview/run/LLM/Git/recover/reopen workflow on both targets. Preserve visible partial/unknown handling. Signing/notarisation is not required for early genuinely private builds, but is required before broader distribution under the release policy below.
+**Exit criteria:** every capability in PRODUCT's initial-release scope passes its gates and the integrated create/author/source/preview/run/LLM/recover/reopen workflow on both targets. Preserve visible partial/unknown handling. Signing/notarisation is not required for early genuinely private builds, but is required before broader distribution under the release policy below.
 
 ## Phase 4 — Narrative intelligence
 

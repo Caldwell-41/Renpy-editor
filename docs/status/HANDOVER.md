@@ -314,3 +314,22 @@ requires Unsloth Studio and the generic-compatible provider path. Phase 3 scope 
 unsettled: explain the proposed capabilities plainly and clarify the intended outcome
 before further elaboration or implementation selection. Planning branch remains
 `codex/phase-2-3-planning`; ongoing Phase 1 work and its allowance are unchanged.
+
+Phase 3 planning continuation — 2026-10-02: user removed 3E; local Git and GitHub
+are deferred outside Phase 3/initial-release acceptance. PRODUCT, ROADMAP, UI and
+the optional Git brief now agree. The Phase 3 brief contains researched implementation
+steps for 3A–3D and 3F, inspected code seams, source-migration/runtime-preview design,
+proof checkpoints and references. Online Ren'Py docs report 8.5.4; the pinned 8.5.3
+behavior still needs qualification at implementation entry. Community project pages
+were inspected only; nothing downloaded, copied or executed.
+
+Next in this planning chat: review the proposed screen/Timeline inventories and
+Run From Here's initial Scene-entry/empty-call-stack boundary. No implementation,
+SDK upgrade, build or dispatch selected. Keep the existing planning worktree/branch;
+the active Phase 1 checkout and all existing budgets remain unchanged. Publication
+target is `origin/codex/phase-2-3-planning`; no merge is selected.
+
+Implementation-plan validation: repository structure/text/privacy/local-link checks
+passed for 315 files; whitespace and eight-document scope review passed. Self-review
+removed the remaining roadmap 3E row and checked that product/release acceptance no
+longer requires Git. No application, SDK or native checks were run for these docs.

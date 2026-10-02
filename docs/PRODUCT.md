@@ -29,7 +29,7 @@ The initial user is one visual-novel creator managing multiple games. They need 
 - move between visual, graph, timeline, and source views without losing intent;
 - validate and run through the selected official SDK;
 - reconcile external edits and preserve unsupported syntax visibly;
-- use Git locally and with private GitHub repositories;
+- optionally add local Git and private GitHub workflows in a separately selected future milestone;
 - request local or remote LLM assistance as inspectable, reviewable proposals.
 
 ## Reliability and responsive observed views
@@ -62,16 +62,17 @@ every display update. The selected contract and measurable gates are in
 5. Build scenes from ordered beats, choices, conditions, calls, jumps, and endings.
 6. Inspect branching, UI screens, and animation/audio timing at appropriate scale.
 7. Edit synchronized source; represent unsupported constructs as custom-code blocks.
-8. Validate, preview/run from an inspectable state, and create a Git checkpoint.
+8. Validate and preview/run from an inspectable state.
 
 ### Phase 1 subset and optional Git
 
 Phase 1 ends with the authoring/source/Branches/validation/play/reopen workflow.
 New local Git status/diff/checkpoint work is deferred to an
 [optional milestone](tasks/active/optional-local-git.md), selected separately at a later
-date. It is not required for Phase 1 acceptance or Phase 2 entry. Existing optional Git
-initialization during project creation remains. The broader initial-release workflows
-above describe later product scope; they do not restore Git as a Phase 1 prerequisite.
+date. The user reaffirmed on 2026-10-02 that local Git/GitHub remain deferred: they
+are not required for Phase 1, Phase 2, Phase 3 or initial-release acceptance. Existing
+optional Git initialization during project creation remains. No Git panel, checkpoint
+or remote workflow is restored through release preparation.
 
 ### LLM-assisted authoring
 
@@ -98,7 +99,6 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
 - Source editor with bidirectional navigation and lossless unsupported regions.
 - Branch-aware characters, variables, lore, state simulation, and run-from-here.
 - First-class Unsloth Studio support plus configurable OpenAI-compatible adapters, without hardcoded model names. Unsloth Studio has dedicated setup, diagnostics and acceptance tests; see the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
-- Local Git workflows and secure supported GitHub authentication.
 
 ## Constraints and principles
 
@@ -113,6 +113,9 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
 - No telemetry by default. Any future telemetry requires explicit consent.
 
 ## Deferred, not forgotten
+
+Local Git status/diff/checkpoints and GitHub authentication/remotes remain optional
+later work, selected separately. Their absence does not block the initial release.
 
 After the initial editor release, the high-priority optional open-world capability
 adds maps, points of interest, travel, day/time, schedules, reachable-state previews,
@@ -133,5 +136,5 @@ and location-aware LLM context on top of the general graph/state model.
 The release is complete only when the user can create multiple projects, save and
 reopen them safely, visually author all five major workspaces, preserve and inspect
 source/custom code, validate and run via a pinned SDK, use reviewable LLM proposals,
-checkpoint with Git, and recover from crashes/external conflicts without silent data
-loss. Measurable phase criteria are in [ROADMAP.md](ROADMAP.md).
+and recover from crashes/external conflicts without silent data loss. Measurable phase
+criteria are in [ROADMAP.md](ROADMAP.md).

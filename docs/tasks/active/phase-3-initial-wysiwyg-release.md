@@ -1,12 +1,14 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Planning date:** 2026-10-02. **State:** scope clarification requested; implementation `not_started`.
-**Latest direction:** the user reports that the proposed Phase 3 does not yet match
-their intent and requests a simple explanation of what each phase enables. The
-capabilities below remain proposals; do not infer agreement from the earlier
-Story-before-Screens ordering preference.
-**User direction:** plan Phases 2 and 3 alongside ongoing Phase 1G; deliver richer
-Story logic before the screen designer in Phase 3.
+**Planning date:** 2026-10-02. **State:** researched implementation-plan draft;
+implementation `not_started`.
+**Latest user direction:** remove 3E because Git remains deferred; plan the
+implementation of the remaining Phase 3 parts using Ren'Py documentation and relevant
+projects as references. Earlier outcome-level planning was not a complete implementation
+plan. The steps below supply a proposed technical approach and proof checkpoints;
+research is not SDK qualification or approval to start coding.
+**Sequence:** Story logic before Screens remains the selected ordering preference.
+Phase 3's exact feature subsets remain reviewable; planning detail is not acceptance.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
 [ROADMAP](../../ROADMAP.md) owns the overall sequence, and
 [PRODUCT](../../PRODUCT.md) retains the initial-release commitment.
@@ -18,7 +20,7 @@ is selected by this document.
 ## 1. Outcome and first usable results
 
 An author can build branching story logic, design supported game screens, time VN
-staging/audio, inspect a supported starting state and run from it, then checkpoint
+staging/audio, inspect a supported starting state and run from it, then save
 and reopen the game. Visual changes remain ordinary Ren'Py source, editable outside
 Loomlight and runnable without editor metadata.
 
@@ -33,8 +35,12 @@ No calendar estimate is committed before the source/SDK feasibility checks.
 | 3B — Screen designer | Edit one supported screen using hierarchy, canvas and properties, then inspect it in Ren'Py. | Declared screen subset, reusable supported components, source reconciliation and accessible editing pass. |
 | 3C — VN Timeline | Animate an existing character and schedule music/SFX relative to a supported beat. | Declared timing/transform/channel subset survives Source edits, undo and reopen and matches runtime comparisons. |
 | 3D — State and Run From Here | Inspect one explicit route's effective state and start at a supported point. | Provenance, unknown-state refusal, call-stack constraints and isolated launch behavior pass. |
-| 3E — Workflow and GitHub | Review local changes, checkpoint exact selected files and explicitly push to a selected private repository. | Optional local Git foundation is separately selected and accepted; supported remote/auth/error flows pass. |
 | 3F — Release acceptance | Install on both supported targets and finish the integrated authoring workflow. | Agreed product coverage, distribution channel, applicable signing and release evidence are complete. |
+
+**3E is removed.** Local Git and GitHub remain deferred optional work, outside this
+phase and initial-release acceptance. Retain 3F's existing ID for traceability; it is
+release qualification, not another creative feature. Existing project-creation Git init
+is unchanged. Repository development commits are unrelated to this product deferral.
 
 Each checkpoint may use internal implementation/review/test commits in the same chat.
 WORKFLOW governs pauses and independent review; these rows do not mandate a chat per
@@ -42,7 +48,7 @@ commit or authorize the entire phase as one goal.
 
 **At the end of Phase 3:** build a richer playable visual novel using supported
 conditions/calls, editable game screens and timed staging/audio; inspect and launch
-from a supported story state; use local/selected remote Git workflows; and install a
+from a supported story state; save/reopen your work; and install a
 qualified initial-release editor on Windows x64 and macOS ARM64. Unsupported Ren'Py
 still remains editable as source, with visual limitations shown. Phase 3 builds on
 Phase 2's cards, lorebook and reviewed generation rather than replacing them.
@@ -57,16 +63,56 @@ Phase 2's cards, lorebook and reviewed generation rather than replacing them.
   selected. Ship Story logic first, then Screens, then the proposed remaining order.
 - 3D must account for supported visual/audio effects from 3C or explicitly refuse
   unsupported entry points. A successful jump is not proof of reconstructed state.
-- 3E depends on Phase 2's production credential boundary and separately approved
-  [GIT.1/GIT.2](optional-local-git.md). Existing project-creation Git init is insufficient.
-  Local Git remains optional for Phases 1 and 2; it is needed for the existing broader
-  initial-release promise unless the user explicitly changes that promise.
+- [Optional Git](optional-local-git.md) has no dependency edge into Phase 3 or 3F.
 - Phase 2 assistance stays on its accepted operation allowlist. New conditions,
   screens or Timeline syntax do not automatically become LLM-editable. Excluded
   regions and unknown effects remain visible in selected context.
 - Phase 4 broader analysis and Phase 5 open-world state are not prerequisites for
   honest, bounded Phase 3 support. Do not infer day/time, character knowledge or
   arbitrary Python state merely because later UI designs mention them.
+
+### Inspected implementation seams
+
+The inspection baseline is this planning branch's inherited application tree at
+`de2fdad`; active Phase 1 changes and future Phase 2 interfaces must be reconciled at
+implementation entry. Proposed new module names below are design suggestions, not
+existing APIs. Keep the current Rust core / TypeScript / Tauri stack.
+
+| Existing code | Finding and implementation consequence |
+| --- | --- |
+| [scene.rs](../../../app/src-core/src/scene.rs), `BeatPayload`, `parse_scene`, `is_terminal_payload` | Current Beats are flat, menu recognition expects unconditional jump destinations, and Choice is terminal. Nested conditions, menu fallthrough and returning calls require a structural extension, not just new form fields. |
+| [source.rs](../../../app/src-core/src/source.rs), [metadata.rs](../../../app/src-core/src/metadata.rs) | Source ranges currently identify Scene/Beat ownership; project/source-map schemas are version 2. Add typed nested/screen/transform locations and an explicit migration while preserving byte offsets versus editor positions. |
+| [scene/flow.rs](../../../app/src-core/src/scene/flow.rs) | Extend this observed projection with condition/call/continuation information; do not build a separate graph store or reinterpret cached edges as write authority. |
+| [scene-ui.ts](../../../app/src/scene-ui.ts), `deriveScenePreview` | Current preview is a scene-local TypeScript projection. Keep a lightweight renderer, but put new shared expression/state semantics in core rather than creating different truth in each workspace. |
+| [transaction](../../../app/src-core/src/transaction), [dispatch.rs](../../../app/src-core/src/dispatch.rs) | Reuse revision checks, history/recovery, session ownership and cancellable background work. New screens/transforms use the same prepared-mutation path. |
+| [lifecycle/runtime.rs](../../../app/src-core/src/lifecycle/runtime.rs), [renpy/runtime.rs](../../../app/src-core/src/renpy/runtime.rs), [runtime-preparation.ts](../../../app/src/runtime-preparation.ts) | Current runtime supports Run/Validate and deliberately disables developer/console/autoreload in controlled play. Preview/Run From Here need explicit typed runtime purposes, not a hidden weakening of normal Run. |
+
+**Common implementation sequence:**
+
+1. Add a bounded lexical/block layer over exact bytes, using existing lexical helpers
+   where suitable. Track indentation, strings, comments and opaque child ranges; no
+   regex script rewriting or project Python execution. Keep unsupported parents opaque
+   when safe child boundaries cannot be established.
+2. Extend source-derived typed models and mapping metadata with stable identity, node
+   kind and parent/range information. Prove migration/no-op reopening of existing
+   projects before any new surface writes; only metadata requires migration, not a
+   rewrite of ordinary existing scripts. Reject unsupported newer schemas cleanly.
+3. Expose narrow read/prepare/apply commands through the existing protocol. A gesture
+   holds a temporary UI draft and commits one reviewed/revision-bound change on release
+   or confirmation. Cancel/Escape, external edits or stale sessions retain input and
+   write nothing. Structural edits cannot consume protected neighboring ranges.
+4. Implement one real operation through renderer → dispatch → source preparation →
+   transaction → reopen before building a whole workspace. Reuse the proposal batching
+   introduced by Phase 2 if its accepted implementation fits this contract.
+5. Add a shared explicit preview job: frozen accepted inputs, reviewed executable
+   trust, isolated scratch project/profile, typed result and original-source mapping.
+   The proposed preview uses a separate Ren'Py window on both targets; native window
+   embedding is not a prerequisite. No automatic execution on selection or editing.
+
+Record a focused ADR for the nested mapping migration and the scratch preview/runtime
+boundary at their implementing checkpoints. Confirm font asset discovery/import needs
+for Screens before extending the existing media allowlist. Long preview/render/SDK
+work releases authoring ownership; only snapshot/precondition/commit work holds it.
 
 ## 3. 3A — Richer Story logic
 
@@ -97,6 +143,25 @@ implementation. All edits use minimal source patches and shared transaction/hist
 **Early risk proof:** exercise a real nested source edit and call/return through core
 dispatch and the pinned SDK before building the full condition-editor UI.
 
+### Implementation plan
+
+| Step | Concrete implementation | Proof before proceeding |
+| --- | --- | --- |
+| 3A.1 — Expressions and nested source | Introduce a typed expression tree in core: bool variable/literal, same-type equality/inequality, integer ordering, `not`, `and`, `or`, parentheses. No calls, attributes, indexing or evaluation of Python text. Add nested conditional blocks with ordered `if`/`elif`/`else` bodies to the source-derived Beat model. | Exact-byte no-op corpus, edits within one nested child, comments/Unicode/newlines, bounded depth/node counts, type errors and unknown expressions. Check SDK behavior for the emitted subset. |
+| 3A.2 — Flow and persistence | Add conditions to choice options and a nonterminal Call Beat with a stable collision-checked `from` label. Preserve existing return labels on edits. Model possible continuation after a conditional menu; replace the blanket terminal-Choice rule with block-aware completion checks. Extend map migration, history and observed graph using the same model. | Old Phase 1 fixtures reopen unchanged; all-false menu continues as Ren'Py specifies; called Scene returns to the following Beat; nested calls and remove/undo retain correct destinations. |
+| 3A.3 — Story controls | Add a variable/operator/value condition builder, nested branch rows, condition badges on options and a Call Scene picker. Support keyboard insert/move and explicit moving across block boundaries. Branches shows guarded/call/continuation edges with navigation to the exact source. | One edit through actual frontend/core dispatch, coherent Source/Story/Branches, cancellation and pending input retention, useful missing/type-mismatch diagnostics. |
+| 3A.4 — Qualification | Run a small branching fixture through normal entry with multiple variable cases and two call sites, including save inside a called Scene and return after a safe surrounding edit. | Actual route/value/return assertions, no-op/minimal-patch regressions and both affected native targets. Stable `from` labels do not promise arbitrary save compatibility after script changes. |
+
+Recommended first scope excludes parameterized/dynamic calls and while-loop authoring.
+Already existing custom forms stay lossless. Add an explicit final Return/Jump where
+the authored block requires one; never make an all-false conditional menu silently
+fall into another Scene. A selected trace used in 3D will account for actual guarded
+continuations; 3A's overview graph does not infer that every displayed path is reachable.
+
+Ren'Py basis: [conditions](https://www.renpy.org/doc/html/conditional.html),
+[conditional menus](https://www.renpy.org/doc/html/menus.html), and
+[calls/return labels](https://www.renpy.org/doc/html/label.html#call-statement).
+
 ## 4. 3B — Supported screen designer
 
 Use the canonical [UI direction](../../UI.md#screenui-designer): hierarchy plus a
@@ -123,6 +188,38 @@ preview as inert controls in the editor; runtime actions require deliberate exec
 and compare its actual SDK rendering before committing to the general canvas design.
 Record supported properties and visible approximation limits alongside the result.
 
+### Implementation plan
+
+**Recommended release inventory:** screen roots; fixed/frame/window/vbox/hbox/grid
+containers; text, image/add, textbutton/imagebutton, bars and viewports; selected
+layout/text/color properties; simple styles and `use` of an explicitly owned component.
+Show/Hide/Return and typed variable-setting actions form the first action builder.
+Game-menu actions are selected by template adapters, not arbitrary Python entry.
+
+| Step | Concrete implementation | Proof before proceeding |
+| --- | --- | --- |
+| 3B.1 — Screen source service | Add proposed core `screens` service with declaration inventory, typed nodes/properties, source spans and protected opaque children, using the shared block/mutation layer. New screens get a collision-checked owned file; existing screens are edited in place, not duplicated under a new definition. | One nested custom screen containing an unsupported neighbor round-trips and accepts a minimal property edit through the transaction layer. |
+| 3B.2 — Canvas, tree and inspector | Add proposed `screen-ui.ts`: synchronized hierarchy and canvas selection, drag/resize/snapping plus numeric and keyboard editing, typed asset/style pickers, action builder and inert hover/selected samples. Store editor layout/selection metadata only; renderable properties remain in source. | Drag is one undo entry; Escape cancels; parent layout rules constrain child movement. Distinguish absolute pixel coordinates, relative coordinates and anchor values rather than coercing every drag into `xalign`/`yalign`. |
+| 3B.3 — Real game screen adapters | Add schema-aware adapters for the pinned generated `say`, `choice`, main-menu/navigation, preferences and save/load templates. Expose supported layout/style slots while preserving required parameters/IDs, action bindings and dynamic list/slot logic. Support reused components by explicit owned definitions. | Change dialogue box/name placement, choice styling and menu layout in a generated project; continue dialogue, choose a route, change a preference and save/load normally in the SDK. Unsupported template versions fall back to source. |
+| 3B.4 — Preview and completion | Use the shared scratch preview job with synthetic `who`/`what`, menu choices and other template inputs. Compare supported layout/hit targets against actual Ren'Py, plus full-game screen integration. Offer an explicit rerun after edits. | Native fonts/scaling/focus at project resolution and a second aspect, accessible tree/property operations, Source edit/reconcile, undo and reopen. Record preview approximations; browser geometry alone cannot qualify native output. |
+
+Candidate file conventions are `game/ui/<screen>.rpy` for new screens and a dedicated
+owned style file, finalized against actual generated projects. Do not replace all of
+`game/screens.rpy` or claim every arbitrary screen is editable. `say`/`choice` template
+bindings are protected semantic slots; parameters are not editable runtime variables.
+For save/load and other dynamic screens, the editor uses sample items, clearly marked.
+Font import uses project-owned assets and typed core handles, not arbitrary CSS URLs.
+
+The default canvas never runs screen Python or actions. Screens may be evaluated
+repeatedly during Ren'Py prediction; real interaction belongs in explicit trusted
+runtime preview. Complex loops, creator-defined displayables, dynamic style expressions,
+custom Python actions and general import remain source/custom regions. New reusable
+components initially have no arbitrary parameter expressions or transclusion authoring.
+
+Ren'Py basis: [screen language](https://www.renpy.org/doc/html/screens.html),
+[actions and values](https://www.renpy.org/doc/html/screen_actions.html), and
+[GUI customization](https://www.renpy.org/doc/html/gui.html).
+
 ## 5. 3C — VN animation/audio Timeline
 
 Proposed first slice: existing Appearance/placement assets, a named transform with
@@ -145,6 +242,35 @@ trusting the gate. Do not use an unexplained screenshot similarity threshold.
 
 **Early risk proof:** one combined transform/audio sequence survives a source edit,
 transaction and real runtime comparison before adding the full Timeline workspace.
+
+### Implementation plan
+
+**Recommended release inventory:** 2D position/anchor, scale, rotation and opacity
+tracks on existing assets; fixed/linear/ease interpolation; reusable named transforms;
+explicit pauses and beat-anchored music/sound play, stop, fade and queue operations.
+First deliver position/opacity plus music/SFX, then the remaining declared inventory.
+Camera/3D/shader effects, unrestricted ATL functions, movie editing and voice alignment
+are separately proposed later additions, not hidden release dependencies.
+
+| Step | Concrete implementation | Proof before proceeding |
+| --- | --- | --- |
+| 3C.1 — ATL/timing source service | Add proposed core `timeline` service: owned transform declaration inventory and supported keyframe/event projection. Bind tracks to stable Scene/Beat/asset IDs and source revisions. Convert absolute keyframe times to explicit durations; validate finite values and conflicting writes to one property. | Generate one named transform and reference it from an existing Show Beat; parse it back, preserve unrelated ATL and verify the final visual state in Ren'Py. |
+| 3C.2 — Timeline controls | Add proposed `timeline-ui.ts` with property tracks, keyframe insert/move/delete, duration/easing inspector, play/scrub/loop and stage handles. Group edits by gesture, retain draft timing until commit, reuse the asset/media service and shared history. | Numeric and drag edits produce the same source changes, one undo, cancel with no write, source navigation and reload with identical timing. |
+| 3C.3 — Audio and interaction boundaries | Model timed segments between player interactions. Emit reviewed play/stop/queue/fade commands and explicit pauses at cue offsets; show every inserted wait. Use simultaneous transforms or qualified ATL parallel blocks for independent property tracks. Keep dialogue/menu waits as boundaries with unknown duration. | Two concurrent animations and delayed SFX preserve ordering; a click/skip/rollback is tested separately from uninterrupted playback. No implicit scheduler or invented fixed dialogue length. |
+| 3C.4 — SDK comparison and completion | Run the scratch preview and then a normal-game fixture. Compare start/mid/end properties, endpoint state and audio cue order; declare tolerances after a bounded feasibility sample. Reconcile supported Source changes and protect opaque ATL. | Both targets' actual media/runtime paths; repeated replay stops audio cleanly, source/external conflicts retain input, rename/delete references and undo/reopen agree. |
+
+Named transforms are ordinary source, proposed under `game/transforms/`; IDs map to
+declarations rather than a separate saved animation truth. Ren'Py interpolation is
+authoritative. TypeScript scrubbing evaluates only the supported projection and labels
+unsupported state; it never executes ATL Python. Sequential blocks execute by duration;
+parallel tracks must have explicit ownership and final-state rules. No sample-accurate
+audio seek promise; scrub audition may restart a clip from its beginning with disclosure.
+An animation continuing over dialogue is tied to interaction time and cannot be
+reconstructed later as an exact elapsed offset without additional evidence.
+
+Ren'Py basis: [ATL](https://www.renpy.org/doc/html/transforms.html),
+[transform properties](https://www.renpy.org/doc/html/transform_properties.html) and
+[audio statements](https://www.renpy.org/doc/html/audio.html).
 
 ## 6. 3D — Supported state and Run From Here
 
@@ -171,27 +297,43 @@ play. Development harness files must be absent from distributable game output.
 case with the real SDK. Reassess the proposed subset if this cannot be demonstrated;
 do not substitute a label warp for that evidence.
 
-## 7. 3E — Workflow and GitHub
+### Implementation plan
 
-Select and complete the existing optional local Git brief before remote work. Reuse
-its reviewed file inclusion, exact-byte checkpoint and external-index protections.
-Phase 3E's proposed remote minimum is explicit authentication, selected repository and
-branch, fetch/status and reviewed push. Divergence produces a refusal with actionable
-guidance. Automatic sync, force-push, broad credential scopes, repository visibility
-changes and general merge/conflict editors are outside this proposed minimum.
+**Recommended first launch contract:** Scene entry with an empty call stack and
+settled supported presentation. Compute state along a finite author-selected route;
+do not infer a route from the Branches layout. After this works, extend only to proven
+stable Beat boundaries with the same stack/timing constraints. The UI states which
+points are available. A label/Beat that requires unknown Python or an active unsupported
+effect remains unavailable for a reconstructed launch; normal Run remains available.
 
-Confirm that minimum against the product's private-repository workflow before
-implementation; pull/clone support is an open scope decision, not implied arbitrary
-project import. Use synthetic repositories for evidence. No private project content
-is transmitted just by opening the Git surface.
+| Step | Concrete implementation | Proof before proceeding |
+| --- | --- | --- |
+| 3D.1 — Shared trace/state reducer | Add proposed core `state` service over the 3A source-derived structure and 3C effect descriptors. Track typed values, selected choices, bounded call frames, presentation/audio descriptors and exact read revisions. Every value is known-with-provenance or unknown-with-reason. | A deterministic selected trace matches expected guarded branches and returns; repeats consume a finite step/depth budget. Unsupported custom effects invalidate potentially affected state conservatively. No project code runs during inspection. |
+| 3D.2 — State inspector | Show target, route decisions, current values, source citations and blocking unknowns. Offer a separate synthetic preset for explicit manual values; it is labelled synthetic rather than proven reachable. Saved presets persist only typed data/references and invalidate on relevant edits. | Change a supporting variable, card-independent source revision, asset or route and reject the stale prepared launch. Context references/lore never silently become runtime values. |
+| 3D.3 — Isolated launcher | Extend the shared explicit preview/runtime job to copy an accepted manifest into a scratch project, exclude saves/cache/editor-private files, and generate a collision-checked bootstrap label. Apply typed state via safely emitted Ren'Py statements, restore the declared settled visuals/audio, and jump to the target. Bind trust and preparation to snapshot/target/state digest. | Compare with normal play at the same target; source project and ordinary saves/persistent data are untouched; cancellation, launch failure, stale completion and Stop clean up the owned process and retain useful diagnostics. |
+| 3D.4 — Bounded entry extension | After Scene-entry proof, add a temporary target label at a proven statement boundary in the scratch copy only. Support resolved prior calls that have already returned; launching with an active call stack stays excluded until a separate reconstruction design is proven. | Normal-run versus reconstructed-run values, available choices, return behavior and settled presentation agree for each supported target; unsupported targets refuse rather than partially pretending success. |
 
-**Completion checks:** exact selected checkpoint; unrelated staged work retained;
-remote ahead/diverged, revoked credentials, interrupted network and reopened app
-states handled without data loss or duplicate actions. Secrets remain outside the
-renderer/project/logs. Asset/diagnostic/recovery improvements here must name observed
-user problems; this is not an unlimited cleanup bucket or replacement recovery system.
+Proposed bootstrap mechanism is the documented `config.label_overrides` mapping for
+`start` in the scratch project only; qualify it against the pinned SDK and existing
+runtime policy. Refuse incompatible existing label overrides/init behavior rather
+than overwrite it. The fixture must prove a separate save directory/persistent scope,
+translation/font/assets inclusion and no startup-script side effects on the real project.
+Ordinary same-user executable trust still applies; scratch execution is not a security
+sandbox for arbitrary project Python. No Python object/pickle snapshot loading.
 
-## 8. 3F — Release and evidence
+For a looped background track, distinguish restoring the selected clip from preserving
+its exact playback position. Synthetic restart-at-beginning is explicit; when matching
+timed continuity matters and cannot be reconstructed, the target is unsupported. Known
+asset identity alone does not establish elapsed animation/audio time.
+
+Do not implement this with raw `--warp`: Ren'Py documents path/state limitations and
+skipped Python execution. Keep warp only as a separately labelled diagnostic candidate,
+not this feature's correctness mechanism. Normal Run/Validate policy remains unchanged.
+
+Ren'Py basis: [warp limitations](https://www.renpy.org/doc/html/developer_tools.html#warping-to-a-line)
+and [label overrides](https://www.renpy.org/doc/html/config.html#var-config.label_overrides).
+
+## 7. 3F — Release and evidence
 
 Before final qualification, map every initial-release PRODUCT workflow and all five
 major workspaces to implemented capability and actual evidence. A first usable slice
@@ -200,7 +342,7 @@ completion or an explicit product/roadmap revision; never silently lower the exi
 
 Use synthetic content for create → author conditional/called routes → screen edit →
 Timeline edit → Source reconciliation → reviewed LLM proposal → supported Run From Here
-→ local checkpoint/selected remote workflow → recovery → close/reopen. Exercise both
+→ recovery → close/reopen. Exercise both
 normal routes and run a copy without editor metadata. Record each capability's limits.
 
 Agent-owned focused tests run at the changed boundary; native input, credential,
@@ -221,17 +363,44 @@ Install/upgrade behavior, package privacy, dependency/licence inventory, known l
 and exact tagged source/package evidence must be recorded. No publishing is selected
 by this planning task and no date is promised.
 
-## 9. Decisions and planning continuation
+### Implementation/qualification plan
+
+| Step | Concrete work | Completion evidence |
+| --- | --- | --- |
+| 3F.1 — Coverage and fixture | Extend existing synthetic fixtures with A/B/C/D scenarios and Phase 2's selected-reference generation. Map the revised PRODUCT requirements to supported operations, limits, candidate and test IDs. No Git gate. | Every promised operation has a rejecting assertion; missing/zero/skipped required cases fail. Independently review the source changes and supported subset. |
+| 3F.2 — Integrated correctness | Extend existing core/browser/SDK/native selectors rather than create a new test orchestrator. Cover nested/source edits, screen interactions, timeline effects, state comparison, undo, ordinary external conflict and reopen in one representative game. | Both target outcomes and source/runtime observations, metadata-free run, migration from accepted Phase 1/2 projects, and no scratch harness in real game source or distributions. |
+| 3F.3 — Desktop delivery | Use the existing Tauri packaging path and selected coherent-candidate qualification. Check install/upgrade/launch, project reopening, keyboard/IME, scaling, audio, credentials and privacy on applicable targets. | Exact candidate/package identities, retained failures and known limits. Human input checks stay focused; routine testing is agent-owned. |
+| 3F.4 — Distribution decision | Select audience/channel and signing/notarisation requirements under the existing policy. Prepare release notes/support limits and obtain any required release selection before publication. | Tagged reviewed source, verified packages and clean distribution contents; no invented private-release claim for a public channel. |
+
+3F packages **Loomlight**. It does not add a game-export/publish service, automatic
+itch.io upload or GitHub integration. The authored game remains usable with the
+official Ren'Py launcher; use its distribution rules when checking that test/bootstrap
+files and editor-private data are absent from an ordinary built game. Any new Export
+Game button needs separate product selection.
+
+Reuse the current [testing policy](../../TESTING.md) and
+[production workflow](../../../.github/workflows/production-scaffold.yml). No package
+matrix is selected by this plan. At each implementation outcome, record a finite
+allowance before native builds: proposed default is one narrow affected-target proof
+per target for the new risky boundary, then one final coherent-candidate qualification
+shared where valid. This is a proposed ceiling, not automatic dispatch permission;
+existing failure budgets persist and changed/failing inputs require explicit accounting.
+Do not run a full matrix for every table row or waive a failed result to fit the budget.
+
+Ren'Py basis: [automated testing](https://www.renpy.org/doc/html/testcases.html) and
+[game distribution contents](https://www.renpy.org/doc/html/build.html).
+
+## 8. Decisions and planning continuation
 
 | Decision | State / next action |
 | --- | --- |
 | Story logic before screen design | User-selected 2026-10-02. |
-| Remaining order 3C → 3D → 3E → 3F | Proposed; dependency order above retained if priorities change. |
-| Condition grammar and call parameters | Proposed bounded subset; confirm in 3A design and SDK proof. |
-| Screen properties/actions and generated-screen ownership | Inventory and mockup before 3B implementation selection. |
-| Timeline tracks, timing model and supported effects | Inventory and real-path proof before 3C selection. |
-| Run From Here entry points and state provenance | Resolve before 3D; unknown state never counts as proven. |
-| Git minimum, pull/clone expectations | Confirm before selecting GIT.1/GIT.2 and 3E. |
+| Remaining order 3C → 3D → 3F | Proposed; dependency order above retained if priorities change. |
+| Condition grammar and call parameters | Concrete grammar and no-parameter first-call design above; qualify the pinned SDK and migration in 3A.1–2. |
+| Screen properties/actions and generated-screen ownership | Recommended inventory and template adapters above; accept inventory/mockups and prove source ownership before 3B UI expansion. |
+| Timeline tracks, timing model and supported effects | Beat-bounded segments and 2D/standard-audio inventory above; native timing proof before completion. |
+| Run From Here entry points and state provenance | Scene entry/empty stack first, then stable Beat boundaries; qualify scratch launch, save isolation and equivalence. |
+| Git | Deferred by user direction; absent from Phase 3 and release acceptance. |
 | Release audience, signing access and schedule | Open until release planning; no service or signing purchases selected. |
 
 Planning branch: `codex/phase-2-3-planning`, forked from local Phase 1G checkpoint
@@ -251,3 +420,35 @@ Planning validation: repository validator passed across 315 files; whitespace an
 six-document scope review passed. Phase 1 application, tests and workflow files are
 unchanged in this planning diff. No native/app/provider check was run. Publication
 target is the separate origin planning branch; no PR or merge is selected.
+
+## 9. Research and continuation record — 2026-10-02
+
+The official online Ren'Py pages inspected report **8.5.4**, while Loomlight's current
+project baseline pins **8.5.3**. These sources inform the design; they do not establish
+compatibility with 8.5.3. An attempted pinned-tag documentation fetch was unavailable.
+Before each SDK-dependent implementation checkpoint, inspect the actual pinned SDK's
+documentation/source and run a synthetic capability proof. No SDK upgrade, third-party
+download, app launch or compatibility pass is implied by this research.
+
+| Reference inspected | Useful lesson and boundary |
+| --- | --- |
+| [Fumi](https://visq.itch.io/fumi) developer page | Property builders, synchronized hierarchy/canvas and a dedicated preview project are useful UX references for 3B; its page labels direct preview editing experimental. It is a product-description review, not a downloaded/tested implementation or proof of cross-platform support for Loomlight. |
+| [ActionEditor3](https://github.com/kyouryuukunn/renpy-ActionEditor3) README | Property tracks, numeric editing, keyframes and emitted ATL inform 3C. Its documentation notes output depends on the starting state and some extra effects need runtime helper files. Loomlight instead plans standard Ren'Py output for its declared subset and explicit state provenance. No code copied. |
+| [Ren'Py All-In-One GUI Template](https://tofurocks.itch.io/renpy-gui-template) developer page | Useful examples of real VN interface needs, including history and accessibility; gallery/achievements/music-room systems are not automatically added to Phase 3. No template/assets downloaded or reused. |
+
+References provide behavior/UX examples, not authorization to import another tool,
+change stack, bundle code/assets or add its entire feature list. Any later reuse needs
+an identified licence and dependency review. The official linked language docs own
+Ren'Py semantics; Loomlight's source/transaction invariants own its editing contract.
+
+This update removes 3E, aligns PRODUCT/ROADMAP/optional-Git acceptance, and supplies
+implementation sequences, existing code seams, proof fixtures and remaining decisions
+for 3A, 3B, 3C, 3D and 3F. Detailed numeric capacity/timing limits and actual test paths
+are fixed in the selected implementation briefs after the early proofs; none are
+claimed measured here. Next: review the recommended inventories and first entry-point
+limits. Continue planning on this branch; Phase 1G and Phase 2 prerequisites remain.
+
+Implementation-plan validation: repository structure/text/privacy/local-link checks
+passed for 315 files; whitespace and eight-document scope review passed. Self-review
+removed the remaining roadmap 3E row and checked that product/release acceptance no
+longer requires Git. No application, SDK or native checks were run for these docs.

@@ -57,7 +57,8 @@ screen-reader semantics where the chosen desktop/webview stack permits them.
 
 Phase 1 makes Scene, Source, and Branches the functional centre workspaces. Characters,
 Assets, Variables, project setup and Diagnostics/Runtime are supporting surfaces.
-Git status/diff/checkpoint is a deferred optional supporting surface, outside Phase 1.
+Git status/diff/checkpoint is a deferred optional supporting surface, outside Phases
+1–3 and initial-release acceptance; GitHub/remotes remain deferred too.
 UI Designer and Timeline are later major workspaces and must not appear as functional
 Phase 1 features; they may be omitted or clearly labelled as future work.
 
@@ -545,8 +546,8 @@ Phase 1 provides normal `Run Game` from the project's standard entry point. Corr
 `Run From Here` is deferred until state simulation can establish effective prior state.
 A local Git repository may be initialised during project creation (checked by default),
 but new status/diff/checkpoint controls belong to the deferred
-[optional Git milestone](tasks/active/optional-local-git.md), not Phase 1. Do not add a
-required Git panel or checkpoint step to the Phase 1 authoring flow.
+[optional Git milestone](tasks/active/optional-local-git.md), not Phases 1–3. Do not add
+a required Git panel or checkpoint step to initial-release authoring or acceptance.
 
 Validate and Run use one input/revision preparation path: retain Source drafts and
 uncommitted Scene forms; explicitly save/commit through existing commands, use the
