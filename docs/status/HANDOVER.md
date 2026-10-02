@@ -71,7 +71,7 @@ confirms workspace entry with starter Narration/Return Beats. The
 [creation/Story record](../tasks/active/ui-design-review.md#creation-observation-and-story-review--2026-10-02)
 limits the pass to this fast successful Mac path; detailed progress stages were not
 separately assessed. Next: Story layout, inline editing with physical input, commit/
-undo, status stability and Writing focus. Eleven recorded corrections remain pending;
+undo, status stability and remaining Story feedback. Twelve recorded corrections remain pending;
 no additional build/dispatch or integration is selected. Existing evidence/budgets
 are unchanged; no agent project edits or new launches occurred.
 Latest [Story feedback](../tasks/active/ui-design-review.md#story-controls-and-choice-layout-feedback--2026-10-02)
@@ -87,6 +87,11 @@ Add Beat form should save once and return a collapsed saved Beat, without immedi
 reopening a Commit Beat editor. Source already inserts on the initial confirmation;
 the automatically reopened editor causes the redundant confirmation affordance.
 Preserve active drafts/failure retention; this remains a pending correction, no build.
+Latest [chapter/Writing focus feedback](../tasks/active/ui-design-review.md#chapter-disclosure-and-writing-focus-feedback--2026-10-02)
+accepts Writing focus for the reviewed Mac UX and adds STORY-04: individual chapter
+collapse/expand controls that preserve the selected scene/editor and pending input.
+Physical typing/IME and editing/commit/undo results are still unreported; next continue
+those Story observations and Source review. No new application/build work is selected.
 
 ### Exact successful qualification
 

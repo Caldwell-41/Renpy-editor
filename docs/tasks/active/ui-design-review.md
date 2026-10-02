@@ -1344,3 +1344,26 @@ CONFIG-01, REVIEW-01, STORY-01/02/03 and BUTTON-01. Continue Story feedback and
 physical editing/undo review before Source. This checkpoint records the requested
 behaviour and source explanation only; no application correction, agent draft edit,
 launch, build or dispatch occurred. Existing qualification and budgets are unchanged.
+
+### Chapter disclosure and Writing focus feedback — 2026-10-02
+
+**Writing focus — user-accepted Mac UX:** the user says "Writing focus is good".
+Record positive acceptance of the behaviour reviewed in this session. This does not
+infer completion of typing/IME, commit/undo, all compact layouts or Windows checks.
+
+**STORY-04 — user-requested chapter disclosure, implementation pending:** the user
+should be able to collapse and expand individual chapters in the Story tree. Add a
+clear chevron/disclosure control beside each chapter name; default chapters expanded.
+Collapsing hides that chapter's scene list without changing the selected scene,
+navigating away from its editor or modifying source. Preserve chapter menu actions,
+pending inputs and normal selection/navigation contracts. Provide Enter/Space keyboard
+activation, accurate expanded state and appropriate focus return if a focused child
+is hidden. Keep the state stable through ordinary workspace redraws within the
+project; this is tree presentation, not game metadata or new chapter authoring.
+Source currently renders chapter headings and child scenes without a disclosure.
+
+Twelve corrections now remain pending: WELCOME-01/02/03, WIZARD-01, SDK-01,
+CONFIG-01, REVIEW-01, STORY-01/02/03/04 and BUTTON-01. Continue remaining Story
+editing/commit/undo observations, then Source review. This checkpoint records
+feedback only; no application correction, agent draft edit, app launch, build or
+dispatch occurred. Existing qualification and cumulative budgets are preserved.
