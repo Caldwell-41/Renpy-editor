@@ -7,7 +7,7 @@
 
 ## Live continuation
 
-**State: A1–A9 corrected locally; one CONFIG-01 design detail remains; Windows deferred.**
+**State: corrected Mac review installer ready; CONFIG-01 detail open; Windows deferred.**
 The [full-chat recheck](../tasks/active/ui-design-review.md#full-chat-request-reconciliation--2026-10-03)
 found a remaining CONFIG-01 detail: the accepted aspect-ratio label/caption and valid
 Custom-dimension preview handling are incomplete. The larger picker is implemented;
@@ -33,15 +33,20 @@ No unchanged observed-flow timing gate, official SDK or package matrix was rerun
 The [Windows checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03)
 has 12 specific action/result rows, all unexecuted on Windows.
 
-**Hands-on review resumes at Story after corrected installer selection.**
-Installed/retained `01d0896` does not contain these new UI fixes. Fresh-project bootstrap
-inputs are unchanged and the earlier user-confirmed launch remains separate evidence;
-old-project repair remains outside scope. Physical keyboard/IME, native OS drops, live
-SDK download/detailed creation progress and final UX acceptance remain open. No new
-installer, manual hosted workflow, automation, merge/conflict resolution or new phase
-was selected. PR #17 remains draft/open/conflicting. Expensive counters stay 8 packages,
-44 native/boundary starts and separately 4 explicit SDK menu starts. Publish this
-coherent closeout; verify refs and preserve the separate planning worktree.
+**The user-selected local Mac installer is ready; resume hands-on review at Story.**
+Built input `19cdcaa` (app source `1d4bf14`) with one release build. Retained final DMG:
+`.toolchains/review-builds/ui-refresh-19cdcaa/Loomlight_0.1.0_19cdcaa_aarch64.dmg`,
+SHA-256 `4e83485c968b12bc843382a4136301ccc13e68fa51202f27813a22f2f449a1da`.
+Integrity and actual mounted app identity/ARM64/ad-hoc resource signature pass.
+The [build delivery record](../tasks/active/ui-design-review.md#local-mac-installer-delivery--2026-10-03)
+retains original signature failure/post-packaging correction and exact evidence.
+Installed `01d0896` remains unchanged until the user replaces it; no native app/game
+was launched for this build. Existing bootstrap inputs/earlier acceptance remain
+separate; old-project repair is outside scope. Physical input/IME, OS drop, live SDK/
+creation progress and final UX acceptance remain open. No hosted/Windows dispatch,
+automation, merge/conflict resolution or new phase was selected. PR #17 stays draft/
+open/conflicting. Counters are now 9 production builds, unchanged 44 native/boundary
+starts and separately 4 SDK menu starts. No manual operation is pending.
 
 ## Earlier UI review record (historical; superseded by the live state above)
 

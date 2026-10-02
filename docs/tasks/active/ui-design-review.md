@@ -2332,3 +2332,64 @@ remain evidence for their exact input; they were not rerun or relabelled. The in
 `01d0896` remains older, a corrected installer is still unselected, physical/IME/OS
 drop/live-progress review remains open, and the 12 Windows rows remain user-deferred.
 Record CONFIG-01 as partial rather than repeating the full-completion claim.
+
+
+### Local corrected Mac installer selection — 2026-10-03
+
+The user requested a local build and link. Selected input is clean/published
+`19cdcaa2e4d249d6be99fb18bf4f9613b011fadf`, app source `1d4bf14`, on the existing
+feature branch; fresh main remains `4d7ba03`. One local macOS ARM64 release app/DMG
+package, static artifact verification and delivery are selected. Use the existing
+pinned tools and earlier unchanged-input local qualification; do not dispatch a
+hosted or Windows build, change/install over the user's running application, launch
+a game, integrate or add a feature phase. CONFIG-01's remaining accepted-preview
+detail stays documented as incomplete. Record actual output hashes and continuation
+below after packaging.
+
+
+### Local Mac installer delivery — 2026-10-03
+
+Requested local package build completed at input
+`19cdcaa2e4d249d6be99fb18bf4f9613b011fadf`, app source `1d4bf14`. Source tree was
+clean; the selection/handover docs written before compilation were the only changes.
+`npm exec -- tauri build -- --locked` ran once with the pinned ARM64 toolchain and
+passed production web compilation, optimized Rust compilation and app/DMG bundling.
+Retained the existing web chunk advisory. No source changes, hosted dispatch, Windows
+build, SDK/game/native scenario launch, application install or integration occurred.
+
+Delivered file (ignored):
+`.toolchains/review-builds/ui-refresh-19cdcaa/Loomlight_0.1.0_19cdcaa_aarch64.dmg`,
+**5,683,777 bytes**, SHA-256
+`4e83485c968b12bc843382a4136301ccc13e68fa51202f27813a22f2f449a1da`.
+Retained final app executable SHA-256
+`7105c6f96baa17ed1fd0ef2ec0bce855b0729f8b3f193b265f5403b3a633e491`.
+`SHA256SUMS.txt`, portable `BUILD.json` and installation README accompany the files.
+
+Failure classification: the sidecar checksum script initially used `hashlib.file_digest`,
+unavailable in the system Python; portable streaming SHA-256 corrected this without
+recompilation. Original Tauri DMG integrity passed, but its app had only a linker
+ad-hoc signature and strict bundle verification reported “code has no resources but
+signature indicates they must be present.” Applied a local ad-hoc resource signature
+to the retained app, verified it, and repacked the same compiled payload into the final
+DMG with an Applications shortcut. Preserved the original `-unsealed.dmg`, SHA-256
+`0cd136078053d139774c45320073a9c7b1a63b1a1fa7f9c7ebfcfa5b336a70e7`; do not
+deliver it as the corrected installer. One Tauri production build, two DMG containers
+(original and post-processing correction), no duplicate source build or waiver.
+
+Final checks PASS: `hdiutil verify`; read-only/no-browse mounted payload executable
+checksum equals retained app; strict/deep `codesign --verify`; `lipo -archs` is arm64;
+Info.plist bundle identifier `app.loomlight.desktop`, version 0.1.0; Applications
+symlink present. Mounted volume was detached and temporary staging removed. Signature
+is local ad-hoc with sealed resources, not Developer ID/notarized distribution;
+existing distribution limits remain. No app execution was used as proof.
+Ignored reports: `ui-review-19cdcaa-{build,final-dmg,dmg-verify}.log` and
+`ui-review-19cdcaa-payload.json` under `.toolchains/reports/`.
+
+Totals become **9 production package builds**, unchanged **44 native/boundary starts**
+and separately **4 explicit SDK menu starts**. Existing 78 frontend/185 core/1 desktop/
+browser results remain for the unchanged source, not new native qualification.
+CONFIG-01's accepted-preview details remain incomplete. Windows stays user-deferred.
+The older installed app/private projects were untouched. Provide the final DMG link;
+the user quits Loomlight, installs/replaces from that DMG and resumes at Story. No
+manual operation is pending. Keep PR #17 draft/open/conflicting and preserve both
+worktrees. Publish only this documentation, never binaries/logs or private data.

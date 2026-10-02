@@ -1,5 +1,42 @@
 # Current outcome handover
 
+## Corrected local Mac installer ready — 2026-10-03
+
+The user's requested local build completed from published input
+`19cdcaa2e4d249d6be99fb18bf4f9613b011fadf`, app source `1d4bf14`. One normal
+pinned-toolchain Tauri release build produced app/DMG successfully. Source inputs
+were unchanged; only the pre-build documentation selection was dirty. The final
+retained Mac ARM64 installer is:
+`.toolchains/review-builds/ui-refresh-19cdcaa/Loomlight_0.1.0_19cdcaa_aarch64.dmg`
+SHA-256 `4e83485c968b12bc843382a4136301ccc13e68fa51202f27813a22f2f449a1da`.
+`SHA256SUMS.txt`, `BUILD.json`, README and the sealed app accompany it. Delivered
+app executable SHA-256:
+`7105c6f96baa17ed1fd0ef2ec0bce855b0729f8b3f193b265f5403b3a633e491`.
+
+Static checks: final DMG integrity PASS; read-only mounted payload matches retained
+app, bundle ID `app.loomlight.desktop`, version 0.1.0, thin arm64; strict/deep signature
+verification PASS with local ad-hoc sealed resources. The original Tauri bundle had
+only the linker signature and failed bundle-resource verification. Locally sealed
+that app and repacked the same compiled input; preserved the original unsealed DMG
+as evidence. This is not Developer ID/notarized distribution. One release compilation,
+two DMG containers, no duplicate build/hosted request. The checksum helper's Python
+API mismatch was corrected with portable streaming SHA-256; no build rerun. Full
+bounded evidence and original/final hashes are in the task/ignored reports.
+
+Cumulative totals: **9 production package builds; 44 native/boundary starts; separately
+4 SDK menu starts**. No application/game/native case was launched; installed older
+`01d0896` and the user's project were untouched. Existing local 78 frontend/185 core/
+1 desktop/browser evidence remains for these unchanged source inputs, not a new
+native acceptance claim. CONFIG-01 preview detail remains incomplete. Windows is
+still deferred under its checklist. No manual workflow or automation is pending.
+
+Deliver the final DMG link. User quits the old app, opens the DMG and drags Loomlight
+into Applications/replaces the old copy, then resumes review at **Story**. Continue
+physical keyboard/IME, OS drop, live progress and final visual/UX acceptance. Do not
+silently repair the older project's GUI assets. Preserve main/planning worktree and
+PR #17 draft/open/conflicting; no integration or new phase was selected. Publish and
+verify this build-delivery record without adding binaries or receipt-only commits.
+
 ## Full-chat recheck: CONFIG-01 detail still incomplete — 2026-10-03
 
 Latest request is an audit/list/brief summary, not another package or feature phase.
