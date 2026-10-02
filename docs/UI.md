@@ -64,6 +64,11 @@ with cancellation and protected-boundary checks, while native OS asset-drop owne
 remains enabled. Local verification does not establish native acceptance; the user
 explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
+The subsequent full-chat recheck found one incomplete CONFIG-01 detail: the accepted
+resolution block also requires an aspect-ratio label and “Game resolution, not editor
+size” caption, with no misleading preview for invalid Custom dimensions. The larger
+picker is implemented; those preview details remain pending in the task ledger.
+
 - Welcome distinguishes the introduction from Recent Projects; available projects
   have a hover/focus treatment. Settings has a cog and a button hover treatment.
   Wizard steps fill the rail, SDK selection says **Select existing SDK…**, resolution

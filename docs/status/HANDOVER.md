@@ -1,5 +1,20 @@
 # Current outcome handover
 
+## Full-chat recheck: CONFIG-01 detail still incomplete — 2026-10-03
+
+Latest request is an audit/list/brief summary, not another package or feature phase.
+[Full-chat reconciliation](../tasks/active/ui-design-review.md#full-chat-request-reconciliation--2026-10-03)
+rechecked published `9208da8`, source `1d4bf14`, with a clean entry tree. One omission:
+the accepted resolution mockup's aspect-ratio label and “Game resolution, not editor
+size” caption are absent; invalid Custom dimensions get a misleading fallback shape.
+The enlarged picker is present, so CONFIG-01 is partial. Complete this bounded detail
+and focused valid/invalid/portrait preview check when continuing correction work.
+Other original requests and A1–A9 remain represented in source. No code change or
+new tests/native/SDK/package/workflow dispatch occurred in this audit. Earlier proof,
+installed `01d0896`, unselected corrected installer and user-deferred Windows checklist
+remain as below. Publish this meaningful audit correction; do not label all design
+acceptance complete or create a receipt-only commit.
+
 ## Audit corrections completed locally; Windows deferred — 2026-10-03
 
 Selected outcome: fix each A1–A9 issue and save specific tests for later Windows use.

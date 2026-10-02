@@ -2294,3 +2294,41 @@ only source/tests/canonical review docs are included, no private fixtures or log
 No further build, hosted dispatch, native/SDK start, integration or new phase is
 selected. Windows is deferred under the checklist above; macOS/native/final acceptance
 awaits a selected corrected installer.
+
+
+### Full-chat request reconciliation — 2026-10-03
+
+The user requested another check against every request in this chat, an issue list
+and a brief change summary. Audit input is published `9208da8`; application source
+remains `1d4bf147a120c1e0e8977b07f68f4cb6948e1473`. The working tree was clean at
+entry. Rechecked current controls/handlers/styles against the saved findings,
+including the accepted resolution-picker image and written criteria. No application
+change, new suite/package/native/SDK start or workflow dispatch was selected here.
+
+**One remaining accepted-design omission: CONFIG-01 detail.** The larger 48px/16px
+picker, presets/Custom fields and dynamic rectangle are implemented. However,
+`renderConfiguration` displays only width × height beside the rectangle; the accepted
+mockup/written criteria also require an aspect-ratio label and the caption
+“Game resolution, not editor size.” Neither is rendered. Empty Custom dimensions
+use the `w || 16` / `h || 9` fallback, so the preview can suggest a ratio for invalid
+input. Complete the label/caption and valid-dimension preview handling, including
+bounded portrait proportions; add a focused actual-renderer check. This is a
+source/reference finding, not a new native reproduction or new feature phase.
+
+The other original findings are represented in current source: Welcome cog/tones/
+hover; full wizard rail, SDK wording and inline Git; shared buttons, Choice layout,
+single-confirmation Beats, chapter collapse, independent top sidebar icons, Writing
+focus and drag grips; authoring capitalization/default colour and fresh-game GUI
+bootstrap; Runtime/Branches dismissal and saved routes; Source unified tabs/overflow/
+active-file reveal; Character previews/appearance name-image edits/list direct Edit;
+Assets categories/drop area; shared creation/edit modals, whole-row selection, X
+controls and naming help. A1–A9 corrections remain present, including discard/type
+reset, stable appearance selection/alias reuse, visible focus, divider reset, pending
+controls, loading/error/retry and pointer/native-drop separation. No additional
+implementation omission was identified in this bounded source reconciliation.
+
+Do not equate this with final native/visual acceptance. The earlier local checks
+remain evidence for their exact input; they were not rerun or relabelled. The installed
+`01d0896` remains older, a corrected installer is still unselected, physical/IME/OS
+drop/live-progress review remains open, and the 12 Windows rows remain user-deferred.
+Record CONFIG-01 as partial rather than repeating the full-completion claim.

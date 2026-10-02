@@ -7,7 +7,12 @@
 
 ## Live continuation
 
-**State: A1–A9 corrected and locally verified; Windows testing explicitly deferred.**
+**State: A1–A9 corrected locally; one CONFIG-01 design detail remains; Windows deferred.**
+The [full-chat recheck](../tasks/active/ui-design-review.md#full-chat-request-reconciliation--2026-10-03)
+found a remaining CONFIG-01 detail: the accepted aspect-ratio label/caption and valid
+Custom-dimension preview handling are incomplete. The larger picker is implemented;
+record this as partial, with source unchanged. The other original requests and A1–A9
+are represented in current source; native/final UX acceptance remains separate.
 The user selected every audit fix plus a specific later Windows checklist. Source
 checkpoint **`1d4bf147a120c1e0e8977b07f68f4cb6948e1473`** preserves incoming audit `41ddf2c`
 on the existing branch. The [correction record](../tasks/active/ui-design-review.md#audit-corrections-selected-and-implemented--2026-10-03)
