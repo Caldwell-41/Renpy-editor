@@ -1717,3 +1717,33 @@ launches, SDK/native case starts, builds or CI dispatches. Fresh feature refs ma
 `42c4df6`, main unchanged. Continue feedback gathering; implementation/package scope
 for this blocker has not been separately selected. Earlier pending corrections and
 sidebar/drag proposal approval remain open; no integration/new phase selected.
+
+### Branches detail popup dismissal — 2026-10-02
+
+**BRANCHES-02 — close affordance, implementation pending:** the user reports that
+clicking a graph item opens a modal with no way to close it. Native inspection of
+the existing running app reproduces the detail popup on selecting a Scene node.
+It exposes Scene/route selectors and navigation actions but no Close control within
+the popup. Escape while graph-focused makes no change. Clicking the expanded
+"Scene details" toolbar toggle closes it; this existing route is not discoverable
+from the popup. The agent closed it with that toggle and left the project in
+Branches/Saved. No source edit, save/discard or execution occurred.
+
+This is currently a nonmodal overlay inspector (`branches-controls`), not an
+accessible blocking dialog. Add a compact popup header with a clearly visible X at
+the top-right, accessible Close scene details label, tooltip and visible keyboard
+focus. Escape dismisses the inspector while focus is in it or its graph scope,
+without interfering with another active modal. Return focus to the selected graph
+node (or the Scene details toggle if the node no longer exists). Keep toolbar
+expanded state accurate and provide the same close behaviour in all dismissal
+paths. Closing retains selection, graph pan/zoom and source/editor drafts; it does
+not navigate or execute. Treat it consistently with the pending sidebar/close
+affordance pass, preserving nonmodal graph access rather than introducing a new
+blocking overlay.
+
+Read-only code confirms the toolbar toggle changes `controls.hidden` in
+`app/src/branches-ui.ts:51`; node selection opens it at line 99. There is no internal
+Close or Escape handler. The confirmed missing routes remain the separate functional
+BRANCHES-01 blocker. This checkpoint changes docs only; zero new app launches,
+SDK/native cases, packages or dispatches. Continue Branches feedback; implementation
+and the earlier wider proposal are still pending.

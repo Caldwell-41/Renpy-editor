@@ -31,7 +31,9 @@ counts are in HANDOVER/the blocker record. Windows is unverified for these fixes
 Current hands-on surface is [Branches](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02):
 saved routes are confirmed in Source but the graph stays disconnected after Refresh.
 Screen-language label misclassification is the leading hypothesis; correction is
-pending, with no new build selected.
+pending, with no new build selected. [Detail-popup dismissal](../tasks/active/ui-design-review.md#branches-detail-popup-dismissal--2026-10-02)
+also needs a visible Close X and Escape support; the current Scene details toolbar
+toggle closes it, but the popup has no internal close affordance.
 Earlier [Source](../tasks/active/ui-design-review.md#source-tab-presentation-and-active-file-visibility--2026-10-02):
 tab Close grouping, overflow controls and automatic active-tab reveal remain
 pending corrections. Moving to Source does not close remaining Story checks.

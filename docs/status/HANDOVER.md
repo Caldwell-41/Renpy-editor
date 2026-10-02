@@ -2,6 +2,13 @@
 
 ## Current review surface — Branches, 2026-10-02
 
+[BRANCHES-02](../tasks/active/ui-design-review.md#branches-detail-popup-dismissal--2026-10-02)
+adds a pending detail-popup correction: visible header X, Escape dismissal and
+focus return. Native read-only reproduction confirms no internal Close and Escape
+from the graph does nothing; the toolbar Scene details toggle currently hides it.
+The agent used that toggle to close the popup and left Branches/Saved unchanged.
+No project edits or new runs/builds/dispatches. Continue feedback gathering.
+
 [BRANCHES-01](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02)
 is a confirmed functional blocker: four disconnected Scene cards despite saved
 entry/jump/three-choice routes. Native read-only Source inspection confirmed the
