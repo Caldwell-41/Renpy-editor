@@ -1614,3 +1614,12 @@ approval. The wider UI proposal is still unapproved. Fresh feature refs matched
 The user chooses to create a fresh project. Await their hands-on Story/Run Game
 observation; project creation or launch success is not yet reported. Existing-project
 repair is not selected.
+
+**Fresh-project human result:** after choosing the fresh restart, the user reports
+"new project works fine" on the local Mac. Record positive acceptance of the fresh
+project flow for STARTER-GUI-01, alongside the existing exact SDK bootstrap/menu
+evidence. The earlier project remains unchanged; its missing assets were not
+repaired. This does not infer acceptance of every Beat type, physical input/IME,
+OS drop, live download/progress or Windows. Next: continue Story review; RUNTIME-01
+and the accumulated visual corrections remain pending, with STORY-05/06 still
+awaiting proposal approval. No new agent build/run/dispatch.
