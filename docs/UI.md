@@ -50,15 +50,19 @@ and the linked task; implementation does not imply final native/human acceptance
 ### Hands-on review corrections — 2026-10-02
 
 Implementation status: the [chat-to-implementation audit](tasks/active/ui-design-review.md#chat-to-implementation-audit--2026-10-02)
-identifies incomplete details in the behaviours below. Choice creation still needs
-grouped, consistently sized actions; discarded forms must restore dependent controls
-and status; appearance selection must survive redraw and former owned expressions
-must remain reusable. Sidebar hiding must transfer focus/update semantics, layout
-reset must synchronize the divider, and Beat creation needs pending-control guarding
-and saved-row reveal/focus. Media needs explicit loading/useful error feedback.
-Internal Beat dragging must coexist with the native asset-drop handler on Windows;
-the current HTML5 implementation has a documented platform conflict. These are
-remaining corrections, not completed/native-qualified behaviours.
+identified nine gaps, corrected in the 2026-10-03 source continuation. Choice fields
+stack at compact widths with a separate grouped action row. Discard resets the full
+Variable form, its dependent controls and persistence status. Selected appearance
+identity survives edits, default changes and view restoration; previously generated
+aliases can be reused only while their exact owned declarations remain intact.
+Sidebar controls expose initial/updated panel state and transfer focus on hide/restore.
+The preview divider shares one allocation update for pointer, keyboard and reset.
+Beat creation disables duplicate submission/dismissal while pending, restores input
+after failure, and reveals/focuses the saved collapsed row. Media shows loading,
+bounded read-error detail and explicit retry. Beat grips use captured pointer gestures,
+with cancellation and protected-boundary checks, while native OS asset-drop ownership
+remains enabled. Local verification does not establish native acceptance; the user
+explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
 - Welcome distinguishes the introduction from Recent Projects; available projects
   have a hover/focus treatment. Settings has a cog and a button hover treatment.

@@ -123,7 +123,14 @@ and a verified explicit image declaration. Image, declaration, authoring metadat
 and any affected Scene/source-map patches commit together. Original selected files
 and previously imported project files remain intact, preserving custom references;
 there is no automatic obsolete-file deletion. Old image names/declarations remain
-available as aliases and participate in normal collision checks.
+available as aliases. Asset metadata may retain `appearanceAliases`, mapping a former
+image discovery name to its exact Loomlight-generated declaration. Renaming back may
+reuse that declaration for the same Asset only when its canonical literal form and
+single exact source owner still match. An externally changed declaration, duplicate
+owner or another Asset with that name refuses; unknown historical declarations are
+not silently adopted. This metadata records ownership for a transactional edit;
+`.rpy` remains authoritative for runnable content. Previously selected images and
+unsupported/custom source references remain intact.
 
 Phase 1D persists these identities in `.renpy-editor/authoring.json` schema version 1.
 Each Character stores a UUID, immutable creation-time lowercase technical identifier,

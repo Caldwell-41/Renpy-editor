@@ -1,39 +1,42 @@
 # Current status
 
-**Updated:** 2026-10-02.
+**Updated:** 2026-10-03.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
 
 ## Live continuation
 
-**State: review audit found incomplete corrections; replacement installer not selected.**
-The user requested comparison against this chat and the saved findings. The
-[audit record](../tasks/active/ui-design-review.md#chat-to-implementation-audit--2026-10-02)
-supersedes the prior completion claim: **A1–A9 remain** (Choice actions, Variable
-discard/reset, appearance selection/name reuse, sidebar focus/semantics, divider
-reset, new-Beat pending/focus, media state/errors and native drag integration).
-Application checkpoint **`e4013fa76672205b9166bb97752da1aeb8856a86`** is unchanged;
-published audit input was `ad6ad7f`. Six gaps were reproduced in the actual renderer
-with synthetic data, one with a disposable core fixture; media presentation is code
-inspection and Windows drag incompatibility is a documented source-backed inference.
-Correct these before packaging or restarting hands-on acceptance. Canonical behaviour
-and implementation limits are in UI/DATA_MODEL/ARCHITECTURE and the task.
-Local evidence: **74 frontend tests**, **185 routine core tests** (40 ignored,
-3 separately selected), **7 focused review tests**, **1 updated IPC test**, **1 desktop
-test**, production web compilation, format/diff/validator checks and the expanded
-Chrome fixture regression pass. The enforced Branches workload passes all 3 samples.
-These are local automated checks; no replacement installer or native Windows evidence
-is claimed for this candidate.
+**State: A1–A9 corrected and locally verified; Windows testing explicitly deferred.**
+The user selected every audit fix plus a specific later Windows checklist. Source
+checkpoint **`1d4bf147a120c1e0e8977b07f68f4cb6948e1473`** preserves incoming audit `41ddf2c`
+on the existing branch. The [correction record](../tasks/active/ui-design-review.md#audit-corrections-selected-and-implemented--2026-10-03)
+owns implementation, failures/corrections and evidence. Choice actions, Variable
+discard/default controls, retained Appearance selection/owned alias reuse, sidebar
+focus/semantics, divider reset, pending Beat controls/saved focus and media feedback
+are corrected. Internal Beat reorder now uses captured pointer gestures while native
+OS asset-drop ownership remains enabled. This is implementation with local proof,
+not final native or visual acceptance.
 
-**Hands-on review resumes at Story after correction and installer selection.**
-Installed/retained `01d0896` is the earlier corrected build and does not contain these
-new UI corrections. Fresh-project bootstrap succeeded in the user's review; old-project
-GUI repair remains outside scope. Physical keyboard/IME, actual OS asset drop, live
-SDK download/detailed creation progress, Windows native checks and final visual/UX
-acceptance remain open. No manual workflow/package operation or automation is pending.
-PR #17 remains draft/open/conflicting; no merge/conflict resolution/new phase selected.
-Cumulative package/native/SDK counters and exact evidence remain in HANDOVER/task.
+Local checks pass: **78 frontend tests**, **185 routine release core tests**
+(40 existing ignores, 3 separately selected), **1 macOS desktop unit test**, production
+web compilation, format/diff/repository validation (**322 files**) and the expanded
+actual-renderer Chrome regression. It checks both palettes/all six surfaces plus the
+audited interactions, real mouse reorder/cancellation, decoded appearance thumbnails
+and deferred Beat receipts. The web build retains its existing chunk-size advisory.
+No unchanged observed-flow timing gate, official SDK or package matrix was rerun.
+The [Windows checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03)
+has 12 specific action/result rows, all unexecuted on Windows.
+
+**Hands-on review resumes at Story after corrected installer selection.**
+Installed/retained `01d0896` does not contain these new UI fixes. Fresh-project bootstrap
+inputs are unchanged and the earlier user-confirmed launch remains separate evidence;
+old-project repair remains outside scope. Physical keyboard/IME, native OS drops, live
+SDK download/detailed creation progress and final UX acceptance remain open. No new
+installer, manual hosted workflow, automation, merge/conflict resolution or new phase
+was selected. PR #17 remains draft/open/conflicting. Expensive counters stay 8 packages,
+44 native/boundary starts and separately 4 explicit SDK menu starts. Publish this
+coherent closeout; verify refs and preserve the separate planning worktree.
 
 ## Earlier UI review record (historical; superseded by the live state above)
 

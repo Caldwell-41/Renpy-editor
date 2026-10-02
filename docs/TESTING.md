@@ -963,3 +963,15 @@ and separately enforced observed-flow fixture remain the broad qualification pol
 The existing authoring IPC test also rejects renderer paths in `appearance.update`.
 Desktop tests/check compile the native drag-state presentation bridge. Exact evidence
 and installer/native limits belong in the active UI task and HANDOVER.
+
+The 2026-10-03 audit regressions also require grouped Choice actions at compact widths,
+Variable discard/reopen across all three types with a truthful subsequent Boolean
+submission, retained appearance selection after save/default/view changes, sidebar
+focus/semantics, shared divider reset, pending Beat controls and saved-row focus,
+media loading/error/retry, and real Chrome pointer capture/reorder/cancellation.
+The release core appearance test includes reuse of former expressions and rejecting
+custom collisions/externally edited aliases while preserving bytes and IDs.
+Windows native testing is explicitly deferred by the user. The specific gestures,
+expected results and evidence fields are in the
+[deferred Windows checklist](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
+Browser mouse events and fake native drag-state signals do not satisfy those rows.

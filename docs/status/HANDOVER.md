@@ -1,5 +1,57 @@
 # Current outcome handover
 
+## Audit corrections completed locally; Windows deferred — 2026-10-03
+
+Selected outcome: fix each A1–A9 issue and save specific tests for later Windows use.
+Source checkpoint **`1d4bf147a120c1e0e8977b07f68f4cb6948e1473`**, parent
+`41ddf2c755b334c4a291dc40a565628b2e440ce7`, on the existing
+`feature/phase-1g-branches-runtime` branch. Fresh main remains `4d7ba03`; the separate
+planning worktree remains `8a9da37`. PR #17 was rechecked OPEN, draft, CONFLICTING.
+No reset, merge/conflict resolution, manual workflow or new phase occurred.
+
+All nine audit fixes are implemented with focused local regressions; the
+[correction record](../tasks/active/ui-design-review.md#audit-corrections-selected-and-implemented--2026-10-03)
+and canonical UI/DATA_MODEL describe the behavior and owned-alias contract. Pointer
+Beat dragging preserves native OS drop ownership; no HTML5/native handler conflict
+is left in the implementation. Actual Windows WebView2 gestures are still unverified,
+explicitly deferred by the user. The [12-row Windows checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03)
+records concrete actions/expected outcomes and evidence fields; every Windows row
+is DEFERRED, not passed.
+
+Local evidence: frontend **78 passed**, routine release core **185 passed/40 ignored/
+3 separately filtered**, desktop **1 passed**, web compilation, Rust format/diff and
+repository validation (**322 files**) pass. Expanded existing Chrome regression passes
+both themes/all six surfaces and audit cases: compact Choice/grouped button bounds,
+all Variable type discard/reopen plus visible Boolean submission, Appearance retention
+through Character save/default/view changes and decoded thumbnails, sidebar visible
+focus/semantics, divider reset, pending Beat receipt/saved focus, captured real mouse
+reorder/one Undo and Escape/outside/protected refusals. DOM checks also cover source
+failure/input recovery, lost capture/blur/pointer cancellation, pending drafts and
+media loading/read error/retry/cache behavior. Ignored logs/screenshots are under
+`.toolchains/reports/ui-audit-fixes-*` and `ui-refresh/audit-fixed-*.png`. Browser fake
+IPC receipts clone values to match native serialization. Preserve the documented
+initial test/harness failures and real duplicate-CSS correction; no failure was waived.
+The unchanged web chunk-size advisory remains. Existing flow/SDK acceptance is not
+relabelled as proof of the changed candidate; no unrelated timing/SDK run was added.
+
+Cumulative expensive totals remain **8 production packages; 44 native/boundary
+starts; separately 4 explicit SDK menu starts**. This outcome added zero native app/
+SDK starts, installer builds or manual hosted dispatches. Installed/retained Mac
+`01d0896` is unchanged; it cannot demonstrate the new UI fixes. The fresh-project
+bootstrap code/inputs are unchanged, so its earlier accepted launch remains separate
+evidence. No automatic old-project GUI repair is selected.
+
+Next user-selected step: a corrected Mac review installer, then resume at **Story**
+and continue Source/Branches/Characters/Assets/Variables. Physical keyboard/IME, OS
+asset drops, live SDK/detailed creation progress and final visual/UX approval remain
+open; native Windows rows await a Windows host and corrected package selection.
+Publish and verify the implementation and this coherent documentation checkpoint;
+no receipt-only SHA-chasing commit. No autonomous Goal or client pause is claimed.
+No manual operation or automation is pending. Repository quality may trigger on
+publication; inspect its actual state once if relevant, without dispatching a duplicate.
+
+## Earlier audit input (superseded by the correction record above)
+
 ## Review audit found incomplete corrections — 2026-10-02
 
 Latest user outcome: compare changes against this chat and saved requirements.

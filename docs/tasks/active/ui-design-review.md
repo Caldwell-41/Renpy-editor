@@ -2190,3 +2190,107 @@ packages, 44 native/boundary starts and separately recorded 4 SDK menu starts.
 Physical keyboard/IME, OS drop, live SDK download/detailed creation progress,
 Windows native verification and final UX feedback remain open. No manual workflow
 or automation is pending.
+
+
+### Audit corrections selected and implemented — 2026-10-03
+
+The user selected fixes for every audit item and explicitly deferred Windows testing.
+Incoming published checkpoint `41ddf2c755b334c4a291dc40a565628b2e440ce7` was preserved;
+fresh feature/main refs matched the recorded state. The separate planning worktree
+remains at `8a9da37`. This is the existing UI correction outcome, with local verification
+and a later Windows checklist; no additional installer, hosted dispatch, integration
+or new phase was selected.
+
+| Audit item | Implemented correction | Focused proof / remaining limit |
+| --- | --- | --- |
+| A1 | Three Choice fields with a separate grouped action row; intrinsic, single-line buttons; compact fields stack. Removed a duplicate CSS rule that overrode compact stacking. | Actual-renderer wide/compact dimensions and action grouping; native DPI/visual review deferred. |
+| A2 | Discard resets the complete Variable form including detached defaults, rebuilds the Boolean control and refreshes persistence status. | int/string/bool discard → reopen, empty discarded text and a subsequent Boolean payload; no silent write on discard. |
+| A3 | Retain selected Appearance UUID per Character through save, default change and view restoration; pressed state and inspector preview follow that UUID. | Actual-renderer save/default/view round trip; viewing does not change the default. |
+| A4 | Record exact generated image aliases for the same Asset; reuse only canonical declarations with one intact source owner. Preserve IDs/defaults, old images, custom source and transactional companions. | Real core happy → calm → thoughtful → former names; custom-name and externally edited alias refusals preserve bytes. Unknown historical declarations remain refusals. |
+| A5 | Initialize/update panel controls and expanded state; hide focuses the visible restore control, restore focuses the tree toggle. | Actual renderer and visible-focus assertions; native screen-reader/keyboard checks deferred. |
+| A6 | Use one numeric allocation update for pointer/keyboard/reset; remove the hidden slider; reset updates CSS and accessible value together. | ArrowDown 34 → 36 → Reset 34, no range input; native divider gestures deferred. |
+| A7 | Disable new-Beat fields, confirmation and Cancel while a receipt is pending; reject duplicate confirmation; retain input on failure; reveal/focus the saved collapsed row. | Deferred success and failure DOM checks plus actual-renderer pending/saved-focus checks. |
+| A8 | Explicit loading state, bounded useful read-error detail, explicit Retry preview; retain ordered/cache/session guards. | Deferred read failure/retry/cache regression; native first-load/default/image-replacement acceptance remains open. |
+| A9 | Captured pointer-driven Beat reorder replaces HTML5 drag ownership. Preserve the native asset-drop handler; show insertion markers/ghost, edge scroll, cancellation and protected/gap checks; dispose capture/listeners. | Real Chrome mouse capture/reorder/Undo, Escape/outside/protected refusals and DOM checks; Windows WebView2 plus Explorer coexistence explicitly deferred. |
+
+Source checkpoint **`1d4bf147a120c1e0e8977b07f68f4cb6948e1473`**, parent `41ddf2c`, carries the fixes
+and permanent regressions. The verification closeout below records exact evidence. Local browser/DOM fixtures are not a native application or SDK qualification.
+Earlier failed/superseded qualification remains unchanged. The installed `01d0896`
+contains none of these new UI corrections; a corrected review installer still needs
+selection. Counters remain 8 packages, 44 native/boundary starts and separately 4
+explicit SDK menu starts. No manual workflow or automation is pending.
+
+### Deferred Windows review checklist — 2026-10-03
+
+**Status: DEFERRED by the user; every row below is unexecuted on Windows.** Use an
+explicitly selected corrected Windows x64 package when one exists; record its commit,
+installer SHA-256, Windows/WebView2 version, display scaling, palette and results.
+The existing `d690d7f`/`01d0896` artifacts do not prove these new corrections. Use a
+disposable project and synthetic files, retain failed evidence, and record each row
+Pass/Fail/Unavailable without inferring a pass from macOS or browser fixtures. This
+checklist does not dispatch a workflow or select another package build.
+
+| ID | Specific actions | Expected result |
+| --- | --- | --- |
+| WIN-UI-01 — Beat and native asset drag coexistence (A9) | With native drag/drop enabled, drag the left Beat grip up/down across several ordinary rows. Undo once; redo; save and reopen. Immediately drag PNG/JPEG/WebP files from Explorer into Assets, then reorder another Beat. | Visible insertion marker/ghost, exactly one saved reorder and one Undo; IDs/text/source preserved. Explorer drag highlights the drop area and opens the staged import modal; both gesture types continue working. |
+| WIN-UI-02 — drag cancellation/bounds (A9) | Escape during a drag; drop outside the list/on the same row; switch focus to another app; drag toward Choice/Jump/Return/protected code or a source gap. Try while an editor has unsubmitted input. Drag through a long list near both scroll edges. | Cancelled/forbidden gestures write nothing, leave no ghost/marker/capture, retain input and remain responsive. Allowed edge scrolling follows the pointer. Keyboard move controls remain usable. |
+| WIN-UI-03 — Assets staging | Drop several image files, change categories, set kind/name/Character-expression metadata, cancel and keep/discard, reopen via Browse. Include a duplicate or unsupported file and complete the valid rows. Drop while away from Assets. | Drop/Browse use the same guarded modal, categories remain available, originals remain intact, valid imports occur once, failed rows remain actionable, and no off-surface accidental import occurs. |
+| WIN-UI-04 — physical names and IME | In Character, Asset/expression and Variable creation, type/paste uppercase ASCII technical names, blur and submit. Use a Windows IME in dialogue, narration, display names and text defaults, including Enter during composition. Open the naming guidance with the keyboard. | Creation identifiers canonicalize consistently without OS correction; guidance distinguishes Loomlight rules from Ren’Py syntax. Display/text content stays intact; composition is not prematurely committed. Existing source identifiers are unchanged. |
+| WIN-UI-05 — Variable discard/type integrity (A2) | New Variable: int/42 → Cancel → Discard → reopen; repeat with string text and bool/True. Switch type again after reopening, then create Boolean True. Edit an existing default; Keep editing/Escape/Discard; save/reopen. | Reopened form is bool/False, discarded text is empty, control matches Type, footer returns to Saved, and the submitted/persisted value matches what is visible. Cancel/discard does not write. |
+| WIN-UI-06 — Character selection and image refresh (A3/A8) | Select a non-default appearance; save Character unchanged; change the default; switch Grid/List and leave/return. Replace an appearance image. Test a missing/unreadable image then restore it and Retry preview. | Selected UUID, pressed state and preview remain aligned. Default is distinct from viewing. New images load immediately; loading and useful bounded errors are visible; retry recovers without replaying a write or showing another Character’s image. |
+| WIN-UI-07 — appearance rename reuse (A4) | Rename happy → calm → thoughtful → calm → happy, with/without an image replacement. Save/reopen and inspect Show/Change Appearance Beats. Try a name belonging to another image; edit a retained alias externally and try reusing it. | Stable Appearance/Asset/default IDs and supported references; old files/custom source stay intact. Own unchanged aliases can be reused; genuine collisions/edited aliases refuse without partial writes. |
+| WIN-UI-08 — compact Choice/buttons (A1) | Open Choice → Create New Scene at minimum window size and typical laptop size, light/dark, 100% and higher Windows scaling. Type names/select Chapter; cancel/reopen; create once. | Fields remain inside the editor and stack when compact. Cancel/Create share a clear action row and consistent height; no stretched/wrapped button labels or horizontal escape. Creation establishes the saved route. |
+| WIN-UI-09 — sidebar/focus/layout (A5/A6) | Use Tab/Enter to collapse main navigation and hide/restore Scenes/files independently. Collapse Chapters with a Scene selected. Enter/exit Writing focus. Resize preview with pointer and Arrow keys, Reset layout, reopen. Inspect with Narrator if available. | Main collapse leaves tree text/geometry intact; hide/restore focus stays visible; controls announce accurate state. Chapters retain the editor. Writing focus hides sidebars and restores previous choices. Preview allocation and separator value agree after reset. |
+| WIN-UI-10 — Beat confirmation/pending (A7) | Create each applicable Beat with one confirmation; simulate a slow receipt through an approved test driver and attempt duplicate confirmation/Cancel. Exercise a stale-source failure, correct it and retry. Use a long list. | Pending controls are disabled, only one write occurs, failure retains editable values, and success reveals/focuses the saved collapsed row without another Commit. |
+| WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
+| WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
+
+Remaining macOS hands-on review uses a corrected installer when selected and resumes
+at Story, then Source/Branches/Characters/Assets/Variables. Physical IME, OS file drop,
+live download/detailed creation progress and final UX acceptance remain open on the
+relevant targets. Windows deferral is not a pass or a reason to widen this outcome.
+
+
+### Audit correction verification closeout — 2026-10-03
+
+At source checkpoint `1d4bf147a120c1e0e8977b07f68f4cb6948e1473`:
+
+- `npm run check`: **78 passed, 0 failed/skipped**. Includes deferred Beat creation
+  success/failure/recovery/focus, drag cancellation and media loading/error/retry.
+- Routine release core selector: **185 passed, 40 existing ignores, 3 separately
+  filtered**. Includes the extended Appearance rename/reuse/collision regression
+  and existing transaction, ordinary external-edit, reorder/history and IPC guards.
+  The exact rename regression first failed with `DiscoveryCollision` before the fix
+  (**0 passed/1 failed/227 filtered**), then passed; the broad final suite also passes.
+- `cargo test -p loomlight-desktop --locked`: **1 passed** on macOS.
+- Existing `ui-refresh.browser.mjs`: **PASS**, production renderer with synthetic IPC.
+  Covers both palettes/all six surfaces, Source overflow/Undo, shipped smoke/busy
+  contention and the new audit assertions. Real Chrome pointer capture verifies one
+  reorder/Undo plus cancellation/protected refusals; no native Windows claim.
+- Production web compilation, `cargo fmt --check --all`, `git diff --check` and
+  repository/link/privacy validation (**322 files**) pass. The existing >500 kB web
+  chunk advisory is retained. Final compact Choice and loaded/retained Appearance
+  screenshots were inspected. No unrelated SDK/timing/package gate was repeated.
+
+Failure classification and corrections: new DOM tests initially omitted selecting
+Narration before querying its textarea and assumed Happy DOM exposed the default
+`draggable=false` property. The fixture now chooses the actual control and grips
+explicitly disable HTML5 dragging. Early browser attempts used an inaccessible
+hidden-control role locator and nonexistent `.app-toolbar` as an outside-drop target;
+locators now address the retained element and `.app-header`. The new compact assertion
+then exposed a real duplicate `.scene-draft` rule: **compact fields 2 columns instead
+of 1**. Removing that overriding rule corrected the layout. A deferred fake receipt
+mutated the renderer's previous model by shared reference, causing a saved-focus
+assertion failure; the fixture now clones IPC responses, matching native serialization.
+Final rejecting checks pass unchanged in intent. These failures remain recorded here;
+none was counted as a native/platform pass or used to select an expensive retry.
+
+Ignored evidence: `.toolchains/reports/ui-audit-fixes-{frontend,core,core-before,
+core-focused,browser,web,desktop,validation}.log` and
+`ui-refresh/audit-fixed-{choice-compact,appearance}.png`. Original audit/qualification
+logs and all failed/superseded hosted runs remain untouched. The user-owned public
+repository and signed-in owner's push permission were rechecked before publication;
+only source/tests/canonical review docs are included, no private fixtures or logs.
+No further build, hosted dispatch, native/SDK start, integration or new phase is
+selected. Windows is deferred under the checklist above; macOS/native/final acceptance
+awaits a selected corrected installer.
