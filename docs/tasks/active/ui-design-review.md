@@ -1668,3 +1668,52 @@ private project edits, UI navigation, launch, build or test/CI run added. Fresh
 feature refs matched `fc8e0e1`, main unchanged. Source is the current review surface;
 continue its feedback and retain uncompleted Story checks. The earlier sidebar/drag
 proposal still awaits approval; no integration or new feature phase selected.
+
+### Branches saved routes missing — 2026-10-02
+
+**BRANCHES-01 — confirmed functional blocker, correction pending:** the user moves
+to Branches (called "beats" in the message) and reports no connections or Choice
+indications. They confirm the Choice routes are saved. The supplied native view has
+four isolated Scene cards, "Could not refresh completely" and an unresolved project
+start notice. Do not classify this as normal empty flow or only a colour/layout issue.
+
+Bounded native inspection of the existing running `01d0896` app, without source
+edits or execution: "View project start" with an unavailable target opened the
+current Scene instead. Opening the entry router in Source showed a normal saved
+`start` jump to a mapped Scene. That Scene has a saved jump to the Choice Scene;
+the Choice Scene contains a standard menu with three saved literal destinations
+matching mapped Scene labels. Source was Clean, with no unaccepted drafts and
+Saved status. Return to Branches and one explicit Refresh retained the disconnected
+graph and incomplete notice. No private source text, labels or IDs are copied into
+this ledger. This confirms the graph is not representing the accepted source routes.
+
+Likely cause from code: `app/src-core/src/scene/flow.rs:600–629` checks every lexical
+line whose first whitespace-separated word is `label`, including indented screen-
+language UI labels. The official pinned GUI `screens.rpy` contains such controls
+(e.g. `label title` inside `screen game_menu`). They are not story-label declarations,
+but this collector marks the entire label inventory incomplete. Destination resolution
+requires a complete inventory (lines 148–183), so mapped destinations become Unknown
+and the project entry is not inferred. The renderer draws connections/Choice text
+only for resolved destinations (`app/src/branches-ui.ts:89–95`). This explains the
+observed warning and lack of arrows. Treat this as a code-backed hypothesis until
+a focused rejecting production-service regression establishes the correction. No
+parser implementation or test changes have been made in this review checkpoint.
+
+Required correction/acceptance: distinguish screen controls from actual Ren’Py label
+declarations without weakening duplicate/dynamic/custom-label uncertainty. Add a
+focused case with ordinary SDK screen-language labels and mapped saved jump/Choice
+routes; assert entry resolution, all expected literal routes and Choice option text.
+Retain genuine unknown/missing/stale notices and bounded ordinary external-edit
+coverage. Confirm arrowheads and readable Choice labels in the actual graph; opening
+a route must navigate to the correct existing origin/destination. Use source-authority
+checks, not guessed connections or chapter order. Branches remains read-only graph
+navigation; graph editing is not selected. No need to recreate the already-correct
+source project to address this projection defect.
+
+Current surface: Branches, returned there after read-only Source inspection. The
+Source tab bar gained entry/Choice tabs as normal presentation state; project files
+were not changed, saved, discarded or executed by the agent. This adds zero app
+launches, SDK/native case starts, builds or CI dispatches. Fresh feature refs matched
+`42c4df6`, main unchanged. Continue feedback gathering; implementation/package scope
+for this blocker has not been separately selected. Earlier pending corrections and
+sidebar/drag proposal approval remain open; no integration/new phase selected.

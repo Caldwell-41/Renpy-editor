@@ -28,9 +28,13 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
-Current hands-on surface is [Source](../tasks/active/ui-design-review.md#source-tab-presentation-and-active-file-visibility--2026-10-02):
-tab Close grouping, overflow controls and automatic active-tab reveal are recorded
-as pending corrections. Moving to Source does not close remaining Story checks.
+Current hands-on surface is [Branches](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02):
+saved routes are confirmed in Source but the graph stays disconnected after Refresh.
+Screen-language label misclassification is the leading hypothesis; correction is
+pending, with no new build selected.
+Earlier [Source](../tasks/active/ui-design-review.md#source-tab-presentation-and-active-file-visibility--2026-10-02):
+tab Close grouping, overflow controls and automatic active-tab reveal remain
+pending corrections. Moving to Source does not close remaining Story checks.
 The latest [sidebar/Beat proposal](../tasks/active/ui-design-review.md#sidebar-controls-beat-dragging-and-writing-focus-proposal--2026-10-02)
 awaits user approval after two read-only subagent reviews; no additional app changes.
 [Runtime-panel feedback](../tasks/active/ui-design-review.md#runtime-panel-feedback-and-earlier-project-launch--2026-10-02)

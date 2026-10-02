@@ -1,5 +1,21 @@
 # Current outcome handover
 
+## Current review surface — Branches, 2026-10-02
+
+[BRANCHES-01](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02)
+is a confirmed functional blocker: four disconnected Scene cards despite saved
+entry/jump/three-choice routes. Native read-only Source inspection confirmed the
+normal router and literal mapped routes; explicit Refresh still reports incomplete
+flow. Likely cause is the label collector treating SDK screen-language UI `label`
+controls as uncertain story declarations, blocking destination resolution. A focused
+rejecting regression/correction is still pending; no source/parser edit or build was
+selected or performed. Return state is Branches/Saved. Existing project content was
+not altered or executed. Fresh feature refs matched `42c4df6`, main unchanged.
+Continue Branches feedback, retaining remaining Source/Story acceptance. Reuse
+`01d0896`; no new launch, native/SDK case, package or dispatch. Wider corrections
+and sidebar/drag approval stay pending; no integration or new phase selected.
+
+
 ## Current review surface — Source, 2026-10-02
 
 The user moves to Source and records [SOURCE-01/02](../tasks/active/ui-design-review.md#source-tab-presentation-and-active-file-visibility--2026-10-02):
