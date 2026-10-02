@@ -45,12 +45,14 @@ Review is now in Story after the user's rapid successful project creation, with 
 specific generation issue noticed. Workspace entry is observed; individual progress
 stages were not separately assessed. The user accepted the
 [resolution-picker detail](../design/ui-refresh/game-configuration-resolution-picker.png);
-ten accumulated visual/wording corrections remain pending implementation in the ledger,
+eleven accumulated visual/interaction corrections remain pending implementation in the ledger,
 including an inline checkbox/label row for local Git in Review & Create.
 Next: Story layout, inline editing/physical input, commit/undo and Writing focus.
 Latest Story findings remove the redundant preview slider, correct Choice scene-form
 placement/button sizing and select a shared button consistency pass. Preserve the
 user's open unsubmitted form; no application correction or new build is selected.
+Follow-up confirms horizontal Choice-form overflow and selects single-confirmation
+new-Beat creation, returning a saved collapsed row after the initial Add Beat save.
 
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke

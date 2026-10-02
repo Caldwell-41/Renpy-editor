@@ -1308,3 +1308,39 @@ CONFIG-01, REVIEW-01, STORY-01/02 and BUTTON-01. Continue gathering Story feedba
 then physical editing/commit/undo and Source review using the qualified existing build.
 No application changes, agent draft edits, launches, builds or dispatches occurred in
 this checkpoint; prior pass/failure evidence and budgets remain unchanged.
+
+### Choice overflow and single new-Beat confirmation — 2026-10-02
+
+The user's additional screenshot shows a horizontal scrollbar across the Beats area:
+the new-scene fields/actions overflow the Choice card, the view pans horizontally
+and the left-hand Beat content is clipped. This strengthens STORY-02's observed
+layout defect beyond inconsistent styling. Its correction must keep the form and
+both action groups within the card at wide/compact sizes, with vertical stacking
+instead of requiring horizontal scrolling to reach Create Scene and option.
+Preserve the user's active draft; no UI interaction or mutation was performed here.
+
+**STORY-03 — user-requested confirmation correction, implementation pending:** after
+confirming creation of a new Beat in the Add Beat form, the user should not see a
+second required-looking Commit Beat step. Source inspection of `renderNewBeat()`
+shows the confirming Add Beat button already submits `insertBeat` through
+`actions.apply`; after success it selects the inserted Beat and redraws its existing-
+Beat editor. That editor displays Commit Beat despite the creation already being
+saved. This explains the reported extra confirmation; it is not evidence that the
+initial insertion was never saved.
+
+On successful creation, close the new-Beat form and leave the new Beat as a saved,
+collapsed row, brought into view with suitable focus/selection feedback. Do not
+automatically reopen an edit form or create a fresh draft requiring another commit.
+Only a deliberate subsequent edit opens its editor. Keep one creation transaction
+and truthful Saved feedback after its receipt; prevent duplicate submission while
+pending. Invalid input or failed save must keep the creation form/input available
+with the actual error rather than presenting a saved row. Cancel still discards
+only unsubmitted input. Keep toolbar Add Beat as the entry to the type/details form;
+the completed form's confirmation is the one save. Intentional dialogue continuation
+remains its separately selected workflow, not an automatic extra creation commit.
+
+Eleven accumulated findings are now pending: WELCOME-01/02/03, WIZARD-01, SDK-01,
+CONFIG-01, REVIEW-01, STORY-01/02/03 and BUTTON-01. Continue Story feedback and
+physical editing/undo review before Source. This checkpoint records the requested
+behaviour and source explanation only; no application correction, agent draft edit,
+launch, build or dispatch occurred. Existing qualification and budgets are unchanged.
