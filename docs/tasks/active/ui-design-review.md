@@ -1811,3 +1811,31 @@ Review position: Characters findings recorded; live user view Assets. Continue t
 feedback if the user selects it. Fresh feature refs matched `569d57d`, main unchanged.
 Only docs changed; zero new launches, native/SDK cases, builds or dispatches. Earlier
 blockers/corrections and sidebar/drag approval remain open; no new phase/integration.
+
+**Characters follow-up — 2026-10-02:** the user confirms search and Grid/List switching
+work, but calls the list layout unprofessional and wants editing directly from it.
+They confirm Edit Character saves display name/dialogue colour correctly. They also
+confirm Set default works and retains the choice, but the image only loads after
+leaving Characters and returning. These are observed Mac results, not Windows or
+all physical-input acceptance. The latest supplied view is Characters in list mode
+with the inspector image now loaded and Saved status.
+
+**CHARACTERS-04 — polished list rows and direct Edit, correction pending:** replace
+the oversized sparse card-like list row with consistently aligned compact rows:
+small thumbnail, display name/technical name, appearance count and a visible Edit
+action at the row's trailing edge. Keep search, grid/list switching and selection
+functional. Row Edit opens the same existing Character form/transaction pathway
+used by the inspector; do not duplicate save logic. Grid cards should likewise
+expose a discoverable Edit action without requiring an extra details-selection
+step. Preserve draft guards and stable selection; use the accepted Characters
+reference for spacing/hierarchy. Per-appearance editing remains CHARACTERS-03.
+
+Extend **CHARACTERS-01** acceptance: importing or changing the default refreshes
+both card/list thumbnail and inspector preview immediately within the current
+view. Never require leave/re-enter to recover valid media. A later successful
+image does not close the initial-load/default-change defect. Test safe media
+request ordering, successful retry and stale/session completions with rejecting
+assertions before claiming a cause/fix. Persistence of the default is accepted;
+immediate preview refresh remains failed. No new agent UI interaction, code,
+launch, verification run, package or dispatch. Continue review; all recorded
+corrections and the earlier sidebar/drag proposal remain pending.

@@ -2,15 +2,22 @@
 
 ## Latest Characters findings — 2026-10-02
 
+Latest user results: search/Grid-List switching and Edit Character persistence
+pass on Mac. Set default persists, but its image loads only after leaving/re-entering
+Characters; CHARACTERS-01 remains open for immediate refresh. CHARACTERS-04 adds
+compact aligned list rows and direct row/card Edit through the existing form. The
+latest supplied screen is Characters/list mode, not the earlier observed Assets
+view. These are recorded corrections only; no additional app changes or runs.
+
 [CHARACTERS-01/02/03](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02)
 record a failed inspector image despite a rendered card, appearance rows lacking
 selection/preview and per-appearance Edit. Preview loading/request ordering is a
 hypothesis awaiting a rejecting test; default-only rows and the absent update API
 are confirmed in code. The user selects both expression/name editing and image
 replacement. Those requirements are recorded; no app changes selected/performed. Live read-only
-AX found the user now in Assets with both imports available; leave their view alone
-and do not infer full Assets acceptance. Continue feedback from their selected
-surface. Fresh feature refs matched `569d57d`, main unchanged. Zero new launches,
+AX previously found the user in Assets with both imports available; the latest
+user screen is back in Characters. Do not infer full Assets acceptance. Continue
+feedback from their selected surface. Fresh feature refs matched `569d57d`, main unchanged. Zero new launches,
 native/SDK cases, builds or dispatches; reuse `01d0896`. Prior corrections/blockers
 and sidebar/drag proposal approval remain pending.
 

@@ -30,8 +30,10 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
 Latest feedback is [Characters](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02):
 inspector image failure, appearance selection/preview and per-appearance editing
-are pending. The user requests both name and image editing. Live view is Assets, with
-no agent navigation or full acceptance inferred.
+are pending. The user requests both name and image editing, plus direct Edit in
+compact polished list rows. Latest view is Characters/list mode. Search/view switching,
+Character editing and default persistence pass on Mac; immediate image refresh
+after changing the default fails and requires leave/re-enter.
 Earlier [Branches](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02):
 saved routes are confirmed in Source but the graph stays disconnected after Refresh.
 Pan/zoom/Fit is acceptable for now with refinement still needed; Scene/Source
