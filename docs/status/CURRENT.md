@@ -41,7 +41,7 @@ awaits user approval after two read-only subagent reviews; no additional app cha
 also records a pending presentation correction. The repeated GUI error is confirmed
 as the earlier project reopened; installed `01d0896` matches the retained binary.
 The user now reports "new project works fine"; fresh-project Mac acceptance is
-recorded. Continue Story review; the earlier project remains unchanged.
+recorded. Continue the current Branches review; the earlier project remains unchanged.
 The requested bootstrap double-check also passes on Mac: preset/custom resolution,
 Git off/on, metadata/reopen, standard menus/dialogue and execution without editor
 metadata. This follow-up changes tests/docs only; the same `01d0896` installer applies.
