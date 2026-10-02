@@ -14,12 +14,23 @@ Canonical new-name input normalization and the missing pinned-SDK `gui_images`
 generation step are implemented. Frontend 71/71, UI-refresh browser, routine core
 179 pass/40 ignored/3 separately filtered, exact authoring IPC create/import/reopen,
 and exact SDK lifecycle/menu/first-dialogue checks pass. Earlier harness failures
-remain recorded. One package has not yet started; next package this correction and
-run its enriched native UI-refresh case on this Mac. Preserve the original qualified
+remain recorded. Candidate **01d089624ca2113db673116561b8ba0298216cb5** is now packaged:
+one local Mac app + DMG build; enriched native UI-refresh **PASS**, 9 checks, 5.07 s,
+exit 0, one report, cleanup complete. Installer is
+`.toolchains/review-builds/ui-refresh-01d0896/Loomlight_0.1.0_01d0896_aarch64.dmg`,
+SHA-256 `109758abbc8119e6f41a3708af07b6371eb2e4bc544822eeb3c142130bfeb16c`.
+Checksum/BUILD metadata and retained app accompany it; full local reports are ignored.
+The first package command was rejected before build due to argument placement; the
+corrected command produced the sole build. Cumulative production builds 8, packaged
+scenario starts 40, plus unchanged four boundary primary/secondary starts = 44.
+No manual workflow dispatch or Windows check. Preserve the original qualified
 installers/run below; their Windows evidence does not qualify these changed inputs.
 Existing project GUI files are not overwritten or regenerated on opening. After
 installing, create a fresh disposable project and resume Story, including default-
-colour Character creation, uppercase-file Background import and Run Game.
+colour Character creation, uppercase-file Background import and Run Game. The old
+app was closed normally after Stop with Saved status for isolated package checking.
+It has not been replaced in Applications by the agent. Finish by installing the
+retained new DMG and resume hands-on review in this chat; no workflow is pending.
 
 ## UI implementation continuation — 2026-09-30
 

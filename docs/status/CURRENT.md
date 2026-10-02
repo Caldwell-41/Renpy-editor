@@ -15,13 +15,19 @@ attempt 1, tested **d690d7f8ffc08fbc76411c95147f04422620afbc** and completed suc
 cleanup, as did both boundary-smoke checks and all other required gates. SDK fetch
 was skipped on cache hits; live first-install UI progress remains unverified.
 
-**State: scoped authoring/startup correction; no workflow pending.** The 2026-10-02
+**State: review_ready; corrected Mac installer ready, no workflow pending.** The 2026-10-02
 user selected fixes for Character/Background naming and the newly reported missing
 starter GUI-image crash, one local Mac build, then restart at Story. The
 [blocker record](../tasks/active/ui-design-review.md#characterbackground-authoring-blocker--2026-10-02)
 owns that bounded scope and checks. Twelve visual corrections remain pending; no
 Windows build, CI dispatch, integration or new phase is authorized. Existing project
 GUI assets are not silently regenerated; use a fresh disposable project for restart.
+Correction candidate `01d0896` passed 71 frontend tests, browser regression, routine
+core (179 passed/40 ignored/3 separately filtered), exact authoring IPC and official-
+SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh case
+(9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
+`.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
+counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
 
 Previously qualified macOS/Windows installers and
 retained evidence were downloaded and identities verified. Review copies are under

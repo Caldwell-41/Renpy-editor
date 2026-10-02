@@ -1,6 +1,6 @@
 # UI design review
 
-**Updated:** 2026-10-02. **State:** scoped authoring correction in progress; previous candidate qualified, human acceptance open.
+**Updated:** 2026-10-02. **State:** review_ready; scoped authoring/startup fixes locally verified and Mac package ready; human acceptance open.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
@@ -1436,3 +1436,39 @@ one production correction per blocker, zero production packages/CI dispatches ye
 No hypothesis was retried through another package. Whitespace/repository validation
 passed. Next: one Mac package and its enriched packaged UI-refresh case. Windows
 qualification remains only for the unchanged earlier candidate.
+
+**Correction package ready:** implementation candidate
+`01d089624ca2113db673116561b8ba0298216cb5`. One local macOS ARM64 release build
+produced app + DMG; an initial CLI invocation rejected `--locked` before compilation
+or bundling, then corrected forwarding (`-- --locked`) started the sole actual build.
+Both logs remain under ignored `.toolchains/reports/ui-refresh-01d0896/`.
+The enriched packaged `ui-refresh` case passed all nine checks in **5.07 s**, exit 0,
+no timeout, exactly one passing report and `cleanupComplete: true`. It separately
+confirms default hex colour, canonical new Character name and actual persisted `.rpy`
+definition. Its input is synthetic, not physical keyboard/IME acceptance.
+
+Retained installer: ignored
+`.toolchains/review-builds/ui-refresh-01d0896/Loomlight_0.1.0_01d0896_aarch64.dmg`,
+SHA-256 `109758abbc8119e6f41a3708af07b6371eb2e4bc544822eeb3c142130bfeb16c`.
+The retained app executable hash is
+`ddb017e7418bb5380a1d3537f34227e38dbd83cd514ba463e430c24b4ff766c5`;
+`SHA256SUMS.txt` and `BUILD.json` accompany it. Copied installer checksum rechecked.
+No binaries, user project, SDK or full logs were added to Git.
+
+This outcome adds **one** production build and **one** packaged native case start;
+cumulative UI-refresh totals become eight production builds, forty packaged scenario
+starts, plus the unchanged four boundary primary/secondary starts (44 total).
+The older separate Mac debug launch remains separate. Two successful SDK test runs
+of the same disposable menu/dialogue path (second requires positive named result)
+and the recorded development failures are separate from packaged scenario totals.
+No manual CI dispatch or Windows verification occurred. Original cross-target
+qualification at `d690d7f` remains retained, not reused for changed inputs.
+
+Native observation found the old test project Saved and its failed game process still
+running. The agent clicked Stop and quit the old app normally before the isolated new
+package check; no draft discard or private-source rewrite occurred. Reopen with the
+new installer, replacing the Applications copy, create a fresh disposable project,
+and restart Story. Existing test-project GUI assets are not repaired by an app update;
+its content is preserved for any separately requested repair. Twelve accumulated
+visual corrections and physical input/drop/live-download/final visual acceptance
+remain open. No workflow is pending; PR #17 stays draft/open/conflicting, no merge.
