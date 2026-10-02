@@ -92,6 +92,13 @@ cargo test -p loomlight-core --release --locked \
 Run SDK gates separately with their pinned archive and exact test path. Supply `--ignored`
 only for the two runtime SDK gates (ignored because they need an explicit archive), and
 always combine it with `--exact`. Specialist persistence/namespace cases stay excluded.
+
+For changes to starter GUI generation, explicitly select the ignored pinned-SDK
+regression `renpy::tests::official_sdk_starter_contains_runtime_gui_assets` with
+`LOOMLIGHT_RENPY_SDK` pointing to the verified 8.5.3 SDK. It creates a disposable
+project through the real lifecycle and requires menu/first-dialogue execution in
+addition to generic GUI asset presence. It is separate from routine core and from
+the two ignored runtime SDK gates; absence of the SDK is a failure, not a skip pass.
 The workflow result checker rejects missing/malformed summaries, zero selected tests,
 missing/ignored/filtered required cases and failures. Packaged case evidence must contain
 exactly one successful report per required scenario with cleanup complete.

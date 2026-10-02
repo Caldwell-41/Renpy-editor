@@ -13,6 +13,20 @@
   // Wait for Story content, not just the newly mounted Source navigation button.
   details.stage='initial-story-ready';
   await wait(()=>document.querySelector('.scene-workspace .preview-region') && button('Add Beat'));
+  details.stage='character-default-colour';button('Characters').click();
+  await wait(()=>button('New character'));button('New character').click();
+  const control=label=>[...document.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent===label)?.querySelector('input');
+  const technical=control('Technical variable (fixed after creation)');
+  check(technical.autocapitalize==='none','Technical name disables macOS automatic capitalisation');
+  technical.value=' Native_Bec ';control('Display name').value='Native Bec';
+  check(control('Dialogue colour').value==='#c5c8d0','Native character form keeps its default hex colour');
+  button('Create Character').click();
+  await wait(()=>button('Native Bec'));
+  const characterProject=await read('project.current');
+  const characters=await read('authoring.list',{sessionId:characterProject.sessionId});
+  check(characters.characters.some(c=>c.technicalName==='native_bec'&&c.displayName==='Native Bec'&&c.dialogueColor==='#c5c8d0'),'Native form creates character with canonical name and unchanged default colour through real IPC');
+  const definition=await read('source.open',{sessionId:characterProject.sessionId,path:'game/definitions/characters.rpy'});
+  check(definition.text.includes('define native_bec = Character("Native Bec", color="#c5c8d0")'),'Character creation persists an authoritative source definition');
   details.stage='source-opening';button('Source').click();
   await wait(()=>document.querySelector('.cm-content')?.contentEditable==='true' && document.querySelector('[data-source-busy]')?.dataset.sourceBusy==='false');
   details.stage='editor';const editor=document.querySelector('.cm-content');check(getComputedStyle(document.querySelector('.cm-editor')).position==='relative','CodeMirror styles accepted by native CSP');

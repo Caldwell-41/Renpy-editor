@@ -3,6 +3,22 @@ import test from 'node:test';
 import { Window } from 'happy-dom';
 import { assetImport } from '../src/asset-import-ui.js';
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+test('asset import canonicalizes filename suggestions and edited names before IPC',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);
+ const calls:Record<string,unknown>[]=[];const errors:string[]=[];
+ const ui=assetImport(host,[{id:'character',displayName:'Bec'}],{choose:async()=>({choices:[]}),import:async p=>{calls.push(p);},complete:()=>{},status:m=>errors.push(m)});
+ ui.stage({choices:[{authorityId:'background',displayName:'Uni_Night.PNG',extension:'png',byteCount:1},{authorityId:'appearance',displayName:'Bec.PNG',extension:'png',byteCount:1}]});
+ const rows=[...host.querySelectorAll('.import-entry')];
+ const field=(row:Element,label:string)=>[...row.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent===label)!.querySelector<HTMLInputElement|HTMLSelectElement>('input,select')!;
+ assert.equal(field(rows[0]!,'Ren’Py name').value,'uni_night','generated technical name must be accepted by the lowercase-only core');
+ field(rows[0]!,'Ren’Py name').value=' Uni_Night ';
+ field(rows[1]!,'Use as').value='characterAppearance';
+ field(rows[1]!,'Character').value='character';field(rows[1]!,'Expression').value=' Happy ';
+ [...host.querySelectorAll('button')].find(b=>b.textContent==='Import selected files')!.click();await tick();
+ assert.deepEqual(calls,[{authorityId:'background',kind:'background',technicalName:'uni_night',displayName:'Uni_Night',characterId:null,expression:null},{authorityId:'appearance',kind:'characterAppearance',technicalName:'bec',displayName:'Bec',characterId:'character',expression:'happy'}]);
+ assert.deepEqual(errors,[]);ui.dispose();await browser.happyDOM.close();
+});
 test('staged import cancellation retains choices; partial failure never retries a successful file',async()=>{
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
  const host=document.createElement('section');document.body.append(host);

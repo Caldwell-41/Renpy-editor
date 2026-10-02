@@ -1,5 +1,26 @@
 # Current outcome handover
 
+## Latest selected correction — 2026-10-02
+
+The user explicitly requested fixing the Character/Background authoring error and
+one new local macOS ARM64 review build, then restarting at Story. They additionally
+reported a game startup exception for missing standard GUI button images; this is
+included before the same package. This supersedes the earlier review-only build
+restriction for those two blockers. Twelve accumulated visual corrections remain
+pending. No CI dispatch, Windows package, conflict resolution, merge or new phase.
+
+Follow the existing [blocker record](../tasks/active/ui-design-review.md#characterbackground-authoring-blocker--2026-10-02).
+Canonical new-name input normalization and the missing pinned-SDK `gui_images`
+generation step are implemented. Frontend 71/71, UI-refresh browser, routine core
+179 pass/40 ignored/3 separately filtered, exact authoring IPC create/import/reopen,
+and exact SDK lifecycle/menu/first-dialogue checks pass. Earlier harness failures
+remain recorded. One package has not yet started; next package this correction and
+run its enriched native UI-refresh case on this Mac. Preserve the original qualified
+installers/run below; their Windows evidence does not qualify these changed inputs.
+Existing project GUI files are not overwritten or regenerated on opening. After
+installing, create a fresh disposable project and resume Story, including default-
+colour Character creation, uppercase-file Background import and Run Game.
+
 ## UI implementation continuation — 2026-09-30
 
 **State: automated qualification PASS; review builds ready.** No workflow is pending.

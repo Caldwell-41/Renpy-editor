@@ -1,3 +1,4 @@
+import { technicalName, technicalNameInput, technicalNameHelp } from './authoring-input.ts';
 export interface SelectedAsset { authorityId:string;displayName:string;byteCount:number;extension:string }
 interface Character { id:string;displayName:string }
 export interface ImportBatch { choices:SelectedAsset[]; errors?:string[]; cancelled?:boolean }
@@ -17,13 +18,14 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
       const title=document.createElement('h3');title.textContent=selected.displayName;row.append(title);
       const audio=['ogg','mp3','wav','flac'].includes(selected.extension.toLowerCase());
       const kind=document.createElement('select');for(const [value,label] of audio?[['music','Music'],['sfx','Sound effect']]:[['background','Background'],['characterAppearance','Character image']]){const option=document.createElement('option');option.value=value!;option.textContent=label!;kind.append(option);}field(row,'Use as',kind);
-      const name=document.createElement('input');name.value=selected.displayName.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_]/g,'_').replace(/^[^a-zA-Z]+/,'')||'asset';name.pattern='[A-Za-z][A-Za-z0-9_]*';field(row,'Ren’Py name',name);
+      const name=document.createElement('input');name.value=(selected.displayName.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_]/g,'_').replace(/^[^a-zA-Z]+/,'').slice(0,64)||'asset').toLowerCase();technicalNameInput(name);field(row,'Ren’Py name',name);
+      const help=document.createElement('p');help.className='muted';help.textContent=technicalNameHelp;row.append(help);
       const display=document.createElement('input');display.value=selected.displayName.replace(/\.[^.]+$/,'');field(row,'Display name',display);
       const character=document.createElement('select');const empty=document.createElement('option');empty.value='';empty.textContent='Select a character';character.append(empty);characters.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.displayName;character.append(o);});field(row,'Character',character);
-      const expression=document.createElement('input');expression.value='neutral';field(row,'Expression',expression);
+      const expression=document.createElement('input');expression.value='neutral';technicalNameInput(expression);field(row,'Expression',expression);
       const sync=():void=>{character.parentElement!.hidden=expression.parentElement!.hidden=kind.value!=='characterAppearance';};kind.addEventListener('change',sync);sync();
       const remove=document.createElement('button');remove.className='text-button';remove.textContent='Remove from import';remove.addEventListener('click',()=>{if(busy)return;row.remove();jobs.delete(row);entries.splice(entries.indexOf(row),1);submit.hidden=entries.length===0;});row.append(remove);entries.push(row);list.append(row);
-      jobs.set(row,()=>{if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(name.value)||!display.value.trim())throw new Error('Enter a name beginning with a letter, using letters, numbers and underscores, and a display name.');if(kind.value==='characterAppearance'&&(!character.value||!/^[A-Za-z][A-Za-z0-9_]*$/.test(expression.value)))throw new Error('Select a character and enter a valid expression.');return {authorityId:selected.authorityId,kind:kind.value,technicalName:name.value,displayName:display.value.trim(),characterId:kind.value==='characterAppearance'?character.value:null,expression:kind.value==='characterAppearance'?expression.value:null};});
+      jobs.set(row,()=>{const canonicalName=technicalName(name.value,'Ren’Py name');if(!display.value.trim())throw new Error('Display name is required.');if(kind.value==='characterAppearance'&&!character.value)throw new Error('Select a character.');const canonicalExpression=kind.value==='characterAppearance'?technicalName(expression.value,'Expression'):null;return {authorityId:selected.authorityId,kind:kind.value,technicalName:canonicalName,displayName:display.value.trim(),characterId:kind.value==='characterAppearance'?character.value:null,expression:canonicalExpression};});
     }submit.hidden=entries.length===0;
   };
   choose.addEventListener('click',async()=>{if(busy)return;busy=true;choose.disabled=true;try{const batch=await actions.choose();busy=false;if(!disposed)stage(batch);}catch(e){actions.status(e instanceof Error?e.message:'Files could not be selected.');}finally{busy=false;choose.disabled=false;}});

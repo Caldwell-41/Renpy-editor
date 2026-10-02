@@ -16,10 +16,15 @@ export async function visualRequest<T>(operation:CoreOperation,payload:Readonly<
  case 'project.openRecent':case 'project.current':value=project;break;
  case 'project.status':case 'project.flush':value='saved';break;
  case 'authoring.list':value=authoring;break;
+ case 'character.create':{
+  if(!/^[a-z][a-z0-9_]{0,63}$/.test(String(payload.technicalName))||!/^#[0-9a-f]{6}$/i.test(String(payload.dialogueColor)))return {protocolVersion:1,requestId:'visual',ok:false,error:{code:'INVALID_PAYLOAD',message:'Invalid technical name or colour'}};
+  if(characters.some(c=>c.technicalName===payload.technicalName))return {protocolVersion:1,requestId:'visual',ok:false,error:{code:'SYMBOL_COLLISION',message:'That technical name is already used.'}};
+  characters.push({id:String(payload.technicalName),technicalName:String(payload.technicalName),displayName:String(payload.displayName),dialogueColor:String(payload.dialogueColor),defaultAppearanceId:undefined,source:{path:'game/definitions/characters.rpy',statement:`define ${String(payload.technicalName)} = Character(${JSON.stringify(payload.displayName)}, color=${JSON.stringify(payload.dialogueColor)})`,sourceRevision:revision}});value=authoring;break;
+ }
  case 'scene.list':value=sceneModel;break;
  case 'scene.apply':{const command=payload.command as {type:string;sceneId?:string;beatId?:string;beat?:unknown};if(command.type==='selectScene')sceneModel.lastOpen.sceneId=command.sceneId!;value=sceneModel;break;}
  case 'source.list':value={files:[{path:source.path,state:document.state,dirty:document.dirty,readOnly:false}],dirtyCount:Number(document.dirty),draftBytes:document.dirty?document.text.length:0};break;
- case 'source.open':value=document;break;
+ case 'source.open':value=payload.path==='game/definitions/characters.rpy'?{...document,path:payload.path,text:characters.map(c=>c.source.statement).join('\n')}:document;break;
  case 'source.updateDraft':document={...document,...payload,text:String(payload.text),dirty:payload.text!==accepted,state:payload.text!==accepted?'dirty':'clean',draftVersion:document.draftVersion+1};value=document;break;
  case 'source.save':document={...document,dirty:false,state:'clean'};value=document;break;
  case 'flow.list':value={observation:{status:'savedEdits',fromCache:false,checkedAt:Date.now()},revision,entrySceneId:'prologue',nodes:scenes.map(s=>({sceneId:s.id,name:s.displayName,label:s.technicalLabel,location:{path:s.sourcePath,revision,byteStart:0,byteEnd:20},partial:false,stale:false})),edges:[['prologue','apartment',''],['apartment','stay-in','Stay in and read'],['apartment','outside','Go for a walk'],['stay-in','new-day',''],['outside','new-day','']].map(([from,to,text],i)=>({id:`edge-${i}`,sceneId:from,beatId:'choice',optionOrdinal:i,text,kind:'choice',location:{path:source.path,revision,byteStart:80,byteEnd:110},destination:{kind:'resolved',sceneId:to},editable:true})),partial:false,stale:false,overLimit:false,notice:'Known saved paths'};break;

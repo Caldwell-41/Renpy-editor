@@ -194,6 +194,21 @@ impl RenpyAdapter {
             Duration::from_secs(180),
         )?);
         sdk.revalidate(true)?;
+        result?;
+        Self::generate_gui_images(sdk, stage)
+    }
+
+    // Ren'Py's launcher follows generate_gui with gui_images. The first command
+    // does not create the generic button/bar assets used by standard screens.
+    fn generate_gui_images(sdk: &ValidatedSdk, stage: &Path) -> Result<(), RenpyError> {
+        sdk.revalidate(false)?;
+        let args = [command_path(stage), OsString::from("gui_images")];
+        let result = require_success(run_bounded(
+            &sdk.root,
+            launcher_args(&sdk.root, &args)?,
+            Duration::from_secs(180),
+        )?);
+        sdk.revalidate(false)?;
         result
     }
 
@@ -274,7 +289,8 @@ impl RenpyAdapter {
                 Some(&mut after_spawn),
             )?);
             sdk.revalidate(true)?;
-            result
+            result?;
+            Self::generate_gui_images(sdk, stage)
         }
         #[cfg(unix)]
         {
@@ -298,6 +314,17 @@ impl RenpyAdapter {
                 Some(&mut after_spawn),
             )?);
             sdk.revalidate(true)?;
+            result?;
+            validate_directory_anchor(stage, stage_anchor)?;
+            sdk.revalidate(false)?;
+            let args = [OsString::from("."), OsString::from("gui_images")];
+            let result = require_success(run_bounded_anchored(
+                &sdk.root,
+                stage_anchor,
+                anchored_launcher_args(&sdk.root, &args)?,
+                Duration::from_secs(180),
+            )?);
+            sdk.revalidate(false)?;
             result
         }
     }
@@ -1595,6 +1622,64 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
 mod tests {
     use super::*;
     use std::io::Cursor;
+
+    #[test]
+    #[ignore = "requires the pinned official SDK; select this exact test explicitly"]
+    fn official_sdk_starter_contains_runtime_gui_assets() {
+        let root =
+            PathBuf::from(std::env::var_os("LOOMLIGHT_RENPY_SDK").expect("pinned SDK required"));
+        let temporary = tempfile::tempdir().unwrap();
+        let mut lifecycle =
+            crate::lifecycle::LifecycleService::new(temporary.path().join("profile")).unwrap();
+        let parent = lifecycle.register_parent(temporary.path()).unwrap();
+        let selected = lifecycle.register_sdk(&root, "gui-test").unwrap();
+        let created = lifecycle
+            .create_project(crate::lifecycle::CreateProjectRequest {
+                parent_id: parent.id,
+                sdk_id: selected.id,
+                title: "GUI startup test".into(),
+                folder_name: "starter".into(),
+                width: 1280,
+                height: 720,
+                initialize_git: false,
+            })
+            .unwrap();
+        assert_eq!(created.status, "complete");
+        lifecycle.close().unwrap();
+        let sdk = RenpyAdapter::validate_sdk(&root).unwrap();
+        let stage = temporary.path().join("starter");
+        for asset in [
+            "button/idle_background.png",
+            "button/hover_background.png",
+            "button/check_foreground.png",
+            "bar/left.png",
+            "slider/horizontal_idle_thumb.png",
+        ] {
+            assert!(
+                stage.join("game/gui").join(asset).is_file(),
+                "missing runtime GUI asset: {asset}"
+            );
+        }
+        fs::write(stage.join("game/loomlight_gui_test.rpy"), b"testcase loomlight_gui_startup:\n    click \"Start\"\n    click \"Your story begins here.\"\n    exit\n").unwrap();
+        let args = [
+            command_path(&stage),
+            OsString::from("test"),
+            OsString::from("loomlight_gui_startup"),
+        ];
+        let result = run_bounded(
+            &sdk.root,
+            launcher_args(&sdk.root, &args).unwrap(),
+            Duration::from_secs(30),
+        )
+        .unwrap();
+        assert!(!result.timed_out, "starter menu test timed out");
+        assert_eq!(result.exit_code, Some(0), "{}", result.output);
+        assert!(
+            result.output.contains("loomlight_gui_startup") && result.output.contains("PASSED"),
+            "missing positive named SDK test result: {}",
+            result.output
+        );
+    }
 
     #[test]
     fn sdk_hashes_match_multichunk_empty_and_missing_inputs() {

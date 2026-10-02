@@ -511,6 +511,12 @@ Appearances rows, native `Add Appearance` import, and default selection. Existin
 semantic tokens, border-separated rows, visible focus, labels, and reduced-motion
 behavior remain in force; no Scene staging controls are present.
 
+New Character technical names and Appearance expression tokens suppress automatic
+capitalisation/spelling correction and normalize surrounding whitespace and ASCII
+capitals before submission. The fixed technical token uses lowercase letters,
+numbers and underscores, begins with a letter and is limited to 64 characters;
+display names keep their case. Invalid input stays available with actionable feedback.
+
 ## Asset supporting surface
 
 Phase 1 imports by copying files into the project. Assets are grouped sufficiently for
@@ -522,6 +528,11 @@ Phase 1D groups Backgrounds, Character appearances, Music, and SFX. Each row exp
 the safe project-relative filename, normalized Ren'Py discovery name, and status.
 Import is one explicit native-picker action; linking, generation, media editing, and
 bulk processing remain absent.
+
+Asset import suggestions derived from filenames use the same lowercase technical
+token contract. Edited Ren'Py names and expression tokens are normalized on submission;
+uppercase filenames and display labels are preserved. This does not rename existing
+authoritative source symbols or imported assets.
 
 ## Variable supporting surface
 

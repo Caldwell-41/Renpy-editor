@@ -1,6 +1,6 @@
 # UI design review
 
-**Updated:** 2026-10-02. **State:** review_ready, automated qualification passed; human acceptance open.
+**Updated:** 2026-10-02. **State:** scoped authoring correction in progress; previous candidate qualified, human acceptance open.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
@@ -1367,3 +1367,72 @@ CONFIG-01, REVIEW-01, STORY-01/02/03/04 and BUTTON-01. Continue remaining Story
 editing/commit/undo observations, then Source review. This checkpoint records
 feedback only; no application correction, agent draft edit, app launch, build or
 dispatch occurred. Existing qualification and cumulative budgets are preserved.
+
+### Character/background authoring blocker — 2026-10-02
+
+**AUTHORING-01:** the user cannot create a Character or import a Background and sees
+"The authoring value is invalid." The user explicitly selected fixing this blocker,
+one new local macOS ARM64 review build, and restarting review at Story. This supersedes
+the earlier review-only build restriction for this defect only. The twelve accumulated
+UI corrections remain pending; no CI dispatch, Windows build, conflict resolution,
+merge or new feature phase is selected.
+
+Initial hypothesis: renderer identifier rules accept uppercase ASCII letters while
+the core accepts only lowercase identifiers, 1–64 characters beginning with a letter.
+Background import derives its suggested name from the filename without lowercasing it;
+Character creation sends entered technical names unchanged. All invalid identifier,
+colour, payload and variable-value errors currently share the same vague message.
+Confirm the user-action boundaries with rejecting frontend checks and real core IPC,
+normalize only new technical names (retain display names), preserve failed input and
+existing transaction/import authority rules, then package once after focused checks.
+Use existing toolchains and the packaged UI-refresh probe where relevant. First
+correction attempt; zero new builds/native starts/dispatches so far. Two unsuccessful
+corrections of this hypothesis require reassessment under WORKFLOW.
+
+User clarification confirms the background succeeds after lowercasing its name and
+macOS was capitalising the Character technical input. A Character is now visible
+with Saved status in the unchanged qualified app. Colour was also changed during
+the user's retry, so that observation does not separately implicate the default colour.
+Added checks separately exercise the default `#c5c8d0` and canonical names. Frontend
+rejecting checks failed on the old paths; correction passes all 71 frontend tests.
+Real core IPC creation/import/reopen passes. Its first test run failed because the
+inspection-only fixture lacked `game/images`; fixture setup was corrected, not the
+transaction policy or production code.
+
+**STARTER-GUI-01:** the user additionally reports a real-game startup exception for
+missing `gui/button/*background.png`. Include this blocker before the same single
+new Mac build. Pinned SDK source shows normal launcher creation performs `gui_images`
+after `generate_gui`; Loomlight currently omits that command. Compile/lint cannot
+prove the standard menu renders. Add the missing version-owned generation step in
+the private stage and an exact SDK regression for the generated assets. Direct
+inspection of the user's Downloads project is unavailable under macOS privacy
+restrictions even with shell escalation; do not infer file absence from denied reads.
+The first exact SDK check was blocked by sandbox access to Ren'Py's save-token path;
+rerun that check with the required host access. No app package/CI run started yet.
+
+Implementation: new Character/asset/expression technical inputs suppress automatic
+capitalisation, spelling correction and autocorrect, normalize ASCII capitals and
+surrounding spaces before IPC, and retain display-name case. Invalid identifiers
+and colours have specific error text. Existing source identifiers are never renamed.
+The SDK adapter now runs desktop `gui_images` inside the controlled private stage.
+Opening/updating existing projects does not execute that generator or overwrite GUI
+assets; restart review with a fresh disposable project after installing the new app.
+
+Pre-package checks: 71/71 frontend tests; existing UI-refresh browser regression PASS
+(both themes/all workspaces, layout/draft/smoke driver checks); routine core 179
+passed, 40 ignored, 3 separately filtered; exact core IPC create/import/reopen PASS;
+exact official-SDK lifecycle creation plus standard-menu/first-dialogue PASS. The
+browser's initial local listener was sandbox-blocked; its first host run exposed a
+static fixture that did not implement Character creation. The fixture now models
+validation, collision, creation and the source definition, with a unique probe name.
+Those changes repair the test model rather than weakening the native assertions.
+
+SDK-check development failures retained in ignored reports: sandbox save-token
+write; incorrect expected slider filename (corrected against pinned SDK source);
+strict lint of the raw SDK demonstration script's intentionally absent sample art
+(replaced with the actual Loomlight lifecycle); incorrect expected creation receipt
+`created` (actual contract is `complete`). These are fixture/assertion failures;
+one production correction per blocker, zero production packages/CI dispatches yet.
+No hypothesis was retried through another package. Whitespace/repository validation
+passed. Next: one Mac package and its enriched packaged UI-refresh case. Windows
+qualification remains only for the unchanged earlier candidate.

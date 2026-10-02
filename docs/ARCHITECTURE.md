@@ -272,7 +272,9 @@ through the pinned SDK, then finalise the project. A failed creation must not le
 half-created directory presented as a successful Loomlight project.
 
 ADR 0005 implements that flow using Ren'Py 8.5.3's documented launcher
-`generate_gui <stage> --width ... --height ... --start` command. Loomlight applies its
+`generate_gui <stage> --width ... --height ... --start` command, followed by the SDK's
+`gui_images` command against that controlled stage to create the generic button/bar
+assets used by standard screens. Loomlight applies its
 deterministic modular overlay, optionally calls direct `git init`, compiles/lints the
 freshly controlled stage, then revalidates the retained parent identity and performs a
 same-parent no-replace rename (`renameatx_np(RENAME_EXCL)` on macOS and `MoveFileExW`

@@ -137,10 +137,17 @@ test("supporting authoring ignores stale completions and reports persistence tru
 
   click("Characters");
   await tick();
-  enter(labelledControl<HTMLInputElement>("Technical variable (fixed after creation)"), "new_character");
+  click("Create Character");
+  await tick();
+  assert.equal(characterCreates.length, 0, "empty technical name must fail before IPC");
+  assert.match(document.querySelector("#app-status")?.textContent ?? "", /Technical name/);
+  enter(labelledControl<HTMLInputElement>("Technical variable (fixed after creation)"), " New_Character ");
   enter(labelledControl<HTMLInputElement>("Display name"), "New Character");
   click("Create Character");
   await tick();
+  assert.deepEqual(calls.findLast(call => call.operation === "character.create")?.payload, {
+    sessionId: projectB.sessionId, technicalName: "new_character", displayName: "New Character", dialogueColor: "#c5c8d0",
+  });
   click("Variables");
   await tick();
   characterCreates[0]!.resolve(model);

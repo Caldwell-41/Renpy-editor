@@ -933,7 +933,13 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
             "RECOVERY_REQUIRED",
             "Project recovery must be resolved before authoring can continue.",
         ),
-        InvalidPayload | InvalidIdentifier | InvalidColor | InvalidValue => {
+        InvalidIdentifier => (
+            "INVALID_PAYLOAD",
+            "Technical names must begin with a lowercase letter and use 1–64 lowercase letters, numbers or underscores.",
+        ),
+        InvalidColor => ("INVALID_PAYLOAD", "Dialogue colour must be a six-digit hex colour, such as #c5c8d0."),
+        InvalidValue => ("INVALID_PAYLOAD", "Enter a default value matching the variable type."),
+        InvalidPayload => {
             ("INVALID_PAYLOAD", "The authoring value is invalid.")
         }
         ReservedIdentifier => ("RESERVED_IDENTIFIER", "That technical name is reserved."),
@@ -1045,6 +1051,79 @@ mod tests {
             assert_eq!(response["ok"], false);
             assert_eq!(response["error"]["code"], "INVALID_PAYLOAD");
         }
+    }
+
+    #[test]
+    fn authoring_ipc_accepts_canonical_names_and_default_character_colour() {
+        let temp = tempfile::tempdir().unwrap();
+        let profile = temp.path().join("profile");
+        let mut lifecycle = LifecycleService::prepare_branches_ui_probe(profile.clone()).unwrap();
+        std::fs::create_dir_all(profile.join("synthetic-project/game/images")).unwrap();
+        std::fs::create_dir_all(profile.join("synthetic-project/game/audio")).unwrap();
+        let project = lifecycle
+            .open_path(&profile.join("synthetic-project"))
+            .unwrap();
+        let response = response_json(handle_application_request(
+            request(
+                "character.create",
+                json!({"sessionId":project.session_id,"technicalName":"Bec","displayName":"Bec","dialogueColor":"#c5c8d0"}),
+            ),
+            false,
+            &mut lifecycle,
+        ));
+        assert_eq!(response["ok"], false);
+        assert!(response["error"]["message"]
+            .as_str()
+            .unwrap()
+            .contains("lowercase"));
+        assert!(lifecycle.authoring_list().unwrap().characters.is_empty());
+        let response = response_json(handle_application_request(
+            request(
+                "character.create",
+                json!({"sessionId":project.session_id,"technicalName":"bec","displayName":"Bec","dialogueColor":"#c5c8d0"}),
+            ),
+            false,
+            &mut lifecycle,
+        ));
+        assert_eq!(response["ok"], true, "{response}");
+        assert_eq!(
+            response["value"]["characters"][0]["dialogueColor"],
+            "#c5c8d0"
+        );
+        let image = temp.path().join("Uni_Night.PNG");
+        let mut png = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR".to_vec();
+        png.extend_from_slice(&1_u32.to_be_bytes());
+        png.extend_from_slice(&1_u32.to_be_bytes());
+        std::fs::write(&image, png).unwrap();
+        let choice = lifecycle.authoring_select_import(&image).unwrap();
+        let response = response_json(handle_application_request(
+            request(
+                "asset.import",
+                json!({"sessionId":project.session_id,"authorityId":choice.authority_id,"kind":"background","technicalName":"uni_night","displayName":"Uni_Night","characterId":null,"expression":null}),
+            ),
+            false,
+            &mut lifecycle,
+        ));
+        assert_eq!(response["ok"], true, "{response}");
+        assert_eq!(
+            response["value"]["assets"][0]["discoveryName"],
+            "bg uni_night"
+        );
+        lifecycle.close().unwrap();
+        lifecycle
+            .open_path(&profile.join("synthetic-project"))
+            .unwrap();
+        let model = lifecycle.authoring_list().unwrap();
+        assert_eq!(model.characters[0].technical_name, "bec");
+        assert_eq!(model.characters[0].display_name, "Bec");
+        assert_eq!(model.characters[0].dialogue_color, "#c5c8d0");
+        assert_eq!(model.assets[0].display_name, "Uni_Night");
+        assert!(std::fs::read_to_string(
+            profile.join("synthetic-project/game/definitions/characters.rpy")
+        )
+        .unwrap()
+        .contains("define bec = Character(\"Bec\", color=\"#c5c8d0\")"));
+        lifecycle.close().unwrap();
     }
 
     #[test]
