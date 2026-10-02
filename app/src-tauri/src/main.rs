@@ -657,6 +657,16 @@ fn main() {
             Ok(())
         })
         .on_window_event(|window,event| {
+            if window.label()=="main" {
+                let active=match event {
+                    tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Enter {..} | tauri::DragDropEvent::Over {..})=>Some(true),
+                    tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Leave | tauri::DragDropEvent::Drop {..})=>Some(false),
+                    _=>None,
+                };
+                if let (Some(active),Some(main))=(active,window.app_handle().get_webview_window("main")) {
+                    let _=main.eval(format!("window.__loomlightAssetDragState?.({active})"));
+                }
+            }
             if let tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop {paths,..})=event {
                 if window.label()=="main" {
                     let host=window.state::<DesktopState>().0.lock().ok().and_then(|s|s.clone());

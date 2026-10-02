@@ -71,11 +71,12 @@ export class RuntimeWorkspace {
     this.diagnostics.className = "runtime-diagnostics"; this.diagnostics.ariaLabel = "SDK diagnostics";
     const note = document.createElement("p"); note.className = "muted"; note.textContent = "Static Source and Branches findings are separate from SDK validation. Only explicit Validate runs compile and lint.";
     this.notice.role = "alert"; this.previous.hidden = true; this.panel.tabIndex = 0;
-    this.panel.append(title, this.status, this.notice, this.revision, note, this.previous, this.diagnostics, details);
+    const evidence=document.createElement("details");const evidenceLabel=document.createElement("summary");evidenceLabel.textContent="Launch details";evidence.append(evidenceLabel,this.revision,note);
+    this.panel.append(title, this.status, this.notice, this.previous, this.diagnostics, details,evidence);
     this.run.classList.add("primary");
     this.toolbar.append(this.validate, this.run, this.stop);
-    const advanced=document.createElement("div");advanced.className="runtime-advanced";advanced.append(this.inspect,this.revoke,this.policy,this.browse);this.panel.prepend(advanced);
-    const close=button("Close runtime panel");close.classList.add("text-button");close.addEventListener("click",()=>{this.panel.hidden=true;});this.panel.prepend(close);
+    const advanced=document.createElement("details");advanced.className="runtime-advanced";const advancedLabel=document.createElement("summary");advancedLabel.textContent="Advanced";advanced.append(advancedLabel,this.inspect,this.revoke,this.policy,this.browse);this.panel.append(advanced);
+    const close=button("×");close.className="icon-button panel-close";close.ariaLabel="Close runtime panel";close.title=close.ariaLabel;close.addEventListener("click",()=>{this.panel.hidden=true;document.querySelector<HTMLElement>(".runtime-toggle")?.focus();});const header=document.createElement("header");header.className="panel-heading runtime-panel-header";header.append(title,close);this.panel.prepend(header);this.panel.addEventListener("keydown",e=>{if(e.key==="Escape"&&!document.querySelector('[aria-modal="true"]'))close.click();});
     this.validate.addEventListener("click", () => this.begin("validate"));
     this.run.addEventListener("click", () => this.begin("run"));
     this.stop.addEventListener("click", () => { void this.stopOperation().catch(error => this.fail(error)); });
@@ -184,11 +185,12 @@ export class RuntimeWorkspace {
     catch (error) { this.fail(error); }
   }
   private acceptStatus(status: RuntimeStatus): void {
+    if(this.operation?.operationId!==status.operationId){this.runtimeErrorReported=false;this.diagnosticsKey="";}
     this.operation = status; this.outputText = (this.outputText + status.output).slice(0, 2 * 1024 * 1024);
     this.output.textContent = this.outputText + (status.outputTruncated ? "\n[Output truncated at the core retention limit]" : "");
     const labels: Record<string, string> = { starting: "Starting", running: "Running", validating: "Validating (compile then lint)", stopping: "Stopping", exited: this.kind === "validate" ? "Validation finished" : "Game finished", failed: "Failed", cancelled: "Cancelled / stopped", timedOut: "Timed out", cleanupFailed: "Cleanup failed — ownership retained; close is blocked" };
     this.status.textContent = `${labels[status.phase] ?? status.phase}${status.exitCode === null ? "" : ` · exit ${status.exitCode}`}`;
-    if (this.runtimeErrorReported && !status.cleanupComplete) this.status.textContent = `Runtime failed — process ${status.phase}; Stop remains available.`;
+    if (this.runtimeErrorReported) this.status.textContent = status.cleanupComplete ? "Game ended with a runtime error. See diagnostics below." : `Runtime failed — process ${status.phase}; Stop remains available.`;
     this.revision.textContent = `${this.kind === "validate" ? "Tested" : "Launch"} revision: ${status.launchRevision ?? "unavailable"}. ${status.earlierRevision ? "Started from an earlier revision. Stop then Run uses saved edits." : ""} ${status.revisionStale ? "Filesystem freshness unverified; locations rechecked when opened." : "Launch-time evidence; files may change externally."}`;
     this.controls();
   }
@@ -208,16 +210,16 @@ export class RuntimeWorkspace {
     if (!this.operation) return; const id = this.operation.operationId;
     const result = await this.actions.request<{ diagnostics: RuntimeDiagnostic[] }>("runtime.diagnostics", { operationId: id });
     if (!this.current() || id !== this.operation?.operationId) return;
-    if (result.diagnostics.some(d => d.origin === "runtime" && d.severity === "error")) {
+    if (result.diagnostics.some(d => d.operationId===id && d.sessionId===this.actions.sessionId && d.origin === "runtime" && d.severity === "error")) {
       this.runtimeErrorReported = true;
-      if (!this.operation.cleanupComplete) this.status.textContent = `Runtime failed — process ${this.operation.phase}; Stop remains available.`;
+      this.status.textContent = this.operation.cleanupComplete ? "Game ended with a runtime error. See diagnostics below." : `Runtime failed — process ${this.operation.phase}; Stop remains available.`;
     }
     const key = JSON.stringify(result); if (key === this.diagnosticsKey) return; this.diagnosticsKey = key;
     this.diagnostics.replaceChildren();
     if (!result.diagnostics.length) this.diagnostics.textContent = "No structured SDK diagnostics. The process result remains authoritative; inspect raw output for unrecognised failures.";
     for (const diagnostic of result.diagnostics.slice(0,256)) {
       if (diagnostic.operationId !== id || diagnostic.sessionId !== this.actions.sessionId) continue;
-      const row = document.createElement("article"); const text = document.createElement("pre"); text.textContent = `${diagnostic.origin} · ${diagnostic.severity}\n${diagnostic.message}`; row.append(text);
+      const row = document.createElement("details");const summary=document.createElement("summary");summary.textContent=`${diagnostic.severity}: ${diagnostic.message.split("\n")[0]}`;row.append(summary); const text = document.createElement("pre"); text.textContent = `${diagnostic.origin} · ${diagnostic.severity}\n${diagnostic.message}`; row.append(text);
       if (diagnostic.path && diagnostic.sourceRevision) {
         const open = button(`Open ${diagnostic.path}:${diagnostic.line ?? "?"}`);
         const freshness = document.createElement("span"); freshness.textContent = "Location unverified until opened";

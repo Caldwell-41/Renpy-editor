@@ -183,6 +183,7 @@ export function renderSourceWorkspace(
   const controllerId = ++nextControllerId;
   let inventory = initialInventory;
   let current: SourceDocument | undefined;
+  let tabObserver:ResizeObserver|undefined;
   let editor: SourceEditor | undefined;
   let editorPath: string | undefined;
   const retainedEditors = new Map<string,EditorState>();
@@ -276,7 +277,7 @@ export function renderSourceWorkspace(
   };
 
   const drawTree = (): void => {
-    treeHost.replaceChildren();
+    treeHost.replaceChildren();treeHost.classList.add("source-file-tree");
     const heading = document.createElement("p");
     heading.className = "eyebrow";
     heading.textContent = "Source files";
@@ -302,6 +303,7 @@ export function renderSourceWorkspace(
       ? `${inventory.dirtyCount} draft${inventory.dirtyCount === 1 ? "" : "s"} · ${inventory.draftBytes.toLocaleString()} bytes`
       : "No unaccepted drafts";
     treeHost.append(total);
+    treeHost.querySelector<HTMLElement>(".source-file-row.selected")?.scrollIntoView?.({block:"nearest"});
     applyBarrierState();
   };
 
@@ -772,10 +774,13 @@ export function renderSourceWorkspace(
       host.append(empty);
       return;
     }
+    tabObserver?.disconnect();
     const tabs=document.createElement("div");tabs.className="source-tabs";tabs.role="tablist";
-    openTabs.forEach(path=>{const group=document.createElement("div");group.className="source-tab-group";const tab=button(`${path.split("/").at(-1)}${inventory.files.find(f=>f.path===path)?.dirty?" ●":""}`,"source-tab");tab.role="tab";tab.ariaSelected=String(path===current?.path);tab.addEventListener("click",()=>void openFile({path}));
+    openTabs.forEach(path=>{const group=document.createElement("div");group.className="source-tab-group";group.dataset.active=String(path===current?.path);group.title=path;const tab=button(`${path.split("/").at(-1)}${inventory.files.find(f=>f.path===path)?.dirty?" ●":""}`,"source-tab");tab.role="tab";tab.ariaSelected=String(path===current?.path);tab.addEventListener("click",()=>void openFile({path}));
       const close=button("×","text-button source-tab-close");close.ariaLabel=`Close ${path.split("/").at(-1)} tab; keep its draft`;
-      close.addEventListener("click",()=>void(async()=>{let transition:Awaited<ReturnType<typeof controller.prepareTransition>>;try{transition=await controller.prepareTransition("navigation");if(!transition)return;openTabs.delete(path);if(current?.path===path){const next=[...openTabs].at(-1);if(next){transition.release();await openFile({path:next});return;}current=undefined;}drawDocument();}catch(error){actions.status(error instanceof Error?error.message:"Tab could not close","error");}finally{transition?.release();}})());group.append(tab,close);tabs.append(group);});host.append(tabs);
+      close.addEventListener("click",()=>void(async()=>{let transition:Awaited<ReturnType<typeof controller.prepareTransition>>;try{transition=await controller.prepareTransition("navigation");if(!transition)return;openTabs.delete(path);if(current?.path===path){const next=[...openTabs].at(-1);if(next){transition.release();await openFile({path:next});return;}current=undefined;}drawDocument();}catch(error){actions.status(error instanceof Error?error.message:"Tab could not close","error");}finally{transition?.release();}})());group.append(tab,close);tabs.append(group);});const tabBar=document.createElement("div");tabBar.className="source-tab-bar";const previousTab=button("‹","icon-button");previousTab.ariaLabel="Scroll open files left";previousTab.onclick=()=>tabs.scrollBy?.({left:-220,behavior:"smooth"});const nextTab=button("›","icon-button");nextTab.ariaLabel="Scroll open files right";nextTab.onclick=()=>tabs.scrollBy?.({left:220,behavior:"smooth"});const files=document.createElement("select");files.ariaLabel="Open files";openTabs.forEach(path=>{const option=document.createElement("option");option.value=path;option.textContent=path;option.selected=path===current?.path;files.append(option);});files.onchange=()=>void openFile({path:files.value});tabBar.append(previousTab,tabs,nextTab,files);host.append(tabBar);
+    const reveal=():void=>{if(!tabBar.isConnected)return;const overflow=tabs.scrollWidth>tabs.clientWidth;previousTab.hidden=nextTab.hidden=files.hidden=!overflow;const active=tabs.querySelector<HTMLElement>('[data-active="true"]');if(active){const box=tabs.getBoundingClientRect(),item=active.getBoundingClientRect();if(item.left<box.left)tabs.scrollLeft+=item.left-box.left;else if(item.right>box.right)tabs.scrollLeft+=item.right-box.right;}};
+    window.requestAnimationFrame?.(reveal);if(typeof ResizeObserver!=="undefined"){tabObserver=new ResizeObserver(reveal);tabObserver.observe(tabs);}
     const header = document.createElement("header");
     header.className = "source-header";
     const title = document.createElement("div");
@@ -942,7 +947,7 @@ export function renderSourceWorkspace(
     setModalBlocked: (blocked) => { modalBlocked = blocked; },
     dispose: () => {
       if (disposed) return;
-      disposed = true;
+      disposed = true;tabObserver?.disconnect();
       editor?.destroy();retainedEditors.clear();
       documentGeneration += 1;
       unregisterController?.();

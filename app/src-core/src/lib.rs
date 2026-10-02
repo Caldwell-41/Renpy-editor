@@ -14,7 +14,7 @@ pub mod transaction;
 
 use authoring::{
     CreateCharacterRequest, CreateVariableRequest, ImportAssetRequest, SetDefaultAppearanceRequest,
-    UpdateCharacterRequest, UpdateVariableRequest,
+    UpdateAppearanceRequest, UpdateCharacterRequest, UpdateVariableRequest,
 };
 use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
 use media::MediaRequest;
@@ -54,6 +54,7 @@ pub const OPERATIONS: &[&str] = &[
     "character.create",
     "character.update",
     "appearance.setDefault",
+    "appearance.update",
     "asset.chooseImport",
     "asset.chooseImports",
     "asset.import",
@@ -423,6 +424,15 @@ pub fn handle_application_request(
                 )
             })
             .and_then(|payload| lifecycle.authoring_update_character(payload))
+            .and_then(to_value),
+        "appearance.update" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<UpdateAppearanceRequest>(Value::Object(payload)).map_err(
+                    |_| LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload),
+                )
+            })
+            .and_then(|payload| lifecycle.authoring_update_appearance(payload))
             .and_then(to_value),
         "appearance.setDefault" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
@@ -1090,6 +1100,19 @@ mod tests {
             response["value"]["characters"][0]["dialogueColor"],
             "#c5c8d0"
         );
+        // Appearance updates accept opaque authority IDs and the current session,
+        // never a renderer path or unrelated payload fields.
+        let response = response_json(handle_application_request(
+            request(
+                "appearance.update",
+                json!({"sessionId":project.session_id,"id":uuid::Uuid::new_v4().to_string(),"expectedExpression":"happy","expectedAssetSha256":"a".repeat(64),"expression":"calm","authorityId":null,"path":"game/images/arbitrary.png"}),
+            ),
+            false,
+            &mut lifecycle,
+        ));
+        assert_eq!(response["ok"], false);
+        assert_eq!(response["error"]["code"], "INVALID_PAYLOAD");
+        assert!(lifecycle.authoring_list().unwrap().appearances.is_empty());
         let image = temp.path().join("Uni_Night.PNG");
         let mut png = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR".to_vec();
         png.extend_from_slice(&1_u32.to_be_bytes());

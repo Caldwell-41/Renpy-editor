@@ -8,13 +8,14 @@ test("Source retention, SDK discovery and runtime submission are ordered while S
   const failure=assert.rejects(held,/read failed/);
   const write=lane.run("source.updateDraft",async()=>{calls.push("write");return 1;});
   const sdk=lane.run("sdk.discover",async()=>{calls.push("sdk");});
+  const media=lane.run("media.present",async()=>{calls.push("media");});
   const prepare=lane.run("runtime.prepare",async()=>{calls.push("prepare");});
   await Promise.resolve();
   await lane.run("runtime.stop",async()=>{calls.push("stop");});
   assert.deepEqual(calls,["read","stop"]);
   release();await failure;assert.equal(await write,1);
-  await sdk; await prepare;
-  assert.deepEqual(calls,["read","stop","write","sdk","prepare"]);
+  await sdk;await media; await prepare;
+  assert.deepEqual(calls,["read","stop","write","sdk","media","prepare"]);
 });
 
 test("workspace observations finish before early Source navigation uses the shared service",async()=>{

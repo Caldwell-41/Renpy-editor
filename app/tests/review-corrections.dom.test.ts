@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { Window } from 'happy-dom';
+import { catalogue } from '../src/catalog-ui.js';
+import { assetImport } from '../src/asset-import-ui.js';
+import { technicalNameInput, namingHelp } from '../src/authoring-input.js';
+const tick=async()=>{await new Promise(r=>setTimeout(r,0));};
+test('library selection, empty categories and cancelling a staged modal preserve project data',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,MutationObserver:browser.MutationObserver});
+ document.body.innerHTML='<div id="app"><div class="app-shell"><section class="supporting-workspace"></section></div></div>';
+ const host=document.querySelector<HTMLElement>('section')!;const list=document.createElement('section');const create=document.createElement('section');host.append(list,create);
+ const row=document.createElement('div');row.className='entity-row';const name=document.createElement('strong');name.textContent='University';const path=document.createElement('code');path.textContent='game/images/uni.png';row.append(name,path);list.append(row);
+ let writes=0;let reads=0;
+ const importer=assetImport(create,[],{choose:async()=>({choices:[{authorityId:'opaque',displayName:'New.PNG',byteCount:1,extension:'png'}]}),import:async()=>{writes++;},complete:()=>{},status:()=>{}});
+ const dispose=catalogue(host,list,create,'Assets',[{id:'asset',label:'University',kind:'Background',assetId:'asset'}],async()=>{reads++;return {assetId:'asset',dataBase64:'YQ==',mimeType:'image/png',cacheKey:'asset',sha256:'a'.repeat(64),byteCount:1,width:1,height:1,purpose:'thumbnail'};});
+ await tick();assert.equal(reads,1,'card and inspector share successful presentation');
+ const filters=host.querySelector<HTMLSelectElement>('select')!;assert.deepEqual([...filters.options].map(o=>o.textContent),['All','Backgrounds','Character images','Music','Sound effects']);filters.value='Music';filters.dispatchEvent(new window.Event('change'));assert.equal(row.hidden,true);assert.equal(host.querySelector('.catalog-empty')?.hasAttribute('hidden'),false);filters.value='All';filters.dispatchEvent(new window.Event('change'));
+ const close=[...host.querySelectorAll('button')].find(b=>b.ariaLabel==='Close details')!;close.click();assert.equal(host.querySelector<HTMLElement>('.catalog-inspector')!.hidden,true);path.dispatchEvent(new window.MouseEvent('click',{bubbles:true}));assert.equal(host.querySelector<HTMLElement>('.catalog-inspector')!.hidden,false);
+ const add=[...host.querySelectorAll('button')].find(b=>b.textContent==='Import assets')!;add.click();const modal=document.querySelector<HTMLElement>('[aria-modal="true"]')!;assert.ok(modal);assert.equal(create.closest('[aria-modal="true"]'),modal);
+ [...create.querySelectorAll('button')].find(b=>b.textContent==='Choose files…')!.click();await tick();assert.equal(create.querySelectorAll('.import-entry').length,1);[...modal.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!.click();assert.ok(modal.querySelector('.discard-question'));[...modal.querySelectorAll('button')].find(b=>b.textContent==='Discard changes')!.click();assert.equal(document.querySelector('[aria-modal="true"]'),null);assert.equal(create.querySelectorAll('.import-entry').length,0);assert.equal(writes,0);
+ const label=document.createElement('label');const caption=document.createElement('span');caption.textContent='Technical name';const input=document.createElement('input');technicalNameInput(input);label.append(caption,input);namingHelp(label,input);document.body.append(label);input.value=' Bec ';input.dispatchEvent(new window.Event('compositionstart'));input.dispatchEvent(new window.Event('blur'));assert.equal(input.value,' Bec ');input.dispatchEvent(new window.Event('compositionend'));input.dispatchEvent(new window.Event('blur'));assert.equal(input.value,'bec');assert.equal(input.autocapitalize,'none');
+ dispose();importer.dispose();await browser.happyDOM.close();
+});

@@ -4,7 +4,8 @@ use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
         CreateVariableRequest, ImportAssetRequest, ImportChoice, PersistenceStatus,
-        SetDefaultAppearanceRequest, UpdateCharacterRequest, UpdateVariableRequest,
+        SetDefaultAppearanceRequest, UpdateAppearanceRequest, UpdateCharacterRequest,
+        UpdateVariableRequest,
     },
     media::{MediaError, MediaPresentation, MediaRequest},
     metadata::{
@@ -588,6 +589,16 @@ impl LifecycleService {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
             .import_asset(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_update_appearance(
+        &mut self,
+        request: UpdateAppearanceRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .update_appearance(&authority, &project_id, request)
             .map_err(LifecycleError::Authoring)
     }
 

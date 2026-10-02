@@ -27,6 +27,7 @@ export const CORE_OPERATIONS = [
   "character.create",
   "character.update",
   "appearance.setDefault",
+  "appearance.update",
   "asset.chooseImport",
   "asset.chooseImports",
   "asset.import",

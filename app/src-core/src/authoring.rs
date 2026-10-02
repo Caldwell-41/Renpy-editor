@@ -368,6 +368,16 @@ pub struct ImportAssetRequest {
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UpdateAppearanceRequest {
+    pub id: String,
+    pub expected_expression: String,
+    pub expected_asset_sha256: String,
+    pub expression: String,
+    pub authority_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetDefaultAppearanceRequest {
     pub character_id: String,
     pub appearance_id: String,
@@ -894,6 +904,163 @@ impl AuthoringService {
         );
         self.clear_observed_flow(project);
         committed(outcome)?;
+        Ok(metadata)
+    }
+
+    pub fn update_appearance(
+        &mut self,
+        project: &ProjectId,
+        project_uuid: &str,
+        request: UpdateAppearanceRequest,
+    ) -> Result<AuthoringMetadata, AuthoringError> {
+        self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [ASSETS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
+        validate_uuid(&request.id)?;
+        validate_identifier(&request.expression)?;
+        let (mut metadata, snapshot) = self.load_metadata(project, project_uuid)?;
+        let index = metadata
+            .appearances
+            .iter()
+            .position(|a| a.id == request.id)
+            .ok_or(AuthoringError::UnknownEntity)?;
+        let previous = metadata.appearances[index].clone();
+        let asset_index = metadata
+            .assets
+            .iter()
+            .position(|a| a.id == previous.asset_id)
+            .ok_or(AuthoringError::CorruptMetadata)?;
+        let old_asset = metadata.assets[asset_index].clone();
+        if previous.label != request.expected_expression
+            || old_asset.sha256 != request.expected_asset_sha256
+        {
+            return Err(AuthoringError::SourceConflict);
+        }
+        if metadata.appearances.iter().any(|a| {
+            a.id != previous.id
+                && a.character_id == previous.character_id
+                && a.label == request.expression
+        }) {
+            return Err(AuthoringError::DiscoveryCollision);
+        }
+        let character = metadata
+            .characters
+            .iter()
+            .find(|c| c.id == previous.character_id)
+            .ok_or(AuthoringError::CorruptMetadata)?
+            .clone();
+        let technical = &character.technical_name;
+        let renamed = previous.label != request.expression;
+        let discovery = format!("{} {}", technical, request.expression);
+        if renamed {
+            self.ensure_explicit_name_available(
+                project,
+                AssetKind::CharacterAppearance,
+                &discovery,
+            )?;
+        }
+        let mut selected = if let Some(id) = request.authority_id {
+            let authority = self
+                .imports
+                .remove(&id)
+                .ok_or(AuthoringError::UnknownImport)?;
+            if authority.project != *project {
+                return Err(AuthoringError::UnknownImport);
+            }
+            revalidate_selected(&authority)?;
+            if !matches!(
+                authority.extension.as_str(),
+                "png" | "jpg" | "jpeg" | "webp"
+            ) {
+                return Err(AuthoringError::UnsupportedFormat);
+            }
+            Some(authority)
+        } else {
+            None
+        };
+        if let Some(authority) = &selected {
+            if metadata
+                .assets
+                .iter()
+                .any(|a| a.id != old_asset.id && a.sha256 == authority.sha256)
+            {
+                return Err(AuthoringError::DuplicateContent);
+            }
+        }
+        metadata.appearances[index].label = request.expression.clone();
+        metadata.appearances[index]
+            .attributes
+            .insert("expression".into(), request.expression);
+        let asset = &mut metadata.assets[asset_index];
+        asset.discovery_name = discovery;
+        asset.display_name = format!(
+            "{} — {}",
+            character.display_name, metadata.appearances[index].label
+        );
+        if let Some(authority) = &selected {
+            asset.relative_path = format!(
+                "game/images/ll_{}.{}",
+                uuid::Uuid::new_v4().simple(),
+                authority.extension
+            );
+            asset.sha256 = authority.sha256.clone();
+            asset.byte_count = authority.byte_count;
+            asset.status = "available".into();
+        }
+        asset.extra.insert(
+            "discoveryContract".into(),
+            Value::String("explicitDeclaration".into()),
+        );
+        let mut companions = if renamed {
+            self.appearance_reference_mutations(project, project_uuid, &metadata, &previous.id)
+                .map_err(|_| AuthoringError::UnsupportedSource)?
+        } else {
+            Vec::new()
+        };
+        let statement = asset_declaration(&metadata.assets[asset_index])?;
+        let declaration = if !renamed
+            && old_asset
+                .extra
+                .get("discoveryContract")
+                .and_then(Value::as_str)
+                == Some("explicitDeclaration")
+        {
+            let (bytes, base) = self.snapshot(project, ASSETS_PATH)?;
+            let proposed = replace_exact_once(&bytes, &asset_declaration(&old_asset)?, &statement)?;
+            FileMutation {
+                path: RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+                kind: MutationKind::ReplaceExisting,
+                base,
+                expected_bytes: bytes,
+                proposed,
+            }
+        } else {
+            self.declaration_mutation(project, &statement)?
+        };
+        companions.push(declaration);
+        companions.push(metadata_file_mutation(snapshot, &metadata)?);
+        if let Some(authority) = selected.as_mut() {
+            committed(
+                self.transactions.commit_streaming_import(
+                    project,
+                    RelativePath::new(metadata.assets[asset_index].relative_path.clone())
+                        .map_err(|_| AuthoringError::InvalidPayload)?,
+                    &mut authority.file,
+                    authority.byte_count,
+                    &authority.sha256,
+                    companions,
+                ),
+            )?;
+        } else {
+            committed(self.commit_observed(
+                project,
+                TransactionProposal {
+                    mutations: companions,
+                    intent: TransactionIntent::Edit,
+                },
+            ))?;
+        }
+        self.clear_observed_flow(project);
         Ok(metadata)
     }
 

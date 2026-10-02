@@ -268,3 +268,16 @@ test("dialogue navigation protects IME and shares one pending commit",async()=>{
  pending.resolve({...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map((beat,j)=>j?beat:{...beat,payload:{type:"dialogue",characterId:"alice",text:"Kept through navigation"}})})});
  assert.deepEqual(await Promise.all([a,b]),[true,true]);assert.equal(calls,1);assert.match(host.textContent!,/Kept through navigation/);dispose();await browser.happyDOM.close();
 });
+
+
+test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
+ const browser=installDom();let model=sceneModel();let calls=0;
+ const dispose=renderSceneAuthoring(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
+  assert.equal(command.type,'insertBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
+ }});
+ click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
+ const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
+ assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);assert.equal(document.querySelector('.expanded-beat'),null);assert.ok([...document.querySelectorAll('.beat-select')].some(b=>b.textContent?.includes('New text')));
+ dispose();await browser.happyDOM.close();
+});

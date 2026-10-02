@@ -1,4 +1,4 @@
-import { technicalName, technicalNameInput, technicalNameHelp } from './authoring-input.ts';
+import { technicalName, technicalNameInput, technicalNameHelp, namingHelp } from './authoring-input.ts';
 export interface SelectedAsset { authorityId:string;displayName:string;byteCount:number;extension:string }
 interface Character { id:string;displayName:string }
 export interface ImportBatch { choices:SelectedAsset[]; errors?:string[]; cancelled?:boolean }
@@ -6,9 +6,9 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
   let disposed=false,busy=false;const entries:HTMLElement[]=[];
   const choose=document.createElement('button');choose.className='button primary';choose.textContent='Choose files…';
   const description=document.createElement('p');description.className='muted';description.textContent='Choose files or drop them into Assets, then select how each will be used. Original files stay unchanged.';
-  const list=document.createElement('div');list.className='import-staging';const submit=document.createElement('button');submit.className='button primary';submit.textContent='Import selected files';submit.hidden=true;
+  const list=document.createElement('div');list.className='import-staging';const submit=document.createElement('button');submit.className='button primary catalog-submit';submit.textContent='Import selected files';submit.hidden=true;
   const jobs=new Map<HTMLElement,()=>Record<string,unknown>>();
-  function field(row:HTMLElement,title:string,input:HTMLInputElement|HTMLSelectElement):void{const label=document.createElement('label');label.className='field';const text=document.createElement('span');text.textContent=title;label.append(text,input);row.append(label);}
+  function field(row:HTMLElement,title:string,input:HTMLInputElement|HTMLSelectElement):void{const label=document.createElement('label');label.className='field';const text=document.createElement('span');text.textContent=title;label.append(text,input);row.append(label);namingHelp(label,input);}
   const stage=(batch:ImportBatch):void=>{
     if(disposed||busy)return;host.hidden=false;
     batch.errors?.forEach(error=>actions.status(error));
@@ -28,12 +28,13 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
       jobs.set(row,()=>{const canonicalName=technicalName(name.value,'Ren’Py name');if(!display.value.trim())throw new Error('Display name is required.');if(kind.value==='characterAppearance'&&!character.value)throw new Error('Select a character.');const canonicalExpression=kind.value==='characterAppearance'?technicalName(expression.value,'Expression'):null;return {authorityId:selected.authorityId,kind:kind.value,technicalName:canonicalName,displayName:display.value.trim(),characterId:kind.value==='characterAppearance'?character.value:null,expression:canonicalExpression};});
     }submit.hidden=entries.length===0;
   };
+  host.addEventListener('catalog-discard',()=>{if(busy)return;entries.splice(0).forEach(e=>e.remove());jobs.clear();submit.hidden=true;});
   choose.addEventListener('click',async()=>{if(busy)return;busy=true;choose.disabled=true;try{const batch=await actions.choose();busy=false;if(!disposed)stage(batch);}catch(e){actions.status(e instanceof Error?e.message:'Files could not be selected.');}finally{busy=false;choose.disabled=false;}});
   submit.addEventListener('click',async()=>{if(busy)return;
     const payloads:Array<[HTMLElement,Record<string,unknown>]> = [];
     try{for(const [row,read] of jobs)payloads.push([row,read()]);}catch(e){actions.status((e as Error).message);return;}
-    busy=true;host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(c=>c.disabled=true);
+    busy=true;submit.disabled=true;host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(c=>c.disabled=true);
     for(const [row,payload] of payloads){if(disposed)break;try{await actions.import(payload);row.dataset.unsubmitted='false';row.replaceChildren();const result=document.createElement('p');result.textContent=`Imported ${String(payload.displayName)}`;row.append(result);jobs.delete(row);entries.splice(entries.indexOf(row),1);}catch(e){const error=document.createElement('p');error.className='error-message';error.role='alert';error.textContent=(e as Error).message;row.append(error);}}
-    busy=false;if(!disposed){host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(c=>c.disabled=false);if(jobs.size===0)actions.complete();else actions.status('Some files were not imported. Successful imports were kept; review the remaining files.');}
+    busy=false;if(!disposed){submit.disabled=false;host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(c=>c.disabled=false);if(jobs.size===0)actions.complete();else actions.status('Some files were not imported. Successful imports were kept; review the remaining files.');}
   });host.append(description,choose,list,submit);return {stage,dispose:()=>{disposed=true;}};
 }

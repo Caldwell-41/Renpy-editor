@@ -28,7 +28,7 @@
   const openSource = async path => {
     await click("Source");
     await until(() => document.querySelector('.source-workspace'));
-    if(document.querySelector('.project-shell')?.dataset.treeCollapsed === 'true') await click("Scenes / files");
+    if(document.querySelector('.project-shell')?.dataset.treeCollapsed === 'true') document.querySelector(".tree-restore")?.click();
     await until(() => document.querySelector(`button[title="${path}"]`) && !document.querySelector(`button[title="${path}"]`).disabled,20000);
     document.querySelector(`button[title="${path}"]`).click();
     await until(() => document.querySelector(`.source-editor[aria-label="Source editor for ${path}"]`) && !window.__loomlightProbeEditor(document.querySelector(`.source-editor[aria-label="Source editor for ${path}"]`)).readOnly,20000);

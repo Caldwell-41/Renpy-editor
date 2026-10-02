@@ -50,7 +50,8 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
   toolbar.append(refreshButton, button("Zoom in", () => scale(1.2)), button("Zoom out", () => scale(1 / 1.2)), button("Fit graph", fit), button("Open Source", () => actions.source()), button("View project start", () => actions.source(model?.entryLocation ?? undefined)));
   const inspector=button("Scene details",()=>{controls.hidden=!controls.hidden;inspector.ariaExpanded=String(!controls.hidden);});inspector.ariaExpanded="false";toolbar.append(inspector);controls.hidden=true;
   toolbar.append(button("Focus selection",()=>{const point=layoutFlow(model?.nodes??[],model?.edges??[]).get(selectedScene??"");if(point){zoom=1;panX=viewport.clientWidth/2-point.x-100;panY=viewport.clientHeight/2-point.y-30;transform();}}));
-  controls.append(select, edgeSelect, details); host.replaceChildren(title, toolbar, observation, note, viewport, controls);
+  const closeDetails=button("×",()=>{controls.hidden=true;inspector.ariaExpanded="false";(canvas.querySelector<HTMLElement>(`[data-scene-id="${selectedScene}"]`)??inspector).focus();});closeDetails.className="icon-button panel-close";closeDetails.ariaLabel="Close Scene details";closeDetails.title=closeDetails.ariaLabel;
+  controls.append(closeDetails,select, edgeSelect, details);const dismissDetails=(e:KeyboardEvent):void=>{if(e.key==="Escape"&&!controls.hidden&&!document.querySelector('[aria-modal="true"]')){e.preventDefault();closeDetails.click();}};host.addEventListener("keydown",dismissDetails); host.replaceChildren(title, toolbar, observation, note, viewport, controls);
   // Captured targets are checked by Source/Scene at navigation. Panning and clicks
   // do not require a project-wide scan; enabled clicks also work during refresh.
   const navigate = (action: () => void): void => {
@@ -140,5 +141,5 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
   viewport.addEventListener("pointerup", () => { drag = undefined; }); viewport.addEventListener("pointercancel", () => { drag = undefined; });
   const onFocus = (): void => { void refresh(); }; window.addEventListener("focus", onFocus);
   void refresh(false);
-  return () => { remember();disposed = true; sequence += 1; window.removeEventListener("focus", onFocus); };
+  return () => { remember();disposed = true; sequence += 1; host.removeEventListener("keydown",dismissDetails); window.removeEventListener("focus", onFocus); };
 }

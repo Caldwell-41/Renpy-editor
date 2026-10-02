@@ -289,6 +289,12 @@ pub enum SceneCommand {
         beat_id: String,
         direction: MoveDirection,
     },
+    ReorderBeat {
+        scene_id: String,
+        expected_source_revision: String,
+        beat_id: String,
+        to_index: usize,
+    },
     Undo,
     Redo,
 }
@@ -750,6 +756,21 @@ impl AuthoringService {
                 BeatEdit::Move {
                     id: beat_id,
                     direction,
+                },
+            ),
+            SceneCommand::ReorderBeat {
+                scene_id,
+                expected_source_revision,
+                beat_id,
+                to_index,
+            } => self.beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                BeatEdit::Reorder {
+                    id: beat_id,
+                    to_index,
                 },
             ),
             SceneCommand::Undo | SceneCommand::Redo => unreachable!(),
@@ -1256,6 +1277,123 @@ impl AuthoringService {
         })
     }
 
+    pub(crate) fn appearance_reference_mutations(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        next: &AuthoringMetadata,
+        appearance_id: &str,
+    ) -> Result<Vec<FileMutation>, SceneError> {
+        let mut loaded = self.load(project, project_id)?;
+        let previous = loaded.authoring.clone();
+        loaded.authoring = next.clone();
+        let mut mutations = Vec::new();
+        for scene in &loaded.project.scenes {
+            self.ensure_source_paths_clean(project, [scene.source_path.as_str()])
+                .map_err(|_| SceneError::DirtySource)?;
+            let stored = loaded
+                .source_map
+                .scene_mappings
+                .iter()
+                .find(|m| m.scene_id == scene.id)
+                .cloned()
+                .ok_or(SceneError::InvalidMetadata)?;
+            let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            if revision.sha256 != stored.source_revision {
+                return Err(SceneError::SourceConflict);
+            }
+            let (_, beats) = build_mapping(
+                scene,
+                &bytes,
+                &revision.sha256,
+                Some(&stored),
+                &[],
+                Some((&loaded.project, &previous)),
+            )?;
+            if beats.iter().any(|b| b.protected) {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            let mut proposed = bytes.clone();
+            let mut forced = Vec::new();
+            for beat in beats.iter().rev() {
+                let target = match &beat.payload {
+                    BeatPayload::ShowCharacter {
+                        appearance_id: id, ..
+                    }
+                    | BeatPayload::ChangeAppearance {
+                        appearance_id: id, ..
+                    } => id == appearance_id,
+                    _ => false,
+                };
+                if !target {
+                    continue;
+                }
+                let old = previous
+                    .appearances
+                    .iter()
+                    .find(|a| a.id == appearance_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let new = next
+                    .appearances
+                    .iter()
+                    .find(|a| a.id == appearance_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let character = previous
+                    .characters
+                    .iter()
+                    .find(|c| c.id == old.character_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let rendered = rename_appearance_token(
+                    &bytes[beat.byte_start as usize..beat.byte_end as usize],
+                    &character.technical_name,
+                    &old.label,
+                    &new.label,
+                )?;
+                proposed.splice(
+                    beat.byte_start as usize..beat.byte_end as usize,
+                    rendered.iter().copied(),
+                );
+                forced.push((
+                    beat.payload.kind().into(),
+                    sha256(&rendered),
+                    beat.id.clone(),
+                ));
+            }
+            if proposed == bytes {
+                continue;
+            }
+            let (mapping, _) = build_mapping(
+                scene,
+                &proposed,
+                &sha256(&proposed),
+                Some(&stored),
+                &forced,
+                Some((&loaded.project, next)),
+            )?;
+            *loaded
+                .source_map
+                .scene_mappings
+                .iter_mut()
+                .find(|m| m.scene_id == scene.id)
+                .ok_or(SceneError::InvalidMetadata)? = mapping;
+            mutations.push(replace_mutation(
+                &scene.source_path,
+                bytes,
+                revision,
+                proposed,
+            )?);
+        }
+        if !mutations.is_empty() {
+            mutations.push(replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                json_bytes(&loaded.source_map)?,
+            )?);
+        }
+        Ok(mutations)
+    }
+
     fn load(&self, project: &ProjectId, project_id: &str) -> Result<Loaded, SceneError> {
         let (project_bytes, project_revision) = self.scene_snapshot(project, PROJECT_PATH)?;
         let project_metadata = ProjectMetadata::read_bytes(&project_bytes, None)
@@ -1440,6 +1578,10 @@ enum BeatEdit {
     Remove {
         id: String,
     },
+    Reorder {
+        id: String,
+        to_index: usize,
+    },
     Move {
         id: String,
         direction: MoveDirection,
@@ -1615,6 +1757,37 @@ fn apply_beat_edit(
             let mut output = source.to_vec();
             output.drain(beat.byte_start as usize..beat.byte_end as usize);
             Ok((output, Vec::new()))
+        }
+        BeatEdit::Reorder { id, to_index } => {
+            let from = beats
+                .iter()
+                .position(|b| b.id == id)
+                .ok_or(SceneError::UnknownEntity)?;
+            if to_index >= beats.len() || from == to_index {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let (first, last) = (from.min(to_index), from.max(to_index));
+            let window = &beats[first..=last];
+            if window.iter().any(|b| b.protected)
+                || window.windows(2).any(|p| p[0].byte_end != p[1].byte_start)
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            if window.iter().any(|b| is_terminal_payload(&b.payload)) {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let mut order: Vec<&SceneBeat> = window.iter().collect();
+            let moved = order.remove(from - first);
+            order.insert(to_index - first, moved);
+            let mut output = source[..beats[first].byte_start as usize].to_vec();
+            let mut forced = Vec::new();
+            for beat in order {
+                let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
+                output.extend_from_slice(bytes);
+                forced.push((beat.payload.kind().into(), sha256(bytes), beat.id.clone()));
+            }
+            output.extend_from_slice(&source[beats[last].byte_end as usize..]);
+            Ok((output, forced))
         }
         BeatEdit::Move { id, direction } => {
             let index = beats
@@ -2056,6 +2229,41 @@ fn parse_line(
     find_character(loaded, speaker).map(|character_id| BeatPayload::Dialogue { character_id, text })
 }
 
+/// Change only the expression token in an already recognized show statement.
+/// Indentation, spacing, transitions and line endings retain their original bytes.
+fn rename_appearance_token(
+    bytes: &[u8],
+    technical: &str,
+    before: &str,
+    after: &str,
+) -> Result<Vec<u8>, SceneError> {
+    let text = std::str::from_utf8(bytes).map_err(|_| SceneError::OpaqueBoundary)?;
+    let mut tokens = Vec::new();
+    let mut start = None;
+    for (offset, ch) in text.char_indices() {
+        if ch.is_whitespace() {
+            if let Some(begin) = start.take() {
+                tokens.push((begin, offset));
+            }
+        } else if start.is_none() {
+            start = Some(offset);
+        }
+    }
+    if let Some(begin) = start {
+        tokens.push((begin, text.len()));
+    }
+    if tokens.len() < 3
+        || &text[tokens[0].0..tokens[0].1] != "show"
+        || &text[tokens[1].0..tokens[1].1] != technical
+        || &text[tokens[2].0..tokens[2].1] != before
+    {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    let mut output = bytes.to_vec();
+    output.splice(tokens[2].0..tokens[2].1, after.bytes());
+    Ok(output)
+}
+
 fn parse_show(
     rest: &str,
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
@@ -2281,7 +2489,8 @@ fn command_source_paths(
         | SceneCommand::UpdateBeat { scene_id, .. }
         | SceneCommand::ContinueDialogue { scene_id, .. }
         | SceneCommand::RemoveBeat { scene_id, .. }
-        | SceneCommand::MoveBeat { scene_id, .. } => Some(scene_id),
+        | SceneCommand::MoveBeat { scene_id, .. }
+        | SceneCommand::ReorderBeat { scene_id, .. } => Some(scene_id),
         _ => None,
     };
     scene_id
@@ -2862,6 +3071,323 @@ mod tests {
                 },
             )
         }
+    }
+
+    #[test]
+    fn review_reorder_preserves_bytes_ids_one_undo_and_guards() {
+        let fixture=Fixture::new(b"label scene_one:\r\n    \"First\"\r\n    \"Second\"\r\n    \"Third\"\r\n    return\r\n");
+        fixture.migrate();
+        let before = fixture.workspace();
+        let scene = &before.scenes[0];
+        let ids: Vec<_> = scene.beats.iter().map(|b| b.id.clone()).collect();
+        let after = fixture
+            .apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 2,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            after.scenes[0]
+                .beats
+                .iter()
+                .map(|b| b.id.clone())
+                .collect::<Vec<_>>(),
+            vec![
+                ids[1].clone(),
+                ids[2].clone(),
+                ids[0].clone(),
+                ids[3].clone()
+            ]
+        );
+        assert_eq!(std::fs::read(fixture.root.join(&scene.source_path)).unwrap(),b"label scene_one:\r\n    \"Second\"\r\n    \"Third\"\r\n    \"First\"\r\n    return\r\n");
+        let undone = fixture.apply(&after, SceneCommand::Undo).unwrap();
+        assert_eq!(
+            undone.scenes[0]
+                .beats
+                .iter()
+                .map(|b| b.id.clone())
+                .collect::<Vec<_>>(),
+            ids
+        );
+        let current = &undone.scenes[0];
+        assert!(matches!(
+            fixture.apply(
+                &undone,
+                SceneCommand::ReorderBeat {
+                    scene_id: current.id.clone(),
+                    expected_source_revision: current.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 3
+                }
+            ),
+            Err(SceneError::InvariantBlocked)
+        ));
+        let source_path = fixture.root.join(&scene.source_path);
+        let mut external = std::fs::read(&source_path).unwrap();
+        external.extend_from_slice(b"# external edit\r\n");
+        std::fs::write(&source_path, external).unwrap();
+        assert!(fixture
+            .apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 1
+                }
+            )
+            .is_err());
+    }
+
+    #[test]
+    fn review_appearance_edit_preserves_ids_and_patches_supported_references() {
+        use crate::authoring::{ImportAssetRequest, UpdateAppearanceRequest};
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let characters = fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "bec".into(),
+                    display_name: "Bec".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        let original = fixture.root.join("original.png");
+        std::fs::write(&original, b"original raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &original)
+            .unwrap();
+        let imported = fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::CharacterAppearance,
+                    technical_name: "happy".into(),
+                    display_name: "Happy".into(),
+                    character_id: Some(characters.characters[0].id.clone()),
+                    expression: Some("happy".into()),
+                },
+            )
+            .unwrap();
+        let appearance = &imported.appearances[0];
+        let asset = &imported.assets[0];
+        let first = fixture.workspace();
+        let scene = &first.scenes[0];
+        let shown = fixture
+            .apply(
+                &first,
+                SceneCommand::InsertBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    before_beat_id: Some(scene.beats[0].id.clone()),
+                    beat: BeatPayload::ShowCharacter {
+                        character_id: characters.characters[0].id.clone(),
+                        appearance_id: appearance.id.clone(),
+                        placement: PlacementRef::Centre,
+                        transition: TransitionRef::None,
+                    },
+                },
+            )
+            .unwrap();
+        let beat_id = shown.scenes[0].beats[0].id.clone();
+        let replacement = fixture.root.join("replacement.webp");
+        std::fs::write(&replacement, b"replacement raster").unwrap();
+        let selected = fixture
+            .service
+            .select_import(&fixture.project, &replacement)
+            .unwrap();
+        let updated = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "happy".into(),
+                    expected_asset_sha256: asset.sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: Some(selected.authority_id),
+                },
+            )
+            .unwrap();
+        assert_eq!(updated.appearances[0].id, appearance.id);
+        assert_eq!(updated.appearances[0].asset_id, asset.id);
+        assert_eq!(
+            updated.characters[0].default_appearance_id,
+            Some(appearance.id.clone())
+        );
+        assert_eq!(std::fs::read(&original).unwrap(), b"original raster");
+        assert_eq!(std::fs::read(&replacement).unwrap(), b"replacement raster");
+        assert_eq!(
+            std::fs::read(fixture.root.join(&updated.assets[0].relative_path)).unwrap(),
+            b"replacement raster"
+        );
+        let reopened = fixture.workspace();
+        assert_eq!(reopened.scenes[0].beats[0].id, beat_id);
+        assert!(!reopened.scenes[0].beats[0].protected);
+        assert!(String::from_utf8(
+            std::fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap()
+        )
+        .unwrap()
+        .contains("show bec calm"));
+        assert!(fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "happy".into(),
+                    expected_asset_sha256: asset.sha256.clone(),
+                    expression: "angry".into(),
+                    authority_id: None
+                }
+            )
+            .is_err());
+        let current_asset = &updated.assets[0];
+        let image_only = fixture.root.join("image-only.png");
+        fs::write(&image_only, b"image only raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &image_only)
+            .unwrap();
+        let replaced = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "calm".into(),
+                    expected_asset_sha256: current_asset.sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: Some(choice.authority_id),
+                },
+            )
+            .unwrap();
+        let scene_bytes = fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap();
+        assert!(String::from_utf8_lossy(&scene_bytes).contains("show bec calm"));
+        let renamed = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "calm".into(),
+                    expected_asset_sha256: replaced.assets[0].sha256.clone(),
+                    expression: "thoughtful".into(),
+                    authority_id: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            renamed.assets[0].relative_path,
+            replaced.assets[0].relative_path
+        );
+        assert_eq!(renamed.appearances[0].id, appearance.id);
+        assert_eq!(
+            renamed.characters[0].default_appearance_id,
+            Some(appearance.id.clone())
+        );
+        assert_eq!(renamed.assets[0].display_name, "Bec — thoughtful");
+        assert_eq!(fixture.workspace().scenes[0].beats[0].id, beat_id);
+        let before_conflict = fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap();
+        let mut external = before_conflict.clone();
+        external.extend_from_slice(b"# custom external edit\n");
+        fs::write(
+            fixture.root.join(&reopened.scenes[0].source_path),
+            &external,
+        )
+        .unwrap();
+        assert!(fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "sad".into(),
+                    authority_id: None
+                }
+            )
+            .is_err());
+        assert_eq!(
+            fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap(),
+            external
+        );
+        assert_eq!(
+            fixture
+                .service
+                .list(&fixture.project, &fixture.project_id)
+                .unwrap()
+                .appearances[0]
+                .label,
+            "thoughtful"
+        );
+    }
+
+    #[test]
+    fn review_appearance_token_patch_preserves_formatting_and_trailing_text() {
+        assert_eq!(
+            rename_appearance_token(
+                b"    show bec   happy at center with dissolve  # keep\r\n",
+                "bec",
+                "happy",
+                "calm"
+            )
+            .unwrap(),
+            b"    show bec   calm at center with dissolve  # keep\r\n"
+        );
+        assert!(
+            rename_appearance_token(b"    show bec elsewhere\n", "bec", "happy", "calm").is_err()
+        );
+    }
+
+    #[test]
+    fn review_reorder_refuses_crossing_protected_source() {
+        let source=b"label scene_one:\n    \"Before\"\n    python:\n        custom = 42\n    \"After\"\n    return\n";
+        let fixture = Fixture::new(source);
+        fixture.migrate();
+        let before = fixture.workspace();
+        let scene = &before.scenes[0];
+        let target = scene
+            .beats
+            .iter()
+            .position(|b| matches!(&b.payload,BeatPayload::Narration{text} if text=="After"))
+            .unwrap();
+        assert!(matches!(
+            fixture.apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: scene.beats[0].id.clone(),
+                    to_index: target
+                }
+            ),
+            Err(SceneError::OpaqueBoundary)
+        ));
+        assert_eq!(
+            fs::read(fixture.root.join(&scene.source_path)).unwrap(),
+            source
+        );
+        assert!(!fixture.workspace().can_undo);
     }
 
     #[test]
@@ -4242,6 +4768,39 @@ mod tests {
             Err(SceneError::HistoryBoundary)
         ));
     }
+    #[test]
+    fn review_sdk_screen_labels_keep_saved_choice_routes_and_project_entry() {
+        use flow::FlowDestination;
+        let source = b"label scene_one:\n    menu:\n        \"Stay here\":\n            jump scene_one\n        \"Again\":\n            jump scene_one\n";
+        let fixture = Fixture::new(source);
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        fs::write(fixture.root.join("game/screens.rpy"), b"screen preferences():\n    vbox:\n        label _(\"Display\")\n        label title\n").unwrap();
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(!graph.stale);
+        assert_eq!(graph.entry_scene_id, fixture.entry_scene_id);
+        let routes: Vec<_> = graph
+            .edges
+            .iter()
+            .filter(|edge| edge.kind == "choice")
+            .collect();
+        assert_eq!(routes.len(), 2);
+        assert!(routes
+            .iter()
+            .all(|edge| matches!(edge.destination, FlowDestination::Resolved { .. })));
+        assert_eq!(
+            fs::read(fixture.root.join("game/chapters/chapter_01/scene_001.rpy")).unwrap(),
+            source
+        );
+    }
+
     #[test]
     fn flow_partial_choice_retains_routes_after_missing_and_dynamic_options() {
         use flow::FlowDestination;

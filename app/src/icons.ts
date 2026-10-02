@@ -1,4 +1,6 @@
 const paths: Record<string,string> = {
+  settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM10 2h4l1 3 3 2 3 1v4l-3 1-2 3-1 3h-4l-1-3-3-2-3-1v-4l3-1 2-3Z',
+  panel: 'M3 4h18v16H3zM9 4v16m6-10-3 2 3 2',
   story: 'M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1 3-2 6-3 10-1V4c-2-1-6-2-10 1Zm0 0v15',
   source: 'm8 6-6 6 6 6m8-12 6 6-6 6m-3-16-2 20',
   branches: 'M12 5v5M5 18v-5h14v5M12 10v3M10 1h4v4h-4zM3 18h4v4H3zM17 18h4v4h-4z',

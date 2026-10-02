@@ -606,6 +606,11 @@ fn collect_labels(path: &str, bytes: &[u8], revision: &str, inventory: &mut Inve
     };
     for (start, end) in lines {
         let line = std::str::from_utf8(&bytes[start..end]).unwrap();
+        // Story labels are top-level declarations. Indented screen-language
+        // label controls (including translated text) are not story destinations.
+        if line.starts_with([' ', '\t']) {
+            continue;
+        }
         if line.split_whitespace().next() == Some("label") {
             let Some(rest) = line.strip_prefix("label ") else {
                 inventory.complete = false;
@@ -825,3 +830,36 @@ fn entry_jump(bytes: &[u8], start: &FlowLocation) -> Option<String> {
 
 #[cfg(test)]
 pub(super) mod candidate;
+
+#[cfg(test)]
+mod review_regressions {
+    use super::*;
+    #[test]
+    fn sdk_screen_labels_do_not_poison_story_inventory() {
+        let mut inventory = Inventory {
+            complete: true,
+            ..Default::default()
+        };
+        collect_labels("game/screens.rpy", b"screen preferences():\n    vbox:\n        label _(\"Display\")\n        label title\n", "revision", &mut inventory);
+        collect_labels(
+            "game/script.rpy",
+            b"label start:\n    jump destination\nlabel destination:\n    return\n",
+            "revision",
+            &mut inventory,
+        );
+        assert!(inventory.complete);
+        assert_eq!(inventory.labels.len(), 2);
+        assert!(inventory.labels.contains_key("start"));
+        assert!(inventory.labels.contains_key("destination"));
+        collect_labels(
+            "game/custom.rpy",
+            b"label custom(arg):\n    return\n",
+            "revision",
+            &mut inventory,
+        );
+        assert!(
+            !inventory.complete,
+            "unsupported story labels remain uncertain"
+        );
+    }
+}

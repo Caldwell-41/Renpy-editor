@@ -9,13 +9,13 @@ function click(label: string): HTMLButtonElement {
   const item = [...document.querySelectorAll("button")].find(button => button.textContent === label);
   assert.ok(item, label); item.click(); return item;
 }
-function harness(options: { drafts?: number; refuseSave?: boolean; stale?: boolean; terminal?: boolean } = {}) {
+function harness(options: { drafts?: number; refuseSave?: boolean; stale?: boolean; terminal?: boolean; runtimeError?: boolean } = {}) {
   const browser = new Window({ url: "http://tauri.localhost" });
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement });
   const calls: { operation: CoreOperation; payload?: Readonly<Record<string, unknown>> }[] = [];
   let current = true, stopped = false, navigated = false;
-  let drafts = options.drafts ?? 0;
-  const state = (): RuntimeStatus => ({ operationId: "op", phase: stopped ? "cancelled" : options.terminal ? "failed" : "running", exitCode: options.terminal ? 1 : null, output: "", nextSequence: 0, outputTruncated: false, earlierRevision: true, cleanupComplete: stopped || !!options.terminal, launchRevision: "launch", revisionStale: true });
+  let drafts = options.drafts ?? 0;let starts=0;
+  const state = (): RuntimeStatus => ({ operationId:starts>1?"next-op":"op", phase: stopped ? "cancelled" : options.runtimeError?"exited":options.terminal ? "failed" : "running", exitCode: options.runtimeError?0:options.terminal ? 1 : null, output: "", nextSequence: 0, outputTruncated: false, earlierRevision: true, cleanupComplete: stopped || !!options.terminal || !!options.runtimeError, launchRevision: "launch", revisionStale: true });
   const request = async <T>(operation: CoreOperation, payload?: Readonly<Record<string, unknown>>): Promise<T> => {
     calls.push({ operation, payload });
     if (operation === "sdk.discover") return [{ id: "sdk", compatible: true, version: "8.5.3", displayName: "SDK" }] as T;
@@ -23,9 +23,11 @@ function harness(options: { drafts?: number; refuseSave?: boolean; stale?: boole
     if (operation === "source.saveAll") { if (options.refuseSave) throw new Error("Save All refused; drafts retained"); drafts = 0; return {} as T; }
     if (operation === "runtime.prepare") return { preparationId: "prep", savedRevision: "launch", trustId: null, draftCount: drafts, projectPath: "synthetic", sdkPath: "verified-sdk", sdkVersion: "8.5.3", sdkRevision: "sdk-rev", inputs: ["game/custom.rpy"], trustNotice: "Executes project Python; session only, not a sandbox." } as T;
     if (operation === "runtime.grantTrust") return { trustId: "trust" } as T;
+    if(operation==="runtime.start")starts++;
     if (operation === "runtime.start" || operation === "runtime.status") return state() as T;
     if (operation === "runtime.stop") { stopped = true; return state() as T; }
-    if (operation === "runtime.diagnostics") return { diagnostics: [{ id: 0, origin: "compile", severity: "error", message: '<img src=x onerror="alert(1)">', path: "game/custom.rpy", line: 2, sourceRevision: "file", operationId: "op", sessionId: "session", freshness: "unverified" }] } as T;
+    if(operation==="runtime.diagnostics"&&options.runtimeError&&starts>1)return {diagnostics:[]} as T;
+    if (operation === "runtime.diagnostics") return { diagnostics: [{ id: 0, origin: options.runtimeError?"runtime":"compile", severity: "error", message: '<img src=x onerror="alert(1)">', path: "game/custom.rpy", line: 2, sourceRevision: "file", operationId: "op", sessionId: "session", freshness: "unverified" }] } as T;
     if (operation === "runtime.resolveDiagnostic") { if (options.stale) throw new Error("STALE_RUNTIME"); return { path: "game/custom.rpy", expectedRevision: "file", byteStart: 10, byteEnd: 20 } as T; }
     return {} as T;
   };
@@ -93,4 +95,15 @@ test("runtime old-view preparation does not retarget a new session", async () =>
   const h = harness();
   try { click("Run Game"); h.stale(); await tick(); assert.equal(h.calls.some(c => c.operation === "runtime.prepare"), false); }
   finally { h.dispose(); }
+});
+
+
+test("runtime drawer closes without stopping and exit zero cannot hide a reported runtime error",async()=>{
+ const h=harness({runtimeError:true});try{
+  click("Run Game");await tick();click("Trust for this session and continue");await tick(40);
+  assert.match(h.runtime.panel.textContent??"",/Game ended with a runtime error/);
+  const close=h.runtime.panel.querySelector<HTMLButtonElement>('[aria-label="Close runtime panel"]')??[...h.runtime.panel.querySelectorAll('button')].find(b=>b.ariaLabel==='Close runtime panel')!;close.click();
+  assert.equal(h.runtime.panel.hidden,true);assert.equal(h.calls.some(c=>c.operation==='runtime.stop'),false);
+  click("Run Game");await tick();click("Trust for this session and continue");await tick(40);assert.equal(h.calls.filter(c=>c.operation==='runtime.start').length,2);assert.doesNotMatch(h.runtime.panel.querySelector('[role="status"]')?.textContent??h.runtime.panel.textContent??"",/Game ended with a runtime error/);
+ }finally{h.dispose();}
 });

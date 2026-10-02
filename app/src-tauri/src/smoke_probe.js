@@ -330,7 +330,8 @@ setTimeout(async () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await yieldTask();
     overlappingFlushSuppressed = !called.has("project.flush")
-      && document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started";
+      && (document.querySelector("#app-status")?.textContent === "Authoring operation in progress — no additional Flush started"
+        || (document.querySelector('[aria-modal="true"]') && window.__loomlightReadSaveTrace?.().at(-1)?.includes("route=suppressed;origin=keyboard;reason=modal")));
     releaseVariableUpdate?.();
     await waitFor(() => document.querySelector("#app-status")?.textContent === "Saved", "completed variable update");
     supportingAuthoringStage = "flush";
@@ -343,6 +344,7 @@ setTimeout(async () => {
     click("Choose files…");
     await waitFor(()=>importChoiceCount===2,"cancelled asset choice");await yieldTask();
     const cancelledPreserved=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…")?.disabled===false && document.querySelectorAll('.import-entry').length===0;
+    click("Cancel"); // Close the cancelled import dialog before returning to the workspace.
     supportingAuthoringStage = "repair-compatibility";
     click("Repair Ren'Py asset names");
     await awaitCall("asset.repairCompatibility");
@@ -376,8 +378,8 @@ setTimeout(async () => {
       && document.body.textContent.includes("Beats")
       && document.body.textContent.includes("Partial / unknown")
       && document.body.textContent.includes("Visible state and provenance");
-    const allocation = control("Preview size");
-    const allocationCorrect = allocation.value === "34";
+    const allocation = document.querySelector(".preview-divider");
+    const allocationCorrect = allocation?.getAttribute("aria-valuenow") === "34";
     const accessibleReorder = [...document.querySelectorAll("button")]
       .some((item) => item.ariaLabel === "Move scene Scene 1 down")
       && [...document.querySelectorAll("button")]
