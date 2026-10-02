@@ -8,10 +8,12 @@ creation-details modals for Characters/Assets/Variables and whole-card/list-row
 selection. One explicitly requested read-only subagent researched official Carbon,
 Spectrum and Creative Cloud examples. Proposed Drop/Browse opens the same staged
 import modal; original files and existing transaction/partial-success contracts
-remain intact. Category grouping and whether editing also uses modals are optional
-pending questions. No application code or project data changed. Next: remaining
+remain intact. The user confirms separate Music/Sound effects categories and the
+same modal style for creation and editing (Characters, appearances and Variables).
+These design decisions are recorded; implementation remains pending.
+No application code or project data changed. Next: remaining
 Assets feedback, then Variables; do not infer complete acceptance from thumbnails.
-Fresh feature refs match `7fda210`, main remains `4d7ba03`, worktrees preserved.
+Incoming published review checkpoint is `33c62f5`; worktrees preserved.
 Reuse `01d0896`; no new app/SDK/native starts, builds or dispatches. Earlier
 Characters/Branches/Source/Story corrections and sidebar approval remain pending.
 

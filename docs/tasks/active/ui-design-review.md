@@ -1853,13 +1853,13 @@ The user explicitly requests one subagent to research online drop-zone examples;
 that read-only research is complete. No application implementation/build selected.
 
 **ASSETS-01 — persistent category selection, correction pending:** expose All,
-Backgrounds, Character images and Audio at the top beside search/view controls,
+Backgrounds, Character images, Music and Sound effects at the top beside search/view controls,
 including empty categories. Keep a clear selected state and category-specific empty
 message; search combines with the category. These filter the existing library,
 not create user-defined folders or new asset types. Current `catalog-ui.ts:9,39`
 derives categories only from present kinds and hides the selector for one kind,
-explaining its absence here. Audio grouping versus separate Music/Sound effects
-is an optional user preference currently asked, not yet answered.
+explaining its absence here. The user confirms separate Music/Sound effects
+categories rather than combined Audio on 2026-10-02.
 
 **ASSETS-02 — discoverable drop target, correction pending:** replace the hidden-
 until-dragging-only affordance with a compact, always-visible drop strip above the
@@ -1888,7 +1888,7 @@ patterns, not copied product guarantees. Category controls filter one library;
 [Carbon tabs guidance](https://carbondesignsystem.com/components/tabs/usage/)
 distinguishes content filtering from navigation tabs.
 
-**CATALOG-01 — creation modals, correction pending:** New Character, Import assets
+**CATALOG-01 — creation and editing modals, correction pending:** New Character, Import assets
 and New Variable open consistently styled dialogs with a clear heading, header X,
 Cancel and one primary confirm action. Remove their below-content creation forms.
 Focus enters the first meaningful field, remains in the modal, and returns to its
@@ -1898,8 +1898,11 @@ inside the dialog and disable duplicate submission. Asset batches use a bounded
 scrollable staging list with fixed heading/actions. Reuse the existing typed
 transactions and draft/session completion guards. Current `catalog-ui.ts:40`
 unhides and scrolls the creation section; `asset-import-ui.ts` already stages each
-file and retains failed imports. Editing in the same modal style is an optional
-question pending the user's answer; creation modals are explicitly requested.
+file and retains failed imports. The user confirms that Character, appearance and
+Variable Edit actions use the same modal style as creation on 2026-10-02. Inspection
+remains in the details panel; editing opens the dialog through the existing save
+pathway or the separately recorded appearance-update extension. This does not add
+unsupported Asset editing operations or select implementation/package work.
 
 **CATALOG-02 — whole-card/list-row selection, correction pending:** clicking the
 image, name, metadata or empty row/card space selects that entity and its details.
@@ -1910,8 +1913,9 @@ Apply this across the supporting catalogue views, including list mode. Current
 `catalog-ui.ts:32–34` wires only the title button and image; metadata/blank space
 has no selection handler. This confirms the user's report without native mutation.
 
-Continuation: Assets feedback recorded; category grouping and edit-modal preference
-are optional pending questions. Proceed with remaining Assets feedback, then Variables.
+Continuation: the user confirms both proposed preferences: separate Music/Sound
+effects filters and modal editing as well as creation. Design decisions are recorded;
+implementation remains pending. Proceed with remaining Assets feedback, then Variables.
 Fresh feature refs match `7fda210`, main remains `4d7ba03`; preserve the separate
 planning worktree. Reuse `01d0896`; zero new launches, native/SDK cases, builds or
 dispatches. Earlier functional blockers, corrections and sidebar proposal approval

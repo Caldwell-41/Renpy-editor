@@ -32,7 +32,8 @@ Latest feedback is [Assets](../tasks/active/ui-design-review.md#assets-categorie
 persistent top categories, a visible drop target, creation modals for Characters/
 Assets/Variables and whole-card/list-row selection are recorded pending corrections.
 Requested subagent research is complete; no app changes or new build selected.
-Category grouping and editing-modal preference are optional pending questions.
+The user confirms separate Music/Sound effects filters and consistent creation/
+editing modals for Characters, appearances and Variables; implementation is pending.
 Continue Assets, then Variables; actual OS drop acceptance remains open.
 Earlier [Characters](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02):
 inspector image failure, appearance selection/preview and per-appearance editing
