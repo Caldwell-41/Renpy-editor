@@ -71,9 +71,16 @@ confirms workspace entry with starter Narration/Return Beats. The
 [creation/Story record](../tasks/active/ui-design-review.md#creation-observation-and-story-review--2026-10-02)
 limits the pass to this fast successful Mac path; detailed progress stages were not
 separately assessed. Next: Story layout, inline editing with physical input, commit/
-undo, status stability and Writing focus. Seven recorded corrections remain pending;
+undo, status stability and Writing focus. Ten recorded corrections remain pending;
 no additional build/dispatch or integration is selected. Existing evidence/budgets
 are unchanged; no agent project edits or new launches occurred.
+Latest [Story feedback](../tasks/active/ui-design-review.md#story-controls-and-choice-layout-feedback--2026-10-02)
+selects removal of the redundant Preview size slider (retain accessible divider
+resizing), a normal-sized Create New Scene action with its form beneath the Choice
+options, and a shared button consistency pass. The user's Choice creation form is
+open with unsubmitted input; preserve it. These corrections are recorded for later
+implementation; no new build/dispatch is selected. Continue Story feedback before
+physical editing/commit/undo and Source; no acceptance is inferred from the screenshot.
 
 ### Exact successful qualification
 

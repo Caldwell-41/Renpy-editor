@@ -1281,3 +1281,30 @@ and final visual acceptance on both targets retain their open/unreported limits.
 This continuation changes documentation only; no agent project edit, creation, app
 launch, build or dispatch occurred. User-driven creation is separate from retained
 automated scenario/build totals.
+
+### Story controls and Choice layout feedback — 2026-10-02
+
+The user supplied a Light-theme Story screenshot with preview hidden, an expanded
+Choice and its Create New Scene form open. It demonstrates an oversized creation
+button and fields displaced to the right, with content at the card edge. The user
+requests removal of the redundant Preview size slider and an overall consistency
+pass on buttons. Do not touch the user's active form or infer successful commits,
+undo or IME checks from the screenshot. No native action is required to record it.
+
+| Finding | Requested correction / implementation considerations | State |
+| --- | --- | --- |
+| STORY-01: Redundant preview slider | Remove the Preview size label/range from the Beats toolbar, including while preview is hidden. Retain the divider as the resize control with pointer and existing ArrowUp/ArrowDown keyboard operation, remembered allocation and roughly one-third initial default. Update layout reset and resize state so they do not depend on the removed visible slider. Review affected selectors using the remaining divider rather than removing resize coverage. | User-selected correction; pending implementation |
+| STORY-02: Choice scene creation layout | Make Create New Scene a normal-sized secondary action, with intrinsic height/width rather than grid stretching. Place the revealed form in its own full-width section beneath the choice options/action area: labels above Choice text, New Scene name and Chapter, fields aligned in columns where space permits and stacked in compact layouts. Keep its Cancel/Create Scene and option controls grouped inside that section, distinguish them from the Choice's Cancel/Commit Beat actions, prevent clipping and unnecessary text wrapping. Preserve staged input, explicit creation/commit and the existing transaction/draft rules. | User-selected correction; pending implementation |
+| BUTTON-01: Shared button consistency pass | Review Welcome, wizard, Story, Source, Branches, catalogues, Settings and Runtime for coherent button roles, height/padding, text size/weight, radius, alignment, spacing, hover/focus and disabled styling. Define deliberate normal/compact variants through shared styles; primary emphasis comes from role/colour, not accidental oversizing. Keep button dimensions stable when busy; prevent grid/flex stretch and cramped multi-line labels. Preserve all operations and existing specialised toolbar needs. This is a visual/control-layout pass within the UI refresh, not new authoring features. | User-selected correction; pending implementation |
+
+Source inspection supports these observations: `scene-ui.ts` currently renders both
+the slider and keyboard-enabled divider; `main.ts` layout reset queries that slider.
+The Choice editor uses the general `beat-fields` grid and appends creation actions
+and `choice-new-scene` directly into it. This supports a grid-placement/stretch
+explanation for the screenshot; rendered correction still needs verification.
+
+Ten accumulated findings now remain pending: WELCOME-01/02/03, WIZARD-01, SDK-01,
+CONFIG-01, REVIEW-01, STORY-01/02 and BUTTON-01. Continue gathering Story feedback,
+then physical editing/commit/undo and Source review using the qualified existing build.
+No application changes, agent draft edits, launches, builds or dispatches occurred in
+this checkpoint; prior pass/failure evidence and budgets remain unchanged.
