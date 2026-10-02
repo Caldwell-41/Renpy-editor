@@ -1,5 +1,20 @@
 # Current outcome handover
 
+## Latest Assets findings — 2026-10-02
+
+The user is reviewing Assets. [ASSETS-01/02 and CATALOG-01/02](../tasks/active/ui-design-review.md#assets-categories-drop-target-and-supporting-workspace-modals--2026-10-02)
+record persistent top category filters, a compact visible image drop target,
+creation-details modals for Characters/Assets/Variables and whole-card/list-row
+selection. One explicitly requested read-only subagent researched official Carbon,
+Spectrum and Creative Cloud examples. Proposed Drop/Browse opens the same staged
+import modal; original files and existing transaction/partial-success contracts
+remain intact. Category grouping and whether editing also uses modals are optional
+pending questions. No application code or project data changed. Next: remaining
+Assets feedback, then Variables; do not infer complete acceptance from thumbnails.
+Fresh feature refs match `7fda210`, main remains `4d7ba03`, worktrees preserved.
+Reuse `01d0896`; no new app/SDK/native starts, builds or dispatches. Earlier
+Characters/Branches/Source/Story corrections and sidebar approval remain pending.
+
 ## Latest Characters findings — 2026-10-02
 
 Latest user results: search/Grid-List switching and Edit Character persistence

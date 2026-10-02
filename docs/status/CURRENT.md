@@ -28,7 +28,13 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
-Latest feedback is [Characters](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02):
+Latest feedback is [Assets](../tasks/active/ui-design-review.md#assets-categories-drop-target-and-supporting-workspace-modals--2026-10-02):
+persistent top categories, a visible drop target, creation modals for Characters/
+Assets/Variables and whole-card/list-row selection are recorded pending corrections.
+Requested subagent research is complete; no app changes or new build selected.
+Category grouping and editing-modal preference are optional pending questions.
+Continue Assets, then Variables; actual OS drop acceptance remains open.
+Earlier [Characters](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02):
 inspector image failure, appearance selection/preview and per-appearance editing
 are pending. The user requests both name and image editing, plus direct Edit in
 compact polished list rows. Latest view is Characters/list mode. Search/view switching,

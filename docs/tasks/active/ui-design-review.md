@@ -67,6 +67,8 @@ approved palettes and recorded corrections; these are development references onl
 - Searchable grid/list; All, Backgrounds, Character images and Audio filters.
 - Optional details/preview inspector; preserve image proportions and transparency.
 - Import button and drop-anywhere asset area, with drop indicator only while dragging.
+  The 2026-10-02 review correction below adds a compact persistent drop target;
+  its stronger drag-over indicator still appears only during dragging.
 - After choosing/dropping files, allow asset-type selection before import. Preserve
   valid character associations and existing import permissions.
 - Audio preview controls are designed but disabled, with a future-milestone label.
@@ -1839,3 +1841,78 @@ assertions before claiming a cause/fix. Persistence of the default is accepted;
 immediate preview refresh remains failed. No new agent UI interaction, code,
 launch, verification run, package or dispatch. Continue review; all recorded
 corrections and the earlier sidebar/drag proposal remain pending.
+
+### Assets categories, drop target and supporting-workspace modals — 2026-10-02
+
+The user moves to Assets and requests a category selector at the top, a visible
+area for dropping images, creation-details modals for Characters/Assets/Variables,
+and selection from anywhere on a card or list row. The supplied view shows two
+available Character-image entries with rendered thumbnails and selected inspector
+preview. This does not prove fresh import, OS drop, audio or all Assets acceptance.
+The user explicitly requests one subagent to research online drop-zone examples;
+that read-only research is complete. No application implementation/build selected.
+
+**ASSETS-01 — persistent category selection, correction pending:** expose All,
+Backgrounds, Character images and Audio at the top beside search/view controls,
+including empty categories. Keep a clear selected state and category-specific empty
+message; search combines with the category. These filter the existing library,
+not create user-defined folders or new asset types. Current `catalog-ui.ts:9,39`
+derives categories only from present kinds and hides the selector for one kind,
+explaining its absence here. Audio grouping versus separate Music/Sound effects
+is an optional user preference currently asked, not yet answered.
+
+**ASSETS-02 — discoverable drop target, correction pending:** replace the hidden-
+until-dragging-only affordance with a compact, always-visible drop strip above the
+cards, labelled "Drop images here or Browse files". Use a subdued border at rest
+and stronger accent/background during a valid native drag; retain the existing
+Assets-wide drop route and keyboard/native-picker alternative. Drop and Import
+assets open the same staged details modal; dropping alone must not write. Confirm
+per-file type/name and Character association/expression where required. Preserve
+the existing 32-file bound, original external files, authority/session checks and
+honest partial-success behaviour. Successful imports are retained, failed entries
+stay editable, and Cancel does not undo already completed imports. Actual Finder/
+Explorer gesture acceptance remains open. This target initially belongs to Assets;
+no new cross-page Character drop workflow is inferred.
+
+Official examples researched by the requested subagent:
+
+- [Carbon file uploader](https://www.carbondesignsystem.com/building-blocks/core/components/file-uploader/guidelines):
+  visible drop area, browse alternative, drag-over emphasis and file feedback.
+- [Adobe Spectrum DropZone](https://react-spectrum.adobe.com/DropZone):
+  compact drop areas with Browse files and accepted-type handling.
+- [Adobe Creative Cloud Libraries](https://www.adobe.com/creativecloud/business/enterprise/cc-libraries-collaboration.html):
+  native files dropped into an asset library.
+
+The compact strip and modal flow are Loomlight proposals inferred from these
+patterns, not copied product guarantees. Category controls filter one library;
+[Carbon tabs guidance](https://carbondesignsystem.com/components/tabs/usage/)
+distinguishes content filtering from navigation tabs.
+
+**CATALOG-01 — creation modals, correction pending:** New Character, Import assets
+and New Variable open consistently styled dialogs with a clear heading, header X,
+Cancel and one primary confirm action. Remove their below-content creation forms.
+Focus enters the first meaningful field, remains in the modal, and returns to its
+trigger on close. Escape/Cancel follow the existing unsaved-input guard; an active
+write cannot be discarded by dismissing presentation. Keep validation errors/input
+inside the dialog and disable duplicate submission. Asset batches use a bounded
+scrollable staging list with fixed heading/actions. Reuse the existing typed
+transactions and draft/session completion guards. Current `catalog-ui.ts:40`
+unhides and scrolls the creation section; `asset-import-ui.ts` already stages each
+file and retains failed imports. Editing in the same modal style is an optional
+question pending the user's answer; creation modals are explicitly requested.
+
+**CATALOG-02 — whole-card/list-row selection, correction pending:** clicking the
+image, name, metadata or empty row/card space selects that entity and its details.
+Use a coherent hover/focus/selected treatment and keyboard activation. Direct Edit,
+Set default and other controls retain their own actions without accidental extra
+selection/activation; avoid nested buttons and preserve unsubmitted-input guards.
+Apply this across the supporting catalogue views, including list mode. Current
+`catalog-ui.ts:32–34` wires only the title button and image; metadata/blank space
+has no selection handler. This confirms the user's report without native mutation.
+
+Continuation: Assets feedback recorded; category grouping and edit-modal preference
+are optional pending questions. Proceed with remaining Assets feedback, then Variables.
+Fresh feature refs match `7fda210`, main remains `4d7ba03`; preserve the separate
+planning worktree. Reuse `01d0896`; zero new launches, native/SDK cases, builds or
+dispatches. Earlier functional blockers, corrections and sidebar proposal approval
+remain open. This documentation/research checkpoint changes no app or project data.
