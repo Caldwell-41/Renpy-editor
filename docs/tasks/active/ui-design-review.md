@@ -1920,3 +1920,67 @@ Fresh feature refs match `7fda210`, main remains `4d7ba03`; preserve the separat
 planning worktree. Reuse `01d0896`; zero new launches, native/SDK cases, builds or
 dispatches. Earlier functional blockers, corrections and sidebar proposal approval
 remain open. This documentation/research checkpoint changes no app or project data.
+
+### Variables naming and shared catalogue affordances — 2026-10-02
+
+The user reports macOS capitalising a new Variable name and making it invalid,
+requests consistent prevention across Characters/Assets/Variables, replaces small
+Close details text with X, confirms Variables selection works only from the name
+column, and requests naming-best-practice tooltips on creation fields in all three.
+Record these as pending corrections; no new build or general implementation selected.
+
+**VARIABLES-01 — consistent technical-name input, correction pending:** code confirms
+the Variable creation field/submission at `main.ts:744–745` does not call
+`technicalNameInput` or `technicalName`; Character creation/Appearance expressions
+and staged Assets already do in corrected candidate `01d0896`. Extend the shared
+helper to Variables and audit every technical/expression creation field across all
+three surfaces. Suppress autocapitalisation, autocorrection, spelling suggestions
+and inappropriate autocomplete; normalize surrounding whitespace and ASCII capitals
+before validation/submission. Make the resulting technical name visible before
+confirming; do not rewrite during active IME composition or disturb the caret.
+Keep display names and Variable text values unchanged. Preserve immutable existing
+identifiers and authoritative source; this is new-name input handling, not rename.
+Reject invalid/duplicate input with specific feedback while retaining entered data.
+Focused future verification must cover mixed-case typing/paste, all three real
+creation paths and actual macOS keyboard/IME; HTML attributes alone are not native
+acceptance. Existing Character/Asset helper evidence remains valid; the new report
+does not prove those corrected paths have regressed. No rejecting test/fix yet.
+
+**CATALOG-03 — inspector Close X, correction pending:** replace the small shared
+Close details text (`catalog-ui.ts:15`) with a clearly visible top-right header X
+on Characters, Assets and Variables. Give it an accessible Close details label,
+tooltip, consistent click target and visible hover/focus treatment. Escape closes
+the active inspector where appropriate and returns focus to the selected entity;
+respect pending-input guards and another active modal. Closing details does not
+delete, save or change the selected entity. Align with the previously requested
+Branches/runtime/modal close-affordance work without changing their ownership.
+
+**CATALOG-02 follow-up:** the name-only Variable selection is the same shared
+catalogue defect already recorded. Extend whole-row selection acceptance to the
+type, initial-value and blank-space columns; direct Edit remains independent and
+keyboard activation remains available. Do not create a separate competing fix.
+
+**CATALOG-04 — contextual naming help, correction pending:** provide a consistent
+focusable information icon beside the name label in Character, Asset and Variable
+creation dialogs (and Appearance expression fields). Its tooltip opens on hover
+and keyboard focus/activation; essential format/validation hints remain available
+without hover. Explain the distinction between display name and fixed technical
+name, with meaningful surface-specific examples (`bec`, `uni_night`,
+`relationship_score`, `happy`). Suggested technical-name copy: "Use a descriptive
+lowercase name, starting with a letter. Separate words with underscores; avoid
+spaces and punctuation. Loomlight saves technical names in lowercase (1–64 letters,
+numbers or underscores)." Display-name help permits readable words/capitalisation.
+Keep actual field rules authoritative and state which names are fixed after creation.
+
+Reference [Ren'Py language basics](https://www.renpy.org/doc/html/language_basics.html)
+and [reserved names](https://www.renpy.org/doc/html/reserved.html): avoid reserved
+engine names and leading underscores for user identifiers. Do not claim that Ren'Py
+itself requires lowercase or Loomlight's 64-character limit; these are Loomlight's
+creation contract. Do not imply a comprehensive reserved-name analysis exists.
+No new generic identifier renaming or speculative metadata scope is selected.
+
+Continuation: Variables review is active; type/default editing, persistence and
+known-assignment navigation remain unreported, not inferred passes. Shared creation/
+editing modals and separate Music/Sound effects filters were confirmed previously.
+Only review docs changed; reuse `01d0896`, zero new launches, native/SDK cases,
+builds or dispatches. Existing blockers and sidebar proposal approval remain open.

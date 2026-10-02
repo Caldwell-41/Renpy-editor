@@ -28,7 +28,12 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
-Latest feedback is [Assets](../tasks/active/ui-design-review.md#assets-categories-drop-target-and-supporting-workspace-modals--2026-10-02):
+Latest feedback is [Variables](../tasks/active/ui-design-review.md#variables-naming-and-shared-catalogue-affordances--2026-10-02):
+Variable creation bypasses the name helper used by Characters/Assets, explaining
+the capitalization failure. Consistent name handling, shared inspector Close X,
+whole-row selection and naming-help tooltips are pending corrections. Continue
+Variables type/default persistence and known-assignment review; no new build selected.
+Earlier [Assets](../tasks/active/ui-design-review.md#assets-categories-drop-target-and-supporting-workspace-modals--2026-10-02):
 persistent top categories, a visible drop target, creation modals for Characters/
 Assets/Variables and whole-card/list-row selection are recorded pending corrections.
 Requested subagent research is complete; no app changes or new build selected.

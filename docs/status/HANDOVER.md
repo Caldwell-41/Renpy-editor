@@ -1,5 +1,19 @@
 # Current outcome handover
 
+## Latest Variables findings — 2026-10-02
+
+[VARIABLES-01 and CATALOG-03/04](../tasks/active/ui-design-review.md#variables-naming-and-shared-catalogue-affordances--2026-10-02)
+record macOS capitalization of Variable names, consistent technical-name handling
+across all three supporting surfaces, visible inspector Close X and contextual
+naming tooltips. Name-only Variable selection extends existing CATALOG-02.
+Code confirms Variable creation bypasses the helper already used by Characters/
+Assets in `01d0896`; no correction or rejecting test has yet been performed.
+Keep display names/text values and existing source identifiers unchanged; explain
+Loomlight's lowercase/64-character contract separately from Ren'Py syntax.
+Next: remaining Variables type/default persistence and known-assignment feedback.
+Incoming checkpoint `a3985ae`; preserve branch/worktrees. Review docs only; no new
+app/SDK/native starts, build or dispatch. Wider corrections/approval remain pending.
+
 ## Latest Assets findings — 2026-10-02
 
 The user is reviewing Assets. [ASSETS-01/02 and CATALOG-01/02](../tasks/active/ui-design-review.md#assets-categories-drop-target-and-supporting-workspace-modals--2026-10-02)
