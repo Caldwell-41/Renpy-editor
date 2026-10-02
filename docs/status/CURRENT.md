@@ -30,6 +30,10 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
 The latest [sidebar/Beat proposal](../tasks/active/ui-design-review.md#sidebar-controls-beat-dragging-and-writing-focus-proposal--2026-10-02)
 awaits user approval after two read-only subagent reviews; no additional app changes.
+[Runtime-panel feedback](../tasks/active/ui-design-review.md#runtime-panel-feedback-and-earlier-project-launch--2026-10-02)
+also records a pending presentation correction. The repeated GUI error is confirmed
+as the earlier project reopened; installed `01d0896` matches the retained binary.
+Continue with a fresh project; the earlier project's incomplete assets stay preserved.
 The requested bootstrap double-check also passes on Mac: preset/custom resolution,
 Git off/on, metadata/reopen, standard menus/dialogue and execution without editor
 metadata. This follow-up changes tests/docs only; the same `01d0896` installer applies.
