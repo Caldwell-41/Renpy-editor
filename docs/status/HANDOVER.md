@@ -2,6 +2,11 @@
 
 ## Current review surface — Branches, 2026-10-02
 
+The user accepts pan/zoom/Fit for now but requests further refinement; record
+provisional Mac usability, not final polish. Open Scene / View origin in Source
+navigation is confirmed correct. Missing connections and popup dismissal remain
+open. Next planned review surface: Characters; no app navigation by the agent.
+
 [BRANCHES-02](../tasks/active/ui-design-review.md#branches-detail-popup-dismissal--2026-10-02)
 adds a pending detail-popup correction: visible header X, Escape dismissal and
 focus return. Native read-only reproduction confirms no internal Close and Escape

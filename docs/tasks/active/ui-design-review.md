@@ -1747,3 +1747,12 @@ Close or Escape handler. The confirmed missing routes remain the separate functi
 BRANCHES-01 blocker. This checkpoint changes docs only; zero new app launches,
 SDK/native cases, packages or dispatches. Continue Branches feedback; implementation
 and the earlier wider proposal are still pending.
+
+**Remaining Branches human checks — 2026-10-02:** the user reports pan/zoom/Fit
+"acceptable for now but needs refinement"; record provisional Mac usability, not
+final polish acceptance or a newly specified gesture/layout redesign. The user
+confirms Open Scene / View origin in Source reaches the correct place; those
+observed navigation paths pass on this Mac. Do not infer resolved Choice-route
+navigation or graph completeness: BRANCHES-01/02 remain pending. Next planned
+review surface is Characters; moving on does not close either blocker or remaining
+physical/cross-target checks. No app changes or additional runs/builds/dispatches.
