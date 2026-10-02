@@ -1756,3 +1756,58 @@ observed navigation paths pass on this Mac. Do not infer resolved Choice-route
 navigation or graph completeness: BRANCHES-01/02 remain pending. Next planned
 review surface is Characters; moving on does not close either blocker or remaining
 physical/cross-target checks. No app changes or additional runs/builds/dispatches.
+
+### Characters preview and appearance controls — 2026-10-02
+
+The user reviews Characters and reports an uploaded image showing "Preview
+unavailable", no way to view the other appearances and no way to edit them. Their
+supplied view has a rendered Character card image and two appearance rows; the
+inspector preview fails. Do not equate that failure with an unsuccessful import.
+
+**CHARACTERS-01 — inspector preview failure, correction pending:** Character card
+and selected appearance inspector must show the same valid imported media. Keep
+loading distinct from unavailable/error, retain actionable failure information and
+allow recovery rather than leaving an initial failure permanently blank. Present
+media read-only through the existing bounded, session-owned service.
+
+Code-backed hypothesis: `catalog-ui.ts:25` immediately clones the card thumbnail
+into an auto-opened inspector. If it has no src yet, it enqueues another media load;
+all caught failures become only "Preview unavailable" (`:20`). Character rendering
+starts that load before a persistence read (`main.ts:675–678`), while `media.present`
+is outside RequestLane's ordered reads and safe-read retry list (`main.ts:234–245`,
+`request-lane.ts`). Concurrent host service checkout may refuse the initial preview;
+the later thumbnail can succeed independently. Investigate with a focused rejecting
+case for initial auto-selection during loading and host busy/refusal, plus bounded
+cache/session disposal. This cause is not yet proven by a test; no implementation
+or qualification run has occurred. Reuse valid media/cache where appropriate and
+never replay an ambiguous write to recover a presentation read.
+
+**CHARACTERS-02 — view appearances, correction pending:** show each appearance as a
+selectable row or thumbnail with its expression/name and a clear selected state.
+Selecting one displays its own image and supported details in the inspector. Keep
+"Set default" separate: viewing an appearance must not modify the Character's
+default or source. Retain the selection through ordinary redraws and allow keyboard
+selection; missing media must not make the other appearances inaccessible.
+
+**CHARACTERS-03 — edit appearances, correction pending:** each
+appearance needs its own Edit control with Save/Cancel, distinct from Edit Character.
+The user explicitly selects both expression/name editing and image replacement.
+Keep the fields together in the appearance editor; do not add new render modes.
+Current rows (`main.ts:705`) contain only labels, fixed default outfit/pose text and
+Set default. Character Edit at line 702 updates only display name/dialogue colour.
+The typed API currently exposes `appearance.setDefault`, not appearance update;
+editing requires a bounded transaction-backed extension, not a decorative button.
+Preserve appearance identity, references, source formatting, expected revisions,
+original external images and failed/cancelled input. Any expression rename must
+safely update supported references or report protected/unsupported references,
+never rewrite scripts with regex. Keep existing static-import scope.
+
+Live read-only AX observation found the user had independently moved to Assets:
+both Character images are listed as available and the selected asset has an image
+in its inspector. The agent did not navigate away, change defaults, import, edit
+or run the project. This observation supports an inspector presentation defect,
+not complete acceptance of Assets or proof of the preview failure's exact cause.
+Review position: Characters findings recorded; live user view Assets. Continue that
+feedback if the user selects it. Fresh feature refs matched `569d57d`, main unchanged.
+Only docs changed; zero new launches, native/SDK cases, builds or dispatches. Earlier
+blockers/corrections and sidebar/drag approval remain open; no new phase/integration.

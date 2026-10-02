@@ -28,10 +28,14 @@ SDK creation/menu/dialogue checks, then one local Mac package/native UI-refresh 
 (9 checks, 5.07 s, cleanup complete). Use the ARM64 DMG under ignored
 `.toolchains/review-builds/ui-refresh-01d0896/`; exact checksum/evidence and cumulative
 counts are in HANDOVER/the blocker record. Windows is unverified for these fixes.
-Current hands-on surface is [Branches](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02):
+Latest feedback is [Characters](../tasks/active/ui-design-review.md#characters-preview-and-appearance-controls--2026-10-02):
+inspector image failure, appearance selection/preview and per-appearance editing
+are pending. The user requests both name and image editing. Live view is Assets, with
+no agent navigation or full acceptance inferred.
+Earlier [Branches](../tasks/active/ui-design-review.md#branches-saved-routes-missing--2026-10-02):
 saved routes are confirmed in Source but the graph stays disconnected after Refresh.
 Pan/zoom/Fit is acceptable for now with refinement still needed; Scene/Source
-navigation is user-confirmed on Mac. Next planned surface is Characters.
+navigation is user-confirmed on Mac; the subsequent Characters findings are above.
 Screen-language label misclassification is the leading hypothesis; correction is
 pending, with no new build selected. [Detail-popup dismissal](../tasks/active/ui-design-review.md#branches-detail-popup-dismissal--2026-10-02)
 also needs a visible Close X and Escape support; the current Scene details toolbar
@@ -45,7 +49,7 @@ awaits user approval after two read-only subagent reviews; no additional app cha
 also records a pending presentation correction. The repeated GUI error is confirmed
 as the earlier project reopened; installed `01d0896` matches the retained binary.
 The user now reports "new project works fine"; fresh-project Mac acceptance is
-recorded. Continue the current Branches review; the earlier project remains unchanged.
+recorded. Continue hands-on review; the earlier project remains unchanged.
 The requested bootstrap double-check also passes on Mac: preset/custom resolution,
 Git off/on, metadata/reopen, standard menus/dialogue and execution without editor
 metadata. This follow-up changes tests/docs only; the same `01d0896` installer applies.
