@@ -101,3 +101,13 @@ two Tauri builds and fourteen top-level starts. This policy change adds zero run
 builds or launches and does not reset those totals. Phase 0 and accepted 1A-1F remain
 preserved; optional Git is deferred. Read old ledgers only for relevant evidence, not
 as live next-step authority. HANDOVER and the new selected brief own continuation.
+
+## Concurrent planning
+
+Docs-only Phases 2–3 planning is isolated on `codex/phase-2-3-planning`; it does not
+replace the active Phase 1G review above. The user confirmed those two phases and
+selected Story logic before screen design in Phase 3. The
+[Phase 2 delivery sequence](../tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+and [Phase 3 draft](../tasks/active/phase-3-initial-wysiwyg-release.md) are ready for
+scope discussion. Implementation entry still requires accepted Phase 1 through 1H
+and explicit bounded selection. HANDOVER records branch isolation and continuation.

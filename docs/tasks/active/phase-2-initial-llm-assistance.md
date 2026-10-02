@@ -1,11 +1,11 @@
 # Phase 2 — Initial LLM assistance
 
-**Planning date:** 2026-09-22.
+**Planning date:** 2026-09-22; delivery sequencing reviewed 2026-10-02.
 **State:** detailed planning checkpoint; implementation not started or authorised.
 **User direction:** review and plan Phase 2 without touching existing Phase 1 work; add Unsloth Studio as a first-class provider and incorporate the reviewed suggestions.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
-**Isolation:** this planning publication must not edit Phase 1 code, tests, workflows, task ledgers, CURRENT, HANDOVER or PR #14. It does not claim or alter Phase 1 acceptance.
+**Isolation:** preserve Phase 1 code, tests, workflows and acceptance ledgers. The original September publication also left CURRENT/HANDOVER untouched. The October concurrent-planning branch adds only a short planning note there, preserving the active Phase 1 continuation; it does not claim or alter Phase 1 acceptance.
 
 ## 1. Outcome and scope
 
@@ -138,7 +138,7 @@ The displayed file diff must derive from the exact core-prepared mutations later
 
 ## 8. Review, partial acceptance, history and lifetime
 
-Provide semantic and file views, readable explanations, affected entities, dependencies and uncertainty. Reuse Quiet Studio Dark, accessible checkboxes/keyboard focus, responsive panels and clear empty/error/stale states. Untrusted output renders as passive text; no injected HTML or provider links automatically opened.
+Provide semantic and file views, readable explanations, affected entities, dependencies and uncertainty. Reuse the accepted UI refresh and semantic theme tokens in both supported themes, accessible checkboxes/keyboard focus, responsive panels and clear empty/error/stale states. Untrusted output renders as passive text; no injected HTML or provider links automatically opened.
 
 Selection units are whole semantic operations or inseparable operation groups, not arbitrary diff lines. Selecting dependent dialogue requires its Character definition or explicit remapping. Changing selection rebuilds dependencies and patches and shows a fresh diff. Never auto-select hidden changes.
 
@@ -162,7 +162,11 @@ Provide list/edit/filter/approve/reject/supersede controls with undo and reopen 
 
 ## 10. Checkpoint sequence and gates
 
-Each row is a separate checkpoint/chat unless the user explicitly selects otherwise. All implementation states initially are not_started.
+These are dependency checkpoints, not mandatory chat boundaries. Select one coherent
+outcome with internal implementation/test/review checkpoints under [WORKFLOW](../../WORKFLOW.md);
+resume that same outcome/chat after a wait. All implementation states remain `not_started`.
+The original provider requirements and approval boundaries remain; planning does not
+authorize provider connections or execution.
 
 | Checkpoint | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
@@ -172,7 +176,7 @@ Each row is a separate checkpoint/chat unless the user explicitly selects otherw
 | 2B.1 — Context and prompts | Deterministic manifests, budgets, dependency disclosure, revisions/provenance, versioned editable prompt resources. | Golden payloads; no whole-project leakage; unknown state and route cycles bounded; no silent truncation; complete request accounting. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
 | 2C.1 — Proposal planner | Strict schemas, semantic/dependency checks and non-mutating batch-to-patch preparation. | Malicious/invalid output writes nothing; same-file batch edits, new IDs, terminal constraints, Unicode/custom preservation and exact previewed mutations. |
-| 2C.2 — Proposal acceptance | Semantic/file review, dependency-valid subsets, stale rejection, one transaction/undo and explicit transient lifetime. | Core/renderer/native acceptance, duplicate-click/retry protection, concurrent drafts, external edits, process termination/recovery, no partial success claims. |
+| 2C.2 — Proposal acceptance | Semantic/file review, dependency-valid subsets, stale rejection, one transaction/undo and explicit transient lifetime. | Core/renderer/native acceptance, duplicate-click/retry protection, concurrent drafts, external edits, interrupted-acceptance recovery using non-crashing fault/state fixtures, no partial success claims. |
 | 2C.3 — Character and lore completion | Full Character action plus persistent lore statuses, provenance, editing and approvals. | No implicit lore approval or source execution; migration/reopen, stale citations, missing entities, repeated undo/redo and metadata-free game behavior. |
 | 2C.4 — Integrated acceptance | Real authoring workflow through every action/provider and supported client target. | Required matrix below passes; remaining limitations explicit; stop for independent review rather than automatically merging/starting Phase 3. |
 
@@ -187,7 +191,7 @@ At each checkpoint, update its ledger and canonical behavior/ADRs, run cheap rel
 | Provider fixtures | Auth redaction; endpoint/base-path normalization; redirects/proxies; unavailable/no-model/busy errors; parameter/capability mismatch; exact model IDs; structured and plain malformed results; tools-disabled fields; SSE splits/UTF-8/unknown events; missing usage and finish reasons. |
 | Lifecycle/concurrency | Provider change, key rotation, model switch, project switch, cancel/complete race, old-session callback, competing Source draft, accepted source/lore change, stale send token and duplicate acceptance. Save remains responsive during a stalled request. |
 | Context | Deterministic order, selected route repeats, dependency accounting, excluded custom code/assets, unknown state, exact large integers, stale summaries/lore, over-budget rejection and no implicit sends. |
-| Transactions | Multiple operations touching one file; new Character plus dialogue; partial dependency refusal; terminal beat validity; external edits; Unicode/BOM/newline preservation; undo/redo; failed commit; crash/recovery; metadata limits and reopen. |
+| Transactions | Multiple operations touching one file; new Character plus dialogue; partial dependency refusal; terminal beat validity; external edits; Unicode/BOM/newline preservation; undo/redo; failed commit; ordinary interrupted-save/recovery fixtures; metadata limits and reopen. |
 | Security/privacy | Native credentials absent from renderer/project/logs/artifacts; prompt-injection fixtures cannot expand authority; unsafe names/paths/HTML refused; no ambient WebView HTTP/shell privilege; no tool execution; provider retention disclosure. |
 | UX/native | Windows x64 and macOS ARM64 packaged action/context/diff/accept workflow; keyboard/focus; small window/overflow; readable status; cancel/error/retry; authoritative native credential interaction. Browser tests support but do not replace packaged evidence. |
 | Live compatibility | Record exact client commit, provider/version or unknown, model ID/quantization where known, configured context/output, transport and actual results. Test Studio, Ollama and one representative generic endpoint using synthetic content. Do not require identical prose. |
@@ -223,3 +227,55 @@ Planning validation: four-file scope review; repository text/privacy checks appl
 Next bounded action: review this plan, especially the qualified model-management boundary and network policy. After Phase 1 is accepted and the user selects 2A.0, inspect actual refs/ownership again, reconcile the brief with accepted Phase 1 interfaces, then record the real implementation branch/PR and active checkpoint in the existing CURRENT/HANDOVER. Do not create an implementation branch from this historical planning baseline merely because it is quoted here.
 
 Implementation ledger fields per checkpoint: state, authorising instruction, branch/PR, candidate, decisions/changed paths, test commands/counts/skips, live-provider evidence, target run/attempt/SHA, blockers, published continuation and next approval boundary. Preserve one live repository handover when Phase 2 becomes active.
+
+## 14. October milestone sequencing
+
+The user selected planning Phases 2 and 3 while Phase 1G continues. This is a docs-only
+successor to the original four-file publication scope in section 13. Branch:
+`codex/phase-2-3-planning`, based on `de2fdad`; no existing provider requirement is
+removed and Phase 1 through 1H remains the implementation prerequisite.
+
+**First usable result:** explicitly select dialogue, inspect its destination/context,
+generate a rewrite, inspect exact changes, accept and undo it. Prove that complete
+path early with one qualified provider before expanding to all five actions. This
+orders work; it does not reduce the final three-provider or five-action commitment.
+
+| Outcome | Existing checkpoints covered | Reviewable result |
+| --- | --- | --- |
+| Provider feasibility | 2A.0 | Measured compatibility of available Studio/Ollama/generic configurations; credential/request ADR and concrete production plan. |
+| First safe rewrite | Necessary parts of 2A.1–2A.2, 2B.1–2B.2 and 2C.1–2C.2 | One complete user-initiated rewrite with real context/revision checks, native credentials, strict proposal review, one transaction and undo. |
+| Scene and provider completion | Remaining provider coverage plus continue/draft Scene and dependency-valid acceptance | Real authored scenes and selected subsets; no hidden source changes or silent provider fallback. |
+| Character and lore | 2C.3 plus related context/actions | Character proposals and explicit lore approval, provenance, invalidation and reopen. |
+| Milestone acceptance | 2C.4 | Five actions, three providers and both client targets with honest live evidence and known limitations. |
+
+The first rewrite outcome needs a bounded execution brief after 2A.0; it is not
+permission to implement all transport modes or proposal families at once. Non-streaming
+is the first path. Optional SSE follows only after separate qualification. Required
+selected-context, credential, revision and acceptance checks cannot be postponed as
+polish to accelerate that demo. Cross-reference checkpoint IDs in the execution ledger
+so early shared work is not reimplemented or retested without changed inputs.
+
+The main uncertainties are actual provider capabilities and multi-operation source
+preparation. Prove a small batch touching the same file before expanding proposal UI;
+retain operation grouping, stale rejection and one undo entry. Phase 0's
+[credential spike](../../research/CREDENTIAL_STORE_SPIKE_RESULTS.md) is supporting
+evidence only: production native secret entry, unavailable/locked-store handling and
+packaged identity behavior need their own affected-target checks. Do not repeat the
+stack comparison or claim the old no-renderer probe qualifies new settings UI.
+
+Recheck official provider documentation and installed versions at 2A.0; section 2
+records September research, not a newly verified compatibility claim. No provider
+was contacted in this October planning task. Availability of suitable inference hosts
+and models is unresolved. Missing live access is a recorded gate, not an implicit
+permission to install models, spend money or substitute mocks for required evidence.
+
+Apply ADR 0010 and current TESTING selection: retain ordinary external edits and
+interrupted acceptance with non-crashing fixtures, avoid retired specialist experiments,
+prove real user-action boundaries and gate rejection, and keep cumulative problem
+budgets. Agent-owned checks cover development; physical user review is limited to
+genuinely human interaction/visual acceptance. No native builds are needed for planning.
+
+Phase 2 is complete only at its existing integrated gate. Then
+[Phase 3](phase-3-initial-wysiwyg-release.md) begins with richer Story logic followed
+by Screens, as selected by the user. New Phase 3 constructs do not silently expand
+Phase 2's permitted proposal operations or imply state/reachability knowledge.

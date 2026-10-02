@@ -1,6 +1,6 @@
 # Phased roadmap
 
-**Planning clarification:** 2026-09-15. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](status/CURRENT.md) for actual implementation and gate state.
+**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](status/CURRENT.md) for actual implementation and gate state.
 
 ## Phase 0 — Foundation and proof (complete)
 
@@ -78,6 +78,13 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
+The October delivery sequence targets a complete reviewed dialogue rewrite early,
+then Scene/provider completion, Character/lore and final integrated acceptance.
+[The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+maps those outcomes to the requirement checkpoints below; it retains all three
+providers and five actions. Checkpoints use internal commits in the same outcome/chat
+under WORKFLOW, not mandatory chat transfers.
+
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
 
 | Checkpoint | Scope and gate |
@@ -93,6 +100,13 @@ State simulation/Run From Here remain Phase 3; broader reachability/state and na
 ## Phase 3 — Initial WYSIWYG release
 
 **Outcome:** satisfy PRODUCT's initial-release scope through separately gated capabilities, not one large implementation goal. Preserve the accepted source/transaction/authority architecture and exclude arbitrary existing-project import.
+
+The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) defines
+first usable results, proposed subsets, dependencies, early risk proofs and completion
+gates. The user selected **Story logic first, then screen design** on 2026-10-02.
+The remaining order is proposed. This plans ahead alongside Phase 1G; it neither starts
+Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
+entry points, Git remote scope and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |
 | --- | --- |

@@ -257,3 +257,33 @@ Reason: Deliver usable builds and finish available review preparation as one out
 Read AGENTS.md, docs/status/HANDOVER.md and docs/tasks/active/phase-1g-review-delivery.md. Inspect fresh refs/ownership; preserve newer work. Retrieve the existing Windows/Mac packages from run 36383551820, attempt 1, verify their identity and provide local files, hashes and launch instructions. Do not rebuild for docs; follow the brief's single local Windows fallback only if its package is unavailable/unusable.
 Prepare disposable fixtures, perform the bounded Windows checks where access is verified, and provide one focused user checklist per OS. Missing native access must not withhold an available build. Review and publish the evidence and handover. Use internal checkpoints, not replacement goals. Pause for my review; resume the SAME goal/thread on my command through the client's actual control. Keep cumulative budgets and explicit approval boundaries. No automatic polling, retries, new matrix, conflict resolution, merge, 1H, optional Git or Phase 2.
 ```
+
+## Concurrent Phase 2–3 planning — 2026-10-02
+
+The user selected docs-only planning of the next two major phases while Phase 1G
+review continues, and chose Story logic before screen design for Phase 3. The isolated
+branch `codex/phase-2-3-planning` starts at local Phase 1G checkpoint `de2fdad` and
+has its own managed worktree; the original feature checkout remains in place.
+Remote feature head was `3c5ce24` at planning entry, so the fork also preserves the
+then-unpublished chapter/Writing-focus documentation commit. No feature ref is moved.
+
+[Phase 2](../tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+retains existing requirements with an early complete rewrite outcome and current
+workflow/testing policy. [Phase 3](../tasks/active/phase-3-initial-wysiwyg-release.md)
+is a reviewable draft with proposed subsets and open decisions. Only the planning
+request and Story-before-Screens priority are selected; implementation remains
+`not_started`, dependent on accepted Phase 1 through 1H and later bounded selection.
+
+Next in this planning chat: review and refine the proposed subsets. Continue Phase 1G
+from the unchanged review sections above in its existing checkout. Planning uses any
+Codex host and documentation checks only; zero app builds, launches, provider calls or
+manual production dispatches are selected. Preserve the existing Phase 1 budgets.
+Publish planning to its own branch; do not merge it or retarget it into active Phase 1
+work automatically. At later integration, reconcile this short concurrent note with
+the then-current HANDOVER rather than replacing newer Phase 1 state with this snapshot.
+
+Planning evidence: repository validation passed across 315 files; whitespace and
+six-document scope review passed. Publication target: `origin/codex/phase-2-3-planning`;
+no planning PR or merge. Verify its head against the local planning commit before
+reporting publication. The primary worktree acquired active Phase 1 edits during this
+session; they remain exclusively with that workstream and were not copied or staged.
