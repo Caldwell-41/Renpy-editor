@@ -1505,3 +1505,61 @@ builds and 44 starts including boundary primary/secondary. PR #17 was freshly re
 as draft/open/conflicting at `3fad28f`. Windows verification for corrected inputs,
 the twelve visual corrections and remaining physical/live progress acceptance stay
 open. Continue fresh-project Story review in this chat.
+
+### Sidebar controls, Beat dragging and Writing focus proposal — 2026-10-02
+
+The user requests subagent research and a proposal for approval before application
+changes. Two read-only subagents reviewed official editor examples and the current
+code. No implementation, build, app launch or workflow dispatch is selected here.
+Fresh feature refs match `b4d6c05`; main is unchanged. Record these alongside the
+twelve earlier pending corrections; do not treat proposal preparation as acceptance.
+
+**STORY-05 — sidebar independence and focus, awaiting approval:** replace the
+"Collapse navigation" and "Scenes / files" text controls with small icon buttons at
+the top of their respective panels. Main navigation alone collapses to the existing
+64 px icon rail. Story tree labels, width, chapter state and selection stay intact;
+its column shifts left into the reclaimed space. The Story tree/file list has its
+own hide button, removing its column entirely, with a restore icon beside the
+workspace title. Give each icon a tooltip, accessible name, keyboard activation and
+accurate expanded/controlled state. Move focus to a surviving control when hiding
+its pane. Avoid conflicting compact-layout rules or invisible retained columns.
+
+Writing focus temporarily hides main navigation completely (including its icon
+rail), Story tree/file list and any inspector, retaining the current preview hide.
+Keep "Exit writing focus" in the Scene header. Exiting restores the preceding pane
+visibility and widths, chapter expansion, selected Scene/Beat and draft, without
+overwriting stored layout preferences. This refines the earlier positive Writing
+focus feedback; that observation does not accept this expanded behaviour.
+
+Source cause: `app/src/ui-refresh.css:10` applies navigation-collapse styling to
+every descendant `.tree-item` and hides `.story-tree`, while the with-tree grid
+still reserves that column (lines 25/37). The toggle at `app/src/main.ts:406` changes
+only navigation state. Scope compact rules to the navigation aside. Current focus
+(`app/src/scene-ui.ts:500`) only controls preview/divider visibility.
+
+**STORY-06 — Beat drag reorder, awaiting approval:** add a small six-dot grip on
+the left of each movable Beat row. Dragging from the grip shows a ghost row and a
+clear insertion line; drop persists one reorder with one Undo step; Escape or drop
+outside a valid destination cancels without changing source. Retain keyboard reorder
+through the grip/menu, draft guards and visible failure feedback. Unsupported or
+terminal/protected source boundaries remain respected. Do not drag form fields or
+turn ordinary text selection into a drag.
+
+The existing `MoveBeat` command (`app/src-core/src/scene.rs:286`) only supports
+adjacent up/down movement; drag across multiple rows needs a bounded arbitrary-
+destination transaction, not repeated adjacent writes. Preserve exact source bytes,
+Beat IDs, expected revision, history and protected-region checks. The existing
+unsubmitted-edit guard at `app/src/scene-ui.ts:302` also applies to dragging.
+
+**STORY-04 — reaffirmed:** chapter chevrons collapse/expand only their child Scene
+list, initially expanded. Retain chapter menus, selected editor/drafts and stable
+expansion state across redraws. This remains pending with the earlier corrections.
+
+Reference patterns: [VS Code Custom Layout](https://code.visualstudio.com/docs/configure/custom-layout)
+documents independent visibility controls in top chrome; [JetBrains Tool Windows](https://www.jetbrains.com/help/idea/tool-windows.html)
+documents pane-header hide controls and hiding/restoring previously open panes.
+The proposed placement adapts these patterns to Loomlight's existing separate columns.
+
+Next: obtain the user's approval of this concrete proposal before implementation.
+No package/native/SDK starts or CI dispatches added; existing evidence and cost
+totals are unchanged. Continue the same review branch/chat; no integration selected.

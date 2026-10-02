@@ -1,5 +1,21 @@
 # Current outcome handover
 
+## Latest UI proposal — 2026-10-02
+
+The user requests subagent examples and approval before changing sidebar controls,
+Beat dragging, chapters and Writing focus. Two read-only subagents completed that
+review. The [concrete proposal](../tasks/active/ui-design-review.md#sidebar-controls-beat-dragging-and-writing-focus-proposal--2026-10-02)
+records STORY-05 (independent top-of-panel icons and hide-all/restore Writing focus),
+STORY-06 (left dot grip, one transactional reorder/Undo) and reaffirmed STORY-04
+(chapter disclosure). Twelve earlier corrections stay pending; the two added
+proposals await approval. The reported navigation/tree coupling is confirmed in
+shared CSS, not the navigation state toggle. No application code changes, launch,
+build, verification run or dispatch occurred. Reuse installer `01d0896`; counts and
+Windows limits below are unchanged. Fresh feature refs matched `b4d6c05`, main
+unchanged; preserve the existing branch and separate planning worktree. Next:
+user approval of this proposal, then only the explicitly selected implementation
+and verification scope. No workflow pending, conflict resolution or merge selected.
+
 ## Latest selected correction — 2026-10-02
 
 **Bootstrap follow-up complete:** the user requested double-checking fresh-game
