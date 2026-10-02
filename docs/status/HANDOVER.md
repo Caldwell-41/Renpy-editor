@@ -1,5 +1,20 @@
 # Current outcome handover
 
+## Current review surface — Source, 2026-10-02
+
+The user moves to Source and records [SOURCE-01/02](../tasks/active/ui-design-review.md#source-tab-presentation-and-active-file-visibility--2026-10-02):
+visually attach Close X to its script tab; contain overflowing open tabs, expose
+scroll/open-files controls and automatically reveal the newly opened active tab.
+Keep the corresponding file row selected and preserve editor/draft state. These
+are pending corrections, not implemented or verified. The user says the latest
+opened file should have focus in the file bar; this supports the active-tab reveal
+proposal. A tabs-versus-left-list overflow clarification remains optional. No Story
+acceptance is inferred merely from moving to Source. Continue Source feedback,
+retaining the remaining Story and physical input checks. Reuse `01d0896`. Only docs
+changed; zero new app/SDK/native starts, builds or dispatches. Fresh feature refs
+matched `fc8e0e1`, main unchanged; earlier sidebar/drag approval remains pending.
+
+
 ## Latest runtime review — 2026-10-02
 
 The [runtime-panel finding](../tasks/active/ui-design-review.md#runtime-panel-feedback-and-earlier-project-launch--2026-10-02)

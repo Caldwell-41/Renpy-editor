@@ -1623,3 +1623,48 @@ repaired. This does not infer acceptance of every Beat type, physical input/IME,
 OS drop, live download/progress or Windows. Next: continue Story review; RUNTIME-01
 and the accumulated visual corrections remain pending, with STORY-05/06 still
 awaiting proposal approval. No new agent build/run/dispatch.
+
+### Source tab presentation and active-file visibility — 2026-10-02
+
+The user moves review to Source in the fresh project and reports that the script
+Close button looks detached from its tab, and additional files can open off-screen
+without a clear indication. They additionally require the latest opened file to
+have focus in the file bar. The supplied view shows one open `.rpy` tab and a Clean
+editor/Saved project. This does not infer completion of all Story acceptance or
+physical Source typing, save/reopen, conflict and compact-layout checks.
+
+**SOURCE-01 — integrated tab Close, implementation pending:** render filename,
+draft indicator and Close X as one visual tab, sharing selected/hover background,
+height and boundary. Keep the X attached at its right edge with a useful target,
+accessible name and visible focus. Closing a tab retains its draft under the
+existing transition contract; do not turn Close into Discard or Save. Long labels
+truncate within the tab, with the full relative path available to distinguish
+duplicate filenames. Current `app/src/source-ui.ts:775–778` groups name and Close
+buttons structurally, but CSS at `app/src/ui-refresh.css:21/29` gives the active name
+and Close different backgrounds and applies the selection indicator to the name
+only. Correct the unified visual surface without merging their separate actions.
+
+**SOURCE-02 — overflow and active-file reveal, implementation pending:** keep the
+open-tab strip inside the available editor width, with visible previous/next scroll
+controls and an open-files menu when tabs overflow. Opening or switching to a file
+makes its tab active and reveals it in the strip, rather than selecting an invisible
+off-screen tab. Keep the matching Source Files row highlighted. The user's "focus"
+requirement means the current file must be visibly selected/revealed; preserve the
+editor's cursor and readiness for typing without stealing keyboard focus on every
+redraw. Preserve independent drafts, selections, undo state and dirty indicators.
+Selection after closing the active tab must likewise be visible.
+
+The tab strip currently uses `overflow:auto`, but has no explicit overflow controls
+and `openFile`/tab rendering has no active-tab scroll/reveal (`source-ui.ts:692/775`).
+A clarification was asked whether the reported overflow refers to top tabs or the
+left Source Files list; the follow-up refers to the file bar and active opened file,
+so the proposed correction targets tabs. If the left list is also affected, retain
+a bounded independently scrollable list with its heading/search visible, rather
+than allowing it to spill beyond the window. Do not claim a many-tab reproduction
+from the supplied single-tab screenshot.
+
+This checkpoint records feedback/proposed acceptance only. No application code,
+private project edits, UI navigation, launch, build or test/CI run added. Fresh
+feature refs matched `fc8e0e1`, main unchanged. Source is the current review surface;
+continue its feedback and retain uncompleted Story checks. The earlier sidebar/drag
+proposal still awaits approval; no integration or new feature phase selected.
