@@ -1,6 +1,6 @@
 # UI design review
 
-**Updated:** 2026-09-30. **State:** review_ready, automated qualification passed; human acceptance open.
+**Updated:** 2026-10-02. **State:** review_ready, automated qualification passed; human acceptance open.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
@@ -1252,3 +1252,32 @@ Seven accumulated corrections now remain pending: WELCOME-01/02/03, WIZARD-01,
 SDK-01, CONFIG-01 and REVIEW-01. Continue reviewing the summary, then observe actual
 project-creation progress in the existing qualified build. This checkpoint changes
 only the review record; no application code, build, agent app launch or dispatch.
+
+### Creation observation and Story review — 2026-10-02
+
+The user reports project generation completed rapidly with no specific issues noticed
+and requests continuation to Story. Fresh read-only native observation confirms the
+created disposable project is open in Story with Scene 1, starter Narration and
+Return / End Beats. Record successful fast completion and workspace entry as a
+**user-reported Mac pass**, supported by the visible resulting workspace. No elapsed
+measurement, detailed stage-by-stage observation or long-running progress behaviour
+is claimed. This report introduces no creation defect or demand for an artificial
+delay/repeated creation solely to inspect a brief progress display.
+
+Current Story observation: Light theme, navigation and scene list visible, preview
+above Beats, scene details collapsed, Writing focus off. Preview allocation control
+reads 59%; the reason for that value is not inferred. The accepted initial allocation
+is roughly one-third with remembered user adjustments, so this observation alone is
+not classified as a default-size defect. The starter project has no background, and
+the preview honestly shows that empty state. Compare structure with the saved Story
+layout and colour with the accepted palettes, rather than importing mockup artwork.
+
+Next: review Story spacing/panel proportions, open the starter Narration for inline
+editing, observe physical typing/commit/undo and status stability, and try Writing
+focus and panel controls. Do not infer these checks passed from initial inspection.
+Seven existing visual/wording corrections remain pending implementation. Live SDK
+download, physical keyboard/IME, actual OS drop, resolution preset/Custom user checks
+and final visual acceptance on both targets retain their open/unreported limits.
+This continuation changes documentation only; no agent project edit, creation, app
+launch, build or dispatch occurred. User-driven creation is separate from retained
+automated scenario/build totals.

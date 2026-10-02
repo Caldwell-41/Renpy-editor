@@ -58,12 +58,22 @@ existing reference set. All seven accumulated visual/wording corrections remain 
 implementation; design approval does not select another build/dispatch. Remaining
 acceptance/budgets are unchanged.
 
-**Current review position:** Review & Create, step 4. The user requests
+**Previous review position:** Review & Create, step 4. The user requests
 [REVIEW-01](../tasks/active/ui-design-review.md#review--create-checkbox-feedback--2026-09-30):
 align the Git checkbox to the left of its label on one row inside Advanced, retaining
 its value/behaviour. No project creation occurred during agent inspection. Next:
 finish summary feedback and observe actual creation progress. Resolution preset/Custom
 input checks are still unreported; reaching step 4 is not inferred acceptance.
+
+**Current review position — 2026-10-02:** Story in the created disposable project.
+The user reports rapid generation with no issues noticed; native read-only observation
+confirms workspace entry with starter Narration/Return Beats. The
+[creation/Story record](../tasks/active/ui-design-review.md#creation-observation-and-story-review--2026-10-02)
+limits the pass to this fast successful Mac path; detailed progress stages were not
+separately assessed. Next: Story layout, inline editing with physical input, commit/
+undo, status stability and Writing focus. Seven recorded corrections remain pending;
+no additional build/dispatch or integration is selected. Existing evidence/budgets
+are unchanged; no agent project edits or new launches occurred.
 
 ### Exact successful qualification
 

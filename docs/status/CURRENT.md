@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-09-30.
+**Updated:** 2026-10-02.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
@@ -41,10 +41,13 @@ No installer launch or new human acceptance result is claimed by this preparatio
 The user's first [Welcome findings](../tasks/active/ui-design-review.md#welcome-feedback--2026-09-30)
 record missing Settings affordance, column-tone separation and project-hover feedback.
 All three corrections are pending; continue collecting review feedback in this chat.
-Review is now at wizard step 4. The user accepted the
+Review is now in Story after the user's rapid successful project creation, with no
+specific generation issue noticed. Workspace entry is observed; individual progress
+stages were not separately assessed. The user accepted the
 [resolution-picker detail](../design/ui-refresh/game-configuration-resolution-picker.png);
 seven accumulated visual/wording corrections remain pending implementation in the ledger,
 including an inline checkbox/label row for local Git in Review & Create.
+Next: Story layout, inline editing/physical input, commit/undo and Writing focus.
 
 Cumulative refresh: three accepted hosted dispatches, attempt 1 each; seven production
 builds (six hosted, one local), 39 native scenario starts plus four boundary-smoke
