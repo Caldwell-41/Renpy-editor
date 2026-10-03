@@ -7,18 +7,30 @@
 
 ## Live continuation
 
-**State: approved Branches option B implemented; corrected installer not selected; Windows deferred.**
-The user chose B. [BRANCHES-03 implementation](../tasks/active/ui-design-review.md#option-b-selected-and-implemented--2026-10-03)
-is saved at source **`88add80972ca29c81086a5476ad6ed0bde342fe4`**: heavier rounded orthogonal routes,
-separate backward/parallel channels, opaque readable label pills, correct arrowheads
-and Fit bounds. The selected reference is retained in the design index. Local checks
-pass: **83 frontend tests**, web compilation, all-workspace actual-renderer regression,
-500-node/2000-edge browser check, diff/repository validation (**325 files**). These
-are local renderer checks, not native acceptance. WIN-UI-13 adds exact connector,
-label/zoom/scaling and navigation checks to the deferred Windows list.
-Delivered `19cdcaa` predates sidebar/Branches source changes; no new installer was
-selected. CONFIG-01 and physical/native/final UX acceptance remain open. No hosted
-request, native/SDK start, integration or new phase; no pending operation.
+**State: catalogue layout/staged-preview corrections implemented; installer unchanged; Windows deferred.**
+The user reports provisional acceptance with further review open, then selects fixes
+for Character/Variable layouts and a selected-image preview in the import modal.
+[CATALOG-05 / ASSETS-03](../tasks/active/ui-design-review.md#catalogue-layout-and-staged-import-preview-follow-up--2026-10-03)
+is implemented at source **`cedef502c7f517a808319696ba3a94952377f41d`**, parent `002c753`.
+Character mixed-image/placeholder Grid/List layouts and the Variable table's four
+columns now align. Selected images replace the initial Choose section; smaller Add
+files, loading/error/Retry, remove/discard/reopen and read-only retained-file preview
+preserve explicit import confirmation and transaction ownership.
+Local checks pass: **85 frontend tests**, web build, **7 focused core tests**, **1
+macOS desktop test**, full actual-renderer regression including catalogue alignment
+at three widths/both themes and staged PNG decode/compact actions. Format/diff and
+repository validation pass (**325 files**). WIN-UI-14 joins the deferred list.
+No native/file-drop/final UX pass is claimed. Delivered installer `19cdcaa` predates
+these/sidebar/Branches changes; no replacement installer was selected this turn.
+CONFIG-01 and physical/live-progress/final UX acceptance remain open. Remote planning
+advanced to `267ec2a`; its separate local worktree remains `2c5a164`. Preserve both.
+PR #17 remains OPEN/draft/CONFLICTING. No hosted request, package, native/SDK app
+start, integration or new phase; no pending operation.
+
+**Previous Branches correction:**
+Option B source `88add80` implements heavier rounded routes, distinct channels,
+readable label pills and Fit bounds. Its 83-test/frontend/browser/large-graph proof
+and WIN-UI-13 acceptance remain in the [implementation record](../tasks/active/ui-design-review.md#option-b-selected-and-implemented--2026-10-03).
 
 **Previous sidebar correction:**
 The user reported misaligned/widening sidebar controls, the hidden tree restore button
@@ -55,7 +67,7 @@ audited interactions, real mouse reorder/cancellation, decoded appearance thumbn
 and deferred Beat receipts. The web build retains its existing chunk-size advisory.
 No unchanged observed-flow timing gate, official SDK or package matrix was rerun.
 The [Windows checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03)
-has 13 specific action/result rows, all unexecuted on Windows.
+has 14 specific action/result rows, all unexecuted on Windows.
 
 **The user-selected local Mac installer is ready; resume hands-on review at Story.**
 Built input `19cdcaa` (app source `1d4bf14`) with one release build. Retained final DMG:

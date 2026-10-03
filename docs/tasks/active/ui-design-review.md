@@ -2649,3 +2649,10 @@ package, native/SDK application start, hosted workflow, merge/conflict resolutio
 or feature phase selected. Counts stay 9 packages, 44 native/boundary starts and
 separately 4 SDK menu starts. Publish this correction on the existing branch and
 record its exact source checkpoint in CURRENT/HANDOVER. No pending operation.
+
+Source checkpoint **`cedef502c7f517a808319696ba3a94952377f41d`** contains these
+corrections and canonical behavior/test updates. Final format/diff/repository check
+passes (325 files). Fresh remote inspection finds planning `267ec2a` newer than its
+separate local `2c5a164` worktree; preserve both. Main `4d7ba03` and PR #17
+OPEN/draft/CONFLICTING are unchanged. Continuation details are now at the top of
+CURRENT/HANDOVER; source and state are to be published together.

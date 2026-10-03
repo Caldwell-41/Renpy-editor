@@ -1,5 +1,45 @@
 # Current outcome handover
 
+## Catalogue layout and staged preview corrected — 2026-10-03
+
+The latest screenshots select correction of Character grid/list layouts, Variable
+column alignment and selected-image preview replacing the initial Choose files
+section. Acceptance is provisional (“acceptable for now”), with refinement/final
+review still open. Source checkpoint **`cedef502c7f517a808319696ba3a94952377f41d`**,
+parent `002c753`, preserves sidebar and approved Branches B implementation.
+The [CATALOG-05 / ASSETS-03 follow-up](../tasks/active/ui-design-review.md#catalogue-layout-and-staged-import-preview-follow-up--2026-10-03)
+owns exact behavior, initial setup failures/corrections and evidence.
+
+Explicit summary/surface columns fix mixed Character image/placeholder rows and
+four-column Variable/header alignment. Staging replaces initial Choose/description
+with passive per-image previews, dimensions/size and import fields; smaller Add
+files remains. Remove/discard restores empty chooser, errors offer Retry, audio
+shows metadata, and focus avoids hidden controls. `asset.previewImport` uses the
+current session's project-bound retained file authority, checks identity/size/hash
+and existing passive limits, writes nothing and preserves confirmation. URLs are
+bounded/revoked and late detached receipts ignored. No format scope expansion.
+
+Evidence PASS: 85 frontend tests, web compilation, 7 focused core tests, 1 macOS
+desktop test, full Chrome actual-renderer regression (mixed Character Grid/List,
+Variable header positions at 1440/960/560 in both themes; decoded staged PNG,
+remove/discard/reopen and footer actions at full/compact size), inspected screenshots,
+format/diff and repository validation (325 files). Browser bridge uses synthetic
+fixtures; native drop, physical IME and final UX remain unclaimed. Existing web
+chunk-size advisory remains. Windows checklist has 14 specific deferred rows,
+including WIN-UI-14 for layouts, native staging/preview, external changes and DPI.
+
+Delivered `19cdcaa` installer predates these/sidebar/Branches fixes. Continue review
+or select a replacement installer separately; no new package selected this turn.
+CONFIG-01, live SDK/detailed creation progress and physical/final acceptance remain.
+Remote planning advanced to `267ec2a35ed94bbf565594200cd729c87c6fb11c`; its local
+separate worktree remains `2c5a164`. Preserve both without resetting/updating that
+checkout. Main `4d7ba03`, PR #17 OPEN/draft/CONFLICTING remain. No package,
+native/SDK application start, hosted dispatch, automation, merge/conflict resolution
+or new phase; totals stay 9 packages, 44 native/boundary starts and separately 4 SDK
+menu starts. No pending operation. Publish/verify this continuation checkpoint on
+the same branch; no receipt-only commit.
+
+
 ## Approved Branches option B implemented — 2026-10-03
 
 The user chose B, selecting its bounded connector implementation. Source checkpoint
