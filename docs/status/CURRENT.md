@@ -7,15 +7,18 @@
 
 ## Live continuation
 
-**State: Branches connector mockups selected; awaiting visual choice; Windows deferred.**
-The user's latest feedback selects [BRANCHES-03 design options](../tasks/active/ui-design-review.md#branches-connector-design-options--2026-10-03):
-heavier arrows, legible labels, node-avoiding backward links and distinct reciprocal
-routes. A requested subagent produced three inspected built-in image-generation previews:
-curved top-down, rounded orthogonal, horizontal. Model selection is unavailable;
-no Sunburst identity is claimed. Previews are retained in ignored
-`.toolchains/reports/branches-mockups-2026-10-03/`; B's generated missing arrowhead/
-imperfect tip is disclosed as a concept limitation. Choose a direction before implementation. No app
-change, new package/CI/integration is selected for this proposal.
+**State: approved Branches option B implemented; corrected installer not selected; Windows deferred.**
+The user chose B. [BRANCHES-03 implementation](../tasks/active/ui-design-review.md#option-b-selected-and-implemented--2026-10-03)
+is saved at source **`88add80972ca29c81086a5476ad6ed0bde342fe4`**: heavier rounded orthogonal routes,
+separate backward/parallel channels, opaque readable label pills, correct arrowheads
+and Fit bounds. The selected reference is retained in the design index. Local checks
+pass: **83 frontend tests**, web compilation, all-workspace actual-renderer regression,
+500-node/2000-edge browser check, diff/repository validation (**325 files**). These
+are local renderer checks, not native acceptance. WIN-UI-13 adds exact connector,
+label/zoom/scaling and navigation checks to the deferred Windows list.
+Delivered `19cdcaa` predates sidebar/Branches source changes; no new installer was
+selected. CONFIG-01 and physical/native/final UX acceptance remain open. No hosted
+request, native/SDK start, integration or new phase; no pending operation.
 
 **Previous sidebar correction:**
 The user reported misaligned/widening sidebar controls, the hidden tree restore button
@@ -52,7 +55,7 @@ audited interactions, real mouse reorder/cancellation, decoded appearance thumbn
 and deferred Beat receipts. The web build retains its existing chunk-size advisory.
 No unchanged observed-flow timing gate, official SDK or package matrix was rerun.
 The [Windows checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03)
-has 12 specific action/result rows, all unexecuted on Windows.
+has 13 specific action/result rows, all unexecuted on Windows.
 
 **The user-selected local Mac installer is ready; resume hands-on review at Story.**
 Built input `19cdcaa` (app source `1d4bf14`) with one release build. Retained final DMG:

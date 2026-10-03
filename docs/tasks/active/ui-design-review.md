@@ -2244,6 +2244,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-10 — Beat confirmation/pending (A7) | Create each applicable Beat with one confirmation; simulate a slow receipt through an approved test driver and attempt duplicate confirmation/Cancel. Exercise a stale-source failure, correct it and retry. Use a long list. | Pending controls are disabled, only one write occurs, failure retains editable values, and success reveals/focuses the saved collapsed row without another Commit. |
 | WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
 | WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
+| WIN-UI-13 — approved B connector routing | In a disposable project save reciprocal Scene 1/New Scene jumps, a long jump skipping a node, two choices with the same target/text, a self-loop, a same-layer link and a missing/custom destination. Review both palettes at 100%/higher DPI, zoom/pan/Fit, select routes and use Source navigation. Include long/Unicode names and choice text. | Every known arrowhead meets its correct node boundary; heavier rounded paths avoid all node interiors; reciprocal/duplicate/backward routes remain distinguishable. Label pills stay legible and clear of nodes; Fit includes outer routes/pills. Long node names retain full tooltips/details. No guessed link for missing/custom/terminal flow; saved source, selections, notices and navigation remain correct. Record zoom/scale-specific readability separately. |
 
 Remaining macOS hands-on review uses a corrected installer when selected and resumes
 at Story, then Source/Branches/Characters/Assets/Variables. Physical IME, OS file drop,
@@ -2520,3 +2521,74 @@ the user's choice before implementation. No mockup is accepted yet. Save selecti
 and any refinements here when the user replies; do not reproduce the shortened
 illustrative toolbar as a new product requirement. The user requested connector
 refinement, not graph-editing ports; drawn attachment dots are conceptual.
+
+
+### Option B selected and implemented — 2026-10-03
+
+The user chose **B**, selecting the rounded orthogonal connector implementation
+within the existing Branches review. This supersedes the mockup-choice wait above;
+no horizontal orientation, graph editing, shortened toolbar, new package/CI run or
+integration is selected. Source checkpoint **`88add80972ca29c81086a5476ad6ed0bde342fe4`**, parent `c771493`, preserves
+sidebar `59f0323`, main `4d7ba03` and planning worktree `2c5a164`. The unchanged
+selected image is now saved in `docs/design/ui-refresh/branches-connectors-rounded.png`
+with its hash, prompt set and generated limitations in the existing manifest/index.
+The missing mockup arrowhead/imperfect tip are corrected in actual SVG output.
+
+Implemented:
+
+- 3px opaque palette-accent connectors, rounded orthogonal corners and a visible
+  10px arrowhead at every known destination boundary. Selection increases line
+  weight without changing source, navigation or route ownership.
+- Stable, separate node ports and outside channels for backward, long, same-layer,
+  self and duplicate routes. Adjacent forward links use clear inter-row gaps. Labels
+  that do not fit a direct gap can move with their route to an outside channel.
+  Node interiors remain clear; reciprocal routes do not reuse the same path.
+- 14px primary text on opaque rounded bordered pills, drawn above all connectors.
+  Full text remains in existing route details/tooltip. Caption truncation respects
+  Unicode character boundaries. Existing >100-edge label suppression and graph
+  limits remain; unknown/missing/terminal destinations do not acquire guessed links.
+- Fixed 200×60px nodes keep render/routing bounds aligned; long names ellipsize with
+  their full name/technical label in the tooltip and existing details. The accepted
+  entry Scene seeds cyclic placement, with no inferred entry when it is unproven.
+- Fit includes outside connectors and label rectangles, including negative extents;
+  pan/zoom, selected targets, focus, stale/partial notices and captured navigation
+  remain. No source/service writes or SDK execution were added.
+
+Focused verification at the source checkpoint's file contents:
+
+- `npm run check`: **83 passed, 0 failed/skipped**. Five new rejecting routing cases
+  cover reciprocal/duplicate/long/same-layer/self routes, ragged rows, label/node
+  separation, determinism, unchanged flow data, unresolved/terminal refusal, limits
+  and Unicode captions. Existing Branches refresh/navigation/focus cases pass.
+- Production web compilation PASS; existing chunk-size advisory remains.
+- Full existing actual-renderer `ui-refresh.browser.mjs` PASS. Added eight directed
+  links (the six illustrative routes plus duplicate/self) at 1440/960/560px in both
+  themes. Sample actual rounded SVG geometry every 2px to reject node interiors;
+  require all eight distinct paths and arrow markers, 3px/full-opacity strokes,
+  exact rendered node size, readable pill text bounds, opaque fill and Fit visibility.
+  Inspected ignored `ui-refresh/branches-b-{light,dark}-{1440,960,560}.png` captures.
+- Existing 500-node/2000-edge Branches browser check PASS, reusing retained synthetic
+  service fixture SHA-256 `8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196`.
+  Final measured initial layout **40.4ms**, pan-frame p95 **15.7ms**, visible dispatch/
+  rAF p95 **14.6ms**, rendering-opportunity p95 **31.3ms**; all retained diagnostic
+  thresholds pass. Browser/server cleanup complete. This is Chrome development
+  evidence, not packaged macOS/Windows timing or native/physical acceptance.
+  The evidence hash list now includes `branches-routing.ts`.
+- Repository validation **325 files** and diff check PASS. No unchanged core/SDK gate
+  was repeated: this is renderer geometry/style, without a changed service contract.
+
+Initial cheap checks classified and corrected before final proof: a helper cleanup
+left an unused parameter (`TS6133`), SVG creation returned `Element` without typed
+`dataset` (`TS2339`), and a CSS-edit script initially used a repository-prefixed path
+from `app/`. Removed the unused parameter, used `setAttribute` and corrected the
+working-directory path. Final checks pass; no failed gate was waived. Early/final
+large-graph development runs passed; the final report includes the router's exact
+source identity. Logs/JSON remain ignored under `.toolchains/reports/branches-b-*`.
+
+Windows **WIN-UI-13** below remains DEFERRED. Actual native/final UX approval remains
+open; source/browser proof is not a new installer acceptance. Delivered `19cdcaa`
+predates sidebar/Branches changes. No additional package/install/native/SDK start,
+hosted dispatch, merge/conflict resolution or new phase; counts remain 9 packages,
+44 native/boundary starts and separately 4 SDK menu starts. CONFIG-01 remains open.
+Continue hands-on feedback or separately select a corrected installer. Publish and
+verify source plus this meaningful verification/continuation record on the same branch.

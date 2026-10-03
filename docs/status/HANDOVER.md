@@ -1,5 +1,35 @@
 # Current outcome handover
 
+## Approved Branches option B implemented — 2026-10-03
+
+The user chose B, selecting its bounded connector implementation. Source checkpoint
+**`88add80972ca29c81086a5476ad6ed0bde342fe4`**, parent `c771493`, preserves the earlier sidebar correction.
+The [BRANCHES-03 closeout](../tasks/active/ui-design-review.md#option-b-selected-and-implemented--2026-10-03)
+owns behavior, rejecting cases, initial corrections and exact evidence. The accepted
+unchanged mockup/prompt/hash is retained in the design reference set; its missing
+arrowhead/imperfect tip were generation defects and are corrected in production SVG.
+
+Implemented 3px accent strokes, 14px opaque label pills above connectors, distinct
+ports/channels for reciprocal/parallel/long/backward/self links, rounded node-safe
+paths, fixed node bounds/full-name tooltips and Fit of route/label extents. Accepted
+entry anchors cycles; unresolved/terminal flow remains unguessed. Keep read-only
+flow, captured navigation, pan/zoom/selection/focus and partial/stale contract.
+
+Local proof: **83 frontend tests**, web compilation, full actual-renderer UI regression,
+eight-link SVG sampling/bounds at three sizes/both themes, and existing 500-node/
+2000-edge Chrome check PASS. Diagnostic layout 40.4ms, pan p95 15.7ms; all retained
+thresholds pass, cleanup complete. Diff/repository validation passes (325 files).
+No core/SDK contract changed; those unchanged gates were not rerun. Windows
+WIN-UI-13 is DEFERRED; native/physical/final UX acceptance is unclaimed.
+
+Delivered `19cdcaa` predates sidebar/Branches changes. Continue user review or select
+a corrected installer separately. CONFIG-01 remains open. Main `4d7ba03`, planning
+`2c5a164`, PR #17 OPEN/draft/CONFLICTING and prior evidence remain. No new package,
+native/SDK start, hosted request, automation, merge/conflict resolution or new phase;
+counts remain 9 packages, 44 native/boundary starts and separately 4 SDK menu starts.
+No pending operation. Publish/verify this meaningful verification and continuation
+checkpoint with source on the same branch; no receipt-only commit.
+
 ## Branches connector mockups selected — 2026-10-03
 
 Latest request: show 2–3 image choices before changing Branches. The user reports
