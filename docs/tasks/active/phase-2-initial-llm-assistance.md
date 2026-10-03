@@ -791,3 +791,123 @@ Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its 
 head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
 Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
 implementation selection after Phase 1 acceptance.
+
+## 20. Bounded deliverables and next-outcome prompts
+
+The user selected deliverable-sized execution on 2026-10-03: an owner with bounded
+subagent assignments completes one target, checks the actual result, fixes in-scope
+findings, updates canonical docs/the task ledger/HANDOVER, and returns a prompt for
+the next outcome. Do not one-shot Phase 2, Phase 3 or an entire lane. Section 19's
+five stages are a scheduling/dependency map, not five phase-sized agent goals.
+
+The targets below are planning selections for future briefs, not extra requirement
+IDs or execution approval. Existing 2A–2C and 3A–3D/3F gates retain authority. Before
+starting each target, fix its concrete allowed operations, affected test hosts,
+finite expensive-run allowance and dependencies against the then-current baseline.
+Split a target further when it cannot be proved as one coherent bounded result;
+do not silently turn it into delivery of the remaining phase.
+
+### Deliverable queue
+
+| Target | Finished result and decisive proof | Requirement/dependency |
+| --- | --- | --- |
+| Shared source foundation | One nested child edit preserves surrounding source and stable locations through undo/reopen. Introduce minimum structure/preparation only. | Bounded 3A.1/3A.2; Phase 1/1H entry. Can overlap provider qualification. |
+| Provider qualification | Synthetic Studio/generic results and concrete request/credential contracts; report failures/unknowns. | 2A.0; return for its existing review before production integration. No project sends. |
+| Provider settings and credentials | Configure provider/model/credentials/limits and explicitly check readiness; native credential storage and failures follow the declared contract. | 2A.1 after 2A.0 review. |
+| Request lifecycle | Complete/cancel a bounded synthetic request; failures, limits and late replies preserve responsiveness. | 2A.2 using accepted settings/credentials. Scope streaming to qualified behavior. |
+| Manual reference library | Create/edit/approve manual cards and lore on shared records/forms, undo and reopen with exact statuses/revisions. | Necessary 2B.1. Can overlap provider settings work after contracts agree. |
+| Prompts and context preparation | Edit/restore a prompt and save/reopen; select exact reference revisions and inspect a bounded payload without silent truncation. | Remaining necessary 2B.1 on the manual library; shared prompt/limit settings. |
+| First safe dialogue rewrite | Prepare and inspect one exact send with selected references, review one response, apply once, undo and reopen; invalid/stale output changes nothing. | Bounded 2B.2/2C.1/2C.2 using the prior foundations. One integrated owner outcome across both lanes. |
+| Continue Scene | Generate supported Beats at an explicit insertion anchor, review the group, apply/undo and retain terminal/custom boundaries. | Bounded remaining 2B.2/2C.1/2C.2 after first rewrite. |
+| Draft Scene | Review/create one new Scene with core IDs and explicit terminal state; any incoming connection stays a separate visible operation. | Next bounded 2B.2/2C.1/2C.2 increment on the same proposal path. |
+| Generated Character cards | Draft/update a card with explicit acceptance/approval, provenance and undo/reopen; any selected runnable definition/Appearance operation is separate and reviewed. | Character portion of 2C.3 on manual records/proposal infrastructure. |
+| Generated lorebook entries | Draft/update reviewable entries with applicability, citations, approval/staleness and undo/reopen. | Lore portion of 2C.3; reuse the same reference lifecycle. |
+| Phase 2 qualification | Complete all selected actions on Studio and one qualified generic endpoint, plus affected native targets and the integrated workflow. | 2C.4; no phase completion claim from the first rewrite alone. |
+| Conditional Story logic | Author supported nested conditions/choice guards; Story, Source and Branches agree; native routes match the declared variables. | Necessary 3A.1–3A.4 after shared foundation/first rewrite. Can overlap remaining Phase 2. |
+| Scene calls and Story completion | Call a Scene, return to the following Beat and preserve guarded continuation/return labels through edits and persistence; qualify 3A's combined behavior. | Remaining 3A.1–3A.4; build on conditional source/flow. |
+| Screen round trip | One supported custom screen can be edited via synchronized canvas/tree/properties, undone and reopened; unsupported neighbors survive and native layout agrees. | Bounded 3B.1/3B.2/3B.4; accepted Phase 2 and 3A. Introduce shared scratch runtime job once. |
+| Dialogue and choice screens | Edit declared dialogue/choice layout/style slots without breaking speaking, choices or required bindings in the actual game. | Bounded 3B.3 on the proven screen services. |
+| Menu screens and Screen completion | Complete the declared menu/preferences/save/load adapters and remaining supported inventory; qualify native interactions, Source reconciliation and persistence. | Remaining 3B.1–3B.4; split adapters further in the brief if required. |
+| Static character staging | Drag/resize and numeric/keyboard edits give accurate native placement at game resolution/window sizes; one gesture is one undo and Escape writes nothing. | Bounded 3C.1/3C.2; independent of full Timeline UI. Can overlap Screen round trip after shared runtime/asset contracts agree. |
+| PNG/ATL idles | Frame sequences and the supported transform idle continue through dialogue, change/stop correctly and survive undo/reopen. | First bounded 3C.1a/3C.3 media increment on shared placement. |
+| Native looping video | One qualified opaque/silent clip starts on Show and stops on Hide using shared placement; then qualify the declared embedded-audio/mixer behavior. | Next 3C.1a/3C.3 increment; bounded media delivery and native profile proof. |
+| Prepared transparent video | Supplied side-mask playback has correct transparency and logical geometry; qualify any selected separate-mask route before exposing it. | Next 3C.1a; no mask generation/conversion. |
+| Play-once video | Declared disappear/hold-last/supplied-still end states and replacement/restore behavior work in native playback. | Next 3C.1a/3C.3; no frame-exact resume promise. |
+| Transform Timeline | Add/move/edit supported keyframes and interpolation on the same source/placement/history model; native state/timing agrees. | Remaining transform parts of 3C.1/3C.2/3C.4. |
+| Audio Timeline and 3C completion | Place declared music/SFX cues, waits/fades/queues and interaction boundaries; qualify combined staging/idles/video/transforms/audio. | Remaining 3C.3/3C.4. Full selected inventory still required. |
+| State inspection | A chosen finite route shows known values, provenance and explicit unknowns without executing project code. | 3D.1/3D.2 after accepted 3A; accepted 3C descriptors for supported effects. |
+| Run from Scene entry | An isolated scratch launch matches normal play at a supported Scene entry and preserves real project/saves; refuse unknown or stale state. | 3D.3 with qualified 3A/3C semantics and shared runtime service. |
+| Run from supported Beat boundaries | Extend only to proven stable statement boundaries; qualifying normal/reconstructed runs agree and unsupported starts refuse. | 3D.4 after Scene-entry proof; active call-stack reconstruction remains excluded. |
+| Integrated initial release | Complete one real authoring workflow across writing, Assist, Screens, Timeline and State; close the required combined acceptance evidence. | 3F after all required capabilities, not a new feature sweep. Git remains deferred. |
+
+Within the two parallel lanes, choose only currently independent targets from this
+queue. The owner can have a paired outcome where both lanes jointly deliver one user
+action (especially the first rewrite); do not launch unrelated phase-sized assignments.
+When one lane completes a target, integrate its proof and prepare its next prompt;
+do not automatically broaden the other lane or repeat unchanged expensive checks.
+Story logic precedes Screens. Screens and animation targets then overlap; State and
+release consume their accepted semantics. The exact sequence follows dependencies,
+not a requirement to serialize every row of this table.
+
+### Completion loop and stop boundary
+
+1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
+   baseline, required dependencies, affected test hosts and finite execution allowance.
+2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and up to two
+   GPT-6.1 Sol High implementation agents on independent declared files/contracts.
+   Use one writer for shared mutable code; sequence dependent work. A short serial
+   target need not occupy both implementation agents. No recursive agent tree.
+3. **Build the complete target.** Integrate at real operation boundaries. Continue
+   through required source/dispatch/persistence/UI work within the selected result.
+4. **Check and fix.** Run relevant cheap checks and required actual-path/native proof;
+   self-review the integrated diff and real UI where changed. Correct in-scope findings
+   and rerun affected checks. Preserve independent review where already required.
+   Existing cumulative budgets and two-correction reassessment rules remain.
+5. **Close the record.** Update canonical behavioral docs/ADRs as needed, the existing
+   task ledger and live HANDOVER/CURRENT with exact refs, evidence, failures/skips,
+   remaining limitations and any pending operation. Commit and publish only within
+   actual authorization; disclose local-only/unpublished work.
+6. **Return the result and next prompt.** Report what now works, compact check results,
+   known limitations, review status and the next dependency-ready target. Supply a
+   paste-ready prompt with its fresh continuation refs. Stop before that distinct
+   outcome; the user selects it. A returned prompt is not permission to execute it.
+
+Internal commits/checks/fixes do not force a new chat or approval request. Resume the
+same target in the same chat after waits using the repository's existing workflow.
+If the target is genuinely blocked or awaiting acceptance, provide a continuation/
+review prompt for that target and retain its unresolved state; do not present a blocked
+deliverable as complete or advance to dependent work. A new outcome may use a new chat,
+but it is not required merely because a checkpoint was committed.
+
+### Next-outcome prompt contract
+
+Keep the prompt below 4,000 characters. Put durable rules in the repository and link
+the selected task section; avoid copying entire phase plans, UI rules or AGENTS into
+each message. Preserve these concrete fields:
+
+```text
+Deliver <one target>: <observable finished result>.
+Repository: Caldwell-41/Renpy-editor
+Continuation: <current branch/PR, published checkpoint or explicit local-only state>
+Codex machine: <actual execution host>
+Test hosts: <affected Windows x64/macOS ARM64 requirements and accessible prerequisites>
+Reason: <why this result is next and which accepted dependencies it uses>
+Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
+Use one GPT-6.1 Sol High owner and up to two GPT-6.1 Sol High implementation agents
+for independent bounded assignments with declared file/contract ownership.
+Scope: <included operations and explicit exclusions>.
+Prove: <decisive user-action/source/persistence checks and required native evidence>.
+Allowance: <finite builds/dispatches plus existing problem budget, not a fresh reset>.
+Complete implementation, focused checks, review and in-scope fixes; update canonical
+docs, task ledger and HANDOVER. Publish within the recorded authorization.
+Return the result and a prompt for the next distinct deliverable; do not start it.
+Resume this same target/chat after any workflow wait. <Specific review/publish limits>.
+```
+
+Guidance checked: [official GPT-6 prompting guidance](https://developers.openai.com/api/docs/guides/latest-model#prompting-best-practices)
+recommends explicit delegation/autonomy and testing proportionate to changed scope.
+Its behavior examples are based on Astra and must be evaluated for the selected Sol
+team. [OpenAI's multi-agent guidance](https://developers.openai.com/api/docs/guides/deployment-checklist#use-multi-agent-for-parallel-work)
+supports concrete independent assignments and serial ownership of dependent/shared
+work. These inform the cadence; the deliverable queue and repository gates are
+Loomlight decisions, not a mandated OpenAI milestone count or new orchestration system.

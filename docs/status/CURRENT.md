@@ -211,3 +211,14 @@ inspected the installed app/source and used one user-requested research subagent
 this update changes docs only. No new app, provider, SDK, build or CI execution.
 Continue on the existing planning branch; select bounded implementation after Phase 1
 acceptance against the accepted baseline. No new PR or merge.
+
+Bounded delivery cadence selected — 2026-10-03: the user requests one deliverable per
+owner/team outcome, with implementation, focused checking, in-scope fixes, canonical
+docs/task/HANDOVER update and a prompt for the next milestone. Phase 2 section 20 owns
+the concrete cross-phase queue and prompt contract; Phase 3 links it. Section 19's
+parallel dependencies and existing milestone gates remain, with no whole-phase agent
+assignment or automatic next-target execution. GPT-6 official guidance was fetched;
+Astra behavior examples are starting points for the selected Sol team. No production
+implementation/agent/build/provider/SDK/CI execution was started. Existing push
+rejection remains unresolved: guideline commit `6330291` and subsequent documentation
+are local-only until explicit authorization for the existing GitHub planning branch.

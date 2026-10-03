@@ -14,7 +14,9 @@ research is not SDK qualification or approval to start coding.
 and completes 3A alongside remaining Phase 2 work after the first safe rewrite.
 Story logic precedes Screens; Screens and Timeline then use two implementation lanes.
 [The Phase 2 delivery section](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
-owns the shared sequence/team. Exact feature subsets remain reviewable.
+owns the shared sequence/team. Its [bounded deliverable queue and completion loop](phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
+selects one tested result at a time, then docs/handover and a next-outcome prompt.
+Exact feature subsets remain reviewable.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
 [ROADMAP](../../ROADMAP.md) owns the overall sequence, and
 [PRODUCT](../../PRODUCT.md) retains the initial-release commitment.
@@ -748,3 +750,31 @@ precision, accessible help, typing/composition versus completion/submission boun
 retained inputs and no-mutation refusal. No application checks or new execution allowance.
 Publish this coherent docs checkpoint on the existing origin planning branch and verify
 its exact head; resolve the checkpoint SHA from Git rather than a receipt-only commit.
+
+Publication blocked: guideline checkpoint `6330291a6284db2fafd9bd8fac17f92c93f4de77`
+is committed locally. Automatic approval review rejected the push to
+`origin/codex/phase-2-3-planning`, citing potential private project-content export
+without explicit authorization for that payload/destination. The remote remains at
+the previously verified `267ec2a`; no push acceptance is claimed. No workaround or
+retry was attempted. Request explicit user authorization to publish the six-document
+guideline update and this blocker record to the existing GitHub planning branch;
+after authorization, push once and verify the exact head. No PR, merge or implementation.
+
+Bounded delivery cadence selected — 2026-10-03: the user requests one deliverable per
+owner/team outcome, with implementation, focused checking, in-scope fixes, canonical
+docs/task/HANDOVER update and a prompt for the next milestone. Phase 2 section 20 owns
+the concrete cross-phase queue and prompt contract; Phase 3 links it. Section 19's
+parallel dependencies and existing milestone gates remain, with no whole-phase agent
+assignment or automatic next-target execution. GPT-6 official guidance was fetched;
+Astra behavior examples are starting points for the selected Sol team. No production
+implementation/agent/build/provider/SDK/CI execution was started. Existing push
+rejection remains unresolved: guideline commit `6330291` and subsequent documentation
+are local-only until explicit authorization for the existing GitHub planning branch.
+
+Deliverable-plan verification: repository validation passed for 329 files; whitespace
+and four-document scope/link review passed. Checked provider review/Phase 1 entry,
+first-rewrite dependency, separate phase acceptance, shared UI/source ownership and
+next-target selection. Split provider lifecycle, context preparation and each remaining
+AI action into separate deliverables. No native/build tests are required for this docs
+change. Keep publication local while the existing approval-review rejection is pending;
+no push retry, new PR, merge or implementation was attempted.
