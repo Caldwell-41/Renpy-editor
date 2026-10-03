@@ -1,9 +1,11 @@
 # UI design review
 
-**Updated:** 2026-10-02. **State:** review_ready; scoped authoring/startup fixes locally verified and Mac package ready; human acceptance open.
+**Updated:** 2026-10-04. **State:** Mac completion/review/qualification selected for the next chat; Windows and integration follow separately; human acceptance open.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
+
+**Live selection:** the [2026-10-04 completion sequence](#selected-1g-completion-sequence--2026-10-04) supersedes earlier review-only/no-build/no-dispatch boundaries only for its named next-chat stages. Historical allowances and failures remain evidence, not renewed authorization.
 
 The user requested discussion of seven supplied reference images, questions and
 recommendations for each page, and revised mockups as useful. The user clarified that
@@ -2775,3 +2777,82 @@ The delivered `b6cc06b` installer predates this source fix. Windows remains defe
 no package/install/native/SDK start, hosted dispatch, merge/conflict resolution or
 new phase. Counters remain 10 packages, 44 native/boundary starts and separately
 4 SDK menu starts. CONFIG-01 and final 1G acceptance/integration remain open.
+
+
+### Selected 1G completion sequence — 2026-10-04
+
+The user selected this order: a new Mac chat completes the resolution picker and
+conducts final Mac review, then publishes/runs remote build checks and fixes issues;
+a different agent on a Windows PC verifies the passing candidate; a final separate
+chat handles integration. This documentation turn executes none of those stages.
+
+**Stage 1 — next Mac chat (selected scope):**
+
+- Start from current feature branch, incoming checkpoint `9456972`, latest app source
+  `f287a7e`; inspect fresh refs and preserve newer work. Complete CONFIG-01 only:
+  dimensions plus reduced aspect ratio, accepted caption “Game resolution, not editor
+  size.”, truthful empty/invalid Custom handling and bounded proportional portrait
+  preview. Preserve the existing resolution constraints unless separately selected;
+  they are Loomlight policy, not a universal Ren'Py limit. No new presets/format scope.
+- Run focused automated checks, self-review and bounded corrections. Build one pinned
+  local macOS ARM64 installer for the corrected source; verify payload identity,
+  signature/integrity and checksums using the retained packaging procedure. Reuse
+  unchanged validated inputs honestly. The retained `b6cc06b` installer predates the
+  sidebar spacing fix and cannot qualify the new candidate.
+- Prepare disposable fixtures and guide the user through the final Mac session after
+  local automated gates pass: picker invalid/Custom/portrait; Story/Source navigation
+  spacing and independent panels; approved Branches B; catalogue/media/modal/import
+  corrections; physical keyboard/IME, Finder OS drop, real uncached SDK progress and
+  creation progress. Include TESTING's focused runtime/route/Save/Stop/diagnostic and
+  scaling/close/reopen checks. Agents own routine automated/service verification;
+  user input owns physical/visual acceptance. Record actual results and exact package,
+  source SHA, SDK, platform, evidence, failures and remaining acceptance. Earlier
+  provisional observations are not a blanket final pass. Fix selected review issues
+  within existing 1G scope and retest affected interactions before advancing.
+
+**Stage 2 — same Mac chat, after Mac review passes (selected scope):**
+
+- Publish the corrected candidate on the existing branch/PR and verify the remote SHA.
+  Use Repository quality and the existing `.github/workflows/production-scaffold.yml`
+  final production qualification, with package retention (`upload_packages=true`),
+  rather than a new workflow or standalone R1/feasibility/performance matrix.
+- One initial final-candidate production dispatch is selected. Necessary corrections
+  and verification of changed inputs are selected too: classify failures, prove the
+  cause locally when possible, retain exact failed/superseded runs and justify any
+  correction rerun in the ledger before dispatch. No duplicate unchanged successful
+  matrix, automatic ambiguous-dispatch retry, or repeated same-hypothesis correction
+  beyond WORKFLOW's two-unsuccessful-correction reassessment rule.
+- Record run ID/attempt/branch/tested SHA/input policy, update continuation before
+  waiting, and use the existing manual same-chat waiting rule without model polling.
+  Resume that chat to audit terminal evidence, fix failures and complete affected
+  checks; do not waive failed/skipped/missing gates. Do not transfer until required
+  remote evidence passes for the recorded candidate. Hosted Windows automation does
+  not replace the subsequent Windows-PC/native/human review.
+
+**Stage 3 — subsequent Windows-PC agent (future separate chat):**
+
+- Review the exact passing source/package candidate on Windows x64 with the existing
+  14-row deferred checklist and affected production/native/service/input gates.
+  Verify the driver reaches WebView2 where automation claims native input; synthetic
+  DOM/Chrome observations do not count. Prepare remaining physical/human checks.
+- Windows remains deferred now. Do not invent Windows results from Mac. Any Windows
+  correction changes the candidate: repeat affected Mac checks, remote qualification
+  as justified by changed scope, and relevant user interactions; identify superseded
+  acceptance. Keep candidate identity consistent across both platforms.
+
+**Stage 4 — final separate integration chat (future selection boundary):**
+
+Resolve PR #17 against freshly inspected main while preserving both intended changes,
+verify affected combined-input gates on required hosts, then reviewed integration.
+Conflict resolution is not a merge and pre-conflict candidate passes do not qualify
+changed combined code. The next Mac chat does not resolve conflicts, rebase/rewrite
+history, merge, close 1G/1H or implement a new feature phase. Later chat selections
+remain explicit; optional Git is outside Phase 1.
+
+Fresh refs for this plan: feature `94569725d152f3bfae8d67b347b0b6be168fdc67`,
+Git remote main and REST main `4d7ba0333c48d60242a9a42d3e079fea499a5531`, remote
+planning `267ec2a`, separate local planning worktree `2c5a164`. PR #17 is OPEN/draft/
+CONFLICTING. GraphQL PR `baseRefOid` reports `924619d`, differing from current Git/REST
+main; do not assume that PR snapshot is the current integration ref. Refresh live
+refs at the integration stage. No operation pending. Historical evidence is retained;
+counters remain 10 packages, 44 native/boundary starts and separately 4 SDK menu starts.

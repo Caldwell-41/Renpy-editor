@@ -136,6 +136,13 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 ### 1G — Branches, validation/run and diagnostics
 
+**Completion sequence selected 2026-10-04:** the
+[UI review ledger](ui-design-review.md#selected-1g-completion-sequence--2026-10-04)
+owns next-chat resolution completion/final Mac review/remote qualification, subsequent
+Windows-PC verification of the passing candidate, and a final separately selected
+integration chat. All required target acceptance stays open until verified; resolving
+conflicts requires affected combined-input checks, not reuse of unrelated green runs.
+
 **Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
 [1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
 and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'

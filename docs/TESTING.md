@@ -514,6 +514,15 @@ increases or unsupported causal claims about application Save routing.
 
 ## Phase 1G testing ownership and cadence
 
+**Completion scheduling amendment, 2026-10-04:** follow the user's
+[selected staged sequence](tasks/active/ui-design-review.md#selected-1g-completion-sequence--2026-10-04):
+next Mac chat completes the picker, proves local changed-scope gates and prepares
+final Mac review; after Mac acceptance, publish/run required remote qualification
+and correct failures; then a Windows-PC agent verifies the same passing candidate;
+a final separate chat verifies conflict-resolved combined inputs before integration.
+This changes scheduling, not required target evidence or test ownership. Corrections
+invalidate affected prior results and require relevant cross-platform rechecks.
+
 **User decision, 2026-09-25:** no routine physical testing by the user during 1G build
 checkpoints. Plan one focused final session on Windows x64 and macOS ARM64 after the
 agent's automated gates pass. New Git work/testing is deferred to

@@ -1,5 +1,51 @@
 # Current outcome handover
 
+## Selected next-agent handover — 2026-10-04
+
+**Machine:** local macOS ARM64; genuine Windows verification requires a Windows PC.
+**Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.
+**Incoming checkpoint:** `94569725d152f3bfae8d67b347b0b6be168fdc67`;
+latest application source `f287a7e232e152af9cb178e237c33357b4cb6e03`.
+**Reason:** approved staged final 1G completion; resolution detail and final acceptance
+remain open, latest sidebar spacing is fixed in source but not the delivered installer.
+Read the [selected sequence](../tasks/active/ui-design-review.md#selected-1g-completion-sequence--2026-10-04)
+for exact authority and gates. This docs handover adds no build/run/dispatch.
+
+Next chat owns CONFIG-01 completion, focused automated checks/self-review, one pinned
+corrected Mac installer and prepared final Mac human/native review. After Mac review
+passes, publish/verify the exact candidate, run required existing remote checks and
+final production qualification with retained artifacts, classify/fix failures and
+verify affected changes. One initial qualification dispatch plus justified changed-
+input correction reruns are selected; no duplicate unchanged successful matrices,
+ambiguous-dispatch retry, specialist/performance expansion or polling loop. Persist
+run/attempt/SHA/evidence/continuation before manual same-chat waiting; resume that
+chat to finish the evidence audit and fixes. Counters and budgets are cumulative.
+
+Completion of the next chat means a documented passing Mac review and required remote
+qualification for one identified candidate, plus a precise Windows transfer/checklist.
+A subsequent different agent on Windows runs the 14-row checklist and affected native/
+service/input qualification, with remaining human review prepared rather than fabricated.
+Windows corrections require affected Mac rechecks. Only after both platforms' required
+results and acceptance are complete does a final separately selected chat reconcile
+PR #17 with current main, recheck combined inputs and integrate. The next chat must
+not resolve conflicts/rebase/merge/close the milestone or start 1H/new features.
+
+Reuse earlier qualified evidence only for proven unchanged inputs. The `b6cc06b`
+installer below predates `f287a7e` and the pending picker completion. Preserve all
+packages/failed runs and use disposable fixtures, not private project content.
+Frontend 85, production web/browser/repository checks currently pass for the spacing
+source; those are not final native/Windows acceptance. CONFIG-01 preserves current
+Loomlight limits, adds dimensions/reduced ratio/caption, refuses misleading invalid
+preview and fits portrait proportions; no new preset scope is selected.
+
+Live Git/REST main is `4d7ba03`; GraphQL PR base snapshot differs at `924619d`.
+Do not assume either recorded ref remains current: inspect fresh refs at entry and
+integration. Remote planning `267ec2a` and separate local planning worktree `2c5a164`
+are preserved. No operation pending; Windows deferred. Counters unchanged: 10 packages,
+44 native/boundary starts and separately 4 SDK menu starts. Publish and verify this
+documentation checkpoint; the successor uses the latest HANDOVER, never resets to
+an incoming historical SHA. Earlier sections below are retained evidence snapshots.
+
 ## Story/Source sidebar spacing regression corrected — 2026-10-03
 
 The user reports icons touching sidebar labels on Story/Source in the latest Mac
