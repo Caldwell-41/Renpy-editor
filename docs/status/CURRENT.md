@@ -198,3 +198,16 @@ shared placement/history and existing entry/acceptance gates remain. No app/medi
 execution, new agents, worktrees, builds, CI or implementation was started. Next: review
 remaining subsets/UX and select bounded implementation after Phase 1 acceptance on
 the current accepted baseline. Publish on the existing planning branch; no PR or merge.
+
+UI/UX agent guidance selected — 2026-10-03: the user accepted the researched twelve
+guidelines, including straightforward interface language and validation after field
+completion plus submission. UI.md owns the contract; INDEX and both phase briefs link
+to it, and the existing owner/two-lane plan shares controls/validators. Required help
+stays visible; optional Ren'Py detail uses accessible tooltips/help. Validation preserves
+incomplete/IME input, checks blur or explicit field commit, rechecks all submitted
+values and refuses without writing/sending. This is future implementation guidance,
+not a claim of current application compliance or new Phase 1 acceptance. Prior review
+inspected the installed app/source and used one user-requested research subagent;
+this update changes docs only. No new app, provider, SDK, build or CI execution.
+Continue on the existing planning branch; select bounded implementation after Phase 1
+acceptance against the accepted baseline. No new PR or merge.

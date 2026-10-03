@@ -47,6 +47,146 @@ and the linked task; implementation does not imply final native/human acceptance
   session/generation completion rules. New Assets audio preview stays disabled;
   existing explicit Story audition remains available.
 
+## Accepted UI/UX guidelines for implementation agents
+
+The user accepted these cross-workspace guidelines and the plain-language/validation
+refinements on 2026-10-03. They extend Quiet Studio and the latest written interaction
+decisions; they do not select an application implementation or reopen Phase 1 acceptance.
+Read this section before designing Phase 2/3 controls. Use accepted decisions and
+corrections over illustrative generated details or older layout descriptions below.
+
+1. **Preserve the visual identity.** Use paper/teal and charcoal/copper, system fonts,
+   restrained borders and modest corners. Reuse shared semantic tokens and controls.
+   Story content, selected Beats and game artwork take priority over shell decoration.
+2. **Keep workspaces familiar.** Keep navigation on the left, authoring in the centre,
+   optional properties on the right and diagnostics below where appropriate. Preserve
+   selection, scroll position and remembered panel layout across tools. Expand advanced
+   details on demand; do not duplicate global Save/Run/status controls in every panel.
+3. **Make selection explicit.** Highlight the selected item and identify its name/type
+   in the inspector. Synchronize canvas/hierarchy selection for the same object; keep
+   keyboard focus distinct from selection. Previewing an appearance does not change
+   its default. An inspector must never silently edit a previously selected item.
+4. **Make commitment clear.** Use inline editing for frequent writing and bounded dialogs
+   for catalogue creation/editing. Distinguish draft, applied and saved states using the
+   existing editor contracts. Navigation and failed submissions preserve unfinished work.
+   Label fields, group related controls, show units and place errors beside their fields.
+5. **One meaningful action, one coherent Undo.** A character drag/resize, Beat move or
+   accepted proposal uses one transaction/history path. Name undo actions where useful
+   and reveal or identify the affected item. Escape cancels an unfinished gesture;
+   continuous feedback is not a separate source commit per pointer movement.
+6. **Provide alternatives to dragging.** Offer numeric position/scale/time fields,
+   clickable move commands and keyboard controls. Make grips and handles easy to hit.
+   The operation must work both with keyboard input and with clicks without dragging.
+7. **Keep Assist understandable.** Preserve preparation, explicit generation, review
+   and application. Show target, references, effective prompt and limits before sending;
+   show changes before acceptance. Generated references never approve themselves.
+   Applying a proposal is undoable and is not a validation pass. Use the existing
+   operation-group/editability rules rather than inventing an unrestricted patch editor.
+8. **Report factual state without disturbing authoring.** Distinguish saved work,
+   unsaved drafts, generation, validation failure and stale previews. Keep status regions
+   stable. Percentages require measured progress. Label partial embedded previews and
+   provide deliberate Ren'Py playback; a browser rendering is not native runtime proof.
+9. **Interrupt in proportion to loss.** Keep routine undoable editing quick. Confirm
+   actual draft loss or irreversible consequences with specific action labels. Dialogs
+   have a visible Close/Cancel route, guarded Escape and focus return. Respect in-flight
+   write ownership; cancellation must not imply a started write has been rolled back.
+10. **Adapt without shrinking everything.** Collapse secondary panels before squeezing
+    the main editor. Stack forms/comparisons at compact widths; keep actions reachable.
+    Maintain visible focus, readable text, both themes and user text/interface sizing.
+    Pair colour with text/shape, use keyboard-accessible semantics and respect reduced
+    motion. Keep horizontal scrolling local to content that needs it, such as Source.
+11. **Use straightforward language.** Write short, concrete labels and messages in
+    familiar authoring terms. Reduce implementation jargon; expose necessary Ren'Py
+    terms with plain explanations and optional deeper help. Keep terminology consistent.
+    Do not hide information needed to make a decision in a tooltip.
+12. **Validate after field completion and again on submission.** Check applicable
+    formats, names, required values, types and ranges when a user finishes a field;
+    recheck all submitted values before writing or sending. Explain the correction,
+    preserve input and avoid interrupting typing. The detailed contract below applies.
+
+### Interface language and help
+
+Use action labels that describe the result: **Move to scene**, **Apply changes** or
+**Discard changes**, rather than internal vocabulary or ambiguous Yes/No buttons.
+Explain failures as what went wrong and what the author can do next. For example,
+“Enter a whole number from 1 to 60” is preferable to “Invalid scalar”; “This preview
+cannot show this animation. Preview in Ren'Py” is clearer than a compositor error.
+
+Preserve precision where it matters. Technical-name fields still distinguish the name
+used in Ren'Py from a display name; dimensions show pixels, durations show seconds and
+LLM limits show tokens. A label such as **Maximum response length (tokens)** needs a
+short explanation of tokens. Keep **System prompt** with an explanation of its role.
+Do not relabel technical concepts so broadly that authors mistake scale for size,
+preview zoom for game resolution or applying changes for saving/validation.
+
+Tooltips or a labelled help affordance can explain anchors, ATL, Ren'Py naming
+conventions and other optional technical detail. Make help available on keyboard focus
+as well as hover, with a discoverable access route for icon-only controls. Longer or
+interactive explanations belong in expandable help. Required syntax, units, constraints
+and error recovery remain visible beside the field; placeholders are not labels.
+Keep credentials and raw internal exception dumps out of routine copy. Show relevant
+project/file paths where they help identify the target; keep unrelated machine detail
+in bounded diagnostics rather than requiring it to understand an ordinary error.
+
+### Input validation timing and recovery
+
+- **Before interaction:** show persistent labels, required/optional status, units and
+  useful examples/rules. Do not mark untouched empty fields erroneous on opening.
+- **While typing:** allow incomplete values. Do not show new format errors on every
+  keystroke, steal focus, rewrite user text or validate during IME composition. If an
+  error is already shown, update/clear it as the correction becomes valid. Cheap
+  nonintrusive feedback may update, but inactivity alone does not prove a complete
+  identifier, number or multiline statement.
+- **On field completion:** validate text/numeric fields on blur and on an explicit
+  field commit where the editor has one. Validate discrete selections/file choices
+  when selected. Enter only commits where it already does; ordinary Enter in multiline
+  text continues to insert a newline. Run normal name/format checks at these boundaries.
+- **On submission:** revalidate the whole form, including untouched fields and dependent
+  values, regardless of prior results. Invalid input performs no write/provider send;
+  preserve every field, identify the errors and focus the first invalid field. A summary
+  can link multiple errors. Do not rely only on a disabled button to explain invalidity.
+- **Error presentation:** use text beside the affected field with accessible association
+  and invalid state. Say the expected format/range and show a useful example. Announce
+  meaningful error transitions without repeatedly announcing each typed character.
+- **Shared rules:** use the existing authoritative validators and consistent UI checks,
+  not divergent per-workspace definitions. Submit still goes through core validation,
+  source/revision checks and the existing transaction contract. Client checks do not
+  establish current source ownership, file availability or runtime compatibility.
+- **Asynchronous checks:** bind any necessary result to the current value/session and
+  ignore stale replies. Show checking/unavailable separately from invalid. Routine
+  field validation never initiates LLM sends, model loading or project execution;
+  existing explicit connection/native test controls retain their own boundaries.
+- **Preserve meaning:** apply only established, documented normalization. Do not silently
+  truncate, change prose, repair source syntax or coerce an invalid number to a fallback.
+  Name checks apply to technical identifiers, not dialogue or lore prose. Source edits
+  retain the lossless-source and unsupported-region contract.
+
+### Shared ownership and proportionate review
+
+The owner maintains shared tokens and interaction conventions for buttons, fields,
+selection, inspectors, dialogs, draft handling, validation and status. Both lanes reuse
+those patterns; extend existing helpers when needed rather than creating independent
+forms/validation systems. Inspect the accepted baseline at implementation entry.
+
+For the changed surface, review representative content in both themes and wide/compact
+layouts; keyboard/focus, text scaling, selection retention and relevant empty, busy,
+error/stale states. Exercise one action through undo/cancel and failed submission.
+For field changes, check untouched/incomplete input, blur, invalid submission,
+correction/resubmission and applicable IME/dependent/asynchronous cases. Verify no
+mutation occurs on refusal and values survive. Canvas changes need actual Ren'Py
+comparison for their declared behavior. Use existing task-ledger and changed-scope
+gates; these guidelines add no blanket package matrix, certification or approval flow.
+
+Research supports the interaction recommendations; the specific Loomlight controls
+and commitments above are accepted product decisions. Useful primary references:
+[Microsoft forms](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/forms),
+[WAI tree focus/selection](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/),
+[Apple undo](https://developer.apple.com/design/human-interface-guidelines/undo-and-redo),
+[Apple alerts](https://developer.apple.com/design/human-interface-guidelines/alerts),
+[WCAG non-drag alternatives](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html),
+[HAX proposal correction](https://www.microsoft.com/en-us/haxtoolkit/guideline/support-efficient-correction/)
+and [accessible status](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
+
 ## Design intent
 
 Project Loomlight is a restrained, professional writing and game-authoring tool.

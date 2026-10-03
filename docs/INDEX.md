@@ -53,7 +53,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
-| Workspaces and interaction | [UI.md](UI.md) |
+| Workspaces and interaction | [UI.md](UI.md), including [agent UI/UX guidelines](UI.md#accepted-uiux-guidelines-for-implementation-agents) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |

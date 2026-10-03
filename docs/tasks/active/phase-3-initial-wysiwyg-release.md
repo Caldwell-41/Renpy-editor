@@ -27,6 +27,11 @@ not approval to implement every checkpoint.
 Planning can continue now. No implementation, integration, release or new CI dispatch
 is selected by this document.
 
+Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents),
+including plain interface language, optional technical help, completion/submission
+validation and shared control ownership. These guide future implementation; they do
+not claim the current application already satisfies every interaction.
+
 ## 1. Outcome and first usable results
 
 An author can build branching story logic, design supported game screens, time VN
@@ -723,3 +728,23 @@ qualification; no app/media/SDK execution or implementation was performed. Publi
 this docs checkpoint on the existing origin planning branch and verify its exact head;
 no PR, merge, build or CI is selected. Next remains subset/UX review and bounded
 implementation selection after Phase 1 acceptance against the current accepted baseline.
+
+UI/UX agent guidance selected — 2026-10-03: the user accepted the researched twelve
+guidelines, including straightforward interface language and validation after field
+completion plus submission. UI.md owns the contract; INDEX and both phase briefs link
+to it, and the existing owner/two-lane plan shares controls/validators. Required help
+stays visible; optional Ren'Py detail uses accessible tooltips/help. Validation preserves
+incomplete/IME input, checks blur or explicit field commit, rechecks all submitted
+values and refuses without writing/sending. This is future implementation guidance,
+not a claim of current application compliance or new Phase 1 acceptance. Prior review
+inspected the installed app/source and used one user-requested research subagent;
+this update changes docs only. No new app, provider, SDK, build or CI execution.
+Continue on the existing planning branch; select bounded implementation after Phase 1
+acceptance against the accepted baseline. No new PR or merge.
+
+Guideline verification: repository validation passed for 329 files; whitespace and
+six-document scope/link review passed. Reviewed plain labels versus required technical
+precision, accessible help, typing/composition versus completion/submission boundaries,
+retained inputs and no-mutation refusal. No application checks or new execution allowance.
+Publish this coherent docs checkpoint on the existing origin planning branch and verify
+its exact head; resolve the checkpoint SHA from Git rather than a receipt-only commit.

@@ -7,6 +7,11 @@
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
 **Isolation:** preserve Phase 1 code, tests, workflows and acceptance ledgers. The original September publication also left CURRENT/HANDOVER untouched. The October concurrent-planning branch adds only a short planning note there, preserving the active Phase 1 continuation; it does not claim or alter Phase 1 acceptance.
 
+Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents),
+including plain interface language, optional technical help, completion/submission
+validation and shared control ownership. These guide future implementation; they do
+not claim the current application already satisfies every interaction.
+
 ## In plain language
 
 | Part | What you can do when it is complete |
@@ -744,6 +749,10 @@ consumes the agreed records contract. The owner may rebalance independent pieces
 while preserving explicit ownership of shared files and the completion points above.
 
 ### Team operation
+
+The owner coordinates shared UI controls and field-validation contracts using the
+[accepted UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents);
+both lanes reuse the same patterns.
 
 Use **one GPT-6.1 Sol owner at high reasoning effort and two GPT-6.1 Sol implementation
 agents at high reasoning effort** when an implementation outcome is selected.
