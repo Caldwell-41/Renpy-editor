@@ -112,13 +112,33 @@ try {
  assert.equal(await page.getByRole('button',{name:'Choose files…',exact:true}).isVisible(),true);
  await page.getByRole('button',{name:'Close Import assets',exact:true}).click();
  // Review corrections: controls preserve independent panels and active content.
+ // The expanded navigation must keep the same icon/label gap on every surface,
+ // including both sides of the legacy 1100px tree-layout breakpoint.
+ for(const theme of ['light','dark']) for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']) {
+  await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
+  await page.getByRole('button',{name:surface,exact:true}).click();
+  await page.locator('#app-status').filter({hasText:'Saved'}).waitFor();
+  await page.evaluate(()=>window.dispatchEvent(new Event('loomlight-reset-layout')));
+  for(const width of [1440,1101,1100,960,560]) {
+   await page.setViewportSize({width,height:900});
+   const gaps=await page.locator('.story-sidebar>.tree-item').evaluateAll(items=>items.map(item=>{
+    const icon=item.querySelector('.navigation-icon').getBoundingClientRect();
+    const text=[...item.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
+    const range=document.createRange();range.selectNodeContents(text);
+    return {label:item.ariaLabel,gap:range.getBoundingClientRect().left-icon.right};
+   }));
+   assert.equal(gaps.length,6);
+   for(const item of gaps)assert.equal(item.gap,12,`${theme} ${surface} at ${width}px: ${item.label} icon/label spacing`);
+   if(width===1100)await page.screenshot({path:output+`navigation-spacing-${surface.toLowerCase()}-${theme}.png`});
+  }
+ }
  // Sidebar controls must fit the existing tracks and never obscure editor headers.
  for(const theme of ['light','dark']) for(const surface of ['Story','Source']) {
   await page.setViewportSize({width:1440,height:900});
   await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
   await page.getByRole('button',{name:surface,exact:true}).click();
   await page.locator(surface==='Story'?'.scene-header':'.source-tab-bar').waitFor();
-  for(const width of [1440,960,560]) for(const navClosed of [false,true]) for(const treeClosed of [false,true]) {
+  for(const width of [1440,1101,1100,960,560]) for(const navClosed of [false,true]) for(const treeClosed of [false,true]) {
    await page.setViewportSize({width,height:900});
    const nav=page.locator('.navigation-toggle');
    if((await nav.getAttribute('aria-expanded'))!==String(!navClosed)) await nav.click();
@@ -130,10 +150,12 @@ try {
     const title=document.querySelector('.scene-header h1');let titleBox;
     if(title){const r=document.createRange();r.selectNodeContents(title);titleBox=box(r);}
     const source=document.querySelector('.source-tab-group');
-    return {nav:box(nav),toggle:box(toggle),navOverflow:nav.scrollWidth>nav.clientWidth+1,tree:box(tree),treeToggle:box(treeToggle),restore:box(restore),title:titleBox,source:source?box(source):null,arrow:toggle.querySelector('path').getAttribute('d'),restoreArrow:restore.querySelector('path').getAttribute('d'),hideArrow:treeToggle.querySelector('path').getAttribute('d')};
+    const icons=[...nav.querySelectorAll(':scope>.tree-item')].map(item=>({margin:getComputedStyle(item.querySelector('.navigation-icon')).marginRight,fontSize:getComputedStyle(item).fontSize}));
+    return {icons,nav:box(nav),toggle:box(toggle),navOverflow:nav.scrollWidth>nav.clientWidth+1,tree:box(tree),treeToggle:box(treeToggle),restore:box(restore),title:titleBox,source:source?box(source):null,arrow:toggle.querySelector('path').getAttribute('d'),restoreArrow:restore.querySelector('path').getAttribute('d'),hideArrow:treeToggle.querySelector('path').getAttribute('d')};
    });
    assert.equal(Math.round(m.nav.width),navClosed?64:180,JSON.stringify(m));
    assert.equal(m.navOverflow,false,`sidebar control introduced horizontal overflow: ${JSON.stringify(m)}`);
+   for(const icon of m.icons){assert.equal(icon.margin,navClosed?'0px':'12px');if(navClosed)assert.equal(icon.fontSize,'0px');}
    assert.equal(m.toggle.width,32);assert.equal(m.toggle.height,32);
    assert.ok(m.toggle.x>=m.nav.x&&m.toggle.right<=m.nav.right);
    assert.equal(m.arrow,navClosed?m.restoreArrow:m.hideArrow,'navigation arrow did not reflect state');

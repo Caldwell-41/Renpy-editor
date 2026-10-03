@@ -78,6 +78,8 @@ picker is implemented; those preview details remain pending in the task ledger.
   their existing panel widths at 32px, with left arrows when expanded and right arrows
   for reopening. The restore control has a reserved slot beside the editor heading/
   Source tabs, and never covers their text. Collapsed Settings uses a labelled cog.
+  Expanded navigation keeps a 12px icon-to-label gap on every surface, including
+  compact Story/Source layouts; collapsed links and panel controls keep zero icon margin.
   Chapter disclosure keeps
   the selected Scene and its editing state. Writing focus hides both sidebars,
   preview and context; exiting restores the previous panel choices.

@@ -2240,7 +2240,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-06 — Character selection and image refresh (A3/A8) | Select a non-default appearance; save Character unchanged; change the default; switch Grid/List and leave/return. Replace an appearance image. Test a missing/unreadable image then restore it and Retry preview. | Selected UUID, pressed state and preview remain aligned. Default is distinct from viewing. New images load immediately; loading and useful bounded errors are visible; retry recovers without replaying a write or showing another Character’s image. |
 | WIN-UI-07 — appearance rename reuse (A4) | Rename happy → calm → thoughtful → calm → happy, with/without an image replacement. Save/reopen and inspect Show/Change Appearance Beats. Try a name belonging to another image; edit a retained alias externally and try reusing it. | Stable Appearance/Asset/default IDs and supported references; old files/custom source stay intact. Own unchanged aliases can be reused; genuine collisions/edited aliases refuse without partial writes. |
 | WIN-UI-08 — compact Choice/buttons (A1) | Open Choice → Create New Scene at minimum window size and typical laptop size, light/dark, 100% and higher Windows scaling. Type names/select Chapter; cancel/reopen; create once. | Fields remain inside the editor and stack when compact. Cancel/Create share a clear action row and consistent height; no stretched/wrapped button labels or horizontal escape. Creation establishes the saved route. |
-| WIN-UI-09 — sidebar/focus/layout (A5/A6) | Use Tab/Enter to collapse main navigation and hide/restore Scenes/files independently. Collapse Chapters with a Scene selected. Enter/exit Writing focus. Resize preview with pointer and Arrow keys, Reset layout, reopen. At 100%/higher DPI, verify header alignment, fixed control/panel widths, reverse opening arrows, and restore separation from the Story title/Source tabs (including no file open). Inspect with Narrator if available. | Main collapse leaves tree text/geometry intact; hide/restore focus stays visible; controls announce accurate state. Chapters retain the editor. Writing focus hides sidebars and restores previous choices. Preview allocation and separator value agree after reset. |
+| WIN-UI-09 — sidebar/focus/layout (A5/A6) | Use Tab/Enter to collapse main navigation and hide/restore Scenes/files independently. Collapse Chapters with a Scene selected. Enter/exit Writing focus. Resize preview with pointer and Arrow keys, Reset layout, reopen. At 100%/higher DPI, compare icon/label spacing across all six surfaces above/below the 1100px breakpoint, with main navigation expanded/collapsed and Scenes/files visible/hidden; verify header alignment, fixed control/panel widths, reverse opening arrows, and restore separation from the Story title/Source tabs (including no file open). Inspect with Narrator if available. | Main collapse leaves tree text/geometry intact; hide/restore focus stays visible; controls announce accurate state. Chapters retain the editor. Writing focus hides sidebars and restores previous choices. Preview allocation and separator value agree after reset. |
 | WIN-UI-10 — Beat confirmation/pending (A7) | Create each applicable Beat with one confirmation; simulate a slow receipt through an approved test driver and attempt duplicate confirmation/Cancel. Exercise a stale-source failure, correct it and retry. Use a long list. | Pending controls are disabled, only one write occurs, failure retains editable values, and success reveals/focuses the saved collapsed row without another Commit. |
 | WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
 | WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
@@ -2742,3 +2742,36 @@ surfaces. Installer compilation/static checks do not constitute new native accep
 No unresolved hosted operation exists. Retain historical failed runs and their
 corrections; the earlier `d690d7f` cross-platform UI qualification is evidence only
 for its recorded candidate, not a new qualification of this local build.
+
+
+### Story/Source navigation spacing regression — 2026-10-03
+
+The user reports touching sidebar icons/labels on Story and Source after the latest
+Mac delivery; the other surfaces remain readable. Fresh feature refs are `0474e04`;
+main `4d7ba03`, remote planning `267ec2a` and separate local planning `2c5a164` worktree
+remain preserved. This selects a bounded spacing correction, not another installer,
+CI request, integration or feature phase.
+
+Root cause: the legacy max-width 1100px `.with-tree` override removed all icon
+margins even when navigation remained expanded. Removed only that override so the
+shared 12px icon-to-label gap applies to Story/Source too. Explicit collapsed-link
+and fixed panel-control zero margins remain. Panel widths, independent collapse,
+arrow direction, restore slots and editor content retain their existing behavior.
+
+Rejecting actual-renderer evidence: the new text-Range geometry assertion fails on
+unchanged CSS at light Story/1100px with **0px rather than 12px**. After correction,
+full browser regression PASS: all six surfaces, both themes, five widths
+1440/1101/1100/960/560px (**60 surface/width/theme combinations, six labels each**).
+Existing sidebar geometry coverage now checks **80 combinations** of Story/Source,
+both themes, those widths, navigation expanded/collapsed and tree visible/hidden;
+collapsed labels/margins, 32px controls, widths, overflow, arrows and restore
+separation pass. Frontend check **85 passed**, production web build PASS (existing
+chunk-size advisory). Inspected light Story/Source/Branches captures; synthetic
+preview-image loading is not native asset evidence. Ignored evidence is in
+`.toolchains/reports/sidebar-spacing-{before,after,check,build}.log` and existing
+`ui-refresh/` screenshots. WIN-UI-09 now includes this exact breakpoint/parity check.
+
+The delivered `b6cc06b` installer predates this source fix. Windows remains deferred;
+no package/install/native/SDK start, hosted dispatch, merge/conflict resolution or
+new phase. Counters remain 10 packages, 44 native/boundary starts and separately
+4 SDK menu starts. CONFIG-01 and final 1G acceptance/integration remain open.
