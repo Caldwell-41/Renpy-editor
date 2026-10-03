@@ -3,7 +3,7 @@
 **Planning date:** 2026-09-22; delivery sequencing reviewed 2026-10-02.
 **State:** detailed planning checkpoint; implementation not started or authorised.
 **User direction:** review and plan Phase 2 without touching existing Phase 1 work; add Unsloth Studio as a first-class provider and incorporate the reviewed suggestions.
-**Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
+**Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
 **Isolation:** preserve Phase 1 code, tests, workflows and acceptance ledgers. The original September publication also left CURRENT/HANDOVER untouched. The October concurrent-planning branch adds only a short planning note there, preserving the active Phase 1 continuation; it does not claim or alter Phase 1 acceptance.
 
@@ -18,8 +18,8 @@
 **At the end of Phase 2:** write with an LLM that receives your selected character
 and world references, under prompts and size limits you control. Generated game
 changes and reference material become durable only through your review. These are
-capability summaries; section 14 orders a small complete rewrite across the underlying
-checkpoints early, followed by the remaining actions and provider coverage.
+capability summaries; sections 14 and 19 order shared foundations and a small complete
+rewrite early, then overlap the remaining AI work with richer Story logic.
 
 ## 1. Outcome and scope
 
@@ -276,7 +276,7 @@ authorize provider connections or execution.
 | 2C.1 — Proposal planner | Strict schemas, semantic/dependency checks and non-mutating batch-to-patch preparation. | Malicious/invalid output writes nothing; same-file batch edits, new IDs, terminal constraints, Unicode/custom preservation and exact previewed mutations. |
 | 2C.2 — Proposal acceptance | Semantic/file review, dependency-valid subsets, stale rejection, one transaction/undo and explicit transient lifetime. | Core/renderer/native acceptance, duplicate-click/retry protection, concurrent drafts, external edits, interrupted-acceptance recovery using non-crashing fault/state fixtures, no partial success claims. |
 | 2C.3 — Character and lore completion | LLM draft/update of Character cards and lorebook entries, separate runnable definitions, statuses, provenance and approvals on the manual foundation from 2B.1. | No implicit lore approval or source execution; migration/reopen, stale citations, missing entities, repeated undo/redo and metadata-free game behavior. |
-| 2C.4 — Integrated acceptance | Real authoring workflow through every action/provider and supported client target. | Required matrix below passes; remaining limitations explicit; stop for independent review rather than automatically merging/starting Phase 3. |
+| 2C.4 — Integrated acceptance | Real authoring workflow through every action/provider and supported client target. | Required matrix below passes; remaining limitations explicit; complete independent review; no automatic merge or new execution scope. Selected 3A overlap follows section 19. |
 
 Dependency detail: 2B.1 supplies manual cards/lorebook and their approved-reference selection before the first rewrite. 2C.1 defines their proposal operations; 2C.3 completes LLM generation/update and lifecycle UX. Until each generated action is complete it is visibly unavailable; the five-action release claim is made only at 2C.4. Confirm schema ownership during 2A.0 to avoid circular prerequisites.
 
@@ -342,6 +342,7 @@ orders work; it does not reduce the final two-provider or five-action commitment
 
 | Outcome | Existing checkpoints covered | Reviewable result |
 | --- | --- | --- |
+| Shared source foundations | Bounded 3A.1/3A.2 portion selected under section 19 | Stable parent/block-aware locations; one nested child edit with undo/reopen before expanded AI planning. |
 | Provider feasibility | 2A.0 | Measured compatibility of available Studio/generic configurations; credential/request ADR and concrete production plan. |
 | First safe rewrite | Necessary parts of 2A.1–2A.2, 2B.1–2B.2 and 2C.1–2C.2 | One complete rewrite using selected manual cards/lorebook, editable/resettable prompts and size controls, with native credentials, revision checks, strict proposal review, one transaction and undo. |
 | Scene and provider completion | Remaining provider coverage plus continue/draft Scene and dependency-valid acceptance | Real authored scenes and selected subsets; no hidden source changes or silent provider fallback. |
@@ -375,10 +376,13 @@ prove real user-action boundaries and gate rejection, and keep cumulative proble
 budgets. Agent-owned checks cover development; physical user review is limited to
 genuinely human interaction/visual acceptance. No native builds are needed for planning.
 
-Phase 2 is complete only at its existing integrated gate. Then
-[Phase 3](phase-3-initial-wysiwyg-release.md) begins with richer Story logic followed
-by Screens, as selected by the user. New Phase 3 constructs do not silently expand
-Phase 2's permitted proposal operations or imply state/reachability knowledge.
+Phase 2 is complete only at its existing integrated gate. The selected
+[shared-foundation sequence](#19-selected-shared-foundations-and-two-lane-delivery)
+brings forward bounded 3A source work, then allows 3A completion alongside remaining
+Phase 2 work after the first safe rewrite. Screens/Timeline follow accepted Phase 2
+and 3A. New Phase 3 constructs do not silently expand Phase 2's permitted proposal
+operations or imply state/reachability knowledge. This replaces the earlier blanket
+Phase-2-before-any-Phase-3 implementation ordering; feature outcomes/gates are retained.
 
 ## 15. Provider expansion recommendation — 2026-10-02
 
@@ -672,3 +676,109 @@ the Phase 3 cross-link after expanding this section. Repository validation passe
 329 files; whitespace and documentation/image-only scope checks passed. No application
 tests or CI are required for this planning change. Publish this coherent checkpoint on
 the existing planning branch and verify its remote head; then user design review is next.
+
+## 19. Selected shared foundations and two-lane delivery
+
+The user selected this delivery approach after reviewing the rework risks: bring a
+bounded part of 3A's source foundations forward, prove one complete Phase 2 rewrite,
+then overlap Phase 2 completion with 3A. After Story logic, develop Screens and Timeline
+in two lanes. Phase 1 acceptance through 1H remains the entry prerequisite. This is
+planning authorization; implementation remains `not_started` and requires selection
+of a bounded outcome against the then-current accepted baseline.
+
+This section owns the cross-phase delivery sequence and team allocation. Section 10
+keeps Phase 2 requirement/gate IDs; the [Phase 3 brief](phase-3-initial-wysiwyg-release.md)
+keeps 3A–3D/3F requirements. The phases retain separate completion gates. Delivery
+stages below neither add product scope nor count as accepted implementation outcomes.
+
+### Build shared capabilities once, when first needed
+
+The inspected application has flat Scene Beats, blanket terminal Choice handling and
+a scene-local TypeScript preview reducer. Building an expanding AI planner around
+those assumptions would create avoidable restructuring in 3A. Reduce that risk with
+small proven capabilities, not a framework implementing every future syntax up front.
+
+| Shared capability | First implementation boundary | Later consumers |
+| --- | --- | --- |
+| Source structure and stable locations | Bring forward the minimum 3A.1/3A.2 support needed for parent/block ownership, stable Beat/source locations, revisions and explicit insertion anchors. Prove one nested child edit and lossless reopen before expanding AI mutation families. | AI targets/context, nested Story editing, and typed screen/transform source locations. Screen/ATL grammar adapters arrive with those features, not in this first slice. |
+| Semantic edit preparation | 2C.1 prepares supported typed operations into exact candidate patches; review and acceptance reuse the existing Phase 1 transaction/history/recovery path. Manual visual controls reuse the relevant preparation primitives. | Dialogue/Scene AI edits, nested Story controls, Screens and Timeline. Each domain retains its own validation. |
+| Reference records | 2B.1 establishes shared IDs, revision/status/provenance and inclusion contracts for cards/lorebook, then their distinct manual forms. 2C.3 adds generated operations on those same records. | Both reference editors, selected context, proposal review and stale detection. No duplicated card-versus-lore lifecycle/storage system. |
+| Core story semantics | 3A owns the supported condition/call/continuation interpretation and known/unknown results. Agree its contract early; implement it with actual 3A behavior. | Story/Branches, source-derived context facts and later 3D trace/state inspection. Do not implement separate evaluators in the AI panel and preview. Full route reconstruction stays in 3D. |
+| Explicit scratch runtime job | Introduce the shared snapshot/preparation/process/cleanup service at the first 3B/3C runtime-preview consumer; extend its typed purpose and inputs for 3D. | Screen preview, Timeline comparison and Run From Here. Static AI proposal review remains non-executing and does not wait for this service. |
+
+`.rpy` remains authoritative. Extend the existing source/metadata services and preserve
+their migration/no-op guarantees; do not create a second saved document or replace
+the transaction system. Integrate shared schema changes through one migration path
+and preserve existing IDs/unknown fields. Do not preallocate speculative screen/ATL
+schemas merely to force every feature into one version bump.
+
+AI operations address stable authoring targets and semantic intent, not model-chosen
+byte ranges, paths or executable patches. A compatible parent/block-aware model does
+not authorize AI generation of conditions, calls, screens or ATL. The first rewrite
+can target ordinary Phase 1 dialogue using the new location contract. Nested targets
+or later constructs need explicit action-scope qualification; otherwise refuse or
+mark them excluded. Preserve the existing Phase 2 proposal allowlist. Cards/lorebook
+are author references and never become runtime state implicitly.
+
+### Staged lane assignments and integration points
+
+| Delivery stage | Implementation lane 1 | Implementation lane 2 | Dependency/proof before expansion |
+| --- | --- | --- | --- |
+| 1 — Foundation and provider feasibility | Minimum source structure/locations from 3A.1/3A.2; introduce only the relevant reusable edit-preparation seams. | 2A.0 provider qualification, followed by approved 2A.1/2A.2 credentials/request work. | One nested child edit through dispatch, undo and reopen preserves source/IDs; one qualified provider yields a valid bounded synthetic response. 2A.0's review boundary remains before provider production integration. |
+| 2 — First useful AI workflow | Deterministic context and strict proposal planning/acceptance using stage 1 locations/preparation (necessary 2B/2C parts). | Shared manual card/lore records/forms, prompt/limit settings and Assist preparation/review UI against agreed interfaces. | One complete rewrite with selected manual references: exact reviewed send, valid proposal, acceptance, undo and reopen. No hidden draft acceptance or shortened context. Native credentials and affected target checks remain required. |
+| 3 — Overlap milestone completion | Complete 3A conditions/calls, flow/history and Story/Branches controls against the shared model. | Remaining Phase 2 actions, generated cards/lorebook, second-provider coverage and 2C.4 preparation/qualification. | Reconcile every shared-model change with context/proposal targeting. Existing Phase 2 operations remain correct or visibly refuse unsupported boundaries; complete each milestone's own gates. 3A may be selected after the first safe rewrite without waiting for all 2C.4 work. |
+| 4 — Visual authoring | 3B Screen source adapters, canvas/hierarchy/properties and runtime comparison. | 3C Beat-anchored transforms/audio, Timeline controls and runtime comparison. | Accepted 3A and Phase 2; stable source/asset/history contracts. Integrate one shared runtime job before independent preview expansion. Each lane proves one real round trip before broadening its inventory. |
+| 5 — State and integrated release | 3D trace/state inspection and isolated launch, using accepted 3A semantics and qualified 3C effects. | Remaining cross-workspace/UI and affected-target release qualification; fix bounded integrated findings. | Normal-run comparison for supported entry points, then 3F's integrated release gate. Unknown state/timing still refuses unsupported launch; release acceptance follows all required capabilities. |
+
+Stage 1 brings forward source foundations only, not the full 3A UI or state engine.
+Minimum block support must not delay the first rewrite until Screens/Timeline exist.
+Stage 2 is one integrated authoring outcome across both lanes, not separate backend
+and frontend completion claims. Stage 3 overlap is intentional; 2C.4 remains required
+for declaring Phase 2 complete and for stage 4 entry. Story logic precedes Screens;
+3B/3C can then overlap. Portions of 3D state inspection may be scoped earlier once
+3A is accepted, but final launch qualification needs the supported 3C effects.
+
+The assignments are defaults for bounded tasks, not fixed ownership of an entire
+phase. Stage 2's record service and renderer work are sequenced inside lane 2; lane 1
+consumes the agreed records contract. The owner may rebalance independent pieces
+while preserving explicit ownership of shared files and the completion points above.
+
+### Team operation
+
+Use **one GPT-6.1 Sol owner at high reasoning effort and two GPT-6.1 Sol implementation
+agents at high reasoning effort** when an implementation outcome is selected.
+
+- The owner defines contracts and task/file boundaries, resolves shared-model decisions,
+  reviews both lanes, integrates coherent changes and verifies the combined outcome.
+  The owner coordinates shared-core ownership instead of becoming an unplanned third
+  independent feature lane. Implementation agents build the assigned foundations too.
+- Each implementation lane uses an isolated worktree with a bounded assignment and
+  declared source files/interfaces. Assign one writer for each shared model, migration,
+  dispatch/transaction seam and fixture; dependent lanes consume its reviewed checkpoint.
+  Keep UI fixtures/types synchronized with actual core contracts.
+- Integrate at each real operation/completion point above rather than accumulating
+  two phase-sized branches. Review actual dispatch/source/persistence behavior early;
+  rendered controls or mocked APIs alone cannot establish the combined outcome.
+- The owner selects combined changed-scope checks and records evidence against the
+  integrated candidate. Lanes run focused checks for their work; use shared fixtures
+  without duplicating expensive native/package matrices for unchanged inputs.
+  WORKFLOW/TESTING allowances, target requirements and manual waiting still apply.
+- Owner review covers integration. Any independently required checkpoint review remains
+  a separate pass. This team plan creates no new reviewer mandate or CI allowance and
+  does not authorize merges, service installation, spending or provider requests.
+
+No agents, implementation worktrees or execution were launched by this planning update.
+At implementation entry reconcile the accepted Phase 1 APIs with these proposed seams,
+select the first bounded source/provider tasks, and record their actual ownership and
+branch/checkpoint in CURRENT/HANDOVER and the existing task ledgers. Do not implement
+against this planning branch's inherited historical application tree.
+
+Delivery-plan verification: repository structure/text/privacy/local-link validation
+passed for 329 files; whitespace and six-document scope review passed. Checked the
+Phase 2/3 entry gates, first-rewrite dependency, provider-qualification review boundary,
+separate milestone acceptance, operation allowlist and unchanged deferred Git scope.
+No application/native/provider checks were run for these documentation changes.
+Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its remote
+head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
+Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance.

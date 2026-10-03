@@ -79,9 +79,14 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
-The October delivery sequence targets a complete reviewed dialogue rewrite early,
-using selected manual cards/lorebook and configurable prompts/limits, then Scene/provider
-completion, LLM-generated cards/lorebook and final integrated acceptance.
+The selected delivery sequence brings forward bounded 3A source foundations alongside
+provider feasibility, then targets a complete reviewed dialogue rewrite using manual
+cards/lorebook and configurable prompts/limits. Remaining Phase 2 actions/provider
+coverage and 3A Story logic can then overlap.
+[Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
+own the detailed dependency gates and GPT-6.1 Sol High owner/two-agent allocation.
+Phase 2 still requires final integrated acceptance; these stages do not enlarge its
+AI operation allowlist or authorize implementation.
 [The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
 maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
 under WORKFLOW, not mandatory chat transfers.
@@ -111,8 +116,11 @@ Git/GitHub are deferred and absent from Phase 3/release acceptance.
 The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) defines
 first usable results, proposed subsets, dependencies, implementation steps, inspected
 code seams, early risk proofs and completion gates. The user selected **Story logic first, then screen design** on 2026-10-02.
-The remaining order is proposed. This plans ahead alongside Phase 1G; it neither starts
-Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
+The selected shared-foundation sequence allows scoped 3A work before Phase 2
+completion; after accepted Phase 2/3A, Screens and Timeline can use parallel lanes.
+State/Run From Here consumes qualified story/effect semantics, and release qualification
+follows all required capabilities. This plans ahead alongside Phase 1G; it neither
+starts Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
 entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |

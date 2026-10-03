@@ -7,13 +7,20 @@ implementation of the remaining Phase 3 parts using Ren'Py documentation and rel
 projects as references. Earlier outcome-level planning was not a complete implementation
 plan. The steps below supply a proposed technical approach and proof checkpoints;
 research is not SDK qualification or approval to start coding.
-**Sequence:** Story logic before Screens remains the selected ordering preference.
-Phase 3's exact feature subsets remain reviewable; planning detail is not acceptance.
+**Sequence:** selected staged overlap brings bounded 3A source foundations forward
+and completes 3A alongside remaining Phase 2 work after the first safe rewrite.
+Story logic precedes Screens; Screens and Timeline then use two implementation lanes.
+[The Phase 2 delivery section](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
+owns the shared sequence/team. Exact feature subsets remain reviewable.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
 [ROADMAP](../../ROADMAP.md) owns the overall sequence, and
 [PRODUCT](../../PRODUCT.md) retains the initial-release commitment.
-**Entry:** accepted/integrated Phase 1 including 1H, accepted Phase 2, fresh refs and
-implementation inspection, and selection of a bounded implementation outcome.
+**Entry:** accepted/integrated Phase 1 including 1H, fresh refs/implementation
+inspection and selection of a bounded outcome. Minimum 3A source foundations may be
+selected before Phase 2 completion; remaining 3A follows the first safe Phase 2 rewrite.
+3B/3C require accepted Phase 2 and 3A. 3D follows its qualified semantics/effects, and
+3F retains all milestone acceptance dependencies. These are scoped entry conditions,
+not approval to implement every checkpoint.
 Planning can continue now. No implementation, integration, release or new CI dispatch
 is selected by this document.
 
@@ -26,7 +33,8 @@ Loomlight and runnable without editor metadata.
 
 Phase 3 is substantially larger than Phase 2. Deliver reviewable capabilities along
 the way; do not hide the first usable result behind completion of every workspace.
-The order below is proposed except for the user's selected Story-before-Screens order.
+The selected delivery overlap above governs implementation; the table below names
+capability completion boundaries rather than a strictly serial execution order.
 No calendar estimate is committed before the source/SDK feasibility checks.
 
 | Checkpoint | First usable result | Completion boundary |
@@ -58,9 +66,10 @@ Phase 2's cards, lorebook and reviewed generation rather than replacing them.
 - 3A establishes shared condition/call semantics before 3D uses them. Branches keeps
   its observed saved-state contract; it does not become a second source of truth or
   claim complete reachability analysis.
-- 3B and 3C reuse accepted source mapping, transactions, assets and history. Their
-  internal source-model dependencies are checked at entry; no parallel writer is
-  selected. Ship Story logic first, then Screens, then the proposed remaining order.
+- 3B and 3C reuse accepted source mapping, transactions, assets and history. After
+  accepted Phase 2/3A they may run in separate implementation lanes, with one owner
+  assigning shared-file writers and integrating their source/runtime contracts.
+  Story logic remains before Screens; runtime comparison uses one shared job service.
 - 3D must account for supported visual/audio effects from 3C or explicitly refuse
   unsupported entry points. A successful jump is not proof of reconstructed state.
 - [Optional Git](optional-local-git.md) has no dependency edge into Phase 3 or 3F.
@@ -102,8 +111,10 @@ existing APIs. Keep the current Rust core / TypeScript / Tauri stack.
    or confirmation. Cancel/Escape, external edits or stale sessions retain input and
    write nothing. Structural edits cannot consume protected neighboring ranges.
 4. Implement one real operation through renderer → dispatch → source preparation →
-   transaction → reopen before building a whole workspace. Reuse the proposal batching
-   introduced by Phase 2 if its accepted implementation fits this contract.
+   transaction → reopen before building a whole workspace. The early shared source
+   slice precedes expanded Phase 2 proposal planning; 2C.1 extends its preparation
+   seams and later 3A/3B/3C controls reuse them. Preserve domain validation and the
+   existing transaction layer rather than building a separate AI patching system.
 5. Add a shared explicit preview job: frozen accepted inputs, reviewed executable
    trust, isolated scratch project/profile, typed result and original-source mapping.
    The proposed preview uses a separate Ren'Py window on both targets; native window
@@ -469,7 +480,9 @@ are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-
 | Decision | State / next action |
 | --- | --- |
 | Story logic before screen design | User-selected 2026-10-02. |
-| Remaining order 3C → 3D → 3F | Proposed; dependency order above retained if priorities change. |
+| Shared foundations and overlap | User-selected: bounded 3A foundations, first Phase 2 rewrite, overlapping Phase 2/3A completion, then two lanes for 3B/3C. Phase 2 section 19 owns details. |
+| Team | One GPT-6.1 Sol High owner and two GPT-6.1 Sol High implementation agents; no implementation agents/worktrees launched by this docs update. |
+| State and release | 3D consumes qualified 3A/3C semantics/effects; final 3F follows all required milestone gates. |
 | Condition grammar and call parameters | Concrete grammar and no-parameter first-call design above; qualify the pinned SDK and migration in 3A.1–2. |
 | Screen properties/actions and generated-screen ownership | Recommended inventory and template adapters above; accept inventory/mockups and prove source ownership before 3B UI expansion. |
 | Timeline tracks, timing model and supported effects | Beat-bounded segments and 2D/standard-audio inventory above; native timing proof before completion. |
@@ -483,8 +496,10 @@ checkout. This branch changes docs only and does not qualify or accept Phase 1.
 The existing HANDOVER carries a short concurrent-planning note; no second handover
 or orchestration system is created. The Phase 2 brief retains its own requirement IDs.
 
-Next: review the proposed subsets, then refine the earliest undecided scope. After
-Phase 1 acceptance, select Phase 2's bounded provider qualification outcome first.
+Next: review the proposed subsets and prepare the first bounded shared-source and
+provider-qualification assignments from Phase 2 section 19. After Phase 1 acceptance,
+select those outcomes against fresh refs; provider production integration still waits
+for 2A.0 review. Full Story controls do not gate the first dialogue rewrite.
 At implementation entry use the current accepted baseline, not this historical fork.
 Codex can plan on any host; documentation validation needs no native build/app launch.
 Implementation briefs must state affected test hosts, measured limits, finite build/

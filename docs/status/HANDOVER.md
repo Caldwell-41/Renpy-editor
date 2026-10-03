@@ -373,3 +373,27 @@ approval step was added. Publication target remains `origin/codex/phase-2-3-plan
 The subagent's initial worktree save approval was interrupted before any write; the
 parent completed the same prepared save with worktree authorization. No duplicate
 image generation occurred. Resolve the final checkpoint from Git; no new Goal or CI.
+
+Selected delivery approach: the user approved updating the docs after the rework
+assessment. Phase 2 section 19 now owns shared source/edit/reference/semantic/runtime
+foundations and staged overlap: early minimum 3A source work alongside provider
+feasibility, first complete AI rewrite, overlapping Phase 2/3A completion, then
+Screen/Timeline lanes and state/release integration. The team is one GPT-6.1 Sol High
+owner plus two GPT-6.1 Sol High implementation agents; the owner coordinates contracts,
+shared-file writers, integration and combined verification. Phase 2/3 acceptance and
+the Phase 2 operation allowlist remain; Phase 1 through 1H is still required before
+implementation. ROADMAP/Phase 3 entry/sequence agree; exact feature subsets remain
+reviewable. This docs-only selection starts no agents, implementation worktrees,
+provider requests, builds, SDK/native runs or CI; no merge or new planning PR.
+Continue on `codex/phase-2-3-planning`. Next: review subsets/UX and, after Phase 1
+acceptance, select bounded source/provider tasks against the current accepted baseline.
+
+Delivery-plan verification: repository structure/text/privacy/local-link validation
+passed for 329 files; whitespace and six-document scope review passed. Checked the
+Phase 2/3 entry gates, first-rewrite dependency, provider-qualification review boundary,
+separate milestone acceptance, operation allowlist and unchanged deferred Git scope.
+No application/native/provider checks were run for these documentation changes.
+Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its remote
+head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
+Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance.
