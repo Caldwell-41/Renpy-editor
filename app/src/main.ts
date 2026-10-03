@@ -407,7 +407,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     sidebar.append(nav);
   });
   const collapse=button("","icon-button navigation-toggle");collapse.prepend(icon("panel"));collapse.title="Toggle navigation size";collapse.ariaLabel="Toggle navigation size";collapse.setAttribute("aria-controls",sidebar.id);
-  const setNavigationCollapsed=(collapsed:boolean):void=>{layout.dataset.navigationCollapsed=String(collapsed);collapse.ariaExpanded=String(!collapsed);};
+  const setNavigationCollapsed=(collapsed:boolean):void=>{layout.dataset.navigationCollapsed=String(collapsed);collapse.ariaExpanded=String(!collapsed);collapse.replaceChildren(icon(collapsed?"panelOpen":"panel"));collapse.title=collapsed?"Expand navigation":"Collapse navigation";};
   setNavigationCollapsed(layout.dataset.navigationCollapsed==="true");
   collapse.addEventListener("click",()=>{const collapsed=layout.dataset.navigationCollapsed!=="true";setNavigationCollapsed(collapsed);saveLayout(layoutKey,{navigationCollapsed:collapsed});});sidebar.prepend(collapse);
   layout.addEventListener("reset-panes",()=>setNavigationCollapsed(false));
@@ -417,7 +417,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   if(hasTree){
     layout.classList.add("with-tree");
     const toggle=button("","icon-button project-tree-toggle");toggle.prepend(icon("panel"));toggle.title="Toggle scene or file list";toggle.ariaLabel="Toggle scene or file list";toggle.setAttribute("aria-controls",treePanel.id);
-    const restore=button("","icon-button tree-restore");restore.prepend(icon("panel"));restore.ariaLabel="Show scene or file list";restore.title=restore.ariaLabel;restore.setAttribute("aria-controls",treePanel.id);
+    const restore=button("","icon-button tree-restore");restore.prepend(icon("panelOpen"));restore.ariaLabel="Show scene or file list";restore.title=restore.ariaLabel;restore.setAttribute("aria-controls",treePanel.id);
     const setTreeCollapsed=(collapsed:boolean,transferFocus=false):void=>{layout.dataset.treeCollapsed=String(collapsed);toggle.ariaExpanded=restore.ariaExpanded=String(!collapsed);if(transferFocus)(collapsed?restore:toggle).focus();};
     setTreeCollapsed(layoutFor(layoutKey).treeCollapsed||window.innerWidth<900);
     toggle.addEventListener("click",()=>{setTreeCollapsed(true,true);saveLayout(layoutKey,{treeCollapsed:true});});treePanel.prepend(toggle);
@@ -438,7 +438,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   });
   const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>{if(hasBlockingModal())return;const controller=currentSourceController(project);const capture=controller?.captureSaveIntent("toolbar",false);if(controller&&capture?.kind==="captured")void requestSourceSave(project,controller,capture.intent);else if(capture?.kind==="blocked")setStatus(capture.message,"error");else requestProjectFlush(project);});
   document.querySelector(".app-header")?.append(shellSave);
-  const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");sidebar.insertBefore(settingsButton,close);}
+  const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");settingsButton.ariaLabel="Settings";settingsButton.title="Settings";sidebar.insertBefore(settingsButton,close);}
   document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
   document.querySelector(".app-shell")?.append(runtimeWorkspace.panel);
   runtimeWorkspace.panel.hidden=true;

@@ -59,7 +59,50 @@ try {
  for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
  // Review corrections: controls preserve independent panels and active content.
+ // Sidebar controls must fit the existing tracks and never obscure editor headers.
+ for(const theme of ['light','dark']) for(const surface of ['Story','Source']) {
+  await page.setViewportSize({width:1440,height:900});
+  await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
+  await page.getByRole('button',{name:surface,exact:true}).click();
+  await page.locator(surface==='Story'?'.scene-header':'.source-tab-bar').waitFor();
+  for(const width of [1440,960,560]) for(const navClosed of [false,true]) for(const treeClosed of [false,true]) {
+   await page.setViewportSize({width,height:900});
+   const nav=page.locator('.navigation-toggle');
+   if((await nav.getAttribute('aria-expanded'))!==String(!navClosed)) await nav.click();
+   const treeChanged=(await page.locator('.project-tree-toggle').getAttribute('aria-expanded'))!==String(!treeClosed);
+   if(treeChanged) await page.locator(treeClosed?'.project-tree-toggle':'.tree-restore').click();
+   const m=await page.evaluate(()=>{
+    const box=e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height};};
+    const nav=document.querySelector('.story-sidebar'),toggle=document.querySelector('.navigation-toggle'),tree=document.querySelector('.project-tree-panel'),treeToggle=document.querySelector('.project-tree-toggle'),restore=document.querySelector('.tree-restore');
+    const title=document.querySelector('.scene-header h1');let titleBox;
+    if(title){const r=document.createRange();r.selectNodeContents(title);titleBox=box(r);}
+    const source=document.querySelector('.source-tab-group');
+    return {nav:box(nav),toggle:box(toggle),navOverflow:nav.scrollWidth>nav.clientWidth+1,tree:box(tree),treeToggle:box(treeToggle),restore:box(restore),title:titleBox,source:source?box(source):null,arrow:toggle.querySelector('path').getAttribute('d'),restoreArrow:restore.querySelector('path').getAttribute('d'),hideArrow:treeToggle.querySelector('path').getAttribute('d')};
+   });
+   assert.equal(Math.round(m.nav.width),navClosed?64:180,JSON.stringify(m));
+   assert.equal(m.navOverflow,false,`sidebar control introduced horizontal overflow: ${JSON.stringify(m)}`);
+   assert.equal(m.toggle.width,32);assert.equal(m.toggle.height,32);
+   assert.ok(m.toggle.x>=m.nav.x&&m.toggle.right<=m.nav.right);
+   assert.equal(m.arrow,navClosed?m.restoreArrow:m.hideArrow,'navigation arrow did not reflect state');
+   assert.notEqual(m.restoreArrow,m.hideArrow,'restore arrow must point the opposite way');
+   if(treeClosed){
+    assert.ok(m.restore.right<=(m.title??m.source).x,`restore control overlaps editor heading/tabs: ${JSON.stringify(m)}`);
+    if(treeChanged)assert.equal(await page.locator('.tree-restore').evaluate(e=>document.activeElement===e),true);
+   }else{
+    assert.equal(Math.round(m.tree.width),230);
+    assert.equal(m.toggle.y,m.treeToggle.y,'sidebar header controls are not aligned');
+    assert.ok(m.treeToggle.x>=m.tree.x&&m.treeToggle.right<=m.tree.right);
+   }
+  }
+  await page.screenshot({path:output+`sidebar-corrected-${surface.toLowerCase()}-${theme}-compact.png`});
+  await page.setViewportSize({width:1440,height:900});
+  await page.locator('.navigation-toggle').click();
+  await page.locator('.tree-restore').click();
+ }
+ await page.setViewportSize({width:1440,height:900});
  await page.getByRole('button',{name:'Story',exact:true}).click();
+ await page.evaluate(()=>window.dispatchEvent(new Event('loomlight-reset-layout')));
+ await page.screenshot({path:output+'sidebar-corrected-expanded.png'});
  const treeBefore=await page.locator('.project-tree-panel').boundingBox();
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);

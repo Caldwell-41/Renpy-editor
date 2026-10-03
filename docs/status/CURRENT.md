@@ -7,7 +7,18 @@
 
 ## Live continuation
 
-**State: corrected Mac review installer ready; CONFIG-01 detail open; Windows deferred.**
+**State: sidebar alignment follow-up implemented; installer predates it; Windows deferred.**
+The user reported misaligned/widening sidebar controls, the hidden tree restore button
+covering the Scene title, and arrows that did not reverse. The bounded
+[sidebar follow-up](../tasks/active/ui-design-review.md#sidebar-control-alignment-follow-up--2026-10-03)
+fixes fixed-size header placement, reserved restore space in Story/Source and stateful
+arrows. Main navigation/tree widths remain independent; the collapsed Settings cog
+has a tooltip instead of a clipped label. Local frontend/build/browser checks pass;
+actual native acceptance is still open. Delivered installer `19cdcaa` predates these
+source changes. No new installer, CI dispatch or integration was selected. Fresh
+planning worktree is now `2c5a164`; preserve its newer work. CONFIG-01 remains open.
+
+**Prior installer/audit state:**
 The [full-chat recheck](../tasks/active/ui-design-review.md#full-chat-request-reconciliation--2026-10-03)
 found a remaining CONFIG-01 detail: the accepted aspect-ratio label/caption and valid
 Custom-dimension preview handling are incomplete. The larger picker is implemented;

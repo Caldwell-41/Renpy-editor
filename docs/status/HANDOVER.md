@@ -1,5 +1,37 @@
 # Current outcome handover
 
+## Sidebar control alignment follow-up — 2026-10-03
+
+The user reviewed the delivered Mac build and selected four sidebar corrections:
+header alignment, no control-driven width expansion, no tree restore/title overlap,
+and reversed opening arrows. Incoming feature `254fe36` and main `4d7ba03` were
+preserved. The separate planning worktree advanced to `2c5a164`; preserve it. PR #17
+remains OPEN/draft/CONFLICTING; no integration was selected.
+
+Fixed 32px controls within existing sidebar tracks, removed the tree float and SVG
+link margin, placed navigation toggle in the project header, and reserved a 44px
+restore slot beside the Story heading/Source tabs (including empty Source). Opening
+arrows now point right; expanded controls point left. Collapsed Settings is a cog
+with an accessible label/tooltip. Retain existing hide/restore focus, ARIA state,
+chapter selection, independent widths and Writing focus panel restoration.
+
+Focused local evidence: 78 frontend tests, web compilation and existing actual-
+renderer browser regression pass. Added 48 sidebar geometry/state combinations:
+Story/Source, light/dark, 1440/960/560px, both panel states. Checks require existing
+180/64px navigation and 230px tree width, contained 32px controls, no horizontal rail
+overflow, aligned header controls, reversed arrows, restore/title-tab separation
+and visible focus transfer. Captures inspected; fixture previews are synthetic.
+Repository/diff validation pass. The task retains intermediate product/harness
+corrections; no failure is waived. Native macOS/Windows acceptance is unclaimed.
+
+Source changes are newer than delivered `19cdcaa`; the installed app is not changed
+by source edits. Continue hands-on feedback or select a corrected package explicitly.
+No new package/native/SDK start or hosted dispatch; totals remain 9 packages,
+44 native/boundary starts and separately 4 SDK menu starts. CONFIG-01 remains open;
+Windows WIN-UI-09 now includes these exact alignment/arrow/title checks. No pending
+operation, automation, merge/conflict resolution or new phase. Publish this coherent
+source/docs checkpoint on the same branch and verify it; no receipt-only commit.
+
 ## Corrected local Mac installer ready — 2026-10-03
 
 The user's requested local build completed from published input

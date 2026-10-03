@@ -267,24 +267,66 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .project-shell[data-navigation-collapsed="true"]>.project-tree-panel .story-tree {
   display:block}
 .navigation-toggle {
-  margin:0 0 12px;
-  align-self:flex-end}
+  position:absolute;
+  top:18px;
+  right:12px;
+  margin:0}
 .project-tree-toggle {
-  float:right;
-  margin:0 0 8px}
+  position:absolute;
+  top:18px;
+  right:12px;
+  float:none;
+  margin:0}
+.story-sidebar {
+  position:relative;
+  padding-top:18px}
+.story-sidebar>h2 {
+  min-height:32px;
+  padding-right:40px}
+.project-shell[data-navigation-collapsed="true"]>.story-sidebar {
+  padding-top:62px}
+.project-shell[data-navigation-collapsed="true"] .sidebar-settings {
+  font-size:0;
+  padding:10px}
+.project-shell[data-navigation-collapsed="true"] .sidebar-settings>.navigation-icon {
+  margin:0}
+.project-tree-panel .tree-heading {
+  flex-direction:column;
+  align-items:flex-start;
+  padding-right:38px}
+.project-tree-panel .tree-heading>.eyebrow {
+  min-height:32px;
+  display:flex;
+  align-items:center}
+.project-shell .navigation-toggle,.project-shell .project-tree-toggle,.project-shell .tree-restore {
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  min-width:32px;
+  height:32px;
+  padding:6px}
+.project-shell .navigation-toggle>.navigation-icon,.project-shell .project-tree-toggle>.navigation-icon,.project-shell .tree-restore>.navigation-icon {
+  margin:0}
 .project-shell {
-  position:relative}
-.tree-restore {
+  position:relative;
+  --workspace-inset:28px}
+.project-shell>.tree-restore {
   display:none;
   position:absolute;
-  top:6px;
-  left:190px;
+  top:24px;
+  left:calc(var(--nav-width) + var(--workspace-inset));
   z-index:12;
   background:var(--surface-panel)}
 .project-shell[data-tree-collapsed="true"]>.tree-restore {
   display:inline-flex}
-.project-shell[data-navigation-collapsed="true"]>.tree-restore {
-  left:74px}
+.project-shell[data-tree-collapsed="true"]:not([data-writing-focus="true"])>.scene-workspace>.scene-header,.project-shell[data-tree-collapsed="true"]>.source-workspace>.source-tab-bar,.project-shell[data-tree-collapsed="true"]>.source-workspace>p:first-child {
+  padding-left:44px}
+@media(max-width:760px) {
+  .project-shell {--workspace-inset:16px}
+  .project-shell>.tree-restore {top:16px}
+}
 .project-shell[data-writing-focus="true"],.project-shell.with-tree[data-writing-focus="true"] {
   grid-template-columns:minmax(0,1fr)}
 .project-shell[data-writing-focus="true"]>.story-sidebar,.project-shell[data-writing-focus="true"]>.project-tree-panel,.project-shell[data-writing-focus="true"]>.tree-restore {

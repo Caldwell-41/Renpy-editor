@@ -2240,7 +2240,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-06 — Character selection and image refresh (A3/A8) | Select a non-default appearance; save Character unchanged; change the default; switch Grid/List and leave/return. Replace an appearance image. Test a missing/unreadable image then restore it and Retry preview. | Selected UUID, pressed state and preview remain aligned. Default is distinct from viewing. New images load immediately; loading and useful bounded errors are visible; retry recovers without replaying a write or showing another Character’s image. |
 | WIN-UI-07 — appearance rename reuse (A4) | Rename happy → calm → thoughtful → calm → happy, with/without an image replacement. Save/reopen and inspect Show/Change Appearance Beats. Try a name belonging to another image; edit a retained alias externally and try reusing it. | Stable Appearance/Asset/default IDs and supported references; old files/custom source stay intact. Own unchanged aliases can be reused; genuine collisions/edited aliases refuse without partial writes. |
 | WIN-UI-08 — compact Choice/buttons (A1) | Open Choice → Create New Scene at minimum window size and typical laptop size, light/dark, 100% and higher Windows scaling. Type names/select Chapter; cancel/reopen; create once. | Fields remain inside the editor and stack when compact. Cancel/Create share a clear action row and consistent height; no stretched/wrapped button labels or horizontal escape. Creation establishes the saved route. |
-| WIN-UI-09 — sidebar/focus/layout (A5/A6) | Use Tab/Enter to collapse main navigation and hide/restore Scenes/files independently. Collapse Chapters with a Scene selected. Enter/exit Writing focus. Resize preview with pointer and Arrow keys, Reset layout, reopen. Inspect with Narrator if available. | Main collapse leaves tree text/geometry intact; hide/restore focus stays visible; controls announce accurate state. Chapters retain the editor. Writing focus hides sidebars and restores previous choices. Preview allocation and separator value agree after reset. |
+| WIN-UI-09 — sidebar/focus/layout (A5/A6) | Use Tab/Enter to collapse main navigation and hide/restore Scenes/files independently. Collapse Chapters with a Scene selected. Enter/exit Writing focus. Resize preview with pointer and Arrow keys, Reset layout, reopen. At 100%/higher DPI, verify header alignment, fixed control/panel widths, reverse opening arrows, and restore separation from the Story title/Source tabs (including no file open). Inspect with Narrator if available. | Main collapse leaves tree text/geometry intact; hide/restore focus stays visible; controls announce accurate state. Chapters retain the editor. Writing focus hides sidebars and restores previous choices. Preview allocation and separator value agree after reset. |
 | WIN-UI-10 — Beat confirmation/pending (A7) | Create each applicable Beat with one confirmation; simulate a slow receipt through an approved test driver and attempt duplicate confirmation/Cancel. Exercise a stale-source failure, correct it and retry. Use a long list. | Pending controls are disabled, only one write occurs, failure retains editable values, and success reveals/focuses the saved collapsed row without another Commit. |
 | WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
 | WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
@@ -2393,3 +2393,56 @@ The older installed app/private projects were untouched. Provide the final DMG l
 the user quits Loomlight, installs/replaces from that DMG and resumes at Story. No
 manual operation is pending. Keep PR #17 draft/open/conflicting and preserve both
 worktrees. Publish only this documentation, never binaries/logs or private data.
+
+
+### Sidebar control alignment follow-up — 2026-10-03
+
+The user reports that both sidebar close controls are misaligned and enlarge their
+panels, the hidden Story tree restore control covers the Scene title, and the arrows
+do not reverse to indicate reopening. This selects a bounded source correction;
+no new installer/hosted dispatch/integration was requested. Fresh feature/main refs
+match incoming `254fe36`/`4d7ba03`; planning worktree is newer at `2c5a164` and was
+preserved. PR #17 remains draft/open/conflicting.
+
+- Give both header controls fixed 32×32px bounds, centre their 20px icons without
+  navigation-link margins, and place them at the same inset within existing tracks.
+  Remove float-driven tree-heading layout and the extra navigation-toggle row.
+- Keep main navigation 180px/64px and tree 230px (or the user's saved width).
+  Reserve space for the restore icon beside the Scene title/Source tabs, including
+  the empty Source prompt. Compact positioning uses the actual navigation width
+  and editor inset. Writing focus does not retain an unused title indent.
+- Use matching panel icons with left-pointing collapse and right-pointing restore
+  arrows; navigation updates its arrow and tooltip immediately on state changes.
+  Preserve expanded/controls ARIA, visible hide/restore focus, chapter/editor state,
+  independent tree width and Writing focus restoration.
+- The collapsed Settings label was visibly clipped and caused horizontal rail
+  overflow. Use the existing cog alone with an accessible label and tooltip.
+
+Verification: `npm run check` **78 passed**, production web compilation PASS
+(existing chunk-size advisory), full existing `ui-refresh.browser.mjs` PASS, diff
+and repository validation PASS. New rejecting geometry checks cover **48 combinations**
+(Story/Source × light/dark × 1440/960/560px × main expanded/collapsed × tree visible/
+hidden): exact existing track widths, contained 32px controls, no horizontal nav
+scroll overflow, matching header height, distinct/opposite arrow paths, restore
+separation from actual Scene text/visible Source tabs, focus transfer on hide, and
+saved state restoration. Existing chapter/focus/Source/Beat/catalogue checks remain.
+Inspected expanded/compact captures in ignored `.toolchains/reports/ui-refresh/`;
+synthetic preview images are not native asset-loading evidence. Check/build/browser
+logs are `.toolchains/reports/sidebar-alignment-*.log`.
+
+Intermediate evidence preserved in this record: initial browser start was blocked
+by sandbox loopback EPERM; rerun with authorized local test capability. First geometry
+run rejected the real collapsed Settings overflow, corrected above. A later Source
+assertion measured a hidden tab-scroll arrow (zero box); changed to the visible tab
+itself. The new geometry loop left Source's persisted tree state hidden for an old
+file-list test: reset event alone does not persist preference changes, so the fixture
+now restores through the actual controls. These are harness corrections, not product
+exceptions or waived failures; final full regression passes.
+
+The delivered `19cdcaa` Mac installer predates these edits. No package/install/native/
+SDK start, workflow dispatch, merge/conflict resolution or new phase was added.
+Cumulative totals remain 9 packages, 44 native/boundary starts, separately 4 SDK menu
+starts. Windows testing remains explicitly deferred; WIN-UI-09 includes alignment,
+control widths, arrow direction and title/tab/empty-Source separation at scaling.
+CONFIG-01 remains pending. Continue the existing hands-on review; select a corrected
+installer separately when needed. Publish this source/docs checkpoint and verify.

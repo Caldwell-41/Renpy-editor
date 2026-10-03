@@ -74,7 +74,11 @@ picker is implemented; those preview details remain pending in the task ledger.
   Wizard steps fill the rail, SDK selection says **Select existing SDK…**, resolution
   uses a readable 48-pixel picker with aspect preview, and Git has an inline checkbox.
 - Main navigation has its own top icon toggle and a 64-pixel collapsed rail. The
-  Scene/file list has independent hide/restore controls. Chapter disclosure keeps
+  Scene/file list has independent hide/restore controls. Both header controls fit
+  their existing panel widths at 32px, with left arrows when expanded and right arrows
+  for reopening. The restore control has a reserved slot beside the editor heading/
+  Source tabs, and never covers their text. Collapsed Settings uses a labelled cog.
+  Chapter disclosure keeps
   the selected Scene and its editing state. Writing focus hides both sidebars,
   preview and context; exiting restores the previous panel choices.
 - New Beats save when confirmed once, returning a collapsed row. Choice creation
