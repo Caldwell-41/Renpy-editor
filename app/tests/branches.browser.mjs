@@ -22,7 +22,7 @@ assert.equal(fixture.nodes.length, 500); assert.equal(fixture.edges.length, 2000
 if (evidenceDir) await mkdir(evidenceDir, { recursive: true });
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
 const sourceHashes = {};
-for (const name of ["tests/branches.browser.mjs", "tests/branches-timing-policy.mjs", "src/branches-ui.ts", "src/styles.css", "package-lock.json"]) {
+for (const name of ["tests/branches.browser.mjs", "tests/branches-timing-policy.mjs", "src/branches-ui.ts", "src/branches-routing.ts", "src/styles.css", "package-lock.json"]) {
   sourceHashes[name] = sha256(await readFile(join(appRoot, name)));
 }
 const report = {

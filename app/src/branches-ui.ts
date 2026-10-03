@@ -1,4 +1,5 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
+import { branchBounds, routeBranches, type GraphBounds } from "./branches-routing.ts";
 export interface FlowLocation { readonly path: string; readonly revision: string; readonly byteStart: number; readonly byteEnd: number }
 export interface FlowNode { readonly sceneId: string; readonly name: string; readonly label: string; readonly location: FlowLocation | null; readonly partial: boolean; readonly stale: boolean }
 export type FlowDestination = { readonly kind: "resolved"; readonly sceneId: string } | { readonly kind: "missing"; readonly label: string } | { readonly kind: "unknown"; readonly label: string | null; readonly location: FlowLocation | null } | { readonly kind: "terminal" };
@@ -13,13 +14,14 @@ export interface BranchesActions {
 }
 export interface Point { readonly x: number; readonly y: number }
 /** Deterministic layers of the known graph. Cycles stay bounded; no execution claim. */
-export function layoutFlow(nodes: readonly FlowNode[], edges: readonly FlowEdge[] = []): ReadonlyMap<string, Point> {
+export function layoutFlow(nodes: readonly FlowNode[], edges: readonly FlowEdge[] = [], entrySceneId?: string): ReadonlyMap<string, Point> {
   if(nodes.length>500 || edges.length>2000)return new Map();
   const sorted=[...nodes].sort((a,b)=>a.label.localeCompare(b.label)||a.sceneId.localeCompare(b.sceneId));
   const links=new Map(sorted.map(n=>[n.sceneId,[] as string[]]));const incoming=new Set<string>();
   for(const e of edges)if(e.destination.kind==="resolved"&&links.has(e.sceneId)&&links.has(e.destination.sceneId)){links.get(e.sceneId)!.push(e.destination.sceneId);incoming.add(e.destination.sceneId);}
   links.forEach(a=>a.sort());const levels=new Map<string,number>();let offset=0;
   const visit=(id:string):void=>{const queue:[string,number][]=[[id,offset]];for(let i=0;i<queue.length;i++){const [current,depth]=queue[i]!;if(levels.has(current))continue;levels.set(current,depth);for(const next of links.get(current)??[])if(!levels.has(next))queue.push([next,depth+1]);}offset=Math.max(...levels.values())+1;};
+  if(entrySceneId&&links.has(entrySceneId))visit(entrySceneId);
   for(const n of sorted.filter(n=>!incoming.has(n.sceneId)))if(!levels.has(n.sceneId))visit(n.sceneId);
   for(const n of sorted)if(!levels.has(n.sceneId))visit(n.sceneId);
   const rows=new Map<number,FlowNode[]>();for(const n of sorted){const depth=levels.get(n.sceneId)!;rows.set(depth,[...(rows.get(depth)??[]),n]);}
@@ -43,13 +45,13 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
   const details = document.createElement("div"); details.className = "branches-details";
   const edgeSelect = document.createElement("select"); edgeSelect.setAttribute("aria-label", "Selected route");
   const transform = (): void => { canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`; };
-  const bounds=():{width:number;height:number}=>{const points=[...layoutFlow(model?.nodes??[],model?.edges??[]).values()];return {width:Math.max(280,...points.map(p=>p.x+240)),height:Math.max(200,...points.map(p=>p.y+120))};};
+  let graphBounds:GraphBounds={x:0,y:0,width:280,height:200};
   const remember=():void=>{if(actions.layoutKey)saveLayout(actions.layoutKey,{graph:{zoom,x:panX,y:panY}});};
-  const fit = (): void => {const b=bounds();zoom=Math.max(.05,Math.min(1,(viewport.clientWidth||900)/b.width,(viewport.clientHeight||500)/b.height));panX=viewport.clientWidth?(viewport.clientWidth-b.width*zoom)/2:0;panY=viewport.clientHeight?Math.max(0,(viewport.clientHeight-b.height*zoom)/2):0;transform();};
+  const fit = (): void => {const b=graphBounds;zoom=Math.max(.05,Math.min(1,(viewport.clientWidth||900)/b.width,(viewport.clientHeight||500)/b.height));panX=viewport.clientWidth?(viewport.clientWidth-b.width*zoom)/2-b.x*zoom:0;panY=viewport.clientHeight?Math.max(0,(viewport.clientHeight-b.height*zoom)/2)-b.y*zoom:0;transform();};
   const scale = (factor: number): void => { zoom = Math.min(2, Math.max(.05, zoom * factor)); transform(); };
   toolbar.append(refreshButton, button("Zoom in", () => scale(1.2)), button("Zoom out", () => scale(1 / 1.2)), button("Fit graph", fit), button("Open Source", () => actions.source()), button("View project start", () => actions.source(model?.entryLocation ?? undefined)));
   const inspector=button("Scene details",()=>{controls.hidden=!controls.hidden;inspector.ariaExpanded=String(!controls.hidden);});inspector.ariaExpanded="false";toolbar.append(inspector);controls.hidden=true;
-  toolbar.append(button("Focus selection",()=>{const point=layoutFlow(model?.nodes??[],model?.edges??[]).get(selectedScene??"");if(point){zoom=1;panX=viewport.clientWidth/2-point.x-100;panY=viewport.clientHeight/2-point.y-30;transform();}}));
+  toolbar.append(button("Focus selection",()=>{const point=layoutFlow(model?.nodes??[],model?.edges??[],model?.entrySceneId).get(selectedScene??"");if(point){zoom=1;panX=viewport.clientWidth/2-point.x-100;panY=viewport.clientHeight/2-point.y-30;transform();}}));
   const closeDetails=button("×",()=>{controls.hidden=true;inspector.ariaExpanded="false";(canvas.querySelector<HTMLElement>(`[data-scene-id="${selectedScene}"]`)??inspector).focus();});closeDetails.className="icon-button panel-close";closeDetails.ariaLabel="Close Scene details";closeDetails.title=closeDetails.ariaLabel;
   controls.append(closeDetails,select, edgeSelect, details);const dismissDetails=(e:KeyboardEvent):void=>{if(e.key==="Escape"&&!controls.hidden&&!document.querySelector('[aria-modal="true"]')){e.preventDefault();closeDetails.click();}};host.addEventListener("keydown",dismissDetails); host.replaceChildren(title, toolbar, observation, note, viewport, controls);
   // Captured targets are checked by Source/Scene at navigation. Panning and clicks
@@ -67,6 +69,7 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     if (!routes.some((edge) => edge.id === selectedEdge)) selectedEdge = undefined;
     edgeSelect.value = selectedEdge ?? "";
     canvas.querySelectorAll<SVGElement>("[data-edge-id]").forEach((item) => item.classList.toggle("selected", item.dataset.edgeId === selectedEdge));
+    canvas.querySelectorAll<SVGElement>("[data-label-edge-id]").forEach(item=>item.classList.toggle("selected",item.getAttribute("data-label-edge-id")===selectedEdge));
     canvas.querySelectorAll<HTMLElement>(".branch-node").forEach((item) => { item.classList.toggle("selected", item.dataset.sceneId === selectedScene); item.setAttribute("aria-pressed", String(item.dataset.sceneId === selectedScene)); });
     if (!node) return;
     const description = document.createElement("p"); description.textContent = `${node.name} · ${node.label}${node.sceneId === model?.entrySceneId ? " · Entry" : ""}${node.partial ? " · Partial" : ""}${node.stale ? " · Stale" : ""}`; details.append(description);
@@ -84,21 +87,22 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     if (model.overLimit || model.nodes.length > 500 || model.edges.length > 2000) { note.textContent = model.overLimit ? model.notice : "Graph limit exceeded. Open Source to continue."; selectedScene = undefined; selectedEdge = undefined; showDetails(); return; }
     if (!model.nodes.some((node) => node.sceneId === selectedScene)) { selectedScene = undefined; selectedEdge = undefined; }
     const placeholder = document.createElement("option"); placeholder.value = ""; placeholder.textContent = "Choose a Scene"; select.append(placeholder);
-    const positions = layoutFlow(model.nodes,model.edges);
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add("branches-lines"); svg.setAttribute("width", String(bounds().width)); svg.setAttribute("height", String(bounds().height)); svg.setAttribute("aria-hidden", "true"); canvas.append(svg);
+    const positions = layoutFlow(model.nodes,model.edges,model.entrySceneId);
+    const routes=routeBranches(positions,model.edges);graphBounds=branchBounds(positions,routes);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add("branches-lines"); svg.setAttribute("width", String(graphBounds.width)); svg.setAttribute("height", String(graphBounds.height));svg.setAttribute("viewBox",`${graphBounds.x} ${graphBounds.y} ${graphBounds.width} ${graphBounds.height}`);svg.style.left=`${graphBounds.x}px`;svg.style.top=`${graphBounds.y}px`; svg.setAttribute("aria-hidden", "true"); canvas.append(svg);
     const defs = document.createElementNS(svg.namespaceURI, "defs"); const marker = document.createElementNS(svg.namespaceURI, "marker"); marker.setAttribute("id", "branches-arrow"); marker.setAttribute("viewBox", "0 0 10 10"); marker.setAttribute("refX", "10"); marker.setAttribute("refY", "5"); marker.setAttribute("markerWidth", "6"); marker.setAttribute("markerHeight", "6"); marker.setAttribute("orient", "auto-start-reverse"); const arrow = document.createElementNS(svg.namespaceURI, "path"); arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z"); marker.append(arrow); defs.append(marker); svg.append(defs);
-    for (const edge of model.edges) {
-      if (edge.destination.kind !== "resolved") continue;
-      const from = positions.get(edge.sceneId); const to = positions.get(edge.destination.sceneId); if (!from || !to) continue;
+    marker.setAttribute("markerUnits","userSpaceOnUse");marker.setAttribute("markerWidth","10");marker.setAttribute("markerHeight","10");
+    const labelLayer=document.createElementNS(svg.namespaceURI,"g");svg.append(labelLayer);
+    for (const route of routes) {
+      const edge=route.edge;
       const path = document.createElementNS(svg.namespaceURI, "path");
-      const d = from === to ? `M ${from.x+200} ${from.y+30} C ${from.x+260} ${from.y-50}, ${from.x-30} ${from.y-50}, ${from.x} ${from.y+30}` : `M ${from.x+100} ${from.y+60} C ${from.x+100} ${(from.y+60+to.y)/2}, ${to.x+100} ${(from.y+60+to.y)/2}, ${to.x+100} ${to.y}`;
-      path.setAttribute("d", d); path.setAttribute("marker-end", "url(#branches-arrow)"); path.setAttribute("data-edge-id", edge.id); svg.append(path);
-      if(edge.text&&model.edges.length<=100){const label=document.createElementNS(svg.namespaceURI,"text");label.textContent=edge.text.length>34?edge.text.slice(0,31)+"…":edge.text;label.setAttribute("x",String((from.x+to.x)/2+100));label.setAttribute("y",String((from.y+to.y)/2+24));label.setAttribute("text-anchor","middle");label.classList.add("branch-edge-label");svg.append(label);}
+      path.setAttribute("d", route.path); path.setAttribute("marker-end", "url(#branches-arrow)"); path.setAttribute("data-edge-id", edge.id); svg.insertBefore(path,labelLayer);
+      if(route.label){const p=route.label;const group=document.createElementNS(svg.namespaceURI,"g");group.classList.add("branch-route-label");group.setAttribute("data-label-edge-id",edge.id);const pill=document.createElementNS(svg.namespaceURI,"rect");pill.setAttribute("x",String(p.x-p.width/2));pill.setAttribute("y",String(p.y-p.height/2));pill.setAttribute("width",String(p.width));pill.setAttribute("height",String(p.height));pill.setAttribute("rx","6");const label=document.createElementNS(svg.namespaceURI,"text");label.textContent=p.text;label.setAttribute("x",String(p.x));label.setAttribute("y",String(p.y));label.setAttribute("text-anchor","middle");label.setAttribute("dominant-baseline","central");label.classList.add("branch-edge-label");const full=document.createElementNS(svg.namespaceURI,"title");full.textContent=edge.text;group.append(pill,label,full);labelLayer.append(group);}
     }
     for (const node of model.nodes) {
       const option = document.createElement("option"); option.value = node.sceneId; option.textContent = node.name; select.append(option);
       const point = positions.get(node.sceneId)!; const card = button(`${node.name}${node.sceneId === model.entrySceneId ? " · Entry" : ""}`, () => { selectedScene = node.sceneId; selectedEdge = undefined; select.value = node.sceneId; controls.hidden=false;inspector.ariaExpanded="true";showDetails(); });
-      card.addEventListener("dblclick",()=>{if(!node.stale&&node.location)navigate(()=>actions.scene(node));});card.className = "branch-node"; card.dataset.sceneId = node.sceneId; card.style.left = `${point.x}px`; card.style.top = `${point.y}px`; card.title = node.label; canvas.append(card);
+      card.addEventListener("dblclick",()=>{if(!node.stale&&node.location)navigate(()=>actions.scene(node));});card.className = "branch-node"; card.dataset.sceneId = node.sceneId; card.style.left = `${point.x}px`; card.style.top = `${point.y}px`; card.title = `${node.name} · ${node.label}`; canvas.append(card);
     }
     select.value = selectedScene ?? ""; showDetails(); transform();
   }

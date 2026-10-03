@@ -745,7 +745,17 @@ blocked; acknowledging a warning or deleting a journal is not an available resol
 Branches displays accepted core flow with an deterministic layered layout (with bounded placement for cycles and disconnected scenes), directed
 routes, an entry badge only when runnable `start` proves it, and separate partial/stale
 notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
-or labelled selectors; duplicate option text remains separate. Arrow keys pan the
+or labelled selectors; duplicate option text remains separate. The selected rounded
+orthogonal connector treatment uses 3px palette-accent lines, visible arrowheads and
+14px route text on opaque bordered pills. Adjacent forward links use row gaps;
+backward, long, same-layer and self links use distinct outside channels. Paths avoid
+Scene node interiors, reciprocal/parallel routes have distinct ports and lanes, and
+Fit includes route/label bounds. The accepted entry anchors cyclic components;
+missing/unknown/terminal destinations never acquire invented arrows. Fixed 200×60px
+nodes ellipsize long names with full name/label in the tooltip and existing details.
+The existing >100-edge label suppression/34-character label truncation and graph
+limits remain; details retain full route text. This is a saved-flow display, not graph
+editing or runtime certainty. Arrow keys pan the
 focused graph, +/- zoom, Home fits; equivalent buttons remain available. Pointer pan
 is optional. Under [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md),
 Branches displays the last observed saved state, including accepted app edits.

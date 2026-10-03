@@ -275,8 +275,11 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .branches-viewport { height: clamp(240px, 48vh, 620px); overflow: hidden; position: relative; border: 1px solid var(--border-normal); background: var(--surface-app); touch-action: none; }
 .branches-canvas { transform-origin: 0 0; position: relative; will-change: transform; }
 .branches-lines { position: absolute; pointer-events: none; overflow: visible; }
-.branches-lines path { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; opacity: .55; }
-.branch-node { position: absolute; width: 200px; min-height: 60px; padding: 10px; overflow-wrap: anywhere; border: 1px solid var(--border-normal); background: var(--surface-panel); color: var(--text-primary); border-radius: 4px; text-align: left; }
+.branches-lines path { fill: none; stroke: var(--accent-primary); stroke-width: 3; opacity: 1; stroke-linecap: round; stroke-linejoin: round; }
+.branch-node { position: absolute; width: 200px; height: 60px; min-height: 60px; box-sizing: border-box; padding: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid var(--border-normal); background: var(--surface-panel); color: var(--text-primary); border-radius: 4px; text-align: left; }
+.branch-edge-label { fill: var(--text-primary); font-size: 14px; font-weight: 550; }
+.branch-route-label rect { fill: var(--surface-raised); stroke: var(--border-strong); stroke-width: 1; }
+.branch-route-label.selected rect { stroke: var(--accent-primary); stroke-width: 2; }
 .branch-node.selected { border-color: var(--accent-primary); }
 .branches-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 16px; }
 .branches-controls select { min-width: 0; width: 100%; }
@@ -286,8 +289,8 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 
 .branches-viewport:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
-.branches-lines path.selected { stroke: var(--accent-primary); stroke-width: 3; opacity: 1; }
-.branches-lines marker path { fill: var(--text-secondary); stroke: none; }
+.branches-lines path.selected { stroke-width: 4; }
+.branches-lines marker path { fill: var(--accent-primary); stroke: none; }
 
 .branches-controls select { padding: 8px 10px; min-height: 38px; color: var(--text-primary); background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: var(--radius-small); }
 

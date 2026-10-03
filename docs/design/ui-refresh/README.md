@@ -2,6 +2,7 @@
 
 Saved 2026-09-29 at the user's request for comparison during implementation.
 The accepted resolution-picker detail was added 2026-09-30 during hands-on review.
+Rounded Branches connectors (option B) were selected 2026-10-03.
 These are design references, not working-app screenshots or bundled game assets.
 The [design decisions and build plan](../../tasks/active/ui-design-review.md) own
 behaviour, acceptance criteria and corrections. This index owns image selection only.
@@ -23,6 +24,7 @@ The preferred Settings layout applies to Settings, not every page.
 | Settings, compact | [Fallback](settings-compact-fallback.png) | Supporting fallback only when width requires it |
 | Source | [Layout](source-layout.png) | File navigation/tabs and optional context |
 | Branches | [Layout](branches-layout.png) | Graph and optional scene details; no graph editing |
+| Branches, connectors | [Selected option B](branches-connectors-rounded.png) | Heavier rounded orthogonal routes, separate backward channels and opaque label pills |
 | Characters | [Layout](characters-layout.png) | Cast grid, appearances and optional inspector |
 | Assets | [Layout](assets-layout.png) | Grid/filter/details; new audio controls remain disabled |
 | Variables | [Layout](variables-layout.png) | Table/inspector and known assignments only |
@@ -50,6 +52,11 @@ The preferred Settings layout applies to Settings, not every page.
   fixtures for screenshots; never add private game content or personal paths to Git.
 - Do not reproduce unsupported fields/actions. The plan explicitly bounds metadata,
   variable references, audio, graph editing and project settings.
+- The selected Branches connector reference controls routing style. Preserve every
+  directed arrowhead and its correct destination; the image's missing `4` arrowhead
+  and imperfect Jump tip are generation errors, not accepted behaviour. Attachment
+  dots do not select graph editing; the shortened illustrative toolbar does not
+  remove existing actions. Node ranks remain a deterministic saved-flow layout.
 - Compare hierarchy, spacing, density, alignment, panel behaviour and colour roles.
   Do not demand pixel identity with generated text, sample art or OS font rendering.
 
