@@ -7,6 +7,20 @@
 
 ## Live continuation
 
+**Latest source: Story/Source navigation spacing corrected; installer update pending selection.**
+Source checkpoint `f287a7e` removes the legacy compact tree-layout override that
+made icons touch expanded navigation labels. The new browser assertion rejected
+0px at Story/1100px before the fix; all six surfaces now preserve a 12px gap in
+both themes across five widths. Frontend 85 tests, production web build, full
+browser regression and repository validation pass; 80 sidebar-state combinations
+retain collapsed margins/control bounds/arrows/restore separation. See the
+[spacing regression record](../tasks/active/ui-design-review.md#storysource-navigation-spacing-regression--2026-10-03).
+The existing `b6cc06b` installer below predates this correction. Windows WIN-UI-09
+includes the new spacing/breakpoint check. No new package, native/SDK execution,
+CI dispatch or integration; counters remain unchanged. Resume final review with
+a corrected installer when selected. CONFIG-01 and the remaining 1G work below
+remain open.
+
 **State: latest corrected Mac installer ready; final 1G acceptance/integration open; Windows deferred.**
 The user selected a rebuild. Final installer from **`b6cc06b3496e20288de8a06211dfd599e29f9bf3`**
 (app source `cedef50`) is ready:

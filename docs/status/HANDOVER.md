@@ -1,5 +1,33 @@
 # Current outcome handover
 
+## Story/Source sidebar spacing regression corrected — 2026-10-03
+
+The user reports icons touching sidebar labels on Story/Source in the latest Mac
+review. Source checkpoint **`f287a7e`**, parent `0474e04`, removes only the old
+max-width 1100px `.with-tree` icon-margin override. Expanded links retain the shared
+12px gap; collapsed links and panel controls keep zero margin. Existing widths,
+independent collapse, arrows and restore slots are preserved. The
+[task record](../tasks/active/ui-design-review.md#storysource-navigation-spacing-regression--2026-10-03)
+owns cause, rejecting evidence, exact changed-scope checks and Windows continuation.
+
+New browser geometry proof first rejected the unchanged product at Story/1100px
+(0px instead of 12px); corrected full regression passes all six surfaces/both
+palettes/five widths and 80 navigation/tree state combinations. Frontend check
+85 passed, web build PASS (existing chunk advisory), repository validation and
+diff checks PASS. Inspected synthetic light Story/Source/Branches and dark Story
+captures. This proves renderer spacing, not macOS/Windows native acceptance.
+
+The final `b6cc06b` installer below remains available but predates this source fix.
+No replacement package was selected by the regression report. WIN-UI-09 includes
+all-surface spacing above/below the breakpoint with expanded/collapsed navigation
+and visible/hidden Scenes/files. Windows remains deferred. No native/SDK launch,
+workflow dispatch, merge/conflict resolution or new phase; no operation pending.
+Totals remain 10 packages, 44 native/boundary starts and separately 4 SDK menu
+starts. Main `4d7ba03`, remote planning `267ec2a`, separate local worktree `2c5a164`
+and draft/open/conflicting PR #17 are preserved. Publish and verify the source/docs
+checkpoint on the same branch. Continue final 1G acceptance; CONFIG-01 and prior
+remaining work are still open, and select a new installer when needed.
+
 ## Latest corrected Mac installer ready — 2026-10-03
 
 User requested installer rebuild and remaining 1G summary. Built one pinned local
