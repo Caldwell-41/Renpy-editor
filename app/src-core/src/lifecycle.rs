@@ -582,6 +582,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    pub fn authoring_preview_import(
+        &mut self,
+        request: crate::media::ImportPreviewRequest,
+    ) -> Result<crate::media::MediaPresentation, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .preview_import(&authority, request)
+            .map_err(LifecycleError::Media)
+    }
+
     pub fn authoring_import_asset(
         &mut self,
         request: ImportAssetRequest,

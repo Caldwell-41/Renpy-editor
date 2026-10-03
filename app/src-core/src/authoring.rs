@@ -536,6 +536,47 @@ impl AuthoringService {
         })
     }
 
+    /// Read only the retained, project-bound selection. Preview never consumes import authority.
+    pub fn preview_import(
+        &mut self,
+        project: &ProjectId,
+        request: crate::media::ImportPreviewRequest,
+    ) -> Result<crate::media::MediaPresentation, crate::media::MediaError> {
+        use crate::media::{MediaError, MAX_PRESENTATION_BYTES};
+        let authority = self
+            .imports
+            .get_mut(&request.authority_id)
+            .ok_or(MediaError::UnknownAsset)?;
+        if &authority.project != project {
+            return Err(MediaError::UnknownAsset);
+        }
+        if authority.byte_count > MAX_PRESENTATION_BYTES {
+            return Err(MediaError::Oversize);
+        }
+        revalidate_selected(authority).map_err(|_| MediaError::UnsafeAsset)?;
+        authority
+            .file
+            .seek(SeekFrom::Start(0))
+            .map_err(|_| MediaError::Io)?;
+        let mut bytes = Vec::new();
+        (&mut authority.file)
+            .take(MAX_PRESENTATION_BYTES + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| MediaError::Io)?;
+        if bytes.len() as u64 > MAX_PRESENTATION_BYTES {
+            return Err(MediaError::Oversize);
+        }
+        if bytes.len() as u64 != authority.byte_count || hash_bytes(&bytes) != authority.sha256 {
+            return Err(MediaError::SourceConflict);
+        }
+        crate::media::import_image_presentation(
+            request.authority_id,
+            &authority.extension,
+            &bytes,
+            authority.sha256.clone(),
+        )
+    }
+
     pub fn list(
         &self,
         project: &ProjectId,
@@ -2481,6 +2522,102 @@ mod tests {
         let (count, hash) = hash_file(&mut file).unwrap();
         assert_eq!(count, 17 * 1024 * 1024);
         assert_eq!(hash.len(), 64);
+    }
+
+    #[test]
+    fn preview_import_is_read_only_repeatable_and_preserves_confirmation() {
+        use crate::media::ImportPreviewRequest;
+        let (_temporary, root, project_uuid) = project_fixture();
+        let mut service = AuthoringService::default();
+        let project = service.register_project(&root).unwrap();
+        let path = root.join("selected.png");
+        let mut bytes = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR".to_vec();
+        bytes.extend_from_slice(&1u32.to_be_bytes());
+        bytes.extend_from_slice(&2u32.to_be_bytes());
+        fs::write(&path, &bytes).unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        let request = ImportPreviewRequest {
+            authority_id: choice.authority_id.clone(),
+        };
+        let preview = service.preview_import(&project, request.clone()).unwrap();
+        assert_eq!(preview.width, Some(1));
+        assert_eq!(preview.height, Some(2));
+        assert_eq!(service.preview_import(&project, request).unwrap(), preview);
+        assert!(service
+            .list(&project, &project_uuid)
+            .unwrap()
+            .assets
+            .is_empty());
+        service
+            .import_asset(
+                &project,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "selected".into(),
+                    display_name: "Selected".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            fs::read(root.join("game/images/bg selected.png")).unwrap(),
+            bytes
+        );
+    }
+
+    #[test]
+    fn preview_import_rejects_unknown_wrong_project_changed_oversize_and_active_media() {
+        use crate::media::{ImportPreviewRequest, MediaError};
+        let (_temporary, root, _) = project_fixture();
+        let mut service = AuthoringService::default();
+        let project = service.register_project(&root).unwrap();
+        let (_other_temp, other_root, _) = project_fixture();
+        let other = service.register_project(&other_root).unwrap();
+        let path = root.join("selected.png");
+        fs::write(&path, b"not passive raster content").unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        let request = ImportPreviewRequest {
+            authority_id: choice.authority_id,
+        };
+        assert_eq!(
+            service.preview_import(&other, request.clone()),
+            Err(MediaError::UnknownAsset)
+        );
+        assert_eq!(
+            service.preview_import(
+                &project,
+                ImportPreviewRequest {
+                    authority_id: "missing".into()
+                }
+            ),
+            Err(MediaError::UnknownAsset)
+        );
+        assert_eq!(
+            service.preview_import(&project, request.clone()),
+            Err(MediaError::UnsupportedFormat)
+        );
+        fs::write(&path, b"changed content").unwrap();
+        assert_eq!(
+            service.preview_import(&project, request),
+            Err(MediaError::SourceConflict)
+        );
+        File::create(&path)
+            .unwrap()
+            .set_len(17 * 1024 * 1024)
+            .unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        assert_eq!(
+            service.preview_import(
+                &project,
+                ImportPreviewRequest {
+                    authority_id: choice.authority_id
+                }
+            ),
+            Err(MediaError::Oversize)
+        );
     }
 
     #[test]

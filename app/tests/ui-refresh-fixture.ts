@@ -15,6 +15,11 @@ export async function visualRequest<T>(operation:CoreOperation,payload:Readonly<
  case 'project.listRecent':value=[{id:'tram',projectId:'visual-project',title:'The Last Tram',displayPath:'Documents / Stories / The Last Tram',lastOpenedUnixMs:Date.UTC(2026,8,29),status:'available'}];break;
  case 'project.openRecent':case 'project.current':value=project;break;
  case 'project.status':case 'project.flush':value='saved';break;
+ case 'asset.chooseImports':value={choices:[{authorityId:'selected-room',displayName:'Moonlit_room.png',byteCount:12000,extension:'png'}]};break;
+ case 'asset.previewImport':{
+  const canvas=window.document.createElement('canvas');canvas.width=800;canvas.height=450;const context=canvas.getContext('2d')!;context.fillStyle='#32414b';context.fillRect(0,0,800,450);context.fillStyle='#deb688';context.beginPath();context.arc(620,100,45,0,Math.PI*2);context.fill();context.fillStyle='#526559';context.fillRect(0,350,800,100);
+  value={assetId:payload.authorityId,purpose:'imagePreview',mimeType:'image/png',dataBase64:canvas.toDataURL('image/png').split(',')[1],sha256:revision,byteCount:12000,width:800,height:450,cacheKey:'selected-room'};break;
+ }
  case 'authoring.list':value=authoring;break;
  case 'character.create':{
   if(!/^[a-z][a-z0-9_]{0,63}$/.test(String(payload.technicalName))||!/^#[0-9a-f]{6}$/i.test(String(payload.dialogueColor)))return {protocolVersion:1,requestId:'visual',ok:false,error:{code:'INVALID_PAYLOAD',message:'Invalid technical name or colour'}};

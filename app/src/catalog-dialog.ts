@@ -49,6 +49,6 @@ export function catalogDialog(content: HTMLElement, title: string, trigger?: HTM
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
     }
   });
-  content.querySelector<HTMLElement>('input,select,button')?.focus();
+  [...content.querySelectorAll<HTMLElement>('input,select,button')].find(control=>!control.closest('[hidden]'))?.focus();
   return finish;
 }

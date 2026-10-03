@@ -155,13 +155,6 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   height:48px;
   grid-column:1;
   grid-row:1/3}
-.catalog-list:has(.catalog-thumbnail) .entity-row {
-  grid-template-columns:48px minmax(100px,1fr) minmax(70px,.5fr) auto}
-.catalog-list:has(.catalog-thumbnail) .entity-row>div {
-  grid-column:2;
-  grid-row:1/3}
-.catalog-list:has(.catalog-thumbnail) .entity-row>span {
-  grid-column:3}
 .catalog-inspector>.panel-close {
   float:right}
 .catalog-inspector h2 {
@@ -581,20 +574,6 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   width:48px;
   height:48px;
   font-size:24px}
-.catalog-list:has(.catalog-placeholder) .entity-row {
-  grid-template-columns:48px minmax(100px,1fr) minmax(70px,.5fr) auto}
-.catalog-list:has(.catalog-placeholder) .entity-row>div:not(.catalog-placeholder) {
-  grid-column:2;
-  grid-row:1/3}
-.catalog-list .catalog-direct-edit {
-  grid-column:4;
-  grid-row:1/3;
-  align-self:center!important}
-.catalog-list .entity-row>code {
-  grid-column:1}
-.catalog-list:has(.catalog-thumbnail) .entity-row>code {
-  grid-column:2}
-
 @media(max-width:760px) {
   .expanded-beat[data-beat-type="dialogue"] {
   grid-template-columns:minmax(0,1fr)}
@@ -626,3 +605,26 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   box-sizing:border-box}
 
 .catalog-list .entity-row>.catalog-placeholder{grid-column:1;grid-row:1/3}.catalog-dialog-panel .catalog-create>button{align-self:flex-start}.catalog-dialog-footer{gap:8px}.catalog-dialog-panel .catalog-create>.muted{font-size:12px;margin:0 0 4px}.catalog-dialog-panel .field{margin-bottom:8px}
+
+/* Catalogue rows use explicit surface columns, including mixed image/placeholder rows. */
+.catalog-grid .entity-row>.catalog-summary {display:flex;flex-direction:column;gap:4px;padding:0 16px;min-width:0}
+.catalog-grid .catalog-summary>.card-open {padding:0;overflow-wrap:anywhere}
+.catalog-grid .catalog-summary>code {overflow-wrap:anywhere}
+.catalog-grid.catalog-list:not(.catalog-variables) .entity-row {grid-template-columns:48px minmax(0,1fr) minmax(70px,.5fr) auto;gap:12px;padding:12px}
+.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>.catalog-thumbnail,
+.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>.catalog-placeholder {grid-column:1;grid-row:1;width:48px;height:48px;padding:0}
+.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>.catalog-summary {grid-column:2;grid-row:1;padding:0}
+.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>span:not(.media-feedback) {grid-column:3;grid-row:1;padding:0}
+.catalog-grid.catalog-list .entity-row>.catalog-direct-edit {grid-column:4;grid-row:1;margin:0;align-self:center}
+.catalog-grid.catalog-list .entity-row>.media-feedback {grid-column:1/-1;padding:0}
+.catalog-variables {--variable-columns:minmax(80px,1fr) minmax(40px,.5fr) minmax(65px,1fr) 52px}
+.catalog-grid.catalog-variables>.catalog-table-header,
+.catalog-grid.catalog-variables>.entity-row {grid-template-columns:var(--variable-columns);gap:12px;padding:12px;align-items:center}
+.catalog-grid.catalog-variables>.entity-row>.card-open {grid-column:1;grid-row:1;padding:0;min-width:0;overflow-wrap:anywhere}
+.catalog-grid.catalog-variables>.entity-row>.catalog-type {grid-column:2;grid-row:1;padding:0}
+.catalog-grid.catalog-variables>.entity-row>.catalog-value {grid-column:3;grid-row:1;padding:0}
+.catalog-grid.catalog-variables>.entity-row>.catalog-direct-edit {width:52px;padding:8px}
+@media(max-width:760px){.catalog-grid.catalog-list:not(.catalog-variables) .entity-row {grid-template-columns:48px minmax(0,1fr) auto}.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>span:not(.media-feedback){grid-column:2;grid-row:2}.catalog-grid.catalog-list:not(.catalog-variables) .entity-row>.catalog-direct-edit{grid-column:3;grid-row:1/3}.catalog-grid.catalog-variables>.entity-row,.catalog-grid.catalog-variables>.catalog-table-header{gap:8px}}
+.import-preview {display:block;width:100%;height:180px;object-fit:contain;background:var(--surface-raised);border-radius:4px}
+.import-preview-status {font-size:.85em;color:var(--text-muted);overflow-wrap:anywhere}
+.import-staged-toolbar {display:flex;align-items:center;justify-content:space-between;gap:12px}

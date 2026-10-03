@@ -101,10 +101,18 @@ picker is implemented; those preview details remain pending in the task ledger.
   preview and edited by expression and/or replacement image; preview selection does
   not change the default. Ordered media reads, cache reuse and Retry preview address
   the initial inspector/default-refresh failure.
+  Character grid and list layouts share a summary block; image and initial-letter
+  placeholders occupy the same list column. Variable names, types, initial values
+  and Edit actions share the table header's four columns, including compact windows.
 - Assets always shows All, Backgrounds, Character images, Music and Sound effects,
   plus a visible Drop/Browse area. Native drag state highlights that area; Drop and
   Browse enter the same staged import modal and require confirmation before writing.
   Native file-drop acceptance is still separate from browser fixture checks.
+  After selection, the initial Choose files section is replaced by a preview of
+  each staged image, its dimensions/size and import fields. Add files remains a
+  smaller action; removing/discarding all staged files restores the empty chooser.
+  Preview loading/errors/Retry do not import anything. Audio shows file information;
+  passive raster limits apply. Closing/discarding releases preview URLs.
 - Technical-name inputs across all three libraries suppress OS capitalization,
   correction and spelling, and canonicalize uppercase ASCII at blur/submission
   without changing display names or text values. Focusable naming guidance explains

@@ -15,7 +15,7 @@ export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElem
   search.value=retained?.search??"";filters.value=retained?.kind??"All";
   const view=document.createElement("button");view.className="button";view.textContent="List view";view.ariaPressed="false";
   const body=document.createElement("div");body.className="catalog-body";
-  const grid=document.createElement("div");grid.className=`catalog-grid${title==="Variables"?" catalog-list":""}`;
+  const grid=document.createElement("div");grid.className=`catalog-grid catalog-${title.toLowerCase()}${title==="Variables"?" catalog-list":""}`;
   if(title!=="Variables"&&retained?.asList){grid.classList.add("catalog-list");view.textContent="Grid view";view.ariaPressed="true";}
   const inspector=document.createElement("aside");inspector.className="catalog-inspector";inspector.ariaLabel=`${title} details`;inspector.hidden=true;
   const empty=document.createElement("p");empty.className="muted catalog-empty";empty.textContent=`No matching ${title.toLowerCase()}.`;
@@ -70,6 +70,11 @@ export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElem
     const controls=[...row.querySelectorAll<HTMLElement>(":scope > .row-actions, :scope > button")];const extras=info.extra??[];
     const trigger=document.createElement("button");trigger.className="card-open";trigger.textContent=info.label;trigger.ariaLabel=`Show details for ${info.label}`;trigger.addEventListener("click",()=>selectRow(row,info,controls,extras));
     const summary=row.querySelector("strong");if(summary)summary.replaceWith(trigger);else row.prepend(trigger);
+    if(title!=="Variables"){
+      let summaryBlock=trigger.parentElement;
+      if(summaryBlock===row){summaryBlock=document.createElement("div");row.insertBefore(summaryBlock,trigger);summaryBlock.append(trigger);const code=row.querySelector(":scope > code");if(code)summaryBlock.append(code);}
+      summaryBlock!.classList.add("catalog-summary");
+    }else{row.querySelector(":scope > code")?.classList.add("catalog-type");row.querySelector(":scope > span")?.classList.add("catalog-value");}
     if(info.assetId){const image=document.createElement("img");image.className="catalog-thumbnail";image.alt="Loading preview…";image.dataset.mediaLabel=info.label;image.loading="lazy";image.dataset.assetId=info.assetId;row.prepend(image);if(observer)observer.observe(image);else enqueue(info.assetId,image);}else if(title!=="Variables"){const placeholder=document.createElement("div");placeholder.className="catalog-placeholder";placeholder.textContent=info.kind==="Music"||info.kind==="Sound effect"?"♫":info.label.slice(0,1).toUpperCase();row.prepend(placeholder);}
     row.tabIndex=0;row.setAttribute("aria-label",`Select ${info.label}`);
     row.addEventListener("click",event=>{if(!(event.target as HTMLElement).closest("button,input,select,a"))selectRow(row,info,controls,extras);});
@@ -84,7 +89,7 @@ export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElem
   if(create){create.classList.add("catalog-create");create.hidden=true;const add=document.createElement("button");add.className="button primary";add.textContent=title==="Assets"?"Import assets":title==="Characters"?"New character":"New variable";add.addEventListener("click",()=>{closeDialog=catalogDialog(create,add.textContent!,add);});toolbar.append(add);}
   if(title==="Variables"){const header=document.createElement("div");header.className="catalog-table-header";for(const label of ["Name","Type","Initial value", "Actions"]){const cell=document.createElement("span");cell.textContent=label;header.append(cell);}grid.prepend(header);}
   list.replaceChildren();list.classList.add("catalog-section");body.append(grid,inspector);list.append(toolbar,body,empty);apply();
-  if(title==="Assets"&&create){const drop=document.createElement("button");drop.className="asset-drop-target";drop.type="button";drop.textContent="Drop images here or Browse files";drop.onclick=()=>{closeDialog=catalogDialog(create,"Import assets",drop);create.querySelector<HTMLButtonElement>("button")?.click();};toolbar.after(drop);
+  if(title==="Assets"&&create){const drop=document.createElement("button");drop.className="asset-drop-target";drop.type="button";drop.textContent="Drop images here or Browse files";drop.onclick=()=>{closeDialog=catalogDialog(create,"Import assets",drop);[...create.querySelectorAll<HTMLButtonElement>("button")].find(control=>!control.closest('[hidden]'))?.click();};toolbar.after(drop);
     const staged=()=>{if(create.querySelector(".import-entry"))closeDialog=catalogDialog(create,"Import assets",drop);};
     const watcher=new MutationObserver(()=>{if(!create.closest('[aria-modal="true"]'))staged();});watcher.observe(create,{childList:true,subtree:true});createObservers.push(watcher);
   }

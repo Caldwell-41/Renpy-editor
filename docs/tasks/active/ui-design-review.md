@@ -2245,6 +2245,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
 | WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
 | WIN-UI-13 — approved B connector routing | In a disposable project save reciprocal Scene 1/New Scene jumps, a long jump skipping a node, two choices with the same target/text, a self-loop, a same-layer link and a missing/custom destination. Review both palettes at 100%/higher DPI, zoom/pan/Fit, select routes and use Source navigation. Include long/Unicode names and choice text. | Every known arrowhead meets its correct node boundary; heavier rounded paths avoid all node interiors; reciprocal/duplicate/backward routes remain distinguishable. Label pills stay legible and clear of nodes; Fit includes outer routes/pills. Long node names retain full tooltips/details. No guessed link for missing/custom/terminal flow; saved source, selections, notices and navigation remain correct. Record zoom/scale-specific readability separately. |
+| WIN-UI-14 — catalogue columns and staged preview | Review Characters with both image-backed and zero-appearance entries; toggle Grid/List, open/close details and resize at 100%/higher DPI. Review bool/int/string Variable rows against all four headers. Browse/drop PNG/JPEG files, inspect their previews before Import, add another file, remove all, Cancel/discard/reopen, change a selected file externally and retry. Include audio and an oversized/unsupported raster. | No image/initial/title overlap; matching Character list columns and Variable header/cell alignment. Whole-row selection and Edit remain reachable. Initial Choose section disappears after selection; real images/dimensions are shown, Add files remains available, empty staging restores chooser, footer actions remain visible. Errors offer Retry without a write; only explicit Import creates assets, no successful partial import is replayed. Native preview/drop/cleanup and OS scaling are still unverified until this is run. |
 
 Remaining macOS hands-on review uses a corrected installer when selected and resumes
 at Story, then Source/Branches/Characters/Assets/Variables. Physical IME, OS file drop,
@@ -2592,3 +2593,59 @@ hosted dispatch, merge/conflict resolution or new phase; counts remain 9 package
 44 native/boundary starts and separately 4 SDK menu starts. CONFIG-01 remains open.
 Continue hands-on feedback or separately select a corrected installer. Publish and
 verify source plus this meaningful verification/continuation record on the same branch.
+
+### Catalogue layout and staged import preview follow-up — 2026-10-03
+
+**CATALOG-05 / ASSETS-03 — selected and implemented locally.** The user calls the
+current work acceptable for now with further review possible, then reports broken
+Character/Variable layouts and the retained top Choose files section instead of a
+selected image preview. This is provisional feedback, not final acceptance. The
+Character screenshot is the list state (Grid view is the toggle destination);
+Variables remains the approved table. Correct both Character view states and the
+Variable table rather than inventing a Variable grid.
+
+Preserved incoming feature/source `002c753` / `88add80`, main `4d7ba03`, separate
+planning worktree `2c5a164` and draft/conflicting PR #17. Explicit surface/summary
+classes replace parent-wide image/placeholder column inference. Mixed Character
+rows share list slots; grid titles remain below media; all four Variable columns
+share the header template. Whole-row selection, direct Edit, search/type filtering,
+retained views, appearance selection and transaction owners remain.
+
+Selected-image staging now replaces the initial description/Choose files with
+per-file passive preview, dimensions/size, existing import fields and smaller Add
+files. Empty removal/discard restores the chooser; image loading/errors have Retry,
+audio has file information. The typed `asset.previewImport` session/project-bound
+read accepts only retained selection authority, never a renderer path/URL. It
+rechecks identity/size/hash, uses existing PNG/JPEG passive limits (16 MiB, dimensions
+1–8192), writes nothing and preserves explicit import authority. Ordered reads and
+32 MiB object-URL retention bound staging; remove/success/discard/dispose revoke,
+and detached receipts are ignored. Hidden chooser focus is avoided when opening a
+staged dialog. WebP still imports under the existing contract but has explicit
+unsupported preview feedback; no format expansion is selected.
+
+Local evidence: **85 frontend tests** (including two preview lifecycle rejecting
+cases), production web build, **7 focused core tests** (two retained-selection
+checks, two IPC/session checks, three existing passive-media checks), **1 macOS
+desktop test**, and the full actual-renderer Chrome regression PASS. Added actual
+mixed-media/placeholder Grid/List assertions and four-column x/row alignment at
+1440/960/560 widths, both themes. Staged PNG decodes to the fixture's actual 800×450
+size; initial Choose/description hide, remove/discard/reopen restore, actions remain
+visible at 1440×900 and 560×480 in both themes. Inspected generated Character,
+Variable and import screenshots in ignored local reports. Bridge uses synthetic
+fixtures; this is not native drop/SDK or final UX acceptance.
+
+Initial local failures were qualification setup gaps: the operation snapshot lacked
+the new allowlist entry; fixture compilation used a shadowed document and the wrong
+Event type; the first expanded browser case tried to click a toolbar behind the
+existing compact details drawer. Corrected the explicit protocol snapshot, fixture
+references/types and dismissed that drawer through its X before toggling views.
+No assertions were removed, thresholds relaxed or hidden controls force-clicked.
+The subsequent full checks pass. Existing web chunk-size advisory remains.
+
+WIN-UI-14 joins the existing deferred Windows checklist (14 rows); no Windows pass
+is claimed. Installer `19cdcaa` predates these/sidebar/Branches corrections.
+CONFIG-01, physical IME/drop, live progress and final UX review remain open. No new
+package, native/SDK application start, hosted workflow, merge/conflict resolution
+or feature phase selected. Counts stay 9 packages, 44 native/boundary starts and
+separately 4 SDK menu starts. Publish this correction on the existing branch and
+record its exact source checkpoint in CURRENT/HANDOVER. No pending operation.

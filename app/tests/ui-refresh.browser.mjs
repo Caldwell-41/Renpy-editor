@@ -58,6 +58,59 @@ try {
  await page.locator('.recent-open').click();await page.getByRole('button',{name:'Add Beat',exact:true}).waitFor();
  for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
+
+ // Catalogue follow-up: mixed media/placeholder rows and exact Variable header alignment.
+ for(const theme of ['light','dark']) for(const width of [1440,960,560]) {
+  await page.setViewportSize({width,height:900});
+  await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
+  await page.getByRole('button',{name:'Characters',exact:true}).click();
+  if(width<1000&&await page.locator('.catalog-inspector').isVisible())await page.getByRole('button',{name:'Close details',exact:true}).click();
+  for(const list of [false,true]){
+   if(await page.locator('.catalog-grid').evaluate(e=>e.classList.contains('catalog-list'))!==list)await page.locator('.catalog-toolbar').getByRole('button',{name:list?'List view':'Grid view',exact:true}).click();
+   const rows=await page.locator('.catalog-grid>.entity-row').evaluateAll(rows=>rows.map(row=>{
+    const b=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width};};
+    return {row:b(row),media:b(row.querySelector('.catalog-thumbnail,.catalog-placeholder')),summary:b(row.querySelector('.catalog-summary')),edit:b(row.querySelector('.catalog-direct-edit')),overflow:row.scrollWidth>row.clientWidth+1};
+   }));
+   assert.equal(rows.length,4);
+   for(const row of rows){assert.equal(row.overflow,false,JSON.stringify(row));assert.ok(list?row.media.right<=row.summary.x:row.media.bottom<=row.summary.y,`media overlaps name: ${JSON.stringify(row)}`);assert.ok(row.summary.right<=row.row.right);assert.ok(row.edit.right<=row.row.right);}
+   if(list)assert.equal(new Set(rows.map(r=>r.summary.x)).size,1,'image and no-image rows must share columns');
+   if(width===1440&&theme==='light')await page.screenshot({path:output+`characters-corrected-${list?'list':'grid'}.png`});
+  }
+  await page.getByRole('button',{name:'Variables',exact:true}).click();
+  const variable=await page.locator('.catalog-variables').evaluate(grid=>{
+   const rect=e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,bottom:b.bottom,right:b.right};};
+   return {header:[...grid.querySelector('.catalog-table-header').children].map(rect),rows:[...grid.querySelectorAll('.entity-row')].map(row=>[...row.querySelectorAll(':scope > .card-open,:scope > .catalog-type,:scope > .catalog-value,:scope > .catalog-direct-edit')].map(rect))};
+  });
+  for(const row of variable.rows){assert.equal(row.length,4);row.forEach((cell,i)=>assert.ok(Math.abs(cell.x-variable.header[i].x)<1,`Variable column ${i} misaligned: ${JSON.stringify(variable)}`));assert.ok(Math.max(...row.map(c=>c.y))<Math.min(...row.map(c=>c.bottom)),'Variable cells must share a single row');}
+  if(width===1440&&theme==='light')await page.screenshot({path:output+'variables-corrected-columns.png'});
+ }
+ await page.setViewportSize({width:1440,height:900});
+ await page.getByRole('button',{name:'Assets',exact:true}).click();
+ await page.getByRole('button',{name:'Import assets',exact:true}).click();
+ await page.getByRole('button',{name:'Choose files…',exact:true}).click();
+ await page.waitForFunction(()=>{const image=document.querySelector('.import-preview');return image?.complete&&image.naturalWidth===800;});
+ assert.equal(await page.getByRole('button',{name:'Choose files…',exact:true}).isVisible(),false);
+ assert.equal(await page.locator('.import-empty-description').isVisible(),false);
+ assert.equal(await page.getByRole('button',{name:'Add files…',exact:true}).isVisible(),true);
+ for(const theme of ['light','dark']) for(const width of [1440,560]){
+  await page.setViewportSize({width,height:width===560?480:900});
+  await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  const preview=await page.locator('.import-preview').boundingBox(),panel=await page.locator('.catalog-dialog-panel').boundingBox();
+  assert.ok(preview.width<=panel.width);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  const submit=await page.getByRole('button',{name:'Import selected files',exact:true}).boundingBox();assert.ok(submit.y>=0&&submit.y+submit.height<=(width===560?480:900),'Import action must stay visible');
+  await page.screenshot({path:output+`assets-staged-image-preview-${theme}-${width}.png`});
+ }
+ await page.setViewportSize({width:1440,height:900});
+ await page.getByRole('button',{name:'Remove from import',exact:true}).click();
+ assert.equal(await page.getByRole('button',{name:'Choose files…',exact:true}).isVisible(),true);
+ await page.getByRole('button',{name:'Choose files…',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('.import-preview')?.naturalWidth===800);
+ await page.getByRole('button',{name:'Close Import assets',exact:true}).click();
+ await page.getByRole('button',{name:'Discard changes',exact:true}).click();
+ assert.equal(await page.locator('.import-preview').count(),0);
+ await page.getByRole('button',{name:'Import assets',exact:true}).click();
+ assert.equal(await page.getByRole('button',{name:'Choose files…',exact:true}).isVisible(),true);
+ await page.getByRole('button',{name:'Close Import assets',exact:true}).click();
  // Review corrections: controls preserve independent panels and active content.
  // Sidebar controls must fit the existing tracks and never obscure editor headers.
  for(const theme of ['light','dark']) for(const surface of ['Story','Source']) {
@@ -129,7 +182,7 @@ try {
  await page.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.locator('.expanded-beat>.row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Characters',exact:true}).click();
- await page.getByRole('button',{name:'List view',exact:true}).click();
+ if(!await page.locator('.catalog-grid').evaluate(e=>e.classList.contains('catalog-list')))await page.getByRole('button',{name:'List view',exact:true}).click();
  await page.locator('.catalog-grid .entity-row').nth(1).locator('code').click();
  assert.equal(await page.locator('.catalog-inspector h2').textContent(),'Alice');
  await page.getByRole('button',{name:'Edit Alice',exact:true}).click();
@@ -387,5 +440,5 @@ try {
  await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBeat').length),1);
  await audit.evaluate(()=>window.__auditReleaseBeat());await audit.locator('.new-beat').waitFor({state:'detached'});assert.equal(await audit.locator('[data-beat-id="audit-added"] .beat-select').evaluate(e=>document.activeElement===e),true);assert.equal(await audit.locator('[data-beat-id="audit-added"] .expanded-beat').count(),0);
  assert.deepEqual(errors,[]);await audit.close();
- console.log('PASS: all six workspaces in both themes; onboarding, Settings, compact layouts, Source undo; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
+ console.log('PASS: mixed Character grid/list columns and Variable header alignment at three widths/both themes; staged PNG decode, chooser replacement, compact actions, remove/discard/reopen; all six workspaces in both themes; onboarding, Settings, compact layouts, Source undo; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

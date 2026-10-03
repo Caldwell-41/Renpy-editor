@@ -236,7 +236,7 @@ function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
 const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "flow.list", "runtime.resolveDiagnostic", "media.present"].includes(operation);
+  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
   for (let attempt = 0; ; attempt += 1) {
     const requester = coreRequester;
     const response = await requestLane.run(operation, () => requester<T>(operation, payload));
@@ -749,6 +749,7 @@ function renderAssets(workspace: HTMLElement, project: OpenProject, model: Autho
   const imported = supportingSection(); imported.append(formHeading("Import assets"));
   const importer=assetImport(imported,model.characters,{
     choose:()=>projectValue<ImportBatch>(project,"asset.chooseImports"),
+    preview:authorityId=>projectValue<MediaPresentation>(project,"asset.previewImport",{authorityId}),
     import:async payload=>{await runAuthoringOperation(project,imported,()=>projectValue(project,"asset.import",payload));},
     complete:()=>{if(currentProject?.sessionId===project.sessionId)showProject(project,"assets");},status:message=>setStatus(message,"error")
   });stageDroppedAssets=importer.stage;workspace.append(list,imported);

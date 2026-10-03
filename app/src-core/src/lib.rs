@@ -57,6 +57,7 @@ pub const OPERATIONS: &[&str] = &[
     "appearance.update",
     "asset.chooseImport",
     "asset.chooseImports",
+    "asset.previewImport",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
@@ -524,6 +525,14 @@ pub fn handle_application_request(
                     .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
             })
             .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
+            .and_then(to_value),
+        "asset.previewImport" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<media::ImportPreviewRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Media(media::MediaError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.authoring_preview_import(payload))
             .and_then(to_value),
         "media.present" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
@@ -1119,6 +1128,28 @@ mod tests {
         png.extend_from_slice(&1_u32.to_be_bytes());
         std::fs::write(&image, png).unwrap();
         let choice = lifecycle.authoring_select_import(&image).unwrap();
+        for payload in [
+            json!({"sessionId":project.session_id,"authorityId":choice.authority_id,"path":"../outside.png"}),
+            json!({"sessionId":project.session_id,"authorityId":choice.authority_id,"url":"https://example.invalid/image.png"}),
+        ] {
+            let response = response_json(handle_application_request(
+                request("asset.previewImport", payload),
+                false,
+                &mut lifecycle,
+            ));
+            assert_eq!(response["error"]["code"], "INVALID_PAYLOAD");
+        }
+        let response = response_json(handle_application_request(
+            request(
+                "asset.previewImport",
+                json!({"sessionId":project.session_id,"authorityId":choice.authority_id}),
+            ),
+            false,
+            &mut lifecycle,
+        ));
+        assert_eq!(response["ok"], true, "{response}");
+        assert_eq!(response["value"]["width"], 1);
+        assert!(lifecycle.authoring_list().unwrap().assets.is_empty());
         let response = response_json(handle_application_request(
             request(
                 "asset.import",
@@ -1178,6 +1209,11 @@ mod tests {
             (
                 "media.present",
                 json!({ "sessionId": "stale", "assetId": uuid::Uuid::new_v4().to_string(), "purpose": "thumbnail" }),
+                "STALE_PROJECT_SESSION",
+            ),
+            (
+                "asset.previewImport",
+                json!({"sessionId":"stale","authorityId":"unknown"}),
                 "STALE_PROJECT_SESSION",
             ),
             (

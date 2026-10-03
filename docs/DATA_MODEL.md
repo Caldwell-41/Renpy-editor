@@ -327,6 +327,15 @@ dimensions where applicable. Renderer caches are memory-only and content keyed; 
 view/session generations are cancelled, object URLs are revoked on invalidation, and
 all media is disposed when the active project/session changes.
 
+Staged import uses `asset.previewImport` with only the current session and opaque
+selection authority ID. The authority remains project bound, retains the selected
+file handle and is not consumed by preview. Identity, byte count and SHA-256 must
+still match; PNG/JPEG use the same 16 MiB/8192-pixel limits. The response has the
+existing passive media shape, with the selection ID in `assetId` until an Asset
+exists. No renderer path/URL is accepted. Staged object URLs are capped at 32 MiB,
+released on removal, successful import, discard and disposal; late receipts cannot
+reattach removed previews. Audio staging shows metadata without autoplay.
+
 ## Corrective Phase 1D value and asset contracts
 
 New background and character-appearance filenames use lowercase space-separated

@@ -30,6 +30,7 @@ export const CORE_OPERATIONS = [
   "appearance.update",
   "asset.chooseImport",
   "asset.chooseImports",
+  "asset.previewImport",
   "asset.import",
   "asset.repairCompatibility",
   "variable.create",

@@ -7,7 +7,7 @@ test('asset import canonicalizes filename suggestions and edited names before IP
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
  const host=document.createElement('section');document.body.append(host);
  const calls:Record<string,unknown>[]=[];const errors:string[]=[];
- const ui=assetImport(host,[{id:'character',displayName:'Bec'}],{choose:async()=>({choices:[]}),import:async p=>{calls.push(p);},complete:()=>{},status:m=>errors.push(m)});
+ const ui=assetImport(host,[{id:'character',displayName:'Bec'}],{preview:async()=>{throw Error('Preview fixture unavailable');},choose:async()=>({choices:[]}),import:async p=>{calls.push(p);},complete:()=>{},status:m=>errors.push(m)});
  ui.stage({choices:[{authorityId:'background',displayName:'Uni_Night.PNG',extension:'png',byteCount:1},{authorityId:'appearance',displayName:'Bec.PNG',extension:'png',byteCount:1}]});
  const rows=[...host.querySelectorAll('.import-entry')];
  const field=(row:Element,label:string)=>[...row.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent===label)!.querySelector<HTMLInputElement|HTMLSelectElement>('input,select')!;
@@ -23,10 +23,10 @@ test('staged import cancellation retains choices; partial failure never retries 
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
  const host=document.createElement('section');document.body.append(host);
  let attempt=0;const calls:string[]=[];let complete=0;
- const ui=assetImport(host,[],{choose:async()=>({choices:[],cancelled:true}),import:async p=>{calls.push(String(p.authorityId));if(p.authorityId==='two'&&attempt++===0)throw Error('File no longer available');},complete:()=>{complete++;},status:()=>{}});
+ const ui=assetImport(host,[],{preview:async()=>{throw Error('Preview fixture unavailable');},choose:async()=>({choices:[],cancelled:true}),import:async p=>{calls.push(String(p.authorityId));if(p.authorityId==='two'&&attempt++===0)throw Error('File no longer available');},complete:()=>{complete++;},status:()=>{}});
  ui.stage({choices:[{authorityId:'one',displayName:'one.png',extension:'png',byteCount:1},{authorityId:'two',displayName:'two.ogg',extension:'ogg',byteCount:1}]});
  const click=(text:string)=>[...host.querySelectorAll('button')].find(b=>b.textContent===text)!.click();
- click('Choose files…');await tick();assert.equal(host.querySelectorAll('.import-entry').length,2);
+ click('Add files…');await tick();assert.equal(host.querySelectorAll('.import-entry').length,2);
  click('Import selected files');await tick();assert.deepEqual(calls,['one','two']);assert.equal(complete,0);assert.match(host.textContent!,/File no longer available/);
  click('Import selected files');await tick();assert.deepEqual(calls,['one','two','two']);assert.equal(complete,1);
  ui.dispose();await browser.happyDOM.close();
@@ -53,4 +53,33 @@ test('native request channel keeps progress truthful and ignores events after co
  assert.equal(host.querySelector('[role="alert"]')?.textContent,'Download failed');
  assert.equal(host.querySelector('.operation-panel')?.getAttribute('data-failed'),'true');
  ui.dispose();await browser.happyDOM.close();
+});
+
+test('selected image replaces chooser and releases previews on removal and discard',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);
+ const created:string[]=[],revoked:string[]=[];const createURL=URL.createObjectURL,revokeURL=URL.revokeObjectURL;
+ URL.createObjectURL=()=>{const url=`blob:preview-${created.length}`;created.push(url);return url;};URL.revokeObjectURL=url=>revoked.push(url);
+ let writes=0;
+ const ui=assetImport(host,[],{choose:async()=>({choices:[]}),preview:async authorityId=>({assetId:authorityId,dataBase64:'YQ==',mimeType:'image/png',sha256:'a',byteCount:1,width:2,height:1,cacheKey:'a',purpose:'imagePreview'}),import:async()=>{writes++;},complete:()=>{},status:()=>{}});
+ try{
+  const stage=()=>ui.stage({choices:[{authorityId:'opaque',displayName:'room.png',extension:'png',byteCount:1}]});
+  stage();await tick();const img=host.querySelector<HTMLImageElement>('.import-preview')!;img.dispatchEvent(new window.Event('load'));
+  assert.equal(host.querySelector<HTMLButtonElement>('button')!.hidden,true);assert.equal(host.querySelector<HTMLElement>('.import-empty-description')!.hidden,true);
+  assert.equal(img.getAttribute('src'),created[0]);assert.equal(writes,0);assert.match(host.textContent!,/2 × 1/);
+  [...host.querySelectorAll('button')].find(b=>b.textContent==='Remove from import')!.click();assert.deepEqual(revoked,created);
+  assert.equal(host.querySelector<HTMLButtonElement>('button')!.hidden,false);assert.equal(host.querySelector<HTMLElement>('.import-staged-toolbar')!.hidden,true);
+  stage();await tick();host.dispatchEvent(new window.Event('catalog-discard'));assert.deepEqual(revoked,created);assert.equal(host.querySelectorAll('.import-entry').length,0);
+ }finally{ui.dispose();URL.createObjectURL=createURL;URL.revokeObjectURL=revokeURL;await browser.happyDOM.close();}
+});
+
+test('removed and disposed staging ignores late previews; errors offer retry without importing',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);let receipt!:(value:any)=>void;let reads=0,writes=0;
+ const media={assetId:'opaque',dataBase64:'YQ==',mimeType:'image/png',sha256:'a',byteCount:1,width:1,height:1,cacheKey:'a',purpose:'imagePreview' as const};
+ const ui=assetImport(host,[],{choose:async()=>({choices:[]}),preview:async()=>{reads++;if(reads===2)throw Error('Selection changed');return new Promise(resolve=>receipt=resolve);},import:async()=>{writes++;},complete:()=>{},status:()=>{}});
+ const stage=()=>ui.stage({choices:[{authorityId:'opaque',displayName:'room.png',extension:'png',byteCount:1}]});
+ stage();const oldImage=host.querySelector('img')!;[...host.querySelectorAll('button')].find(b=>b.textContent==='Remove from import')!.click();receipt(media);await tick();assert.equal(oldImage.hasAttribute('src'),false);
+ stage();await tick();assert.match(host.textContent!,/Selection changed/);const retry=host.querySelector<HTMLButtonElement>('.media-retry')!;assert.equal(retry.hidden,false);retry.click();await tick();ui.dispose();receipt(media);await tick();assert.equal(host.querySelector('img')!.hasAttribute('src'),false);assert.equal(writes,0);
+ await browser.happyDOM.close();
 });

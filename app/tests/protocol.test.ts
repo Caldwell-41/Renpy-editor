@@ -44,6 +44,7 @@ test("frontend operation list contains only bounded Phase 1C through 1G foundati
     "appearance.update",
     "asset.chooseImport",
   "asset.chooseImports",
+    "asset.previewImport",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",

@@ -70,6 +70,10 @@ typed semantic command whose core implementation verifies current metadata and s
 revisions, constructs the smallest safe mutation set, and commits through the shared
 transaction service. `media.present` is read-only and accepts an Asset UUID plus a
 presentation purpose, never a path or URL.
+`asset.previewImport` reads an opaque retained selection authority for the current
+session/project before import. It applies the passive image presentation limits,
+rechecks the selected identity/size/hash and does not consume the authority or write
+project files. Explicit import remains a separate transactional operation.
 
 Loomlight is a single-instance desktop application. The maintained Tauri
 single-instance plugin is registered before desktop `setup`, so a losing launch is
