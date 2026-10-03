@@ -293,10 +293,10 @@ Ren'Py basis: [screen language](https://www.renpy.org/doc/html/screens.html),
 
 ## 5. 3C — VN animation/audio Timeline
 
-Proposed first slice: existing Appearance/placement assets, a named transform with
-position/opacity changes and a small reviewed interpolation set, plus play/stop/fade
-events on supported audio channels. Timing is tied explicitly to beat execution and
-relative event order. Authoring time, preview time and actual runtime time have
+Selected early sequence: static character staging, PNG/ATL idle loops, native looping
+video, prepared transparent video, and once-only end controls. Existing supported
+transform/audio work uses those same Appearance/placement/source services. Timing is
+tied explicitly to beat execution and relative event order. Authoring time, preview time and actual runtime time have
 distinct meanings. Dialogue interactions can wait indefinitely; do not invent a fixed
 duration for an entire interactive Scene.
 
@@ -394,8 +394,74 @@ Upstream basis: [movie formats and sprites](https://www.renpy.org/doc/html/movie
 [supported image formats](https://www.renpy.org/doc/html/displayables.html#images),
 [ATL](https://www.renpy.org/doc/html/transforms.html) and
 [transform properties](https://www.renpy.org/doc/html/transform_properties.html).
-Online documentation reports 8.5.4; the project's pinned 8.5.3 still needs measured
-qualification. Reading upstream docs is not a codec, mask or target acceptance pass.
+Online documentation reports 8.5.4. Tagged 8.5.3 source/doc inspection below confirms
+relevant APIs; measured codec, mask and target qualification is still required.
+
+### Agreed implementation order and source bindings
+
+The user accepted the researched sequence below and requested it be recorded. This
+orders the selected 3C capabilities within the existing two-lane delivery plan; it
+starts no implementation. Keep static/frame/video appearances on one selection,
+placement, source-patch and history path. No new animation runtime or converter.
+
+| Order | Concrete implementation and author controls | Proof before expansion |
+| --- | --- | --- |
+| 1 — Static staging | Add Story selection/drag/resize plus numeric/keyboard position, anchor and scale. Emit source-backed placement transforms. Map viewport coordinates to the game's virtual coordinates; preserve intended pixel versus relative value types. | One still Appearance matches real SDK placement at project resolution and a second window size; a gesture is one undo, Escape writes nothing and reopen agrees. No Timeline/keyframes required. |
+| 2 — PNG/ATL idles | Add an ordered frame list with positive durations or an explicit FPS default and per-frame durations. Emit an ATL image block with frame references/pauses and optional repeat. Add the supported looping-transform binding separately from outer placement. | A supplied transparent PNG sequence and supported transform idle continue across dialogue waits, stop/change correctly and survive source edits, undo/reopen. Consistent frame dimensions/subject placement are recommended; show mismatches rather than silently crop/rescale assets. |
+| 3 — Native looping video | Add an animated Appearance/background backed by a typed Movie definition using the qualified native profile and native playback defaults. Expose Loop and explicit preview controls. First prove an opaque, silent clip; then qualify the declared embedded-audio profile and mixer behavior. | One accepted clip starts on Show and stops on Hide; moving/resizing it uses the same placement controls. Existing dialogue advances do not emit another Show. Video playback remains responsive and does not interfere with ordinary music/SFX. |
+| 4 — Prepared transparent video | Add supplied side-mask binding and calculate logical width from the visible half. A separate supplied-mask route remains optional after its synchronization proof. No alpha extraction or mask generation. | A prepared masked clip displays correct transparency, anchor and dimensions over a background in native SDK output. Check simultaneous supported movie frame rates and supplied dependency validation. |
+| 5 — Play-once/end state | Add explicit once-only Movie settings and an end-state choice: disappear, hold last frame, or supplied still. Define incompatible settings and fallback/first-frame behavior before exposing controls. | Each end state matches native playback, including hide/replacement, reload and ordinary save/load/rollback checks. Distinguish first-frame loading from missing/end fallback. No frame-exact seeking/resume promise. |
+| 6 — Integrated qualification | Combine staging, frame/video idles, once-only playback and existing Timeline/audio authoring through actual source/transaction dispatch on both supported targets. | 3C.4's full source, lifecycle, timing, geometry and persistence gate passes on the integrated candidate before declaring 3C complete. |
+
+Map these slices to existing IDs: static controls/source preparation use 3C.1/3C.2;
+frames and videos incrementally complete 3C.1a; loop/end/audio lifecycle completes
+3C.3; native comparison and combined qualification complete 3C.4. This does not require
+building the entire Timeline canvas before simple staging/idle results. The broader
+keyframe/audio inventory proceeds after these early source/media proofs, reusing them.
+
+**Source implementation:** keep animation content and placement distinct. PNG frames
+become a supported ATL image definition; videos become a typed, literal-only Movie
+definition; Show Character/Background references that definition and its placement.
+Changing position must not replace the frame/video binding or reset an idle. A normal
+idle needs no dialogue callback: show once and leave it visible through consecutive
+say interactions. Only deliberate hide/appearance changes replace it. Speak-only or
+text-reveal-triggered animation is a separately selectable later behavior.
+
+**Actual Loomlight seams:** inspected authoring metadata currently validates
+`render_mode = staticImportedAsset` with one `asset_id`; Story Preview uses image
+elements. Extend those into typed static/frame/movie render bindings with an explicit
+migration retaining existing IDs. `media.present` currently copies complete base64
+bytes, capped at 16 MiB, for thumbnail/imagePreview/audioAudition. A video-capable
+bounded delivery path is required; merely allowing new suffixes or increasing the
+image cap is insufficient. Design session/revision-bound asset handles and large-file
+delivery at the early proof, retaining narrow core-mediated access and cleanup. Do
+not expose arbitrary project paths or grant blanket webview file access. Reconcile
+these inspected seams against the accepted baseline at implementation entry.
+
+**Preview and lifecycle:** offer fast embedded playback only where the host WebView
+and supported compositor can represent that profile; otherwise show a supplied poster
+and partial status with explicit pinned-SDK playback. Ren'Py output remains the geometry,
+transparency and timing authority. This first release does not depend on embedding a
+native Ren'Py window. Use native movie channel allocation/defaults initially, with
+explicit qualification for embedded audio and multiple simultaneous movies. Save/load,
+rollback, skip and Run From Here can change decoder timing: establish supported restart
+or resume behavior rather than promising exact elapsed-frame reconstruction.
+
+**Research evidence:** the official
+[8.5.3 movie documentation](https://raw.githubusercontent.com/renpy/renpy/8.5.3.26051504/sphinx/source/movie.rst)
+and [Movie implementation](https://raw.githubusercontent.com/renpy/renpy/8.5.3.26051504/renpy/display/video.py)
+were inspected at tag `8.5.3.26051504`. This supports using native loop, mask, supplied
+start/fallback image and last-frame mechanisms, not a custom playback engine. Confirm
+the installed SDK build at implementation entry; source inspection does not qualify
+codec files or restored playback on the targets. Native defaults avoid copying a
+newer-version custom callback into the pinned adapter.
+
+Creator references: [FunFiction's visual editor](https://funfictionart.itch.io/renpy-wysiwyg-editor)
+and [its repository](https://github.com/FunFiction/renpy-wysiwyg-drag-drop-editor)
+inform direct staging/source edits; [ActionEditor3](https://github.com/kyouryuukunn/renpy-ActionEditor3)
+informs keyframe/loop controls but documents movie-preview limitations. These are UX
+and bounded-edit precedents, not Loomlight native playback evidence or dependencies.
+No community code was downloaded, copied or executed during this research.
 
 ### Implementation plan
 
@@ -403,8 +469,8 @@ qualification. Reading upstream docs is not a codec, mask or target acceptance p
 tracks on existing assets; fixed/linear/ease interpolation; reusable named transforms;
 explicit pauses and beat-anchored music/sound play, stop, fade and queue operations;
 static drag/resize, qualified native movie/frame-sequence appearances and nonblocking
-idle loops. First deliver static staging and one native idle alongside position/opacity
-and music/SFX, then the remaining declared inventory.
+idle loops. Follow the agreed incremental sequence above, then complete the remaining
+transform/keyframe/audio inventory using the same services and fixtures.
 Camera/3D/shader effects, unrestricted ATL functions, movie editing and voice alignment
 are separately proposed later additions, not hidden release dependencies.
 
@@ -575,6 +641,7 @@ are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-
 | Condition grammar and call parameters | Concrete grammar and no-parameter first-call design above; qualify the pinned SDK and migration in 3A.1–2. |
 | Screen properties/actions and generated-screen ownership | Recommended inventory and template adapters above; accept inventory/mockups and prove source ownership before 3B UI expansion. |
 | Staging, native media and idle loops | User-selected drag/resize, pre-rendered playback and dialogue idle loops; only pinned-Ren'Py-supported profiles, no conversion. Native placement/format/timing proof remains required. |
+| Native animation implementation order | User-selected static staging → PNG/ATL idles → native looping video → prepared transparency → play-once/end states → combined qualification; source bindings and delivery seams above. |
 | Timeline tracks, timing model and supported effects | Beat-bounded segments and 2D/standard-audio inventory above; native timing proof before completion. |
 | Run From Here entry points and state provenance | Scene entry/empty stack first, then stable Beat boundaries; qualify scratch launch, save isolation and equivalence. |
 | Git | Deferred by user direction; absent from Phase 3 and release acceptance. |
@@ -604,8 +671,8 @@ target is the separate origin planning branch; no PR or merge is selected.
 
 The official online Ren'Py pages inspected report **8.5.4**, while Loomlight's current
 project baseline pins **8.5.3**. These sources inform the design; they do not establish
-compatibility with 8.5.3. An attempted pinned-tag documentation fetch was unavailable.
-Before each SDK-dependent implementation checkpoint, inspect the actual pinned SDK's
+compatibility with 8.5.3. An initial pinned-tag documentation fetch was unavailable; the subsequent animation
+research inspected tagged 8.5.3 source/docs as recorded in 3C above. Before each SDK-dependent implementation checkpoint, inspect the actual pinned SDK's
 documentation/source and run a synthetic capability proof. No SDK upgrade, third-party
 download, app launch or compatibility pass is implied by this research.
 
@@ -647,3 +714,12 @@ drag/resize without keyframes, idle lifecycle and the retained Run From Here tim
 boundary. No media/SDK/app/native tests were run; candidate profiles remain unqualified.
 Publish on `origin/codex/phase-2-3-planning` and verify the remote head. No new PR,
 merge, build/CI allowance or implementation is selected; resolve this checkpoint from Git.
+
+Animation-sequence planning verification: repository validation passed for 329 files;
+whitespace and five-document scope review passed. Reviewed static-first delivery,
+shared placement/history, explicit play-once end states, bounded media access and
+profile-dependent previews. Tagged-source/community research is not native target
+qualification; no app/media/SDK execution or implementation was performed. Publish
+this docs checkpoint on the existing origin planning branch and verify its exact head;
+no PR, merge, build or CI is selected. Next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance against the current accepted baseline.

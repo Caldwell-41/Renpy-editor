@@ -621,6 +621,14 @@ supported exports; no GIF/video conversion action is offered. The
 [3C contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
 owns exact format, source/persistence and runtime proof requirements.
 
+The [agreed implementation sequence](tasks/active/phase-3-initial-wysiwyg-release.md#agreed-implementation-order-and-source-bindings)
+delivers static controls, PNG/ATL idles, native looping video, prepared transparency
+and play-once/end choices in order. Frame/video content shares the same placement
+controls. Play once exposes a declared end state: disappear, hold last frame or show
+a supplied still. An idle is shown once across dialogue; speak-only/text-reveal triggers
+remain later scope. Embedded playback is profile-dependent, with an explicit real
+Ren'Py preview when unavailable; it does not claim native parity from a browser alone.
+
 ### State simulation and run from here
 
 Reachable, saved, synthetic, and contradictory states will use distinct labels/icons.

@@ -186,3 +186,15 @@ while pinned 8.5.3 qualification remains future work. No new implementation, pro
 request, media import/decoding, app/SDK/native run, agent, build or CI was performed.
 Continue on the existing planning branch; next remains UX/subset review and bounded
 implementation selection after Phase 1 acceptance. No merge or new planning PR.
+
+Animation implementation sequence selected: after the researched explanation, the user
+agreed to static staging → PNG/ATL idles → native looping video → prepared transparent
+video → play-once/end states, followed by combined qualification. The Phase 3 brief
+owns concrete source bindings, existing asset/media seams, bounded video delivery,
+channel/audio behavior and profile-dependent embedded previews. Tagged official
+8.5.3 source and community creator references are linked; source reading is not native
+qualification. UI and the lane allocation agree. Native-only imports/no conversion,
+shared placement/history and existing entry/acceptance gates remain. No app/media/SDK
+execution, new agents, worktrees, builds, CI or implementation was started. Next: review
+remaining subsets/UX and select bounded implementation after Phase 1 acceptance on
+the current accepted baseline. Publish on the existing planning branch; no PR or merge.

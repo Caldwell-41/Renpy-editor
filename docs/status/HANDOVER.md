@@ -417,3 +417,24 @@ drag/resize without keyframes, idle lifecycle and the retained Run From Here tim
 boundary. No media/SDK/app/native tests were run; candidate profiles remain unqualified.
 Publish on `origin/codex/phase-2-3-planning` and verify the remote head. No new PR,
 merge, build/CI allowance or implementation is selected; resolve this checkpoint from Git.
+
+Animation implementation sequence selected: after the researched explanation, the user
+agreed to static staging → PNG/ATL idles → native looping video → prepared transparent
+video → play-once/end states, followed by combined qualification. The Phase 3 brief
+owns concrete source bindings, existing asset/media seams, bounded video delivery,
+channel/audio behavior and profile-dependent embedded previews. Tagged official
+8.5.3 source and community creator references are linked; source reading is not native
+qualification. UI and the lane allocation agree. Native-only imports/no conversion,
+shared placement/history and existing entry/acceptance gates remain. No app/media/SDK
+execution, new agents, worktrees, builds, CI or implementation was started. Next: review
+remaining subsets/UX and select bounded implementation after Phase 1 acceptance on
+the current accepted baseline. Publish on the existing planning branch; no PR or merge.
+
+Animation-sequence planning verification: repository validation passed for 329 files;
+whitespace and five-document scope review passed. Reviewed static-first delivery,
+shared placement/history, explicit play-once end states, bounded media access and
+profile-dependent previews. Tagged-source/community research is not native target
+qualification; no app/media/SDK execution or implementation was performed. Publish
+this docs checkpoint on the existing origin planning branch and verify its exact head;
+no PR, merge, build or CI is selected. Next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance against the current accepted baseline.
