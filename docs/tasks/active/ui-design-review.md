@@ -2446,3 +2446,77 @@ starts. Windows testing remains explicitly deferred; WIN-UI-09 includes alignmen
 control widths, arrow direction and title/tab/empty-Source separation at scaling.
 CONFIG-01 remains pending. Continue the existing hands-on review; select a corrected
 installer separately when needed. Publish this source/docs checkpoint and verify.
+
+
+### Branches connector design options — 2026-10-03
+
+The user reports four presentation issues in the delivered Mac build: arrows need
+more visual weight; route text is hard to read; backward links run behind Scene
+nodes; and opposite Scene 1/New Scene routes overlap. Select **BRANCHES-03** as
+mockup/choice review first. The user explicitly requests a subagent and 2–3 raster
+image choices, mentioning GPT sunburst. Available built-in image generation has no
+model selector; do not attribute these previews to a selectable Sunburst model.
+Use the imagegen skill/built-in generator, with one separate call per variant.
+
+Incoming feature `59f0323`, main `4d7ba03` and planning worktree `2c5a164` are preserved;
+PR #17 remains draft/open/conflicting. This request selects proposals and repository
+review state, not Branches implementation, a new package/CI run, integration or a
+new phase. Earlier saved-flow resolution and navigation evidence remains separate.
+
+Read-only renderer inspection explains the presentation: `branches-ui.ts` uses the
+same bottom-centre to top-centre cubic template for every non-self edge, regardless
+of direction or other nodes, with midpoint label placement. Normal edges are 1.5px
+at 0.55 opacity (`styles.css`); labels are 12px secondary text with an app-background
+stroke (`ui-refresh.css`). There is no route-avoidance or parallel-lane allocation.
+The user screenshot is evidence of this visual problem, not a source-completeness
+or execution failure. No private project files were read or copied into fixtures.
+
+Proposals share paper/teal colours, heavier connectors, distinct arrowheads and
+opaque readable label pills. Compare the SAME illustrative graph in each:
+Scene 1 (Entry) → New Scene (Start); New Scene → Scene 1 (Back); New Scene → Three
+(Three); New Scene → Four (4); Scene 1 → Four (Jump); Four → Scene 1 (Jump back).
+Backward links here mean authored routes returning to an earlier Scene, not the
+Ren’Py Return/End terminal Beat. Samples are design concepts, not a runtime trace.
+
+- **A — Curved:** retain a top-down tree with smooth forward curves and outer
+  backward-route lanes; closest to the existing composition.
+- **B — Rounded orthogonal:** separate connector channels, rounded corners and
+  labels on straight segments; prioritize explicit direction and dense readability.
+- **C — Horizontal:** left-to-right progression, separated forward/backward curves
+  above/below the nodes; a different graph orientation for comparison.
+
+Generated mockups are unaccepted previews under ignored
+`.toolchains/reports/branches-mockups-2026-10-03/`; they do not replace the accepted
+reference set. Record inspected output paths/limitations before delivery. Wait for
+the user's choice before implementing a connector/layout direction. Preserve
+sidebar source `59f0323`, which also predates any corrected installer delivery;
+CONFIG-01 and native/physical acceptance remain open. Windows verification stays
+deferred; after a direction is selected add overlapping reciprocal links, long
+backward links, labels/arrowheads at zoom and higher display scaling to its list.
+No tests, app/native/SDK starts, packages or hosted dispatches are selected by this
+proposal. Counters remain 9 packages, 44 native/boundary starts, separately 4 SDK
+menu starts. No background workflow or integration is pending.
+
+
+**Mockup delivery:** generated and inspected three separate PNGs in the ignored
+preview directory: `option-a-curved.png`, `option-b-orthogonal.png`,
+`option-c-horizontal.png`. `PROMPTS.md` retains the final prompt set, edits and
+inspection notes. A keeps the existing top-down arrangement with separate outer
+backward curves; C provides the clearest complete horizontal example. B demonstrates
+rounded orthogonal routing channels and is a useful top-down direction, but its
+raster misses the `4` arrowhead and imperfectly attaches the Jump tip. These are
+explicit generated-preview limitations, not approved production behaviour; every
+implemented directed route must have a visible arrowhead and stop at its proper
+node boundary. No paths pass behind unrelated nodes in these concepts. A originally
+had Start pointing upward and the illustrative Return label; one targeted image
+edit corrected direction and renamed it Jump back. B's targeted edit separated
+Jump from the `4` port, with the residual arrow-tip issues above disclosed.
+
+Preview generation used the built-in image tool, not a claimed Sunburst model.
+Application source remains `59f0323`; no production tests were rerun because this
+turn changes design docs only. Repository validation passes **322 files** and diff
+check passes. Deliver A/B/C inline, with B's residual raster limitations, and obtain
+the user's choice before implementation. No mockup is accepted yet. Save selection
+and any refinements here when the user replies; do not reproduce the shortened
+illustrative toolbar as a new product requirement. The user requested connector
+refinement, not graph-editing ports; drawn attachment dots are conceptual.

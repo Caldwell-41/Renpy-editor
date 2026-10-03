@@ -1,5 +1,32 @@
 # Current outcome handover
 
+## Branches connector mockups selected — 2026-10-03
+
+Latest request: show 2–3 image choices before changing Branches. The user reports
+thin arrows, unclear labels, backward links behind nodes and overlapping opposite
+Scene 1/New Scene routes. The [BRANCHES-03 proposal](../tasks/active/ui-design-review.md#branches-connector-design-options--2026-10-03)
+records read-only renderer evidence and three options: curved top-down, rounded
+orthogonal, horizontal. A user-requested subagent uses built-in image generation;
+there is no selectable GPT sunburst override. Samples use synthetic graph names
+and the paper/teal palette, not private project contents. Generated images are
+unaccepted previews in ignored `.toolchains/reports/branches-mockups-2026-10-03/`.
+All three previews are ready: `option-a-curved.png`, `option-b-orthogonal.png`,
+`option-c-horizontal.png`, with `PROMPTS.md` alongside. A/C have all visible directed
+arrowheads; B demonstrates useful routing channels but the raster misses the `4`
+arrowhead and imperfectly attaches Jump. These limitations are disclosed in the
+ledger and delivery; do not approve them as production behaviour. No graph editing
+or shortened toolbar is selected by these illustrations. Deliver previews and obtain
+the user's visual choice before implementation. Docs/diff validation passes (322
+files); no app tests are selected for this documentation-only checkpoint.
+
+Source remains published `59f0323`; main `4d7ba03`, planning `2c5a164` and PR #17
+OPEN/draft/CONFLICTING are preserved. Delivered `19cdcaa` installer predates sidebar
+source correction. CONFIG-01 remains open; Windows/physical/final UX acceptance
+remain deferred/open. No app tests/native/SDK starts, packages, hosted dispatch,
+merge/conflict resolution or new phase are selected by mockup review. Totals stay
+9 packages, 44 native/boundary starts, separately 4 SDK menu starts. Publish/verify
+this meaningful design checkpoint after previews are ready; no receipt-only commit.
+
 ## Sidebar control alignment follow-up — 2026-10-03
 
 The user reviewed the delivered Mac build and selected four sidebar corrections:

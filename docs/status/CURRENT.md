@@ -7,7 +7,17 @@
 
 ## Live continuation
 
-**State: sidebar alignment follow-up implemented; installer predates it; Windows deferred.**
+**State: Branches connector mockups selected; awaiting visual choice; Windows deferred.**
+The user's latest feedback selects [BRANCHES-03 design options](../tasks/active/ui-design-review.md#branches-connector-design-options--2026-10-03):
+heavier arrows, legible labels, node-avoiding backward links and distinct reciprocal
+routes. A requested subagent produced three inspected built-in image-generation previews:
+curved top-down, rounded orthogonal, horizontal. Model selection is unavailable;
+no Sunburst identity is claimed. Previews are retained in ignored
+`.toolchains/reports/branches-mockups-2026-10-03/`; B's generated missing arrowhead/
+imperfect tip is disclosed as a concept limitation. Choose a direction before implementation. No app
+change, new package/CI/integration is selected for this proposal.
+
+**Previous sidebar correction:**
 The user reported misaligned/widening sidebar controls, the hidden tree restore button
 covering the Scene title, and arrows that did not reverse. The bounded
 [sidebar follow-up](../tasks/active/ui-design-review.md#sidebar-control-alignment-follow-up--2026-10-03)
