@@ -7,25 +7,30 @@
 
 ## Live continuation
 
-**State: catalogue layout/staged-preview corrections implemented; installer unchanged; Windows deferred.**
-The user reports provisional acceptance with further review open, then selects fixes
-for Character/Variable layouts and a selected-image preview in the import modal.
-[CATALOG-05 / ASSETS-03](../tasks/active/ui-design-review.md#catalogue-layout-and-staged-import-preview-follow-up--2026-10-03)
-is implemented at source **`cedef502c7f517a808319696ba3a94952377f41d`**, parent `002c753`.
-Character mixed-image/placeholder Grid/List layouts and the Variable table's four
-columns now align. Selected images replace the initial Choose section; smaller Add
-files, loading/error/Retry, remove/discard/reopen and read-only retained-file preview
-preserve explicit import confirmation and transaction ownership.
-Local checks pass: **85 frontend tests**, web build, **7 focused core tests**, **1
-macOS desktop test**, full actual-renderer regression including catalogue alignment
-at three widths/both themes and staged PNG decode/compact actions. Format/diff and
-repository validation pass (**325 files**). WIN-UI-14 joins the deferred list.
-No native/file-drop/final UX pass is claimed. Delivered installer `19cdcaa` predates
-these/sidebar/Branches changes; no replacement installer was selected this turn.
-CONFIG-01 and physical/live-progress/final UX acceptance remain open. Remote planning
-advanced to `267ec2a`; its separate local worktree remains `2c5a164`. Preserve both.
-PR #17 remains OPEN/draft/CONFLICTING. No hosted request, package, native/SDK app
-start, integration or new phase; no pending operation.
+**State: latest corrected Mac installer ready; final 1G acceptance/integration open; Windows deferred.**
+The user selected a rebuild. Final installer from **`b6cc06b3496e20288de8a06211dfd599e29f9bf3`**
+(app source `cedef50`) is ready:
+`.toolchains/review-builds/ui-refresh-b6cc06b/Loomlight_0.1.0_b6cc06b_aarch64.dmg`,
+SHA-256 `6209a3540756c774e88ec1e2a9d11b618f46cc370c6c81cbd390b09bec234d71`.
+It includes sidebar alignment, approved Branches B and catalogue/staged-image
+preview corrections. Release compilation/bundling, sealed ad-hoc signature, ARM64
+identity, DMG integrity and mounted payload checks all pass; temporary mounts/staging
+are cleaned. The installed app was untouched. No app/game launch or new native pass.
+[Delivery and remaining 1G work](../tasks/active/ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03)
+owns hashes, evidence and the compact closure list. Existing unchanged-input local
+proof remains 85 frontend, 7 focused core, 1 desktop and full actual-renderer checks;
+this is not cross-platform qualification of the latest source.
+
+Remaining: CONFIG-01 resolution ratio/caption/invalid/portrait preview detail; final
+macOS physical/UX/runtime session and OS drop/live progress; deferred Windows
+qualification/native/final acceptance (14-row checklist); separately selected PR #17
+conflict resolution, affected integration gates and merge. 1H follows integration;
+optional Git is outside Phase 1. User acceptance is provisional. Resume with the
+changed sidebar/Branches/catalogue/import surfaces on the new installer.
+Main `4d7ba03`, remote planning `267ec2a` and separate local `2c5a164` worktree remain
+preserved. PR #17 OPEN/draft/CONFLICTING. Counters now 10 production builds, unchanged
+44 native/boundary starts and separately 4 SDK menu starts. No hosted request,
+Windows build, integration or new phase selected; no pending operation.
 
 **Previous Branches correction:**
 Option B source `88add80` implements heavier rounded routes, distinct channels,

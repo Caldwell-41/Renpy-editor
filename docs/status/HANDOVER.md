@@ -1,5 +1,44 @@
 # Current outcome handover
 
+## Latest corrected Mac installer ready — 2026-10-03
+
+User requested installer rebuild and remaining 1G summary. Built one pinned local
+macOS ARM64 release package at input **`b6cc06b3496e20288de8a06211dfd599e29f9bf3`**,
+app source **`cedef502c7f517a808319696ba3a94952377f41d`**. It contains sidebar,
+Branches B, Character/Variable layout and staged-image preview corrections.
+Final ignored installer:
+`.toolchains/review-builds/ui-refresh-b6cc06b/Loomlight_0.1.0_b6cc06b_aarch64.dmg`,
+5,752,413 bytes, SHA-256
+`6209a3540756c774e88ec1e2a9d11b618f46cc370c6c81cbd390b09bec234d71`.
+[Delivery ledger / remaining 1G](../tasks/active/ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03)
+records exact app/raw hashes, static checks and continuation. BUILD.json,
+SHA256SUMS.txt and README.txt accompany the retained app and final/raw containers.
+
+Release web/Rust/app/DMG build passes. Applied known local ad-hoc resource seal to
+the same payload and repacked with Applications shortcut; final integrity,
+strict/deep signature, ARM64-only identity, mounted executable checksum/execute bit
+and bundle version all pass. Detached volume and removed temporary staging.
+Not Developer ID/notarized. Existing 85 frontend/7 core/1 desktop/full-browser proof
+is reused for unchanged inputs, not a new native gate. Installed application and
+private projects remain untouched; no app/game/SDK execution. User quits Loomlight,
+replaces the Applications copy from final DMG and resumes changed-surface review.
+
+1G remains open for CONFIG-01 ratio/caption/valid Custom/portrait preview; final Mac
+physical keyboard/IME, Finder drop, live SDK/detailed creation progress and focused
+runtime/UX session; later Windows affected native/packaged qualification and final
+session (14-row checklist); separately selected PR #17 conflicts/integration checks
+and merge. Final session covers navigation/pending input, authored routes,
+script saves during play/Stop/rerun, diagnostic Source navigation and scaling/reopen.
+Acceptance stays provisional; 1H follows integration and optional Git is not a
+Phase 1 prerequisite. No workflow is pending, and no automatic CI/Windows dispatch,
+conflict resolution, merge or next phase is selected by this build request.
+
+Main `4d7ba03`, OPEN/draft/conflicting PR #17, remote planning `267ec2a` and separate
+local worktree `2c5a164` preserved. Totals now 10 production builds, unchanged 44
+native/boundary starts and separately 4 SDK menu starts. Earlier packages/failures
+are retained. Publish/verify this delivery documentation only; no binary/log commit.
+
+
 ## Catalogue layout and staged preview corrected — 2026-10-03
 
 The latest screenshots select correction of Character grid/list layouts, Variable

@@ -5418,3 +5418,21 @@ not native G1-V2/input/final human acceptance or integration. Next separately pr
 remaining Windows native evidence and focused final sessions under TESTING; no automatic
 new launches, matrix, conflict resolution, merge or 1H. Publish documentation with
 `[skip ci]`; source/acceptance does not transfer automatically to another SHA.
+
+## 42. UI review continuation and latest local Mac delivery — 2026-10-03
+
+Live UI work and exact delivery are owned by the
+[UI review ledger](ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03)
+and CURRENT/HANDOVER. User-selected corrected macOS installer from `b6cc06b`, app
+source `cedef50`, is compiled and statically verified. This is one local review
+package, not a new cross-platform qualification or 1G acceptance. Preserve Q1 and
+UI qualification run `36661814610` at `d690d7f` as evidence for their actual candidates.
+
+Remaining 1G: known CONFIG-01 accepted-design details; final macOS native/physical
+runtime and UI interaction acceptance; user-deferred Windows latest-source/native
+qualification and focused final session (14-row UI checklist); separately approved
+conflict resolution, affected integration gates and reviewed merge of PR #17.
+Prepared final sessions follow TESTING's ownership/narrow reuse rules; earlier green
+runs do not automatically qualify later inputs. 1H is a following selected outcome,
+and optional Git remains outside Phase 1. No pending workflow, new dispatch, merge
+or next phase is selected. Publication retains all historical failed-run evidence.

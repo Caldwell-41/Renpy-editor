@@ -2656,3 +2656,89 @@ passes (325 files). Fresh remote inspection finds planning `267ec2a` newer than 
 separate local `2c5a164` worktree; preserve both. Main `4d7ba03` and PR #17
 OPEN/draft/CONFLICTING are unchanged. Continuation details are now at the top of
 CURRENT/HANDOVER; source and state are to be published together.
+
+### Latest corrected Mac installer selected — 2026-10-03
+
+The user explicitly requested rebuilding the installer, then the remaining Phase 1G
+list. One local macOS ARM64 release app/DMG build plus artifact integrity, sealed
+resource/signature, bundle identity and mounted-payload checks is selected. Input
+is clean/published **`b6cc06b3496e20288de8a06211dfd599e29f9bf3`**, app source
+`cedef502c7f517a808319696ba3a94952377f41d`. It includes sidebar alignment,
+approved Branches B and catalogue/staged-preview corrections. Existing 85 frontend,
+7 focused core, 1 desktop, full browser/format/diff validation results are retained
+for these unchanged inputs; no duplicate SDK/native qualification is selected.
+
+Fresh main stays `4d7ba03`, feature remote matches input, PR #17 remains
+OPEN/draft/CONFLICTING. Remote planning `267ec2a` and separate local `2c5a164`
+worktree are preserved. Use pinned local toolchains; retain earlier installer and
+any raw output. Do not install over the user's running app or launch a game.
+Windows remains deferred; no hosted dispatch, conflict resolution, merge or new
+phase selected. CONFIG-01 remains incomplete. Build command is running with output
+under ignored `.toolchains/reports/ui-review-b6cc06b-build.log`; record final
+artifact hashes, cost counters and remaining Phase 1G work below before delivery.
+
+### Latest corrected Mac installer delivery — 2026-10-03
+
+One pinned `npm exec -- tauri build -- --locked` production build completed at
+input **`b6cc06b3496e20288de8a06211dfd599e29f9bf3`**, application source
+`cedef502c7f517a808319696ba3a94952377f41d`. Source inputs are unchanged from the
+85-frontend/7-focused-core/1-desktop/full-browser correction evidence. Production
+web/optimized Rust compilation and app/DMG bundling pass; the existing web chunk
+advisory remains. No duplicate source build, SDK/native scenario or game launch.
+
+Final installer (ignored):
+`.toolchains/review-builds/ui-refresh-b6cc06b/Loomlight_0.1.0_b6cc06b_aarch64.dmg`,
+**5,752,413 bytes**, SHA-256
+`6209a3540756c774e88ec1e2a9d11b618f46cc370c6c81cbd390b09bec234d71`.
+Retained sealed executable SHA-256
+`c87235275178eedf3c1399ed5a398e306fb78eb41c4a361e791ad712dc2d6291`.
+Portable BUILD.json, SHA256SUMS.txt and installation README accompany the app/DMG.
+Original Tauri DMG is retained as `-unsealed.dmg`, digest
+`28b9626335f002f2a1a698eee0186fc0b71a52fd557aee5a2aa0a2ceaee38336`;
+use the final installer, not that evidence copy. The previous `19cdcaa` installer
+remains untouched.
+
+Applied the previously verified local ad-hoc resource seal and repacked the same
+compiled payload with Applications shortcut; this is not Developer ID signing or
+notarization. Original compiled executable digest
+`34546b876c5ad6f905fbcc6dbf5d323006b7723e1c68735ee4f84c69ff5fd5e2` is retained
+in BUILD.json. Final `hdiutil verify`, strict/deep `codesign --verify`, ARM64-only
+architecture, identifier/version, mounted executable hash/execute mode, mounted
+signature and Applications shortcut all pass. Mounted volume detached and temporary
+staging removed. Both SHA256SUMS entries independently pass. No install over the
+user's app or private-project change occurred. Logs and packaging script stay ignored.
+
+Totals are now **10 production package builds**, unchanged **44 native/boundary
+starts**, separately **4 SDK menu starts**. One source build, two DMG containers;
+no hosted/Windows dispatch, conflict resolution, merge or new phase. Main `4d7ba03`,
+remote planning `267ec2a`/local separate `2c5a164` worktree and OPEN/draft/conflicting
+PR #17 remain. No operation pending. User quits Loomlight, replaces its Applications
+copy from the final DMG, and resumes at the changed sidebar/Branches/catalogue/import
+surfaces. Installer compilation/static checks do not constitute new native acceptance.
+
+**Remaining Phase 1G work:**
+
+1. Complete CONFIG-01: aspect-ratio label, “Game resolution, not editor size.” caption,
+   truthful empty/invalid Custom preview and bounded portrait proportions. These are
+   the known remaining accepted-design details, not a new feature phase; this build
+   request does not expand into their implementation.
+2. Finish final macOS native/UX review with this installer: corrected sidebars,
+   Branches B, Character Grid/List/Variable columns and staged previews; physical
+   keyboard/IME, Finder file drop, genuine uncached SDK progress and detailed creation
+   progress. Keep provisional feedback separate from final acceptance. TESTING's
+   short final 1G session also covers Scene/Source/Branches navigation and pending
+   input, authored routes, script save during play/Stop/rerun, an SDK diagnostic's
+   Source location, resize/scaling and close/reopen. Reuse applicable prior observations
+   narrowly and record candidate/platform/results instead of repeating accepted suites.
+3. Windows x64 remains explicitly deferred: later agent-run affected native/packaged
+   qualification for final source, genuine WebView2 input/responsiveness and the
+   focused final user session, including the existing 14-row Windows action/result
+   checklist. Earlier green candidates do not qualify subsequent fixes automatically.
+4. After acceptance, separately select PR #17 conflict resolution, affected integrated
+   checks and reviewed merge. 1G is not integrated; 1H follows as a separately selected
+   integrated vertical-slice acceptance outcome. Optional Git features remain outside
+   Phase 1 and are not a blocker.
+
+No unresolved hosted operation exists. Retain historical failed runs and their
+corrections; the earlier `d690d7f` cross-platform UI qualification is evidence only
+for its recorded candidate, not a new qualification of this local build.
