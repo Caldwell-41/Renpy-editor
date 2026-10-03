@@ -2,7 +2,10 @@
 
 **Planning date:** 2026-10-02. **State:** researched implementation-plan draft;
 implementation `not_started`.
-**Latest user direction:** remove 3E because Git remains deferred; plan the
+**Latest user direction:** accept only native Ren'Py video/animation formats at this
+stage, with no conversion; 3C explicitly covers character drag/resize, pre-rendered
+playback and dialogue-time idle loops. Earlier direction removed 3E/Git and requested
+implementation research. Plan the
 implementation of the remaining Phase 3 parts using Ren'Py documentation and relevant
 projects as references. Earlier outcome-level planning was not a complete implementation
 plan. The steps below supply a proposed technical approach and proof checkpoints;
@@ -41,7 +44,7 @@ No calendar estimate is committed before the source/SDK feasibility checks.
 | --- | --- | --- |
 | 3A — Story logic | A variable changes which choice is available; a called Scene returns to its caller. | Supported conditions/calls agree across Story, Source, Branches and actual runtime. |
 | 3B — Screen designer | Edit one supported screen using hierarchy, canvas and properties, then inspect it in Ren'Py. | Declared screen subset, reusable supported components, source reconciliation and accessible editing pass. |
-| 3C — VN Timeline | Animate an existing character and schedule music/SFX relative to a supported beat. | Declared timing/transform/channel subset survives Source edits, undo and reopen and matches runtime comparisons. |
+| 3C — Staging, native animation and VN Timeline | Drag/resize a character; play a supplied native animation, including an idle loop during dialogue; animate transforms and schedule music/SFX. | Declared placement/media/timing/transform/channel subset survives Source edits, undo and reopen and matches native SDK output; no import conversion. |
 | 3D — State and Run From Here | Inspect one explicit route's effective state and start at a supported point. | Provenance, unknown-state refusal, call-stack constraints and isolated launch behavior pass. |
 | 3F — Release acceptance | Install on both supported targets and finish the integrated authoring workflow. | Agreed product coverage, distribution channel, applicable signing and release evidence are complete. |
 
@@ -297,10 +300,11 @@ relative event order. Authoring time, preview time and actual runtime time have
 distinct meanings. Dialogue interactions can wait indefinitely; do not invent a fixed
 duration for an entire interactive Scene.
 
-The broader canonical track list is a design direction, not automatic first-slice
-support. Inventory camera/effects/voice/movie/loop behavior before 3C approval and
-identify which are in its release subset. Full video editing, unrestricted ATL,
-arbitrary Python interpolation and sample-accurate synchronization are excluded.
+The broader canonical track list is a design direction. Character drag/resize,
+native pre-rendered playback and idle loops are now explicit completion requirements
+below; remaining camera/effects/voice scope needs separate inventory. Full video
+editing, import conversion, unrestricted ATL, arbitrary Python interpolation and
+sample-accurate synchronization are excluded.
 
 **Completion checks:** preview/play/scrub supported effects with disclosed limits;
 change timing numerically and by keyboard; preserve source mappings and unsupported
@@ -311,20 +315,105 @@ trusting the gate. Do not use an unexplained screenshot similarity threshold.
 **Early risk proof:** one combined transform/audio sequence survives a source edit,
 transaction and real runtime comparison before adding the full Timeline workspace.
 
+### Selected staging, native media and idle playback
+
+The user wants to drag/resize a character with matching game placement, play existing
+pre-rendered animations and give a character an idle loop while dialogue waits. The
+selected import boundary is **only formats natively supported by the pinned desktop
+Ren'Py SDK; no conversion/transcoding in this release**. This makes those authoring
+outcomes explicit 3C requirements; exact profiles must still be qualified before
+implementation claims support.
+
+- Select a visible character in Story Preview, drag it and resize with handles;
+  expose position/anchor/scale numerically and by keyboard. Preserve aspect ratio by
+  default. Static placement needs no keyframe or Timeline setup. Write ordinary
+  Ren'Py transforms through the shared edit layer. Use project virtual coordinates,
+  with viewport zoom separate from game scale; compare anchors, bounds and placement
+  against actual SDK output. Apply the same staging to static and animated appearances.
+- Import a qualified native video or an explicit ordered sequence of supported image
+  assets with positive frame durations. Use it as an animated Character Appearance or
+  background with Play once/Loop and a declared end state. The same media/appearance
+  service supplies Story and Timeline; do not build a separate animation asset store.
+- Assign an idle animation to an Appearance or reuse a supported looping transform.
+  A nonblocking loop continues across dialogue waits until hidden or deliberately
+  replaced. Advancing text must not re-show/restart the character on every Beat.
+  Keep base placement/size separate from animation changes so dragging does not erase
+  the idle. Unsupported overlapping property ownership is diagnosed rather than guessed.
+
+**Initial format profile candidates:** WebM with VP8/VP9 video and, when audio is
+present, qualified Opus/Vorbis; Ogg/OGV with Theora video and qualified Vorbis audio;
+and timed PNG frame sequences emitted as supported ATL image animation. These are a
+bounded subset of upstream formats, not a requirement to expose every Ren'Py decoder.
+Publish the exact accepted container/video/audio combinations only after pinned-SDK
+qualification on Windows x64 and macOS ARM64. File extensions alone are insufficient.
+Broader native formats may be added only after that same bounded qualification.
+
+Animated GIF import/playback is excluded; there is no GIF-to-frames/video conversion.
+Likewise no automatic MP4/H.264/AAC conversion, frame extraction, mask generation,
+re-encoding or video-editing pipeline. Reject unsupported input before writing project
+assets and explain the supported export profiles. Reject unqualified single-file
+animated-image formats rather than silently treating them as a still image. The existing
+Phase 1 static-image/audio allowlist remains its own accepted subset.
+
+Transparent movie sprites use an author-supplied Ren'Py-compatible mask representation;
+the first qualified route is a prepared side-by-side mask, with an optional separate
+mask route only if synchronization is proved. Do not infer that a video's alpha channel
+is playable. Logical sprite dimensions/resize handles exclude the mask portion. Authors
+can instead supply transparent PNG frames. Optional poster/end images are supplied
+assets, not frames extracted by Loomlight. Multiple simultaneous movies need a qualified
+frame-rate/capacity policy; reject incompatible combinations rather than claim fidelity.
+
+Extend the shared asset/source contracts with verified media kind, container/codecs,
+logical dimensions, frame-rate/timing information where available, stable asset IDs,
+mask/frame dependencies and explicit playback settings. These describe source-backed
+render definitions and imported bytes, not a second runnable truth. Preserve original
+accepted bytes. Asset lifecycle, source reconciliation, undo and migration/reopen apply
+to the whole dependency group. Validate contents and declared profiles without running
+project scripts. Missing or unsupported media retains a diagnostic and cannot become a
+successful imported/previewed asset merely because its filename has an allowed suffix.
+
+Use the shared runtime preview for authoritative decoding/comparison. A browser unable
+to play a qualified Ren'Py profile shows a supplied poster/partial status and an explicit
+Preview in Ren'Py action; it never rejects or transcodes a valid game asset solely to
+match WebView support. Selecting/importing media does not automatically start playback
+or execute Ren'Py. Preview play/stop is explicit and releases its media on close/switch.
+Idle loops need not have exact elapsed time reconstructable in 3D: normal playback is
+separate from Run From Here, which retains unknown-timing refusal or clearly labelled
+synthetic restart rules.
+
+**3C completion proof:** drag/resize both a still and animated Appearance; compare
+logical placement/scale with the compiled/running game at project resolution and a
+second window size. Play a supplied native clip once and loop it; demonstrate a masked
+sprite and transparent frame sequence over a background. Keep an idle running through
+at least two dialogue waits, then change/hide it and verify playback stops. Exercise
+click/skip/rollback/save-load, source edits, undo/reopen, rejected GIF/unsupported codec,
+missing dependencies and mixed frame rates on both affected native targets. Define
+timing/geometry tolerances from the early proof; no arbitrary exact video-seek promise.
+
+Upstream basis: [movie formats and sprites](https://www.renpy.org/doc/html/movie.html),
+[supported image formats](https://www.renpy.org/doc/html/displayables.html#images),
+[ATL](https://www.renpy.org/doc/html/transforms.html) and
+[transform properties](https://www.renpy.org/doc/html/transform_properties.html).
+Online documentation reports 8.5.4; the project's pinned 8.5.3 still needs measured
+qualification. Reading upstream docs is not a codec, mask or target acceptance pass.
+
 ### Implementation plan
 
 **Recommended release inventory:** 2D position/anchor, scale, rotation and opacity
 tracks on existing assets; fixed/linear/ease interpolation; reusable named transforms;
-explicit pauses and beat-anchored music/sound play, stop, fade and queue operations.
-First deliver position/opacity plus music/SFX, then the remaining declared inventory.
+explicit pauses and beat-anchored music/sound play, stop, fade and queue operations;
+static drag/resize, qualified native movie/frame-sequence appearances and nonblocking
+idle loops. First deliver static staging and one native idle alongside position/opacity
+and music/SFX, then the remaining declared inventory.
 Camera/3D/shader effects, unrestricted ATL functions, movie editing and voice alignment
 are separately proposed later additions, not hidden release dependencies.
 
 | Step | Concrete implementation | Proof before proceeding |
 | --- | --- | --- |
 | 3C.1 — ATL/timing source service | Add proposed core `timeline` service: owned transform declaration inventory and supported keyframe/event projection. Bind tracks to stable Scene/Beat/asset IDs and source revisions. Convert absolute keyframe times to explicit durations; validate finite values and conflicting writes to one property. | Generate one named transform and reference it from an existing Show Beat; parse it back, preserve unrelated ATL and verify the final visual state in Ren'Py. |
-| 3C.2 — Timeline controls | Add proposed `timeline-ui.ts` with property tracks, keyframe insert/move/delete, duration/easing inspector, play/scrub/loop and stage handles. Group edits by gesture, retain draft timing until commit, reuse the asset/media service and shared history. | Numeric and drag edits produce the same source changes, one undo, cancel with no write, source navigation and reload with identical timing. |
-| 3C.3 — Audio and interaction boundaries | Model timed segments between player interactions. Emit reviewed play/stop/queue/fade commands and explicit pauses at cue offsets; show every inserted wait. Use simultaneous transforms or qualified ATL parallel blocks for independent property tracks. Keep dialogue/menu waits as boundaries with unknown duration. | Two concurrent animations and delayed SFX preserve ordering; a click/skip/rollback is tested separately from uninterrupted playback. No implicit scheduler or invented fixed dialogue length. |
+| 3C.1a — Native animation assets/appearances | Extend shared asset/appearance bindings for qualified native video and timed image sequences, typed Movie/ATL definitions, supplied masks and explicit loop/end behavior. Validate container and codecs; copy accepted bytes unchanged. No conversion or mask generation. | One imported animated Appearance and idle survive transaction, source edit and reopen; native format/mask/frame tests pass and rejected input writes no project asset. |
+| 3C.2 — Timeline controls | Add proposed `timeline-ui.ts` with property tracks, keyframe insert/move/delete, duration/easing inspector, play/scrub/loop and Story stage drag/resize handles with aspect lock and numeric/keyboard alternatives. Static placement requires no keyframes. Group edits by gesture, retain draft timing until commit, reuse the asset/media service and shared history. | Numeric and drag edits produce the same source changes, one undo, cancel with no write, source navigation and reload with identical timing. |
+| 3C.3 — Audio and interaction boundaries | Model timed segments between player interactions. Emit reviewed play/stop/queue/fade commands and explicit pauses at cue offsets; show every inserted wait. Use simultaneous transforms or qualified ATL parallel blocks for independent property tracks. Keep dialogue/menu waits as boundaries with unknown duration; nonblocking Appearance/transform idle loops continue until hide/replacement. | Idle continuity across dialogue and stop/change behavior; two concurrent animations and delayed SFX preserve ordering; a click/skip/rollback is tested separately from uninterrupted playback. No implicit scheduler or invented fixed dialogue length. |
 | 3C.4 — SDK comparison and completion | Run the scratch preview and then a normal-game fixture. Compare start/mid/end properties, endpoint state and audio cue order; declare tolerances after a bounded feasibility sample. Reconcile supported Source changes and protect opaque ATL. | Both targets' actual media/runtime paths; repeated replay stops audio cleanly, source/external conflicts retain input, rename/delete references and undo/reopen agree. |
 
 Named transforms are ordinary source, proposed under `game/transforms/`; IDs map to
@@ -485,6 +574,7 @@ are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-
 | State and release | 3D consumes qualified 3A/3C semantics/effects; final 3F follows all required milestone gates. |
 | Condition grammar and call parameters | Concrete grammar and no-parameter first-call design above; qualify the pinned SDK and migration in 3A.1–2. |
 | Screen properties/actions and generated-screen ownership | Recommended inventory and template adapters above; accept inventory/mockups and prove source ownership before 3B UI expansion. |
+| Staging, native media and idle loops | User-selected drag/resize, pre-rendered playback and dialogue idle loops; only pinned-Ren'Py-supported profiles, no conversion. Native placement/format/timing proof remains required. |
 | Timeline tracks, timing model and supported effects | Beat-bounded segments and 2D/standard-audio inventory above; native timing proof before completion. |
 | Run From Here entry points and state provenance | Scene entry/empty stack first, then stable Beat boundaries; qualify scratch launch, save isolation and equivalence. |
 | Git | Deferred by user direction; absent from Phase 3 and release acceptance. |
@@ -549,3 +639,11 @@ limits the manual preview claim. Publication uses the existing planning branch; 
 merge or planning PR is selected. No application tests are needed for this docs/image
 change. The next action is user review of the proposed interactions and remaining
 Phase 3 subsets, not implementation. Resolve this checkpoint's SHA from Git.
+
+Native-media planning verification: repository validation passed for 329 files;
+whitespace and eight-document scope review passed. Checked native-only container/codec
+qualification, no conversion/GIF pipeline, shared appearance/asset ownership, static
+drag/resize without keyframes, idle lifecycle and the retained Run From Here timing
+boundary. No media/SDK/app/native tests were run; candidate profiles remain unqualified.
+Publish on `origin/codex/phase-2-3-planning` and verify the remote head. No new PR,
+merge, build/CI allowance or implementation is selected; resolve this checkpoint from Git.

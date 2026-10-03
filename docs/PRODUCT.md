@@ -95,7 +95,10 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
 - Scene sequencing and live scene preview/staging.
 - Scene/label/choice-level branching graph with scalable detail and diagnostics.
 - Hybrid canvas/hierarchy screen designer that emits maintainable screen language.
-- VN-focused animation/audio timeline that emits valid Ren'Py constructs.
+- VN-focused animation/audio timeline that emits valid Ren'Py constructs. Phase 3
+  includes character drag/resize with verified runtime placement, playback of qualified
+  native pre-rendered animations and nonblocking character idles during dialogue.
+  Video/animation imports use pinned-Ren'Py-supported profiles only; conversion is deferred.
 - Source editor with bidirectional navigation and lossless unsupported regions.
 - Branch-aware characters, variables, lore, state simulation, and run-from-here.
 - First-class Unsloth Studio support plus configurable OpenAI-compatible adapters, without hardcoded model names. Unsloth Studio has dedicated setup, diagnostics and acceptance tests; see the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
@@ -126,6 +129,8 @@ and location-aware LLM context on top of the general graph/state model.
 - General import and full visualisation of arbitrary existing Ren'Py projects.
 - Real-time collaboration or multi-user project locking.
 - A full non-linear video editor or unrestricted pixel-position drawing canvas.
+- Video/animation conversion, GIF import/conversion, transcoding or mask generation.
+  Native media playback and source-backed character staging remain in Phase 3 scope.
 - Silent LLM application, automatic canonical lore, or full-script context by
   default.
 - Bundling an SDK before licence and redistribution review.

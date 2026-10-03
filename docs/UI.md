@@ -609,6 +609,18 @@ The Timeline authors VN staging, not arbitrary video compositing. Phase 1's appe
 placement, transition, audio, and Beat abstractions are intentionally designed to feed
 this workspace later.
 
+Selected 3C interaction: click a character in Story Preview, drag it and resize via
+aspect-preserving handles, or use position/anchor/scale fields and keyboard controls.
+Static staging does not require keyframes or Timeline setup. The saved transform uses
+game virtual coordinates, with editor zoom kept separate. The Appearance picker adds
+qualified native animation choices and explicit Play once/Loop/end controls. An idle
+continues while dialogue waits and stops on hide/replacement; base placement edits
+preserve its animation binding. Preview play/stop is deliberate, with native Preview
+in Ren'Py when the WebView cannot faithfully decode that profile. Import refusal lists
+supported exports; no GIF/video conversion action is offered. The
+[3C contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+owns exact format, source/persistence and runtime proof requirements.
+
 ### State simulation and run from here
 
 Reachable, saved, synthetic, and contradictory states will use distinct labels/icons.

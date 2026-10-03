@@ -397,3 +397,23 @@ Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its 
 head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
 Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
 implementation selection after Phase 1 acceptance.
+
+Native-media planning selection: the user wants accurate character drag/resize,
+pre-rendered playback and dialogue-time idles, with only Ren'Py-supported formats
+accepted at this stage. 3C now owns those explicit outcomes, native container/codec
+qualification, supplied masks/frames, playback/idle lifecycle and runtime geometry
+proof. GIF import/conversion, transcoding and mask generation are deferred. PRODUCT,
+UI, DATA_MODEL, ROADMAP and the two-lane allocation agree. The initial candidates are
+a bounded native subset, not every upstream format; published docs describe 8.5.4,
+while pinned 8.5.3 qualification remains future work. No new implementation, provider
+request, media import/decoding, app/SDK/native run, agent, build or CI was performed.
+Continue on the existing planning branch; next remains UX/subset review and bounded
+implementation selection after Phase 1 acceptance. No merge or new planning PR.
+
+Native-media planning verification: repository validation passed for 329 files;
+whitespace and eight-document scope review passed. Checked native-only container/codec
+qualification, no conversion/GIF pipeline, shared appearance/asset ownership, static
+drag/resize without keyframes, idle lifecycle and the retained Run From Here timing
+boundary. No media/SDK/app/native tests were run; candidate profiles remain unqualified.
+Publish on `origin/codex/phase-2-3-planning` and verify the remote head. No new PR,
+merge, build/CI allowance or implementation is selected; resolve this checkpoint from Git.

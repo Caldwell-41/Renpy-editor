@@ -226,6 +226,18 @@ Phase 1 does not create disposable special cases for basic VN staging:
 
 The UI subset may be narrow; the stored semantic model must remain extensible.
 
+Planned 3C extension: static placement stores source-backed position/anchor/scale,
+independent of editor viewport zoom. Animated Appearances reuse stable Asset IDs for
+qualified native video or explicit ordered image-frame/duration references, with typed
+loop/end behavior and supplied-mask dependencies. Logical dimensions exclude any
+side-mask portion. Container/codec/timing metadata must be verified and versioned; the
+existing Phase 1 allowlist is not silently expanded. Preserve accepted media bytes;
+there is no conversion or extracted-frame cache as a new source of truth. Dependencies
+share existing import/history/recovery and source mapping. The
+[3C media contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+owns format qualification and acceptance; this describes a future schema, not current
+implemented metadata or browser decoder support.
+
 ## Transaction model
 
 Every manual, visual, source, and later LLM edit becomes a transaction:

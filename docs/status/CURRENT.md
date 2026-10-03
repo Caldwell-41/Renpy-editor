@@ -174,3 +174,15 @@ reviewable. This docs-only selection starts no agents, implementation worktrees,
 provider requests, builds, SDK/native runs or CI; no merge or new planning PR.
 Continue on `codex/phase-2-3-planning`. Next: review subsets/UX and, after Phase 1
 acceptance, select bounded source/provider tasks against the current accepted baseline.
+
+Native-media planning selection: the user wants accurate character drag/resize,
+pre-rendered playback and dialogue-time idles, with only Ren'Py-supported formats
+accepted at this stage. 3C now owns those explicit outcomes, native container/codec
+qualification, supplied masks/frames, playback/idle lifecycle and runtime geometry
+proof. GIF import/conversion, transcoding and mask generation are deferred. PRODUCT,
+UI, DATA_MODEL, ROADMAP and the two-lane allocation agree. The initial candidates are
+a bounded native subset, not every upstream format; published docs describe 8.5.4,
+while pinned 8.5.3 qualification remains future work. No new implementation, provider
+request, media import/decoding, app/SDK/native run, agent, build or CI was performed.
+Continue on the existing planning branch; next remains UX/subset review and bounded
+implementation selection after Phase 1 acceptance. No merge or new planning PR.
