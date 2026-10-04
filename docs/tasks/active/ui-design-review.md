@@ -3095,3 +3095,12 @@ SDK/transaction/backend evidence retained under its exact identities, not called
 new full-candidate matrix. Exact final remote qualification still required after Mac
 acceptance. Counters: **13 production builds, 60 native/boundary starts**, separately
 5 SDK menu/launcher starts. Initial final production dispatch remains **0/1**.
+
+**Local-only publication boundary:** automatic approval review rejected the combined
+checkpoint/push command before execution, citing publication to an unverified remote
+before the user-selected Mac-review gate. Saved the checkpoint locally instead;
+no push/workflow request sent, no workaround or duplicate dispatch. Remote remains
+last verified `273b8e7`; source `28e44b0`/`8104ed7` and later evidence are local only.
+Normal retained P1 English Run now reports Running/no structured diagnostic. Next
+collect user menu/Start/first-line feedback, then remaining five-step review; publish
+only after the selected Mac gate passes. Original-profile restoration still pending.

@@ -58,6 +58,12 @@ review passes, publish exact candidate, required Repository quality and producti
 subsequently Windows transfer. No conflict resolution/rebase/merge, 1G/1H closure
 or next feature phase. Counters: **13 production builds, 60 native/boundary starts**,
 separately **5 SDK menu/launcher starts**. Original-profile restoration remains pending.
+**Publication:** checkpoints after remote `273b8e7` are LOCAL ONLY. Automatic
+approval review rejected the combined commit/push request before execution because
+publication preceded the selected Mac-review gate. A local-only checkpoint was
+saved instead; do not retry the push until that gate passes. No remote workflow
+request was sent. Normal P1 game now reports Running with no structured diagnostic.
+
 Fresh refs last checked: main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
 PR GraphQL base `924619d` differs from Git main. Preserve planning worktree.
 

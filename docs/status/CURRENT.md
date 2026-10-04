@@ -32,6 +32,10 @@ English normal-wizard project created successfully with genuinely downloaded SDK
 Human SDK/create progress, keyboard/Finder/scaling/runtime/reopen observations remain
 OPEN. Restore original profile after review via guarded helper with app/game quit.
 
+Latest source/evidence after published `273b8e7` are LOCAL ONLY. Automatic approval
+review refused pre-Mac-review publication; retain local checkpoints and publish at
+the selected gate. Normal P1 English game reports Running without SDK diagnostic.
+
 No CI operation pending; production dispatch **0/1**, only after Mac review passes.
 No local runner pending; P1 normal app open for human review. Counters: 13 production
 builds, 60 native/boundary starts and separately 5 SDK menu/launcher starts.
