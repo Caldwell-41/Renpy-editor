@@ -1,6 +1,59 @@
 # Current outcome handover
 
-## Selected next-agent handover — 2026-10-04
+## Final Mac completion in progress — 2026-10-04
+
+**Machine:** local macOS 26.6.2 (25G83), ARM64; Windows-PC review remains deferred.
+**Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.
+**Corrected source/build input:** `580740f85c03118b37846a2413e849a4187555bb`.
+**State:** `in_progress`; corrected installer verified, local native cases running;
+Mac physical/visual acceptance and final remote qualification remain pending.
+The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
+owns checks, retained failures, prepared five-step Mac review and continuation.
+
+CONFIG-01 is implemented: dimensions/reduced ratio/caption, truthful empty/invalid
+Custom guidance with no preview, proportional 100×64 bounded portrait/landscape.
+Existing presets/validation and Story/Source spacing `f287a7e` are included.
+Frontend 85 passed/0 skipped, production web and Source/selection/UI browsers PASS;
+all five corrected driver browser cases PASS. Two collapsed-control omissions in
+shipped probe were fixed without relaxing rejecting assertions. Existing unchanged
+core/service evidence retained separately; browser proof is not native acceptance.
+
+One release build and retained seal/repack verification pass. Corrected local DMG:
+`.toolchains/review-builds/ui-refresh-580740f/Loomlight_0.1.0_580740f_aarch64.dmg`,
+5,751,732 bytes, SHA-256
+`9e6df6905f7f16d2d30ba58578e9d461d6fc8e1b5fc671d72c378d53e1abf0c1`.
+Sealed executable SHA-256
+`6114877e6f441b18d7af0186241c83506a44bba27b6ea03def5422b68710e7a9`.
+Mounted hash/execute mode/identity, ARM64, strict/deep ad-hoc seal, container integrity,
+Applications shortcut, checksum manifest and artifact privacy scan PASS.
+Not Developer ID/notarized. Original raw container and earlier packages retained.
+
+**Pending local operation:** retained six-case packaged real-SDK runner, exec session
+14077, summary/evidence under ignored `.toolchains/reports/final-1g-mac/`.
+Compile and lint PASS with cleanup. Route-a FAIL (307.637 s), `Timeout: source-save-click`
+while awaiting the earlier-launch revision observation; retain failure and assess on
+unlocked host. Remaining terminal evidence is not yet audited.
+The older normal app was quit through its guarded flow. CUA now reports the Mac
+locked; user asked to unlock it. Do not infer native/user acceptance or start a
+second instance while this runner owns the app. Prepared synthetic review files and
+profile-isolation/restore helper have not changed the user's application profile.
+
+No workflow dispatched; initial final production request **0/1**. Once local native
+checks finish, verify the actual installer copy and guide MAC-01 through MAC-05 in
+manageable steps. Preserve the existing app profile/SDKs for uncached download review;
+record user physical/visual observations separately. Only after passing Mac review,
+publish/qualify the exact candidate with required Repository quality and production
+`upload_packages=true`, then manual same-chat wait/audit and Windows transfer.
+No conflict resolution, rebase/merge, milestone closure or next feature phase.
+Counters: **11 production builds**, **48 native/boundary starts** (44 incoming +
+compile/lint/route-a/route-b); two remaining local cases queued. Separately **4 SDK
+menu starts** unchanged. Audit pending logs before updating totals.
+Fresh entry refs remain main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
+GraphQL PR base `924619d` differs from Git main. Preserve both planning worktrees.
+Source and this pause record are selected for publication on the existing branch;
+verify remote HEAD after push. Installers/logs stay ignored.
+
+## Earlier selected next-agent handover — 2026-10-04
 
 **Machine:** local macOS ARM64; genuine Windows verification requires a Windows PC.
 **Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.

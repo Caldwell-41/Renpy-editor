@@ -2863,7 +2863,7 @@ counters remain 10 packages, 44 native/boundary starts and separately 4 SDK menu
 sequence above in this same Mac chat. Entry local/remote feature `a15e923`, clean;
 Git main `4d7ba03`, remote planning `267ec2a`, separate local worktree `2c5a164`
 preserved. PR #17 remains OPEN/draft/CONFLICTING; GraphQL base `924619d` still
- differs from Git main. No conflict resolution/integration or Windows execution.
+differs from Git main. No conflict resolution/integration or Windows execution.
 
 CONFIG-01 now shows dimensions/reduced ratio and the exact accepted caption. Preview
 and Continue share the unchanged even-dimension limits; empty/invalid Custom input
@@ -2895,3 +2895,66 @@ verify final mounted payload/hash/signature, prepare disposable review files and
 manageable Mac review steps. Initial final remote production dispatch remains **0/1**;
 only after Mac review passes. Incoming cumulative counters: 10 production builds,
 44 native/boundary starts, separately 4 SDK menu starts. Windows stays deferred.
+
+
+**Prepared Mac review sequence (human rows remain OPEN):** use corrected local
+candidate `580740f`, macOS ARM64, official SDK 8.5.3 and synthetic content only.
+The ignored `.toolchains/final-1g-mac-review/` contains generated background/two
+appearance PNGs, PCM WAV, unsupported text, hashes and an empty projects directory.
+A guarded `profile-session.py` is prepared but **not executed**: with Loomlight quit,
+it can preserve the whole original application profile intact, activate an empty
+review profile for a genuine uncached SDK download, then retain the review profile
+and restore the original. No deletion, cache purge or private-project mutation.
+Application Support writes still need the host's sandbox approval when executed.
+
+| Session step | User physical/visual observation | Agent responsibility / current result |
+| --- | --- | --- |
+| MAC-01 — installer, welcome and wizard | Confirm installed copy, both palettes, full-height steps, real download bytes/Verify/Install and stable creation stages. On picker test presets, Custom 1600×1000 (8:5), 1080×1920 (9:16), empty/odd/out-of-range rejection. | Verify installer/payload, prepare clean preserved profile, record actual SDK/network/creation observation; human OPEN. |
+| MAC-02 — Story/Source and physical input | Expanded icon/label gap above/below 1100px, independent navigation/tree/focus/restore, Writing focus and divider reset. Type/composition in dialogue and Source, native Save/commit/undo/redo, pending input across navigation; Beat pointer drag/cancel alongside keyboard moves. | Automated renderer checks PASS; prepare disposable authoring content, record keyboard/IME availability, scaling and actual results separately; human OPEN. |
+| MAC-03 — Branches B | Review reciprocal/long/duplicate/self/same-layer/missing routes, Unicode/long captions, arrow destinations, labels, Fit/zoom/pan, details dismissal and mapped destination edit with pending input. | Prepare saved synthetic routes after project creation; ordinary graph/service proofs retained, native/human OPEN. |
+| MAC-04 — catalogue/import | Image/empty Character entries and Grid/List; appearance retention/default/alias reuse/replacement/retry. Variable bool/int/string columns and discard/reopen. Browse and Finder multi-file image/audio drop, preview, category/metadata, Add/remove/Cancel, unsupported-row failure, once-only import. Use real keyboard/IME for naming/display/text. | Synthetic files ready; agent owns ordinary service/rejecting/no-write cases, user owns Finder/physical/visual observations; OPEN. |
+| MAC-05 — final runtime and reopen | Run both authored routes, save a script while playing, earlier-launch status, Stop/rerun latest save; one known SDK diagnostic → current Source; resize/scaling/shortcuts, close/reopen retained work and usability. | Retained packaged real-SDK cases executing on this candidate; prepare concise reversible diagnostic and route fixture after creation. Physical/visual OPEN. |
+
+Present one manageable step at a time in this same chat; do not assign routine
+service/race tests to the user. Record Pass/Fail/Unavailable per actual observation,
+platform/version/display scale/palette and package identity. Remote production
+qualification remains gated on passing Mac review, initial dispatch **0/1**.
+
+
+**Verified installer / native wait checkpoint:** built input/app source
+`580740f85c03118b37846a2413e849a4187555bb`, one release compilation, retained local
+ad-hoc sealing/repack procedure. Final DMG
+`.toolchains/review-builds/ui-refresh-580740f/Loomlight_0.1.0_580740f_aarch64.dmg`,
+5,751,732 bytes, SHA-256
+`9e6df6905f7f16d2d30ba58578e9d461d6fc8e1b5fc671d72c378d53e1abf0c1`.
+Sealed executable `6114877e6f441b18d7af0186241c83506a44bba27b6ea03def5422b68710e7a9`;
+raw container `6723a958ebdc3bf176cd381a9d880b8904e9bf54959b35d58da13e4b638a7bb4`
+retained separately. Final integrity/mounted signature/hash/execute mode/identifier/
+version/ARM64/Applications shortcut and two checksum entries PASS; privacy scan 7 files
+PASS. Not Developer ID/notarized. Original app installation/profile and prior installers
+preserved. Exact 132 app/workflow input hashes recorded at source `580740f`; all match.
+Platform macOS 26.6.2 (25G83), arm64; official pinned SDK archive 8.5.3.
+
+One existing six-case local packaged runner launched against the sealed retained app,
+using independent disposable profiles and real IPC/service/SDK. Compile PASS 304.392 s
+(including 283.884 s diagnostic navigation), lint PASS 27.763 s; cleanup true for both.
+Route-a FAIL 307.637 s: `Timeout: source-save-click`, awaiting the earlier-launch
+observation after saving during play. Preserved JSON/log, no acceptance waiver.
+CUA showed native Stop-before-close and saved Source states during observation; an
+agent window Raise was used, not a physical-user result. Subsequent CUA reports the
+Mac locked and automatic unlock unavailable. **Classification provisional environment
+limitation/missing unlocked-host evidence; product/harness cause remains unresolved.**
+No production change or automatic identical retry is selected from that timeout alone.
+User asked to unlock Mac; further native UI-dependent work waits for that capability.
+
+Pending bounded runner: exec session 14077, ignored `final-1g-mac/native-summary.log`
+and individual case reports. It continues the originally selected cases within its
+existing 420-second per-case watchdog; do not start a second writer/app/probe. On
+same-chat resume, audit all terminal reports and exact process/input state first.
+Do not rerun compile/lint success unchanged. Assess failed/missing affected cases on
+an unlocked host and justify any necessary local correction or rerun before execution.
+Then verify native picker and prepare physical review one step at a time. Profile
+isolation helper remains unexecuted. No remote dispatch; production allowance **0/1**.
+Counters now 11 production builds; incoming 44 native/boundary starts plus currently
+started local cases (see pending logs); separate 4 SDK menu starts unchanged. Final
+Mac acceptance, remote qualification, Windows transfer and integration remain open.

@@ -7,36 +7,37 @@
 
 ## Live continuation
 
-**Selected sequence: next Mac chat → remote qualification → Windows-PC agent → separate integration chat.**
-Incoming checkpoint `9456972`; latest app source `f287a7e` fixes Story/Source icon
-spacing (85 frontend tests, web build, full browser and repository validation pass).
-The [selected completion sequence](../tasks/active/ui-design-review.md#selected-1g-completion-sequence--2026-10-04)
-owns scope, candidate identity, dispatch/correction controls and future boundaries.
+**Final Mac completion in progress; physical/visual acceptance remains open.**
+Corrected source/build input `580740f85c03118b37846a2413e849a4187555bb` completes
+CONFIG-01 and includes Story/Source spacing `f287a7e`. The
+[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
+contains focused checks, driver failures/corrections, installer and planned Mac review.
 
-Next Mac chat is authorized to complete CONFIG-01 ratio/caption/invalid Custom/
-bounded portrait preview, run focused checks, build/verify a corrected ARM64 installer,
-and guide final Mac review. After that passes, publish and run existing required
-remote quality/final production qualification with retained packages; fix failures
-and verify changed inputs using the recorded bounded correction policy. Record the
-exact tested SHA and run/attempt before manual same-chat waiting. No workflow has
-been dispatched by this planning update.
+| Capability | Implementation / automated evidence | Native / human acceptance |
+| --- | --- | --- |
+| Resolution picker and sidebar spacing | 85 frontend tests; web/Source/selection/full UI browser PASS; bounded proportional valid previews and truthful invalid Custom | Physical/visual review OPEN |
+| Runtime diagnostic and Advanced driver | Both collapsed controls revealed via Summary; all five rendered driver cases PASS | Local compile/lint PASS; route-a timeout retained, Mac locked; other reports pending |
+| Corrected ARM64 installer | One build at `580740f`; mounted payload/signature/identity/integrity/checksums/privacy PASS | Local packaged verification in progress; final Mac review OPEN |
+| Final candidate qualification | No production dispatch (0/1) | After Mac review; Windows-PC 14-row review later; integration separate |
 
-Then transfer the exact passing candidate to a different agent on Windows x64 for
-native/service/input checks and the 14-row checklist. Windows remains deferred now.
-Any corrections require affected Mac rechecks. A final separately selected integration
-chat resolves PR #17, verifies combined inputs and merges reviewed work; none of that
-is authorized for the next Mac chat. Final 1G/1H acceptance is not yet complete.
+Final ignored DMG:
+`.toolchains/review-builds/ui-refresh-580740f/Loomlight_0.1.0_580740f_aarch64.dmg`,
+SHA-256 `9e6df6905f7f16d2d30ba58578e9d461d6fc8e1b5fc671d72c378d53e1abf0c1`.
+Older `b6cc06b` package is superseded for review. Synthetic media and projects directory
+are prepared; guarded original-profile preservation/restore helper is not executed.
 
-Existing installer `b6cc06b` in `.toolchains/review-builds/ui-refresh-b6cc06b/` remains
-available but predates source `f287a7e`; it is historical review evidence, not the
-new final candidate. SHA-256 and payload evidence remain in the
-[delivery record](../tasks/active/ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03).
+Next: unlock the Mac (CUA reported it locked), finish/audit the pending six-case local
+packaged runner recorded in HANDOVER, then guide five manageable Mac review groups.
+Record physical/IME/Finder/live SDK/create/runtime/scaling/reopen observations separately.
+After Mac passes, publish the exact candidate and run required remote quality/production
+qualification with retained packages, manual same-chat wait, then transfer to Windows.
+Do not resolve PR #17, rebase/merge/close 1G/1H or start a feature phase.
 
-Fresh Git/REST main remains `4d7ba03`; GraphQL PR base snapshot reports `924619d`
-(discrepancy recorded in the sequence ledger). Preserve remote planning `267ec2a`
-and separate local worktree `2c5a164`. PR #17 OPEN/draft/CONFLICTING. No operation
-pending. Counters unchanged: 10 production packages, 44 native/boundary starts,
-separately 4 SDK menu starts. No integration or new feature phase executed.
+No CI operation pending. Counters: 11 production builds, 48 native/boundary starts (44 incoming + four
+confirmed local starts), two local cases queued; separately 4 SDK menu starts.
+Entry feature `a15e923`, main `4d7ba03`, remote planning `267ec2a`, separate local
+worktree `2c5a164`, PR OPEN/draft/CONFLICTING preserved. Earlier records below are
+historical and do not override this live continuation.
 
 **Previous Branches correction:**
 Option B source `88add80` implements heavier rounded routes, distinct channels,
