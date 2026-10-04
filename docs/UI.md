@@ -126,6 +126,146 @@ the existing even-dimension limits. Native/visual acceptance remains in the task
 Qualification and remaining native/human review are recorded in CURRENT/HANDOVER;
 these corrections have not yet been delivered as a replacement installer.
 
+## Accepted UI/UX guidelines for implementation agents
+
+The user accepted these cross-workspace guidelines and the plain-language/validation
+refinements on 2026-10-03. They extend Quiet Studio and the latest written interaction
+decisions; they do not select an application implementation or reopen Phase 1 acceptance.
+Read this section before designing Phase 2/3 controls. Use accepted decisions and
+corrections over illustrative generated details or older layout descriptions below.
+
+1. **Preserve the visual identity.** Use paper/teal and charcoal/copper, system fonts,
+   restrained borders and modest corners. Reuse shared semantic tokens and controls.
+   Story content, selected Beats and game artwork take priority over shell decoration.
+2. **Keep workspaces familiar.** Keep navigation on the left, authoring in the centre,
+   optional properties on the right and diagnostics below where appropriate. Preserve
+   selection, scroll position and remembered panel layout across tools. Expand advanced
+   details on demand; do not duplicate global Save/Run/status controls in every panel.
+3. **Make selection explicit.** Highlight the selected item and identify its name/type
+   in the inspector. Synchronize canvas/hierarchy selection for the same object; keep
+   keyboard focus distinct from selection. Previewing an appearance does not change
+   its default. An inspector must never silently edit a previously selected item.
+4. **Make commitment clear.** Use inline editing for frequent writing and bounded dialogs
+   for catalogue creation/editing. Distinguish draft, applied and saved states using the
+   existing editor contracts. Navigation and failed submissions preserve unfinished work.
+   Label fields, group related controls, show units and place errors beside their fields.
+5. **One meaningful action, one coherent Undo.** A character drag/resize, Beat move or
+   accepted proposal uses one transaction/history path. Name undo actions where useful
+   and reveal or identify the affected item. Escape cancels an unfinished gesture;
+   continuous feedback is not a separate source commit per pointer movement.
+6. **Provide alternatives to dragging.** Offer numeric position/scale/time fields,
+   clickable move commands and keyboard controls. Make grips and handles easy to hit.
+   The operation must work both with keyboard input and with clicks without dragging.
+7. **Keep Assist understandable.** Preserve preparation, explicit generation, review
+   and application. Show target, references, effective prompt and limits before sending;
+   show changes before acceptance. Generated references never approve themselves.
+   Applying a proposal is undoable and is not a validation pass. Use the existing
+   operation-group/editability rules rather than inventing an unrestricted patch editor.
+8. **Report factual state without disturbing authoring.** Distinguish saved work,
+   unsaved drafts, generation, validation failure and stale previews. Keep status regions
+   stable. Percentages require measured progress. Label partial embedded previews and
+   provide deliberate Ren'Py playback; a browser rendering is not native runtime proof.
+9. **Interrupt in proportion to loss.** Keep routine undoable editing quick. Confirm
+   actual draft loss or irreversible consequences with specific action labels. Dialogs
+   have a visible Close/Cancel route, guarded Escape and focus return. Respect in-flight
+   write ownership; cancellation must not imply a started write has been rolled back.
+10. **Adapt without shrinking everything.** Collapse secondary panels before squeezing
+    the main editor. Stack forms/comparisons at compact widths; keep actions reachable.
+    Maintain visible focus, readable text, both themes and user text/interface sizing.
+    Pair colour with text/shape, use keyboard-accessible semantics and respect reduced
+    motion. Keep horizontal scrolling local to content that needs it, such as Source.
+11. **Use straightforward language.** Write short, concrete labels and messages in
+    familiar authoring terms. Reduce implementation jargon; expose necessary Ren'Py
+    terms with plain explanations and optional deeper help. Keep terminology consistent.
+    Do not hide information needed to make a decision in a tooltip.
+12. **Validate after field completion and again on submission.** Check applicable
+    formats, names, required values, types and ranges when a user finishes a field;
+    recheck all submitted values before writing or sending. Explain the correction,
+    preserve input and avoid interrupting typing. The detailed contract below applies.
+
+### Interface language and help
+
+Use action labels that describe the result: **Move to scene**, **Apply changes** or
+**Discard changes**, rather than internal vocabulary or ambiguous Yes/No buttons.
+Explain failures as what went wrong and what the author can do next. For example,
+“Enter a whole number from 1 to 60” is preferable to “Invalid scalar”; “This preview
+cannot show this animation. Preview in Ren'Py” is clearer than a compositor error.
+
+Preserve precision where it matters. Technical-name fields still distinguish the name
+used in Ren'Py from a display name; dimensions show pixels, durations show seconds and
+LLM limits show tokens. A label such as **Maximum response length (tokens)** needs a
+short explanation of tokens. Keep **System prompt** with an explanation of its role.
+Do not relabel technical concepts so broadly that authors mistake scale for size,
+preview zoom for game resolution or applying changes for saving/validation.
+
+Tooltips or a labelled help affordance can explain anchors, ATL, Ren'Py naming
+conventions and other optional technical detail. Make help available on keyboard focus
+as well as hover, with a discoverable access route for icon-only controls. Longer or
+interactive explanations belong in expandable help. Required syntax, units, constraints
+and error recovery remain visible beside the field; placeholders are not labels.
+Keep credentials and raw internal exception dumps out of routine copy. Show relevant
+project/file paths where they help identify the target; keep unrelated machine detail
+in bounded diagnostics rather than requiring it to understand an ordinary error.
+
+### Input validation timing and recovery
+
+- **Before interaction:** show persistent labels, required/optional status, units and
+  useful examples/rules. Do not mark untouched empty fields erroneous on opening.
+- **While typing:** allow incomplete values. Do not show new format errors on every
+  keystroke, steal focus, rewrite user text or validate during IME composition. If an
+  error is already shown, update/clear it as the correction becomes valid. Cheap
+  nonintrusive feedback may update, but inactivity alone does not prove a complete
+  identifier, number or multiline statement.
+- **On field completion:** validate text/numeric fields on blur and on an explicit
+  field commit where the editor has one. Validate discrete selections/file choices
+  when selected. Enter only commits where it already does; ordinary Enter in multiline
+  text continues to insert a newline. Run normal name/format checks at these boundaries.
+- **On submission:** revalidate the whole form, including untouched fields and dependent
+  values, regardless of prior results. Invalid input performs no write/provider send;
+  preserve every field, identify the errors and focus the first invalid field. A summary
+  can link multiple errors. Do not rely only on a disabled button to explain invalidity.
+- **Error presentation:** use text beside the affected field with accessible association
+  and invalid state. Say the expected format/range and show a useful example. Announce
+  meaningful error transitions without repeatedly announcing each typed character.
+- **Shared rules:** use the existing authoritative validators and consistent UI checks,
+  not divergent per-workspace definitions. Submit still goes through core validation,
+  source/revision checks and the existing transaction contract. Client checks do not
+  establish current source ownership, file availability or runtime compatibility.
+- **Asynchronous checks:** bind any necessary result to the current value/session and
+  ignore stale replies. Show checking/unavailable separately from invalid. Routine
+  field validation never initiates LLM sends, model loading or project execution;
+  existing explicit connection/native test controls retain their own boundaries.
+- **Preserve meaning:** apply only established, documented normalization. Do not silently
+  truncate, change prose, repair source syntax or coerce an invalid number to a fallback.
+  Name checks apply to technical identifiers, not dialogue or lore prose. Source edits
+  retain the lossless-source and unsupported-region contract.
+
+### Shared ownership and proportionate review
+
+The owner maintains shared tokens and interaction conventions for buttons, fields,
+selection, inspectors, dialogs, draft handling, validation and status. Both lanes reuse
+those patterns; extend existing helpers when needed rather than creating independent
+forms/validation systems. Inspect the accepted baseline at implementation entry.
+
+For the changed surface, review representative content in both themes and wide/compact
+layouts; keyboard/focus, text scaling, selection retention and relevant empty, busy,
+error/stale states. Exercise one action through undo/cancel and failed submission.
+For field changes, check untouched/incomplete input, blur, invalid submission,
+correction/resubmission and applicable IME/dependent/asynchronous cases. Verify no
+mutation occurs on refusal and values survive. Canvas changes need actual Ren'Py
+comparison for their declared behavior. Use existing task-ledger and changed-scope
+gates; these guidelines add no blanket package matrix, certification or approval flow.
+
+Research supports the interaction recommendations; the specific Loomlight controls
+and commitments above are accepted product decisions. Useful primary references:
+[Microsoft forms](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/forms),
+[WAI tree focus/selection](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/),
+[Apple undo](https://developer.apple.com/design/human-interface-guidelines/undo-and-redo),
+[Apple alerts](https://developer.apple.com/design/human-interface-guidelines/alerts),
+[WCAG non-drag alternatives](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html),
+[HAX proposal correction](https://www.microsoft.com/en-us/haxtoolkit/guideline/support-efficient-correction/)
+and [accessible status](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
+
 ## Design intent
 
 Project Loomlight is a restrained, professional writing and game-authoring tool.
@@ -136,7 +276,8 @@ screen-reader semantics where the chosen desktop/webview stack permits them.
 
 Phase 1 makes Scene, Source, and Branches the functional centre workspaces. Characters,
 Assets, Variables, project setup and Diagnostics/Runtime are supporting surfaces.
-Git status/diff/checkpoint is a deferred optional supporting surface, outside Phase 1.
+Git status/diff/checkpoint is a deferred optional supporting surface, outside Phases
+1–3 and initial-release acceptance; GitHub/remotes remain deferred too.
 UI Designer and Timeline are later major workspaces and must not appear as functional
 Phase 1 features; they may be omitted or clearly labelled as future work.
 
@@ -635,8 +776,8 @@ Phase 1 provides normal `Run Game` from the project's standard entry point. Corr
 `Run From Here` is deferred until state simulation can establish effective prior state.
 A local Git repository may be initialised during project creation (checked by default),
 but new status/diff/checkpoint controls belong to the deferred
-[optional Git milestone](tasks/active/optional-local-git.md), not Phase 1. Do not add a
-required Git panel or checkpoint step to the Phase 1 authoring flow.
+[optional Git milestone](tasks/active/optional-local-git.md), not Phases 1–3. Do not add
+a required Git panel or checkpoint step to initial-release authoring or acceptance.
 
 Validate and Run use one input/revision preparation path: retain Source drafts and
 uncommitted Scene forms; explicitly save/commit through existing commands, use the
@@ -659,6 +800,25 @@ external revision boundaries rather than overwriting newer work.
 
 ## Later workspaces
 
+### Proposed Phase 2–3 interaction direction — 2026-10-02
+
+The [Phase 2 interaction journey](tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+places reviewed assistance next to writing, extends Characters with cards, introduces
+Lorebook, and exposes prompt/context/response controls. Its
+[four generated LLM screen concepts](design/phase-2-llm/README.md) illustrate preparation,
+semantic proposal review, reference editing and AI settings, with explicit schematic
+corrections. Approval and inclusion remain separate, context budget includes output
+and margin, and unaccepted proposals are transient. The
+[Phase 3 Story interaction design](tasks/active/phase-3-initial-wysiwyg-release.md#story-interaction-design)
+keeps the Beat list and adds expandable, labelled conditional bodies, explicit insertion
+parents and continuations, returning Call rows and an honest manual branch preview.
+Its [generated concept](design/phase-3-story/README.md) uses a saved actual Story UI
+screenshot. The same brief outlines Screens, Timeline and state-panel journeys.
+These are proposed later-phase designs, not accepted replacements for the existing
+Phase 1 shell or proof of implemented behavior. The task briefs own interaction details;
+the accepted theme, shared controls and pending Phase 1 corrections remain authoritative.
+
+
 ### Screen/UI designer
 
 | Component hierarchy | Constraint canvas | Properties/source |
@@ -679,6 +839,26 @@ The Timeline authors VN staging, not arbitrary video compositing. Phase 1's appe
 placement, transition, audio, and Beat abstractions are intentionally designed to feed
 this workspace later.
 
+Selected 3C interaction: click a character in Story Preview, drag it and resize via
+aspect-preserving handles, or use position/anchor/scale fields and keyboard controls.
+Static staging does not require keyframes or Timeline setup. The saved transform uses
+game virtual coordinates, with editor zoom kept separate. The Appearance picker adds
+qualified native animation choices and explicit Play once/Loop/end controls. An idle
+continues while dialogue waits and stops on hide/replacement; base placement edits
+preserve its animation binding. Preview play/stop is deliberate, with native Preview
+in Ren'Py when the WebView cannot faithfully decode that profile. Import refusal lists
+supported exports; no GIF/video conversion action is offered. The
+[3C contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+owns exact format, source/persistence and runtime proof requirements.
+
+The [agreed implementation sequence](tasks/active/phase-3-initial-wysiwyg-release.md#agreed-implementation-order-and-source-bindings)
+delivers static controls, PNG/ATL idles, native looping video, prepared transparency
+and play-once/end choices in order. Frame/video content shares the same placement
+controls. Play once exposes a declared end state: disappear, hold last frame or show
+a supplied still. An idle is shown once across dialogue; speak-only/text-reveal triggers
+remain later scope. Embedded playback is profile-dependent, with an explicit real
+Ren'Py preview when unavailable; it does not claim native parity from a browser alone.
+
 ### State simulation and run from here
 
 Reachable, saved, synthetic, and contradictory states will use distinct labels/icons.
@@ -692,6 +872,15 @@ LLM remains an action surface rather than a dominant permanent chat. Before send
 provider, endpoint class, model, local/remote status, selected context/exclusions,
 estimated size, and private/adult remote-send warning. Output remains untrusted
 structured data reviewed through semantic/file diffs.
+
+Planned Phase 2 reference editors expose Character cards and a searchable/filterable
+lorebook, manual editing and Generate/Update actions, approval/stale state and explicit
+context inclusion. Settings exposes per-action system-prompt editing and Restore
+baseline, with customized/baseline version indicators. Context budget and maximum
+response tokens are editable per provider/model with visible request overrides.
+Before Send, show the effective prompt, selected card/lore entries and token breakdown;
+over-budget input requires a visible correction. Prompt reset is undoable and does
+not reset references, credentials or size settings. These controls are not Phase 1 UI.
 
 ## Resolution and accessibility checks
 

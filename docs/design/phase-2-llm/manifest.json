@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-02",
+  "status": "proposed, not accepted or implemented",
+  "mode": "built-in image_gen",
+  "useCase": "ui-mockup",
+  "generationCalls": 4,
+  "retries": 0,
+  "assets": [
+    {
+      "file": "prepare-rewrite-light-v1.png",
+      "sha256": "53b2356806c706f413f0b74419e1adc26802c9c6fe82e8b6c528e21ad1a8cc1f",
+      "dimensions": [
+        1513,
+        1039
+      ],
+      "prompt": "prepare-rewrite-light-v1.txt",
+      "generatedOriginal": "exec-1920318f-a48b-4c76-a5bf-6d17bc9a12cb.png"
+    },
+    {
+      "file": "review-rewrite-light-v1.png",
+      "sha256": "e632fe51cd8b435cdce2c84850d2e66fd3279b9e0f067846c9c4b1978775d7b6",
+      "dimensions": [
+        1513,
+        1039
+      ],
+      "prompt": "review-rewrite-light-v1.txt",
+      "generatedOriginal": "exec-bffeb4c7-605d-478d-be83-fc03704f0766.png"
+    },
+    {
+      "file": "references-light-v1.png",
+      "sha256": "d8420f7838a5c02558e47104646316e9dc1cd41184888482b6c56c14a0b08929",
+      "dimensions": [
+        1514,
+        1039
+      ],
+      "prompt": "references-light-v1.txt",
+      "generatedOriginal": "exec-d7078c43-a45c-4681-b9df-0be712ff3f0c.png"
+    },
+    {
+      "file": "ai-settings-light-v1.png",
+      "sha256": "bcff9085060077ee8f57fcf69599fb8be36b9f833217b9858f9fbebea708a1d3",
+      "dimensions": [
+        1513,
+        1039
+      ],
+      "prompt": "ai-settings-light-v1.txt",
+      "generatedOriginal": "exec-08893598-c126-43e2-86ca-644f368ca419.png"
+    }
+  ],
+  "references": [
+    {
+      "file": "story-light.png",
+      "kind": "saved actual Story UI screenshot, synthetic The Last Tram fixture",
+      "role": "actual shell and paper/teal palette",
+      "sha256": "acea17a8cf502f054645812a7dc85adefb2d1d8ebf663b993e740944723278d3"
+    },
+    {
+      "file": "../ui-refresh/settings-preferred-layout.png",
+      "kind": "accepted generated structural reference",
+      "role": "Settings structure only; purple superseded",
+      "sha256": "6908b2347872bf0fc54d942812d2d4b8665000b1673cbaaaaf9a8500a00c46e2"
+    },
+    {
+      "file": "../ui-refresh/characters-layout.png",
+      "kind": "accepted generated structural reference",
+      "role": "Characters structure only; purple superseded",
+      "sha256": "bb61d1688bf436577411a02c006169ace45a163f980e4d06cd01b0ccc5cc4812"
+    }
+  ],
+  "captureLimitation": "Host locked; saved actual screenshot used. No live capture of current uncommitted Phase 1 work."
+}

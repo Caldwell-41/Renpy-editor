@@ -32,6 +32,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | --- | --- |
 | Accepted UI designs, staged build plan, risks and build-approval boundary | [UI design review](tasks/active/ui-design-review.md) |
 | Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
+| Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |
+| Proposed LLM preparation/review/reference/settings screens, exact prompts and provenance | [Phase 2 LLM concepts](design/phase-2-llm/README.md) |
 | Outcome-sized goals, internal checkpoints, same-thread waiting and handovers | [WORKFLOW.md](WORKFLOW.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
@@ -46,10 +48,12 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
+| Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
+| Selected shared foundations, staged Phase 2/3 overlap and Sol High owner/two-lane assignments | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
-| Workspaces and interaction | [UI.md](UI.md) |
+| Workspaces and interaction | [UI.md](UI.md), including [agent UI/UX guidelines](UI.md#accepted-uiux-guidelines-for-implementation-agents) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |

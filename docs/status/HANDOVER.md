@@ -67,6 +67,29 @@ request was sent. Normal P1 game now reports Running with no structured diagnost
 Fresh refs last checked: main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
 PR GraphQL base `924619d` differs from Git main. Preserve planning worktree.
 
+## Local planning documentation merge — 2026-10-05
+
+User authorization: merge `codex/phase-2-3-planning` locally into
+`feature/phase-1g-branches-runtime`, preserve both UI sections and current Phase 1
+status, run documentation checks, commit, and do not push. Inputs are feature
+`e8af02ec4b580df9b15ebd72891508209bbf7919` and planning
+`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`. The single UI insertion conflict keeps
+the Phase 1 corrections first and the accepted agent guidelines next. Plans/assets
+are merged without application/test/workflow changes. Current Mac-review source,
+package/profile recovery, evidence, counters, remaining review and publication gate
+above are preserved. No main/PR integration, new acceptance or Phase 2/3 execution.
+
+The merge is local-only; the planning branch/worktree remain intact. Older planning
+publication instructions below are historical: this instruction selects **no push**,
+and no publication request is pending. Continue the live Phase 1 review above.
+The Phase 3 ledger records merge validation; resolve this merge checkpoint from Git.
+
+Merge checks: repository structure/text/privacy/local-link validation PASS for
+340 files; whitespace PASS. Exact preservation checks PASS for both complete UI
+sections and the pre-merge live Phase 1 CURRENT/HANDOVER content. The 24-file merge
+scope is documentation/design references only; app, tests, scripts, workflows and
+AGENTS are unchanged. No app/SDK/native/build/CI check was run for this docs-only merge.
+
 ## Earlier selected next-agent handover — 2026-10-04
 
 **Machine:** local macOS ARM64; genuine Windows verification requires a Windows PC.
@@ -944,3 +967,232 @@ Reason: Deliver usable builds and finish available review preparation as one out
 Read AGENTS.md, docs/status/HANDOVER.md and docs/tasks/active/phase-1g-review-delivery.md. Inspect fresh refs/ownership; preserve newer work. Retrieve the existing Windows/Mac packages from run 36383551820, attempt 1, verify their identity and provide local files, hashes and launch instructions. Do not rebuild for docs; follow the brief's single local Windows fallback only if its package is unavailable/unusable.
 Prepare disposable fixtures, perform the bounded Windows checks where access is verified, and provide one focused user checklist per OS. Missing native access must not withhold an available build. Review and publish the evidence and handover. Use internal checkpoints, not replacement goals. Pause for my review; resume the SAME goal/thread on my command through the client's actual control. Keep cumulative budgets and explicit approval boundaries. No automatic polling, retries, new matrix, conflict resolution, merge, 1H, optional Git or Phase 2.
 ```
+
+## Concurrent Phase 2–3 planning — 2026-10-02
+
+The user selected docs-only planning of the next two major phases while Phase 1G
+review continues, and chose Story logic before screen design for Phase 3. The isolated
+branch `codex/phase-2-3-planning` starts at local Phase 1G checkpoint `de2fdad` and
+has its own managed worktree; the original feature checkout remains in place.
+Remote feature head was `3c5ce24` at planning entry, so the fork also preserves the
+then-unpublished chapter/Writing-focus documentation commit. No feature ref is moved.
+
+[Phase 2](../tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+retains existing requirements with an early complete rewrite outcome and current
+workflow/testing policy. [Phase 3](../tasks/active/phase-3-initial-wysiwyg-release.md)
+is a reviewable draft with proposed subsets and open decisions. The planning request,
+Story-before-Screens priority and the Phase 2 reference/prompt/size requirements
+recorded below are selected; implementation remains
+`not_started`, dependent on accepted Phase 1 through 1H and later bounded selection.
+
+Next in this planning chat: review and refine the proposed subsets. Continue Phase 1G
+from the unchanged review sections above in its existing checkout. Planning uses any
+Codex host and documentation checks only; zero app builds, launches, provider calls or
+manual production dispatches are selected. Preserve the existing Phase 1 budgets.
+Publish planning to its own branch; do not merge it or retarget it into active Phase 1
+work automatically. At later integration, reconcile this short concurrent note with
+the then-current HANDOVER rather than replacing newer Phase 1 state with this snapshot.
+
+Planning evidence: repository validation passed across 315 files; whitespace and
+six-document scope review passed. Publication target: `origin/codex/phase-2-3-planning`;
+no planning PR or merge. Verify its head against the local planning commit before
+reporting publication. The primary worktree acquired active Phase 1 edits during this
+session; they remain exclusively with that workstream and were not copied or staged.
+
+### Phase 2 references and controls refinement — 2026-10-02
+
+The user selected Character cards and a lorebook, both manual and LLM-generatable,
+as generation references; editable/viewable system prompts with baseline reset; and
+context/response limits. The Phase 2 brief now puts manual reference editing before
+the first rewrite and LLM draft/update completion in 2C.3. Canonical product/data/UI
+and roadmap descriptions agree. Phase 2 and Phase 3 include plain-language end states.
+Provider expansion is a recommendation: tested extension scaffolding and optional
+unverified compatible profiles, with no new required provider or waived baseline gate.
+Official provider docs were read; no inference request occurred.
+
+Continuation: discuss provider priorities and remaining Phase 3 subsets on this same
+planning branch. Original Phase 1 work remains in its own checkout. Documentation
+validation and whitespace/scope review apply; publish only these documentation edits
+and verify the planning remote head. No app/native tests or production dispatch.
+
+Refinement evidence: repository validation passed for 315 files; whitespace and
+eight-document scope review passed. Publication target remains the existing planning
+branch, with no merge or additional-provider implementation selected.
+
+Planning correction — 2026-10-02: the user removed Ollama support; Phase 2 now
+requires Unsloth Studio and the generic-compatible provider path. Phase 3 scope is
+unsettled: explain the proposed capabilities plainly and clarify the intended outcome
+before further elaboration or implementation selection. Planning branch remains
+`codex/phase-2-3-planning`; ongoing Phase 1 work and its allowance are unchanged.
+
+Phase 3 planning continuation — 2026-10-02: user removed 3E; local Git and GitHub
+are deferred outside Phase 3/initial-release acceptance. PRODUCT, ROADMAP, UI and
+the optional Git brief now agree. The Phase 3 brief contains researched implementation
+steps for 3A–3D and 3F, inspected code seams, source-migration/runtime-preview design,
+proof checkpoints and references. Online Ren'Py docs report 8.5.4; the pinned 8.5.3
+behavior still needs qualification at implementation entry. Community project pages
+were inspected only; nothing downloaded, copied or executed.
+
+Next in this planning chat: review the proposed screen/Timeline inventories and
+Run From Here's initial Scene-entry/empty-call-stack boundary. No implementation,
+SDK upgrade, build or dispatch selected. Keep the existing planning worktree/branch;
+the active Phase 1 checkout and all existing budgets remain unchanged. Publication
+target is `origin/codex/phase-2-3-planning`; no merge is selected.
+
+Implementation-plan validation: repository structure/text/privacy/local-link checks
+passed for 315 files; whitespace and eight-document scope review passed. Self-review
+removed the remaining roadmap 3E row and checked that product/release acceptance no
+longer requires Git. No application, SDK or native checks were run for these docs.
+
+UI/UX planning refinement — 2026-10-02: the user requested interaction design and a
+generated image based on the current UI. The Phase 3 brief now includes the nested
+Story Beat journey, insertion/move/draft/preview contracts and a generated paper/teal
+concept, plus the Screens/Timeline/state journeys. Phase 2 now records its assistance,
+reference and settings journey. The [design reference](../design/phase-3-story/README.md)
+retains the prompt/provenance and visual limitations. Live capture was unavailable on
+the locked host, so generation used a saved actual synthetic-fixture Story screenshot.
+This is proposed design, not accepted or implemented UI. Continue reviewing these
+interactions and the remaining feature subsets on `codex/phase-2-3-planning`.
+No Phase 1 files, application code, build/SDK/native runs or CI dispatches were added.
+
+UX planning verification: repository structure/text/privacy/local-link validation
+passed for 319 files, whitespace/scope review passed, and the generated image was
+visually inspected. The written spec corrects the schematic Call return wording and
+limits the manual preview claim. Publication uses the existing planning branch; no
+merge or planning PR is selected. No application tests are needed for this docs/image
+change. The next action is user review of the proposed interactions and remaining
+Phase 3 subsets, not implementation. Resolve this checkpoint's SHA from Git.
+
+LLM screen planning — 2026-10-02: the user delegated equivalent Phase 2 UX planning
+and image generation to a GPT-6.1 Sol subagent. The
+[expanded Phase 2 design](../tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+and [four proposed concepts](../design/phase-2-llm/README.md) cover preparation, semantic
+review, cards/lorebook and AI settings, including cancellation/errors/draft safety and
+compact/accessibility contracts. Total-budget, approval/inclusion, explicit proposed
+reference saves and transient proposal boundaries are preserved. Assets use the saved
+actual synthetic-fixture screenshot; no live capture on the locked host. Exact prompts,
+hashes and schematic corrections are retained. No implementation or Phase 1 changes.
+The parent reviewed the four concepts and written interaction contracts; publication
+uses the existing planning branch;
+no pending CI, provider request, build or new PR. Next: user review of the proposed design after verified publication. Resolve the checkpoint SHA from Git.
+
+LLM UX verification: repository validation passed for 329 files, whitespace/scope review
+passed, and all four images were visually inspected by the parent. Explicitly reviewed
+reference approval may combine save and approve; no redundant mandatory two-click
+approval step was added. Publication target remains `origin/codex/phase-2-3-planning`.
+The subagent's initial worktree save approval was interrupted before any write; the
+parent completed the same prepared save with worktree authorization. No duplicate
+image generation occurred. Resolve the final checkpoint from Git; no new Goal or CI.
+
+Selected delivery approach: the user approved updating the docs after the rework
+assessment. Phase 2 section 19 now owns shared source/edit/reference/semantic/runtime
+foundations and staged overlap: early minimum 3A source work alongside provider
+feasibility, first complete AI rewrite, overlapping Phase 2/3A completion, then
+Screen/Timeline lanes and state/release integration. The team is one GPT-6.1 Sol High
+owner plus two GPT-6.1 Sol High implementation agents; the owner coordinates contracts,
+shared-file writers, integration and combined verification. Phase 2/3 acceptance and
+the Phase 2 operation allowlist remain; Phase 1 through 1H is still required before
+implementation. ROADMAP/Phase 3 entry/sequence agree; exact feature subsets remain
+reviewable. This docs-only selection starts no agents, implementation worktrees,
+provider requests, builds, SDK/native runs or CI; no merge or new planning PR.
+Continue on `codex/phase-2-3-planning`. Next: review subsets/UX and, after Phase 1
+acceptance, select bounded source/provider tasks against the current accepted baseline.
+
+Delivery-plan verification: repository structure/text/privacy/local-link validation
+passed for 329 files; whitespace and six-document scope review passed. Checked the
+Phase 2/3 entry gates, first-rewrite dependency, provider-qualification review boundary,
+separate milestone acceptance, operation allowlist and unchanged deferred Git scope.
+No application/native/provider checks were run for these documentation changes.
+Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its remote
+head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
+Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance.
+
+Native-media planning selection: the user wants accurate character drag/resize,
+pre-rendered playback and dialogue-time idles, with only Ren'Py-supported formats
+accepted at this stage. 3C now owns those explicit outcomes, native container/codec
+qualification, supplied masks/frames, playback/idle lifecycle and runtime geometry
+proof. GIF import/conversion, transcoding and mask generation are deferred. PRODUCT,
+UI, DATA_MODEL, ROADMAP and the two-lane allocation agree. The initial candidates are
+a bounded native subset, not every upstream format; published docs describe 8.5.4,
+while pinned 8.5.3 qualification remains future work. No new implementation, provider
+request, media import/decoding, app/SDK/native run, agent, build or CI was performed.
+Continue on the existing planning branch; next remains UX/subset review and bounded
+implementation selection after Phase 1 acceptance. No merge or new planning PR.
+
+Native-media planning verification: repository validation passed for 329 files;
+whitespace and eight-document scope review passed. Checked native-only container/codec
+qualification, no conversion/GIF pipeline, shared appearance/asset ownership, static
+drag/resize without keyframes, idle lifecycle and the retained Run From Here timing
+boundary. No media/SDK/app/native tests were run; candidate profiles remain unqualified.
+Publish on `origin/codex/phase-2-3-planning` and verify the remote head. No new PR,
+merge, build/CI allowance or implementation is selected; resolve this checkpoint from Git.
+
+Animation implementation sequence selected: after the researched explanation, the user
+agreed to static staging → PNG/ATL idles → native looping video → prepared transparent
+video → play-once/end states, followed by combined qualification. The Phase 3 brief
+owns concrete source bindings, existing asset/media seams, bounded video delivery,
+channel/audio behavior and profile-dependent embedded previews. Tagged official
+8.5.3 source and community creator references are linked; source reading is not native
+qualification. UI and the lane allocation agree. Native-only imports/no conversion,
+shared placement/history and existing entry/acceptance gates remain. No app/media/SDK
+execution, new agents, worktrees, builds, CI or implementation was started. Next: review
+remaining subsets/UX and select bounded implementation after Phase 1 acceptance on
+the current accepted baseline. Publish on the existing planning branch; no PR or merge.
+
+Animation-sequence planning verification: repository validation passed for 329 files;
+whitespace and five-document scope review passed. Reviewed static-first delivery,
+shared placement/history, explicit play-once end states, bounded media access and
+profile-dependent previews. Tagged-source/community research is not native target
+qualification; no app/media/SDK execution or implementation was performed. Publish
+this docs checkpoint on the existing origin planning branch and verify its exact head;
+no PR, merge, build or CI is selected. Next remains subset/UX review and bounded
+implementation selection after Phase 1 acceptance against the current accepted baseline.
+
+UI/UX agent guidance selected — 2026-10-03: the user accepted the researched twelve
+guidelines, including straightforward interface language and validation after field
+completion plus submission. UI.md owns the contract; INDEX and both phase briefs link
+to it, and the existing owner/two-lane plan shares controls/validators. Required help
+stays visible; optional Ren'Py detail uses accessible tooltips/help. Validation preserves
+incomplete/IME input, checks blur or explicit field commit, rechecks all submitted
+values and refuses without writing/sending. This is future implementation guidance,
+not a claim of current application compliance or new Phase 1 acceptance. Prior review
+inspected the installed app/source and used one user-requested research subagent;
+this update changes docs only. No new app, provider, SDK, build or CI execution.
+Continue on the existing planning branch; select bounded implementation after Phase 1
+acceptance against the accepted baseline. No new PR or merge.
+
+Guideline verification: repository validation passed for 329 files; whitespace and
+six-document scope/link review passed. Reviewed plain labels versus required technical
+precision, accessible help, typing/composition versus completion/submission boundaries,
+retained inputs and no-mutation refusal. No application checks or new execution allowance.
+Publish this coherent docs checkpoint on the existing origin planning branch and verify
+its exact head; resolve the checkpoint SHA from Git rather than a receipt-only commit.
+
+Publication blocked: guideline checkpoint `6330291a6284db2fafd9bd8fac17f92c93f4de77`
+is committed locally. Automatic approval review rejected the push to
+`origin/codex/phase-2-3-planning`, citing potential private project-content export
+without explicit authorization for that payload/destination. The remote remains at
+the previously verified `267ec2a`; no push acceptance is claimed. No workaround or
+retry was attempted. Request explicit user authorization to publish the six-document
+guideline update and this blocker record to the existing GitHub planning branch;
+after authorization, push once and verify the exact head. No PR, merge or implementation.
+
+Bounded delivery cadence selected — 2026-10-03: the user requests one deliverable per
+owner/team outcome, with implementation, focused checking, in-scope fixes, canonical
+docs/task/HANDOVER update and a prompt for the next milestone. Phase 2 section 20 owns
+the concrete cross-phase queue and prompt contract; Phase 3 links it. Section 19's
+parallel dependencies and existing milestone gates remain, with no whole-phase agent
+assignment or automatic next-target execution. GPT-6 official guidance was fetched;
+Astra behavior examples are starting points for the selected Sol team. No production
+implementation/agent/build/provider/SDK/CI execution was started. Existing push
+rejection remains unresolved: guideline commit `6330291` and subsequent documentation
+are local-only until explicit authorization for the existing GitHub planning branch.
+
+Deliverable-plan verification: repository validation passed for 329 files; whitespace
+and four-document scope/link review passed. Checked provider review/Phase 1 entry,
+first-rewrite dependency, separate phase acceptance, shared UI/source ownership and
+next-target selection. Split provider lifecycle, context preparation and each remaining
+AI action into separate deliverables. No native/build tests are required for this docs
+change. Keep publication local while the existing approval-review rejection is pending;
+no push retry, new PR, merge or implementation was attempted.

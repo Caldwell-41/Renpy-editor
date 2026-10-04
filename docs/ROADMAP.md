@@ -1,6 +1,6 @@
 # Phased roadmap
 
-**Planning clarification:** 2026-09-15. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](status/CURRENT.md) for actual implementation and gate state.
+**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](status/CURRENT.md) for actual implementation and gate state.
 
 ## Phase 0 — Foundation and proof (complete)
 
@@ -65,7 +65,8 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 **Decision:** 2026-09-25. [Optional Git](tasks/active/optional-local-git.md) preserves the
 former 1G.3a/1G.3b requirements as GIT.1 safety and GIT.2 UI. No date or automatic start;
 the user may select it later. It is not required for 1G/1H, Phase 1 closure or Phase 2
-entry. Existing project-creation Git init remains. Later GitHub integration depends on
+entry, Phase 3 or initial-release acceptance. The user removed proposed 3E on
+2026-10-02. Existing project-creation Git init remains. Later GitHub integration depends on
 this foundation if selected; it must not assume Phase 1 delivered status/diff/checkpoints.
 
 The remaining Phase 1 test cadence is agent-run development and early native process
@@ -74,17 +75,29 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
-**Outcome:** Unsloth Studio, Ollama and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
+**Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
+
+The selected delivery sequence brings forward bounded 3A source foundations alongside
+provider feasibility, then targets a complete reviewed dialogue rewrite using manual
+cards/lorebook and configurable prompts/limits. Remaining Phase 2 actions/provider
+coverage and 3A Story logic can then overlap.
+[Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
+own the detailed dependency gates and GPT-6.1 Sol High owner/two-agent allocation.
+Phase 2 still requires final integrated acceptance; these stages do not enlarge its
+AI operation allowlist or authorize implementation.
+[The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
+under WORKFLOW, not mandatory chat transfers.
 
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
 
 | Checkpoint | Scope and gate |
 | --- | --- |
-| 2A — Provider and credential boundary | Core-owned provider configuration, endpoint/locality disclosure, reviewed OS credential adapter, bounded requests/cancellation and redacted errors. Test no renderer/project/log credential leakage, no implicit sends, and safe endpoint/redirect handling. |
-| 2B — Deterministic selected-context assembly | Explicit user-selected Scene/route/slice context with source revisions, provenance, dependency disclosure and size estimate. Route-aware means a selected documented scope, not proof of reachable runtime state. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
-| 2C — Structured proposals and acceptance | Scene/Character/lore actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
+| 2A — Provider and credential boundary | Core-owned provider configuration, explicit context/response limits, endpoint/locality disclosure, reviewed OS credential adapter, bounded requests/cancellation and redacted errors. Test no renderer/project/log credential leakage, no implicit sends, and safe endpoint/redirect handling. |
+| 2B — Deterministic selected-context assembly | Manual Character cards/lorebook, editable system prompts with baseline reset, and explicit user-selected Scene/route/slice/reference context with source revisions, provenance, dependency disclosure and size estimate. Route-aware means a selected documented scope, not proof of reachable runtime state. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
+| 2C — Structured proposals and acceptance | Scene, runnable Character, Character-card and lorebook draft/update actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
 
 **Exit criteria:** every send reveals destination/locality/context/estimated size; remote sensitive-content warnings and explicit consent work; unsupported schemas/paths/identifiers and malicious output are refused; partial acceptance cannot omit required definitions or dependencies; stale/cancelled responses cannot mutate a replacement session. No source or lore becomes canonical without review. Credentials and these safety gates are Phase 2 prerequisites, not deferred Phase 3 release polish.
 
@@ -92,20 +105,35 @@ State simulation/Run From Here remain Phase 3; broader reachability/state and na
 
 ## Phase 3 — Initial WYSIWYG release
 
+**Implementation planning requested — 2026-10-02:** the user removed 3E and asked
+for implementation plans for the remaining parts. The detailed brief now includes
+source/code seams, staged implementation and proof fixtures based on Ren'Py docs and
+relevant projects. Exact feature inventories remain proposed; no coding is selected.
+Git/GitHub are deferred and absent from Phase 3/release acceptance.
+
 **Outcome:** satisfy PRODUCT's initial-release scope through separately gated capabilities, not one large implementation goal. Preserve the accepted source/transaction/authority architecture and exclude arbitrary existing-project import.
+
+The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) defines
+first usable results, proposed subsets, dependencies, implementation steps, inspected
+code seams, early risk proofs and completion gates. The user selected **Story logic first, then screen design** on 2026-10-02.
+The selected shared-foundation sequence allows scoped 3A work before Phase 2
+completion; after accepted Phase 2/3A, Screens and Timeline can use parallel lanes.
+State/Run From Here consumes qualified story/effect semantics, and release qualification
+follows all required capabilities. This plans ahead alongside Phase 1G; it neither
+starts Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
+entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |
 | --- | --- |
 | 3A — Mature authoring and supported flow/state constructs | Explicitly own initial-release conditions/calls and their shared semantics, source mapping, diagnostics and history. Mature Scene/Source/Branches without creating a second graph or document truth. Unknown/custom constructs remain lossless. |
 | 3B — Supported screen designer | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
-| 3C — VN animation/audio Timeline | Reviewed Ren'Py event/transform/channel subset with explicit timing, source mapping, undo and runtime tests. No general non-linear video editor or unrestricted ATL promise. |
+| 3C — Staging, native animation and VN Timeline | Character drag/resize with matching runtime placement; native pre-rendered playback and dialogue idle loops; reviewed timing/transform/audio subset with source mapping, undo and native tests. Only pinned-Ren'Py-supported media profiles; no GIF import/conversion, transcoding or video editing. |
 | 3D — Supported state simulation and Run From Here | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
-| 3E — Workflow and GitHub maturity | Asset/diagnostic/recovery usability and safe supported GitHub authentication/remotes, with explicit review and non-destructive defaults. Builds on Phase 1's minimum recovery, Phase 2's credential boundary and the separately selected optional Git foundation for GitHub work; it does not retroactively supply those prerequisites. |
 | 3F — Distribution and release acceptance | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
 
 These are dependency-planning boundaries; each execution brief must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.
 
-**Exit criteria:** every capability in PRODUCT's initial-release scope passes its gates and the integrated create/author/source/preview/run/LLM/Git/recover/reopen workflow on both targets. Preserve visible partial/unknown handling. Signing/notarisation is not required for early genuinely private builds, but is required before broader distribution under the release policy below.
+**Exit criteria:** every capability in PRODUCT's initial-release scope passes its gates and the integrated create/author/source/preview/run/LLM/recover/reopen workflow on both targets. Preserve visible partial/unknown handling. Signing/notarisation is not required for early genuinely private builds, but is required before broader distribution under the release policy below.
 
 ## Phase 4 — Narrative intelligence
 

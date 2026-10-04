@@ -212,6 +212,17 @@ one symbol table and reject Python keywords, underscore-reserved names, known
 Ren'Py/Loomlight names, and statically visible top-level `define`/`default` collisions
 in both canonical definition files.
 
+Planned Phase 2 Character cards are editor-only records with stable IDs, optional
+links to runnable Characters, descriptive/personality/voice/background/relationship
+fields, provenance, applicability, approval state and revision. They may be manually
+authored or LLM-proposed; approving a card does not modify the runnable definition.
+The lorebook groups editable entries with titles/categories/tags and references.
+Approved current cards/entries are included only through the reviewed context manifest.
+Changes invalidate affected prepared sends/proposals; unresolved links are retained.
+Exact versioned schemas/migrations remain Phase 2 design work. Project prompt overrides
+record the baseline version and content digest; machine provider profiles own context
+and output limits. See the [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
+
 A lore fact records subject, category, canonical text, characters who know it,
 route applicability, valid game-day/time range, source scenes/decisions, contradictory
 alternatives, provenance, review status, and last review/change. Lore remains a later
@@ -236,6 +247,18 @@ Phase 1 does not create disposable special cases for basic VN staging:
   fades, and Timeline synchronization.
 
 The UI subset may be narrow; the stored semantic model must remain extensible.
+
+Planned 3C extension: static placement stores source-backed position/anchor/scale,
+independent of editor viewport zoom. Animated Appearances reuse stable Asset IDs for
+qualified native video or explicit ordered image-frame/duration references, with typed
+loop/end behavior and supplied-mask dependencies. Logical dimensions exclude any
+side-mask portion. Container/codec/timing metadata must be verified and versioned; the
+existing Phase 1 allowlist is not silently expanded. Preserve accepted media bytes;
+there is no conversion or extracted-frame cache as a new source of truth. Dependencies
+share existing import/history/recovery and source mapping. The
+[3C media contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+owns format qualification and acceptance; this describes a future schema, not current
+implemented metadata or browser decoder support.
 
 ## Transaction model
 

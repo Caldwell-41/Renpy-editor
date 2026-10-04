@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-04.
+**Updated:** 2026-10-05.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
@@ -43,6 +43,19 @@ Remote qualification, Windows-PC 14-row review and final separate integration re
 Do not resolve PR #17, rebase/merge/close 1G/1H or start a feature phase.
 Entry feature `a15e923`, main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
 preserve newer separate work. Historical records below do not override continuation.
+
+### Local planning documentation merge — 2026-10-05
+
+The user selected merging planning `2c5a164` into local feature checkpoint `e8af02e`,
+with documentation checks and a commit, explicitly **no push**. Both UI sections are
+retained: current Phase 1 corrections, then agent guidelines. Phase 2/3 plans, design
+references and bounded delivery targets now accompany this checkout. No application,
+test, workflow or Phase 1 acceptance change is selected. The live Mac-review state,
+source/package evidence, profile recovery, counters and remaining gates above stay
+authoritative. This is not 1G/1H integration or resolution of PR #17 against main.
+Planning worktree/branch remain intact. All unpublished checkpoints and this merge
+stay local; no publication operation is pending or requested. Continue the existing
+Phase 1 review; Phase 2/3 implementation remains not started. Resolve merge SHA from Git.
 
 **Previous Branches correction:**
 Option B source `88add80` implements heavier rounded routes, distinct channels,
@@ -260,3 +273,124 @@ two Tauri builds and fourteen top-level starts. This policy change adds zero run
 builds or launches and does not reset those totals. Phase 0 and accepted 1A-1F remain
 preserved; optional Git is deferred. Read old ledgers only for relevant evidence, not
 as live next-step authority. HANDOVER and the new selected brief own continuation.
+
+## Concurrent planning
+
+Docs-only Phases 2–3 planning is isolated on `codex/phase-2-3-planning`; it does not
+replace the active Phase 1G review above. The user confirmed those two phases and
+selected Story logic before screen design in Phase 3. The
+[Phase 2 delivery sequence](../tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+and [Phase 3 draft](../tasks/active/phase-3-initial-wysiwyg-release.md) are ready for
+scope discussion. Implementation entry still requires accepted Phase 1 through 1H
+and explicit bounded selection. HANDOVER records branch isolation and continuation.
+
+Phase 2 planning now explicitly includes manual/LLM-generated Character cards and a
+lorebook for reviewed context, editable system prompts with Restore baseline, and
+context/response size controls. Extra-provider scaffolding is recommended, not selected
+as additional supported-provider scope. See the Phase 2 brief's refinement record.
+
+Planning correction — 2026-10-02: the user removed Ollama support; Phase 2 now
+requires Unsloth Studio and the generic-compatible provider path. Phase 3 scope is
+unsettled: explain the proposed capabilities plainly and clarify the intended outcome
+before further elaboration or implementation selection. Planning branch remains
+`codex/phase-2-3-planning`; ongoing Phase 1 work and its allowance are unchanged.
+
+Phase 3 planning continuation — 2026-10-02: user removed 3E; local Git and GitHub
+are deferred outside Phase 3/initial-release acceptance. PRODUCT, ROADMAP, UI and
+the optional Git brief now agree. The Phase 3 brief contains researched implementation
+steps for 3A–3D and 3F, inspected code seams, source-migration/runtime-preview design,
+proof checkpoints and references. Online Ren'Py docs report 8.5.4; the pinned 8.5.3
+behavior still needs qualification at implementation entry. Community project pages
+were inspected only; nothing downloaded, copied or executed.
+
+Next in this planning chat: review the proposed screen/Timeline inventories and
+Run From Here's initial Scene-entry/empty-call-stack boundary. No implementation,
+SDK upgrade, build or dispatch selected. Keep the existing planning worktree/branch;
+the active Phase 1 checkout and all existing budgets remain unchanged. Publication
+target is `origin/codex/phase-2-3-planning`; no merge is selected.
+
+UI/UX planning refinement — 2026-10-02: the user requested interaction design and a
+generated image based on the current UI. The Phase 3 brief now includes the nested
+Story Beat journey, insertion/move/draft/preview contracts and a generated paper/teal
+concept, plus the Screens/Timeline/state journeys. Phase 2 now records its assistance,
+reference and settings journey. The [design reference](../design/phase-3-story/README.md)
+retains the prompt/provenance and visual limitations. Live capture was unavailable on
+the locked host, so generation used a saved actual synthetic-fixture Story screenshot.
+This is proposed design, not accepted or implemented UI. Continue reviewing these
+interactions and the remaining feature subsets on `codex/phase-2-3-planning`.
+No Phase 1 files, application code, build/SDK/native runs or CI dispatches were added.
+
+LLM screen planning — 2026-10-02: the user delegated equivalent Phase 2 UX planning
+and image generation to a GPT-6.1 Sol subagent. The
+[expanded Phase 2 design](../tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+and [four proposed concepts](../design/phase-2-llm/README.md) cover preparation, semantic
+review, cards/lorebook and AI settings, including cancellation/errors/draft safety and
+compact/accessibility contracts. Total-budget, approval/inclusion, explicit proposed
+reference saves and transient proposal boundaries are preserved. Assets use the saved
+actual synthetic-fixture screenshot; no live capture on the locked host. Exact prompts,
+hashes and schematic corrections are retained. No implementation or Phase 1 changes.
+The parent reviewed the four concepts and written interaction contracts; publication
+uses the existing planning branch;
+no pending CI, provider request, build or new PR. Next: user review of the proposed design after verified publication. Resolve the checkpoint SHA from Git.
+
+Selected delivery approach: the user approved updating the docs after the rework
+assessment. Phase 2 section 19 now owns shared source/edit/reference/semantic/runtime
+foundations and staged overlap: early minimum 3A source work alongside provider
+feasibility, first complete AI rewrite, overlapping Phase 2/3A completion, then
+Screen/Timeline lanes and state/release integration. The team is one GPT-6.1 Sol High
+owner plus two GPT-6.1 Sol High implementation agents; the owner coordinates contracts,
+shared-file writers, integration and combined verification. Phase 2/3 acceptance and
+the Phase 2 operation allowlist remain; Phase 1 through 1H is still required before
+implementation. ROADMAP/Phase 3 entry/sequence agree; exact feature subsets remain
+reviewable. This docs-only selection starts no agents, implementation worktrees,
+provider requests, builds, SDK/native runs or CI; no merge or new planning PR.
+Continue on `codex/phase-2-3-planning`. Next: review subsets/UX and, after Phase 1
+acceptance, select bounded source/provider tasks against the current accepted baseline.
+
+Native-media planning selection: the user wants accurate character drag/resize,
+pre-rendered playback and dialogue-time idles, with only Ren'Py-supported formats
+accepted at this stage. 3C now owns those explicit outcomes, native container/codec
+qualification, supplied masks/frames, playback/idle lifecycle and runtime geometry
+proof. GIF import/conversion, transcoding and mask generation are deferred. PRODUCT,
+UI, DATA_MODEL, ROADMAP and the two-lane allocation agree. The initial candidates are
+a bounded native subset, not every upstream format; published docs describe 8.5.4,
+while pinned 8.5.3 qualification remains future work. No new implementation, provider
+request, media import/decoding, app/SDK/native run, agent, build or CI was performed.
+Continue on the existing planning branch; next remains UX/subset review and bounded
+implementation selection after Phase 1 acceptance. No merge or new planning PR.
+
+Animation implementation sequence selected: after the researched explanation, the user
+agreed to static staging → PNG/ATL idles → native looping video → prepared transparent
+video → play-once/end states, followed by combined qualification. The Phase 3 brief
+owns concrete source bindings, existing asset/media seams, bounded video delivery,
+channel/audio behavior and profile-dependent embedded previews. Tagged official
+8.5.3 source and community creator references are linked; source reading is not native
+qualification. UI and the lane allocation agree. Native-only imports/no conversion,
+shared placement/history and existing entry/acceptance gates remain. No app/media/SDK
+execution, new agents, worktrees, builds, CI or implementation was started. Next: review
+remaining subsets/UX and select bounded implementation after Phase 1 acceptance on
+the current accepted baseline. Publish on the existing planning branch; no PR or merge.
+
+UI/UX agent guidance selected — 2026-10-03: the user accepted the researched twelve
+guidelines, including straightforward interface language and validation after field
+completion plus submission. UI.md owns the contract; INDEX and both phase briefs link
+to it, and the existing owner/two-lane plan shares controls/validators. Required help
+stays visible; optional Ren'Py detail uses accessible tooltips/help. Validation preserves
+incomplete/IME input, checks blur or explicit field commit, rechecks all submitted
+values and refuses without writing/sending. This is future implementation guidance,
+not a claim of current application compliance or new Phase 1 acceptance. Prior review
+inspected the installed app/source and used one user-requested research subagent;
+this update changes docs only. No new app, provider, SDK, build or CI execution.
+Continue on the existing planning branch; select bounded implementation after Phase 1
+acceptance against the accepted baseline. No new PR or merge.
+
+Bounded delivery cadence selected — 2026-10-03: the user requests one deliverable per
+owner/team outcome, with implementation, focused checking, in-scope fixes, canonical
+docs/task/HANDOVER update and a prompt for the next milestone. Phase 2 section 20 owns
+the concrete cross-phase queue and prompt contract; Phase 3 links it. Section 19's
+parallel dependencies and existing milestone gates remain, with no whole-phase agent
+assignment or automatic next-target execution. GPT-6 official guidance was fetched;
+Astra behavior examples are starting points for the selected Sol team. No production
+implementation/agent/build/provider/SDK/CI execution was started. Existing push
+rejection remains unresolved: guideline commit `6330291` and subsequent documentation
+are local-only until explicit authorization for the existing GitHub planning branch.

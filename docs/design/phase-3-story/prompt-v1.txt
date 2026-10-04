@@ -1,0 +1,21 @@
+Create a polished, realistic desktop UI design concept for Loomlight, a visual Ren'Py authoring editor, based closely on the supplied actual application screenshot. This is a ui-mockup extending the existing Story workspace for proposed Phase 3 nested story logic.
+REFERENCE ROLE: the supplied image is the existing implemented app. Preserve its recognizable shell, typography style, paper/off-white and muted teal palette, two left navigation columns, top toolbar and bottom status bar. Use only synthetic story content shown here. Do not use purple, neon, futuristic glass, node graph as main editor, photography, or new branding.
+OUTPUT: one sharp wide desktop screenshot, approximately 1600 by 1100, with crisp legible UI text. No device frame, no outside captions, no watermark. Give the central workspace ample width and height.
+SHELL: top left book icon Loomlight, project The Last Tram; top right Save, Validate, Run Game teal button, Stop. First left rail Story selected, Source, Branches, Characters, Assets, Variables; Settings bottom. Second left rail STORY TREE with collapsible Chapter One; Prologue, The Apartment selected, Stay in, Head outside, A new day; + New Scene. Main title The Apartment with View in Source, Writing focus, Undo, Redo.
+PREVIEW: retain Scene Preview above Beats, but reduce its height to roughly one quarter of the central workspace. Use the reference's simple geometric night landscape with moon and a dialogue overlay reading Bec and “I can tell you what happened.” Small text: “Illustrative branch preview”. Below it a small selector “Preview branch: If” and note “Manual selection · not a playthrough”. Show accessible horizontal divider grip. REMOVE the obsolete Preview size slider.
+BEAT LIST: main focus is a calm readable editable outline, not a programming IDE. Header Beats at left and + Add Beat teal button right. Show compact familiar rectangular rows:
+1 Background — Apartment at night
+2 Show Character — Bec · centre
+3 downward chevron Condition — trust is at least 5        Edit condition
+This condition group is expanded, with a subtle teal outline and indented contents joined by a thin vertical nesting rail. Use named branch headers, not just color:
+   IF · trust ≥ 5
+      3.1 Dialogue   Bec: I can tell you what happened.
+      + Add Beat to If
+   OTHERWISE
+      3.2 Dialogue   Bec: Maybe another time.
+      + Add Beat to Otherwise
+Then a thin neutral divider at the original, nonindented level with text “Continue after condition”.
+4 Call Scene — Shared conversation      Returns here ↩
+5 Dialogue — Bec: Shall we head out?
+Make the condition group visibly contain both branch bodies. Both branches stay visible and readable. One child row selected with pale teal highlight but no big open form, no pending edits. A small breadcrumb above the list or selected row reads “The Apartment / Condition 3 / If”. Show source-linked outline numbering rather than implying player executes both branch bodies. All rows below group are clearly outside both branches.
+BOTTOM: Local project, Saved, Runtime & diagnostics. Strong readable contrast and clean thin borders. Visual hierarchy matters more than exact pixel fidelity. The illustration demonstrates a proposed design, not a running feature or proof of runtime state.

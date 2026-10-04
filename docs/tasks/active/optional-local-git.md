@@ -1,6 +1,6 @@
 # Optional milestone — Local Git checkpoints
 
-**Decision:** 2026-09-25. **State:** deferred; GIT.1 and GIT.2 are `not_started`.
+**Decision:** 2026-09-25; deferral reaffirmed 2026-10-02, removing proposed Phase 3E. **State:** deferred; GIT.1 and GIT.2 are `not_started`.
 **Authority:** the user removed new Git work from Phase 1 and requested a separately
 selectable optional milestone. This preserves the design; it does not start work.
 **Entry:** explicit later selection, current refs/ownership and implementation reviewed,
@@ -8,9 +8,10 @@ and accepted source/session/recovery foundations. No automatic phase dependency 
 
 ## 1. Scope and preparation
 
-Local status, reviewed diff and exact user-confirmed checkpoints are optional. Phase 1
-and Phase 2 do not require them. Existing optional `git init` during project creation
-stays implemented and retains its regressions; do not remove it or expand it now.
+Local status, reviewed diff and exact user-confirmed checkpoints are optional. Phase 1,
+Phase 2, Phase 3 and initial-release acceptance do not require them. GitHub/remotes also
+remain deferred; removing 3E does not merge remote scope into GIT.1/GIT.2. Existing
+optional `git init` during project creation stays implemented and retains its regressions; do not remove it or expand it now.
 This changes the Loomlight product scope, not the developer repository Git workflow.
 The former 1G.3a/1G.3b requirements become GIT.1/GIT.2 below; V1/V2 identifiers remain
 for traceability. Remote/authentication and destructive restore remain excluded.
