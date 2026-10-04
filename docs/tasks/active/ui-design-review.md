@@ -2237,7 +2237,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-01 — Beat and native asset drag coexistence (A9) | With native drag/drop enabled, drag the left Beat grip up/down across several ordinary rows. Undo once; redo; save and reopen. Immediately drag PNG/JPEG/WebP files from Explorer into Assets, then reorder another Beat. | Visible insertion marker/ghost, exactly one saved reorder and one Undo; IDs/text/source preserved. Explorer drag highlights the drop area and opens the staged import modal; both gesture types continue working. |
 | WIN-UI-02 — drag cancellation/bounds (A9) | Escape during a drag; drop outside the list/on the same row; switch focus to another app; drag toward Choice/Jump/Return/protected code or a source gap. Try while an editor has unsubmitted input. Drag through a long list near both scroll edges. | Cancelled/forbidden gestures write nothing, leave no ghost/marker/capture, retain input and remain responsive. Allowed edge scrolling follows the pointer. Keyboard move controls remain usable. |
 | WIN-UI-03 — Assets staging | Drop several image files, change categories, set kind/name/Character-expression metadata, cancel and keep/discard, reopen via Browse. Include a duplicate or unsupported file and complete the valid rows. Drop while away from Assets. | Drop/Browse use the same guarded modal, categories remain available, originals remain intact, valid imports occur once, failed rows remain actionable, and no off-surface accidental import occurs. |
-| WIN-UI-04 — physical names and IME | In Character, Asset/expression and Variable creation, type/paste uppercase ASCII technical names, blur and submit. Use a Windows IME in dialogue, narration, display names and text defaults, including Enter during composition. Open the naming guidance with the keyboard. | Creation identifiers canonicalize consistently without OS correction; guidance distinguishes Loomlight rules from Ren’Py syntax. Display/text content stays intact; composition is not prematurely committed. Existing source identifiers are unchanged. |
+| WIN-UI-04 — physical English names/input | In Character, Asset/expression and Variable creation, type/paste uppercase ASCII technical names, blur and submit. Use the standard keyboard in English dialogue, narration, display names and text defaults; select/copy/paste, undo/redo and Save/commit. Open the naming guidance with the keyboard. | Creation identifiers canonicalize consistently without OS correction; guidance distinguishes Loomlight rules from Ren’Py syntax. Display/text content stays intact, keyboard Save/commit works and focus remains stable. Existing source identifiers are unchanged. |
 | WIN-UI-05 — Variable discard/type integrity (A2) | New Variable: int/42 → Cancel → Discard → reopen; repeat with string text and bool/True. Switch type again after reopening, then create Boolean True. Edit an existing default; Keep editing/Escape/Discard; save/reopen. | Reopened form is bool/False, discarded text is empty, control matches Type, footer returns to Saved, and the submitted/persisted value matches what is visible. Cancel/discard does not write. |
 | WIN-UI-06 — Character selection and image refresh (A3/A8) | Select a non-default appearance; save Character unchanged; change the default; switch Grid/List and leave/return. Replace an appearance image. Test a missing/unreadable image then restore it and Retry preview. | Selected UUID, pressed state and preview remain aligned. Default is distinct from viewing. New images load immediately; loading and useful bounded errors are visible; retry recovers without replaying a write or showing another Character’s image. |
 | WIN-UI-07 — appearance rename reuse (A4) | Rename happy → calm → thoughtful → calm → happy, with/without an image replacement. Save/reopen and inspect Show/Change Appearance Beats. Try a name belonging to another image; edit a retained alias externally and try reusing it. | Stable Appearance/Asset/default IDs and supported references; old files/custom source stay intact. Own unchanged aliases can be reused; genuine collisions/edited aliases refuse without partial writes. |
@@ -2246,7 +2246,7 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-10 — Beat confirmation/pending (A7) | Create each applicable Beat with one confirmation; simulate a slow receipt through an approved test driver and attempt duplicate confirmation/Cancel. Exercise a stale-source failure, correct it and retry. Use a long list. | Pending controls are disabled, only one write occurs, failure retains editable values, and success reveals/focuses the saved collapsed row without another Commit. |
 | WIN-UI-11 — earlier Source/Branches/Runtime corrections | Open more Source files than fit; open another and close its tab with a draft. Save Choice routes and Refresh Branches; open details and dismiss with X/Escape. Run a disposable game; close/reopen diagnostics, including an error with exit zero. | Active tab and file row reveal together; Close is attached and retains draft. Saved graph routes appear; details close and return focus. Runtime X stays visible, errors remain reported, and closing the drawer does not stop the game. |
 | WIN-UI-12 — onboarding and remaining acceptance | Review Welcome cog/hover/column tones, full-height wizard rail, SDK wording, resolution picker, inline Git checkbox. Observe a real uncached official SDK download and staged creation; run a fresh game through its menus. | Clear click affordances, readable controls, truthful download/create progress and no missing GUI-image crash. Preserve the earlier-project distinction; no silent repair. Record final visual/UX feedback separately from automated checks. |
-| WIN-UI-13 — approved B connector routing | In a disposable project save reciprocal Scene 1/New Scene jumps, a long jump skipping a node, two choices with the same target/text, a self-loop, a same-layer link and a missing/custom destination. Review both palettes at 100%/higher DPI, zoom/pan/Fit, select routes and use Source navigation. Include long/Unicode names and choice text. | Every known arrowhead meets its correct node boundary; heavier rounded paths avoid all node interiors; reciprocal/duplicate/backward routes remain distinguishable. Label pills stay legible and clear of nodes; Fit includes outer routes/pills. Long node names retain full tooltips/details. No guessed link for missing/custom/terminal flow; saved source, selections, notices and navigation remain correct. Record zoom/scale-specific readability separately. |
+| WIN-UI-13 — approved B connector routing | In a disposable project save reciprocal Scene 1/New Scene jumps, a long jump skipping a node, two choices with the same target/text, a self-loop, a same-layer link and a missing/custom destination. Review both palettes at 100%/higher DPI, zoom/pan/Fit, select routes and use Source navigation. Include long English names and choice text. | Every known arrowhead meets its correct node boundary; heavier rounded paths avoid all node interiors; reciprocal/duplicate/backward routes remain distinguishable. Label pills stay legible and clear of nodes; Fit includes outer routes/pills. Long node names retain full tooltips/details. No guessed link for missing/custom/terminal flow; saved source, selections, notices and navigation remain correct. Record zoom/scale-specific readability separately. |
 | WIN-UI-14 — catalogue columns and staged preview | Review Characters with both image-backed and zero-appearance entries; toggle Grid/List, open/close details and resize at 100%/higher DPI. Review bool/int/string Variable rows against all four headers. Browse/drop PNG/JPEG files, inspect their previews before Import, add another file, remove all, Cancel/discard/reopen, change a selected file externally and retry. Include audio and an oversized/unsupported raster. | No image/initial/title overlap; matching Character list columns and Variable header/cell alignment. Whole-row selection and Edit remain reachable. Initial Choose section disappears after selection; real images/dimensions are shown, Add files remains available, empty staging restores chooser, footer actions remain visible. Errors offer Retry without a write; only explicit Import creates assets, no successful partial import is replayed. Native preview/drop/cleanup and OS scaling are still unverified until this is run. |
 
 Remaining macOS hands-on review uses a corrected installer when selected and resumes
@@ -2910,9 +2910,9 @@ Application Support writes still need the host's sandbox approval when executed.
 | Session step | User physical/visual observation | Agent responsibility / current result |
 | --- | --- | --- |
 | MAC-01 — installer, welcome and wizard | Confirm installed copy, both palettes, full-height steps, real download bytes/Verify/Install and stable creation stages. On picker test presets, Custom 1600×1000 (8:5), 1080×1920 (9:16), empty/odd/out-of-range rejection. | Verify installer/payload, prepare clean preserved profile, record actual SDK/network/creation observation; human OPEN. |
-| MAC-02 — Story/Source and physical input | Expanded icon/label gap above/below 1100px, independent navigation/tree/focus/restore, Writing focus and divider reset. Type/composition in dialogue and Source, native Save/commit/undo/redo, pending input across navigation; Beat pointer drag/cancel alongside keyboard moves. | Automated renderer checks PASS; prepare disposable authoring content, record keyboard/IME availability, scaling and actual results separately; human OPEN. |
-| MAC-03 — Branches B | Review reciprocal/long/duplicate/self/same-layer/missing routes, Unicode/long captions, arrow destinations, labels, Fit/zoom/pan, details dismissal and mapped destination edit with pending input. | Prepare saved synthetic routes after project creation; ordinary graph/service proofs retained, native/human OPEN. |
-| MAC-04 — catalogue/import | Image/empty Character entries and Grid/List; appearance retention/default/alias reuse/replacement/retry. Variable bool/int/string columns and discard/reopen. Browse and Finder multi-file image/audio drop, preview, category/metadata, Add/remove/Cancel, unsupported-row failure, once-only import. Use real keyboard/IME for naming/display/text. | Synthetic files ready; agent owns ordinary service/rejecting/no-write cases, user owns Finder/physical/visual observations; OPEN. |
+| MAC-02 — Story/Source and physical input | Expanded icon/label gap above/below 1100px, independent navigation/tree/focus/restore, Writing focus and divider reset. Type English text in dialogue and Source, native Save/commit/undo/redo, pending input across navigation; Beat pointer drag/cancel alongside keyboard moves. | Automated renderer checks PASS; prepare disposable authoring content, record keyboard/IME availability, scaling and actual results separately; human OPEN. |
+| MAC-03 — Branches B | Review reciprocal/long/duplicate/self/same-layer/missing routes, long English captions, arrow destinations, labels, Fit/zoom/pan, details dismissal and mapped destination edit with pending input. | Prepare saved synthetic routes after project creation; ordinary graph/service proofs retained, native/human OPEN. |
+| MAC-04 — catalogue/import | Image/empty Character entries and Grid/List; appearance retention/default/alias reuse/replacement/retry. Variable bool/int/string columns and discard/reopen. Browse and Finder multi-file image/audio drop, preview, category/metadata, Add/remove/Cancel, unsupported-row failure, once-only import. Use the standard keyboard for English naming/display/text. | Synthetic files ready; agent owns ordinary service/rejecting/no-write cases, user owns Finder/physical/visual observations; OPEN. |
 | MAC-05 — final runtime and reopen | Run both authored routes, save a script while playing, earlier-launch status, Stop/rerun latest save; one known SDK diagnostic → current Source; resize/scaling/shortcuts, close/reopen retained work and usability. | Retained packaged real-SDK cases executing on this candidate; prepare concise reversible diagnostic and route fixture after creation. Physical/visual OPEN. |
 
 Present one manageable step at a time in this same chat; do not assign routine
@@ -3004,3 +3004,68 @@ cases, plus affected fixture compile/lint and missing runtime-error/UI-refresh; 
 remote dispatch before Mac acceptance. No identical-success matrix repeat or third
 same-hypothesis correction. Old/unlocked reports stay in their original directories.
 Physical keyboard standard only (user report); IME composition **UNAVAILABLE**, not PASS.
+
+
+**F1 passes — corrected local candidate:** source/build input
+`28e44b0dd3a3454223f65667722419878952cb66`. One changed-input build, verified sealed
+ARM64 installer `.toolchains/review-builds/ui-refresh-28e44b0/Loomlight_0.1.0_28e44b0_aarch64.dmg`,
+5,750,827 bytes, SHA-256 `c9cbb43685209886600de5ccdf491222fee36348dfaea798819ccfe01d2f2eb1`;
+sealed executable `7ac773ff7f2fe2e79f99d89be63092945d6d02d3bb6df137a167459dc2fd94e5`.
+Retained procedure passes integrity/mounted identity/hash/execute mode/ad-hoc strict
+signature/ARM64/Applications shortcut and checksums; privacy scan PASS. Format and
+repository validation 325 files PASS. Exact 132 input hashes recorded; only changed
+app/workflow input from `580740f` is `src-core/src/lifecycle/runtime_probe.rs`.
+
+All six F1 native real-service/SDK reports PASS with cleanup: compile 25.073 s,
+lint 24.351 s, route-a 36.110 s, route-b 36.664 s, runtime-error 25.631 s,
+ui-refresh 4.388 s. Exit zero, exactly one positive report each, no watchdog timeout.
+Both routes retain saved-byte/reopen, at least 9.5-second running duration,
+Cancel-close/Stop and earlier-launch checks. This confirms the missing fixture quit
+screen cause without suppressing runtime errors. Logs/JSON/input hashes stay ignored
+under `final-1g-mac/fixture-f1-*`; synthetic input, not physical-user acceptance.
+The superseded unlocked run has route-a/route-b FAIL with cleanup (227.965/226.727 s),
+runtime-error/UI-refresh PASS (26.083/4.355 s); retain all reports on `580740f`.
+Counters **12 production builds, 58 native/boundary starts** (44 incoming + original
+four + unlocked four + F1 six), separately 4 SDK menu starts. No remote dispatch (0/1).
+
+**English scope clarification (user, same chat):** app support is English; prepare a
+fresh English-named/content review project through the normal wizard and verify it.
+The non-English diagnostic filename in automated fixtures is intentional path/byte
+preservation coverage, not app UI localisation. Every probe already creates a fresh
+project; actual Stop failure was in English-named `options.rpy`, now corrected.
+Manual review uses English only; non-English IME/input/localisation is not a required
+physical acceptance exercise for this selected English scope. Preserve existing
+source bytes/UTF-8/path regressions and composition safeguards; no destructive
+conversion or unsupported translation feature is selected. User has standard keyboard
+only. Create the English disposable review project next, with a preserved clean profile
+for genuine SDK progress; collect user's visual observations separately.
+
+**Native picker correction P1:** the normal macOS WKWebView still rendered the
+resolution select about 23 logical pixels high despite its nominal minimum height.
+This fails CONFIG-01’s actual 44–48px requirement. Target only the resolution select:
+retain native select/keyboard/options semantics, remove platform appearance, set 48px
+height and draw a theme-token chevron. Existing browser checks now reject height/width
+regressions in both palettes and wide/compact layouts. Verify in the actual retained
+Mac app before human acceptance; no remote dispatch yet.
+
+**Fresh English normal-wizard review:** preserved the original whole application
+profile intact at ignored `.toolchains/final-1g-mac-review/preserved-app-profile`;
+`profile-state.json` is `isolated`. The clean review profile genuinely downloaded
+official SDK 8.5.3 through Install (agent observed starting 0 and SDK Ready, but not
+measured intermediate bytes/Verify/Install; human observation still OPEN). Normal
+Create captured Generate game and staged progress, then opened a Saved project.
+Project `.toolchains/final-1g-mac-review/projects/loomlight-final-mac-review`, title
+Loomlight Final Mac Review, 1600×1000, Git enabled. Nine generated/helper `.rpy`
+filenames are ASCII; source hashes retained ignored. Explicit helper consent and
+session trust enabled normal Run, which reports Running without an SDK diagnostic.
+Agent could not bind the game window through app inventory; a display-name selector
+opened an unrelated SDK launcher, which was immediately quit. Do not count it as
+game/menu acceptance. User observation requested separately.
+
+**Recovery requirement:** after final review, quit Loomlight and the game, execute
+ignored `profile-session.py restore` with host approval. It retains the review
+profile/SDK and restores the original intact without overwriting/deleting either.
+Until then only the clean review profile is active; private project folders were
+not changed. Counters before P1: 12 production builds, 59 native/boundary starts
+(58 recorded probes plus this normal review app), separately 5 SDK menu/launcher
+starts (4 incoming plus unintended launcher). No remote dispatch, 0/1.

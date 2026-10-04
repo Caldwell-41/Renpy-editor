@@ -7,6 +7,10 @@ on x86-64 and macOS on Apple Silicon. Intel macOS is out of scope. It should fee
 a narrative-design tool first and an IDE second while producing ordinary, modular
 Ren'Py projects that remain usable in other editors.
 
+The initial application interface and support scope are English. Localised UI and
+non-English physical-input acceptance are outside this selected Phase 1 scope.
+The source-authority and lossless preservation rules still apply to existing files.
+
 For Loomlight-created projects the authoring hierarchy is:
 
 `project → chapter → scene → narrative beat → Ren'Py statement`

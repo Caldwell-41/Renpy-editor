@@ -63,6 +63,8 @@ try {
  }
  for(const theme of ['light','dark']) for(const viewport of [1440,560]) {
   await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);await page.setViewportSize({width:viewport,height:900});
+  const pickerBox=await preset.boundingBox();assert.equal(pickerBox.height,48,'resolution picker lost its accepted rendered height');
+  assert.ok(pickerBox.width<=420,'resolution picker exceeds accepted maximum width');
   for(const [w,h,label] of [[1600,1000,'8:5'],[1080,1920,'9:16'],[640,4320,'4:27'],[7680,360,'64:3']]) {
    await page.getByLabel('Width',{exact:true}).fill(String(w));await page.getByLabel('Height',{exact:true}).fill(String(h));
    assert.ok((await ratio.textContent()).includes(`${w} × ${h} · ${label}`));

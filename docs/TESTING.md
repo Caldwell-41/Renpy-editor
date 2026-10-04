@@ -523,6 +523,12 @@ a final separate chat verifies conflict-resolved combined inputs before integrat
 This changes scheduling, not required target evidence or test ownership. Corrections
 invalidate affected prior results and require relevant cross-platform rechecks.
 
+**English support amendment, 2026-10-04:** the user selected English application
+UI/support and standard-keyboard manual acceptance. Non-English IME/localisation
+is outside the selected Phase 1 physical review; unavailable IME is not a blocker
+or a claimed pass. Use English-named/content disposable projects on both targets.
+Keep existing UTF-8/path preservation and composition regression tests.
+
 **User decision, 2026-09-25:** no routine physical testing by the user during 1G build
 checkpoints. Plan one focused final session on Windows x64 and macOS ARM64 after the
 agent's automated gates pass. New Git work/testing is deferred to
