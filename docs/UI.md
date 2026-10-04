@@ -64,10 +64,11 @@ with cancellation and protected-boundary checks, while native OS asset-drop owne
 remains enabled. Local verification does not establish native acceptance; the user
 explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
-The subsequent full-chat recheck found one incomplete CONFIG-01 detail: the accepted
-resolution block also requires an aspect-ratio label and “Game resolution, not editor
-size” caption, with no misleading preview for invalid Custom dimensions. The larger
-picker is implemented; those preview details remain pending in the task ledger.
+The CONFIG-01 resolution block shows dimensions and their reduced aspect ratio with
+the caption “Game resolution, not editor size.” Valid previews preserve proportions
+within 100 × 64 logical pixels, including portrait resolutions. Empty or invalid
+Custom input shows guidance without a shape or ratio; preview and Continue share
+the existing even-dimension limits. Native/visual acceptance remains in the task ledger.
 
 - Welcome distinguishes the introduction from Recent Projects; available projects
   have a hover/focus treatment. Settings has a cog and a button hover treatment.

@@ -363,8 +363,38 @@ function renderConfiguration(panel: HTMLElement): void {
   const preset = document.createElement("select"); preset.className="resolution-picker"; [[1920,1080,"Full HD — 1920 × 1080"],[1280,720,"HD — 1280 × 720"],[2560,1440,"QHD — 2560 × 1440"],[0,0,"Custom"]].forEach(([w,h,label]) => { const option = document.createElement("option"); option.value = `${w}x${h}`; option.textContent = String(label); if (w === wizard.resolution.width && h === wizard.resolution.height) option.selected = true; preset.append(option); });
   const width = input("number"); width.min = "640"; width.max = "7680"; width.step = "2"; width.value = String(wizard.resolution.width); const height = input("number"); height.min = "360"; height.max = "4320"; height.step = "2"; height.value = String(wizard.resolution.height);
   const sync = (): void => { wizard.resolution = { width: Number(width.value), height: Number(height.value) }; }; preset.addEventListener("change", () => { const parts = preset.value.split("x"); const w = Number(parts[0] ?? 0); const h = Number(parts[1] ?? 0); if (w && h) { width.value = String(w); height.value = String(h); sync(); } }); width.addEventListener("input", sync); height.addEventListener("input", sync);
-  const dimensions = document.createElement("div"); dimensions.className = "dimension-row"; dimensions.append(field("Width", width), field("Height", height));if(!["1920x1080","1280x720","2560x1440"].includes(`${wizard.resolution.width}x${wizard.resolution.height}`))preset.value="0x0";dimensions.hidden=preset.value!=="0x0";preset.addEventListener("change",()=>{dimensions.hidden=preset.value!=="0x0";}); const ratio=document.createElement("div");ratio.className="resolution-preview";const ratioLabel=document.createElement("span");const ratioScreen=document.createElement("div");ratioScreen.className="resolution-screen";ratio.append(ratioScreen,ratioLabel);const updateRatio=():void=>{const {width:w,height:h}=wizard.resolution;ratioScreen.style.aspectRatio=`${w||16} / ${h||9}`;ratioLabel.textContent=`${w} × ${h}`;};preset.addEventListener("change",updateRatio);width.addEventListener("input",updateRatio);height.addEventListener("input",updateRatio);updateRatio();panel.append(field("Resolution preset", preset), ratio, dimensions);
-  navigation(panel, () => { sync(); const {width: w,height: h} = wizard.resolution; if (w >= 640 && w <= 7680 && h >= 360 && h <= 4320 && w % 2 === 0 && h % 2 === 0) { wizard.step = 4; showWizard(); } else setStatus("Use even dimensions between 640×360 and 7680×4320.", "error"); });
+  const dimensions = document.createElement("div"); dimensions.className = "dimension-row";
+  dimensions.append(field("Width", width), field("Height", height));
+  if (!["1920x1080", "1280x720", "2560x1440"].includes(`${wizard.resolution.width}x${wizard.resolution.height}`)) preset.value = "0x0";
+  dimensions.hidden = preset.value !== "0x0";
+  const ratio = document.createElement("div"); ratio.className = "resolution-preview";
+  const ratioText = document.createElement("div");
+  const ratioLabel = document.createElement("div"); ratioLabel.ariaLive = "polite";
+  const caption = document.createElement("div"); caption.textContent = "Game resolution, not editor size.";
+  const ratioScreen = document.createElement("div"); ratioScreen.className = "resolution-screen"; ratioScreen.ariaHidden = "true";
+  ratioText.append(ratioLabel, caption); ratio.append(ratioScreen, ratioText);
+  const validResolution = (): boolean => {
+    const { width: w, height: h } = wizard.resolution;
+    return width.value !== "" && height.value !== "" && w >= 640 && w <= 7680 && h >= 360 && h <= 4320 && w % 2 === 0 && h % 2 === 0;
+  };
+  const updateRatio = (): void => {
+    const { width: w, height: h } = wizard.resolution;
+    ratioScreen.hidden = !validResolution();
+    if (ratioScreen.hidden) {
+      ratioScreen.style.removeProperty("width"); ratioScreen.style.removeProperty("height");
+      ratioLabel.textContent = width.value === "" || height.value === "" ? "Enter Width and Height to preview the resolution." : "Use even dimensions between 640×360 and 7680×4320.";
+      return;
+    }
+    let a = w, b = h;
+    while (b) { const remainder = a % b; a = b; b = remainder; }
+    const scale = Math.min(100 / w, 64 / h);
+    ratioScreen.style.width = `${w * scale}px`; ratioScreen.style.height = `${h * scale}px`;
+    ratioLabel.textContent = `${w} × ${h} · ${w / a}:${h / a}`;
+  };
+  preset.addEventListener("change", () => { dimensions.hidden = preset.value !== "0x0"; updateRatio(); });
+  width.addEventListener("input", updateRatio); height.addEventListener("input", updateRatio);
+  updateRatio(); panel.append(field("Resolution preset", preset), ratio, dimensions);
+  navigation(panel, () => { sync(); if (validResolution()) { wizard.step = 4; showWizard(); } else setStatus("Use even dimensions between 640×360 and 7680×4320.", "error"); });
 }
 function renderReview(panel: HTMLElement): void {
   wizardHeading(panel, "New Project · 4 of 4", "Review & Create", "Check your project details. Loomlight will create and validate the game, then open it.");

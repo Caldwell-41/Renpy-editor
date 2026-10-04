@@ -46,7 +46,34 @@ try {
  await page.getByLabel('Game title').fill('The Last Tram');await page.getByRole('button',{name:'Choose parent directory',exact:true}).click();
  await page.getByText('Available',{exact:false}).waitFor();await page.screenshot({path:output+'wizard-details.png'});
  await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('radio').waitFor();await page.screenshot({path:output+'wizard-sdk.png'});
- await page.getByRole('button',{name:'Continue',exact:true}).click();await page.screenshot({path:output+'wizard-configuration.png'});
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ // The preview must describe valid game dimensions, never invent a shape for invalid input.
+ const preset=page.getByLabel('Resolution preset'),screen=page.locator('.resolution-screen'),ratio=page.locator('.resolution-preview');
+ for(const [value,label] of [['1920x1080','1920 × 1080 · 16:9'],['1280x720','1280 × 720 · 16:9'],['2560x1440','2560 × 1440 · 16:9']]) {
+  await preset.selectOption(value);assert.ok((await ratio.textContent()).includes(label));
+ }
+ assert.ok((await ratio.textContent()).includes('Game resolution, not editor size.'));
+ await preset.selectOption('0x0');
+ for(const [w,h] of [['','1080'],['1920',''],['639','360'],['640','359'],['7682','4320'],['7680','4322'],['641','360'],['640','361'],['640.5','360']]) {
+  await page.getByLabel('Width',{exact:true}).fill(w);await page.getByLabel('Height',{exact:true}).fill(h);
+  assert.equal(await screen.isVisible(),false,`invalid ${w} × ${h} showed a shape`);
+  assert.equal(/\d+:\d+/.test(await ratio.textContent()),false,'invalid dimensions showed a ratio');
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await page.getByRole('heading',{name:'Game configuration',exact:true}).waitFor();
+ }
+ for(const theme of ['light','dark']) for(const viewport of [1440,560]) {
+  await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);await page.setViewportSize({width:viewport,height:900});
+  for(const [w,h,label] of [[1600,1000,'8:5'],[1080,1920,'9:16'],[640,4320,'4:27'],[7680,360,'64:3']]) {
+   await page.getByLabel('Width',{exact:true}).fill(String(w));await page.getByLabel('Height',{exact:true}).fill(String(h));
+   assert.ok((await ratio.textContent()).includes(`${w} × ${h} · ${label}`));
+   const box=await screen.boundingBox();assert.ok(box.width<=100&&box.height<=64);
+   assert.ok(Math.abs(box.width/box.height-w/h)<0.02,`distorted ${w} × ${h}: ${JSON.stringify(box)}`);
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+   if(w===1080)await page.screenshot({path:output+`wizard-portrait-${theme}-${viewport}.png`});
+  }
+ }
+ await page.setViewportSize({width:1440,height:900});await preset.selectOption('1920x1080');
+ await page.screenshot({path:output+'wizard-configuration.png'});
  await page.getByRole('button',{name:'Continue',exact:true}).click();await page.screenshot({path:output+'wizard-review.png'});
  const before=await page.locator('.wizard-panel').boundingBox();
  await page.evaluate(()=>{const s=document.querySelector('#app-status');for(let i=0;i<100;i++)s.textContent=i%2?'Unsaved Source draft':'Saved';});

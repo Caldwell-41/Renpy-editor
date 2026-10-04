@@ -2856,3 +2856,42 @@ CONFLICTING. GraphQL PR `baseRefOid` reports `924619d`, differing from current G
 main; do not assume that PR snapshot is the current integration ref. Refresh live
 refs at the integration stage. No operation pending. Historical evidence is retained;
 counters remain 10 packages, 44 native/boundary starts and separately 4 SDK menu starts.
+
+### Final Mac completion execution — 2026-10-04
+
+**State: in_progress; Mac physical/visual review pending.** User selected the staged
+sequence above in this same Mac chat. Entry local/remote feature `a15e923`, clean;
+Git main `4d7ba03`, remote planning `267ec2a`, separate local worktree `2c5a164`
+preserved. PR #17 remains OPEN/draft/CONFLICTING; GraphQL base `924619d` still
+ differs from Git main. No conflict resolution/integration or Windows execution.
+
+CONFIG-01 now shows dimensions/reduced ratio and the exact accepted caption. Preview
+and Continue share the unchanged even-dimension limits; empty/invalid Custom input
+shows guidance without any shape or ratio. Border-box previews preserve proportions
+inside 100 × 64 logical pixels, including extreme portrait/landscape. Existing presets
+and source `f287a7e` Story/Source spacing are included. Canonical UI description updated.
+
+**Focused evidence:** frontend check 85 passed, 0 skipped; production web build PASS
+(existing chunk advisory); Source-save and selection browsers PASS; full UI browser
+PASS, including all presets, nine invalid cases that cannot advance, reduced Custom
+ratios, four proportions at two widths/both palettes, bounded geometry and no overflow.
+New ratio assertion first rejected old source. Reviewed compact light portrait capture.
+Repository validator PASS (325 files), diff check PASS. Existing unchanged core/service
+proof is reused; these renderer tests do not claim native/physical/SDK acceptance.
+Ignored logs: `config-01-red.log`, `config-01-check.log`, `config-01-browser.log`.
+
+**Driver failure classification/corrections:** the full browser command failed at
+compile diagnostic navigation because its shipped probe clicked a link inside closed
+Details. Correction 1 opens the matching diagnostic row via Summary; compile/lint then
+passed, but route-a exposed the same omitted reveal for Advanced/controlled play.
+Correction 2 opens Advanced via Summary. All five driver cases now PASS, retaining
+hidden/disabled click rejection and actual failing-line/route/Save/Stop/reopen assertions.
+This is a harness correction, not an application or SDK result; no threshold waived.
+Failed logs `config-01-browser.log` and `config-01-driver-corrected.log` retained;
+passing `config-01-driver-corrected-2.log`. No third same-hypothesis correction.
+
+Next: pin corrected source, one local ARM64 build with retained sealing/repack procedure,
+verify final mounted payload/hash/signature, prepare disposable review files and conduct
+manageable Mac review steps. Initial final remote production dispatch remains **0/1**;
+only after Mac review passes. Incoming cumulative counters: 10 production builds,
+44 native/boundary starts, separately 4 SDK menu starts. Windows stays deferred.

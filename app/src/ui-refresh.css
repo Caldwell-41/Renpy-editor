@@ -118,8 +118,8 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   margin:12px 0 24px;
   color:var(--text-muted)}
 .resolution-screen {
-  width:100px;
-  max-height:100px;
+  flex:none;
+  box-sizing:border-box;
   background:var(--accent-subtle);
   border:1px solid var(--accent-primary);
   border-radius:4px}

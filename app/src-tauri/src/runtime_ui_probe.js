@@ -61,7 +61,10 @@
       await until(() => [...document.querySelectorAll('.runtime-diagnostics button')].some(b => b.textContent.includes("雪 diagnostic.rpy:2")));
       await until(() => /Failed/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
       assert(/Failed/.test(document.querySelector('.runtime-panel [role="status"]').textContent),"SDK failure remains failure");
-      document.querySelector('.runtime-diagnostics button').click();
+      const diagnostic = [...document.querySelectorAll('.runtime-diagnostics button')].find(b => b.textContent.includes("雪 diagnostic.rpy:2"));
+      const diagnosticRow = diagnostic.closest('details');
+      if (!diagnosticRow.open) diagnosticRow.querySelector('summary').click();
+      diagnostic.click();
       await until(() => document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
       const input = window.__loomlightProbeEditor(document.querySelector(' .source-editor[aria-label="Source editor for game/雪 diagnostic.rpy"]'));
       input.focus(); // CodeMirror synchronizes its retained selection on the next view update.
@@ -120,6 +123,8 @@
       }
       checkpoint("controlled-play-install");
       if (document.querySelector(".runtime-panel").hidden) await click("Runtime & diagnostics");
+      const advanced = document.querySelector('.runtime-advanced');
+      if (!advanced.open) advanced.querySelector('summary').click();
       await click("Enable controlled play"); await click("Add controlled play helper");
       await until(() => {
         const failure=document.querySelector('.runtime-panel [role="alert"]')?.textContent;
