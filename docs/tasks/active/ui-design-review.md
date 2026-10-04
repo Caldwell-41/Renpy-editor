@@ -3069,3 +3069,29 @@ Until then only the clean review profile is active; private project folders were
 not changed. Counters before P1: 12 production builds, 59 native/boundary starts
 (58 recorded probes plus this normal review app), separately 5 SDK menu/launcher
 starts (4 incoming plus unintended launcher). No remote dispatch, 0/1.
+
+**P1 verified retained candidate:** source/build input
+`8104ed78afe26cf102f394f4d9e6f1a74215dfc0`, final installer
+`.toolchains/review-builds/ui-refresh-8104ed7/Loomlight_0.1.0_8104ed7_aarch64.dmg`,
+5,750,844 bytes; SHA-256
+`7ab87687e52120d5070c4a57b8830775737b8e57e6e6d44b7375cb5c0a1826b1`.
+Sealed executable `19a456755251ac5a7694129603fa7d2d03c124cab7af248204109d1e2d6ff1b2`.
+Release, retained seal/repack/mounted checks, artifact privacy (7 files), source hash
+manifest (132 inputs) PASS. Web build/UI browser and validation (325 files) PASS.
+
+Normal retained P1 app launched against the clean review profile. Actual WKWebView
+CUA screenshots show selector 96 physical pixels high / 48 logical at the observed
+2× display scale, 840 physical / 420 logical wide, readable text/chevron in Light
+and Dark. Native option popup retains all four presets; Custom selected; empty Width
+refuses Continue with guidance/no shape/ratio; 1080×1920 shows 9:16 bounded portrait
+and advances to Review. No project created by this inspection; returned to home
+and reopened the saved English review project. Earlier F1 normal Run/Stop reported
+Cancelled/stopped exit 0 without SDK diagnostic; user menu/first-line observation
+remains OPEN. Normal P1 Run launched for the next human check. Agent screenshot/
+native observations are separate from human acceptance.
+
+P1 changes only picker styling/test plus English scope docs relative to F1; unchanged
+SDK/transaction/backend evidence retained under its exact identities, not called a
+new full-candidate matrix. Exact final remote qualification still required after Mac
+acceptance. Counters: **13 production builds, 60 native/boundary starts**, separately
+5 SDK menu/launcher starts. Initial final production dispatch remains **0/1**.

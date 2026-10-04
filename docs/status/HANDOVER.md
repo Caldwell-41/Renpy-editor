@@ -4,54 +4,62 @@
 
 **Machine:** local macOS 26.6.2 (25G83), ARM64; Windows-PC review remains deferred.
 **Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.
-**Corrected source/build input:** `580740f85c03118b37846a2413e849a4187555bb`.
-**State:** `in_progress`; corrected installer verified, local native cases running;
-Mac physical/visual acceptance and final remote qualification remain pending.
+**Latest source:** `8104ed78afe26cf102f394f4d9e6f1a74215dfc0` (native picker P1).
+**State:** `in_progress`; F1 six packaged cases pass; P1 installer and native picker
+verification pass. Human Mac acceptance and final remote qualification remain OPEN.
 The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
-owns checks, retained failures, prepared five-step Mac review and continuation.
+retains failures, corrections, package identities and five manageable review groups.
 
-CONFIG-01 is implemented: dimensions/reduced ratio/caption, truthful empty/invalid
-Custom guidance with no preview, proportional 100×64 bounded portrait/landscape.
-Existing presets/validation and Story/Source spacing `f287a7e` are included.
-Frontend 85 passed/0 skipped, production web and Source/selection/UI browsers PASS;
-all five corrected driver browser cases PASS. Two collapsed-control omissions in
-shipped probe were fixed without relaxing rejecting assertions. Existing unchanged
-core/service evidence retained separately; browser proof is not native acceptance.
+CONFIG-01 dimensions/reduced ratio/caption, truthful invalid Custom and bounded
+proportional portrait preview are implemented, retaining presets/validation and
+sidebar spacing `f287a7e`. Normal WKWebView still rendered the select about 23px
+high; P1 targets its native appearance and 48px actual height. Focused web build,
+full UI browser with height/width assertions (both palettes/wide/compact), validation
+325 files and diff check PASS. Native P1 selector size/Custom/portrait and both palettes PASS (agent observations).
+English app support/manual projects are selected by the user; standard keyboard only,
+non-English IME/localisation outside physical acceptance. Keep lossless/UTF-8 regressions.
 
-One release build and retained seal/repack verification pass. Corrected local DMG:
-`.toolchains/review-builds/ui-refresh-580740f/Loomlight_0.1.0_580740f_aarch64.dmg`,
-5,751,732 bytes, SHA-256
-`9e6df6905f7f16d2d30ba58578e9d461d6fc8e1b5fc671d72c378d53e1abf0c1`.
-Sealed executable SHA-256
-`6114877e6f441b18d7af0186241c83506a44bba27b6ea03def5422b68710e7a9`.
-Mounted hash/execute mode/identity, ARM64, strict/deep ad-hoc seal, container integrity,
-Applications shortcut, checksum manifest and artifact privacy scan PASS.
-Not Developer ID/notarized. Original raw container and earlier packages retained.
+**F1 retained verified package:** input `28e44b0dd3a3454223f65667722419878952cb66`,
+`.toolchains/review-builds/ui-refresh-28e44b0/Loomlight_0.1.0_28e44b0_aarch64.dmg`,
+SHA-256 `c9cbb43685209886600de5ccdf491222fee36348dfaea798819ccfe01d2f2eb1`.
+All six real-SDK/native compile/lint/routes/runtime-error/UI-refresh reports PASS with
+cleanup. Earlier `580740f` failures retained; F1 fixes missing Quit confirmation UI
+only in the minimal probe fixture. Do not reclassify earlier route failures as passes.
+`/Applications` remains older `580740f`; retained P1 app is the current review copy.
 
-**Pending local operation:** retained six-case packaged real-SDK runner, exec session
-14077, summary/evidence under ignored `.toolchains/reports/final-1g-mac/`.
-Compile and lint PASS with cleanup. Route-a FAIL (307.637 s), `Timeout: source-save-click`
-while awaiting the earlier-launch revision observation; retain failure and assess on
-unlocked host. Remaining terminal evidence is not yet audited.
-The older normal app was quit through its guarded flow. CUA now reports the Mac
-locked; user asked to unlock it. Do not infer native/user acceptance or start a
-second instance while this runner owns the app. Prepared synthetic review files and
-profile-isolation/restore helper have not changed the user's application profile.
+**Active disposable review / recovery:** original whole app profile preserved intact
+at ignored `.toolchains/final-1g-mac-review/preserved-app-profile`, state `isolated`.
+Clean review profile genuinely installed official SDK 8.5.3 and created the English
+project `.toolchains/final-1g-mac-review/projects/loomlight-final-mac-review` through
+the normal wizard (1600×1000, Git enabled). Agent captured download start/ready and
+Generate/stages/create success, not intermediate measured download phases. Human
+progress observation remains OPEN. Normal Run reports Running; user game-window/
+first-line observation is pending. No physical/visual pass is inferred.
+After review: quit Loomlight/game and execute ignored `profile-session.py restore`
+with host approval; it retains the review profile and restores the original intact.
+Do not overwrite/delete either profile; private project folders remain untouched.
 
-No workflow dispatched; initial final production request **0/1**. Once local native
-checks finish, verify the actual installer copy and guide MAC-01 through MAC-05 in
-manageable steps. Preserve the existing app profile/SDKs for uncached download review;
-record user physical/visual observations separately. Only after passing Mac review,
-publish/qualify the exact candidate with required Repository quality and production
-`upload_packages=true`, then manual same-chat wait/audit and Windows transfer.
-No conflict resolution, rebase/merge, milestone closure or next feature phase.
-Counters: **11 production builds**, **48 native/boundary starts** (44 incoming +
-compile/lint/route-a/route-b); two remaining local cases queued. Separately **4 SDK
-menu starts** unchanged. Audit pending logs before updating totals.
-Fresh entry refs remain main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
-GraphQL PR base `924619d` differs from Git main. Preserve both planning worktrees.
-Source and this pause record are selected for publication on the existing branch;
-verify remote HEAD after push. Installers/logs stay ignored.
+**Current retained candidate:** P1 source `8104ed7`, verified final DMG
+`.toolchains/review-builds/ui-refresh-8104ed7/Loomlight_0.1.0_8104ed7_aarch64.dmg`,
+5,750,844 bytes; SHA-256
+`7ab87687e52120d5070c4a57b8830775737b8e57e6e6d44b7375cb5c0a1826b1`.
+Retained seal/repack/mount/integrity/identity/ARM64/checksum/privacy checks PASS.
+Normal retained P1 app is open on the clean review profile with the saved English
+project; Run launched for human menu/first-line check. F1 normal Stop completed
+Cancelled/stopped exit 0. P1 wizard actual 48px size/chevron in both palettes,
+empty Custom rejection and portrait/Review PASS through native CUA. Human acceptance
+remains OPEN; next collect game/menu/first-line and genuine progress observations,
+then guide standard-keyboard Story/Source, Branches, catalogue/Finder and final
+runtime/scaling/reopen in manageable groups. No runner pending.
+
+No remote workflow dispatched: initial final production **0/1**. Only after Mac
+review passes, publish exact candidate, required Repository quality and production
+`upload_packages=true`, record run/attempt/SHA then manual same-chat wait/audit;
+subsequently Windows transfer. No conflict resolution/rebase/merge, 1G/1H closure
+or next feature phase. Counters: **13 production builds, 60 native/boundary starts**,
+separately **5 SDK menu/launcher starts**. Original-profile restoration remains pending.
+Fresh refs last checked: main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
+PR GraphQL base `924619d` differs from Git main. Preserve planning worktree.
 
 ## Earlier selected next-agent handover — 2026-10-04
 

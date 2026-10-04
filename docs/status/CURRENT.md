@@ -7,37 +7,38 @@
 
 ## Live continuation
 
-**Final Mac completion in progress; physical/visual acceptance remains open.**
-Corrected source/build input `580740f85c03118b37846a2413e849a4187555bb` completes
-CONFIG-01 and includes Story/Source spacing `f287a7e`. The
-[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
-contains focused checks, driver failures/corrections, installer and planned Mac review.
+**Final Mac completion in progress; human acceptance remains open.**
+Latest source `8104ed78afe26cf102f394f4d9e6f1a74215dfc0` fixes actual Mac picker
+height after CONFIG-01 preview completion; retains sidebar `f287a7e`. Focused web/UI
+browser checks PASS. P1 ARM64 installer/mounted/privacy checks PASS; native 48px picker, both palettes,
+invalid Custom and portrait/Review checks PASS as agent observations.
+The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
+and HANDOVER retain exact operations, failures, packages and recovery.
 
-| Capability | Implementation / automated evidence | Native / human acceptance |
-| --- | --- | --- |
-| Resolution picker and sidebar spacing | 85 frontend tests; web/Source/selection/full UI browser PASS; bounded proportional valid previews and truthful invalid Custom | Physical/visual review OPEN |
-| Runtime diagnostic and Advanced driver | Both collapsed controls revealed via Summary; all five rendered driver cases PASS | Local compile/lint PASS; route-a timeout retained, Mac locked; other reports pending |
-| Corrected ARM64 installer | One build at `580740f`; mounted payload/signature/identity/integrity/checksums/privacy PASS | Local packaged verification in progress; final Mac review OPEN |
-| Final candidate qualification | No production dispatch (0/1) | After Mac review; Windows-PC 14-row review later; integration separate |
+All six corrected F1 real-SDK/native cases PASS at `28e44b0`; verified package:
+`.toolchains/review-builds/ui-refresh-28e44b0/Loomlight_0.1.0_28e44b0_aarch64.dmg`,
+SHA-256 `c9cbb43685209886600de5ccdf491222fee36348dfaea798819ccfe01d2f2eb1`.
+P1 supersedes it for changed-picker acceptance; its DMG is
+`.toolchains/review-builds/ui-refresh-8104ed7/Loomlight_0.1.0_8104ed7_aarch64.dmg`,
+SHA-256 `7ab87687e52120d5070c4a57b8830775737b8e57e6e6d44b7375cb5c0a1826b1`.
+Earlier route failures are retained.
+English-only app/manual review scope is selected; standard keyboard, no IME gate.
+Existing source preservation/UTF-8 regression coverage remains.
 
-Final ignored DMG:
-`.toolchains/review-builds/ui-refresh-580740f/Loomlight_0.1.0_580740f_aarch64.dmg`,
-SHA-256 `9e6df6905f7f16d2d30ba58578e9d461d6fc8e1b5fc671d72c378d53e1abf0c1`.
-Older `b6cc06b` package is superseded for review. Synthetic media and projects directory
-are prepared; guarded original-profile preservation/restore helper is not executed.
+**Active review profile:** original app profile is preserved intact under ignored
+`.toolchains/final-1g-mac-review/preserved-app-profile`; clean profile active. Fresh
+English normal-wizard project created successfully with genuinely downloaded SDK
+8.5.3. Normal Run reports Running; user game/menu/first-line observation pending.
+Human SDK/create progress, keyboard/Finder/scaling/runtime/reopen observations remain
+OPEN. Restore original profile after review via guarded helper with app/game quit.
 
-Next: unlock the Mac (CUA reported it locked), finish/audit the pending six-case local
-packaged runner recorded in HANDOVER, then guide five manageable Mac review groups.
-Record physical/IME/Finder/live SDK/create/runtime/scaling/reopen observations separately.
-After Mac passes, publish the exact candidate and run required remote quality/production
-qualification with retained packages, manual same-chat wait, then transfer to Windows.
+No CI operation pending; production dispatch **0/1**, only after Mac review passes.
+No local runner pending; P1 normal app open for human review. Counters: 13 production
+builds, 60 native/boundary starts and separately 5 SDK menu/launcher starts.
+Remote qualification, Windows-PC 14-row review and final separate integration remain.
 Do not resolve PR #17, rebase/merge/close 1G/1H or start a feature phase.
-
-No CI operation pending. Counters: 11 production builds, 48 native/boundary starts (44 incoming + four
-confirmed local starts), two local cases queued; separately 4 SDK menu starts.
-Entry feature `a15e923`, main `4d7ba03`, remote planning `267ec2a`, separate local
-worktree `2c5a164`, PR OPEN/draft/CONFLICTING preserved. Earlier records below are
-historical and do not override this live continuation.
+Entry feature `a15e923`, main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
+preserve newer separate work. Historical records below do not override continuation.
 
 **Previous Branches correction:**
 Option B source `88add80` implements heavier rounded routes, distinct channels,

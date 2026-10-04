@@ -64,7 +64,9 @@ with cancellation and protected-boundary checks, while native OS asset-drop owne
 remains enabled. Local verification does not establish native acceptance; the user
 explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
-The CONFIG-01 resolution block shows dimensions and their reduced aspect ratio with
+The CONFIG-01 resolution select uses a rendered 48-pixel height and 16-pixel text,
+with a theme-aware chevron while retaining native option/keyboard semantics.
+The resolution block shows dimensions and their reduced aspect ratio with
 the caption “Game resolution, not editor size.” Valid previews preserve proportions
 within 100 × 64 logical pixels, including portrait resolutions. Empty or invalid
 Custom input shows guidance without a shape or ratio; preview and Continue share
