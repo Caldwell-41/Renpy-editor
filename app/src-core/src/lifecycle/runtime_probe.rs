@@ -151,6 +151,9 @@ impl LifecycleService {
             r##"define config.name = "Runtime UI fixture"
 define config.sound = False
 define config.developer = False
+# This minimal fixture has no confirm screen. An editor-owned Stop must quit
+# directly rather than fail inside the SDK's fallback confirmation layout.
+define config.quit_action = Quit(confirm=False)
 image oracle_asset = Solid("#335577")
 default route_state = "unset"
 screen main_menu():

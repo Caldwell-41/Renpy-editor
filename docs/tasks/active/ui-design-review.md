@@ -2958,3 +2958,49 @@ isolation helper remains unexecuted. No remote dispatch; production allowance **
 Counters now 11 production builds; incoming 44 native/boundary starts plus currently
 started local cases (see pending logs); separate 4 SDK menu starts unchanged. Final
 Mac acceptance, remote qualification, Windows transfer and integration remain open.
+
+
+**Same-chat unlocked resume — 2026-10-04:** user says ready. Clean local/remote
+feature `273b8e7`; main remains `4d7ba03`. Installed Applications executable matches
+sealed candidate `580740f` digest exactly; normal app is at Welcome, no open project.
+Original runner handle expired and no runner/probe remains. Compile/lint retain their
+positive reports. Route-a negative report additionally records SDK quit-prompt error
+(`Layout.yesno_prompt`) after route readiness; no source fix inferred from it.
+Route-b log contains one failed `native-watchdog` report with cleanup true; wrapper
+JSON/exit evidence is missing. Runtime-error/UI-refresh never started. Preserve this
+incomplete run; do not fabricate wrapper success. CUA access now works on unlocked Mac.
+
+Selected next discriminating action: quit the idle normal app through the UI; rerun
+only route-a/route-b under unlocked conditions, then execute missing runtime-error/
+ui-refresh once. Exact same retained sealed candidate/SDK archive, separate output
+`final-1g-mac/unlocked-native/`, bounded existing runner and original assertions.
+No repeat of unchanged compile/lint successes; no build or remote dispatch. This is
+local environment recovery/assessment, not a package matrix retry or pass waiver.
+If unlocked failure repeats, reassess actual failing stage/driver/fixture before any
+further run. Incoming counters remain 11 builds, 48 automated/native starts; these
+four selected starts add only as actually launched. User physical review remains OPEN.
+
+
+**Unlocked discrimination — fixture Stop defect confirmed:** route-a again FAIL,
+227.965 s, same misleading retained stage `source-save-click`. Its actual progress
+includes long-run duration after the Save; the pending expectation is Cancelled/Stop,
+while native runtime reports a real SDK quit-prompt error. CUA revealing the runtime
+panel confirms the error rather than a still-dirty Source. The official local 8.5.3
+`Quit` implementation defaults to confirmation outside the main menu and calls
+`layout.yesno_screen`, matching the failing `Layout.yesno_prompt` traceback. The minimal
+probe's screens omit any quit confirmation. This changes classification from a purely
+provisional lock explanation to a **confirmed fixture defect**, with lock delay retained
+as a separate observed limitation. No product error is hidden or accepted.
+
+Bounded correction hypothesis F1: give only the minimal explicit native-test fixture
+`config.quit_action = Quit(confirm=False)`. It has no confirm UI and editor-owned Stop
+already owns cleanup; production generated games and runtime diagnostic behavior stay
+unchanged. Preserve all assertions (normal route duration, Save/earlier revision,
+Cancel close, Stop status, disk reopen, positive report/cleanup). Build a corrected
+candidate because this fixture is compiled into the probe-capable desktop binary;
+`580740f` installer remains historical review input, not the final corrected candidate.
+One changed-input local build is justified. Verify F1 with the real SDK/native route
+cases, plus affected fixture compile/lint and missing runtime-error/UI-refresh; no
+remote dispatch before Mac acceptance. No identical-success matrix repeat or third
+same-hypothesis correction. Old/unlocked reports stay in their original directories.
+Physical keyboard standard only (user report); IME composition **UNAVAILABLE**, not PASS.

@@ -847,6 +847,12 @@ hosted Chromium and packaged WebView evidence distinct.
 
 ### 1G.2b named packaged scenarios
 
+The minimal SDK runtime probe fixture supplies `config.quit_action = Quit(confirm=False)`
+because it intentionally has no confirmation screen. Ordinary editor-owned Stop must
+reach the retained Cancelled/cleanup assertions rather than fail in the SDK's fallback
+quit layout. Production generated-game quit behavior and runtime error reporting are
+unchanged; do not suppress diagnostics or loosen Stop assertions to compensate.
+
 The existing production workflow now includes the explicit R1 SDK service and R2
 compile/lint navigation tests, plus five independent real-service package cases:
 `compile`, `lint`, `route-a`, `route-b`, and `runtime-error`. The native-only fixture
