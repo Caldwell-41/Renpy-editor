@@ -31,3 +31,15 @@ test("workspace observations finish before early Source navigation uses the shar
     assert.deepEqual(calls,[operation,"source.list"]);
   }
 });
+
+test("Close Project waits for a saved-state observation and dispatches exactly once",async()=>{
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;let checkedOut=false;
+  const observation=lane.run("project.status",async()=>{checkedOut=true;calls.push("status");await new Promise<void>(resolve=>{release=resolve;});checkedOut=false;});
+  await Promise.resolve();
+  const close=lane.run("project.close",async()=>{calls.push("close");if(checkedOut)throw new Error("RUNTIME_BUSY");return "closed";});
+  // Observe failure immediately without leaving an unhandled rejected promise.
+  const outcome=close.then(value=>({value}),error=>({error}));
+  try{await Promise.resolve();assert.deepEqual(calls,["status"],"Close must wait for the host's checked-out service, without replaying the write");}
+  finally{release();await observation;await outcome;}
+  assert.equal(await close,"closed");assert.deepEqual(calls,["status","close"]);
+});

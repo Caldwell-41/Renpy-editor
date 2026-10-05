@@ -30,7 +30,11 @@ try {
   await page.keyboard.press("Tab");
   assert.equal(await page.evaluate(()=>document.activeElement.textContent),"Trust for this session and continue");
   await page.getByRole("button",{name:"Trust for this session and continue"}).click();
-  await page.getByRole("button",{name:"Open game/雪 diagnostic.rpy:2",exact:true}).waitFor();
+  const diagnostic=page.getByRole("button",{name:"Open game/雪 diagnostic.rpy:2",exact:true,includeHidden:true});
+  await diagnostic.waitFor({state:"attached"});
+  assert.equal(await diagnostic.isVisible(),false,"Diagnostics start collapsed");
+  await page.locator(".runtime-diagnostics details summary").click();
+  await diagnostic.waitFor();
   for(const width of [1100,640]){
     await page.setViewportSize({width,height:720});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);

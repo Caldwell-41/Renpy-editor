@@ -3560,3 +3560,63 @@ candidate/retained installer/14-row prompt. Windows physical review and later se
 PR conflict resolution/combined qualification/integration remain deferred. No merge,
 rewrite, closure/1H/new feature. No Goal lifecycle created; ending the turn stops model
 polling and does not claim a verified live-Goal pause.
+
+
+**P5 terminal audit / P6 and F2 — 2026-10-05:** production 37307663113 attempt 1,
+exact cab39e1, FAILED; required Repository quality 37307638008 remains PASS for that
+candidate. Preflight and both frontend/Source/selection/UI/shipped-driver/format gates
+PASS. Core routine selectors PASS (Mac 187/40 ignored, Windows 182/37 ignored, each
+3 filtered) plus actual independent enforced flow/lifecycle/download/SDK diagnostics/
+desktop gates. Branches browser PASS with timing diagnostics retained under TEST-P2.
+Runtime browser has failure outcome on BOTH hosts, though continue-on-error normalizes
+its step conclusion; mandatory deferred enforcement correctly FAILS both jobs.
+
+F2 confirmed stale harness: runtime-ui.browser waits at line 33 for the hidden
+`Open game/雪 diagnostic.rpy:2` button inside a closed details row. Local unchanged
+script reproduces that same timeout. Locate attached hidden control, assert initially
+collapsed, explicitly click the disclosure summary, then require visible control and
+unchanged focus/1100px/640px/page-error assertions. First local correction omitted
+includeHidden on the role locator and still timed out; retained intermediate failure.
+Corrected locator PASS in 0.869s. No product diagnostic layout or Unicode/UTF-8 guard
+changed, no navigation assertion/timeout relaxed. This is one harness alignment fix.
+
+Mac packaged cases: compile/lint/route-b/runtime-error/ui-refresh PASS, route-a FAIL
+62.743s exit 1, cleanup true. Route-a saved/stale/Running >9.5s/Stop all passed, Stop
+reports Cancelled/stopped exit 0; timeout is later close/reopen with Clean Source,
+Saved status, no runtime modal/notice. Windows all six cases PASS/cleanup true, both
+route measured-font/Save/Stop/reopen cases and full boundary smoke PASS. Mac boundary
+smoke/licence inventory skipped, both success-only installer uploads skipped. These
+missing gates remain open; Windows hosted results are not Windows-PC verification.
+
+Artifacts 11345087791 (macos-26) / 11345392511 (windows-2025) are retained under
+ignored remote-p5-artifacts alongside whole-run logs/API metadata/inventory. Both
+input manifests match all 132 candidate/P5 inputs, runtime-input file hashes and
+retained payload hashes verified. Mac retained App tar SHA256
+8ab413c7a204459938d64e62489fc6969dfa9608d825ce9540c29c38aa4715af;
+Windows retained executable 7f2a8eca3be415f176ac6764157e79e50203a3183002864233055486a6d661f5.
+These failed-candidate payloads are not passing final installers. No artifact expiry,
+cleanup failure, skipped native result or deferred browser error is called success.
+
+P6 cause hypothesis: project.close bypasses RequestLane while the terminal poll's
+refreshPersistence project.status (unlike independent runtime.status) checks out the
+shared service. dispatch.rs confirms ordinary concurrent requests are rejected before
+dispatch with RUNTIME_BUSY; request-lane regression holds saved-state read and rejects
+premature close/exactly-once contract on unchanged code. Queueing project.close fixes
+that confirmed collision and never replays the write. Runtime Stop/token controls
+remain independent. Precise failing native request interleaving was not captured;
+this mechanism is consistent with the Mac evidence, not proof of its sole CI cause.
+Driver now records close-after-stop-requested/completed and bounded modal/recent/Welcome
+state on failure; no retry or longer deadline. Both browser shipped route drivers PASS
+with those stages; 87 frontend tests PASS/0 skipped. Product P6 first correction only.
+
+Fresh feature 380813a / main 4d7ba03 / separate planning worktree 2c5a164 preserved.
+Local totals before next build 17 builds / 69 native starts / 7 separate SDK starts;
+this remote run adds 2 package builds / 14 app starts (Mac six, Windows six plus two
+boundary processes), recorded separately rather than inventing historical totals.
+Initial final allowance 1/1 used, correction dispatches 1. Next one pinned P6 package,
+focused native route-a/route-b close/Save/Stop/reopen proof, then a justified changed-
+input correction qualification after Mac PASS. New renderer ordering affects both
+platforms; the prior Windows job was failed by its runtime-browser gate, so no unchanged
+successful full matrix is duplicated. Full production run still required on corrected
+coherent inputs. Preserve failures and manual same-chat wait; no specialist/performance
+expansion, ambiguous retry, Windows-PC claim, conflicts/integration/closure/new phase.

@@ -1024,3 +1024,6 @@ and existing Source draft leave flow as Close Project. The narrow desktop-only
 requires the core service to have no open project plus confirmed process cleanup before
 exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
 retain their existing independent harness behavior. OS termination still uses shutdown.
+Project closure is ordered behind shared-service saved-state observations and Source
+retention, so a passive read cannot race its single close request. Runtime Stop and
+other token-bound controls stay independent; ambiguous writes are never replayed.

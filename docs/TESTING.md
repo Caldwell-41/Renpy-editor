@@ -891,6 +891,13 @@ and JSON, exact Git inputs/target/executable digest, core/SDK logs and package a
 when requested. Both supported targets must pass on the coherent candidate. No
 native-keyboard or human acceptance claim is inferred from synthetic DOM events.
 
+The final 1G close regression holds a saved-state read while Close Project is selected,
+rejects premature shared-service dispatch and requires exactly one close after release.
+Packaged route drivers report close-after-Stop request/completion separately before
+reopen; failed reports retain Welcome/recent/button/modal state. The standalone runtime
+browser expands the initially collapsed diagnostic disclosure before checking its
+visible navigation control, then retains its focus/1100px/640px overflow checks.
+
 ### Observed-flow qualification
 
 The production workflow and the bounded `quality.yml` flow-profile dispatch select

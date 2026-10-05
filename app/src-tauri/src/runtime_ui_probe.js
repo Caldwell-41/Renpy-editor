@@ -198,7 +198,9 @@
         await click("Stop"); await until(() => /Cancelled \/ stopped/.test(document.querySelector('.runtime-panel [role="status"]').textContent));
         await until(() => find("Run Game") && !find("Run Game").disabled);
         checkpoint("long-run-save-stop-passed");
-        await click("Close Project"); await click("Runtime UI fixture");
+        checkpoint("close-after-stop-requested");await click("Close Project");
+        await until(()=>document.querySelector('.welcome')&&find("Runtime UI fixture"),15000);
+        checkpoint("close-after-stop-completed");await click("Runtime UI fixture");
         await until(() => find("Run Game")); await settled();
         const next = await read("project.current"); assert(next.sessionId !== sessionId,"reopen has new session identity");
         const reopened=await read("source.open",{sessionId:next.sessionId,path:"game/雪 diagnostic.rpy"});
@@ -210,6 +212,6 @@
     checkpoint("complete");
     await call("probe.runtimeUiReport",{passed:true,stage,stages,branchLabels,layer:"packaged WebView, synthetic DOM input, real IPC/service/SDK",nativeKeyboard:false});
   } catch (error) {
-    await call("probe.runtimeUiReport",{passed:false,stage,stages,sourceState:document.querySelector(".source-document-state")?.textContent,sourceBusy:document.querySelector(".source-workspace")?.dataset.sourceBusy,saveTrace:window.__loomlightReadSaveTrace?.(),error:String(error),runtimeStatus:document.querySelector('.runtime-panel [role="status"]')?.textContent,notice:document.querySelector('.runtime-panel [role="alert"]')?.textContent,appStatus:document.querySelector("#app-status")?.textContent,output:document.querySelector(".runtime-output")?.textContent?.slice(-8192),dialog:document.querySelector(".runtime-dialog")?.textContent?.slice(0,2000),elapsedMs:Math.round(performance.now()-started)});
+    await call("probe.runtimeUiReport",{passed:false,stage,stages,sourceState:document.querySelector(".source-document-state")?.textContent,sourceBusy:document.querySelector(".source-workspace")?.dataset.sourceBusy,saveTrace:window.__loomlightReadSaveTrace?.(),error:String(error),runtimeStatus:document.querySelector('.runtime-panel [role="status"]')?.textContent,notice:document.querySelector('.runtime-panel [role="alert"]')?.textContent,appStatus:document.querySelector("#app-status")?.textContent,output:document.querySelector(".runtime-output")?.textContent?.slice(-8192),dialog:document.querySelector(".runtime-dialog")?.textContent?.slice(0,2000),closeState:{welcomePresent:!!document.querySelector('.welcome'),recentCount:document.querySelectorAll('.recent-open').length,closeButtonPresent:!!find("Close Project"),modal:document.querySelector('[aria-modal="true"]')?.textContent?.slice(0,1000)},elapsedMs:Math.round(performance.now()-started)});
   }
 })();

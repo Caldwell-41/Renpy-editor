@@ -7,54 +7,43 @@
 
 ## Live continuation
 
-**State: awaiting_ci — correction run, manual same-chat resume.** Published and
-verified candidate `cab39e101af7a3cb37c10d207f9af31b2450818d` on the existing
-`feature/phase-1g-branches-runtime`; 132 app/workflow inputs equal tested P5 package
-source `0e3077df10bd713ca1d956dfc84be2bd8384eb16`. PR #17 remains open/draft/
-conflicting; no integration. Original user profile restored; disposable evidence kept.
+**State: correcting terminal P5 qualification failures (P6 / F2).** Run
+37307663113 attempt 1 on `cab39e101af7a3cb37c10d207f9af31b2450818d` is FAILED.
+Preflight and measured Branches labels PASS on all runners. Both platform jobs fail
+the deferred runtime-browser result: a stale test waits for a diagnostic inside its
+collapsed disclosure. Mac also fails packaged route-a while closing/reopening after
+Stop (62.743s; Stop exit 0, cleanup true); 5/6 Mac cases PASS, all 6 Windows cases
+PASS and Windows boundary smoke PASS. Mac boundary/licence gates and both final
+installer uploads skipped; no passing final package candidate is claimed.
 
-- Repository quality [37307638008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307638008), attempt **1**, workflow_dispatch, exact cab39e1 SHA above: **PASS**. Actual required Validate repository job and all steps success; optional diagnostic/profile jobs intentionally skipped by false selectors.
-- Production [37307663113](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307663113), attempt **1**, workflow_dispatch, exact cab39e1 SHA above, `upload_packages=true`: confirmed **in_progress / Preflight** at the initial identity read (2026-10-05 about 12:11 UTC). No acceptance or installer retention claimed yet.
+Both failure-evidence artifacts retained locally and input/payload hashes verified:
+132 inputs equal cab39e1/P5. Failed package payloads are diagnostic evidence, not the
+selected Windows installer. Full log/metadata/browser outcomes/case reports retained;
+original failed 37300975410 remains failed too. Repository quality 37307638008 PASS
+belongs to cab39e1. Fresh feature head 380813a, main 4d7ba03 and planning worktree
+2c5a164 unchanged. No conflict/integration work or private profile mutation.
 
-Initial final dispatch **1/1 consumed**; justified changed-input correction dispatches
-**1**. Neither package matrix started in the failed original run 37300975410 attempt
-1 on 94ffa25; that run remains FAILED in label-clipping browser preflight with no
-artifacts, full failure log/job metadata/inventory preserved. No duplicate successful
-matrix, ambiguous dispatch/retry or pending local runner. Counters **17 builds / 69
-native starts / 7 separate SDK menu/launcher starts**; remote package counts await audit.
+P6 confirmed mechanism: Close Project bypasses the request lane while a project.status
+read can own the checked-out service. A rejecting regression reproduces premature
+close/RUNTIME_BUSY; queueing project.close behind observations fixes this without
+replaying writes or blocking independent Stop controls. This matches the Mac failure
+but its precise request interleaving was not recorded, so sole CI causality remains
+an inference. F2 standalone browser correction expands the diagnostic disclosure;
+closed-state/visibility/focus/resize assertions remain. 87 frontend tests/0 skipped,
+corrected runtime browser and both shipped route drivers PASS; pinned package/native
+verification pending. Prior unchanged Mac interaction evidence stays on its real inputs.
 
-P5 Mac acceptance PASS: 86 frontend tests/0 skipped, both-font/palette/three-width UI
-browser and all five finalized shipped runtime drivers; format/self-review/repository
-checks. Exact native route-a 37.016s / route-b 36.007s PASS, each exit 0 and cleanup
-true, measured 49.0529785/49.6357422px SVG captions in 70px pills/Fit bounds; real SDK
-Run >9.5s, edited destinations, Save/Stop/reopen and route-b refusal/Cancel. Synthetic
-selection/real IPC/SDK remains distinct from physical keyboard. Five Branch UI/test/
-probe inputs changed and 127 unchanged; prior unaffected picker/sidebar/catalogue/
-import/Finder/progress/diagnostic/English-input evidence is reused by interaction
-impact only. Intermediate browser-command/report-variable failures remain failed in
-the ledger, with corrected component proof separately recorded.
-
-Verified corrected local ARM64 installer: ignored
-`.toolchains/review-builds/ui-refresh-0e3077d/Loomlight_0.1.0_0e3077d_aarch64.dmg`,
-5,752,010 bytes; SHA-256 `d0154be1e24dca11a80fb1bef300d7cceded0f1bd84504c09f9f92fbdb671797`.
-Sealed executable `3e8ee00ea907e1ac3abe4aac916f3580bd162f1a06674af5634d2dde0b283f80`.
-Mounted identity/ARM64/integrity/signature/hash/privacy PASS; locally ad-hoc signed,
-not Developer ID/notarized. Installed app untouched; prior packages preserved.
-
-Manual SAME-chat wait: stop model polling. Resume: “Audit production run 37307663113
-attempt 1 on cab39e1.” Inspect that recorded operation plus fresh refs/worktrees/diff.
-If pending, pause again without a loop or dispatch. If terminal, audit required
-preflight, both platform gates, real-SDK/native reports, cleanup, exact input manifests
-and success-only retained installers; classify and preserve failures. Only necessary
-changed-input fixes and justified affected reruns remain authorized. After required
-remote PASS prepare the exact passing candidate/retained Windows installer/14-row
-Windows-PC prompt. Windows physical review, PR conflict resolution, combined-input
-integration, phase closure/1H/new features remain deferred. No Goal lifecycle was
-created; ending this turn stops model polling, not a claimed live-Goal pause.
-
-This wait record follows tested cab39e1 with no app/workflow input change. Validate,
-publish and verify it without another package matrix; its commit SHA does not replace
-the recorded tested candidate or make earlier green builds qualify later inputs.
+Initial final dispatch 1/1 consumed; changed-input correction dispatches 1. Local
+counters 17 builds / 69 native starts / 7 separate SDK starts. This failed remote run
+additionally executed 2 package builds / 14 app starts (Mac six cases, Windows six
+plus two boundary processes); do not fold historical remote work into these counters.
+Continue this SAME chat with focused P6/F2 verification, one pinned corrected installer
+and affected native routes. After Mac PASS, publish and justify the next changed-input
+existing production qualification with upload_packages=true; preserve every failure,
+confirmed run/attempt/SHA and manual wait. No unchanged successful full matrix exists
+in this run. Windows transfer remains gated on required remote PASS. No retry of an
+ambiguous dispatch, threshold waiver, Windows-PC test, conflict resolution, rewrite,
+merge, closure/1H or new feature. No Goal lifecycle created.
 
 **Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
