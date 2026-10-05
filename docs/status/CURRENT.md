@@ -7,47 +7,44 @@
 
 ## Live continuation
 
-**Agent-owned final Mac review in progress; locked desktop blocks native input.**
-Latest source `8104ed78afe26cf102f394f4d9e6f1a74215dfc0` fixes actual Mac picker
-height after CONFIG-01 preview completion; retains sidebar `f287a7e`. Focused web/UI
-browser checks PASS. P1 ARM64 installer/mounted/privacy checks PASS; native 48px picker, both palettes,
-invalid Custom and portrait/Review checks PASS as agent observations.
-The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
-and HANDOVER retain exact operations, failures, packages and recovery.
+**Agent-owned final Mac review in progress on unlocked desktop.** Source/build input
+`4b77b547f53b3f2a6f2c85f9c7e6d7d90a4a19e7` includes CONFIG-01, native P1 picker,
+sidebar `f287a7e` and P2 Source keyboard-Save focus restoration. Focused 85 frontend
+checks/0 skipped, web build, Source save/focus/selection and UI browser PASS.
+Native picker/both palettes/invalid/portrait and Source Save → continued typing/paste
+PASS. Eight-assertion English SDK menu testcase PASS on unlocked disposable copy;
+locked failure retained. Standard English keyboard support selected; no IME gate.
 
-All six corrected F1 real-SDK/native cases PASS at `28e44b0`; verified package:
-`.toolchains/review-builds/ui-refresh-28e44b0/Loomlight_0.1.0_28e44b0_aarch64.dmg`,
-SHA-256 `c9cbb43685209886600de5ccdf491222fee36348dfaea798819ccfe01d2f2eb1`.
-P1 supersedes it for changed-picker acceptance; its DMG is
-`.toolchains/review-builds/ui-refresh-8104ed7/Loomlight_0.1.0_8104ed7_aarch64.dmg`,
-SHA-256 `7ab87687e52120d5070c4a57b8830775737b8e57e6e6d44b7375cb5c0a1826b1`.
-Earlier route failures are retained.
-English-only app/manual review scope is selected; standard keyboard, no IME gate.
-Existing source preservation/UTF-8 regression coverage remains.
+P2 verified ARM64 installer:
+`.toolchains/review-builds/ui-refresh-4b77b54/Loomlight_0.1.0_4b77b54_aarch64.dmg`,
+SHA-256 `0d0e3bdc123f861763e86e2ba27548633ab3f597debb58b4eaec94c1f2d33a2c`.
+Mounted identity/signature/integrity/ARM64/checksum/privacy PASS. Review uses retained
+P2 app, installed `/Applications` copy stays older. F1 six real-SDK/native reports and
+all superseded/failed evidence remain; changed behavior needs current proof.
 
-**Active review profile:** original app profile is preserved intact under ignored
-`.toolchains/final-1g-mac-review/preserved-app-profile`; clean profile active. Fresh
-English normal-wizard project created successfully with genuinely downloaded SDK
-8.5.3. Normal Run reports Running; user game/menu/first-line observation pending.
-The user selected agent-run objective/visual review with tooling gaps reported.
-Native Source action was refused because Mac is locked; user asked only to unlock
-and reply Ready. Fresh English copied-project SDK menu testcase timed out, no PASS;
-original source hashes unchanged, failure retained. Reassess after unlock. Native
-keyboard/Finder/scaling/runtime/reopen/progress remain OPEN; subjective feedback is
-optional and agent observations are not physical human typing. Restore original
-profile after review via guarded helper with app/game quit.
+Native real-image/empty Character Grid/List, appearance selection/edit/default,
+bool/int/string Variables and discard/reopen PASS. Native Browse multi-file previews,
+remove/Add/cancel/Keep editing and one background/music import PASS. Documents image
+selection stalled on macOS TCC directory-open permission (stack/log proof), not proved
+dialog defect; CUA cannot access its permission alert. Temporary-folder selection
+completes without changing broader permissions. Finder cross-app desktop geometry
+unavailable through tool; one concise physical drop request pending. Story/Branches,
+final runtime/diagnostic/scaling/reopen and measured SDK download phases remain OPEN.
+Agent observations are separate from human physical acceptance; feedback optional.
 
-Latest source/evidence after published `273b8e7` are LOCAL ONLY. Automatic approval
-review refused pre-Mac-review publication; retain local checkpoints and publish at
-the selected gate. Normal P1 English game reports Running without SDK diagnostic.
+Original whole profile is preserved intact in ignored review files; clean profile
+active with genuinely installed SDK 8.5.3 and normal-wizard English 1600×1000 project.
+Restore it with guarded helper after app/game quit before final transfer. Private
+project folders untouched. Exact evidence/continuation is in HANDOVER and the
+[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04).
 
-No CI operation pending; production dispatch **0/1**, only after Mac review passes.
-No local runner pending; P1 normal app open for human review. Counters: 13 production
-builds, 60 native/boundary starts and separately 6 SDK menu/launcher starts.
-Remote qualification, Windows-PC 14-row review and final separate integration remain.
-Do not resolve PR #17, rebase/merge/close 1G/1H or start a feature phase.
-Entry feature `a15e923`, main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
-preserve newer separate work. Historical records below do not override continuation.
+All checkpoints after verified origin `273b8e7` are LOCAL ONLY; early publication was
+rejected by automatic approval review before the selected Mac gate. No push/workflow
+pending; initial final production **0/1**, after Mac PASS only. Counters: **14 builds,
+62 native/boundary starts**, separately **7 SDK menu/launcher starts**. Remaining:
+remote qualification, Windows-PC 14-row exact-candidate review, separate integration.
+No PR #17 conflicts/rebase/merge/1G/1H closure or new feature phase. Preserve newer
+local planning-doc merge `353f1f7`, its no-push instruction and planning worktree.
 
 ### Local planning documentation merge — 2026-10-05
 

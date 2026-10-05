@@ -3193,3 +3193,67 @@ imported file appeared. Brief local stack sample retained ignored at
 which does not establish a backend deadlock. Normal Cmd-Q quit succeeded. Preserve
 observation and reassess once in fresh corrected P2 session; no unbounded retries,
 no forced profile discard, no product cause claimed yet.
+
+**P2 package/native proof — 2026-10-05:** source/build input `4b77b547f53b3f2a6f2c85f9c7e6d7d90a4a19e7`,
+retained final ARM64 installer `ui-refresh-4b77b54/Loomlight_0.1.0_4b77b54_aarch64.dmg`
+under ignored review-builds, 5,751,006 bytes, SHA-256
+`0d0e3bdc123f861763e86e2ba27548633ab3f597debb58b4eaec94c1f2d33a2c`.
+Sealed executable `bec88eec76dc01fbb6a2a9c3c38bbbd1a2b29368fea36bebddfd363bb5e29be6`;
+release, retained seal/repack/integrity/read-only mount/identity/ARM64/checksum and
+privacy checks PASS. Native Source Command-S followed immediately by typing PASS;
+native paste/save restores exact original Scene bytes and remains focused/clean.
+No new core/SDK matrix: those inputs unchanged. This package includes P1/F1/sidebar.
+
+**Appearance wait classification:** fresh P2 reopened the saved happy appearance.
+A second normal selection from the review assets folder stalled before importing
+calm. A full stack inspection (both retained samples) identifies `select_import` →
+`DirectoryAnchor::open_root` → native `open`, not a renderer or native-dialog deadlock.
+Scoped macOS permission log confirms a pending Documents-folder TCC prompt and
+changed ad-hoc code requirement. The first provisional “idle” reading was incomplete;
+the earlier observation is not a proved failed import. Browser now explicitly waits
+for Character Save dialog closure and PASS; the simple orphan-dialog hypothesis is
+rejected, no application fix applied. Sandbox-refused localhost attempt retained;
+approved local browser run completed. Evidence stays ignored in final-1g-mac.
+
+CUA refuses access to UserNotificationCenter for safety reasons, so that permission
+alert cannot be inspected/answered by the agent. No broader Documents permission was
+granted or TCC protection changed. Normal Cmd-Q removed the window but left the
+permission-blocked review process; scoped TERM ended only that disposable process
+before a fresh start. No calm import existed then. Changed-input reassessment uses
+the same synthetic PNG copied to the temporary folder: native Browse/Open completes,
+dialog closes, Saved appears, two appearances render. Select non-default calm → Edit
+Character → Save retains calm and closes the dialog. This classifies the wait as a
+host permission limitation; it does not qualify an unanswered Documents prompt.
+Native real happy/calm media are proportional and legible in cards/details.
+Counters now **14 production builds, 62 native/boundary starts**, separately **7 SDK
+menu/launcher starts**. No push or remote dispatch; final Mac review still OPEN.
+
+**Catalogue/Browse continuation:** native mixed Alex image/Morgan empty rows and
+cards align; default calm changes card media; Variable bool false/int 42/string
+English text share aligned headers/cells. A dirty Boolean form asks discard and
+reopens empty/default False. Four supported native chooser selections stage actual
+PNG dimensions/decoded previews and WAV file information. Remove calm/happy leaves
+background/audio; Add files → native Cancel retains staging; close asks discard,
+Keep editing preserves it; one Import creates exactly four distinct total media
+files (two prior appearances plus background/music). Ignored hashes/byte counts in
+`native-import-evidence.json`; no imported-row replay or private content.
+
+Q1 source selector audit, rejection self-test and nine package-retention tests PASS;
+repository validation 340 files/diff check PASS. Fresh remote heads unchanged:
+feature `273b8e7`, main `4d7ba03`, planning `267ec2a`; preserve local merge/worktree.
+No build for this test/evidence-only change: app code remains P2. Added explicit
+Character Save dialog-close assertion passes on existing full browser; its named
+`catalog-dialog-red-corrected.log` is a passing hypothesis check, not product red.
+
+**Actual wait/continuation:** Finder opened the temporary synthetic-media folder;
+initial CUA binding took 272.529 s, later navigation worked. The documented API exposes
+separate cropped app windows and no shared desktop positions, so a reliable Finder
+cross-app drop cannot be driven from observed coordinates. User asked for a clickable
+folder link; supplied in this chat. Await their drop of background/WAV/unsupported
+text into Assets, leave unimported; inspect staged supported rows/unsupported error,
+then discard duplicate staging. This human result stays separate from Browse PASS.
+Continue same Mac chat with native Story/sidebar/focus, prepared ASCII saved Branches
+payload and mapped-input checks, affected P2 runtime/routes/diagnostic/scaling/reopen
+and missing intermediate genuine download observation. Prepared Branches payload is
+outside the active project and has not been applied. Original profile remains safely
+preserved; restore before final transfer. No runner/remote dispatch/push pending.
