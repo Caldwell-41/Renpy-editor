@@ -27,6 +27,11 @@
   check(characters.characters.some(c=>c.technicalName==='native_bec'&&c.displayName==='Native Bec'&&c.dialogueColor==='#c5c8d0'),'Native form creates character with canonical name and unchanged default colour through real IPC');
   const definition=await read('source.open',{sessionId:characterProject.sessionId,path:'game/definitions/characters.rpy'});
   check(definition.text.includes('define native_bec = Character("Native Bec", color="#c5c8d0")'),'Character creation persists an authoritative source definition');
+  details.stage='unsupported-drop-presentation';button('Assets').click();await wait(()=>button('Import assets'));
+  window.__loomlightReceiveAssets(characterProject.sessionId,{choices:[],errors:['Unsupported review file could not be selected.']});
+  await wait(()=>document.querySelector('#app-status')?.textContent.includes('Unsupported review file'));
+  check(document.querySelector('.catalog-create')?.hidden===true && !document.querySelector('.catalog-dialog') && !document.querySelector('.import-entry'),'Unsupported-only production drop callback reports error without exposing the empty form or a dialog');
+  check((await read('authoring.list',{sessionId:characterProject.sessionId})).assets.length===characters.assets.length,'Unsupported-only callback imports no asset through real service');
   details.stage='source-opening';button('Source').click();
   await wait(()=>document.querySelector('.cm-content')?.contentEditable==='true' && document.querySelector('[data-source-busy]')?.dataset.sourceBusy==='false');
   details.stage='editor';const editor=document.querySelector('.cm-content');check(getComputedStyle(document.querySelector('.cm-editor')).position==='relative','CodeMirror styles accepted by native CSP');

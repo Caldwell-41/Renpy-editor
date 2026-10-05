@@ -354,7 +354,7 @@ try {
  await refresh.addScriptTag({content:await readFile(new URL('../src-tauri/src/ui_refresh_probe.js',import.meta.url),'utf8')});
  await refresh.waitForFunction(()=>window.__refreshReport,{},{timeout:30000});
  const refreshReport=await refresh.evaluate(()=>window.__refreshReport);
- assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,9);
+ assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,11);
  assert.deepEqual(await refresh.evaluate(()=>window.__busyRemaining),[0,0,0]);
  await refresh.close();
  // A user may navigate as soon as the shell appears, before a large Story read

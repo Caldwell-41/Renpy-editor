@@ -28,7 +28,7 @@ remove/Add/cancel/Keep editing and one background/music import PASS. Documents i
 selection stalled on macOS TCC directory-open permission (stack/log proof), not proved
 dialog defect; CUA cannot access its permission alert. Temporary-folder selection
 completes without changing broader permissions. Finder cross-app desktop geometry
-unavailable through tool; one concise physical drop request pending. Story/Branches,
+unavailable through tool; user reports physical Finder drop works with the unsupported-text error. Story/Branches,
 final runtime/diagnostic/scaling/reopen and measured SDK download phases remain OPEN.
 Agent observations are separate from human physical acceptance; feedback optional.
 

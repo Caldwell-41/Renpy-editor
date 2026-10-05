@@ -53,8 +53,7 @@ hypothesis rejected, no dialog fix. CUA cannot access UserNotificationCenter; no
 permission/TCC setting changed. Cmd-Q removed window but process stayed blocked;
 scoped TERM ended only disposable review app before restart. Same synthetic image
 from temporary folder imports/closes normally. Preserve failed evidence. Finder
-shows separate app windows with no shared desktop geometry; pending concise user
-request asks actual Finder drop of background/WAV/unsupported text, leave unimported.
+shows separate app windows with no shared desktop geometry; user reports actual Finder drop works with the unsupported-text error.
 Do not claim Finder pass from Browse. Remaining: native Story/Branches/mapped-input,
 final runtime/diagnostic/scaling/reopen and intermediate genuine download progress.
 

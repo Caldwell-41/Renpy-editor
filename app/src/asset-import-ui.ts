@@ -20,7 +20,8 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
   const pump=async():Promise<void>=>{if(previewing||disposed)return;previewing=true;try{while(previews.length&&!disposed){const preview=previews.shift()!;if(jobs.has(preview.row))await preview.load();}}finally{previewing=false;}};
   function field(row:HTMLElement,title:string,input:HTMLInputElement|HTMLSelectElement):void{const label=document.createElement('label');label.className='field';const text=document.createElement('span');text.textContent=title;label.append(text,input);row.append(label);namingHelp(label,input);}
   const stage=(batch:ImportBatch):void=>{
-    if(disposed||busy)return;host.hidden=false;
+    if(disposed||busy)return;
+    if(batch.choices.length)host.hidden=false;
     batch.errors?.forEach(error=>actions.status(error));
     for(const selected of batch.choices){
       if(entries.length>=32){actions.status('Import up to 32 files at a time.');break;}

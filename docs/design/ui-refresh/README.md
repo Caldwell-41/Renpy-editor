@@ -74,3 +74,7 @@ for platform-dependent focus, scaling, chrome, input and final verification. Do 
 run a full installer matrix for each visual adjustment. Generated-image comparisons
 complement functional/native checks; they do not replace them. The build plan owns
 target sizes, platform evidence and run limits.
+
+Asset import errors remain visible when a selection contains no supported files.
+An empty or unsupported-only batch keeps the import form hidden unless an existing
+staging dialog is already open; it creates no assets.

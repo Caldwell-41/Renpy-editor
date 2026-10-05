@@ -3257,3 +3257,35 @@ payload and mapped-input checks, affected P2 runtime/routes/diagnostic/scaling/r
 and missing intermediate genuine download observation. Prepared Branches payload is
 outside the active project and has not been applied. Original profile remains safely
 preserved; restore before final transfer. No runner/remote dispatch/push pending.
+
+
+**Finder physical result / unsupported-only P3 — 2026-10-05:** user reports the
+actual Finder drop works, with an error for `unsupported.txt`. This is the human
+physical observation, separate from native Browse and synthetic callback proofs.
+Agent inspection sees the unsupported error and no staged supported rows (the user
+may already have dismissed them); do not invent another staged-preview observation.
+No physical test request remains pending.
+
+The same native inspection exposes a small real presentation defect: an
+unsupported-only batch unhides the empty import form outside its modal. P3 leaves
+the host hidden when there are no supported choices, still reports all errors,
+imports nothing and preserves existing staging. Existing modal DOM regression first
+rejects the original behavior (`false != true`), then passes with the fix. Native
+probe adds error/form/dialog/no-write assertions via the production asset callback
+and real authoring service; it is explicitly synthetic, not another Finder result.
+85 frontend tests/0 skipped and production web build PASS. Full UI browser first
+fails its stale expected probe count (11 actual/9 expected); count updated for the
+two added checks, all behavior assertions PASS. Retain both logs and original red.
+Changed-input ARM64 build and affected native checks remain required before acceptance.
+
+Story fixture setup: arbitrary extra labels in a managed Scene are truthfully
+refused; free-label jumps project as protected Custom Code. Correct the disposable
+fixture by creating two managed Scenes through the native UI and pointing the
+primary menu at their recorded technical labels. No parser/product fix or source
+rewrite is selected. Native paste/Command-S accepts the controlled single-label
+source. Story shows the imported background and two mapped choices; native Narration
+paste, pending-navigation refusal, Commit, Undo and Redo all PASS with Saved status.
+Branches native graph renders the entry, both destinations, distinct route channels,
+bounded long caption pill and arrowheads at node boundaries; details initially closed.
+Standalone labels preserved in script are source content, not managed graph nodes.
+No new build/native start/remote dispatch yet; original profile restoration pending.
