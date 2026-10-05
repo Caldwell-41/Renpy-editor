@@ -952,7 +952,9 @@ routes, an entry badge only when runnable `start` proves it, and separate partia
 notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
 or labelled selectors; duplicate option text remains separate. The selected rounded
 orthogonal connector treatment uses 3px palette-accent lines, visible arrowheads and
-14px route text on opaque bordered pills. Adjacent forward links use row gaps;
+14px route text on opaque bordered pills. Pill widths, route channels and Fit bounds
+use the rendered caption's font metrics plus padding on each platform; captions retain
+full text in their tooltip/details. Adjacent forward links use row gaps;
 backward, long, same-layer and self links use distinct outside channels. Paths avoid
 Scene node interiors, reciprocal/parallel routes have distinct ports and lanes, and
 Fit includes route/label bounds. The accepted entry anchors cyclic components;

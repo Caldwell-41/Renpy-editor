@@ -1005,3 +1005,9 @@ Windows native testing is explicitly deferred by the user. The specific gestures
 expected results and evidence fields are in the
 [deferred Windows checklist](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 Browser mouse events and fake native drag-state signals do not satisfy those rows.
+
+Final 1G Branches qualification also rejects font-dependent pill clipping in the real
+browser at three widths/both palettes, including a wider English font and a truncated
+long caption. Routing checks use measured widths for label/channel separation and Fit
+bounds. Packaged route-a/route-b reports assert actual native SVG text width plus
+padding and fitted pill bounds; synthetic selection remains distinct from native input.

@@ -1,6 +1,7 @@
 (async () => {
   const started = performance.now();
   const stages = [];
+  let branchLabels = [];
   let stage = "open";
   const mode = window.__loomlightRuntimeProbeCase;
   const delay = ms => new Promise(resolve => setTimeout(resolve,ms));
@@ -77,7 +78,18 @@
     } else {
       if (mode !== "runtime-error") {
         checkpoint("branches-destination-edit"); await click("Branches");
-        await until(() => document.querySelectorAll('.branch-node').length === 3); await click("Scene details");
+        await until(() => document.querySelectorAll('.branch-node').length === 3);
+        await click("Fit graph");
+        const viewport=document.querySelector('.branches-viewport').getBoundingClientRect();
+        const labels=[...document.querySelectorAll('.branch-route-label')];
+        assert(labels.length===2,"Both authored route captions have native pills");
+        branchLabels=labels.map(group=>{const pill=group.querySelector('rect'),text=group.querySelector('text'),bounds=pill.getBoundingClientRect();
+          const width=Number(pill.getAttribute('width')),textWidth=text.getComputedTextLength();
+          assert(width===Math.ceil(textWidth)+20,"Native pill uses rendered font width with padding");
+          assert(bounds.left>=viewport.left-1&&bounds.right<=viewport.right+1&&bounds.top>=viewport.top-1&&bounds.bottom<=viewport.bottom+1,"Fit includes native route pills");
+          return {text:text.textContent,width,textWidth};
+        });
+        checkpoint("branches-label-font-metrics-passed");await click("Scene details");
         const select = document.querySelector('select[aria-label="Selected Scene"]');
         select.value = project.sceneId; select.dispatchEvent(new Event("change"));
         const routes = document.querySelector('select[aria-label="Selected route"]');
@@ -196,7 +208,7 @@
     }
     assert(document.documentElement.scrollWidth <= window.innerWidth + 2,"no page overflow at package viewport");
     checkpoint("complete");
-    await call("probe.runtimeUiReport",{passed:true,stage,stages,layer:"packaged WebView, synthetic DOM input, real IPC/service/SDK",nativeKeyboard:false});
+    await call("probe.runtimeUiReport",{passed:true,stage,stages,branchLabels,layer:"packaged WebView, synthetic DOM input, real IPC/service/SDK",nativeKeyboard:false});
   } catch (error) {
     await call("probe.runtimeUiReport",{passed:false,stage,stages,sourceState:document.querySelector(".source-document-state")?.textContent,sourceBusy:document.querySelector(".source-workspace")?.dataset.sourceBusy,saveTrace:window.__loomlightReadSaveTrace?.(),error:String(error),runtimeStatus:document.querySelector('.runtime-panel [role="status"]')?.textContent,notice:document.querySelector('.runtime-panel [role="alert"]')?.textContent,appStatus:document.querySelector("#app-status")?.textContent,output:document.querySelector(".runtime-output")?.textContent?.slice(-8192),dialog:document.querySelector(".runtime-dialog")?.textContent?.slice(0,2000),elapsedMs:Math.round(performance.now()-started)});
   }

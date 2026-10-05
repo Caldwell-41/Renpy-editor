@@ -28,7 +28,7 @@ export function roundedRoute(points: readonly Point[]): string {
 function labelWidth(text: string): number {
   return 20+[...text].reduce((n,c)=>n+(/[^\x00-\x7f]/u.test(c)?16:/[MW@]/u.test(c)?14:8),0);
 }
-const caption=(text:string):string=>{const chars=[...text];return chars.length>34?chars.slice(0,31).join("")+"…":text;};
+export const branchCaption=(text:string):string=>{const chars=[...text];return chars.length>34?chars.slice(0,31).join("")+"…":text;};
 function overlaps(a: RouteLabel,b: RouteLabel): boolean {
   return Math.abs(a.x-b.x)<(a.width+b.width)/2+8 && Math.abs(a.y-b.y)<(a.height+b.height)/2+8;
 }
@@ -40,8 +40,9 @@ function intersectsNode(label: RouteLabel,node: Point): boolean {
  * Adjacent forward layers use their empty row gap. Other links leave the node via
  * a clear side stub and use outside channels, never a line through intermediate nodes.
  */
-export function routeBranches(positions: ReadonlyMap<string,Point>,edges: readonly FlowEdge[]): readonly BranchRoute[] {
+export function routeBranches(positions: ReadonlyMap<string,Point>,edges: readonly FlowEdge[],measureText?: (text:string)=>number): readonly BranchRoute[] {
   if(positions.size>500 || edges.length>2000)return [];
+  const captionWidth=(text:string):number=>measureText?Math.ceil(measureText(text))+20:labelWidth(text);
   const pending: PendingRoute[]=[];
   for(const edge of [...edges].sort((a,b)=>a.id.localeCompare(b.id))){
     if(edge.destination.kind!=="resolved")continue;
@@ -61,7 +62,7 @@ export function routeBranches(positions: ReadonlyMap<string,Point>,edges: readon
   };
   const groups=new Map<number,PendingRoute[]>();
   for(const r of pending.filter(r=>r.direct))groups.set(r.from.y,[...(groups.get(r.from.y)??[]),r]);
-  const channelGap=Math.max(76,...pending.map(r=>edges.length<=100?labelWidth(caption(r.edge.text))+16:76));
+  const channelGap=Math.max(76,...pending.map(r=>edges.length<=100?captionWidth(branchCaption(r.edge.text))+16:76));
   const left=Math.min(0,...[...positions.values()].map(p=>p.x))-channelGap/2-24,right=Math.max(240,...[...positions.values()].map(p=>p.x+W))+channelGap/2+24;
   const lanes:{left:{min:number;max:number}[][];right:{min:number;max:number}[][]}={left:[],right:[]};
   const labels:RouteLabel[]=[],result:BranchRoute[]=[];
@@ -80,8 +81,8 @@ export function routeBranches(positions: ReadonlyMap<string,Point>,edges: readon
   };
   for(const r of pending){
     const start=port(r,true),end=port(r,false);
-    const text=edges.length<=100?caption(r.edge.text):"";
-    const width=labelWidth(text);
+    const text=edges.length<=100?branchCaption(r.edge.text):"";
+    const width=text?captionWidth(text):20;
     let points:Point[];
     if(r.direct){const group=groups.get(r.from.y)!;const y=r.from.y+H+20+60*(group.indexOf(r)+.5)/group.length;points=[start,{x:start.x,y},{x:end.x,y},end];}
     else points=outside(r,start,end);

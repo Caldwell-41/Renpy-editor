@@ -7,27 +7,33 @@
 
 ## Live continuation
 
-**State: awaiting_ci — manual same-chat resume.** Mac review PASS; original profile
-restored, all disposable profiles/failure evidence retained. Published/tested candidate
-`94ffa25c016740eb541bba4e883f6ab683cb93d6`; 132 app/workflow inputs equal retained
-P4 package source `efb52edebd934277f7643a6978f59a343e6c447b`.
+**State: correcting failed remote preflight.** Recorded production run
+[37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410),
+attempt 1, tested SHA `94ffa25c016740eb541bba4e883f6ab683cb93d6`, FAILED in browser
+preflight: Branches route text exceeded its pill. Both platform package jobs were
+skipped; no installers/artifacts were produced. Required Repository quality
+37300945634 attempt 1 PASS remains evidence for 94ffa25 only. Full failed log, job
+metadata and empty artifact inventory are retained ignored.
 
-- Repository quality [37300945634](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300945634), attempt 1: required job/steps PASS; optional matrices intentionally skipped.
-- Production [37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410), attempt 1, exact SHA above, `upload_packages=true`: confirmed queued at initial identity read.
+Correction hypothesis P5: estimated character widths do not fit every platform font.
+Local rejecting proof: Verdana `Jump` text 42.359375px + 12px minimum padding exceeds
+its 52px estimated pill. Renderer now measures attached SVG captions before routing;
+20px padding feeds pill width, channel spacing and Fit bounds. Existing limits,
+truncation, source and navigation contracts remain. Wider-font browser regression
+retains the clipping assertion. 86 frontend tests/0 skipped and focused UI browser
+PASS. Full browser preflight, pinned local ARM64 package and affected native route
+proof are pending; unchanged Mac/service/physical evidence remains mapped to prior
+inputs. Original user profile stays restored; no private project is used.
 
-Initial final production **1/1 dispatched**, correction reruns 0. No polling or local
-runner; no ambiguous dispatch/retry. Counters **16 builds / 67 native starts / 7
-separate SDK menu/launcher starts**. Remote build counts await terminal evidence.
-Resume this SAME chat: “Resume: audit production run 37300975410 attempt 1 on 94ffa25.”
-Read recorded run/fresh refs/worktree/diff once; pending → pause, terminal → audit
-required jobs, both platform SDK/native/cleanup reports/manifests/installers, classify
-and fix genuine failures with justified changed-input rechecks. Then prepare exact
-passing Windows installer/14-row Windows-PC agent prompt. Windows physical work,
-conflict resolution, integration/closure/1H/new feature phase remain deferred.
-
-Pause docs follow candidate 94ffa25 with no app/workflow change; no package matrix
-for this record and no automatic acceptance of future changed heads. No Goal lifecycle
-was created; turn end stops model polling, not a claimed verified live-Goal pause.
+Initial final production allowance **1/1 consumed**; justified changed-input correction
+reruns **0** dispatched. Local counters **16 builds / 67 native starts / 7 separate SDK
+menu/launcher starts** before P5 packaging. No remote package build/start occurred.
+Continue this SAME chat: finish P5 verification/self-review, record exact candidate and
+changed inputs, then publish and dispatch one justified correction qualification with
+`upload_packages=true` plus required Repository quality. Preserve the failed run;
+record confirmed run/attempt/SHA before manual same-chat waiting. No unchanged retry
+or duplicate successful matrix, Windows-PC claim, PR conflict resolution, history
+rewrite, merge, phase closure or new feature phase. No Goal lifecycle was created.
 
 **Final Mac review PASS; remote qualification next.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,

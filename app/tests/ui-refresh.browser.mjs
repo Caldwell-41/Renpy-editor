@@ -402,10 +402,13 @@ try {
   const location={path:'game/synthetic.rpy',revision:'saved',byteStart:0,byteEnd:10};
   const nodes=['Scene 1','New Scene','Three','Four'].map(name=>({sceneId:name,name,label:name,location,partial:false,stale:false}));
   const edges=[['start','Scene 1','New Scene','Start'],['back','New Scene','Scene 1','Back'],['three','New Scene','Three','Three'],['4','New Scene','Four','4'],['jump','Scene 1','Four','Jump'],['jump-back','Four','Scene 1','Jump back'],['duplicate','Scene 1','New Scene','Other choice'],['self','Three','Three','Again']].map(([id,sceneId,to,text])=>({id,sceneId,beatId:id,optionOrdinal:null,text,kind:'jump',location,editable:true,destination:{kind:'resolved',sceneId:to}}));
-  window.__disposeBranchReview=renderBranches(document.querySelector('#graph'),{load:async()=>({revision:'B',entrySceneId:'Scene 1',nodes,edges,partial:false,stale:false,overLimit:false,notice:'Accepted source'}),source:()=>{},scene:()=>{},status:()=>{}});
+  window.__branchReviewEdges=edges;
+  window.__disposeBranchReview=renderBranches(document.querySelector('#graph'),{load:async()=>({revision:`B-${window.__branchReviewRevision??0}`,entrySceneId:'Scene 1',nodes,edges,partial:false,stale:false,overLimit:false,notice:'Accepted source'}),source:()=>{},scene:()=>{},status:()=>{}});
  });
  await graph.locator('path[data-edge-id]').first().waitFor();
- for(const theme of ['light','dark'])for(const width of [1440,960,560]){
+ for(const family of ['system-ui','Verdana, sans-serif'])for(const theme of ['light','dark'])for(const width of [1440,960,560]){
+  await graph.evaluate(family=>{window.__branchReviewRevision=(window.__branchReviewRevision??0)+1;document.querySelector('#graph').style.fontFamily=family;window.__branchReviewEdges.find(e=>e.id==='duplicate').text=family==='system-ui'?'Other choice':'THE QUICK BROWN FOX CHOOSES THE WIDER ROUTE';},family);
+  await graph.getByRole('button',{name:'Refresh flow',exact:true}).click();
   await graph.setViewportSize({width,height:900});await graph.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
   await graph.getByRole('button',{name:'Fit graph',exact:true}).click();
   const geometry=await graph.evaluate(()=>{
@@ -414,12 +417,13 @@ try {
    let entersNode=false;
    for(const p of paths){const length=p.getTotalLength();for(let t=1;t<length;t+=2){const q=p.getPointAtLength(t);if(cards.some(n=>q.x>n.x+.1&&q.x<n.x+n.width-.1&&q.y>n.y+.1&&q.y<n.y+n.height-.1))entersNode=true;}}
    const labels=[...document.querySelectorAll('.branch-route-label')];
-   return {count:paths.length,unique:new Set(paths.map(p=>p.getAttribute('d'))).size,entersNode,arrows:paths.every(p=>p.getAttribute('marker-end')==='url(#branches-arrow)'),stroke:getComputedStyle(paths[0]).strokeWidth,opacity:getComputedStyle(paths[0]).opacity,cards,labels:labels.map(g=>{const r=g.querySelector('rect'),t=g.querySelector('text'),b=r.getBoundingClientRect();return {width:+r.getAttribute('width'),textWidth:t.getComputedTextLength(),font:getComputedStyle(t).fontSize,fill:getComputedStyle(r).fill,inView:b.left>=viewport.left-1&&b.right<=viewport.right+1&&b.top>=viewport.top-1&&b.bottom<=viewport.bottom+1};}),svgFit:(()=>{const b=svg.getBoundingClientRect();return b.left>=viewport.left-1&&b.right<=viewport.right+1&&b.top>=viewport.top-1&&b.bottom<=viewport.bottom+1;})()};
+   return {count:paths.length,unique:new Set(paths.map(p=>p.getAttribute('d'))).size,entersNode,arrows:paths.every(p=>p.getAttribute('marker-end')==='url(#branches-arrow)'),stroke:getComputedStyle(paths[0]).strokeWidth,opacity:getComputedStyle(paths[0]).opacity,cards,labels:labels.map(g=>{const r=g.querySelector('rect'),t=g.querySelector('text'),b=r.getBoundingClientRect();return {text:t.textContent,full:g.querySelector('title').textContent,width:+r.getAttribute('width'),textWidth:t.getComputedTextLength(),family:getComputedStyle(t).fontFamily,font:getComputedStyle(t).fontSize,fill:getComputedStyle(r).fill,inView:b.left>=viewport.left-1&&b.right<=viewport.right+1&&b.top>=viewport.top-1&&b.bottom<=viewport.bottom+1};}),svgFit:(()=>{const b=svg.getBoundingClientRect();return b.left>=viewport.left-1&&b.right<=viewport.right+1&&b.top>=viewport.top-1&&b.bottom<=viewport.bottom+1;})()};
   });
   assert.equal(geometry.count,8);assert.equal(geometry.unique,8);assert.equal(geometry.entersNode,false);assert.equal(geometry.arrows,true);assert.equal(geometry.stroke,'3px');assert.equal(geometry.opacity,'1');assert.equal(geometry.svgFit,true);
   assert.ok(geometry.cards.every(n=>n.width===200&&n.height===60));assert.equal(geometry.labels.length,8);
-  for(const label of geometry.labels){assert.equal(label.font,'14px');assert.ok(label.textWidth+12<=label.width,'pill clips route text');assert.ok(label.inView,'Fit graph clips a route label');assert.notEqual(label.fill,'rgba(0, 0, 0, 0)');}
-  await graph.screenshot({path:output+`branches-b-${theme}-${width}.png`});
+  for(const label of geometry.labels){assert.equal(label.font,'14px');assert.ok(label.textWidth+12<=label.width,`pill clips route text: ${JSON.stringify(label)}`);assert.ok(label.inView,'Fit graph clips a route label');assert.notEqual(label.fill,'rgba(0, 0, 0, 0)');}
+  const longLabel=geometry.labels.find(l=>l.full.startsWith('THE QUICK'));if(longLabel)assert.equal(longLabel.text,'THE QUICK BROWN FOX CHOOSES THE…');
+  await graph.screenshot({path:output+`branches-b-${family.split(',')[0]}-${theme}-${width}.png`});
  }
  await graph.evaluate(()=>window.__disposeBranchReview());await graph.close();
  // Audit regressions use the production renderer with explicitly deferred receipts.

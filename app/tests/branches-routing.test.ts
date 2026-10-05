@@ -62,3 +62,17 @@ test("Unicode captions truncate on character boundaries and fit inside graph bou
   const l=routes[0]!.label!;assert.equal(l.text,"🌙".repeat(31)+"…");
   const b=branchBounds(positions,routes);assert.ok(l.x-l.width/2>=b.x&&l.x+l.width/2<=b.x+b.width);
 });
+
+test("measured captions size pills, separate channels and contribute to Fit bounds",()=>{
+  const positions=new Map<string,Point>([["a",{x:200,y:50}],["b",{x:200,y:210}]]);
+  const edges=[edge("forward","a","b","THE QUICK BROWN FOX CHOOSES THE WIDER ROUTE"),edge("back","b","a","Jump"),edge("self","a","a","Again")];
+  const measure=(text:string):number=>text==="Jump"?42.359375:380.25;
+  const routes=routeBranches(positions,edges,measure);clearNodes(routes,positions);
+  assert.deepEqual(routeBranches(positions,[...edges].reverse(),measure),routes);
+  const labels=routes.map(r=>r.label!);assert.equal(labels.length,3);
+  assert.equal(labels.find(l=>l.text==="Jump")!.width,63);
+  assert.equal(labels.find(l=>l.text.startsWith("THE QUICK"))!.text,"THE QUICK BROWN FOX CHOOSES THE…");
+  const bounds=branchBounds(positions,routes);
+  for(const l of labels){assert.ok(l.width>=measure(l.text)+20);assert.ok(l.x-l.width/2>=bounds.x&&l.x+l.width/2<=bounds.x+bounds.width);}
+  for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){const a=labels[i]!,b=labels[j]!;assert.ok(Math.abs(a.x-b.x)>=(a.width+b.width)/2||Math.abs(a.y-b.y)>=(a.height+b.height)/2,"measured pills overlap");}
+});

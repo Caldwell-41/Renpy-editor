@@ -1,5 +1,5 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
-import { branchBounds, routeBranches, type GraphBounds } from "./branches-routing.ts";
+import { branchBounds, branchCaption, routeBranches, type GraphBounds } from "./branches-routing.ts";
 export interface FlowLocation { readonly path: string; readonly revision: string; readonly byteStart: number; readonly byteEnd: number }
 export interface FlowNode { readonly sceneId: string; readonly name: string; readonly label: string; readonly location: FlowLocation | null; readonly partial: boolean; readonly stale: boolean }
 export type FlowDestination = { readonly kind: "resolved"; readonly sceneId: string } | { readonly kind: "missing"; readonly label: string } | { readonly kind: "unknown"; readonly label: string | null; readonly location: FlowLocation | null } | { readonly kind: "terminal" };
@@ -29,6 +29,20 @@ export function layoutFlow(nodes: readonly FlowNode[], edges: readonly FlowEdge[
   const result=new Map<string,Point>();rows.forEach((row,depth)=>row.forEach((n,i)=>result.set(n.sceneId,{x:40+(width-row.length*280)/2+i*280,y:50+depth*160})));return result;
 }
 function button(text: string, action: () => void): HTMLButtonElement { const node = document.createElement("button"); node.className = "button"; node.type = "button"; node.textContent = text; node.addEventListener("click", action); return node; }
+function branchTextWidths(svg: SVGSVGElement, edges: readonly FlowEdge[]): ReadonlyMap<string,number> | undefined {
+  // Labels are omitted above 100 edges. Batch writes before reading font metrics,
+  // using the same attached SVG and class as the visible labels on every platform.
+  if(edges.length>100)return undefined;
+  const group=document.createElementNS("http://www.w3.org/2000/svg","g");group.style.visibility="hidden";
+  const texts=new Map<string,SVGTextElement>();
+  for(const edge of edges){if(edge.destination.kind!=="resolved")continue;const caption=branchCaption(edge.text);if(texts.has(caption))continue;
+    const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.classList.add("branch-edge-label");text.textContent=caption;texts.set(caption,text);group.append(text);
+  }
+  svg.append(group);
+  // DOM-only tests lack SVG font metrics; browser/native acceptance uses them.
+  if([...texts.values()].some(text=>typeof text.getComputedTextLength!=="function")){group.remove();return undefined;}
+  const widths=new Map([...texts].map(([caption,text])=>[caption,text.getComputedTextLength()]));group.remove();return widths;
+}
 export function renderBranches(host: HTMLElement, actions: BranchesActions): () => void {
   let disposed = false; let sequence = 0; let loading = false; let queued = false; let model: FlowWorkspace | undefined; let selectedScene: string | undefined; let selectedEdge: string | undefined;
   const retained=actions.layoutKey?layoutFor(actions.layoutKey).graph:undefined;
@@ -88,8 +102,10 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     if (!model.nodes.some((node) => node.sceneId === selectedScene)) { selectedScene = undefined; selectedEdge = undefined; }
     const placeholder = document.createElement("option"); placeholder.value = ""; placeholder.textContent = "Choose a Scene"; select.append(placeholder);
     const positions = layoutFlow(model.nodes,model.edges,model.entrySceneId);
-    const routes=routeBranches(positions,model.edges);graphBounds=branchBounds(positions,routes);
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add("branches-lines"); svg.setAttribute("width", String(graphBounds.width)); svg.setAttribute("height", String(graphBounds.height));svg.setAttribute("viewBox",`${graphBounds.x} ${graphBounds.y} ${graphBounds.width} ${graphBounds.height}`);svg.style.left=`${graphBounds.x}px`;svg.style.top=`${graphBounds.y}px`; svg.setAttribute("aria-hidden", "true"); canvas.append(svg);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add("branches-lines");svg.setAttribute("aria-hidden", "true");canvas.append(svg);
+    const widths=branchTextWidths(svg,model.edges);
+    const routes=routeBranches(positions,model.edges,widths?text=>widths.get(text)!:undefined);graphBounds=branchBounds(positions,routes);
+    svg.setAttribute("width", String(graphBounds.width)); svg.setAttribute("height", String(graphBounds.height));svg.setAttribute("viewBox",`${graphBounds.x} ${graphBounds.y} ${graphBounds.width} ${graphBounds.height}`);svg.style.left=`${graphBounds.x}px`;svg.style.top=`${graphBounds.y}px`;
     const defs = document.createElementNS(svg.namespaceURI, "defs"); const marker = document.createElementNS(svg.namespaceURI, "marker"); marker.setAttribute("id", "branches-arrow"); marker.setAttribute("viewBox", "0 0 10 10"); marker.setAttribute("refX", "10"); marker.setAttribute("refY", "5"); marker.setAttribute("markerWidth", "6"); marker.setAttribute("markerHeight", "6"); marker.setAttribute("orient", "auto-start-reverse"); const arrow = document.createElementNS(svg.namespaceURI, "path"); arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z"); marker.append(arrow); defs.append(marker); svg.append(defs);
     marker.setAttribute("markerUnits","userSpaceOnUse");marker.setAttribute("markerWidth","10");marker.setAttribute("markerHeight","10");
     const labelLayer=document.createElementNS(svg.namespaceURI,"g");svg.append(labelLayer);

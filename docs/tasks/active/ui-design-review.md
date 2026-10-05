@@ -3432,3 +3432,52 @@ changes. Verify input equality and repository checks; publish it without a dupli
 package matrix. The recorded candidate remains 94ffa25, not the receipt commit's SHA.
 No Codex Goal lifecycle was created in this chat; ending this active turn stops model
 polling. Do not claim a live Goal pause was verified from this repository state.
+
+
+**Remote attempt 1 terminal audit / P5 correction — 2026-10-05:** production
+37300975410 attempt 1, exact candidate `94ffa25c016740eb541bba4e883f6ab683cb93d6`,
+FAILED Preflight / Run Source Save real-browser regression at UI browser line 421:
+`pill clips route text`. 85 frontend tests and preceding Source/selection browser
+checks passed; Rust formatting and both platform jobs skipped. Neither package job
+started; artifact inventory is empty. Full log/job metadata/inventory retained in
+ignored final-1g-mac reports. Repository quality 37300945634 attempt 1 remains PASS
+for its exact 94ffa25 input only. Fresh feature ref is 3264665; main 4d7ba03 and the
+separate planning worktree 2c5a164 remain intact. No conflicts/integration touched.
+
+Cause hypothesis P5: character-count widths underestimate some platform fonts. Local
+actual SVG diagnostic reproduces English `Jump`: Verdana text 42.359375px + the
+unchanged 12px clipping assertion > old 52px pill. This establishes font sensitivity;
+we do not claim the hosted runner's precise font was captured. The rejecting browser
+regression fails on unchanged product code with those exact values. Renderer batches
+at most 100 unique caption SVG writes/reads with the visible text class, then uses
+ceil(rendered width)+20px for pills, routing channels and graph bounds. Above 100
+edges labels remain suppressed with no measurement work; 500-node/2000-edge limits,
+Unicode-safe truncation, full tooltip/details and saved-source/navigation contracts
+remain. DOM-only test environments retain the previous estimate; real browser/native
+acceptance uses measured SVG widths. No app font, preset or supported-language change.
+
+Focused proof: 86 frontend tests PASS/0 skipped; UI browser PASS at both palettes,
+1440/960/560px, default and wider font, with long truncated English caption/full title
+and unchanged clipping/Fit/path/card assertions. Router test proves measured widths,
+channel/label separation, deterministic order, node avoidance and Fit extents.
+Browser screenshots reviewed: captions stay inside opaque pills, node interiors are
+clear and outer paths/labels fit; compact Fit naturally scales this large graph down.
+The full required browser command passes build/Source/selection/UI and compile/lint
+drivers, then an intermediate probe report used an undefined variable and failed
+route-a; retained failed log. Corrected report variable now receives all five shipped
+driver checks separately. Earlier test-only Refresh button-name and unchanged-revision
+fixtures were corrected and their failed logs retained; no production assertion was
+relaxed, no failed result relabelled. Product P5 is one correction hypothesis.
+
+Self-review: actual font reads occur only after batch writes in the attached SVG;
+unique captions reuse widths, hidden measuring group is removed, pan/zoom coordinates
+remain local, and the routing algorithm receives the same width used in the pill.
+UI and TESTING own the behavior/affected gate. Repository validation 340 files and
+whitespace PASS. No backend, dependency, workflow, Save/import/SDK lifecycle change.
+Next: pin this source, build/verify one ARM64 installer and run affected packaged
+route-a/route-b with native SVG width/Fit assertions through real IPC/SDK. Other
+completed Mac/physical evidence is reused only on proven unchanged interaction inputs.
+Counters before P5: 16 builds / 67 native starts / 7 separate SDK starts. Initial final
+production 1/1 consumed; changed-input correction dispatches 0. One correction run is
+justified after affected Mac PASS because source/test inputs changed to fix a genuine
+failed gate; no unchanged successful platform matrix is duplicated (neither started).
