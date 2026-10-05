@@ -3289,3 +3289,31 @@ Branches native graph renders the entry, both destinations, distinct route chann
 bounded long caption pill and arrowheads at node boundaries; details initially closed.
 Standalone labels preserved in script are source content, not managed graph nodes.
 No new build/native start/remote dispatch yet; original profile restoration pending.
+
+
+**Native continuation / caption P4:** mapped Branches route selection opens the
+existing Choice editor. Native English paste/Tab then attempted Source navigation
+is truthfully blocked until Commit; accepted fourth caption appears in preview and
+source. Independent navigation collapse/tree hide/restore arrows and restored focus
+PASS; Writing focus hides chrome/preview and returns to the prior independent layout.
+Native edge drag resizes the actual window from 1100×720 to about 802×552 logical
+pixels at 2× scale. Compact tree is the designed overlay; hide it to expose the
+workspace. No OS display setting changed.
+
+A short preview exposes a real remaining visual issue: a long four-option caption
+extends above the canvas and is clipped. P4 adds a bounded scrollable overlay (88%
+maximum height, border-box, zero minimum) so its end remains reachable; no game/source,
+preview resolution, persistence or graph behavior change. Existing browser test with
+real Story Choice structure and long English caption at 90px preview first rejects
+outside bounds, then proves bounded geometry and end-of-caption scroll reachability.
+85 frontend checks/0 skipped, production web build and full UI browser PASS. Original
+red/green logs retained under final-1g-mac; native corrected inspection still required.
+
+P3 source/build `b0d9d1985a675612b9107629f3104d5b97dd1f74` was compiled/retained before
+P4 was discovered: verified ARM64 DMG 5,751,294 bytes, SHA-256
+`80e38d3417e56d498cb4e3ed455f86372bf70d40e9c7366fb47e297c0d17ae35`, executable
+`3c841e3a4637705567137088d498b8dc52c663da3887b0697b0b77d93be71d58`.
+Retained seal/repack/read-only mounted identity/ARM64/signature/checksum PASS.
+It is superseded for final review by changed-input P4, not failed native evidence;
+no P3 app launch/native suite duplicated. Counters now **15 builds, 62 native/boundary
+starts**, separately 7 SDK menu/launcher starts. Remote initial dispatch still 0/1.

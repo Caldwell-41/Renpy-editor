@@ -78,3 +78,6 @@ target sizes, platform evidence and run limits.
 Asset import errors remain visible when a selection contains no supported files.
 An empty or unsupported-only batch keeps the import form hidden unless an existing
 staging dialog is already open; it creates no assets.
+
+Long Story preview captions stay within the game canvas. When a small preview
+cannot display the whole caption, its text scrolls within the bounded overlay.

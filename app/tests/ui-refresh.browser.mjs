@@ -88,6 +88,15 @@ try {
  for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
 
+ // Long accepted Choice captions remain reachable inside a short preview.
+ await page.getByRole('button',{name:'Story',exact:true}).click();
+ await page.locator('.beat-select').nth(3).click();
+ await page.evaluate(()=>{const surround=document.querySelector('.preview-surround');surround.style.flex='none';surround.style.height='90px';document.querySelector('.preview-overlay').textContent='Return to the origin · Repeat the garden · First path to the station · Second English path to the same station';});
+ await page.waitForFunction(()=>document.querySelector('.preview-canvas').getBoundingClientRect().height<=91);
+ const caption=await page.locator('.preview-overlay').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
+ assert.equal(caption.inside,true,'long caption extends outside the bounded preview');assert.equal(caption.scrollable,true);assert.equal(caption.reachedEnd,true,'end of long caption is unreachable');
+ await page.getByRole('button',{name:'Source',exact:true}).click();
+
  // Catalogue follow-up: mixed media/placeholder rows and exact Variable header alignment.
  for(const theme of ['light','dark']) for(const width of [1440,960,560]) {
   await page.setViewportSize({width,height:900});
