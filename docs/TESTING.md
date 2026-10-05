@@ -523,6 +523,15 @@ a final separate chat verifies conflict-resolved combined inputs before integrat
 This changes scheduling, not required target evidence or test ownership. Corrections
 invalidate affected prior results and require relevant cross-platform rechecks.
 
+**Agent-owned Mac review amendment, 2026-10-05:** the user requested that the
+agent perform the remaining objective tests and visual review, and report genuine
+tooling limitations. Use the existing native UI controls and automated service/SDK
+oracles; record agent observations separately from user acceptance. Native injected
+keystrokes can prove OS delivery, but do not claim a human physically typed them.
+User subjective review is optional feedback until a specific uncovered interaction
+requires it. Keep genuine uncovered gates OPEN; do not waive them or manufacture
+a human pass. This changes ownership, not assertions or Windows-host requirements.
+
 **English support amendment, 2026-10-04:** the user selected English application
 UI/support and standard-keyboard manual acceptance. Non-English IME/localisation
 is outside the selected Phase 1 physical review; unavailable IME is not a blocker

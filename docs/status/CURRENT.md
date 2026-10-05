@@ -7,7 +7,7 @@
 
 ## Live continuation
 
-**Final Mac completion in progress; human acceptance remains open.**
+**Agent-owned final Mac review in progress; locked desktop blocks native input.**
 Latest source `8104ed78afe26cf102f394f4d9e6f1a74215dfc0` fixes actual Mac picker
 height after CONFIG-01 preview completion; retains sidebar `f287a7e`. Focused web/UI
 browser checks PASS. P1 ARM64 installer/mounted/privacy checks PASS; native 48px picker, both palettes,
@@ -29,8 +29,13 @@ Existing source preservation/UTF-8 regression coverage remains.
 `.toolchains/final-1g-mac-review/preserved-app-profile`; clean profile active. Fresh
 English normal-wizard project created successfully with genuinely downloaded SDK
 8.5.3. Normal Run reports Running; user game/menu/first-line observation pending.
-Human SDK/create progress, keyboard/Finder/scaling/runtime/reopen observations remain
-OPEN. Restore original profile after review via guarded helper with app/game quit.
+The user selected agent-run objective/visual review with tooling gaps reported.
+Native Source action was refused because Mac is locked; user asked only to unlock
+and reply Ready. Fresh English copied-project SDK menu testcase timed out, no PASS;
+original source hashes unchanged, failure retained. Reassess after unlock. Native
+keyboard/Finder/scaling/runtime/reopen/progress remain OPEN; subjective feedback is
+optional and agent observations are not physical human typing. Restore original
+profile after review via guarded helper with app/game quit.
 
 Latest source/evidence after published `273b8e7` are LOCAL ONLY. Automatic approval
 review refused pre-Mac-review publication; retain local checkpoints and publish at
@@ -38,7 +43,7 @@ the selected gate. Normal P1 English game reports Running without SDK diagnostic
 
 No CI operation pending; production dispatch **0/1**, only after Mac review passes.
 No local runner pending; P1 normal app open for human review. Counters: 13 production
-builds, 60 native/boundary starts and separately 5 SDK menu/launcher starts.
+builds, 60 native/boundary starts and separately 6 SDK menu/launcher starts.
 Remote qualification, Windows-PC 14-row review and final separate integration remain.
 Do not resolve PR #17, rebase/merge/close 1G/1H or start a feature phase.
 Entry feature `a15e923`, main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;

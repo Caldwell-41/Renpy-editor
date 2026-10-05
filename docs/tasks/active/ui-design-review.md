@@ -3104,3 +3104,56 @@ last verified `273b8e7`; source `28e44b0`/`8104ed7` and later evidence are local
 Normal retained P1 English Run now reports Running/no structured diagnostic. Next
 collect user menu/Start/first-line feedback, then remaining five-step review; publish
 only after the selected Mac gate passes. Original-profile restoration still pending.
+
+### Agent-owned final Mac review — 2026-10-05
+
+User selected agent-run objective tests and UI judgment, with tooling limitations
+reported explicitly. Review retained P1 `8104ed7` on macOS ARM64, official SDK 8.5.3,
+clean preserved profile and English project. Fresh local HEAD `353f1f7` contains a
+user-authorized documentation-only planning merge; app/test/workflow inputs equal
+P1, preserve that work and explicit no-push boundary. No rebuild for docs.
+
+Cases before execution: native English Source/Story edit, clipboard/undo/redo,
+Cmd+S/commit, focus/navigation and reopen; Source edit while running/earlier-launch/
+Stop; known diagnostic/current navigation; native catalogue Browse staging and
+visual columns/appearance/discard; native Branches fixtures/navigation; actual
+window resize/interface density. Expected accepted bytes, stable focus and geometry,
+no unintended writes, truthful status and readable both-palette/compact views.
+Agent owns actual UI/SDK/service checks; automated route oracle is retained separately
+under exact F1 identities. Game-window binding/Finder cross-app drag and already
+completed intermediate download stages need capability audit; do not claim passes.
+No duplicate unchanged SDK matrix, final remote dispatch or new feature scope.
+
+**Fresh English SDK menu check selection:** to avoid assigning game-menu assertions
+to the user, run one bounded SDK built-in testcase on an exact source/GUI copy of
+the normal-wizard review project. Assert dimensions/title/build name, main menu,
+Preferences/Load/Save, first narration and return. Original review project is read
+only; copied game source hashes must match before/after. Reuse the existing testcase
+shape and verified installed SDK, no download/build or second matrix. This is a
+game test oracle, not native keyboard or human window-visibility evidence.
+
+**Locked-host checkpoint:** native CUA Source click refused: Mac locked and automatic
+unlock unavailable. Asked only for desktop unlock, not user-run tests. No native
+input success claimed. Fresh English copied-project SDK testcase started, timed out
+at 40 seconds, terminated its own process group (SIGKILL after 5-second termination
+grace); exit -9, no positive named PASS. Original nine ASCII-named `.rpy` hashes
+remain identical. Failed log/JSON retained at ignored `final-1g-mac/english-menu-native.*`;
+classification is provisional environment/capability while locked, not a waived SDK
+pass or proven game defect. Reassess once unlocked; no automatic same-condition retry.
+Counters: 13 production builds, 60 native/boundary starts; separately 6 SDK menu/
+launcher starts (new bounded testcase +1). Existing exact starter-menu regression
+passes retained; it does not turn this failed fresh-project check into a pass.
+
+Input audit: all 132 P1 app/workflow hashes match current checkout after planning
+merge; DMG/executable checksums match BUILD manifest. No source rebuild needed.
+Saved browser captures reviewed: sidebar spacing/alignment, Source text hierarchy,
+Character image/empty-card separation, Variable header/cell columns and compact
+staged-import sticky actions are legible/consistent. Branches B routes terminate
+at node boundaries and labels remain readable in the inspected dark fixture.
+These are fixture/rendered observations, not native acceptance. Story fixture has
+unresolved media URLs, so image composition must be checked with real imported
+assets after unlock. Native key/Finder/drop/resize and game-window binding remain
+OPEN; do not automatically transfer them to the user. No remote dispatch/push.
+Next: user unlocks desktop and replies Ready; resume same chat, use native controls
+on retained P1 app; bounded unlocked reassessment of failed menu check if needed,
+then objective five-group review. Original-profile restoration still pending.

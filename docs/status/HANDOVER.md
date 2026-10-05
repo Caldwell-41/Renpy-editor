@@ -1,12 +1,13 @@
 # Current outcome handover
 
-## Final Mac completion in progress — 2026-10-04
+## Agent-owned final Mac review — 2026-10-05
 
 **Machine:** local macOS 26.6.2 (25G83), ARM64; Windows-PC review remains deferred.
 **Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.
 **Latest source:** `8104ed78afe26cf102f394f4d9e6f1a74215dfc0` (native picker P1).
-**State:** `in_progress`; F1 six packaged cases pass; P1 installer and native picker
-verification pass. Human Mac acceptance and final remote qualification remain OPEN.
+**State:** `in_progress`; agent owns remaining objective/visual Mac review per user
+instruction. Native input is currently BLOCKED by the locked Mac; user asked only
+to unlock and reply Ready. F1/P1 evidence retained; final qualification OPEN.
 The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
 retains failures, corrections, package identities and five manageable review groups.
 
@@ -45,24 +46,34 @@ Do not overwrite/delete either profile; private project folders remain untouched
 `7ab87687e52120d5070c4a57b8830775737b8e57e6e6d44b7375cb5c0a1826b1`.
 Retained seal/repack/mount/integrity/identity/ARM64/checksum/privacy checks PASS.
 Normal retained P1 app is open on the clean review profile with the saved English
-project; Run launched for human menu/first-line check. F1 normal Stop completed
+project/game. Current native Source action was refused because Mac is locked. F1 normal Stop completed
 Cancelled/stopped exit 0. P1 wizard actual 48px size/chevron in both palettes,
-empty Custom rejection and portrait/Review PASS through native CUA. Human acceptance
-remains OPEN; next collect game/menu/first-line and genuine progress observations,
-then guide standard-keyboard Story/Source, Branches, catalogue/Finder and final
-runtime/scaling/reopen in manageable groups. No runner pending.
+empty Custom rejection and portrait/Review PASS through native CUA. User subjective feedback is optional; agent must execute all objective/native cases
+it can reach and report true limitations. Fresh English copied-project SDK menu test
+timed out on locked host (exit -9, no PASS, original source unchanged); failed log/
+JSON retained `final-1g-mac/english-menu-native.*`. Reassess on unlocked host before
+classification; no same-condition retry. Existing menu oracle retained separately.
+Next resume native keyboard/Story/Source, Branches, catalogue/Finder and final
+runtime/scaling/reopen, plus capability audit of game-window binding/progress.
+No runner pending.
 
 No remote workflow dispatched: initial final production **0/1**. Only after Mac
 review passes, publish exact candidate, required Repository quality and production
 `upload_packages=true`, record run/attempt/SHA then manual same-chat wait/audit;
 subsequently Windows transfer. No conflict resolution/rebase/merge, 1G/1H closure
 or next feature phase. Counters: **13 production builds, 60 native/boundary starts**,
-separately **5 SDK menu/launcher starts**. Original-profile restoration remains pending.
+separately **6 SDK menu/launcher starts** (bounded English testcase +1). Original-profile restoration remains pending.
 **Publication:** checkpoints after remote `273b8e7` are LOCAL ONLY. Automatic
 approval review rejected the combined commit/push request before execution because
 publication preceded the selected Mac-review gate. A local-only checkpoint was
 saved instead; do not retry the push until that gate passes. No remote workflow
 request was sent. Normal P1 game now reports Running with no structured diagnostic.
+
+**Fresh ownership/identity:** HEAD `353f1f7` includes the newer user-authorized
+local documentation planning merge; preserve it and its no-push instruction. All
+132 recorded P1 application/workflow input hashes match current checkout. DMG/
+executable checksums match. Saved UI captures reviewed as fixture observations;
+remaining native/visual behavior stays OPEN. Original profile remains preserved.
 
 Fresh refs last checked: main `4d7ba03`, planning remote `267ec2a`/local `2c5a164`;
 PR GraphQL base `924619d` differs from Git main. Preserve planning worktree.
