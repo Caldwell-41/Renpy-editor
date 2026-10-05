@@ -7,49 +7,54 @@
 
 ## Live continuation
 
-**State: P5 Mac correction PASS; publish corrected candidate next.** App/package
-source `0e3077df10bd713ca1d956dfc84be2bd8384eb16` corrects Branches font-dependent
-pill clipping using rendered SVG widths plus padding for labels, channels and Fit.
-86 frontend tests/0 skipped, real UI browser (two fonts/palettes, three widths), all
-five finalized shipped runtime drivers, format, self-review and repository checks
-PASS. The intermediate combined browser command's report-variable failure remains
-retained as failed; its successful unchanged components and corrected driver results
-are identified separately in the ledger.
+**State: awaiting_ci — correction run, manual same-chat resume.** Published and
+verified candidate `cab39e101af7a3cb37c10d207f9af31b2450818d` on the existing
+`feature/phase-1g-branches-runtime`; 132 app/workflow inputs equal tested P5 package
+source `0e3077df10bd713ca1d956dfc84be2bd8384eb16`. PR #17 remains open/draft/
+conflicting; no integration. Original user profile restored; disposable evidence kept.
 
-Exact packaged Mac route-a **37.016s** and route-b **36.007s** PASS, each exit 0,
-cleanup true. Native SVG captions measure 49.0529785/49.6357422px in 70px pills and
-Fit includes their bounds. Both authored destination edits, accepted bytes/reopen,
-real SDK running >9.5s, Save/staleness, Stop and reopen pass; route-b also verifies
-draft refusal/Cancel. These are packaged WebView/synthetic selection with real IPC/
-SDK, not physical keyboard claims. Input manifest has 132 entries, five changed
-Branch UI/test/probe files and 127 unchanged. Original profile remains restored;
-unaffected picker/sidebar/catalogue/import/Finder/progress/diagnostic/English input
-acceptance is reused only for its unchanged interaction inputs.
+- Repository quality [37307638008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307638008), attempt **1**, workflow_dispatch, exact cab39e1 SHA above: **PASS**. Actual required Validate repository job and all steps success; optional diagnostic/profile jobs intentionally skipped by false selectors.
+- Production [37307663113](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307663113), attempt **1**, workflow_dispatch, exact cab39e1 SHA above, `upload_packages=true`: confirmed **in_progress / Preflight** at the initial identity read (2026-10-05 about 12:11 UTC). No acceptance or installer retention claimed yet.
 
-Verified corrected ARM64 installer: ignored
+Initial final dispatch **1/1 consumed**; justified changed-input correction dispatches
+**1**. Neither package matrix started in the failed original run 37300975410 attempt
+1 on 94ffa25; that run remains FAILED in label-clipping browser preflight with no
+artifacts, full failure log/job metadata/inventory preserved. No duplicate successful
+matrix, ambiguous dispatch/retry or pending local runner. Counters **17 builds / 69
+native starts / 7 separate SDK menu/launcher starts**; remote package counts await audit.
+
+P5 Mac acceptance PASS: 86 frontend tests/0 skipped, both-font/palette/three-width UI
+browser and all five finalized shipped runtime drivers; format/self-review/repository
+checks. Exact native route-a 37.016s / route-b 36.007s PASS, each exit 0 and cleanup
+true, measured 49.0529785/49.6357422px SVG captions in 70px pills/Fit bounds; real SDK
+Run >9.5s, edited destinations, Save/Stop/reopen and route-b refusal/Cancel. Synthetic
+selection/real IPC/SDK remains distinct from physical keyboard. Five Branch UI/test/
+probe inputs changed and 127 unchanged; prior unaffected picker/sidebar/catalogue/
+import/Finder/progress/diagnostic/English-input evidence is reused by interaction
+impact only. Intermediate browser-command/report-variable failures remain failed in
+the ledger, with corrected component proof separately recorded.
+
+Verified corrected local ARM64 installer: ignored
 `.toolchains/review-builds/ui-refresh-0e3077d/Loomlight_0.1.0_0e3077d_aarch64.dmg`,
-5,752,010 bytes, SHA-256 `d0154be1e24dca11a80fb1bef300d7cceded0f1bd84504c09f9f92fbdb671797`;
-sealed executable `3e8ee00ea907e1ac3abe4aac916f3580bd162f1a06674af5634d2dde0b283f80`.
+5,752,010 bytes; SHA-256 `d0154be1e24dca11a80fb1bef300d7cceded0f1bd84504c09f9f92fbdb671797`.
+Sealed executable `3e8ee00ea907e1ac3abe4aac916f3580bd162f1a06674af5634d2dde0b283f80`.
 Mounted identity/ARM64/integrity/signature/hash/privacy PASS; locally ad-hoc signed,
-not Developer ID/notarized. Installed app remains untouched; prior packages retained.
-Counters now **17 builds / 69 native starts / 7 separate SDK menu/launcher starts**.
+not Developer ID/notarized. Installed app untouched; prior packages preserved.
 
-Failed production [37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410),
-attempt 1 on `94ffa25c016740eb541bba4e883f6ab683cb93d6`, remains FAILED in browser
-preflight; both package jobs skipped and no artifacts. Required Repository quality
-37300945634 attempt 1 PASS belongs to 94ffa25 only. Full failed log/job metadata/empty
-inventory and local intermediate failures remain ignored. Initial final production
-allowance **1/1 consumed**, changed-input correction dispatches **0** before publication.
+Manual SAME-chat wait: stop model polling. Resume: “Audit production run 37307663113
+attempt 1 on cab39e1.” Inspect that recorded operation plus fresh refs/worktrees/diff.
+If pending, pause again without a loop or dispatch. If terminal, audit required
+preflight, both platform gates, real-SDK/native reports, cleanup, exact input manifests
+and success-only retained installers; classify and preserve failures. Only necessary
+changed-input fixes and justified affected reruns remain authorized. After required
+remote PASS prepare the exact passing candidate/retained Windows installer/14-row
+Windows-PC prompt. Windows physical review, PR conflict resolution, combined-input
+integration, phase closure/1H/new features remain deferred. No Goal lifecycle was
+created; ending this turn stops model polling, not a claimed live-Goal pause.
 
-Next: publish this coherent corrected candidate on the existing feature branch,
-verify 132 app/workflow inputs equal 0e3077d, and run required Repository quality plus
-one justified existing production correction qualification (`upload_packages=true`).
-Source changed to fix the failed required gate; neither prior platform job began, so
-this duplicates no unchanged successful platform matrix. Record confirmed run ID,
-attempt, exact tested SHA and continuation before manual SAME-chat waiting. No
-ambiguous retry, Windows-PC claim, PR conflict resolution, history rewrite, merge,
-phase closure or new feature phase. Windows prompt/installer transfer follows required
-remote PASS. No Goal lifecycle was created; ending the turn stops model polling.
+This wait record follows tested cab39e1 with no app/workflow input change. Validate,
+publish and verify it without another package matrix; its commit SHA does not replace
+the recorded tested candidate or make earlier green builds qualify later inputs.
 
 **Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,

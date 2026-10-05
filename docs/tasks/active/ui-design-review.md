@@ -3529,3 +3529,34 @@ Production uses existing workflow and upload_packages=true; initial final allowa
 no platform started there, so no successful unchanged matrix is repeated. Preserve
 all failed evidence and record confirmed run/attempt/SHA before manual same-chat wait.
 No PR conflict work, integration, Windows physical test, closure or new phase.
+
+
+**Confirmed P5 correction qualification wait — 2026-10-05:** state awaiting_ci.
+Published/verified exact candidate `cab39e101af7a3cb37c10d207f9af31b2450818d`;
+all 132 app/workflow inputs equal packaged/tested source 0e3077d. Existing branch/
+PR preserved; no integration. Required Repository quality
+[37307638008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307638008),
+attempt 1, workflow_dispatch, exact cab39e1: PASS, actual Validate repository job
+and every step success; optional diagnostic/profile jobs intentionally skipped.
+Production [37307663113](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37307663113),
+attempt 1, workflow_dispatch, exact cab39e1, upload_packages=true: confirmed
+in_progress / Preflight at one initial identity read, about 12:11 UTC. No further
+model polling selected. Original failed run 37300975410 attempt 1 remains FAILED,
+no artifacts/platform jobs; no result retroactively waived.
+
+Initial final dispatch allowance 1/1 consumed; justified changed-input correction
+dispatches 1. No duplicate/ambiguous request. Local totals 17 builds / 69 native
+starts / 7 separate SDK menu/launcher starts; remote package counters not preclaimed.
+No local runner/app/game pending and original profile restored. This wait checkpoint
+changes docs only; app/workflow equality with cab39e1 must hold. Publish/verify it
+without new qualification; tested candidate stays cab39e1, not the wait carrier SHA.
+
+Continue SAME chat: “Resume: audit production 37307663113 attempt 1 on cab39e1.”
+Read that recorded operation plus fresh refs/worktree/diff once. Pending -> pause,
+terminal -> audit every required preflight/platform/SDK/native/cleanup/input manifest/
+retained installer; classify/fix selected genuine failures and retest affected inputs.
+After required remote PASS update existing docs/HANDOVER and provide exact Windows
+candidate/retained installer/14-row prompt. Windows physical review and later separate
+PR conflict resolution/combined qualification/integration remain deferred. No merge,
+rewrite, closure/1H/new feature. No Goal lifecycle created; ending the turn stops model
+polling and does not claim a verified live-Goal pause.
