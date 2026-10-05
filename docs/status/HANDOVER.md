@@ -1,76 +1,49 @@
 # Current outcome handover
 
-## Agent-owned final Mac review — 2026-10-05
+## Final Mac acceptance / qualification continuation — 2026-10-05
 
-**Machine:** local macOS 26.6.2 (25G83), ARM64; Windows-PC review deferred.
-**Branch/PR:** `feature/phase-1g-branches-runtime`, PR #17 OPEN/draft/CONFLICTING.
-**Source/build input:** `4b77b547f53b3f2a6f2c85f9c7e6d7d90a4a19e7` (Source P2).
-**State:** `in_progress`; unlocked host. Agent owns objective/native/visual review;
-subjective user feedback optional, injected native keys are not physical human typing.
-The [execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
-retains failures, corrections, exact packages, counters and review groups.
+**Final Mac review PASS; remote qualification next.** Exact app/build source
+`efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
+48px native picker, Source Save focus, unsupported-only import and bounded caption
+corrections. 85 frontend checks/0 skipped, web/UI browsers and affected real-SDK
+route-a/route-b/ui-refresh package cases PASS; all three exit 0/cleanup true.
+Native English Story/Choice/Source input, pending navigation guard, Commit/Undo/Redo,
+sidebar/focus/Writing focus, real catalogues/media/import, diagnostic highlight,
+normal Run/Stop exit 0, minimum window/2× scale and reopen PASS. User separately
+reports genuine Finder drop works with unsupported-text error. No physical human
+keyboard claim; non-English IME outside selected English support scope.
 
-CONFIG-01 ratio/dimensions/caption, truthful invalid Custom and bounded portrait,
-native 48px P1 select and sidebar `f287a7e` are included. Native picker/both palettes/
-invalid/portrait PASS. P2 restores typing focus after the Source keyboard Save barrier;
-85 frontend tests/0 skipped, build, Source save/focus and selection browsers PASS.
-Native Command-S → immediate typing and native paste/save/exact restored Scene bytes
-PASS. Normal English menu testcase on a disposable copy PASS (8 assertions, 5.829 s);
-failed locked-host run retained separately. English app/manual support selected;
-standard keyboard only, non-English IME outside scope; retain UTF-8/source tests.
+Verified ARM64 installer: ignored
+`.toolchains/review-builds/ui-refresh-efb52ed/Loomlight_0.1.0_efb52ed_aarch64.dmg`,
+5,751,326 bytes; SHA-256
+`5da26bf4bfd537edd18bd5356ce07bdb8f2d2658c9aa86f2ba84a9f7c1f5b980`.
+Sealed executable `d2883d2e7c014dd38b785cc805e0a50d369e22734673639af11ae181236b5daa`.
+Mounted identity/ARM64/integrity/signature/checksum/privacy PASS; locally ad-hoc
+signed, not Developer ID/notarized. Link supplied in chat; installed copy remains
+older. Preserve every failed/superseded package/run. Exact input hashes and the
+[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
+separate reused unchanged evidence from current affected proof.
 
-**Verified P2 ARM64 installer:** ignored
-`.toolchains/review-builds/ui-refresh-4b77b54/Loomlight_0.1.0_4b77b54_aarch64.dmg`,
-5,751,006 bytes; SHA-256
-`0d0e3bdc123f861763e86e2ba27548633ab3f597debb58b4eaec94c1f2d33a2c`.
-Sealed executable `bec88eec76dc01fbb6a2a9c3c38bbbd1a2b29368fea36bebddfd363bb5e29be6`.
-Release/seal/repack/read-only mounted identity/ARM64/signature/integrity/checksum/
-privacy checks PASS; local ad-hoc seal, not Developer ID/notarized. Older packages
-and F1 six-case real-SDK/native evidence retained. Changed renderer acceptance must
-be established on P2; earlier green builds do not blanket-qualify it. `/Applications`
-still older `580740f`; review uses the exact retained P2 app.
+Genuine uncached native SDK progress PASS: 63.8 MB of 146.5 MB/43%, screenshot
+65.6 MB/44%, Verify, Install, managed SDK Ready/Continue. Normal creation staged
+progress proof retained on unchanged inputs. Host Documents TCC wait classified
+with native directory-open stack/log; temporary-folder selection completes. No
+broader permission changed or skipped failure converted to pass.
 
-**Active review / recovery:** original whole app profile intact at ignored
-`.toolchains/final-1g-mac-review/preserved-app-profile`; state `isolated`, clean review
-profile active. Official SDK 8.5.3 genuinely installed; normal wizard English project
-`projects/loomlight-final-mac-review` (1600×1000, Git enabled). Download start/ready
-and creation Generate/stages/complete observed; measured intermediate download
-phases remain OPEN. Private project folders untouched. Restore original via guarded
-`profile-session.py restore` with all app/game processes quit before final transfer;
-retain the review profile, never overwrite either profile.
+**Profile recovery complete:** both disposable profiles and SDKs retained ignored;
+guarded renames restored the untouched original whole app profile. No app/game or
+local runner pending, no private project mutation. Counter totals: **16 production
+builds, 67 native/boundary starts**, separately **7 SDK menu/launcher starts**.
 
-**Native catalogue progress:** Alex/Morgan image/empty Grid/List, happy/calm proportional
-media, non-default selection → Character edit/save retention, default change and
-Boolean/Integer/Text creation plus Variable discard/reopen PASS. Browse selected four
-image/audio files; actual PNG dimensions/file info, row removal, Add files chooser
-cancel, close/Keep editing and once-only background/music import PASS. Full UI browser
-now explicitly checks Character Save dialog closure and PASS (fixture evidence).
-
-**Host limitation classified:** pending appearance selection in Documents blocked at
-native directory `open`; both stack samples and scoped TCC log show Documents access
-prompt plus changed ad-hoc code requirement. Earlier incomplete idle/orphan-dialog
-hypothesis rejected, no dialog fix. CUA cannot access UserNotificationCenter; no broad
-permission/TCC setting changed. Cmd-Q removed window but process stayed blocked;
-scoped TERM ended only disposable review app before restart. Same synthetic image
-from temporary folder imports/closes normally. Preserve failed evidence. Finder
-shows separate app windows with no shared desktop geometry; user reports actual Finder drop works with the unsupported-text error.
-Do not claim Finder pass from Browse. Remaining: native Story/Branches/mapped-input,
-final runtime/diagnostic/scaling/reopen and intermediate genuine download progress.
-
-No remote workflow dispatched; initial production **0/1**. Publish exact candidate only
-after Mac review passes, then required Repository quality/production with
-`upload_packages=true`; record run ID/attempt/SHA/continuation before manual same-chat
-waiting. Windows exact-candidate 14-row transfer only after required remote PASS.
-No PR conflict resolution, rebase/merge, 1G/1H closure or feature phase. Counters:
-**14 production builds, 62 native/boundary starts**, separately **7 SDK menu/launcher
-starts**. No local runner pending; normal retained P2 app open on Assets.
-
-**Publication/ownership:** all checkpoints after verified origin `273b8e7` LOCAL ONLY.
-Earlier auto-review rejected publication before selected Mac gate; no workaround.
-Preserve local planning-doc merge `353f1f7` and separate planning worktree `2c5a164`;
-its explicit no-push selection remains. Fresh last verified main `4d7ba03`, planning
-remote `267ec2a`, PR GraphQL base `924619d` differs from Git main. Inspect fresh refs
-at qualification/integration boundaries, never reset to incoming `a15e923`.
+All checkpoints after verified origin `273b8e7` currently LOCAL ONLY. Mac PASS now
+selects Stage 2 feature-candidate publication and exact remote qualification;
+initial production allowance **0/1**, upload_packages=true. No dispatch yet.
+Record confirmed run ID/attempt/tested SHA/continuation before manual same-chat
+waiting; preserve ambiguous requests without retry. After required remote PASS,
+prepare retained exact Windows installer and 14-row Windows-PC agent prompt.
+Windows remains deferred in this Mac chat; later separate integration only.
+Preserve local planning merge `353f1f7` and separate worktree `2c5a164`; no planning
+branch push, conflict resolution, rebase/rewrite, merge, 1G/1H closure or new phase.
 
 ## Local planning documentation merge — 2026-10-05
 

@@ -3317,3 +3317,79 @@ Retained seal/repack/read-only mounted identity/ARM64/signature/checksum PASS.
 It is superseded for final review by changed-input P4, not failed native evidence;
 no P3 app launch/native suite duplicated. Counters now **15 builds, 62 native/boundary
 starts**, separately 7 SDK menu/launcher starts. Remote initial dispatch still 0/1.
+
+
+**P4 retained package / affected native PASS:** source/build
+`efb52edebd934277f7643a6978f59a343e6c447b`, ARM64 DMG 5,751,326 bytes, SHA-256
+`5da26bf4bfd537edd18bd5356ce07bdb8f2d2658c9aa86f2ba84a9f7c1f5b980`;
+sealed executable `d2883d2e7c014dd38b785cc805e0a50d369e22734673639af11ae181236b5daa`.
+Retained release/seal/repack/integrity/read-only mount/identity/ARM64/signature/hash/
+Applications shortcut PASS, artifact privacy 9 files PASS. Installer link supplied in
+this chat. Exact 132 app/workflow hashes retained; from P2 only import UI, preview CSS,
+UI probe and their two tests change. Core/SDK/services and Source implementation are
+unchanged; retain prior identities, no duplicate broad-core/SDK matrix.
+
+Three affected real-SDK/package cases PASS with exit 0 and cleanup: route-a 37.161 s,
+route-b 35.978 s, ui-refresh 4.446 s. Both routes retain destination edit/reopen,
+accepted Save during play, earlier-launch state, at least 9.5 seconds Running,
+Stop/reopened bytes and route-b invalid-draft refusals. Eleven native UI checks include
+unsupported-only error/no empty form/no dialog/no new asset through the real service.
+Normal retained P4 app then starts and reopens the saved English project. Native
+preview shows caption beginning within bounds; native scroll reaches final words.
+Actual minimum window about 562×482 logical at 2× scale remains usable with hidden
+tree and wrapping header. Previous independent layout and saved fourth caption reopen.
+
+Native known `$ if True` diagnostic: Source accepts controlled unsupported statement,
+real SDK compile fails at Scene 3 line 2; expanded diagnostic Open navigates to current
+Source with line 2 highlighted. Restored station narration/return accepts Save and
+retains typing focus. Next validation truthfully detects the intentionally missing
+free-label fixture in script; preserve that source in ignored failure evidence, restore
+normal comment/start jump through native Source transaction. Final normal validation
+then PASS exit 0/no structured diagnostics. These are fixture corrections, not app
+fixes or waived SDK results. Re-grants reflect SDK common `.rpyc`/`.rpymc` rewritten
+by real compile and the existing SDK content/identity consent contract; no weakening.
+Counters **16 builds, 66 native/boundary starts**, separately 7 SDK menu/launcher.
+No remote dispatch (0/1). Genuine intermediate download observation and profile
+restoration remain; normal native Run/Stop finishing. Keep original profile intact.
+
+
+**Final Mac review PASS — 2026-10-05:** agent-owned objective/native/visual review
+on macOS ARM64, standard English input, exact P4 retained package above. User physical
+Finder result remains separate (works, unsupported text error). Non-English IME is
+outside the selected English support scope; no physical human typing claim. Genuine
+normal P4 Run reaches Running/no diagnostic, native Stop reaches Cancelled/stopped
+exit 0. Saved Story/Choice edits and independent layout reopen; exact route/service
+cases above own both route outcomes, Save/staleness/Stop/rerun/reopen assertions.
+Known native SDK diagnostic navigates to current highlighted line and corrected
+normal validation passes. Both-palette picker and unchanged service/alias/replacement/
+retry/pointer-cancel/missing-flow contracts reuse their recorded unchanged-input
+proofs; native real-media/mapped-edit/sidebar/minimum-window observations are additional
+acceptance, not a claim every browser gesture was physically performed.
+
+The one remaining uncached progress check now PASS: empty second disposable profile,
+normal native Install downloads official 8.5.3. AX shows 63.8 MB of 146.5 MB / 43%;
+contemporaneous screenshot 65.6 MB / 44%, then Verify download, then Install SDK.
+Stage rows turn complete/active correctly, indeterminate indicator is used after
+measured download, and final managed compatible SDK/Ready/Continue enabled appears.
+No fake requester or cached archive supplies this observation. First normal-wizard
+creation Generate/stages/completion proof is retained under its unchanged creation
+inputs; no duplicate new project/SDK matrix. Ignored native observation record and
+this chat's actual tool captures retain the layer. Counter +1 normal progress app:
+**16 production builds, 67 native/boundary starts**, separately **7 SDK menu/launcher**.
+
+Recovery COMPLETE: after normal Stop/quit, both guarded helpers retain second profile
+`sdk-progress-profile` and first `review-app-profile`, then restore original whole
+user profile intact. Both state JSONs confirm restoration; no app remains running,
+no private project modification, deletion or overwrite. Disposable SDKs/projects and
+all failed/superseded evidence stay ignored. `/Applications` still original older
+installer; corrected P4 link supplied without replacing it.
+
+Selected next action is Stage 2: publish one exact candidate on the existing feature
+branch/PR, verify remote identity, Repository quality and one initial production
+qualification with upload_packages=true (allowance 0/1 before dispatch). New checkpoint
+contains acceptance/continuation docs only; its 132 app/workflow inputs must match P4
+before dispatch. No remote acceptance yet. Preserve planning branch/worktree/local
+merge; its earlier no-push instruction governed the planning merge operation, no
+planning branch publication is selected. Stage 2 publication of the final feature
+candidate was explicitly selected in this Mac completion sequence. No conflicts,
+history rewrite, integration, Windows-PC execution, closure or new feature phase.

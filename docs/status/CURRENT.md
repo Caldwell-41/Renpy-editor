@@ -7,44 +7,48 @@
 
 ## Live continuation
 
-**Agent-owned final Mac review in progress on unlocked desktop.** Source/build input
-`4b77b547f53b3f2a6f2c85f9c7e6d7d90a4a19e7` includes CONFIG-01, native P1 picker,
-sidebar `f287a7e` and P2 Source keyboard-Save focus restoration. Focused 85 frontend
-checks/0 skipped, web build, Source save/focus/selection and UI browser PASS.
-Native picker/both palettes/invalid/portrait and Source Save → continued typing/paste
-PASS. Eight-assertion English SDK menu testcase PASS on unlocked disposable copy;
-locked failure retained. Standard English keyboard support selected; no IME gate.
+**Final Mac review PASS; remote qualification next.** Exact app/build source
+`efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
+48px native picker, Source Save focus, unsupported-only import and bounded caption
+corrections. 85 frontend checks/0 skipped, web/UI browsers and affected real-SDK
+route-a/route-b/ui-refresh package cases PASS; all three exit 0/cleanup true.
+Native English Story/Choice/Source input, pending navigation guard, Commit/Undo/Redo,
+sidebar/focus/Writing focus, real catalogues/media/import, diagnostic highlight,
+normal Run/Stop exit 0, minimum window/2× scale and reopen PASS. User separately
+reports genuine Finder drop works with unsupported-text error. No physical human
+keyboard claim; non-English IME outside selected English support scope.
 
-P2 verified ARM64 installer:
-`.toolchains/review-builds/ui-refresh-4b77b54/Loomlight_0.1.0_4b77b54_aarch64.dmg`,
-SHA-256 `0d0e3bdc123f861763e86e2ba27548633ab3f597debb58b4eaec94c1f2d33a2c`.
-Mounted identity/signature/integrity/ARM64/checksum/privacy PASS. Review uses retained
-P2 app, installed `/Applications` copy stays older. F1 six real-SDK/native reports and
-all superseded/failed evidence remain; changed behavior needs current proof.
+Verified ARM64 installer: ignored
+`.toolchains/review-builds/ui-refresh-efb52ed/Loomlight_0.1.0_efb52ed_aarch64.dmg`,
+5,751,326 bytes; SHA-256
+`5da26bf4bfd537edd18bd5356ce07bdb8f2d2658c9aa86f2ba84a9f7c1f5b980`.
+Sealed executable `d2883d2e7c014dd38b785cc805e0a50d369e22734673639af11ae181236b5daa`.
+Mounted identity/ARM64/integrity/signature/checksum/privacy PASS; locally ad-hoc
+signed, not Developer ID/notarized. Link supplied in chat; installed copy remains
+older. Preserve every failed/superseded package/run. Exact input hashes and the
+[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04)
+separate reused unchanged evidence from current affected proof.
 
-Native real-image/empty Character Grid/List, appearance selection/edit/default,
-bool/int/string Variables and discard/reopen PASS. Native Browse multi-file previews,
-remove/Add/cancel/Keep editing and one background/music import PASS. Documents image
-selection stalled on macOS TCC directory-open permission (stack/log proof), not proved
-dialog defect; CUA cannot access its permission alert. Temporary-folder selection
-completes without changing broader permissions. Finder cross-app desktop geometry
-unavailable through tool; user reports physical Finder drop works with the unsupported-text error. Story/Branches,
-final runtime/diagnostic/scaling/reopen and measured SDK download phases remain OPEN.
-Agent observations are separate from human physical acceptance; feedback optional.
+Genuine uncached native SDK progress PASS: 63.8 MB of 146.5 MB/43%, screenshot
+65.6 MB/44%, Verify, Install, managed SDK Ready/Continue. Normal creation staged
+progress proof retained on unchanged inputs. Host Documents TCC wait classified
+with native directory-open stack/log; temporary-folder selection completes. No
+broader permission changed or skipped failure converted to pass.
 
-Original whole profile is preserved intact in ignored review files; clean profile
-active with genuinely installed SDK 8.5.3 and normal-wizard English 1600×1000 project.
-Restore it with guarded helper after app/game quit before final transfer. Private
-project folders untouched. Exact evidence/continuation is in HANDOVER and the
-[execution record](../tasks/active/ui-design-review.md#final-mac-completion-execution--2026-10-04).
+**Profile recovery complete:** both disposable profiles and SDKs retained ignored;
+guarded renames restored the untouched original whole app profile. No app/game or
+local runner pending, no private project mutation. Counter totals: **16 production
+builds, 67 native/boundary starts**, separately **7 SDK menu/launcher starts**.
 
-All checkpoints after verified origin `273b8e7` are LOCAL ONLY; early publication was
-rejected by automatic approval review before the selected Mac gate. No push/workflow
-pending; initial final production **0/1**, after Mac PASS only. Counters: **14 builds,
-62 native/boundary starts**, separately **7 SDK menu/launcher starts**. Remaining:
-remote qualification, Windows-PC 14-row exact-candidate review, separate integration.
-No PR #17 conflicts/rebase/merge/1G/1H closure or new feature phase. Preserve newer
-local planning-doc merge `353f1f7`, its no-push instruction and planning worktree.
+All checkpoints after verified origin `273b8e7` currently LOCAL ONLY. Mac PASS now
+selects Stage 2 feature-candidate publication and exact remote qualification;
+initial production allowance **0/1**, upload_packages=true. No dispatch yet.
+Record confirmed run ID/attempt/tested SHA/continuation before manual same-chat
+waiting; preserve ambiguous requests without retry. After required remote PASS,
+prepare retained exact Windows installer and 14-row Windows-PC agent prompt.
+Windows remains deferred in this Mac chat; later separate integration only.
+Preserve local planning merge `353f1f7` and separate worktree `2c5a164`; no planning
+branch push, conflict resolution, rebase/rewrite, merge, 1G/1H closure or new phase.
 
 ### Local planning documentation merge — 2026-10-05
 
