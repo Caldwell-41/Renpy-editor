@@ -1,5 +1,66 @@
 # Current outcome handover
 
+## Live Windows correction and native handoff — 2026-10-06
+
+**State: in_progress; Windows review incomplete.** Consent succeeded with explicit
+user permission. Installed original NSIS remains unchanged. Story latest-saved text
+and normal game exit 0 pass specifics; two Source Run refusals remain WIN-RUN-01.
+Cause reproduced: background observation queues while SDK discovery holds RequestLane,
+then owns the renderer authoring lease when Run prepares. Correction attempt **1**
+removes that observation lease, retaining ordered requests and all Source guards.
+Typecheck, compiled tests, 29 Source/leave/runtime tests, 1 Save-routing test, existing
+Source browser persistence/focus and new race/existing route-a renderer checks pass.
+Affected native Windows/Mac and justified remote qualification are still required.
+
+Original installed focused route-a PASS/exit0/cleanup true; ui-refresh FAIL/exit1/
+cleanup true, editor timeout, seven prior checks pass. Retain reports in the established
+ignored evidence root. Probe diagnostics now separate editor retention and record the
+last dirty-file inventory; same 20 s deadline/one-draft assertion. No unchanged broad
+matrix/retry. Isolated Windows production build **session 25998 PASS, exit 0**, output
+`source-correction-1-build.log`; **1 completed new build / 4 Windows native starts /
+0 SDK menu starts**. No CI dispatch. App/probe/driver inputs changed; baseline 132-file
+proof applies only to qualified `5b467a4`, not the working correction.
+
+Native original app is open on **Windows Interaction Review → Story → Scene 1**.
+Prepared fixture's Choice+trailing terminal Jump caused truthful invariant refusal;
+original evidence retained, tail corrected and reconciled via native Source. Ordinary
+grip reorder/one Undo/Redo save expected source order (`130`–`135`). API cannot hold
+mouse while pressing Escape/switching apps; user requested three physical cancellation
+gestures on Beat 2. Await their observations, then inspect actual UI and compare the
+four `before-human-drag.json` hashes. Do not compete for UI meanwhile. Physical result
+is not inferred. Variable int/42 discard/reopen resets bool/False; English string discard
+also observed, remaining row actions pending. All 14 rows incomplete; WIN-UI-11 Fail.
+Complete every canonical action and TESTING final session; do not prepare integration.
+
+Original profiles and generated review profiles retained; restoration remains pending.
+No private project opened. Do not start probes alongside the interactive single-instance
+owner. User subsequently reports all three held-drag cancellation checks work;
+`after-human-drag.json` proves four saved hashes unchanged. They explicitly permit
+restarting Computer Use, but the first inventory call still reports the physical Escape
+stop and forbids further native calls this turn. Resume the same review next turn;
+inspect the real window before acting, no renewed execution-consent approval.
+Retained candidate executable is 14,150,656 bytes, SHA256
+`ab3da29afde2e3c6fe88223421b44032bd13599f9950fba835640823869cb2fe`;
+`source-correction-1-build-receipt.json` records 3 changed/129 unchanged baseline inputs
+and byte-identical emitted frontend after comment clarification. Native/Mac/remote
+correction flags remain false. Preserve failed receipts and prior cumulative counters. Exact current
+details are in the task's
+[live Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
+Earlier checkpoints below are history, not a renewed consent requirement.
+
+## Windows review resumed — 2026-10-06
+
+**State: in_progress; consent wait resolved.** The user explicitly asked the agent to
+retry with permission; native click succeeded for the disposable Windows Review project.
+This overrides the local skill's default physical handoff. No human click/acceptance
+claim. Fresh-game main menu/Preferences/Help/Load/Start, Runtime X/reopen while Running,
+native CodeMirror English select/edit/Ctrl+S and exact saved source receipt pass their
+specific checks. Launch details truthfully report an earlier revision; Stop reports
+cancelled/stopped with Windows exit -1073741510, and latest-saved rerun is underway.
+Captures `46`–`75` are retained in the same ignored evidence root. No additional app
+start/build/CI; all remaining canonical checklist actions stay required. The previous
+awaiting-consent checkpoint below is historical; resume the current observed UI state.
+
 ## Windows final review checkpoint — 2026-10-06
 
 **State: awaiting one physical execution-consent action; Windows review incomplete.**

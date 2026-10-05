@@ -9,6 +9,48 @@ let browser;
 try {
   await server.listen();
   browser=await chromium.launch({channel:'chrome',headless:true});
+  // WIN-RUN-01: an observation queued during SDK discovery must not refuse
+  // an explicit Run, nor bypass the ordered read or launch more than once.
+  {
+    const page=await browser.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await page.route('**/source-observation-run',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><div id="app"></div>'}));
+    await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/source-observation-run`);
+    await page.evaluate(async()=>{
+      const {runtimeProbeFixture}=await import('/tests/runtime-probe-fixture.mjs');
+      const fixture=runtimeProbeFixture('route-a');window.__observationCalls=fixture.calls;
+      window.__TAURI_INTERNALS__={};
+      const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
+      const {startApplication}=await import('/src/main.ts');
+      startApplication(async(operation,payload)=>{
+        if(operation==='sdk.discover'&&window.__holdSdk){window.__holdSdk=false;window.__sdkWaiting=true;await new Promise(resolve=>window.__releaseSdk=resolve);}
+        if(operation==='source.open'&&window.__holdObservation){window.__holdObservation=false;window.__observationWaiting=true;await new Promise(resolve=>window.__releaseObservation=resolve);}
+        return fixture.request(operation,payload);
+      });
+    });
+    await page.locator('.recent-open').click();
+    await page.getByRole('button',{name:'Source',exact:true}).click();
+    await page.locator('.source-editor').waitFor();
+    await page.evaluate(()=>{window.__holdSdk=true;window.__holdObservation=true;});
+    await page.getByRole('button',{name:'Run Game',exact:true}).click();
+    await page.waitForFunction(()=>window.__sdkWaiting);
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    await page.waitForTimeout(500); // Source's 250 ms observation debounce.
+    await page.evaluate(()=>window.__releaseSdk());
+    await page.waitForFunction(()=>window.__observationWaiting);
+    assert.equal(await page.locator('.runtime-panel [role=alert]').textContent(),'');
+    assert.equal(await page.evaluate(()=>window.__observationCalls.includes('runtime.prepare')),false);
+    await page.evaluate(()=>window.__releaseObservation());
+    await page.getByRole('button',{name:'Trust for this session and continue',exact:true}).click();
+    await page.waitForFunction(()=>window.__observationCalls.includes('runtime.start'));
+    assert.equal(await page.evaluate(()=>window.__observationCalls.filter(op=>op==='runtime.start').length),1);
+    assert.equal(await page.locator('.runtime-panel [role=alert]').textContent(),'');
+    assert.deepEqual(errors,[]);
+    await page.getByRole('button',{name:'Stop',exact:true}).click();
+    await page.waitForFunction(()=>window.__observationCalls.includes('runtime.stop'));
+    await page.close();
+    console.log('PASS WIN-RUN-01: ordered Source observation during SDK discovery; one Run, no persistence refusal. Renderer fixture only.');
+  }
   for(const mode of process.argv.slice(2).length?process.argv.slice(2):['compile','lint','route-a','route-b','runtime-error']) {
     const page=await browser.newPage({viewport:{width:mode==='route-b'?640:1100,height:720}});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));

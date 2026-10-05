@@ -7,7 +7,31 @@
 
 ## Live continuation
 
-**Windows review: awaiting one physical execution-consent click; incomplete.**
+**Windows review: in_progress; incomplete.** User explicitly requested retry with
+permission for the disposable project's execution-consent action; the agent's native
+click succeeded. This overrides the prior default skill handoff and resolves that wait.
+It is agent input with user permission, not physical-human acceptance. Native fresh-game
+menus/Start, drawer close/reopen while Running, Source English selection/edit/Ctrl+S,
+exact saved bytes and truthful earlier-launch status now have captured proof. Stop
+reports cancelled/stopped (Windows exit -1073741510); latest-saved Story rerun shows
+the new saved text and normal close exits 0. Source rerun still fails on the installed
+baseline (WIN-RUN-01); its first correction passes focused local renderer checks.
+Changed app/probe/driver inputs are not covered by the old 132-input acceptance.
+One isolated Windows correction build passed; native/Mac/remote qualification
+remains pending. Installed route-a passes; installed ui-refresh fails at editor timeout,
+retained without waiver. Native Beat reorder/Undo/Redo and Variable discard have partial
+proof. Actual held-drag cancellation gestures require physical action: native API has
+no mouse hold plus Escape/focus switch. App remains on disposable Story Scene 1,
+and the user reports all three cancellations work. All four saved hashes are unchanged.
+They permit restarting automation, but the native API still reports the physical Escape
+stop and refuses further Computer Use this turn; resume on the next turn and inspect.
+Windows **1 completed build / 4 native starts / 0 SDK menu starts**; prior Mac/remote
+counters preserved. See the live
+[Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
+The original checkpoint description below is retained as entry history; remaining
+checklist rows are still incomplete, with current detail in the task ledger.
+
+**Historical installer entry (before the first Source correction):**
 The existing Windows clone was clean, switched to the selected feature branch and
 fast-forwarded to published `e2146f6`; historical worktree and unrelated refs preserved.
 Both qualified manifests and all 132 candidate/source/carrier/checkout inputs match.
@@ -30,7 +54,7 @@ execution?** for the disposable **Windows Review** project. Computer Use prohibi
 acting on security permission requests; the user must click **Trust for this session
 and continue**, then resume the same review. No consent or game launch inferred.
 
-**WIN-UI-01 through WIN-UI-14: Unavailable at this checkpoint / incomplete**, with
+**Current rows: WIN-UI-11 Fail; all other rows Unavailable/incomplete**, with
 per-row partial proof and every remaining action in the
 [Windows execution record](../tasks/active/ui-design-review.md#windows-final-review-entry--2026-10-06).
 This is a pending tooling handoff, not a failure waiver or final Windows acceptance.

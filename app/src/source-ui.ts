@@ -735,7 +735,11 @@ export function renderSourceWorkspace(
       const generation = documentGeneration;
       const sequence = inputSequence;
       if (!observed || !control || disposed) return;
-      void actions.runCoordinated("source.observe", async () => {
+      // Background observation must not reserve the renderer's authoring lease.
+      // RequestLane still orders Source opening after retention; the checks below prevent
+      // it from applying over an explicit save or transition. Taking the authoring
+      // lease here would let a timer queued during SDK discovery refuse Run.
+      void (async () => {
         await retentionTail;
         if (!identityMatches(generation, observed.path) || sequence !== inputSequence || barriers.size > 0) return;
         const next = await actions.open({
@@ -755,7 +759,7 @@ export function renderSourceWorkspace(
           drawDocument();
           actions.refreshPersistence();
         }
-      }).catch(() => { /* explicit Refresh and Save report actionable failures */ });
+      })().catch(() => { /* explicit Refresh and Save report actionable failures */ });
     }, 250);
   };
 

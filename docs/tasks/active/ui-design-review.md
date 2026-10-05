@@ -1,5 +1,118 @@
 # UI design review
 
+### Windows evidence and first Source correction — 2026-10-06
+
+**Live state: in_progress; all 14 rows remain incomplete.** Execution consent is
+resolved by explicit user permission, with agent native clicks recorded separately
+from physical observations. The installed NSIS baseline remains retained and unchanged.
+Latest saved Story Run displays the exact new English text (`85`–`87`); normal game
+close reports **Game finished, exit 0** (`88`–`89`). This specific pass does not waive
+the two Source rerun refusals in `75`–`79`.
+
+**Latest handoff:** user reports **“yes it all works”** for the three physical held-drag
+cancellation gestures (Escape, outside-list release, focus switch). They stopped
+Computer Use to demonstrate them and explicitly permit restarting it. These are user
+observations, separate from agent inspection. `after-human-drag.json` independently
+verifies all four scene/source-map/project/authoring hashes unchanged. The restart
+inventory call nevertheless reports **Computer Use was stopped by the user with the
+physical Escape key**, forbids further native calls this turn and requests a final
+response. No new UI inspection inferred. Resume this same review next turn, inspect
+the current window and continue; no renewed consent approval is needed.
+
+**WIN-RUN-01: cause reproduced; correction attempt 1.** A controlled production
+renderer fixture holds SDK discovery, queues the 250 ms Source observation, then
+releases discovery. The background observer owns the renderer authoring lease and
+Run refuses before execution (`source-run-contention-before.json`). Initial harness
+setup/selector/ordering failures are preserved; they are not product correction
+attempts. Restored pinned Node 24.19.0/npm 11.9.0 dependencies using the unchanged lock.
+The correction removes only the background observation's renderer authoring lease;
+ordered service requests, retention, identity/sequence/barrier guards and all explicit
+write coordinators remain. The existing native-runtime browser driver now rejects this
+race, waits for the ordered observation, and asserts exactly one start. Typecheck,
+compiled tests, **29 Source/leave/runtime tests**, the **1 Save-routing test**, existing
+Source browser persistence/focus checks, new contention regression and existing route-a
+renderer driver pass. These are browser/fixture results, not native candidate acceptance.
+
+**Installed focused checks (once):** `installed-focused/runtime-ui-route-a.json` PASS,
+exit 0, 78.89 s, cleanup true; real installed WebView2/IPC/service/SDK but synthetic
+editor input. `runtime-ui-ui-refresh.json` FAIL, exit 1, 51.266 s, cleanup true,
+`Error: Timeout at editor`; seven earlier checks pass. Failure shows an editable
+CodeMirror document and Unsaved Source draft with 506 files. Exact retained-draft-count
+condition is unresolved; keep this failure, not a timeout waiver. Added failure-only
+inventory diagnostics/stage separation to the shipped probe; its 20 s deadline and
+one-draft assertion are unchanged. No blind repeat or broad unchanged matrix.
+
+**Native partial checks:** app close/reopen restores the recent review project (`94`–
+`95`); three Variable types align to their four headers and whole-row/Edit controls
+(`107`); int/42 Cancel/Discard restores bool/False on reopen (`108`–`116`); string
+English text delivery and Cancel/Discard (`118`–`123`) observed. Boolean True creation,
+existing default edit and final reopen remain required. The prepared Beat fixture had
+Choice followed by another terminal Jump: `105` truthfully refused a required invariant.
+Preserved original fixture bytes, removed that erroneous trailing Jump, observed stale
+projection refusal (`125`), and reconciled through native Source (`126`–`129`). Native
+ordinary grip reorder then saved the expected source order; one Undo restored it and
+Redo restored the reorder (`130`–`135`). IDs/history, Save/reopen, Explorer coexistence,
+all cancellation/edge/protected/pending-input actions still need their full assertions.
+Broken fixture image previews remain unclassified and are not image acceptance.
+
+**Actual tooling handoff:** native API exposes one complete drag, no mouse-down/hold
+operation. It cannot capture the live ghost/marker or send Escape/switch apps while
+holding the mouse. User asked to perform three cancellation gestures on Beat 2 in the
+open disposable Story Scene 1; reported results and hash verification are above. App stays open on
+that surface; `before-human-drag.json` retains scene/map/project/authoring hashes for
+comparison. Continue shell/diagnostic work while waiting; do not compete for native UI.
+
+Counters: Windows **1 completed build / 4 native starts / 0 separate SDK menu starts**.
+Isolated no-bundle production build session 25998 completed exit 0 in 3m09s,
+log `source-correction-1-build.log`; no CI dispatched. Retained candidate executable:
+**14,150,656 bytes**, SHA256
+`ab3da29afde2e3c6fe88223421b44032bd13599f9950fba835640823869cb2fe`.
+`source-correction-1-build-receipt.json` verifies exactly **3 changed / 129 unchanged**
+of 132 baseline app/workflow inputs. A source comment clarification occurred after the
+frontend build; independent frontend rebuilding proves every emitted file byte-identical.
+The initial receipt harness normalized binary CRLF bytes and refused its input assertion;
+corrected text-only normalization passes. Failed assertion remains in the tool transcript;
+it is a receipt failure, not product correction or acceptance. Application/probe/driver
+inputs have changed, so the 132-input baseline proof applies to `5b467a4` only. Native
+correction retest, affected Mac checks and justified remote qualification remain required
+before any renewed both-platform claim. Original/generated profiles and failed evidence
+remain retained; restoration pending. Prior Mac/remote counters and failures unchanged.
+
+The two earlier entry sections below are chronological history; this section and the
+updated per-row table are the live continuation. Do not prepare integration yet.
+
+### Windows review resumed — 2026-10-06
+
+User explicitly requested retry with permission for the disposable Windows Review
+execution-consent action. That direct instruction supersedes the local skill's default
+handoff guideline; the native click succeeded (`46`–`47`). It is **agent action with
+user permission**, not a physical-human click/acceptance. Review is **in_progress**;
+the earlier awaiting-consent checkpoint below is historical. No new app start/build/CI.
+
+Native fresh-game main menu, Preferences, Help, Load and Start render without missing
+GUI assets (`51`–`56`). Runtime drawer X/reopen leaves the same game Running (`57`–`59`).
+CodeMirror native focus/Home/Shift-End selection and English replacement, Ctrl+S saved
+exact source bytes with the scene label intact (`61`–`70`); source receipt becomes Clean/
+Saved. Launch details truthfully say “Started from an earlier revision. Stop then Run
+uses saved edits.” (`72`). Stop reports Cancelled/stopped, Windows exit -1073741510
+(`74`), not an exit-zero claim; explicit latest-saved rerun started (`75`). All remaining
+canonical row actions and final-route/diagnostic/scaling/session checks still mandatory.
+
+**WIN-RUN-01 — native Source rerun refusal, investigation open.** After native Source
+Save receipt was Clean/Saved and the earlier game was fully stopped, Run from Source
+twice ended without execution: “Another persistence operation is still in progress.”
+Captures `75`–`79` preserve both failed preparations; no game start inferred. A normal
+Story navigation succeeds (`80`–`81`), then Run reaches the new-revision execution
+consent (`82`–`84`) without restarting the app. This discriminates Source-surface
+coordination from a permanently occupied whole-session guard. Provisional hypothesis:
+background Source observation contends with Runtime preparation; not yet a confirmed
+code diagnosis. The production Source observer acquires the authoring coordinator;
+Run performs SDK discovery before acquiring that same coordinator. Keep this genuine
+unresolved failure in WIN-UI-11/final rerun coverage; a Story workaround is not a pass
+for Source Run. Correction attempts 0; no changed app input/build/CI. Next: controlled
+held-observer reproduction and focused installed probes, then bounded correction if
+the product cause is established. Continue independent native checklist actions.
+
 ### Windows final review entry — 2026-10-06
 
 User selected the final Windows review of qualified `5b467a4`, application source
@@ -68,20 +181,20 @@ canonical 14-row checklist remain mandatory. No whole row is Pass yet.
 
 | Row | Checkpoint result | Exact evidence / remaining actions |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; not run | Rich disposable Beat/media fixture prepared; native reorder, history/reopen and Explorer coexistence pending. |
-| WIN-UI-02 | Unavailable; not run | Long-list/protected source fixture prepared; cancellation, focus switch, edges and pending-input gestures pending. |
+| WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; fixture invariant failure `105` preserved and corrected through Source. IDs, Save/reopen, live marker/ghost and Explorer coexistence pending. |
+| WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native restart API remains stopped by physical Escape; live UI not re-inspected. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending. |
 | WIN-UI-03 | Unavailable; not run | `media-manifest.json` records valid PNG/JPEG/WebP/audio and unsupported/oversized media; staging/drop/import actions pending. |
 | WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug delivery; Character/Asset/Variable/content/shortcut actions pending. No physical-human keyboard claim. |
-| WIN-UI-05 | Unavailable; not run | Three-type Variable fixture prepared; exact discard/reopen/type/edit/save actions pending. |
+| WIN-UI-05 | Unavailable; partial evidence | `108`–`116` int/42 Cancel/Discard/reopen bool/False; `118`–`123` English string/Discard. Boolean True creation/discard and existing default/Keep/Escape/save/reopen actions pending. |
 | WIN-UI-06 | Unavailable; not run | Two Character entries/appearance UUIDs prepared; native selection/default/replacement/error/retry actions pending. |
 | WIN-UI-07 | Unavailable; not run | Alias/collision fixture prepared; full rename sequence, reference preservation and external-edit refusal pending. |
 | WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
 | WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
 | WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
-| WIN-UI-11 | Unavailable; partial evidence | `35` refusal, `37` helper confirmation, `38` saved helper, `41`–`43` pending consent; Source tabs, graph details and real runtime diagnostics pending. |
-| WIN-UI-12 | Unavailable; partial evidence | `15`–`20` real uncached SDK download/verified installation; `21`–`31` CONFIG-01 resolution/inline Git; `32`–`33` staged creation; fresh-game menus blocked at execution consent. Welcome visual/hover completion pending. |
+| WIN-UI-11 | Fail; incomplete | WIN-RUN-01 `75`–`79` two native Source Run refusals; first correction passes local renderer checks but native/Mac/remote retest pending. Story latest text/normal exit0 `85`–`89` passes specific checks. Installed route-a PASS and ui-refresh FAIL retained. Overflow tabs, graph details and SDK diagnostic actions pending. |
+| WIN-UI-12 | Unavailable; partial evidence | `15`–`20` uncached official SDK download/verified install; CONFIG-01 `21`–`31`; stages `32`–`33`; native fresh menus/Start `51`–`56` PASS specifics; Welcome dark/recent restore `95`. Hover/light/earlier-project distinction/scaling completion pending. |
 | WIN-UI-13 | Unavailable; not run | `interaction-fixture.json` prepares reciprocal/duplicate/long/self/missing links; native routing, Fit/navigation/palettes/scaling pending. |
-| WIN-UI-14 | Unavailable; not run | Synthetic catalogue/media fixtures prepared; native previews, columns, external-change retry, cleanup and higher-DPI actions pending. |
+| WIN-UI-14 | Unavailable; partial evidence | `107` bool/int/string four-header alignment and selection/Edit visible at 96 DPI, Dark. Character, media preview/import/external-change/retry/cleanup/higher-DPI actions pending; broken prepared-fixture image preview unclassified. |
 
 All captures/JSON/fixtures are local ignored evidence under the established
 `.toolchains/reports/final-1g-windows/`. `installation.json` independently re-verifies
