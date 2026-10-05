@@ -3680,3 +3680,34 @@ affects both hosts; no unchanged successful full matrix is duplicated. Existing
 production upload_packages=true remains required. Preserve run/attempt/SHA/evidence
 and manual same-chat wait, then terminal audit/fix. Windows transfer follows required
 remote PASS; no conflict/integration/closure/new feature or ambiguous retries.
+
+
+**Confirmed P6 correction qualification wait — 2026-10-05:** awaiting_ci.
+Published/verified candidate `5b467a402b14c7b371838645a9daa555ba315349`; all
+132 app/workflow inputs equal tested/package source 8ef89a8. Repository quality
+[37312556784](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312556784),
+attempt 1, workflow_dispatch, exact 5b467a4: PASS; actual required job/all steps
+success, optional profile/diagnostic selectors false/jobs skipped intentionally.
+Production [37312593480](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480),
+attempt 1, workflow_dispatch, exact 5b467a4, upload_packages=true: confirmed
+in_progress / Preflight at one initial identity read, about 12:53 UTC. Stop model
+polling now. Initial final allowance 1/1 consumed; changed-input correction dispatches
+2. No duplicate/ambiguous request or unchanged successful full matrix repeated.
+Old 37300975410/37307663113 failures remain failed with all evidence preserved.
+
+Local totals 18 builds / 71 native starts / 7 separate SDK starts; prior remote
+correction added 2 builds/14 app starts, separately audited. New remote package/start
+counts await terminal evidence. No local runner/app/game pending after actual native
+exits/cleanup; original profile preserved. This documentation wait carrier has no
+app/workflow change; verify/publish without another qualification. Tested identity
+stays 5b467a4, not the carrier's SHA. No Goal lifecycle or verified live-Goal pause.
+
+SAME-chat continuation: “Resume: audit production 37312593480 attempt 1 on 5b467a4.”
+Inspect recorded operation + fresh refs/worktrees/diff once. Pending -> pause, terminal
+-> audit all required preflight/platform/SDK/native/cleanup/input/package evidence,
+including true deferred browser outcome rather than normalized continue-on-error
+conclusion. Preserve/classify failures; only justified changed-input fixes/rechecks
+within cumulative WORKFLOW hypothesis budgets remain. Required remote PASS precedes
+Windows prompt with exact candidate/retained installer/14-row checklist. Windows-PC
+review, conflict resolution/combined-input integration/closure/1H/new features remain
+separate later selections. No ambiguous retry, threshold waiver or new orchestration.

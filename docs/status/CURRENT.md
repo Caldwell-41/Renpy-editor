@@ -7,53 +7,61 @@
 
 ## Live continuation
 
-**State: P6/F2 Mac correction PASS; publish corrected candidate next.** Source/package
-`8ef89a85c3e8233ab5c8b73bfce7e166cdd03275` orders project.close behind shared-service
-observations without replaying writes; independent Runtime Stop/control paths remain.
-The runtime browser now opens the collapsed diagnostic disclosure before requiring its
-visible navigation control. 87 frontend tests/0 skipped, corrected standalone runtime
-focus/resize, both shipped browser route drivers, format/self-review/repository PASS.
+**State: awaiting_ci — P6 correction, manual same-chat resume.** Published/verified
+candidate `5b467a402b14c7b371838645a9daa555ba315349` on existing
+`feature/phase-1g-branches-runtime`; all 132 app/workflow inputs equal tested/package
+source `8ef89a85c3e8233ab5c8b73bfce7e166cdd03275`. PR #17 remains open/draft/
+conflicting; separate planning worktree 2c5a164 intact; no integration.
 
-Exact packaged Mac route-a **88.942s**, route-b **111.598s** PASS, each exit 0,
-no timeout, cleanupComplete true. Explicit close-after-stop-requested/completed and
-saved Source/new-session reopen pass; native measured Branches pills, changed/restored
-destinations, real SDK Running >9.5s, Save/staleness/Stop, route-b draft refusal/Cancel
-also pass. Stage durations remain retained; synthetic polling is not physical-input
-or presentation-latency evidence. 132 input hashes: four changed request/test/probe
-files and 128 unchanged from P5. Prior unaffected Mac/physical evidence retains its
-real source/package identities. Original user profile remains restored; probes own
-fresh disposable profiles and no app/game/local runner remains after exit/cleanup.
+- Repository quality [37312556784](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312556784), attempt **1**, workflow_dispatch, exact 5b467a4 SHA above: **PASS**. Required Validate repository job and every step success audited; optional profile/diagnostic jobs intentionally skipped by false selectors.
+- Production [37312593480](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480), attempt **1**, workflow_dispatch, exact 5b467a4 SHA above, `upload_packages=true`: confirmed **in_progress / Preflight** at one initial identity read, about 12:53 UTC on 2026-10-05. Required qualification/retained installers not yet accepted.
 
-Verified installer: ignored
+Initial final allowance **1/1 consumed**; justified changed-input correction dispatches
+**2**. Prior 37300975410 attempt 1 on 94ffa25 and 37307663113 attempt 1 on cab39e1
+remain FAILED; failure logs/artifacts/metadata/input hashes retained. First failed
+before any package; second failed both runtime-browser outcomes and Mac route-a
+close-after-Stop, despite Mac 5/6 and Windows 6/6 native cases and Windows boundary
+smoke PASS. Missing Mac boundary/licence gates and success-only installers stay
+unaccepted. Those failed retained App/executable payloads are diagnostic evidence.
+No ambiguous/duplicate request, unchanged successful full matrix or new remote counts
+preclaimed. Local totals **18 builds / 71 native starts / 7 separate SDK starts**;
+prior remote correction additionally 2 builds / 14 app starts, separately recorded.
+
+P6 Mac changed-scope PASS: project.close ordered behind saved-state observations
+without write replay; Stop/token controls independent. F2 runtime browser expands
+closed diagnostic disclosure, retains initial closed/visible/focus/1100px/640px checks.
+87 frontend tests/0 skipped, both browser shipped routes, format/self-review/repository
+PASS. Exact packaged native route-a **88.942s** / route-b **111.598s** PASS, each
+exit 0/no timeout/cleanup true; explicit Close Project completion and accepted-source/
+new-session reopen, native font/Fit, real SDK routes/Running >9.5s, Save/staleness/Stop
+and route-b refusal/Cancel pass. Raw durations retained; no physical input or latency
+claim. Four changed request/test/probe inputs and 128 unchanged from P5 map prior
+unaffected Mac/Finder/progress/catalogue/picker evidence honestly. Precise prior hosted
+request interleaving was not captured; P6's proven race is consistent evidence, with
+sole CI attribution inferred. No earlier failure relabelled by local corrections.
+
+Verified local ARM64 installer: ignored
 `.toolchains/review-builds/ui-refresh-8ef89a8/Loomlight_0.1.0_8ef89a8_aarch64.dmg`,
 5,752,249 bytes; SHA256 `6cf320e94bded5403172b846152164871fa5dbec12c93d161eae56197a6d9adb`;
 sealed executable `36328bbb46be07b1ad64274048f7a5c223065d9152f9daade1fe5046f6e75de1`.
 Mounted identity/ARM64/hash/integrity/strict signature/privacy PASS; local ad-hoc
-signature, not Developer ID/notarized. Installed app untouched; old packages preserved.
-Local counters **18 builds / 71 native starts / 7 separate SDK menu/launcher starts**.
-Prior failed remote correction additionally ran 2 builds / 14 app starts, separately
-recorded; no new remote counts preclaimed.
+signature, not Developer ID/notarized. Installed app/original user profile untouched;
+disposable probe profiles isolated and no local app/game/runner pending after cleanup.
 
-Production 37307663113 attempt 1 on cab39e1 remains FAILED: both runtime-browser
-outcomes fail (collapsed disclosure) and Mac route-a times out closing after successful
-Stop; Mac 5/6 and Windows 6/6 runtime cases/cleanup pass, Windows boundary smoke pass.
-Mac boundary/licence and both final installer uploads skipped. Both failure artifacts,
-logs and 132-input/retained-payload hashes audited; failed App tar/executable remain
-diagnostic payloads. Earlier 37300975410 attempt 1 also stays FAILED. Required quality
-37307638008 PASS belongs to cab39e1 only. P6's proven request-lane collision fits the
-Mac evidence, but exact prior native request interleaving was not recorded; sole CI
-causality remains inferred. No failure was waived into acceptance.
+Manual SAME-chat waiting: stop model polling. Resume: “Audit production 37312593480
+attempt 1 on 5b467a4.” Inspect that recorded operation plus fresh refs/worktree/diff
+once. Pending -> pause without loop/dispatch; terminal -> audit required preflight,
+both platform jobs, native/SDK case logs, cleanup, exact input manifests/retained
+installers and deferred browser outcomes (not success-normalized step conclusions).
+Classify/preserve/fix genuine failures only within remaining changed-input scope and
+WORKFLOW reassessment rules. After required remote PASS prepare exact passing source/
+retained Windows installer/14-row Windows-PC prompt. Windows physical work, conflicts,
+combined-input integration, rewrite/merge, closure/1H/new feature remain deferred.
+No Goal lifecycle created; turn end stops polling, not a claimed live-Goal pause.
 
-Initial final allowance 1/1 consumed; correction dispatches **1** before next dispatch.
-Next: publish this coherent candidate on the existing feature branch/PR, verify all
-132 app/workflow inputs equal tested 8ef89a8, run required Repository quality and one
-justified existing production correction qualification with upload_packages=true.
-Changed request ordering affects both platforms; neither prior full platform job
-passed all required gates, so no unchanged successful full matrix is duplicated.
-Record confirmed run/attempt/SHA and continuation before manual SAME-chat waiting.
-Windows transfer remains after required remote PASS. No ambiguous retry, threshold
-waiver, conflicts, rewrite, integration, Windows-PC test, closure/1H/new feature phase.
-No Goal lifecycle created; original planning worktree/branch remains intact.
+This wait carrier changes docs only after tested 5b467a4. Validate, publish and verify
+without another package matrix. Tested candidate remains 5b467a4; carrier SHA never
+silently replaces it. Earlier green evidence never automatically qualifies later inputs.
 
 **Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
