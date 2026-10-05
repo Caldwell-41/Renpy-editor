@@ -2,35 +2,51 @@
 
 ## Final Mac acceptance / qualification continuation — 2026-10-05
 
-**State: correcting failed remote preflight.** Recorded production run
-[37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410),
-attempt 1, tested SHA `94ffa25c016740eb541bba4e883f6ab683cb93d6`, FAILED in browser
-preflight: Branches route text exceeded its pill. Both platform package jobs were
-skipped; no installers/artifacts were produced. Required Repository quality
-37300945634 attempt 1 PASS remains evidence for 94ffa25 only. Full failed log, job
-metadata and empty artifact inventory are retained ignored.
+**State: P5 Mac correction PASS; publish corrected candidate next.** App/package
+source `0e3077df10bd713ca1d956dfc84be2bd8384eb16` corrects Branches font-dependent
+pill clipping using rendered SVG widths plus padding for labels, channels and Fit.
+86 frontend tests/0 skipped, real UI browser (two fonts/palettes, three widths), all
+five finalized shipped runtime drivers, format, self-review and repository checks
+PASS. The intermediate combined browser command's report-variable failure remains
+retained as failed; its successful unchanged components and corrected driver results
+are identified separately in the ledger.
 
-Correction hypothesis P5: estimated character widths do not fit every platform font.
-Local rejecting proof: Verdana `Jump` text 42.359375px + 12px minimum padding exceeds
-its 52px estimated pill. Renderer now measures attached SVG captions before routing;
-20px padding feeds pill width, channel spacing and Fit bounds. Existing limits,
-truncation, source and navigation contracts remain. Wider-font browser regression
-retains the clipping assertion. 86 frontend tests/0 skipped and focused UI browser
-PASS. Full browser preflight, pinned local ARM64 package and affected native route
-proof are pending; unchanged Mac/service/physical evidence remains mapped to prior
-inputs. Original user profile stays restored; no private project is used.
+Exact packaged Mac route-a **37.016s** and route-b **36.007s** PASS, each exit 0,
+cleanup true. Native SVG captions measure 49.0529785/49.6357422px in 70px pills and
+Fit includes their bounds. Both authored destination edits, accepted bytes/reopen,
+real SDK running >9.5s, Save/staleness, Stop and reopen pass; route-b also verifies
+draft refusal/Cancel. These are packaged WebView/synthetic selection with real IPC/
+SDK, not physical keyboard claims. Input manifest has 132 entries, five changed
+Branch UI/test/probe files and 127 unchanged. Original profile remains restored;
+unaffected picker/sidebar/catalogue/import/Finder/progress/diagnostic/English input
+acceptance is reused only for its unchanged interaction inputs.
 
-Initial final production allowance **1/1 consumed**; justified changed-input correction
-reruns **0** dispatched. Local counters **16 builds / 67 native starts / 7 separate SDK
-menu/launcher starts** before P5 packaging. No remote package build/start occurred.
-Continue this SAME chat: finish P5 verification/self-review, record exact candidate and
-changed inputs, then publish and dispatch one justified correction qualification with
-`upload_packages=true` plus required Repository quality. Preserve the failed run;
-record confirmed run/attempt/SHA before manual same-chat waiting. No unchanged retry
-or duplicate successful matrix, Windows-PC claim, PR conflict resolution, history
-rewrite, merge, phase closure or new feature phase. No Goal lifecycle was created.
+Verified corrected ARM64 installer: ignored
+`.toolchains/review-builds/ui-refresh-0e3077d/Loomlight_0.1.0_0e3077d_aarch64.dmg`,
+5,752,010 bytes, SHA-256 `d0154be1e24dca11a80fb1bef300d7cceded0f1bd84504c09f9f92fbdb671797`;
+sealed executable `3e8ee00ea907e1ac3abe4aac916f3580bd162f1a06674af5634d2dde0b283f80`.
+Mounted identity/ARM64/integrity/signature/hash/privacy PASS; locally ad-hoc signed,
+not Developer ID/notarized. Installed app remains untouched; prior packages retained.
+Counters now **17 builds / 69 native starts / 7 separate SDK menu/launcher starts**.
 
-**Final Mac review PASS; remote qualification next.** Exact app/build source
+Failed production [37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410),
+attempt 1 on `94ffa25c016740eb541bba4e883f6ab683cb93d6`, remains FAILED in browser
+preflight; both package jobs skipped and no artifacts. Required Repository quality
+37300945634 attempt 1 PASS belongs to 94ffa25 only. Full failed log/job metadata/empty
+inventory and local intermediate failures remain ignored. Initial final production
+allowance **1/1 consumed**, changed-input correction dispatches **0** before publication.
+
+Next: publish this coherent corrected candidate on the existing feature branch,
+verify 132 app/workflow inputs equal 0e3077d, and run required Repository quality plus
+one justified existing production correction qualification (`upload_packages=true`).
+Source changed to fix the failed required gate; neither prior platform job began, so
+this duplicates no unchanged successful platform matrix. Record confirmed run ID,
+attempt, exact tested SHA and continuation before manual SAME-chat waiting. No
+ambiguous retry, Windows-PC claim, PR conflict resolution, history rewrite, merge,
+phase closure or new feature phase. Windows prompt/installer transfer follows required
+remote PASS. No Goal lifecycle was created; ending the turn stops model polling.
+
+**Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
 48px native picker, Source Save focus, unsupported-only import and bounded caption
 corrections. 85 frontend checks/0 skipped, web/UI browsers and affected real-SDK

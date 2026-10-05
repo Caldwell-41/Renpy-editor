@@ -3481,3 +3481,51 @@ Counters before P5: 16 builds / 67 native starts / 7 separate SDK starts. Initia
 production 1/1 consumed; changed-input correction dispatches 0. One correction run is
 justified after affected Mac PASS because source/test inputs changed to fix a genuine
 failed gate; no unchanged successful platform matrix is duplicated (neither started).
+
+
+**P5 pinned package / affected native verification:** source
+`0e3077df10bd713ca1d956dfc84be2bd8384eb16`; one production build completes (17 total).
+Retained corrected local installer
+`.toolchains/review-builds/ui-refresh-0e3077d/Loomlight_0.1.0_0e3077d_aarch64.dmg`,
+5,752,010 bytes, SHA-256 `d0154be1e24dca11a80fb1bef300d7cceded0f1bd84504c09f9f92fbdb671797`.
+Sealed executable `3e8ee00ea907e1ac3abe4aac916f3580bd162f1a06674af5634d2dde0b283f80`;
+compiled executable `0bec37dd39b46deaedf115037d3d9498cf9d88c54a1b0395c7d4de5da9d8efce`.
+Mounted identifier/version/ARM64/payload equality, strict ad-hoc resource signature,
+DMG integrity and privacy scan PASS (9 files). Raw Tauri DMG, P4 and all previous
+failed/superseded evidence retained. No installed app overwrite or Developer ID/
+notarization claim. Input manifest: 132 entries, exactly 5 changed from P4 — Branches
+renderer/router, their two test files and shipped runtime probe assertions; 127
+unchanged including backend, SDK/import/Save/preview controls and workflow.
+
+Finalized shipped driver component PASS for compile/lint/route-a/route-b/runtime-error;
+intermediate combined command's report-variable failure stays failed. Together with
+its unchanged successful build/Source/selection/UI components this supplies local
+browser preflight proof, not a claim that the failed command itself passed. Format,
+repository validation (340 files), whitespace and scoped self-review PASS. Actual
+remote preflight still required on the correction candidate.
+
+
+**P5 affected Mac acceptance PASS / correction dispatch selected:** packaged route-a
+37.016s and route-b 36.007s both PASS, exit 0, no timeout, cleanupComplete true.
+Actual native SVG text widths 49.052978515625/49.6357421875px map to 70px padded
+pills; both Fit bounds pass. Native source/route edit, accepted bytes/revision/new
+session reopen, restored distinct destinations, real SDK Running >9.5s, Save/earlier-
+launch status, Stop and saved reopen pass. Route-b draft refusal/Cancel passes.
+These are packaged WebView/synthetic DOM selection with real IPC/SDK; no physical
+keyboard or Windows-PC claim. Probe owns its disposable profile; original user
+profile remains restored. No pending local app/game/runner after both exit/cleanup.
+Counters **17 production builds / 69 native starts / 7 separate SDK menu/launcher
+starts**. Unaffected P4 native UI/runtime-error/diagnostic/catalogue/import/picker/
+English input/progress/Finder results retain their original identities and limits;
+exact input comparison (5 changed/127 unchanged) plus interaction impact mapping
+justifies reuse, not blanket acceptance of this source or future heads.
+
+One changed-input production correction dispatch is now selected after P5 Mac PASS.
+Publish the coherent docs/application checkpoints on the existing feature branch;
+resolve exact candidate from Git and verify all 132 app/workflow inputs equal tested
+0e3077d before dispatch. Required Repository quality must test this new exact SHA.
+Production uses existing workflow and upload_packages=true; initial final allowance
+1/1 consumed, corrections 0 before dispatch. Failed 37300975410 attempt 1 stays failed;
+no platform started there, so no successful unchanged matrix is repeated. Preserve
+all failed evidence and record confirmed run/attempt/SHA before manual same-chat wait.
+No PR conflict work, integration, Windows physical test, closure or new phase.
