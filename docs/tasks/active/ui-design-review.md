@@ -34,6 +34,21 @@ running executable and WebView2 ownership before correction input evidence.
 validation (337 files), whitespace and three-document scope review pass. No new
 application change/build/CI dispatch; do not prepare integration.
 
+**User ready / exact-path recovery:** another foreground attempt still fails with
+the same capture error. CIM now finds no baseline process, while the native window
+inventory still lists its old handle; that inventory is stale. With no interactive
+owner, verified the retained correction hash and launched its exact path through
+`Start-Process` (Hidden). Actual PID 49132 and its WebView2 154.0.4258.53 child are
+verified (`correction-exact-path-launch.json`, `correction-native-host-blocked.json`).
+Fresh native inventory returns the corrected executable/new window, but capture
+again fails with the same error. No native input or visual acceptance inferred.
+User asked to foreground this newly launched corrected window; the old window had
+already closed. Profiles remain protected; normal launch uses the ordinary review
+profile, distinct from the earlier Computer Use redirected profile. Do not silently
+copy profiles or assume prior SDK/recents are present. Windows process-start attempts
+are now **9**, including the one pre-WebView SDK setup failure; build count remains
+1, separate SDK menu starts 0. No new application change or CI dispatch.
+
 **Earlier handoff:** user reports **“yes it all works”** for the three physical held-drag
 cancellation gestures (Escape, outside-list release, focus switch). They stopped
 Computer Use to demonstrate them and explicitly permit restarting it. These are user
@@ -87,9 +102,10 @@ open disposable Story Scene 1; reported results and hash verification are above.
 that surface; `before-human-drag.json` retains scene/map/project/authoring hashes for
 comparison. Continue shell/diagnostic work while waiting; do not compete for native UI.
 
-Counters: Windows **1 completed build / 8 top-level process-start attempts /
-0 separate SDK menu starts**; one of those eight failed before WebView setup because
-the SDK variable was wrong. Latest launcher opened the baseline, not the correction.
+Counters: Windows **1 completed build / 9 top-level process-start attempts /
+0 separate SDK menu starts**; one of those nine failed before WebView setup because
+the SDK variable was wrong. Latest exact-path launch is the verified correction;
+native capture remains unavailable.
 Isolated no-bundle production build session 25998 completed exit 0 in 3m09s,
 log `source-correction-1-build.log`; no CI dispatched. Retained candidate executable:
 **14,150,656 bytes**, SHA256

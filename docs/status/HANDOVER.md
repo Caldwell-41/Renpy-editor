@@ -22,7 +22,7 @@ cleanup true, editor timeout, seven prior checks pass. Retain reports in the est
 ignored evidence root. Probe diagnostics now separate editor retention and record the
 last dirty-file inventory; same 20 s deadline/one-draft assertion. No unchanged broad
 matrix/retry. Isolated Windows production build **session 25998 PASS, exit 0**, output
-`source-correction-1-build.log`; **1 completed new build / 8 Windows process-start
+`source-correction-1-build.log`; **1 completed new build / 9 Windows process-start
 attempts / 0 SDK menu starts**; one setup failure before WebView. No CI dispatch.
 App/probe/driver inputs changed; baseline 132-file
 proof applies only to qualified `5b467a4`, not the working correction.
@@ -62,6 +62,16 @@ the corrected Source Run test. Preserve both ui-refresh failures; diagnose rathe
 than raise the deadline or blindly repeat. All 14 rows still incomplete. Repository
 validation (337 files), whitespace and three-document scope review pass; no new
 application change, build or CI dispatch in this resume.
+
+**After user ready:** the baseline window inventory was stale; CIM found no process.
+Exact-path correction launch now succeeds: PID 49132, expected executable SHA256,
+owned WebView2 154.0.4258.53 (`correction-exact-path-launch.json` and
+`correction-native-host-blocked.json`). Fresh window capture still fails with the
+same foreground-process-id error; native input remains unverified. User asked to
+foreground this new corrected window. Do not repeat the stale baseline launch.
+The exact-path process uses the ordinary review profile rather than Computer Use's
+redirected profile; original backups remain protected. Verify actual SDK/recents
+before selecting a disposable project; do not copy profiles while the app is open.
 Earlier checkpoints below are history, not a renewed consent requirement.
 
 ## Windows review resumed — 2026-10-06

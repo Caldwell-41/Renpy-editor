@@ -29,9 +29,11 @@ Correction ui-refresh fails earlier at initial-story-ready (zero checks); diagno
 pending. One route-a setup failure used the wrong SDK variable; the correctly configured
 route-a passes exit 0/cleanup true, 90.062 s with synthetic DOM input.
 Current native capture fails twice with “foreground window did not report a process id”;
-the user is asked to foreground Loomlight. The launcher opened the baseline despite
-the candidate path, verified by CIM; no corrected native-input proof inferred.
-Windows **1 completed build / 8 process-start attempts / 0 SDK menu starts**;
+the user is asked to foreground the newly launched corrected window. After their
+first ready reply, the old native window inventory was stale and CIM found no app.
+Exact-path launch now verifies the corrected executable/hash and its WebView2 child;
+fresh capture still fails, so no corrected native-input proof inferred.
+Windows **1 completed build / 9 process-start attempts / 0 SDK menu starts**;
 one setup failure preceded WebView creation. Prior Mac/remote
 counters preserved. See the live
 [Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
@@ -72,7 +74,7 @@ No broad unchanged matrix or CI dispatch selected. Integration handover remains 
 
 Ignored evidence: `.toolchains/reports/final-1g-windows/`. Original profile backups
 verify **3,508/3,508** exact file hashes/file sets; no private project opened. Windows
-baseline app remains open after the native launcher/capture failure; generated review
+corrected app remains open after exact-path launch/capture failure; generated review
 profiles and originals retained;
 **Windows profile restoration is pending**. Recovery receipt identifies both backups
 and the actual packaged-host redirected LocalCache profile. Preserve all on resume.
