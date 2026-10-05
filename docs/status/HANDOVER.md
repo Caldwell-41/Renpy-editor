@@ -10,25 +10,30 @@ then owns the renderer authoring lease when Run prepares. Correction attempt **1
 removes that observation lease, retaining ordered requests and all Source guards.
 Typecheck, compiled tests, 29 Source/leave/runtime tests, 1 Save-routing test, existing
 Source browser persistence/focus and new race/existing route-a renderer checks pass.
-Affected native Windows/Mac and justified remote qualification are still required.
+Affected native Windows input/Mac and justified remote qualification are still required.
+The configured correction route-a packaged check passes exit 0/cleanup true,
+90.062 s with synthetic DOM input; it does not prove native keyboard acceptance.
+Correction ui-refresh fails earlier at initial-story-ready, zero checks, 31.438 s;
+preserve that unclassified failure. An initial route-a setup failure (exit 101)
+was the agent's wrong SDK-variable name; corrected configuration passes.
 
 Original installed focused route-a PASS/exit0/cleanup true; ui-refresh FAIL/exit1/
 cleanup true, editor timeout, seven prior checks pass. Retain reports in the established
 ignored evidence root. Probe diagnostics now separate editor retention and record the
 last dirty-file inventory; same 20 s deadline/one-draft assertion. No unchanged broad
 matrix/retry. Isolated Windows production build **session 25998 PASS, exit 0**, output
-`source-correction-1-build.log`; **1 completed new build / 4 Windows native starts /
-0 SDK menu starts**. No CI dispatch. App/probe/driver inputs changed; baseline 132-file
+`source-correction-1-build.log`; **1 completed new build / 8 Windows process-start
+attempts / 0 SDK menu starts**; one setup failure before WebView. No CI dispatch.
+App/probe/driver inputs changed; baseline 132-file
 proof applies only to qualified `5b467a4`, not the working correction.
 
-Native original app is open on **Windows Interaction Review → Story → Scene 1**.
+At the prior handoff the original app was on **Windows Interaction Review → Story → Scene 1**.
 Prepared fixture's Choice+trailing terminal Jump caused truthful invariant refusal;
 original evidence retained, tail corrected and reconciled via native Source. Ordinary
 grip reorder/one Undo/Redo save expected source order (`130`–`135`). API cannot hold
 mouse while pressing Escape/switching apps; user requested three physical cancellation
-gestures on Beat 2. Await their observations, then inspect actual UI and compare the
-four `before-human-drag.json` hashes. Do not compete for UI meanwhile. Physical result
-is not inferred. Variable int/42 discard/reopen resets bool/False; English string discard
+gestures on Beat 2. Their subsequent report and hash comparison are recorded below;
+physical results are attributed to the user. Variable int/42 discard/reopen resets bool/False; English string discard
 also observed, remaining row actions pending. All 14 rows incomplete; WIN-UI-11 Fail.
 Complete every canonical action and TESTING final session; do not prepare integration.
 
@@ -46,6 +51,17 @@ and byte-identical emitted frontend after comment clarification. Native/Mac/remo
 correction flags remain false. Preserve failed receipts and prior cumulative counters. Exact current
 details are in the task's
 [live Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
+**Latest resume overrides the earlier native pause above:** `136`–`138` show responsive
+saved Story with no residual marker, Ctrl+S and close to Welcome. The candidate-path
+native launcher unexpectedly opened the installed baseline (CIM verified); no corrected
+input proof. Window capture then fails twice with “foreground window did not report
+a process id,” including one fresh-window recovery. Stop native calls pending the
+user foregrounding Loomlight and reporting ready. Safely close the baseline, launch
+the candidate by a verified exact path and prove process/WebView2 ownership before
+the corrected Source Run test. Preserve both ui-refresh failures; diagnose rather
+than raise the deadline or blindly repeat. All 14 rows still incomplete. Repository
+validation (337 files), whitespace and three-document scope review pass; no new
+application change, build or CI dispatch in this resume.
 Earlier checkpoints below are history, not a renewed consent requirement.
 
 ## Windows review resumed — 2026-10-06

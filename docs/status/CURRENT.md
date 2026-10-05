@@ -17,15 +17,22 @@ reports cancelled/stopped (Windows exit -1073741510); latest-saved Story rerun s
 the new saved text and normal close exits 0. Source rerun still fails on the installed
 baseline (WIN-RUN-01); its first correction passes focused local renderer checks.
 Changed app/probe/driver inputs are not covered by the old 132-input acceptance.
-One isolated Windows correction build passed; native/Mac/remote qualification
-remains pending. Installed route-a passes; installed ui-refresh fails at editor timeout,
+One isolated Windows correction build and configured packaged route-a pass; native
+keyboard/Mac/remote qualification remains pending. Installed route-a passes;
+installed ui-refresh fails at editor timeout,
 retained without waiver. Native Beat reorder/Undo/Redo and Variable discard have partial
 proof. Actual held-drag cancellation gestures require physical action: native API has
-no mouse hold plus Escape/focus switch. App remains on disposable Story Scene 1,
-and the user reports all three cancellations work. All four saved hashes are unchanged.
-They permit restarting automation, but the native API still reports the physical Escape
-stop and refuses further Computer Use this turn; resume on the next turn and inspect.
-Windows **1 completed build / 4 native starts / 0 SDK menu starts**; prior Mac/remote
+no mouse hold plus Escape/focus switch. On disposable Story Scene 1 the user reports
+all three cancellations work. All four saved hashes are unchanged.
+Native resume succeeded: `136`–`138` show no residual marker, Save and close to Welcome.
+Correction ui-refresh fails earlier at initial-story-ready (zero checks); diagnosis
+pending. One route-a setup failure used the wrong SDK variable; the correctly configured
+route-a passes exit 0/cleanup true, 90.062 s with synthetic DOM input.
+Current native capture fails twice with “foreground window did not report a process id”;
+the user is asked to foreground Loomlight. The launcher opened the baseline despite
+the candidate path, verified by CIM; no corrected native-input proof inferred.
+Windows **1 completed build / 8 process-start attempts / 0 SDK menu starts**;
+one setup failure preceded WebView creation. Prior Mac/remote
 counters preserved. See the live
 [Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
 The original checkpoint description below is retained as entry history; remaining
@@ -58,14 +65,15 @@ and continue**, then resume the same review. No consent or game launch inferred.
 per-row partial proof and every remaining action in the
 [Windows execution record](../tasks/active/ui-design-review.md#windows-final-review-entry--2026-10-06).
 This is a pending tooling handoff, not a failure waiver or final Windows acceptance.
-Focused installed `route-a`/`ui-refresh` probes are selected but have not run; close
-the interactive owner first. Finish every native/physical/visual action and TESTING's
+Focused installed and correction results are recorded above; close the interactive
+owner before any further probe. Finish every native/physical/visual action and TESTING's
 final routes, Save during play, latest rerun, diagnostics, scaling and session reopen.
 No broad unchanged matrix or CI dispatch selected. Integration handover remains later.
 
 Ignored evidence: `.toolchains/reports/final-1g-windows/`. Original profile backups
 verify **3,508/3,508** exact file hashes/file sets; no private project opened. Windows
-app remains open at consent, generated review profiles and originals retained;
+baseline app remains open after the native launcher/capture failure; generated review
+profiles and originals retained;
 **Windows profile restoration is pending**. Recovery receipt identifies both backups
 and the actual packaged-host redirected LocalCache profile. Preserve all on resume.
 Windows counters **0 builds / 1 native start / 0 separate SDK menu starts**; existing

@@ -9,7 +9,32 @@ Latest saved Story Run displays the exact new English text (`85`–`87`); normal
 close reports **Game finished, exit 0** (`88`–`89`). This specific pass does not waive
 the two Source rerun refusals in `75`–`79`.
 
-**Latest handoff:** user reports **“yes it all works”** for the three physical held-drag
+**Latest continuation:** native control restarted after the user's Resume. Captures
+`136`–`138` show saved reordered Story, no residual marker, native Ctrl+S and project
+close to Welcome. Reopen/ID assertions and Explorer coexistence remain pending.
+The first correction's configured `route-a` packaged probe **PASS**, exit 0,
+90.062 s, cleanup true (`correction-1-route-configured/runtime-ui-route-a.json`):
+real WebView2/IPC/service/SDK, synthetic DOM input, not native keyboard acceptance.
+The earlier two-case invocation retains **ui-refresh FAIL**, exit 1, 31.438 s,
+cleanup true, `Timeout at initial-story-ready`, zero checks, empty workspace and
+Checking saved state (`correction-1-focused/runtime-ui-ui-refresh.json`). This is
+earlier than the baseline editor failure and remains unclassified; no threshold
+change or blind repeat. Its route-a invocation **setup FAIL**, exit 101, 0.109 s,
+no report: the agent supplied the wrong SDK environment-variable name. The correctly
+configured route-a above is a justified harness correction, not a product retry.
+
+**Current native tooling blocker:** requesting the candidate through `sky.launch_app`
+opened the retained installed baseline instead. CIM verifies that baseline path/PID;
+no correction acceptance inferred. Capture fails with **foreground window did not
+report a process id** both initially and after one fresh-window recovery. Native
+calls stopped; user asked to bring Loomlight to the foreground and report ready.
+Use a verified exact-path launcher after safely closing the baseline; prove the
+running executable and WebView2 ownership before correction input evidence.
+`resume-probes-and-native-blocker.json` retains the compact local receipt. Repository
+validation (337 files), whitespace and three-document scope review pass. No new
+application change/build/CI dispatch; do not prepare integration.
+
+**Earlier handoff:** user reports **“yes it all works”** for the three physical held-drag
 cancellation gestures (Escape, outside-list release, focus switch). They stopped
 Computer Use to demonstrate them and explicitly permit restarting it. These are user
 observations, separate from agent inspection. `after-human-drag.json` independently
@@ -62,7 +87,9 @@ open disposable Story Scene 1; reported results and hash verification are above.
 that surface; `before-human-drag.json` retains scene/map/project/authoring hashes for
 comparison. Continue shell/diagnostic work while waiting; do not compete for native UI.
 
-Counters: Windows **1 completed build / 4 native starts / 0 separate SDK menu starts**.
+Counters: Windows **1 completed build / 8 top-level process-start attempts /
+0 separate SDK menu starts**; one of those eight failed before WebView setup because
+the SDK variable was wrong. Latest launcher opened the baseline, not the correction.
 Isolated no-bundle production build session 25998 completed exit 0 in 3m09s,
 log `source-correction-1-build.log`; no CI dispatched. Retained candidate executable:
 **14,150,656 bytes**, SHA256
@@ -181,8 +208,8 @@ canonical 14-row checklist remain mandatory. No whole row is Pass yet.
 
 | Row | Checkpoint result | Exact evidence / remaining actions |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; fixture invariant failure `105` preserved and corrected through Source. IDs, Save/reopen, live marker/ghost and Explorer coexistence pending. |
-| WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native restart API remains stopped by physical Escape; live UI not re-inspected. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending. |
+| WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; `136`–`138` native Save/project close. Fixture invariant failure `105` preserved and corrected through Source. IDs/reopen, live marker/ghost and Explorer coexistence pending. |
+| WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native resume `136` shows no residual marker/responsive Story. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending; current capture failure blocks further input. |
 | WIN-UI-03 | Unavailable; not run | `media-manifest.json` records valid PNG/JPEG/WebP/audio and unsupported/oversized media; staging/drop/import actions pending. |
 | WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug delivery; Character/Asset/Variable/content/shortcut actions pending. No physical-human keyboard claim. |
 | WIN-UI-05 | Unavailable; partial evidence | `108`–`116` int/42 Cancel/Discard/reopen bool/False; `118`–`123` English string/Discard. Boolean True creation/discard and existing default/Keep/Escape/save/reopen actions pending. |
@@ -191,7 +218,7 @@ canonical 14-row checklist remain mandatory. No whole row is Pass yet.
 | WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
 | WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
 | WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
-| WIN-UI-11 | Fail; incomplete | WIN-RUN-01 `75`–`79` two native Source Run refusals; first correction passes local renderer checks but native/Mac/remote retest pending. Story latest text/normal exit0 `85`–`89` passes specific checks. Installed route-a PASS and ui-refresh FAIL retained. Overflow tabs, graph details and SDK diagnostic actions pending. |
+| WIN-UI-11 | Fail; incomplete | WIN-RUN-01 `75`–`79` two native Source Run refusals; first correction passes local renderer and configured packaged route-a checks, but native-input/Mac/remote retest pending. Story latest text/normal exit0 `85`–`89` passes specifics. Baseline and correction ui-refresh FAIL retained; initial-story-ready correction failure unclassified. Overflow tabs, graph details and SDK diagnostic actions pending. |
 | WIN-UI-12 | Unavailable; partial evidence | `15`–`20` uncached official SDK download/verified install; CONFIG-01 `21`–`31`; stages `32`–`33`; native fresh menus/Start `51`–`56` PASS specifics; Welcome dark/recent restore `95`. Hover/light/earlier-project distinction/scaling completion pending. |
 | WIN-UI-13 | Unavailable; not run | `interaction-fixture.json` prepares reciprocal/duplicate/long/self/missing links; native routing, Fit/navigation/palettes/scaling pending. |
 | WIN-UI-14 | Unavailable; partial evidence | `107` bool/int/string four-header alignment and selection/Edit visible at 96 DPI, Dark. Character, media preview/import/external-change/retry/cleanup/higher-DPI actions pending; broken prepared-fixture image preview unclassified. |
