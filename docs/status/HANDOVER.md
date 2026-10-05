@@ -2,6 +2,28 @@
 
 ## Final Mac acceptance / qualification continuation — 2026-10-05
 
+**State: awaiting_ci — manual same-chat resume.** Mac review PASS; original profile
+restored, all disposable profiles/failure evidence retained. Published/tested candidate
+`94ffa25c016740eb541bba4e883f6ab683cb93d6`; 132 app/workflow inputs equal retained
+P4 package source `efb52edebd934277f7643a6978f59a343e6c447b`.
+
+- Repository quality [37300945634](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300945634), attempt 1: required job/steps PASS; optional matrices intentionally skipped.
+- Production [37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410), attempt 1, exact SHA above, `upload_packages=true`: confirmed queued at initial identity read.
+
+Initial final production **1/1 dispatched**, correction reruns 0. No polling or local
+runner; no ambiguous dispatch/retry. Counters **16 builds / 67 native starts / 7
+separate SDK menu/launcher starts**. Remote build counts await terminal evidence.
+Resume this SAME chat: “Resume: audit production run 37300975410 attempt 1 on 94ffa25.”
+Read recorded run/fresh refs/worktree/diff once; pending → pause, terminal → audit
+required jobs, both platform SDK/native/cleanup reports/manifests/installers, classify
+and fix genuine failures with justified changed-input rechecks. Then prepare exact
+passing Windows installer/14-row Windows-PC agent prompt. Windows physical work,
+conflict resolution, integration/closure/1H/new feature phase remain deferred.
+
+Pause docs follow candidate 94ffa25 with no app/workflow change; no package matrix
+for this record and no automatic acceptance of future changed heads. No Goal lifecycle
+was created; turn end stops model polling, not a claimed verified live-Goal pause.
+
 **Final Mac review PASS; remote qualification next.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
 48px native picker, Source Save focus, unsupported-only import and bounded caption
@@ -35,9 +57,9 @@ guarded renames restored the untouched original whole app profile. No app/game o
 local runner pending, no private project mutation. Counter totals: **16 production
 builds, 67 native/boundary starts**, separately **7 SDK menu/launcher starts**.
 
-All checkpoints after verified origin `273b8e7` currently LOCAL ONLY. Mac PASS now
-selects Stage 2 feature-candidate publication and exact remote qualification;
-initial production allowance **0/1**, upload_packages=true. No dispatch yet.
+All implementation/acceptance checkpoints through `94ffa25` are published. Mac PASS
+selected Stage 2 feature-candidate publication; confirmed operations above own the
+current **1/1** initial production dispatch and exact qualification identities.
 Record confirmed run ID/attempt/tested SHA/continuation before manual same-chat
 waiting; preserve ambiguous requests without retry. After required remote PASS,
 prepare retained exact Windows installer and 14-row Windows-PC agent prompt.

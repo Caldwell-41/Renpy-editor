@@ -3393,3 +3393,42 @@ merge; its earlier no-push instruction governed the planning merge operation, no
 planning branch publication is selected. Stage 2 publication of the final feature
 candidate was explicitly selected in this Mac completion sequence. No conflicts,
 history rewrite, integration, Windows-PC execution, closure or new feature phase.
+
+
+**Confirmed remote qualification wait — 2026-10-05:** state `awaiting_ci`.
+Published and verified candidate `94ffa25c016740eb541bba4e883f6ab683cb93d6` on
+`feature/phase-1g-branches-runtime`; PR #17 still OPEN/draft/CONFLICTING, no integration.
+All 132 app/workflow inputs match tested/package source `efb52ed`; exact acceptance
+remains tied to those identities, not every future branch head.
+
+Repository quality [37300945634](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300945634),
+attempt **1**, workflow_dispatch, tested SHA **94ffa25c016740eb541bba4e883f6ab683cb93d6**:
+PASS. Actual required Validate repository job and every step success (structure/link/
+privacy, bounded Q1 rejection/retention tests, selector audit). Optional flow-profile
+and traced diagnostic jobs skipped because selectors false; no optional pass claimed.
+
+Production [37300975410](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37300975410),
+attempt **1**, workflow_dispatch, branch above, tested SHA
+**94ffa25c016740eb541bba4e883f6ab683cb93d6**, `upload_packages=true`: confirmed **queued**
+at the one identity read. Initial final-candidate dispatch allowance **1/1 consumed**;
+changed-input correction reruns **0**. No duplicate/ambiguous request or pending
+local runner. Local counters stay **16 builds / 67 native starts / 7 separate SDK
+menu/launcher starts**; remote build/start counts are not preclaimed before audit.
+
+Manual same-chat waiting now selected: stop model polling. Resume this same chat
+with “Resume: audit production run 37300975410 attempt 1 on 94ffa25.” Inspect that
+recorded operation plus fresh refs/worktree/diff. If still pending, pause again without
+a loop or dispatch. If terminal, audit required preflight, both platform gates, native/
+SDK case logs, cleanup, retained input manifests and success-only final installers.
+Classify failures and preserve evidence; only justified changed-input corrections
+and affected verification/reruns remain authorized. Do not retry unchanged success,
+an ambiguous dispatch or historical unrelated matrix. After required remote PASS,
+update existing docs/handover and provide Windows-PC exact candidate/retained installer/
+14-row prompt. Windows physical review deferred; PR conflict resolution and combined-
+input integration remain a later separately selected chat. No phase closure/1H/new phase.
+
+This documentation pause record follows the tested candidate without app/workflow
+changes. Verify input equality and repository checks; publish it without a duplicate
+package matrix. The recorded candidate remains 94ffa25, not the receipt commit's SHA.
+No Codex Goal lifecycle was created in this chat; ending this active turn stops model
+polling. Do not claim a live Goal pause was verified from this repository state.
