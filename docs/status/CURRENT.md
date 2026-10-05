@@ -1,69 +1,86 @@
 # Current status
 
-**Updated:** 2026-10-05.
+**Updated:** 2026-10-06.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 **Main inspected:** `4d7ba0333c48d60242a9a42d3e079fea499a5531`; no integration.
 
 ## Live continuation
 
-**State: awaiting_ci — P6 correction, manual same-chat resume.** Published/verified
-candidate `5b467a402b14c7b371838645a9daa555ba315349` on existing
-`feature/phase-1g-branches-runtime`; all 132 app/workflow inputs equal tested/package
-source `8ef89a85c3e8233ab5c8b73bfce7e166cdd03275`. PR #17 remains open/draft/
-conflicting; separate planning worktree 2c5a164 intact; no integration.
+**State: Mac acceptance and required remote qualification PASS; ready for Windows-PC review.**
+Exact qualified candidate `5b467a402b14c7b371838645a9daa555ba315349` on existing
+`feature/phase-1g-branches-runtime`; all **132** app/workflow input hashes match local
+package source `8ef89a85c3e8233ab5c8b73bfce7e166cdd03275` and the docs-only
+continuation carrier. Fresh remote feature `525d251`, main
+`4d7ba0333c48d60242a9a42d3e079fea499a5531`, planning remote `267ec2a` and separate
+planning worktree `2c5a164` preserved at terminal audit. PR #17 remains open/draft/
+conflicting; no integration. A later docs commit does not replace the tested SHA.
 
-- Repository quality [37312556784](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312556784), attempt **1**, workflow_dispatch, exact 5b467a4 SHA above: **PASS**. Required Validate repository job and every step success audited; optional profile/diagnostic jobs intentionally skipped by false selectors.
-- Production [37312593480](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480), attempt **1**, workflow_dispatch, exact 5b467a4 SHA above, `upload_packages=true`: confirmed **in_progress / Preflight** at one initial identity read, about 12:53 UTC on 2026-10-05. Required qualification/retained installers not yet accepted.
+- Repository quality [37312556784](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312556784), attempt **1**, exact candidate above: **PASS**. Required job/every step audited; optional profile/diagnostic jobs intentionally unselected.
+- Production [37312593480](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480), attempt **1**, exact candidate above, `upload_packages=true`: **PASS**, terminal audit 2026-10-06. Preflight, macOS ARM64 and Windows x64/all required gates succeed; both success-only package uploads are present and retained locally.
 
-Initial final allowance **1/1 consumed**; justified changed-input correction dispatches
-**2**. Prior 37300975410 attempt 1 on 94ffa25 and 37307663113 attempt 1 on cab39e1
-remain FAILED; failure logs/artifacts/metadata/input hashes retained. First failed
-before any package; second failed both runtime-browser outcomes and Mac route-a
-close-after-Stop, despite Mac 5/6 and Windows 6/6 native cases and Windows boundary
-smoke PASS. Missing Mac boundary/licence gates and success-only installers stay
-unaccepted. Those failed retained App/executable payloads are diagnostic evidence.
-No ambiguous/duplicate request, unchanged successful full matrix or new remote counts
-preclaimed. Local totals **18 builds / 71 native starts / 7 separate SDK starts**;
-prior remote correction additionally 2 builds / 14 app starts, separately recorded.
+Preflight: **87 frontend tests, 0 failures/skips**, Source/UI/shipped-driver browsers,
+Q1 rejecting fixtures/selectors, repository validation and formatting PASS.
+Routine core: Mac **187 passed / 40 existing ignores / 3 filtered**; Windows
+**182 passed / 37 existing ignores / 3 filtered**. Separate required SDK lifecycle,
+authoring/Source, download-handoff/reuse, runtime service and diagnostics gates execute
+and pass without a skip marker; each platform's desktop Rust test passes. Both archives
+were cache hits, checked by the pinned production checksum installer. The conditional
+cache-miss download is skipped; genuine Mac uncached progress has separate evidence.
 
-P6 Mac changed-scope PASS: project.close ordered behind saved-state observations
-without write replay; Stop/token controls independent. F2 runtime browser expands
-closed diagnostic disclosure, retains initial closed/visible/focus/1100px/640px checks.
-87 frontend tests/0 skipped, both browser shipped routes, format/self-review/repository
-PASS. Exact packaged native route-a **88.942s** / route-b **111.598s** PASS, each
-exit 0/no timeout/cleanup true; explicit Close Project completion and accepted-source/
-new-session reopen, native font/Fit, real SDK routes/Running >9.5s, Save/staleness/Stop
-and route-b refusal/Cancel pass. Raw durations retained; no physical input or latency
-claim. Four changed request/test/probe inputs and 128 unchanged from P5 map prior
-unaffected Mac/Finder/progress/catalogue/picker evidence honestly. Precise prior hosted
-request interleaving was not captured; P6's proven race is consistent evidence, with
-sole CI attribution inferred. No earlier failure relabelled by local corrections.
+Both hosts: **6/6 packaged runtime cases**, exit 0/no timeout/cleanup true;
+compile/lint, both routes, runtime-error and UI refresh. Mac route-a/b **47.067s /
+44.719s**, Windows **45.797s / 42.734s**. Native font metrics, Save during play,
+Running >9.5s, Stop, explicit Close completion and accepted-source/new-session reopen
+pass; route-b refusal/Cancel passes. Boundary/single-instance/navigation/CSP/Source
+command trace, artifact privacy and dependency/licence inventories PASS. Actual
+Runtime and Branches browser outcomes both success (not normalized conclusions);
+Branches schema 3 functional and diagnostic timing results pass on each host.
+Hosted WebView input is synthetic DOM, not physical keyboard or Windows-PC UX.
 
-Verified local ARM64 installer: ignored
+All four artifact ZIP hashes match GitHub digests. Exact candidate/tree/input manifest,
+manifest file hash, executable and retained payload hashes verified. Terminal logs,
+JSON cases, screenshots, inventories, ZIPs, installers and compact audit are retained
+ignored under `.toolchains/reports/final-1g-mac/`. The earlier cached partial CLI log
+is preserved; completed run/attempt logs supply terminal proof. Evidence uploads omit
+individual .log files; full terminal logs retain those gate outputs. No missing gate,
+skip or failed case is treated as a pass.
+
+Windows artifact [11346956654](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480/artifacts/11346956654),
+`phase-1-production-package-windows-2025`: selected `nsis/Loomlight_0.1.0_x64-setup.exe`,
+**3,544,277 bytes**, SHA256
+`cf2d4a004923863b57f28a481c0703076363faf380368948d3d876ef7505d408`.
+Tested AMD64 executable SHA256
+`e4992dde5dc3a2521de8df075cdbb3843a54414b43fc348560c44f8b1eeb1afc`;
+verify the installed executable on the Windows PC. MSI/hosted Mac DMG identities and
+all artifact digests are in the final task ledger. GitHub retention expires 2026-10-12;
+local ignored archives/installers are retained beyond that expiry.
+
+Verified local ARM64 review installer remains
 `.toolchains/review-builds/ui-refresh-8ef89a8/Loomlight_0.1.0_8ef89a8_aarch64.dmg`,
-5,752,249 bytes; SHA256 `6cf320e94bded5403172b846152164871fa5dbec12c93d161eae56197a6d9adb`;
+**5,752,249 bytes**, SHA256
+`6cf320e94bded5403172b846152164871fa5dbec12c93d161eae56197a6d9adb`;
 sealed executable `36328bbb46be07b1ad64274048f7a5c223065d9152f9daade1fe5046f6e75de1`.
-Mounted identity/ARM64/hash/integrity/strict signature/privacy PASS; local ad-hoc
-signature, not Developer ID/notarized. Installed app/original user profile untouched;
-disposable probe profiles isolated and no local app/game/runner pending after cleanup.
+ARM64/mounted identity/integrity/strict ad-hoc signature/privacy PASS; no Developer ID/
+notarization claim. Original profile restored; private projects and installed older
+copy untouched. No local app/game/runner or workflow wait remains.
 
-Manual SAME-chat waiting: stop model polling. Resume: “Audit production 37312593480
-attempt 1 on 5b467a4.” Inspect that recorded operation plus fresh refs/worktree/diff
-once. Pending -> pause without loop/dispatch; terminal -> audit required preflight,
-both platform jobs, native/SDK case logs, cleanup, exact input manifests/retained
-installers and deferred browser outcomes (not success-normalized step conclusions).
-Classify/preserve/fix genuine failures only within remaining changed-input scope and
-WORKFLOW reassessment rules. After required remote PASS prepare exact passing source/
-retained Windows installer/14-row Windows-PC prompt. Windows physical work, conflicts,
-combined-input integration, rewrite/merge, closure/1H/new feature remain deferred.
-No Goal lifecycle created; turn end stops polling, not a claimed live-Goal pause.
+Initial production allowance **1/1 consumed**; justified changed-input correction
+dispatches **2**. Failed 37300975410 on 94ffa25 and 37307663113 on cab39e1 remain
+FAILED with unique evidence retained. Local counters **18 builds / 71 native starts /
+7 separate SDK starts**; prior remote P5 **2 builds / 14 starts**, current P6
+**2 builds / 16 starts** (six cases plus two boundary processes per host), separately
+recorded. This terminal audit adds no build, app start or dispatch.
 
-This wait carrier changes docs only after tested 5b467a4. Validate, publish and verify
-without another package matrix. Tested candidate remains 5b467a4; carrier SHA never
-silently replaces it. Earlier green evidence never automatically qualifies later inputs.
+The selected Mac outcome is complete. Continue on a genuine Windows x64 PC with the
+[14-row checklist](../tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03);
+all rows remain deferred here. Windows corrections change the candidate and require
+mapped affected Mac/remote verification; existing WORKFLOW budgets continue.
+Windows-PC acceptance, PR conflict resolution, affected combined-input qualification,
+integration, 1G/1H closure and any new feature remain later separate work. Publish this
+docs-only transfer without another package matrix; keep qualified identity 5b467a4.
 
-**Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
+**Historical P4 Mac review snapshot — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
 48px native picker, Source Save focus, unsupported-only import and bounded caption
 corrections. 85 frontend checks/0 skipped, web/UI browsers and affected real-SDK
@@ -96,13 +113,10 @@ guarded renames restored the untouched original whole app profile. No app/game o
 local runner pending, no private project mutation. Counter totals: **16 production
 builds, 67 native/boundary starts**, separately **7 SDK menu/launcher starts**.
 
-All implementation/acceptance checkpoints through `94ffa25` are published. Mac PASS
-selected Stage 2 feature-candidate publication; confirmed operations above own the
-current **1/1** initial production dispatch and exact qualification identities.
-Record confirmed run ID/attempt/tested SHA/continuation before manual same-chat
-waiting; preserve ambiguous requests without retry. After required remote PASS,
-prepare retained exact Windows installer and 14-row Windows-PC agent prompt.
-Windows remains deferred in this Mac chat; later separate integration only.
+This historical P4 snapshot preceded the P5/P6 corrections and qualification.
+The terminal transfer above now owns passing candidate/package identities, cumulative
+counters and Windows continuation. All failed/superseded evidence remains intact.
+Windows-PC acceptance and later separate integration remain outstanding.
 Preserve local planning merge `353f1f7` and separate worktree `2c5a164`; no planning
 branch push, conflict resolution, rebase/rewrite, merge, 1G/1H closure or new phase.
 
@@ -115,9 +129,10 @@ references and bounded delivery targets now accompany this checkout. No applicat
 test, workflow or Phase 1 acceptance change is selected. The live Mac-review state,
 source/package evidence, profile recovery, counters and remaining gates above stay
 authoritative. This is not 1G/1H integration or resolution of PR #17 against main.
-Planning worktree/branch remain intact. All unpublished checkpoints and this merge
-stay local; no publication operation is pending or requested. Continue the existing
-Phase 1 review; Phase 2/3 implementation remains not started. Resolve merge SHA from Git.
+Planning worktree/branch remain intact. The merge was local-only at that checkpoint;
+subsequent selected Mac acceptance published the existing feature candidate containing
+it, without pushing the planning branch itself. Phase 2/3 implementation remains
+not started. Continue the live Phase 1 Windows transfer above.
 
 **Previous Branches correction:**
 Option B source `88add80` implements heavier rounded routes, distinct channels,

@@ -1,11 +1,11 @@
 # UI design review
 
-**Updated:** 2026-10-04. **State:** Mac completion/review/qualification selected for the next chat; Windows and integration follow separately; human acceptance open.
+**Updated:** 2026-10-06. **State:** final Mac completion/review and exact-candidate remote qualification PASS; Windows-PC 14-row review remains deferred, integration follows separately.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary
 
-**Live selection:** the [2026-10-04 completion sequence](#selected-1g-completion-sequence--2026-10-04) supersedes earlier review-only/no-build/no-dispatch boundaries only for its named next-chat stages. Historical allowances and failures remain evidence, not renewed authorization.
+**Live selection:** the [2026-10-04 completion sequence](#selected-1g-completion-sequence--2026-10-04) controls the stages; the [terminal Mac/remote audit](#final-mac-terminal-qualification-and-windows-transfer--2026-10-06) now transfers the exact passing candidate to Windows-PC review. Earlier review-only/no-build/no-dispatch boundaries below are historical. Historical allowances and failures remain evidence, not renewed authorization.
 
 The user requested discussion of seven supplied reference images, questions and
 recommendations for each page, and revised mockups as useful. The user clarified that
@@ -1198,7 +1198,9 @@ open. This feedback record adds no build, launch or dispatch.
 
 ### Accepted resolution-picker correction — 2026-09-30
 
-**CONFIG-01 — accepted design, implementation pending.** Native observation found
+**CONFIG-01 — accepted design; Mac implementation/review complete.** The original
+2026-09-30 requirements follow; final evidence is in the
+[terminal audit](#final-mac-terminal-qualification-and-windows-transfer--2026-10-06). Native observation found
 Game configuration, step 3, with Full HD 1920 × 1080 selected. The user reports the
 resolution picker is small and hard to read, requested suggestions and a small mockup,
 then explicitly accepted the proposed larger dropdown with aspect-ratio preview.
@@ -2224,13 +2226,16 @@ explicit SDK menu starts. No manual workflow or automation is pending.
 
 ### Deferred Windows review checklist — 2026-10-03
 
-**Status: DEFERRED by the user; every row below is unexecuted on Windows.** Use an
-explicitly selected corrected Windows x64 package when one exists; record its commit,
-installer SHA-256, Windows/WebView2 version, display scaling, palette and results.
-The existing `d690d7f`/`01d0896` artifacts do not prove these new corrections. Use a
-disposable project and synthetic files, retain failed evidence, and record each row
-Pass/Fail/Unavailable without inferring a pass from macOS or browser fixtures. This
-checklist does not dispatch a workflow or select another package build.
+**Status: DEFERRED to a subsequent genuine Windows-PC chat; all 14 rows remain
+unexecuted as Windows-PC acceptance.** The selected passing candidate is
+`5b467a402b14c7b371838645a9daa555ba315349`, production run 37312593480 attempt 1.
+Use the retained Windows NSIS installer identified in the
+[Windows transfer](../../status/HANDOVER.md#windows-agent-prompt--exact-passing-candidate).
+Hosted WebView2 synthetic-input results pass, but do not replace these physical/native/
+visual checks. Record installer/executable hashes, Windows/WebView2 version, scaling,
+palette and each row Pass/Fail/Unavailable. Use disposable projects and synthetic files;
+preserve failures and user observations separately. Older d690d7f/01d0896 packages
+cannot qualify these corrections. This checklist adds no workflow/build dispatch.
 
 | ID | Specific actions | Expected result |
 | --- | --- | --- |
@@ -2249,10 +2254,11 @@ checklist does not dispatch a workflow or select another package build.
 | WIN-UI-13 — approved B connector routing | In a disposable project save reciprocal Scene 1/New Scene jumps, a long jump skipping a node, two choices with the same target/text, a self-loop, a same-layer link and a missing/custom destination. Review both palettes at 100%/higher DPI, zoom/pan/Fit, select routes and use Source navigation. Include long English names and choice text. | Every known arrowhead meets its correct node boundary; heavier rounded paths avoid all node interiors; reciprocal/duplicate/backward routes remain distinguishable. Label pills stay legible and clear of nodes; Fit includes outer routes/pills. Long node names retain full tooltips/details. No guessed link for missing/custom/terminal flow; saved source, selections, notices and navigation remain correct. Record zoom/scale-specific readability separately. |
 | WIN-UI-14 — catalogue columns and staged preview | Review Characters with both image-backed and zero-appearance entries; toggle Grid/List, open/close details and resize at 100%/higher DPI. Review bool/int/string Variable rows against all four headers. Browse/drop PNG/JPEG files, inspect their previews before Import, add another file, remove all, Cancel/discard/reopen, change a selected file externally and retry. Include audio and an oversized/unsupported raster. | No image/initial/title overlap; matching Character list columns and Variable header/cell alignment. Whole-row selection and Edit remain reachable. Initial Choose section disappears after selection; real images/dimensions are shown, Add files remains available, empty staging restores chooser, footer actions remain visible. Errors offer Retry without a write; only explicit Import creates assets, no successful partial import is replayed. Native preview/drop/cleanup and OS scaling are still unverified until this is run. |
 
-Remaining macOS hands-on review uses a corrected installer when selected and resumes
-at Story, then Source/Branches/Characters/Assets/Variables. Physical IME, OS file drop,
-live download/detailed creation progress and final UX acceptance remain open on the
-relevant targets. Windows deferral is not a pass or a reason to widen this outcome.
+Mac final review and exact-candidate remote qualification now pass; see the
+[terminal audit](#final-mac-terminal-qualification-and-windows-transfer--2026-10-06).
+The app supports English; non-English IME is outside selected scope. Windows-PC
+native input, Explorer drag/drop, uncached SDK/creation progress, scaling and visual
+review remain outstanding in these rows. Windows deferral is not a pass.
 
 
 ### Audit correction verification closeout — 2026-10-03
@@ -3711,3 +3717,113 @@ within cumulative WORKFLOW hypothesis budgets remain. Required remote PASS prece
 Windows prompt with exact candidate/retained installer/14-row checklist. Windows-PC
 review, conflict resolution/combined-input integration/closure/1H/new features remain
 separate later selections. No ambiguous retry, threshold waiver or new orchestration.
+
+
+### Final Mac terminal qualification and Windows transfer — 2026-10-06
+
+**Selected Mac completion outcome COMPLETE; Windows-PC acceptance remains DEFERRED.**
+Qualified candidate **`5b467a402b14c7b371838645a9daa555ba315349`**, application/package
+source **`8ef89a85c3e8233ab5c8b73bfce7e166cdd03275`**. All 132 app/workflow hashes in
+both hosted input manifests match the local P6 inputs and docs continuation; exact
+checkout/tree `cf6361fed36aa088102dcd6edbc4afffa7b0a0a6`, run/attempt, executable,
+manifest-file and retained payload hashes verified. Later docs carriers do not replace
+this qualified SHA. Current ref inspection preserved feature 525d251, main 4d7ba03,
+planning remote 267ec2a and separate planning worktree 2c5a164; PR #17 OPEN/draft/
+CONFLICTING. No integration, history rewrite or phase closure.
+
+Repository quality **37312556784 attempt 1 PASS** on exact 5b467a4: all required
+Validate repository steps success; optional diagnostics/profile selectors false.
+Production [**37312593480 attempt 1 PASS**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480)
+on exact 5b467a4, upload_packages=true. Preflight and both required platform jobs
+success; actual required steps, case reports and cleanup accepted after terminal audit.
+
+| Required evidence | macOS ARM64 / macos-26 | Windows x64 / windows-2025 |
+| --- | --- | --- |
+| Routine core selector | 187 passed, 40 existing ignores, 3 filtered | 182 passed, 37 existing ignores, 3 filtered |
+| Real-service Branches budgets | PASS, 3 samples | PASS, 3 samples |
+| Explicit SDK lifecycle/1D/1E/1F, handoff/reuse, runtime service and diagnostic gates | All execute/PASS, no skip marker | All execute/PASS, no skip marker |
+| Desktop Rust boundary | 1 passed | 1 passed |
+| Packaged compile/lint/route-a/route-b/runtime-error/ui-refresh | 6/6 PASS, exit 0/no timeout/cleanup true | 6/6 PASS, exit 0/no timeout/cleanup true |
+| Route-a / route-b elapsed seconds | 47.067 / 44.719 | 45.797 / 42.734 |
+| Deferred Runtime/Branches actual browser outcomes | success/success; functional and diagnostic timing PASS | success/success; functional and diagnostic timing PASS |
+| Boundary smoke / privacy / licence inventory / success-only package upload | PASS / PASS / present / present | PASS / PASS / present / present |
+
+Preflight frontend **87 passed / 0 failed or skipped**; source/selection/UI/shipped
+compile/lint/routes/error driver browsers, formatting, validator and rejecting Q1
+fixtures/selectors pass. Hosted Mac Darwin 25.6.0 ARM64, Windows 2025Server AMD64;
+Node v24.19.0, cargo/rustc 1.90.0 both, Python 3.14.7/3.12.10. Inventories retain
+97 npm/519 cargo package entries per platform. Pinned Ren’Py 8.5.3 SDK archive cache
+restore succeeds both; production installer checks published pinned SHA256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Only the cache-miss download step is conditionally skipped. This is real cached SDK
+execution, not a new uncached-progress observation. Earlier genuine Mac normal SDK
+download/creation evidence remains separately recorded on unchanged inputs.
+
+Native route reports retain measured-font pill widths (Mac 73px, Windows 70/71px),
+Save/earlier-launch state, Running >9.5s, Stop, explicit close completion and disk/new-
+session reopen. Route-b refusal/Cancel stays tested. Boundary logs retain primary-
+ready/secondary-refusal and all privilege/navigation/lifecycle/Scene/Source/save-trace
+assertions. Hosted input is synthetic DOM, not physical keyboard or Windows-PC UX.
+No threshold was waived, runtime write replay added or precise P5 race interleaving
+retrospectively claimed; P6 proves correction/acceptance, not sole prior causation.
+
+**Retained artifacts:** all four ZIP SHA256 digests match actual downloads and archive
+integrity checks; extracted payload/executable hashes match manifests. GitHub expiry
+is 2026-10-12; local ignored archives and installers are already retained beyond expiry.
+
+| Artifact ID / name | ZIP SHA256 |
+| --- | --- |
+| 11347845379 / phase-1-production-package-macos-26 | c3a6fe6325f4b44417a57eb9a583dcabbc97947fd92e20c7c82e96647290f7eb |
+| 11346956654 / phase-1-production-package-windows-2025 | 4fdbc7bbff48921800e34d8a9e1c1f0cff2bf2946f82c0f2a4bea8f92eb31314 |
+| 11346724976 / phase-1-q1-package-evidence-macos-26 | 3cc95fd0765e4efb26441bb0dafeba68741a6943c2b6192d0400908abc76db89 |
+| 11347016700 / phase-1-q1-package-evidence-windows-2025 | 1257308b9925959bb089565e821a62dc84439264e12356eb236c133c69fff44b |
+
+| Retained success-only installer | Bytes | SHA256 |
+| --- | --- | --- |
+| Windows nsis/Loomlight_0.1.0_x64-setup.exe — selected PC review installer | 3,544,277 | cf2d4a004923863b57f28a481c0703076363faf380368948d3d876ef7505d408 |
+| Windows msi/Loomlight_0.1.0_x64_en-US.msi — alternate, uninstalled here | 5,079,040 | 2c8e3d5fdb0f77ff0dc2f0f16265265d573fb1a3b2070c009f653e64909f6007 |
+| Hosted Mac dmg/Loomlight_0.1.0_aarch64.dmg — distinct from local sealed review DMG | 5,196,937 | e5b280224a80b5d00bedc7234278a607e78e4f267eedbe8276007f4a67bee954 |
+
+Tested Windows executable SHA256
+`e4992dde5dc3a2521de8df075cdbb3843a54414b43fc348560c44f8b1eeb1afc` (PE AMD64 verified);
+tested hosted Mac executable `4a9d7f99043171cecf96a143c9e0ecaec4fc007ee3074be5b87bd773fd4dab1e`.
+Mac retained App tar `4b4180e03f0c3f5b99d4eab048b3b7a36dacdc79460dc16acc405d05307875bd`.
+Windows installer execution and installed-executable equality remain Windows-PC work.
+
+Ignored evidence base `.toolchains/reports/final-1g-mac/`: remote-production-p6-resume.json,
+-artifacts.json, -terminal-logs.zip and extracted remote-p6-terminal-logs;
+remote-p6-artifacts, four *-p6.zip archives and remote-p6-audit-summary.json. Earlier
+cached CLI partial log is preserved; the terminal run/attempt archive was retrieved
+and audited rather than trusting that truncated view. Uploaded evidence lacks individual
+.log files, but terminal logs retain actual gate output and required JSON/smoke/manifest/
+screenshot/inventory evidence is present. No required gate is missing. Failed initial
+37300975410 and P5 37307663113 remain FAILED with their unique evidence intact.
+
+Counters: **18 local builds / 71 native starts / 7 separate SDK starts** unchanged;
+remote P5 **2 builds / 14 starts**, current P6 **2 builds / 16 starts** separately
+verified (12 case processes + 4 boundary processes). Initial final allowance **1/1**
+consumed, justified changed-input correction dispatches **2**. No duplicate unchanged
+full matrix, ambiguous retry, automation or new operation. No app/game/local runner
+pending; original user profile restored.
+
+CONFIG-01 (dimensions/reduced ratio/caption/truthful invalid Custom/bounded portrait),
+f287a7e sidebar spacing and selected Mac correction/review are complete. P4 unaffected
+English-input/Finder/catalogue/import/picker/progress/diagnostic evidence and P5 routing
+proofs are reused by mapped unchanged inputs; P6 changed close/Save/Stop/reopen paths
+have fresh local and both-platform hosted proof. User Finder observation is separate
+from agent-driven native OS input/visual and synthetic service results; non-English
+IME is outside selected English app support, with Unicode source protections retained.
+
+Continuation: use the [Windows-agent prompt](../../status/HANDOVER.md#windows-agent-prompt--exact-passing-candidate)
+and all 14 canonical rows on a genuine Windows PC, preserving profiles/fixtures and
+recording physical/native/visual limitations. Any correction supersedes affected
+candidate acceptance and needs mapped Mac/remote checks. Final conflicts/combined-input
+integration belong to another chat after both platforms pass. This docs-only transfer
+receives validation/whitespace/input equality checks and publication, not a package
+matrix; tested identity stays 5b467a4. No Goal lifecycle or workflow wait remains.
+
+Transfer verification: repository structure/text/privacy/local-link validator **PASS
+for 340 files**, whitespace PASS, both hosted manifests still match **132 unchanged
+app/workflow inputs**, and the saved Windows prompt is **3,982 characters**. Only
+CURRENT/HANDOVER/this task ledger changed; no extra build, native start or remote
+dispatch. Publish/verify this coherent documentation transfer on the existing branch.
