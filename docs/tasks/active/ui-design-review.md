@@ -3620,3 +3620,63 @@ platforms; the prior Windows job was failed by its runtime-browser gate, so no u
 successful full matrix is duplicated. Full production run still required on corrected
 coherent inputs. Preserve failures and manual same-chat wait; no specialist/performance
 expansion, ambiguous retry, Windows-PC claim, conflicts/integration/closure/new phase.
+
+
+**P6 pinned package / focused proof — 2026-10-05:** source
+`8ef89a85c3e8233ab5c8b73bfce7e166cdd03275`, one build (18 local total). Retained
+corrected installer `.toolchains/review-builds/ui-refresh-8ef89a8/Loomlight_0.1.0_8ef89a8_aarch64.dmg`,
+5,752,249 bytes; SHA256 `6cf320e94bded5403172b846152164871fa5dbec12c93d161eae56197a6d9adb`.
+Sealed executable `36328bbb46be07b1ad64274048f7a5c223065d9152f9daade1fe5046f6e75de1`,
+compiled executable `1c8e6a4df5d9f0e55e2ee4ddde82cd482332860ee12004d72835eb22db2f870c`.
+Raw Tauri DMG retained; strict ad-hoc resource signature, ARM64/identifier/version,
+mounted payload equality, DMG integrity and privacy scan (9 files) PASS. Installed
+app untouched; no Developer ID/notarization claim. Every earlier failed/superseded
+package/report is preserved.
+
+132 input manifest versus P5: exactly four changed — request-lane.ts, its test,
+runtime-ui.browser.mjs and shipped runtime_ui_probe.js; 128 unchanged. Branches font
+measurement/routing, resolution/sidebar/catalogue/import/preview and all backend,
+SDK, dependency and workflow inputs unchanged. All 87 frontend tests PASS/0 skipped,
+standalone runtime disclosure/focus/resize PASS, both browser shipped routes PASS with
+explicit close-after-stop completion/reopen. Native affected route-a/route-b is the
+remaining local proof; no broad unchanged local SDK/service matrix is repeated.
+
+Self-review: project.close joins the existing shared-service lane exactly once; no
+request/response ambiguity is retried, Stop/cancel/status/diagnostics retain separate
+controls and Source transition/refusal guards remain. Unit test holds a real-shaped
+checked-out observation, rejects premature close on old code and asserts one successful
+close after release on new code; independent Stop regression remains passing. Browser
+harness changes only the disclosure action and initial hidden locator; no failure or
+budget relaxed. Native driver preserves deadline/no replay and records the exact close
+stage plus bounded failure state. UI/TESTING document these contracts. Repository
+validation 340 files, formatting and whitespace PASS. P6 is one correction of a newly
+confirmed ordinary race; sole attribution of the prior hosted failure remains inferred.
+
+
+**P6 affected packaged Mac PASS / next correction selected:** source 8ef89a8 exact
+retained sealed app runs route-a 88.942s and route-b 111.598s: both PASS, exit 0,
+no timeout, cleanup true. Each reports close-after-stop-requested/completed, then new
+session/read accepted Source bytes on reopen. Native font/Fit pills, changed/restored
+destinations, real route output/assets/state, Save/staleness, Running >9.5s, Stop and
+route-b invalid-draft refusal/Cancel all pass. Raw SDK/start/poll/stage times retained;
+no physical keyboard/presentation-latency or Windows-PC claim. Original profile remains
+restored; bounded probe profiles isolated, no app/game/local runner pending after
+reported cleanup and process exit. Local cumulative counters **18 builds / 71 native
+starts / 7 separate SDK menu/launcher starts**. Failed remote correction's extra
+2 builds/14 starts stay separately recorded. All failed/superseded evidence retained.
+
+Mac changed-scope acceptance PASS. P5 Branches measurement/routing/style proofs and
+P4 unaffected picker/sidebar/catalogue/import/Finder/English-input/progress/diagnostic
+results are reused by exact unchanged inputs and interaction impact. No blanket future
+candidate acceptance. P6 sole attribution of the prior hosted failure remains an
+inference pending actual required qualification; passing local correction does not
+relabel cab39e1's failed remote run. One next existing production correction dispatch
+is justified by changed request-lane/browser/probe inputs after affected native PASS.
+Required Repository quality must run the coherent new exact candidate. Before dispatch,
+publish/verify existing branch and all 132 app/workflow inputs equal tested/package
+8ef89a8, record remaining allowance (initial 1/1 consumed, corrections 1 so far).
+Windows prior full job FAILED its browser gate and new shared-service close ordering
+affects both hosts; no unchanged successful full matrix is duplicated. Existing
+production upload_packages=true remains required. Preserve run/attempt/SHA/evidence
+and manual same-chat wait, then terminal audit/fix. Windows transfer follows required
+remote PASS; no conflict/integration/closure/new feature or ambiguous retries.

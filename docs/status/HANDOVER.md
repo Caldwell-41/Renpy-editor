@@ -2,43 +2,53 @@
 
 ## Final Mac acceptance / qualification continuation — 2026-10-05
 
-**State: correcting terminal P5 qualification failures (P6 / F2).** Run
-37307663113 attempt 1 on `cab39e101af7a3cb37c10d207f9af31b2450818d` is FAILED.
-Preflight and measured Branches labels PASS on all runners. Both platform jobs fail
-the deferred runtime-browser result: a stale test waits for a diagnostic inside its
-collapsed disclosure. Mac also fails packaged route-a while closing/reopening after
-Stop (62.743s; Stop exit 0, cleanup true); 5/6 Mac cases PASS, all 6 Windows cases
-PASS and Windows boundary smoke PASS. Mac boundary/licence gates and both final
-installer uploads skipped; no passing final package candidate is claimed.
+**State: P6/F2 Mac correction PASS; publish corrected candidate next.** Source/package
+`8ef89a85c3e8233ab5c8b73bfce7e166cdd03275` orders project.close behind shared-service
+observations without replaying writes; independent Runtime Stop/control paths remain.
+The runtime browser now opens the collapsed diagnostic disclosure before requiring its
+visible navigation control. 87 frontend tests/0 skipped, corrected standalone runtime
+focus/resize, both shipped browser route drivers, format/self-review/repository PASS.
 
-Both failure-evidence artifacts retained locally and input/payload hashes verified:
-132 inputs equal cab39e1/P5. Failed package payloads are diagnostic evidence, not the
-selected Windows installer. Full log/metadata/browser outcomes/case reports retained;
-original failed 37300975410 remains failed too. Repository quality 37307638008 PASS
-belongs to cab39e1. Fresh feature head 380813a, main 4d7ba03 and planning worktree
-2c5a164 unchanged. No conflict/integration work or private profile mutation.
+Exact packaged Mac route-a **88.942s**, route-b **111.598s** PASS, each exit 0,
+no timeout, cleanupComplete true. Explicit close-after-stop-requested/completed and
+saved Source/new-session reopen pass; native measured Branches pills, changed/restored
+destinations, real SDK Running >9.5s, Save/staleness/Stop, route-b draft refusal/Cancel
+also pass. Stage durations remain retained; synthetic polling is not physical-input
+or presentation-latency evidence. 132 input hashes: four changed request/test/probe
+files and 128 unchanged from P5. Prior unaffected Mac/physical evidence retains its
+real source/package identities. Original user profile remains restored; probes own
+fresh disposable profiles and no app/game/local runner remains after exit/cleanup.
 
-P6 confirmed mechanism: Close Project bypasses the request lane while a project.status
-read can own the checked-out service. A rejecting regression reproduces premature
-close/RUNTIME_BUSY; queueing project.close behind observations fixes this without
-replaying writes or blocking independent Stop controls. This matches the Mac failure
-but its precise request interleaving was not recorded, so sole CI causality remains
-an inference. F2 standalone browser correction expands the diagnostic disclosure;
-closed-state/visibility/focus/resize assertions remain. 87 frontend tests/0 skipped,
-corrected runtime browser and both shipped route drivers PASS; pinned package/native
-verification pending. Prior unchanged Mac interaction evidence stays on its real inputs.
+Verified installer: ignored
+`.toolchains/review-builds/ui-refresh-8ef89a8/Loomlight_0.1.0_8ef89a8_aarch64.dmg`,
+5,752,249 bytes; SHA256 `6cf320e94bded5403172b846152164871fa5dbec12c93d161eae56197a6d9adb`;
+sealed executable `36328bbb46be07b1ad64274048f7a5c223065d9152f9daade1fe5046f6e75de1`.
+Mounted identity/ARM64/hash/integrity/strict signature/privacy PASS; local ad-hoc
+signature, not Developer ID/notarized. Installed app untouched; old packages preserved.
+Local counters **18 builds / 71 native starts / 7 separate SDK menu/launcher starts**.
+Prior failed remote correction additionally ran 2 builds / 14 app starts, separately
+recorded; no new remote counts preclaimed.
 
-Initial final dispatch 1/1 consumed; changed-input correction dispatches 1. Local
-counters 17 builds / 69 native starts / 7 separate SDK starts. This failed remote run
-additionally executed 2 package builds / 14 app starts (Mac six cases, Windows six
-plus two boundary processes); do not fold historical remote work into these counters.
-Continue this SAME chat with focused P6/F2 verification, one pinned corrected installer
-and affected native routes. After Mac PASS, publish and justify the next changed-input
-existing production qualification with upload_packages=true; preserve every failure,
-confirmed run/attempt/SHA and manual wait. No unchanged successful full matrix exists
-in this run. Windows transfer remains gated on required remote PASS. No retry of an
-ambiguous dispatch, threshold waiver, Windows-PC test, conflict resolution, rewrite,
-merge, closure/1H or new feature. No Goal lifecycle created.
+Production 37307663113 attempt 1 on cab39e1 remains FAILED: both runtime-browser
+outcomes fail (collapsed disclosure) and Mac route-a times out closing after successful
+Stop; Mac 5/6 and Windows 6/6 runtime cases/cleanup pass, Windows boundary smoke pass.
+Mac boundary/licence and both final installer uploads skipped. Both failure artifacts,
+logs and 132-input/retained-payload hashes audited; failed App tar/executable remain
+diagnostic payloads. Earlier 37300975410 attempt 1 also stays FAILED. Required quality
+37307638008 PASS belongs to cab39e1 only. P6's proven request-lane collision fits the
+Mac evidence, but exact prior native request interleaving was not recorded; sole CI
+causality remains inferred. No failure was waived into acceptance.
+
+Initial final allowance 1/1 consumed; correction dispatches **1** before next dispatch.
+Next: publish this coherent candidate on the existing feature branch/PR, verify all
+132 app/workflow inputs equal tested 8ef89a8, run required Repository quality and one
+justified existing production correction qualification with upload_packages=true.
+Changed request ordering affects both platforms; neither prior full platform job
+passed all required gates, so no unchanged successful full matrix is duplicated.
+Record confirmed run/attempt/SHA and continuation before manual SAME-chat waiting.
+Windows transfer remains after required remote PASS. No ambiguous retry, threshold
+waiver, conflicts, rewrite, integration, Windows-PC test, closure/1H/new feature phase.
+No Goal lifecycle created; original planning worktree/branch remains intact.
 
 **Retained P4 Mac review evidence — unchanged interaction inputs only.** Exact app/build source
 `efb52edebd934277f7643a6978f59a343e6c447b` includes CONFIG-01, sidebar spacing,
