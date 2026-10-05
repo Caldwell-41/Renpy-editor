@@ -73,6 +73,28 @@ try {
   assert.equal(faithful.draftVersion, faithful.acceptedVersion);
   process.stdout.write(`source-browser-green: faithful-clean-assertion=true saves=${faithful.saves} flushes=${faithful.flushes} updates=${faithful.updates} dirty=${faithful.dirty}\n`);
   }
+  for (const mode of ["faithful", "rich"]) {
+    const page = await browser.newPage();
+    try {
+      await page.goto(`http://127.0.0.1:${address.port}/tests/source-save-browser.html?model=${mode}`);
+      const editor = page.locator(".source-editor");
+      await editor.fill('label scene:\n    "Keyboard Save"\n    return\n');
+      await editor.focus();
+      await page.evaluate(async () => {
+        const controller = window.__sourceBrowserEvidence.controller;
+        const captured = controller.captureSaveIntent("keyboard", true);
+        if (captured.kind !== "captured") throw new Error("Keyboard Save did not capture focused input");
+        await controller.executeSave(captured.intent, async () => {});
+      });
+      assert.equal(await editor.evaluate(element => document.activeElement === element), true, `${mode}: keyboard Save lost typing focus`);
+      const readText = () => editor.evaluate(element => element instanceof HTMLTextAreaElement ? element.value : element.textContent);
+      const before = await readText();
+      // Send keys to the current focus; locator.press/type would refocus and conceal the regression.
+      await page.keyboard.type("# Continue editing");
+      assert.notEqual(await readText(), before, `${mode}: typing after Save was ignored`);
+      process.stdout.write(`source-keyboard-save-focus: ${mode} PASS\n`);
+    } finally { await page.close(); }
+  }
 } finally {
   await browser?.close();
   await server.close();

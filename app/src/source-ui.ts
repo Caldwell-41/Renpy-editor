@@ -456,6 +456,7 @@ export function renderSourceWorkspace(
   const executeSave = async (intent: SourceSaveIntent, flushClean: () => Promise<void>): Promise<SourceSaveOutcome> => {
     const snapshot = snapshotForIntent(intent);
     if (!snapshot) return { kind: "stale", message: "The captured Source document is no longer current." };
+    const restoreTypingFocus = editor?.hasFocus() === true;
     const barrier = beginBarrier();
     actions.status("Retaining latest Source input…");
     try {
@@ -534,6 +535,10 @@ export function renderSourceWorkspace(
       return { kind: "blocked", message: error.message };
     } finally {
       barrier.release();
+      // A rich editor recreated during Save is still non-editable until release.
+      // Restore keyboard typing only after that barrier, without stealing another control's focus.
+      if (restoreTypingFocus && identityMatches(intent.documentGeneration, intent.path)
+        && !modalBlocked && document.activeElement === document.body) editor?.focus();
     }
   };
 

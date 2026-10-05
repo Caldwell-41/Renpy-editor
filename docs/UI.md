@@ -64,6 +64,9 @@ with cancellation and protected-boundary checks, while native OS asset-drop owne
 remains enabled. Local verification does not establish native acceptance; the user
 explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
+Source keyboard Save retains the typing caret/focus after its temporary write
+barrier is released, so typing can continue without clicking the editor again.
+
 The CONFIG-01 resolution select uses a rendered 48-pixel height and 16-pixel text,
 with a theme-aware chevron while retaining native option/keyboard semantics.
 The resolution block shows dimensions and their reduced aspect ratio with

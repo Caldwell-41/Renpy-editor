@@ -3157,3 +3157,39 @@ OPEN; do not automatically transfer them to the user. No remote dispatch/push.
 Next: user unlocks desktop and replies Ready; resume same chat, use native controls
 on retained P1 app; bounded unlocked reassessment of failed menu check if needed,
 then objective five-group review. Original-profile restoration still pending.
+
+**Unlocked menu reassessment PASS:** user replied Ready; same exact English menu
+assertions on a new disposable copy complete in 5.829 seconds, exit 0, named PASSED,
+eight assertions, original source unchanged. Retain failed locked run separately;
+this supports environment blockage rather than a fresh-game content/GUI defect.
+No native game-window visibility claim; SDK oracle now owns menu outcomes.
+Counters SDK menu/launcher starts **7**, native/boundary 60, builds 13.
+
+**SOURCE-FOCUS-P2 selected correction:** native P1 Command-S accepts exact comment
+bytes but focus becomes HTML; an immediate period is ignored. Undo/Redo before
+Save PASS; earlier-launch details correctly state earlier revision; Stop exit 0 PASS.
+Rich CodeMirror is recreated while the Save barrier keeps it non-editable, so its
+render-time focus call cannot work. Capture prior typing focus, then restore after
+barrier release only for the same document, no modal and body focus (avoid taking
+focus from another control). Existing textarea behavior and transaction contract
+remain. Native proof plus corrected browser rejection: rich keyboard Save loses
+focus; faithful textarea PASS. First test measurement mistakenly read textarea
+textContent; fixed to value, retained both logs, no false product diagnosis.
+
+After P2, frontend 85 tests/0 skipped, production web build, Source save/focus browser
+and selection browser PASS. Existing faithful accepted-text/no-Flush and selection/
+failed-commit assertions retained. Two editor modes accept direct subsequent keyboard
+typing without locator refocus. Native retest/new pinned ARM64 package required;
+no backend/SDK matrix duplication. Native Character ALEX → alex/Alex/default-colour
+creation PASS; Browse appearance uses synthetic image (under ignored assets), pending
+completion/visual review. Original private profile remains preserved and active
+clean profile unchanged. No push/remote dispatch, no extra phase.
+
+**Native appearance pending observation (P1):** after Add Appearance HAPPY and
+normal image Browse/Open of synthetic assets/review_happy.png, the modal remained
+Saving/Choose disabled for several minutes. No image/appearance declaration or
+imported file appeared. Brief local stack sample retained ignored at
+`final-1g-mac/appearance-pending-sample.txt`; app main loop/workers appeared idle,
+which does not establish a backend deadlock. Normal Cmd-Q quit succeeded. Preserve
+observation and reassess once in fresh corrected P2 session; no unbounded retries,
+no forced profile discard, no product cause claimed yet.
