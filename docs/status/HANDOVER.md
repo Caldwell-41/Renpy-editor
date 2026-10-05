@@ -1,5 +1,66 @@
 # Current outcome handover
 
+## Windows final review checkpoint — 2026-10-06
+
+**State: awaiting one physical execution-consent action; Windows review incomplete.**
+Resume this same Windows review after the user clicks **Trust for this session and
+continue** in **Allow project execution?** for the disposable **Windows Review**
+project. Computer Use plugin guidance prohibits acting on security permission requests;
+the agent inspected/foregrounded the prompt and asked for that one physical click.
+No consent, game launch or human observation inferred. Inspect the actual result on
+resume before acting. The app remains open at this prompt; do not start the probe runner
+against its single-instance owner.
+
+Existing clean clone fast-forwarded from `a2098c3` to published `e2146f6` on the selected
+feature branch. Historical detached G1-O1 worktree and unrelated refs preserved.
+PR #17 remains OPEN/draft/CONFLICTING; no conflict or integration work. Exact qualified
+candidate/source and 132 passing Windows/Mac input hashes below are verified against
+Git blobs and checkout bytes; no changed app inputs, build or CI dispatch. Four initial
+checkout-only CRLF conversions are recorded; app diff is empty.
+
+Artifact 11346956654 ZIP/NSIS hashes match; installer exit 0. Installed AMD64 executable
+is 14,145,024 bytes, SHA256
+`3c9640b0dea7d29ca02096190cf60aca6be2dae7948324b6c0324c16b1480738`.
+**WIN-PKG-01** is a classified requirement mismatch: the supplied `e4992dde…` is the
+tested `UNK` executable, while the NSIS bundler patches exactly offsets
+10,605,976–10,605,978 to `NSS`. Every other byte matches; completed production log and
+pinned Tauri source confirm this marker. User explicitly selected **Continue with
+verified NSIS payload**. Retain the initial failed assertion and both untouched binaries;
+do not manufacture hash equality. `installation.json` re-verifies all identities.
+Selected focused installed checks: existing `route-a` and `ui-refresh`, after closing
+the interactive app. Official pinned archive is retained; neither case has run yet.
+No unchanged broad matrix or new candidate qualification selected.
+
+Host: Windows 11 Pro 10.0.26200 x64, actual child WebView2 154.0.4258.53, app window
+DPI 96/100%, System/Dark palette. Native title/slug input, uncached official SDK
+download/Verify/Install/Ready, CONFIG-01 invalid/custom/portrait picker and inline Git,
+and staged fresh creation have captured partial proof. Run first correctly refused the
+absent controlled-play helper; helper added through the real transaction before the
+pending execution consent. Human keyboard/menus/acceptance are not claimed.
+
+**WIN-UI-01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13 and 14 are all Unavailable
+at this checkpoint / incomplete.** The
+[per-row Windows execution record](../tasks/active/ui-design-review.md#windows-final-review-entry--2026-10-06)
+names exact partial evidence and remaining actions. Complete every action/expected
+result in the canonical checklist, including TESTING's final routes, Save during play,
+earlier-launch status, Stop/latest rerun, diagnostics, scaling and close/reopen. Request
+physical input only at another demonstrated tooling limit; keep human observations
+separate. English support selected; no IME gate or waiver of Unicode preservation.
+Prepare the separate integration handover only after Windows and Mac pass.
+
+Ignored Windows evidence root `.toolchains/reports/final-1g-windows/` retains packages,
+both hosted evidence manifests, full production terminal logs, binaries, receipts,
+captures, disposable projects and media. Original Roaming/local profile backups verify
+all **3,226 + 282** original hashes/file sets unchanged. App remains open; Windows
+profile recovery is **pending**, originals and generated profiles both retained.
+`profile-recovery.json` contains guarded original/backup paths; actual native data uses
+the packaged host's redirected LocalCache profile (recorded locally), initially no
+recent project/managed SDK. Do not overwrite either profile or delete recovery evidence.
+No private project opened. Windows counters **0 builds / 1 native start / 0 separate
+SDK menu starts**; all Mac/remote counters, failed runs and cumulative WORKFLOW budgets
+below remain unchanged. Documentation validation/whitespace pass; publish this partial
+checkpoint without another package matrix. No phase closure or new feature.
+
 ## Final Mac acceptance / qualification transfer — 2026-10-06
 
 **State: Mac acceptance and required remote qualification PASS; ready for Windows-PC review.**
@@ -79,6 +140,8 @@ docs-only transfer without another package matrix; keep qualified identity 5b467
 
 Copy this prompt into a subsequent Windows-PC chat. It references the existing
 canonical checklist; 3982 characters.
+Its installed executable identity is corrected by WIN-PKG-01 above; same-thread
+recovery is controlled by the live Windows checkpoint, not a new integration goal.
 
 ```text
 Continue Loomlight’s final Phase 1G Windows verification.
@@ -90,7 +153,7 @@ Read AGENTS.md, docs/status/CURRENT.md, docs/status/HANDOVER.md, docs/WORKFLOW.m
 
 Production https://github.com/Caldwell-41/Renpy-editor/actions/runs/37312593480 attempt 1 and Repository quality 37312556784 attempt 1 PASS on that exact SHA. Both hosted platforms passed six packaged runtime cases and SDK/service/browser/boundary/cleanup gates. Hosted DOM input does not prove physical input or UX. Failed runs 37300975410/37307663113 remain failed; preserve evidence.
 
-Download/retain artifact phase-1-production-package-windows-2025, ID 11346956654, from that run; expires 2026-10-12T13:08:37Z. ZIP SHA256 4fdbc7bbff48921800e34d8a9e1c1f0cff2bf2946f82c0f2a4bea8f92eb31314. Install nsis/Loomlight_0.1.0_x64-setup.exe, 3,544,277 bytes, SHA256 cf2d4a004923863b57f28a481c0703076363faf380368948d3d876ef7505d408. Verify installed loomlight.exe against e4992dde5dc3a2521de8df075cdbb3843a54414b43fc348560c44f8b1eeb1afc. Evidence artifact 11347016700 contains the manifest/tested executable. Retain locally before expiry.
+Download/retain artifact phase-1-production-package-windows-2025, ID 11346956654, from that run; expires 2026-10-12T13:08:37Z. ZIP SHA256 4fdbc7bbff48921800e34d8a9e1c1f0cff2bf2946f82c0f2a4bea8f92eb31314. Install nsis/Loomlight_0.1.0_x64-setup.exe, 3,544,277 bytes, SHA256 cf2d4a004923863b57f28a481c0703076363faf380368948d3d876ef7505d408. Verify installed loomlight.exe against 3c9640b0dea7d29ca02096190cf60aca6be2dae7948324b6c0324c16b1480738. Evidence artifact 11347016700 contains the manifest/tested executable. Retain locally before expiry.
 
 Prepare disposable projects/media; protect profiles/private work. Record identities, OS/WebView2 versions, scaling and palette. Own routine automated/service checks; reuse unchanged qualified inputs without another broad matrix. Verify automation reaches native WebView2 when claiming native input. Ask for physical action only at a real tooling limit; record user observations separately. App support is English; IME is outside scope, while Unicode/source-preservation guarantees remain.
 

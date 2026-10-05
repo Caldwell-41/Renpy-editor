@@ -1,6 +1,113 @@
 # UI design review
 
-**Updated:** 2026-10-06. **State:** final Mac completion/review and exact-candidate remote qualification PASS; Windows-PC 14-row review remains deferred, integration follows separately.
+### Windows final review entry — 2026-10-06
+
+User selected the final Windows review of qualified `5b467a4`, application source
+`8ef89a8`, through all 14 canonical checklist rows. Genuine Windows x64/WebView2
+host; routine/native checks owned by the agent, physical requests only at demonstrated
+tooling limits. Integration, PR conflicts, history rewrite and phase closure excluded.
+Existing clean clone fast-forwarded from `a2098c3` to published `e2146f6`; historical
+detached G1-O1 worktree preserved. No attached managed worktree and no Loomlight
+process at entry; cross-host ownership cannot be inspected from this PC. PR #17
+OPEN/draft/CONFLICTING. Both named workflow attempts independently confirm success
+on exact `5b467a4`; no new dispatch/build. Windows package/evidence artifacts retained
+ignored under `.toolchains/reports/final-1g-windows/`, both ZIPs and installer hashes
+match. Input comparison verifies 132 repository blobs on source/candidate/carrier;
+four checkout-only CRLF conversions are recorded in `input-verification.json`.
+Review remains **in_progress**, no checklist row passed by this preparation.
+Existing Mac/remote counters and failed evidence remain unchanged.
+
+**WIN-PKG-01 — classified requirement mismatch, resolved by user decision.** NSIS
+installation exit 0; actual installed PE AMD64 has 14,145,024 bytes, SHA256
+`3c9640b0dea7d29ca02096190cf60aca6be2dae7948324b6c0324c16b1480738`.
+It differs from the retained tested executable `e4992dde…` at exactly offsets
+10,605,976–10,605,978: `UNK` → `NSS` within
+`__TAURI_BUNDLE_TYPE_VAR_…`. Every other byte is identical. P6 Windows terminal log
+13:04:29Z records the NSIS patch; pinned Tauri-utils 2.9.3 platform.rs defines it.
+The user explicitly selected “Continue with verified NSIS payload”; no binary was
+modified to manufacture equality. Preserve `executable-difference.json`, both
+original binaries and the exact failed initial installation check. The supplied hash
+belongs to the unbundled tested executable, not the installed NSIS payload.
+No changed application input or new candidate; targeted installed-payload verification
+is selected instead of repeating the hosted matrix.
+
+Both hosted manifests match all 132 input paths/hashes and all source/candidate/carrier
+Git blobs. Checkout bytes now match too; Git diff confirms no app change. Windows 11
+Pro 10.0.26200 x64, actual WebView2 154.0.4258.53, selected window DPI 96 (100%),
+default System palette rendered Dark. `host.json` records process ownership.
+Computer Use delivered native English title input into packaged WebView2; captures
+01–03 prove visible input and slug update, not human typing. Captures 16–20 prove
+no managed SDK, real official uncached download (text 120.6 MB/82%; screenshot
+124.3 MB/84% of 146.5 MB), verified download/Install and SDK Ready. Captures 21–31
+prove 48px resolution control/options, invalid-empty truthful preview, portrait
+640×1080 16:27, 640×480 4:3 and inline default Git checkbox. Captures 32–33 prove
+real staged project generation and workspace entry. Source/media fixtures retained
+ignored; no private project used.
+
+Fresh-game Run first refused the absent explicit runtime helper without execution;
+agent added the reviewed helper through the production transaction action. Run now
+awaits session execution consent (capture 41). Computer Use guidance prohibits acting
+on security permission prompts; the user has been asked for that single physical click.
+No consent, game launch or human pass is inferred. Windows native app starts +1,
+builds +0, dispatches +0; keep incoming 18/71/7 and remote P5/P6 totals separate.
+
+**Checkpoint: awaiting one physical execution-consent action; review incomplete.**
+Capture `42-resume-observation` and `43-consent-foreground` confirm the same pending
+prompt after the NSIS decision. The required user action is to click **Trust for this
+session and continue** for the disposable **Windows Review** project, then resume this
+same review. No timeout or package exception is treated as execution consent.
+Computer Use plugin guidance is not a repository acceptance
+waiver: the locally installed plugin says “Do not act on security or privacy permission
+requests.” That denies the agent's UI click and requires the physical handoff.
+The exact local skill/guidance location was supplied in chat; this repository record
+omits the host's absolute user path. No automated app input proceeds past the prompt.
+
+The current checkpoint statuses below mean **Unavailable at this checkpoint**, not a
+product failure or completed attempt at every action. All remaining actions in the
+canonical 14-row checklist remain mandatory. No whole row is Pass yet.
+
+| Row | Checkpoint result | Exact evidence / remaining actions |
+| --- | --- | --- |
+| WIN-UI-01 | Unavailable; not run | Rich disposable Beat/media fixture prepared; native reorder, history/reopen and Explorer coexistence pending. |
+| WIN-UI-02 | Unavailable; not run | Long-list/protected source fixture prepared; cancellation, focus switch, edges and pending-input gestures pending. |
+| WIN-UI-03 | Unavailable; not run | `media-manifest.json` records valid PNG/JPEG/WebP/audio and unsupported/oversized media; staging/drop/import actions pending. |
+| WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug delivery; Character/Asset/Variable/content/shortcut actions pending. No physical-human keyboard claim. |
+| WIN-UI-05 | Unavailable; not run | Three-type Variable fixture prepared; exact discard/reopen/type/edit/save actions pending. |
+| WIN-UI-06 | Unavailable; not run | Two Character entries/appearance UUIDs prepared; native selection/default/replacement/error/retry actions pending. |
+| WIN-UI-07 | Unavailable; not run | Alias/collision fixture prepared; full rename sequence, reference preservation and external-edit refusal pending. |
+| WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
+| WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
+| WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
+| WIN-UI-11 | Unavailable; partial evidence | `35` refusal, `37` helper confirmation, `38` saved helper, `41`–`43` pending consent; Source tabs, graph details and real runtime diagnostics pending. |
+| WIN-UI-12 | Unavailable; partial evidence | `15`–`20` real uncached SDK download/verified installation; `21`–`31` CONFIG-01 resolution/inline Git; `32`–`33` staged creation; fresh-game menus blocked at execution consent. Welcome visual/hover completion pending. |
+| WIN-UI-13 | Unavailable; not run | `interaction-fixture.json` prepares reciprocal/duplicate/long/self/missing links; native routing, Fit/navigation/palettes/scaling pending. |
+| WIN-UI-14 | Unavailable; not run | Synthetic catalogue/media fixtures prepared; native previews, columns, external-change retry, cleanup and higher-DPI actions pending. |
+
+All captures/JSON/fixtures are local ignored evidence under the established
+`.toolchains/reports/final-1g-windows/`. `installation.json` independently re-verifies
+archive, installer, tested and installed binaries and the exact three-byte exception;
+the initial failed assertion remains intact. `profile-backup-verification.json` proves
+all **3,226 Roaming + 282 local** original file hashes and file sets unchanged in the
+guarded backups. Backups remain in place while this app session is open; **Windows
+profile restoration is pending**, not claimed complete. Native app data is redirected
+to the packaged host's LocalCache profile; first Welcome/SDK captures show no recent
+project/managed SDK, and newly created metadata corresponds only to disposable review.
+The actual SDK consent path and process ownership are retained locally. No private
+project was opened. Preserve both original and generated profiles during recovery.
+
+After the physical click, inspect the actual result before another action. Complete
+fresh menus, TESTING's Save-during-play/earlier-launch/Stop/latest-rerun/diagnostic/
+close-reopen checks and every checklist action. The selected focused installed-payload
+checks are existing `route-a` and `ui-refresh` probes, only after the interactive app is
+closed (single-instance ownership); pinned official SDK archive is retained. They are
+not another broad matrix, native keyboard or physical acceptance. Neither has run yet.
+No new application input, correction attempt, build, SDK menu start or CI dispatch.
+Windows counters: **0 builds / 1 native start / 0 separate SDK menu starts**.
+Existing Mac/remote counters, failed runs and WORKFLOW budgets remain unchanged.
+Repository validation and whitespace check pass for this documentation checkpoint.
+Publish this partial evidence; do not hand over for integration until Windows rows pass.
+
+**Updated:** 2026-10-06. **State:** final Mac completion/review and exact-candidate remote qualification PASS; Windows-PC review started and awaits one physical execution-consent click; all 14 rows remain incomplete, integration follows separately.
 **Branch:** feature/phase-1g-branches-runtime.
 
 ## Authority and boundary

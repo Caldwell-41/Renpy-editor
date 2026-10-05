@@ -7,6 +7,49 @@
 
 ## Live continuation
 
+**Windows review: awaiting one physical execution-consent click; incomplete.**
+The existing Windows clone was clean, switched to the selected feature branch and
+fast-forwarded to published `e2146f6`; historical worktree and unrelated refs preserved.
+Both qualified manifests and all 132 candidate/source/carrier/checkout inputs match.
+Package artifact 11346956654, evidence 11347016700, Mac evidence 11346724976 and
+terminal run logs are retained locally before expiry. NSIS ZIP and installer hashes
+match the transfer below. Installed AMD64 executable is **14,145,024 bytes**, SHA256
+`3c9640b0dea7d29ca02096190cf60aca6be2dae7948324b6c0324c16b1480738`.
+**WIN-PKG-01**: supplied `e4992dde…` is the tested unbundled executable; NSIS changes
+exactly three bytes `UNK` → `NSS` in Tauri's documented bundle marker. All other bytes
+match. User explicitly selected **Continue with verified NSIS payload**. No application
+change or new candidate; failed initial identity assertion and both binaries retained.
+
+Windows 11 Pro 10.0.26200 x64, WebView2 154.0.4258.53 owned by the verified installed
+process, measured window DPI 96/100%, System palette renders Dark. Agent native title
+input, genuine uncached official SDK progress/verification/installation, CONFIG-01
+custom/invalid/portrait resolution, inline Git and staged fresh creation have partial
+evidence. Fresh Run correctly refused an absent explicit runtime helper; the helper was
+added through the production transaction. The app now displays **Allow project
+execution?** for the disposable **Windows Review** project. Computer Use prohibits
+acting on security permission requests; the user must click **Trust for this session
+and continue**, then resume the same review. No consent or game launch inferred.
+
+**WIN-UI-01 through WIN-UI-14: Unavailable at this checkpoint / incomplete**, with
+per-row partial proof and every remaining action in the
+[Windows execution record](../tasks/active/ui-design-review.md#windows-final-review-entry--2026-10-06).
+This is a pending tooling handoff, not a failure waiver or final Windows acceptance.
+Focused installed `route-a`/`ui-refresh` probes are selected but have not run; close
+the interactive owner first. Finish every native/physical/visual action and TESTING's
+final routes, Save during play, latest rerun, diagnostics, scaling and session reopen.
+No broad unchanged matrix or CI dispatch selected. Integration handover remains later.
+
+Ignored evidence: `.toolchains/reports/final-1g-windows/`. Original profile backups
+verify **3,508/3,508** exact file hashes/file sets; no private project opened. Windows
+app remains open at consent, generated review profiles and originals retained;
+**Windows profile restoration is pending**. Recovery receipt identifies both backups
+and the actual packaged-host redirected LocalCache profile. Preserve all on resume.
+Windows counters **0 builds / 1 native start / 0 separate SDK menu starts**; existing
+Mac/remote counters and failed evidence below remain unchanged. Documentation validator
+and whitespace check pass. No PR #17 conflict resolution, merge or phase closure.
+
+### Retained Mac acceptance and remote qualification
+
 **State: Mac acceptance and required remote qualification PASS; ready for Windows-PC review.**
 Exact qualified candidate `5b467a402b14c7b371838645a9daa555ba315349` on existing
 `feature/phase-1g-branches-runtime`; all **132** app/workflow input hashes match local
