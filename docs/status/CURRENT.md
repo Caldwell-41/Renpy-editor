@@ -7,6 +7,35 @@
 
 ## Live continuation
 
+**Bounded Mac follow-up — awaiting one physical held-grip check, 2026-10-06.**
+No application changes. All **132** app/workflow inputs match frozen `ee5f55e`;
+**10 changed / 122 unchanged** versus qualified `5b467a4`. One native ARM64
+production candidate retained; sealed EXE SHA256
+`98841d7d2db6440ae2e0664b272bb1a3afd72e04a591ec80f9956dbe4ad39524`.
+Default DMG-step/resource-signature failures preserved; same compiled bundle ad-hoc
+sealed/repacked, strict identity/mounted equality Pass. No notarization claim.
+
+Agent checks Pass: renderer **46/46**, selected-media service **2/2**, desktop **1/1**,
+three packaged probes with cleanup true; native Source Run/draft inventory, import
+and replacement refusal/reselection/partial no-replay, shared previews and import
+preview presentation. Temporary external bytes restored. Only held lower/upper-edge,
+toolbar/outside bounds and Escape needs human input: documented driver cannot hold
+the mouse button. Regression coverage Pass; physical observation remains Unavailable.
+
+Candidate PID **44272** is Saved on disposable Story → Scene 1, **63 Beats**, details
+closed. **293-file cancellation-only** baseline retained; Escape before release.
+Protected original profile **3,227 hashes unchanged**, disposable profile active;
+restore after session/app absence. Cumulative Mac **19 builds / 77 starts / 7 SDK
+menus**, three native game launches separate; Windows counters unchanged.
+**Zero new remote dispatches.** After physical Pass/hash audit/profile restoration,
+publish Mac acceptance and run one justified changed-input required Windows/macOS
+qualification; manual same-chat waiting, no duplicate matrix or automation. Separate
+integration remains pending; PR #17 conflicts/merge/1G/1H closure untouched.
+Exact identities, failures and continuation: [Mac ledger](../tasks/active/ui-design-review.md#bounded-mac-frozen-candidate-follow-up--2026-10-06)
+and [handover](HANDOVER.md#bounded-mac-follow-up-checkpoint--2026-10-06).
+
+### Earlier Windows frozen handover (completed)
+
 **Windows review frozen / Mac follow-up ready — 2026-10-06.** User's final Welcome
 hover/readability and session feedback: **“all working, happy.”** All 14 WIN-UI rows
 Pass in the selected native/physical/rendered scopes; higher DPI remains Unavailable/

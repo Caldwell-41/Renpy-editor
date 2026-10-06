@@ -1,5 +1,77 @@
 # Current outcome handover
 
+## Bounded Mac follow-up checkpoint — 2026-10-06
+
+**State: awaiting one focused human held-pointer check.** The user selected the
+six-item frozen-candidate follow-up, agent-owned routine checks, a focused human
+session only for genuine tooling gaps, and no application change unless necessary.
+The clean Mac clone FF-only updated to published Windows handover `9f49979`;
+main `4d7ba03` and planning worktree `2c5a164` remain untouched. No application edits.
+All **132** checkout/raw-probe/sealed-package inputs match frozen
+`ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1`: **10 changed / 122 unchanged** against
+qualified `5b467a4`. The retained official 8.5.3 archive matches its published and
+repository SHA256; no download. Native host is macOS **26.6.2 / ARM64**.
+
+One production compilation succeeds. The default DMG step fails; its log and initial
+unsealed signature failure remain retained. The same compiled app is locally ad-hoc
+sealed and repacked without a source change. Strict signature, ARM64, bundle identity,
+read-only mounted-executable equality and privacy scan Pass; no notarization claim.
+Retained `.toolchains/review-builds/bounded-mac-ee5f55e/` contains app, tar and
+`Loomlight_0.1.0_ee5f55e_aarch64.dmg` (**5,753,547 bytes**, SHA256
+`94290d429214ebfda50356d2ad409a3fec963948224b6afb5843084c2a561d70`). Sealed executable
+**13,833,072 bytes**, SHA256
+`98841d7d2db6440ae2e0664b272bb1a3afd72e04a591ec80f9956dbe4ad39524`.
+The raw packaged probes use executable
+`0c6dad8bb8536883944d072b3ffc9671df3c34bc68c33248fefff6c0ff45c70a`;
+both exact manifests are retained and match all frozen inputs.
+
+Focused renderer **46/46, zero skips**, selected-media real-service **2/2**,
+desktop **1/1**, TypeScript/format/validator/whitespace and rejecting-gate/selector
+audits Pass. Packaged `route-b` **37.813s**, `runtime-error` **25.434s**,
+`ui-refresh` **4.391s** Pass, exit 0/no timeout/cleanup true. Their synthetic DOM
+evidence is distinct from subsequent actual native keyboard/picker/clipboard actions.
+Native Source draft/Run/save/Stop/latest-saved rerun/close-reopen, shared Story previews
+and PNG/JPEG/WebP preview presentation Pass in the scoped
+[Mac ledger](../tasks/active/ui-design-review.md#bounded-mac-frozen-candidate-follow-up--2026-10-06).
+
+**Import/replacement Pass:** after the human unlock, native changed PNG refusal
+retains both entered names and all **273 project hashes**, adding no recovery staging.
+Reselected PNG succeeds once while externally changed JPEG refuses; explicit remainder
+retry changes zero project hashes and cannot replay the completed PNG. Reselected JPEG
+succeeds once. Replacement refusal retains `calm`/selected filename and all **285 hashes**;
+reselection saves once with the same appearance identity. All temporary external bytes
+restored; native Saved, no prepared-recovery blockage. `native-import-result.json` retained.
+
+**Pending native state:** exact retained candidate PID **44272**, Story → Scene 1,
+**63 Beats**, details closed, Saved. Held-pointer scrolling is Unavailable to the
+documented driver (drag has no held-button API). Only a short human lower/upper-edge,
+toolbar/outside and Escape session remains. Fresh **293-file cancellation-only**
+baseline is `held-cancellation-before.json`; press Escape before release, avoiding
+deliberate drops. Any deliberate move needs a separate comparison.
+Do not repeat completed runtime, keyboard/layout, Finder or SDK-download evidence.
+
+Original profile **3,227 files** is hash-verified and preserved under ignored
+`.toolchains/bounded-mac-c6-review/preserved-original-profile`; disposable profile
+is active. Restore only after app/game absence through that directory's guarded
+`profile-session.py restore`; retain the review profile and verify original hashes.
+This restoration is **pending**, not claimed complete. Do not launch an older copy
+against either profile during the session. Fixture-only folder-name/source-map setup
+refusals and the mapped-definition Save refusal are retained; an unmapped non-scene
+comment Save succeeds. No product correction or Windows retest is selected.
+
+Cumulative Mac **19 production compilations / 77 top-level native starts / 7 separate
+SDK starts** (this follow-up adds one compilation, six starts including one older-copy
+inspection and one sandbox-limited candidate start; one default packaging-step failure;
+three deliberate native game starts recorded separately). Windows counters unchanged.
+Initial remote allowance **1/1 used; two correction dispatches**, unchanged; **zero new
+dispatches**. After all six Mac checks pass, publish the coherent acceptance checkpoint
+and dispatch the single justified changed-input required quality/production workflows,
+with packages, exact run/attempt/SHA and manual same-chat waiting. No duplicate matrix,
+automation, PR #17 conflict resolution, rewrite/merge or 1G/1H closure. Resume this chat
+with the held-edge/toolbar/outside/Escape observations. Audit cancellation hashes,
+then close the candidate and restore the protected original profile. Evidence and recovery are
+ignored under `.toolchains/reports/bounded-mac-windows-c6/` and the review directory.
+
 ## Frozen Windows review transfer — 2026-10-06
 
 **State: review_ready for the bounded Mac follow-up; combined acceptance incomplete.**

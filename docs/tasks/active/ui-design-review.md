@@ -1,5 +1,102 @@
 # UI design review
 
+### Bounded Mac frozen-candidate follow-up — 2026-10-06
+
+**Live state: awaiting one focused human held-pointer check.** User selected
+the six corrected behaviors together, one coherent native candidate, agent-owned
+routine checking and a focused human session only for actual tool limits. Application
+changes require a demonstrated necessary correction; none made. Clean checkout
+FF-only advanced from `e2146f6` to Windows handover `9f49979`, preserving planning
+worktree `2c5a164`, remote/main `4d7ba03` and PR #17's draft/open/conflicting state.
+
+**Identity Pass:** all 132 input paths/hashes equal frozen code
+`ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1` and both local raw/sealed manifests.
+Exactly 10 changed / 122 unchanged against `5b467a4` and the retained earlier Mac
+manifest. Published Windows EXE identity remains
+`4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`;
+Mac binaries differ. Retained verified official SDK archive SHA256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`
+matches repository and saved published checksum. Native host macOS 26.6.2/ARM64;
+Node 24.19.0, npm 11.9.0, Rust/Cargo 1.90.0. No SDK download.
+
+**Package:** one production compilation Pass (Cargo 23.73s). Default DMG step Fail;
+`production-build.log` retained. Raw bundle strict resource signature Fail; same
+compiled app locally ad-hoc sealed/repacked, strict signature/ARM64/identity/read-only
+mounted equality/privacy Pass. No source changes, Developer ID or notarization claim.
+Retained `.toolchains/review-builds/bounded-mac-ee5f55e/Loomlight.app` and `.app.tar`;
+tar SHA256 `5fca6da5e9edc2c251b5159026b9d1e48e93f15697c56870ff100fc6d8945e4d`.
+DMG 5,753,547 bytes, SHA256
+`94290d429214ebfda50356d2ad409a3fec963948224b6afb5843084c2a561d70`.
+Sealed executable 13,833,072 bytes, SHA256
+`98841d7d2db6440ae2e0664b272bb1a3afd72e04a591ec80f9956dbe4ad39524`.
+Raw packaged-probe executable SHA256
+`0c6dad8bb8536883944d072b3ffc9671df3c34bc68c33248fefff6c0ff45c70a`;
+`runtime-inputs.json` and `sealed-runtime-inputs.json` distinguish exact tested identities.
+Evidence directory: ignored `.toolchains/reports/bounded-mac-windows-c6/`.
+
+| Focused case | Result and exact scope/evidence |
+| --- | --- |
+| Source Run / launch lease | **Pass** native Source: acknowledged draft survives unavailable-SDK refusal and Cancel; subsequent Run reaches saved-revision consent and Running. Real unmapped `transforms.rpy` comment Save during play becomes Clean/Saved, Launch details reports earlier revision `8170fb7bd8b5…`; Stop exit 0, one latest-saved rerun Running at `533b3d0d0b165e221954b1993ea7830a378e72c7d9892593a9a8679b309c8913`, no earlier-launch notice; Stop exit 0 and saved close/reopen Pass. `native-source-run-result.json` in ignored review directory. Packaged route-b additionally proves mapped-draft Save All refusal/Cancel/retention, save during play and new-session reopen; runtime-error navigates its actual failing Source location. |
+| Source draft inventory | **Pass** native English keyboard and Unicode clipboard in non-scene `variables.rpy`: 1 draft / **165 UTF-8 bytes** (145 original + 20 comment), focus remains in editor, all **269 project hashes unchanged** while acknowledged and after Undo Clean/Saved. `draft-retention-result.json`, initialized baseline. Keyboard tool drops non-ASCII; Unicode is proven via paste, not IME or human typing. |
+| Import/replacement refusal and reselection | **Pass native/service/renderer.** Native changed PNG refusal retains both entered names and all **273 project hashes**, no prepared recovery. Reselected PNG succeeds once while changed JPEG refuses; explicit remainder retry adds zero writes and cannot replay PNG. Reselected JPEG succeeds once. Replacement refusal preserves all **285 hashes**, expression and filename; reselection saves once with appearance ID `d19a8898-383d-4451-b0ce-798a70cbb016` retained. Temporary external PNG/JPEG bytes restored; Saved, no recovery blockage. `native-import-result.json`. Both real-service cases Pass (2/2, 230 filtered, no ignores); partial-success renderer regression Pass. |
+| Shared Story previews | **Pass** native canvas/details display the same decoded blue background simultaneously; Source → Story recreation with inspector still open shows both image views, no blank/broken live view. Native screenshots are retained in this chat; DOM concurrent-URL/disposal rejecting regression also Pass. No physical-human visual claim. |
+| Held Beat edge scrolling | **Pass regression / Unavailable native held input.** Focused DOM test proves stationary down/up frames, clipped toolbar/outside bounds, Escape/marker cleanup and zero cancellation writes. Fresh native fixture has 63 Beats; documented CUA exposes drag, not hold/down/up. Human held-pointer session remains, with a new cancellation-only baseline; deliberate moves must have a separate hash comparison. |
+| Import preview error presentation | **Pass selected native/controller scope.** Native PNG/JPEG both decode at **1280×720**; WebP explanation/Retry with no image node/broken box, Retry retains that presentation. Remove, Cancel → Keep editing, Cancel → Discard, Saved Assets and empty reopen Pass. All **273 project hashes and original media unchanged**; `native-preview-result.json`. Loading and decoder-error/retry/release are covered by passing controller tests, not an additional forced native decoder case. No WebP decoder expansion. |
+
+Focused renderer **46 passed / 0 failed / 0 skipped**, TypeScript, formatting,
+repository validation (**340 files**), whitespace and Q1 rejecting fixtures/selectors
+Pass. Desktop **1/1**, no skips. Focused browser WIN-RUN-01 ordered observation plus
+shipped route-b/runtime-error drivers Pass. First browser invocation **Fail EPERM**
+opening loopback; elevated host-access invocation Pass, both logs retained.
+Packaged `route-b` **37.813s**, `runtime-error` **25.434s**, `ui-refresh` **4.391s**:
+all Pass, exactly one report each, exit 0, no timeout, cleanup true. Synthetic DOM
+probe actions remain distinct from native keyboard, clipboard, picker and pixels.
+
+**Discriminating failures retained; no application correction:** sandbox-launched
+candidate cannot access profile/picker and UI Quit does not terminate it; verified
+exact process path, SIGTERM and absence before host-access launch. Copied fixture
+folder name mismatches metadata; correcting only fixture metadata then exposes its
+stale long-list map. Existing schema migration initializes that disposable fixture.
+No private project opened. Native `typeText` loses non-ASCII; Undo then clipboard
+paste passes. Initial picker clipboard timeout, ineffective folder Select All and
+diff-prefix index helper refusal are tooling limitations; exact file selection and
+fresh full AX indices succeed. Mapped `variables.rpy` comment Save remains refused
+during play/after Stop; reopening exposes `MAPPED_DEFINITION`. Draft is retained until
+explicit discard; accepted variables bytes preserved. The same Unicode comment in
+unmapped `transforms.rpy` saves during play. Classification: unsuitable mapped-file
+acceptance fixture/expected refusal, no changed hypothesis correction or waived gate.
+`save-discrepancy-classification.json` preserves this result separately.
+
+**Native wait/recovery:** PID **44272**, exact retained candidate, Story → Scene 1,
+63 Beats, details closed, Saved. Fresh **293-file cancellation-only** baseline in
+`held-cancellation-before.json`; only human held lower/upper-edge, toolbar/outside
+bounds and Escape observations pending. Press Escape before release; deliberate drops
+need a separate comparison. Earlier Mac-lock failure retained; user unlock succeeds,
+agent completes native import/replacement. Immediate picker Open snapshot was briefly
+unavailable; fresh observed enabled Open succeeds, no new candidate start.
+Original **3,227-file** app profile hash-identical/preserved under ignored
+`.toolchains/bounded-mac-c6-review/preserved-original-profile`; disposable profile
+active. Restore after app/game absence using guarded `profile-session.py restore`,
+retain review profile, compare original hashes. Restoration remains **pending**.
+All fixture/media/profile manifests and failures retained; no deletion or overwrite.
+
+Cumulative Mac **19 production compilations / 77 top-level starts / 7 separate SDK
+menu starts**. This adds **one compiled candidate, six starts** (older installed-copy
+inspection, three self-isolating probes, one sandbox-limited start, one host-access
+native start), **one default DMG step failure**, and **three native game launches**
+recorded separately. Windows **6 production + 1 unqualified / 4 failed build/setup /
+21 top-level starts / 0 SDK menus** unchanged. Remote initial **1/1 used**, existing
+correction dispatches **2**, this outcome **0**; all prior failed remote runs preserved.
+
+**Next:** only a short human held-edge session for the missing button-hold API,
+then audit the cancellation-only hashes. No repeated completed native checks.
+Restore original profile, publish exact complete Mac evidence. Only after all six pass,
+execute one justified changed-input quality/production qualification with retained
+Windows/Mac packages, actual required SDK/service/browser/boundary/cleanup gates and
+six runtime cases, exact run/attempt/SHA/manifests; publish wait and stop model polling.
+No unchanged full 14-row/keyboard/layout/download repetition, new application work,
+PR #17 conflicts/rewrite/merge, 1G/1H closure or next phase. Same-chat continuation.
+
 ### Frozen Windows review completion — 2026-10-06
 
 **Live state: review_ready for bounded Mac follow-up; combined acceptance incomplete.**
