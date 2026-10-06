@@ -2,6 +2,21 @@
 
 ## Live Windows correction and native handoff — 2026-10-06
 
+**Paused by explicit user request for PC use.** No further native input proceeds
+until the user resumes. Candidate 2 is on supported rename review → Story → Scene 1
+→ Choice → Create New Scene, empty Choice text, New Scene/Chapter 1, Saved (`573`).
+No write or external-byte restoration is pending; original profiles still await
+restoration with the app closed. No CI pending. WIN-UI-08 partial captures `505`–`573`
+and `native-compact-choice-partial.json` / `native-compact-choice-light-partial.json`
+prove Dark laptop/minimum geometry, one saved route, Light minimum stacking,
+native English typing/Tab/Enter Cancel, all 233 files unchanged, empty reopen.
+Laptop Light and higher OS scaling remain pending. Windows Settings launch returned
+“launched app did not expose a targetable window”; no retry/scaling change.
+The resize API rejects endpoints outside the window; native keyboard Size works.
+On resume inspect current windows before input, continue sizing/scaling and remaining
+rows. No new build/start/SDK-menu/CI dispatch or source change; existing counters,
+failed ui-refresh evidence and Mac/remote qualification requirements remain intact.
+
 **Latest native checkpoint:** WIN-UI-05/06/07 **Pass on Windows**, candidate 2
 `686e56fb…`. Variable/Character evidence `298`–`378` remains intact. Supported
 appearance fixture, fresh project UUID `79d891ca-32b0-4738-a730-6e0315349dd6`,
@@ -18,7 +33,7 @@ false. WebP imports but has the documented bounded unavailable preview. An alrea
 imported JPEG replacement refuses without any write. Native capture works; the
 foreground wait below is historical. Main-window mouse targeting of the native
 WebView2 dropdown was rejected; keyboard selection succeeds, no product failure.
-Current app: supported rename fixture → Characters, Saved, no dialog/write pending.
+Earlier app checkpoint: supported rename fixture → Characters, Saved (`504`).
 Continue WIN-UI-08 compact Choice/layout, then remaining canonical actions. Eleven
 rows, Mac/remote correction qualification, failed ui-refresh diagnosis and original
 profile restoration remain open. Same candidate, 2 successful builds/1 setup

@@ -7,6 +7,18 @@
 
 ## Live continuation
 
+**Paused at the user's request for PC use — 2026-10-06.** Native input stopped.
+Candidate 2 remains on supported rename review → Story → Scene 1 → Choice →
+Create New Scene, empty Choice text, default New Scene/Chapter 1, Saved (`573`).
+No write, external-byte restoration or CI operation is pending. Original profile
+restoration remains pending; do not alter profiles while the app is open.
+WIN-UI-08 is partial: Dark laptop/minimum and Light minimum forms fit/stack;
+Dark creation saves one route. Light native English/Tab/Enter cancellation changes
+none of 233 files and reopening clears discarded names (`550`–`573`). Laptop Light
+and higher OS scaling remain unverified. Native Windows Settings launch exposes no
+targetable window; no retry or scaling change occurred. Resume only on user request,
+reselect/capture actual app state, then continue remaining canonical actions.
+
 **Latest native checkpoint:** WIN-UI-05/06/07 **Pass on Windows** on candidate 2
 (`686e56fb…`). Variable and Character evidence remains `298`–`378`. Appearance
 rename cycles with/without WebP replacement, supported Show/Change references and
@@ -17,7 +29,7 @@ restored. `native-appearance-rename-completion.json` retains rejecting assertion
 WebP's bounded unavailable presentation is documented, not a failed import.
 Native capture is working; a WebView2-owned dropdown rejects a main-window mouse
 target but native keyboard selection succeeds. No user foreground action is pending.
-Current app: supported rename fixture → Characters, Saved, dialog closed (`504`).
+Earlier app checkpoint: supported rename fixture → Characters, Saved (`504`).
 Continue WIN-UI-08 compact Choice/layout and remaining canonical actions. Eleven
 rows, two failed ui-refresh probes, affected Mac/remote qualification and profile
 restoration remain open. No new source change/build/start/SDK menu/CI dispatch.

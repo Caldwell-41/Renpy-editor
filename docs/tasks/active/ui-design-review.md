@@ -2,6 +2,22 @@
 
 ### Windows evidence and first Source correction — 2026-10-06
 
+**User-requested pause for PC use:** native input stopped at capture `573`.
+Candidate 2 remains Saved on supported rename review → Story → Scene 1 → Choice
+→ Create New Scene, empty Choice text / New Scene / Chapter 1. No write, external
+media/alias restoration or CI operation is pending; original profile restoration
+remains pending. Resume only when requested and inspect actual windows first.
+WIN-UI-08 partial evidence `505`–`573`: Dark laptop/minimum fields and action row
+fit; native minimum-size creation establishes one saved route. Light minimum
+562×512 outer pixels at 96 DPI stacks fields with aligned action buttons. English
+typing, Tab focus and Enter Cancel leave all 233 files unchanged; reopen clears
+discarded names. Receipts `native-compact-choice-partial.json` and
+`native-compact-choice-light-partial.json` retain full snapshots. Light laptop and
+higher OS scaling remain pending. The native resize tool rejects endpoints beyond
+current window bounds; keyboard Size works. Windows Settings launch returned
+“launched app did not expose a targetable window”; no retry or scaling change.
+No source change/build/top-level Loomlight start/SDK menu/CI dispatch added.
+
 **Live state: in_progress; WIN-UI-05/06/07 pass native Windows review;
 the other 11 rows remain incomplete.** Execution consent is
 resolved by explicit user permission, with agent native clicks recorded separately
@@ -32,7 +48,7 @@ process start, SDK menu or CI dispatch; Mac/remote qualification remains open.
 
 **Latest continuation:** appearance completion is recorded in the checkpoint table
 and appearance paragraph below. Current candidate 2 is on supported rename review
-→ Characters, Saved, no dialog/write or external-byte restoration pending (`504`).
+→ Characters, Saved at the earlier checkpoint (`504`). Latest paused state is above.
 Continue compact Choice/layout and remaining Windows actions; no CI pending.
 
 **Earlier continuation:** native control restarted after the user's Resume. Captures
@@ -397,8 +413,8 @@ the changed candidate still requires affected Mac and remote qualification.
 | WIN-UI-05 | Pass, native Windows | `108`–`123` int/42 and string discard; `336`–`374` bool/True discard, type int→bool, Boolean True creation, existing-default Escape/Keep editing/Discard, Save and project reopen. Discard snapshots prove all 118/124 files unchanged; reopened form and authoritative source agree on both persisted True values. |
 | WIN-UI-06 | Pass, native Windows | `298`–`334`, `375`–`378`: replacement refresh, non-default selection, unchanged Character save, distinct default, Grid/List and leave/return, zero-appearance Character, missing image bounded error, exact-byte restore and independent large/thumbnail Retry. Selected happy UUID remains aligned while default is calm; project reopen retains both. No write replay issued by Retry. |
 | WIN-UI-07 | Pass, native Windows | Genuine collision `379`–`385` refuses with all 130 files unchanged; protected first fixture/refusal `394`–`398` preserved. Supported copy retains custom Unicode Python outside mapped scenes. Both complete rename cycles with/without WebP replacement pass `405`–`457`; duplicate JPEG replacement refuses unchanged. Show/Change references update and restore across another rename-back, stable IDs/defaults/old images/custom source; project reopen shows happy `458`–`494`. Edited retained alias refuses with all 215 files unchanged `496`–`502`; exact bytes restored and draft discarded `503`–`504`. `native-appearance-rename-completion.json`, two cycle receipts, reference-cycle and edited-alias receipts retain assertions. WebP presentation is explicitly deferred with bounded unavailable preview. |
-| WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
-| WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
+| WIN-UI-08 | Unavailable; partial evidence | `505`–`538` Dark laptop/minimum fit/stack, native names/Chapter, Cancel/reopen and one saved route. `550`–`573` Light minimum fit/stack, native English/Tab/Enter Cancel, all 233 files unchanged and empty reopen. Both local compact-choice receipts retain snapshots. Light laptop and measured higher OS DPI pending. |
+| WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; `518`–`519`, `554`–`562` navigation/tree toggles preserve editor and independent visibility. Full six-surface/sidebar/keyboard/focus/divider/breakpoint/higher-DPI actions pending. |
 | WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
 | WIN-UI-11 | Fail; incomplete | WIN-RUN-01 failed original `75`–`79` preserved; corrected native Source Run/Save during play/earlier launch/Stop/latest Source rerun/normal exit0 PASS specifics `148`–`174`. Renderer and configured packaged route-a also pass; Mac/remote correction qualification pending. Both ui-refresh FAIL retained; initial-story-ready failure unclassified. Overflow tabs, graph details and SDK diagnostic actions pending. |
 | WIN-UI-12 | Unavailable; partial evidence | `15`–`20` uncached official SDK download/verified install; CONFIG-01 `21`–`31`; stages `32`–`33`; native fresh menus/Start `51`–`56` PASS specifics; Welcome dark/recent restore `95`. Hover/light/earlier-project distinction/scaling completion pending. |
