@@ -2,9 +2,9 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `awaiting_dispatch_resolution`; user approved one corrective matrix;
-its single dispatch returned HTTP 500 and no new run was found. Acceptance is ambiguous;
-no duplicate request or corrected-target pass. Goal lifecycle Resume not claimed.
+**Execution state:** `awaiting_ci`; user-authorised dispatch retry accepted as
+37522794804/1 at exact `9df1d25`. Corrective allowance consumed; no further retry.
+No corrected-target pass or Goal lifecycle Resume claimed.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -633,3 +633,54 @@ The Agent Guide's explicit “no automatic retry after ambiguous dispatch” rul
 applicable. An explicit instruction to retry the dispatch once is needed before
 resending, with a fresh no-duplicate check; this is retry permission for the already
 approved matrix, not another matrix allowance or a repeat of the approval request.
+
+
+### Confirmed corrective matrix and manual wait
+
+The user explicitly instructed **Retry the dispatch once**. A fresh all-branch
+workflow history check at **2026-10-06 19:57:23 UTC** still found no delayed acceptance
+of the first HTTP 500 request. Clean local/remote PR #18 branch head was
+**`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**; only documentation changed after
+correction implementation 21c029a. Planning worktree/unique refs remain untouched.
+No repeated local SDK/desktop tests or package build were performed.
+
+Exactly one explicitly authorised retry was sent with the same branch/workflow and
+`upload_packages=true`. It succeeded and returned
+[**37522794804/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37522794804).
+The run API confirms workflow_dispatch, exact head above, created
+**2026-10-06 19:57:34 UTC**, status **in_progress**. Observation at **19:57:45 UTC**:
+Preflight job **112472186077** is live at locked Node selection; repository validator,
+Q1 rejecting fixtures and selector audit steps already passed. Windows/macOS target
+jobs were not yet assigned in that snapshot. No target result is claimed.
+
+The earlier HTTP 500/absent-run evidence remains historical, not retroactively successful.
+Cumulative production requests: initial successful matrix request + ambiguous corrective
+request + this user-authorised retry = 3 requests, **2 confirmed matrix runs**. Initial
+matrix allowance 1/1 consumed; corrective matrix allowance **1/1 now consumed**; explicit
+dispatch retry **1/1 used**, no further retry/matrix authority. Local/initial CI SDK,
+spawn/build/case counters remain unchanged until actual new target evidence supplies
+counts. Pending starts/builds are not fabricated completed operations.
+
+Artifact retention remains seven days; audit/download this run's terminal case logs,
+reports/captures, failure/package evidence and input/inventory records before expiry.
+The later documentation pause record changes no harness/package inputs and does not
+become the tested SHA; do not dispatch another matrix solely for it.
+
+**Next on same-chat manual resume:** inspect this exact recorded run/attempt once and
+relevant ref/worktree changes. If live, checkpoint/wait again without a status loop,
+retry or duplicate. If terminal, inspect actual named required core/archive SDK/runtime/
+diagnostic results, exact PCM/backend/music/SFX observations and 29 positive assertions,
+four case reports/three separately attributed captures, advancing-frame timestamps/
+bounded repeated callbacks and all 30 visible inputs, six packaged cases/cleanup, three
+real-service flow samples, browser/focus/resize, packaged denial/single-instance,
+terminal privacy/dependency/licence inventory, original human reuse scope and exact
+candidate/tree/input/executable/package hashes. Fill final H01–H12/sections 3–4 matrix,
+review rendered artifacts/self-review and reach review_ready only if all requirements
+are proved. Failed/skipped/missing evidence remains unresolved; no waiver or merge.
+
+The Goal tool still reports **blocked** from the earlier allowance stop. This ordinary
+approval/retry turn did not invoke a client Resume; available agent status controls
+cannot activate it. That status is not a new blocked audit or a verified Pause.
+Use the client's Resume control for the SAME saved Goal when the workflow is terminal
+and send `Audit run 37522794804/1 and continue the existing goal.` No replacement Goal,
+new chat, scheduler, model polling or second writer.
