@@ -1366,7 +1366,7 @@ fn terminal_rejected_journal_does_not_block_flush_or_later_commit() {
     );
 }
 
-fn create_terminal_journals(root: &Path, count: usize) {
+pub(super) fn create_terminal_journals(root: &Path, count: usize) {
     let anchor = DirectoryAnchor::open_root(root).unwrap();
     for index in 0..count {
         let txid = format!("tx-terminal-{index}");

@@ -1,29 +1,34 @@
 # Current status
 
-**Updated:** 2026-10-06. **Branch:** main. **Phase 1G: accepted, integrated, complete.**
-[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) merged at
-**`295a189925ac5c9c8655569cb29dd10236d7201d`**, preserving history. Main equals
-reviewed tree `2418b0b1304af753d09ee89b6808553a8323def4` before docs closeout.
+**Updated:** 2026-10-07. **Branch:** acceptance/phase-1h-vertical-slice.
+**Phase 1G: accepted, integrated, complete. Phase 1H: review_ready.**
 
-| Capability / acceptance | State |
-| --- | --- |
-| Branches; trusted Validate/Run/Stop; diagnostics; reviewed workspaces | Implemented and accepted on Windows x64/macOS ARM64 |
-| Automated package qualification | Production **37461862928/1**, quality **37461858768/1**, exact **`c137b6706ed2dc05aac8dfe692689829c785a52a`** Pass; 6 cases per host and retained package hashes |
-| Native/human review | Pass: Windows “all working, happy”; Mac “all working”; original profiles/temporary bytes restored |
-| Integration | Exact **132/132** packaged inputs and all workflows/scripts/spike Git blobs unchanged; PR quality **37472444622/1** and main quality **37473497347/1** Pass |
-| Phase 1H | **not_started**, ready for explicit selection; agent-owned integrated H01–H12 still required |
+Phase 1G merged through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17)
+at `295a189925ac5c9c8655569cb29dd10236d7201d`. Main remains `42ca6f9`.
+[Archived closeout](../tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+retains exact integration/native-human identities and limitations.
 
-Sole conflict retained the qualified observed-flow workflow; no application change,
-additional package qualification or repeated human session. Local integration checks:
-91 frontend tests/no skips, build/typecheck, formatting, validator, Q1 rejection/selector
-audit, 9 retention tests, six retained cases per host and whitespace Pass. Completed
-records archived, canonical links repaired, and unused integrated feature refs retired. [Exact closeout/evidence](../tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
+Phase 1H [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) is ready for
+independent user review. Final production
+[37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148)
+passed at exact **`ba01a84cd7f860be6e8717e98216bdf747875073`** on Windows x64/macOS
+ARM64. The deterministic representative game was authored through real services;
+H01–H12 and applicable sections 3–4 now have audited evidence. Each target passed all
+46 named regressions, separate official-SDK gates, three positive route cases at
+29/29 assertions each, the rejecting control, three enforced flow samples and all
+six packaged native UI cases with cleanup. WebView/single-instance boundaries,
+privacy and dependency/licence inventory passed. All 145 recorded source hashes per
+host and package/input receipts verified. Captures, changed-scope human reuse and
+self-review are recorded in the [final audit](../tasks/active/phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness).
 
-Limits remain: Mac Chrome timing diagnostics Fail under existing policy; recorded
-native-input/assistive-tech limits; no signing/notarization claim. Initial qualification
-**1/1 consumed**, corrections **4**, all unique failures preserved. No owned app/game/
-profile/production workflow wait. Planning worktree `2c5a164` and two unpublished
-commits remain untouched. Phase 1 closure, Phase 2 and optional Git are not selected.
+The test-only Source probe correction passed renewed Windows native qualification.
+Both earlier failed matrices, local attempts and the ambiguous HTTP 500 remain retained.
+Mac Chrome rendering p95 168.3ms remains an advisory timing Fail under TESTING;
+required functional and real-service gates passed. Original human/native-input/
+assistive-technology/display limits remain; no signing/notarization or audible-speaker
+claim. Evidence artifacts are downloaded before October 13 expiry.
 
-**Next:** explicit selection of [Phase 1H](../tasks/active/phase-1h-vertical-slice-acceptance.md).
-[HANDOVER](HANDOVER.md) records exact identities, ownership and continuation.
+**Next:** independent review of PR #18 and its evidence. No CI wait, new matrix, merge,
+Phase 1 closure or Phase 2 implementation is selected. [HANDOVER](HANDOVER.md) owns
+exact review/continuation state. Planning worktree `2c5a164` and two unpublished commits
+remain untouched; optional Git remains deferred.

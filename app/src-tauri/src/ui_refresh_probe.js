@@ -3,7 +3,7 @@
  const details={stage:'welcome',checks:[],layer:'packaged native WebView; real IPC; synthetic editor input'};
  let retentionInventory;
  const probeReadTimings=[];
- const wait=async condition=>{const start=performance.now();while(!await condition()){if(performance.now()-start>20000)throw Error(`Timeout at ${details.stage}`);await new Promise(r=>setTimeout(r,20));}};
+ const wait=async (condition,start=performance.now())=>{while(!await condition()){if(performance.now()-start>20000)throw Error(`Timeout at ${details.stage}`);await new Promise(r=>setTimeout(r,20));}};
  const button=name=>[...document.querySelectorAll('button')].find(b=>b.textContent===name);
  const call=async(operation,payload={})=>{const start=performance.now();try{const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Object.assign(Error(`${operation}: ${r.error.code}`),{code:r.error.code});return r.value;}finally{probeReadTimings.push({operation,elapsedMs:performance.now()-start});}};
  const read=(operation,payload={})=>window.__loomlightProbeRetryBusy(()=>call(operation,payload));
@@ -39,7 +39,13 @@
   details.stage='editor';const editor=document.querySelector('.cm-content');check(getComputedStyle(document.querySelector('.cm-editor')).position==='relative','CodeMirror styles accepted by native CSP');
   editor.focus();const selection=getSelection();selection.selectAllChildren(editor);selection.collapseToStart();document.execCommand('insertText',false,'# Native editor check\n');
   details.stage='editor-warning';await wait(()=>document.querySelector('.source-draft-warning')&&!document.querySelector('.source-draft-warning').hidden);
-  const project=await read('project.current');details.stage='editor-retention';await wait(async()=>{retentionInventory=await read('source.list',{sessionId:project.sessionId});return retentionInventory.dirtyCount===1;});check(true,'Native editor input retained as a session draft');
+  // The warning also covers input still queued in the renderer. Direct probe
+  // observations bypass its RequestLane and can refuse that pending draft write.
+  // Observe acknowledged retention in the rendered tree before querying the host;
+  // a refused/missing retention still fails the existing 20-second wait.
+  const retentionStarted=performance.now();
+  details.stage='editor-settlement';await wait(()=>document.querySelector('.source-draft-total')?.textContent.startsWith('1 draft'),retentionStarted);
+  const project=await read('project.current');details.stage='editor-retention';await wait(async()=>{retentionInventory=await read('source.list',{sessionId:project.sessionId});return retentionInventory.dirtyCount===1;},retentionStarted);check(true,'Native editor input retained as a session draft');
   const bounds=()=>{const r=document.querySelector('.source-editor-shell').getBoundingClientRect();return [r.x,r.y,r.width,r.height].join(',');};const before=bounds();for(let n=0;n<50;n++)document.querySelector('#app-status').textContent=n%2?'Unsaved Source draft':'Saved';check(bounds()===before,'Status updates preserve native editor geometry');
   details.stage='settings';button('Settings').click();await wait(()=>document.querySelector('.settings-overlay'));button('Close settings').click();check(document.querySelector('.cm-content').textContent.includes('Native editor check'),'Settings return retains draft');
   const p=await read('preferences.read');await window.__loomlightProbeRetryBusy(()=>call('preferences.write',{...p,theme:'light'}));check((await read('preferences.read')).theme==='light','Device preference write and read round trip');
@@ -51,6 +57,7 @@
    appStatus:document.querySelector('#app-status')?.textContent,
    sourceState:document.querySelector('.source-document-state')?.textContent,
    sourceBusy:document.querySelector('[data-source-busy]')?.dataset.sourceBusy,
+   rendererDraftTotal:document.querySelector('.source-draft-total')?.textContent,
    draftWarningHidden:document.querySelector('.source-draft-warning')?.hidden,
    editorPresent:!!document.querySelector('.cm-content'),editorEditable:document.querySelector('.cm-content')?.contentEditable,
    storyReady:!!document.querySelector('.scene-workspace .preview-region'),

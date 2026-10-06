@@ -1,10 +1,11 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-10-06.<br>
+**Updated:** 2026-10-07.<br>
 **Status:** Phase 1A–1G and CI-SIMPLE accepted and integrated. Phase 1G merged through
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) at `295a189`; both-platform
-native/human and exact-input qualification accepted. Phase 1H remains `not_started`,
-ready only for explicit selection; Phase 1 itself is not closed.<br>
+native/human and exact-input qualification accepted. Phase 1H is `review_ready`: final
+37529174148/1 at `ba01a84` passed both supported targets and the full evidence audit.
+Independent user review remains; no merge or Phase 1 closure.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
@@ -147,7 +148,7 @@ native-proof/full-freshness experiment. G1/R1/R2 prove shared flow, explicit tru
 runtime/process ownership, supported script editing/saving during play and diagnostics.
 Asset mutations require Stop; live asset refresh remains excluded. Existing Scene,
 Source and Save services are reused. Historical failures and native/human limitations
-remain recorded. 1H is the next separately selected integrated acceptance outcome;
+remain recorded. 1H is a separately selected integrated acceptance outcome;
 its agent-owned gates are not closed by 1G or by reused human feedback.
 
 #### 1G.1 — Branches
@@ -176,6 +177,8 @@ Git init and its regressions remain unchanged. Product deferral does not change 
 repository development/publishing workflow.
 
 ### 1H — Vertical-slice acceptance
+
+**Status:** `review_ready` at tested `ba01a84`; [final target audit](phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness) covers H01–H12/sections 3–4. User acceptance/integration remains a separate decision.
 
 **Entry:** 1G accepted and integrated, plus explicit user selection. The detailed
 [1H acceptance brief](phase-1h-vertical-slice-acceptance.md) maps every case below to

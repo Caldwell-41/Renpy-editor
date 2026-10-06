@@ -1,8 +1,10 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Updated:** 2026-10-06; Phase 1G accepted/integrated; execution remains unselected.
+**Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `not_started`.
+**Execution state:** `review_ready`. Final production 37529174148/1 Pass at exact
+`ba01a84`; required target evidence, H01–H12/sections 3–4 mapping and self-review
+are complete. Independent user review remains; no merge or Phase 1 closure.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -121,8 +123,8 @@ Do not dispatch a packaging matrix for planning changes. During actual acceptanc
 use one complete final matrix per changed candidate; do not rerun unchanged expensive
 gates or use model polling. Capture run ID, attempt, SHA and remaining jobs before an
 awaiting-CI/manual-resume handoff. Failed/skipped/cancelled are distinct from passed.
-The existing production and quality flow selectors still need the migration recorded
-in TEST-AUDIT-1 before routine selection. A future integrated-tree assessment selects
+The production and quality flow-selector migration is complete; retain the exclusions
+and ordinary coverage recorded in TEST-AUDIT-1. A future integrated-tree assessment selects
 affected/required gates; it does not automatically repeat an equivalent matrix on merge
 or claim unimplemented cross-SHA evidence reuse.
 
@@ -154,3 +156,876 @@ are planned and unexecuted. Active 1F CURRENT/HANDOVER and correction evidence r
 owned by PR #14; no replacement handover or application change is introduced here.
 The next permitted action for this PR is documentation review. Starting 1G.1 requires
 integrated/accepted 1F and a user-selected goal; starting 1H requires integrated 1G.
+
+## 7. Execution ledger — 2026-10-07
+
+**Selected outcome:** the user authorised H01–H12 and applicable sections 3–4 to
+`review_ready`, including fixtures/harnesses, focused checks, bounded corrections,
+publication and supported-target qualification. No merge, Phase 1 closure, Phase 2,
+optional Git development or signing/notarisation. Codex is native macOS ARM64;
+Windows x64 evidence will use the existing supported-target production workflow.
+
+**Ownership:** clean main fast-forwarded from `b594712` to fresh
+`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`; no matching branch/PR or pending run existed.
+Created `acceptance/phase-1h-vertical-slice`. The separate planning worktree remains
+`2c5a164`, ahead two unpublished commits, and was not modified/published. Other open
+PRs and refs are untouched. Draft PR #18 and the one confirmed final matrix are below.
+
+### Representative game and selected gates
+
+`tests/fixtures/phase-1h/expected.json` fixes exact Scene source templates (only
+technical labels normalize to logical names), route dialogue, Boolean/string/int64
+outcomes and original PNG/PCM WAV hashes. The test-only lifecycle builder uses staged
+creation without Git, real Character/Variable/import IPC, production Scene commands,
+transactional Source saving, repeated history, real media presentation and reopening.
+Default `trust = 9007199254740993` and assigned int64 extrema remain decimal strings
+on the editor wire and exact integers in source/runtime. Two routes reconverge; tree
+ordering does not change entry/edges. Asset provenance/licence is in the fixture README.
+Testcases are injected only into disposable games; shipped runtime/UI behavior is
+unchanged. They use standard Start/Choice/dialogue, not route jumps or replaced screens.
+
+The existing `production-scaffold.yml` gains one exact ignored SDK gate and retained
+case outputs. Its routine core selectors, enforced observed-flow fixture, two archive
+lifecycle gates, runtime service/diagnostic gates, six packaged UI cases, denial and
+single-instance probes, browsers, privacy and dependency inventory remain required.
+No specialist termination/namespace experiments are selected. Exact candidate/source
+input recording includes the acceptance fixture inputs. Q1 guards continue to reject
+missing/zero/ignored/failed required Cargo results and incomplete packaged cleanup.
+
+| ID | Concrete expected observations and selected proof | Current evidence |
+| --- | --- | --- |
+| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | Final 37529174148/1 (`ba01a84`): staged creation/archive lifecycle and integrated normal menus/save/load/Prefs/history/rollback Pass on both; no half-created destination in named failure cases |
+| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | Final run: real supporting authoring/import/hash/golden/reopen and exact default/assigned int64 values/media Pass on both; 2 Characters/Appearances, 7 original media inputs |
+| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | Final run: supported Beats/golden source and real PCM/channel/showing/bounds/stop/hide assertions Pass on both; each positive SDK case 29/29 |
+| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | Final run: normal entry, both manifested routes/reconvergence/Return and editorial Chapter/semantic flow invariant Pass on both |
+| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | Final run: fixture history/reopen and all named ordinary inverse/external-boundary regressions Pass on both |
+| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | Final run: real compiled cache move/delete/inverse/reopen/incoming refusal and named runtime no-write/Stop/retry Pass on both |
+| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | Final run: opaque/BOM/CRLF/Unicode/Apply Both/overlap regressions, native draft retention/Source boundary and safe mapping/navigation Pass on both; original Windows failure preserved |
+| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | Final run: SDK service/diagnostics and all six packaged cases/cleanup Pass on both; actual compile/lint navigation, script Save/staleness/no reload/Stop/reopen and refusal controls executed |
+| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | Final run: exact editor reopen/metadata/selection preservation and independent metadata-free SDK route Pass on both |
+| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | Final run: all named ordinary real-disk mixed recovery/resolution/follow-up/ambiguity regressions Pass on both; no specialist crash/attack selection |
+| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | Final run: session/cancel/Stop/copy-consent/zero-spawn inspection, native preparation/cancellation/draft retention and complete packaged boundary Pass on both |
+| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | Final run: actual authoring after 4,097 records and all named ordinary resource/precision/discovery regressions Pass on both; 3 enforced flow samples per target Pass |
+
+The evidence column records final tested candidate `ba01a84` on both supported targets.
+The final audit below supplies exact commands/counts/identities, section 3–4 mapping
+and limits. Prior failures remain unique failed-SHA evidence; no automatic acceptance
+transfers to unrelated inputs or a future integration tree.
+
+Section 3 mapping: graph inventory/partial/missing/unknown/duplicate/self-loop/limits use
+`scene::tests::flow_*`, Source navigation and the fixed reconvergent fixture; preparation
+uses real runtime SDK and frontend preparation handlers; trust uses stale SDK/input,
+revocation/session tests plus the new untrusted/copy cases; runtime uses real process
+Stop/descendants, saved editing, no-reload, move/delete/import/history refusal tests;
+diagnostics use the SDK Unicode/BOM/CRLF cases and bounded diagnostic parser/navigation
+regressions. Final evidence must confirm these actual named tests/cases, not just totals.
+
+Section 4 is covered by the final target audit below: source/metadata preservation and
+recovery/path/IPC gates; package WebView denial/single-instance; both native/rendered
+surfaces; production declared limits and three enforced flow samples; terminal privacy
+and licence/dependency inventory and retained artifacts. Mac Chrome timing remains an
+explicit diagnostic under TESTING, not a fabricated pass. Signing/notarisation and
+manual assistive-technology limits remain. Required cases are never waived by prior
+1G green statuses.
+
+**Human reuse assessment:** changes are test-only Rust modules/helpers, synthetic
+assets/manifests, workflow/evidence recording and docs. No Scene/Source/Branches UI,
+Save/native-input dispatch, runtime product behavior, CSS, IPC authority, dependency or
+packaging change. The final probe changes synthetic test ordering/diagnostics and its test command,
+without changing any governing human interaction. Final diff verification confirms
+these boundaries. The mapped 1G native human cases
+remain reusable under TESTING: navigation/input/focus, native shortcuts, resize/scaling,
+Run/Stop/save-staleness/reopen, diagnostic navigation, picker/import/progress and
+cancellation. Original packages keep their own identities; automated gates execute
+this acceptance candidate. No repeated broad user session is requested.
+
+### Concrete regression audit prepared during the target run
+
+This table records selection/body review plus the later named-line audit below,
+not corrected-candidate target acceptance. The local cached release
+inventory lists 236 tests (no tests executed by `--list`); its platform-specific count
+must not substitute for the Windows result. Existing `cargo-log` checks and named
+passing lines in retained target logs are the proof. Keep specialist exclusions intact.
+Alongside the integrated SDK fixture, audit these ordinary regressions:
+
+| IDs | Required named regressions / actual assertions reviewed |
+| --- | --- |
+| H01 | `lifecycle::tests::official_sdk_phase_1c_target_gate` (separate archive gate); `failed_generation_cleans_only_its_stage_and_never_adds_recent`, `cleanup_and_git_failure_are_bounded` in the same module; creation refusal cleans only its stage, keeps destination/recent state |
+| H02 | `authoring::tests::accepted_escaped_string_and_int64_values_reload_exactly`, `appearance_import_keeps_asset_and_relationship_ids_after_reopen`, `stable_entities_round_trip_and_source_is_minimally_patched`; fixed fixture additionally asserts two Characters/Appearances, copied hashes, passive presentation and actual int64 runtime values |
+| H03 | `scene::tests::approved_beat_subset_round_trips_without_runtime_evaluation`, `review_appearance_edit_preserves_ids_and_patches_supported_references`; standalone supported Beat forms and exact neighbouring source, plus new actual SDK staging/audio/state assertions |
+| H04 | `scene::tests::flow_partial_choice_retains_routes_after_missing_and_dynamic_options`, `flow_inventory_custom_duplicate_unreadable_and_lexical_context_are_honest`, `flow_real_commands_history_reopen_and_external_invalidation`; distinct duplicate options, self-loop, later routes, Missing/Unknown under real inventory changes; new fixture proves reconvergence/Return |
+| H05 | `scene::tests::minimal_beat_patch_keeps_unrelated_bytes_and_round_trips_history`, `failed_inverse_does_not_advance_history_or_overwrite_external_metadata`; `transaction::tests::undo_and_redo_stop_at_external_revision_boundaries`, `create_delete_history_uses_actual_commit_identities_repeatedly` |
+| H06 | `scene::tests::chapter_scene_lifecycle_history_and_rpyc_ghost_prevention_are_coherent`, `opaque_boundaries_incoming_edges_and_external_revisions_fail_closed`, `runtime_scene_move_delete_and_real_inverse_refusal_stop_retry`; actual child gate refuses targeted move/delete/inverses without writes and permits retry after Stop; new gate uses real compiled cache bytes |
+| H07 | `source::tests::supported_source_and_scene_edits_share_mapping_history_and_preserve_bom_crlf`, `opaque_source_acceptance_and_adjacent_visual_patch_preserve_exact_custom_bytes`, `clean_external_refreshes_while_dirty_external_requires_exact_apply_both`, `reviewed_combination_transaction_preserves_external_writer_during_commit`, `flow_source_navigation_preserves_draft_caret_and_refuses_stale_ranges`; `lifecycle::tests::apply_both_json_binds_review_and_preserves_draft_and_disk_on_every_stale_identity`, `apply_both_json_refuses_overlap_same_position_and_uncertain_custom_code_boundary` |
+| H08 | Separate `lifecycle::runtime_tests::runtime_official_sdk_service_gate` and `runtime_diagnostics_sdk_gate`; actual saved/saveAll preparation, stale executable/SDK refusal, SDK Run/edit/staleness/no reload/Stop/revoke/reopen, compile/lint Unicode/BOM/CRLF errors and exact revision/UTF-16 navigation; packaged compile/lint/routes/runtime-error remain required |
+| H09 | New representative and long-history close/reopen assertions plus independent metadata-free SDK case; `scene::tests::migration_is_transactional_preserves_ids_unknown_fields_and_reopens`, `authoring::tests::unknown_metadata_fields_and_entity_ids_survive_supported_edits` |
+| H10 | `transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up`, `interrupted_delete_is_recoverable_and_never_loses_the_displaced_source`, `explicit_recovery_resolves_only_proven_keep_or_accept_states`, `prepared_fault_state_can_be_safely_abandoned`, `prepared_abandon_refuses_any_persisted_proposal_evidence`; accepted/backup/external bytes and ambiguity refusal are real disk assertions; Prepared safe finalisation re-registers the project and commits a subsequent real edit |
+| H11 | `lifecycle::tests::failed_candidate_recovery_preserves_current_project`, `project_sessions_are_unique_and_stale_tokens_are_rejected`; `lifecycle::runtime_tests::runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion`, `runtime_dialog_completion_cannot_mutate_replacement_session`, `runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants`; cancelled boundaries assert zero spawn attempts and retained replacement session |
+| H12 | `source::tests::file_and_dirty_buffer_count_limits_retain_existing_drafts`, `aggregate_draft_limit_rejects_only_the_new_draft`; `scene::tests::flow_limits_are_explicit_and_never_truncated`, `flow_entry_uses_source_and_inventory_limits_refuse_without_reading_huge_inputs`; `authoring::tests::pinned_discovery_normalization_covers_case_subdirectories_extensions_and_oversampling`, `untracked_physical_asset_blocks_path_and_discovery_collisions`; new real authoring beyond 4,097 records; `transaction::tests::corrupt_record_beyond_the_former_history_boundary_blocks_real_writes` |
+
+Additional section 3 observations require both service and view evidence:
+
+- Draft preparation: Source `save_all_preflights_every_draft_then_undoes_as_one_history_action`
+  plus real SDK saved/saveAll cases above. Frontend `runtime preparation retains current
+  Source input and Scene forms under the existing lease` covers cancel/saved/saveAll/
+  Return to Scene Commit choices (no implicit commit); `runtime Save All failure releases the Source lease
+  and never prepares execution` rejects attempted execution. Packaged pending Source
+  preparation and validation state are inspected in `runtime_ui_probe.js`.
+  `source::tests::invalid_draft_refuses_save_without_losing_draft_or_changing_disk`
+  asserts the wire persistence state remains `PendingValidation` after refusal and
+  exact draft/disk retention. The current visible caption is `Unsaved Source draft`
+  (`main.ts`/`source-ui.ts`, asserted by shell Save regression); UI.md now distinguishes
+  caption from wire state. This terminology clarification changes no behavior or gate.
+- Trust: new zero-process untrusted open/preview/typing and copied-root UUID refusal;
+  real SDK service test explicitly modifies project `external.py` and SDK `config.py`,
+  asserts `STALE_RUNTIME`/no process, restores exact input, rejects unsupported version
+  and revokes running consent. Imported fixture assets use the passive authoring/
+  transaction service before any runtime trust; importer call graph has no SDK executor.
+- Runtime: `transaction::execution::tests::runtime_reservation_drains_in_flight_asset_transaction`,
+  `runtime_streaming_import_is_refused_before_reading_or_staging_then_retries`,
+  `runtime_scripts_and_metadata_save_but_asset_compound_and_inverse_do_not_write`;
+  Scene real history and lifecycle refusal/retry tests above. In
+  `renpy::runtime::tests`, `runtime_long_play_responsive_stop_and_shutdown` deliberately
+  outlives creation smoke; `runtime_natural_exit_and_crash_cleanup_descendant_pipes`
+  means controlled child nonzero exit 17, not a persistence-crash experiment;
+  `runtime_output_flood_is_bounded_and_stop_remains_responsive` checks retained bytes,
+  page bounds, refusal and cleanup.
+- Diagnostics: exact SDK cases above plus
+  `renpy::runtime::diagnostics::tests::runtime_diagnostics_formats_bounds_and_unicode`
+  and frontend inert/stale-location tests. Actual SDK error navigation rejects
+  caller-supplied path, old session, equal-byte replacement identity and deleted file.
+- Graph/view sessions: literal flow IPC and Source range test, frontend Branches
+  distinct duplicate routes, deletion selection invalidation, captured targets,
+  disposal/old-session refusal and incomplete scan retention. Native rendered flow
+  and three real-service budget samples remain separate target gates.
+
+Section 4 also requires named metadata unknown-field/corruption and narrow protocol
+regressions, passive-media size/path refusal, packaged denial/single-instance, actual
+six-case cleanup, terminal privacy/dependency inventory and rendered evidence review.
+Browser fixtures assert reduced motion/focus/widths/overflow but do not prove native
+keyboard delivery; the explicitly mapped unchanged 1G human evidence supplies that
+scope with its original limits. No static inventory or body review is marked as a
+final target pass.
+
+### Local development failures and cumulative problem record
+
+**H-FIXTURE-1:** first execution of the new fixture/oracle; classification currently
+harness/environment, no demonstrated product defect. Preserve every failed attempt;
+corrections do not turn those attempts into passes.
+
+| Attempt | Observation / classification | Smallest correction or next discriminant |
+| --- | --- | --- |
+| 1 | SDK creation failed writing normal-profile `upgraded.txt`; sandbox/profile isolation omission | Supported portable `Ren'Py Data` above disposable SDK; subsequent creation passed |
+| 2 | Source Save refused edits in mapped Variable definition file (`MAPPED_DEFINITION`); harness violated existing contract | Keep definitions in authoring workspace; custom Source content goes in unmapped transforms file |
+| 3 | All authoring/reopen/compile/lint passed; route processes had no display under sandbox | Same isolated fixture with native display access; no headless substitute or product change |
+| 4 | Real compiled move/delete reached incoming-target refusal, but harness expected wrong error enum | Expect exact existing `ReferenceBlocked`; subsequent lifecycle passed |
+| 5 | First dialogue asserted while transition was still executing; both SDK cases failed and debug screen stayed open until unchanged 60s deadline | Await visible conditions explicitly and add failure teardown; preserve both timeout reports |
+| 6 | Added teardown hook placed outside an SDK testsuite; real compile rejected it | Wrap driver in a named SDK testsuite; use its exact qualified case selector |
+| 7 | Copied project changed folder basename while retaining metadata folder name; open correctly refused `InvalidMetadata` | Copy under another parent with the same basename; no relaxed metadata validation |
+| 8 | Copied Run preparation lacked reviewed runtime helper and correctly refused `RUNTIME_POLICY_REQUIRED` | Use Validate preparation for shared execution-consent rejection; existing Run policy gates remain selected |
+| 9 | Seven initial dialogue/state/image/audio assertions passed; in-game menu action was incorrectly named Preferences | Use actual pinned SDK quick-menu label Prefs; wrong-outcome control rejected as intended |
+| 10 | Menu/save/load/history and route state/media passed; single dialogue click did not reach reconvergence | Investigate Screenshot interaction restart and dialogue completion; retain exact station/rollback assertions |
+| 11 | Direct capture did not fix the same advance failure; screenshot-restart hypothesis disproved | Reassess using SDK Advance control, which handles completion over render frames; no third repetition of single-dismiss hypothesis |
+| 12 | Advance reached station; immediate stop/hide assertion raced queued effects | Explicit 10s condition waits for assertions, unchanged 60s process deadline; capture actual dialogue/state/media and fresh rendered frame |
+| 13 | All four independent cases and cleanup passed; 28/28 assertions per positive case, intentional wrong integer rejected | Complete local native development proof; final Windows/macOS candidate qualification remains open |
+
+Attempt 13: native macOS 26.6.2 ARM64, SDK 8.5.3.26051504/Python 3.12.8,
+1/1 Cargo test Pass/no skip, 67.66s. Independent rooftop/riverside/metadata-free
+cases exit 0 at 8,252/8,240/8,208 ms; wrong-outcome exits 1 at 2,646 ms on exact
+`trust == 1`, with no timeout. All temporary editor/game/save/token/SDK state removed.
+Observed entry: dialogue matches, trust `9007199254740993`, false/unset, Alex bounds
+`[608,656,64,64]`, exact music/SFX paths. Rooftop observes expected dialogue,
+true/`9223372036854775807`/rooftop and `[1216,656,64,64]`; riverside (both copies)
+false/`-9223372036854775808`/riverside and `[0,656,64,64]`. Actual background/character
+showing flags true. Rendered screenshots show expected dialogue and tiny original
+swatches; surrounding checkerboard reflects the deliberate 64px fixture size.
+Evidence: ignored `integrated-authoring-local.log`, `cases-attempt-13/` JSON/logs/PNGs;
+manifest SHA-256 `d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638`.
+Self-review found screenshots from earlier cases being exported under later case names;
+export now retains only each positive case's own route capture, none for rejecting
+control. Attempt 13's original exports are retained unchanged; final workflow will
+verify corrected attribution. No runtime/assertion changes after this local pass.
+
+13 local integrated SDK gate invocations; measured bounded adapter spawns total 84
+across attempts 6–13 (8/8/8/12/12/12/12/12). Earlier uninstrumented launches and
+runtime-service child compile/lint processes are not included or fabricated. Final
+production matrix allowance is now consumed by run 37515083319/1; no retry authorised.
+Failures/logs are ignored under `.toolchains/reports/phase-1h/`; no private paths/logs,
+SDKs or build output enter Git. All correction hypotheses are recorded rather than
+silently restarting a budget. One production dispatch/no retry; zero local desktop builds or editor
+launches. Pending CI target builds/starts are not yet counted as completed; SDK test-process/adapter counts are reported where instrumented,
+and earlier absent counters are not invented. The 1G historical counters remain intact.
+
+Cheap checks so far: validator 352 files; Q1 rejection/selector audit Pass; retention
+9/9; frontend 91/91/no skips; Rust compilation/formatting; whitespace; actionlint 1.7.12
+workflow validation Pass. New asset-manifest test 1/1, long-history test 1/1 and SDK-result rejection guard 1/1 Pass.
+Focused SDK invocations use:
+`cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture`
+with official archive, disposable profiles/portable token root and native display access.
+These are development observations, not yet final coherent-candidate package proof.
+
+### Historical initial candidate and manual same-thread wait
+
+Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
+`acceptance/phase-1h-vertical-slice`, candidate
+**`3d484ef1b0164e15b21c869f7494410daa3fed9d`**, published/remote identity verified.
+Exactly one `production-scaffold.yml` dispatch accepted at 2026-10-06 18:55:50 UTC:
+[**37515083319/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
+`workflow_dispatch`, exact candidate above, `upload_packages=true`. Continuation
+recorded 2026-10-06 19:11 UTC: `in_progress` on the same candidate/attempt; Preflight
+**112445822829** completed success. macOS ARM64 **112446613576** confirmed live
+at desktop Rust tests; Windows x64 **112446613694** at runtime foundation/real SDK
+diagnostics gates. No target result
+claimed, no duplicate dispatch/retry or polling loop. Case/log/input/failure and
+requested package artifacts retain the existing seven-day retention; audit/download
+terminal evidence before expiry. Dispatch acceptance is confirmed, never repeat it.
+Ordinary PR quality [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)
+on the same SHA: actual repository/Q1 rejection/selector steps Pass; unselected flow
+profile and browser diagnostic jobs skipped. No separate quality matrix dispatched.
+
+This docs-only wait publication changes no tested app/workflow/fixture inputs. The
+production run tests `3d484ef` and does not retroactively execute its documentation
+follow-up SHA. No second package matrix is justified for this wait record.
+
+Remaining: on user resume in the SAME Goal/chat, inspect this exact run/attempt once.
+If still pending, wait again without a loop or duplicate dispatch. If terminal, audit
+actual named required core/SDK/diagnostic tests, four integrated case reports and three
+correctly attributed captures per host, six packaged UI case reports/cleanup, compiled
+lifecycle, observed-flow samples/bounds, browsers, denial/single-instance, privacy,
+licences/inventory, exact manifests/package hashes and H01–H12/sections 3–4. Fill final
+expected/actual/target/identity matrix and self-review before `review_ready`; failures,
+skips and missing artifacts stay open. No new retry, feature scope or merge on resume.
+
+Model polling stops here. Goal remains active until a supported user pause action;
+repository `awaiting_ci` is not a verified runtime pause. Official app documentation
+places Pause/Resume in the Goal progress row above the composer; direct installed-app
+UI inspection was unavailable, so no UI action or changed lifecycle state is claimed.
+Use that client control and later resume this chat with: `The workflow is complete;
+audit run 37515083319/1 and continue the existing goal.`
+
+
+### Terminal first matrix and bounded corrections
+
+**Decision pending:** one additional supported-target corrective qualification matrix
+is requested, with no automatic retry, on the published correction inputs. The initial
+1/1 final-matrix allowance is consumed. WORKFLOW's cumulative-budget and manual-wait
+rules require this decision; ordinary resume does not grant it. No dispatch is pending.
+
+Run [37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319)
+finished **failure**, exact candidate `3d484ef1b0164e15b21c869f7494410daa3fed9d`, tree
+`778f8b189b9f301823e6d4ab003927ec7636f6ff`. Preflight passed. macOS ARM64 job
+112446613576 ended 2026-10-06 19:17:11 UTC; Windows x64 job 112446613694 ended
+19:12:28 UTC. Target wall times were 19m26s/14m45s, not billed usage measurements.
+
+| Required evidence at tested candidate | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Routine core, including exact assets/result guard and actual authoring after 4,097 records | 192 passed, 0 failed, 41 ignored, 3 filtered; 53.23s | 187 passed, 0 failed, 38 ignored, 3 filtered; 167.36s |
+| Three actual service observed-flow samples, 500 Scenes/2,000 edges | Pass; initial 44.813/33.611/46.313 ms; warm 47.863/32.818/62.081; accepted 14.108/14.819/13.727 | Pass; initial 327.375/336.352/307.479 ms; warm 326.494/320.291/340.451; accepted 28.332/29.993/28.310 |
+| Ordinary archive lifecycle + SDK download handoff | 1/1 each, 65.84s/28.86s | 1/1 each, 87.97s/33.85s |
+| Real SDK runtime service + diagnostics | 1/1 each, 103.20s/54.64s; compile 8,108 ms/lint 9,534 ms | 1/1 each, 97.92s/50.42s; compile 8,524 ms/lint 8,843 ms |
+| New authored fixture, compile/compiled lifecycle, untrusted/copy trust, routes | Pass 1/1, 110.36s, 12 bounded adapter spawns/cleanup; three positive cases 28/28 assertions, wrong outcome rejects exact integer | Authoring/reopen/validation/compiled lifecycle/copy trust completed; positive cases fail music assertion after first five assertions; gate 140.66s/12 spawns/cleanup |
+| Runtime browser focus/1100/640/no overflow | Pass, page errors empty | Pass, page errors empty |
+| Branches browser functional/evidence | Fail at visible input 21: repeated callback timestamp; incomplete probe, cannot classify final functional pass | Pass; timing diagnostics Pass |
+| Desktop/package, six packaged cases + cleanup | Desktop 1/1, package built; all six required cases Pass/exit 0/no timeout/cleanup | Skipped after SDK gate; all six reports and executable missing |
+| Packaged authoring, denial and single instance | Terminal boundary report Pass for all fields; primary ready/secondary rejected | Skipped/missing |
+| Terminal privacy/dependency/licence inventory | Scan success; 97 npm/519 Cargo entries retained | Scan fails ENOENT for unbuilt executable; inventory skipped. No secret exposure demonstrated |
+
+Ignored selectors preserve the documented specialist exclusions; three ordinary
+separate gates are explicitly filtered and actually passed. SDK cache-hit downloads
+were skipped, with archive-backed tests executed; these are not skip-marker passes.
+H01–H12 ordinary named core/history/recovery/Source/graph/session/limit regressions
+ran on both hosts; SDK lifecycle/runtime/diagnostic gates ran on both. Integrated
+routes H02–H04/H09 fail on Windows, and section 4 browser evidence fails on Mac.
+Windows package/section 4 gates are missing. Both-target acceptance remains open.
+
+Mac route cases: rooftop/riverside/metadata-free 15,866/14,099/14,623 ms, all exit 0;
+wrong-outcome control 6,129 ms, exit 1 specifically `trust == 1`, counted as intended
+rejection. Observed exact large integers, dialogue, playing music/SFX, showing/bounds
+match the fixed manifest. Three separately attributed captures were reviewed: rooftop
+Alex/right and riverside Morgan/left, expected dialogue and 64px original swatches;
+surrounding checkerboard is intentional fixture size. No capture under rejecting case.
+
+Retained/downloaded artifacts: Windows **11437705996**, 221,211 bytes, expires
+2026-10-13 19:12:23 UTC; Mac **11437966834**, 5,696,457 bytes, expires 19:17:03 UTC.
+Evidence ignored under `.toolchains/reports/phase-1h/production-37515083319/`, including
+raw job logs and both artifacts. Mac `Loomlight.app.tar` SHA-256
+`ec43db415825579e562a851581570b5a31be995320af7f4e40963e59362ab2f2` verified;
+executable `1236085072050b2f59babcb02e5cf936f437a55c1db0dabee7b4fb99fd713ed5`;
+runtime input-report hash `a2b6dfc987243cd52a169c78925beb67f7727aff0d9c05d695ff284b972dfadd`
+verified against receipt, exact candidate/tree/run/attempt agree. Package remains failed
+qualification despite passing retained cases. Windows receipt says `not-built`, not
+an accepted package. No package result is transferred to correction SHA.
+
+**H-FIXTURE-1, first Windows matrix:** positive cases fail
+`renpy.music.get_playing() == "audio/music_theme.wav"` after 10s (13,073/13,030/13,067 ms),
+without process timeout. Wrong-outcome control passes 3,287 ms. Actual failed-channel
+value/PCM state was not recorded before assertion; absent hosted output is a provisional
+environment/harness hypothesis, not a proved product defect or vendor bug. Pinned
+8.5.3 source returns no playing filename when PCM is unavailable and attempts a dummy
+fallback after device-init failure. Production `apply_minimal_environment` clears
+inherited SDL overrides, so workflow env alone cannot establish the experiment.
+
+Correction `21c029a3f47bf5d191ebc00c593391d1469b3869` sets `SDL_AUDIODRIVER=dummy`
+only in the disposable driver at top-level init before Interface.start/audio init.
+It logs actual PCM/config/backend/channel state before assertions and adds required
+PCM initialization. Existing exact music/SFX/stop/hide/route checks and 10s/60s bounds
+remain. Real SDK decoding/channel state is tested; no audible-speaker claim, mock
+audio oracle, shipped runtime environment change or privilege exception is introduced.
+Focused native Mac local invocation 14 passes 1/1/no skip, **66.19s**, 12 bounded
+spawns/cleanup. Three positives **29/29** each, actual PCM/sound/dummy true and expected
+channel paths; case times 8,158/8,150/8,158 ms. Wrong outcome exit 1 in 2,590 ms.
+Evidence: `integrated-authoring-local-correction-1.log`, `cases-local-correction-1/`.
+This is a discriminating locally proven correction; hosted Windows still must run it.
+
+**H-FRAME-1:** Mac Chrome 152.0.7977.83 on Apple M1 Virtual, visible input 21,
+raf1/raf2 timestamp both **5818.832**, callback continuation times 5,823.3/5,828.1 ms.
+Transform/geometry/visibility/focus remained expected; first 21 visible samples passed,
+but assertion stopped remaining navigation/resize evidence. Existing diagnostic-only
+timing policy does not waive this malformed endpoint. Original pan p95 114.4 ms is
+retained as an overrun, not a production defect or pass. Cause of repeated browser
+timestamps is not established. [HTML callback processing](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks)
+uses frame timestamps and [High Resolution Time](https://www.w3.org/TR/hr-time-3/#dfn-coarsen-time)
+permits coarsening; neither supplies a physical presentation guarantee.
+
+Same correction commit awaits a strictly advancing callback timestamp, retaining equal
+observations for at most eight callbacks and including their entire delay in the same
+input interval. Backward/malformed/exhausted sequences reject; no input/measurement
+is replayed or discarded, no deadline/threshold is increased. The original strict
+`raf2Timestamp > raf1Timestamp` assertion remains. New helper is test-only and included
+in probe source hashes. Three rejection tests exercise actual repeated/advancing,
+exhausted and backward/nonfinite sequences; all seven timing/helper tests pass.
+Local probe invocation 1 was refused before browser launch (`listen EPERM`), retained
+unchanged. Invocation 2 with native localhost/browser access passes original/visible
+30/30, navigation/resize, empty page errors, complete cleanup and distinct reviewed
+captures. Chrome 154.0.8037.98/Apple M4, layout 56.8 ms; pan p95 17.3; dispatch max 0.5;
+visible first/advancing p95 16.9/33.8. No equal callback occurred locally; deterministic
+helper tests prove the equality path. Evidence: `browser-correction-1.log` and
+`browser-correction-1-native/`/log. Changed endpoint identities need both-target proof.
+
+Cumulative counters: **14 local integrated SDK invocations + 2 initial CI host
+invocations = 16**; measured bounded adapter spawns **96 local + 24 CI = 120**.
+Earlier uninstrumented launches and runtime child compile/lint are excluded, not
+fabricated. One production matrix dispatched, allowance **1/1 consumed**, no retry.
+One CI Mac desktop/package build; Windows desktop/package skipped. Six Mac packaged
+runtime cases and primary/secondary boundary launches executed; zero local desktop
+builds/editor launches. Browser correction: one CI Mac failure, one prelaunch local
+permission failure, one native local browser launch; Windows original probe passes.
+Historical problem records/counters remain. No third attempt of a disproved hypothesis.
+
+Correction checks: frontend **94/94/no skip/typecheck**, validator **353 files**, Rust
+format/SDK result guard, Q1 self-test/source-selector audit and whitespace Pass. No
+production behavior/dependency/IPC/packaging input change; unchanged 1G human reuse
+assessment and native-input/assistive-tech/unsigned limits remain. No fixture gate was
+weakened, no failed run relabelled and no cross-SHA automated acceptance assumed.
+Local checks ran before committing the correction: the browser report records HEAD
+`d65b34a` with then-uncommitted changes. Every recorded browser source hash matches
+the committed correction at `21c029a`; these are focused development results, not
+final supported-target coherent-candidate qualification.
+
+**Continuation after decision:** if one corrective matrix is authorised, check fresh
+refs/ownership, use the existing branch/PR and dispatch the existing production workflow
+once on the exact published head with package retention, record run/attempt/SHA, and
+pause manually in this SAME Goal/chat. Resume audits all required target artifacts,
+new PCM/channel logs/29 assertions, four SDK reports/three captures, advancing-frame
+samples/bounded repeats, six packaged cases/cleanup and original named regression
+matrix. If still pending, pause again without polling. No automatic retry or merge.
+If allowance is declined, leave acceptance unresolved for review. Goal is active until
+explicit user/client pause; no runtime pause has been verified by this ledger.
+
+
+### Named regression and correction quality audit
+
+Completed [quality 37519834637/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37519834637)
+Pass at exact correction checkpoint `3867329b2f3a90b4d2b74f8d025c1054b99ddb3d`.
+Required job 112462107082 ended 2026-10-06 19:33:26 UTC with actual repository
+structure/links/privacy, Q1 rejecting fixtures and selector/retained-case audit steps
+Pass. Optional flow profile and Mac browser diagnostic jobs were unselected/skipped;
+this quality run executed no native/package or frontend qualification. No duplicate
+quality dispatch or production retry.
+
+The 46 explicitly named ordinary regressions in the concrete H01–H12 table were
+matched to exact `test ... ... ok` lines in each original target's retained core and
+separate SDK logs: **46/46 Mac, 46/46 Windows, no named result missing**. Ignored
+SDK declarations in the broad-core log were not counted; their separate real executed
+Pass lines supplied evidence. The H01–H12 evidence column now records actual terminal
+observations and unexecuted/failed package/route scope, rather than stale pending-job
+labels. Required assertion bodies remain those reviewed in the concrete table.
+The original candidate's 46 named passes do not supply automated acceptance of the
+changed harness; renewed both-target qualification remains the outstanding decision.
+
+This is a substantive requirement/evidence audit after publication, with a docs-only
+checkpoint following the tested correction head. It changes no harness/runtime/package
+inputs and does not warrant another package matrix by itself. The existing approval
+question for one corrective production matrix remains pending; no new question or
+implicit retry authority is introduced. Goal runtime remains active pending user action.
+
+### Goal blocker audit — third consecutive decision turn
+
+The previous two turns made progress: published the locally proven corrections and
+terminal failure audit, then verified correction quality and all 46 named regressions
+per first-candidate host. The same required corrective qualification allowance remained
+pending throughout both. This third turn revalidated clean ownership and the retained
+Windows evidence: all three positive SDK cases remain failed, package `not-built`,
+runtime cases skipped. No human approval reply or corrective operation exists.
+
+Authorised independent implementation, focused checks, self-review and available
+evidence audit are exhausted. More local/old-candidate checks cannot establish corrected
+Windows/macOS qualification; a duplicate dispatch would exceed the consumed allowance.
+The genuine blocker is the pending decision for one additional corrective matrix.
+Publish this lifecycle checkpoint and then set the existing Goal `blocked`; tool
+confirmation is the runtime authority, not a repository status label. Phase 1H stays
+`awaiting_decision`, not `review_ready` or complete. No new permission question, matrix,
+package build, polling loop or retry. Continue in the same Goal/chat when the user
+authorises the bounded matrix; preserve all existing counters and failed evidence.
+
+
+### Approved corrective dispatch — acceptance unresolved
+
+The user replied **Approved** to the pending request for one additional Windows
+x64/macOS ARM64 production qualification matrix, with package retention and no automatic
+retry. This resolves the previous allowance blocker; it does not grant a duplicate
+request, further matrix, feature scope, merge or Phase 1 closure.
+
+Fresh preflight confirmed clean branch/PR #18 ownership and matching local/remote head
+**`0b6db00dfcfb317570583e121db94dd63f572ba2`**, PR open/draft; main remains `42ca6f9`.
+Planning worktree `2c5a164` and its unpublished work are untouched. Only documentation
+changed after correction implementation `21c029a`; no new application/harness inputs
+or repeated local package/SDK tests. The sole prior production run was terminal failure
+37515083319/1 at `3d484ef`; no existing corrective operation was found.
+
+Exactly **one** request was issued:
+`gh workflow run production-scaffold.yml --ref acceptance/phase-1h-vertical-slice --field upload_packages=true`.
+It returned exit 1 / **HTTP 500** from the workflow dispatch endpoint for workflow
+357322921; completion was observed at **2026-10-06 19:49:34 UTC**. No run ID/attempt
+was returned. One follow-up run-history lookup found only the original failed run,
+no matching corrective SHA. This does not prove that delayed acceptance is impossible;
+classification is ambiguous external request/absent confirmed identity, not a test,
+product or harness failure. Do not label it a confirmed pending CI run or retry it.
+
+The approved corrective allowance is reserved against this request: one corrective
+request attempted, **zero corrective runs confirmed**, no duplicate dispatch. Original
+matrix 1/1 consumed remains; original 14 local SDK + 2 CI-host invocations / 120 measured
+bounded spawns, one Mac package build and all prior failure evidence remain unchanged.
+No new local/CI build, SDK launch, packaged case or target pass is claimed.
+
+**Pending operation:** resolve acceptance of this single dispatch for the exact branch/
+SHA/workflow/input/time above. No process/session handle remains live. On user resume
+in the same chat, inspect the recorded workflow history once for a matching accepted
+run. If found, adopt that run's ID/attempt/SHA, audit terminal evidence or checkpoint
+and wait manually if live. If still absent/uncertain, preserve uncertainty and request
+an explicit retry decision only after resolving the no-duplicate boundary; ordinary
+Resume grants no retry. No autonomous status-check loop or watcher.
+
+The Goal tool still reports `blocked` from the preceding allowance stop; this ordinary
+approved turn does not perform a client lifecycle Resume, and available agent status
+controls cannot resume it. That is an actual observed state, not a new three-turn
+blocked audit or a claimed Pause. Use the client's Resume control for the SAME saved
+Goal when continuing; no replacement Goal/chat or second writer. Full remaining scope
+is the corrected supported-target matrix and requirement-by-requirement artifact audit
+to `review_ready`; all named regression, PCM/channel, advancing-frame, six packaged,
+flow/boundary/privacy/inventory and exact identity checks remain required.
+
+
+**User-requested dispatch status clarification:** after the user asked what was happening,
+a second read-only check at **2026-10-06 19:54:07 UTC** queried the workflow's dispatch
+history across all branches for runs created since 19:49:00 UTC. It returned an empty
+array. This was a user-requested status check, not an autonomous polling loop; no second
+dispatch. User approval for the corrective matrix is accepted and remains recorded.
+The external HTTP 500 failed to supply an accepted operation, and no run is confirmed.
+The Agent Guide's explicit “no automatic retry after ambiguous dispatch” rule remains
+applicable. An explicit instruction to retry the dispatch once is needed before
+resending, with a fresh no-duplicate check; this is retry permission for the already
+approved matrix, not another matrix allowance or a repeat of the approval request.
+
+
+### Confirmed corrective matrix and manual wait
+
+The user explicitly instructed **Retry the dispatch once**. A fresh all-branch
+workflow history check at **2026-10-06 19:57:23 UTC** still found no delayed acceptance
+of the first HTTP 500 request. Clean local/remote PR #18 branch head was
+**`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**; only documentation changed after
+correction implementation 21c029a. Planning worktree/unique refs remain untouched.
+No repeated local SDK/desktop tests or package build were performed.
+
+Exactly one explicitly authorised retry was sent with the same branch/workflow and
+`upload_packages=true`. It succeeded and returned
+[**37522794804/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37522794804).
+The run API confirms workflow_dispatch, exact head above, created
+**2026-10-06 19:57:34 UTC**, status **in_progress**. Observation at **19:57:45 UTC**:
+Preflight job **112472186077** is live at locked Node selection; repository validator,
+Q1 rejecting fixtures and selector audit steps already passed. Windows/macOS target
+jobs were not yet assigned in that snapshot. No target result is claimed.
+
+The earlier HTTP 500/absent-run evidence remains historical, not retroactively successful.
+Cumulative production requests: initial successful matrix request + ambiguous corrective
+request + this user-authorised retry = 3 requests, **2 confirmed matrix runs**. Initial
+matrix allowance 1/1 consumed; corrective matrix allowance **1/1 now consumed**; explicit
+dispatch retry **1/1 used**, no further retry/matrix authority. Local/initial CI SDK,
+spawn/build/case counters remain unchanged until actual new target evidence supplies
+counts. Pending starts/builds are not fabricated completed operations.
+
+Artifact retention remains seven days; audit/download this run's terminal case logs,
+reports/captures, failure/package evidence and input/inventory records before expiry.
+The later documentation pause record changes no harness/package inputs and does not
+become the tested SHA; do not dispatch another matrix solely for it.
+
+**Next on same-chat manual resume:** inspect this exact recorded run/attempt once and
+relevant ref/worktree changes. If live, checkpoint/wait again without a status loop,
+retry or duplicate. If terminal, inspect actual named required core/archive SDK/runtime/
+diagnostic results, exact PCM/backend/music/SFX observations and 29 positive assertions,
+four case reports/three separately attributed captures, advancing-frame timestamps/
+bounded repeated callbacks and all 30 visible inputs, six packaged cases/cleanup, three
+real-service flow samples, browser/focus/resize, packaged denial/single-instance,
+terminal privacy/dependency/licence inventory, original human reuse scope and exact
+candidate/tree/input/executable/package hashes. Fill final H01–H12/sections 3–4 matrix,
+review rendered artifacts/self-review and reach review_ready only if all requirements
+are proved. Failed/skipped/missing evidence remains unresolved; no waiver or merge.
+
+The Goal tool still reports **blocked** from the earlier allowance stop. This ordinary
+approval/retry turn did not invoke a client Resume; available agent status controls
+cannot activate it. That status is not a new blocked audit or a verified Pause.
+Use the client's Resume control for the SAME saved Goal when the workflow is terminal
+and send `Audit run 37522794804/1 and continue the existing goal.` No replacement Goal,
+new chat, scheduler, model polling or second writer.
+
+
+### Terminal corrective matrix and Source probe correction
+
+User instruction: **Audit run 37522794804/1 and continue.** Recorded operation is
+terminal **failure** at exact **`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**, tree
+**`c5df6b86538a2a2b90a48c29b8af05443e57ac68`**. Preflight 112472186077 Pass;
+Mac job **112472814807** Pass, ended 2026-10-06 **20:20:16 UTC**;
+Windows job **112472815375** Fail, ended **20:26:30 UTC**. No retry dispatched.
+Fresh ownership check found matching clean local/PR head `9497612`, PR #18 open/draft,
+main `42ca6f9`; planning worktree `2c5a164` and its two unpublished commits untouched.
+The saved Goal still reports the earlier `blocked` state; this ordinary authorised
+continuation did not perform or claim a client lifecycle Resume.
+
+| Required evidence at tested `9df1d25` | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Frontend/preflight | Shared preflight 94/94, typecheck/build/source browsers, validator 348 tracked files, Q1/selector controls Pass | Same completed shared preflight; target source browsers also Pass |
+| Routine broad core | 192 Pass / 41 ignored / 3 filtered; no failures | 187 Pass / 38 ignored / 3 filtered; no failures |
+| Named H01–H12 ordinary tests | 46/46 actual executed Pass lines | 46/46 actual executed Pass lines |
+| Separate real SDK lifecycle/download/runtime/diagnostic gates | All selected gates execute and Pass | All selected gates execute and Pass |
+| Integrated SDK gate | 1/1, no wrapper skip; 111.65s including preparation/cleanup, 12 bounded adapter spawns | 1/1, no wrapper skip; 138.04s including preparation/cleanup, 12 bounded adapter spawns |
+| Positive SDK cases | Rooftop/riverside/metadata-free: 29/29 assertions each, exit 0, no process timeout | Same three cases, 29/29 each, exit 0, no process timeout |
+| Rejecting SDK control | Exact wrong `trust == 1` assertion fails, exit 1; wrapper accepts expected rejection | Same actual rejection, exit 1 |
+| Three enforced real-service 500 Scene / 2,000 edge flow samples | initial 40.63–98.29ms; warm 31.97–72.27ms; accepted-update 13.34–18.21ms, Pass | initial 276.77–300.10ms; warm 278.82–295.61ms; accepted-update 27.68–28.79ms, Pass |
+| Runtime and Branches browser functional/evidence gates | Both Pass; 30 original + 30 visible inputs, strict advancing timestamps, zero extra equal callbacks, navigation/resize/cleanup Pass | Same functional/evidence Pass and populations; zero extra equal callbacks |
+| Branches timing diagnostics | Fail: visible rendering opportunity p95 179.3ms > 100ms; existing diagnostic-only policy retained | Pass: visible rendering opportunity p95 29.8ms |
+| Desktop Rust / Tauri package | Pass / built | Pass / built |
+| Six packaged native UI cases | 6/6 Pass, cleanup true each | compile/lint/route-a/route-b/runtime-error 5/5 Pass, cleanup true; ui-refresh Fail, cleanup true |
+| Native denial / single-instance boundary | Pass, actual primary/secondary evidence | Skipped after native-case failure; no pass |
+| Terminal privacy / dependency inventory | Scan Pass; 97 npm / 519 Cargo entries | Scan Pass; inventory skipped, no inventory acceptance |
+| Retained package / input receipt | Available; executable, tar and input receipt hashes verified | Available; executable and input receipt hashes verified; failed case accurately retained |
+
+Actual audio logs from all six positive target cases record `pcmOk=true`,
+`soundEnabled=true`, `dummyOutput=true`, exact `audio/music_theme.wav` and
+`audio/sfx_bell.wav`. Entry dialogue and exact default `9007199254740993` were observed;
+rooftop assigns `9223372036854775807`/true and riverside `-9223372036854775808`/false,
+with exact dialogue, route, showing and 64×64 image bounds. Normal menus/save/load/
+history/rollback/reconvergence/Return and stop/hide assertions passed. SDL dummy is
+actual decoded channel state, not audible-speaker evidence. Three correctly attributed
+SDK captures per target were visually reviewed: Alex/rooftop versus Morgan/riverside;
+metadata-free matches riverside. The rejecting control has no relabelled screenshot.
+Selected-case success is distinct from other testcases explicitly not selected by that
+invocation; required selected cases did execute, including metadata-free independently.
+
+**Artifact identity/retention:** complete artifacts are retained ignored under
+`.toolchains/reports/phase-1h/production-37522794804/{macos,windows}/`, including actual
+SDK case logs, core/SDK/browser/native logs and receipts. Both **144/144** source input
+hashes match exact tested Git blobs; all seven Branches report source hashes also
+match. Mac artifact **11441274005** expires **2026-10-13 20:19:41 UTC**; Windows
+**11442422247** expires **20:26:25 UTC**; both downloaded before expiry. Mac manual
+bundle artifact 11441213968 also exists; the tar in the complete evidence artifact
+already provides the executable and bundle identity needed here.
+
+- Mac executable SHA-256: `1236085072050b2f59babcb02e5cf936f437a55c1db0dabee7b4fb99fd713ed5`.
+- Mac retained tar: `5d8e620f54af92147e979252d5cfdf49396561dbee6c7d417d476c460e0fc037`.
+- Mac input receipt: `22cf943cb522f91657c2affd8c4daae4d938c7c4be10b74de204a4324d6b1ed3`.
+- Windows executable/retained executable: `6e5330e1028b6e859da60dcd412f76d92beee1cff2fd922878ad3988d1e9d426`.
+- Windows input receipt: `cfb754d3652658e0fddabb08bcc4dc08f9a4617c9c58df02f402c7a8a9c927bb`.
+
+**H-UI-RETENTION-1, first native failure:** Windows ui-refresh ends exit 1 after
+**30.969s**, no outer process timeout, at `editor-retention` / `Timeout at
+editor-retention`. Seven prior checks pass (real Character create/source definition,
+unsupported-only drop/no import, editor/CSP). Input appears in the editable Source view;
+draft warning visible, source busy false, 506 files, backend dirtyCount **0**, no dirty
+files. Cleanup **true**. Geometry/Settings/preference checks did not execute. Boundary
+and inventory skips are consequences, not distinct demonstrated defects. Terminal
+privacy succeeds; no secret exposure or withheld package. This failure remains a
+failure, irrespective of the five other Windows cases and all Mac passes.
+
+**Discriminant and bounded correction:** Source's warning includes local input not yet
+acknowledged by `source.updateDraft`; actual renderer requests are ordered by
+`RequestLane`. The probe calls `__TAURI_INTERNALS__.invoke` directly for reads and can
+own the service ahead of the renderer's write. Writes deliberately are not blindly
+replayed after refusal. The original failure did not capture the draft response code,
+so the exact hosted cause is not proven merely by static code or this fixture result.
+It is a locally reproduced harness mechanism consistent with the actual failed state;
+renewed Windows native execution must resolve remaining uncertainty. If it still fails,
+inspect the `editor-settlement` state/renderer draft total and classify the genuine
+remaining behaviour before another correction; do not weaken or extend deadlines.
+
+New focused browser control exercises the real renderer/CodeMirror and shipped probe
+with a fixture service: original ordering produces one refused write and 162–163
+contending direct reads, then the same seven-check/dirtyCount-zero failure; corrected
+ordering retains exact `# Native editor check` input and all **11 checks Pass**, one
+backend inventory observation, zero refused writes. A separately refused write fails
+at `editor-settlement`, before any direct inventory read. Both rejecting controls remain
+rejections, not successful product cases. No input replay, skipped assertion, larger
+20s stage/outer deadline, changed product queue or shipping runtime override.
+
+Correction **`efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`** adds only the probe's rendered
+acknowledgement wait and bounded draft-total diagnostic, the focused browser control
+in existing `test:source-browser`, and TESTING documentation. Existing backend
+`dirtyCount === 1`, all later assertions and native requirement remain. Production
+Source/IPC/Rust behaviour is unchanged; the embedded probe changes packaged input,
+so final candidate needs applicable renewed native evidence on both targets. Unchanged
+1G human/native-input/assistive-tech/signing limits remain under TESTING; this is no
+automated cross-SHA acceptance policy.
+
+**Local attempts/checks:** first invocation used a wrong working-directory-relative
+file path and launched no test; second failed `listen EPERM` before browser launch.
+Both prelaunch failures retained. Invocation 3 discriminant Pass; committed-form
+correction invocation 1 repeats all three controls Pass, including actual exact text
+and required backend check. Existing full UI browser regression suite Pass (all six
+workspaces/themes, staged assets, Source undo, shipped probes, busy contention,
+navigation/layout/focus/pointer controls). Evidence: `ui-retention-discriminant-{1,2,3}.log`,
+`ui-retention-correction-{1,2}.log`, `ui-retention-ui-regression-1.log`. Node syntax,
+9 Q1 package-retention tests, Q1 rejecting controls and whitespace Pass. No local
+SDK, native package build or editor launch in this audit/correction turn.
+
+**Cumulative budget:** initial 1/1 + corrective 1/1 confirmed production matrices,
+explicit dispatch retry 1/1 used, three requests total (one ambiguous HTTP 500 retained),
+no new dispatch. Integrated fixture now **14 local + 4 CI-host invocations = 18**,
+**96 local + 48 CI measured bounded adapter spawns = 144**; earlier uninstrumented/
+other runtime-service children excluded. Three target package builds total (two Mac,
+one Windows); **18 packaged runtime cases: 17 Pass, one Fail**, all reported cleanup
+true; two Mac boundary primary/secondary sequences, Windows boundary unavailable.
+Zero local desktop builds/editor launches. Original hypotheses/failures are preserved;
+new issue has one native failure and one locally proven correction, not two failed
+corrections of the same hypothesis.
+
+**Remaining decision/outcome:** Phase 1H is not `review_ready`. Correction is concrete
+and locally verified. Request **one additional existing Windows x64/macOS ARM64
+production matrix with package retention, no automatic retry**, then audit exact new
+candidate/attempt/artifacts in the SAME goal/chat. The Agent Guide/WORKFLOW permits
+only the approved dispatch allowance; `Audit ... and continue` does not add another
+matrix. Do not dispatch before explicit approval, reuse old results as newly executed,
+merge, close Phase 1, start Phase 2, create a new writer or reset the saved Goal.
+
+
+**User question and fresh approval:** the user asked why 1G passed but this run failed
+without code changes and authorised **“Retry the dispatch once with the fix.”** Git
+comparison from accepted `c137b67` to tested `9df1d25` confirms no change in main
+renderer, Source controller/editor/RequestLane, native host, UI-refresh probe or lockfile.
+Passing an earlier execution does not eliminate the probe's scheduling race; the local
+control now proves this mechanism, while missing hosted response telemetry prevents
+claiming the exact Windows cause. New SDK/frame corrections themselves passed both
+targets. Final review shares one existing 20-second deadline across renderer settlement
+and backend retention observation, avoiding an extra retention allowance. Focused
+correction invocation 2 passed all three controls in this final form; syntax and
+repository validator (354 files) / whitespace Pass before publication.
+
+This explicit instruction approves **one additional existing two-target production
+matrix with the fix and package retention**, one dispatch request/no automatic retry;
+it is not a rerun of the old failed SHA. Prepare/publish the exact candidate, check
+refs/ownership/other operations, dispatch once and record its confirmed identity.
+Previous allowances/counters remain consumed. No merge or widened product scope.
+
+
+### Confirmed fixed-probe matrix and manual wait
+
+The user's explicit **“Retry the dispatch once with the fix”** was executed once after
+final focused controls/validator/syntax/whitespace Pass and publication. Fresh PR/ref
+check confirmed open/draft PR #18 and matching clean local/remote branch head
+**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. Main remains `42ca6f9`; planning
+worktree `2c5a164`/two unpublished commits untouched. An all-branch production dispatch
+history check found only the two prior terminal 1H matrices and historical runs; no
+existing new candidate operation or delayed HTTP 500 acceptance.
+
+Exactly one request to existing production-scaffold.yml was issued for branch
+`acceptance/phase-1h-vertical-slice`, `upload_packages=true`, at 2026-10-06
+**20:47:55 UTC**. It succeeded and returned
+[**37529174148/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148).
+Run API confirms workflow_dispatch, exact candidate above, created **20:47:59 UTC**,
+**in_progress**, attempt 1. The one initial job snapshot has Preflight
+**112493828798** in progress; target jobs not yet assigned. No terminal or target pass
+assumed, no watch/poll loop or retry.
+
+Cumulative production requests now **4**, confirmed matrices **3**: original successful
+request, ambiguous HTTP 500, explicit retry's confirmed corrective matrix, this
+user-approved fixed-probe matrix. Initial 1/1, corrective 1/1, earlier dispatch retry
+1/1, and new fixed-probe dispatch **1/1 used**; no further matrix/retry authority.
+Integrated SDK/native/build counters remain the completed 18 invocations/144 measured
+spawns/three package builds/18 native cases until new actual execution evidence exists.
+No package build or SDK/native result counted from a queued/in-progress job.
+
+Publish this meaningful accepted-operation continuation after the tested candidate;
+following docs do not change or retroactively become tested `ba01a84`. PR description
+records prior failures, local correction proof and this exact pending operation. Goal
+tool remains its observed earlier `blocked` state; no client lifecycle Resume/Pause
+claimed or replacement Goal/chat/writer created. Stop model polling and continue in
+the SAME chat on the user's terminal instruction: **Audit run 37529174148/1 and continue.**
+If using the saved Goal, use the client's real Resume control; agent tools cannot
+activate it. On resume check this exact attempt and changed refs once. If pending,
+wait again; if terminal, audit all H01–H12/sections 3–4 requirements including real
+Windows Source retention, all six packaged cases/cleanup, denial/single-instance,
+privacy/inventory, source/package identities and retained original failures/limits.
+No new dispatch is implied by resume, no independent review/merge until review_ready.
+
+
+### Final target audit and review readiness
+
+User instruction: **Audit run 37529174148/1 and continue.** Exact recorded attempt
+is terminal **success** at **`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**, both supported targets. Fresh audit
+confirmed clean local/remote PR #18 head `1910a29`, open/draft before handoff; only
+status/ledger docs follow tested `ba01a84`. Main `42ca6f9`, planning worktree `2c5a164`
+and two unpublished commits unchanged. No new dispatch, SDK/game/editor run or package
+build in this audit turn. **Outcome: `review_ready` for independent user review.**
+Not user acceptance, integration, Phase 1 closure or permission to start Phase 2.
+
+| Gate / exact selected evidence | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Terminal target job | 112495119976 Pass, ended 2026-10-06 21:05:47 UTC | 112495119964 Pass, ended 21:09:55 UTC |
+| Preflight | Shared 112493828798 Pass, ended 20:51:02 UTC; 94/94 frontend, typecheck/build, source browsers, format, repository/Q1/selectors | Same actual completed shared preflight; target source-browser regression also Pass |
+| Routine core selectors | 192 Pass, 0 Fail, 41 ignored, 3 filtered; 36.40s | 187 Pass, 0 Fail, 38 ignored, 3 filtered; 135.93s |
+| Required named H01–H12 table | 46/46 exact executed `... ok` lines | 46/46 exact executed `... ok` lines |
+| Additional section 3/long-history/fixture controls | Ten specifically selected named lines verified, including runtime reservation/import/no-write, long play, descendant nonzero/pipe cleanup, bounded output, Unicode diagnostics, 4,097-record authoring, asset hash and SDK result guard | Same ten actual executed lines verified |
+| Official archive lifecycle/SDK handoff | Separate exact gates 1/1 each, 53.60s / 26.64s; no selected skip | 1/1 each, 68.13s / 23.41s; no selected skip |
+| Real SDK runtime/diagnostics | Exact service 1/1 77.07s and diagnostics 1/1 37.43s; compile/lint markers and normal saved/edit/no reload/refusal/retry/consent/Stop/reopen executed | 1/1 69.88s and 1/1 45.96s, same required stages |
+| Integrated SDK gate | 1/1, 79.401s including cleanup, 12 bounded adapter spawns, cleanup true | 1/1, 78.051s, 12 measured spawns, cleanup true |
+| Actual route oracles | Rooftop/riverside/metadata-free, 29/29 each, exit 0/no process timeout; wrong-outcome `trust == 1` assertion really fails exit 1 | Same three positives and rejecting control |
+| Six packaged UI cases | compile/lint/route-a/route-b/runtime-error/ui-refresh 6/6 Pass; exit 0, no timeout, cleanup true each | 6/6 Pass, exit 0/no timeout/cleanup true each |
+| Fixed UI-refresh / retention | All 11 checks Pass, 4.929s | All 11 checks Pass, 7.781s; earlier native retention failure now has renewed passing evidence |
+| Packaged denial/single-instance/Source command trace | All nine reported boundary booleans true; actual primary-ready/secondary-rejected/window-found | Same real boundary and Ctrl+S trace; no longer skipped |
+| Browser blocking functional/evidence | Runtime focus/1100+640/no overflow/page errors; Branches 30 original +30 visible, strictly advancing timestamps, navigation/held refresh/resize/cleanup Pass | Same blocking functional/evidence Pass |
+| Browser advisory timings | Mac visible rendering opportunity p95 168.3ms >100ms; diagnostic Fail retained, no functional waiver | Visible rendering p95 31.8ms; diagnostic Pass |
+| Enforced 500 Scene / 2,000 edge service budgets | Three actual samples Pass: initial 31.65–32.77ms, warm 30.86–33.49ms, accepted update 13.24–14.34ms | Three Pass: initial 168.21–183.40ms, warm 171.06–178.76ms, accepted update 16.96–18.26ms |
+| Desktop Rust / Tauri package / terminal privacy | All Pass; actual artifact privacy scan 6 files | All Pass; actual scan 6 files |
+| Dependency/licence inventory | Completed, 97 npm /519 Cargo entries | Completed, 97 npm /519 Cargo entries; no longer skipped |
+| Package/source identity / retention | 145/145 tested Git input hashes and all seven browser source hashes verified; executable/tar/input receipt verified | 145/145 + seven browser hashes, executable/input receipt verified |
+
+Commands are the exact existing production workflow selectors recorded in the earlier
+selection/body audit: routine broad core, exact `official_sdk_phase_1c_target_gate`,
+`official_sdk_download_handoff_target_gate`, `runtime_official_sdk_service_gate`,
+`runtime_diagnostics_sdk_gate`, and
+`renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture`.
+The last actually executes; its broad-suite ignored declaration is not counted as a
+pass. Cache-miss SDK download steps skip because the pinned archive cache exists;
+archive verification and all real archive-backed selected gates execute. The workflow
+retains ordinary external-write/interrupted-save assertions and specialist exclusions.
+Source-browser command executes the old-collision/corrected-retention/refused-write
+controls on preflight and both targets; all expected controls pass without weakening
+native refusal/deadline/cleanup requirements.
+
+**Independent observable game identity:** both authored manifests match expected
+SHA-256 **`d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638`**,
+five initial authored Scenes, seven original copied assets, three typed Variables.
+Disposable compiled Scene is then removed transactionally; four live game Scenes
+remain after reopen. Actual default trust `9007199254740993`, rooftop max-int64/true,
+riverside min-int64/false and exact dialogue/route/images/bounds are in each SDK log.
+All six positive target cases report actual PCM/config sound/dummy output true and
+exact music/SFX paths. Normal Start/Choice, Prefs, save/load/history/rollback,
+reconvergence/Return, stop/hide and preserved opaque custom code assertions execute.
+Wrong-outcome logs include the actual rejecting assertion; they have no falsely
+attributed capture. The three SDK captures per host were visually reviewed: distinct
+Alex/rooftop and Morgan/riverside dialogue, metadata-free riverside consistent with
+its own expected route. Original tiny solid-colour assets intentionally exercise
+identity/placement; this is an acceptance fixture, not an art-quality claim.
+
+**Section 3 disposition:** graph missing/unknown/duplicate/self-loop/partial/limits/
+stale navigation is covered by the concrete named core/Source/Branches tests; native
+route-a/route-b verify real destination edit, font metrics and close/reopen. Frontend
+preparation cases and native route-b exercise preserved forms, explicit choices,
+Cancel/Save All refusal and zero execution; Source wire PendingValidation and visible
+Unsaved Source draft remain distinct. Trust/body audit plus real service SDK gates and
+copied-UUID/untrusted integrated cases prove stale root/SDK/executable refusal,
+revocation and zero uninitiated SDK launches. Named real runtime reservation/import/
+inverse refusal, long-play/nonzero/pipe/flood controls and native Save/staleness/Stop/
+reopen stages Pass. Compile/lint native navigation and real SDK Unicode/BOM/newline/
+stale/deleted/out-of-scope/inert/bounded diagnostic cases Pass. Fixture browser evidence
+is never substituted for disk/process/native-service boundaries.
+
+**Section 4 rendered/human impact:** new 1100/640 Runtime/Diagnostics browser captures
+on both targets were visually reviewed: readable Quiet Studio Dark styling/controls,
+Unicode diagnostic path, narrow layout and expected scrollable output; focus/overflow
+assertions Pass. Native Scene/Source/Branches/supporting authoring and Source command
+trace pass in the real packaged boundary. The UI browser suite exercises all six
+workspaces/both themes and layout/focus/input semantics; frontend theme tests retain
+reduced-motion CSS assertions. Changed-scope
+diff confirms only cfg(test) Rust modules/helper access, fixture inputs, test probe/
+browser ordering, workflow/result recording and documentation. Governing renderer/
+Source/native-input dispatch, Rust product behavior, IPC/capabilities/CSP, dependencies,
+CSS and packaging behavior have no change from accepted 1G. The embedded probe and
+recorded inputs changed, so renewed automated package evidence was required and now
+exists at the exact final SHA.
+
+| Reused end-of-1G human interaction | Impact assessment for final 1H candidate |
+| --- | --- |
+| Scene/Source/Branches keyboard navigation, focus and retained input | Governing renderer/controller/native input unchanged; probe-only wait is not a human input path; original accepted cases retained |
+| Native Ctrl/Cmd shortcuts and close/reopen | Product dispatch/controller/host and dependencies unchanged; new native synthetic boundary also verifies target-specific traces; original physical-input limitations retained |
+| Run/Save/launch-staleness/Stop/rerun | Product runtime UI/service behavior unchanged; final real SDK/native gates renewed; original human usability cases remain applicable |
+| SDK diagnostic safe navigation | Parser/location/view implementations unchanged; actual renewed compile/lint navigation; original accepted human case remains applicable |
+| Resize/display scaling/six surfaces/Quiet Studio Dark | CSS/layout/renderer/dependencies unchanged; new browser sizes reviewed and native route-b compact gate renewed; original scaling scope/limits retained |
+| Picker/import/progress/cancellation/held-grip editing | Governing handlers/transaction/editor behavior unchanged; supporting native checks renewed; prior accepted profile restoration and human cases remain applicable |
+
+Reuse is under [TESTING's narrow human policy](../../TESTING.md#final-human-session-and-narrow-evidence-reuse),
+with exact original packages/results in the
+[1G integration human impact record](../archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
+Windows “all working, happy” and Mac “all working” retain original identities and
+native-input/assistive-technology/display limitations; no second human session or new
+screen-reader pass claimed. This is not a general automated cross-SHA waiver.
+
+**Exact artifacts:** complete Mac artifact **11444371823** expires **2026-10-13
+21:05:38 UTC**, complete Windows **11445325215** expires **21:09:35 UTC**; both are
+fully downloaded before expiry under ignored
+`.toolchains/reports/phase-1h/production-37529174148/{macos,windows}/`. Their 42 files
+per host include actual case logs, screenshots, manifests/receipts, core/SDK/browser/
+native reports and inventories. Manual install artifacts **11444341856** Mac and
+**11444776647** Windows also upload successfully, expiring 21:05:40 /21:09:37 UTC.
+Complete evidence tar/executable suffices for verified package identity; installers
+were not launched or separately qualified in this audit.
+
+- Mac executable SHA-256: `a671f34c9f8918a929da0695a23c1b676e3f059a33898c198e2461803bbaf151`.
+- Mac tar: `ee08d08229fc9aa015395971d03b83ef3323d363dcdd374845b697e21f63dacd`.
+- Mac input receipt: `0f53dd8cb39dc0a7fa4a38595fe86f785371babcc06ba01df1e335901e235591`.
+- Windows executable/retained executable: `821dd0016f013b3a28379770c9bdb0d31d026245a930c7eb95ec6812b992ea8d`.
+- Windows input receipt: `330b24b62cdfcdea5c0016f19c81e96b5d8d3794556ae9ac1109689c002b9e35`.
+
+**Quality/self-review:** completed quality **37529126800/1** at exact `ba01a84`
+required job 112493658479 Pass; current docs checkpoint quality **37529411501/1** at
+`1910a29`, job 112494635551, actual validator/Q1 rejection/selector audit Pass. Optional
+flow profile/Mac diagnostic jobs were unselected/skipped, not claimed executed. Final
+self-review rechecked cfg(test) containment, real service authoring/minimal source
+transactions, fixed independent golden oracle and provenance, positive exact values/
+media and real rejecting controls, normal entry, save/profile/token/temp cleanup,
+real compiled-cache lifecycle, repeated history/reopen, bounded advancing frame
+rejection/full elapsed wait, acknowledgement before direct reads with shared 20s
+retention deadline, unchanged executable product/security/dependency scope, selected
+policy gates, artifact identities and every required matrix row. No new blocker or
+production correction is identified. No repeated expensive run for documentation.
+
+**Cumulative record:** four production dispatch requests (one historical ambiguous
+HTTP 500), three confirmed matrices; all approved initial/corrective/retry/fixed-probe
+allowances consumed, no further dispatch or merge. Integrated fixture **14 local +6
+CI-host invocations =20**, **96 local +72 CI measured bounded adapter spawns =168**;
+earlier uninstrumented/other runtime children excluded. **Five target package builds**
+(three Mac/two Windows), **30 packaged native cases (29 Pass/one prior Fail)**, cleanup
+true each; three Mac and one Windows primary/secondary boundary sequences completed.
+Zero local desktop builds/editor launches. Original SDK fixture attempts, original
+37515083319/1 and corrective 37522794804/1 failures remain retained, not retroactively
+successful. Fixed Windows retention now Pass on a renewed candidate; the original
+unrecorded host refusal cause remains a supported mechanism rather than proven telemetry.
+Mac advisory 168.3ms timing overrun remains Fail; all mandatory gates pass. Unsigned/
+not-notarized packages, original human/native-input/assistive-tech limits and no audible
+speaker proof remain. No open required H01–H12/sections 3–4 gate remains.
+
+**Stop/next action:** publish this evidence matrix, replace CURRENT/HANDOVER with the
+actual review-ready state and present PR #18 for independent user review. Keep the
+active task and failure evidence until separately authorised acceptance/integration;
+no archive/merge/branch deletion/Phase 1 closure/Phase 2 work. The Goal objective ends
+at review_ready; user review is the next independent decision, not another CI wait.

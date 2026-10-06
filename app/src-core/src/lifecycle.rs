@@ -1,3 +1,5 @@
+#[cfg(test)]
+pub(crate) mod acceptance;
 pub mod runtime;
 mod runtime_probe;
 use crate::{

@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "playwright";
 import { classifyBranchesTiming } from "./branches-timing-policy.mjs";
+import { isAdvancingFrame } from "./branches-frame-sampling.mjs";
 
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const p95 = values => [...values].sort((a, b) => a - b)[Math.ceil(values.length * .95) - 1];
@@ -22,7 +23,7 @@ assert.equal(fixture.nodes.length, 500); assert.equal(fixture.edges.length, 2000
 if (evidenceDir) await mkdir(evidenceDir, { recursive: true });
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
 const sourceHashes = {};
-for (const name of ["tests/branches.browser.mjs", "tests/branches-timing-policy.mjs", "src/branches-ui.ts", "src/branches-routing.ts", "src/styles.css", "package-lock.json"]) {
+for (const name of ["tests/branches.browser.mjs", "tests/branches-timing-policy.mjs", "tests/branches-frame-sampling.mjs", "src/branches-ui.ts", "src/branches-routing.ts", "src/styles.css", "package-lock.json"]) {
   sourceHashes[name] = sha256(await readFile(join(appRoot, name)));
 }
 const report = {
@@ -33,7 +34,7 @@ const report = {
     runnerImage: process.env.ImageOS ?? null, runnerImageVersion: process.env.ImageVersion ?? null },
   layer: "Chromium; synthetic keyboard and service-produced fixture, not packaged IPC/native input",
   endpoints: { original: "dispatch-to-first-rAF continuation (legacy population, diagnostic)",
-    visible: "dispatch-to-first-rAF and dispatch-to-second-rAF continuation (rendering-opportunity diagnostic, not guaranteed presentation)" },
+    visible: "dispatch-to-first-rAF and dispatch-to-next-advancing-rAF continuation (rendering-opportunity diagnostic, not guaranteed presentation)" },
   nodes: 500, edges: 2000, original: [], visible: [], noInput: [], captures: [], pageErrors: [], cleanup: {},
 };
 const server = await createServer({ root: appRoot, logLevel: "error", server: { host: "127.0.0.1", port: 0 } });
@@ -64,6 +65,7 @@ try {
   await page.goto(`http://127.0.0.1:${report.serverPort}/__branches`);
   report.initialLayoutMs = await page.evaluate(async fixture => {
     const { renderBranches } = await import("/src/branches-ui.ts");
+    window.__nextAdvancingFrame = (await import("/tests/branches-frame-sampling.mjs")).nextAdvancingFrame;
     const host = document.querySelector("#host"); const start = performance.now();
     window.__branchesFixture = fixture; window.__branchesCalls = [];
     window.__disposeBranches = renderBranches(host, { load: async () => window.__holdFlowRefresh ? new Promise(resolve => { window.__releaseFlowRefresh = resolve; }) : window.__branchesFixture, source: location => window.__branchesCalls.push(["source",location]), scene: (node,edge) => window.__branchesCalls.push(["scene",node.sceneId,edge?.beatId]), status: () => {} });
@@ -100,19 +102,26 @@ try {
     const dispatchEnd = performance.now();
     const raf1Timestamp = await new Promise(requestAnimationFrame);
     const raf1End = performance.now();
-    let raf2Timestamp = null, end = raf1End;
-    if (secondRaf) { raf2Timestamp = await new Promise(requestAnimationFrame); end = performance.now(); }
+    let raf2Timestamp = null, raf2ObservedTimestamps = [], end = raf1End;
+    if (secondRaf) {
+      raf2ObservedTimestamps = await window.__nextAdvancingFrame(raf1Timestamp);
+      raf2Timestamp = raf2ObservedTimestamps.at(-1);
+      end = performance.now();
+    }
     if (traced) {
       // Backdated User Timing entries correlate exact timer boundaries in the trace.
       for (const [name, startTime] of Object.entries({ start, dispatchEnd, raf1End, end })) performance.mark(`${mark}-${name}`, { startTime });
     }
-    return { index, key, start, dispatchEnd, raf1Timestamp, raf1End, raf2Timestamp, end,
+    return { index, key, start, dispatchEnd, raf1Timestamp, raf1End, raf2Timestamp, raf2ObservedTimestamps, end,
       dispatchMs: dispatchEnd - start, dispatchToRafMs: raf1End - start, renderingOpportunityMs: secondRaf ? end - start : null };
   }, { sequence, index, key, secondRaf, traced });
   const checkTiming = sample => {
     assert.ok(sample.start <= sample.dispatchEnd && sample.dispatchEnd <= sample.raf1End && sample.raf1End <= sample.end);
     // rAF's supplied timestamp may precede dispatch; it is not the callback-entry time.
-    if (sample.raf2Timestamp !== null) assert.ok(sample.raf2Timestamp > sample.raf1Timestamp);
+    if (sample.raf2Timestamp !== null) {
+      assert.ok(isAdvancingFrame(sample.raf1Timestamp, sample.raf2ObservedTimestamps));
+      assert.ok(sample.raf2Timestamp > sample.raf1Timestamp);
+    }
   };
 
   report.originalBefore = await geometry();

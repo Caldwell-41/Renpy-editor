@@ -132,6 +132,9 @@ jobs:
             transaction::tests::final_window_external_writer_is_preserved_as_conflict \
             lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
             lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
+            lifecycle::acceptance::phase1h_expected_assets_are_exact_original_inputs \
+            lifecycle::acceptance::phase1h_authoring_continues_after_4097_terminal_journals_and_reopens \
+            renpy::tests::phase1h::phase1h_sdk_case_guard_rejects_missing_zero_skipped_and_failed_cases \
             renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
             renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
             renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
@@ -236,6 +239,17 @@ jobs:
           "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
           grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+      - name: Phase 1H integrated production-service authoring and SDK routes
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_PHASE1H_EVIDENCE_DIR: ${{ runner.temp }}/phase-1h-cases
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1h-integrated-authoring.log" renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate
+          grep 'phase-1h-integrated-authoring-sdk-gate: passed' "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold
@@ -398,6 +412,8 @@ jobs:
             ${{ runner.temp }}/dependency-inventory.json
             ${{ runner.temp }}/runtime-sdk-service.log
             ${{ runner.temp }}/runtime-diagnostics-sdk.log
+            ${{ runner.temp }}/phase-1h-integrated-authoring.log
+            ${{ runner.temp }}/phase-1h-cases
             ${{ runner.temp }}/runtime-ui-inputs.json
             ${{ runner.temp }}/runtime-ui-*.log
             ${{ runner.temp }}/runtime-ui-*.json

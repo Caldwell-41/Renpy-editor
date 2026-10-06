@@ -26,7 +26,9 @@ through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17), with both
 qualification/native/human acceptance and exact integrated-input review. The
 [completed 1G record](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 retains identities, failures and limits. [Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md)
-remains `not_started`, ready for explicit selection of H01–H12. Phase 1 is not closed;
+is `review_ready`: final 37529174148/1 at `ba01a84` passed required Windows x64/macOS
+ARM64 gates and the H01–H12/sections 3–4 evidence audit. Independent user review remains;
+prior failures and limits are retained. No merge or Phase 1 closure.
 Phase 2 remains planning only.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.

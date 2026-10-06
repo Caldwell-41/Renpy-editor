@@ -1,6 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { classifyBranchesTiming } from "./branches-timing-policy.mjs";
+import { isAdvancingFrame, nextAdvancingFrame } from "./branches-frame-sampling.mjs";
+
+test("repeated callback timestamps remain evidence until a strictly advancing frame", async () => {
+  const supplied = [5818.832, 5818.832, 5835.5];
+  const observed = await nextAdvancingFrame(5818.832, async () => supplied.shift());
+  assert.deepEqual(observed, [5818.832, 5818.832, 5835.5]);
+  assert.equal(isAdvancingFrame(5818.832, observed), true);
+  assert.equal(isAdvancingFrame(5818.832, [5818.832]), false);
+});
+
+test("a nonadvancing frame sequence is bounded and rejected", async () => {
+  let calls = 0;
+  const observed = await nextAdvancingFrame(100, async () => { calls++; return 100; });
+  assert.equal(calls, 8);
+  assert.deepEqual(observed, Array(8).fill(100));
+  assert.equal(isAdvancingFrame(100, observed), false);
+});
+
+test("backward or malformed callback evidence cannot be accepted or retried away", async () => {
+  for (const timestamp of [99, NaN, Infinity, undefined]) {
+    let calls = 0;
+    const observed = await nextAdvancingFrame(100, async () => { calls++; return timestamp; });
+    assert.equal(calls, 1);
+    assert.equal(isAdvancingFrame(100, observed), false);
+  }
+  assert.equal(isAdvancingFrame(100, []), false);
+  assert.equal(isAdvancingFrame(100, [99, 101]), false);
+});
 
 const baseline = () => ({ initialLayoutMs: 1999.9, original: [{ dispatchMs: 99.9 }],
   visible: [{ dispatchMs: 99.9 }], panFrameP95Ms: 99.9, visibleDispatchToRafP95Ms: 99.9,

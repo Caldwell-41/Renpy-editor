@@ -90,8 +90,23 @@ cargo test -p loomlight-core --release --locked \
 ```
 
 Run SDK gates separately with their pinned archive and exact test path. Supply `--ignored`
-only for the two runtime SDK gates (ignored because they need an explicit archive), and
-always combine it with `--exact`. Specialist persistence/namespace cases stay excluded.
+only for explicitly selected SDK tests needing an archive, and always combine it with
+`--exact`. Specialist persistence/namespace cases stay excluded.
+
+Phase 1H additionally selects
+`renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate` with
+`LOOMLIGHT_RUNTIME_SDK_ARCHIVE` on each supported target. It creates and authors the
+representative game through real services, compares fixed source/media expectations,
+reopens, validates through explicit runtime trust and runs both routes from normal
+entry using the pinned SDK test driver. Original assets and outcome/source expectations
+live in `tests/fixtures/phase-1h/`. Its ignored state means ordinary core does not repeat
+SDK execution; a missing archive is a failure. The production workflow requires the
+named positive Cargo result and completion marker and retains the independent case log.
+The disposable driver sets SDL's dummy audio output before SDK audio initialization,
+so hosted runners need no speaker device. It records actual PCM initialization and
+music/SFX channel filenames before asserting them, and still requires real playback
+and stopping. This verifies decoding/channel state, not audible speaker output.
+The routine core also selects actual authoring/reopen after 4,097 terminal journals.
 
 For changes to starter GUI generation, explicitly select the ignored pinned-SDK
 regression `renpy::tests::official_sdk_starter_contains_runtime_gui_assets` with
@@ -517,8 +532,8 @@ increases or unsupported causal claims about application Save routing.
 **Phase 1G completion, 2026-10-06:** both-platform native/human review, required
 qualification and exact-input integration are accepted in the
 [closeout ledger](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
-The staged completion sequence is historical. Phase 1H remains unselected; its
-integrated H01–H12 gates still belong to the existing brief. Apply the narrow human
+The staged completion sequence is historical. Phase 1H is selected; its
+integrated H01–H12 gates belong to the active acceptance brief. Apply the narrow human
 reuse policy below; do not automatically repeat the accepted full human session.
 Corrections invalidate affected results and require relevant cross-platform rechecks.
 
@@ -797,8 +812,14 @@ change the transform, retain 500 nodes/2,000 paths, stay visible/focused and mai
 positive clipped graph/representative-node intersection. Representative IDs, positions,
 dimensions and viewport geometry are checked outside the timing interval.
 
-The visible sequence reports both first-rAF and **second-rAF rendering-opportunity**
+The visible sequence reports both first-rAF and **next-advancing-rAF rendering-opportunity**
 intervals against the unchanged <100 ms p95 objective; initial layout remains <2 s.
+The second endpoint requires a timestamp strictly greater than the first. Equal
+timestamps are retained and awaited for at most eight further callbacks, including
+all elapsed wait time in the same input sample. Backward/malformed or exhausted
+sequences still fail; no input is replayed or discarded. Ordinarily this is the
+second callback. The original two-callback endpoint and failures remain historical
+evidence; changed probe identities must qualify again on both targets.
 Neither callback proves physical presentation. Rendering opportunities can include
 previous browser work. Under TEST-P2 all five Chrome timing thresholds are diagnostic;
 functional/evidence failures still block. Fast dispatch does not erase an overrun or
@@ -956,6 +977,13 @@ busy observations and a 1200 ms initial Story read. A separate early-navigation
 regression switches to Source while that read is held and asserts the application
 queues its Source request without contention. Commit drivers wait for the accepted
 form receipt; debounced status copy is not an operation-completion signal. Native
+UI-refresh waits for the rendered draft inventory to acknowledge retention before
+its direct IPC observation; the draft warning alone also covers unretained input.
+`tests/ui-refresh-retention.browser.mjs` reproduces the original probe read/write
+collision, proves exact input retention with the corrected ordering, and rejects a
+genuine refused write without polling the backend. The original backend dirty-count
+assertion and shared 20-second retention deadline remain required. These fixture controls do
+not close a native target failure; a changed packaged probe requires renewed evidence.
 UI-refresh reports distinguish opening/Story/Source stages and retain bounded failure
 state. The smoke path rejects unavailable clicks. Unit checks retain an
 ambiguous-prefix negative selector case, non-busy rejection and busy-deadline failure.

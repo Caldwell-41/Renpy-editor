@@ -1,72 +1,102 @@
 # Current outcome handover
 
-## Phase 1G integration and closeout — 2026-10-06
+## Phase 1H integrated acceptance — 2026-10-07
 
-**State: complete; accepted Phase 1G integrated with documentation closeout.**
-Genuine macOS ARM64 execution; required evidence Windows x64/macOS ARM64. User selected
-PR #17 conflict reconciliation/review, affected checks, reviewed merge and 1G closeout.
-No 1H selection, Phase 2 implementation or optional Git work.
+**State: review_ready.** Final exact run and complete retained evidence are audited;
+H01–H12/applicable sections 3–4 have no open required gate. The selected outcome is
+complete to independent user review. No pending CI/local SDK/editor/game/profile or
+terminal operation. Do not resume the obsolete CI wait or dispatch another matrix.
+[Final evidence matrix, self-review, limits and package hashes](../tasks/active/phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness).
 
-**Verified integration:** [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17)
-merged **2026-10-06 13:46:39 UTC** at
-**`295a189925ac5c9c8655569cb29dd10236d7201d`**. Parents:
-`4d7ba0333c48d60242a9a42d3e079fea499a5531` and reviewed conflict-resolution head
-`7c4e55fea622c3c5390702de2600c61e8bfb2209`; both histories preserved.
-Main tree **`2418b0b1304af753d09ee89b6808553a8323def4`** equals reviewed head.
-Only conflict `quality.yml`: retain qualified observed-flow workflow, superseding
-main's older isolated profiler under ADR 0010. No application/test/workflow/dependency
-change. Both target manifests match **132/132** packaged inputs; every workflow,
-repository script and spike Git blob also equals qualified `c137b67`. No extra package
-matrix justified or dispatched. No cross-SHA automated execution claimed.
+**Ownership/review boundary:** branch `acceptance/phase-1h-vertical-slice`, attached
+[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), presented for independent
+review. Continue from its latest published review-ready evidence checkpoint following
+exact tested candidate **`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. Correction implementation begins
+`efd8a6b`; `ba01a84` includes the final shared retention deadline and prior terminal
+audit. Subsequent `1910a29` and this completion publication change only docs and do not
+become new tested package SHAs. Main **`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`**,
+planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`** and its two unpublished
+commits are untouched. No merge, Phase 1 acceptance/closure, Phase 2, optional Git,
+signing or branch deletion. Codex audit machine macOS ARM64; native test hosts Windows
+x64/macOS ARM64. Independent review/acceptance is the next decision, not remaining
+work inside this completed acceptance goal.
 
-| Evidence | Exact identity / result |
-| --- | --- |
-| Qualified production / quality | **37461862928/1**, **37461858768/1**, **`c137b6706ed2dc05aac8dfe692689829c785a52a`**, qualified tree **`388789432601cd4cf6b0222ed08243541d1f3301`**; required actual gates Pass, 6 cases each host/cleanup and retained packages |
-| Frozen runtime | **`ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1`**; sole extra qualified input is necessary lifecycle `#[cfg(test)]` alignment; runtime behavior unchanged |
-| PR integration quality | [37472444622](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37472444622)/1 on **`7c4e55fea622c3c5390702de2600c61e8bfb2209`**; actual validator/rejection/selector steps Pass |
-| Merged-main quality | [37473497347](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37473497347)/1 on **`295a189925ac5c9c8655569cb29dd10236d7201d`**; actual required steps Pass; optional diagnostics unselected/skipped |
-| Local integration | Validator 340 files, Q1 rejection/selector audit, retention 9/9, frontend 91/91/no skips, typecheck/build, Rust formatting/whitespace Pass; six retained reports per host rechecked Pass |
-| Human/native review | Windows “all working, happy”; Mac “all working”; navigation/input, routes/Save/staleness/Stop/reopen, diagnostics, resize/scaling/shortcuts, picker/import/progress and grip-cancel map to unchanged governing inputs; original binaries retain their own identities |
+**Terminal qualification:** [37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148),
+production-scaffold.yml, workflow_dispatch, `upload_packages=true`, exact candidate/tree
+above, created 2026-10-06 **20:47:59 UTC**. Preflight **112493828798** Pass at 20:51:02;
+Mac **112495119976** Pass at **21:05:47**, Windows **112495119964** Pass at
+**21:09:55**. Overall success, attempt 1. Completed quality **37529126800/1** at
+`ba01a84` and **37529411501/1** at docs checkpoint `1910a29` have actual required
+validator/Q1 rejection/selector Pass; optional profile/diagnostic jobs unselected/skipped.
+No new dispatch or expensive local execution in the final audit.
 
-All original package hashes/artifact IDs, test counts, human scope, profile restoration,
-failed runs and measurements remain in the [terminal acceptance ledger](../tasks/archive/2026-10-06-ui-design-review.md#both-platform-terminal-acceptance-and-transfer--2026-10-06)
-and [final integration record](../tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
-Ignored `.toolchains/reports/bounded-mac-windows-c6/correction-4-artifacts/` retains four
-verified ZIPs beyond 2026-10-13 expiry, installers/EXE/app-tar/manifests/logs. Integration
-receipts are ignored under `.toolchains/reports/phase-1g-integration/`. No logs/builds/
-private paths or SDK downloads committed. Mac 293 cancellation hashes unchanged,
-3,227 original profile hashes restored; Windows profiles and temporary media restored.
+**Requirement proof:** 94/94 frontend/preflight and source-browser controls Pass.
+Routine broad core 192 Mac/187 Windows, documented 41/38 ignored and three specialist
+filters, no failures. All 46 concrete ordinary regressions per host match actual
+executed Pass lines; ten additional runtime/diagnostic/long-history/asset/result controls
+also verified. Separate official archive creation/download/runtime/diagnostic gates
+execute 1/1 each; cache-miss download skip is not a skipped target test. New SDK gate
+1/1 per host, 79.401s Mac/78.051s Windows including cleanup, 12 bounded adapter spawns
+each. Both normal-entry routes and metadata-free copy pass 29/29 assertions: actual
+PCM/channel paths, exact large default/int64 extrema, Boolean/string state, dialogue,
+showing/placement, menus/Prefs/save/load/history/rollback/reconvergence/Return and
+stop/hide. Wrong `trust == 1` assertion genuinely rejects exit 1; no rejecting capture.
+Three correctly attributed route captures per host visually reviewed. Expected manifest
+SHA `d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638` matches both
+actual authored manifests; real golden/source/history/reopen/compiled-cache assertions hold.
 
-**Closeout:** completed 1G/UI/review-delivery/testing-policy records archived; retired
-G1-O experiments retained as NO-GO/superseded, never passed. Canonical contracts remain
-in PRODUCT/ARCHITECTURE/DATA_MODEL/TRANSACTIONS/SECURITY/UI/ADRs; roadmap/Phase 1 plan/
-TESTING/INDEX now reflect 1G closure. One [historical acceptance handover](../tasks/archive/2026-10-06-phase-1g-acceptance-handover.md)
-is justified by unique package/profile/restoration/failure/planning receipts and linked
-historical anchors. One live CURRENT/HANDOVER. Docs-only publication uses validator,
-link/privacy/whitespace review and ordinary main quality; it is not a new qualified
-package or tested integration identity. Final publication SHA is discoverable from
-main without a receipt-only commit chasing itself.
+All **six packaged native cases per host Pass**, exit 0/no timeout/cleanup true. Windows
+UI-refresh now passes all 11 checks in **7.781s**, Mac in **4.929s**; acknowledged Source
+retention, backend dirtyCount, geometry, Settings/draft and preferences are required.
+The local collision and genuine refused-write controls remain rejecting; no input replay,
+assertion waiver or larger shared 20s deadline. Real boundary reports prove all nine
+booleans, target-specific synthetic Ctrl/Cmd command trace, denial and actual primary/
+secondary/window activation. Terminal privacy scans Pass and both inventories contain
+97 npm/519 Cargo entries. Runtime browser focus/1100/640/no overflow and Branches
+functional/evidence navigation/held-refresh/resize/cleanup Pass, 30 original +30 visible
+strictly advancing callbacks each. Three enforced real-service 500 Scene/2,000 edge
+samples per target Pass. Source/game content remains authoritative; test instrumentation
+is isolated from normal projects/product paths.
 
-**Limits/budgets:** Mac Chrome timing stays diagnostic Fail; browser functional/native/
-package acceptance Pass. Recorded physical/native-input and assistive-tech limitations,
-unsigned/not-notarized packages, deliberate attack/crash exclusions and >500 kB frontend
-bundle advisory remain. Initial final **1/1 consumed**, correction dispatches **4**;
-remote series **6 app builds/46 starts**; local Mac **19 builds/77 starts/7 SDK menus**,
-Windows **6 production+1 unqualified/4 failed setup/21 starts/0 SDK menus**, unchanged.
-Integration added zero app builds/native starts/package dispatches/retries. Preserve all
-unique failures including **37459347476/1**; no counters reset by this chat.
+**Rendered/human limits:** Runtime/Diagnostics captures on both hosts reviewed and
+readable; renewed native Scene/Source/Branches/supporting checks Pass. Final diff has
+only test modules/helper access, fixtures, probes/browser ordering/evidence workflows
+and docs; governing product renderer/native input/CSS/dependencies/IPC/security/runtime
+behavior is unchanged from accepted 1G. Each reused navigation/shortcuts/play/diagnostic/
+resize/scaling/picker/import/cancellation human case has an impact map in the ledger,
+with original Windows “all working, happy” and Mac “all working” identities/limits.
+No repeated human session or new physical-input/screen-reader claim. Mac Chrome
+rendering-opportunity p95 **168.3ms** remains diagnostic Fail under existing TESTING;
+mandatory functional/enforced service gates Pass. Unsigned/not-notarized packages,
+original display/native-input/assistive-tech limits and no audible speaker evidence
+remain. No general cross-SHA automated acceptance or unimplemented reuse policy.
 
-**Ownership/continuation:** this checkout is main; unused fully integrated PR #17 feature refs
-retired locally/remotely after ancestry, exact remote-head and worktree checks. Separate planning worktree remains
-**`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**, clean, **ahead 2**; remote planning
-**`267ec2a35ed94bbf565594200cd729c87c6fb11c`** unchanged. Those unpublished commits and
-its earlier publication-rejection boundary remain intact; no push retry. Other open PRs,
-unreviewed dependency/abandoned CI work and archive refs remain. No owned app/game/
-profile/package-workflow operation pending.
+**Retained evidence:** complete artifacts are downloaded ignored under
+`.toolchains/reports/phase-1h/production-37529174148/{macos,windows}/`, 42 files per host.
+Mac artifact **11444371823** expires **2026-10-13 21:05:38 UTC**, Windows
+**11445325215** expires **21:09:35**. Both 145/145 source hashes, seven browser source
+hashes, executable/bundle/input receipts match exact tested inputs. Mac executable
+`a671f34c9f8918a929da0695a23c1b676e3f059a33898c198e2461803bbaf151`; Windows
+`821dd0016f013b3a28379770c9bdb0d31d026245a930c7eb95ec6812b992ea8d`.
+Exact tar/receipt values and available manual installer artifact IDs are in the ledger;
+installers were not launched during audit. Prior artifacts and all original SDK/audio/
+frame/UI-retention failures remain in production-37515083319/production-37522794804 and
+local logs. No logs, private paths, downloaded SDKs/build output committed.
 
-**Next actual state:** [Phase 1H](../tasks/active/phase-1h-vertical-slice-acceptance.md)
-**`not_started`**, prerequisite 1G satisfied, waiting only for explicit selection.
-On selection inspect fresh refs/ownership, use the existing brief and H01–H12; reuse
-unchanged human evidence under TESTING, execute applicable integrated automated gates
-on both hosts. No new goal/branch/dispatch created here. Phase 1 itself remains open;
-Phase 2 and optional Git remain outside this completed outcome.
+**Budget/result history:** four production requests, three confirmed matrices, one
+ambiguous HTTP 500 retained. All initial/corrective/dispatch-retry/fixed-probe allowances
+used; no further dispatch authority. Integrated fixture cumulative **14 local +6 CI
+invocations =20**, **96 local +72 CI measured spawns =168**; earlier uninstrumented/other
+runtime children excluded. Five target package builds (three Mac/two Windows), 30 native
+cases (29 Pass/one historical Fail), cleanup true; three Mac/one Windows primary-secondary
+boundary sequences. Zero local desktop builds/editor launches. Fixed native retention
+Pass resolves the open acceptance gate; the exact original unrecorded host refusal
+cause remains an inference supported by the reproduced mechanism. Nothing rewrites
+failed results or resets hypotheses/budgets.
+
+**Next action:** independent review of PR #18 and this exact evidence, then a separately
+authorised acceptance/integration decision. Preserve the active task until that decision;
+archive/consolidate only at authorised closure. No pending process, recovery state or
+manual test is assigned to the user. No additional matrix to validate documentation,
+no polling/watcher/second writer/new goal for this completed outcome, no merge or Phase 2.

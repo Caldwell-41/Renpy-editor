@@ -1832,3 +1832,8 @@ fn fail_journal(store: &JournalStore, journal: &mut Journal, code: ErrorCode) ->
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+pub(crate) fn seed_terminal_journals_for_acceptance(root: &Path, count: usize) {
+    tests::create_terminal_journals(root, count);
+}
