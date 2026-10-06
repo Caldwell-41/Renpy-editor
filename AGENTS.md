@@ -3,10 +3,11 @@
 ## Mission and entry points
 
 Project Loomlight is a single-user Windows x64/macOS ARM64 visual Ren'Py authoring
-tool. Read [CURRENT](docs/status/CURRENT.md) for project state,
-[HANDOVER](docs/status/HANDOVER.md) for the exact continuation branch/checkpoint,
-and the linked active task for approved scope. Do not duplicate volatile phase,
-branch or approval state in this guide. ADR 0003 selects Tauri 2; ADR 0005 defines
+tool. [CURRENT](docs/status/CURRENT.md) owns project state;
+[HANDOVER](docs/status/HANDOVER.md) owns the exact continuation branch/checkpoint;
+the linked active task owns approved scope. Use the selective reading rules below.
+Do not duplicate volatile phase, branch or approval state in this guide.
+ADR 0003 selects Tauri 2; ADR 0005 defines
 version-pinned staged project creation.
 
 ## Invariants
@@ -35,9 +36,12 @@ version-pinned staged project creation.
 Follow [WORKFLOW](docs/WORKFLOW.md). Requirements, acceptance criteria, decisions and
 continuation state belong in the repository; prompts select a coherent outcome.
 
-1. At goal entry, read CURRENT, HANDOVER, the relevant active-task sections and closest
-   nested AGENTS.md. Read ADRs/code/evidence as needed; search before reading broadly.
-   On same-thread continuation, check changed state rather than repeat all orientation.
+1. At a new substantive outcome or genuine transfer, read CURRENT, HANDOVER and only
+   the selected active-task sections. Narrow tasks use applicable instructions and
+   relevant task/contracts; consult live status when phase, branch, acceptance or
+   continuation matters. Follow the closest nested AGENTS.md. Search before reading
+   broadly; read ADRs/code/evidence as needed. On same-thread continuation, check changed
+   or missing state rather than repeat all orientation.
 2. Inspect current refs, the working branch/PR and available worktree ownership.
    Preserve unrelated/local work. Never reset to a historical SHA from an old prompt.
 3. Complete ONE approved outcome per goal, using small internal checkpoints. Include
@@ -45,10 +49,11 @@ continuation state belong in the repository; prompts select a coherent outcome.
    as authorised. A checkpoint/commit is not automatically a stop or new-chat boundary.
    Pause for a genuine decision, unavailable capability, budget limit or external wait;
    name the actual reason. Do not silently widen a review-only or otherwise narrow task.
-4. Record meaningful decisions and coherent checkpoints without rewriting a full
-   handover after every step. Before a real pause, transfer or completion, update the
-   existing HANDOVER and task ledger with the exact state, evidence, pending operation,
-   remaining scope/budget and continuation. Publish and verify; disclose local-only work.
+4. Record meaningful decisions, attempts and results in the owning task ledger.
+   Before a real pause, transfer or completion, replace the live HANDOVER continuation
+   with exact state, evidence links, pending operation, remaining scope/budget and next
+   action. Update CURRENT only when overall project state changes. Follow WORKFLOW's
+   status-document guidance; publish and verify as authorised, disclosing local-only work.
 5. Resume the SAME goal in the SAME chat after a workflow wait by default. Give the
    user the actual client pause/resume control and a short continuation message, not
    a replacement /goal. A new goal is for a different outcome; a new chat for the same
@@ -56,8 +61,9 @@ continuation state belong in the repository; prompts select a coherent outcome.
    New/replacement goal prompts retain machine, test-host and reason fields and the
    4,000-character cap. Ordinary same-thread resume messages need not repeat the plan.
 
-Keep one live HANDOVER.md. It supports recovery and transfer, not mandatory context
-resets. Preserve durable learning in canonical docs/tests and evidence in the ledger.
+Keep one live HANDOVER.md; superseded continuations belong in the owning ledger or Git
+history. It supports recovery and transfer, not mandatory context resets. Preserve
+durable learning in canonical docs/tests and evidence in the ledger.
 
 ## Proportionate delivery and review
 
@@ -116,10 +122,12 @@ git diff --check
 Run checks relevant to the changed scope, cheap checks first. Stack spikes remain
 isolated; do not present a spike as the production application.
 
-Keep agent use bounded: start with the live status, handover, selected task and
-relevant code or diffs. Read historical ledgers only when the active task points to
-them or they contain needed evidence. Push coherent checkpoints and report compact
-test counts, skips and relevant failure excerpts instead of full successful logs.
+Keep agent use bounded: follow the selective entry rules and read relevant code/diffs.
+Archive links locate evidence; they do not require loading an entire ledger. For a
+needed or user-requested historical review, follow a section-specific link or search
+by issue, date, candidate or result and read the matching sections. Push coherent
+checkpoints as authorised and report compact test counts, skips and relevant failure
+excerpts instead of full successful logs.
 Do not create receipt-only commits that chase their own SHA.
 
 ## Waiting and CI cost controls
@@ -170,6 +178,7 @@ roadmap documents; Phase 1 milestones remain in
 
 Update canonical docs with behavioral changes. At task closure, consolidate lessons,
 archive the completed plan/evidence, remove redundant transient handovers or retain
-only a justified historical record, repair links, and reset CURRENT/HANDOVER to the
-next actual state. Never delete unique failure evidence or unresolved recovery state.
+only a justified historical record, repair links, and replace CURRENT/HANDOVER with
+the next actual state. Follow [status-document maintenance](docs/WORKFLOW.md#status-document-maintenance).
+Never delete unique failure evidence or unresolved recovery state.
 Historical snapshots do not override live instructions.

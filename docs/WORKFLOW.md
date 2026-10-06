@@ -28,11 +28,16 @@ files. PRs link to the canonical plan; comments may record publication/CI receip
 
 ## Goal entry and continuation
 
-At the start of an outcome or a genuine handoff, read AGENTS, CURRENT, HANDOVER and
-only the active-plan sections relevant to that outcome. Inspect remote refs, branch/PR,
+At the start of a substantive outcome or a genuine handoff, read AGENTS, CURRENT,
+HANDOVER and only the active-plan sections relevant to that outcome. Narrow tasks use
+applicable instructions and relevant task/contracts; consult live status when phase,
+branch, acceptance or continuation matters. Inspect relevant remote refs, branch/PR,
 recent changes and available local worktree ownership. Preserve unpublished and unrelated
 work; report unavailable cross-host state. Verify that the recorded candidate exists.
-Read relevant code, diffs and directly linked evidence rather than every historical ledger.
+Read relevant code, diffs and selected evidence sections. A linked archive is a lookup
+destination, not a requirement to read the whole historical ledger. When needed or
+requested by the user, follow its section link or search by issue, date, candidate or
+result, then read the matching sections. INDEX routes to owning active/archive records.
 
 Within the same thread, retain the established plan and decisions. After a pause,
 check the pending operation, fresh refs/relevant diff, local edits and ownership.
@@ -197,9 +202,10 @@ privacy or functional risk may still block; do not dismiss it for lacking a numb
 requirement. Distinguish a demonstrated defect, missing required evidence, a hypothesis
 and optional improvement. New capability/threat-model scope needs an explicit decision,
 not an automatic expansion of acceptance. Keep safety and honest failure reporting.
-CURRENT/HANDOVER carry a short capability table separating implemented, automated proof
-and native/human acceptance, plus one next action. Link detailed evidence instead of
-copying the historical ledger. Preserve historical failures; label superseded directions
+CURRENT carries a short capability table separating implemented, automated proof
+and native/human acceptance; HANDOVER carries the selected outcome's continuation
+and one next action. Link detailed evidence instead of copying the historical ledger.
+Preserve historical failures; label superseded directions
 rather than rewriting results or turning past exclusions into passes.
 
 ## Test host routing and ownership
@@ -236,15 +242,38 @@ early tests, fewer speculative/full-matrix reruns; no quantified saving is claim
 
 Record meaningful decisions, completed increments, defects and evidence as they arise.
 Do not rewrite the full handover or create receipt-only commits at each small step.
-Before a genuine pause, transfer or completion, update the existing HANDOVER and task
-ledger once with sufficient recovery state. Keep detailed history in its owning ledger;
+Before a genuine pause, transfer or completion, update the task ledger and replace the
+live HANDOVER continuation once with sufficient recovery state. Update CURRENT when
+overall project state changes. Keep detailed history in its owning ledger;
 CURRENT/HANDOVER must agree about the live outcome and distinguish evidence from approval.
+
+### Status-document maintenance
+
+CURRENT is the project overview: accepted baseline, capability/acceptance state,
+active workstreams and links. HANDOVER is the selected outcome's recovery record:
+continuation location and candidate, key acceptance limits, pending operation/ownership,
+material recovery state, cumulative budget reference and next action. Detailed procedures,
+attempts, measurements and receipts belong in the owning task ledger; lasting behavior
+and decisions belong in canonical technical docs/ADRs.
+
+Aim for 200-400 words in CURRENT and 600-1,200 in HANDOVER. These are review targets,
+not minimums or hard limits: shorter complete records are welcome; unique recovery needs
+may justify more space. At each real handoff, review word counts and briefly explain any
+necessary excess. Do not pad a short record or omit a needed recovery/acceptance fact.
+
+Replace superseded live text instead of appending another earlier continuation. Link
+directly to relevant evidence/checklist headings rather than duplicating them. Archive
+links are for selective lookup, not default full-ledger reading. Preserve existing
+justified archives and unique failures; create no snapshot for each chat. Git history
+retains previous live wording. No new size validator is required.
+
+### Handover fields
 
 | Field | Required content |
 | --- | --- |
 | Outcome/checkpoint and state | Approved outcome, completed increments, implemented versus accepted status. |
 | Continuation location | Branch/PR, candidate and available ownership/local-only state. |
-| Evidence | Relevant commands/results; exact workflow/run/attempt/SHA and artifacts when applicable. |
+| Evidence | Key results and exact workflow/run/attempt/SHA when applicable; section links to detailed commands, counts, artifacts and receipts in the owning ledger. |
 | Pending operation | Last observed status, observation time, unresolved identity/access and artifact expiry. |
 | Remaining work | Next action, relevant paths, blockers, approval boundary and cumulative budget reference. |
 | Resume route | Same thread by default; actual client control or user action needed, not an invented helper. |
@@ -371,6 +400,11 @@ lessons before archiving a completed task. Preserve unique acceptance/failure ev
 and unresolved issues. Archive the completed task/ledger with a final status and update
 INDEX/CURRENT/HANDOVER links. Pure duplicate handovers can be removed once useful
 content is preserved; Git history retains earlier live HANDOVER revisions.
+
+Finish with short live status records for the next actual state under
+[status-document maintenance](#status-document-maintenance). A completed milestone's
+old checklist and next-step prompts remain historical; do not present them as pending
+work or treat completion as selection of the next milestone.
 
 Do not generate a snapshot for every chat. Existing historical snapshots may remain
 until a link/evidence audit proves they can be consolidated. Never remove runtime

@@ -1,8 +1,11 @@
 # Documentation index
 
-Start with [current status](status/CURRENT.md), the
-[continuation handover](status/HANDOVER.md), and the relevant brief in
-[`tasks/active`](tasks/active). Follow the
+For a new substantive outcome or genuine transfer, start with short
+[current status](status/CURRENT.md), the [continuation handover](status/HANDOVER.md),
+and only the relevant brief sections in [`tasks/active`](tasks/active). Narrow tasks
+use applicable instructions and relevant contracts/task sections; consult live status
+when phase, branch, acceptance or continuation matters. Same-chat resumes check changed
+or missing state. Follow the
 [repository-first delivery workflow](WORKFLOW.md): detail and handover state live
 here; goals select one coherent outcome with internal checkpoints. Workflow waits
 resume the same goal/thread on user command rather than require a new chat.
@@ -98,3 +101,11 @@ redundant handovers and repair links. No new handover snapshot is required for e
 chat. The completed [Phase 0 corrective review](tasks/archive/2026-09-13-phase-0-corrective-review.md)
 and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md)
 remain historical evidence.
+
+For needed or user-requested historical review, use the concern links above to find
+the owning ledger in `tasks/active` or `tasks/archive`. Follow the specific evidence
+heading, or search by issue, date, candidate or result and read matching sections.
+An archive link does not require reading the whole ledger. Git history supplies earlier
+CURRENT/HANDOVER wording. [Status-document maintenance](WORKFLOW.md#status-document-maintenance)
+defines ownership, replacement at handoff and soft size targets; future continuation
+records must not accumulate completed checkpoints.
