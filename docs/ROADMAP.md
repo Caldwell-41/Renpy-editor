@@ -162,6 +162,14 @@ Private distribution requires an actually private repository or another reviewed
 
 Early genuinely private packages may be unsigned after CI verification and clear limitation disclosure. Signing and macOS notarisation follow once distribution stabilises, before wider release. Release/update credentials remain protected from untrusted PRs. Each release maps to a tagged commit and records dependency/licence review, SBOM/provenance planning, package-content privacy scan, install/launch evidence and known limitations. Reproducibility claims must state what was actually reproduced.
 
+**One-off 0.1.0 exception — 2026-10-07:** the user explicitly approved
+[v0.1.0](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0) as an early
+public prerelease with original unsigned/non-notarized Windows/macOS packages and
+unqualified installer paths disclosed. [Publication evidence](tasks/archive/2026-10-07-release-0.1.0.md)
+records the tagged source, original qualification, asset checksums, licences/provenance
+and approval. This exception applies only to 0.1.0 and does not change later-release
+signing/notarisation or install/launch requirements.
+
 ## Evidence and cost discipline
 
 Use cheap targeted tests while developing and complete supported-target gates for the final changed code/test/workflow tree. Keep routine Phase 0 matrices manual-only, avoid duplicate expensive matrices for unchanged trees, and do not build packages for documentation-only commits. Preserve lightweight evidence routinely and full packages only when explicitly needed. Record failures and skips accurately; neither a planning amendment nor an old green run closes a new gate.

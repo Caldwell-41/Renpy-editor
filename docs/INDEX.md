@@ -52,7 +52,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Historical G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/archive/2026-10-06-phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
 | Accepted Phase 1H, independent review, integration and retained target/failure evidence | [tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md) |
-| Prepared 0.1.0 publication and public unsigned-preview decision | [Release task](tasks/active/release-0.1.0.md) |
+| Published 0.1.0 preview, approved exception and verified assets | [Release task](tasks/archive/2026-10-07-release-0.1.0.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |

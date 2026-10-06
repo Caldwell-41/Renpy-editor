@@ -181,6 +181,12 @@ verification. Signing/notarisation and a secured update channel are required bef
 broader distribution. Never embed signing keys in CI variables available to untrusted
 pull requests.
 
+**Approved 0.1.0 exception — 2026-10-07:** the early public prerelease uses original
+unsigned/non-notarized packages, with unqualified installer paths explicitly disclosed,
+following the user’s specific approval. The [publication record](tasks/archive/2026-10-07-release-0.1.0.md)
+retains exact source/build/asset evidence. This is a one-off distribution exception;
+future broader releases remain subject to the baseline above.
+
 If a secret enters history: stop, revoke/rotate first, assess exposure, then coordinate
 history remediation rather than silently rewriting. If source loss/corruption is
 suspected: stop writes, preserve recovery data and Git state, and produce a redacted

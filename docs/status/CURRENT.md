@@ -24,12 +24,15 @@ assistive-technology/display limits, unsigned/not-notarized packages and no audi
 speaker or installer-execution claim remain. Complete raw evidence is downloaded before
 October 13 expiry; failed evidence is preserved.
 
-**Selected follow-up:** [0.1.0 publication](../tasks/active/release-0.1.0.md) is prepared,
-awaiting the user's public unsigned-preview decision. Original Windows/macOS installers,
-notes, checksums, provenance/licence assets are staged; no tag or Release exists yet.
-Current policy requires signing/notarisation and install/launch evidence before public
-binary distribution; an explicit early-preview exception has been requested.
+**Published:** [Loomlight 0.1.0](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0),
+early public prerelease, release **405202404**. Tag `v0.1.0` targets `45ffe24`; original
+qualified installers, checksums, provenance and licence assets are published. All eleven
+uploaded/downloaded asset hashes verified. The user explicitly approved unsigned/
+non-notarized packages and unqualified installer paths as a one-off public-preview
+exception. [Archived publication](../tasks/archive/2026-10-07-release-0.1.0.md) owns exact
+approval, tag/build identities, asset hashes and limitations.
 
-Phase 2/3 remain planning only and optional Git remains deferred. The planning worktree
-at `2c5a164` and its two unpublished commits are untouched. [HANDOVER](HANDOVER.md)
-owns exact publication continuation.
+**Next actual state:** no implementation selected. Phase 2/3 remain planning only and
+optional Git remains deferred. Planning worktree `2c5a164` and its two unpublished
+commits are untouched. [HANDOVER](HANDOVER.md) owns the completed publication record
+and preserved-work details.
