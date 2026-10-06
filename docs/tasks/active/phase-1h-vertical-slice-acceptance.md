@@ -2,7 +2,8 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `awaiting_ci` (Goal runtime pause not claimed).
+**Execution state:** `awaiting_decision`; terminal first matrix failed, harness corrections
+published with focused local proof; no new dispatch authorised. Goal runtime pause not claimed.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -205,6 +206,10 @@ missing/zero/ignored/failed required Cargo results and incomplete packaged clean
 | H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | Existing real dispatch/service and frontend/native gates selected; copied-UUID consent and zero-process untrusted inspection Pass on local Mac; target evidence open |
 | H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | New exact native Mac long-history test Pass (1/1, no skip, 77.70s); target suite/resource gates open |
 
+This initial mapping records the pre-dispatch local state. The terminal target audit
+and changed-candidate requirements below supersede its pending-target entries; no
+automatic acceptance transfers to the corrected probe.
+
 Section 3 mapping: graph inventory/partial/missing/unknown/duplicate/self-loop/limits use
 `scene::tests::flow_*`, Source navigation and the fixed reconvergent fixture; preparation
 uses real runtime SDK and frontend preparation handlers; trust uses stale SDK/input,
@@ -354,7 +359,7 @@ Focused SDK invocations use:
 with official archive, disposable profiles/portable token root and native display access.
 These are development observations, not yet final coherent-candidate package proof.
 
-### Published candidate and manual same-thread wait
+### Historical initial candidate and manual same-thread wait
 
 Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
 `acceptance/phase-1h-vertical-slice`, candidate
@@ -392,3 +397,132 @@ places Pause/Resume in the Goal progress row above the composer; direct installe
 UI inspection was unavailable, so no UI action or changed lifecycle state is claimed.
 Use that client control and later resume this chat with: `The workflow is complete;
 audit run 37515083319/1 and continue the existing goal.`
+
+
+### Terminal first matrix and bounded corrections
+
+**Decision pending:** one additional supported-target corrective qualification matrix
+is requested, with no automatic retry, on the published correction inputs. The initial
+1/1 final-matrix allowance is consumed. WORKFLOW's cumulative-budget and manual-wait
+rules require this decision; ordinary resume does not grant it. No dispatch is pending.
+
+Run [37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319)
+finished **failure**, exact candidate `3d484ef1b0164e15b21c869f7494410daa3fed9d`, tree
+`778f8b189b9f301823e6d4ab003927ec7636f6ff`. Preflight passed. macOS ARM64 job
+112446613576 ended 2026-10-06 19:17:11 UTC; Windows x64 job 112446613694 ended
+19:12:28 UTC. Target wall times were 19m26s/14m45s, not billed usage measurements.
+
+| Required evidence at tested candidate | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Routine core, including exact assets/result guard and actual authoring after 4,097 records | 192 passed, 0 failed, 41 ignored, 3 filtered; 53.23s | 187 passed, 0 failed, 38 ignored, 3 filtered; 167.36s |
+| Three actual service observed-flow samples, 500 Scenes/2,000 edges | Pass; initial 44.813/33.611/46.313 ms; warm 47.863/32.818/62.081; accepted 14.108/14.819/13.727 | Pass; initial 327.375/336.352/307.479 ms; warm 326.494/320.291/340.451; accepted 28.332/29.993/28.310 |
+| Ordinary archive lifecycle + SDK download handoff | 1/1 each, 65.84s/28.86s | 1/1 each, 87.97s/33.85s |
+| Real SDK runtime service + diagnostics | 1/1 each, 103.20s/54.64s; compile 8,108 ms/lint 9,534 ms | 1/1 each, 97.92s/50.42s; compile 8,524 ms/lint 8,843 ms |
+| New authored fixture, compile/compiled lifecycle, untrusted/copy trust, routes | Pass 1/1, 110.36s, 12 bounded adapter spawns/cleanup; three positive cases 28/28 assertions, wrong outcome rejects exact integer | Authoring/reopen/validation/compiled lifecycle/copy trust completed; positive cases fail music assertion after first five assertions; gate 140.66s/12 spawns/cleanup |
+| Runtime browser focus/1100/640/no overflow | Pass, page errors empty | Pass, page errors empty |
+| Branches browser functional/evidence | Fail at visible input 21: repeated callback timestamp; incomplete probe, cannot classify final functional pass | Pass; timing diagnostics Pass |
+| Desktop/package, six packaged cases + cleanup | Desktop 1/1, package built; all six required cases Pass/exit 0/no timeout/cleanup | Skipped after SDK gate; all six reports and executable missing |
+| Packaged authoring, denial and single instance | Terminal boundary report Pass for all fields; primary ready/secondary rejected | Skipped/missing |
+| Terminal privacy/dependency/licence inventory | Scan success; 97 npm/519 Cargo entries retained | Scan fails ENOENT for unbuilt executable; inventory skipped. No secret exposure demonstrated |
+
+Ignored selectors preserve the documented specialist exclusions; three ordinary
+separate gates are explicitly filtered and actually passed. SDK cache-hit downloads
+were skipped, with archive-backed tests executed; these are not skip-marker passes.
+H01–H12 ordinary named core/history/recovery/Source/graph/session/limit regressions
+ran on both hosts; SDK lifecycle/runtime/diagnostic gates ran on both. Integrated
+routes H02–H04/H09 fail on Windows, and section 4 browser evidence fails on Mac.
+Windows package/section 4 gates are missing. Both-target acceptance remains open.
+
+Mac route cases: rooftop/riverside/metadata-free 15,866/14,099/14,623 ms, all exit 0;
+wrong-outcome control 6,129 ms, exit 1 specifically `trust == 1`, counted as intended
+rejection. Observed exact large integers, dialogue, playing music/SFX, showing/bounds
+match the fixed manifest. Three separately attributed captures were reviewed: rooftop
+Alex/right and riverside Morgan/left, expected dialogue and 64px original swatches;
+surrounding checkerboard is intentional fixture size. No capture under rejecting case.
+
+Retained/downloaded artifacts: Windows **11437705996**, 221,211 bytes, expires
+2026-10-13 19:12:23 UTC; Mac **11437966834**, 5,696,457 bytes, expires 19:17:03 UTC.
+Evidence ignored under `.toolchains/reports/phase-1h/production-37515083319/`, including
+raw job logs and both artifacts. Mac `Loomlight.app.tar` SHA-256
+`ec43db415825579e562a851581570b5a31be995320af7f4e40963e59362ab2f2` verified;
+executable `1236085072050b2f59babcb02e5cf936f437a55c1db0dabee7b4fb99fd713ed5`;
+runtime input-report hash `a2b6dfc987243cd52a169c78925beb67f7727aff0d9c05d695ff284b972dfadd`
+verified against receipt, exact candidate/tree/run/attempt agree. Package remains failed
+qualification despite passing retained cases. Windows receipt says `not-built`, not
+an accepted package. No package result is transferred to correction SHA.
+
+**H-FIXTURE-1, first Windows matrix:** positive cases fail
+`renpy.music.get_playing() == "audio/music_theme.wav"` after 10s (13,073/13,030/13,067 ms),
+without process timeout. Wrong-outcome control passes 3,287 ms. Actual failed-channel
+value/PCM state was not recorded before assertion; absent hosted output is a provisional
+environment/harness hypothesis, not a proved product defect or vendor bug. Pinned
+8.5.3 source returns no playing filename when PCM is unavailable and attempts a dummy
+fallback after device-init failure. Production `apply_minimal_environment` clears
+inherited SDL overrides, so workflow env alone cannot establish the experiment.
+
+Correction `21c029a3f47bf5d191ebc00c593391d1469b3869` sets `SDL_AUDIODRIVER=dummy`
+only in the disposable driver at top-level init before Interface.start/audio init.
+It logs actual PCM/config/backend/channel state before assertions and adds required
+PCM initialization. Existing exact music/SFX/stop/hide/route checks and 10s/60s bounds
+remain. Real SDK decoding/channel state is tested; no audible-speaker claim, mock
+audio oracle, shipped runtime environment change or privilege exception is introduced.
+Focused native Mac local invocation 14 passes 1/1/no skip, **66.19s**, 12 bounded
+spawns/cleanup. Three positives **29/29** each, actual PCM/sound/dummy true and expected
+channel paths; case times 8,158/8,150/8,158 ms. Wrong outcome exit 1 in 2,590 ms.
+Evidence: `integrated-authoring-local-correction-1.log`, `cases-local-correction-1/`.
+This is a discriminating locally proven correction; hosted Windows still must run it.
+
+**H-FRAME-1:** Mac Chrome 152.0.7977.83 on Apple M1 Virtual, visible input 21,
+raf1/raf2 timestamp both **5818.832**, callback continuation times 5,823.3/5,828.1 ms.
+Transform/geometry/visibility/focus remained expected; first 21 visible samples passed,
+but assertion stopped remaining navigation/resize evidence. Existing diagnostic-only
+timing policy does not waive this malformed endpoint. Original pan p95 114.4 ms is
+retained as an overrun, not a production defect or pass. Cause of repeated browser
+timestamps is not established. [HTML callback processing](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks)
+uses frame timestamps and [High Resolution Time](https://www.w3.org/TR/hr-time-3/#dfn-coarsen-time)
+permits coarsening; neither supplies a physical presentation guarantee.
+
+Same correction commit awaits a strictly advancing callback timestamp, retaining equal
+observations for at most eight callbacks and including their entire delay in the same
+input interval. Backward/malformed/exhausted sequences reject; no input/measurement
+is replayed or discarded, no deadline/threshold is increased. The original strict
+`raf2Timestamp > raf1Timestamp` assertion remains. New helper is test-only and included
+in probe source hashes. Three rejection tests exercise actual repeated/advancing,
+exhausted and backward/nonfinite sequences; all seven timing/helper tests pass.
+Local probe invocation 1 was refused before browser launch (`listen EPERM`), retained
+unchanged. Invocation 2 with native localhost/browser access passes original/visible
+30/30, navigation/resize, empty page errors, complete cleanup and distinct reviewed
+captures. Chrome 154.0.8037.98/Apple M4, layout 56.8 ms; pan p95 17.3; dispatch max 0.5;
+visible first/advancing p95 16.9/33.8. No equal callback occurred locally; deterministic
+helper tests prove the equality path. Evidence: `browser-correction-1.log` and
+`browser-correction-1-native/`/log. Changed endpoint identities need both-target proof.
+
+Cumulative counters: **14 local integrated SDK invocations + 2 initial CI host
+invocations = 16**; measured bounded adapter spawns **96 local + 24 CI = 120**.
+Earlier uninstrumented launches and runtime child compile/lint are excluded, not
+fabricated. One production matrix dispatched, allowance **1/1 consumed**, no retry.
+One CI Mac desktop/package build; Windows desktop/package skipped. Six Mac packaged
+runtime cases and primary/secondary boundary launches executed; zero local desktop
+builds/editor launches. Browser correction: one CI Mac failure, one prelaunch local
+permission failure, one native local browser launch; Windows original probe passes.
+Historical problem records/counters remain. No third attempt of a disproved hypothesis.
+
+Correction checks: frontend **94/94/no skip/typecheck**, validator **353 files**, Rust
+format/SDK result guard, Q1 self-test/source-selector audit and whitespace Pass. No
+production behavior/dependency/IPC/packaging input change; unchanged 1G human reuse
+assessment and native-input/assistive-tech/unsigned limits remain. No fixture gate was
+weakened, no failed run relabelled and no cross-SHA automated acceptance assumed.
+Local checks ran before committing the correction: the browser report records HEAD
+`d65b34a` with then-uncommitted changes. Every recorded browser source hash matches
+the committed correction at `21c029a`; these are focused development results, not
+final supported-target coherent-candidate qualification.
+
+**Continuation after decision:** if one corrective matrix is authorised, check fresh
+refs/ownership, use the existing branch/PR and dispatch the existing production workflow
+once on the exact published head with package retention, record run/attempt/SHA, and
+pause manually in this SAME Goal/chat. Resume audits all required target artifacts,
+new PCM/channel logs/29 assertions, four SDK reports/three captures, advancing-frame
+samples/bounded repeats, six packaged cases/cleanup and original named regression
+matrix. If still pending, pause again without polling. No automatic retry or merge.
+If allowance is declined, leave acceptance unresolved for review. Goal is active until
+explicit user/client pause; no runtime pause has been verified by this ledger.

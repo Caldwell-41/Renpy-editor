@@ -2,86 +2,103 @@
 
 ## Phase 1H integrated acceptance — 2026-10-07
 
-**State: awaiting_ci; confirmed production operation pending, Goal runtime pause not claimed.**
-Selected outcome: H01–H12 and applicable sections 3–4 to `review_ready` for independent
-review. No merge, Phase 1 closure, Phase 2, optional Git or signing/notarisation.
-Native Codex host macOS ARM64; required test hosts Windows x64/macOS ARM64.
-[Active scope/evidence ledger](../tasks/active/phase-1h-vertical-slice-acceptance.md#7-execution-ledger--2026-10-07).
+**State: awaiting_decision; first matrix terminal failure, bounded corrections locally
+proven, no corrective dispatch authorised or pending. Goal runtime pause not claimed.**
+Selected outcome: H01–H12 and sections 3–4 to `review_ready` for independent review.
+No merge, Phase 1 closure, Phase 2, optional Git or signing/notarisation.
+Codex/test development host macOS ARM64; final test hosts Windows x64/macOS ARM64.
+[Live evidence, failure classification and continuation](../tasks/active/phase-1h-vertical-slice-acceptance.md#terminal-first-matrix-and-bounded-corrections).
 
-**Ownership:** branch `acceptance/phase-1h-vertical-slice`, based on fresh main
-`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`. Published candidate **`3d484ef1b0164e15b21c869f7494410daa3fed9d`**, remote identity
-verified; draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) attached.
-Exactly one final production matrix dispatched; no duplicate/ambiguous request. Separate planning
-worktree `2c5a164597779331af9ff81bf0eb3bdabb41ddb7` and two unpublished commits remain
-untouched; no push retry there. Other PRs/unique refs retained. No app/game process
-or normal-profile operation pending.
+**Ownership:** existing branch `acceptance/phase-1h-vertical-slice`, fresh-main base
+`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`; draft
+[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) attached. First tested
+candidate `3d484ef1b0164e15b21c869f7494410daa3fed9d`; correction implementation
+**`21c029a3f47bf5d191ebc00c593391d1469b3869`**, with this meaningful docs-only terminal
+checkpoint following it. Verify fresh published head before any approved dispatch;
+no cross-SHA automated evidence reuse is asserted. Separate planning worktree
+`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, two unpublished commits and other PRs/refs
+remain untouched. No disposable project/game/editor process or normal-profile write pending.
 
-**Changes:** deterministic original assets/expected source and outcomes; cfg(test)-only
-production-service staged authoring/import/history/reopen fixture; actual long-history
-authoring after 4,097 terminal records; exact ignored SDK gate running independent
-normal-entry rooftop/riverside/metadata-free/wrong-outcome cases. Actual compile/lint,
-compiled Scene move/delete/inverses, incoming refusal, untrusted zero-process inspection
-and copied-UUID consent rejection included. Existing production workflow gains this
-gate and case artifacts, retaining all prior required selectors/packages/denial/privacy/
-inventory/rendered-flow checks. Input manifest includes fixture files. Final diff
-confirms no shipped runtime/UI/IPC/dependency/packaging behavior change; mapped 1G human
-interactions reusable under TESTING, original packages retain their identities.
+**Terminal operation:** [37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
+`production-scaffold.yml`, workflow_dispatch, exact first candidate, upload_packages=true,
+created 2026-10-06 18:55:50 UTC. Preflight Pass; Mac job 112446613576 finished failure
+19:17:11 UTC; Windows job 112446613694 finished failure 19:12:28 UTC. No retry/cancellation.
+Ordinary quality 37515065625/1 passed required repository/Q1/selector steps at first
+candidate; optional diagnostic jobs unselected/skipped. No separate quality dispatch.
 
-**Local evidence:** native Mac SDK attempt 13 Pass, 1/1/no skip, 67.66s; three positive
-cases each 28/28 assertions/exit 0, wrong outcome specifically fails `trust == 1`/exit 1;
-no case timeout and complete temporary cleanup. Actual dialogue, exact int64 values,
-image bounds/showing and playing audio match fixed manifest. Logs/JSON/screenshots
-ignored under `.toolchains/reports/phase-1h/`; case export attribution corrected after
-self-review, so final workflow must verify this small harness change. Manifest SHA-256
-`d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638`.
-Long-history 1/1/no skip (77.70s); asset and SDK rejection guards 1/1 each. Validator
-352 files, frontend 91/91/no skips/typecheck, Q1 rejection/selector audit, retention 9/9,
-Rust compilation/formatting, actionlint 1.7.12 and whitespace Pass. No final candidate
-Windows qualification or packaged-target result claimed yet.
+**Windows failure:** authoring/reopen, real Validate/compiled lifecycle/copy trust
+reached successfully. Three positive SDK cases fail the exact music filename assertion
+at 10s, no process timeout; wrong-outcome control passes intended rejection. Actual
+failed PCM/channel state was not logged. Hosted output-device limitation is a provisional
+harness/environment hypothesis, not a proved product defect/vendor bug. Downstream
+package/desktop/UI/boundary/inventory skipped; six reports missing. Privacy failure
+is ENOENT on unbuilt executable, no demonstrated secret leak. Core 187 passed / 38 ignored /
+3 filtered and separate flow/archive/runtime/diagnostic gates pass.
 
-**Cumulative H-FIXTURE-1:** 13 local integrated SDK invocations; all failed attempts
-retained/classified in ledger. 84 measured bounded adapter spawns across attempts 6–13;
-earlier uninstrumented launches/runtime child compile/lint excluded from this count.
-No demonstrated product defect; hypotheses reassessed, no gate/timeout weakened.
-One confirmed production dispatch/no retry; zero local desktop builds/editor launches.
-CI target builds/starts not yet terminal/counted. Selected final matrix allowance 1/1
-consumed; resume does not authorise another. Historical 1G counters,
-failures and limits remain in its archived ledger; no reset.
+**Mac failure:** new SDK gate 1/1 Pass, 110.36s; three positives 28/28 each, wrong outcome
+rejects exact `trust == 1`, all cleanup/captures reviewed and attributed correctly. Core
+192 passed / 41 ignored / 3 filtered and separate gates pass. Desktop/package built; six native
+packaged cases/cleanup, terminal denial/single-instance/privacy/inventory pass. Branches
+browser stops at visible input 21: both callbacks supply 5818.832; functional/evidence
+check remains failed despite expected geometry/focus. Original pan p95 114.4ms retained
+as timing diagnostic overrun. Cause of repeated timestamp not established; no waiver.
 
-**Outstanding operation:** [production 37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
-`production-scaffold.yml`, `workflow_dispatch`, branch above, exact tested SHA
-`3d484ef1b0164e15b21c869f7494410daa3fed9d`, `upload_packages=true`.
-Created 2026-10-06 18:55:50 UTC; continuation audit recorded 19:11 UTC confirms `in_progress`
-on the same SHA/attempt. Preflight 112445822829 completed success; macOS ARM64
-112446613576 is live at desktop Rust tests; Windows x64 112446613694 is live at
-the runtime foundation/real SDK diagnostics gates.
-No target pass claimed; no dispatch/retry or polling loop. Retained artifacts seven
-days, audit/download before expiry. Ordinary PR quality
-[37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)
-on same SHA: required repository/Q1/selector steps Pass; optional flow/browser diagnostic
-jobs unselected/skipped. No manual duplicate quality dispatch. Wait publication
-is docs-only; production tests the candidate SHA, not the later documentation SHA.
+**Retained evidence:** both artifacts downloaded under ignored
+`.toolchains/reports/phase-1h/production-37515083319/`. Windows 11437705996 expires
+2026-10-13 19:12:23 UTC; Mac 11437966834 expires 19:17:03 UTC. Mac tar SHA
+`ec43db415825579e562a851581570b5a31be995320af7f4e40963e59362ab2f2`, executable SHA
+`1236085072050b2f59babcb02e5cf936f437a55c1db0dabee7b4fb99fd713ed5`, input-report SHA
+`a2b6dfc987243cd52a169c78925beb67f7727aff0d9c05d695ff284b972dfadd`; tar/report hashes
+verified, candidate/tree/run/attempt agree. No corrected-candidate package acceptance.
 
-**Continuation:** user resumes SAME Goal/chat, inspect the recorded run/attempt once
-and changed refs/ownership. If pending, pause again with no polling loop/retry. If
-terminal, audit actual named required tests, four integrated SDK reports and three
-correct route captures per host, six packaged cases/cleanup, precise input/package
-identities, observed-flow enforced samples, browsers/denial/single-instance, privacy
-and dependency/licence inventory. Use the active ledger’s concrete regression audit to check named assertions, not totals.
-Finish H01–H12 and sections 3–4 expected/actual matrix, self-review and bounded evidence corrections to `review_ready`. Failed/skipped/
-missing required evidence remains unresolved. No new dispatch, feature scope or merge.
-Retain Mac Chrome timing-only diagnostic and unsigned/native-input/assistive-tech limits.
+**Corrections at 21c029a:** disposable SDK driver selects SDL dummy output before real
+PCM init, logs actual backend/channel state before assertions and adds required PCM
+check. Music/SFX/stop/hide/original route oracle and 10s/60s deadlines remain. No shipped
+runtime override; real channel decoding/playback tested without an audible-speaker claim.
+Browser probe waits for a strictly advancing timestamp, retaining up to 8 equal callbacks
+and including all wait time in the same input; malformed/backward/exhausted sequences
+reject, original strict greater-than assertion remains. No input replay/discard or
+threshold change. Test helper is recorded in source hashes; both targets need renewed
+qualification. 1G native human evidence remains reusable because production UI/runtime/
+IPC/dependencies/packaging behavior did not change; prior limits remain.
 
-**Actual waiting control:** model polling stops; the Goal remains active until a user
-pause action. `awaiting_ci` does not prove runtime pause. Official app documentation
-places Pause/Resume in the Goal progress row above the composer; direct installed-app
-UI inspection unavailable, no UI action/lifecycle change claimed. Use client Pause,
-later Resume in this saved chat and send: `The workflow is complete; audit run
-37515083319/1 and continue the existing goal.` No replacement Goal/new chat.
+**Focused correction proof:** local Mac SDK 1/1 Pass, 66.19s, positives 29/29 each, actual
+PCM/config/dummy true, expected music/SFX filenames; wrong outcome exit 1 and cleanup.
+Browser first local invocation refused localhost before launch, retained; second native
+invocation Pass, 30 original + 30 visible, navigation/resize/cleanup/distinct captures, Chrome
+154.0.8037.98; p95 pan 17.3 / visible-first 16.9 / advancing 33.8ms. Equality path covered by
+three rejecting/advancing helper tests, no equality occurred in actual local run.
+Frontend 94/94/no skips/typecheck, validator 353 files, Rust format/result guard, Q1 self-test/
+source-audit, whitespace Pass. Logs/captures ignored; no private content committed.
 
-**Prior accepted baseline:** 1G integrated through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17)
-at `295a189925ac5c9c8655569cb29dd10236d7201d`; qualified production 37461862928/1 and
-quality 37461858768/1 at `c137b6706ed2dc05aac8dfe692689829c785a52a`. Exact input review,
-package hashes, human/profile restoration, cumulative counters and unique failures remain
-in [1G terminal/integration evidence](../tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+**Cumulative budgets:** H-FIXTURE-1 has 14 local SDK invocations + 2 CI host invocations = 16;
+measured bounded adapter spawns 96 local + 24 CI = 120. Earlier uninstrumented/runtime-child
+compile/lint launches excluded, not invented. One production matrix dispatched;
+**selected final allowance 1/1 consumed, zero retry allowance**. One CI Mac package build,
+Windows package skipped, six Mac runtime cases+primary/secondary boundary starts;
+zero local desktop builds/editor launches. H-FRAME-1 retains CI failure, prelaunch local
+permission failure and one native local browser launch; no hypothesis totals reset.
+Full failures/counters and named regression audit remain in active ledger.
+
+**Decision/continuation:** request one additional corrective production matrix on the
+published correction inputs, with package retention and no automatic retry. WORKFLOW's
+budget rule requires a new decision after exhausted caps; ordinary Resume does not
+authorise dispatch. Before user approval no CI work remains pending. Once authorised,
+verify branch/head/ownership and dispatch existing workflow once, record exact run/
+attempt/SHA, then use manual SAME Goal/chat waiting. Resume audits named H01–H12 and
+sections 3–4 tests, PCM/channel logs/29 assertions, four SDK reports/three captures,
+advancing-frame samples/repeats, six packaged cases/cleanup, flow/browser/denial/privacy/
+inventory and package/input identities. Failed/skipped/missing gates stay open. Stop
+at review_ready only after all required evidence; no merge or Phase 1 closure.
+
+**Actual pause control:** Goal remains active until explicit user/client pause;
+awaiting_decision is repository state only. App documentation places Pause/Resume in
+Goal progress row above composer; installed-app UI action not verified. Pause through
+that client control while deciding; resume this SAME chat after the allowance decision.
+No replacement Goal, new chat, automation, polling loop or second writer.
+
+**Accepted baseline:** 1G integrated via PR #17 at 295a189; qualified production
+37461862928/1/quality37461858768/1 at c137b67. Original human/profile restoration,
+package hashes, unique failures/counters and limitations remain in
+[1G closeout](../tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 and [justified historical handover](../tasks/archive/2026-10-06-phase-1g-acceptance-handover.md).
