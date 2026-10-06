@@ -294,10 +294,11 @@ Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
 **`3d484ef1b0164e15b21c869f7494410daa3fed9d`**, published/remote identity verified.
 Exactly one `production-scaffold.yml` dispatch accepted at 2026-10-06 18:55:50 UTC:
 [**37515083319/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
-`workflow_dispatch`, exact candidate above, `upload_packages=true`. Last observed
-2026-10-06 18:56 UTC: `in_progress`; Preflight job **112445822829** running frontend
-validation, repository/Q1/selector steps already passed. Windows x64 and macOS ARM64
-jobs await successful Preflight; no target result claimed. Case/log/input/failure and
+`workflow_dispatch`, exact candidate above, `upload_packages=true`. Continuation
+recorded 2026-10-06 19:00 UTC: `in_progress` on the same candidate/attempt; Preflight
+**112445822829** completed success. macOS ARM64 **112446613576** and Windows x64
+**112446613694** confirmed live at Source Save browser regression. No target result
+claimed, no duplicate dispatch/retry or polling loop. Case/log/input/failure and
 requested package artifacts retain the existing seven-day retention; audit/download
 terminal evidence before expiry. Dispatch acceptance is confirmed, never repeat it.
 Ordinary PR quality [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)

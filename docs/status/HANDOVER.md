@@ -51,9 +51,10 @@ failures and limits remain in its archived ledger; no reset.
 **Outstanding operation:** [production 37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
 `production-scaffold.yml`, `workflow_dispatch`, branch above, exact tested SHA
 `3d484ef1b0164e15b21c869f7494410daa3fed9d`, `upload_packages=true`.
-Created 2026-10-06 18:55:50 UTC, observed 18:56 UTC `in_progress`: Preflight
-112445822829 validating frontend after successful repository/Q1/selector steps;
-Windows/macOS jobs await Preflight. No target pass claimed. Retained artifacts seven
+Created 2026-10-06 18:55:50 UTC; continuation recorded 19:00 UTC confirms `in_progress`
+on the same SHA/attempt. Preflight 112445822829 completed success; macOS ARM64
+112446613576 and Windows x64 112446613694 are live at Source Save browser regression.
+No target pass claimed; no dispatch/retry or polling loop. Retained artifacts seven
 days, audit/download before expiry. Ordinary PR quality
 [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)
 on same SHA: required repository/Q1/selector steps Pass; optional flow/browser diagnostic
