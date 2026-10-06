@@ -9,11 +9,12 @@
 
 **Candidate-5 physical scroll retest Pass — 2026-10-06.** User reports both held
 edges and Escape now work. Hash comparison finds four durable saved reorders,
-206→230 files including recovery evidence; all source lines are preserved. Clarify
-whether drops/moves were deliberate or order changed despite Escape before claiming
-physical no-write cancellation. WIN-UI-02 is Unavailable on that remaining assertion;
-old failed edge evidence stays failed. No new build/start/CI/SDK. After clarification,
-continue Explorer drop/coexistence and brief English/hover/visual feedback; no scaling.
+206→230 files including recovery evidence; all source lines are preserved. User
+confirms those moves were **deliberate**, resolving attribution. WIN-UI-02 Pass in
+selected physical/native/automated scope; broader session hashes include intentional
+writes, while separate no-write regressions remain Pass. Old edge failure preserved.
+No new build/start/CI/SDK. Continue Explorer drop/coexistence and brief English/hover/
+visual feedback; no scaling.
 
 ### Earlier edge-scroll correction checkpoint (physical retest supersedes wait)
 

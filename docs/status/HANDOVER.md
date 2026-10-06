@@ -6,12 +6,13 @@
 working” for both directions and Escape. Hash comparison finds four durable Scene
 1/source-map reorders plus 24 retained recovery files (206→230); source-line multisets
 all preserved. One later candidate-4 reorder also accounts for 200→206 before launch.
-Await the user's clarification of deliberate drops/moves versus changes after
-Escape. Do not infer no-write cancellation; WIN-UI-02 remains Unavailable for that
-assertion. `physical-edge-retest-candidate-5-result.json` and
+User confirms **“deliberate”** drops/moves, resolving attribution. WIN-UI-02 Pass in
+selected physical/native/automated scope; whole-session hashes include intentional
+writes, so use the separate no-write regression/earlier native cancellation receipts
+for that assertion. `physical-edge-retest-candidate-5-result.json` and
 `edge-scroll-replacement-file-delta.json` retain full before/after/journal evidence.
-After clarification continue Explorer drop/coexistence; app remains Story/Scene 1,
-Saved, candidate 5. No new build/start/CI/SDK; counters below unchanged, scale excluded.
+Continue Explorer drop/coexistence with disposable media; candidate 5 is Saved on
+Assets. No new build/start/CI/SDK; counters below unchanged, scale excluded.
 
 **Earlier failure/correction:** User reports
 candidate-4 marker and Escape cleanup work; held top/bottom scrolling fails. All
