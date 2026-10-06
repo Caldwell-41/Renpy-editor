@@ -2,7 +2,29 @@
 
 ## Live Windows correction and native handoff — 2026-10-06
 
-**Current next action:** continue remaining Windows rows on the fresh import-correction
+**Latest native checkpoint:** WIN-UI-05/06/07 **Pass on Windows**, candidate 2
+`686e56fb…`. Variable/Character evidence `298`–`378` remains intact. Supported
+appearance fixture, fresh project UUID `79d891ca-32b0-4738-a730-6e0315349dd6`,
+retains custom Unicode Python outside mapped scenes and replaces only its copied
+protected scene with Return. The original refusal/fixture is preserved.
+Both happy→calm→thoughtful→calm→happy cycles pass with/without replacement
+(`405`–`457`). Added Change Appearance saves once with disabled pending controls;
+happy→thoughtful→happy updates Show/Change source, restores their exact statements,
+and reopened Change form shows happy (`468`–`494`). Stable IDs/defaults, old images
+and custom source are asserted in `native-appearance-rename-completion.json`.
+Externally modified retained calm alias refuses with all 215 files unchanged;
+original definition bytes restored, draft discarded (`496`–`504`), restorePending
+false. WebP imports but has the documented bounded unavailable preview. An already
+imported JPEG replacement refuses without any write. Native capture works; the
+foreground wait below is historical. Main-window mouse targeting of the native
+WebView2 dropdown was rejected; keyboard selection succeeds, no product failure.
+Current app: supported rename fixture → Characters, Saved, no dialog/write pending.
+Continue WIN-UI-08 compact Choice/layout, then remaining canonical actions. Eleven
+rows, Mac/remote correction qualification, failed ui-refresh diagnosis and original
+profile restoration remain open. Same candidate, 2 successful builds/1 setup
+failure/11 starts/0 SDK menus; no CI pending or new source change.
+
+**Earlier checkpoint (superseded app location):** continue remaining Windows rows on the fresh import-correction
 fixture. WIN-IMPORT-01 attempt 1 passes its affected Windows native import/replacement
 checks (`259`–`309`); preserve the failed original Interaction Review and its prepared
 journal. Native Browse/preview/categories,

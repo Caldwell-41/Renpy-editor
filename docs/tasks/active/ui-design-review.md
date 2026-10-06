@@ -2,14 +2,40 @@
 
 ### Windows evidence and first Source correction — 2026-10-06
 
-**Live state: in_progress; all 14 rows remain incomplete.** Execution consent is
+**Live state: in_progress; WIN-UI-05/06/07 pass native Windows review;
+the other 11 rows remain incomplete.** Execution consent is
 resolved by explicit user permission, with agent native clicks recorded separately
 from physical observations. The installed NSIS baseline remains retained and unchanged.
 Latest saved Story Run displays the exact new English text (`85`–`87`); normal game
 close reports **Game finished, exit 0** (`88`–`89`). This specific pass does not waive
 the two Source rerun refusals in `75`–`79`.
 
-**Latest continuation:** native control restarted after the user's Resume. Captures
+**Native Variable/Character completion:** candidate 2, native WebView2 SendInput,
+96 DPI/100%, System renders Dark, maximized 2560×1392. WIN-UI-05 passes with
+`108`–`123`, `336`–`374`; both True values persist after project close/reopen,
+existing editor reopens True and closes Clean/Saved. Discard receipts prove all
+118/124 files unchanged. WIN-UI-06 passes `298`–`334`, `375`–`378`: unchanged
+Character save retains selected appearance; default changes independently;
+Grid/List/leave/return and project reopen retain the intended identities/previews.
+Selected happy `51a37ee7…`, Asset `e66be188…`, remains blue while default calm
+`9104e5de…` remains green. Missing happy image shows bounded error; exact original
+SHA256 `5de46a83…` is restored and independent large/thumbnail Retry recover.
+No Save/Import is replayed; no full-file before/after snapshot was taken for this
+missing-image check. Bob without appearances has no stale Alice image.
+`native-variable-character-completion.json`, `native-variable-bool-discard.json`,
+`native-variable-existing-discard.json`, `native-missing-image.json` and the
+replacement receipt retain details locally. Indexed native clicks sometimes miss
+their intended control; observed misses were verified before coordinate input,
+not treated as product failures or repeated successful writes. Capture-session
+recovery remains effective; no foreground action is pending. No additional build,
+process start, SDK menu or CI dispatch; Mac/remote qualification remains open.
+
+**Latest continuation:** appearance completion is recorded in the checkpoint table
+and appearance paragraph below. Current candidate 2 is on supported rename review
+→ Characters, Saved, no dialog/write or external-byte restoration pending (`504`).
+Continue compact Choice/layout and remaining Windows actions; no CI pending.
+
+**Earlier continuation:** native control restarted after the user's Resume. Captures
 `136`–`138` show saved reordered Story, no residual marker, native Ctrl+S and project
 close to Welcome. Reopen/ID assertions and Explorer coexistence remain pending.
 The first correction's configured `route-a` packaged probe **PASS**, exit 0,
@@ -359,17 +385,18 @@ omits the host's absolute user path. No automated app input proceeds past the pr
 
 The current checkpoint statuses below mean **Unavailable at this checkpoint**, not a
 product failure or completed attempt at every action. All remaining actions in the
-canonical 14-row checklist remain mandatory. No whole row is Pass yet.
+canonical 14-row checklist remain mandatory. WIN-UI-05/06/07 now pass on candidate 2;
+the changed candidate still requires affected Mac and remote qualification.
 
 | Row | Checkpoint result | Exact evidence / remaining actions |
 | --- | --- | --- |
 | WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; `136`–`143` Save/close/reopen and all four source/metadata hashes unchanged, including mapped IDs. Fixture invariant failure `105` preserved and corrected through Source. Live marker/ghost and Explorer coexistence pending. |
-| WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native resume `136` shows no residual marker/responsive Story. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending; current capture failure blocks further input. |
+| WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native resume `136` shows no residual marker/responsive Story. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending. Native capture recovered; no foreground wait remains. |
 | WIN-UI-03 | Fail on prior candidate; incomplete | Native Browse/staging/categories/Cancel/Keep and duplicate refusal `215`–`255`; no writes before Import. WIN-IMPORT-01 corrected native specifics pass `259`–`295`: refusal before staging, valid partial import and explicit reselection once, chooser restored. Explorer/off-surface drop and final cancel/reopen actions still pending. |
 | WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug; `235`–`239` uppercase ASCII expression canonicalizes on blur and naming guidance opens by keyboard. Character/Asset/Variable/display/content/shortcut completion pending. No physical-human keyboard claim. |
-| WIN-UI-05 | Unavailable; partial evidence | `108`–`116` int/42 Cancel/Discard/reopen bool/False; `118`–`123` English string/Discard. Boolean True creation/discard and existing default/Keep/Escape/save/reopen actions pending. |
-| WIN-UI-06 | Unavailable; not run | Two Character entries/appearance UUIDs prepared; native selection/default/replacement/error/retry actions pending. |
-| WIN-UI-07 | Unavailable; not run | Alias/collision fixture prepared; full rename sequence, reference preservation and external-edit refusal pending. |
+| WIN-UI-05 | Pass, native Windows | `108`–`123` int/42 and string discard; `336`–`374` bool/True discard, type int→bool, Boolean True creation, existing-default Escape/Keep editing/Discard, Save and project reopen. Discard snapshots prove all 118/124 files unchanged; reopened form and authoritative source agree on both persisted True values. |
+| WIN-UI-06 | Pass, native Windows | `298`–`334`, `375`–`378`: replacement refresh, non-default selection, unchanged Character save, distinct default, Grid/List and leave/return, zero-appearance Character, missing image bounded error, exact-byte restore and independent large/thumbnail Retry. Selected happy UUID remains aligned while default is calm; project reopen retains both. No write replay issued by Retry. |
+| WIN-UI-07 | Pass, native Windows | Genuine collision `379`–`385` refuses with all 130 files unchanged; protected first fixture/refusal `394`–`398` preserved. Supported copy retains custom Unicode Python outside mapped scenes. Both complete rename cycles with/without WebP replacement pass `405`–`457`; duplicate JPEG replacement refuses unchanged. Show/Change references update and restore across another rename-back, stable IDs/defaults/old images/custom source; project reopen shows happy `458`–`494`. Edited retained alias refuses with all 215 files unchanged `496`–`502`; exact bytes restored and draft discarded `503`–`504`. `native-appearance-rename-completion.json`, two cycle receipts, reference-cycle and edited-alias receipts retain assertions. WebP presentation is explicitly deferred with bounded unavailable preview. |
 | WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
 | WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
 | WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
@@ -377,6 +404,18 @@ canonical 14-row checklist remain mandatory. No whole row is Pass yet.
 | WIN-UI-12 | Unavailable; partial evidence | `15`–`20` uncached official SDK download/verified install; CONFIG-01 `21`–`31`; stages `32`–`33`; native fresh menus/Start `51`–`56` PASS specifics; Welcome dark/recent restore `95`. Hover/light/earlier-project distinction/scaling completion pending. |
 | WIN-UI-13 | Unavailable; not run | `interaction-fixture.json` prepares reciprocal/duplicate/long/self/missing links; native routing, Fit/navigation/palettes/scaling pending. |
 | WIN-UI-14 | Fail on prior candidate; incomplete | `107` Variable alignment; `214` Assets images load; `215`–`255` real staged PNG/JPEG dimensions, audio, bounded raster error/Retry, native external-change refusal and Cancel/Keep. WIN-IMPORT-01 corrected native specifics pass `259`–`309`; shared staged Retry copy observation still pending. Add/remove-last restores chooser; Character/Grid/List/cancel/reopen/drop/higher-DPI completion pending; broken Story preview remains separate. |
+
+**Appearance checkpoint — 2026-10-06:** all WIN-UI-07 actions now pass on native
+Windows candidate 2. Captures `405`–`504` and the row receipt distinguish native
+SendInput/WebView2 actions from physical-human observations (none for this row).
+No source correction, build, top-level start, SDK menu start or CI dispatch was
+added. The first protected-scene refusal remains preserved; supported review uses
+only a fresh disposable copy. All external media/alias restore flags are false;
+original profile restoration remains pending. A main-window coordinate click into
+the WebView2-owned dropdown was refused by the native tool; activation/fresh capture
+and keyboard type selection resolve it without a write replay. The earlier active
+window explanation remains unsupported. Eleven rows and final session work remain,
+with both failed ui-refresh probes and affected Mac/remote qualification still open.
 
 All captures/JSON/fixtures are local ignored evidence under the established
 `.toolchains/reports/final-1g-windows/`. `installation.json` independently re-verifies

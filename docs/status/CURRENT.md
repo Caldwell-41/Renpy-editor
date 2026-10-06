@@ -7,6 +7,21 @@
 
 ## Live continuation
 
+**Latest native checkpoint:** WIN-UI-05/06/07 **Pass on Windows** on candidate 2
+(`686e56fb…`). Variable and Character evidence remains `298`–`378`. Appearance
+rename cycles with/without WebP replacement, supported Show/Change references and
+project reopen pass (`405`–`494`); IDs/defaults, old images and custom Unicode
+source remain intact. Genuine collision and externally edited alias refuse;
+the latter changes none of 215 files (`496`–`502`), then exact original bytes are
+restored. `native-appearance-rename-completion.json` retains rejecting assertions.
+WebP's bounded unavailable presentation is documented, not a failed import.
+Native capture is working; a WebView2-owned dropdown rejects a main-window mouse
+target but native keyboard selection succeeds. No user foreground action is pending.
+Current app: supported rename fixture → Characters, Saved, dialog closed (`504`).
+Continue WIN-UI-08 compact Choice/layout and remaining canonical actions. Eleven
+rows, two failed ui-refresh probes, affected Mac/remote qualification and profile
+restoration remain open. No new source change/build/start/SDK menu/CI dispatch.
+
 **Windows review: in_progress; incomplete.** User explicitly requested retry with
 permission for the disposable project's execution-consent action; the agent's native
 click succeeded. This overrides the prior default skill handoff and resolves that wait.
