@@ -1,12 +1,12 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Updated:** 2026-09-28; TEST-AUDIT-1 testing-policy alignment; execution remains unselected.
+**Updated:** 2026-10-06; Phase 1G accepted/integrated; execution remains unselected.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
 **Execution state:** `not_started`.
-**Entry:** Phase 1G closure and integration, accepted Phase 1F retained, fresh refs and
+**Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
-**Prerequisite contracts:** [1G brief](phase-1g-branches-runtime-git.md), integrated 1F,
+**Prerequisite contracts:** [1G brief](../archive/2026-10-06-phase-1g-branches-runtime-git.md), integrated 1F,
 [TESTING](../../TESTING.md), [TRANSACTIONS](../../TRANSACTIONS.md), [UI](../../UI.md),
 [SECURITY](../../SECURITY.md) and [WORKFLOW](../../WORKFLOW.md).
 
@@ -84,7 +84,7 @@ accepted/displaced bytes, blocked ambiguity, safe resolution and follow-up write
 Deliberate application/transaction crash and timed namespace experiments are specialist
 history under WORKFLOW, not routine H01-H12 gates. Controlled runtime nonzero exit,
 ordinary Ren'Py errors and Stop/descendant cleanup remain required; see the
-[selector disposition](testing-policy-alignment.md#selector-disposition).
+[selector disposition](../archive/2026-10-06-testing-policy-alignment.md#selector-disposition).
 UI stubs alone cannot prove disk recovery, process cleanup or native keyboard delivery.
 
 ## 4. Cross-cutting release-of-phase gates
@@ -148,7 +148,7 @@ canonical lessons and archive completed plans while preserving unique failed evi
 This historical record is superseded for Git scope and test ownership by the September
 25 decision. CURRENT/HANDOVER own the active documentation branch and actual status.
 
-This brief and the [1G planning record](phase-1g-branches-runtime-git.md#10-planning-coverage-and-review-record)
+This brief and the [1G planning record](../archive/2026-10-06-phase-1g-branches-runtime-git.md#10-planning-coverage-and-review-record)
 form one documentation checkpoint on `docs/phase-1g-1h-planning`. All acceptance rows
 are planned and unexecuted. Active 1F CURRENT/HANDOVER and correction evidence remain
 owned by PR #14; no replacement handover or application change is introduced here.

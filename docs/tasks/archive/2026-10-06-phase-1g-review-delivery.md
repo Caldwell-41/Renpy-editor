@@ -1,5 +1,9 @@
 # Phase 1G review delivery
 
+**Archived:** 2026-10-06. Completed within accepted/integrated Phase 1G; historical states and directions below are superseded.
+[Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+and [live handover](../../status/HANDOVER.md) own final state.
+
 **Updated:** 2026-09-28. **Outcome:** REVIEW-DELIVERY-1, `not_started`.
 **Repository/branch:** Caldwell-41/Renpy-editor / feature/phase-1g-branches-runtime.
 **PR:** #17, draft/open/conflicting. [HANDOVER](../../status/HANDOVER.md) is the live record.
@@ -14,7 +18,7 @@ per supported OS. Pause for user feedback in the same thread; record supplied re
 without assuming acceptance or starting integration. Package availability is not proof
 that an installer works on the user's machine.
 
-The [Phase 1G brief](phase-1g-branches-runtime-git.md) retains product requirements and
+The [Phase 1G brief](2026-10-06-phase-1g-branches-runtime-git.md) retains product requirements and
 historical evidence. Its superseded current-checkpoint/next-goal text and older Q1
 preparation/dispatch/audit prompts are not live authority for this new selection.
 Read relevant sections only. [WORKFLOW](../../WORKFLOW.md) governs execution;
@@ -24,7 +28,7 @@ Read relevant sections only. [WORKFLOW](../../WORKFLOW.md) governs execution;
 
 Use run `36383551820`, attempt 1, tested candidate
 `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`. Its
-[terminal audit](testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
+[terminal audit](2026-10-06-testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
 records the qualification and independently computed file hashes. Later documentation
 commits do not become that candidate. Do not rebuild merely to include updated docs.
 

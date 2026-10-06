@@ -17,7 +17,7 @@ Historical corrective evidence below keeps its actual result.
 
 [WORKFLOW's delivery rules](WORKFLOW.md#proportionate-delivery-rules) exclude deliberate
 process-termination experiments from routine selection. The
-[TEST-AUDIT-1 selector disposition](tasks/active/testing-policy-alignment.md#selector-disposition)
+[TEST-AUDIT-1 selector disposition](tasks/archive/2026-10-06-testing-policy-alignment.md#selector-disposition)
 records the rationale and exact specialist cases. The four persistence-termination
 parents and two embedded SDK specialist tests are explicitly ignored. Production and
 quality broad-core selectors skip the separately selected flow fixture and the two
@@ -54,7 +54,7 @@ inputs. `sdk_file_hash_retains_cancellation_and_deadline` preserves request cont
 Use ordinary correctness checks and the existing disposable application scenarios
 for this regression. Deliberate crash reproduction was local diagnostic evidence;
 it is not a new routine test or a reason to run hostile filesystem/race experiments.
-See the active Phase 1G ledger for the scoped Windows evidence and remaining gates.
+See the archived Phase 1G/UI ledgers for scoped Windows evidence and final closeout.
 
 ## Current production scaffold and Phase 0 regression commands
 
@@ -514,14 +514,13 @@ increases or unsupported causal claims about application Save routing.
 
 ## Phase 1G testing ownership and cadence
 
-**Completion scheduling amendment, 2026-10-04:** follow the user's
-[selected staged sequence](tasks/active/ui-design-review.md#selected-1g-completion-sequence--2026-10-04):
-next Mac chat completes the picker, proves local changed-scope gates and prepares
-final Mac review; after Mac acceptance, publish/run required remote qualification
-and correct failures; then a Windows-PC agent verifies the same passing candidate;
-a final separate chat verifies conflict-resolved combined inputs before integration.
-This changes scheduling, not required target evidence or test ownership. Corrections
-invalidate affected prior results and require relevant cross-platform rechecks.
+**Phase 1G completion, 2026-10-06:** both-platform native/human review, required
+qualification and exact-input integration are accepted in the
+[closeout ledger](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
+The staged completion sequence is historical. Phase 1H remains unselected; its
+integrated H01–H12 gates still belong to the existing brief. Apply the narrow human
+reuse policy below; do not automatically repeat the accepted full human session.
+Corrections invalidate affected results and require relevant cross-platform rechecks.
 
 **Agent-owned Mac review amendment, 2026-10-05:** the user requested that the
 agent perform the remaining objective tests and visual review, and report genuine
@@ -618,7 +617,7 @@ Investigate an overrun at its observed layer before changing production code. A 
 bounded experiment must distinguish a concrete hypothesis; a failure is not permission
 for indefinite browser/graphics tuning. Collect trustworthy supported-runtime evidence
 before proposing a different role for a Chrome timing gate. The user explicitly
-approved that change in [TEST-P2](tasks/active/phase-1g-branches-runtime-git.md#33-r2-p1-test-p2--chrome-timing-acceptance-role--2026-09-27)
+approved that change in [TEST-P2](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#33-r2-p1-test-p2--chrome-timing-acceptance-role--2026-09-27)
 after reviewing MAC-N1.
 Historical failed runs remain failed; this prospective policy does not rerun them or
 fill skipped gates. Preserve the original run, attempt, SHA and unavailable evidence.
@@ -764,7 +763,7 @@ keyboard acceptance.
 
 ## Retained 1G.1 development evidence
 
-The active [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
+The archived [1G ledger](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
 records candidate, exact results and deferred supported-target evidence. Retained cases
 live in `scene.rs` (`flow_*`), `lifecycle.rs` (literal `flow.list` and existing Scene
 commands through the real handler), `source.rs` (revision-qualified navigation),
@@ -805,8 +804,8 @@ previous browser work. Under TEST-P2 all five Chrome timing thresholds are diagn
 functional/evidence failures still block. Fast dispatch does not erase an overrun or
 close packaged/native rendered-input acceptance. Review the endpoint/layer evidence.
 The separate core <250 ms/<2 s budgets are unchanged and not measured by this probe.
-[MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
-retains the original defect/failure; [MAC-M1 ledger 29](tasks/active/phase-1g-branches-runtime-git.md#29-r2-p1-mac-m1-probe-correction-and-local-proof--2026-09-27)
+[MAC-D1 ledger 28](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
+retains the original defect/failure; [MAC-M1 ledger 29](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#29-r2-p1-mac-m1-probe-correction-and-local-proof--2026-09-27)
 records the correction and fixed local proof, not retrospective CI qualification.
 
 Set `LOOMLIGHT_BRANCHES_EVIDENCE_DIR` to an ignored output directory to save the full
@@ -1034,9 +1033,10 @@ focus/semantics, shared divider reset, pending Beat controls and saved-row focus
 media loading/error/retry, and real Chrome pointer capture/reorder/cancellation.
 The release core appearance test includes reuse of former expressions and rejecting
 custom collisions/externally edited aliases while preserving bytes and IDs.
-Windows native testing is explicitly deferred by the user. The specific gestures,
-expected results and evidence fields are in the
-[deferred Windows checklist](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
+The originally deferred Windows native testing subsequently completed; final results
+and limitations are in the archived review ledger. The specific gestures, expected
+results and evidence fields remain in the
+[historical Windows checklist](tasks/archive/2026-10-06-ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 Browser mouse events and fake native drag-state signals do not satisfy those rows.
 
 Final 1G Branches qualification also rejects font-dependent pill clipping in the real

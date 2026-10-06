@@ -1,5 +1,70 @@
 # UI design review
 
+**Archived:** 2026-10-06. Completed within accepted/integrated Phase 1G; historical states and directions below are superseded.
+[Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+and [live handover](../../status/HANDOVER.md) own final state.
+
+## Phase 1G integration and closeout — 2026-10-06
+
+**State: accepted and integrated; Phase 1G complete.** The user selected integration
+and closeout in a separate genuine macOS ARM64 chat. [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17)
+was reviewed, marked ready and merged with history preserved at **`295a189925ac5c9c8655569cb29dd10236d7201d`**,
+2026-10-06 13:46:39 UTC. Parents: main **`4d7ba0333c48d60242a9a42d3e079fea499a5531`**
+and reviewed head **`7c4e55fea622c3c5390702de2600c61e8bfb2209`**. Main's tree
+**`2418b0b1304af753d09ee89b6808553a8323def4`** equals the reviewed head exactly.
+
+**Conflict disposition:** only `quality.yml` conflicted. Main's isolated profiler
+was superseded by the qualified observed-flow workflow and ADR 0010/TESTING. Retaining
+feature bytes preserves all **132/132 packaged inputs**, plus every workflow, repository
+script and spike Git blob, on qualified **`c137b6706ed2dc05aac8dfe692689829c785a52a`**.
+No application/test/workflow/dependency change was introduced by integration. No
+additional package matrix is justified; this is exact input assessment, not new package
+execution or a generic cross-SHA acceptance waiver. Original qualification stays on
+production **37461862928/1** and quality **37461858768/1**, exact `c137b67`.
+
+**Fresh required integration evidence:** [PR quality 37472444622](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37472444622)/1
+on `7c4e55f` and [main quality 37473497347](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37473497347)/1
+on `295a189` Pass after actual required-step/log audit: validator, Q1 rejection fixtures
+and selector audit. Optional unselected diagnostic jobs are skipped, not claimed passes.
+Local validator 340 files, Q1 self-test/source audit, **9 retention tests**, **91 frontend
+tests/0 skips**, typecheck/build, Rust formatting and whitespace Pass. Rechecked retained
+runtime reports: **6/6 per host Pass**, cleanup true. Existing >500 kB frontend bundle
+advisory remains. Raw integration receipts stay ignored in `phase-1g-integration` reports.
+
+**Human impact map:** navigation/retained input, routes/Save/staleness/Stop/reopen,
+diagnostic navigation, resize/scaling/shortcuts, picker/import/progress and held-grip
+cancellation have unchanged governing implementation, tests/probes and dependencies.
+Windows “all working, happy” and Mac “all working” remain accepted on their original
+recorded binaries. No repeated human session or SDK download. Profiles/temporary media
+remain restored; no owned app/game/profile operation. Exact hosted package hashes,
+132-input manifests, six cases per target, 293 cancellation hashes and 3,227 restored
+Mac profile hashes remain in the terminal acceptance record below.
+
+**Limits/counters preserved:** Chrome timing Fail remains diagnostic under the existing
+policy; physical/native-input and assistive-tech limits, unsigned/not-notarized packages
+and retired specialist observation/crash scopes remain explicit. All unique failed
+runs and local failures retained, including **37459347476/1**. Initial final allowance
+**1/1 consumed**, corrections **4**, remote series **6 app builds/46 starts**; local Mac
+**19 builds/77 starts/7 SDK menus**, Windows **6 production+1 unqualified/4 failed setup/
+21 starts/0 SDK menus**, unchanged. Integration adds no app build/start, package dispatch,
+retry, automation or wait. Fresh lightweight PR/main quality runs are listed separately.
+
+**Closeout:** canonical product/architecture/data/transaction/security/UI contracts retain
+accepted behavior. Phase plan/roadmap/index/testing now reflect accepted 1G and upcoming
+unselected 1H. Archive completed 1G/UI/review-delivery/testing-alignment records and
+retired G1-O investigations without rewriting historical failures. Keep one live
+CURRENT/HANDOVER; one justified pre-integration handover archive preserves exact package,
+profile, restoration, failure and planning-transfer receipts and their linked anchors.
+Documentation closeout receives validator/link/privacy/whitespace checks and ordinary
+main quality only; it does not replace tested candidate or integration identities.
+
+Planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**, two unpublished commits
+and remote planning **`267ec2a35ed94bbf565594200cd729c87c6fb11c`** preserved; no retry of
+its earlier rejected publication. Integrated PR #17's unused feature branch retired locally/remotely after
+ancestry, exact remote-head and worktree checks; other open PRs, unique planning work
+and archive refs preserved. **1H remains `not_started`**, ready for explicit selection with H01–H12 owned by
+its existing brief. Phase 1 is not closed; no Phase 2 or optional Git execution.
+
 ## Phase 1G integration review — 2026-10-06
 
 **State: conflict reconciled locally; reviewed merge awaits current repository quality.**
@@ -408,7 +473,7 @@ build/setup attempts / 21 top-level starts / 0 separate SDK menu starts**. Mac/r
 totals unchanged. All original packages, evidence, failed candidates and review data
 are retained locally beyond GitHub expiry; no deletion/polling automation.
 
-**Next:** [six-item bounded Mac checklist](../../status/HANDOVER.md#bounded-mac-follow-up--frozen-windows-candidate)
+**Next:** [six-item bounded Mac checklist](2026-10-06-phase-1g-acceptance-handover.md#bounded-mac-follow-up--frozen-windows-candidate)
 on the exact frozen inputs, then justified coherent Windows/macOS remote qualification.
 Reuse unchanged Mac/Windows evidence; new corrections retest only affected behavior.
 Both-platform acceptance and final separate integration remain pending. PR #17
@@ -3377,7 +3442,7 @@ explicit SDK menu starts. No manual workflow or automation is pending.
 unexecuted as Windows-PC acceptance.** The selected passing candidate is
 `5b467a402b14c7b371838645a9daa555ba315349`, production run 37312593480 attempt 1.
 Use the retained Windows NSIS installer identified in the
-[Windows transfer](../../status/HANDOVER.md#windows-agent-prompt--exact-passing-candidate).
+[Windows transfer](2026-10-06-phase-1g-acceptance-handover.md#windows-agent-prompt--exact-passing-candidate).
 Hosted WebView2 synthetic-input results pass, but do not replace these physical/native/
 visual checks. Record installer/executable hashes, Windows/WebView2 version, scaling,
 palette and each row Pass/Fail/Unavailable. Use disposable projects and synthetic files;
@@ -4961,7 +5026,7 @@ have fresh local and both-platform hosted proof. User Finder observation is sepa
 from agent-driven native OS input/visual and synthetic service results; non-English
 IME is outside selected English app support, with Unicode source protections retained.
 
-Continuation: use the [Windows-agent prompt](../../status/HANDOVER.md#windows-agent-prompt--exact-passing-candidate)
+Continuation: use the [Windows-agent prompt](2026-10-06-phase-1g-acceptance-handover.md#windows-agent-prompt--exact-passing-candidate)
 and all 14 canonical rows on a genuine Windows PC, preserving profiles/fixtures and
 recording physical/native/visual limitations. Any correction supersedes affected
 candidate acceptance and needs mapped Mac/remote checks. Final conflicts/combined-input

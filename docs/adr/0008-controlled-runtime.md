@@ -95,7 +95,7 @@ shutdown is called again. Preparation/trust are cleared on shutdown. This does n
 containment of deliberately escaping project Python.
 
 R1-B1/B2 implementation and automated cases are in the
-[1G ledger](../tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
+[1G ledger](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
 Historical replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on
 Windows x64 and macOS ARM64 with checked artifacts and all 60 input hashes per target.
 Independent review then identified the renderer completion branch bypassing receipt
@@ -107,6 +107,6 @@ input hashes per target were verified; frontend 50, runtime core Windows 17/macO
 explicit SDK 1 and desktop 1 passed per target. The two ignored core entries are the
 separately executed SDK gate and child-process fixture. R1 technical findings are
 closed; 1G.2a is review-ready, not user-accepted. See the
-[final-source closure](../tasks/active/phase-1g-branches-runtime-git.md#final-source-r1-recheck-and-closure--2026-09-26).
+[final-source closure](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#final-source-r1-recheck-and-closure--2026-09-26).
 Existing native successes retain their original inputs and provenance; 1G.2b remains
 unstarted and separately selected.

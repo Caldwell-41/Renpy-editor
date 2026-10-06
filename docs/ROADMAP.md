@@ -21,7 +21,13 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1E and CI-SIMPLE are integrated. Phase 1F is accepted after final review; [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) integration is complete and CURRENT/HANDOVER own its verified state. Phase 1G implementation remains incomplete; Phase 1H execution is not started. The [1G brief](tasks/active/phase-1g-branches-runtime-git.md) defines three checkpoint chats across Branches and runtime/diagnostics; the [1H brief](tasks/active/phase-1h-vertical-slice-acceptance.md) retains twelve acceptance IDs with new Git work removed. Each needs accepted/integrated prerequisites and explicit execution selection.
+**Status:** Phase 1A–1G and CI-SIMPLE are accepted and integrated. Phase 1G merged
+through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17), with both-platform
+qualification/native/human acceptance and exact integrated-input review. The
+[completed 1G record](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+retains identities, failures and limits. [Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md)
+remains `not_started`, ready for explicit selection of H01–H12. Phase 1 is not closed;
+Phase 2 remains planning only.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
@@ -31,10 +37,10 @@ The bounded beat set remains background/scene, show/hide and appearance changes,
 
 The 2026-09-27 [scope reset](adr/0010-local-project-safety-and-observed-flow.md)
 prioritizes data-loss prevention, ordinary external-edit handling and responsive
-last-observed Branches. Phase 1G implementation is underway and incomplete;
-G1-OBS replaces the retired native observation proof. Deliberate same-user filesystem
+last-observed Branches. Accepted G1-OBS replaces the retired native observation proof.
+Deliberate same-user filesystem
 attacks are outside initial acceptance. Historical failures remain preserved,
-and final supported-target/user acceptance is still required.
+and final 1G supported-target/user acceptance is recorded in the closeout ledger.
 
 ### Dependency checkpoints
 

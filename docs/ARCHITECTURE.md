@@ -402,7 +402,7 @@ later file reads. Material implementation decisions still require the owning run
 Shared flow projection must preserve known routes and explicit missing/unknown/partial
 boundaries without a second parser/document authority. Diagnostics gain structured
 locations and revision/session freshness through the existing SDK adapter. See the
-[1G brief](tasks/active/phase-1g-branches-runtime-git.md) for budgets and proof gates.
+[1G brief](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) for budgets and proof gates.
 New Git status/diff/checkpoint services are deferred to
 [optional Git](tasks/active/optional-local-git.md); only existing optional creation-time
 init remains in Phase 1. No Git implementation is implied by the general adapter table.

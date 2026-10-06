@@ -1,7 +1,11 @@
 # Phase 1G — Branches, runtime and diagnostics
 
+**Archived:** 2026-10-06. Completed within accepted/integrated Phase 1G; historical states and directions below are superseded.
+[Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+and [live handover](../../status/HANDOVER.md) own final state.
+
 **Updated:** 2026-09-28. **Current checkpoint:** TEST-AUDIT-1 documentation/selector
-review; see [the policy/alignment ledger](testing-policy-alignment.md) and section 35.
+review; see [the policy/alignment ledger](2026-10-06-testing-policy-alignment.md) and section 35.
 R2-P1 packaged proof correction and
 supported-target qualification, `blocked` after the failed matrix (ledger 23). G1-OBS remains
 `review_ready` (ledger 22). Windows diagnosis R2-P1-WIN-D1 is `review_ready`
@@ -35,13 +39,13 @@ conflict resolution or merge. WIN-F1 remains preserved.
 
 Phase 1F and its post-merge verification are closed; preserve prior Save/F4 acceptance.
 Planning PR #15 is integrated. New Git work is preserved as the deferred
-[optional Git milestone](optional-local-git.md), not a 1G/1H/Phase 1 or Phase 2 prerequisite.
+[optional Git milestone](../active/optional-local-git.md), not a 1G/1H/Phase 1 or Phase 2 prerequisite.
 The historical filename is retained for existing links; it does not retain Git scope.
 
 ## 1. Ownership and existing foundations
 
 Read [AGENTS](../../../AGENTS.md), [WORKFLOW](../../WORKFLOW.md), current status and
-handover from the actual implementation branch, the [parent plan](phase-1-vertical-slice.md),
+handover from the actual implementation branch, the [parent plan](../active/phase-1-vertical-slice.md),
 [UI](../../UI.md), [DATA_MODEL](../../DATA_MODEL.md), [TRANSACTIONS](../../TRANSACTIONS.md),
 [SECURITY](../../SECURITY.md) and [SDK ADR 0002](../../adr/0002-versioned-renpy-sdk-adapter.md).
 The integrated 1F Source brief and shell-Save ADR govern drafts and Save; do not copy
@@ -288,7 +292,7 @@ and prove a narrow end-to-end slice using the pinned SDK before broad runtime wi
 
 Controlled child nonzero exit and ordinary SDK exceptions retain failure/cleanup
 coverage; deliberate application/persistence crashes are separately selected specialist
-experiments under WORKFLOW. See the [selector disposition](testing-policy-alignment.md#selector-disposition).
+experiments under WORKFLOW. See the [selector disposition](2026-10-06-testing-policy-alignment.md#selector-disposition).
 
 Agent-run Windows/macOS process evidence is required at R1. No user physical testing
 is requested here. Missing host access leaves R1 blocked; it is not substituted with
@@ -335,7 +339,7 @@ native evidence and cannot replace it.
 
 ## 7. Deferred optional Git
 
-Former 1G.3a/1G.3b and V1/V2 now belong to [optional Git](optional-local-git.md).
+Former 1G.3a/1G.3b and V1/V2 now belong to [optional Git](../active/optional-local-git.md).
 Existing project-creation Git init remains; new Git work is not required for Phase 1.
 
 ## 8. Capability closure
@@ -351,7 +355,7 @@ matrix and user review are complete. 1H remains separately selected integrated a
 Run relevant cheap checks first: `python3 scripts/validate.py` and `git diff --check`.
 For implementation, select applicable `app/` frontend, formatting and targeted core
 checks under WORKFLOW/TESTING. Unfiltered core and embedded SDK selectors still need
-the [audited alignment](testing-policy-alignment.md#selector-disposition) before use.
+the [audited alignment](2026-10-06-testing-policy-alignment.md#selector-disposition) before use.
 Use targeted regressions while developing;
 retain the repository's SDK/source regression commands where affected. Desktop/package
 commands and the existing supported-target workflow remain governed by
@@ -2880,7 +2884,7 @@ The user selected investigation, bounded diagnostics if decision-relevant, and
 publication of findings/next-step planning only. No production implementation,
 changed freshness contract, G1-O2, timing-limit change or CI dispatch is authorized.
 
-The canonical [G1-O1-R review and next implementation plan](phase-1g-g1-o1-r-review.md)
+The canonical [G1-O1-R review and next implementation plan](2026-10-06-phase-1g-g1-o1-r-review.md)
 contains the sanitized nine-sample comparison, complete sequential stage model,
 native operation interpretation, A/B/C comparison, checked Microsoft API guarantees,
 S1 safety map, inspected UI/production findings and all remaining integration proofs.
@@ -2957,7 +2961,7 @@ matched this feature head and main 4d7ba0333c48d60242a9a42d3e079fea499a5531.
 Feature checkout was clean; prior repository chats idle, no active repository
 build/benchmark writer found. Historical detached checkout remained clean.
 
-The [pre-registration and findings](phase-1g-g1-o1-n-experiment.md) own exact
+The [pre-registration and findings](2026-10-06-phase-1g-g1-o1-n-experiment.md) own exact
 input/diff/binary/log hashes, ordered cases, native flags, safety map, cost
 disposition and later proof gaps. The source is test-only (cfg(test)/Windows);
 the existing candidate/negative controls and production paths are unchanged.
@@ -5241,7 +5245,7 @@ preserving 14 newer commits and historical work/evidence. Main remains `4d7ba03`
 PR is draft/open/conflicting. No integration, test/workflow implementation, native
 build, app/browser/SDK launch or CI dispatch occurred.
 
-[The owning policy/alignment ledger](testing-policy-alignment.md#test-audit-1--selected-documentation-and-selector-audit)
+[The owning policy/alignment ledger](2026-10-06-testing-policy-alignment.md#test-audit-1--selected-documentation-and-selector-audit)
 contains the active-instruction classification, selector/embedded-call audit, required
 ordinary regressions, cumulative problem record, checks and amended Q1 plan.
 Ledger 34 remains byte-preserved historical review evidence; its proposed next action
@@ -5257,7 +5261,7 @@ recovery, including successful Prepared abandonment/follow-up-write assertions;
 no product protection is weakened.
 
 **Next proposed action:** select R2-P1-Q1-PREP in the
-[amended Q1 proposal](testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected),
+[amended Q1 proposal](2026-10-06-testing-policy-alignment.md#amended-r2-p1-q1-proposal--not-selected),
 publish/review preparation, then stop before separately selected Q1-EXEC. Both standard
 targets, all five cases, core budgets and required package/native gaps remain. No
 cross-SHA waiver, replay of Mac diagnosis, unused F1 allowance, conflict resolution,
@@ -5271,7 +5275,7 @@ published documentation head from Git; no receipt-only commit.
 **Authority/state:** user selected only bounded test/workflow preparation on the existing
 feature branch. Source preparation is `review_ready`; Q1-EXEC and final acceptance remain
 unselected. Start from the amended scope and five-step record in the
-[TEST-AUDIT/Q1 ledger](testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
+[TEST-AUDIT/Q1 ledger](2026-10-06-testing-policy-alignment.md#r2-p1-q1-prep--testworkflow-source-alignment--2026-09-28).
 
 All four process-termination parents are reasoned ignored tests; the successful Prepared
 abandon/Flush/unrelated-byte/follow-up-write regression now runs through a non-crashing
@@ -5301,7 +5305,7 @@ refs when Q1-EXEC is separately selected; do not start that matrix from this che
 ## 37. Q1-PREP review and corrections — 2026-09-28
 
 User selected review and correction of Luna's published preparation `e8dc1fa`.
-The [detailed review](testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28)
+The [detailed review](2026-10-06-testing-policy-alignment.md#q1-prep-review-and-corrections--2026-09-28)
 records the retained-regression audit and four findings: target-specific Python
 lookup, three preflight Rust formatting failures, macOS bundle permission loss during
 artifact upload, and stale publication/migration instructions. All are corrected in
@@ -5337,7 +5341,7 @@ defect; no runner or product failure occurred. Post-rejection candidate run inve
 returned zero runs. No new run/attempt/job/artifact exists and no operation is pending.
 Both targets remain unqualified; executable/archive hashes and case reports are absent.
 
-The [owning Q1 execution record](testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28)
+The [owning Q1 execution record](2026-10-06-testing-policy-alignment.md#r2-p1-q1-exec--standard-package-qualification--2026-09-28)
 contains the error, access/pin checks and recovery scope. One dispatch request was
 consumed; zero accepted runs/builds/app starts. Source audit and gate fixtures passed
 but missed this semantic workflow error. No retry, workflow correction, conflict
@@ -5356,7 +5360,7 @@ runner allocation; interpreter choices remain Windows `python` and macOS `python
 The prior focused checker required the invalid `runner.os` expression. It now rejects
 that original error, wrong interpreter mapping/scope, duplicates and bare helper calls.
 
-[The detailed correction record](testing-policy-alignment.md#q1-workflow-context-correction--2026-09-28)
+[The detailed correction record](2026-10-06-testing-policy-alignment.md#q1-workflow-context-correction--2026-09-28)
 contains the authoritative context reference, local tool identity and checks. Independent
 actionlint 1.7.12 rejected both original workflows at the expected locations and passes
 both corrected workflows. Gate self-tests/source audit pass. This is `review_ready`
@@ -5381,7 +5385,7 @@ running dependency installation after successful repository validation, gate fix
 source audit and Node/npm setup. Windows/macOS jobs were not yet listed; zero artifacts
 were available. No package, binary/hash or completed qualification is claimed.
 
-The [owning execution record](testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28)
+The [owning execution record](2026-10-06-testing-policy-alignment.md#q1-execution-after-workflow-context-correction--2026-09-28)
 holds full identity, scope, snapshot, counters and the terminal audit checklist.
 State is `awaiting_ci` with manual resume: no active polling or automatic wake-up.
 Resume this run/attempt only; no dispatch/rerun. Cumulative Q1 requests: two (one
@@ -5394,7 +5398,7 @@ publication does not change the run's candidate; no merge, conflict resolution o
 User resumed audit only. Run `36383551820`, attempt **1**, candidate
 `8546dcddd5ac95bfe849575fe618f6e990cdd5d4`, completed success at `06:06:35Z`.
 Preflight `108804103380`, Windows `108804257548` and Mac `108804257567` all passed.
-The [detailed terminal audit](testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
+The [detailed terminal audit](2026-10-06-testing-policy-alignment.md#q1-terminal-evidence-audit--2026-09-28)
 records exact source/tree/binary/archive identities, artifact IDs/expiry, test counts,
 all fixed core samples and route measurements, limits and cumulative budgets.
 
@@ -5422,7 +5426,7 @@ new launches, matrix, conflict resolution, merge or 1H. Publish documentation wi
 ## 42. UI review continuation and latest local Mac delivery — 2026-10-03
 
 Live UI work and exact delivery are owned by the
-[UI review ledger](ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03)
+[UI review ledger](2026-10-06-ui-design-review.md#latest-corrected-mac-installer-delivery--2026-10-03)
 and CURRENT/HANDOVER. User-selected corrected macOS installer from `b6cc06b`, app
 source `cedef50`, is compiled and statically verified. This is one local review
 package, not a new cross-platform qualification or 1G acceptance. Preserve Q1 and

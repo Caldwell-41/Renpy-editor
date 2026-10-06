@@ -4,7 +4,7 @@ Saved 2026-09-29 at the user's request for comparison during implementation.
 The accepted resolution-picker detail was added 2026-09-30 during hands-on review.
 Rounded Branches connectors (option B) were selected 2026-10-03.
 These are design references, not working-app screenshots or bundled game assets.
-The [design decisions and build plan](../../tasks/active/ui-design-review.md) own
+The [design decisions and build plan](../../tasks/archive/2026-10-06-ui-design-review.md) own
 behaviour, acceptance criteria and corrections. This index owns image selection only.
 Original generated images are preserved; [manifest.json](manifest.json) records their
 original filenames and SHA-256 hashes of these unchanged copies.

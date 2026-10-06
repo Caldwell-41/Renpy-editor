@@ -353,5 +353,5 @@ advance session consent only from its recorded base identities and hashes.
 
 Runtime cleanup failure retains its reservation. A project cannot be unregistered
 while an execution reservation remains active. See [ADR 0008](adr/0008-controlled-runtime.md)
-and the [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger)
+and the [1G ledger](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger)
 for resource bounds, implementation status and native evidence.

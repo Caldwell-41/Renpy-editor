@@ -1,12 +1,10 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-28 (TEST-AUDIT-1 testing-policy alignment)<br>
-**Status:** Phase 1A-1E and CI-SIMPLE are integrated. Phase 1F is accepted by
-[final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
-PR #14 integration is complete. Original 1G/1H planning is integrated through PR #15;
-the September 25 scope/testing amendment is recorded here with all implementation
-checkpoints separately selected. That unstarted state was a planning snapshot; CURRENT/HANDOVER own
-actual integration state.<br>
+**Updated:** 2026-10-06.<br>
+**Status:** Phase 1A–1G and CI-SIMPLE accepted and integrated. Phase 1G merged through
+[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) at `295a189`; both-platform
+native/human and exact-input qualification accepted. Phase 1H remains `not_started`,
+ready only for explicit selection; Phase 1 itself is not closed.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
@@ -62,7 +60,7 @@ Preserve Welcome/Recent Projects, title/folder/parent/path preview, discovered/i
 
 Retain inspected candidate authority until activation, prepare before replacing the healthy current session, and distinguish session IDs from stable project IDs. Close/switch invalidates the old authority and import selections. Stale requests and UI completions cannot retarget another session.
 
-**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The embedded SDK test still needs the [audited split](testing-policy-alignment.md#selector-disposition) before routine execution.
+**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The implemented [audited split](../archive/2026-10-06-testing-policy-alignment.md#selector-disposition) separates embedded specialist exercises from routine SDK execution.
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
@@ -136,28 +134,21 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 ### 1G — Branches, validation/run and diagnostics
 
-**Completion sequence selected 2026-10-04:** the
-[UI review ledger](ui-design-review.md#selected-1g-completion-sequence--2026-10-04)
-owns next-chat resolution completion/final Mac review/remote qualification, subsequent
-Windows-PC verification of the passing candidate, and a final separately selected
-integration chat. All required target acceptance stays open until verified; resolving
-conflicts requires affected combined-input checks, not reuse of unrelated green runs.
+**Status: accepted and integrated — 2026-10-06.**
+The [completed 1G brief](../archive/2026-10-06-phase-1g-branches-runtime-git.md) retains
+G1/R1/R2 requirements and historical evidence. [Final integration/closeout](../archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+records both-platform acceptance, exact qualified inputs, PR #17 merge and required
+integration quality. Only the superseded main profiler conflicted; reconciliation
+introduced no application/test/workflow input change or additional package matrix.
 
-**Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
-[1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
-and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'
-complete logs, artifacts and all 60 input hashes per target were verified for candidate
-`c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; the user selected 1G.2b from `78f051e`.
-Final 1G acceptance remains incomplete. The user approved
-[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md): last-observed
-Branches, ordinary external-edit/data-loss protection and proportionate local-project
-scope. G1-OBS replaces the retired G1-O native-proof program and old G1-V1 display
-freshness gate. Historical failures stay in the 1G ledger; current code and tests
-still need the replacement contract and both supported targets' evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
-supported script editing/saving during play and usable diagnostics. Asset mutations
-require Stop; live asset refresh is excluded. Existing Scene/Source/Save
-services are reused. Agent-run tests own development checks; user physical testing is
-reserved for one final 1G session under [TESTING](../../TESTING.md#phase-1g-testing-ownership-and-cadence).
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) governs last-observed
+Branches and ordinary external-edit/data-loss protections; G1-OBS replaces the retired
+native-proof/full-freshness experiment. G1/R1/R2 prove shared flow, explicit trusted
+runtime/process ownership, supported script editing/saving during play and diagnostics.
+Asset mutations require Stop; live asset refresh remains excluded. Existing Scene,
+Source and Save services are reused. Historical failures and native/human limitations
+remain recorded. 1H is the next separately selected integrated acceptance outcome;
+its agent-owned gates are not closed by 1G or by reused human feedback.
 
 #### 1G.1 — Branches
 

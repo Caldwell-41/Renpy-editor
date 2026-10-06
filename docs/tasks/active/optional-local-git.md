@@ -18,7 +18,7 @@ for traceability. Remote/authentication and destructive restore remain excluded.
 
 Before implementation, read AGENTS, WORKFLOW, CURRENT/HANDOVER, TRANSACTIONS, SECURITY,
 DATA_MODEL and the current Source Save contract. Reuse the operation-preparation path
-from [1G](phase-1g-branches-runtime-git.md#3-cross-cutting-accepted-behaviour) without a
+from [1G](../archive/2026-10-06-phase-1g-branches-runtime-git.md#3-cross-cutting-accepted-behaviour) without a
 new Save authority. Reassess runtime/Git compatibility if play exists at selection time.
 
 At GIT.1 entry define an explicit inclusion table against actual metadata schemas:

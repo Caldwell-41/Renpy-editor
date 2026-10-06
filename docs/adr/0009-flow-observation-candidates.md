@@ -15,7 +15,7 @@ The 503-source-file fixture currently reads/hashes every source twice per flow
 request. Windows secure read/path/hash work dominates; increasing readers failed.
 The measured stage includes opens, directory validation and I/O as well as SHA-256;
 the evidence does **not** establish that the hash algorithm itself is expensive.
-See [ledger 15–17](../tasks/active/phase-1g-branches-runtime-git.md#17-g1-v1-observation-redesign-review--2026-09-27).
+See [ledger 15–17](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#17-g1-v1-observation-redesign-review--2026-09-27).
 
 Recommend a **core-private, session-scoped candidate index**, retaining bounded
 source bytes and their observed revisions, with **one mandatory fresh secure
@@ -245,12 +245,12 @@ experiment's 199.032 ms verifier plus about 68.6 ms other work also lacks margin
 The earlier hypothetical 175 ms verifier + 65 ms other-work allocation is **withdrawn
 as a credible forecast** by G1-O1-R. The completed local comparison measured about
 159–162 ms of other work and 299–302 ms verification, still without final leaf binding.
-The [updated whole-request model](../tasks/active/phase-1g-g1-o1-r-review.md#whole-request-cost-model)
+The [updated whole-request model](../tasks/archive/2026-10-06-phase-1g-g1-o1-r-review.md#whole-request-cost-model)
 sets out a conditional 230 ms estimate with explicit binding cost and separate
 metadata/inventory reductions; it is a requirement for a new proof, not a performance
 result. No uniform local-to-hosted speed multiplier or CPU-specific cause is established.
 
-The [ledger implementation checkpoints](../tasks/active/phase-1g-branches-runtime-git.md#implementation-checkpoints)
+The [ledger implementation checkpoints](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#implementation-checkpoints)
 require safety proof and native feasibility before production integration, and an
 enforced real-service gate before any further full production/package run.
 
@@ -269,7 +269,7 @@ These support API limits, not measured Loomlight performance or a portable cache
 ## G1-O1 feasibility disposition — 2026-09-27
 
 The test-only prototype in `b3d696533290d91bc2ff7d4eb65562d2c68642e1` does not
-qualify this decision for production. [Ledger 18](../tasks/active/phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
+qualify this decision for production. [Ledger 18](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27)
 records the exact native run, all samples, integrity-checked evidence and gaps.
 Windows warm/accepted samples were 570–586 ms against <250 ms; macOS timing passed.
 Mandatory content verification and the 250 ms requirement are unchanged.
@@ -285,7 +285,7 @@ G1-O2 is blocked; separately review the safety boundary and Windows cost model f
 
 ## G1-O1-R review disposition — 2026-09-27
 
-The [completed review and next-checkpoint plan](../tasks/active/phase-1g-g1-o1-r-review.md)
+The [completed review and next-checkpoint plan](../tasks/archive/2026-10-06-phase-1g-g1-o1-r-review.md)
 preserve this contract and the unchanged timing gate. Local Windows accepted median
 460.195 ms versus hosted 574.858 ms confirms environment sensitivity and continued
 NO-GO. Historical run 36278262505 attempt 1 and negative reproductions remain evidence
@@ -314,7 +314,7 @@ boundary, fixture or timing target changes here. G1-O2 remains ineligible.
 
 ## G1-O1-N bounded native experiment disposition — 2026-09-27
 
-The [pre-registered one-file experiment](../tasks/active/phase-1g-g1-o1-n-experiment.md)
+The [pre-registered one-file experiment](../tasks/archive/2026-10-06-phase-1g-g1-o1-n-experiment.md)
 is complete with **NO-GO** for missing safety qualification. Local native relative
 opening/final binding passed ordinary/writer/mapping and eight restored-time
 replacement assertions, then hostile leaf-symlink setup was denied (Win32 1314).

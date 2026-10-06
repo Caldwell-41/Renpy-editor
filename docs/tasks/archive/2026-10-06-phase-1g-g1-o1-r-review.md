@@ -1,5 +1,9 @@
 # G1-O1-R: Windows feasibility review and next checkpoint
 
+**Archived:** 2026-10-06. Retired/superseded investigation; original NO-GO and failure evidence retained. Do not resume.
+[Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+and [live handover](../../status/HANDOVER.md) own final state.
+
 > Historical evidence: the user superseded this continuation and its display
 > acceptance requirements with [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md).
 > Preserve the recorded results; do not resume the native experiment or old G1-O plan.
@@ -7,7 +11,7 @@
 **Date:** 2026-09-27. **State:** `review_ready` investigation; capability **NO-GO**.
 **Entry:** `94128d3d5104f2716d5996d9f4a0492c923054b6`, branch
 `feature/phase-1g-branches-runtime`, draft/open [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-This is the detailed plan linked from [ledger 19](phase-1g-branches-runtime-git.md#19-g1-o1-r-windows-feasibility-review--2026-09-27).
+This is the detailed plan linked from [ledger 19](2026-10-06-phase-1g-branches-runtime-git.md#19-g1-o1-r-windows-feasibility-review--2026-09-27).
 It does not approve implementation or change [ADR 0009](../../adr/0009-flow-observation-candidates.md).
 
 ## Recommendation and decision boundary
@@ -46,7 +50,7 @@ at `b3d696533290d91bc2ff7d4eb65562d2c68642e1`; its tree and code were not change
 The historical comparison is [run 36278262505](https://github.com/Caldwell-41/Renpy-editor/actions/runs/36278262505),
 **attempt 1**, Windows job `108505073512`, macOS job `108505073353`. All failures,
 artifact digests and the later negative reproductions remain in
-[ledger 18](phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27).
+[ledger 18](2026-10-06-phase-1g-branches-runtime-git.md#18-g1-o1-verified-candidate-feasibility-proof--2026-09-27).
 
 | Environment / sample | Cold ms | Warm ms | Accepted edit ms | Outcome |
 | --- | ---: | ---: | ---: | --- |

@@ -1,5 +1,9 @@
 # Testing delivery policy and active-instruction alignment
 
+**Archived:** 2026-10-06. Completed within accepted/integrated Phase 1G; historical states and directions below are superseded.
+[Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+and [live handover](../../status/HANDOVER.md) own final state.
+
 **Updated:** 2026-09-28.
 **Scope:** Adopt the approved retrospective operating rules; then, only if selected,
 audit the current Phase 1G branch for outdated active testing instructions.

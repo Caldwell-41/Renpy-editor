@@ -99,7 +99,7 @@ do not expand specialist attack experiments into a prerequisite for routine
 hobby-editor work. Keep ordinary external-writer and interrupted-save coverage.
 Use the routine broad-core and separate SDK selectors in TESTING; unfiltered core
 is only a command reference and can duplicate archive-backed gates. The
-[selector audit](docs/tasks/active/testing-policy-alignment.md#selector-disposition)
+[selector audit](docs/tasks/archive/2026-10-06-testing-policy-alignment.md#selector-disposition)
 records the exact specialist exclusions; current evidence belongs in HANDOVER.
 An official-SDK wrapper with a skip marker is not target evidence.
 

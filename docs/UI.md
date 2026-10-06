@@ -2,7 +2,7 @@
 
 ## Accepted redesign direction — 2026-09-29
 
-The [UI design review and implementation plan](tasks/active/ui-design-review.md)
+The [UI design review and implementation plan](tasks/archive/2026-10-06-ui-design-review.md)
 records the user-accepted replacement designs for the workspace, Settings, Welcome
 and creation wizard. They supersede the initial dark/indigo palette below: Dark uses
 warm charcoal/copper, Light uses paper/deep teal, with Follow system as the default.
@@ -13,7 +13,7 @@ that does not move editing content. Settings is available without an open projec
 The user authorized implementation on 2026-09-30. The implementation now includes
 both palettes, a stable shell/footer, Settings, onboarding progress and the redesigned
 workspaces. Qualification status and exact tested inputs belong in CURRENT/HANDOVER
-and the linked task; implementation does not imply final native/human acceptance.
+and the archived task; both-platform acceptance and PR #17 integration are complete.
 
 ### Implemented refresh behaviour
 
@@ -49,7 +49,7 @@ and the linked task; implementation does not imply final native/human acceptance
 
 ### Hands-on review corrections — 2026-10-02
 
-Implementation status: the [chat-to-implementation audit](tasks/active/ui-design-review.md#chat-to-implementation-audit--2026-10-02)
+Implementation status: the [chat-to-implementation audit](tasks/archive/2026-10-06-ui-design-review.md#chat-to-implementation-audit--2026-10-02)
 identified nine gaps, corrected in the 2026-10-03 source continuation. Choice fields
 stack at compact widths with a separate grouped action row. Discard resets the full
 Variable form, its dependent controls and persistence status. Selected appearance
@@ -61,8 +61,8 @@ Beat creation disables duplicate submission/dismissal while pending, restores in
 after failure, and reveals/focuses the saved collapsed row. Media shows loading,
 bounded read-error detail and explicit retry. Beat grips use captured pointer gestures,
 with cancellation and protected-boundary checks, while native OS asset-drop ownership
-remains enabled. Local verification does not establish native acceptance; the user
-explicitly deferred [Windows testing](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
+remains enabled. The subsequently completed native/human Windows review is retained in the
+[Windows checklist](tasks/archive/2026-10-06-ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
 
 Source keyboard Save retains the typing caret/focus after its temporary write
 barrier is released, so typing can continue without clicking the editor again.
@@ -126,8 +126,9 @@ the existing even-dimension limits. Native/visual acceptance remains in the task
   without changing display names or text values. Focusable naming guidance explains
   Loomlight's lowercase, letter-first, 64-character contract and descriptive names.
 
-Qualification and remaining native/human review are recorded in CURRENT/HANDOVER;
-these corrections have not yet been delivered as a replacement installer.
+Both-platform qualification/native/human acceptance and retained replacement-package
+identities are recorded in CURRENT/HANDOVER and the archived review ledger. PR #17
+integration is complete; recorded Chrome timing and signing/input limitations remain.
 
 ## Accepted UI/UX guidelines for implementation agents
 
@@ -793,7 +794,7 @@ undo/redo or compound operations. Existing asset browsing/preview stays availabl
 Do not offer live asset refresh. Stop then Run deliberately starts the latest saved
 script revision; external file changes do not become a promise of isolated runtime input. Conflicting file lifecycle/history operations offer
 Stop and retry; do not lock the entire editor for the duration of play. The detailed
-[1G.2a proof](tasks/active/phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation)
+[1G.2a proof](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation)
 is required before claiming this behaviour works.
 
 If an external change affects one Scene file, block unsafe writes/reconciliation for
