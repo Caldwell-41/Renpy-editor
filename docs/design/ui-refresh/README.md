@@ -79,5 +79,8 @@ Asset import errors remain visible when a selection contains no supported files.
 An empty or unsupported-only batch keeps the import form hidden unless an existing
 staging dialog is already open; it creates no assets.
 
+Staged image previews appear only after successful decoding. Unavailable, failed or
+released previews show their explanation and Retry without a broken-image box.
+
 Long Story preview captions stay within the game canvas. When a small preview
 cannot display the whole caption, its text scrolls within the bounded overlay.

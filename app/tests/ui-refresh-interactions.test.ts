@@ -83,3 +83,21 @@ test('removed and disposed staging ignores late previews; errors offer retry wit
  stage();await tick();assert.match(host.textContent!,/Selection changed/);const retry=host.querySelector<HTMLButtonElement>('.media-retry')!;assert.equal(retry.hidden,false);retry.click();await tick();ui.dispose();receipt(media);await tick();assert.equal(host.querySelector('img')!.hasAttribute('src'),false);assert.equal(writes,0);
  await browser.happyDOM.close();
 });
+
+test('unavailable import previews hide broken images and retry shows only decoded content',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);let reads=0,writes=0;
+ const created:string[]=[],revoked:string[]=[];const createURL=URL.createObjectURL,revokeURL=URL.revokeObjectURL;
+ URL.createObjectURL=()=>{const url=`blob:retry-${created.length}`;created.push(url);return url;};URL.revokeObjectURL=url=>revoked.push(url);
+ const ui=assetImport(host,[],{choose:async()=>({choices:[]}),preview:async()=>{if(++reads===1)throw Error('This passive media format is not supported for presentation.');return {assetId:'opaque',dataBase64:'YQ==',mimeType:'image/png',sha256:'a',byteCount:1,width:2,height:1,cacheKey:'a',purpose:'imagePreview'};},import:async()=>{writes++;},complete:()=>{},status:()=>{}});
+ try{
+  ui.stage({choices:[{authorityId:'opaque',displayName:'room.webp',extension:'webp',byteCount:1}]});await tick();
+  const image=host.querySelector<HTMLImageElement>('img')!,retry=host.querySelector<HTMLButtonElement>('.media-retry')!;
+  assert.match(host.textContent!,/not supported for presentation/);assert.equal(image.hidden,true,'an unavailable preview must not display a broken image box');assert.equal(image.hasAttribute('src'),false);assert.equal(retry.hidden,false);
+  retry.click();await tick();assert.equal(image.hidden,true,'wait for browser decode before displaying the preview');image.dispatchEvent(new window.Event('error'));
+  assert.equal(image.hidden,true);assert.equal(image.hasAttribute('src'),false);assert.match(host.textContent!,/could not be decoded/);assert.equal(retry.hidden,false);assert.deepEqual(revoked,created);
+  retry.click();await tick();image.dispatchEvent(new window.Event('load'));
+  assert.equal(image.hidden,false);assert.match(host.textContent!,/2 × 1/);assert.equal(retry.hidden,true);assert.equal(writes,0);
+  host.dispatchEvent(new window.Event('catalog-discard'));assert.deepEqual(revoked,created);assert.equal(host.querySelectorAll('.import-entry').length,0);
+ }finally{ui.dispose();URL.createObjectURL=createURL;URL.revokeObjectURL=revokeURL;await browser.happyDOM.close();}
+});

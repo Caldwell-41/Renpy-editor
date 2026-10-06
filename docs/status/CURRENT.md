@@ -7,6 +7,30 @@
 
 ## Live continuation
 
+**Explorer drop / import-preview correction — 2026-10-06; in_progress.** Human
+candidate-5 drop highlights Assets and stages all three files; PNG/JPEG previews
+Pass. WebP has the expected unsupported-presentation explanation but an unintended
+broken-image box (WIN-IMPORT-PREVIEW-01). Attempt 1 hides previews until decoded
+and on release. Rejecting regression fails before; all 6 affected import tests,
+TypeScript/Vite and candidate-6 native PNG/JPEG/error/Retry/discard checks Pass.
+All 230 saved files and three originals remain unchanged. WIN-UI-14 Pass in selected
+current-scaling scope; WIN-UI-03 remains Unavailable for off-Assets/coexistence.
+
+Current candidate 6: 14,151,168 bytes, SHA256
+`4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`, production
+build 38.235s. All 132 inputs verified against both passing manifests: 10 changed /
+122 unchanged; only import renderer/test differ from candidate 5. No broad matrix
+or CI dispatch. Cumulative Windows: 6 production builds + 1 unqualified, 4 failed
+build/setup attempts, 21 starts, 0 separate SDK menus. Candidate 6 is Saved on the
+disposable graph project → Story → Scene 1. Next: off-Assets physical drop, then Beat
+reorder/Undo coexistence; short English/hover/visual feedback. Scale remains excluded.
+Profiles remain protected pending restoration after the session. Add unavailable
+import-preview presentation to the single bounded affected Mac follow-up; changed
+candidate Mac/remote acceptance and separate integration remain pending. Exact
+evidence: [live ledger](../tasks/active/ui-design-review.md#windows-explorer-drop-and-unavailable-preview-correction--2026-10-06).
+
+### Earlier physical edge retest (passing unaffected evidence retained)
+
 **Candidate-5 physical scroll retest Pass — 2026-10-06.** User reports both held
 edges and Escape now work. Hash comparison finds four durable saved reorders,
 206→230 files including recovery evidence; all source lines are preserved. User

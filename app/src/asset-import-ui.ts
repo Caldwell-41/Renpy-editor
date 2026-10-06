@@ -32,7 +32,7 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
       const retry=document.createElement('button');retry.className='button media-retry';retry.textContent='Retry preview';retry.hidden=true;status.append(retry);
       if(audio){status.textContent=`Audio file · ${(selected.byteCount/1024).toFixed(1)} KB`;}
       else{
-        const image=document.createElement('img');image.className='import-preview';image.alt=`Preview of ${selected.displayName}`;row.insertBefore(image,status);
+        const image=document.createElement('img');image.className='import-preview';image.alt=`Preview of ${selected.displayName}`;image.hidden=true;row.insertBefore(image,status);
         const setStatus=(message:string,retryable:boolean):void=>{status.replaceChildren(document.createTextNode(message),retry);retry.hidden=!retryable;};
         const load=async():Promise<void>=>{
           if(disposed||!jobs.has(row))return;setStatus('Loading preview…',false);image.setAttribute('aria-busy','true');
@@ -44,8 +44,8 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
             let total=[...urls.values()].reduce((n,entry)=>n+entry.bytes,0);
             for(const [other,entry] of urls){if(total+bytes.length<=32*1024*1024)break;total-=entry.bytes;release(other);}
             const url=URL.createObjectURL(new Blob([bytes],{type:media.mimeType}));
-            urls.set(row,{url,bytes:bytes.length,release:()=>{image.removeAttribute('src');setStatus('Preview released to save memory. ',true);}});
-            image.onload=()=>{if(!disposed&&jobs.has(row)){setStatus(`${media.width??''} × ${media.height??''} · ${(selected.byteCount/1024).toFixed(1)} KB`,false);image.removeAttribute('aria-busy');}};
+            urls.set(row,{url,bytes:bytes.length,release:()=>{image.hidden=true;image.removeAttribute('src');setStatus('Preview released to save memory. ',true);}});
+            image.onload=()=>{if(!disposed&&jobs.has(row)){image.hidden=false;setStatus(`${media.width??''} × ${media.height??''} · ${(selected.byteCount/1024).toFixed(1)} KB`,false);image.removeAttribute('aria-busy');}};
             image.onerror=()=>{if(!disposed&&jobs.has(row)){release(row);setStatus('Preview unavailable: this image could not be decoded. ',true);image.removeAttribute('aria-busy');}};
             image.src=url;
           }catch(error){if(!disposed&&jobs.has(row)){image.removeAttribute('aria-busy');setStatus(`Preview unavailable: ${error instanceof Error?error.message:'Image could not be read.'} `,true);}}

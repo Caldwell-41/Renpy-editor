@@ -1,5 +1,47 @@
 # Current outcome handover
 
+## Live Explorer drop and preview correction — 2026-10-06
+
+**State: in_progress; candidate-6 affected native preview checks Pass.** Human
+candidate-5 Explorer drop highlights Assets, stages three files, and displays PNG/
+JPEG previews. WebP broken-image report is reproduced: the bounded unsupported
+presentation message is correct, but the renderer exposes an image with no source.
+WIN-IMPORT-PREVIEW-01 attempt 1 hides it until decode succeeds and whenever released.
+New regression rejects old behavior (0/1); all 6 import tests and TypeScript/Vite
+Pass. Native candidate 6 verifies PNG 640×480, JPEG 480×640, visible WebP explanation/
+Retry without a broken box, and Cancel/discard. All 230 saved files and three original
+media files remain unchanged; no import was submitted. Human observations remain
+separate from agent native proof.
+
+Retained `candidate-6/loomlight.exe`: 14,151,168 bytes, SHA256
+`4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`.
+Production build 38.235s (Cargo release 36.91s); exact process path verified.
+`import-preview-build-receipt.json` verifies all 132 inputs against identical passing
+Windows/Mac manifests: 10 changed / 122 unchanged. Only asset-import-ui.ts and
+ui-refresh-interactions.test.ts differ from candidate 5. Earlier unchanged drag/
+Explorer-drop/native/service results are retained, no repeated broad matrix.
+`physical-explorer-drop-result.json`, `physical-webp-*-before` and
+`candidate-6-native-import-preview-proof.json` retain the failed/corrected evidence.
+
+**Next:** candidate 6 → disposable graph review → Story → Scene 1, Saved; Explorer
+still shows only the three synthetic review files. Ask for one off-Assets drop onto
+Story (no import), then a safe Narration reorder and Undo to prove coexistence after
+OS dropping. Sky cannot perform a cross-window drag; physical observation is needed.
+Do not repeat the successful Assets drop, edge scrolling or cancellation matrix.
+Continue short physical English/focus and hover/final readability feedback afterward.
+Scaling remains excluded. WIN-UI-14 Pass in selected scope; WIN-UI-03 remains
+Unavailable until off-surface/coexistence completes. Canonical row table lives in the
+[task ledger](../tasks/active/ui-design-review.md#windows-explorer-drop-and-unavailable-preview-correction--2026-10-06).
+
+Cumulative Windows: **6 production builds + 1 unqualified direct-Cargo build / 4
+failed build/setup attempts / 21 top-level starts / 0 separate SDK menu starts**.
+No new manual CI; Mac/remote counters unchanged. Profile restoration remains pending
+with the app open. Add unsupported import-preview presentation to the one bounded
+affected Mac follow-up after Windows freezes. No both-platform claim, PR conflicts,
+integration, phase closure or new feature.
+
+## Earlier physical edge retest (passing unaffected evidence retained)
+
 ## Live physical edge-scroll retest — 2026-10-06
 
 **State: in_progress; candidate-5 physical edge scrolling Pass.** User says “all

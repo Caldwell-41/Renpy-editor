@@ -1,5 +1,58 @@
 # UI design review
 
+### Windows Explorer drop and unavailable-preview correction — 2026-10-06
+
+**Live state: in_progress; candidate-6 affected native checks Pass.** Human
+candidate-5 observations: Assets drop highlight and three-file staging **Pass**;
+PNG/JPEG previews **Pass**; WebP displays a broken image. Saved snapshots prove
+all **230 project files unchanged**, and no Import was submitted.
+`physical-explorer-drop-result.json` records the human observation separately.
+
+**WIN-IMPORT-PREVIEW-01, product presentation defect, correction attempt 1:** WebP
+presentation is deliberately unsupported and the bounded explanation/Retry already
+exists. The renderer nevertheless exposes an image without a usable source,
+producing a broken icon and 180px empty box above the explanation. Native screenshots
+`physical-webp-broken-before.jpg` and `physical-webp-error-before.jpg` retain this
+failure. Hide images until browser decoding succeeds; hide on URL release, including
+decode failure/cache eviction. No format/IPC/import/drag contract expansion.
+
+Rejecting test **0 passed / 1 failed** before the correction
+(`import-preview-before-fix.log`); all **6 import tests Pass**, no skips
+(`import-preview-focused-tests.log`). Test covers service refusal, decoder error,
+retry recovery, URL release, no implicit import and discard. TypeScript/Vite Pass.
+Native WebView2 candidate 6: PNG 640×480 and JPEG 480×640 decode; WebP explanation/
+Retry stays visible with no broken box on retry; Cancel/discard returns Saved Assets.
+All **230 project files and three original media files unchanged**.
+`candidate-6-native-import-preview-proof.json` and its named captures bind this proof.
+No human drop repetition: candidate-5 OS callback evidence is unchanged and reused.
+
+Candidate 6 production build **Pass 38.235s** (Cargo release 36.91s), 14,151,168 bytes,
+SHA256 `4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`.
+`import-preview-build-receipt.json` verifies all **132 inputs** against identical
+passing Windows/Mac manifests: **10 changed / 122 unchanged**. Only import renderer
+and its test differ from candidate 5. Clean old instance closed/absence verified;
+exact new process path verified. Cumulative Windows: **6 successful production builds
++ 1 unqualified direct-Cargo build / 4 failed build/setup attempts / 21 top-level
+starts / 0 separate SDK menu starts**. One picker accessibility-cache refusal is
+tooling evidence, not a product/build failure; foreground native keyboard selection
+works. No broad unchanged matrix/manual CI; Mac/remote counters unchanged.
+
+Evidence-helper audit found its initial retained candidate-6 snapshots captured an
+older Assets state through a stale closure. These snapshots remain superseded;
+`candidate-6-capture-helper-failure.json` records the tooling failure. Passing native
+actions were freshly recaptured with explicit state/window arguments as
+`candidate-6-focused-*`; exact retained messages/assertions are checked from those
+files. No new source correction/build/start or human drop repetition resulted.
+
+**Next:** candidate 6 is Saved on graph review → Story → Scene 1, no modal/draft or
+external restoration pending. Physical off-Assets drop, then Narration reorder/Undo
+coexistence; brief English/focus and hover/final visuals. Preserve prior edge and
+Explorer successes. Scale remains user-excluded. Profiles remain protected pending
+restoration after session. Include this preview error state in the single bounded
+affected Mac follow-up after Windows freezes; changed-candidate remote qualification
+and both-platform acceptance remain pending. PR #17 conflicts/integration and 1G/1H
+closure untouched. The row table below is current with the amendments recorded here.
+
 ### Physical Windows edge-scroll correction — 2026-10-06
 
 **Live state: in_progress; candidate-5 physical edge scrolling Pass.** User reports
@@ -126,9 +179,9 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 
 | Row | Status | Exact evidence and remaining scope |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; native reorder/physical marker subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Human candidate-4 ghost/marker Pass. Edge scrolling fails under WIN-DRAG-01; Explorer coexistence remains. |
+| WIN-UI-01 | Unavailable; native reorder/physical marker subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Physical marker and corrected candidate-5 held scrolling Pass; deliberate reorders preserve source lines. Post-Explorer-drop coexistence remains. |
 | WIN-UI-02 | Pass, selected physical/native/automated scope | Candidate-4 held edge failure is preserved. Candidate-5 user reports both directions/Escape work and confirms the four saved reorders were deliberate. Source lines preserved; broader session hashes include intentional writes. Isolated no-write cancellation/protected-boundary regressions and earlier native receipts remain Pass; 16 Scene tests and held-pointer Chrome fixture pass. |
-| WIN-UI-03 | Unavailable; Browse/service subchecks Pass | Prior selected-media failure retained; WIN-IMPORT-01 correction/native reselection/partial-import proof `259`–`309` passes. `candidate-4-native-import-cleanup-proof.json`: PNG/JPEG preview, Add files, remove all, Cancel/discard/reopen, all 200 project files unchanged. Physical multi-file Explorer drop, off-Assets refusal and coexistence remain. |
+| WIN-UI-03 | Unavailable; Browse/service/physical Assets drop subchecks Pass | Prior WIN-IMPORT-01 failure and corrected native reselection/partial-import proof `259`–`309` retained. Existing add/remove/Cancel/reopen proof retained. Human candidate-5 highlight/three-file drop and PNG/JPEG Pass; native candidate-6 unavailable preview/Retry/discard Pass, all 230 files/original media unchanged. Off-Assets refusal and post-drop coexistence remain. |
 | WIN-UI-04 | Unavailable; agent native English subchecks Pass | Native Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact English commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Short physical English/focus spot-check remains. IME outside scope. |
 | WIN-UI-05 | Pass, native Windows | Existing `108`–`123`, `336`–`374` and discard/reopen receipts: all types reset correctly, both Boolean True values persist; no-write snapshots retained. Native string default also passes on candidate 3. |
 | WIN-UI-06 | Pass, native Windows | Existing `298`–`334`, `375`–`378`: stable selected/default identities, replacement, Grid/List/reopen, missing-image error, exact restore and independent Retry. Inputs unchanged. |
@@ -139,7 +192,7 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 | WIN-UI-11 | Pass, selected native/packaged scope | WIN-RUN-01 correction `148`–`174`; native tabs/draft close/reopen `694`–`724`; graph/details X/Escape `596`–`689`; fixed draft counter/Undo receipt. Candidate 3 route-b/runtime-error and candidate 4 ui-refresh pass. Exact SDK failing-line navigation is packaged synthetic input; native graph Source navigation selects the correct file/mapped-range end, not an exact line-start claim. |
 | WIN-UI-12 | Unavailable; automated/native stages Pass | Genuine uncached verified official SDK `15`–`20`, CONFIG-01 `21`–`31`, staged creation `32`–`33`, fresh menus `51`–`56`, Dark Welcome `95`, candidate 4 Light Welcome/recent reopen. Earlier-project distinction remains, no silent repair. Hover/final human visual feedback remains; no repeated download/build/menu matrix. |
 | WIN-UI-13 | Unavailable; native graph subchecks Pass | Six-scene saved geometry/navigation, reciprocal/duplicate/self/same-layer/backward/terminal/missing/custom, both palettes zoom/pan/Fit `596`–`689`, terminal source receipt. Full long-name tooltip hover/final readability feedback remains; details already show full text. |
-| WIN-UI-14 | Unavailable; catalogue/preview/cleanup subchecks Pass | Prior columns/selection/Retry/external-file recovery `214`–`334`; candidate 3 Light laptop Character Grid/List and Variable columns; candidate 4 actual PNG 640×480/JPEG 480×640 staging/add/remove/discard/empty reopen, all 200 files unchanged. Story concurrent previews fixed. Physical Explorer drop remains. |
+| WIN-UI-14 | Pass, selected current-scaling native/physical scope | Columns/selection/Retry/external-file recovery `214`–`334`, candidate-3 Character Grid/List/Variable columns, candidate-4 staging/add/remove/discard/empty reopen retained. Human candidate-5 Explorer highlight/three-file drop/PNG/JPEG Pass. WIN-IMPORT-PREVIEW-01 broken box failure retained; candidate-6 native decoded PNG/JPEG, unavailable WebP/Retry/discard Pass, all 230 files/originals unchanged. Story shared previews corrected. Higher DPI Unavailable/user-excluded; no Narrator/full native layout permutation claim. |
 
 **Next: one final Windows hands-on session.** Current app is candidate 4 on
 Windows Connector Geometry Review → Assets, Saved, Light PaperTeal, 1102×752
