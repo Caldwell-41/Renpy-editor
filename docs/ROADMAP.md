@@ -26,8 +26,8 @@ through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17), with both
 qualification/native/human acceptance and exact integrated-input review. The
 [completed 1G record](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 retains identities, failures and limits. [Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md)
-is selected and `awaiting_decision` after the first qualification matrix failed;
-locally proven harness corrections need a renewed target allowance. Phase 1 is not closed;
+is selected and `awaiting_dispatch_resolution`: a corrective matrix was approved,
+but its single request returned HTTP 500 without a confirmed run. Phase 1 is not closed;
 Phase 2 remains planning only.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.

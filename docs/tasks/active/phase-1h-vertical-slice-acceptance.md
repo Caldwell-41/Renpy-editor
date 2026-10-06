@@ -2,8 +2,9 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `awaiting_decision`; terminal first matrix failed, harness corrections
-published with focused local proof; no new dispatch authorised. Goal runtime pause not claimed.
+**Execution state:** `awaiting_dispatch_resolution`; user approved one corrective matrix;
+its single dispatch returned HTTP 500 and no new run was found. Acceptance is ambiguous;
+no duplicate request or corrected-target pass. Goal lifecycle Resume not claimed.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -573,3 +574,62 @@ confirmation is the runtime authority, not a repository status label. Phase 1H s
 `awaiting_decision`, not `review_ready` or complete. No new permission question, matrix,
 package build, polling loop or retry. Continue in the same Goal/chat when the user
 authorises the bounded matrix; preserve all existing counters and failed evidence.
+
+
+### Approved corrective dispatch — acceptance unresolved
+
+The user replied **Approved** to the pending request for one additional Windows
+x64/macOS ARM64 production qualification matrix, with package retention and no automatic
+retry. This resolves the previous allowance blocker; it does not grant a duplicate
+request, further matrix, feature scope, merge or Phase 1 closure.
+
+Fresh preflight confirmed clean branch/PR #18 ownership and matching local/remote head
+**`0b6db00dfcfb317570583e121db94dd63f572ba2`**, PR open/draft; main remains `42ca6f9`.
+Planning worktree `2c5a164` and its unpublished work are untouched. Only documentation
+changed after correction implementation `21c029a`; no new application/harness inputs
+or repeated local package/SDK tests. The sole prior production run was terminal failure
+37515083319/1 at `3d484ef`; no existing corrective operation was found.
+
+Exactly **one** request was issued:
+`gh workflow run production-scaffold.yml --ref acceptance/phase-1h-vertical-slice --field upload_packages=true`.
+It returned exit 1 / **HTTP 500** from the workflow dispatch endpoint for workflow
+357322921; completion was observed at **2026-10-06 19:49:34 UTC**. No run ID/attempt
+was returned. One follow-up run-history lookup found only the original failed run,
+no matching corrective SHA. This does not prove that delayed acceptance is impossible;
+classification is ambiguous external request/absent confirmed identity, not a test,
+product or harness failure. Do not label it a confirmed pending CI run or retry it.
+
+The approved corrective allowance is reserved against this request: one corrective
+request attempted, **zero corrective runs confirmed**, no duplicate dispatch. Original
+matrix 1/1 consumed remains; original 14 local SDK + 2 CI-host invocations / 120 measured
+bounded spawns, one Mac package build and all prior failure evidence remain unchanged.
+No new local/CI build, SDK launch, packaged case or target pass is claimed.
+
+**Pending operation:** resolve acceptance of this single dispatch for the exact branch/
+SHA/workflow/input/time above. No process/session handle remains live. On user resume
+in the same chat, inspect the recorded workflow history once for a matching accepted
+run. If found, adopt that run's ID/attempt/SHA, audit terminal evidence or checkpoint
+and wait manually if live. If still absent/uncertain, preserve uncertainty and request
+an explicit retry decision only after resolving the no-duplicate boundary; ordinary
+Resume grants no retry. No autonomous status-check loop or watcher.
+
+The Goal tool still reports `blocked` from the preceding allowance stop; this ordinary
+approved turn does not perform a client lifecycle Resume, and available agent status
+controls cannot resume it. That is an actual observed state, not a new three-turn
+blocked audit or a claimed Pause. Use the client's Resume control for the SAME saved
+Goal when continuing; no replacement Goal/chat or second writer. Full remaining scope
+is the corrected supported-target matrix and requirement-by-requirement artifact audit
+to `review_ready`; all named regression, PCM/channel, advancing-frame, six packaged,
+flow/boundary/privacy/inventory and exact identity checks remain required.
+
+
+**User-requested dispatch status clarification:** after the user asked what was happening,
+a second read-only check at **2026-10-06 19:54:07 UTC** queried the workflow's dispatch
+history across all branches for runs created since 19:49:00 UTC. It returned an empty
+array. This was a user-requested status check, not an autonomous polling loop; no second
+dispatch. User approval for the corrective matrix is accepted and remains recorded.
+The external HTTP 500 failed to supply an accepted operation, and no run is confirmed.
+The Agent Guide's explicit “no automatic retry after ambiguous dispatch” rule remains
+applicable. An explicit instruction to retry the dispatch once is needed before
+resending, with a fresh no-duplicate check; this is retry permission for the already
+approved matrix, not another matrix allowance or a repeat of the approval request.
