@@ -28,15 +28,48 @@ Native resume succeeded: `136`–`138` show no residual marker, Save and close t
 Correction ui-refresh fails earlier at initial-story-ready (zero checks); diagnosis
 pending. One route-a setup failure used the wrong SDK variable; the correctly configured
 route-a passes exit 0/cleanup true, 90.062 s with synthetic DOM input.
-Current native capture fails twice with “foreground window did not report a process id”;
-the user is asked to foreground the newly launched corrected window. After their
-first ready reply, the old native window inventory was stale and CIM found no app.
-Exact-path launch now verifies the corrected executable/hash and its WebView2 child;
-fresh capture still fails, so no corrected native-input proof inferred.
+**Native capture recovered after diagnosis.** User confirms the app was already active;
+the foreground explanation was unsupported. Persistent tool-session captures returned
+inconsistent window IDs, text and pixels. Kernel reset and fresh native API/window
+selection restore consistent candidate identity and Welcome (`139`). Native Source
+Run now starts a real SDK child and displays saved text (`148`–`155`); English
+selection/replacement/Ctrl+S during play persists the exact expected narration with
+label intact and child alive (`157`–`162`). Earlier-launch details and terminal Stop
+are truthful (`163`–`165`); latest saved Source rerun displays the new text and
+normal Quit finishes exit 0 (`166`–`174`). WIN-RUN-01 affected native Windows
+behavior passes; all remaining row actions and Mac/remote qualification remain open.
 Windows **1 completed build / 9 process-start attempts / 0 SDK menu starts**;
 one setup failure preceded WebView creation. Prior Mac/remote
-counters preserved. See the live
-[Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
+counters preserved.
+
+The full 500-Scene diagnostic copy opens normally after preserving its required
+folder basename; initial stale status was prematurely classified as a refusal.
+First Story-ready capture is a 67,679 ms upper bound; the planned 60 s observation
+cutoff was missed, so this is inconclusive timing evidence, not gate acceptance.
+Native full-workload Source comment survives tab close/reopen as a session draft;
+discard restores Clean/Saved and the fixture closes (`184`–`210`). Both packaged
+ui-refresh failures remain failed; no additional build/start/probe/CI dispatch.
+Native asset Browse previews/categories/English expression blur/guidance/Cancel/Keep
+pass specifics (`214`–`249`). **WIN-IMPORT-01:** an ordinary change to a selected
+file causes blocking prepared recovery during Import; zero assets imported, accepted
+files unchanged, original media restored, failed journal retained (`250`–`255`).
+Correction 1 validates content before import/replacement transactions and fixes staged
+error wording. Focused final tests **2 pass**, adjacent preview/identity tests **3 pass**.
+Candidate 2 release build passes (1m05s); first setup invocation failed before compiling
+because child PATH lacked pinned npm. Retained executable **14,151,168 bytes**, SHA256
+`686e56fb349c6cf53e187958089006d29b9f25813ea029ae8333e4d9fed4830c`;
+all **132 inputs checked, 5 changed/127 unchanged** against qualified baseline.
+Affected native Windows import and replacement specifics pass (`259`–`309`): changed
+selections refuse before staging with all project files unchanged; valid partial import
+and explicit reselection succeed once, assets 3→5. Replacement preserves Appearance/
+Asset/default identities and immediately refreshes correct preview. No failure waiver:
+original blocked project/journal retained, full row acceptance still incomplete.
+Current app is candidate 2 on fresh Interaction Review → Characters, Saved.
+Bare-path helper launch wrongly opened installed baseline; no test input issued;
+explicit `process:` identifier and independent ownership check select candidate 2.
+Windows totals **2 successful builds**, **1 pre-compilation setup failure**, **11 starts**,
+**0 SDK menus**. Mac/remote checks and two ui-refresh failures remain open. No CI pending.
+See the [Windows correction record](../tasks/active/ui-design-review.md#windows-evidence-and-first-source-correction--2026-10-06).
 The original checkpoint description below is retained as entry history; remaining
 checklist rows are still incomplete, with current detail in the task ledger.
 
@@ -63,7 +96,7 @@ execution?** for the disposable **Windows Review** project. Computer Use prohibi
 acting on security permission requests; the user must click **Trust for this session
 and continue**, then resume the same review. No consent or game launch inferred.
 
-**Current rows: WIN-UI-11 Fail; all other rows Unavailable/incomplete**, with
+**Historical entry rows (superseded by correction evidence above):** with
 per-row partial proof and every remaining action in the
 [Windows execution record](../tasks/active/ui-design-review.md#windows-final-review-entry--2026-10-06).
 This is a pending tooling handoff, not a failure waiver or final Windows acceptance.
@@ -74,7 +107,7 @@ No broad unchanged matrix or CI dispatch selected. Integration handover remains 
 
 Ignored evidence: `.toolchains/reports/final-1g-windows/`. Original profile backups
 verify **3,508/3,508** exact file hashes/file sets; no private project opened. Windows
-corrected app remains open after exact-path launch/capture failure; generated review
+corrected app remains open for the native Source rerun; generated review
 profiles and originals retained;
 **Windows profile restoration is pending**. Recovery receipt identifies both backups
 and the actual packaged-host redirected LocalCache profile. Preserve all on resume.

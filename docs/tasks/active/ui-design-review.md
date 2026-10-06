@@ -49,6 +49,145 @@ copy profiles or assume prior SDK/recents are present. Windows process-start att
 are now **9**, including the one pre-WebView SDK setup failure; build count remains
 1, separate SDK menu starts 0. No new application change or CI dispatch.
 
+**Capture diagnosis corrected after user challenge:** user confirms Loomlight was
+already open and active. The agent's repeated foreground explanation was unsupported.
+Isolated lookup/text-only/screenshot-only calls succeed, but the persistent tool
+session returns inconsistent provenance: screenshot of another app, then an old
+installed-window ID and Story tree alongside current Welcome pixels. No input was
+sent from those inconsistent captures and unrelated pixels were not retained.
+Resetting the node-repl JavaScript kernel, reimporting the documented native API,
+rehydrating the returned current window and activating it restores a consistent
+candidate ID/path, Welcome text and screenshot (`139`). Tool session state is the
+demonstrated failure layer; internal helper cause is unknown. No user foreground
+problem or Loomlight regression established. Native review resumes without another
+app launch/build; counts remain 1/9/0. Two disposable recents are visibly present;
+no profile copy was performed. Supersedes the pending foreground request above.
+
+**WIN-RUN-01 affected Windows native retest PASS (specific behavior):** candidate
+`ab3da29a…` opens Source Clean/Saved and Run reaches explicit consent, starts real
+SDK child PID 51044 and displays the earlier saved narration (`148`–`155`). Native
+Home/Shift-End selects only the quoted English narration; replacement and Ctrl+S
+while Running save the expected text and preserve the label/return (`157`–`162`,
+`correction-native-save-source.json`). Launch details truthfully report the earlier
+revision (`163`); Stop reports Cancelled/stopped, exit -1073741510, and child is gone
+(`164`–`165`, `correction-native-stop-child.json`). Run once more from Source reaches
+new-revision consent, launches a new real game, displays **Windows correction saved
+during play.** and normal Quit finishes exit 0 (`166`–`174`). No persistence refusal
+or Story workaround. This is agent native OS input, not a physical-human observation.
+Old failed Source runs remain failed; row 11 remains incomplete and ui-refresh
+failures/Mac/remote correction qualification remain open. No extra app launch/build.
+Interaction fixture save/reopen preserves all four exact hashes and mapped IDs
+(`140`–`143`, `after-correction-reopen.json`); Explorer/live-gesture actions remain.
+
+**Selected ui-refresh diagnosis:** one normal native opening of a hash-verified copy
+of the retained failed full 500-Scene/2,000-edge/506-source fixture, at a shallower
+disposable path. Hypothesis: real filesystem/service opening cost explains the
+20 s initial-Story timeout; changed Source observation is not yet active on Story.
+Observe opening and Story readiness, retain all outcomes and timings, stop the
+diagnostic after 60 s without readiness. This is a single diagnostic opening, not a
+responsiveness population or passing probe; no changed gate/deadline, reduced
+fixture, broad matrix, build or automatic retry. Owner agent, genuine Windows
+WebView2/native input/real service; retained correction executable unchanged.
+
+**Full-fixture diagnostic outcome (not gate acceptance):** the first copy used a
+different basename from metadata `folderName`; normal opening refused it (`184`–`185`).
+Preserved that copy and prepared a fresh shallow copy retaining `synthetic-project`;
+all 515 files hash-match the failed fixture (`full-ui-refresh-basename-correction.json`).
+One native selection opens that full copy. Early captures still show the old validation
+status, so the agent prematurely described another refusal; `195` corrects that
+conclusion with real Story/Scene 000/Add Beat. Readiness was first captured at an
+upper bound of **67,679 ms**, not sampled precisely; the selected 60 s observation
+cutoff was missed during diagnosis. This is an inconclusive timing experiment, not
+a passing deadline or permission to raise the packaged 20 s gate. No further opening
+retry selected. Native Source opens the full workload (`196`–`199`); inserting the
+English comment, closing its tab and reopening preserves the exact session draft
+(`200`–`204`), footer Unsaved Source draft. Scene-stale validation is visible; no
+Source Save requested and no exact dirty-count assertion measured. Explicit discard
+restores Clean/Saved and project closes (`205`–`210`). Retain
+`full-ui-refresh-native-diagnostic.json`, both copies and both packaged failures.
+Counts remain **1 build / 9 process-start attempts / 0 SDK menu starts**. Continue
+remaining native rows; discriminate the original gate failures before another probe.
+
+**WIN-IMPORT-01 — ordinary selected-file change, correction attempt 1:** native
+Assets catalogue actually renders the prepared images (`214`); broken Story preview
+remains separate. Native Browse selects PNG/JPEG/oversized raster/audio; initial
+chooser disappears, Add files and footer remain, real images/dimensions load
+(`215`–`224`, `242`–`249`). Character category/selection and uppercase expression
+`THOUGHTFUL` → `thoughtful` on blur, keyboard naming guidance and Cancel/Keep retain
+values (`225`–`241`). A read-only Retry repeats the useful 8192-pixel bound; all
+125 pre-import project file hashes remain unchanged (`native-import-preview-no-write.json`).
+The native picker truncated an overlong four-absolute-path entry; corrected by
+navigating to the media folder and using short names before submitting. Tool setup
+failure, not product failure. Dropdown coordinate input refused its WebView popup;
+documented activation/fresh capture and native keyboard selection succeed.
+
+Ordinary external change to the disposable selected raster makes Retry refuse with
+MEDIA_CHANGED (`250`–`251`), but wording falsely says it was already imported.
+One explicit Import attempt (`252`–`253`) correctly refuses two identical-content
+images, then the changed raster creates a **blocking prepared recovery journal**;
+the audio row subsequently refuses recovery-required. **Zero successful imports**,
+asset count 3→3, all prior 125 file hashes unchanged; three new journal/stage files
+are preserved, no mutation has commit intent. The stage is 2,296 changed bytes
+against the 349-byte selection. `native-partial-import.json` records exact outcome;
+do not interpret generic “Successful imports were kept” as proof of any success.
+All seven media originals restored to manifest hashes. Native discard clears only
+unsubmitted staging (`254`–`255`); project/recovery artifacts remain untouched,
+footer Recovery required — writes are disabled. WIN-UI-03/14 **Fail; incomplete**.
+
+Cause: retained file identity remains valid after in-place editing; import/replacement
+did not compare current content with the selection hash until transaction staging.
+Selected correction hashes the retained handle before either write enters the
+streaming transaction, rejecting changed selections with Choose the import file again;
+existing final streaming hash/identity checks remain. Shared media copy now refers
+to selection/validation rather than assuming an import occurred. Two focused Windows
+service regressions reproduce the original failure, **0 pass / 2 fail**, retained
+`import-change-before-fix.log`. First corrected run proves import and both rejection
+paths but fails replacement reselection because its thin authoring fixture cannot
+support a rename without lifecycle metadata (**1 pass / 1 fail**,
+`import-change-after-fix.log`); corrected the fixture to replace an image with its
+expression unchanged, retaining the same product correction. Final focused retest
+**2 passed / 0 failed**, including both same-size and changed-length files and explicit
+reselection on the same project (`import-change-focused-reselection.log`). Adjacent
+preview tests **2 passed**, saved appearance identity/reopen **1 passed**. Repository
+validation **337 files** and `git diff --check` pass.
+
+Candidate 2 configured pinned no-bundle release build passes in **1m05s**; its first
+invocation failed before compilation because the child PATH lacked pinned npm.
+Both build logs retained. Executable **14,151,168 bytes**, SHA256
+`686e56fb349c6cf53e187958089006d29b9f25813ea029ae8333e4d9fed4830c`.
+`import-correction-2-build-receipt.json` verifies all **132 inputs: 5 changed, 127
+unchanged** against the qualified baseline, including both core files in addition
+to the three Source/probe/driver corrections. No old-candidate full acceptance reuse.
+
+Fresh preparation copies **88 accepted non-recovery files**, each verified, with
+original basename and empty recovery directory; original failed project/journal kept
+(`import-correction-fixture.json`). Native capture `259` verifies candidate 2 ownership;
+bare-path helper launch instead resolved the installed baseline (`258`), no test input
+issued. Explicit `process:` identifier launches the correct executable, independently
+confirmed by process ownership. This is a launch-tool error, not foreground absence.
+
+**Affected Windows native specifics PASS:** native PNG selection→ordinary in-place
+change→explicit Import refuses Choose the import file again (`273`–`275`), **all
+project hashes unchanged, no journal/stage added**. Add valid JPEG and confirm once:
+failed row remains actionable; JPEG imports exactly once (`276`–`281`). Removing the
+failed row restores the chooser (`282`–`284`). Explicitly reselected PNG shows current
+content; uppercase `RECOVERED_PNG` canonicalizes on blur; one confirmation imports it
+(`285`–`295`). Assets **3→5**, exact unique saved IDs/hashes, no replay of JPEG success.
+`corrected-native-import-change.json` retains hashes/IDs and exact restoration receipt.
+
+Native image replacement repeats selected-file change/refusal (`298`–`303`): all
+project files/journals unchanged. Restore and explicitly reselect, save once
+(`304`–`309`): new preview immediately displays correct content; Appearance/Asset/
+default IDs unchanged, saved bytes match selection (`corrected-native-replacement-change.json`).
+All changed disposable originals restored. These are native Windows input through
+WebView2; no new human claim. Shared media error wording still needs its native Retry
+observation. Full WIN-UI-03/06/14 actions, Mac and remote proof remain incomplete.
+
+Cumulative Windows: **2 successful packaged builds**, **1 pre-compilation build setup
+failure**, **11 top-level starts**, **0 SDK menu starts**. Earlier wrong-SDK and
+incorrect-launch starts stay counted; Mac/remote totals unchanged. Do
+not replay a write on this blocked failed fixture or delete its journal to continue.
+
 **Earlier handoff:** user reports **“yes it all works”** for the three physical held-drag
 cancellation gestures (Escape, outside-list release, focus switch). They stopped
 Computer Use to demonstrate them and explicitly permit restarting it. These are user
@@ -224,20 +363,20 @@ canonical 14-row checklist remain mandatory. No whole row is Pass yet.
 
 | Row | Checkpoint result | Exact evidence / remaining actions |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; `136`–`138` native Save/project close. Fixture invariant failure `105` preserved and corrected through Source. IDs/reopen, live marker/ghost and Explorer coexistence pending. |
+| WIN-UI-01 | Unavailable; partial evidence | `130`–`135` native reorder/one Undo/Redo with saved source order; `136`–`143` Save/close/reopen and all four source/metadata hashes unchanged, including mapped IDs. Fixture invariant failure `105` preserved and corrected through Source. Live marker/ghost and Explorer coexistence pending. |
 | WIN-UI-02 | Unavailable; partial evidence | User reports Escape/outside/focus-switch cancellations work; all four saved hashes independently unchanged. Native resume `136` shows no residual marker/responsive Story. Same-row, protected/gap/pending-input, both scroll edges and keyboard actions pending; current capture failure blocks further input. |
-| WIN-UI-03 | Unavailable; not run | `media-manifest.json` records valid PNG/JPEG/WebP/audio and unsupported/oversized media; staging/drop/import actions pending. |
-| WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug delivery; Character/Asset/Variable/content/shortcut actions pending. No physical-human keyboard claim. |
+| WIN-UI-03 | Fail on prior candidate; incomplete | Native Browse/staging/categories/Cancel/Keep and duplicate refusal `215`–`255`; no writes before Import. WIN-IMPORT-01 corrected native specifics pass `259`–`295`: refusal before staging, valid partial import and explicit reselection once, chooser restored. Explorer/off-surface drop and final cancel/reopen actions still pending. |
+| WIN-UI-04 | Unavailable; partial evidence | `01`–`03` native English wizard title/slug; `235`–`239` uppercase ASCII expression canonicalizes on blur and naming guidance opens by keyboard. Character/Asset/Variable/display/content/shortcut completion pending. No physical-human keyboard claim. |
 | WIN-UI-05 | Unavailable; partial evidence | `108`–`116` int/42 Cancel/Discard/reopen bool/False; `118`–`123` English string/Discard. Boolean True creation/discard and existing default/Keep/Escape/save/reopen actions pending. |
 | WIN-UI-06 | Unavailable; not run | Two Character entries/appearance UUIDs prepared; native selection/default/replacement/error/retry actions pending. |
 | WIN-UI-07 | Unavailable; not run | Alias/collision fixture prepared; full rename sequence, reference preservation and external-edit refusal pending. |
 | WIN-UI-08 | Unavailable; not run | Compact Choice creation, both palettes and measured higher OS DPI pending. |
 | WIN-UI-09 | Unavailable; partial evidence | `host.json`: actual WebView2 ownership and 96-DPI window; six-surface/sidebar/focus/divider/breakpoint/higher-DPI checks pending. |
 | WIN-UI-10 | Unavailable; not run | Each Beat creation, approved slow receipt, duplicate/Cancel and stale-source correction/retry pending. |
-| WIN-UI-11 | Fail; incomplete | WIN-RUN-01 `75`–`79` two native Source Run refusals; first correction passes local renderer and configured packaged route-a checks, but native-input/Mac/remote retest pending. Story latest text/normal exit0 `85`–`89` passes specifics. Baseline and correction ui-refresh FAIL retained; initial-story-ready correction failure unclassified. Overflow tabs, graph details and SDK diagnostic actions pending. |
+| WIN-UI-11 | Fail; incomplete | WIN-RUN-01 failed original `75`–`79` preserved; corrected native Source Run/Save during play/earlier launch/Stop/latest Source rerun/normal exit0 PASS specifics `148`–`174`. Renderer and configured packaged route-a also pass; Mac/remote correction qualification pending. Both ui-refresh FAIL retained; initial-story-ready failure unclassified. Overflow tabs, graph details and SDK diagnostic actions pending. |
 | WIN-UI-12 | Unavailable; partial evidence | `15`–`20` uncached official SDK download/verified install; CONFIG-01 `21`–`31`; stages `32`–`33`; native fresh menus/Start `51`–`56` PASS specifics; Welcome dark/recent restore `95`. Hover/light/earlier-project distinction/scaling completion pending. |
 | WIN-UI-13 | Unavailable; not run | `interaction-fixture.json` prepares reciprocal/duplicate/long/self/missing links; native routing, Fit/navigation/palettes/scaling pending. |
-| WIN-UI-14 | Unavailable; partial evidence | `107` bool/int/string four-header alignment and selection/Edit visible at 96 DPI, Dark. Character, media preview/import/external-change/retry/cleanup/higher-DPI actions pending; broken prepared-fixture image preview unclassified. |
+| WIN-UI-14 | Fail on prior candidate; incomplete | `107` Variable alignment; `214` Assets images load; `215`–`255` real staged PNG/JPEG dimensions, audio, bounded raster error/Retry, native external-change refusal and Cancel/Keep. WIN-IMPORT-01 corrected native specifics pass `259`–`309`; shared staged Retry copy observation still pending. Add/remove-last restores chooser; Character/Grid/List/cancel/reopen/drop/higher-DPI completion pending; broken Story preview remains separate. |
 
 All captures/JSON/fixtures are local ignored evidence under the established
 `.toolchains/reports/final-1g-windows/`. `installation.json` independently re-verifies

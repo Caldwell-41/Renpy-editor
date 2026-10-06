@@ -843,7 +843,7 @@ impl AuthoringService {
         if &authority.project != project {
             return Err(AuthoringError::UnknownImport);
         }
-        revalidate_selected(&authority)?;
+        revalidate_import_contents(&mut authority)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         if metadata
             .assets
@@ -1049,14 +1049,14 @@ impl AuthoringService {
             );
         }
         let mut selected = if let Some(id) = request.authority_id {
-            let authority = self
+            let mut authority = self
                 .imports
                 .remove(&id)
                 .ok_or(AuthoringError::UnknownImport)?;
             if authority.project != *project {
                 return Err(AuthoringError::UnknownImport);
             }
-            revalidate_selected(&authority)?;
+            revalidate_import_contents(&mut authority)?;
             if !matches!(
                 authority.extension.as_str(),
                 "png" | "jpg" | "jpeg" | "webp"
@@ -2383,6 +2383,17 @@ fn revalidate_selected(authority: &ImportAuthority) -> Result<(), AuthoringError
     Ok(())
 }
 
+fn revalidate_import_contents(authority: &mut ImportAuthority) -> Result<(), AuthoringError> {
+    revalidate_selected(authority)?;
+    // Ordinary edits between selection and confirmation must refuse before a
+    // transaction is staged. Streaming still verifies the selection hash again.
+    let (byte_count, sha256) = hash_file(&mut authority.file)?;
+    if byte_count != authority.byte_count || sha256 != authority.sha256 {
+        return Err(AuthoringError::UnknownImport);
+    }
+    Ok(())
+}
+
 fn hash_bytes(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
@@ -2618,6 +2629,131 @@ mod tests {
             ),
             Err(MediaError::Oversize)
         );
+    }
+
+    #[test]
+    fn review_selected_media_change_before_import_leaves_project_ready() {
+        selected_media_change_leaves_project_ready(false);
+    }
+
+    #[test]
+    fn review_selected_media_change_before_replacement_leaves_project_ready() {
+        selected_media_change_leaves_project_ready(true);
+    }
+
+    fn selected_media_change_leaves_project_ready(replacement: bool) {
+        for changed in [
+            b"changed bytes".as_slice(),
+            b"changed and longer bytes".as_slice(),
+        ] {
+            let (_temporary, root, project_uuid) = project_fixture();
+            let external = tempdir().unwrap();
+            let path = external.path().join("selected.png");
+            let mut service = AuthoringService::default();
+            let project = service.register_project(&root).unwrap();
+            let appearance = if replacement {
+                let model = service
+                    .create_character(
+                        &project,
+                        &project_uuid,
+                        CreateCharacterRequest {
+                            technical_name: "alice".into(),
+                            display_name: "Alice".into(),
+                            dialogue_color: "#aabbcc".into(),
+                        },
+                    )
+                    .unwrap();
+                fs::write(&path, b"original appearance").unwrap();
+                let selected = service.select_import(&project, &path).unwrap();
+                let model = service
+                    .import_asset(
+                        &project,
+                        &project_uuid,
+                        ImportAssetRequest {
+                            authority_id: selected.authority_id,
+                            kind: AssetKind::CharacterAppearance,
+                            technical_name: "alice".into(),
+                            display_name: "Alice happy".into(),
+                            character_id: Some(model.characters[0].id.clone()),
+                            expression: Some("happy".into()),
+                        },
+                    )
+                    .unwrap();
+                Some((model.appearances[0].clone(), model.assets[0].sha256.clone()))
+            } else {
+                None
+            };
+            fs::write(&path, b"original data").unwrap();
+            let selected = service.select_import(&project, &path).unwrap();
+            let metadata_before = fs::read(root.join(AUTHORING_PATH)).unwrap();
+            let declarations_before = fs::read(root.join(ASSETS_PATH)).ok();
+            let journals_before = fs::read_dir(root.join(".renpy-editor/recovery"))
+                .unwrap()
+                .count();
+            fs::write(&path, changed).unwrap();
+            let write = |service: &mut AuthoringService, authority_id| {
+                if let Some((appearance, hash)) = &appearance {
+                    service.update_appearance(
+                        &project,
+                        &project_uuid,
+                        UpdateAppearanceRequest {
+                            id: appearance.id.clone(),
+                            expected_expression: appearance.label.clone(),
+                            expected_asset_sha256: hash.clone(),
+                            expression: appearance.label.clone(),
+                            authority_id: Some(authority_id),
+                        },
+                    )
+                } else {
+                    service.import_asset(
+                        &project,
+                        &project_uuid,
+                        ImportAssetRequest {
+                            authority_id,
+                            kind: AssetKind::Background,
+                            technical_name: "review".into(),
+                            display_name: "Review".into(),
+                            character_id: None,
+                            expression: None,
+                        },
+                    )
+                }
+            };
+            assert!(
+                matches!(
+                    write(&mut service, selected.authority_id),
+                    Err(AuthoringError::UnknownImport)
+                ),
+                "Ordinary changed selection must refuse before creating a recovery journal"
+            );
+            assert_eq!(
+                fs::read(root.join(AUTHORING_PATH)).unwrap(),
+                metadata_before
+            );
+            assert_eq!(fs::read(root.join(ASSETS_PATH)).ok(), declarations_before);
+            assert_eq!(
+                fs::read_dir(root.join(".renpy-editor/recovery"))
+                    .unwrap()
+                    .count(),
+                journals_before
+            );
+            assert_eq!(service.status(&project), PersistenceStatus::Saved);
+            assert!(!root.join("game/images/bg review.png").exists());
+            assert!(!root.join("game/images/alice calm.png").exists());
+            // Explicitly selecting the changed file again must succeed on this same project.
+            let reselected = service.select_import(&project, &path).unwrap();
+            let updated = write(&mut service, reselected.authority_id).unwrap();
+            if let Some((appearance, _)) = &appearance {
+                assert_eq!(updated.appearances[0].id, appearance.id);
+                assert_eq!(updated.appearances[0].asset_id, appearance.asset_id);
+                assert_eq!(updated.appearances[0].label, appearance.label);
+            }
+            assert_eq!(
+                fs::read(root.join(&updated.assets[0].relative_path)).unwrap(),
+                changed
+            );
+            assert_eq!(service.status(&project), PersistenceStatus::Saved);
+        }
     }
 
     #[test]

@@ -837,7 +837,7 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
         ),
         SourceConflict => (
             "MEDIA_CHANGED",
-            "The media changed after it was imported. Revalidate it before presentation.",
+            "The media changed since selection or validation. Select it again or restore the verified file before retrying.",
         ),
         RecoveryRequired => (
             "RECOVERY_REQUIRED",

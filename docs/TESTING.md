@@ -1001,6 +1001,14 @@ The existing authoring IPC test also rejects renderer paths in `appearance.updat
 Desktop tests/check compile the native drag-state presentation bridge. Exact evidence
 and installer/native limits belong in the active UI task and HANDOVER.
 
+The Windows review's selected-media regressions cover ordinary content changes
+between selection and explicit Import or image replacement, including same-size
+changes. Refusal must precede transaction staging: accepted metadata/source and
+recovery entries stay unchanged, the project remains Saved, and explicit reselection
+can succeed on the same project. Streaming retains its final content/identity checks.
+Select these with `cargo test -p loomlight-core --locked review_selected_media_change`;
+native staging/partial-import recovery still requires the affected packaged check.
+
 The 2026-10-03 audit regressions also require grouped Choice actions at compact widths,
 Variable discard/reopen across all three types with a truthful subsequent Boolean
 submission, retained appearance selection after save/default/view changes, sidebar

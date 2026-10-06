@@ -2,6 +2,44 @@
 
 ## Live Windows correction and native handoff — 2026-10-06
 
+**Current next action:** continue remaining Windows rows on the fresh import-correction
+fixture. WIN-IMPORT-01 attempt 1 passes its affected Windows native import/replacement
+checks (`259`–`309`); preserve the failed original Interaction Review and its prepared
+journal. Native Browse/preview/categories,
+English expression canonicalization/guidance and Cancel/Keep are captured `214`–`249`.
+Ordinary selected-file change → explicit Import blocks recovery (`250`–`255`), zero
+successful imports, all accepted files unchanged. All seven originals restored.
+That failed project remains preserved; the running candidate 2 is on fresh
+Interaction Review → Characters, Saved, with the corrected appearance preview.
+Correction attempt 1 validates retained selected content before import/replacement
+staging and corrects misleading media-change copy. Both original service regressions
+fail as expected; final focused tests pass 2/2, adjacent preview/identity tests 3/3.
+Retained candidate 2 is 14,151,168 bytes, SHA256
+`686e56fb349c6cf53e187958089006d29b9f25813ea029ae8333e4d9fed4830c`;
+132 inputs checked, 5 changed/127 unchanged against the qualified baseline.
+Native import refusal adds no journal/changes no file; mixed valid JPEG imports once,
+explicit PNG reselection imports once (assets 3→5). Replacement refusal also changes
+no file/journal; reselection saves correct bytes, stable IDs and immediate preview.
+Candidate 2 process ownership verified independently; a bare-path helper launch first
+opened the installed baseline, preserved without test input, then closed. Explicit
+`process:` executable selection launches the correct candidate. One build setup
+invocation failed before compilation because pinned npm was absent from child PATH;
+configured build passes in 1m05s. Counts are 2 successful packaged builds, one setup
+failure, 11 top-level starts/0 SDK menus; Mac/remote and
+full 14-row/final-session acceptance still open. No CI pending or dispatch selected.
+
+**Latest diagnostic:** full fixture opens at the shallow copy with original basename
+`synthetic-project`, all 515 copied file hashes verified. The first mismatched-basename
+copy is preserved. Early old-status captures were prematurely called another refusal;
+`195` proves normal Story readiness. First ready capture is a 67,679 ms upper bound;
+the planned 60 s observation cutoff was missed, so no timing gate pass is inferred.
+Native full-fixture Source comment survives tab close/reopen (`200`–`204`), with
+Unsaved Source draft footer and Scene-stale validation. Explicit discard restores
+Clean/Saved; project closes (`205`–`210`). Both ui-refresh failures remain open.
+Native capture is working; the foreground wait below is superseded. Continue remaining
+rows on the fresh disposable fixture. This earlier diagnostic did not select another
+probe; latest cumulative counts are above. Detailed receipts are in the task ledger.
+
 **State: in_progress; Windows review incomplete.** Consent succeeded with explicit
 user permission. Installed original NSIS remains unchanged. Story latest-saved text
 and normal game exit 0 pass specifics; two Source Run refusals remain WIN-RUN-01.
@@ -73,6 +111,24 @@ The exact-path process uses the ordinary review profile rather than Computer Use
 redirected profile; original backups remain protected. Verify actual SDK/recents
 before selecting a disposable project; do not copy profiles while the app is open.
 Earlier checkpoints below are history, not a renewed consent requirement.
+
+**Live recovery supersedes the foreground wait:** the user says Loomlight was already
+active. Isolated tool captures reveal inconsistent target provenance; reset the
+node-repl kernel and reimport the documented native API, then rehydrate/activate
+the returned current window. This restores matching candidate ID/path, Welcome
+text and screenshot (`139`), without another app launch or profile copy. Internal
+helper cause unknown; no foreground/user error established. Never send input from
+an ID/text/pixel mismatch. Native interaction fixture reopens with all four saved
+hashes unchanged (`140`–`143`, `after-correction-reopen.json`). Native corrected
+Source Run starts real SDK child PID 51044 and shows saved text (`148`–`155`).
+Native English narration replacement/Ctrl+S while Running saves exact expected
+text/label and keeps that child alive (`157`–`162`, `correction-native-save-source.json`).
+Earlier-revision details and Stop/exit -1073741510 are truthful; child is gone
+(`163`–`165`, `correction-native-stop-child.json`). Latest saved Source rerun has
+been requested once (`166`); new-revision consent, actual child, latest saved text
+and normal Quit/exit 0 now pass (`167`–`174`). WIN-RUN-01 affected native Windows
+behavior passes; retain the original failures. All remaining canonical rows,
+unclassified ui-refresh failures and Mac/remote correction qualification remain open.
 
 ## Windows review resumed — 2026-10-06
 
