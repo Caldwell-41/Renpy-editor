@@ -1,3 +1,5 @@
+#[cfg(test)]
+pub(crate) mod candidate;
 use super::{identity::identity_for_file, path::is_link_or_reparse, ErrorCode, FileIdentity};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -55,6 +57,11 @@ pub struct DirectoryAnchor {
 }
 
 impl DirectoryAnchor {
+    pub(crate) fn runtime_handle(&self) -> Result<File, ErrorCode> {
+        self.validate_chain()?;
+        self.handle().try_clone().map_err(|_| ErrorCode::IoFailure)
+    }
+
     pub fn open_root(path: &Path) -> Result<Self, ErrorCode> {
         let handle = open_directory_path(path).map_err(|_| ErrorCode::UnsafePath)?;
         let metadata = fs::symlink_metadata(path).map_err(|_| ErrorCode::UnsafePath)?;

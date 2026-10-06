@@ -4,7 +4,8 @@ Start with [current status](status/CURRENT.md), the
 [continuation handover](status/HANDOVER.md), and the relevant brief in
 [`tasks/active`](tasks/active). Follow the
 [repository-first delivery workflow](WORKFLOW.md): detail and handover state live
-here; chat prompts select one checkpoint rather than repeat the implementation plan.
+here; goals select one coherent outcome with internal checkpoints. Workflow waits
+resume the same goal/thread on user command rather than require a new chat.
 
 Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
 PR #8's UI follow-up. [Phase 1F](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md)
@@ -13,7 +14,9 @@ Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14
 CURRENT/HANDOVER own the verified result.
 Remaining [1G planning](tasks/active/phase-1g-branches-runtime-git.md)
 and [1H acceptance planning](tasks/active/phase-1h-vertical-slice-acceptance.md) are
-originally integrated documentation, with implementation unstarted and separately gated.
+tracked in the live handover. Q1 automated qualification has passed;
+[review-build delivery and remaining native/user review](tasks/active/phase-1g-review-delivery.md)
+are next. Integration and 1H remain separately gated.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
@@ -27,20 +30,30 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 
 | Concern | Canonical document |
 | --- | --- |
-| Repo-first plans, checkpoint chats, handovers and cleanup | [WORKFLOW.md](WORKFLOW.md) |
+| Accepted UI designs, staged build plan, risks and build-approval boundary | [UI design review](tasks/active/ui-design-review.md) |
+| Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
+| Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |
+| Proposed LLM preparation/review/reference/settings screens, exact prompts and provenance | [Phase 2 LLM concepts](design/phase-2-llm/README.md) |
+| Outcome-sized goals, internal checkpoints, same-thread waiting and handovers | [WORKFLOW.md](WORKFLOW.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
-| Planned Phase 1G Branches and runtime/diagnostics | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| Controlled runtime, trust and process ownership | [ADR 0008](adr/0008-controlled-runtime.md) |
+| Phase 1G requirements and historical execution evidence | [tasks/active/phase-1g-branches-runtime-git.md](tasks/active/phase-1g-branches-runtime-git.md) |
+| Phase 1G review-build delivery, bounded native checks and final user review | [Review delivery brief](tasks/active/phase-1g-review-delivery.md) |
+| Local hobby-project scope, observed Branches and replacement acceptance | [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) |
+| Historical G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/active/phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
 | Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
+| Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
+| Selected shared foundations, staged Phase 2/3 overlap and Sol High owner/two-lane assignments | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |
-| Workspaces and interaction | [UI.md](UI.md) |
+| Workspaces and interaction | [UI.md](UI.md), including [agent UI/UX guidelines](UI.md#accepted-uiux-guidelines-for-implementation-agents) |
 | Threat model and privacy | [SECURITY.md](SECURITY.md) |
 | Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |

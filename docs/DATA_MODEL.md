@@ -110,6 +110,28 @@ colour, default appearance, and an `Appearances` list. Adding an appearance impo
 copies an image into the project and assigns an expression name; filename inference may
 prefill the name but is never authoritative.
 
+Appearance editing retains the Appearance, Asset and default-selection UUIDs.
+`appearance.update` requires the expected expression and Asset SHA-256, with an
+optional session-bound native selection authority for image replacement. A rename
+patches only the expression token in recognized Show/Change Appearance statements,
+retaining formatting, line endings, Beat IDs and other source bytes. Dirty, stale or
+protected Scene mappings refuse the rename. Character/Variable technical identifiers
+remain immutable; this operation does not introduce general identifier renaming.
+
+Replacement images use a unique lowercase `game/images/ll_<uuid>.<extension>` path
+and a verified explicit image declaration. Image, declaration, authoring metadata
+and any affected Scene/source-map patches commit together. Original selected files
+and previously imported project files remain intact, preserving custom references;
+there is no automatic obsolete-file deletion. Old image names/declarations remain
+available as aliases. Asset metadata may retain `appearanceAliases`, mapping a former
+image discovery name to its exact Loomlight-generated declaration. Renaming back may
+reuse that declaration for the same Asset only when its canonical literal form and
+single exact source owner still match. An externally changed declaration, duplicate
+owner or another Asset with that name refuses; unknown historical declarations are
+not silently adopted. This metadata records ownership for a transactional edit;
+`.rpy` remains authoritative for runnable content. Previously selected images and
+unsupported/custom source references remain intact.
+
 Phase 1D persists these identities in `.renpy-editor/authoring.json` schema version 1.
 Each Character stores a UUID, immutable creation-time lowercase technical identifier,
 display name, `#rrggbb` dialogue colour, optional default Appearance UUID, and exact
@@ -190,6 +212,17 @@ one symbol table and reject Python keywords, underscore-reserved names, known
 Ren'Py/Loomlight names, and statically visible top-level `define`/`default` collisions
 in both canonical definition files.
 
+Planned Phase 2 Character cards are editor-only records with stable IDs, optional
+links to runnable Characters, descriptive/personality/voice/background/relationship
+fields, provenance, applicability, approval state and revision. They may be manually
+authored or LLM-proposed; approving a card does not modify the runnable definition.
+The lorebook groups editable entries with titles/categories/tags and references.
+Approved current cards/entries are included only through the reviewed context manifest.
+Changes invalidate affected prepared sends/proposals; unresolved links are retained.
+Exact versioned schemas/migrations remain Phase 2 design work. Project prompt overrides
+record the baseline version and content digest; machine provider profiles own context
+and output limits. See the [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
+
 A lore fact records subject, category, canonical text, characters who know it,
 route applicability, valid game-day/time range, source scenes/decisions, contradictory
 alternatives, provenance, review status, and last review/change. Lore remains a later
@@ -214,6 +247,18 @@ Phase 1 does not create disposable special cases for basic VN staging:
   fades, and Timeline synchronization.
 
 The UI subset may be narrow; the stored semantic model must remain extensible.
+
+Planned 3C extension: static placement stores source-backed position/anchor/scale,
+independent of editor viewport zoom. Animated Appearances reuse stable Asset IDs for
+qualified native video or explicit ordered image-frame/duration references, with typed
+loop/end behavior and supplied-mask dependencies. Logical dimensions exclude any
+side-mask portion. Container/codec/timing metadata must be verified and versioned; the
+existing Phase 1 allowlist is not silently expanded. Preserve accepted media bytes;
+there is no conversion or extracted-frame cache as a new source of truth. Dependencies
+share existing import/history/recovery and source mapping. The
+[3C media contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+owns format qualification and acceptance; this describes a future schema, not current
+implemented metadata or browser decoder support.
 
 ## Transaction model
 
@@ -305,6 +350,15 @@ dimensions where applicable. Renderer caches are memory-only and content keyed; 
 view/session generations are cancelled, object URLs are revoked on invalidation, and
 all media is disposed when the active project/session changes.
 
+Staged import uses `asset.previewImport` with only the current session and opaque
+selection authority ID. The authority remains project bound, retains the selected
+file handle and is not consumed by preview. Identity, byte count and SHA-256 must
+still match; PNG/JPEG use the same 16 MiB/8192-pixel limits. The response has the
+existing passive media shape, with the selection ID in `assetId` until an Asset
+exists. No renderer path/URL is accepted. Staged object URLs are capped at 32 MiB,
+released on removal, successful import, discard and disposal; late receipts cannot
+reattach removed previews. Audio staging shows metadata without autoplay.
+
 ## Corrective Phase 1D value and asset contracts
 
 New background and character-appearance filenames use lowercase space-separated
@@ -322,3 +376,64 @@ values outside signed 64-bit range; strings remain a distinct typed value.
 Raw string values are limited to 10,000 UTF-8 bytes, complete generated statements to
 64 KiB, and the serialized authoring document to 1 MiB, so every accepted value remains
 reloadable after escaping.
+
+## Shared flow projection (1G.1)
+
+`flow.list` returns a core-derived observation of accepted source, never a second
+runnable graph. Nodes reference existing Scene IDs/labels. Choice/Jump routes and
+Return terminals carry their originating Scene, proven Beat ID where available,
+exact source range and revision. Choice identity includes the source revision and
+option ordinal/range so duplicate captions do not collapse; mapped Jump/Return IDs
+retain their proven Beat identity. Unknown ranges never select a nearby Beat.
+
+Destinations distinguish a uniquely resolved mapped Scene, proven absent static label,
+unresolved/custom destination (with Source navigation only when proven), and terminal
+Return. A bounded project-wide lexical inventory must be complete before absence or
+uniqueness is claimed. Conditional/dynamic source remains opaque; proven canonical
+options after an unknown destination are retained with an explicit incomplete boundary.
+Additional labels remain unmapped, not invented Scenes. The unique accepted `start`
+label's canonical unconditional jump establishes the entry badge; custom/missing/
+ambiguous entry does not fall back to metadata or tree ordering.
+
+Under the selected [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md)
+contract, observation identity describes source bytes, inventory and metadata actually
+used by that graph. Dirty Source buffers are excluded. Retain consumed dependencies,
+including relevant authoring/media presence and inventory; app edits invalidate
+affected inputs and disk Refresh rebuilds from current reads. The cache is session
+scoped and disposable. A graph revision never certifies that disk is still identical.
+
+Carry observation/check status separately from partial source recognition, persistence
+and execution state. Record the last completed disk check and subsequent accepted
+app-edit generation so the UI can distinguish checked content from later saved edits.
+No persistence schema migration or graph-owned write authority is required.
+
+Navigation checks current target/range independently; commands retain exact current
+Scene/Source transaction preconditions. Limits remain 16 MiB/file, 32 MiB aggregate,
+2,048 source files, 500 Scenes and 2,000 edges with existing traversal guards.
+Keep at most four readers, bounded buffers and session cancellation; no file-handle
+cache between requests. One disk acquisition is sufficient for observed display;
+no immutable filesystem snapshot or mandatory second hash pass is promised.
+
+`FlowWorkspace.observation` carries `status` (`checked`, `savedEdits`, or
+`incomplete`), `checkedAt` (UTC epoch milliseconds of the last completed scan, or
+null), and `fromCache`. `fromCache` requests a background disk check when opening a
+previous view; it is not write authority. Partial custom syntax is distinct from a
+failed scan. The renderer keeps the last usable model with visible failure status.
+The graph hash includes consumed authoring/media state as well as source and metadata.
+
+
+## Runtime diagnostic projection (1G.2b)
+
+A runtime diagnostic carries origin (`compile`, `lint`, `runtime`), severity, bounded
+message, optional proven project-relative path and one-based line, optional column,
+source content revision, operation/session identity and freshness. Column stays absent
+when the pinned format does not establish it. Core retains the launch file identities;
+`runtime.resolveDiagnostic` accepts only operation ID and diagnostic ordinal, never
+renderer-supplied paths or ranges. It verifies identity and revision and returns a
+revision-qualified Source byte range. BOM, CRLF and Unicode conversion remains in the
+existing Source controller. Failed/unknown freshness is distinct from process outcome.
+
+The projection is limited to 256 records and at most 4 KiB per message; raw output
+retains the existing 2 MiB limit with 32 KiB pages. Known pinned SDK compile/traceback
+and lint locations are recognised; all other text remains bounded fallback output.
+No diagnostic is independent document truth or authority to mutate/open arbitrary files.

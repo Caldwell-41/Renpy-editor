@@ -15,8 +15,14 @@ version-pinned staged project creation.
 - Preserve comments, formatting, custom syntax, embedded Python, and unsupported
   regions; patch the smallest safe source range. Never rewrite scripts with regex.
 - All editing surfaces and LLM proposals use one transactional change layer.
-- Treat projects and LLM output as untrusted. Parsing does not make a project safe
-  to run; running Ren'Py code can execute Python.
+- Treat project text and LLM output as untrusted data. Opening/inspection never runs
+  project code; deliberate Ren'Py execution can run Python with user privileges.
+- Follow the proportionate local hobby-project scope in
+  [ADR 0010](docs/adr/0010-local-project-safety-and-observed-flow.md): prioritize
+  data-loss prevention, ordinary external edits and responsive observed views.
+  Deliberate same-user filesystem attack races are not routine acceptance gates.
+  Preserve existing write/recovery protections; do not resume retired native
+  observation experiments without a separately selected task.
 - Use official Ren'Py SDK downloads, verify published checksums, pin per project,
   and isolate version-specific CLI behavior behind an adapter.
 - Do not send project content to an LLM until the user initiates an operation.
@@ -24,33 +30,56 @@ version-pinned staged project creation.
 - Do not commit secrets, personal data, real private game content, absolute user
   paths, logs, downloaded SDKs, build output, or credentials.
 
-## Repository-first planning and checkpoint execution
+## Repository-first goals and checkpoints
 
-Follow [WORKFLOW](docs/WORKFLOW.md). Detailed implementation instructions, acceptance
-criteria, decisions, known issues, evidence and handovers belong in the repository,
-not in a long chat prompt or an external attachment.
+Follow [WORKFLOW](docs/WORKFLOW.md). Requirements, acceptance criteria, decisions and
+continuation state belong in the repository; prompts select a coherent outcome.
 
-1. Read CURRENT, HANDOVER, the selected active task, relevant ADRs, and the closest
-   nested AGENTS.md before editing. Search before reading broadly.
-2. Fetch/inspect current refs, the recorded working branch, open PRs and history.
-   Preserve unrelated work. A newer timestamp is not proof of integration; never
-   reset to a historical SHA just because an old prompt names it.
-3. Execute ONE approved checkpoint per chat. Implement or investigate that checkpoint,
-   review it, run its actual gates, and resolve bounded findings with the user.
-   Do not advance to the next checkpoint in the same chat.
-4. Before stopping, commit and publish the task's checkpoint record and update the
-   existing HANDOVER.md. Record failures, missing evidence, branch/PR, exact candidate,
-   outstanding operations and the next bounded action. An interruption also needs a
-   handover; it is not a completed checkpoint.
-5. After verifying publication, give one lightweight next-chat prompt naming the
-   repository, working branch, checkpoint and handover. Link to detail rather than
-   copying it. State any approval boundary; a plan is not blanket execution approval.
+1. At goal entry, read CURRENT, HANDOVER, the relevant active-task sections and closest
+   nested AGENTS.md. Read ADRs/code/evidence as needed; search before reading broadly.
+   On same-thread continuation, check changed state rather than repeat all orientation.
+2. Inspect current refs, the working branch/PR and available worktree ownership.
+   Preserve unrelated/local work. Never reset to a historical SHA from an old prompt.
+3. Complete ONE approved outcome per goal, using small internal checkpoints. Include
+   investigation, implementation, focused verification, self-review and bounded fixes
+   as authorised. A checkpoint/commit is not automatically a stop or new-chat boundary.
+   Pause for a genuine decision, unavailable capability, budget limit or external wait;
+   name the actual reason. Do not silently widen a review-only or otherwise narrow task.
+4. Record meaningful decisions and coherent checkpoints without rewriting a full
+   handover after every step. Before a real pause, transfer or completion, update the
+   existing HANDOVER and task ledger with the exact state, evidence, pending operation,
+   remaining scope/budget and continuation. Publish and verify; disclose local-only work.
+5. Resume the SAME goal in the SAME chat after a workflow wait by default. Give the
+   user the actual client pause/resume control and a short continuation message, not
+   a replacement /goal. A new goal is for a different outcome; a new chat for the same
+   outcome is a fallback for unavailable/unusable context or explicit user choice.
+   New/replacement goal prompts retain machine, test-host and reason fields and the
+   4,000-character cap. Ordinary same-thread resume messages need not repeat the plan.
 
-Keep one live HANDOVER.md; preserve durable lessons/tests/decisions in their canonical
-homes and checkpoint evidence in the task ledger. Do not create a new handover file
-for every chat or require the next chat to find an old attachment.
+Keep one live HANDOVER.md. It supports recovery and transfer, not mandatory context
+resets. Preserve durable learning in canonical docs/tests and evidence in the ledger.
+
+## Proportionate delivery and review
+
+Follow [the seven delivery rules](docs/WORKFLOW.md#proportionate-delivery-rules):
+match guarantees to user actions; prove risky real paths early on affected targets;
+test actual user-action boundaries and rejecting assertions; classify failures before
+fixing; keep cumulative problem budgets; align written policy with executable gates;
+and justify new blockers with evidence and user harm. Two unsuccessful corrections
+of the same hypothesis trigger reassessment, not another automatically renewed goal.
+
+Keep data-loss and ordinary external-edit regressions. Do not resurrect specialist
+hostile/crash experiments, waive genuine failures, or transfer routine verification
+to the user. Development runs where convenient; test hosts follow the requirement,
+not the host running Codex. Use the existing workflow and task ledger, not a new
+orchestrator, mandatory approval framework or duplicate testing system.
 
 ## Commands
+
+These are command references, not a mandate to run every command for every task.
+Use the approved changed-scope selection from WORKFLOW and TESTING. If a command
+still embeds an excluded exercise, stop that command and record the alignment gap;
+do not silently skip required ordinary coverage or run the excluded exercise.
 
 Production scaffold commands run from `app/`:
 
@@ -64,9 +93,15 @@ cargo test -p loomlight-desktop --locked  # supported desktop build environment
 npm exec -- tauri build -- --locked
 ```
 
-The core test command includes the Phase 1B hostile-race and real process-termination
-recovery suite. See [TRANSACTIONS](docs/TRANSACTIONS.md). An official-SDK wrapper with
-a skip marker is not target evidence.
+The core suite retains historical Phase 1B race and real process-termination
+recovery tests. Scope new gates using [TESTING](docs/TESTING.md) and ADR 0010;
+do not expand specialist attack experiments into a prerequisite for routine
+hobby-editor work. Keep ordinary external-writer and interrupted-save coverage.
+Use the routine broad-core and separate SDK selectors in TESTING; unfiltered core
+is only a command reference and can duplicate archive-backed gates. The
+[selector audit](docs/tasks/active/testing-policy-alignment.md#selector-disposition)
+records the exact specialist exclusions; current evidence belongs in HANDOVER.
+An official-SDK wrapper with a skip marker is not target evidence.
 
 Retain the Phase 0 regression commands:
 
@@ -89,16 +124,22 @@ Do not create receipt-only commits that chase their own SHA.
 
 ## Waiting and CI cost controls
 
-Do not use repeated model turns to poll externally observable long-running work.
-Use a qualified non-model watcher with a durable checkpoint and verified same-thread
-continuation when available. Pause autonomous goal continuation only through an
-approved, ownership-safe runtime mechanism; yield and resume from the completion
-event. Never equate queue acceptance with actual continuation.
+Follow [manual same-thread waiting](docs/WORKFLOW.md#waiting-without-model-polling).
+Dispatch only within the approved allowance. Record the confirmed workflow run,
+attempt, branch, exact tested SHA and continuation before waiting. If acceptance of
+the request is ambiguous, preserve that uncertainty; never dispatch a duplicate.
 
-Until that mechanism is implemented and qualified on the actual host, record the
-exact run/attempt/SHA and a blocked/manual-resume handover, then stop active polling.
-Do not invoke hypothetical helper commands or claim automatic wake-up. Do not start
-a second agent, reset a goal, weaken approvals, or bypass budgets to keep work alive.
+Default: checkpoint, stop model polling, and resume on the user's command in the same
+chat. Ending a response or writing `awaiting_ci` does not itself pause a live Codex
+Goal. Use only a supported, authorised lifecycle control; otherwise tell the user to
+pause through their client's real control. Never claim a runtime pause was verified
+when only the repository record changed. Do not reset/clear the goal, start a second
+writer, manipulate client databases, or revive abandoned W0/OPT-1A automation.
+
+On resume, check the recorded operation and relevant ref/worktree changes. If still
+pending, pause again without a status-check loop. If terminal, audit its actual
+required evidence and continue only the remaining authorised outcome and budget.
+`Resume` does not authorise a retry, another matrix, new scope or a merge.
 
 No package matrix solely for documentation, no duplicate expensive run of unchanged
 validated inputs, and no automatic retry after ambiguous dispatch. Reuse acceptance
@@ -108,11 +149,13 @@ gates are not passes. Preserve exact failed/superseded run evidence.
 ## Security and Git
 
 - Use argument arrays for subprocesses; never interpolate project content into shell commands.
-- Apply canonical path, containment, symlink, and archive-entry checks before I/O.
+- Keep approved-root/relative-path containment, straightforward unsupported-link
+  refusal and archive-entry checks. Read-only display does not require a fresh
+  hostile-namespace proof at every syscall; writes retain their transaction contract.
 - Keep renderer/webview privileges deny-by-default and expose typed, narrow IPC.
 - Use the account's noreply identity; configure local Git identity only in this repository.
 - Never rewrite history, force-push, change repository visibility, or discard work.
-- Reuse the recorded implementation branch/PR across checkpoint chats. Create a new
+- Reuse the recorded implementation branch/PR across checkpoints and pauses. Create a new
   branch only when the handover calls for it and no corresponding work already exists.
 - At authorised integration/closure, merge reviewed, validated work, verify main,
   and delete only branches proven redundant and unused. Do not merge unreviewed changes

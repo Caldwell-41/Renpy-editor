@@ -5,6 +5,8 @@
 //! persisted mapping and patches only exact byte ranges or creates/deletes an owned
 //! Scene file through the journalled transaction service.
 
+pub mod flow;
+
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
     metadata::{
@@ -287,12 +289,19 @@ pub enum SceneCommand {
         beat_id: String,
         direction: MoveDirection,
     },
+    ReorderBeat {
+        scene_id: String,
+        expected_source_revision: String,
+        beat_id: String,
+        to_index: usize,
+    },
     Undo,
     Redo,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
+    RuntimeBusy,
     InvalidPayload,
     InvalidMetadata,
     UnsupportedSource,
@@ -400,7 +409,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::InvalidMetadata)?;
         let proposed_project = json_bytes(&metadata)?;
         let proposed_map = json_bytes(&source_map)?;
-        match self.transactions.commit(
+        match self.commit_observed(
             project,
             TransactionProposal {
                 mutations: vec![
@@ -532,6 +541,7 @@ impl AuthoringService {
         project_id: &str,
         request: RecoveryResolveRequest,
     ) -> Result<RecoveryReport, SceneError> {
+        self.clear_observed_flow(project);
         self.transactions
             .resolve_recovery(project, &request.transaction_id, request.resolution)
             .map_err(diagnostic_error)?;
@@ -746,6 +756,21 @@ impl AuthoringService {
                 BeatEdit::Move {
                     id: beat_id,
                     direction,
+                },
+            ),
+            SceneCommand::ReorderBeat {
+                scene_id,
+                expected_source_revision,
+                beat_id,
+                to_index,
+            } => self.beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                BeatEdit::Reorder {
+                    id: beat_id,
+                    to_index,
                 },
             ),
             SceneCommand::Undo | SceneCommand::Redo => unreachable!(),
@@ -1252,6 +1277,123 @@ impl AuthoringService {
         })
     }
 
+    pub(crate) fn appearance_reference_mutations(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        next: &AuthoringMetadata,
+        appearance_id: &str,
+    ) -> Result<Vec<FileMutation>, SceneError> {
+        let mut loaded = self.load(project, project_id)?;
+        let previous = loaded.authoring.clone();
+        loaded.authoring = next.clone();
+        let mut mutations = Vec::new();
+        for scene in &loaded.project.scenes {
+            self.ensure_source_paths_clean(project, [scene.source_path.as_str()])
+                .map_err(|_| SceneError::DirtySource)?;
+            let stored = loaded
+                .source_map
+                .scene_mappings
+                .iter()
+                .find(|m| m.scene_id == scene.id)
+                .cloned()
+                .ok_or(SceneError::InvalidMetadata)?;
+            let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            if revision.sha256 != stored.source_revision {
+                return Err(SceneError::SourceConflict);
+            }
+            let (_, beats) = build_mapping(
+                scene,
+                &bytes,
+                &revision.sha256,
+                Some(&stored),
+                &[],
+                Some((&loaded.project, &previous)),
+            )?;
+            if beats.iter().any(|b| b.protected) {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            let mut proposed = bytes.clone();
+            let mut forced = Vec::new();
+            for beat in beats.iter().rev() {
+                let target = match &beat.payload {
+                    BeatPayload::ShowCharacter {
+                        appearance_id: id, ..
+                    }
+                    | BeatPayload::ChangeAppearance {
+                        appearance_id: id, ..
+                    } => id == appearance_id,
+                    _ => false,
+                };
+                if !target {
+                    continue;
+                }
+                let old = previous
+                    .appearances
+                    .iter()
+                    .find(|a| a.id == appearance_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let new = next
+                    .appearances
+                    .iter()
+                    .find(|a| a.id == appearance_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let character = previous
+                    .characters
+                    .iter()
+                    .find(|c| c.id == old.character_id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let rendered = rename_appearance_token(
+                    &bytes[beat.byte_start as usize..beat.byte_end as usize],
+                    &character.technical_name,
+                    &old.label,
+                    &new.label,
+                )?;
+                proposed.splice(
+                    beat.byte_start as usize..beat.byte_end as usize,
+                    rendered.iter().copied(),
+                );
+                forced.push((
+                    beat.payload.kind().into(),
+                    sha256(&rendered),
+                    beat.id.clone(),
+                ));
+            }
+            if proposed == bytes {
+                continue;
+            }
+            let (mapping, _) = build_mapping(
+                scene,
+                &proposed,
+                &sha256(&proposed),
+                Some(&stored),
+                &forced,
+                Some((&loaded.project, next)),
+            )?;
+            *loaded
+                .source_map
+                .scene_mappings
+                .iter_mut()
+                .find(|m| m.scene_id == scene.id)
+                .ok_or(SceneError::InvalidMetadata)? = mapping;
+            mutations.push(replace_mutation(
+                &scene.source_path,
+                bytes,
+                revision,
+                proposed,
+            )?);
+        }
+        if !mutations.is_empty() {
+            mutations.push(replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                json_bytes(&loaded.source_map)?,
+            )?);
+        }
+        Ok(mutations)
+    }
+
     fn load(&self, project: &ProjectId, project_id: &str) -> Result<Loaded, SceneError> {
         let (project_bytes, project_revision) = self.scene_snapshot(project, PROJECT_PATH)?;
         let project_metadata = ProjectMetadata::read_bytes(&project_bytes, None)
@@ -1324,7 +1466,7 @@ impl AuthoringService {
         proposal: TransactionProposal,
     ) -> Result<Vec<Revision>, SceneError> {
         let snapshot = proposal.mutations.clone();
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed {
                 transaction_id,
                 revisions,
@@ -1366,7 +1508,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::DirtySource)?;
         let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.undo_proposal(&current).map_err(history_error)?;
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
                 .accepted_undo_with_revisions(&revisions)
                 .map_err(history_error),
@@ -1384,7 +1526,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::DirtySource)?;
         let current = current_revisions(&self.transactions, project, paths)?;
         let proposal = history.redo_proposal(&current).map_err(history_error)?;
-        match self.transactions.commit(project, proposal) {
+        match self.commit_observed(project, proposal) {
             CommitOutcome::Committed { revisions, .. } => history
                 .accepted_redo_with_revisions(&revisions)
                 .map_err(history_error),
@@ -1435,6 +1577,10 @@ enum BeatEdit {
     },
     Remove {
         id: String,
+    },
+    Reorder {
+        id: String,
+        to_index: usize,
     },
     Move {
         id: String,
@@ -1611,6 +1757,37 @@ fn apply_beat_edit(
             let mut output = source.to_vec();
             output.drain(beat.byte_start as usize..beat.byte_end as usize);
             Ok((output, Vec::new()))
+        }
+        BeatEdit::Reorder { id, to_index } => {
+            let from = beats
+                .iter()
+                .position(|b| b.id == id)
+                .ok_or(SceneError::UnknownEntity)?;
+            if to_index >= beats.len() || from == to_index {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let (first, last) = (from.min(to_index), from.max(to_index));
+            let window = &beats[first..=last];
+            if window.iter().any(|b| b.protected)
+                || window.windows(2).any(|p| p[0].byte_end != p[1].byte_start)
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            if window.iter().any(|b| is_terminal_payload(&b.payload)) {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let mut order: Vec<&SceneBeat> = window.iter().collect();
+            let moved = order.remove(from - first);
+            order.insert(to_index - first, moved);
+            let mut output = source[..beats[first].byte_start as usize].to_vec();
+            let mut forced = Vec::new();
+            for beat in order {
+                let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
+                output.extend_from_slice(bytes);
+                forced.push((beat.payload.kind().into(), sha256(bytes), beat.id.clone()));
+            }
+            output.extend_from_slice(&source[beats[last].byte_end as usize..]);
+            Ok((output, forced))
         }
         BeatEdit::Move { id, direction } => {
             let index = beats
@@ -1915,11 +2092,7 @@ fn parse_scene(
             while index + 1 < lines.len() {
                 let (_, option_end, option_line) = lines[index];
                 let (_, jump_end, jump_line) = lines[index + 1];
-                let Some(option_text) = option_line
-                    .strip_prefix("        \"")
-                    .and_then(|value| value.strip_suffix("\":"))
-                    .and_then(unescape_string)
-                else {
+                let Some(option_text) = choice_option_text(option_line) else {
                     break;
                 };
                 let Some(label) = jump_line.strip_prefix("            jump ") else {
@@ -1969,6 +2142,13 @@ fn parse_scene(
         return Err(SceneError::UnsupportedSource);
     }
     Ok((label_start, bytes.len().max(label_end), beats))
+}
+
+/// Canonical unconditional option spelling shared by Scene and flow projection.
+fn choice_option_text(line: &str) -> Option<String> {
+    line.strip_prefix("        \"")
+        .and_then(|value| value.strip_suffix("\":"))
+        .and_then(unescape_string)
 }
 
 fn parse_line(
@@ -2047,6 +2227,41 @@ fn parse_line(
     let (speaker, quoted) = line.split_once(" \"")?;
     let text = quoted.strip_suffix('"').and_then(unescape_string)?;
     find_character(loaded, speaker).map(|character_id| BeatPayload::Dialogue { character_id, text })
+}
+
+/// Change only the expression token in an already recognized show statement.
+/// Indentation, spacing, transitions and line endings retain their original bytes.
+fn rename_appearance_token(
+    bytes: &[u8],
+    technical: &str,
+    before: &str,
+    after: &str,
+) -> Result<Vec<u8>, SceneError> {
+    let text = std::str::from_utf8(bytes).map_err(|_| SceneError::OpaqueBoundary)?;
+    let mut tokens = Vec::new();
+    let mut start = None;
+    for (offset, ch) in text.char_indices() {
+        if ch.is_whitespace() {
+            if let Some(begin) = start.take() {
+                tokens.push((begin, offset));
+            }
+        } else if start.is_none() {
+            start = Some(offset);
+        }
+    }
+    if let Some(begin) = start {
+        tokens.push((begin, text.len()));
+    }
+    if tokens.len() < 3
+        || &text[tokens[0].0..tokens[0].1] != "show"
+        || &text[tokens[1].0..tokens[1].1] != technical
+        || &text[tokens[2].0..tokens[2].1] != before
+    {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    let mut output = bytes.to_vec();
+    output.splice(tokens[2].0..tokens[2].1, after.bytes());
+    Ok(output)
 }
 
 fn parse_show(
@@ -2274,7 +2489,8 @@ fn command_source_paths(
         | SceneCommand::UpdateBeat { scene_id, .. }
         | SceneCommand::ContinueDialogue { scene_id, .. }
         | SceneCommand::RemoveBeat { scene_id, .. }
-        | SceneCommand::MoveBeat { scene_id, .. } => Some(scene_id),
+        | SceneCommand::MoveBeat { scene_id, .. }
+        | SceneCommand::ReorderBeat { scene_id, .. } => Some(scene_id),
         _ => None,
     };
     scene_id
@@ -2606,6 +2822,7 @@ fn sha256(bytes: &[u8]) -> String {
 
 fn diagnostic_error(value: crate::transaction::PublicDiagnostic) -> SceneError {
     match value.code {
+        ErrorCode::RuntimeBusy => SceneError::RuntimeBusy,
         ErrorCode::Conflict => SceneError::Conflict,
         ErrorCode::RecoveryRequired => SceneError::RecoveryRequired,
         ErrorCode::HistoryBoundary
@@ -2643,6 +2860,8 @@ impl BoolNot for bool {
 
 #[cfg(test)]
 mod tests {
+    mod candidate_proof;
+    mod observed;
     use super::*;
     use crate::authoring::{
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,
@@ -2852,6 +3071,404 @@ mod tests {
                 },
             )
         }
+    }
+
+    #[test]
+    fn review_reorder_preserves_bytes_ids_one_undo_and_guards() {
+        let fixture=Fixture::new(b"label scene_one:\r\n    \"First\"\r\n    \"Second\"\r\n    \"Third\"\r\n    return\r\n");
+        fixture.migrate();
+        let before = fixture.workspace();
+        let scene = &before.scenes[0];
+        let ids: Vec<_> = scene.beats.iter().map(|b| b.id.clone()).collect();
+        let after = fixture
+            .apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 2,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            after.scenes[0]
+                .beats
+                .iter()
+                .map(|b| b.id.clone())
+                .collect::<Vec<_>>(),
+            vec![
+                ids[1].clone(),
+                ids[2].clone(),
+                ids[0].clone(),
+                ids[3].clone()
+            ]
+        );
+        assert_eq!(std::fs::read(fixture.root.join(&scene.source_path)).unwrap(),b"label scene_one:\r\n    \"Second\"\r\n    \"Third\"\r\n    \"First\"\r\n    return\r\n");
+        let undone = fixture.apply(&after, SceneCommand::Undo).unwrap();
+        assert_eq!(
+            undone.scenes[0]
+                .beats
+                .iter()
+                .map(|b| b.id.clone())
+                .collect::<Vec<_>>(),
+            ids
+        );
+        let current = &undone.scenes[0];
+        assert!(matches!(
+            fixture.apply(
+                &undone,
+                SceneCommand::ReorderBeat {
+                    scene_id: current.id.clone(),
+                    expected_source_revision: current.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 3
+                }
+            ),
+            Err(SceneError::InvariantBlocked)
+        ));
+        let source_path = fixture.root.join(&scene.source_path);
+        let mut external = std::fs::read(&source_path).unwrap();
+        external.extend_from_slice(b"# external edit\r\n");
+        std::fs::write(&source_path, external).unwrap();
+        assert!(fixture
+            .apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: ids[0].clone(),
+                    to_index: 1
+                }
+            )
+            .is_err());
+    }
+
+    #[test]
+    fn review_appearance_edit_preserves_ids_and_patches_supported_references() {
+        use crate::authoring::{ImportAssetRequest, UpdateAppearanceRequest};
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let characters = fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "bec".into(),
+                    display_name: "Bec".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        let original = fixture.root.join("original.png");
+        std::fs::write(&original, b"original raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &original)
+            .unwrap();
+        let imported = fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::CharacterAppearance,
+                    technical_name: "happy".into(),
+                    display_name: "Happy".into(),
+                    character_id: Some(characters.characters[0].id.clone()),
+                    expression: Some("happy".into()),
+                },
+            )
+            .unwrap();
+        let appearance = &imported.appearances[0];
+        let asset = &imported.assets[0];
+        let first = fixture.workspace();
+        let scene = &first.scenes[0];
+        let shown = fixture
+            .apply(
+                &first,
+                SceneCommand::InsertBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    before_beat_id: Some(scene.beats[0].id.clone()),
+                    beat: BeatPayload::ShowCharacter {
+                        character_id: characters.characters[0].id.clone(),
+                        appearance_id: appearance.id.clone(),
+                        placement: PlacementRef::Centre,
+                        transition: TransitionRef::None,
+                    },
+                },
+            )
+            .unwrap();
+        let beat_id = shown.scenes[0].beats[0].id.clone();
+        let replacement = fixture.root.join("replacement.webp");
+        std::fs::write(&replacement, b"replacement raster").unwrap();
+        let selected = fixture
+            .service
+            .select_import(&fixture.project, &replacement)
+            .unwrap();
+        let updated = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "happy".into(),
+                    expected_asset_sha256: asset.sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: Some(selected.authority_id),
+                },
+            )
+            .unwrap();
+        assert_eq!(updated.appearances[0].id, appearance.id);
+        assert_eq!(updated.appearances[0].asset_id, asset.id);
+        assert_eq!(
+            updated.characters[0].default_appearance_id,
+            Some(appearance.id.clone())
+        );
+        assert_eq!(std::fs::read(&original).unwrap(), b"original raster");
+        assert_eq!(std::fs::read(&replacement).unwrap(), b"replacement raster");
+        assert_eq!(
+            std::fs::read(fixture.root.join(&updated.assets[0].relative_path)).unwrap(),
+            b"replacement raster"
+        );
+        let reopened = fixture.workspace();
+        assert_eq!(reopened.scenes[0].beats[0].id, beat_id);
+        assert!(!reopened.scenes[0].beats[0].protected);
+        assert!(String::from_utf8(
+            std::fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap()
+        )
+        .unwrap()
+        .contains("show bec calm"));
+        assert!(fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "happy".into(),
+                    expected_asset_sha256: asset.sha256.clone(),
+                    expression: "angry".into(),
+                    authority_id: None
+                }
+            )
+            .is_err());
+        let current_asset = &updated.assets[0];
+        let image_only = fixture.root.join("image-only.png");
+        fs::write(&image_only, b"image only raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &image_only)
+            .unwrap();
+        let replaced = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "calm".into(),
+                    expected_asset_sha256: current_asset.sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: Some(choice.authority_id),
+                },
+            )
+            .unwrap();
+        let scene_bytes = fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap();
+        assert!(String::from_utf8_lossy(&scene_bytes).contains("show bec calm"));
+        let renamed = fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "calm".into(),
+                    expected_asset_sha256: replaced.assets[0].sha256.clone(),
+                    expression: "thoughtful".into(),
+                    authority_id: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            renamed.assets[0].relative_path,
+            replaced.assets[0].relative_path
+        );
+        assert_eq!(renamed.appearances[0].id, appearance.id);
+        assert_eq!(
+            renamed.characters[0].default_appearance_id,
+            Some(appearance.id.clone())
+        );
+        assert_eq!(renamed.assets[0].display_name, "Bec — thoughtful");
+        for (from, to) in [
+            ("thoughtful", "calm"),
+            ("calm", "happy"),
+            ("happy", "thoughtful"),
+        ] {
+            let restored = fixture
+                .service
+                .update_appearance(
+                    &fixture.project,
+                    &fixture.project_id,
+                    UpdateAppearanceRequest {
+                        id: appearance.id.clone(),
+                        expected_expression: from.into(),
+                        expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                        expression: to.into(),
+                        authority_id: None,
+                    },
+                )
+                .expect("this appearance can reuse its former expression");
+            assert_eq!(restored.appearances[0].id, appearance.id);
+            assert_eq!(
+                restored.characters[0].default_appearance_id,
+                Some(appearance.id.clone())
+            );
+            assert_eq!(
+                restored.assets[0].relative_path,
+                renamed.assets[0].relative_path
+            );
+            assert!(String::from_utf8_lossy(
+                &fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap()
+            )
+            .contains(&format!("show bec {to}")));
+        }
+        let definitions = fixture.root.join("game/definitions/assets.rpy");
+        let before_collision = fs::read(&definitions).unwrap();
+        let mut custom = before_collision.clone();
+        custom.extend_from_slice(b"image bec occupied = \"images/custom.png\"\n");
+        fs::write(&definitions, &custom).unwrap();
+        assert!(matches!(
+            fixture.service.update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "occupied".into(),
+                    authority_id: None
+                }
+            ),
+            Err(crate::authoring::AuthoringError::DiscoveryCollision)
+        ));
+        assert_eq!(fs::read(&definitions).unwrap(), custom);
+        fs::write(&definitions, &before_collision).unwrap();
+        let current = fixture
+            .service
+            .list(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let alias = current.assets[0].extra["appearanceAliases"]["bec calm"]
+            .as_str()
+            .unwrap();
+        let changed_alias = String::from_utf8(before_collision.clone())
+            .unwrap()
+            .replace(alias, &format!("{alias} # edited externally"));
+        fs::write(&definitions, changed_alias.as_bytes()).unwrap();
+        assert!(matches!(
+            fixture.service.update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "calm".into(),
+                    authority_id: None
+                }
+            ),
+            Err(crate::authoring::AuthoringError::DiscoveryCollision)
+        ));
+        assert_eq!(fs::read(&definitions).unwrap(), changed_alias.as_bytes());
+        fs::write(&definitions, &before_collision).unwrap();
+        assert_eq!(fixture.workspace().scenes[0].beats[0].id, beat_id);
+        let before_conflict = fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap();
+        let mut external = before_conflict.clone();
+        external.extend_from_slice(b"# custom external edit\n");
+        fs::write(
+            fixture.root.join(&reopened.scenes[0].source_path),
+            &external,
+        )
+        .unwrap();
+        assert!(fixture
+            .service
+            .update_appearance(
+                &fixture.project,
+                &fixture.project_id,
+                UpdateAppearanceRequest {
+                    id: appearance.id.clone(),
+                    expected_expression: "thoughtful".into(),
+                    expected_asset_sha256: renamed.assets[0].sha256.clone(),
+                    expression: "sad".into(),
+                    authority_id: None
+                }
+            )
+            .is_err());
+        assert_eq!(
+            fs::read(fixture.root.join(&reopened.scenes[0].source_path)).unwrap(),
+            external
+        );
+        assert_eq!(
+            fixture
+                .service
+                .list(&fixture.project, &fixture.project_id)
+                .unwrap()
+                .appearances[0]
+                .label,
+            "thoughtful"
+        );
+    }
+
+    #[test]
+    fn review_appearance_token_patch_preserves_formatting_and_trailing_text() {
+        assert_eq!(
+            rename_appearance_token(
+                b"    show bec   happy at center with dissolve  # keep\r\n",
+                "bec",
+                "happy",
+                "calm"
+            )
+            .unwrap(),
+            b"    show bec   calm at center with dissolve  # keep\r\n"
+        );
+        assert!(
+            rename_appearance_token(b"    show bec elsewhere\n", "bec", "happy", "calm").is_err()
+        );
+    }
+
+    #[test]
+    fn review_reorder_refuses_crossing_protected_source() {
+        let source=b"label scene_one:\n    \"Before\"\n    python:\n        custom = 42\n    \"After\"\n    return\n";
+        let fixture = Fixture::new(source);
+        fixture.migrate();
+        let before = fixture.workspace();
+        let scene = &before.scenes[0];
+        let target = scene
+            .beats
+            .iter()
+            .position(|b| matches!(&b.payload,BeatPayload::Narration{text} if text=="After"))
+            .unwrap();
+        assert!(matches!(
+            fixture.apply(
+                &before,
+                SceneCommand::ReorderBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: scene.beats[0].id.clone(),
+                    to_index: target
+                }
+            ),
+            Err(SceneError::OpaqueBoundary)
+        ));
+        assert_eq!(
+            fs::read(fixture.root.join(&scene.source_path)).unwrap(),
+            source
+        );
+        assert!(!fixture.workspace().can_undo);
     }
 
     #[test]
@@ -4231,5 +4848,739 @@ mod tests {
             fixture.apply(&changed, SceneCommand::Undo),
             Err(SceneError::HistoryBoundary)
         ));
+    }
+    #[test]
+    fn review_sdk_screen_labels_keep_saved_choice_routes_and_project_entry() {
+        use flow::FlowDestination;
+        let source = b"label scene_one:\n    menu:\n        \"Stay here\":\n            jump scene_one\n        \"Again\":\n            jump scene_one\n";
+        let fixture = Fixture::new(source);
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        fs::write(fixture.root.join("game/screens.rpy"), b"screen preferences():\n    vbox:\n        label _(\"Display\")\n        label title\n").unwrap();
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(!graph.stale);
+        assert_eq!(graph.entry_scene_id, fixture.entry_scene_id);
+        let routes: Vec<_> = graph
+            .edges
+            .iter()
+            .filter(|edge| edge.kind == "choice")
+            .collect();
+        assert_eq!(routes.len(), 2);
+        assert!(routes
+            .iter()
+            .all(|edge| matches!(edge.destination, FlowDestination::Resolved { .. })));
+        assert_eq!(
+            fs::read(fixture.root.join("game/chapters/chapter_01/scene_001.rpy")).unwrap(),
+            source
+        );
+    }
+
+    #[test]
+    fn flow_partial_choice_retains_routes_after_missing_and_dynamic_options() {
+        use flow::FlowDestination;
+        let source = b"label scene_one:\n    menu:\n        \"Same\":\n            jump absent\n        \"Same\":\n            jump scene_one\n        \"Dynamic\":\n            jump expression target\n        \"Later\":\n            jump scene_one\n";
+        let fixture = Fixture::new(source);
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(graph.partial);
+        assert!(!graph.stale);
+        let routes: Vec<_> = graph
+            .edges
+            .iter()
+            .filter(|edge| edge.kind == "choice")
+            .collect();
+        assert_eq!(routes.len(), 4);
+        assert!(matches!(
+            routes[0].destination,
+            FlowDestination::Missing { .. }
+        ));
+        assert!(matches!(
+            routes[1].destination,
+            FlowDestination::Resolved { .. }
+        ));
+        assert!(matches!(
+            routes[2].destination,
+            FlowDestination::Unknown { .. }
+        ));
+        assert!(matches!(
+            routes[3].destination,
+            FlowDestination::Resolved { .. }
+        ));
+        assert_ne!(routes[0].id, routes[1].id);
+        assert!(routes.iter().all(|edge| !edge.editable));
+        assert_eq!(
+            fs::read(fixture.root.join("game/chapters/chapter_01/scene_001.rpy")).unwrap(),
+            source
+        );
+    }
+
+    #[test]
+    fn flow_inventory_custom_duplicate_unreadable_and_lexical_context_are_honest() {
+        use flow::FlowDestination;
+        let fixture = Fixture::new(b"label scene_one:\n    jump custom\n");
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        let project = || {
+            fixture
+                .service
+                .flow_workspace(&fixture.project, &fixture.project_id)
+                .unwrap()
+        };
+        assert!(matches!(
+            project().edges[0].destination,
+            FlowDestination::Missing { .. }
+        ));
+        fs::write(
+            fixture.root.join("game/custom.rpy"),
+            b"label custom:\n    return\n",
+        )
+        .unwrap();
+        assert!(matches!(
+            project().edges[0].destination,
+            FlowDestination::Unknown {
+                location: Some(_),
+                ..
+            }
+        ));
+        fs::write(
+            fixture.root.join("game/duplicate.rpy"),
+            b"label custom:\n    return\n",
+        )
+        .unwrap();
+        assert!(matches!(
+            project().edges[0].destination,
+            FlowDestination::Unknown { location: None, .. }
+        ));
+        fs::remove_file(fixture.root.join("game/custom.rpy")).unwrap();
+        fs::write(
+            fixture.root.join("game/duplicate.rpy"),
+            b"define sample = \"\"\"\nlabel custom:\n\"\"\"\n",
+        )
+        .unwrap();
+        assert!(matches!(
+            project().edges[0].destination,
+            FlowDestination::Missing { .. }
+        ));
+        fs::write(fixture.root.join("game/broken.rpy"), [0xff]).unwrap();
+        assert!(matches!(
+            project().edges[0].destination,
+            FlowDestination::Unknown { .. }
+        ));
+    }
+
+    #[test]
+    fn flow_real_commands_history_reopen_and_external_invalidation() {
+        use flow::FlowDestination;
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        let mut model = fixture.workspace();
+        let chapter_id = model.chapters[0].id.clone();
+        for name in ["Left", "Right", "End"] {
+            model = fixture
+                .apply(
+                    &model,
+                    SceneCommand::CreateScene {
+                        chapter_id: chapter_id.clone(),
+                        display_name: name.into(),
+                    },
+                )
+                .unwrap();
+        }
+        let entry = model.scenes[0].clone();
+        let left = model.scenes[1].clone();
+        let right = model.scenes[2].clone();
+        let end = model.scenes[3].clone();
+        for (scene, payload) in [
+            (
+                &entry,
+                BeatPayload::Choice {
+                    options: vec![
+                        ChoiceOption {
+                            text: "Same".into(),
+                            destination_scene_id: left.id.clone(),
+                        },
+                        ChoiceOption {
+                            text: "Same".into(),
+                            destination_scene_id: right.id.clone(),
+                        },
+                    ],
+                },
+            ),
+            (
+                &left,
+                BeatPayload::Jump {
+                    scene_id: end.id.clone(),
+                },
+            ),
+            (
+                &right,
+                BeatPayload::Jump {
+                    scene_id: end.id.clone(),
+                },
+            ),
+        ] {
+            model = fixture
+                .apply(
+                    &model,
+                    SceneCommand::UpdateBeat {
+                        scene_id: scene.id.clone(),
+                        expected_source_revision: scene.source_revision.clone(),
+                        beat_id: scene.beats[0].id.clone(),
+                        beat: payload,
+                    },
+                )
+                .unwrap();
+        }
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert_eq!(graph.edges.len(), 5);
+        assert!(!graph.partial);
+        assert_eq!(graph.edges.iter().filter(|edge| matches!(&edge.destination, FlowDestination::Resolved { scene_id } if scene_id == &end.id)).count(), 2);
+        assert_eq!(
+            graph
+                .edges
+                .iter()
+                .filter(|edge| matches!(edge.destination, FlowDestination::Terminal))
+                .count(),
+            1
+        );
+        assert!(matches!(
+            fixture.apply(
+                &model,
+                SceneCommand::DeleteScene {
+                    scene_id: end.id.clone(),
+                    expected_source_revision: end.source_revision.clone()
+                }
+            ),
+            Err(SceneError::ReferenceBlocked)
+        ));
+        model = fixture.apply(&model, SceneCommand::Undo).unwrap();
+        assert_eq!(
+            fixture
+                .service
+                .flow_workspace(&fixture.project, &fixture.project_id)
+                .unwrap()
+                .edges
+                .iter()
+                .filter(|edge| matches!(edge.destination, FlowDestination::Terminal))
+                .count(),
+            2
+        );
+        let _ = fixture.apply(&model, SceneCommand::Redo).unwrap();
+        let reopened = AuthoringService::default();
+        let authority = reopened.register_project(&fixture.root).unwrap();
+        reopened
+            .ensure_phase_1e_metadata(&authority, &fixture.project_id)
+            .unwrap();
+        assert_eq!(
+            reopened
+                .flow_workspace(&authority, &fixture.project_id)
+                .unwrap()
+                .edges
+                .len(),
+            5
+        );
+        fs::write(
+            fixture.root.join(&entry.source_path),
+            b"label scene_one:\n    jump expression target\n",
+        )
+        .unwrap();
+        let stale = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(stale.partial);
+        assert!(stale
+            .edges
+            .iter()
+            .filter(|edge| edge.scene_id == entry.id)
+            .all(|edge| !edge.editable));
+    }
+
+    #[test]
+    fn flow_limits_are_explicit_and_never_truncated() {
+        let mut source = String::from("label scene_one:\n    menu:\n");
+        for _ in 0..=flow::MAX_FLOW_EDGES {
+            source.push_str("        \"Again\":\n            jump scene_one\n");
+        }
+        let fixture = Fixture::new(source.as_bytes());
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(graph.over_limit);
+        assert!(graph.nodes.is_empty() && graph.edges.is_empty());
+    }
+
+    #[test]
+    fn flow_observed_budget_fixture_500_scenes_2000_edges() {
+        let samples = if std::env::var("LOOMLIGHT_ENFORCE_FLOW_BUDGETS").as_deref() == Ok("1") {
+            3
+        } else {
+            1
+        };
+        for sample in 1..=samples {
+            flow_observed_budget_sample(sample);
+        }
+        if samples == 3 {
+            println!("phase-1g-observed-budget-gate: passed (3 samples)");
+        }
+    }
+    fn flow_observed_budget_sample(sample: usize) {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        let mut loaded = fixture
+            .service
+            .load(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let template = loaded.project.scenes[0].clone();
+        loaded.project.scenes.clear();
+        loaded.source_map.scene_mappings.clear();
+        loaded.source_map.sources.clear();
+        for i in 0..500 {
+            let mut scene = template.clone();
+            scene.id = uuid::Uuid::new_v4().to_string();
+            scene.technical_label = format!("scene_{i:03}");
+            scene.display_name = format!("Scene {i:03}");
+            scene.source_path = format!("game/chapters/chapter_01/scene_{i:03}.rpy");
+            loaded.project.scenes.push(scene);
+        }
+        loaded.project.entry_scene_id = Some(loaded.project.scenes[0].id.clone());
+        loaded.project.last_open.scene_id = loaded.project.scenes[0].id.clone();
+        // Remove the original file before building the unchanged synthetic workload.
+        fs::remove_file(fixture.root.join(&template.source_path)).unwrap();
+        for (i, scene) in loaded.project.scenes.iter().enumerate() {
+            let mut source = format!("label {}:\n    menu:\n", scene.technical_label);
+            for offset in 0..4 {
+                source.push_str(&format!(
+                    "        \"Route {offset}\":\n            jump scene_{:03}\n",
+                    (i + offset) % 500
+                ));
+            }
+            let (mapping, _) = build_mapping(
+                scene,
+                source.as_bytes(),
+                &sha256(source.as_bytes()),
+                None,
+                &[],
+                Some((&loaded.project, &loaded.authoring)),
+            )
+            .unwrap();
+            fs::write(fixture.root.join(&scene.source_path), source).unwrap();
+            loaded.source_map.sources.push(scene.source_path.clone());
+            loaded.source_map.scene_mappings.push(mapping);
+        }
+        fs::write(
+            fixture.root.join(PROJECT_PATH),
+            json_bytes(&loaded.project).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            fixture.root.join(SOURCE_MAP_PATH),
+            json_bytes(&loaded.source_map).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_000\n",
+        )
+        .unwrap();
+        let fixture_paths = fixture
+            .service
+            .transactions
+            .inventory_files_bounded(&fixture.project, "game", 8192)
+            .unwrap()
+            .into_iter()
+            .filter(|path| path.ends_with(".rpy"))
+            .collect::<Vec<_>>();
+        assert_eq!(fixture_paths.len(), 503);
+        assert_eq!(
+            fixture_paths
+                .iter()
+                .map(|path| fs::metadata(fixture.root.join(path)).unwrap().len())
+                .sum::<u64>(),
+            105_627
+        );
+        let start = std::time::Instant::now();
+        let graph = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let initial = start.elapsed();
+        assert_eq!(graph.nodes.len(), 500);
+        assert_eq!(graph.edges.len(), 2000);
+        assert!(!graph.over_limit && !graph.stale && !graph.partial);
+        let start = std::time::Instant::now();
+        let again = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let update = start.elapsed();
+        assert_eq!(graph.revision, again.revision);
+        let workspace = fixture.workspace();
+        let origin = &workspace.scenes[0];
+        let BeatPayload::Choice { mut options } = origin.beats[0].payload.clone() else {
+            panic!("choice fixture");
+        };
+        options[0].text = "Route A".into();
+        let proposal = fixture
+            .service
+            .build_command(
+                &fixture.project,
+                fixture
+                    .service
+                    .load(&fixture.project, &fixture.project_id)
+                    .unwrap(),
+                SceneCommand::UpdateBeat {
+                    scene_id: origin.id.clone(),
+                    expected_source_revision: origin.source_revision.clone(),
+                    beat_id: origin.beats[0].id.clone(),
+                    beat: BeatPayload::Choice { options },
+                },
+            )
+            .unwrap();
+        fixture
+            .service
+            .commit_history(&fixture.project, proposal)
+            .unwrap();
+        let start = flow::ACCEPTED_AT
+            .get()
+            .expect("real successful transaction timestamp");
+        let changed = fixture
+            .service
+            .flow_observed(&fixture.project, &fixture.project_id)
+            .unwrap();
+        let accepted_update = start.elapsed();
+        assert_eq!(graph.observation.status, "checked");
+        assert!(graph.observation.checked_at.is_some());
+        assert_eq!(again.observation.status, "checked");
+        assert_eq!(changed.observation.status, "savedEdits");
+        assert_ne!(graph.revision, changed.revision);
+        assert_eq!(changed.edges.len(), 2000);
+        assert!(changed.edges.iter().any(|edge| edge.text == "Route A"));
+        loaded = fixture
+            .service
+            .load(&fixture.project, &fixture.project_id)
+            .unwrap();
+        println!("G1-U2 sample {sample} (real service; timing from transaction acceptance, includes invalidation/history/projection): initial={initial:?}; warm_refresh={update:?}; accepted_update={accepted_update:?}; 500 Scenes / 2000 edges");
+        if let Ok(path) = std::env::var("LOOMLIGHT_FLOW_EVIDENCE") {
+            fs::write(path, serde_json::to_vec(&graph).unwrap()).unwrap();
+        }
+        // The full suite also checks this fixture's behavior, but target latency
+        // gates run it alone so concurrent crash/I/O tests do not own the timing.
+        if std::env::var("LOOMLIGHT_ENFORCE_FLOW_BUDGETS").as_deref() == Ok("1") {
+            assert!(
+                !cfg!(debug_assertions),
+                "G1 target budgets require the release profile"
+            );
+            assert!(
+                initial < std::time::Duration::from_secs(2),
+                "G1 initial projection {initial:?} exceeds 2 s"
+            );
+            assert!(
+                accepted_update < std::time::Duration::from_millis(250),
+                "G1 accepted projection update {accepted_update:?} exceeds 250 ms"
+            );
+            assert!(
+                update < std::time::Duration::from_secs(2),
+                "G1 disk refresh {update:?} exceeds 2 s"
+            );
+        }
+        let mut excess = template;
+        excess.id = uuid::Uuid::new_v4().to_string();
+        excess.technical_label = "excess".into();
+        excess.source_path = "game/chapters/chapter_01/excess.rpy".into();
+        let source = b"label excess:\n    return\n";
+        let (mapping, _) = build_mapping(
+            &excess,
+            source,
+            &sha256(source),
+            None,
+            &[],
+            Some((&loaded.project, &loaded.authoring)),
+        )
+        .unwrap();
+        fs::write(fixture.root.join(&excess.source_path), source).unwrap();
+        loaded.source_map.sources.push(excess.source_path.clone());
+        loaded.source_map.scene_mappings.push(mapping);
+        loaded.project.scenes.push(excess);
+        fs::write(
+            fixture.root.join(PROJECT_PATH),
+            json_bytes(&loaded.project).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            fixture.root.join(SOURCE_MAP_PATH),
+            json_bytes(&loaded.source_map).unwrap(),
+        )
+        .unwrap();
+        assert!(
+            fixture
+                .service
+                .flow_workspace(&fixture.project, &fixture.project_id)
+                .unwrap()
+                .over_limit
+        );
+    }
+    #[test]
+    fn flow_entry_uses_source_and_inventory_limits_refuse_without_reading_huge_inputs() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let graph = || {
+            fixture
+                .service
+                .flow_workspace(&fixture.project, &fixture.project_id)
+                .unwrap()
+        };
+        assert!(graph().entry_scene_id.is_empty());
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        assert_eq!(graph().entry_scene_id, fixture.entry_scene_id);
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump expression target\n",
+        )
+        .unwrap();
+        assert!(graph().entry_scene_id.is_empty());
+        assert!(graph().partial);
+        fs::write(
+            fixture.root.join("game/script.rpy"),
+            b"label start:\n    jump scene_one\n",
+        )
+        .unwrap();
+        fs::write(
+            fixture.root.join("game/custom.rpy"),
+            b"label\tpossibly_missing:\n    return\n",
+        )
+        .unwrap();
+        assert!(graph().entry_scene_id.is_empty());
+        fs::remove_file(fixture.root.join("game/custom.rpy")).unwrap();
+        let huge = fs::File::create(fixture.root.join("game/huge.rpy")).unwrap();
+        huge.set_len(17 * 1024 * 1024).unwrap();
+        let refused = graph();
+        assert!(refused.over_limit);
+        assert!(refused.nodes.is_empty() && refused.edges.is_empty());
+        assert!(fixture
+            .service
+            .transactions
+            .inventory_files_bounded(&fixture.project, "game", 1)
+            .is_err());
+    }
+    #[test]
+    fn runtime_real_history_asset_compound_refusal_preserves_stack_then_stop_retry() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let paths = ["game/images/history.png", "game/history.rpy"];
+        fixture
+            .service
+            .commit_history(
+                &fixture.project,
+                TransactionProposal {
+                    intent: TransactionIntent::Edit,
+                    mutations: paths
+                        .iter()
+                        .map(|path| FileMutation {
+                            path: RelativePath::new(*path).unwrap(),
+                            kind: MutationKind::CreateNew,
+                            base: Revision::expected_absence(),
+                            expected_bytes: vec![],
+                            proposed: b"# synthetic history content\n".to_vec(),
+                        })
+                        .collect(),
+                },
+            )
+            .unwrap();
+        let mut workspace = fixture.workspace();
+        for redo in [false, true] {
+            let gate = fixture
+                .service
+                .transactions
+                .reserve_execution(&fixture.project)
+                .unwrap();
+            let child_root = fixture.root.join(".git/runtime-fixture");
+            fs::create_dir_all(&child_root).unwrap();
+            let process = crate::renpy::runtime::tests::service_process(
+                &child_root,
+                gate,
+                crate::renpy::runtime::RuntimeKind::Run,
+                false,
+                true,
+                false,
+            );
+            let before = serde_json::to_value(&workspace).unwrap();
+            let command = if redo {
+                SceneCommand::Redo
+            } else {
+                SceneCommand::Undo
+            };
+            assert!(matches!(
+                fixture.apply(&workspace, command),
+                Err(SceneError::RuntimeBusy)
+            ));
+            assert_eq!(serde_json::to_value(fixture.workspace()).unwrap(), before);
+            for path in paths {
+                assert_eq!(fixture.root.join(path).exists(), !redo);
+            }
+            process.stop();
+            drop(process); // actual child cleanup releases the transaction gate
+            workspace = fixture
+                .apply(
+                    &workspace,
+                    if redo {
+                        SceneCommand::Redo
+                    } else {
+                        SceneCommand::Undo
+                    },
+                )
+                .unwrap();
+            for path in paths {
+                assert_eq!(fixture.root.join(path).exists(), redo);
+            }
+            assert_eq!(workspace.can_undo, redo);
+            assert_eq!(workspace.can_redo, !redo);
+        }
+    }
+
+    #[test]
+    fn runtime_scene_move_delete_and_real_inverse_refusal_stop_retry() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let mut workspace = fixture
+            .apply(
+                &fixture.workspace(),
+                SceneCommand::CreateChapter {
+                    display_name: "Second".into(),
+                },
+            )
+            .unwrap();
+        let chapter = workspace.chapters.last().unwrap().id.clone();
+        let first_chapter = workspace.chapters[0].id.clone();
+        workspace = fixture
+            .apply(
+                &workspace,
+                SceneCommand::CreateScene {
+                    chapter_id: first_chapter,
+                    display_name: "Movable".into(),
+                },
+            )
+            .unwrap();
+        let scene_id = workspace.scenes.last().unwrap().id.clone();
+        for step in [
+            "move",
+            "undoMove",
+            "redoMove",
+            "delete",
+            "undoDelete",
+            "redoDelete",
+        ] {
+            let scene = workspace.scenes.iter().find(|s| s.id == scene_id).cloned();
+            let command = || match step {
+                "move" => SceneCommand::MoveScene {
+                    scene_id: scene_id.clone(),
+                    chapter_id: chapter.clone(),
+                    direction: None,
+                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                },
+                "delete" => SceneCommand::DeleteScene {
+                    scene_id: scene_id.clone(),
+                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                },
+                "undoMove" | "undoDelete" => SceneCommand::Undo,
+                _ => SceneCommand::Redo,
+            };
+            let gate = fixture
+                .service
+                .transactions
+                .reserve_execution(&fixture.project)
+                .unwrap();
+            // Undo-delete creates a new, unloaded path; it is deliberately allowed
+            // by script-only play. Validation reserves all writes for this case.
+            let kind = if step == "undoDelete" {
+                crate::renpy::runtime::RuntimeKind::Validate
+            } else {
+                crate::renpy::runtime::RuntimeKind::Run
+            };
+            let child_root = fixture.root.join(".git/runtime-fixture");
+            fs::create_dir_all(&child_root).unwrap();
+            let process = crate::renpy::runtime::tests::service_process(
+                &child_root,
+                gate,
+                kind,
+                false,
+                true,
+                false,
+            );
+            let before = serde_json::to_value(&workspace).unwrap();
+            let manifest_snapshot = || {
+                fixture
+                    .service
+                    .transactions
+                    .execution_snapshot(&fixture.project)
+                    .unwrap()
+                    .1
+                    .into_iter()
+                    .filter(|(p, _)| {
+                        !matches!(p.as_str(), "ready" | "heartbeat" | "descendant.pid")
+                    })
+                    .collect::<std::collections::BTreeMap<_, _>>()
+            };
+            let manifest = manifest_snapshot();
+            assert!(
+                matches!(
+                    fixture.apply(&workspace, command()),
+                    Err(SceneError::RuntimeBusy)
+                ),
+                "{step}"
+            );
+            assert_eq!(
+                serde_json::to_value(fixture.workspace()).unwrap(),
+                before,
+                "{step}"
+            );
+            assert_eq!(manifest_snapshot(), manifest, "{step}");
+            process.stop();
+            drop(process);
+            workspace = fixture.apply(&workspace, command()).unwrap();
+        }
     }
 }

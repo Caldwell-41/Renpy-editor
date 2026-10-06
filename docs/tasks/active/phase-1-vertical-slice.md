@@ -1,11 +1,11 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-09-25 (Git deferral and testing revision)<br>
+**Updated:** 2026-09-28 (TEST-AUDIT-1 testing-policy alignment)<br>
 **Status:** Phase 1A-1E and CI-SIMPLE are integrated. Phase 1F is accepted by
 [final review 7.29](../archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review);
 PR #14 integration is complete. Original 1G/1H planning is integrated through PR #15;
 the September 25 scope/testing amendment is recorded here with all implementation
-checkpoints unstarted and separately selected. CURRENT/HANDOVER own
+checkpoints separately selected. That unstarted state was a planning snapshot; CURRENT/HANDOVER own
 actual integration state.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
@@ -52,7 +52,7 @@ Historical implementation: [transaction brief](../archive/2026-09-14-phase-1-tra
 
 Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The completed follow-up records the resource-limit and correctness repairs; 1E owns the integrated file-lifecycle semantics required by Scenes.
 
-**Gate:** actual stale-write, substitution, non-cooperating-writer, process-termination, evidence-retention and follow-up-write regressions pass on both targets. Bounded resource use must not impose a lifetime limit on successful authoring.
+**Gate:** ordinary stale-write, path/link refusal, competing-writer, interrupted-save recovery, evidence-retention and follow-up-write regressions pass on both targets. Use non-crashing fault/state fixtures for routine recovery. Historical deliberate termination and timed namespace tests remain specialist-only under WORKFLOW; retain their code/evidence and working protections. Bounded resource use must not impose a lifetime limit on successful authoring.
 
 ### 1C — Project lifecycle and SDK foundation
 
@@ -62,7 +62,7 @@ Preserve Welcome/Recent Projects, title/folder/parent/path preview, discovered/i
 
 Retain inspected candidate authority until activation, prepare before replacing the healthy current session, and distinguish session IDs from stable project IDs. Close/switch invalidates the old authority and import selections. Stale requests and UI completions cannot retarget another session.
 
-**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects crash consistency, stage/parent/promotion races, single-instance ownership and metadata-free runtime checks pass on both targets.
+**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The embedded SDK test still needs the [audited split](testing-policy-alignment.md#selector-disposition) before routine execution.
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
@@ -136,9 +136,24 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 
 ### 1G — Branches, validation/run and diagnostics
 
+**Completion sequence selected 2026-10-04:** the
+[UI review ledger](ui-design-review.md#selected-1g-completion-sequence--2026-10-04)
+owns next-chat resolution completion/final Mac review/remote qualification, subsequent
+Windows-PC verification of the passing candidate, and a final separately selected
+integration chat. All required target acceptance stays open until verified; resolving
+conflicts requires affected combined-input checks, not reuse of unrelated green runs.
+
 **Entry:** 1F accepted and integrated, plus explicit checkpoint selection. The detailed
 [1G brief](phase-1g-branches-runtime-git.md) owns three checkpoint chats: 1G.1, 1G.2a
-and 1G.2b, all unstarted. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
+and 1G.2b. 1G.1 and 1G.2a are `review_ready`. R1-B1/B2 are closed after both targets'
+complete logs, artifacts and all 60 input hashes per target were verified for candidate
+`c12d953`, run `36148942247`, attempt 1. User acceptance remains separate; the user selected 1G.2b from `78f051e`.
+Final 1G acceptance remains incomplete. The user approved
+[ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md): last-observed
+Branches, ordinary external-edit/data-loss protection and proportionate local-project
+scope. G1-OBS replaces the retired G1-O native-proof program and old G1-V1 display
+freshness gate. Historical failures stay in the 1G ledger; current code and tests
+still need the replacement contract and both supported targets' evidence. G1/R1/R2 prove shared flow, runtime/trust/process ownership,
 supported script editing/saving during play and usable diagnostics. Asset mutations
 require Stop; live asset refresh is excluded. Existing Scene/Source/Save
 services are reused. Agent-run tests own development checks; user physical testing is
@@ -148,7 +163,10 @@ reserved for one final 1G session under [TESTING](../../TESTING.md#phase-1g-test
 
 Render the basic Scene/label/choice graph from the same semantic edges as Scene. Navigate to source Choice/Jump and destination Scene. Define terminal/return behavior and visible dangling destinations; graph operations use the shared transaction model. Do not add a parallel graph truth, conditional authoring, advanced reachability/state analysis, mature minimap/search or Run From Here.
 
-**Gate:** two routes, jumps/returns, destination creation/removal policy, dangling references and bidirectional navigation stay coherent across Scene, Source and Branches on both targets.
+**Gate:** two routes, jumps/returns, destination creation/removal policy, dangling
+references and bidirectional navigation stay coherent across Scene, Source and Branches
+on both targets. ADR 0010's G1-U1/U2 observed-state, responsiveness and retained
+G1-V2 interaction gates apply; graph display cannot authorize a write or execution.
 
 #### 1G.2 — Explicit SDK validation, normal Run Game and diagnostics
 
@@ -184,7 +202,7 @@ Run the following with synthetic, repository-safe content from fresh checkouts o
 7. Edit supported Source and observe Scene/Branches synchronization; introduce unsupported/incomplete/external content and prove lossless protection, truthful stale/partial states and controlled reconciliation.
 8. Validate, navigate real diagnostics, perform explicit normal run/stop, and verify revision/trust status during authoring.
 9. Close/reopen and continue with valid workspace selection. Run a copy without `.renpy-editor/`.
-10. Interrupt mixed transactions and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
+10. Represent interrupted mixed transactions with non-crashing fault/state fixtures and preserve competing external writes. Use the minimum recovery workflow to inspect, explicitly resolve safe cases and continue; prove ambiguity remains blocked without deleting evidence.
 11. Exercise failed project switches, old-session requests, delayed/reordered successes/errors, cancelled import and rapid navigation. Prove no wrong-session effects, obsolete navigation or false Saved state.
 12. Exercise metadata limits, precision, discovery/case collisions and long terminal history. Confirm accepted data remains reloadable and the project remains writable beyond the former journal-count boundary.
 

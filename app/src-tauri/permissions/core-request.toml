@@ -2,3 +2,8 @@
 identifier = "allow-loomlight-core"
 description = "Allows only the versioned, schema-validated Loomlight core request envelope."
 commands.allow = ["core_request"]
+
+[[permission]]
+identifier = "allow-application-close"
+description = "Allows payload-free exit only after core project close and owned runtime cleanup."
+commands.allow = ["complete_application_close"]

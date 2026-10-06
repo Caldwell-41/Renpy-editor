@@ -70,6 +70,10 @@ typed semantic command whose core implementation verifies current metadata and s
 revisions, constructs the smallest safe mutation set, and commits through the shared
 transaction service. `media.present` is read-only and accepts an Asset UUID plus a
 presentation purpose, never a path or URL.
+`asset.previewImport` reads an opaque retained selection authority for the current
+session/project before import. It applies the passive image presentation limits,
+rechecks the selected identity/size/hash and does not consume the authority or write
+project files. Explicit import remains a separate transactional operation.
 
 Loomlight is a single-instance desktop application. The maintained Tauri
 single-instance plugin is registered before desktop `setup`, so a losing launch is
@@ -272,7 +276,9 @@ through the pinned SDK, then finalise the project. A failed creation must not le
 half-created directory presented as a successful Loomlight project.
 
 ADR 0005 implements that flow using Ren'Py 8.5.3's documented launcher
-`generate_gui <stage> --width ... --height ... --start` command. Loomlight applies its
+`generate_gui <stage> --width ... --height ... --start` command, followed by the SDK's
+`gui_images` command against that controlled stage to create the generic button/bar
+assets used by standard screens. Loomlight applies its
 deterministic modular overlay, optionally calls direct `git init`, compiles/lints the
 freshly controlled stage, then revalidates the retained parent identity and performs a
 same-parent no-replace rename (`renameatx_np(RENAME_EXCL)` on macOS and `MoveFileExW`
@@ -295,6 +301,25 @@ special cases:
   Timeline integration;
 - Scene beats and Branches share one semantic edge/domain model; graph data is not a
   separately generated truth.
+
+### Review correction transaction and presentation paths
+
+The Scene `reorderBeat` command moves a supported Beat to a final index through the
+existing revision-checked proposal/history path. It preserves exact source slices and
+stable IDs, rejects intervening gaps/protected or terminal Beats, and produces one
+Undo entry. Pointer grips and keyboard arrows share that existing authoring owner.
+
+Appearance updates use typed, session-bound IPC. Replacement files use native import
+authorities; expression changes patch recognized token ranges and update mapping
+hashes/IDs. One transaction owns image/declaration/metadata/Scene companions. Unknown
+payload fields, dirty source, stale expected identity and unsafe ownership refuse.
+
+Catalogue dialogs move the existing forms into accessible presentation containers;
+completion, mutation and generation ownership remain in the original handlers.
+Discard resets unsubmitted inputs/staging while completed imports remain saved.
+Media presentation reads now use the existing ordered service lane with busy retries,
+leaving Stop independent; a view-owned bounded cache is reused by cards/inspectors.
+Late completions cannot attach to a different Asset or disposed view.
 
 ## External-change reconciliation
 
@@ -381,3 +406,124 @@ locations and revision/session freshness through the existing SDK adapter. See t
 New Git status/diff/checkpoint services are deferred to
 [optional Git](tasks/active/optional-local-git.md); only existing optional creation-time
 init remains in Phase 1. No Git implementation is implied by the general adapter table.
+
+### Implemented 1G.1 flow boundary
+
+The read-only `flow.list` IPC reuses Lifecycle session authority, Source reconciliation,
+Scene mappings/canonical choice spelling, the shared lexical scanner and anchored
+transaction reads. It does not evaluate Python, run the SDK, mutate graph files or
+introduce renderer filesystem privileges. Existing Scene commands own all destination
+changes, creation, deletion refusal and history. The Branches renderer is disposable;
+old-session completions cannot navigate, alter status or revive a detached view.
+
+Flow caps 500 mapped Scenes / 2,000 displayed edges; source inventory caps 2,048 `.rpy`
+files / 32 MiB aggregate / 16 MiB per file and 8,192 enumerated directory entries.
+Existing traversal depth/file limits remain tighter where applicable. Bounded read
+variants share the transaction implementation and leave existing caller limits intact.
+Incomplete inventory yields unknown flow; resource refusal never silently truncates.
+Revision-qualified Source navigation uses optional `expectedRevision` and preserves
+retained draft selection on mismatch. No capability, CSP or mutation authority changes.
+
+### Observed-flow implementation (G1-OBS)
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) replaces ADR 0009.
+Reuse the shared projector and Source/Scene/transaction owners with one bounded
+session-owned observation cache. Accepted app mutations update/invalidate changed
+inputs; open/focus/Refresh requests reconcile disk. A disk refresh acquires current
+bounded source/metadata once; no second all-source verification or native final
+name-binding experiment is required for display. Coalesce work and discard old-session
+results. `AuthoringService` owns the cache and routes all accepted authoring/history
+commits through changed-path invalidation. Streaming imports/recovery clear the cache
+when a precise dependency update is unavailable. Metadata and media dependencies are
+reacquired for projection; unchanged source observations are reused after app edits.
+
+Graph status describes the last observed saved state. Keep navigation validation,
+transaction preconditions/recovery and runtime preparation independent. UI feedback,
+focus/draft retention and ordinary external-edit regressions are the integration
+priorities. `flow.list` accepts an optional `refresh` boolean (default false); true
+requests disk acquisition. Opening Branches shows the observed model then coalesces a
+disk check if it came from cache or saved edits. Focus/Refresh acquire disk; the old
+periodic scan is removed. Source reconciliation handles external mapped edits and
+preserves dirty buffers. See the active checkpoint ledger for qualification evidence.
+
+## Controlled runtime foundation (Phase 1G.2a)
+
+[ADR 0008](adr/0008-controlled-runtime.md) defines explicit saved-revision preparation,
+session trust, the controlled-play policy and independent process supervision. The
+Source controller's existing input barrier also supports runtime preparation; the
+shared coordinator retains pending Scene input and never commits it implicitly.
+The core owns prepare/grant/start/cancel/Stop/status/revoke capabilities, SDK/project
+manifests and the transaction reservation. Broad runtime/Diagnostics UI is still 1G.2b.
+
+Play releases script editing after the SDK's policy readiness callback. Accepted script
+changes mark the launch as an earlier revision. Assets/inventory and conflicting loaded
+source/compiled lifecycle changes require Stop. Output is bounded inert text; a terminal
+manifest comparison conservatively marks changed output/source stale. Unknown SDK cache
+or save provenance requires renewed consent; no `.rpyc` suffix is trusted automatically.
+Desktop exit explicitly shuts down the supervisor. Core close/switch refuse until
+preparation is cancelled or Stop cleanup finishes, then use existing draft safeguards.
+Target acceptance remains recorded in the live Phase 1G ledger, not inferred here.
+
+
+### Runtime presentation and diagnostic authority (1G.2b)
+
+A session-owned RuntimeWorkspace mounts the toolbar and bottom panel across existing
+editor views. It reuses prepareRuntimeInput and the Source operation lease and observes
+long work receipts after releasing that lease. Status/Stop/revoke retain the independent
+control lane. Runtime diagnostics record each command's output boundary, so compile,
+lint and normal-run output keep their actual origins. Location resolution is a narrow
+service request against retained launch identity and accepted Source bytes. No new
+filesystem/process permission, CSP relaxation or independent Save owner is introduced.
+
+Diagnostic reads use the independently available runtime control lane and immutable
+launch manifest; they never check out the authoring service. A packaged test exposed
+a race where diagnostic polling could refuse a concurrent Source read. The held-owner
+regression now includes diagnostics, malformed payload/session refusal and responsive
+Stop. Diagnostic resolution alone uses the Source/transaction authority.
+
+The renderer retries only specific read requests refused with `RUNTIME_BUSY` before
+service checkout, for at most 40 retries at 25 ms. Payload/session identity never
+changes. Writes, trust grants and process starts are never replayed. This covers
+Source opening/status observations overlapping normal background read consumers.
+
+Source retention/observation, project status/flush and scene/authoring/flow observations
+share a renderer request lane. Initial Story reads therefore finish before early Source
+navigation uses the same service, and background observations cannot take it during
+Save. Short runtime submissions and SDK discovery join the lane; runtime control/status
+bypass it so Stop remains responsive. Picker and unrelated surface lifetimes retain
+existing coordination. A failed
+read releases the lane. Only explicit pre-dispatch busy reads retry; no write is replayed.
+
+Native main-window close and application quit route into the same Runtime Stop/Cancel
+and existing Source draft leave flow as Close Project. The narrow desktop-only
+`complete_application_close` command accepts no payload, rejects other windows and
+requires the core service to have no open project plus confirmed process cleanup before
+exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
+retain their existing independent harness behavior. OS termination still uses shutdown.
+
+
+## UI refresh: device state and editor adapter
+
+The UI remains vanilla TypeScript/Vite inside Tauri 2. Catalogue, settings, import,
+progress, icons and Source adapter modules separate presentation from the existing
+transaction controller. Bundled CodeMirror supplies selection/history, highlighting
+and search; it does not write files. Its raw-source state retains mixed newline bytes
+in a persistent text tree and restores them with undo effects. The existing Source
+controller still owns draft generations, barriers, explicit acceptance and conflicts.
+CodeMirror style injection uses Tauri's style nonce; CSP is not widened.
+
+Versioned `preferences.read/write` operations use the existing anchored application
+state root and atomic replacement helper, with bounded validated theme/density/font
+and per-project layout fields. They never edit a game. Invalid preference data falls
+back to defaults; failed writes remain visible in Settings.
+
+`core_request` optionally accepts a Tauri progress channel for SDK install/project
+create. A scoped observer publishes ordered actual stage/byte events; the terminal
+response alone owns success/failure. SDK reads use a heap buffer and retain checksum,
+size and extraction protections. Unknown byte totals stay indeterminate.
+
+Multiple-file selection and native drop obtain the same import authorities as the
+single-file picker. The main-window drop captures its project session before worker
+hashing and rechecks ownership before grants are registered. The renderer receives
+opaque grants and display metadata, never authority from a supplied arbitrary path.
+Each staged import still uses the existing typed transaction operation.

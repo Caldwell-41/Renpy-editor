@@ -1,8 +1,12 @@
 import "./styles.css";
+import "./ui-refresh.css";
+import { enableRichSourceEditor } from "./source-editor.ts";
+enableRichSourceEditor();
+import { loadPreferences } from "./preferences.ts";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { requestApplicationExit, startApplication } from "./main.ts";
 
-startApplication();
+void loadPreferences().then(() => startApplication());
 
 const applicationWindow = getCurrentWindow();
 let destroying = false;

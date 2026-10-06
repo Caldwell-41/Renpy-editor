@@ -104,6 +104,7 @@ pub struct SourceDocument {
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SourceOpenRequest {
+    pub expected_revision: Option<String>,
     pub path: String,
     pub selection_start: Option<u64>,
     pub selection_end: Option<u64>,
@@ -167,6 +168,7 @@ pub(crate) struct SourceSessions {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SourceError {
+    RuntimeBusy,
     InvalidPayload,
     UnknownFile,
     InvalidUtf8,
@@ -244,6 +246,7 @@ impl AuthoringService {
     ) -> Result<SourceDocument, SourceError> {
         validate_source_path(&request.path)?;
         self.ensure_buffer(project, &request.path)?;
+        self.refresh_buffer(project, &request.path)?;
         {
             let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let buffer = sessions
@@ -251,7 +254,14 @@ impl AuthoringService {
                 .get_mut(project)
                 .and_then(|items| items.get_mut(&request.path))
                 .ok_or(SourceError::UnknownFile)?;
-            if let Some(start) = request.byte_start {
+            let mapped_navigation_valid =
+                request.expected_revision.as_ref().is_none_or(|revision| {
+                    revision == &buffer.base_revision.sha256
+                        && buffer.draft.is_none()
+                        && buffer.external.is_none()
+                        && !buffer.unavailable
+                });
+            if let Some(start) = request.byte_start.filter(|_| mapped_navigation_valid) {
                 let bom = usize::from(buffer.base_bytes.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
                 buffer.selection_start = byte_to_utf16(
                     strip_bom(&buffer.base_bytes),
@@ -266,7 +276,6 @@ impl AuthoringService {
                 buffer.selection_end = request.selection_end.unwrap_or(start);
             }
         }
-        self.refresh_buffer(project, &request.path)?;
         self.reconcile_clean_source(project, project_id, &request.path)?;
         self.source_document(project, project_id, &request.path)
     }
@@ -1038,7 +1047,7 @@ impl AuthoringService {
         source_map
             .validate(project_id)
             .map_err(|_| SourceError::InvalidSource)?;
-        let outcome = self.transactions.commit(
+        let outcome = self.commit_observed(
             project,
             TransactionProposal {
                 mutations: vec![FileMutation {
@@ -1362,6 +1371,7 @@ fn sha256(bytes: &[u8]) -> String {
 
 fn transaction_error(error: crate::transaction::PublicDiagnostic) -> SourceError {
     match error.code {
+        ErrorCode::RuntimeBusy => SourceError::RuntimeBusy,
         ErrorCode::RecoveryRequired => SourceError::RecoveryRequired,
         ErrorCode::Conflict
         | ErrorCode::StaleRevision
@@ -1374,6 +1384,7 @@ fn transaction_error(error: crate::transaction::PublicDiagnostic) -> SourceError
 
 fn scene_source_error(error: SceneError) -> SourceError {
     match error {
+        SceneError::RuntimeBusy => SourceError::RuntimeBusy,
         SceneError::UnsupportedSource
         | SceneError::InvalidMetadata
         | SceneError::InvalidPayload => SourceError::InvalidSource,
@@ -1525,6 +1536,7 @@ mod tests {
                     &self.project,
                     &self.project_id,
                     SourceOpenRequest {
+                        expected_revision: None,
                         path: path.into(),
                         selection_start: None,
                         selection_end: None,
@@ -1562,6 +1574,30 @@ mod tests {
                 },
             )
         }
+    }
+
+    #[test]
+    fn flow_observed_source_save_preserves_draft_then_updates_saved_projection() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        let original = f.open(&f.scene_path);
+        let before = f.service.flow_observed(&f.project, &f.project_id).unwrap();
+        let draft = f.draft(&original, "label scene_one:\n    jump scene_one\n");
+        assert_eq!(
+            f.service
+                .flow_observed(&f.project, &f.project_id)
+                .unwrap()
+                .revision,
+            before.revision
+        );
+        f.save(&draft).unwrap();
+        let after = f.service.flow_observed(&f.project, &f.project_id).unwrap();
+        assert_eq!(after.observation.status, "savedEdits");
+        assert_ne!(after.revision, before.revision);
+        assert!(matches!(
+            after.edges[0].destination,
+            crate::scene::flow::FlowDestination::Resolved { .. }
+        ));
+        assert!(!f.open(&f.scene_path).dirty);
     }
 
     #[test]
@@ -2028,6 +2064,7 @@ mod tests {
                 &fixture.project,
                 &fixture.project_id,
                 SourceOpenRequest {
+                    expected_revision: None,
                     path: "../outside.rpy".into(),
                     selection_start: None,
                     selection_end: None,
@@ -2069,6 +2106,7 @@ mod tests {
                 &fixture.project,
                 &fixture.project_id,
                 SourceOpenRequest {
+                    expected_revision: None,
                     path: "game/oversize.rpy".into(),
                     selection_start: None,
                     selection_end: None,
@@ -2164,5 +2202,90 @@ mod tests {
             .unwrap();
         assert_eq!(inventory.dirty_count, 4);
         assert_eq!(inventory.draft_bytes, MAX_DRAFT_BYTES as u64);
+    }
+    #[test]
+    fn flow_source_navigation_preserves_draft_caret_and_refuses_stale_ranges() {
+        let fixture = Fixture::new(b"label scene_one:\n    \"Hello\"\n    return\n");
+        let original = fixture.open(&fixture.scene_path);
+        let draft = "label scene_one:\n    \"Pending\"\n    return\n";
+        fixture
+            .service
+            .source_update_draft(
+                &fixture.project,
+                &fixture.project_id,
+                SourceDraftRequest {
+                    path: fixture.scene_path.clone(),
+                    expected_base_revision: original.base_revision.clone(),
+                    text: draft.into(),
+                    selection_start: 22,
+                    selection_end: 24,
+                },
+            )
+            .unwrap();
+        let accepted = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert!(!accepted.stale);
+        assert_eq!(accepted.edges.len(), 1);
+        assert_eq!(accepted.edges[0].location.revision, original.base_revision);
+        assert_eq!(
+            fs::read(fixture.root.join(&fixture.scene_path)).unwrap(),
+            b"label scene_one:\n    \"Hello\"\n    return\n"
+        );
+        let target = SourceOpenRequest {
+            path: fixture.scene_path.clone(),
+            expected_revision: Some(original.base_revision.clone()),
+            selection_start: None,
+            selection_end: None,
+            byte_start: Some(0),
+            byte_end: Some(4),
+        };
+        let retained = fixture
+            .service
+            .source_open(&fixture.project, &fixture.project_id, target.clone())
+            .unwrap();
+        assert_eq!(retained.text.as_deref(), Some(draft));
+        assert_eq!(retained.selection_start, 22);
+        assert_eq!(retained.selection_end, 24);
+        fs::write(
+            fixture.root.join(&fixture.scene_path),
+            b"label scene_one:\n    \"External\"\n    return\n",
+        )
+        .unwrap();
+        let conflict = fixture
+            .service
+            .flow_workspace(&fixture.project, &fixture.project_id)
+            .unwrap();
+        assert_eq!(conflict.observation.status, "incomplete");
+        let retained = fixture
+            .service
+            .source_open(&fixture.project, &fixture.project_id, target.clone())
+            .unwrap();
+        assert_eq!(retained.text.as_deref(), Some(draft));
+        assert_eq!((retained.selection_start, retained.selection_end), (22, 24));
+        assert!(retained
+            .external_text
+            .as_deref()
+            .unwrap()
+            .contains("External"));
+        fixture
+            .service
+            .source_discard(
+                &fixture.project,
+                &fixture.project_id,
+                SourcePathRequest {
+                    path: fixture.scene_path.clone(),
+                },
+            )
+            .unwrap();
+        let mut stale = target;
+        stale.expected_revision = Some("0".repeat(64));
+        let prior = fixture.open(&fixture.scene_path);
+        let next = fixture
+            .service
+            .source_open(&fixture.project, &fixture.project_id, stale)
+            .unwrap();
+        assert_eq!(next.selection_start, prior.selection_start);
     }
 }

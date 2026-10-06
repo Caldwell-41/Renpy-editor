@@ -1,8 +1,11 @@
+pub mod runtime;
+mod runtime_probe;
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
         CreateVariableRequest, ImportAssetRequest, ImportChoice, PersistenceStatus,
-        SetDefaultAppearanceRequest, UpdateCharacterRequest, UpdateVariableRequest,
+        SetDefaultAppearanceRequest, UpdateAppearanceRequest, UpdateCharacterRequest,
+        UpdateVariableRequest,
     },
     media::{MediaError, MediaPresentation, MediaRequest},
     metadata::{
@@ -126,6 +129,7 @@ pub enum LifecycleError {
     CreatedNotOpened,
     RecoveryRequired,
     StaleSession,
+    Runtime(runtime::RuntimeError),
     Authoring(AuthoringError),
     Scene(SceneError),
     Source(SourceError),
@@ -160,6 +164,7 @@ pub struct LifecycleService {
     sdks: HashMap<String, ValidatedSdk>,
     current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
     authoring: AuthoringService,
+    runtime: runtime::RuntimeState,
 }
 
 struct InspectedProject {
@@ -216,6 +221,7 @@ impl LifecycleService {
             sdks: HashMap::new(),
             current: None,
             authoring: AuthoringService::default(),
+            runtime: runtime::RuntimeState::default(),
         })
     }
 
@@ -298,6 +304,9 @@ impl LifecycleService {
         &mut self,
         request: CreateProjectRequest,
     ) -> Result<CreationResult, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         validate_title(&request.title)?;
         validate_folder_name(&request.folder_name)?;
         let resolution = Resolution {
@@ -321,11 +330,13 @@ impl LifecycleService {
         ensure_absent(&final_path)?;
         let token = uuid::Uuid::new_v4().to_string();
         let stage_name = format!(".loomlight-stage-{token}");
+        crate::progress::stage("prepare");
         let mut stage = create_project_stage(parent, stage_name, token, || Ok(()))?;
         let prepared = (|| {
             validate_stage_identity(&stage)?;
             sdk.revalidate(true)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            crate::progress::stage("generate");
             RenpyAdapter::generate_starter_anchored(
                 &sdk,
                 &stage.path,
@@ -347,6 +358,7 @@ impl LifecycleService {
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: overlay");
             if request.initialize_git {
+                crate::progress::stage("git");
                 validate_stage_identity(&stage)?;
                 crate::ports::GitPort::initialise_new_repository(
                     &LocalGit {
@@ -361,11 +373,13 @@ impl LifecycleService {
             validate_stage_identity(&stage)?;
             sdk.revalidate(false)
                 .map_err(|_| LifecycleError::UnsupportedSdk)?;
+            crate::progress::stage("validate");
             RenpyAdapter::validate_generated_anchored(&sdk, &stage.path, stage_file(&stage)?)
                 .map_err(|_| LifecycleError::GenerationFailed)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: validated");
             validate_stage_identity(&stage)?;
+            crate::progress::stage("finalise");
             promote_anchored_stage(parent, &mut stage, &request.folder_name)?;
             #[cfg(test)]
             eprintln!("phase-1c-create-checkpoint: promoted");
@@ -379,6 +393,7 @@ impl LifecycleService {
             let _ = cleanup_stage(parent, &mut stage);
         }
         let inspected = prepared?;
+        crate::progress::stage("open");
         let opened = self
             .activate_project(inspected)
             .map_err(|_| LifecycleError::CreatedNotOpened)?;
@@ -407,6 +422,9 @@ impl LifecycleService {
     }
 
     pub fn close(&mut self) -> Result<(), LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -414,6 +432,7 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
+        self.runtime = runtime::RuntimeState::default();
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
@@ -427,6 +446,9 @@ impl LifecycleService {
         &mut self,
         mut inspected: InspectedProject,
     ) -> Result<OpenProject, LifecycleError> {
+        if self.runtime.busy() {
+            return Err(LifecycleError::Runtime(runtime::RuntimeError::Busy));
+        }
         if self
             .current
             .as_ref()
@@ -460,6 +482,7 @@ impl LifecycleService {
             self.authoring.unregister_project(&authority);
             return Err(error);
         }
+        self.runtime = runtime::RuntimeState::default();
         let activated = inspected.project.clone();
         let previous = self
             .current
@@ -559,6 +582,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    pub fn authoring_preview_import(
+        &mut self,
+        request: crate::media::ImportPreviewRequest,
+    ) -> Result<crate::media::MediaPresentation, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .preview_import(&authority, request)
+            .map_err(LifecycleError::Media)
+    }
+
     pub fn authoring_import_asset(
         &mut self,
         request: ImportAssetRequest,
@@ -566,6 +599,16 @@ impl LifecycleService {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
             .import_asset(&authority, &project_id, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn authoring_update_appearance(
+        &mut self,
+        request: UpdateAppearanceRequest,
+    ) -> Result<AuthoringMetadata, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .update_appearance(&authority, &project_id, request)
             .map_err(LifecycleError::Authoring)
     }
 
@@ -586,6 +629,20 @@ impl LifecycleService {
         self.authoring
             .repair_asset_compatibility(&authority, &project_id)
             .map_err(LifecycleError::Authoring)
+    }
+
+    pub fn flow_observed(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .flow_observed(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn flow_workspace(&self) -> Result<crate::scene::flow::FlowWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .flow_workspace(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
     }
 
     pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
@@ -774,6 +831,52 @@ impl LifecycleService {
                 schema_version: RECENT_SCHEMA_VERSION,
                 entries: Vec::new(),
             })
+    }
+
+    pub fn read_preferences(&self) -> crate::preferences::Preferences {
+        let read = || -> Option<crate::preferences::Preferences> {
+            let mut file = self
+                .data_anchor
+                .open_file(OsStr::new("ui-preferences.json"))
+                .ok()?;
+            if file.metadata().ok()?.len() > 64 * 1024 {
+                return None;
+            }
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes).ok()?;
+            let prefs: crate::preferences::Preferences = serde_json::from_slice(&bytes).ok()?;
+            prefs.valid().then_some(prefs)
+        };
+        read().unwrap_or_default()
+    }
+
+    pub fn write_preferences(
+        &self,
+        prefs: crate::preferences::Preferences,
+    ) -> Result<crate::preferences::Preferences, LifecycleError> {
+        if !prefs.valid() {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let bytes = serde_json::to_vec(&prefs).map_err(|_| LifecycleError::Io)?;
+        let name = format!(".ui-preferences-{}.tmp", uuid::Uuid::new_v4());
+        let temporary = OsStr::new(&name);
+        let destination = OsStr::new("ui-preferences.json");
+        let result = (|| {
+            let mut file = self
+                .data_anchor
+                .create_new_file(temporary)
+                .map_err(|_| LifecycleError::UnsafePath)?;
+            file.write_all(&bytes).map_err(|_| LifecycleError::Io)?;
+            crate::transaction::flush_open_file(&file).map_err(|_| LifecycleError::Io)?;
+            drop(file);
+            self.data_anchor.flush().map_err(|_| LifecycleError::Io)?;
+            replace_recent_file(&self.data_anchor, temporary, destination)?;
+            verify_recent_commit(&self.data_anchor, destination, &bytes)
+        })();
+        if result.is_err() {
+            let _ = self.data_anchor.remove_file_if_exists(temporary);
+        }
+        result.map(|_| prefs)
     }
 
     fn write_recent(&self, store: &RecentStore) -> Result<(), LifecycleError> {
@@ -1871,8 +1974,36 @@ fn promote_no_replace(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ui_preferences_are_device_local_atomic_and_recover_corrupt_records() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("profile");
+        let service = LifecycleService::new(root.clone()).unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::System
+        ));
+        let mut prefs = crate::preferences::Preferences::default();
+        prefs.theme = crate::preferences::Theme::Light;
+        service.write_preferences(prefs).unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::Light
+        ));
+        assert!(service.current().is_none());
+        fs::write(root.join("ui-preferences.json"), b"broken").unwrap();
+        assert!(matches!(
+            service.read_preferences().theme,
+            crate::preferences::Theme::System
+        ));
+        assert!(!fs::read_dir(&root).unwrap().any(|e| e
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .ends_with(".tmp")));
+    }
 
-    fn make_openable_project(root: &Path, title: &str) {
+    pub(super) fn make_openable_project(root: &Path, title: &str) {
         let folder = root.file_name().unwrap().to_str().unwrap();
         fs::create_dir_all(root.join("game/definitions")).unwrap();
         fs::create_dir_all(root.join("game/chapters/chapter_01")).unwrap();
@@ -1936,7 +2067,7 @@ mod tests {
             .unwrap()
     }
 
-    fn closeout_ipc(
+    pub(super) fn closeout_ipc(
         service: &mut LifecycleService,
         operation: &str,
         payload: serde_json::Value,
@@ -2377,6 +2508,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn inspected_root_substitution_cannot_activate_or_replace_current() {
         let temp = tempfile::tempdir().unwrap();
         let old_root = temp.path().join("old-project");
@@ -2437,6 +2569,137 @@ mod tests {
             .status()
             .unwrap();
         assert_eq!(status.code(), Some(88), "SDK checkpoint {checkpoint}");
+    }
+
+    #[test]
+    #[ignore = "specialist SDK install process-termination recovery; ADR 0010"]
+    fn official_sdk_managed_install_crash_recovery_specialist() {
+        let Some(archive) = std::env::var_os("LOOMLIGHT_PHASE1C_SDK_ARCHIVE") else {
+            eprintln!("phase-1c-sdk-crash-specialist: skipped (no official SDK archive)");
+            return;
+        };
+        let temp = tempfile::tempdir().unwrap();
+        let archive = Path::new(&archive);
+        let interrupted_before = temp.path().join("managed-before-promotion");
+        crash_managed_sdk_install(&interrupted_before, archive, "before");
+        let recovered_before =
+            crate::renpy::install_supported_sdk_from_archive(&interrupted_before, archive).unwrap();
+        assert_eq!(recovered_before.version, SUPPORTED_VERSION);
+
+        let managed_state = temp.path().join("managed-after-promotion");
+        crash_managed_sdk_install(&managed_state, archive, "after");
+        let sdk =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        assert_eq!(sdk.version, SUPPORTED_VERSION);
+        let already_installed =
+            crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
+        assert!(sdk.same_identity(&already_installed));
+        println!("phase-1c-remediation-sdk-recovery: passed");
+    }
+
+    #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
+    fn official_sdk_stage_namespace_specialist() {
+        let Some(archive) = std::env::var_os("LOOMLIGHT_PHASE1C_SDK_ARCHIVE") else {
+            eprintln!("phase-1c-stage-specialist: skipped (no official SDK archive)");
+            return;
+        };
+        let temp = tempfile::tempdir().unwrap();
+        let sdk =
+            crate::renpy::install_supported_sdk_from_archive(temp.path(), Path::new(&archive))
+                .unwrap();
+        {
+            let requested_stage_parent = temp.path().join("anchored-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-anchored-child-stage");
+            RenpyAdapter::generate_starter_anchored_with_hooks(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+                || Ok(()),
+            )
+            .unwrap();
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
+        }
+
+        {
+            let requested_stage_parent = temp.path().join("inflight-child-test");
+            fs::create_dir(&requested_stage_parent).unwrap();
+            let stage_parent = requested_stage_parent.canonicalize().unwrap();
+            let token = uuid::Uuid::new_v4().to_string();
+            let stage_name = format!(".loomlight-stage-{token}");
+            let stage_path = stage_parent.join(&stage_name);
+            fs::create_dir(&stage_path).unwrap();
+            restrict_directory(&stage_path).unwrap();
+            fs::write(
+                stage_path.join(STAGE_MARKER),
+                format!("loomlight-project-stage-v1\n{token}\n"),
+            )
+            .unwrap();
+            fs::create_dir(stage_path.join("game")).unwrap();
+            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
+            let moved = stage_parent.join("moved-inflight-child-stage");
+            RenpyAdapter::generate_starter_anchored_with_hooks(
+                &sdk,
+                &stage_path,
+                stage_file(&stage).unwrap(),
+                1280,
+                720,
+                || Ok(()),
+                || {
+                    #[cfg(unix)]
+                    {
+                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
+                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
+                    }
+                    #[cfg(windows)]
+                    assert!(fs::rename(&stage_path, &moved).is_err());
+                    Ok(())
+                },
+            )
+            .unwrap();
+            #[cfg(unix)]
+            {
+                assert!(moved.join("game/screens.rpy").is_file());
+                assert!(!stage_path.join("game/screens.rpy").exists());
+            }
+            #[cfg(windows)]
+            assert!(stage_path.join("game/screens.rpy").is_file());
+        }
+        println!("phase-1c-remediation-stage-races: passed");
     }
 
     #[test]
@@ -2803,6 +3066,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist process-termination recovery; ADR 0010"]
     fn recent_crash_checkpoints_restart_from_a_complete_store() {
         for checkpoint in ["partial", "durable", "committed"] {
             let temp = tempfile::tempdir().unwrap();
@@ -2898,6 +3162,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn substitution_after_final_validation_never_survives_as_final() {
         let temp = tempfile::tempdir().unwrap();
         let requested_parent = temp.path().join("projects");
@@ -2942,6 +3207,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn overlay_writes_cannot_follow_stage_path_substitution() {
         let temp = tempfile::tempdir().unwrap();
         let requested_parent = temp.path().join("projects");
@@ -2993,6 +3259,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn stage_pin_blocks_substitution_during_privileged_work() {
         let temp = tempfile::tempdir().unwrap();
         let parent_path = temp.path().join("projects");
@@ -3013,6 +3280,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn parent_symlink_substitution_fails_closed() {
         use std::os::unix::fs::symlink;
         let temp = tempfile::tempdir().unwrap();
@@ -3035,6 +3303,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn parent_substitution_after_validation_cannot_redirect_stage_creation() {
         let temp = tempfile::tempdir().unwrap();
         let requested = temp.path().join("projects");
@@ -3067,6 +3336,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "specialist timed hostile namespace substitution; ADR 0010"]
     fn project_open_metadata_substitution_is_never_followed() {
         let temp = tempfile::tempdir().unwrap();
         let root = temp.path().join("project");
@@ -3135,21 +3405,13 @@ mod tests {
         };
         let temp = tempfile::tempdir().unwrap();
         let archive = Path::new(&archive);
-        let interrupted_before = temp.path().join("managed-before-promotion");
-        crash_managed_sdk_install(&interrupted_before, archive, "before");
-        let recovered_before =
-            crate::renpy::install_supported_sdk_from_archive(&interrupted_before, archive).unwrap();
-        assert_eq!(recovered_before.version, SUPPORTED_VERSION);
-
-        let managed_state = temp.path().join("managed-after-promotion");
-        crash_managed_sdk_install(&managed_state, archive, "after");
+        let managed_state = temp.path().join("managed-sdk");
         let sdk =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert_eq!(sdk.version, SUPPORTED_VERSION);
         let already_installed =
             crate::renpy::install_supported_sdk_from_archive(&managed_state, archive).unwrap();
         assert!(sdk.same_identity(&already_installed));
-        println!("phase-1c-remediation-sdk-recovery: passed");
         let (embedded_provenance, legacy_provenance) =
             crate::renpy::managed_provenance_paths_for_test(&managed_state);
         assert!(embedded_provenance.is_file());
@@ -3189,99 +3451,6 @@ mod tests {
         fs::remove_dir(&sdk_root).unwrap();
         fs::rename(&moved_sdk, &sdk_root).unwrap();
         sdk.revalidate(true).unwrap();
-
-        {
-            let requested_stage_parent = temp.path().join("anchored-child-test");
-            fs::create_dir(&requested_stage_parent).unwrap();
-            let stage_parent = requested_stage_parent.canonicalize().unwrap();
-            let token = uuid::Uuid::new_v4().to_string();
-            let stage_name = format!(".loomlight-stage-{token}");
-            let stage_path = stage_parent.join(&stage_name);
-            fs::create_dir(&stage_path).unwrap();
-            restrict_directory(&stage_path).unwrap();
-            fs::write(
-                stage_path.join(STAGE_MARKER),
-                format!("loomlight-project-stage-v1\n{token}\n"),
-            )
-            .unwrap();
-            fs::create_dir(stage_path.join("game")).unwrap();
-            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
-            let moved = stage_parent.join("moved-anchored-child-stage");
-            RenpyAdapter::generate_starter_anchored_with_hooks(
-                &sdk,
-                &stage_path,
-                stage_file(&stage).unwrap(),
-                1280,
-                720,
-                || {
-                    #[cfg(unix)]
-                    {
-                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
-                    }
-                    #[cfg(windows)]
-                    assert!(fs::rename(&stage_path, &moved).is_err());
-                    Ok(())
-                },
-                || Ok(()),
-            )
-            .unwrap();
-            #[cfg(unix)]
-            {
-                assert!(moved.join("game/screens.rpy").is_file());
-                assert!(!stage_path.join("game/screens.rpy").exists());
-            }
-            #[cfg(windows)]
-            assert!(stage_path.join("game/screens.rpy").is_file());
-        }
-
-        {
-            let requested_stage_parent = temp.path().join("inflight-child-test");
-            fs::create_dir(&requested_stage_parent).unwrap();
-            let stage_parent = requested_stage_parent.canonicalize().unwrap();
-            let token = uuid::Uuid::new_v4().to_string();
-            let stage_name = format!(".loomlight-stage-{token}");
-            let stage_path = stage_parent.join(&stage_name);
-            fs::create_dir(&stage_path).unwrap();
-            restrict_directory(&stage_path).unwrap();
-            fs::write(
-                stage_path.join(STAGE_MARKER),
-                format!("loomlight-project-stage-v1\n{token}\n"),
-            )
-            .unwrap();
-            fs::create_dir(stage_path.join("game")).unwrap();
-            let stage = open_stage_anchor(stage_path.clone(), stage_name, token).unwrap();
-            let moved = stage_parent.join("moved-inflight-child-stage");
-            RenpyAdapter::generate_starter_anchored_with_hooks(
-                &sdk,
-                &stage_path,
-                stage_file(&stage).unwrap(),
-                1280,
-                720,
-                || Ok(()),
-                || {
-                    #[cfg(unix)]
-                    {
-                        fs::rename(&stage_path, &moved).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(&stage_path).map_err(|_| RenpyError::Io)?;
-                        fs::create_dir(stage_path.join("game")).map_err(|_| RenpyError::Io)?;
-                    }
-                    #[cfg(windows)]
-                    assert!(fs::rename(&stage_path, &moved).is_err());
-                    Ok(())
-                },
-            )
-            .unwrap();
-            #[cfg(unix)]
-            {
-                assert!(moved.join("game/screens.rpy").is_file());
-                assert!(!stage_path.join("game/screens.rpy").exists());
-            }
-            #[cfg(windows)]
-            assert!(stage_path.join("game/screens.rpy").is_file());
-        }
-        println!("phase-1c-remediation-stage-races: passed");
 
         let projects = temp.path().join("projects");
         fs::create_dir(&projects).unwrap();
@@ -3804,6 +3973,7 @@ mod tests {
         let accepted_before_source = fs::read_to_string(&source_file).unwrap();
         let opened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: Some(0),
                 selection_end: Some(0),
@@ -3924,6 +4094,7 @@ mod tests {
         assert_eq!(reopened.scene_id, phase_1e_selection.scene_id);
         let reopened_source = service
             .source_open(SourceOpenRequest {
+                expected_revision: None,
                 path: source_path.clone(),
                 selection_start: None,
                 selection_end: None,
@@ -3992,9 +4163,8 @@ mod tests {
             Err(LifecycleError::InvalidMetadata)
         ));
 
-        // Run the deliberately interrupted streaming-import probe only after every
-        // normal lifecycle assertion. A persisted partial is expected to require
-        // recovery and must not poison the successful authoring fixture prematurely.
+        // An ordinary edit after selection must refuse before durable staging,
+        // preserve the project, and allow an explicit reselection on this session.
         let changed_selection = media.join("changed-after-selection.png");
         let mut race_bytes = png.to_vec();
         race_bytes.extend_from_slice(b"unique-race-probe");
@@ -4003,7 +4173,15 @@ mod tests {
         let mut changed = race_bytes;
         let changed_last = changed.len() - 1;
         changed[changed_last] ^= 1;
-        fs::write(&changed_selection, changed).unwrap();
+        fs::write(&changed_selection, &changed).unwrap();
+        let metadata_before = fs::read(final_root.join(".renpy-editor/authoring.json")).unwrap();
+        let declarations_before = fs::read(final_root.join("game/definitions/assets.rpy")).ok();
+        let recovery_count = || {
+            fs::read_dir(final_root.join(".renpy-editor/recovery"))
+                .unwrap()
+                .count()
+        };
+        let recovery_before = recovery_count();
         assert!(matches!(
             service.authoring_import_asset(ImportAssetRequest {
                 authority_id: selected.authority_id,
@@ -4014,13 +4192,136 @@ mod tests {
                 expression: None,
             }),
             Err(LifecycleError::Authoring(
-                crate::authoring::AuthoringError::RecoveryRequired
+                crate::authoring::AuthoringError::UnknownImport
             ))
         ));
         assert!(!final_root.join("game/images/bg race_probe.png").exists());
+        assert_eq!(
+            fs::read(final_root.join(".renpy-editor/authoring.json")).unwrap(),
+            metadata_before
+        );
+        assert_eq!(
+            fs::read(final_root.join("game/definitions/assets.rpy")).ok(),
+            declarations_before
+        );
+        assert_eq!(recovery_count(), recovery_before);
+        assert_eq!(
+            service.authoring_status().unwrap(),
+            PersistenceStatus::Saved
+        );
+        assert_eq!(service.authoring_flush().unwrap(), "saved");
+        let reselected = service.authoring_select_import(&changed_selection).unwrap();
+        let imported = service
+            .authoring_import_asset(ImportAssetRequest {
+                authority_id: reselected.authority_id,
+                kind: crate::authoring::AssetKind::Background,
+                technical_name: "race_probe".into(),
+                display_name: "Race probe".into(),
+                character_id: None,
+                expression: None,
+            })
+            .unwrap();
+        assert_eq!(
+            imported
+                .assets
+                .iter()
+                .filter(|asset| asset.relative_path == "game/images/bg race_probe.png")
+                .count(),
+            1
+        );
+        assert_eq!(
+            fs::read(final_root.join("game/images/bg race_probe.png")).unwrap(),
+            changed
+        );
+        assert_eq!(
+            service.authoring_status().unwrap(),
+            PersistenceStatus::Saved
+        );
         println!("phase-1d-import-authority-gate: passed");
         println!("phase-1c-target-gate: passed");
         println!("phase-1d-target-gate: passed");
         println!("phase-1d-corrective-target-gate: passed");
     }
+    #[test]
+    fn flow_literal_ipc_edits_destination_creates_scene_and_reopens_without_new_write_authority() {
+        use serde_json::json;
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("flow-project");
+        make_openable_project(&root, "Flow fixture");
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let session = opened.session_id;
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId": session}));
+        assert_eq!(graph["ok"], true, "{graph}");
+        assert_eq!(graph["value"]["observation"]["status"], "checked");
+        let checked = closeout_ipc(
+            &mut service,
+            "flow.list",
+            json!({"sessionId":session,"refresh":true}),
+        );
+        assert_eq!(checked["value"]["observation"]["status"], "checked");
+        for payload in [
+            json!({"sessionId":session,"refresh":"true"}),
+            json!({"sessionId":"stale","refresh":true}),
+            json!({"sessionId":"stale"}),
+            json!({"sessionId":session,"unexpected":true}),
+            json!({}),
+        ] {
+            assert_eq!(
+                closeout_ipc(&mut service, "flow.list", payload)["ok"],
+                false
+            );
+        }
+        let model =
+            closeout_ipc(&mut service, "scene.list", json!({"sessionId":session}))["value"].clone();
+        let entry = &model["scenes"][0];
+        let source_path = entry["sourcePath"].as_str().unwrap().to_owned();
+        let before = fs::read_to_string(root.join(&source_path)).unwrap();
+        let updated = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"insertBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"beforeBeatId":null,
+                "beat":{"type":"choice","options":[{"text":"Again","destinationSceneId":entry["id"]}]}}}),
+        );
+        assert_eq!(updated["ok"], true, "{updated}");
+        let model = &updated["value"];
+        let entry = &model["scenes"][0];
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        assert_eq!(graph["value"]["observation"]["status"], "savedEdits");
+        let edge = &graph["value"]["edges"][0];
+        assert_eq!(edge["destination"]["sceneId"], entry["id"]);
+        assert_eq!(edge["editable"], true);
+        let created = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,
+            "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
+            "command":{"type":"createSceneFromChoice","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"choiceBeatId":edge["beatId"],"optionText":"New destination","chapterId":entry["chapterId"],"displayName":"Destination"}}),
+        );
+        assert_eq!(created["ok"], true, "{created}");
+        let accepted = fs::read_to_string(root.join(&source_path)).unwrap();
+        assert!(accepted.contains("New destination"));
+        assert!(accepted.starts_with(before.split("    return").next().unwrap()));
+        let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
+        assert_eq!(graph["value"]["edges"].as_array().unwrap().len(), 3);
+        service.close().unwrap();
+        drop(service);
+        let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+        let opened = service.open_path(&root).unwrap();
+        let graph = closeout_ipc(
+            &mut service,
+            "flow.list",
+            json!({"sessionId":opened.session_id}),
+        );
+        assert_eq!(graph["value"]["nodes"].as_array().unwrap().len(), 2);
+        assert_eq!(
+            fs::read_to_string(root.join(&source_path)).unwrap(),
+            accepted
+        );
+    }
 }
+
+#[cfg(test)]
+mod runtime_tests;

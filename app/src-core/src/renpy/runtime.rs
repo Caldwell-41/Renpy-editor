@@ -1,0 +1,467 @@
+//! Core-owned long-lived process supervision. No renderer paths or argv enter here.
+//! Unlike creation smoke checks, play has no deadline and pipe reads never block.
+use super::*;
+use crate::transaction::{DirectoryAnchor, ExecutionGate};
+use serde::Deserialize;
+use std::process::{ChildStderr, ChildStdout};
+
+pub(crate) mod diagnostics;
+mod platform;
+
+const READY_MARKER: &[u8] = b"LOOMLIGHT_RUNTIME_READY_V1";
+const RETAINED_OUTPUT: usize = 2 * 1024 * 1024;
+const PAGE_BYTES: usize = 32 * 1024;
+const VALIDATION_DEADLINE: Duration = Duration::from_secs(180);
+const GRACE: Duration = Duration::from_secs(1);
+const CLEANUP_DEADLINE: Duration = Duration::from_secs(5);
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum RuntimeKind {
+    Run,
+    Validate,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeStatus {
+    pub operation_id: String,
+    pub phase: String,
+    pub exit_code: Option<i32>,
+    pub output: String,
+    pub next_sequence: usize,
+    pub output_truncated: bool,
+    pub earlier_revision: bool,
+    pub cleanup_complete: bool,
+    pub launch_revision: Option<String>,
+    pub revision_stale: Option<bool>,
+}
+
+struct Observation {
+    phase: &'static str,
+    exit: Option<i32>,
+    bytes: Vec<u8>,
+    truncated: bool,
+    cleaned: bool,
+    stale: Option<bool>,
+    ready: bool,
+    marker_tail: Vec<u8>,
+    stages: Vec<(usize, &'static str)>,
+}
+
+#[derive(Clone)]
+pub(crate) struct RuntimeControl {
+    pub(crate) id: String,
+    launch_revision: Option<String>,
+    manifest: Arc<crate::transaction::ExecutionManifest>,
+    gate: Arc<ExecutionGate>,
+    cancel: Arc<crate::runtime_work::Cancellation>,
+    observation: Arc<Mutex<Observation>>,
+}
+
+pub(crate) struct RuntimeProcess {
+    pub(crate) id: String,
+    launch_revision: Option<String>,
+    gate: Arc<ExecutionGate>,
+    cancel: Arc<crate::runtime_work::Cancellation>,
+    observation: Arc<Mutex<Observation>>,
+    worker: Option<thread::JoinHandle<()>>,
+    pub(crate) manifest: Arc<crate::transaction::ExecutionManifest>,
+}
+
+impl RuntimeProcess {
+    pub(crate) fn start(
+        sdk: ValidatedSdk,
+        anchor: DirectoryAnchor,
+        kind: RuntimeKind,
+        gate: Arc<ExecutionGate>,
+        manifest: crate::transaction::ExecutionManifest,
+    ) -> Result<Self, RenpyError> {
+        sdk.revalidate(false)?;
+        anchor
+            .validate_chain()
+            .map_err(|_| RenpyError::InvalidSdk)?;
+        let args = match kind {
+            RuntimeKind::Run => vec![vec![OsString::from("run")]],
+            RuntimeKind::Validate => vec![
+                vec![OsString::from("compile")],
+                vec![OsString::from("lint"), OsString::from("--error-code")],
+            ],
+        };
+        let commands = args
+            .into_iter()
+            .map(|args| {
+                #[cfg(unix)]
+                let project = OsString::from(".");
+                #[cfg(windows)]
+                let project = command_path(anchor.path());
+                let mut argv = vec![project];
+                argv.extend(args);
+                #[cfg(unix)]
+                let saves = OsString::from("game/saves");
+                #[cfg(windows)]
+                let saves = command_path(&anchor.path().join("game/saves"));
+                argv.extend([OsString::from("--savedir"), saves]);
+                #[cfg(unix)]
+                let argv = anchored_launcher_args(&sdk.root, &argv)?;
+                #[cfg(windows)]
+                let argv = launcher_args(&sdk.root, &argv)?;
+                let mut command = Command::new(&argv[0]);
+                apply_minimal_environment(&mut command);
+                command.args(&argv[1..]).current_dir(anchor.path());
+                #[cfg(test)]
+                {
+                    command
+                        .env("RENPY_SKIP_MAIN_MENU", "1")
+                        .env("RENPY_DISABLE_SOUND", "1");
+                    if std::env::var("LOOMLIGHT_RUNTIME_TEST_HEADLESS").as_deref() == Ok("1") {
+                        command
+                            .env("SDL_VIDEODRIVER", "dummy")
+                            .env("SDL_AUDIODRIVER", "dummy")
+                            .env("RENPY_RENDERER", "sw");
+                    }
+                }
+                // Only the exact reviewed project helper uses this; it is not an SDK flag.
+                if kind == RuntimeKind::Run {
+                    command.env("LOOMLIGHT_CONTROLLED_PLAY", "1");
+                }
+                Ok(command)
+            })
+            .collect::<Result<Vec<_>, RenpyError>>()?;
+        Self::spawn_commands(
+            commands,
+            Some((sdk, anchor, manifest)),
+            kind,
+            gate,
+            VALIDATION_DEADLINE,
+            kind == RuntimeKind::Run,
+        )
+    }
+
+    fn spawn_commands(
+        commands: Vec<Command>,
+        context: Option<(
+            ValidatedSdk,
+            DirectoryAnchor,
+            crate::transaction::ExecutionManifest,
+        )>,
+        kind: RuntimeKind,
+        gate: Arc<ExecutionGate>,
+        validation_deadline: Duration,
+        readiness_required: bool,
+    ) -> Result<Self, RenpyError> {
+        let manifest = context
+            .as_ref()
+            .map(|(_, _, manifest)| manifest.clone())
+            .unwrap_or_default();
+        let launch_revision = context.as_ref().map(|(_, _, manifest)| {
+            format!(
+                "{:x}",
+                Sha256::digest(serde_json::to_vec(manifest).unwrap_or_default())
+            )
+        });
+        gate.begin(kind == RuntimeKind::Run && !readiness_required)
+            .map_err(|_| RenpyError::ProcessFailed)?;
+        let cancel = crate::runtime_work::current()
+            .unwrap_or_else(|| Arc::new(crate::runtime_work::Cancellation::default()));
+        let observation = Arc::new(Mutex::new(Observation {
+            phase: "starting",
+            exit: None,
+            bytes: vec![],
+            truncated: false,
+            cleaned: false,
+            stale: None,
+            ready: false,
+            marker_tail: vec![],
+            stages: vec![],
+        }));
+        let worker_cancel = cancel.clone();
+        let worker_observation = observation.clone();
+        let worker_gate = gate.clone();
+        let worker = thread::Builder::new()
+            .name("loomlight-runtime".into())
+            .spawn(move || {
+                crate::runtime_work::scoped(worker_cancel.clone(), || {
+                    let started = Instant::now();
+                    let mut outcome = "exited";
+                    let mut cleanup_ok = true;
+                    for (stage, mut command) in commands.into_iter().enumerate() {
+                        if let Ok(mut state) = worker_observation.lock() {
+                            let offset = state.bytes.len();
+                            state.stages.push((
+                                offset,
+                                if kind == RuntimeKind::Run {
+                                    "runtime"
+                                } else if stage == 0 {
+                                    "compile"
+                                } else {
+                                    "lint"
+                                },
+                            ));
+                        }
+                        #[cfg(test)]
+                        let force_cleanup_failure = command.get_envs().any(|(k, v)| {
+                            k == "LOOMLIGHT_RUNTIME_TEST_CLEANUP_FAILURE" && v.is_some()
+                        });
+                        if worker_cancel.cancelled() {
+                            outcome = "cancelled";
+                            break;
+                        }
+                        if context.as_ref().is_some_and(|(sdk, anchor, _)| {
+                            sdk.revalidate(false).is_err() || anchor.validate_chain().is_err()
+                        }) {
+                            outcome = "identityChanged";
+                            break;
+                        }
+                        let anchor = context.as_ref().map(|(_, anchor, _)| anchor);
+                        // Atomic cancellation/spawn boundary: cancellation that wins
+                        // before this commitment spawns nothing; later cancellation
+                        // stops/reaps the owned tree through this same worker.
+                        if !worker_cancel.commit_spawn() {
+                            outcome = "cancelled";
+                            break;
+                        }
+                        #[cfg(test)]
+                        worker_cancel.record_spawn();
+                        let mut child = match platform::OwnedChild::spawn(&mut command, anchor) {
+                            Ok(value) => value,
+                            Err(_) => {
+                                outcome = "spawnFailed";
+                                break;
+                            }
+                        };
+                        set_phase(
+                            &worker_observation,
+                            if kind == RuntimeKind::Run {
+                                if readiness_required {
+                                    "starting"
+                                } else {
+                                    "running"
+                                }
+                            } else {
+                                "validating"
+                            },
+                        );
+                        let mut stop_started = None;
+                        let mut ready = !readiness_required;
+                        loop {
+                            if child.drain(&worker_observation).is_err() {
+                                outcome = "outputFailed";
+                                break;
+                            }
+                            if !ready && worker_observation.lock().is_ok_and(|state| state.ready) {
+                                ready = true;
+                                worker_gate.playing();
+                                set_phase(&worker_observation, "running");
+                            }
+                            match child.exited() {
+                                Ok(true) => break,
+                                Err(_) => {
+                                    outcome = "processFailed";
+                                    break;
+                                }
+                                Ok(false) => {}
+                            }
+                            let cancelled = worker_cancel.cancelled();
+                            let timed_out = (kind == RuntimeKind::Validate || !ready)
+                                && started.elapsed() >= validation_deadline;
+                            if (cancelled || timed_out) && stop_started.is_none() {
+                                worker_gate.stopping();
+                                set_phase(&worker_observation, "stopping");
+                                outcome = if cancelled { "cancelled" } else { "timedOut" };
+                                child.graceful();
+                                stop_started = Some(Instant::now());
+                            }
+                            if stop_started.is_some_and(|time: Instant| time.elapsed() >= GRACE) {
+                                break;
+                            }
+                            thread::sleep(Duration::from_millis(10));
+                        }
+                        worker_gate.stopping();
+                        match child.cleanup(CLEANUP_DEADLINE, &worker_observation) {
+                            Ok(exit) => {
+                                #[cfg(test)]
+                                if force_cleanup_failure {
+                                    outcome = "cleanupFailed";
+                                    cleanup_ok = false;
+                                    break;
+                                }
+                                if let Ok(mut state) = worker_observation.lock() {
+                                    state.exit = exit;
+                                }
+                                if outcome != "exited" || exit != Some(0) {
+                                    if outcome == "exited" {
+                                        outcome = "failed";
+                                    }
+                                    break;
+                                }
+                            }
+                            Err(_) => {
+                                outcome = "cleanupFailed";
+                                cleanup_ok = false;
+                                break;
+                            }
+                        }
+                        // Validation proceeds to lint only after successful compilation.
+                    }
+                    // Cleanup must never wait for filesystem freshness work. The next
+                    // preparation performs the full inventory; until then freshness is
+                    // conservatively stale, including unknown SDK-generated output.
+                    let stale = context.as_ref().map(|_| true);
+                    if let Ok(mut state) = worker_observation.lock() {
+                        state.stale = stale;
+                        state.phase = outcome;
+                        state.cleaned = cleanup_ok;
+                    }
+                    if cleanup_ok {
+                        worker_gate.finish();
+                    }
+                })
+            })
+            .map_err(|_| {
+                gate.finish();
+                RenpyError::ProcessFailed
+            })?;
+        Ok(Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            launch_revision,
+            gate,
+            cancel,
+            observation,
+            worker: Some(worker),
+            manifest: Arc::new(manifest),
+        })
+    }
+
+    pub(crate) fn diagnostics(&self, session: &str) -> Vec<diagnostics::RuntimeDiagnostic> {
+        self.control().diagnostics(session)
+    }
+
+    pub(crate) fn shutdown(&mut self) -> bool {
+        self.stop();
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
+        !self.active()
+    }
+    pub(crate) fn control(&self) -> RuntimeControl {
+        RuntimeControl {
+            id: self.id.clone(),
+            launch_revision: self.launch_revision.clone(),
+            manifest: self.manifest.clone(),
+            gate: self.gate.clone(),
+            cancel: self.cancel.clone(),
+            observation: self.observation.clone(),
+        }
+    }
+    pub(crate) fn stop(&self) {
+        self.control().stop();
+    }
+    pub(crate) fn active(&self) -> bool {
+        self.gate.active()
+    }
+    pub(crate) fn status(&self, after: usize) -> Result<RuntimeStatus, RenpyError> {
+        self.control().status(after)
+    }
+}
+impl RuntimeControl {
+    pub(crate) fn diagnostics(&self, session: &str) -> Vec<diagnostics::RuntimeDiagnostic> {
+        let Ok(state) = self.observation.lock() else {
+            return vec![];
+        };
+        let mut result = Vec::new();
+        for (index, (start, origin)) in state.stages.iter().enumerate() {
+            let end = state
+                .stages
+                .get(index + 1)
+                .map(|s| s.0)
+                .unwrap_or(state.bytes.len());
+            let mut bytes = &state.bytes[*start..end];
+            if !state.cleaned && index + 1 == state.stages.len() {
+                // A partial location header must not expose an ordinal that later retargets.
+                bytes = bytes
+                    .iter()
+                    .rposition(|b| *b == b'\n')
+                    .map(|last| &bytes[..=last])
+                    .unwrap_or(&[]);
+            }
+            diagnostics::parse(
+                &String::from_utf8_lossy(bytes),
+                origin,
+                &self.id,
+                session,
+                &self.manifest,
+                &mut result,
+            );
+        }
+        result
+    }
+
+    pub(crate) fn stop(&self) {
+        self.cancel.cancel();
+        self.gate.stopping();
+    }
+    pub(crate) fn status(&self, after: usize) -> Result<RuntimeStatus, RenpyError> {
+        let state = self
+            .observation
+            .lock()
+            .map_err(|_| RenpyError::ProcessFailed)?;
+        if after > state.bytes.len() {
+            return Err(RenpyError::ProcessFailed);
+        }
+        let mut end = (after + PAGE_BYTES).min(state.bytes.len());
+        // Keep valid UTF-8 scalars intact across pages (invalid SDK bytes stay lossy).
+        while end > after && state.bytes.get(end).is_some_and(|byte| byte & 0xc0 == 0x80) {
+            end -= 1;
+        }
+        Ok(RuntimeStatus {
+            operation_id: self.id.clone(),
+            phase: state.phase.into(),
+            exit_code: state.exit,
+            output: String::from_utf8_lossy(&state.bytes[after..end]).into_owned(),
+            next_sequence: end,
+            output_truncated: state.truncated,
+            earlier_revision: self.gate.generation.load(Ordering::Acquire) > 0,
+            cleanup_complete: state.cleaned,
+            launch_revision: self.launch_revision.clone(),
+            revision_stale: state.stale,
+        })
+    }
+}
+
+impl Drop for RuntimeProcess {
+    fn drop(&mut self) {
+        self.shutdown();
+    }
+}
+
+fn set_phase(observation: &Mutex<Observation>, phase: &'static str) {
+    if let Ok(mut state) = observation.lock() {
+        state.phase = phase;
+    }
+}
+fn retain(observation: &Mutex<Observation>, bytes: &[u8]) -> io::Result<()> {
+    let mut state = observation
+        .lock()
+        .map_err(|_| io::Error::other("runtime state"))?;
+    if !state.ready {
+        let mut window = std::mem::take(&mut state.marker_tail);
+        window.extend_from_slice(bytes);
+        state.ready = window
+            .windows(READY_MARKER.len())
+            .any(|part| part == READY_MARKER);
+        if !state.ready {
+            state.marker_tail =
+                window[window.len().saturating_sub(READY_MARKER.len() - 1)..].to_vec();
+        }
+    }
+    let keep = bytes
+        .len()
+        .min(RETAINED_OUTPUT.saturating_sub(state.bytes.len()));
+    state.bytes.extend_from_slice(&bytes[..keep]);
+    state.truncated |= keep < bytes.len();
+    Ok(())
+}
+
+#[cfg(test)]
+pub(crate) mod tests;

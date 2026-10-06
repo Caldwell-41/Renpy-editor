@@ -7,7 +7,17 @@ on:
   workflow_dispatch:
     inputs:
       phase1g_flow_profile:
-        description: Run the bounded Phase 1G flow profiler instead of repository quality
+        description: Run bounded G1-OBS core, rendered interaction and three-sample budgets (no package)
+        required: false
+        type: boolean
+        default: false
+      phase1g_macos_browser_diagnostic:
+        description: One macOS-only traced Branches probe using the retained R2-P1 service fixture
+        required: false
+        type: boolean
+        default: false
+      phase1g_candidate_proof:
+        description: Select G1-O1 safety and three fixed feasibility samples (requires flow profile)
         required: false
         type: boolean
         default: false
@@ -17,7 +27,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.phase1g_flow_profile }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -26,10 +36,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+      - name: Exercise bounded Q1 gate rejection fixtures
+        run: |
+          python3 app/scripts/check-q1-prep-gates.py self-test
+          python3 app/scripts/test-q1-package-retention.py
+      - name: Audit Q1 selectors and retained cases
+        run: python3 app/scripts/check-q1-prep-gates.py source-audit .
 
 
   phase1g-flow-profile:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -41,6 +57,8 @@ jobs:
             runner: macos-26
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
+    env:
+      Q1_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
     defaults:
       run:
         working-directory: app
@@ -53,21 +71,238 @@ jobs:
           key: phase-1b-${{ matrix.runner }}
           workspaces: app -> target
           cache-bin: "false"
-      - name: Profile isolated Branches projection
+      - name: Set up pinned Node for observed UI gates
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm toolchain
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        run: npm install --global npm@11.9.0
+      - name: Ordinary reliability and UI regressions
+        if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
-        env:
-          LOOMLIGHT_PROFILE_FLOW: "1"
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --release --locked scene::tests::flow_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
-            | tee "$RUNNER_TEMP/runtime-flow-profile.log"
-          grep 'phase-1g-flow-profile:' "$RUNNER_TEMP/runtime-flow-profile.log"
+          node --version
+          npm --version
+          "$Q1_PYTHON" --version
+          npm ci --ignore-scripts
+          npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
+          cargo test -p loomlight-core --release --locked -- \
+            --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
+            --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
+            --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+            --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/observed-core.log"
+          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/observed-core.log"
+          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/observed-core.log"
+          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/observed-core.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log" \
+            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
+            transaction::tests::every_persistent_transition_has_bounded_recovery \
+            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
+            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
+            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
+            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
+            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
+            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
+            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
+            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
+            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
+            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
+            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
+            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
+      - name: Three isolated real-service observed-flow samples
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        shell: bash
+        env:
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+        run: |
+          set -o pipefail
+          git rev-parse HEAD
+          rustc -Vv
+          cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-profile.log"
+          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-profile.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          grep 'phase-1g-observed-budget-gate: passed (3 samples)' "$RUNNER_TEMP/runtime-flow-profile.log"
+      - name: Rendered interaction during refresh
+        if: ${{ !inputs.phase1g_candidate_proof }}
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+          LOOMLIGHT_BRANCHES_SCREENSHOT: ${{ runner.temp }}/observed-branches.png
+        run: |
+          set -o pipefail
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/observed-browser.log"
+      - name: Prove isolated verified candidates
+        if: ${{ inputs.phase1g_candidate_proof }}
+        shell: bash
+        env:
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+        run: |
+          set -o pipefail
+          {
+            git rev-parse HEAD
+            rustc -Vv
+            if [ "$RUNNER_OS" = "Windows" ]; then
+              powershell -NoProfile -Command 'Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,OSArchitecture; Get-Volume | Select-Object DriveLetter,FileSystemType'
+            else
+              sw_vers
+              df "$RUNNER_TEMP"
+              diskutil info /
+            fi
+            cargo test -p loomlight-core --release --locked g1_o1 -- --ignored --skip g1_o1_n_ordered_safety --skip g1_o1_feasibility --test-threads=1 --nocapture
+          } 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
+          safety=${PIPESTATUS[0]}
+          if [ "$safety" -ne 0 ]; then exit "$safety"; fi
+          if grep -q 'g1-o1-safety-counterexample:' "$RUNNER_TEMP/runtime-flow-profile.log"; then
+            echo 'G1-O1 rejected: known safety counterexample; profiling cannot qualify this candidate.'
+            exit 1
+          fi
+          set +e
+          failed=0
+          for sample in 1 2 3; do
+            echo "g1-o1-sample: $sample" | tee -a "$RUNNER_TEMP/runtime-flow-profile.log"
+            cargo test -p loomlight-core --release --locked scene::tests::candidate_proof::g1_o1_feasibility -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/g1-o1-sample-$sample.log"
+            status=${PIPESTATUS[0]}
+            cat "$RUNNER_TEMP/g1-o1-sample-$sample.log" >> "$RUNNER_TEMP/runtime-flow-profile.log"
+            if [ "$status" -ne 0 ] || ! grep -q 'phase-1g-candidate-proof: passed' "$RUNNER_TEMP/g1-o1-sample-$sample.log"; then failed=1; fi
+          done
+          test "$failed" -eq 0
       - name: Upload flow profile
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: phase-1g-flow-profile-${{ matrix.runner }}
-          path: ${{ runner.temp }}/runtime-flow-profile.log
+          path: |
+            ${{ runner.temp }}/runtime-flow-profile.log
+            ${{ runner.temp }}/runtime-flow.json
+            ${{ runner.temp }}/observed-*.log
+            ${{ runner.temp }}/observed-branches.png
+          if-no-files-found: error
+          retention-days: 7
+
+  phase1g-macos-browser-diagnostic:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_macos_browser_diagnostic }}
+    name: R2-P1 macOS browser diagnostic
+    runs-on: macos-26
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        working-directory: app
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require isolated diagnostic selection
+        env:
+          FLOW_PROFILE: ${{ inputs.phase1g_flow_profile }}
+          CANDIDATE_PROOF: ${{ inputs.phase1g_candidate_proof }}
+        run: |
+          test "$FLOW_PROFILE" = false
+          test "$CANDIDATE_PROOF" = false
+          command -v gh
+          command -v python3
+      - name: Set up existing pinned Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm and dependencies
+        run: |
+          npm install --global npm@11.9.0
+          npm ci --ignore-scripts
+      - name: Verify retained real-service fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/macos-browser-diagnostic"
+          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024 > "$RUNNER_TEMP/macos-browser-diagnostic/input-artifact.json"
+          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024/zip > "$RUNNER_TEMP/retained-macos.zip"
+          python3 - <<'PYFIXTURE'
+          import hashlib, json, os, pathlib, zipfile
+          root = pathlib.Path(os.environ["RUNNER_TEMP"])
+          output = root / "macos-browser-diagnostic"
+          metadata = json.loads((output / "input-artifact.json").read_text())
+          archive = root / "retained-macos.zip"
+          digest = "82580f0178840ebc413767622ef7bdd7076de05f2bdcc95dfe756f826940961b"
+          assert metadata["id"] == 10923840024 and not metadata["expired"]
+          assert metadata["workflow_run"]["id"] == 36293797731
+          assert metadata["workflow_run"]["head_sha"] == "f1a0f148445f34f8af1a57d0f69e2d27eb543b11"
+          assert archive.stat().st_size == metadata["size_in_bytes"] == 224142
+          assert metadata["digest"] == "sha256:" + digest
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
+          with zipfile.ZipFile(archive) as source:
+              assert source.namelist().count("runtime-flow.json") == 1
+              assert source.getinfo("runtime-flow.json").file_size < 8 * 1024 * 1024
+              fixture = source.read("runtime-flow.json")
+          assert hashlib.sha256(fixture).hexdigest() == "8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196"
+          model = json.loads(fixture)
+          assert len(model["nodes"]) == 500 and len(model["edges"]) == 2000
+          (output / "runtime-flow.json").write_bytes(fixture)
+          print("Verified retained service fixture; no core/SDK execution.")
+          PYFIXTURE
+      - name: Record diagnostic identity
+        run: |
+          {
+            git rev-parse HEAD
+            sw_vers
+            uname -m
+            node --version
+            npm --version
+            shasum -a 256 tests/branches.browser.mjs src/branches-ui.ts src/styles.css package-lock.json ../.github/workflows/quality.yml
+          } > "$RUNNER_TEMP/macos-browser-diagnostic/identity.log"
+      - name: One traced browser launch
+        timeout-minutes: 2
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/macos-browser-diagnostic/runtime-flow.json
+          LOOMLIGHT_BRANCHES_EVIDENCE_DIR: ${{ runner.temp }}/macos-browser-diagnostic
+          LOOMLIGHT_BRANCHES_TRACE: "1"
+        run: |
+          set -o pipefail
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/macos-browser-diagnostic/probe.log"
+      - name: Inventory evidence and verify reported cleanup
+        if: always()
+        run: |
+          python3 - <<'PYAUDIT'
+          import hashlib, json, os, pathlib, socket, subprocess
+          output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "macos-browser-diagnostic"
+          output.mkdir(exist_ok=True)
+          report_path = output / "report.json"
+          audit = {"reportPresent": report_path.exists()}
+          if report_path.exists():
+              report = json.loads(report_path.read_text())
+              audit["cleanup"] = report.get("cleanup")
+              audit["traceSaved"] = report.get("traceSaved", False)
+              pids = [str(process["id"]) for process in report.get("browserProcesses", [])]
+              if pids:
+                  result = subprocess.run(["ps", "-p", ",".join(pids), "-o", "pid=,comm="], capture_output=True, text=True)
+                  audit["browserPidsAbsent"] = result.returncode == 1 and not result.stdout.strip()
+              if "serverPort" in report:
+                  with socket.socket() as connection:
+                      audit["serverPortClosed"] = connection.connect_ex(("127.0.0.1", report["serverPort"])) != 0
+          (output / "cleanup-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
+          inventory = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(output.iterdir()) if path.is_file() and path.name != "manifest.json"}
+          (output / "manifest.json").write_text(json.dumps(inventory, indent=2) + "\n")
+          assert audit.get("cleanup") == {"browser": "closed", "server": "closed"}, audit
+          assert audit.get("browserPidsAbsent") and audit.get("serverPortClosed"), audit
+          assert audit.get("traceSaved") and (output / "trace.json").is_file(), audit
+          PYAUDIT
+      - name: Upload diagnostic evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r2-p1-macos-browser-diagnostic
+          path: ${{ runner.temp }}/macos-browser-diagnostic/
           if-no-files-found: error
           retention-days: 7

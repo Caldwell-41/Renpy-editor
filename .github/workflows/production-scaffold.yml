@@ -8,12 +8,6 @@ on:
         required: false
         type: boolean
         default: false
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/production-scaffold.yml
-      - app/**
-      - scripts/validate.py
 
 permissions:
   contents: read
@@ -32,6 +26,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate repository structure, links, privacy, and secrets
         run: python3 scripts/validate.py
+      - name: Exercise bounded Q1 gate rejection fixtures
+        run: |
+          python3 app/scripts/check-q1-prep-gates.py self-test
+          python3 app/scripts/test-q1-package-retention.py
+      - name: Audit Q1 selectors and retained cases
+        run: python3 app/scripts/check-q1-prep-gates.py source-audit .
       - name: Select locked Node toolchain
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -65,7 +65,9 @@ jobs:
           - name: macOS ARM64
             runner: macos-26
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 45
+    timeout-minutes: 60
+    env:
+      Q1_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
     defaults:
       run:
         working-directory: app
@@ -88,6 +90,7 @@ jobs:
           npm --version
           rustc --version --verbose
           cargo --version --verbose
+          "$Q1_PYTHON" --version
       - name: Restore Rust dependency cache
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
@@ -104,14 +107,69 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --release --locked -- --nocapture \
+          cargo test -p loomlight-core --release --locked -- \
+            --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
+            --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
+            --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+            --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'recent_crash_checkpoints_restart_from_a_complete_store' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'substitution_after_final_validation_never_survives_as_final' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'parent_substitution_after_validation_cannot_redirect_stage_creation' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'project_open_metadata_substitution_is_never_followed' "$RUNNER_TEMP/phase-1b-transactions.log"
           grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'final_window_external_writer_is_preserved_as_conflict .*ok' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
+          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log" \
+            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
+            transaction::tests::every_persistent_transition_has_bounded_recovery \
+            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
+            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
+            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
+            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
+            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
+            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
+            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
+            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
+            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
+            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
+            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
+            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
+      - name: Isolated real-service Branches observed-model budgets
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+          LOOMLIGHT_ENFORCE_FLOW_BUDGETS: "1"
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
+            | tee "$RUNNER_TEMP/runtime-flow-budget.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-budget.log"
+          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-budget.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
+      # Browser functional/evidence failures are reasserted below; Chrome timing
+      # overruns remain visible diagnostics in the report and warning annotations.
+      # The mandatory gate follows independent SDK/package checks and reads
+      # outcome, never the success-normalized conclusion.
+      - name: Runtime browser focus and resize
+        id: runtime-browser
+        continue-on-error: true
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SCREENSHOT_DIR: ${{ runner.temp }}
+        run: |
+          set -o pipefail
+          node tests/runtime-ui.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-ui-browser.log"
+      - name: Branches browser workload, navigation, and timing
+        id: branches-browser
+        continue-on-error: true
+        shell: bash
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/runtime-flow.json
+        run: |
+          set -o pipefail
+          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/runtime-branches-browser.log"
       - name: Restore pinned Ren'Py SDK archive
         id: phase-1c-sdk-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -135,10 +193,12 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          grep -E '^test lifecycle::tests::official_sdk_phase_1c_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
+          if grep -q 'phase-1c-target-gate: skipped' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"; then exit 1; fi
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log" lifecycle::tests::official_sdk_phase_1c_target_gate
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep 'phase-1c-remediation-sdk-recovery: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep 'phase-1c-remediation-stage-races: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-exact-ipc-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-import-authority-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
@@ -155,11 +215,51 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             renpy::reconciliation_tests::official_sdk_download_handoff_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+          grep -E '^test renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log" renpy::reconciliation_tests::official_sdk_download_handoff_target_gate
           grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
+      - name: Runtime foundation and real SDK diagnostics gates
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_official_sdk_service_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-sdk-service.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-sdk-service.log"
+          grep -E '^test lifecycle::runtime_tests::runtime_official_sdk_service_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-sdk-service.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log" lifecycle::runtime_tests::runtime_official_sdk_service_gate
+          grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
+          cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_diagnostics_sdk_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          grep -E '^test lifecycle::runtime_tests::runtime_diagnostics_sdk_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
+          grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
+          grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
       - name: Package production scaffold
+        id: package-app
         run: npm exec -- tauri build -- --locked
+      - name: Real-service packaged runtime UI scenarios
+        id: runtime-ui-probes
+        shell: bash
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          TARGET_OS: ${{ runner.os }}
+        run: |
+          if [ "$TARGET_OS" = "Windows" ]; then
+            python scripts/record-runtime-inputs.py target/release/loomlight.exe "$RUNNER_TEMP/runtime-ui-inputs.json"
+            python scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP"
+          else
+            python3 scripts/record-runtime-inputs.py target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight "$RUNNER_TEMP/runtime-ui-inputs.json"
+            python3 scripts/run-runtime-ui-probes.py target/release/bundle/macos/Loomlight.app/Contents/MacOS/loomlight "$RUNNER_TEMP"
+          fi
+      - name: Require all packaged Runtime reports and cleanup evidence
+        if: always()
+        shell: bash
+        run: |
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py runtime-cases "$RUNNER_TEMP"
       - name: Run packaged WebView boundary smoke
         shell: bash
         env:
@@ -226,6 +326,8 @@ jobs:
             exit 1
           fi
       - name: Scan production artifacts for secrets
+        id: source-artifact-scan
+        if: always()
         shell: bash
         env:
           LOOMLIGHT_SMOKE_SECRET: loomlight-${{ github.run_id }}-${{ github.run_attempt }}-sentinel
@@ -236,6 +338,30 @@ jobs:
           else
             node scripts/scan-artifacts.mjs dist target/release/bundle/macos/Loomlight.app
           fi
+      - name: Retain and identify the produced package on failure
+        if: always()
+        shell: bash
+        env:
+          PACKAGE_OUTCOME: ${{ steps.package-app.outcome }}
+          SCAN_OUTCOME: ${{ steps.source-artifact-scan.outcome }}
+          RUNTIME_OUTCOME: ${{ steps.runtime-ui-probes.outcome }}
+          TARGET_OS: ${{ runner.os }}
+          TARGET_RUNNER: ${{ matrix.runner }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          EVIDENCE_DIR: ${{ runner.temp }}/q1-package-evidence
+        run: |
+          "$Q1_PYTHON" scripts/retain-q1-package.py \
+            --platform "$TARGET_OS" \
+            --runner "$TARGET_RUNNER" \
+            --package-outcome "${PACKAGE_OUTCOME:-skipped}" \
+            --scan-outcome "${SCAN_OUTCOME:-missing}" \
+            --runtime-outcome "${RUNTIME_OUTCOME:-skipped}" \
+            --run-id "$RUN_ID" \
+            --run-attempt "$RUN_ATTEMPT" \
+            --sha "$WORKFLOW_SHA" \
+            --output "$EVIDENCE_DIR"
       - name: Record dependency and licence inventory
         shell: bash
         run: |
@@ -243,20 +369,45 @@ jobs:
           node scripts/dependency-inventory.mjs \
             --cargo-metadata "$RUNNER_TEMP/cargo-metadata.json" \
             --output "$RUNNER_TEMP/dependency-inventory.json"
-      - name: Upload lightweight production evidence
+      - name: Enforce deferred browser results
         if: always()
-        continue-on-error: true
+        shell: bash
+        env:
+          RUNTIME_BROWSER_OUTCOME: ${{ steps.runtime-browser.outcome }}
+          BRANCHES_BROWSER_OUTCOME: ${{ steps.branches-browser.outcome }}
+        run: |
+          set -o pipefail
+          echo "Runtime browser: ${RUNTIME_BROWSER_OUTCOME:-not-run}"
+          echo "Branches browser: ${BRANCHES_BROWSER_OUTCOME:-not-run}"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py browser-outcomes \
+            "${RUNTIME_BROWSER_OUTCOME:-missing}" \
+            "${BRANCHES_BROWSER_OUTCOME:-missing}" \
+            | tee "$RUNNER_TEMP/browser-outcomes.log"
+      - name: Upload bounded production failure and package evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: phase-1-production-evidence-${{ matrix.runner }}
+          name: phase-1-q1-package-evidence-${{ matrix.runner }}
           path: |
+            ${{ runner.temp }}/q1-package-evidence
             ${{ runner.temp }}/loomlight-scaffold-smoke.json
             ${{ runner.temp }}/loomlight-single-instance-secondary.log
             ${{ runner.temp }}/phase-1b-transactions.log
             ${{ runner.temp }}/phase-1c-project-lifecycle.log
             ${{ runner.temp }}/phase-1c-sdk-download-handoff.log
             ${{ runner.temp }}/dependency-inventory.json
-          if-no-files-found: warn
+            ${{ runner.temp }}/runtime-sdk-service.log
+            ${{ runner.temp }}/runtime-diagnostics-sdk.log
+            ${{ runner.temp }}/runtime-ui-inputs.json
+            ${{ runner.temp }}/runtime-ui-*.log
+            ${{ runner.temp }}/runtime-ui-*.json
+            ${{ runner.temp }}/runtime-flow.json
+            ${{ runner.temp }}/runtime-flow-budget.log
+            ${{ runner.temp }}/runtime-branches-browser.log
+            ${{ runner.temp }}/runtime-ui-browser.log
+            ${{ runner.temp }}/browser-outcomes.log
+            ${{ runner.temp }}/runtime-*.png
+          if-no-files-found: error
           retention-days: 7
       - name: Upload packaged application for manual runs
         if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.upload_packages }}

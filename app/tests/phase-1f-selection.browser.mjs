@@ -14,7 +14,7 @@ try {
   await server.listen();
   const address = server.httpServer.address();
   try { browser = await chromium.launch({ channel: "chrome", headless: true }); }
-  catch { browser = await chromium.launch({ headless: true }); }
+  catch { browser = await chromium.launch({ headless: true, ...(process.env.LOOMLIGHT_BROWSER_EXECUTABLE ? { executablePath: process.env.LOOMLIGHT_BROWSER_EXECUTABLE } : {}) }); }
   const page = await browser.newPage();
   await page.route("**/__selection_review", route => route.fulfill({
     contentType: "text/html",

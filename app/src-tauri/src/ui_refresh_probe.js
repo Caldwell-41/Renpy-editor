@@ -1,0 +1,68 @@
+// Explicit disposable-profile native check. Reports exactly what was exercised.
+(async()=>{
+ const details={stage:'welcome',checks:[],layer:'packaged native WebView; real IPC; synthetic editor input'};
+ let retentionInventory;
+ const probeReadTimings=[];
+ const wait=async condition=>{const start=performance.now();while(!await condition()){if(performance.now()-start>20000)throw Error(`Timeout at ${details.stage}`);await new Promise(r=>setTimeout(r,20));}};
+ const button=name=>[...document.querySelectorAll('button')].find(b=>b.textContent===name);
+ const call=async(operation,payload={})=>{const start=performance.now();try{const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Object.assign(Error(`${operation}: ${r.error.code}`),{code:r.error.code});return r.value;}finally{probeReadTimings.push({operation,elapsedMs:performance.now()-start});}};
+ const read=(operation,payload={})=>window.__loomlightProbeRetryBusy(()=>call(operation,payload));
+ const check=(ok,message)=>{if(!ok)throw Error(message);details.checks.push(message);};
+ try{
+  await wait(()=>document.querySelector('.recent-open'));
+  details.stage='project-opening';document.querySelector('.recent-open').click();
+  // The navigation shell appears before the initial real-service observation ends.
+  // Wait for Story content, not just the newly mounted Source navigation button.
+  details.stage='initial-story-ready';
+  await wait(()=>document.querySelector('.scene-workspace .preview-region') && button('Add Beat'));
+  details.stage='character-default-colour';button('Characters').click();
+  await wait(()=>button('New character'));button('New character').click();
+  const control=label=>[...document.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent===label)?.querySelector('input');
+  const technical=control('Technical variable (fixed after creation)');
+  check(technical.autocapitalize==='none','Technical name disables macOS automatic capitalisation');
+  technical.value=' Native_Bec ';control('Display name').value='Native Bec';
+  check(control('Dialogue colour').value==='#c5c8d0','Native character form keeps its default hex colour');
+  button('Create Character').click();
+  await wait(()=>button('Native Bec'));
+  const characterProject=await read('project.current');
+  const characters=await read('authoring.list',{sessionId:characterProject.sessionId});
+  check(characters.characters.some(c=>c.technicalName==='native_bec'&&c.displayName==='Native Bec'&&c.dialogueColor==='#c5c8d0'),'Native form creates character with canonical name and unchanged default colour through real IPC');
+  const definition=await read('source.open',{sessionId:characterProject.sessionId,path:'game/definitions/characters.rpy'});
+  check(definition.text.includes('define native_bec = Character("Native Bec", color="#c5c8d0")'),'Character creation persists an authoritative source definition');
+  details.stage='unsupported-drop-presentation';button('Assets').click();await wait(()=>button('Import assets'));
+  window.__loomlightReceiveAssets(characterProject.sessionId,{choices:[],errors:['Unsupported review file could not be selected.']});
+  await wait(()=>document.querySelector('#app-status')?.textContent.includes('Unsupported review file'));
+  check(document.querySelector('.catalog-create')?.hidden===true && !document.querySelector('.catalog-dialog') && !document.querySelector('.import-entry'),'Unsupported-only production drop callback reports error without exposing the empty form or a dialog');
+  check((await read('authoring.list',{sessionId:characterProject.sessionId})).assets.length===characters.assets.length,'Unsupported-only callback imports no asset through real service');
+  details.stage='source-opening';button('Source').click();
+  await wait(()=>document.querySelector('.cm-content')?.contentEditable==='true' && document.querySelector('[data-source-busy]')?.dataset.sourceBusy==='false');
+  details.stage='editor';const editor=document.querySelector('.cm-content');check(getComputedStyle(document.querySelector('.cm-editor')).position==='relative','CodeMirror styles accepted by native CSP');
+  editor.focus();const selection=getSelection();selection.selectAllChildren(editor);selection.collapseToStart();document.execCommand('insertText',false,'# Native editor check\n');
+  details.stage='editor-warning';await wait(()=>document.querySelector('.source-draft-warning')&&!document.querySelector('.source-draft-warning').hidden);
+  const project=await read('project.current');details.stage='editor-retention';await wait(async()=>{retentionInventory=await read('source.list',{sessionId:project.sessionId});return retentionInventory.dirtyCount===1;});check(true,'Native editor input retained as a session draft');
+  const bounds=()=>{const r=document.querySelector('.source-editor-shell').getBoundingClientRect();return [r.x,r.y,r.width,r.height].join(',');};const before=bounds();for(let n=0;n<50;n++)document.querySelector('#app-status').textContent=n%2?'Unsaved Source draft':'Saved';check(bounds()===before,'Status updates preserve native editor geometry');
+  details.stage='settings';button('Settings').click();await wait(()=>document.querySelector('.settings-overlay'));button('Close settings').click();check(document.querySelector('.cm-content').textContent.includes('Native editor check'),'Settings return retains draft');
+  const p=await read('preferences.read');await window.__loomlightProbeRetryBusy(()=>call('preferences.write',{...p,theme:'light'}));check((await read('preferences.read')).theme==='light','Device preference write and read round trip');
+  details.stage='complete';details.passed=true;
+ }catch(e){
+  details.passed=false;details.error=String(e);
+  details.failureState={retentionDirtyCount:retentionInventory?.dirtyCount,
+   retentionFiles:retentionInventory?.files.filter(file=>file.dirty).map(file=>({path:file.path,state:file.state})),
+   appStatus:document.querySelector('#app-status')?.textContent,
+   sourceState:document.querySelector('.source-document-state')?.textContent,
+   sourceBusy:document.querySelector('[data-source-busy]')?.dataset.sourceBusy,
+   draftWarningHidden:document.querySelector('.source-draft-warning')?.hidden,
+   editorPresent:!!document.querySelector('.cm-content'),editorEditable:document.querySelector('.cm-content')?.contentEditable,
+   storyReady:!!document.querySelector('.scene-workspace .preview-region'),
+   recentCount:document.querySelectorAll('.recent-open').length,
+   sourceFileCount:document.querySelectorAll('.source-file-row').length,
+    workspaceText:document.querySelector('.source-workspace,.scene-workspace,.catalog-workspace')?.textContent?.slice(0,1500),
+    dialogText:document.querySelector('.catalog-dialog')?.textContent?.slice(0,1500),
+    buttons:[...document.querySelectorAll('button')].map(b=>({text:b.textContent,disabled:b.disabled})).slice(0,60)};
+   if(details.stage==='character-default-colour'){
+    try{const project=await read('project.current');const model=await read('authoring.list',{sessionId:project.sessionId});details.failureState.characters=model.characters.map(c=>({technicalName:c.technicalName,displayName:c.displayName}));}catch(error){details.failureState.observationError=String(error);}
+   }
+ }
+ details.probeReadTimings=probeReadTimings;
+ await call('probe.runtimeUiReport',details);
+})();

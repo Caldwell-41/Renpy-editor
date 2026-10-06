@@ -24,6 +24,7 @@ argument array:
 <renpy launcher> launcher generate_gui <private stage>
   --width <width> --height <height>
   --template <exact-sdk>/gui --start
+<renpy launcher> <private stage> gui_images
 ```
 
 Loomlight invokes this only for its new private staging project. Because the private
@@ -33,6 +34,15 @@ creates or replaces the entry script with a small deterministic router and adds
 Loomlight definitions, Chapter 1 / Scene 1 source, and versioned metadata. The same
 8.5.3 adapter compiles and strictly lints the resulting staged scaffold before
 finalisation.
+
+**2026-10-02 correction:** `generate_gui` alone does not generate the generic
+button/bar/slider images. The pinned launcher's normal creation flow additionally
+runs `gui_images`; the adapter now includes that desktop command before overlay,
+validation and promotion. This executes only the controlled new stage. It does not
+regenerate or overwrite GUI assets when opening an existing user project. Strict
+compile/lint is insufficient evidence that standard menu images are present; the
+focused official-SDK regression creates a full Loomlight project and exercises its
+standard main menu and starter dialogue.
 
 Staging uses a private, uniquely named sibling directory on the destination
 filesystem. Stage creation itself is descriptor-relative to retained parent authority

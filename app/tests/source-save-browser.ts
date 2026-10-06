@@ -1,3 +1,5 @@
+import { enableRichSourceEditor } from "../src/source-editor.ts";
+if(new URLSearchParams(location.search).get("model")==="rich")enableRichSourceEditor();
 import {
   renderSourceWorkspace,
   type SourceDocument,

@@ -96,6 +96,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
     else if (operation === "project.flush") { flushes += 1; value = null; }
     else if (operation === "project.close") { closes += 1; value = null; }
     else if (operation === "source.list") value = inventory();
+    else if (operation === "flow.list") value = { revision: "flow", entrySceneId: "scene", nodes: [], edges: [], partial: false, stale: false, overLimit: false, notice: "Accepted source" };
     else if (operation === "source.open") value = model;
     else if (operation === "source.updateDraft") {
       if (failNextRetention) {
@@ -181,6 +182,19 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   assert.equal(saves, 1);
   assert.equal(flushes, 1);
 
+  editor.value = acceptedText + "# Branch navigation draft\n";
+  editor.selectionStart = 7; editor.selectionEnd = 9;
+  editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+  const beforeBranchesSaves = saves;
+  click("Branches"); await ticks();
+  assert.ok(document.querySelector(".branches-viewport"));
+  assert.equal(saves, beforeBranchesSaves);
+  assert.equal(model.dirty, true);
+  click("Source"); await ticks();
+  editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+  assert.equal(editor.value, model.text);
+  assert.equal(editor.selectionStart, 7); assert.equal(editor.selectionEnd, 9);
+
   click("Characters");
   await ticks();
   const supportingInput = document.querySelector<HTMLInputElement>('input[name="technicalName"]')!;
@@ -203,12 +217,19 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   assert.equal(calls.filter((operation) => [
     "character.create", "character.update", "variable.create", "variable.update", "asset.import", "asset.repairCompatibility",
   ].includes(operation)).length, supportingMutationsBefore);
-  assert.equal(document.querySelector("#app-status")?.textContent, "Pending validation");
+  assert.equal(document.querySelector("#app-status")?.textContent, "Unsaved Source draft");
   assert.equal(supportingInput.value, "unsubmitted_character");
   assert.equal(flushes, 2);
   assert.equal(saves, 1);
 
   click("Source");
+  await ticks();
+  assert.ok(document.querySelector('[aria-label="Unsubmitted changes"]'));
+  click("Keep editing");
+  assert.equal(supportingInput.value, "unsubmitted_character");
+  click("Source");
+  await ticks();
+  click("Discard and leave");
   await ticks();
   editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
   editor.value = editor.value.replace("Shell-owned", "Remounted");

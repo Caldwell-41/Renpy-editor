@@ -288,6 +288,7 @@ fn validate_source_definition(
 
 #[derive(Debug)]
 pub enum AuthoringError {
+    RuntimeBusy,
     NoOpenProject,
     RecoveryRequired,
     InvalidPayload,
@@ -367,6 +368,16 @@ pub struct ImportAssetRequest {
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UpdateAppearanceRequest {
+    pub id: String,
+    pub expected_expression: String,
+    pub expected_asset_sha256: String,
+    pub expression: String,
+    pub authority_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetDefaultAppearanceRequest {
     pub character_id: String,
     pub appearance_id: String,
@@ -396,6 +407,7 @@ struct ImportAuthority {
 pub struct AuthoringService {
     pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
+    pub(crate) observed_flow: Mutex<HashMap<ProjectId, crate::scene::flow::ObservedFlow>>,
     pub(crate) scene_history: Mutex<HashMap<ProjectId, crate::transaction::HistoryStack>>,
     pub(crate) source_sessions: Mutex<crate::source::SourceSessions>,
 }
@@ -434,6 +446,7 @@ impl AuthoringService {
 
     pub fn unregister_project(&mut self, id: &ProjectId) {
         self.clear_source_project(id);
+        self.clear_observed_flow(id);
         self.transactions.unregister_trusted_project(id);
         self.imports.retain(|_, authority| &authority.project != id);
         if let Ok(mut history) = self.scene_history.lock() {
@@ -521,6 +534,47 @@ impl AuthoringService {
             byte_count,
             extension,
         })
+    }
+
+    /// Read only the retained, project-bound selection. Preview never consumes import authority.
+    pub fn preview_import(
+        &mut self,
+        project: &ProjectId,
+        request: crate::media::ImportPreviewRequest,
+    ) -> Result<crate::media::MediaPresentation, crate::media::MediaError> {
+        use crate::media::{MediaError, MAX_PRESENTATION_BYTES};
+        let authority = self
+            .imports
+            .get_mut(&request.authority_id)
+            .ok_or(MediaError::UnknownAsset)?;
+        if &authority.project != project {
+            return Err(MediaError::UnknownAsset);
+        }
+        if authority.byte_count > MAX_PRESENTATION_BYTES {
+            return Err(MediaError::Oversize);
+        }
+        revalidate_selected(authority).map_err(|_| MediaError::UnsafeAsset)?;
+        authority
+            .file
+            .seek(SeekFrom::Start(0))
+            .map_err(|_| MediaError::Io)?;
+        let mut bytes = Vec::new();
+        (&mut authority.file)
+            .take(MAX_PRESENTATION_BYTES + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| MediaError::Io)?;
+        if bytes.len() as u64 > MAX_PRESENTATION_BYTES {
+            return Err(MediaError::Oversize);
+        }
+        if bytes.len() as u64 != authority.byte_count || hash_bytes(&bytes) != authority.sha256 {
+            return Err(MediaError::SourceConflict);
+        }
+        crate::media::import_image_presentation(
+            request.authority_id,
+            &authority.extension,
+            &bytes,
+            authority.sha256.clone(),
+        )
     }
 
     pub fn list(
@@ -789,7 +843,7 @@ impl AuthoringService {
         if &authority.project != project {
             return Err(AuthoringError::UnknownImport);
         }
-        revalidate_selected(&authority)?;
+        revalidate_import_contents(&mut authority)?;
         let (mut metadata, metadata_snapshot) = self.load_metadata(project, project_uuid)?;
         if metadata
             .assets
@@ -889,7 +943,219 @@ impl AuthoringService {
             &authority.sha256,
             companions,
         );
+        self.clear_observed_flow(project);
         committed(outcome)?;
+        Ok(metadata)
+    }
+
+    pub fn update_appearance(
+        &mut self,
+        project: &ProjectId,
+        project_uuid: &str,
+        request: UpdateAppearanceRequest,
+    ) -> Result<AuthoringMetadata, AuthoringError> {
+        self.ensure_ready(project)?;
+        self.ensure_source_paths_clean(project, [ASSETS_PATH])
+            .map_err(|_| AuthoringError::DirtySource)?;
+        validate_uuid(&request.id)?;
+        validate_identifier(&request.expression)?;
+        let (mut metadata, snapshot) = self.load_metadata(project, project_uuid)?;
+        let index = metadata
+            .appearances
+            .iter()
+            .position(|a| a.id == request.id)
+            .ok_or(AuthoringError::UnknownEntity)?;
+        let previous = metadata.appearances[index].clone();
+        let asset_index = metadata
+            .assets
+            .iter()
+            .position(|a| a.id == previous.asset_id)
+            .ok_or(AuthoringError::CorruptMetadata)?;
+        let old_asset = metadata.assets[asset_index].clone();
+        if previous.label != request.expected_expression
+            || old_asset.sha256 != request.expected_asset_sha256
+        {
+            return Err(AuthoringError::SourceConflict);
+        }
+        if metadata.appearances.iter().any(|a| {
+            a.id != previous.id
+                && a.character_id == previous.character_id
+                && a.label == request.expression
+        }) {
+            return Err(AuthoringError::DiscoveryCollision);
+        }
+        let character = metadata
+            .characters
+            .iter()
+            .find(|c| c.id == previous.character_id)
+            .ok_or(AuthoringError::CorruptMetadata)?
+            .clone();
+        let technical = &character.technical_name;
+        let renamed = previous.label != request.expression;
+        let discovery = format!("{} {}", technical, request.expression);
+        // Only exact declarations previously generated for this asset may be reused.
+        // Retain old aliases for unsupported/custom source, without adopting edits.
+        let mut aliases = match old_asset.extra.get("appearanceAliases") {
+            Some(Value::Object(aliases)) => aliases.clone(),
+            None => Map::new(),
+            _ => return Err(AuthoringError::CorruptMetadata),
+        };
+        let reusable = aliases
+            .get(&discovery)
+            .and_then(Value::as_str)
+            .map(str::to_owned);
+        if let Some(statement) = &reusable {
+            let prefix = format!("image {discovery} = ");
+            let runtime_path: String = statement
+                .strip_prefix(&prefix)
+                .and_then(|quoted| serde_json::from_str(quoted).ok())
+                .ok_or(AuthoringError::CorruptMetadata)?;
+            RelativePath::new(format!("game/{runtime_path}"))
+                .map_err(|_| AuthoringError::CorruptMetadata)?;
+            if statement
+                != &format!(
+                    "{prefix}{}",
+                    serde_json::to_string(&runtime_path)
+                        .map_err(|_| AuthoringError::CorruptMetadata)?
+                )
+            {
+                return Err(AuthoringError::CorruptMetadata);
+            }
+        }
+        if renamed {
+            if metadata
+                .assets
+                .iter()
+                .any(|a| a.id != old_asset.id && a.discovery_name == discovery)
+            {
+                return Err(AuthoringError::DiscoveryCollision);
+            }
+            self.ensure_explicit_name_available_except(
+                project,
+                AssetKind::CharacterAppearance,
+                &discovery,
+                reusable.as_deref(),
+            )?;
+        }
+        let old_explicit = old_asset
+            .extra
+            .get("discoveryContract")
+            .and_then(Value::as_str)
+            == Some("explicitDeclaration");
+        if old_explicit {
+            aliases.insert(
+                old_asset.discovery_name.clone(),
+                Value::String(asset_declaration(&old_asset)?),
+            );
+        }
+        let mut selected = if let Some(id) = request.authority_id {
+            let mut authority = self
+                .imports
+                .remove(&id)
+                .ok_or(AuthoringError::UnknownImport)?;
+            if authority.project != *project {
+                return Err(AuthoringError::UnknownImport);
+            }
+            revalidate_import_contents(&mut authority)?;
+            if !matches!(
+                authority.extension.as_str(),
+                "png" | "jpg" | "jpeg" | "webp"
+            ) {
+                return Err(AuthoringError::UnsupportedFormat);
+            }
+            Some(authority)
+        } else {
+            None
+        };
+        if let Some(authority) = &selected {
+            if metadata
+                .assets
+                .iter()
+                .any(|a| a.id != old_asset.id && a.sha256 == authority.sha256)
+            {
+                return Err(AuthoringError::DuplicateContent);
+            }
+        }
+        metadata.appearances[index].label = request.expression.clone();
+        metadata.appearances[index]
+            .attributes
+            .insert("expression".into(), request.expression);
+        let asset = &mut metadata.assets[asset_index];
+        asset.discovery_name = discovery;
+        asset.display_name = format!(
+            "{} — {}",
+            character.display_name, metadata.appearances[index].label
+        );
+        if let Some(authority) = &selected {
+            asset.relative_path = format!(
+                "game/images/ll_{}.{}",
+                uuid::Uuid::new_v4().simple(),
+                authority.extension
+            );
+            asset.sha256 = authority.sha256.clone();
+            asset.byte_count = authority.byte_count;
+            asset.status = "available".into();
+        }
+        asset.extra.insert(
+            "discoveryContract".into(),
+            Value::String("explicitDeclaration".into()),
+        );
+        let mut companions = if renamed {
+            self.appearance_reference_mutations(project, project_uuid, &metadata, &previous.id)
+                .map_err(|_| AuthoringError::UnsupportedSource)?
+        } else {
+            Vec::new()
+        };
+        let statement = asset_declaration(&metadata.assets[asset_index])?;
+        let replace = if !renamed && old_explicit {
+            Some(asset_declaration(&old_asset)?)
+        } else {
+            reusable
+        };
+        let declaration = if let Some(previous_statement) = replace {
+            let (bytes, base) = self.snapshot(project, ASSETS_PATH)?;
+            let proposed = replace_exact_once(&bytes, &previous_statement, &statement)?;
+            FileMutation {
+                path: RelativePath::new(ASSETS_PATH).map_err(|_| AuthoringError::Io)?,
+                kind: MutationKind::ReplaceExisting,
+                base,
+                expected_bytes: bytes,
+                proposed,
+            }
+        } else {
+            self.declaration_mutation(project, &statement)?
+        };
+        aliases.insert(
+            metadata.assets[asset_index].discovery_name.clone(),
+            Value::String(statement),
+        );
+        metadata.assets[asset_index]
+            .extra
+            .insert("appearanceAliases".into(), Value::Object(aliases));
+        companions.push(declaration);
+        companions.push(metadata_file_mutation(snapshot, &metadata)?);
+        if let Some(authority) = selected.as_mut() {
+            committed(
+                self.transactions.commit_streaming_import(
+                    project,
+                    RelativePath::new(metadata.assets[asset_index].relative_path.clone())
+                        .map_err(|_| AuthoringError::InvalidPayload)?,
+                    &mut authority.file,
+                    authority.byte_count,
+                    &authority.sha256,
+                    companions,
+                ),
+            )?;
+        } else {
+            committed(self.commit_observed(
+                project,
+                TransactionProposal {
+                    mutations: companions,
+                    intent: TransactionIntent::Edit,
+                },
+            ))?;
+        }
+        self.clear_observed_flow(project);
         Ok(metadata)
     }
 
@@ -918,7 +1184,7 @@ impl AuthoringService {
             mutations: vec![metadata_file_mutation(snapshot, &metadata)?],
             intent: TransactionIntent::Edit,
         };
-        committed(self.transactions.commit(project, proposal))?;
+        committed(self.commit_observed(project, proposal))?;
         Ok(metadata)
     }
 
@@ -977,7 +1243,7 @@ impl AuthoringService {
             });
         }
         mutations.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
-        committed(self.transactions.commit(
+        committed(self.commit_observed(
             project,
             TransactionProposal {
                 mutations,
@@ -1192,6 +1458,16 @@ impl AuthoringService {
         kind: AssetKind,
         discovery_name: &str,
     ) -> Result<(), AuthoringError> {
+        self.ensure_explicit_name_available_except(project, kind, discovery_name, None)
+    }
+
+    fn ensure_explicit_name_available_except(
+        &self,
+        project: &ProjectId,
+        kind: AssetKind,
+        discovery_name: &str,
+        owned_statement: Option<&str>,
+    ) -> Result<(), AuthoringError> {
         let Some((source, _)) = self
             .transactions
             .snapshot_optional(
@@ -1210,11 +1486,15 @@ impl AuthoringService {
                 DeclarationKey::Audio(discovery_name.to_ascii_lowercase())
             }
         };
+        let mut owners = 0;
         for (start, end) in lexical_statements(&source)? {
             let line = std::str::from_utf8(&source[start..end])
                 .map_err(|_| AuthoringError::UnsupportedSource)?;
             if declaration_key(line).as_ref() == Some(&key) {
-                return Err(AuthoringError::DiscoveryCollision);
+                owners += 1;
+                if owned_statement != Some(line) || owners > 1 {
+                    return Err(AuthoringError::DiscoveryCollision);
+                }
             }
         }
         Ok(())
@@ -1374,7 +1654,7 @@ impl AuthoringService {
             ],
             intent: TransactionIntent::Edit,
         };
-        committed(self.transactions.commit(project, proposal))?;
+        committed(self.commit_observed(project, proposal))?;
         Ok(metadata)
     }
 }
@@ -1412,6 +1692,7 @@ fn committed(outcome: CommitOutcome) -> Result<(), AuthoringError> {
         CommitOutcome::RecoveryRequired { .. } => Err(AuthoringError::RecoveryRequired),
         CommitOutcome::Conflict { .. } => Err(AuthoringError::SourceConflict),
         CommitOutcome::Rejected { diagnostic } => match diagnostic.code {
+            crate::transaction::ErrorCode::RuntimeBusy => Err(AuthoringError::RuntimeBusy),
             crate::transaction::ErrorCode::AlreadyExists => Err(AuthoringError::PathCollision),
             crate::transaction::ErrorCode::RecoveryRequired => {
                 Err(AuthoringError::RecoveryRequired)
@@ -1648,6 +1929,22 @@ fn verify_mapped_statements<'a>(
 /// context. Multi-line logical statements and indented Ren'Py/Python blocks remain
 /// opaque. The whole file is still checked so appending after unfinished syntax fails.
 fn lexical_statements(source: &[u8]) -> Result<Vec<(usize, usize)>, AuthoringError> {
+    lexical_lines(source, true)
+}
+
+/// Shared lexical boundary for read-only consumers; never evaluates source.
+pub(crate) fn lexical_lines(
+    source: &[u8],
+    top_only: bool,
+) -> Result<Vec<(usize, usize)>, AuthoringError> {
+    lexical_ranges(source, top_only, true)
+}
+
+pub(crate) fn lexical_ranges(
+    source: &[u8],
+    top_only: bool,
+    single_only: bool,
+) -> Result<Vec<(usize, usize)>, AuthoringError> {
     let text = std::str::from_utf8(source).map_err(|_| AuthoringError::UnsupportedSource)?;
     let bytes = text.as_bytes();
     let mut ranges = Vec::new();
@@ -1748,7 +2045,7 @@ fn lexical_statements(source: &[u8]) -> Result<Vec<(usize, usize)>, AuthoringErr
         let complete =
             triple.is_none() && quote.is_none() && bracket_depth == 0 && !explicit_continuation;
         if complete {
-            if logical_top_level && logical_lines == 1 {
+            if (!top_only || logical_top_level) && (!single_only || logical_lines == 1) {
                 ranges.push((logical_start, line_end));
             }
             logical_lines = 0;
@@ -2086,6 +2383,17 @@ fn revalidate_selected(authority: &ImportAuthority) -> Result<(), AuthoringError
     Ok(())
 }
 
+fn revalidate_import_contents(authority: &mut ImportAuthority) -> Result<(), AuthoringError> {
+    revalidate_selected(authority)?;
+    // Ordinary edits between selection and confirmation must refuse before a
+    // transaction is staged. Streaming still verifies the selection hash again.
+    let (byte_count, sha256) = hash_file(&mut authority.file)?;
+    if byte_count != authority.byte_count || sha256 != authority.sha256 {
+        return Err(AuthoringError::UnknownImport);
+    }
+    Ok(())
+}
+
 fn hash_bytes(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
@@ -2225,6 +2533,227 @@ mod tests {
         let (count, hash) = hash_file(&mut file).unwrap();
         assert_eq!(count, 17 * 1024 * 1024);
         assert_eq!(hash.len(), 64);
+    }
+
+    #[test]
+    fn preview_import_is_read_only_repeatable_and_preserves_confirmation() {
+        use crate::media::ImportPreviewRequest;
+        let (_temporary, root, project_uuid) = project_fixture();
+        let mut service = AuthoringService::default();
+        let project = service.register_project(&root).unwrap();
+        let path = root.join("selected.png");
+        let mut bytes = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR".to_vec();
+        bytes.extend_from_slice(&1u32.to_be_bytes());
+        bytes.extend_from_slice(&2u32.to_be_bytes());
+        fs::write(&path, &bytes).unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        let request = ImportPreviewRequest {
+            authority_id: choice.authority_id.clone(),
+        };
+        let preview = service.preview_import(&project, request.clone()).unwrap();
+        assert_eq!(preview.width, Some(1));
+        assert_eq!(preview.height, Some(2));
+        assert_eq!(service.preview_import(&project, request).unwrap(), preview);
+        assert!(service
+            .list(&project, &project_uuid)
+            .unwrap()
+            .assets
+            .is_empty());
+        service
+            .import_asset(
+                &project,
+                &project_uuid,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "selected".into(),
+                    display_name: "Selected".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            fs::read(root.join("game/images/bg selected.png")).unwrap(),
+            bytes
+        );
+    }
+
+    #[test]
+    fn preview_import_rejects_unknown_wrong_project_changed_oversize_and_active_media() {
+        use crate::media::{ImportPreviewRequest, MediaError};
+        let (_temporary, root, _) = project_fixture();
+        let mut service = AuthoringService::default();
+        let project = service.register_project(&root).unwrap();
+        let (_other_temp, other_root, _) = project_fixture();
+        let other = service.register_project(&other_root).unwrap();
+        let path = root.join("selected.png");
+        fs::write(&path, b"not passive raster content").unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        let request = ImportPreviewRequest {
+            authority_id: choice.authority_id,
+        };
+        assert_eq!(
+            service.preview_import(&other, request.clone()),
+            Err(MediaError::UnknownAsset)
+        );
+        assert_eq!(
+            service.preview_import(
+                &project,
+                ImportPreviewRequest {
+                    authority_id: "missing".into()
+                }
+            ),
+            Err(MediaError::UnknownAsset)
+        );
+        assert_eq!(
+            service.preview_import(&project, request.clone()),
+            Err(MediaError::UnsupportedFormat)
+        );
+        fs::write(&path, b"changed content").unwrap();
+        assert_eq!(
+            service.preview_import(&project, request),
+            Err(MediaError::SourceConflict)
+        );
+        File::create(&path)
+            .unwrap()
+            .set_len(17 * 1024 * 1024)
+            .unwrap();
+        let choice = service.select_import(&project, &path).unwrap();
+        assert_eq!(
+            service.preview_import(
+                &project,
+                ImportPreviewRequest {
+                    authority_id: choice.authority_id
+                }
+            ),
+            Err(MediaError::Oversize)
+        );
+    }
+
+    #[test]
+    fn review_selected_media_change_before_import_leaves_project_ready() {
+        selected_media_change_leaves_project_ready(false);
+    }
+
+    #[test]
+    fn review_selected_media_change_before_replacement_leaves_project_ready() {
+        selected_media_change_leaves_project_ready(true);
+    }
+
+    fn selected_media_change_leaves_project_ready(replacement: bool) {
+        for changed in [
+            b"changed bytes".as_slice(),
+            b"changed and longer bytes".as_slice(),
+        ] {
+            let (_temporary, root, project_uuid) = project_fixture();
+            let external = tempdir().unwrap();
+            let path = external.path().join("selected.png");
+            let mut service = AuthoringService::default();
+            let project = service.register_project(&root).unwrap();
+            let appearance = if replacement {
+                let model = service
+                    .create_character(
+                        &project,
+                        &project_uuid,
+                        CreateCharacterRequest {
+                            technical_name: "alice".into(),
+                            display_name: "Alice".into(),
+                            dialogue_color: "#aabbcc".into(),
+                        },
+                    )
+                    .unwrap();
+                fs::write(&path, b"original appearance").unwrap();
+                let selected = service.select_import(&project, &path).unwrap();
+                let model = service
+                    .import_asset(
+                        &project,
+                        &project_uuid,
+                        ImportAssetRequest {
+                            authority_id: selected.authority_id,
+                            kind: AssetKind::CharacterAppearance,
+                            technical_name: "alice".into(),
+                            display_name: "Alice happy".into(),
+                            character_id: Some(model.characters[0].id.clone()),
+                            expression: Some("happy".into()),
+                        },
+                    )
+                    .unwrap();
+                Some((model.appearances[0].clone(), model.assets[0].sha256.clone()))
+            } else {
+                None
+            };
+            fs::write(&path, b"original data").unwrap();
+            let selected = service.select_import(&project, &path).unwrap();
+            let metadata_before = fs::read(root.join(AUTHORING_PATH)).unwrap();
+            let declarations_before = fs::read(root.join(ASSETS_PATH)).ok();
+            let journals_before = fs::read_dir(root.join(".renpy-editor/recovery"))
+                .unwrap()
+                .count();
+            fs::write(&path, changed).unwrap();
+            let write = |service: &mut AuthoringService, authority_id| {
+                if let Some((appearance, hash)) = &appearance {
+                    service.update_appearance(
+                        &project,
+                        &project_uuid,
+                        UpdateAppearanceRequest {
+                            id: appearance.id.clone(),
+                            expected_expression: appearance.label.clone(),
+                            expected_asset_sha256: hash.clone(),
+                            expression: appearance.label.clone(),
+                            authority_id: Some(authority_id),
+                        },
+                    )
+                } else {
+                    service.import_asset(
+                        &project,
+                        &project_uuid,
+                        ImportAssetRequest {
+                            authority_id,
+                            kind: AssetKind::Background,
+                            technical_name: "review".into(),
+                            display_name: "Review".into(),
+                            character_id: None,
+                            expression: None,
+                        },
+                    )
+                }
+            };
+            assert!(
+                matches!(
+                    write(&mut service, selected.authority_id),
+                    Err(AuthoringError::UnknownImport)
+                ),
+                "Ordinary changed selection must refuse before creating a recovery journal"
+            );
+            assert_eq!(
+                fs::read(root.join(AUTHORING_PATH)).unwrap(),
+                metadata_before
+            );
+            assert_eq!(fs::read(root.join(ASSETS_PATH)).ok(), declarations_before);
+            assert_eq!(
+                fs::read_dir(root.join(".renpy-editor/recovery"))
+                    .unwrap()
+                    .count(),
+                journals_before
+            );
+            assert_eq!(service.status(&project), PersistenceStatus::Saved);
+            assert!(!root.join("game/images/bg review.png").exists());
+            assert!(!root.join("game/images/alice calm.png").exists());
+            // Explicitly selecting the changed file again must succeed on this same project.
+            let reselected = service.select_import(&project, &path).unwrap();
+            let updated = write(&mut service, reselected.authority_id).unwrap();
+            if let Some((appearance, _)) = &appearance {
+                assert_eq!(updated.appearances[0].id, appearance.id);
+                assert_eq!(updated.appearances[0].asset_id, appearance.asset_id);
+                assert_eq!(updated.appearances[0].label, appearance.label);
+            }
+            assert_eq!(
+                fs::read(root.join(&updated.assets[0].relative_path)).unwrap(),
+                changed
+            );
+            assert_eq!(service.status(&project), PersistenceStatus::Saved);
+        }
     }
 
     #[test]

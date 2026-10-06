@@ -1,0 +1,90 @@
+[
+  {
+    "file": "story-wide-layout.png",
+    "generatedOriginal": "exec-685349ea-c181-4507-82ad-4c001d488f65.png",
+    "sha256": "dada9c161be02cbb089d30afbd5d90c7cbf99405d29b92d31a635df44d996851"
+  },
+  {
+    "file": "story-compact-layout.png",
+    "generatedOriginal": "exec-baa97d2b-f7f5-4dff-bc10-02c0058b1edf.png",
+    "sha256": "33d1a76de7f14eaba14ceb969465bc0fc8c534d70b49687e56be8dba3f8b5550"
+  },
+  {
+    "file": "settings-preferred-layout.png",
+    "generatedOriginal": "exec-5f413033-d2e2-49bc-8d51-2cb5ea3dd536.png",
+    "sha256": "6908b2347872bf0fc54d942812d2d4b8665000b1673cbaaaaf9a8500a00c46e2"
+  },
+  {
+    "file": "settings-compact-fallback.png",
+    "generatedOriginal": "exec-6448c5fc-9403-440c-b22b-d6da5487747e.png",
+    "sha256": "3a31ffa67c73d7ead47c550c3d6f9220dbd4150c2df44fe9180853e5be72803d"
+  },
+  {
+    "file": "source-layout.png",
+    "generatedOriginal": "exec-af4c6f81-e930-41cf-ac68-45afd4cc1c11.png",
+    "sha256": "868588cd7e6f818ec10fb7d4d152e5c766c2b98d183190c3872c2bd267b1c919"
+  },
+  {
+    "file": "branches-layout.png",
+    "generatedOriginal": "exec-0e60c50f-b5f4-49fe-927c-6000074fff27.png",
+    "sha256": "b953a5487bc4b8dedb21c95b4e4e2ae8c48e0860da211e556c978239fe53e8e3"
+  },
+  {
+    "file": "characters-layout.png",
+    "generatedOriginal": "exec-108bbd59-425f-4a37-9de4-c3171d861bbb.png",
+    "sha256": "bb61d1688bf436577411a02c006169ace45a163f980e4d06cd01b0ccc5cc4812"
+  },
+  {
+    "file": "assets-layout.png",
+    "generatedOriginal": "exec-252ae662-9c94-47eb-a97c-2d68b8eb8e1d.png",
+    "sha256": "92c9161fd8e2861e9bb3eb34a7808425e8ea33e1096906ecd62bfe3ace00c5da"
+  },
+  {
+    "file": "variables-layout.png",
+    "generatedOriginal": "exec-be6d68d2-4415-464b-9965-ccf30f3b835b.png",
+    "sha256": "dcf78aaca3d3f1c120619bac1a72b85486848385d55f078f3c533adea14b934a"
+  },
+  {
+    "file": "palette-dark-charcoal-copper.png",
+    "generatedOriginal": "exec-ba7d1009-261c-46e4-99b7-7dbb6066a604.png",
+    "sha256": "92d70856bb0286e60ddfffea835d842be355d357343cd2afa678d9b4dfca0947"
+  },
+  {
+    "file": "palette-light-paper-teal.png",
+    "generatedOriginal": "exec-2e4d1d93-6e26-4c4a-8d4e-ac8b35645c89.png",
+    "sha256": "e6b2f2871726ab41e28c283290ccb5c66f9b67b07b16b8716fe4cc58f7940328"
+  },
+  {
+    "file": "welcome-light-dark.png",
+    "generatedOriginal": "exec-56fc91b9-1896-46eb-8026-5e746b2760bf.png",
+    "sha256": "ecd102218e8578e60ea1abd18233bc791b026f9c5b6a187cbf6b817bbc389e57"
+  },
+  {
+    "file": "new-project-four-steps.png",
+    "generatedOriginal": "exec-e49421a8-a2b6-4e04-b080-980e5c56349d.png",
+    "sha256": "19833bb52ccf526126f45e01544c7c51e4505414aeb0a696189d0552e2d5de49"
+  },
+  {
+    "file": "new-project-progress.png",
+    "generatedOriginal": "exec-04a1ca1b-6322-41f0-80d9-9b6d98ee7fad.png",
+    "sha256": "fbbede92b38767ff5f1b4c124e5ab00d05a37cd60075b1fd42e405fff508aaa1"
+  },
+  {
+    "file": "game-configuration-resolution-picker.png",
+    "generatedOriginal": "exec-2102e5d9-547d-40d2-ace1-1eaf91f73656.png",
+    "sha256": "2fad6d00dd18d280311955b4e31d67b0a953731dc70a0e561d6fceb4413874c6",
+    "generationMethod": "built-in image_gen",
+    "finalPrompt": "Edit target: the supplied compact Loomlight Game configuration mockup. Keep all wording, typography, palette, dropdown, panel and footer controls unchanged. Correct ONLY the aspect-ratio preview geometry: the illustrated rectangle labelled 16:9 is currently too wide for its height. Replace it with a smaller centered rectangle with mathematically correct 16:9 proportions (width divided by height is 1.7778), approximately 570 pixels wide by 321 pixels tall within this image. It must be visibly narrower than the resolution dropdown, have a flat very pale teal fill, a thin muted outline, and centered text '16:9'. Keep generous blank space on either side of this preview. Preserve the caption 'Game resolution, not editor size.' below it. Do not stretch this preview to fill the available panel width. No additional controls or annotations."
+  },
+  {
+    "file": "branches-connectors-rounded.png",
+    "generatedOriginal": "option-b-orthogonal.png",
+    "sha256": "4ca7de6f085173be3dd201b4820e6a6d3109df549285410c6552a1e699ff34ec",
+    "generationMethod": "built-in image_gen",
+    "acceptedDate": "2026-10-03",
+    "finalPrompt": "Edit ONLY the connector labelled \"Jump\" in this UI mockup so it has its own independent destination port. Keep the \"4\" path exactly as it is, pointing down into Four's TOP center. Move the long \"Jump\" vertical route rightward so it runs in a separate outside corridor 50px to the RIGHT of Four's right edge (and still 80px LEFT of the farther \"Jump back\" corridor), then bends LEFT at a rounded elbow and enters Four's RIGHT side near its UPPER corner with a LEFTWARD arrowhead. The \"Jump back\" route still leaves Four right side near its LOWER corner and loops up into Scene 1. This gives Three/4 downward flow, Jump an independently readable leftward destination arrow on Four upper-right, and Jump back a separate source below it. Preserve all four card positions, six labels, palette, typography, rest of all routes and all other arrows. No added nodes/edges. Do not merge Jump with the 4 line or with Jump back.",
+    "scope": "Connector style and readable labels only; generated port dots and shortened toolbar are not new product actions.",
+    "generationPrompt": "Use case: ui-mockup.\nAsset type: high-fidelity design preview of the Loomlight Branches graph, landscape desktop crop.\nPrimary request: Show ONE polished app interface, not a collage and not a photograph. Paper/teal palette: cream background #F6F4EC, warm-gray rectangular scene cards #EAE8DF with subtle borders, dark charcoal 18px UI text, teal connectors #286F6A. Crop tightly to the heading Branches, a compact toolbar with Refresh flow, minus, plus, Fit graph, and the graph canvas. No sidebar, no OS chrome, no extra controls. Canvas has a very faint dotted grid.\nScene graph: exactly four scene cards named \"Scene 1\" with a small \"Entry\" badge, \"New Scene\", \"Three\", and \"Four\". Exactly SIX directed edges: Scene 1 -> New Scene labelled \"Start\"; New Scene -> Scene 1 labelled \"Back\"; New Scene -> Three labelled \"Three\"; New Scene -> Four labelled \"4\"; Scene 1 -> Four labelled \"Jump\"; Four -> Scene 1 labelled \"Jump back\". Every label is large dark readable text inside an opaque cream pill with a fine gray border and generous padding. Connector strokes approximately 3px, clearly visible teal, with solid triangular direction arrowheads at the destination card. Cards approximately 210 x 72 px. Distinct attachment ports around node perimeter. All connectors remain OUTSIDE card interiors except attachment to their boundary. No routes behind nodes, no shared lines, no overlapping reciprocal routes, no extra scene cards or extra edges. The six labels must all be present exactly once. Preserve exact source/destination relationships. Ample whitespace. Modern restrained real product design.\nVariant B: TOP-DOWN rounded ORTHOGONAL routing, with only straight vertical and horizontal segments and rounded 16px corners. Scene 1 upper center, New Scene middle center, Three bottom-left, Four bottom-right. Exactly six arrows, follow these directions carefully. The Start edge points DOWN from Scene 1 bottom-center to New Scene top-center. Back routes from New Scene left-side around an outside left vertical channel, then enters Scene 1 left-side; arrowhead points RIGHT into Scene 1. Three goes from New Scene bottom-left, a right-angle elbow leftward then down into Three top. 4 goes from New Scene bottom-right, a right-angle elbow rightward then down into Four top. Jump runs from Scene 1 RIGHT-side, horizontally right into the outer right routing corridor then downward then LEFT into Four upper right-side. Jump back runs from Four lower right-side, horizontally right into a FARTHER outer right corridor, then upward above Scene 1, then LEFT and DOWN into Scene 1 top-right. This FARTHER Jump back route must remain separately visible from the inner Jump route with at least 55px distance between vertical channels. Back and Jump back are reverse links, not Return/End beats. All six opaque readable label pills visibly attach to their own separate path and stay far from card boundaries. No route crossing or card overlap. Compact rational rounded-elbow diagram layout, orderly tracking lanes, no sweeping Bezier curves.",
+    "limitations": "Generated 4 arrowhead is missing and Jump tip imperfect. Written selection requires all arrowheads at correct boundaries; ports are not editing controls."
+  }
+]

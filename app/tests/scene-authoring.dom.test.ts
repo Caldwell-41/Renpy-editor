@@ -6,6 +6,7 @@ import {
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
+  settleSceneDraft,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -97,7 +98,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea"); assert.ok(textarea);
   textarea.value = "First line\nSecond line"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   assert.equal(hasSceneDraft(document), true);
-  textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+  textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
   await tick();
   assert.equal(calls.at(-1)?.type, "continueDialogue");
   assert.equal(calls.at(-1)?.text, "First line\nSecond line");
@@ -214,6 +215,35 @@ test("pending media is cancelled logically and disposed with the project view", 
   assert.equal(oldImage.src, "");
 });
 
+test("simultaneous Story preview and thumbnail keep their displayed URLs alive", async () => {
+  installDom();
+  const base = sceneModel();
+  const first = base.scenes[0]!;
+  const model = { ...base, scenes: [{ ...first, beats: [
+    { id: "background", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "background" as const, assetId: "bg", transition: "none" as const } },
+    ...first.beats,
+  ] }, base.scenes[1]!] };
+  const revoked = new Set<string>();
+  const originalRevoke = URL.revokeObjectURL;
+  URL.revokeObjectURL = (url: string) => { revoked.add(url); originalRevoke(url); };
+  let dispose: (() => void) | undefined;
+  try {
+    dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+      status: () => {}, resolution: { width: 1280, height: 720 }, apply: async () => model,
+      present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "hash", byteCount: 1, width: 1, height: 1, cacheKey: `${assetId}:hash` }),
+    });
+    await tick();
+    const images = [...document.querySelectorAll<HTMLImageElement>(".preview-background, .asset-thumbnail img")];
+    assert.equal(images.length, 2);
+    for (const image of images) {
+      assert.ok(image.src.startsWith("blob:"));
+      assert.equal(revoked.has(image.src), false, "a currently displayed image URL was revoked");
+    }
+    dispose(); dispose = undefined;
+    for (const image of images) assert.equal(revoked.has(image.src), true, "view disposal must release its image URLs");
+  } finally { dispose?.(); URL.revokeObjectURL = originalRevoke; }
+});
+
 test("closeout: Background clears previously visible Characters", () => {
   const scene = sceneModel().scenes[0]!;
   const actual = deriveScenePreview({ ...scene, beats: [
@@ -254,4 +284,107 @@ test("Background resolves default-layer uncertainty after Custom Code without cl
   assert.equal(actual.variablesUnknown, true);
   assert.equal(actual.partial, true);
   assert.deepEqual(actual.unknownBeatIds, ["custom"]);
+});
+
+
+test("dialogue navigation protects IME and shares one pending commit",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!;host.className="scene-workspace";
+ const original=sceneModel();const pending=deferred<SceneWorkspace>();let calls=0;
+ const dispose=renderSceneAuthoring(host,document.querySelector("#tree")!,original,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{calls++;return pending.promise;}});
+ host.querySelector<HTMLButtonElement>(".beat-select")!.click();const text=host.querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ text.dispatchEvent(new window.Event("compositionstart"));assert.equal(await settleSceneDraft(host),false);assert.equal(calls,0);
+ text.dispatchEvent(new window.Event("compositionend"));const a=settleSceneDraft(host),b=settleSceneDraft(host);assert.equal(calls,1);assert.equal(text.disabled,true);
+ pending.resolve({...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map((beat,j)=>j?beat:{...beat,payload:{type:"dialogue",characterId:"alice",text:"Kept through navigation"}})})});
+ assert.deepEqual(await Promise.all([a,b]),[true,true]);assert.equal(calls,1);assert.match(host.textContent!,/Kept through navigation/);dispose();await browser.happyDOM.close();
+});
+
+
+test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
+ const browser=installDom();let model=sceneModel();let calls=0;
+ const dispose=renderSceneAuthoring(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
+  assert.equal(command.type,'insertBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
+ }});
+ click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
+ const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
+ assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);assert.equal(document.querySelector('.expanded-beat'),null);assert.ok([...document.querySelectorAll('.beat-select')].some(b=>b.textContent?.includes('New text')));
+ dispose();await browser.happyDOM.close();
+});
+
+test("new Beat waits for its receipt, restores failure input, and focuses the saved row",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
+ const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}});
+ click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
+ confirm.click();await tick();assert.equal(status,'Source changed');assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
+ fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);
+ const next=structuredClone(model);const beats=[...next.scenes[0]!.beats];beats.splice(1,0,{id:'added',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Keep this text'}});receipt.resolve({...next,scenes:next.scenes.map((scene,i)=>i?scene:{...scene,beats})});await tick();
+ const row=host.querySelector<HTMLElement>('[data-beat-id="added"]')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.beat-select'));assert.equal(row.querySelector('.expanded-beat'),null);assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();
+});
+
+test("held Beat drag scrolls the visible writing panel edges and stops on cancellation", async () => {
+  const browser = installDom();
+  const host = document.querySelector<HTMLElement>("#host")!;
+  let writes = 0;
+  const frames = new Map<number, FrameRequestCallback>();
+  let frameId = 0;
+  window.requestAnimationFrame = callback => { frames.set(++frameId, callback); return frameId; };
+  window.cancelAnimationFrame = id => { frames.delete(id); };
+  const dispose = renderSceneAuthoring(host, document.querySelector("#tree")!, sceneModel(), {
+    status: () => {}, resolution: { width: 1920, height: 1080 },
+    present: async () => { throw Error("unused"); }, apply: async () => { writes++; return sceneModel(); },
+  });
+  try {
+    const panel = host.querySelector<HTMLElement>(".beats-region")!;
+    const list = host.querySelector<HTMLElement>(".beats-list")!;
+    const toolbar = host.querySelector<HTMLElement>(".beats-toolbar")!;
+    const grip = host.querySelector<HTMLButtonElement>(".beat-grip")!;
+    const bounds = (top: number, bottom: number): DOMRect => ({ left: 0, right: 300, top, bottom, x: 0, y: top, width: 300, height: bottom - top, toJSON: () => ({}) });
+    panel.getBoundingClientRect = () => bounds(100, 400);
+    toolbar.getBoundingClientRect = () => bounds(100, 160);
+    list.getBoundingClientRect = () => bounds(160 - panel.scrollTop, 2160 - panel.scrollTop);
+    // Shipped CSS scrolls the panel; the full-height inner list cannot scroll.
+    Object.defineProperty(list, "scrollTop", { configurable: true, get: () => 0, set: () => {} });
+    panel.scrollTop = 150;
+    document.elementFromPoint = () => grip.closest(".beat-card");
+    const pointer = (type: string, y: number) => new browser.PointerEvent(type, { button: 0, pointerId: 1, clientX: 100, clientY: y, bubbles: true }) as unknown as Event;
+    const frame = () => { const [id, callback] = frames.entries().next().value!; frames.delete(id); callback(0); };
+    grip.dispatchEvent(pointer("pointerdown", 220));
+    window.dispatchEvent(pointer("pointermove", 390));
+    frame(); assert.equal(panel.scrollTop, 160, "held pointer at visible bottom must scroll down");
+    frame(); assert.equal(panel.scrollTop, 170, "holding still must keep scrolling");
+    window.dispatchEvent(pointer("pointermove", 170));
+    frame(); assert.equal(panel.scrollTop, 160, "visible top below sticky toolbar must scroll up");
+    window.dispatchEvent(pointer("pointermove", 410));
+    frame(); assert.equal(panel.scrollTop, 160, "outside panel must not scroll");
+    window.dispatchEvent(pointer("pointermove", 140));
+    frame(); assert.equal(panel.scrollTop, 160, "sticky toolbar must not count as a list edge");
+    window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    assert.equal(frames.size, 0);
+    assert.equal(document.querySelector(".beat-drag-ghost"), null);
+    window.dispatchEvent(pointer("pointerup", 170));
+    assert.equal(writes, 0);
+  } finally { dispose(); await browser.happyDOM.close(); }
+});
+
+test("preview reset updates the divider and layout without a hidden slider",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;
+ const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()});
+ const divider=host.querySelector<HTMLElement>('.preview-divider')!;divider.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));assert.equal(divider.getAttribute('aria-valuenow'),'36');
+ window.dispatchEvent(new window.Event('loomlight-reset-layout'));assert.equal(divider.getAttribute('aria-valuenow'),'34');assert.equal(host.querySelector<HTMLElement>('.scene-stack')!.style.getPropertyValue('--preview-share'),'34fr');assert.equal(host.querySelector('input[type="range"]'),null);dispose();await browser.happyDOM.close();
+});
+
+test("pointer Beat reorder cancels outside, on Escape and across protected boundaries",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;let model=sceneModel();
+ const beats=[...model.scenes[0]!.beats];beats.splice(1,0,{id:'narration',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Second'}});beats[2]={...beats[2]!,byteStart:40};model={...model,scenes:model.scenes.map((scene,i)=>i?scene:{...scene,beats})};
+ const calls:SceneCommand[]=[];const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async command=>{calls.push(command);return model;}});
+ const grip=host.querySelector<HTMLButtonElement>('.beat-grip')!;const target=host.querySelector<HTMLElement>('[data-beat-id="narration"]')!;
+ let hit:Element|null=target;document.elementFromPoint=()=>hit;
+ const pointer=(type:string,x:number)=>new browser.PointerEvent(type,{button:0,pointerId:1,clientX:x,clientY:20,bubbles:true}) as unknown as Event;
+ grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));assert.ok(target.classList.contains('drop-after'));window.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape'}));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);
+ hit=null;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
+ hit=host.querySelector('[data-beat-id="choice"]');grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
+ hit=target;for(const cancel of ['pointercancel','blur','lostpointercapture']){grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));if(cancel==='lostpointercapture')grip.dispatchEvent(pointer(cancel,30));else window.dispatchEvent(cancel==='blur'?new window.Event('blur'):pointer(cancel,30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);}
+ click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!.click();
+ hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);assert.equal(calls[0]!.type,'reorderBeat');assert.equal(calls[0]!.toIndex,1);assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
 });

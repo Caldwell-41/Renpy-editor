@@ -1,8 +1,67 @@
 # Testing strategy
 
+## Current scope: proportionate hobby-editor acceptance
+
+[ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) governs new work.
+Routine gates prioritize save/reopen/undo, external in-place and replace-on-save
+conflicts, interrupted-save recovery, draft/session retention, malformed input,
+basic path/link refusal, explicit execution and usable response times.
+Use deterministic ordinary writer interleavings where they protect against lost work.
+
+Deliberately timed same-user root/parent/reparse attacks, persistence-process
+termination, SDK-install crash recovery and the G1-O native-reader experiments are
+specialist historical tests, not blockers for last-observed Branches.
+Preserve them and their failures; do not acquire symlink privileges or change security
+settings to pass a hobby-editor gate. Existing robust write/recovery code remains.
+Historical corrective evidence below keeps its actual result.
+
+[WORKFLOW's delivery rules](WORKFLOW.md#proportionate-delivery-rules) exclude deliberate
+process-termination experiments from routine selection. The
+[TEST-AUDIT-1 selector disposition](tasks/active/testing-policy-alignment.md#selector-disposition)
+records the rationale and exact specialist cases. The four persistence-termination
+parents and two embedded SDK specialist tests are explicitly ignored. Production and
+quality broad-core selectors skip the separately selected flow fixture and the two
+archive-backed SDK gates; ordinary Prepared recovery now uses a non-crashing fault-state
+fixture. These source selectors are prepared here; this checkpoint does not compile or
+execute them. Controlled game failure, Stop and descendant cleanup remain required.
+
+G1-OBS updates production code, test classification/selectors and real-service gates
+together. Historical `g1_o1` tests and seventeen named timed namespace substitutions use
+explicit specialist `#[ignore]` attributes; ordinary writer interleavings, baseline
+path/link rejection, recovery, session/process/privacy remain routine. The one-shot
+G1-O1-N native test remains separately ignored and is never selected by routine CI.
+Use `--ignored --exact <test>` only for a separately selected specialist task; report
+all exclusions and target capability limits honestly.
+
+Branches acceptance is G1-U1 observed-state behavior, G1-U2 <250 ms accepted-model
+update and <2 s initial/explicit disk refresh, plus the retained G1-V2 rendered
+interaction gate and data-loss/authority regressions in ADR 0010. Same fixture,
+three fixed successful samples per supported target; changed semantics require new
+evidence. A quickly returned unchanged graph cannot pass an accepted-edit case.
+No second complete source pass, final leaf-binding matrix, 230 ms verifier allocation
+or fixed 1,006/503/504 source-pass count is required.
+
+## SDK hashing regression
+
+Keep large SDK hashing buffers on the heap. The Windows release main thread has a
+1 MiB stack reserve; a 1 MiB local array plus the function frame can overflow before
+any hashing begins, even when the ordinary empty-profile startup works. A passing
+test-harness thread does not prove the same allocation fits the desktop main thread.
+
+`renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs` covers exact
+file/tree digests and framing across chunk boundaries, empty files and missing
+inputs. `sdk_file_hash_retains_cancellation_and_deadline` preserves request controls.
+Use ordinary correctness checks and the existing disposable application scenarios
+for this regression. Deliberate crash reproduction was local diagnostic evidence;
+it is not a new routine test or a reason to run hostile filesystem/race experiments.
+See the active Phase 1G ledger for the scoped Windows evidence and remaining gates.
+
 ## Current production scaffold and Phase 0 regression commands
 
-From `app/`, the Phase 1A production checks are:
+These command references describe the existing scaffold, not a run-all instruction.
+Select changed-scope checks under WORKFLOW using the routine selectors below;
+an archive-backed SDK wrapper returning a skip marker is not qualification evidence.
+From `app/`, the Phase 1A production command references are:
 
 ```bash
 npm ci --ignore-scripts
@@ -15,6 +74,48 @@ cargo test -p loomlight-core --locked
 cargo test -p loomlight-desktop --locked
 npm exec -- tauri build -- --locked
 ```
+
+The unfiltered core line above is a general command reference only. For routine broad
+core coverage, both workflows use the same three exclusions and verify positive Cargo
+summaries plus named ordinary regressions:
+
+```bash
+cargo test -p loomlight-core --release --locked -- \
+  --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
+  --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
+  --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
+  --nocapture
+cargo test -p loomlight-core --release --locked \
+  scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture
+```
+
+Run SDK gates separately with their pinned archive and exact test path. Supply `--ignored`
+only for the two runtime SDK gates (ignored because they need an explicit archive), and
+always combine it with `--exact`. Specialist persistence/namespace cases stay excluded.
+
+For changes to starter GUI generation, explicitly select the ignored pinned-SDK
+regression `renpy::tests::official_sdk_starter_contains_runtime_gui_assets` with
+`LOOMLIGHT_RENPY_SDK` pointing to the verified 8.5.3 SDK. It creates disposable
+projects through the real lifecycle at 1280×720 without Git and custom 1600×1000
+with Git. It checks generated files, SDK metadata, reopening, actual runtime
+dimensions/title/build name, Preferences/Load/Save menus, first dialogue and return
+to the main menu. The custom game runs without editor metadata. Each execution
+requires a positive named SDK test result in addition to generic GUI asset presence.
+It is separate from routine core and from
+the two ignored runtime SDK gates; absence of the SDK is a failure, not a skip pass.
+The workflow result checker rejects missing/malformed summaries, zero selected tests,
+missing/ignored/filtered required cases and failures. Packaged case evidence must contain
+exactly one successful report per required scenario with cleanup complete.
+The shared Q1 workflow helpers use `python` on Windows and `python3` on macOS via
+the job's `Q1_PYTHON` setting, selected from `matrix.runner`. Job-level `env` cannot
+use the `runner` context; the focused source audit rejects the original invalid
+expression and incorrect interpreter mappings. For changes to these workflows, run
+`actionlint -shellcheck= -pyflakes= .github/workflows/production-scaffold.yml .github/workflows/quality.yml`
+from the repository root before dispatch. This checks YAML and Actions expression
+semantics independently of the focused source audit (validated with actionlint 1.7.12).
+The disabled integrations are external shellcheck/pyflakes, not workflow rules.
+Gate self-tests and synthetic package-retention CLI
+tests run in preflight; they do not launch or qualify an application.
 
 The full desktop Rust test, package, and injected packaged-WebView probe run separately
 on Windows x64 and macOS ARM64 in `production-scaffold.yml`. The core-only Cargo test is
@@ -83,7 +184,7 @@ smoke, secret scan, and dependency/licence inventory. Evidence artifacts are
 `10343096571` (Windows; SHA-256 `74b3a0b31b6a6012059cef99a3517a30432af5e0b226f09279f6472ffde66c17`)
 and `10342841434` (macOS; SHA-256 `d01081e879877744a098410e51b1b1db871c6c9994f765143150afa54bb69184`).
 
-The Phase 1C durability/race correction adds
+Historical Phase 1C durability/race evidence (not current routine authorization) adds
 real subprocess termination before/after managed-SDK final promotion and at partial,
 durable-staged, and committed Recent Projects boundaries. Deterministic tests cover
 missing/corrupt/mismatched provenance, abandoned SDK stages/downloads, app-state and
@@ -264,7 +365,7 @@ pass.
 | Integration | Pinned official SDK compile, lint `--error-code`, tests, run harness, diagnostics, distributions |
 | Desktop E2E | Project create/save/close/reopen, Scene edit, source sync, external conflict, preview/run; Git checkpoint in optional Git |
 | Cross-platform | Windows and macOS file watching, paths, subprocesses, credential store, package/install/launch |
-| Security/privacy | IPC denial, traversal/symlinks, hostile projects, redacted logs, fixture/package PII scan |
+| Security/privacy | Narrow IPC, malformed input, traversal and ordinary unsupported-link refusal, explicit execution, redacted logs and package privacy; specialist OS attack experiments separate |
 | Performance | Large scripts/assets/graphs, incremental parse, patch latency, preview responsiveness, memory budgets |
 
 Phase 2 LLM-specific schema/adversarial/context/consent tests are intentionally not a
@@ -279,8 +380,8 @@ quality-gated rather than one large feature branch:
 | Milestone | Minimum evidence before proceeding |
 | --- | --- |
 | 1A scaffold | Locked fresh install/build/test; command/capability denial; CSP/navigation/network/ambient host denial; privacy/licence checks; packaged Windows x64/macOS ARM64 smoke; semantic theme tokens/reduced-motion foundation |
-| 1B transactions | External-writer races, stale revisions, path/file/recovery identity and symlink substitution, crash-point recovery, durability semantics, undo/redo conflict boundaries on both targets |
-| 1C project lifecycle | New-project staging/failure cleanup; parent/stage child-process and promotion races; restart-safe verified SDK installation/provenance; crash-safe Recent Projects; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/` |
+| 1B transactions | Ordinary external-writer conflicts, stale revisions, path refusal, interrupted-save recovery, durability semantics and undo/redo on both targets; retained historical defenses remain |
+| 1C project lifecycle | New-project staging/failure cleanup and basic path/link refusal; restart-safe verified SDK installation/provenance and Recent Projects via non-crashing fault/state fixtures; detected/install/browse SDK; conventional Ren'Py template paths and standard GUI; create/validate/close/reopen; game runs without `.renpy-editor/`; timed namespace/crash experiments remain specialist history |
 | 1D authoring models | Character/appearance, copied image/audio assets, automatic-discovery naming collisions, basic variables, source round-trip/reload identity |
 | 1E Scene | Bounded Beat workflow, preview/partial state, choice linking, Story tree file lifecycle, stale `.rpyc` cleanup/ghost-script regression, undo/redo, accessibility, Quiet Studio Dark conformance |
 | 1F Source | Partial CST/range mapping, no-op/minimal-patch golden tests, direct source→Scene sync, exact custom-code preservation, external conflicts |
@@ -290,15 +391,16 @@ quality-gated rather than one large feature branch:
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
 
-The Phase 1B core suite launches a child copy of the Rust test process and exits it at
+The historical Phase 1B core suite launches a child copy of the Rust test process and exits it at
 prepared, staged, commit-intent, exchanged, verified, committed, and durable journal
 boundaries. A fresh service then classifies the retained state. In-process hooks
 deterministically race external content/identity/path changes before and after the
 platform operation. The latest suite also proves recovery-directory namespace
 substitution cannot convert unresolved recovery into an empty successful scan. The
-production Windows/macOS matrix runs the same platform-appropriate suite in release
-mode and retains its log with the existing packaged-boundary and dependency evidence;
-it is not duplicated in a second expensive matrix.
+current Windows/macOS matrix still selects those termination parents in release mode.
+That is an alignment gap, not routine authority. The proposed migration preserves
+specialist evidence and ordinary recovery assertions in separate selections; no second
+expensive matrix is required to verify a documentation change.
 
 ## Representative source coverage
 
@@ -412,6 +514,30 @@ increases or unsupported causal claims about application Save routing.
 
 ## Phase 1G testing ownership and cadence
 
+**Completion scheduling amendment, 2026-10-04:** follow the user's
+[selected staged sequence](tasks/active/ui-design-review.md#selected-1g-completion-sequence--2026-10-04):
+next Mac chat completes the picker, proves local changed-scope gates and prepares
+final Mac review; after Mac acceptance, publish/run required remote qualification
+and correct failures; then a Windows-PC agent verifies the same passing candidate;
+a final separate chat verifies conflict-resolved combined inputs before integration.
+This changes scheduling, not required target evidence or test ownership. Corrections
+invalidate affected prior results and require relevant cross-platform rechecks.
+
+**Agent-owned Mac review amendment, 2026-10-05:** the user requested that the
+agent perform the remaining objective tests and visual review, and report genuine
+tooling limitations. Use the existing native UI controls and automated service/SDK
+oracles; record agent observations separately from user acceptance. Native injected
+keystrokes can prove OS delivery, but do not claim a human physically typed them.
+User subjective review is optional feedback until a specific uncovered interaction
+requires it. Keep genuine uncovered gates OPEN; do not waive them or manufacture
+a human pass. This changes ownership, not assertions or Windows-host requirements.
+
+**English support amendment, 2026-10-04:** the user selected English application
+UI/support and standard-keyboard manual acceptance. Non-English IME/localisation
+is outside the selected Phase 1 physical review; unavailable IME is not a blocker
+or a claimed pass. Use English-named/content disposable projects on both targets.
+Keep existing UTF-8/path preservation and composition regression tests.
+
 **User decision, 2026-09-25:** no routine physical testing by the user during 1G build
 checkpoints. Plan one focused final session on Windows x64 and macOS ARM64 after the
 agent's automated gates pass. New Git work/testing is deferred to
@@ -453,6 +579,97 @@ only after the driver is proven to reach the packaged application on that target
 its evidence is labelled accurately; otherwise the small final human session owns that
 remaining check. No new general desktop-automation platform is required for 1G.
 
+### Supported-runtime responsiveness and diagnostic boundaries
+
+Platform responsiveness claims require the packaged production frontend and real
+IPC/service on that platform: WKWebView on macOS ARM64, WebView2 on Windows x64.
+Chrome remains useful for portable frontend regression and browser diagnostics;
+its timing alone cannot establish that the packaged application is slow or fast.
+Record the exact hardware, physical/virtual host, OS/build, runtime version where
+available, display/scale/refresh settings, foreground/focus state, candidate, package
+and fixture hashes, toolchains and instrumentation. Mark unavailable identity fields
+as unknown. Evidence from a physical Mac does not explain a virtual Mac's failure,
+and macOS evidence does not qualify Windows.
+
+Before a performance experiment, declare the hypothesis, workload, timer boundaries,
+sample count, limits, build/launch allowance and stop rule. Retain all fixed samples,
+nearest-rank p95, maximum, overruns, timeouts, functional failures and cleanup results.
+Separate cold opening, steady interaction, refresh and accepted-edit measurements;
+do not pool them. Use the ADR 0010 full fixture and unchanged budgets. A smaller
+project may supply an additional usability baseline, never replace the full fixture.
+Prefer ordinary untraced native measurements first; tracing or screenshots during a
+series can perturb later samples. Collect visual evidence outside timing populations
+and disclose any remaining instrumentation. No subtraction of idle/control time,
+trimming outliers, retry-until-green or automatic allowance increase.
+
+Name endpoints honestly. Dispatch-to-first-rAF measures callback availability after
+synthetic input; a second rAF supplies another rendering opportunity. Neither proves
+pixels reached the display, OS input latency, or perceived responsiveness. Verify the
+intended graph transform, visible intersection, focus and full 500-node/2,000-edge
+workload, and retain both intervals separately. Native WebView rAF evidence improves
+runtime relevance but does not make this a physical-presentation timer. Report each
+p95 against the unchanged <100 ms objective as a labelled proxy, separately from
+observed usability; it does not redefine or alone close G1-V2. Genuine native-input
+observations need a verified driver and visible results, and the final human session
+remains separate. If a reliable presentation endpoint is unavailable, state the limit
+instead of inventing one or claiming a complete end-to-end pass.
+
+Investigate an overrun at its observed layer before changing production code. A new
+bounded experiment must distinguish a concrete hypothesis; a failure is not permission
+for indefinite browser/graphics tuning. Collect trustworthy supported-runtime evidence
+before proposing a different role for a Chrome timing gate. The user explicitly
+approved that change in [TEST-P2](tasks/active/phase-1g-branches-runtime-git.md#33-r2-p1-test-p2--chrome-timing-acceptance-role--2026-09-27)
+after reviewing MAC-N1.
+Historical failed runs remain failed; this prospective policy does not rerun them or
+fill skipped gates. Preserve the original run, attempt, SHA and unavailable evidence.
+
+The explicit packaged `branches-performance` probe uses the original 500-Scene /
+2,000-edge source content plus empty `game/options.rpy`, `game/gui.rpy` and
+`game/screens.rpy`, which ordinary lifecycle opening requires. This approved
+inspection-only superset has **506 sources / 105,627 bytes**. The existing core
+budget fixture remains **503 sources / 105,627 bytes**; report these populations
+separately and do not claim exact fixture equivalence. `branches-interactive` prepares
+the same disposable workload for the separately bounded native-input observation.
+Neither case installs an SDK or runs game code. Default packaged runtime scenarios
+are unchanged; select the performance case explicitly. The performance probe requires
+a native-driver click on its Start control within 60 seconds, removes that control,
+then waits a fixed five seconds before measurements and requires visible/focused
+state. Finish AX/capture work before that settling interval ends; leave measurement
+populations unobserved by capture/trace. App-driver attachment can create another
+instance when multiple registered packages share an identifier: verify the exact
+running fixture window, preserve targeting failures and audit process cleanup.
+
+### Independent browser outcomes in the production workflow
+
+The production workflow records Runtime and Branches browser steps separately. Only
+these two steps defer failure with `continue-on-error`; the mandatory final browser
+gate inspects their original `outcome`, not the success-normalized `conclusion`.
+Both must be `success`. Failure, cancellation, skipped or missing results cannot pass.
+This lets subsequent SDK, desktop and packaged checks run despite a browser failure,
+while the overall production job and success-only installer upload remain blocked.
+Other genuine prerequisite failures retain normal fail-fast step behavior. This is
+bounded failure deferral, not a promise that every unrelated check survives every
+kind of failure. Evidence upload still runs on failure. Workflow edits receive syntax
+and outcome-path checks locally; no package matrix solely to verify this policy.
+Chrome Branches timing now has a **diagnostic-only** acceptance role on both hosts.
+Retain the strict <2,000 ms initial-layout and <100 ms synchronous-dispatch maximum,
+original first-rAF p95, visible first-rAF p95 and visible second-rAF p95 thresholds.
+An overrun retains `budgetStatus: "fail"`, the metric/value/limit entries, every raw
+sample and a console/Actions warning, but alone does not fail the browser process.
+Schema 3 `status` describes the blocking functional/evidence result; it is not a
+platform performance verdict. The separate no-input population remains context only.
+The diagnostic policy helper is hashed with the browser script in its source identity.
+
+Full workload, geometry, visibility/focus, navigation, refresh, resize and page-error
+assertions remain blocking, as do invalid evidence, timeouts, startup and cleanup
+errors. The final workflow gate still requires both browser process outcomes to pass;
+there is no blanket waiver of browser failures. Real-service/core timing gates retain
+their acceptance role and thresholds. Packaged WKWebView/macOS and WebView2/Windows
+measurements plus observed usability determine platform responsiveness under the
+contract above; a browser diagnostic pass cannot substitute for them. The M4 native
+result does not qualify Windows, all Macs or final human acceptance. No supported-
+target acceptance is inferred from this edit; publication is not hosted validation.
+
 ### Final human session and narrow evidence reuse
 
 Prepare one reproducible project and short expected-result checklist, aiming for roughly
@@ -491,14 +708,17 @@ corrections. Do not dispatch a full matrix for each checkpoint or documentation 
 Do not append every scenario to one smoke; report independent stages, monotonic timing,
 cleanup outcomes and reliable terminal failure reports.
 
-Current `production-scaffold.yml` supports manual dispatch and automatically packages
-relevant main pushes. It does not implement pre/post-merge evidence deduplication. Before
-scheduling an expensive final pre-merge run, record the intended integration/run strategy
-and any bounded workflow amendment needed to avoid an automatic duplicate. A trigger
-change must be implemented/reviewed before relying on it; documentation never suppresses
-an actual trigger or permits bypassing required checks. Prefer a small explicit trigger
-policy over reviving OPT-1A or adding a general evidence controller. This documentation
-update changes no workflow and dispatches no production matrix.
+`production-scaffold.yml` is manual-dispatch-only; pushes to main, including workflow or
+application changes, do not start package qualification. Each target still runs its own
+functional gates. A failure-time evidence artifact retains the exact executable (the
+macOS app bundle), digest, source/run identity and incomplete outcome for seven days,
+after scanning the produced package for secrets. Its manifest distinguishes not built,
+built-but-missing, available, and output produced during a failed package step. Installers
+remain success-only. The scanned macOS bundle is retained as `Loomlight.app.tar` to
+preserve executable permissions, symlinks and hidden bundle entries through artifact
+upload. Verify both its recorded archive hash and the executable hash inside the tar;
+extract the tar before launching a recovered package. This is not evidence reuse or a cross-SHA waiver, and does not
+authorize a production dispatch during Q1-PREP.
 
 ## Required quality gate by change type
 
@@ -506,7 +726,7 @@ update changes no workflow and dispatches no production matrix.
 | --- | --- |
 | Documentation/governance | Validator, link/privacy scan, `git diff --check` |
 | Source model/serializer | Unit + golden + targeted fuzz + fixture SDK lint |
-| Files/SDK/process | Unit + hostile-path/archive/transaction tests + platform integration |
+| Files/SDK/process | Unit + ordinary path/archive/conflict/non-crashing recovery tests + affected platform integration; deliberate crash/hostile-OS experiments only when explicitly scoped |
 | Scene/file lifecycle | Reference checks + transaction/recovery + stale `.rpyc` cleanup + SDK lint/run |
 | UI workflow | Unit/component + keyboard/accessibility + changed-path desktop E2E + visual-token conformance |
 | Generated Ren'Py | Official pinned SDK compile + lint + relevant automated test + standard-template smoke |
@@ -541,3 +761,286 @@ lifecycle/project, verify accepted bytes and reopened projection, and retain ref
 checks for stale revisions and malformed payloads. These tests run in the normal core
 suite on both packaged targets. Synthetic UI routing still does not replace native
 keyboard acceptance.
+
+## Retained 1G.1 development evidence
+
+The active [1G ledger](tasks/active/phase-1g-branches-runtime-git.md#12-1g1-execution-ledger)
+records candidate, exact results and deferred supported-target evidence. Retained cases
+live in `scene.rs` (`flow_*`), `lifecycle.rs` (literal `flow.list` and existing Scene
+commands through the real handler), `source.rs` (revision-qualified navigation),
+`branches.dom.test.ts` and the existing shell Save/navigation regression.
+
+Run from `app/`: `cargo test -p loomlight-core --locked flow`, `npm run check`, and
+`npm run test:source-browser`. For the unchanged budget workload, set
+`LOOMLIGHT_FLOW_EVIDENCE` to an agent-owned temporary JSON path and run
+`cargo test --release -p loomlight-core --locked flow_observed_budget_fixture -- --nocapture`;
+then run `node tests/branches.browser.mjs` with the same variable. The latter requires
+500 Scenes / 2,000 edges produced by the actual service, reports build/layout and
+synthetic pan/frame timing, checks 640px resize and verifies origin editing navigation.
+Optional `LOOMLIGHT_BRANCHES_SCREENSHOT` records the rendered review surface. A small
+subview of the same fixture is used only for the screenshot, after full-scale assertions.
+
+Browser scripts accept optional `LOOMLIGHT_BROWSER_EXECUTABLE` for an already installed
+Chromium. Record its actual version: this is a development browser, not proof of the
+packaged Windows/macOS WebView or OS-native key delivery. No browser binary, SDK,
+measurement output or absolute machine path belongs in Git. Final 1G still owns the
+real packaged graph edit/disk/reopen scenario and both supported-target measurements.
+
+
+### Branches timing interpretation
+
+The browser probe retains the original 30 one-way inputs and nearest-rank p95
+<100 ms diagnostic threshold under the **dispatch-to-first-rAF continuation** name (legacy
+`panFrame*` output fields remain aliases). That path moves the fitted graph offscreen;
+it is historical comparison, not sustained visible-pan coverage. A separate fixed
+30-input sequence alternates ArrowLeft/ArrowRight at fitted x=40/0. Every input must
+change the transform, retain 500 nodes/2,000 paths, stay visible/focused and maintain
+positive clipped graph/representative-node intersection. Representative IDs, positions,
+dimensions and viewport geometry are checked outside the timing interval.
+
+The visible sequence reports both first-rAF and **second-rAF rendering-opportunity**
+intervals against the unchanged <100 ms p95 objective; initial layout remains <2 s.
+Neither callback proves physical presentation. Rendering opportunities can include
+previous browser work. Under TEST-P2 all five Chrome timing thresholds are diagnostic;
+functional/evidence failures still block. Fast dispatch does not erase an overrun or
+close packaged/native rendered-input acceptance. Review the endpoint/layer evidence.
+The separate core <250 ms/<2 s budgets are unchanged and not measured by this probe.
+[MAC-D1 ledger 28](tasks/active/phase-1g-branches-runtime-git.md#28-r2-p1-mac-d1-macos-frame-budget-diagnosisreview--2026-09-27)
+retains the original defect/failure; [MAC-M1 ledger 29](tasks/active/phase-1g-branches-runtime-git.md#29-r2-p1-mac-m1-probe-correction-and-local-proof--2026-09-27)
+records the correction and fixed local proof, not retrospective CI qualification.
+
+Set `LOOMLIGHT_BRANCHES_EVIDENCE_DIR` to an ignored output directory to save the full
+report and two clipped frame captures, taken after visible inputs 0 and 1. Captures
+are outside timing, retain the graph's transform and can perturb subsequent browser
+work; their wall time is recorded, never subtracted. They prove the two rendered
+states separately, not that either state was physically presented at the timer endpoint.
+Set `LOOMLIGHT_BRANCHES_TRACE=1` as well for bounded Chromium rendering/GPU/User Timing
+and screenshot trace output plus a fixed 30-sample no-input control after Fit. There
+is no warm-up or sample trimming. All sequences use per-sample CDP calls; the control
+also reads geometry, but omits the two explicit captures. Fit can leave graphics work
+pending, so this is not a pure idle-host benchmark. A 60-second page deadline bounds
+the run; `finally` attempts trace saving and both cleanups independently, retaining
+partial samples and errors on failure. Abrupt process/browser loss can still prevent
+trace recovery and must be reported as missing evidence.
+
+Reports retain ordered page-clock boundaries, raw distributions, browser/GPU mode,
+focus/visibility, Node/Playwright/runner identity, Git base and exact fixture/source
+SHA-256s. Trace start/stop overhead is recorded separately. Compare traced/untraced
+fixed launches without pooling or subtracting scheduler/instrumentation time; their
+difference is not an isolated estimate of trace overhead. No automatic retry or tool
+installation follows from a failure. Browser results remain separate from native
+WebView, supported-runner and human acceptance. Attribute stalls using trace brackets
+before choosing a renderer or environment correction; lack of reproduction cannot
+waive historical failed/skipped gates.
+
+For an explicitly approved hosted diagnostic, `quality.yml` provides the manual
+`phase1g_macos_browser_diagnostic=true` selector. Keep `phase1g_flow_profile=false`
+and `phase1g_candidate_proof=false`; conflicting selection fails before tool setup.
+Only one `macos-26` job runs. It uses existing pinned Node/npm/locked dependencies and
+the runner's installed Chrome, verifies archived R2-P1 artifact 10923840024 and its
+exact service fixture, and launches this probe once with tracing. There is no core,
+SDK or package build, broad suite, Windows job or automatic retry. This fixture reuse
+is diagnostic input reuse, not acceptance reuse; an expired/unavailable artifact is
+a blocker, never permission to substitute a new workload silently. The artifact
+`r2-p1-macos-browser-diagnostic` retains report, trace, captures, identity, cleanup audit
+and a SHA-256 inventory for seven days, including on failure. Job timeout is ten
+minutes; the probe retains its 60-second page deadline and all measurement budgets.
+Missing reports/traces/cleanup evidence fail the audit. A hosted pass does not accept
+the historical run, core budgets, native WebView or final packages. Ledger 30 owns the
+approved single dispatch and result; no continuing authorization follows from this
+workflow selector. Follow the repository manual-resume rule while external CI runs.
+
+The historical H1 trace reproduced both long GPU command-scheduling waits and late
+BeginFrame delivery, including >100 ms controls with no new input or recorded
+layout/paint/raster work. See ledger 30 for exact samples and causal limits. Inspect
+ledger 32's completed native assessment and ledger 33's timing decision before any
+new hypothesis. H1 remains FAIL; neither idle-time subtraction nor an unverified
+browser/backend flag is a correction. Its one-dispatch allowance is consumed, and
+the old proposed controls/reruns are historical, not the next routine task. No new
+renderer optimization follows from Chrome timing alone. Keep physical presentation,
+hosted Chromium and packaged WebView evidence distinct.
+
+### 1G.2b named packaged scenarios
+
+The minimal SDK runtime probe fixture supplies `config.quit_action = Quit(confirm=False)`
+because it intentionally has no confirmation screen. Ordinary editor-owned Stop must
+reach the retained Cancelled/cleanup assertions rather than fail in the SDK's fallback
+quit layout. Production generated-game quit behavior and runtime error reporting are
+unchanged; do not suppress diagnostics or loosen Stop assertions to compensate.
+
+The existing production workflow now includes the explicit R1 SDK service and R2
+compile/lint navigation tests, plus five independent real-service package cases:
+`compile`, `lint`, `route-a`, `route-b`, and `runtime-error`. The native-only fixture
+setup creates a fresh synthetic project before opening the UI. The injected driver
+uses visible runtime/Source/Branches controls and the real requester; it never installs
+the older mock smoke requester. Compile/lint select their actual Unicode/BOM/CRLF
+failing line. Route cases edit/restore a destination, assert selected dialogue/state/
+asset, assert exactly two choice edges and verify the changed destination source
+text/revision plus graph after project close/reopen before restoring routes. During play,
+they save a script, observe staleness, and measure at least 9.5 seconds from observed
+route output plus Running state before Stop; preparation/trust time is excluded.
+The case report records `runningObservedMs`. Accepted script bytes are checked again
+on reopen after Stop. The 640px route-b case also retains an invalid
+mapped draft through Cancel and refused Save All, then deliberately runs the saved
+revision. Runtime failure remains separate.
+
+`app/scripts/run-runtime-ui-probes.py` records each case, elapsed time, process exit,
+timeout and cleanup result. Failure in one case does not hide later cases. The existing
+legacy boundary smoke remains independently reported. Evidence includes every case log
+and JSON, exact Git inputs/target/executable digest, core/SDK logs and package artifacts
+when requested. Both supported targets must pass on the coherent candidate. No
+native-keyboard or human acceptance claim is inferred from synthetic DOM events.
+
+The final 1G close regression holds a saved-state read while Close Project is selected,
+rejects premature shared-service dispatch and requires exactly one close after release.
+Packaged route drivers report close-after-Stop request/completion separately before
+reopen; failed reports retain Welcome/recent/button/modal state. The standalone runtime
+browser expands the initially collapsed diagnostic disclosure before checking its
+visible navigation control, then retains its focus/1100px/640px overflow checks.
+
+### Observed-flow qualification
+
+The production workflow and the bounded `quality.yml` flow-profile dispatch select
+`scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges` with
+`LOOMLIGHT_ENFORCE_FLOW_BUDGETS=1`. The test creates three independent fixed fixtures,
+asserts 503 sources / 105,627 bytes / 500 Scenes / 2,000 edges, and measures initial
+and explicit refresh (<2 s each) separately from accepted update (<250 ms). The
+accepted timer starts at the production wrapper's successful transaction return,
+before invalidation, and includes history and production observed projection. It
+asserts the changed caption and completed/saved-edit statuses. No IPC, transaction
+duration or rendering latency is inferred from this timer. Completion marker:
+`phase-1g-observed-budget-gate: passed (3 samples)`.
+
+The bounded dispatch is intended to run ordinary core/UI regressions and Chromium rendering on
+Windows x64/macOS ARM64 without packaging or SDK download. The browser's 30 pan
+samples run while a refresh response is deliberately pending; navigation remains
+usable. Chromium/synthetic events do not replace final packaged WebView/native input
+acceptance. Historical full-verification timings keep their original failures.
+Both broad-core selectors now apply the same three exclusions. Production and quality
+run the exact observed-budget fixture separately with enforcement enabled, so its three
+fixed samples run once per target rather than again inside broad core.
+
+Retain the real 500-Scene/2,000-edge workload, rendered 30-sample interaction check,
+ordinary external changes (including same-length content edits and normal file
+replacement), additions/deletions, metadata invalidation, Source draft/caret, session
+cancellation and resource-bound tests. Explicit Refresh reads current content even
+if timestamps are unchanged. A completed display observation is allowed to age
+until the next trigger; deliberately timed namespace attacks are not display gates.
+No native-open microbenchmark or full corrected ADR 0009 candidate is a prerequisite.
+
+R1's old automatic branch trigger is retired into this combined final gate; explicit
+manual R1 dispatch remains available for bounded future corrections. Final production
+verification is manually dispatched once on the implementation branch. The production
+workflow has no automatic main-push trigger; no cross-SHA/pre/post-merge reuse is claimed.
+Integration and its run strategy require separate authorisation.
+
+
+## UI refresh verification
+
+The 2026-09-30 refresh adds CodeMirror, both accepted palettes, native progress and
+batch/drop staging. `npm run test:source-browser` now includes
+`tests/ui-refresh.browser.mjs`: all six workspaces in both themes, onboarding/Settings,
+1440p and compact/laptop captures, interface sizes, fixed status/editor geometry and
+exact mixed-newline edit/undo/redo. It executes the shipped smoke interactions against
+real CodeMirror DOM with a stubbed desktop boundary. This is a driver/renderer check,
+not native security, physical keyboard/IME, drop or SDK-download evidence.
+
+The same preflight also runs `tests/native-runtime-driver.browser.mjs` against the
+shipped compile/lint/route-a/route-b/runtime-error scripts and real application DOM
+at the packaged viewports (640×720 for route-b; 1100×720 otherwise). Its strict fixture
+models service responses and output sequence changes, injects temporary busy read
+refusals and a 150 ms Beat commit receipt delay, and rejects unknown operations
+and hidden/disabled synthetic clicks. It catches dated-recent selectors, optional
+panel/form access, CodeMirror selection synchronization and reopen readiness before
+packaging. `ui-refresh.browser.mjs` also executes the shipped UI refresh probe with
+busy observations and a 1200 ms initial Story read. A separate early-navigation
+regression switches to Source while that read is held and asserts the application
+queues its Source request without contention. Commit drivers wait for the accepted
+form receipt; debounced status copy is not an operation-completion signal. Native
+UI-refresh reports distinguish opening/Story/Source stages and retain bounded failure
+state. The smoke path rejects unavailable clicks. Unit checks retain an
+ambiguous-prefix negative selector case, non-busy rejection and busy-deadline failure.
+These tests establish driver compatibility only: fixture persistence, runtime output,
+consent and close results are not native service/SDK/security acceptance. The real
+packaged gates and all rejecting assertions remain required. Optional native Branches
+performance probes are not selected or revived by this compatibility audit.
+
+Frontend tests retain rejecting Save/conflict/selection assertions and add staged
+import cancellation/partial-failure, dialogue composition/commit ownership, and
+ordered progress/unknown-total/failure checks through the actual frontend channel
+handler. Core tests cover bounded preferences, atomic preference persistence, scoped
+progress, and written-byte download accounting. The two official archive-backed SDK
+gates remain separate from routine core selection; no specialist exercises are added.
+
+The runner, report validator and package-evidence manifest share the six required
+cases in `scripts/runtime_probe_cases.py`; missing/failed UI-refresh evidence is
+explicitly rejected and retained. The existing packaged runtime runner selects
+`ui-refresh`, using a
+disposable profile to require native CSP styling, real draft IPC, status geometry,
+Settings return and preference round-trip/cleanup. Its editor input is explicitly
+synthetic. No second qualification matrix or new testing orchestrator is introduced.
+Current exact counts, failed attempts, native capability gaps and remaining human
+acceptance are recorded in the UI task and HANDOVER, not inferred from screenshots.
+
+## Hands-on UI correction regressions
+
+Held Beat edge scrolling must use the actual `.beats-region` scroll owner and visible
+list bounds below its sticky toolbar, not the full-height non-scrolling inner list.
+Retain the regression for continued down/up scrolling with a stationary pointer,
+outside/toolbar refusal, Escape frame/marker cleanup and zero cancellation writes.
+A focused shipped-CSS browser fixture can discriminate container/geometry failures;
+physical WebView2 holding still requires the target-machine retest.
+
+The final Windows review adds rejecting DOM regressions for two observed defects:
+simultaneous Story canvas/thumbnail displays must retain live object URLs until view
+disposal, and acknowledged Source input must update the sidebar dirty count and
+UTF-8 byte total through repeated edits/undo without saving or moving editor focus.
+Native checks additionally compare all saved project files before/after draft Undo
+and import staging cancellation. Keep packaged probe diagnostics bounded and scoped
+to the calls actually instrumented; their timings are not application UI-operation
+timings. Single-instance forwarding with zero intended reports must remain a failed
+runner result even if the process exits zero. Passing native synthetic-input probes
+do not establish held-pointer or Explorer cross-window drag acceptance.
+
+The 2026-10-02 review corrections extend the existing suites rather than selecting a
+new package matrix. `npm run check` includes modal cancellation/staging preservation,
+whole-row selection, composition-safe names, single-confirmation Beat insertion and
+runtime-error/close semantics. `node app/tests/ui-refresh.browser.mjs` additionally
+rejects unavailable control clicks and verifies independent sidebar restoration,
+Chapter disclosure, Choice form bounds, repeatable modal dismissal, fixed categories,
+Source tab overflow/reveal and both palettes/minimum layouts. Its fake bridge is not
+physical IME, OS file-drop, native WebView, SDK or security acceptance.
+
+`cargo test -p loomlight-core --locked review_` selects the saved-route/screen-label,
+Beat reorder/history/protected/stale, Appearance name/image/reference and exact-token
+regressions, alongside an existing Apply Both review test. The routine core selector
+and separately enforced observed-flow fixture remain the broad qualification policy.
+The existing authoring IPC test also rejects renderer paths in `appearance.update`.
+Desktop tests/check compile the native drag-state presentation bridge. Exact evidence
+and installer/native limits belong in the active UI task and HANDOVER.
+
+The Windows review's selected-media regressions cover ordinary content changes
+between selection and explicit Import or image replacement, including same-size
+changes. Refusal must precede transaction staging: accepted metadata/source and
+recovery entries stay unchanged, the project remains Saved, and explicit reselection
+can succeed on the same project. Streaming retains its final content/identity checks.
+Select these with `cargo test -p loomlight-core --locked review_selected_media_change`;
+native staging/partial-import recovery still requires the affected packaged check.
+
+The 2026-10-03 audit regressions also require grouped Choice actions at compact widths,
+Variable discard/reopen across all three types with a truthful subsequent Boolean
+submission, retained appearance selection after save/default/view changes, sidebar
+focus/semantics, shared divider reset, pending Beat controls and saved-row focus,
+media loading/error/retry, and real Chrome pointer capture/reorder/cancellation.
+The release core appearance test includes reuse of former expressions and rejecting
+custom collisions/externally edited aliases while preserving bytes and IDs.
+Windows native testing is explicitly deferred by the user. The specific gestures,
+expected results and evidence fields are in the
+[deferred Windows checklist](tasks/active/ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
+Browser mouse events and fake native drag-state signals do not satisfy those rows.
+
+Final 1G Branches qualification also rejects font-dependent pill clipping in the real
+browser at three widths/both palettes, including a wider English font and a truncated
+long caption. Routing checks use measured widths for label/channel separation and Fit
+bounds. Packaged route-a/route-b reports assert actual native SVG text width plus
+padding and fitted pill bounds; synthetic selection remains distinct from native input.

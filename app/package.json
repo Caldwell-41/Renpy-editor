@@ -12,12 +12,18 @@
     "build:tests": "tsc -p tsconfig.tests.json",
     "check": "npm run typecheck && npm test",
     "dev": "vite",
-    "test": "npm run build:tests && node --test --test-concurrency=1 dist-tests/tests/*.test.js",
-    "test:source-browser": "npm run build && node tests/source-save.browser.mjs && node tests/phase-1f-selection.browser.mjs",
+    "test": "npm run build:tests && node --test --test-concurrency=1 dist-tests/tests/*.test.js tests/branches-timing-policy.test.mjs",
+    "test:source-browser": "npm run build && node tests/source-save.browser.mjs && node tests/phase-1f-selection.browser.mjs && node tests/ui-refresh.browser.mjs && node tests/native-runtime-driver.browser.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "tauri": "tauri"
   },
   "dependencies": {
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@lezer/highlight": "1.2.5",
     "@tauri-apps/api": "2.11.1"
   },
   "devDependencies": {

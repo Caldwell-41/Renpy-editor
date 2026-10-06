@@ -13,10 +13,12 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
 });
 
-test("frontend operation list contains only bounded Phase 1C through 1F operations", () => {
+test("frontend operation list contains only bounded Phase 1C through 1G foundation operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",
     "system.version",
+    "preferences.read",
+    "preferences.write",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
@@ -39,12 +41,16 @@ test("frontend operation list contains only bounded Phase 1C through 1F operatio
     "character.create",
     "character.update",
     "appearance.setDefault",
+    "appearance.update",
     "asset.chooseImport",
+  "asset.chooseImports",
+    "asset.previewImport",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
     "variable.update",
     "scene.list",
+    "flow.list",
     "scene.apply",
     "scene.recovery",
     "scene.resolveRecovery",
@@ -57,9 +63,21 @@ test("frontend operation list contains only bounded Phase 1C through 1F operatio
     "source.applyBoth",
     "source.saveAll",
     "source.discardAll",
+    "runtime.installPolicy",
+    "runtime.prepare",
+    "runtime.requestStatus",
+    "runtime.cancelRequest",
+    "runtime.grantTrust",
+    "runtime.cancelPreparation",
+    "runtime.start",
+    "runtime.stop",
+    "runtime.status",
+    "runtime.diagnostics",
+    "runtime.resolveDiagnostic",
+    "runtime.revokeTrust",
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|credential/i.test(operation)), false);
-  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && /status|diff|commit|reset|remote/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {
@@ -176,7 +194,8 @@ test("desktop manifest grants one local capability and only the host single-inst
   assert.equal(capability.local, true);
   assert.deepEqual(capability.webviews, ["main"]);
   assert.equal("windows" in capability, false);
-  assert.deepEqual(capability.permissions, ["allow-loomlight-core"]);
+  assert.deepEqual(capability.permissions, ["allow-loomlight-core", "allow-application-close"]);
+  assert.match(permission, /commands\.allow = \["complete_application_close"\]/);
   assert.match(permission, /commands\.allow = \["core_request"\]/);
   assert.match(host, /#\[tauri::command\(async\)\]/);
   assert.match(host, /window\.label\(\) != "main"/);

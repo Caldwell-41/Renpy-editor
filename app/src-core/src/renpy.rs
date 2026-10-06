@@ -1,3 +1,4 @@
+pub(crate) mod runtime;
 use bzip2::read::BzDecoder;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -193,6 +194,21 @@ impl RenpyAdapter {
             Duration::from_secs(180),
         )?);
         sdk.revalidate(true)?;
+        result?;
+        Self::generate_gui_images(sdk, stage)
+    }
+
+    // Ren'Py's launcher follows generate_gui with gui_images. The first command
+    // does not create the generic button/bar assets used by standard screens.
+    fn generate_gui_images(sdk: &ValidatedSdk, stage: &Path) -> Result<(), RenpyError> {
+        sdk.revalidate(false)?;
+        let args = [command_path(stage), OsString::from("gui_images")];
+        let result = require_success(run_bounded(
+            &sdk.root,
+            launcher_args(&sdk.root, &args)?,
+            Duration::from_secs(180),
+        )?);
+        sdk.revalidate(false)?;
         result
     }
 
@@ -273,7 +289,8 @@ impl RenpyAdapter {
                 Some(&mut after_spawn),
             )?);
             sdk.revalidate(true)?;
-            result
+            result?;
+            Self::generate_gui_images(sdk, stage)
         }
         #[cfg(unix)]
         {
@@ -297,6 +314,17 @@ impl RenpyAdapter {
                 Some(&mut after_spawn),
             )?);
             sdk.revalidate(true)?;
+            result?;
+            validate_directory_anchor(stage, stage_anchor)?;
+            sdk.revalidate(false)?;
+            let args = [OsString::from("."), OsString::from("gui_images")];
+            let result = require_success(run_bounded_anchored(
+                &sdk.root,
+                stage_anchor,
+                anchored_launcher_args(&sdk.root, &args)?,
+                Duration::from_secs(180),
+            )?);
+            sdk.revalidate(false)?;
             result
         }
     }
@@ -353,7 +381,7 @@ impl RenpyAdapter {
     }
 }
 
-fn inspect_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
+pub(crate) fn inspect_sdk(path: &Path) -> Result<ValidatedSdk, RenpyError> {
     let selected = fs::symlink_metadata(path).map_err(|_| RenpyError::InvalidSdk)?;
     if !selected.is_dir() || crate::transaction::is_link_or_reparse(&selected) {
         return Err(RenpyError::InvalidSdk);
@@ -966,19 +994,52 @@ pub fn install_supported_sdk(data_root: &Path) -> Result<ValidatedSdk, RenpyErro
         if response.status().is_redirection() {
             return Err(RenpyError::Download);
         }
+        let total = response
+            .headers()
+            .get("content-length")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse::<u64>().ok())
+            .filter(|v| *v > 0 && *v <= MAX_ARCHIVE_BYTES);
         let source = response.into_body().into_reader();
-        let mut source = source.take(MAX_ARCHIVE_BYTES + 1);
         let mut output = OpenOptions::new()
             .create_new(true)
             .write(true)
             .open(archive)
             .map_err(|_| RenpyError::Io)?;
-        let downloaded = io::copy(&mut source, &mut output).map_err(|_| RenpyError::Download)?;
-        if downloaded > MAX_ARCHIVE_BYTES {
-            return Err(RenpyError::Download);
-        }
+        copy_sdk_download(source, &mut output, total)?;
         crate::transaction::flush_open_file(&output).map_err(|_| RenpyError::Io)
     })
+}
+
+fn copy_sdk_download(
+    source: impl Read,
+    output: &mut impl Write,
+    total: Option<u64>,
+) -> Result<(), RenpyError> {
+    crate::progress::report("download", Some(0), total);
+    let mut source = source.take(MAX_ARCHIVE_BYTES + 1);
+    let mut downloaded = 0u64;
+    let mut buffer = vec![0u8; 64 * 1024];
+    let mut last = std::time::Instant::now();
+    loop {
+        let count = source.read(&mut buffer).map_err(|_| RenpyError::Download)?;
+        if count == 0 {
+            break;
+        }
+        output
+            .write_all(&buffer[..count])
+            .map_err(|_| RenpyError::Download)?;
+        downloaded += count as u64;
+        if last.elapsed() >= Duration::from_millis(100) {
+            crate::progress::report("download", Some(downloaded), total);
+            last = std::time::Instant::now();
+        }
+    }
+    crate::progress::report("download", Some(downloaded), total);
+    if downloaded > MAX_ARCHIVE_BYTES {
+        return Err(RenpyError::Download);
+    }
+    Ok(())
 }
 
 // Keep download transport injectable for tests without adding a renderer operation,
@@ -1079,10 +1140,12 @@ pub fn install_verified_archive(
     if destination.exists() {
         return Err(RenpyError::ExistingDestination);
     }
+    crate::progress::stage("verify");
     if sha256_file(archive)? != expected {
         return Err(RenpyError::Checksum);
     }
     validate_archive(archive, limits)?;
+    crate::progress::stage("install");
     let parent = destination.parent().ok_or(RenpyError::Io)?;
     let stage = create_sdk_stage(parent)?;
     let payload = stage.join("payload");
@@ -1350,8 +1413,9 @@ fn find_sdk_root(payload: &Path) -> Result<PathBuf, RenpyError> {
 fn sha256_file(path: &Path) -> Result<String, RenpyError> {
     let mut file = File::open(path).map_err(|_| RenpyError::Io)?;
     let mut digest = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    let mut buffer = vec![0_u8; 1024 * 1024];
     loop {
+        crate::runtime_work::check().map_err(|_| RenpyError::Io)?;
         let count = file.read(&mut buffer).map_err(|_| RenpyError::Io)?;
         if count == 0 {
             break;
@@ -1476,7 +1540,7 @@ fn hash_regular_tree(root: &Path) -> Result<String, RenpyError> {
         digest.update(relative.to_string_lossy().as_bytes());
         digest.update([0]);
         let mut file = File::open(&path).map_err(|_| RenpyError::InvalidSdk)?;
-        let mut buffer = [0_u8; 1024 * 1024];
+        let mut buffer = vec![0_u8; 1024 * 1024];
         loop {
             let count = file.read(&mut buffer).map_err(|_| RenpyError::InvalidSdk)?;
             if count == 0 {
@@ -1558,6 +1622,210 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
 mod tests {
     use super::*;
     use std::io::Cursor;
+
+    #[test]
+    #[ignore = "requires the pinned official SDK; select this exact test explicitly"]
+    fn official_sdk_starter_contains_runtime_gui_assets() {
+        let root =
+            PathBuf::from(std::env::var_os("LOOMLIGHT_RENPY_SDK").expect("pinned SDK required"));
+        let temporary = tempfile::tempdir().unwrap();
+        let mut lifecycle =
+            crate::lifecycle::LifecycleService::new(temporary.path().join("profile")).unwrap();
+        let parent = lifecycle.register_parent(temporary.path()).unwrap();
+        let selected = lifecycle.register_sdk(&root, "gui-test").unwrap();
+        let sdk = RenpyAdapter::validate_sdk(&root).unwrap();
+        for (folder, width, height, initialize_git) in [
+            ("starter", 1280, 720, false),
+            ("custom-starter", 1600, 1000, true),
+        ] {
+            let created = lifecycle
+                .create_project(crate::lifecycle::CreateProjectRequest {
+                    parent_id: parent.id.clone(),
+                    sdk_id: selected.id.clone(),
+                    title: "GUI startup test".into(),
+                    folder_name: folder.into(),
+                    width,
+                    height,
+                    initialize_git,
+                })
+                .unwrap();
+            assert_eq!(created.status, "complete");
+            let opened = created.project.unwrap();
+            assert_eq!(opened.title, "GUI startup test");
+            assert_eq!(opened.folder_name, folder);
+            assert_eq!(opened.sdk_version, SUPPORTED_VERSION);
+            assert_eq!(
+                opened.resolution,
+                crate::metadata::Resolution { width, height }
+            );
+            assert_eq!(opened.chapter_name, "Chapter 1");
+            assert_eq!(opened.scene_name, "Scene 1");
+            lifecycle.close().unwrap();
+            let stage = temporary.path().join(folder);
+            for file in [
+                "game/script.rpy",
+                "game/options.rpy",
+                "game/gui.rpy",
+                "game/screens.rpy",
+                "game/definitions/characters.rpy",
+                "game/definitions/variables.rpy",
+                "game/definitions/transforms.rpy",
+                "game/chapters/chapter_01/scene_001.rpy",
+                ".renpy-editor/project.json",
+                ".renpy-editor/source-map.json",
+                ".renpy-editor/authoring.json",
+            ] {
+                assert!(stage.join(file).is_file(), "missing starter file: {file}");
+            }
+            assert_eq!(stage.join(".git").is_dir(), initialize_git);
+            if initialize_git {
+                let git = Command::new("git")
+                    .arg("-C")
+                    .arg(&stage)
+                    .args(["rev-parse", "--is-inside-work-tree"])
+                    .output()
+                    .unwrap();
+                assert!(git.status.success());
+                assert_eq!(String::from_utf8(git.stdout).unwrap().trim(), "true");
+            }
+            let metadata: crate::metadata::ProjectMetadata = serde_json::from_slice(
+                &fs::read(stage.join(".renpy-editor/project.json")).unwrap(),
+            )
+            .unwrap();
+            assert_eq!(metadata.project_id, opened.project_id);
+            assert_eq!(metadata.sdk.adapter, "renpy-8.5.3");
+            assert_eq!(metadata.sdk.version, SUPPORTED_VERSION);
+            assert_eq!(metadata.resolution, opened.resolution);
+            assert_eq!(metadata.entry_scene_id.as_ref(), Some(&opened.scene_id));
+            let reopened = lifecycle.open_path(&stage).unwrap();
+            assert_eq!(reopened.project_id, opened.project_id);
+            assert_eq!(reopened.scene_id, opened.scene_id);
+            assert_eq!(reopened.resolution, opened.resolution);
+            lifecycle.close().unwrap();
+            for asset in [
+                "button/idle_background.png",
+                "button/hover_background.png",
+                "button/check_foreground.png",
+                "bar/left.png",
+                "bar/right.png",
+                "slider/horizontal_idle_thumb.png",
+            ] {
+                assert!(
+                    stage.join("game/gui").join(asset).is_file(),
+                    "missing runtime GUI asset: {asset}"
+                );
+            }
+            // Runtime checks prove generated configuration and rendered controls, rather
+            // than treating compile/lint or a still-running exception screen as success.
+            fs::write(
+                stage.join("game/loomlight_gui_test.rpy"),
+                format!(
+                    r#"testcase loomlight_gui_startup:
+    assert eval (config.screen_width == {width} and config.screen_height == {height})
+    assert eval (config.name == "GUI startup test" and build.name == "{folder}")
+    assert screen "main_menu"
+    click "Preferences"
+    assert screen "preferences"
+    click "Return"
+    click "Load"
+    assert screen "load"
+    click "Return"
+    click "Start"
+    assert screen "say"
+    click "Save"
+    assert screen "save"
+    click "Return"
+    click "Your story begins here."
+    assert screen "main_menu"
+    exit
+"#
+                ),
+            )
+            .unwrap();
+            // Runnable content must remain independent of editor metadata. Removing
+            // it only from the custom disposable fixture also proves that boundary.
+            if initialize_git {
+                fs::remove_dir_all(stage.join(".renpy-editor")).unwrap();
+            }
+            let args = [
+                command_path(&stage),
+                OsString::from("test"),
+                OsString::from("loomlight_gui_startup"),
+            ];
+            let result = run_bounded(
+                &sdk.root,
+                launcher_args(&sdk.root, &args).unwrap(),
+                Duration::from_secs(30),
+            )
+            .unwrap();
+            assert!(!result.timed_out, "starter menu test timed out");
+            assert_eq!(result.exit_code, Some(0), "{}", result.output);
+            assert!(
+                result.output.contains("loomlight_gui_startup") && result.output.contains("PASSED"),
+                "missing positive named SDK test result: {}",
+                result.output
+            );
+        }
+    }
+
+    #[test]
+    fn sdk_hashes_match_multichunk_empty_and_missing_inputs() {
+        let fixture = tempfile::tempdir().unwrap();
+        let root = fixture.path();
+        let bytes: Vec<u8> = (0..2 * 1024 * 1024 + 31)
+            .map(|index| (index % 251) as u8)
+            .collect();
+        fs::write(root.join("a.bin"), &bytes).unwrap();
+        fs::write(root.join("z-empty"), []).unwrap();
+        assert_eq!(
+            sha256_file(&root.join("a.bin")).unwrap(),
+            hex::encode(Sha256::digest(&bytes))
+        );
+        assert_eq!(
+            sha256_file(&root.join("z-empty")).unwrap(),
+            hex::encode(Sha256::digest([]))
+        );
+        // Fixed filename order and explicit framing, independent of traversal.
+        let mut expected = Sha256::new();
+        expected.update(b"a.bin\0");
+        expected.update(&bytes);
+        expected.update([0xff]);
+        expected.update(b"z-empty\0");
+        expected.update([0xff]);
+        assert_eq!(
+            hash_regular_tree(root).unwrap(),
+            hex::encode(expected.finalize())
+        );
+        assert!(matches!(
+            sha256_file(&root.join("absent")),
+            Err(RenpyError::Io)
+        ));
+        assert!(matches!(
+            hash_regular_tree(&root.join("absent")),
+            Err(RenpyError::InvalidSdk)
+        ));
+    }
+
+    #[test]
+    fn sdk_file_hash_retains_cancellation_and_deadline() {
+        let fixture = tempfile::tempdir().unwrap();
+        let path = fixture.path().join("file");
+        fs::write(&path, b"sdk hash input").unwrap();
+        let cancel = std::sync::Arc::new(crate::runtime_work::Cancellation::default());
+        cancel.cancel();
+        assert!(matches!(
+            crate::runtime_work::scoped(cancel, || sha256_file(&path)),
+            Err(RenpyError::Io)
+        ));
+        assert!(matches!(
+            crate::runtime_work::proof_scoped(
+                std::sync::Arc::new(crate::runtime_work::Cancellation::default()),
+                std::time::Instant::now() - std::time::Duration::from_secs(1),
+                || sha256_file(&path),
+            ),
+            Err(RenpyError::Io)
+        ));
+    }
 
     fn archive(path: &Path, members: &[(&str, &[u8])]) {
         let file = File::create(path).unwrap();

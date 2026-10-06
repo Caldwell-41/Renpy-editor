@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Channel, invoke } from "@tauri-apps/api/core";
 import { createRequest, isCoreResponse, type CoreOperation, type CoreResponse } from "./protocol.ts";
 
 export async function requestCore<T>(
@@ -6,9 +6,23 @@ export async function requestCore<T>(
   payload: Readonly<Record<string, unknown>> = {},
 ): Promise<CoreResponse<T>> {
   const request = createRequest(operation, payload);
-  const response: unknown = await invoke("core_request", { request });
+  let active=true;
+  let onProgress: Channel<OperationProgress> | undefined;
+  if(operation === "sdk.install" || operation === "project.create") {
+    onProgress = new Channel<OperationProgress>(); let sequence=0;
+    onProgress.onmessage = update => { if(active && update.sequence > sequence){ sequence=update.sequence; listeners.forEach(listener=>listener(operation,update)); } };
+  }
+  let response: unknown;
+  try { response = await invoke("core_request", { request, onProgress }); } finally { active=false; }
   if (!isCoreResponse(response, request.requestId)) {
     throw new Error("The desktop core returned an invalid response.");
   }
   return response as CoreResponse<T>;
 }
+
+/** Desktop verifies the project is already closed before allowing application exit. */
+export async function completeApplicationClose(): Promise<void> { await invoke("complete_application_close"); }
+
+export interface OperationProgress { sequence: number; stage: string; bytes?: number; total?: number }
+const listeners=new Set<(operation: string, progress: OperationProgress)=>void>();
+export function observeProgress(listener: (operation: string, progress: OperationProgress)=>void):()=>void { listeners.add(listener);return ()=>listeners.delete(listener); }

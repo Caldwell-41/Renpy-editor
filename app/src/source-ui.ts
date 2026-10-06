@@ -1,3 +1,7 @@
+import { layoutFor, saveLayout } from "./preferences.ts";
+import { sourceEditor, type SourceEditor } from "./source-editor.ts";
+import type { EditorState } from "@codemirror/state";
+import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
 export type SourceFileState = "clean" | "dirty" | "conflict" | "invalid" | "readOnly" | "unavailable";
 
 export interface SourceFileSummary {
@@ -56,6 +60,7 @@ export interface SourceDocument {
 }
 
 export interface SourceTarget {
+  readonly expectedRevision?: string;
   readonly path: string;
   readonly selectionStart?: number;
   readonly selectionEnd?: number;
@@ -87,13 +92,15 @@ export interface SourceTransitionHandle {
 export interface SourceWorkspaceController {
   readonly captureSaveIntent: (origin: "keyboard" | "toolbar", requireEditingContext: boolean) => SourceSaveCapture;
   readonly executeSave: (intent: SourceSaveIntent, flushClean: () => Promise<void>) => Promise<SourceSaveOutcome>;
-  readonly prepareTransition: (reason: "navigation" | "leave") => Promise<SourceTransitionHandle | undefined>;
+  readonly prepareTransition: (reason: "navigation" | "leave" | "runtime") => Promise<SourceTransitionHandle | undefined>;
+  readonly refreshAccepted: () => Promise<void>;
   readonly hasUnretainedInput: () => boolean;
   readonly setModalBlocked: (blocked: boolean) => void;
   readonly dispose: () => void;
 }
 
 export interface SourceActions {
+  readonly layoutKey?: string;
   readonly open: (target: SourceTarget) => Promise<SourceDocument>;
   readonly update: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly text: string; readonly selectionStart: number; readonly selectionEnd: number }) => Promise<SourceDocument>;
   readonly save: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number }) => Promise<SourceDocument>;
@@ -134,12 +141,7 @@ function button(label: string, className = "button secondary"): HTMLButtonElemen
 }
 
 function stateLabel(state: SourceFileState): string {
-  return ({ clean: "Clean", dirty: "Pending validation", conflict: "Conflict", invalid: "Invalid Source · Scene stale", readOnly: "Read-only", unavailable: "Unavailable" })[state];
-}
-
-function lineNumbers(text: string): string {
-  const count = Math.max(1, text.split("\n").length);
-  return Array.from({ length: count }, (_, index) => String(index + 1)).join("\n");
+  return ({ clean: "Clean", dirty: "Unsaved Source draft", conflict: "Conflict", invalid: "Invalid Source · Scene stale", readOnly: "Read-only", unavailable: "Unavailable" })[state];
 }
 
 function focusableWithin(host: HTMLElement): HTMLElement[] {
@@ -181,7 +183,11 @@ export function renderSourceWorkspace(
   const controllerId = ++nextControllerId;
   let inventory = initialInventory;
   let current: SourceDocument | undefined;
-  let editor: HTMLTextAreaElement | undefined;
+  let tabObserver:ResizeObserver|undefined;
+  let editor: SourceEditor | undefined;
+  let editorPath: string | undefined;
+  const retainedEditors = new Map<string,EditorState>();
+  const openTabs = new Set<string>();
   let displayedReview: SourceDocument | undefined;
   let disposed = false;
   let documentGeneration = 0;
@@ -249,12 +255,13 @@ export function renderSourceWorkspace(
 
   const captureSnapshot = (advance: boolean): InputSnapshot | undefined => {
     if (!current || !editor || !current.editable) return undefined;
+    const wire = sourceTextareaSnapshot(current, editor);
     const changed = !latestSnapshot
       || latestSnapshot.documentGeneration !== documentGeneration
       || latestSnapshot.path !== current.path
-      || latestSnapshot.text !== editor.value
-      || latestSnapshot.selectionStart !== editor.selectionStart
-      || latestSnapshot.selectionEnd !== editor.selectionEnd;
+      || latestSnapshot.text !== wire.text
+      || latestSnapshot.selectionStart !== wire.selectionStart
+      || latestSnapshot.selectionEnd !== wire.selectionEnd;
     if (advance || changed) inputSequence += 1;
     if (!latestSnapshot || advance || changed) {
       latestSnapshot = {
@@ -263,20 +270,19 @@ export function renderSourceWorkspace(
         sequence: inputSequence,
         path: current.path,
         expectedBaseRevision: current.baseRevision,
-        text: editor.value,
-        selectionStart: editor.selectionStart,
-        selectionEnd: editor.selectionEnd,
+        ...wire,
       };
     }
     return latestSnapshot;
   };
 
   const drawTree = (): void => {
-    treeHost.replaceChildren();
+    treeHost.replaceChildren();treeHost.classList.add("source-file-tree");
     const heading = document.createElement("p");
     heading.className = "eyebrow";
     heading.textContent = "Source files";
-    treeHost.append(heading);
+    const search=document.createElement("input");search.type="search";search.placeholder="Find a file…";search.ariaLabel="Find a file";search.addEventListener("input",()=>{treeHost.querySelectorAll<HTMLElement>(".source-file-row").forEach(row=>row.hidden=!(row.textContent??"").toLowerCase().includes(search.value.toLowerCase()));});
+    treeHost.append(heading,search);
     for (const file of inventory.files) {
       const row = document.createElement("div");
       row.className = `source-file-row${current?.path === file.path ? " selected" : ""}`;
@@ -297,6 +303,7 @@ export function renderSourceWorkspace(
       ? `${inventory.dirtyCount} draft${inventory.dirtyCount === 1 ? "" : "s"} · ${inventory.draftBytes.toLocaleString()} bytes`
       : "No unaccepted drafts";
     treeHost.append(total);
+    treeHost.querySelector<HTMLElement>(".source-file-row.selected")?.scrollIntoView?.({block:"nearest"});
     applyBarrierState();
   };
 
@@ -323,6 +330,18 @@ export function renderSourceWorkspace(
         });
         if (identityMatches(snapshot.documentGeneration, snapshot.path) && snapshot.sequence >= acknowledgedSequence) {
           acknowledgedSequence = snapshot.sequence;
+          const previous = current;
+          const summary = inventory.files.find(file => file.path === next.path);
+          if (summary) {
+            const bytes = (value: string | undefined): number => new TextEncoder().encode(value ?? "").byteLength;
+            inventory = {
+              ...inventory,
+              files: inventory.files.map(file => file.path === next.path ? { ...file, state: next.state, dirty: next.dirty } : file),
+              dirtyCount: inventory.dirtyCount + Number(next.dirty) - Number(summary.dirty),
+              draftBytes: Math.max(0, inventory.draftBytes + (next.dirty ? bytes(next.text) : 0) - (summary.dirty ? bytes(previous?.text) : 0)),
+            };
+            drawTree();
+          }
           current = next;
           if (latestRetentionFailure && latestRetentionFailure.snapshot.sequence <= snapshot.sequence) latestRetentionFailure = undefined;
           if (latestSnapshot?.sequence === snapshot.sequence) {
@@ -371,7 +390,7 @@ export function renderSourceWorkspace(
     value !== undefined && review.path === value.path
     && review.baseRevision === value.baseRevision && review.draftVersion === value.draftVersion
     && review.liveRevision === value.liveRevision && review.combinedPreview === value.combinedPreview
-    && review.text === value.text && editor?.value === review.text
+    && review.text === value.text && editor?.value === textareaText(review.text ?? "")
     && value.canApplyBoth && typeof review.liveRevision === "string"
     && typeof review.combinedPreview === "string";
 
@@ -385,7 +404,7 @@ export function renderSourceWorkspace(
     if (reviewNotice) reviewNotice.hidden = !staleReview;
     const badge = host.querySelector<HTMLElement>(".source-document-state");
     if (badge) {
-      badge.textContent = localPending ? "Pending validation" : stateLabel(current.state);
+      badge.textContent = localPending && latestSnapshot?.text !== current.text ? "Unsaved Source draft" : stateLabel(current.state);
       badge.dataset.state = localPending ? "dirty" : current.state;
     }
     const save = host.querySelector<HTMLButtonElement>('button[data-source-action="save"]');
@@ -419,7 +438,7 @@ export function renderSourceWorkspace(
 
   const captureSaveIntent = (origin: "keyboard" | "toolbar", requireEditingContext: boolean): SourceSaveCapture => {
     if (disposed || !current || !editor) return { kind: "notApplicable" };
-    if (requireEditingContext && document.activeElement !== editor) return { kind: "notApplicable" };
+    if (requireEditingContext && !editor.hasFocus()) return { kind: "notApplicable" };
     if (modalBlocked || host.querySelector('[aria-modal="true"]')) return { kind: "blocked", message: "Finish the open dialog before saving." };
     if (barriers.size > 0) return { kind: "blocked", message: "Source persistence is already in progress." };
     const snapshot = captureForSettlement();
@@ -449,6 +468,7 @@ export function renderSourceWorkspace(
   const executeSave = async (intent: SourceSaveIntent, flushClean: () => Promise<void>): Promise<SourceSaveOutcome> => {
     const snapshot = snapshotForIntent(intent);
     if (!snapshot) return { kind: "stale", message: "The captured Source document is no longer current." };
+    const restoreTypingFocus = editor?.hasFocus() === true;
     const barrier = beginBarrier();
     actions.status("Retaining latest Source input…");
     try {
@@ -527,10 +547,14 @@ export function renderSourceWorkspace(
       return { kind: "blocked", message: error.message };
     } finally {
       barrier.release();
+      // A rich editor recreated during Save is still non-editable until release.
+      // Restore keyboard typing only after that barrier, without stealing another control's focus.
+      if (restoreTypingFocus && identityMatches(intent.documentGeneration, intent.path)
+        && !modalBlocked && document.activeElement === document.body) editor?.focus();
     }
   };
 
-  const prepareTransition = async (_reason: "navigation" | "leave"): Promise<SourceTransitionHandle | undefined> => {
+  const prepareTransition = async (_reason: "navigation" | "leave" | "runtime"): Promise<SourceTransitionHandle | undefined> => {
     if (disposed) return undefined;
     const barrier = beginBarrier();
     const snapshot = captureSnapshot(false);
@@ -696,6 +720,7 @@ export function renderSourceWorkspace(
           const next = await actions.open(target);
           if (disposed || generation !== documentGeneration) return;
           current = next;
+          openTabs.add(next.path);
           inputSequence += 1;
           acknowledgedSequence = inputSequence;
           latestRetentionFailure = undefined;
@@ -722,13 +747,17 @@ export function renderSourceWorkspace(
       const generation = documentGeneration;
       const sequence = inputSequence;
       if (!observed || !control || disposed) return;
-      void actions.runCoordinated("source.observe", async () => {
+      // Background observation must not reserve the renderer's authoring lease.
+      // RequestLane still orders Source opening after retention; the checks below prevent
+      // it from applying over an explicit save or transition. Taking the authoring
+      // lease here would let a timer queued during SDK discovery refuse Run.
+      void (async () => {
         await retentionTail;
         if (!identityMatches(generation, observed.path) || sequence !== inputSequence || barriers.size > 0) return;
         const next = await actions.open({
           path: observed.path,
-          selectionStart: control.selectionStart,
-          selectionEnd: control.selectionEnd,
+          selectionStart: sourceTextareaSnapshot(observed, control).selectionStart,
+          selectionEnd: sourceTextareaSnapshot(observed, control).selectionEnd,
         });
         if (!identityMatches(generation, observed.path) || sequence !== inputSequence || barriers.size > 0) return;
         const changed = next.state !== current?.state
@@ -742,7 +771,7 @@ export function renderSourceWorkspace(
           drawDocument();
           actions.refreshPersistence();
         }
-      }).catch(() => { /* explicit Refresh and Save report actionable failures */ });
+      })().catch(() => { /* explicit Refresh and Save report actionable failures */ });
     }, 250);
   };
 
@@ -756,6 +785,7 @@ export function renderSourceWorkspace(
   };
 
   const drawDocument = (): void => {
+    if(editor && editorPath){const state=editor.state();if(state)retainedEditors.set(editorPath,state);editor.destroy();}
     host.replaceChildren();
     editor = undefined;
     if (!current) {
@@ -765,6 +795,13 @@ export function renderSourceWorkspace(
       host.append(empty);
       return;
     }
+    tabObserver?.disconnect();
+    const tabs=document.createElement("div");tabs.className="source-tabs";tabs.role="tablist";
+    openTabs.forEach(path=>{const group=document.createElement("div");group.className="source-tab-group";group.dataset.active=String(path===current?.path);group.title=path;const tab=button(`${path.split("/").at(-1)}${inventory.files.find(f=>f.path===path)?.dirty?" ●":""}`,"source-tab");tab.role="tab";tab.ariaSelected=String(path===current?.path);tab.addEventListener("click",()=>void openFile({path}));
+      const close=button("×","text-button source-tab-close");close.ariaLabel=`Close ${path.split("/").at(-1)} tab; keep its draft`;
+      close.addEventListener("click",()=>void(async()=>{let transition:Awaited<ReturnType<typeof controller.prepareTransition>>;try{transition=await controller.prepareTransition("navigation");if(!transition)return;openTabs.delete(path);if(current?.path===path){const next=[...openTabs].at(-1);if(next){transition.release();await openFile({path:next});return;}current=undefined;}drawDocument();}catch(error){actions.status(error instanceof Error?error.message:"Tab could not close","error");}finally{transition?.release();}})());group.append(tab,close);tabs.append(group);});const tabBar=document.createElement("div");tabBar.className="source-tab-bar";const previousTab=button("‹","icon-button");previousTab.ariaLabel="Scroll open files left";previousTab.onclick=()=>tabs.scrollBy?.({left:-220,behavior:"smooth"});const nextTab=button("›","icon-button");nextTab.ariaLabel="Scroll open files right";nextTab.onclick=()=>tabs.scrollBy?.({left:220,behavior:"smooth"});const files=document.createElement("select");files.ariaLabel="Open files";openTabs.forEach(path=>{const option=document.createElement("option");option.value=path;option.textContent=path;option.selected=path===current?.path;files.append(option);});files.onchange=()=>void openFile({path:files.value});tabBar.append(previousTab,tabs,nextTab,files);host.append(tabBar);
+    const reveal=():void=>{if(!tabBar.isConnected)return;const overflow=tabs.scrollWidth>tabs.clientWidth;previousTab.hidden=nextTab.hidden=files.hidden=!overflow;const active=tabs.querySelector<HTMLElement>('[data-active="true"]');if(active){const box=tabs.getBoundingClientRect(),item=active.getBoundingClientRect();if(item.left<box.left)tabs.scrollLeft+=item.left-box.left;else if(item.right>box.right)tabs.scrollLeft+=item.right-box.right;}};
+    window.requestAnimationFrame?.(reveal);if(typeof ResizeObserver!=="undefined"){tabObserver=new ResizeObserver(reveal);tabObserver.observe(tabs);}
     const header = document.createElement("header");
     header.className = "source-header";
     const title = document.createElement("div");
@@ -793,9 +830,11 @@ export function renderSourceWorkspace(
     discard.addEventListener("click", () => confirmDiscard(false));
     const refresh = button("Refresh");
     refresh.addEventListener("click", () => {
-      if (current) void openFile({ path: current.path, selectionStart: editor?.selectionStart, selectionEnd: editor?.selectionEnd });
+      if (current) { const selection = editor ? sourceTextareaSnapshot(current,editor) : current; void openFile({ path: current.path, selectionStart: selection.selectionStart, selectionEnd: selection.selectionEnd }); }
     });
-    toolbar.append(save, discard, refresh);
+    const find=button("Find / replace");find.addEventListener("click",()=>editor?.find());
+    const context=button("Scene context");context.ariaExpanded=String(!!actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);context.addEventListener("click",()=>{const mapping=host.querySelector<HTMLElement>(".source-mapping");if(mapping){mapping.hidden=!mapping.hidden;context.ariaExpanded=String(!mapping.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!mapping.hidden});}});
+    toolbar.append(save, discard, refresh, find, context);
     host.append(toolbar);
     const draftWarning = document.createElement("p");
     draftWarning.className = "source-draft-warning";
@@ -861,30 +900,8 @@ export function renderSourceWorkspace(
 
     const editorShell = document.createElement("div");
     editorShell.className = "source-editor-shell";
-    const gutter = document.createElement("pre");
-    gutter.className = "source-line-numbers";
-    gutter.ariaHidden = "true";
-    gutter.textContent = lineNumbers(current.text ?? "");
-    const text = document.createElement("textarea");
-    text.className = "source-editor";
-    text.spellcheck = false;
-    text.wrap = "off";
-    text.value = current.text ?? "";
-    text.readOnly = barriers.size > 0 || !current.editable;
-    text.ariaLabel = `Source editor for ${current.path}`;
-    text.selectionStart = Math.min(current.selectionStart, text.value.length);
-    text.selectionEnd = Math.min(current.selectionEnd, text.value.length);
-    text.addEventListener("scroll", () => { gutter.scrollTop = text.scrollTop; });
-    text.addEventListener("input", () => {
-      if (barriers.size > 0) return;
-      gutter.textContent = lineNumbers(text.value);
-      recordEditorEvent();
-    });
-    for (const event of ["select", "keyup", "mouseup"]) {
-      text.addEventListener(event, () => {
-        if (barriers.size === 0) recordEditorEvent();
-      });
-    }
+    const text=sourceEditor(editorShell,{rawText:current.text??"",newline:current.newline,text:textareaText(current.text??""),from:textareaOffset(current.text??"",current.selectionStart),to:textareaOffset(current.text??"",current.selectionEnd),readOnly:barriers.size>0||!current.editable,label:`Source editor for ${current.path}`,change:()=>{if(barriers.size===0)recordEditorEvent();},retained:retainedEditors.get(current.path)});
+    editorPath=current.path;
     editor = text;
     latestSnapshot = {
       controllerId,
@@ -892,15 +909,13 @@ export function renderSourceWorkspace(
       sequence: inputSequence,
       path: current.path,
       expectedBaseRevision: current.baseRevision,
-      text: text.value,
-      selectionStart: text.selectionStart,
-      selectionEnd: text.selectionEnd,
+      ...sourceTextareaSnapshot(current,text),
     };
-    editorShell.append(gutter, text);
     host.append(editorShell);
 
     const mapping = document.createElement("section");
     mapping.className = "source-mapping";
+    mapping.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
     const mappingHeading = document.createElement("h2");
     mappingHeading.textContent = "Mapped ranges";
     mapping.append(mappingHeading);
@@ -914,7 +929,7 @@ export function renderSourceWorkspace(
       const select = button(range.protected ? `Custom Code · ${range.kind}` : range.kind, range.protected ? "source-range opaque" : "source-range supported");
       select.addEventListener("click", () => {
         text.focus();
-        text.setSelectionRange(range.editorStart, range.editorEnd);
+        text.setSelectionRange(textareaOffset(current?.text ?? "",range.editorStart), textareaOffset(current?.text ?? "",range.editorEnd));
         recordEditorEvent();
       });
       mapping.append(select);
@@ -936,11 +951,25 @@ export function renderSourceWorkspace(
     captureSaveIntent,
     executeSave,
     prepareTransition,
+    refreshAccepted: async () => {
+      if (disposed || !current || barriers.size === 0 || hasLocalInput()) return;
+      const generation = documentGeneration;
+      const path = current.path;
+      const next = await actions.open({ path, selectionStart: current.selectionStart, selectionEnd: current.selectionEnd });
+      if (!identityMatches(generation, path)) return;
+      current = next;
+      latestSnapshot = undefined;
+      latestRetentionFailure = undefined;
+      await refreshInventory();
+      drawDocument();
+      actions.refreshPersistence();
+    },
     hasUnretainedInput: hasLocalInput,
     setModalBlocked: (blocked) => { modalBlocked = blocked; },
     dispose: () => {
       if (disposed) return;
-      disposed = true;
+      disposed = true;tabObserver?.disconnect();
+      editor?.destroy();retainedEditors.clear();
       documentGeneration += 1;
       unregisterController?.();
       unregisterController = undefined;
@@ -958,6 +987,7 @@ export function renderSourceWorkspace(
     path: target.path,
     selectionStart: "selectionStart" in target ? target.selectionStart : undefined,
     selectionEnd: "selectionEnd" in target ? target.selectionEnd : undefined,
+    expectedRevision: "expectedRevision" in target ? target.expectedRevision : undefined,
     byteStart: "byteStart" in target ? target.byteStart : undefined,
     byteEnd: "byteEnd" in target ? target.byteEnd : undefined,
   });

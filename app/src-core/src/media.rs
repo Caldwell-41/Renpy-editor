@@ -7,7 +7,7 @@ use crate::{
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use serde::{Deserialize, Serialize};
 
-const MAX_PRESENTATION_BYTES: u64 = 16 * 1024 * 1024;
+pub(crate) const MAX_PRESENTATION_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION: u32 = 8192;
 type ValidatedImage = (&'static str, Option<(u32, u32)>);
 
@@ -24,6 +24,33 @@ pub enum MediaPurpose {
 pub struct MediaRequest {
     pub asset_id: String,
     pub purpose: MediaPurpose,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ImportPreviewRequest {
+    pub authority_id: String,
+}
+
+pub(crate) fn import_image_presentation(
+    authority_id: String,
+    extension: &str,
+    bytes: &[u8],
+    sha256: String,
+) -> Result<MediaPresentation, MediaError> {
+    let (mime_type, dimensions) = validate_image(extension, bytes)?;
+    let (width, height) = dimensions.map_or((None, None), |(w, h)| (Some(w), Some(h)));
+    Ok(MediaPresentation {
+        cache_key: format!("{authority_id}:{sha256}"),
+        asset_id: authority_id,
+        purpose: MediaPurpose::ImagePreview,
+        mime_type: mime_type.into(),
+        data_base64: STANDARD.encode(bytes),
+        sha256,
+        byte_count: bytes.len() as u64,
+        width,
+        height,
+    })
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
