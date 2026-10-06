@@ -1,5 +1,46 @@
 # Current outcome handover
 
+## Mac acceptance and combined qualification — 2026-10-06
+
+**State: Mac Pass; preparing the single authorized changed-input remote qualification.**
+Human reports **“all working”** for held lower/upper edges, toolbar/outside bounds and
+Escape. All **293 cancellation-only project hashes unchanged**; native Saved and
+Undo/Redo disabled. `physical-held-result.json` retains human observations separately
+from native/hash verification. All six bounded Mac checks Pass in their recorded
+selected scopes; no application correction, repeated full review or Windows retest.
+Normal project close/app Quit and process absence Pass. Original **3,227-file profile
+restored/hash-identical**; review profile preserved, temporary media restored.
+`restoration.json` and `mac-acceptance.json` retained locally; no native operation pending.
+
+Frozen app remains `ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1`. All **132 inputs**
+reverified; **10 changed / 122 unchanged** versus `5b467a4`. Local Mac and Windows
+candidate identities below remain authoritative. Later documentation carrier SHAs
+do not replace them. Both workflows are byte-identical to qualified `5b467a4`;
+reuse prior workflow-semantic validation, no workflow edits or optional diagnostic run.
+
+**Justification/allowance:** ten materially changed app/test/probe inputs since prior
+qualified `5b467a4` require one coherent Windows/macOS qualification after both native
+reviews Pass. Dispatch existing `quality.yml` default validation and one
+`production-scaffold.yml` with `upload_packages=true`, on this feature's published
+acceptance carrier. This is the selected changed-input correction qualification,
+not a documentation-only duplicate; initial 1/1 and prior two correction dispatches
+remain consumed. No ambiguous retry or additional matrix. Local counters unchanged:
+Mac **19 builds / 77 starts / 7 SDK menus**, Windows **6 production + 1 unqualified /
+4 failed setup / 21 starts / 0 SDK menus**; three local Mac game starts separate.
+
+**Required terminal audit:** Preflight and both native-host jobs; positive named SDK
+lifecycle/download/runtime-service/diagnostic gates, browser actual outcomes, desktop
+boundary/single-instance/privacy/dependency/cleanup evidence; exactly one successful
+report for each `compile`, `lint`, `route-a`, `route-b`, `runtime-error`, `ui-refresh`
+per host; run/attempt/exact SHA, **132 matching input hashes**, retained scanned
+packages/app/executables with verified hashes. Timing diagnostics stay distinct from
+functional failures. Missing/failed/skipped gates are unresolved. Record confirmed
+runs before manual same-chat waiting; do not poll. On resume audit those identities,
+publish combined handover only after both hosts Pass. PR #17 remains draft/open/
+conflicting; no conflict resolution/rewrite/merge, 1G/1H closure or next phase.
+
+## Earlier focused human-input checkpoint (completed)
+
 ## Bounded Mac follow-up checkpoint — 2026-10-06
 
 **State: awaiting one focused human held-pointer check.** The user selected the

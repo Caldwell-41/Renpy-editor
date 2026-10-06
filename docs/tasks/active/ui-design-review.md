@@ -1,5 +1,36 @@
 # UI design review
 
+### Bounded Mac acceptance and combined qualification — 2026-10-06
+
+**Live state: Mac Pass; preparing one changed-input remote qualification.** Human
+reports **“all working”** for the focused held lower/upper-edge, toolbar/outside and
+Escape session. Native Saved/Undo and Redo disabled; **293/293 cancellation-only
+hashes unchanged**, no intentional/accidental reorder evidence. `physical-held-result.json`
+records human observations separately. All six selected cases below now Pass.
+Normal project close/app Quit and process absence confirmed; guarded restoration
+preserves review profile and restores **3,227/3,227 original hashes**. External PNG/JPEG
+bytes restored. `restoration.json`, `mac-acceptance.json` retained; no app/game pending.
+No app correction, new build/start/SDK or affected Windows retest.
+
+All **132** frozen inputs reverified; **10 changed / 122 unchanged** versus qualified
+`5b467a4`. Both workflows are byte-identical to that qualification; prior actionlint
+1.7.12 semantic evidence reused. Native Mac/Windows executable identities remain those
+below, distinct from later documentation carrier SHAs.
+
+**One qualification justified:** ten changed application/test/probe inputs need the
+existing required Windows x64/macOS ARM64 gates after both native reviews Pass.
+Select default `quality.yml` validation plus `production-scaffold.yml`,
+`upload_packages=true`; no optional flow/diagnostic/proof run. Initial allowance 1/1
+and prior two correction dispatches preserved; this authorizes exactly one new coherent
+changed-input qualification, not a duplicate unchanged matrix or ambiguous retry.
+No dispatch yet at this acceptance checkpoint. Local cumulative counters unchanged.
+Terminal audit must verify actual named SDK/service/browser/boundary/privacy/cleanup
+gates, six packaged cases per target, exact run/attempt/SHA,132 matching input hashes,
+retained scanned packages/app/executables and hashes. Confirm identities/publish wait,
+then manual same-chat resume without model polling. No integration/phase closure.
+
+### Earlier Mac focused-input checkpoint (completed)
+
 ### Bounded Mac frozen-candidate follow-up — 2026-10-06
 
 **Live state: awaiting one focused human held-pointer check.** User selected

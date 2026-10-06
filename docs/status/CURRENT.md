@@ -7,6 +7,27 @@
 
 ## Live continuation
 
+**Mac acceptance Pass / combined qualification preparing — 2026-10-06.** User's
+held-grip feedback **“all working”**, native Saved/Undo and Redo disabled, and all
+**293 cancellation-only hashes unchanged** complete the sixth focused check. All six
+Mac cases Pass in selected native/service/controller/human scopes. Original profile
+**3,227 hashes restored/identical**, review profile retained, app/game absent and
+temporary external media restored. No application changes or new local starts/builds.
+
+All **132** inputs equal frozen `ee5f55e` (**10 changed / 122 unchanged** versus
+`5b467a4`). Exact local Mac/Windows binary identities remain recorded below; later
+docs commits do not replace them. The ten changed inputs justify **one coherent
+required Windows/macOS qualification**: default repository quality plus production
+`upload_packages=true`, no optional diagnostics or duplicate matrix. Workflows unchanged;
+initial 1/1 and prior two correction dispatches preserved. No new dispatch yet.
+Audit actual SDK/service/browser/boundary/cleanup gates, all six runtime cases per host,
+run/attempt/SHA, matching manifests and retained scanned packages before claiming
+combined acceptance. Manual same-chat waiting; final integration remains separate.
+Exact evidence/budgets: [acceptance ledger](../tasks/active/ui-design-review.md#bounded-mac-acceptance-and-combined-qualification--2026-10-06)
+and [handover](HANDOVER.md#mac-acceptance-and-combined-qualification--2026-10-06).
+
+### Earlier Mac held-grip handoff (completed)
+
 **Bounded Mac follow-up — awaiting one physical held-grip check, 2026-10-06.**
 No application changes. All **132** app/workflow inputs match frozen `ee5f55e`;
 **10 changed / 122 unchanged** versus qualified `5b467a4`. One native ARM64
