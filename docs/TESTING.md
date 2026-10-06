@@ -389,7 +389,7 @@ Phase 1 Desktop E2E requirement.
 ## Phase 1 milestone gates
 
 The implementation sequence in
-[`tasks/active/phase-1-vertical-slice.md`](tasks/active/phase-1-vertical-slice.md) is
+[`tasks/archive/2026-10-07-phase-1-vertical-slice.md`](tasks/archive/2026-10-07-phase-1-vertical-slice.md) is
 quality-gated rather than one large feature branch:
 
 | Milestone | Minimum evidence before proceeding |
@@ -403,6 +403,27 @@ quality-gated rather than one large feature branch:
 | 1G completion | Branch graph from shared edges, authoritative SDK diagnostics/run, continued authoring during play, technical-surface design consistency |
 | 1H acceptance | Fresh end-to-end Windows/macOS create→author→save→close→reopen→validate→run workflow plus transaction, source, privacy/security, packaged app, accessibility, and visual-system gates |
 
+Phase 1 is accepted and closed after [independent 1H review and integration](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07).
+Qualification remains production 37529174148/1 at `ba01a84`; integrated main `82d4518`
+has the identical reviewed input tree and required quality 37536967028/1 Pass.
+The accepted limits and both earlier failed matrices remain part of that evidence.
+Future corrections select affected gates under this policy rather than replay unchanged
+qualification or treat historical skipped wrappers as target evidence.
+
+Durable 1H regression lessons:
+
+- Keep fixed expected source/media/runtime observations independent of produced output;
+  exercise normal entry and both actual routes, plus a deliberately wrong assertion
+  that must fail. Exact large integers and metadata-free play remain required.
+- Preserve per-case terminal results, nonzero failures, process cleanup and input/package
+  identity; a success marker or capture alone cannot prove accepted behavior.
+- Test probes must await acknowledged draft retention before contending backend reads,
+  while retaining the backend dirty-count assertion and rejecting refused writes.
+  Preserve the shared deadline; do not replay input or hide a real refusal.
+- Frame evidence requires strictly advancing timestamps and bounded rejection of
+  malformed/backward/nonadvancing evidence. Chrome timing Fail stays diagnostic under
+  the existing policy; required functional and real-service budgets still enforce.
+
 A green result from one platform cannot close a cross-platform milestone. Failed and
 flaky runs remain evidence; isolate and fix defects rather than retrying until green.
 
@@ -412,10 +433,11 @@ boundaries. A fresh service then classifies the retained state. In-process hooks
 deterministically race external content/identity/path changes before and after the
 platform operation. The latest suite also proves recovery-directory namespace
 substitution cannot convert unresolved recovery into an empty successful scan. The
-current Windows/macOS matrix still selects those termination parents in release mode.
-That is an alignment gap, not routine authority. The proposed migration preserves
-specialist evidence and ordinary recovery assertions in separate selections; no second
-expensive matrix is required to verify a documentation change.
+implemented [selector split](tasks/archive/2026-10-06-testing-policy-alignment.md#selector-disposition)
+excludes those deliberate process-termination/namespace parents from the routine
+Windows/macOS matrix. Ordinary external-writer and interrupted-save recovery assertions
+remain selected, including archive-backed lifecycle gates with specialist sections split
+out. Historical specialist defenses/evidence are retained; no documentation-only matrix.
 
 ## Representative source coverage
 
@@ -532,8 +554,8 @@ increases or unsupported causal claims about application Save routing.
 **Phase 1G completion, 2026-10-06:** both-platform native/human review, required
 qualification and exact-input integration are accepted in the
 [closeout ledger](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
-The staged completion sequence is historical. Phase 1H is selected; its
-integrated H01–H12 gates belong to the active acceptance brief. Apply the narrow human
+The staged completion sequence is historical. Phase 1H is accepted and integrated; its
+integrated H01–H12 evidence belongs to the archived acceptance ledger. Apply the narrow human
 reuse policy below; do not automatically repeat the accepted full human session.
 Corrections invalidate affected results and require relevant cross-platform rechecks.
 

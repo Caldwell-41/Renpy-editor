@@ -1,23 +1,23 @@
 # Plan: Phase 1 complete authoring vertical slice
 
 **Updated:** 2026-10-07.<br>
-**Status:** Phase 1A–1G and CI-SIMPLE accepted and integrated. Phase 1G merged through
-[PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) at `295a189`; both-platform
-native/human and exact-input qualification accepted. Phase 1H is `review_ready`: final
-37529174148/1 at `ba01a84` passed both supported targets and the full evidence audit.
-Independent user review remains; no merge or Phase 1 closure.<br>
+**Status:** Phase 1A–1H and CI-SIMPLE accepted and integrated; Phase 1 closed.
+PR #18 merged at `82d45189d003239b622bc946c85b639a093f46a1` after independent review;
+required main quality 37536967028/1 Pass. The
+[closure ledger](2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
+retains exact qualification/review/integration identities, failures and limits.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority
 
-Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](../archive/2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
+Turn the accepted Phase 0 architecture into a small but genuinely usable Loomlight workflow without collapsing the initial product into one implementation task. Read [CURRENT](../../status/CURRENT.md) for present gate state, the [integrated corrective record](2026-09-15-phase-1a-1d-integrated-corrective.md) and its [completed follow-up](2026-09-15-phase-1a-1d-correction-follow-up.md) for accepted 1A–1D evidence.
 
-Each milestone requires explicit user approval and a bounded execution brief. The archived [Phase 1F goal](../archive/2026-09-23-phase-1f-source-synchronisation.md) retains the accepted contract and historical evidence. Planning approval and a documentation merge do not authorise 1G/1H execution. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
+Each milestone requires explicit user approval and a bounded execution brief. The archived [Phase 1F goal](2026-09-23-phase-1f-source-synchronisation.md) retains the accepted contract and historical evidence. Planning approval and a documentation merge do not authorise 1G/1H execution. Internal checkpoints are dependencies within that milestone, not permission to proceed past the approved boundary. Earlier closure evidence remains valid only for the code state and cases it actually tested.
 
 ## Product target and fixed decisions
 
 A user can create a conventional Ren'Py project, select/install and pin the supported SDK, configure resolution, safely persist/close/reopen, create Characters/Appearances/Assets/basic Variables, visually author a small branching VN, use Scene/Source/Branches, validate/run, and continue after restart. New Git status/diff/checkpoint work is an
-[optional later milestone](optional-local-git.md), not a Phase 1 requirement.
+[optional later milestone](../active/optional-local-git.md), not a Phase 1 requirement.
 
 - Targets are Windows x86-64 and macOS Apple Silicon ARM64. Tauri 2 is the production shell; Phase 0 spikes remain evidence, not production services.
 - `.rpy` bytes are authoritative. Editor metadata stores stable identity, mappings and convenience state; it is not a second runnable document. The game runs without `.renpy-editor/`; arbitrary existing-project import and reconstruction after metadata deletion remain deferred.
@@ -41,13 +41,13 @@ Appearance and placement changes are explicit beats. Preview selection distingui
 
 ### 1A — Production scaffold
 
-Historical implementation: [production scaffold](../archive/2026-09-14-phase-1-production-scaffold.md). Preserve the Tauri workspace, locked toolchains, typed command boundary, main-WebView capability/CSP restrictions, safe ports, semantic theme tokens, reduced-motion support and packaged denial tests. No new desktop architecture is required by the current review.
+Historical implementation: [production scaffold](2026-09-14-phase-1-production-scaffold.md). Preserve the Tauri workspace, locked toolchains, typed command boundary, main-WebView capability/CSP restrictions, safe ports, semantic theme tokens, reduced-motion support and packaged denial tests. No new desktop architecture is required by the current review.
 
 **Gate:** Windows/macOS packaging and authorised/unauthorised WebView probes pass without widening renderer privileges. Historical passes do not replace the integrated corrective gate.
 
 ### 1B — Transaction, file coordination, and recovery foundation
 
-Historical implementation: [transaction brief](../archive/2026-09-14-phase-1-transaction-recovery.md), [corrective evidence](../archive/2026-09-14-phase-1b-corrective-transaction-recovery.md), and [transaction contract](../../TRANSACTIONS.md).
+Historical implementation: [transaction brief](2026-09-14-phase-1-transaction-recovery.md), [corrective evidence](2026-09-14-phase-1b-corrective-transaction-recovery.md), and [transaction contract](../../TRANSACTIONS.md).
 
 Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, retained accepted/displaced evidence, no-replace creation and serialized commit/recovery/flush. Multi-file changes are recoverable sequences, not all-files atomic commits or portable compare-and-swap. The completed follow-up records the resource-limit and correctness repairs; 1E owns the integrated file-lifecycle semantics required by Scenes.
 
@@ -55,19 +55,19 @@ Retain exact base-byte/hash/platform-identity checks, handle-anchored paths, ret
 
 ### 1C — Project lifecycle and SDK foundation
 
-Historical implementation: [project lifecycle](../archive/2026-09-14-phase-1c-project-lifecycle.md), [SDK/lifecycle correction](../archive/2026-09-14-phase-1c-corrective-lifecycle.md), [durability/race correction](../archive/2026-09-14-phase-1c-durability-race-remediation.md) and [single-instance correction](../archive/2026-09-14-phase-1c-single-instance.md).
+Historical implementation: [project lifecycle](2026-09-14-phase-1c-project-lifecycle.md), [SDK/lifecycle correction](2026-09-14-phase-1c-corrective-lifecycle.md), [durability/race correction](2026-09-14-phase-1c-durability-race-remediation.md) and [single-instance correction](2026-09-14-phase-1c-single-instance.md).
 
 Preserve Welcome/Recent Projects, title/folder/parent/path preview, discovered/installed/browsed compatible SDK selection, resolution, Review & Create, optional Git initialization, safe staging and no-replace finalisation. Preserve the exact-version SDK/provenance and child-process trust boundaries. A losing application process must never initialise independent lifecycle state.
 
 Retain inspected candidate authority until activation, prepare before replacing the healthy current session, and distinguish session IDs from stable project IDs. Close/switch invalidates the old authority and import selections. Stale requests and UI completions cannot retarget another session.
 
-**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The implemented [audited split](../archive/2026-10-06-testing-policy-alignment.md#selector-disposition) separates embedded specialist exercises from routine SDK execution.
+**Gate:** create/validate/close/reopen and failed-switch behavior, SDK/Recent Projects interrupted-state recovery and provenance, basic stage/parent/path refusal, single-instance ownership and metadata-free runtime checks pass on both targets. Use non-crashing fault/state fixtures; deliberate crash/timed namespace experiments require separate specialist selection. The implemented [audited split](2026-10-06-testing-policy-alignment.md#selector-disposition) separates embedded specialist exercises from routine SDK execution.
 
 ### 1D — Supporting authoring models: Characters, Appearances, Assets, Variables
 
-Historical implementation: [supporting authoring task](../archive/2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the completed [UI operation/Flush follow-up](../archive/2026-09-15-phase-1d-ui-operation-follow-up.md) merged through PR #8 and passed post-merge gates. Phase 1E received separate explicit approval and its merged implementation is tracked in the [archived Scene ledger](../archive/2026-09-16-phase-1e-scene-authoring.md).
+Historical implementation: [supporting authoring task](2026-09-15-phase-1d-supporting-authoring.md). The integrated checkpoint merged through PR #7; the completed [UI operation/Flush follow-up](2026-09-15-phase-1d-ui-operation-follow-up.md) merged through PR #8 and passed post-merge gates. Phase 1E received separate explicit approval and its merged implementation is tracked in the [archived Scene ledger](2026-09-16-phase-1e-scene-authoring.md).
 
-Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](../archive/2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
+Preserve Character technical variable/display name/dialogue colour/default appearance; extensible Appearance attributes and Asset references; copied backgrounds/character images/music/SFX; and typed Variable defaults. Source remains conventional Ren'Py with minimal verified edits and stable UUIDs. The [completed follow-up](2026-09-15-phase-1a-1d-correction-follow-up.md) records accepted lexical context, metadata reloadability, compatibility repair, exact discovery and session-safe supporting UI behavior.
 
 **Gate:** accepted definitions reload and match runnable source; IDs and unknown metadata survive; physical availability/collisions and discovery agree with the pinned SDK; supporting authoring and truthful persistence/Flush work in the packaged app. All integrated follow-up blockers must close before 1E can be approved.
 
@@ -119,7 +119,7 @@ Review actual rendered surfaces against Quiet Studio Dark: typography, spacing, 
 
 **Accepted:** final review 2026-09-23; integration through PR #14 is complete. F1-F4 are closed; preserve all six native Save passes. See CURRENT/HANDOVER for the verified main state.
 
-**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](../archive/2026-09-23-phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
+**Entry:** 1E closure and explicit approval. Extend the existing source foundation; do not replace it. The bounded [1F execution brief](2026-09-23-phase-1f-source-synchronisation.md) owns implementation order, state-policy decisions and acceptance evidence.
 
 **Review candidate:** implemented on `feature/phase-1f-source-synchronisation` in draft
 PR #14. The execution brief owns the exact candidate and gate evidence. This is not an
@@ -136,8 +136,8 @@ Ordinary external divergence may be isolated to an affected file/Scene where saf
 ### 1G — Branches, validation/run and diagnostics
 
 **Status: accepted and integrated — 2026-10-06.**
-The [completed 1G brief](../archive/2026-10-06-phase-1g-branches-runtime-git.md) retains
-G1/R1/R2 requirements and historical evidence. [Final integration/closeout](../archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
+The [completed 1G brief](2026-10-06-phase-1g-branches-runtime-git.md) retains
+G1/R1/R2 requirements and historical evidence. [Final integration/closeout](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 records both-platform acceptance, exact qualified inputs, PR #17 merge and required
 integration quality. Only the superseded main profiler conflicted; reconciliation
 introduced no application/test/workflow input change or additional package matrix.
@@ -171,17 +171,17 @@ Flush the intended accepted revision before execution; refuse unresolved recover
 #### Optional local Git — outside Phase 1
 
 Former 1G.3a/1G.3b requirements are preserved as GIT.1/GIT.2 in
-[optional-local-git.md](optional-local-git.md). They require explicit later selection
+[../active/optional-local-git.md](../active/optional-local-git.md). They require explicit later selection
 and never block 1G/1H, Phase 1 closure or Phase 2 entry. Existing optional project-creation
 Git init and its regressions remain unchanged. Product deferral does not change the
 repository development/publishing workflow.
 
 ### 1H — Vertical-slice acceptance
 
-**Status:** `review_ready` at tested `ba01a84`; [final target audit](phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness) covers H01–H12/sections 3–4. User acceptance/integration remains a separate decision.
+**Status:** `accepted` and integrated; [final target audit](2026-10-07-phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness) covers H01–H12/sections 3–4. Independent review and PR #18 integration close Phase 1; the closure ledger above retains exact evidence and limits.
 
 **Entry:** 1G accepted and integrated, plus explicit user selection. The detailed
-[1H acceptance brief](phase-1h-vertical-slice-acceptance.md) maps every case below to
+[1H acceptance brief](2026-10-07-phase-1h-vertical-slice-acceptance.md) maps every case below to
 H01–H12 and adds cross-capability failure scenarios and evidence requirements. This is
 acceptance of implemented capabilities, not a place to hide missing feature work.
 

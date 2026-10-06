@@ -174,7 +174,7 @@ gates are not passes. Preserve exact failed/superseded run evidence.
 [INDEX](docs/INDEX.md) routes documentation; material architecture decisions require
 an ADR. Product scope/UX remains in the canonical product, architecture, data, UI and
 roadmap documents; Phase 1 milestones remain in
-[the vertical-slice plan](docs/tasks/active/phase-1-vertical-slice.md).
+[the vertical-slice plan](docs/tasks/archive/2026-10-07-phase-1-vertical-slice.md).
 
 Update canonical docs with behavioral changes. At task closure, consolidate lessons,
 archive the completed plan/evidence, remove redundant transient handovers or retain

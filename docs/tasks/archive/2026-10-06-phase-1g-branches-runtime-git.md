@@ -45,7 +45,7 @@ The historical filename is retained for existing links; it does not retain Git s
 ## 1. Ownership and existing foundations
 
 Read [AGENTS](../../../AGENTS.md), [WORKFLOW](../../WORKFLOW.md), current status and
-handover from the actual implementation branch, the [parent plan](../active/phase-1-vertical-slice.md),
+handover from the actual implementation branch, the [parent plan](2026-10-07-phase-1-vertical-slice.md),
 [UI](../../UI.md), [DATA_MODEL](../../DATA_MODEL.md), [TRANSACTIONS](../../TRANSACTIONS.md),
 [SECURITY](../../SECURITY.md) and [SDK ADR 0002](../../adr/0002-versioned-renpy-sdk-adapter.md).
 The integrated 1F Source brief and shell-Save ADR govern drafts and Save; do not copy

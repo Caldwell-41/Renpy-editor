@@ -10,7 +10,7 @@ explicitly approves Phase 1. Accepted Phase 0 architecture decisions are depende
 not permission to implement.
 
 The broader ordered Phase 1 milestones and fixed product/UX decisions are recorded in
-[phase-1-vertical-slice.md](../active/phase-1-vertical-slice.md). That plan does not expand this
+[phase-1-vertical-slice.md](2026-10-07-phase-1-vertical-slice.md). That plan does not expand this
 scaffold task: this remains the first bounded implementation gate and must complete
 before later authoring milestones begin.
 
@@ -32,7 +32,7 @@ dark palette; do not polish authoring screens in this task.
 - [Testing strategy](../../TESTING.md)
 - [UI/design system](../../UI.md)
 - [Phase 1 roadmap outcome](../../ROADMAP.md)
-- [Phase 1 vertical-slice plan](../active/phase-1-vertical-slice.md)
+- [Phase 1 vertical-slice plan](2026-10-07-phase-1-vertical-slice.md)
 
 ## Bounded implementation
 

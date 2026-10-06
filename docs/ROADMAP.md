@@ -21,17 +21,16 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 
 ## Phase 1 — Complete authoring vertical slice
 
-**Status:** Phase 1A–1G and CI-SIMPLE are accepted and integrated. Phase 1G merged
-through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17), with both-platform
-qualification/native/human acceptance and exact integrated-input review. The
-[completed 1G record](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
-retains identities, failures and limits. [Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md)
-is `review_ready`: final 37529174148/1 at `ba01a84` passed required Windows x64/macOS
-ARM64 gates and the H01–H12/sections 3–4 evidence audit. Independent user review remains;
-prior failures and limits are retained. No merge or Phase 1 closure.
-Phase 2 remains planning only.
+**Status:** Phase 1A–1H and CI-SIMPLE accepted and integrated; **Phase 1 closed
+2026-10-07**. [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
+`82d45189d003239b622bc946c85b639a093f46a1` after one fresh independent review.
+Production 37529174148/1 at exact `ba01a84` proves required Windows x64/macOS ARM64
+H01–H12/sections 3–4 gates; main quality 37536967028/1 Pass and exact integrated-input
+audit prove integration. The [closure ledger](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
+retains identities, both earlier failed matrices, cumulative attempts and limits.
+Phase 2/3 remain planning only; no next implementation is selected.
 
-**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/active/phase-1-vertical-slice.md) owns detailed milestone scope and gates.
+**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
 Phase 1 includes conventional staged project creation; distinct title/folder identity, selected parent, compatible pinned SDK, configurable resolution and optional local Git initialization; modular source and editor-only metadata; safe persistence/reopen; Characters with extensible Appearances; copied Assets and bool/int/string Variables; the bounded visual beat set; Scene/Source/Branches workspaces; scene-local partial preview; lossless Custom Code; shared transactions, coherent history, minimum usable recovery; explicit SDK validation/normal run and supported script editing/saving during play; asset mutations require Stop. New Git status/diff/checkpoint work is optional later scope.
 

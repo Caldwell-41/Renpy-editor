@@ -125,7 +125,7 @@
 - Phase 1 product scope and core UX are now defined in
   [ROADMAP.md](../ROADMAP.md), [UI.md](../UI.md), [DATA_MODEL.md](../DATA_MODEL.md),
   [ARCHITECTURE.md](../ARCHITECTURE.md), and the
-  [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md).
+  [Phase 1 vertical-slice plan](../tasks/archive/2026-10-07-phase-1-vertical-slice.md).
 - The first Phase 1 implementation gate is the completed
   [production scaffold](../tasks/archive/2026-09-14-phase-1-production-scaffold.md).
   The bounded [Phase 1B transaction/recovery brief](../tasks/archive/2026-09-14-phase-1-transaction-recovery.md)

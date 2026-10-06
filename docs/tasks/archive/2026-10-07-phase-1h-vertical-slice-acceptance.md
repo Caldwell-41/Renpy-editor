@@ -1,14 +1,15 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
-**Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `review_ready`. Final production 37529174148/1 Pass at exact
-`ba01a84`; required target evidence, H01–H12/sections 3–4 mapping and self-review
-are complete. Independent user review remains; no merge or Phase 1 closure.
+**Updated:** 2026-10-07. **State:** `accepted`, integrated and archived; Phase 1 closed.
+**Authority:** the user selected independent review, PR #18 integration and Phase 1 closure.
+**Qualification:** production 37529174148/1 at exact `ba01a84` on both supported targets.
+**Integration:** PR #18 merge `82d45189d003239b622bc946c85b639a093f46a1`; required main
+quality 37536967028/1 Pass. [Closure record](#independent-review-integration-and-phase-1-closure--2026-10-07).
+Earlier planning/execution/stop records below are historical; their failures and limits remain intact.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
-**Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
-**Prerequisite contracts:** [1G brief](../archive/2026-10-06-phase-1g-branches-runtime-git.md), integrated 1F,
+**Parent:** [Phase 1 plan](2026-10-07-phase-1-vertical-slice.md).
+**Prerequisite contracts:** [1G brief](2026-10-06-phase-1g-branches-runtime-git.md), integrated 1F,
 [TESTING](../../TESTING.md), [TRANSACTIONS](../../TRANSACTIONS.md), [UI](../../UI.md),
 [SECURITY](../../SECURITY.md) and [WORKFLOW](../../WORKFLOW.md).
 
@@ -39,7 +40,7 @@ dialogue/state/assets; launch success, screenshots alone, labels and entity coun
 not prove route correctness. Keep any test instrumentation isolated from shipped games.
 
 New Git status/diff/checkpoint acceptance is removed from H01/H08/H10/H11 and preserved
-in [optional Git](optional-local-git.md). Existing init regression remains automated.
+in [optional Git](../active/optional-local-git.md). Existing init regression remains automated.
 The implementing agent owns H01-H12 and the relevant ordinary conflict, failure and
 recovery cases; the user does not reproduce them manually.
 [ADR 0010](../../adr/0010-local-project-safety-and-observed-flow.md) removes deliberate
@@ -86,7 +87,7 @@ accepted/displaced bytes, blocked ambiguity, safe resolution and follow-up write
 Deliberate application/transaction crash and timed namespace experiments are specialist
 history under WORKFLOW, not routine H01-H12 gates. Controlled runtime nonzero exit,
 ordinary Ren'Py errors and Stop/descendant cleanup remain required; see the
-[selector disposition](../archive/2026-10-06-testing-policy-alignment.md#selector-disposition).
+[selector disposition](2026-10-06-testing-policy-alignment.md#selector-disposition).
 UI stubs alone cannot prove disk recovery, process cleanup or native keyboard delivery.
 
 ## 4. Cross-cutting release-of-phase gates
@@ -150,7 +151,7 @@ canonical lessons and archive completed plans while preserving unique failed evi
 This historical record is superseded for Git scope and test ownership by the September
 25 decision. CURRENT/HANDOVER own the active documentation branch and actual status.
 
-This brief and the [1G planning record](../archive/2026-10-06-phase-1g-branches-runtime-git.md#10-planning-coverage-and-review-record)
+This brief and the [1G planning record](2026-10-06-phase-1g-branches-runtime-git.md#10-planning-coverage-and-review-record)
 form one documentation checkpoint on `docs/phase-1g-1h-planning`. All acceptance rows
 are planned and unexecuted. Active 1F CURRENT/HANDOVER and correction evidence remain
 owned by PR #14; no replacement handover or application change is introduced here.
@@ -975,7 +976,7 @@ exists at the exact final SHA.
 
 Reuse is under [TESTING's narrow human policy](../../TESTING.md#final-human-session-and-narrow-evidence-reuse),
 with exact original packages/results in the
-[1G integration human impact record](../archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
+[1G integration human impact record](2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
 Windows “all working, happy” and Mac “all working” retain original identities and
 native-input/assistive-technology/display limitations; no second human session or new
 screen-reader pass claimed. This is not a general automated cross-SHA waiver.
@@ -1029,3 +1030,76 @@ actual review-ready state and present PR #18 for independent user review. Keep t
 active task and failure evidence until separately authorised acceptance/integration;
 no archive/merge/branch deletion/Phase 1 closure/Phase 2 work. The Goal objective ends
 at review_ready; user review is the next independent decision, not another CI wait.
+
+## Independent review, integration and Phase 1 closure — 2026-10-07
+
+**State: accepted and integrated; Phase 1 closed.** The user selected one fresh
+independent reviewer, bounded corrections if needed, verified integration and closure.
+Codex machine macOS ARM64; native qualification hosts Windows x64/macOS ARM64.
+No Phase 2 implementation, optional Git development, signing or new native matrix.
+
+**Independent review:** fresh reviewer `/root/phase1h_review` examined exact PR #18
+head **`cfa8314684a3a347716ed0c8a4a27108cba2351e`** against main
+**`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`**, qualified candidate
+**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. **No actionable blocking findings.**
+Review covered the complete changed implementation, fixed golden source/outcome/media
+oracle and provenance, real production-service authoring, normal Start/Choice execution,
+real compiled-cache lifecycle, source/history/reopen preservation, rejecting controls,
+cleanup, frame attribution, qualification artifacts and narrow human reuse.
+The reviewer independently verified 145/145 input hashes per host, package/executable/
+receipt hashes, all 46 named regression Pass lines, three positive 29/29 SDK routes and
+wrong-outcome exit 1, six native cases per host, all 11 Source-retention checks,
+three enforced flow samples, browser hashes/advancing frames, boundary evidence and
+97 npm/519 Cargo entries. All six route captures and four Runtime/Diagnostics captures
+were visually inspected. Review ran no code/native/SDK gate or new workflow.
+
+**Integration identity:** [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18)
+merged with history preserved at **`82d45189d003239b622bc946c85b639a093f46a1`**,
+**2026-10-06 21:53:05 UTC**. Parents are exact base/head above. Integrated tree
+**`920f4b6b282e39567bb58c79d3413579cec00e27`** equals reviewed head tree exactly;
+no conflicts or reconciliation changes. Only six documentation files differ between
+tested `ba01a84` and reviewed/integrated tree. All application, test, fixture, workflow,
+dependency and repository-script inputs remain the tested Git blobs; root independently
+matched all 145 recorded inputs per host to both original candidate and reviewed head,
+then verified the identical merge tree. Qualification stays on its original SHA;
+this is an actual integration-input assessment under section 5/WORKFLOW, not new
+execution at the merge SHA or a general cross-SHA waiver. No additional package matrix.
+
+**Required integration quality:** PR [37534098740/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37534098740)
+at `cfa8314`, job **112510538499**, and main
+[37536967028/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37536967028)
+at `82d4518`, job **112520332787**, Pass. Actual logs contain repository validator,
+Q1 rejection controls, nine package-retention tests and selector audit Pass. Optional
+unselected profiler/diagnostic jobs are skipped, never counted as executed gates.
+Local validator/link/privacy scan, Q1 self-test, nine retention tests, source audit,
+seven advancing-frame/timing tests and whitespace checks Pass. Focused Source browser
+control initially stopped before assertions with sandbox loopback `EPERM`; classified
+as environment denial. Its authorised local-listener rerun proves old collision
+rejection, corrected collision all 11 checks Pass and genuine refused retention
+rejection. This is fixture-bridge evidence only and adds no native/SDK launch.
+Raw integration audits/logs remain ignored under `.toolchains/reports/phase-1h-integration/`.
+
+**Acceptance and retained limits:** H01–H12 and applicable sections 3–4 are accepted
+on the audited both-target evidence in the final matrix above. The fresh review
+confirms test-only Rust containment, unchanged governing product/security/dependency
+paths and justified human interaction reuse. Mac Chrome **168.3ms diagnostic Fail**,
+original human/physical-input/display/assistive-tech limits, unsigned/not-notarized
+packages, unexecuted installers and no audible-speaker proof remain explicit.
+Both failed matrices **37515083319/1** at `3d484ef` and **37522794804/1** at `9df1d25`,
+local failures, ambiguous HTTP 500 and every cumulative attempt/spawn/build counter
+remain retained. Integration adds **zero** package builds, native/SDK launches or
+production dispatches; no retry allowance is renewed. Complete downloaded raw evidence
+stays ignored at its original locations; no failure/recovery evidence is deleted.
+
+**Closure:** archive this completed ledger and the Phase 1 vertical-slice plan, repair
+inbound/internal links and replace live CURRENT/HANDOVER. Canonical TESTING consolidates
+oracle/rejection/cleanup/observation lessons and records the implemented selector split.
+The closure publication changes documentation only; its ordinary main quality is verified
+as part of final publication, without a receipt-only commit chasing its own identity.
+PR #18's branch is retired locally/remotely only after exact-head, ancestry, worktree
+and open-PR checks. Other open PRs/refs and archive tags are preserved.
+Planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**, unpublished commits
+**`6330291`** and **`2c5a164`**, remote planning **`267ec2a35ed94bbf565594200cd729c87c6fb11c`**
+remain untouched. No pending recovery/editor/game/profile operation. Next state is
+Phase 1 accepted/closed with Phase 2/3 planning available for separate user selection.

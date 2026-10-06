@@ -19,9 +19,11 @@ CURRENT/HANDOVER own the verified result.
 integrated through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 [Final closeout](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 retains exact qualification/merge identities, both-platform feedback and limitations.
-[Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness)
-is `review_ready` after both-target qualification and the required evidence audit.
-Independent user review, Phase 1 closure and Phase 2 execution remain separate decisions.
+[Phase 1H](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
+is accepted and integrated through [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18).
+Phase 1 is closed after independent review, both-target qualification and required main quality.
+Unique failures and acceptance limits remain in the archived ledger. Phase 2 execution
+requires separate user selection.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
@@ -29,7 +31,7 @@ acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
 [W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
 programme is not the next task. CURRENT/HANDOVER own live state.
 
-Read the [Phase 1 plan](tasks/active/phase-1-vertical-slice.md) for product prerequisites
+Read the [Phase 1 plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) for product prerequisites
 and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
 open-ended coding task. Historical snapshots are evidence, not current instructions.
 
@@ -49,7 +51,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Local hobby-project scope, observed Branches and replacement acceptance | [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) |
 | Historical G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/archive/2026-10-06-phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
-| Review-ready Phase 1H integrated acceptance and final target evidence | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
+| Accepted Phase 1H, independent review, integration and retained target/failure evidence | [tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
@@ -66,7 +68,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Transaction, durability and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Product phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
-| Phase 1 sequence and prerequisites | [tasks/active/phase-1-vertical-slice.md](tasks/active/phase-1-vertical-slice.md) |
+| Completed Phase 1 sequence and prerequisites | [tasks/archive/2026-10-07-phase-1-vertical-slice.md](tasks/archive/2026-10-07-phase-1-vertical-slice.md) |
 | Completed Phase 1E Scene authoring ledger | [tasks/archive/2026-09-16-phase-1e-scene-authoring.md](tasks/archive/2026-09-16-phase-1e-scene-authoring.md) |
 | Completed Phase 1D UI operation/Flush follow-up | [tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md](tasks/archive/2026-09-15-phase-1d-ui-operation-follow-up.md) |
 | Correction execution record, R1-R7 | [tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md](tasks/archive/2026-09-15-phase-1a-1d-correction-follow-up.md) |

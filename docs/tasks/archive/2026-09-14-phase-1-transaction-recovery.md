@@ -15,7 +15,7 @@ Phase 1A is complete. The user explicitly approved this bounded Phase 1B goal on
 
 Read the completed
 [Phase 1A scaffold task](2026-09-14-phase-1-production-scaffold.md), the
-[Phase 1 vertical-slice plan](../active/phase-1-vertical-slice.md), ADR 0001, and the canonical
+[Phase 1 vertical-slice plan](2026-10-07-phase-1-vertical-slice.md), ADR 0001, and the canonical
 architecture, data-model, security, and testing documents before editing.
 
 ## Outcome sought

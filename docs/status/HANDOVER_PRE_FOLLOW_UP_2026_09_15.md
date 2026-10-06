@@ -10,7 +10,7 @@
 1. [`AGENTS.md`](../../AGENTS.md)
 2. [Integrated corrective task](../tasks/archive/2026-09-15-phase-1a-1d-integrated-corrective.md)
 3. [Current status](CURRENT.md)
-4. [Phase 1 vertical-slice plan](../tasks/active/phase-1-vertical-slice.md)
+4. [Phase 1 vertical-slice plan](../tasks/archive/2026-10-07-phase-1-vertical-slice.md)
 5. [Completed Phase 1D supporting authoring task](../tasks/archive/2026-09-15-phase-1d-supporting-authoring.md)
 6. [Completed Phase 1C single-instance correction](../tasks/archive/2026-09-14-phase-1c-single-instance.md)
 7. [Completed Phase 1C durability/race remediation](../tasks/archive/2026-09-14-phase-1c-durability-race-remediation.md)

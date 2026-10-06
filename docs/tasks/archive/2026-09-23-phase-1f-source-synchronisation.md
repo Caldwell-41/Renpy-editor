@@ -6,7 +6,7 @@
 **Current authority:** user's final closeout goal authorises conditional integration and handover; Phase 1G implementation is excluded. Historical checkpoint instructions below do not override this decision.
 **Baseline:** Integrated main with Phase 1A-1E and CI-SIMPLE at original entry; preserve the existing unmerged Phase 1F work.
 **Historical working branch:** `feature/phase-1f-source-synchronisation`, PR #14. Final closure is governed by ledger 7.29.
-**Parent requirements:** [Phase 1 plan](../active/phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.
+**Parent requirements:** [Phase 1 plan](2026-10-07-phase-1-vertical-slice.md), section 1F. Preserve the existing [source/data](../../DATA_MODEL.md), [transaction/recovery](../../TRANSACTIONS.md), [UI](../../UI.md), [architecture](../../ARCHITECTURE.md) and [security](../../SECURITY.md) contracts.
 
 **2026-09-21 precedence note:** The [corrected diagnosis](2026-09-23-phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis) supersedes the historical inference that the smoke proved `source.save` never ran. Its composite predicate and missing operation trace do not establish that. The fake service can re-dirty unchanged text after successful Save. Historical ledger entries and failed runs below are preserved, but their old immediate-dispatch instructions are not current authority. Implement and self-check 1F-SAVE before validating a corrected application candidate; follow [HANDOVER](../../status/HANDOVER.md).
 
