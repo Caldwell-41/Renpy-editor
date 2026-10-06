@@ -2,90 +2,104 @@
 
 ## Phase 1H integrated acceptance — 2026-10-07
 
-**State: awaiting_ci.** The user-approved single dispatch retry succeeded;
-corrective production 37522794804/1 is confirmed in progress. No corrected-target pass
-or further retry authority. The Goal tool still reports `blocked` from the earlier
-allowance stop; no client lifecycle Resume/Pause is claimed.
-[Exact confirmed operation and remaining audit](../tasks/active/phase-1h-vertical-slice-acceptance.md#confirmed-corrective-matrix-and-manual-wait).
+**State: approved qualification dispatch preparation.** User-requested audit of
+[37522794804/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37522794804)
+is complete: terminal failure on Windows UI-refresh; Mac required production gates
+Pass. A bounded test-only probe correction is concrete and locally proved. The user has now approved one additional dispatch with the fix. No pending workflow
+or SDK/editor/game process; the final shared-deadline focused browser verification passed all three controls. The Goal
+tool still reports the earlier `blocked` state; no client lifecycle Resume/Pause claimed.
+[Owning terminal audit, exact hashes and correction](../tasks/active/phase-1h-vertical-slice-acceptance.md#terminal-corrective-matrix-and-source-probe-correction).
 
-**Outcome/ownership:** H01–H12 and applicable sections 3–4 to `review_ready` for
-independent review. No merge, Phase 1 closure, Phase 2, optional Git or signing.
-Existing branch `acceptance/phase-1h-vertical-slice`, draft
-[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) attached. Codex/local
-checks run on macOS ARM64; native final evidence requires Windows x64/macOS ARM64.
-Fresh preflight confirmed matching clean local/remote head and open/draft PR at
-**`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**; main remains `42ca6f9`.
-Correction implementation **`21c029a3f47bf5d191ebc00c593391d1469b3869`**; only docs
-changed afterward. This recovery publication follows the attempted candidate and does
-not become its tested SHA. Planning worktree `2c5a164597779331af9ff81bf0eb3bdabb41ddb7`,
-two unpublished commits, other refs/PRs and normal profiles remain untouched.
-No local game/editor/SDK process remains pending.
+**Approved outcome/ownership:** complete H01–H12 and applicable sections 3–4 to
+`review_ready` for independent review. No merge, Phase 1 closure, Phase 2, optional Git
+or signing. Reuse branch `acceptance/phase-1h-vertical-slice`, draft attached
+[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18). Development machine macOS
+ARM64; final native test hosts Windows x64/macOS ARM64. Continue from the latest
+published audit/shared-deadline checkpoint following first correction implementation
+**`efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`**, subject `fix: order native UI probe
+observations after draft retention`. The subsequent checkpoint includes the final
+shared retention timer and is the candidate to dispatch. No local native target pass or tested SHA is claimed for this new candidate. Prior clean PR head `9497612`; main remains
+`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`. Planning worktree
+`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, two unpublished commits, other refs/PRs
+and normal profiles remain untouched. Never reset to an old candidate.
 
-**Pending operation:** [production 37522794804/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37522794804),
-`production-scaffold.yml`, workflow_dispatch, exact SHA above, `upload_packages=true`,
-created **2026-10-06 19:57:34 UTC**. Run API observation **19:57:45 UTC** confirms
-`in_progress`, attempt 1. Preflight 112472186077 is live at Node selection; validator,
-Q1 rejection and selector steps pass. Target jobs were not yet assigned in that
-snapshot. No terminal result assumed. The first corrective HTTP 500 request/absent
-history remains retained; explicit retry permission was used once after a fresh
-no-delayed-run check. Do not relabel the failed request as accepted or redispatch.
+**Exact terminal operation:** production-scaffold.yml, workflow_dispatch,
+`upload_packages=true`, attempt 1, created 2026-10-06 19:57:34 UTC. Tested SHA
+**`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**, tree
+**`c5df6b86538a2a2b90a48c29b8af05443e57ac68`**. Preflight 112472186077 Pass;
+Mac 112472814807 Pass, ended 20:20:16 UTC; Windows 112472815375 Fail, ended
+20:26:30 UTC. Prior correction `21c029a` audio/frame issues passed on both targets.
+Original failed 37515083319/1 at `3d484ef`, ambiguous HTTP 500 request and authorised
+single dispatch retry remain preserved in the ledger; neither failure is relabelled.
 
-**Budget:** initial matrix 1/1 consumed; corrective matrix 1/1 now consumed; explicit
-dispatch retry 1/1 used. Three total production requests, two confirmed matrices; no
-further retry/matrix authority. H-FIXTURE-1 remains 14 local SDK + 2 initial CI invocations = 16,
-96 local + 24 initial CI measured bounded adapter spawns = 120; new pending executions are
-not counted until actual evidence. Earlier uninstrumented/runtime child compile/lint
-excluded. One original Mac package build/six runtime cases and boundary starts;
-Windows package skipped; zero local desktop builds/editor launches. No new build/SDK/
-case result is claimed. [Cumulative failures and correction proof](../tasks/active/phase-1h-vertical-slice-acceptance.md#terminal-first-matrix-and-bounded-corrections)
-remain authoritative; approval/retry did not reset them.
+**Audited acceptance at `9df1d25`:** frontend 94/94 and source browsers/preflight Pass;
+broad core 192 Mac/187 Windows with documented ignores, all 46 named regressions per
+host actual executed Pass, all separate real SDK gates Pass. New SDK selected cases
+rooftop/riverside/metadata-free Pass, 29/29 assertions each, actual PCM and exact
+music/SFX paths, exact int64 outcomes/dialogue/showing/bounds/stop/hide, normal entry/
+menus/save/load/history/rollback/reconvergence/Return. Wrong-outcome assertion really
+fails exit 1 and is correctly classified as rejection. Three attributed captures per
+host visually reviewed. Each target has three enforced 500 Scene/2,000 edge real-service
+flow samples Pass. Both browser functional/evidence gates Pass, 30 original + 30 visible,
+strict advancing timestamps and navigation/resize/cleanup; Mac visible rendering
+p95 179.3ms remains diagnostic Fail under existing TESTING policy. No audible-speaker,
+native hardware-input/assistive-tech or signing claim.
 
-**Available proof and failures:** first production
-[37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319)
-at exact `3d484ef1b0164e15b21c869f7494410daa3fed9d` failed. Windows three positive
-SDK cases fail playing-music assertion, later package/native/privacy/inventory evidence
-missing; privacy ENOENT is an unbuilt executable, no demonstrated secret leak. Mac new
-SDK routes/compiled lifecycle and six packaged cases/cleanup, boundary/single-instance/
-privacy/inventory pass; Branches browser fails repeated callback timestamp at visible
-input 21. No failure waived. All 46 named ordinary regressions match actual passing lines
-on both original hosts; broad counts 192 Mac / 187 Windows with documented ignores and
-separate SDK gates executed. [Named audit](../tasks/active/phase-1h-vertical-slice-acceptance.md#named-regression-and-correction-quality-audit)
-includes quality 37519834637/1 Pass at 3867329 for repository/Q1/selectors only;
-optional diagnostic jobs skipped, no frontend/native execution in that quality run.
+Both packages built and retain exact receipts. Mac all six native UI cases/cleanup,
+WebView denial/single-instance, privacy, 97 npm/519 Cargo inventory Pass. Windows
+compile/lint/route-a/route-b/runtime-error Pass with cleanup; ui-refresh fails at
+`editor-retention`, 30.969s/exit 1/no process timeout/cleanup true: seven prior checks
+pass, editor contains the input/warning, 506 files, source busy false, backend dirtyCount
+0. Geometry/Settings/preference assertions remain unexecuted. Windows boundary and
+inventory skipped; privacy Pass and retained executable available. These are open
+requirements, not additional demonstrated defects or passes.
 
-**Corrections ready:** test-only disposable driver sets SDL dummy output before real
-PCM initialization, logs actual channel state, adds PCM assertion and keeps exact
-music/SFX/stop/hide/route expectations and 10s/60s bounds. Browser helper requires a
-strictly advancing timestamp, records up to 8 equal callbacks and includes full elapsed
-wait in the same input; malformed/backward/exhausted sequences fail. No replay,
-discarded sample, increased threshold, shipped runtime override or audible-speaker
-claim. Focused local Mac SDK 1/1/no skip, 66.19s, positives 29/29 each and rejecting control/
-cleanup; browser 30 original + 30 visible/navigation/resize/cleanup and distinct captures;
-frontend 94/94/typecheck, validator 353 files, Rust format/result guard and Q1 controls
-Pass. Test/helper source hashes match committed correction. No automated cross-SHA
-acceptance. Unchanged 1G human interaction evidence and unsigned/native-input/assistive-
-tech limits remain under TESTING.
+**Correction/discriminant:** direct probe IPC observations bypass the renderer's
+RequestLane; the warning can precede acknowledged retention. Local real-renderer/
+CodeMirror fixture reproduces old ordering's read/write collision, one refused write
+and 162–163 direct reads, then the same seven-check failure. Corrected ordering waits
+for rendered draft inventory acknowledgement, then performs the original backend
+`dirtyCount === 1` assertion: exact input retained, all 11 checks Pass, one inventory
+read/no refusal. Separate genuine refused-write control still fails at
+`editor-settlement` with zero direct inventory reads. Original hosted response code
+was not recorded, so actual Windows cause remains a supported hypothesis needing
+native resolution. If it fails again, inspect bounded rendererDraftTotal/failure stage;
+classify remaining product/service/input behaviour before another correction.
+No assertion/deadline weakening, input replay, production queue/runtime override.
 
-**Retained recovery evidence:** original Windows artifact 11437705996 expires 2026-10-13
-19:12:23 UTC; Mac 11437966834 expires 19:17:03 UTC. Both are downloaded under ignored
-`.toolchains/reports/phase-1h/production-37515083319/`; Mac package/input hashes and
-three correctly attributed route captures were verified/reviewed. Exact hashes,
-receipts, failure logs and manifests are in the linked terminal ledger; no logs,
-absolute private paths or SDK/build output are committed.
+Final self-review shares one 20-second retention deadline across acknowledgement and
+backend observation. Correction includes only packaged test probe/wait/diagnostic, focused browser control
+in existing source-browser command and TESTING documentation. Focused committed-form
+controls and full existing UI browser suite Pass; Node syntax, nine package-retention
+and Q1 rejecting controls, validator 354 files and whitespace Pass. Two prelaunch invocation failures (wrong relative path,
+sandbox listen EPERM) retained; neither launched a browser or SDK. No local native
+build/editor launch. Changed embedded probe/package input requires renewed supported-
+target qualification; old required passes are exact old-SHA evidence, not implemented
+cross-SHA acceptance. Unchanged 1G human evidence remains narrowly reusable under TESTING.
 
-**Same-thread continuation:** when this recorded workflow is terminal, use the client's
-Resume control for the SAME saved Goal and send `Audit run 37522794804/1 and continue
-the existing goal.` Available agent lifecycle controls cannot activate the previously
-blocked Goal; this approval/retry turn did not invent a Resume/Pause action. Inspect
-this exact run/attempt and changed ref/worktree state once. If still live, checkpoint
-and wait again without polling/duplicate/retry. If terminal, audit actual requirements
-below; preserve failures/skips/missing evidence and expired-artifact limitations.
-No replacement Goal/chat, watcher, automatic wake-up, second writer or merge.
+**Budget:** initial matrix 1/1 + corrective matrix 1/1 consumed; earlier explicit dispatch
+retry 1/1 used. Three historical requests/two confirmed matrices. New fix dispatch
+approved 1/1, not yet sent; no automatic retry or further matrix authority.
+Integrated fixture cumulative 14 local + 4 CI-host invocations = 18; 96 local + 48 CI
+measured bounded adapter spawns = 144 (earlier uninstrumented/other runtime children
+excluded). Three target package builds, 18 native cases (17 Pass/one Fail), all cleanup
+true; two Mac primary/secondary boundary sequences, Windows boundary unavailable.
+All previous problem attempts remain; this new issue has one native failure and one
+locally proved correction. Approval does not reset those budgets.
 
-**Remaining acceptance:** corrected native qualification and complete artifact audit
-for every H01–H12/sections 3–4 requirement: named core/SDK/diagnostic gates, PCM/channel
-logs and 29 assertions, four cases/three captures, advancing-frame evidence/bounded repeats,
-six packaged cases/cleanup, enforced flow samples, browser/denial/single-instance,
-terminal privacy/dependency/licence inventory and exact source/package identities.
-Failures/skips/missing reports remain open. Stop at review_ready only after the full
-required evidence is proved; no further matrix or merge is authorised.
+**Retained evidence:** complete artifacts ignored under
+`.toolchains/reports/phase-1h/production-37522794804/{macos,windows}/`; Mac artifact
+11441274005 expires 2026-10-13 20:19:41 UTC, Windows 11442422247 expires 20:26:25 UTC.
+Both 144/144 source hashes and seven browser source hashes match exact tested Git
+blobs; executable/bundle/input receipt SHA-256 verified, exact values in ledger.
+Local `ui-retention-*` logs retain controls/attempts. Original matrix artifacts remain
+under production-37515083319. No private paths, logs, SDKs or build output committed.
+
+**Next action:** the user explicitly approved **“Retry the dispatch once with the fix.”**
+This covers one additional existing Windows x64/macOS ARM64 matrix with package
+retention and no automatic retry. After final shared-deadline control verification, fresh exact ref/
+worktree and no-existing-operation check, publish/dispatch once, record confirmed
+run/attempt/branch/exact SHA and manual same-chat wait. If ambiguous, preserve uncertainty
+and do not redispatch. On terminal user resume audit the new exact requirements and
+artifacts; no status loop/watcher/second writer/replacement Goal/chat. Stop at
+`review_ready` only with all H01–H12/sections 3–4 qualified; no merge.

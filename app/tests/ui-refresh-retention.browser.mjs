@@ -8,7 +8,7 @@ import {chromium} from 'playwright';
 const server=await createServer({root:fileURLToPath(new URL('..',import.meta.url)),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser;
 const script=await readFile(new URL('../src-tauri/src/ui_refresh_probe.js',import.meta.url),'utf8');
-const settled="details.stage='editor-settlement';await wait(()=>document.querySelector('.source-draft-total')?.textContent.startsWith('1 draft'))";
+const settled="details.stage='editor-settlement';await wait(()=>document.querySelector('.source-draft-total')?.textContent.startsWith('1 draft'),retentionStarted)";
 assert.ok(script.includes(`${settled};`),'shipped probe must await acknowledged retention');
 const corrected=script;
 const original=corrected.replace(`${settled};`, '');

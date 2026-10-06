@@ -982,7 +982,7 @@ its direct IPC observation; the draft warning alone also covers unretained input
 `tests/ui-refresh-retention.browser.mjs` reproduces the original probe read/write
 collision, proves exact input retention with the corrected ordering, and rejects a
 genuine refused write without polling the backend. The original backend dirty-count
-assertion and 20-second stage deadline remain required. These fixture controls do
+assertion and shared 20-second retention deadline remain required. These fixture controls do
 not close a native target failure; a changed packaged probe requires renewed evidence.
 UI-refresh reports distinguish opening/Story/Source stages and retain bounded failure
 state. The smoke path rejects unavailable clicks. Unit checks retain an

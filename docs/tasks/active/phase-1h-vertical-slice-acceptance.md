@@ -2,9 +2,11 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `awaiting_ci`; user-authorised dispatch retry accepted as
-37522794804/1 at exact `9df1d25`. Corrective allowance consumed; no further retry.
-No corrected-target pass or Goal lifecycle Resume claimed.
+**Execution state:** qualification dispatch preparation. Corrective
+37522794804/1 at exact `9df1d25` failed Windows UI-refresh; Mac required gates Pass.
+Test-only Source probe correction is locally proved; user approved one new dispatch
+with the fix, not yet sent. No automatic retry or additional matrix authority.
+Goal lifecycle Resume is not claimed.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -194,22 +196,23 @@ missing/zero/ignored/failed required Cargo results and incomplete packaged clean
 
 | ID | Concrete expected observations and selected proof | Current evidence |
 | --- | --- | --- |
-| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | First candidate: staged creation/archive lifecycle Pass on both; Mac integrated menus/save/load/history/rollback Pass; Windows integrated sequence stops before those interactions; corrected qualification open |
-| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | First candidate: authoring/import/hash/golden/reopen Pass on both; Mac route values/media Pass; Windows audio fails before assigned route outcomes; corrected qualification open |
-| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | First candidate: golden source and supported Beat regressions Pass on both; Mac runtime state/media Pass; Windows audio/remaining route assertions fail or do not execute; corrected qualification open |
-| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | First candidate: production flow/source regressions Pass on both; Mac routes/reconvergence/Return Pass; Windows routes stop before choice; corrected qualification open |
-| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | First candidate: fixture history/reopen and every named ordinary history/external-boundary regression Pass on both; corrected coherent-candidate qualification still open |
-| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | First candidate: real compile/cache move/delete/inverse/reopen/incoming refusal and named runtime no-write/Stop/retry regressions Pass on both; corrected qualification open |
-| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | First candidate: custom Source/reopen and named exact-byte/draft/Apply Both/overlap/core regressions Pass on both; Mac native Source boundary Pass, Windows package missing; corrected qualification open |
-| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | First candidate: SDK service/diagnostic gates Pass on both; six Mac packaged cases/cleanup Pass, Windows package missing; corrected qualification open |
-| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | First candidate: editor reopen/metadata preservation Pass on both; Mac metadata-free SDK route Pass, Windows copy fails audio; corrected qualification open |
-| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | First candidate: every named ordinary real-disk recovery/safe-resolution/follow-up/ambiguity regression Pass on both; corrected coherent-candidate qualification still open |
-| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | First candidate: named core dispatch/session/cancel/Stop gates and copied-UUID/zero-process inspection Pass on both; Mac package boundary Pass, Windows package missing; corrected qualification open |
-| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | First candidate: actual authoring after 4,097 records and every named ordinary resource/precision/discovery gate Pass on both; corrected coherent-candidate qualification still open |
+| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | 37522794804/1: staged creation/archive lifecycle and integrated normal menus/save/load/history/rollback Pass on both; final probe candidate needs renewed qualification |
+| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | 37522794804/1: exact authoring/import/assets/golden/reopen and actual default/assigned int64 values/media Pass on both |
+| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | 37522794804/1: supported Beats/golden source and real PCM/channel/showing/bounds/stop/hide assertions Pass on both; 29/29 each positive SDK case |
+| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | 37522794804/1: production flow, both routes/reconvergence/Return and editorial Chapter invariant Pass on both |
+| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | 37522794804/1: fixture history/reopen and all named ordinary inverse/external-boundary regressions Pass on both |
+| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | 37522794804/1: real compiled cache move/delete/inverse/reopen/incoming refusal and named runtime no-write/Stop/retry Pass on both |
+| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | 37522794804/1: opaque/BOM/CRLF/Unicode/Apply Both/overlap regressions Pass on both; Mac packaged Source/boundary Pass; Windows UI-refresh draft-retention failure and boundary skipped remain open |
+| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | 37522794804/1: SDK service/diagnostics and compile/lint/route-a/route-b/runtime-error packaged cases/cleanup Pass on both; sixth Windows UI-refresh case fails |
+| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | 37522794804/1: editor reopen/metadata preservation and independent metadata-free SDK route Pass on both |
+| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | 37522794804/1: all named ordinary real-disk recovery/resolution/follow-up/ambiguity regressions Pass on both |
+| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | 37522794804/1: session/cancel/Stop/copy consent/zero-spawn inspection and native route preparation/cancellation Pass on both; Windows UI-refresh refusal remains open and boundary skipped |
+| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | 37522794804/1: actual authoring after 4,097 records and all named ordinary resource/precision/discovery regressions Pass on both; three enforced flow samples per target Pass |
 
-The evidence column records the first terminal candidate at `3d484ef`, not acceptance
-of the corrected probe. The terminal audit and changed-candidate requirements below
-retain its exact failures and gaps; no automatic acceptance transfers across SHAs.
+The evidence column records terminal corrective candidate `9df1d25`, not acceptance
+of the later Source-probe correction. Both failed matrices remain in the ledger; no
+automatic acceptance transfers across SHAs. Windows UI-refresh/boundary/inventory and
+renewed changed-probe qualification prevent `review_ready`.
 
 Section 3 mapping: graph inventory/partial/missing/unknown/duplicate/self-loop/limits use
 `scene::tests::flow_*`, Source navigation and the fixed reconvergent fixture; preparation
@@ -684,3 +687,149 @@ cannot activate it. That status is not a new blocked audit or a verified Pause.
 Use the client's Resume control for the SAME saved Goal when the workflow is terminal
 and send `Audit run 37522794804/1 and continue the existing goal.` No replacement Goal,
 new chat, scheduler, model polling or second writer.
+
+
+### Terminal corrective matrix and Source probe correction
+
+User instruction: **Audit run 37522794804/1 and continue.** Recorded operation is
+terminal **failure** at exact **`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**, tree
+**`c5df6b86538a2a2b90a48c29b8af05443e57ac68`**. Preflight 112472186077 Pass;
+Mac job **112472814807** Pass, ended 2026-10-06 **20:20:16 UTC**;
+Windows job **112472815375** Fail, ended **20:26:30 UTC**. No retry dispatched.
+Fresh ownership check found matching clean local/PR head `9497612`, PR #18 open/draft,
+main `42ca6f9`; planning worktree `2c5a164` and its two unpublished commits untouched.
+The saved Goal still reports the earlier `blocked` state; this ordinary authorised
+continuation did not perform or claim a client lifecycle Resume.
+
+| Required evidence at tested `9df1d25` | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Frontend/preflight | Shared preflight 94/94, typecheck/build/source browsers, validator 348 tracked files, Q1/selector controls Pass | Same completed shared preflight; target source browsers also Pass |
+| Routine broad core | 192 Pass / 41 ignored / 3 filtered; no failures | 187 Pass / 38 ignored / 3 filtered; no failures |
+| Named H01–H12 ordinary tests | 46/46 actual executed Pass lines | 46/46 actual executed Pass lines |
+| Separate real SDK lifecycle/download/runtime/diagnostic gates | All selected gates execute and Pass | All selected gates execute and Pass |
+| Integrated SDK gate | 1/1, no wrapper skip; 111.65s including preparation/cleanup, 12 bounded adapter spawns | 1/1, no wrapper skip; 138.04s including preparation/cleanup, 12 bounded adapter spawns |
+| Positive SDK cases | Rooftop/riverside/metadata-free: 29/29 assertions each, exit 0, no process timeout | Same three cases, 29/29 each, exit 0, no process timeout |
+| Rejecting SDK control | Exact wrong `trust == 1` assertion fails, exit 1; wrapper accepts expected rejection | Same actual rejection, exit 1 |
+| Three enforced real-service 500 Scene / 2,000 edge flow samples | initial 40.63–98.29ms; warm 31.97–72.27ms; accepted-update 13.34–18.21ms, Pass | initial 276.77–300.10ms; warm 278.82–295.61ms; accepted-update 27.68–28.79ms, Pass |
+| Runtime and Branches browser functional/evidence gates | Both Pass; 30 original + 30 visible inputs, strict advancing timestamps, zero extra equal callbacks, navigation/resize/cleanup Pass | Same functional/evidence Pass and populations; zero extra equal callbacks |
+| Branches timing diagnostics | Fail: visible rendering opportunity p95 179.3ms > 100ms; existing diagnostic-only policy retained | Pass: visible rendering opportunity p95 29.8ms |
+| Desktop Rust / Tauri package | Pass / built | Pass / built |
+| Six packaged native UI cases | 6/6 Pass, cleanup true each | compile/lint/route-a/route-b/runtime-error 5/5 Pass, cleanup true; ui-refresh Fail, cleanup true |
+| Native denial / single-instance boundary | Pass, actual primary/secondary evidence | Skipped after native-case failure; no pass |
+| Terminal privacy / dependency inventory | Scan Pass; 97 npm / 519 Cargo entries | Scan Pass; inventory skipped, no inventory acceptance |
+| Retained package / input receipt | Available; executable, tar and input receipt hashes verified | Available; executable and input receipt hashes verified; failed case accurately retained |
+
+Actual audio logs from all six positive target cases record `pcmOk=true`,
+`soundEnabled=true`, `dummyOutput=true`, exact `audio/music_theme.wav` and
+`audio/sfx_bell.wav`. Entry dialogue and exact default `9007199254740993` were observed;
+rooftop assigns `9223372036854775807`/true and riverside `-9223372036854775808`/false,
+with exact dialogue, route, showing and 64×64 image bounds. Normal menus/save/load/
+history/rollback/reconvergence/Return and stop/hide assertions passed. SDL dummy is
+actual decoded channel state, not audible-speaker evidence. Three correctly attributed
+SDK captures per target were visually reviewed: Alex/rooftop versus Morgan/riverside;
+metadata-free matches riverside. The rejecting control has no relabelled screenshot.
+Selected-case success is distinct from other testcases explicitly not selected by that
+invocation; required selected cases did execute, including metadata-free independently.
+
+**Artifact identity/retention:** complete artifacts are retained ignored under
+`.toolchains/reports/phase-1h/production-37522794804/{macos,windows}/`, including actual
+SDK case logs, core/SDK/browser/native logs and receipts. Both **144/144** source input
+hashes match exact tested Git blobs; all seven Branches report source hashes also
+match. Mac artifact **11441274005** expires **2026-10-13 20:19:41 UTC**; Windows
+**11442422247** expires **20:26:25 UTC**; both downloaded before expiry. Mac manual
+bundle artifact 11441213968 also exists; the tar in the complete evidence artifact
+already provides the executable and bundle identity needed here.
+
+- Mac executable SHA-256: `1236085072050b2f59babcb02e5cf936f437a55c1db0dabee7b4fb99fd713ed5`.
+- Mac retained tar: `5d8e620f54af92147e979252d5cfdf49396561dbee6c7d417d476c460e0fc037`.
+- Mac input receipt: `22cf943cb522f91657c2affd8c4daae4d938c7c4be10b74de204a4324d6b1ed3`.
+- Windows executable/retained executable: `6e5330e1028b6e859da60dcd412f76d92beee1cff2fd922878ad3988d1e9d426`.
+- Windows input receipt: `cfb754d3652658e0fddabb08bcc4dc08f9a4617c9c58df02f402c7a8a9c927bb`.
+
+**H-UI-RETENTION-1, first native failure:** Windows ui-refresh ends exit 1 after
+**30.969s**, no outer process timeout, at `editor-retention` / `Timeout at
+editor-retention`. Seven prior checks pass (real Character create/source definition,
+unsupported-only drop/no import, editor/CSP). Input appears in the editable Source view;
+draft warning visible, source busy false, 506 files, backend dirtyCount **0**, no dirty
+files. Cleanup **true**. Geometry/Settings/preference checks did not execute. Boundary
+and inventory skips are consequences, not distinct demonstrated defects. Terminal
+privacy succeeds; no secret exposure or withheld package. This failure remains a
+failure, irrespective of the five other Windows cases and all Mac passes.
+
+**Discriminant and bounded correction:** Source's warning includes local input not yet
+acknowledged by `source.updateDraft`; actual renderer requests are ordered by
+`RequestLane`. The probe calls `__TAURI_INTERNALS__.invoke` directly for reads and can
+own the service ahead of the renderer's write. Writes deliberately are not blindly
+replayed after refusal. The original failure did not capture the draft response code,
+so the exact hosted cause is not proven merely by static code or this fixture result.
+It is a locally reproduced harness mechanism consistent with the actual failed state;
+renewed Windows native execution must resolve remaining uncertainty. If it still fails,
+inspect the `editor-settlement` state/renderer draft total and classify the genuine
+remaining behaviour before another correction; do not weaken or extend deadlines.
+
+New focused browser control exercises the real renderer/CodeMirror and shipped probe
+with a fixture service: original ordering produces one refused write and 162–163
+contending direct reads, then the same seven-check/dirtyCount-zero failure; corrected
+ordering retains exact `# Native editor check` input and all **11 checks Pass**, one
+backend inventory observation, zero refused writes. A separately refused write fails
+at `editor-settlement`, before any direct inventory read. Both rejecting controls remain
+rejections, not successful product cases. No input replay, skipped assertion, larger
+20s stage/outer deadline, changed product queue or shipping runtime override.
+
+Correction **`efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`** adds only the probe's rendered
+acknowledgement wait and bounded draft-total diagnostic, the focused browser control
+in existing `test:source-browser`, and TESTING documentation. Existing backend
+`dirtyCount === 1`, all later assertions and native requirement remain. Production
+Source/IPC/Rust behaviour is unchanged; the embedded probe changes packaged input,
+so final candidate needs applicable renewed native evidence on both targets. Unchanged
+1G human/native-input/assistive-tech/signing limits remain under TESTING; this is no
+automated cross-SHA acceptance policy.
+
+**Local attempts/checks:** first invocation used a wrong working-directory-relative
+file path and launched no test; second failed `listen EPERM` before browser launch.
+Both prelaunch failures retained. Invocation 3 discriminant Pass; committed-form
+correction invocation 1 repeats all three controls Pass, including actual exact text
+and required backend check. Existing full UI browser regression suite Pass (all six
+workspaces/themes, staged assets, Source undo, shipped probes, busy contention,
+navigation/layout/focus/pointer controls). Evidence: `ui-retention-discriminant-{1,2,3}.log`,
+`ui-retention-correction-{1,2}.log`, `ui-retention-ui-regression-1.log`. Node syntax,
+9 Q1 package-retention tests, Q1 rejecting controls and whitespace Pass. No local
+SDK, native package build or editor launch in this audit/correction turn.
+
+**Cumulative budget:** initial 1/1 + corrective 1/1 confirmed production matrices,
+explicit dispatch retry 1/1 used, three requests total (one ambiguous HTTP 500 retained),
+no new dispatch. Integrated fixture now **14 local + 4 CI-host invocations = 18**,
+**96 local + 48 CI measured bounded adapter spawns = 144**; earlier uninstrumented/
+other runtime-service children excluded. Three target package builds total (two Mac,
+one Windows); **18 packaged runtime cases: 17 Pass, one Fail**, all reported cleanup
+true; two Mac boundary primary/secondary sequences, Windows boundary unavailable.
+Zero local desktop builds/editor launches. Original hypotheses/failures are preserved;
+new issue has one native failure and one locally proven correction, not two failed
+corrections of the same hypothesis.
+
+**Remaining decision/outcome:** Phase 1H is not `review_ready`. Correction is concrete
+and locally verified. Request **one additional existing Windows x64/macOS ARM64
+production matrix with package retention, no automatic retry**, then audit exact new
+candidate/attempt/artifacts in the SAME goal/chat. The Agent Guide/WORKFLOW permits
+only the approved dispatch allowance; `Audit ... and continue` does not add another
+matrix. Do not dispatch before explicit approval, reuse old results as newly executed,
+merge, close Phase 1, start Phase 2, create a new writer or reset the saved Goal.
+
+
+**User question and fresh approval:** the user asked why 1G passed but this run failed
+without code changes and authorised **“Retry the dispatch once with the fix.”** Git
+comparison from accepted `c137b67` to tested `9df1d25` confirms no change in main
+renderer, Source controller/editor/RequestLane, native host, UI-refresh probe or lockfile.
+Passing an earlier execution does not eliminate the probe's scheduling race; the local
+control now proves this mechanism, while missing hosted response telemetry prevents
+claiming the exact Windows cause. New SDK/frame corrections themselves passed both
+targets. Final review shares one existing 20-second deadline across renderer settlement
+and backend retention observation, avoiding an extra retention allowance. Focused
+correction invocation 2 passed all three controls in this final form; syntax and
+repository validator (354 files) / whitespace Pass before publication.
+
+This explicit instruction approves **one additional existing two-target production
+matrix with the fix and package retention**, one dispatch request/no automatic retry;
+it is not a rerun of the old failed SHA. Prepare/publish the exact candidate, check
+refs/ownership/other operations, dispatch once and record its confirmed identity.
+Previous allowances/counters remain consumed. No merge or widened product scope.
