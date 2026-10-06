@@ -7,6 +7,27 @@
 
 ## Live continuation
 
+**Corrected qualification awaiting_ci — 2026-10-06.** Necessary test-only lifecycle
+alignment/local official-SDK Pass is published at exact tested carrier
+**`c137b6706ed2dc05aac8dfe692689829c785a52a`**. User **“Go ahead”** authorized one
+corrected set: default [quality 37461858768](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461858768)
+required steps **Pass**; [production 37461862928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461862928),
+`upload_packages=true`, **attempt 1**, **in_progress** at **2026-10-06 12:14:51 UTC**.
+Both SHA/branch/event/attempt confirmed. **132 updated inputs**, **11 changed / 121
+unchanged** versus baseline; only lifecycle test differs from frozen `ee5f55e`, runtime
+code unchanged. All six native/human cases and restored profiles retain acceptance.
+
+Prior **37459347476/1 Fail** and verified failure artifacts retained; initial **1/1**,
+correction dispatches **4** consumed. No further retry/matrix authorized; local counters
+unchanged, current remote build/start counts await actual evidence. Stop model polling;
+manual same-chat resume to audit exact corrected run, six cases per host, all required
+SDK/service/browser/boundary/privacy/cleanup gates, matching updated manifests and
+retained packages. Combined acceptance remains open; final integration is separate.
+[Exact wait/continuation](HANDOVER.md#corrected-qualification-wait--2026-10-06),
+[ledger](../tasks/active/ui-design-review.md#corrected-qualification-wait--2026-10-06).
+
+### Earlier qualification failure (corrected run now pending)
+
 **Combined qualification Fail / test-only correction ready — 2026-10-06.**
 [Production 37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476),
 attempt **1**, exact SHA `88016acb40caa036a946ef31795ca61235e5ce6d`, fails on both

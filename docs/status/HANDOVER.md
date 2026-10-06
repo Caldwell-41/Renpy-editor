@@ -1,5 +1,37 @@
 # Current outcome handover
 
+## Corrected qualification wait — 2026-10-06
+
+**State: awaiting_ci; test-only correction published and one authorized qualification dispatched.**
+Corrected carrier **`c137b6706ed2dc05aac8dfe692689829c785a52a`**, feature branch,
+both requests confirmed **attempt 1**, `workflow_dispatch`. Frozen runtime implementation
+remains `ee5f55e`; only the `#[cfg(test)]` lifecycle input differs, **131/132 unchanged**.
+All **132 corrected inputs** retained in `correction-c137b67-inputs.json`: **11 changed /
+121 unchanged** versus qualified `5b467a4`. Human/native six-case results reused under
+the recorded test-only impact assessment; exact earlier package identities preserved.
+
+| Operation | Confirmed evidence / state |
+| --- | --- |
+| Default quality | [37461858768](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461858768) **Pass**; validator/rejection fixtures/selector audit each success, jobs/log retained, optional unselected jobs not claimed. |
+| Production, `upload_packages=true` | [37461862928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461862928) **in_progress** at **2026-10-06 12:14:51 UTC**, no terminal acceptance yet. |
+
+User **“Go ahead”** authorizes this one corrected set after concrete fix/local SDK Pass.
+Initial **1/1**, production correction dispatches now **4**. Prior failed **37459347476/1**
+and both verified failure archives remain retained; no failure reclassified. Current
+remote production build/start counts await actual evidence. Local counters/profile
+restoration unchanged, no local app/game pending. No further retry/matrix authorized.
+
+**Wait:** publish and end ordinary chat turn, no autonomous Goal or polling/automation.
+Resume this chat with “Audit corrected qualification 37461862928 attempt 1.” Inspect
+that exact run once; if pending, wait again. If terminal, audit every required named
+SDK/service/browser/boundary/privacy/inventory/cleanup gate and six packaged cases
+per target, exact run/attempt/SHA, **132 updated matching inputs**, retained installers/
+app/executables and hashes. Preserve missing/failed/skipped gates. Publish combined
+handover only after both hosts Pass; integration remains separate. No PR #17 conflicts,
+rewrite/merge, 1G/1H closure or next phase. Later wait docs SHA is not tested carrier.
+
+## Earlier failure audit (correction qualification now pending)
+
 ## Combined qualification failure audit — 2026-10-06
 
 **State: earlier qualification Fail; verified test-only correction ready; one corrected qualification authorized.**

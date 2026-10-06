@@ -1,5 +1,32 @@
 # UI design review
 
+### Corrected qualification wait — 2026-10-06
+
+**Live state: awaiting_ci.** Necessary test-only alignment is published at exact
+carrier **`c137b6706ed2dc05aac8dfe692689829c785a52a`**. User **“Go ahead”** authorizes
+one corrected qualification. All **132 updated inputs** retained/verified: **11 changed /
+121 unchanged** versus `5b467a4`, **131 equal frozen `ee5f55e`** plus one lifecycle
+test input; production prefix and runtime/UI/probe/workflow inputs unchanged.
+Six native/human results reusable; original profiles restored, no new human session.
+
+| Workflow, attempt 1, feature branch, exact carrier | Last verified state |
+| --- | --- |
+| Default quality [37461858768](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461858768) | **Pass**, each required validator/rejection/selector step success; jobs/log retained, unselected optional jobs not claimed |
+| Production `upload_packages=true`, [37461862928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461862928) | **in_progress**, **2026-10-06 12:14:51 UTC**; SHA/event/attempt confirmed once, no terminal package acceptance |
+
+`remote-correction-4-dispatch.json`, exact API receipts, corrected input manifest and
+quality jobs/log retained under ignored bounded evidence. Initial **1/1** unchanged;
+cumulative production correction dispatches **4**. Current run's app-build/start counts
+await actual evidence; all local counters unchanged. Failed **37459347476/1** remains
+Fail, two downloaded/hash-verified failure archives and both local retests preserved.
+No further retry/dispatch or matrix authorized. Publish wait and end ordinary turn;
+manual same-chat resume to audit **37461862928/1** against corrected 132 inputs and
+all required SDK/service/browser/boundary/privacy/inventory/cleanup/six-case/package
+evidence. No model polling/automation; if pending on resume wait again. Combined
+acceptance and separate integration/phase closure remain incomplete.
+
+### Earlier failure audit (correction qualification now pending)
+
 ### QUAL-IMPORT-01 qualification audit and test alignment — 2026-10-06
 
 **Live state: combined qualification Fail; necessary test-only correction verified;
