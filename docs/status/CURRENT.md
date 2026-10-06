@@ -24,8 +24,12 @@ assistive-technology/display limits, unsigned/not-notarized packages and no audi
 speaker or installer-execution claim remain. Complete raw evidence is downloaded before
 October 13 expiry; failed evidence is preserved.
 
-**Next actual state:** no implementation selected. Phase 2/3 planning is available for
-separate user selection; optional Git remains deferred. The planning worktree at
-`2c5a164` and its two unpublished commits are untouched. Only PR #18's proven-integrated
-branch was retired; other open work and archive tags remain. [HANDOVER](HANDOVER.md)
-owns continuation and preserved-work details.
+**Selected follow-up:** [0.1.0 publication](../tasks/active/release-0.1.0.md) is prepared,
+awaiting the user's public unsigned-preview decision. Original Windows/macOS installers,
+notes, checksums, provenance/licence assets are staged; no tag or Release exists yet.
+Current policy requires signing/notarisation and install/launch evidence before public
+binary distribution; an explicit early-preview exception has been requested.
+
+Phase 2/3 remain planning only and optional Git remains deferred. The planning worktree
+at `2c5a164` and its two unpublished commits are untouched. [HANDOVER](HANDOVER.md)
+owns exact publication continuation.

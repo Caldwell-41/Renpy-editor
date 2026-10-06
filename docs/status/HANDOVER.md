@@ -1,51 +1,44 @@
 # Current outcome handover
 
-## Phase 1 closed — 2026-10-07
+## 0.1.0 publication preparation — 2026-10-07
 
-**State: accepted and integrated; selected review/integration/closure outcome complete.**
-User authorised one fresh independent review of PR #18, bounded findings, verified main
-integration and Phase 1 closure. No next implementation is selected. Codex audit machine
-macOS ARM64; supported native evidence hosts Windows x64/macOS ARM64.
+**State: blocked on the user's public unsigned-preview decision.** The user requested
+publication of accepted Phase 1 as 0.1.0. Preparation is complete; no GitHub Release/tag
+or new build/CI dispatch/native launch has been created. Codex machine macOS ARM64;
+existing qualification hosts Windows x64/macOS ARM64.
 
-**Integration:** [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
-**`82d45189d003239b622bc946c85b639a093f46a1`**, 2026-10-06 21:53:05 UTC, parents
-`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae` and reviewed
-`cfa8314684a3a347716ed0c8a4a27108cba2351e`. Tree
-`920f4b6b282e39567bb58c79d3413579cec00e27` equals reviewed head exactly.
-Current checkout is main; closure documentation follows that integration.
-One fresh reviewer reported no actionable blocking findings after code/oracle/cleanup,
-raw qualification and visual/human-reuse review. Exact review scope and results belong
-in the [archived closure ledger](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07).
+**Continuation:** main documentation preparation follows accepted baseline
+**`a3d89c233971dc16c280e53fb328c3f8f3dd84f6`**. Proposed tag **`v0.1.0`** targets
+the resulting documentation-only preparation checkpoint, pinned in the ignored release
+provenance after commit; it includes the corrected public README.
+[Owning release task](../tasks/active/release-0.1.0.md) records hashes, artifact identities,
+verification and the exact policy decision. Read that small task on resume.
+Prepared notes: ignored `.toolchains/releases/0.1.0/release-notes.md`; eleven staged
+assets in its `staged/` sibling, including three installers, checksums, provenance,
+build inputs and licence/inventory files. They are original production **37529174148/1**
+packages at exact **`ba01a84cd7f860be6e8717e98216bdf747875073`**, not a new build of main.
+Artifact privacy scan, all ten checksum entries and Mac DMG integrity Pass. Installer
+execution/uninstallation and installed-app launch are unqualified for these packages.
 
-**Evidence:** required main quality **37536967028/1**, job **112520332787**, Pass at
-merge `82d4518`; actual validator, Q1 rejecting controls, nine retention tests and
-selector audit verified. Original production **37529174148/1** remains qualification at
-**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
-`4221a1fbb2edcda1048261b795ae732d36ac7aef`. All 145 recorded inputs per host match
-that candidate and reviewed/integrated tree; only six documentation files followed
-qualification. No package re-execution at the merge SHA or general cross-SHA waiver.
-H01–H12/sections 3–4 accepted; the [final matrix](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness)
-retains commands/counts, artifact hashes and expiry, raw locations and limits.
-Closure publication receives ordinary documentation/main-quality verification.
+**Pending decision:** GitHub repository is public, packages unsigned/not-notarized.
+ROADMAP/SECURITY require signing/notarisation and install/launch evidence before wider
+binary distribution. The user has been asked to approve a one-off early public-preview
+exception with all limitations disclosed, or choose signing/installer qualification first.
+Do not publish without their answer or silently substitute a different release scope.
+No CI/process/recovery/profile operation is pending. No new matrix or signing setup
+allowance has been requested/consumed.
 
-**Preserved limits/recovery:** Mac Chrome 168.3ms diagnostic Fail, human/physical-input/
-display/assistive-tech limits, unsigned/not-notarized packages and no audible-speaker/
-installer-execution proof remain. Both failed matrices, ambiguous HTTP 500, local
-failures and cumulative budgets are intact in the archived ledger. Complete raw
-artifacts are downloaded under ignored `.toolchains/reports/phase-1h/`; final artifacts
-expire October 13. Integration receipts stay ignored in `phase-1h-integration` reports.
-No pending recovery, native editor, game, SDK or profile operation; no manual test is
-assigned to the user. No new production dispatch/build/native launch was added.
+**Next action:** on explicit exception approval, inspect current tags/releases/refs,
+finalise prepared notes, publish the pinned `v0.1.0` with original staged packages,
+verify actual release/tag/asset hashes, record publication and archive the task.
+Use same-thread continuation. On a different answer, proceed only within that chosen
+scope and preserve all prepared material. Do not reset the accepted tag target to an
+old prompt SHA or rebuild unchanged inputs to validate documentation.
 
-**Preserved work:** planning worktree branch `codex/phase-2-3-planning` remains at
-**`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**, with unpublished **`6330291`** and
-**`2c5a164`**; remote planning remains **`267ec2a35ed94bbf565594200cd729c87c6fb11c`**.
-Do not reset, publish or retire that work as incidental cleanup. Only PR #18's unused
-branch was retired after ancestry/exact-head/worktree/open-PR proof. Other open PRs,
-unique refs and archive tags remain untouched.
-
-**Next action:** await separate user selection from the Phase 2/3 plans or another
-bounded outcome. Phase 1 completion does not authorise Phase 2 implementation,
-optional Git, signing/notarization or abandoned W0/OPT-1A work. No CI wait or retry is
-carried forward. A new outcome may use a new goal; recovery of this completed closure
-uses this same thread and current main, never an old prompt SHA.
+**Preserved baseline/work:** Phase 1 remains accepted/closed through PR #18 merge
+`82d4518`, required main quality **37536967028/1**, closure `a3d89c2`, final quality
+**37537337718/1**. [Archived closure/evidence](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
+retains all failures, counts and limits. Planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**,
+unpublished **`6330291`**/**`2c5a164`**, remote planning **`267ec2a`**, other PRs/refs and
+archive tags remain untouched. Phase 2/3, optional Git and signing implementation are
+unselected. This continuation selects release preparation, not a new autonomous Goal.

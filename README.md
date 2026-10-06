@@ -1,17 +1,16 @@
 # Project Loomlight
 
 Loomlight is a local-first visual Ren'Py authoring tool for Windows x86-64 and macOS
-Apple Silicon. Phase 0 and the bounded Phase 1A production scaffold are complete; the
-production foundation lives in [`app/`](app/README.md). No authoring workflow is
-implemented yet.
+Apple Silicon. Phase 1 is accepted and integrated: create projects with a pinned SDK,
+author Characters/Assets/Variables and branching Scenes, edit Source, inspect Branches,
+validate/run and close/reopen through shared transactions and recovery.
+The production application lives in [`app/`](app/README.md).
 
-Project Loomlight is the temporary codename for a standalone, single-user,
-WYSIWYG Ren'Py authoring environment for Windows and macOS.
-
-Phase 0 and Phase 1A are complete and Tauri 2 is the accepted desktop runtime. Phase
-1B is planned but has not been approved for implementation. Start with
-[the documentation index](docs/INDEX.md) and
-[the current status](docs/status/CURRENT.md).
+Project Loomlight is the temporary codename for this standalone, single-user authoring
+environment. Tauri 2 is the accepted desktop runtime. Phase 2/3 remain planning only.
+Start with [the documentation index](docs/INDEX.md) and
+[the current status](docs/status/CURRENT.md). The proposed 0.1.0 preview is being prepared;
+its public-distribution decision is recorded in the [release task](docs/tasks/active/release-0.1.0.md).
 
 The repository validator is:
 
