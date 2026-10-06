@@ -1,5 +1,52 @@
 # Current outcome handover
 
+## Phase 1G integration review — 2026-10-06
+
+**State: conflict reconciled locally; reviewed merge awaits current repository quality.**
+User selected PR #17 integration and 1G closeout in this separate genuine macOS ARM64
+chat. Fresh fetch: feature `e227366ccf5d5c30e750ce7d45e4515c1eb1360f`, main
+`4d7ba0333c48d60242a9a42d3e079fea499a5531`; clean checkout, feature already current.
+Planning worktree `2c5a164597779331af9ff81bf0eb3bdabb41ddb7` and its two unpublished
+commits preserved; no other writer or workflow pending. GitHub's PR base SHA refers
+to the earlier merge base `924619d`; fetched main includes the one later profiler commit.
+
+Only conflict: `.github/workflows/quality.yml`. Retain the qualified feature bytes:
+main's old isolated profiler is superseded by ADR 0010/TESTING's observed-flow gates,
+not an independent requirement to restore. No application/test/dependency/probe change.
+All **132/132** inputs equal both hosted manifests on `c137b6706ed2dc05aac8dfe692689829c785a52a`.
+All workflow/repository-script/spike Git blobs also match that candidate; working-tree
+PowerShell newline conversion is not a Git-input delta. Preserve both parents/history;
+no reset, rebase, rewrite or force push.
+
+**Integration checks:** validator **340 files Pass**; Q1 rejecting self-test Pass;
+retention fixtures **9/9 Pass**; source selector/specialist/runtime/workflow audit Pass;
+retained runtime report checker **6/6 per target Pass**; frontend **91/91 Pass, 0 skipped**,
+typecheck/build and Rust formatting Pass; whitespace Pass. Build retains its existing
+>500 kB bundle advisory. Reviewed conflict, current main-only change, final input diff,
+narrow close IPC/trust/runtime ownership and acceptance receipts; no new defect found.
+Evidence is ignored under `.toolchains/reports/phase-1g-integration/`.
+
+**Impact/qualification:** zero changed packaged inputs or workflows; no extra package
+matrix justified. Original production **37461862928/1** and quality **37461858768/1**
+stay evidence on exact `c137b67`, not new execution on this merge SHA. Current PR/main
+repository-quality checks still required. Reused human map: navigation/retained Source
+and Scene input, routes/Save/staleness/Stop/reopen, diagnostics, resize/scaling/shortcuts,
+imports/pickers/progress and held-grip cancellation all have unchanged governing code,
+tests/probes/dependencies; no affected human case. Windows “all working, happy” and Mac
+“all working” retain their original package identities and limitations.
+
+No dispatch/retry/build/native-start counters added: initial **1/1**, corrections **4**;
+remote series **6 app builds/46 starts**; local Mac **19/77/7 SDK menus**, Windows
+**6 production+1 unqualified/4 failed setup/21 starts/0 SDK menus** unchanged. All unique
+failures preserved; Chrome timing remains diagnostic Fail, no signing/notarization claim.
+
+**Remaining:** publish conflict-resolved merge checkpoint on existing branch, update
+PR description/readiness, audit its automatic repository quality once; if pending,
+record exact run/attempt/SHA and use manual same-chat resume. When required checks
+Pass, merge PR #17 preserving history, verify main tree, archive completed 1G records
+and publish final CURRENT/HANDOVER/canonical closeout. No 1H execution or closure,
+Phase 2, optional Git, new package qualification, automation or ambiguous retry.
+
 ## Both-platform acceptance and integration handover — 2026-10-06
 
 **State: selected native review and corrected remote qualification Pass; ready for a

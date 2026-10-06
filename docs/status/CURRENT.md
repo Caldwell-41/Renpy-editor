@@ -1,5 +1,20 @@
 # Current status
 
+**Updated:** 2026-10-06. **Selected outcome:** Phase 1G integration/closeout.
+**Branch:** feature/phase-1g-branches-runtime / PR #17. Main `4d7ba03` fetched.
+Conflict reconciled locally by retaining qualified `quality.yml`; history preserved.
+All **132** packaged inputs and all workflow/script/spike Git blobs equal qualified
+`c137b67`; no application change or additional package matrix justified.
+Local integration checks Pass: validator 340 files, Q1 rejecting/selector audit,
+9 retention fixtures, six retained cases per host, 91 frontend tests/no skips,
+typecheck/build, Rust formatting and whitespace. Native/human evidence retains its
+original identities; unchanged interactions need no repeat. Counters unchanged.
+**Next:** publish/audit current repository quality, reviewed PR merge and 1G docs
+closeout. **1H not_started**; explicit later selection required. Planning worktree
+`2c5a164` preserved. [Exact integration record](HANDOVER.md#phase-1g-integration-review--2026-10-06).
+
+## Historical acceptance state before integration selection
+
 **Updated:** 2026-10-06.
 **Branch:** feature/phase-1g-branches-runtime, draft/open/conflicting
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
