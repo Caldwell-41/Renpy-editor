@@ -3,10 +3,10 @@
 **Updated:** 2026-10-07.<br>
 **Status:** Phase 1A–1G and CI-SIMPLE accepted and integrated. Phase 1G merged through
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) at `295a189`; both-platform
-native/human and exact-input qualification accepted. Phase 1H is selected with one
-further fixed-probe matrix explicitly approved: 37522794804/1 passed Mac required gates but failed
-Windows UI-refresh; a test-only probe correction is locally proved. Fix dispatch not yet sent, no automatic
-retry; Phase 1 itself is not closed.<br>
+native/human and exact-input qualification accepted. Phase 1H is selected and
+`awaiting_ci` for fixed-probe matrix 37529174148/1 at `ba01a84`. Prior 37522794804/1 passed Mac required gates but failed
+Windows UI-refresh; a test-only probe correction is locally proved. No further matrix/
+retry authority; Phase 1 itself is not closed.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority

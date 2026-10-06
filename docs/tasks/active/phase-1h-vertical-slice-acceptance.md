@@ -2,10 +2,9 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** qualification dispatch preparation. Corrective
-37522794804/1 at exact `9df1d25` failed Windows UI-refresh; Mac required gates Pass.
-Test-only Source probe correction is locally proved; user approved one new dispatch
-with the fix, not yet sent. No automatic retry or additional matrix authority.
+**Execution state:** `awaiting_ci`. Fixed-probe production 37529174148/1 is confirmed
+in progress at exact `ba01a84`. Prior 37522794804/1 failed Windows UI-refresh; Mac
+required gates Pass. New approved fix dispatch used once; no further matrix/retry authority.
 Goal lifecycle Resume is not claimed.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
@@ -833,3 +832,45 @@ matrix with the fix and package retention**, one dispatch request/no automatic r
 it is not a rerun of the old failed SHA. Prepare/publish the exact candidate, check
 refs/ownership/other operations, dispatch once and record its confirmed identity.
 Previous allowances/counters remain consumed. No merge or widened product scope.
+
+
+### Confirmed fixed-probe matrix and manual wait
+
+The user's explicit **“Retry the dispatch once with the fix”** was executed once after
+final focused controls/validator/syntax/whitespace Pass and publication. Fresh PR/ref
+check confirmed open/draft PR #18 and matching clean local/remote branch head
+**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. Main remains `42ca6f9`; planning
+worktree `2c5a164`/two unpublished commits untouched. An all-branch production dispatch
+history check found only the two prior terminal 1H matrices and historical runs; no
+existing new candidate operation or delayed HTTP 500 acceptance.
+
+Exactly one request to existing production-scaffold.yml was issued for branch
+`acceptance/phase-1h-vertical-slice`, `upload_packages=true`, at 2026-10-06
+**20:47:55 UTC**. It succeeded and returned
+[**37529174148/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148).
+Run API confirms workflow_dispatch, exact candidate above, created **20:47:59 UTC**,
+**in_progress**, attempt 1. The one initial job snapshot has Preflight
+**112493828798** in progress; target jobs not yet assigned. No terminal or target pass
+assumed, no watch/poll loop or retry.
+
+Cumulative production requests now **4**, confirmed matrices **3**: original successful
+request, ambiguous HTTP 500, explicit retry's confirmed corrective matrix, this
+user-approved fixed-probe matrix. Initial 1/1, corrective 1/1, earlier dispatch retry
+1/1, and new fixed-probe dispatch **1/1 used**; no further matrix/retry authority.
+Integrated SDK/native/build counters remain the completed 18 invocations/144 measured
+spawns/three package builds/18 native cases until new actual execution evidence exists.
+No package build or SDK/native result counted from a queued/in-progress job.
+
+Publish this meaningful accepted-operation continuation after the tested candidate;
+following docs do not change or retroactively become tested `ba01a84`. PR description
+records prior failures, local correction proof and this exact pending operation. Goal
+tool remains its observed earlier `blocked` state; no client lifecycle Resume/Pause
+claimed or replacement Goal/chat/writer created. Stop model polling and continue in
+the SAME chat on the user's terminal instruction: **Audit run 37529174148/1 and continue.**
+If using the saved Goal, use the client's real Resume control; agent tools cannot
+activate it. On resume check this exact attempt and changed refs once. If pending,
+wait again; if terminal, audit all H01–H12/sections 3–4 requirements including real
+Windows Source retention, all six packaged cases/cleanup, denial/single-instance,
+privacy/inventory, source/package identities and retained original failures/limits.
+No new dispatch is implied by resume, no independent review/merge until review_ready.

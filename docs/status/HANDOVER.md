@@ -2,28 +2,33 @@
 
 ## Phase 1H integrated acceptance — 2026-10-07
 
-**State: approved qualification dispatch preparation.** User-requested audit of
-[37522794804/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37522794804)
-is complete: terminal failure on Windows UI-refresh; Mac required production gates
-Pass. A bounded test-only probe correction is concrete and locally proved. The user has now approved one additional dispatch with the fix. No pending workflow
-or SDK/editor/game process; the final shared-deadline focused browser verification passed all three controls. The Goal
-tool still reports the earlier `blocked` state; no client lifecycle Resume/Pause claimed.
-[Owning terminal audit, exact hashes and correction](../tasks/active/phase-1h-vertical-slice-acceptance.md#terminal-corrective-matrix-and-source-probe-correction).
+**State: awaiting_ci.** The user-approved single fixed-probe dispatch succeeded as
+[37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148).
+Existing production-scaffold.yml, workflow_dispatch, `upload_packages=true`, created
+**2026-10-06 20:47:59 UTC**, exact tested SHA
+**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. One initial API snapshot confirms
+`in_progress`, attempt 1, Preflight **112493828798** in progress; target jobs not yet
+assigned. No new target result or further dispatch authority.
+[Exact approved operation/manual wait](../tasks/active/phase-1h-vertical-slice-acceptance.md#confirmed-fixed-probe-matrix-and-manual-wait).
+No local SDK/editor/game process or terminal handle remains. Saved Goal still reports
+the earlier `blocked` state; no client lifecycle Resume/Pause is claimed. Stop model
+polling and resume the SAME goal/chat when the user requests terminal audit.
 
 **Approved outcome/ownership:** complete H01–H12 and applicable sections 3–4 to
 `review_ready` for independent review. No merge, Phase 1 closure, Phase 2, optional Git
 or signing. Reuse branch `acceptance/phase-1h-vertical-slice`, draft attached
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18). Development machine macOS
-ARM64; final native test hosts Windows x64/macOS ARM64. Continue from the latest
-published audit/shared-deadline checkpoint following first correction implementation
-**`efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`**, subject `fix: order native UI probe
-observations after draft retention`. The subsequent checkpoint includes the final
-shared retention timer and is the candidate to dispatch. No local native target pass or tested SHA is claimed for this new candidate. Prior clean PR head `9497612`; main remains
-`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`. Planning worktree
+ARM64; final native test hosts Windows x64/macOS ARM64. Continue from the published candidate **`ba01a84cd7f860be6e8717e98216bdf747875073`**,
+subject `test: bound Source probe settlement and record corrective matrix audit`,
+following first probe correction `efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`.
+Only status/ledger docs follow the dispatched candidate; they do not become its tested
+SHA. Fresh PR/ref check confirmed clean matching local/remote head and open/draft PR.
+Main remains `42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`. Planning worktree
 `2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, two unpublished commits, other refs/PRs
 and normal profiles remain untouched. Never reset to an old candidate.
 
-**Exact terminal operation:** production-scaffold.yml, workflow_dispatch,
+**Prior audited terminal operation:** production-scaffold.yml, workflow_dispatch,
 `upload_packages=true`, attempt 1, created 2026-10-06 19:57:34 UTC. Tested SHA
 **`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**, tree
 **`c5df6b86538a2a2b90a48c29b8af05443e57ac68`**. Preflight 112472186077 Pass;
@@ -78,8 +83,9 @@ target qualification; old required passes are exact old-SHA evidence, not implem
 cross-SHA acceptance. Unchanged 1G human evidence remains narrowly reusable under TESTING.
 
 **Budget:** initial matrix 1/1 + corrective matrix 1/1 consumed; earlier explicit dispatch
-retry 1/1 used. Three historical requests/two confirmed matrices. New fix dispatch
-approved 1/1, not yet sent; no automatic retry or further matrix authority.
+retry 1/1 used; new fixed-probe dispatch 1/1 used. Four production requests, three
+confirmed matrices, including one historical ambiguous HTTP 500. No further retry/
+matrix authority. Pending executions are not counted until actual evidence.
 Integrated fixture cumulative 14 local + 4 CI-host invocations = 18; 96 local + 48 CI
 measured bounded adapter spawns = 144 (earlier uninstrumented/other runtime children
 excluded). Three target package builds, 18 native cases (17 Pass/one Fail), all cleanup
@@ -95,11 +101,16 @@ blobs; executable/bundle/input receipt SHA-256 verified, exact values in ledger.
 Local `ui-retention-*` logs retain controls/attempts. Original matrix artifacts remain
 under production-37515083319. No private paths, logs, SDKs or build output committed.
 
-**Next action:** the user explicitly approved **“Retry the dispatch once with the fix.”**
-This covers one additional existing Windows x64/macOS ARM64 matrix with package
-retention and no automatic retry. After final shared-deadline control verification, fresh exact ref/
-worktree and no-existing-operation check, publish/dispatch once, record confirmed
-run/attempt/branch/exact SHA and manual same-chat wait. If ambiguous, preserve uncertainty
-and do not redispatch. On terminal user resume audit the new exact requirements and
-artifacts; no status loop/watcher/second writer/replacement Goal/chat. Stop at
-`review_ready` only with all H01–H12/sections 3–4 qualified; no merge.
+**Same-thread continuation:** after this exact run is terminal, send **Audit run
+37529174148/1 and continue.** If using the saved Goal, use the client's real Resume
+control for that SAME Goal; agent lifecycle tools cannot activate it. No replacement
+Goal/chat, polling/watcher, second writer, reset or merge. Inspect the recorded attempt
+and changed refs/worktree ownership once. If still pending, checkpoint/wait again
+without redispatch. If terminal, audit all H01–H12/applicable sections 3–4: exact
+required named/core/SDK/browser/flow evidence, actual Windows Source retention and all
+six packaged cases/cleanup, denial/single-instance, privacy/dependency inventory,
+correctly attributed captures and source/package identity. Preserve failed, skipped,
+missing/expired results and old Mac diagnostic/human-input/signing limits. If it fails,
+classify actual evidence and cumulative hypothesis budget before further fixes; no
+retry implied by Resume. Stop at `review_ready` only after every required gate is
+proved for the final candidate; no merge or Phase 1 closure.

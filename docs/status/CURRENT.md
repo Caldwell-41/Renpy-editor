@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-10-07. **Branch:** acceptance/phase-1h-vertical-slice.
-**Phase 1G: accepted, integrated, complete. Phase 1H: approved qualification dispatch preparation.**
+**Phase 1G: accepted, integrated, complete. Phase 1H: awaiting_ci.**
 
 Phase 1G merged through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17)
 at `295a189925ac5c9c8655569cb29dd10236d7201d`. Windows x64/macOS ARM64 production
@@ -29,9 +29,10 @@ and changed-probe native qualification remain unresolved; no product assertion i
 waived or prior SHA accepted automatically. [Terminal audit/correction](../tasks/active/phase-1h-vertical-slice-acceptance.md#terminal-corrective-matrix-and-source-probe-correction)
 retains both failed matrices and cumulative attempts.
 
-**Next:** user approved “Retry the dispatch once with the fix.” Publish and dispatch
-one additional existing production matrix with retained packages/no automatic retry,
-then same-chat terminal audit to `review_ready`. Previous allowances remain consumed;
-new approved fix dispatch not yet sent. No merge.
-[HANDOVER](HANDOVER.md) owns exact continuation. Planning worktree `2c5a164` and two
-unpublished commits remain untouched. Phase 1 closure, Phase 2 and optional Git are not selected.
+**Pending:** the single user-approved fixed-probe dispatch succeeded as
+[37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148),
+exact `ba01a84cd7f860be6e8717e98216bdf747875073`, with package retention. No result yet.
+Previous and new allowances are consumed; no further matrix/retry or merge. **Next:**
+manual same-chat terminal audit to `review_ready`; no model polling. [HANDOVER](HANDOVER.md)
+owns exact continuation. Planning worktree `2c5a164` and two unpublished commits remain
+untouched. Phase 1 closure, Phase 2 and optional Git are not selected.
