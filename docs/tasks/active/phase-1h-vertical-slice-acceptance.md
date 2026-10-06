@@ -1,8 +1,8 @@
 # Phase 1H — Integrated vertical-slice acceptance
 
-**Updated:** 2026-10-06; Phase 1G accepted/integrated; execution remains unselected.
+**Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `not_started`.
+**Execution state:** `in_progress`.
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -121,8 +121,8 @@ Do not dispatch a packaging matrix for planning changes. During actual acceptanc
 use one complete final matrix per changed candidate; do not rerun unchanged expensive
 gates or use model polling. Capture run ID, attempt, SHA and remaining jobs before an
 awaiting-CI/manual-resume handoff. Failed/skipped/cancelled are distinct from passed.
-The existing production and quality flow selectors still need the migration recorded
-in TEST-AUDIT-1 before routine selection. A future integrated-tree assessment selects
+The production and quality flow-selector migration is complete; retain the exclusions
+and ordinary coverage recorded in TEST-AUDIT-1. A future integrated-tree assessment selects
 affected/required gates; it does not automatically repeat an equivalent matrix on merge
 or claim unimplemented cross-SHA evidence reuse.
 
@@ -154,3 +154,135 @@ are planned and unexecuted. Active 1F CURRENT/HANDOVER and correction evidence r
 owned by PR #14; no replacement handover or application change is introduced here.
 The next permitted action for this PR is documentation review. Starting 1G.1 requires
 integrated/accepted 1F and a user-selected goal; starting 1H requires integrated 1G.
+
+## 7. Execution ledger — 2026-10-07
+
+**Selected outcome:** the user authorised H01–H12 and applicable sections 3–4 to
+`review_ready`, including fixtures/harnesses, focused checks, bounded corrections,
+publication and supported-target qualification. No merge, Phase 1 closure, Phase 2,
+optional Git development or signing/notarisation. Codex is native macOS ARM64;
+Windows x64 evidence will use the existing supported-target production workflow.
+
+**Ownership:** clean main fast-forwarded from `b594712` to fresh
+`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`; no matching branch/PR or pending run existed.
+Created `acceptance/phase-1h-vertical-slice`. The separate planning worktree remains
+`2c5a164`, ahead two unpublished commits, and was not modified/published. Other open
+PRs and refs are untouched. No acceptance package matrix has yet been dispatched.
+
+### Representative game and selected gates
+
+`tests/fixtures/phase-1h/expected.json` fixes exact Scene source templates (only
+technical labels normalize to logical names), route dialogue, Boolean/string/int64
+outcomes and original PNG/PCM WAV hashes. The test-only lifecycle builder uses staged
+creation without Git, real Character/Variable/import IPC, production Scene commands,
+transactional Source saving, repeated history, real media presentation and reopening.
+Default `trust = 9007199254740993` and assigned int64 extrema remain decimal strings
+on the editor wire and exact integers in source/runtime. Two routes reconverge; tree
+ordering does not change entry/edges. Asset provenance/licence is in the fixture README.
+Testcases are injected only into disposable games; shipped runtime/UI behavior is
+unchanged. They use standard Start/Choice/dialogue, not route jumps or replaced screens.
+
+The existing `production-scaffold.yml` gains one exact ignored SDK gate and retained
+case outputs. Its routine core selectors, enforced observed-flow fixture, two archive
+lifecycle gates, runtime service/diagnostic gates, six packaged UI cases, denial and
+single-instance probes, browsers, privacy and dependency inventory remain required.
+No specialist termination/namespace experiments are selected. Exact candidate/source
+input recording includes the acceptance fixture inputs. Q1 guards continue to reject
+missing/zero/ignored/failed required Cargo results and incomplete packaged cleanup.
+
+| ID | Concrete expected observations and selected proof | Current evidence |
+| --- | --- | --- |
+| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | Local staged no-Git creation Pass; normal menus/save/load/history/rollback Pass; final both-target evidence open |
+| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | Local authoring/import/hash/golden/reopen Pass; actual route values/media Pass on local Mac; final both targets open |
+| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | Local golden-source Pass; local Mac runtime assertions Pass; final both targets open |
+| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | Local production flow/source Pass; route local Mac runtime assertions Pass; final both targets open |
+| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | Local fixture history/reopen Pass; both-target broad history regressions open |
+| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | Local real compile/lifecycle Pass; final candidate both targets open |
+| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | Local custom Source/reopen Pass; existing Source/core/browser/package regressions selected, target evidence open |
+| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | Local real compile/lint Pass; existing runtime service/diagnostic and packaged cases selected, target evidence open |
+| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | Local reopen Pass; metadata-free riverside SDK case Pass on local Mac; final both targets open |
+| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | Existing named routine transaction/recovery gates selected; final target evidence open |
+| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | Existing real dispatch/service and frontend/native gates selected; copied-UUID consent and zero-process untrusted inspection Pass on local Mac; target evidence open |
+| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | New exact native Mac long-history test Pass (1/1, no skip, 77.70s); target suite/resource gates open |
+
+Section 3 mapping: graph inventory/partial/missing/unknown/duplicate/self-loop/limits use
+`scene::tests::flow_*`, Source navigation and the fixed reconvergent fixture; preparation
+uses real runtime SDK and frontend preparation handlers; trust uses stale SDK/input,
+revocation/session tests plus the new untrusted/copy cases; runtime uses real process
+Stop/descendants, saved editing, no-reload, move/delete/import/history refusal tests;
+diagnostics use the SDK Unicode/BOM/CRLF cases and bounded diagnostic parser/navigation
+regressions. Final evidence must confirm these actual named tests/cases, not just totals.
+
+Section 4 remains open until final target results: source/metadata preservation and
+recovery/path/IPC gates; package WebView denial/single-instance; both native/rendered
+surfaces; production declared limits and three enforced flow samples; terminal privacy
+and licence/dependency inventory and retained artifacts. Mac Chrome timing remains an
+explicit diagnostic under TESTING, not a fabricated pass. Signing/notarisation and
+manual assistive-technology limits remain. Required cases are never waived by prior
+1G green statuses.
+
+**Human reuse assessment:** changes are test-only Rust modules/helpers, synthetic
+assets/manifests, workflow/evidence recording and docs. No Scene/Source/Branches UI,
+Save/native-input dispatch, runtime product behavior, CSS, IPC authority, dependency or
+packaging change. Final diff verification confirms these boundaries. The mapped 1G native human cases
+remain reusable under TESTING: navigation/input/focus, native shortcuts, resize/scaling,
+Run/Stop/save-staleness/reopen, diagnostic navigation, picker/import/progress and
+cancellation. Original packages keep their own identities; automated gates execute
+this acceptance candidate. No repeated broad user session is requested.
+
+### Local development failures and cumulative problem record
+
+**H-FIXTURE-1:** first execution of the new fixture/oracle; classification currently
+harness/environment, no demonstrated product defect. Preserve every failed attempt;
+corrections do not turn those attempts into passes.
+
+| Attempt | Observation / classification | Smallest correction or next discriminant |
+| --- | --- | --- |
+| 1 | SDK creation failed writing normal-profile `upgraded.txt`; sandbox/profile isolation omission | Supported portable `Ren'Py Data` above disposable SDK; subsequent creation passed |
+| 2 | Source Save refused edits in mapped Variable definition file (`MAPPED_DEFINITION`); harness violated existing contract | Keep definitions in authoring workspace; custom Source content goes in unmapped transforms file |
+| 3 | All authoring/reopen/compile/lint passed; route processes had no display under sandbox | Same isolated fixture with native display access; no headless substitute or product change |
+| 4 | Real compiled move/delete reached incoming-target refusal, but harness expected wrong error enum | Expect exact existing `ReferenceBlocked`; subsequent lifecycle passed |
+| 5 | First dialogue asserted while transition was still executing; both SDK cases failed and debug screen stayed open until unchanged 60s deadline | Await visible conditions explicitly and add failure teardown; preserve both timeout reports |
+| 6 | Added teardown hook placed outside an SDK testsuite; real compile rejected it | Wrap driver in a named SDK testsuite; use its exact qualified case selector |
+| 7 | Copied project changed folder basename while retaining metadata folder name; open correctly refused `InvalidMetadata` | Copy under another parent with the same basename; no relaxed metadata validation |
+| 8 | Copied Run preparation lacked reviewed runtime helper and correctly refused `RUNTIME_POLICY_REQUIRED` | Use Validate preparation for shared execution-consent rejection; existing Run policy gates remain selected |
+| 9 | Seven initial dialogue/state/image/audio assertions passed; in-game menu action was incorrectly named Preferences | Use actual pinned SDK quick-menu label Prefs; wrong-outcome control rejected as intended |
+| 10 | Menu/save/load/history and route state/media passed; single dialogue click did not reach reconvergence | Investigate Screenshot interaction restart and dialogue completion; retain exact station/rollback assertions |
+| 11 | Direct capture did not fix the same advance failure; screenshot-restart hypothesis disproved | Reassess using SDK Advance control, which handles completion over render frames; no third repetition of single-dismiss hypothesis |
+| 12 | Advance reached station; immediate stop/hide assertion raced queued effects | Explicit 10s condition waits for assertions, unchanged 60s process deadline; capture actual dialogue/state/media and fresh rendered frame |
+| 13 | All four independent cases and cleanup passed; 28/28 assertions per positive case, intentional wrong integer rejected | Complete local native development proof; final Windows/macOS candidate qualification remains open |
+
+Attempt 13: native macOS 26.6.2 ARM64, SDK 8.5.3.26051504/Python 3.12.8,
+1/1 Cargo test Pass/no skip, 67.66s. Independent rooftop/riverside/metadata-free
+cases exit 0 at 8,252/8,240/8,208 ms; wrong-outcome exits 1 at 2,646 ms on exact
+`trust == 1`, with no timeout. All temporary editor/game/save/token/SDK state removed.
+Observed entry: dialogue matches, trust `9007199254740993`, false/unset, Alex bounds
+`[608,656,64,64]`, exact music/SFX paths. Rooftop observes expected dialogue,
+true/`9223372036854775807`/rooftop and `[1216,656,64,64]`; riverside (both copies)
+false/`-9223372036854775808`/riverside and `[0,656,64,64]`. Actual background/character
+showing flags true. Rendered screenshots show expected dialogue and tiny original
+swatches; surrounding checkerboard reflects the deliberate 64px fixture size.
+Evidence: ignored `integrated-authoring-local.log`, `cases-attempt-13/` JSON/logs/PNGs;
+manifest SHA-256 `d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638`.
+Self-review found screenshots from earlier cases being exported under later case names;
+export now retains only each positive case's own route capture, none for rejecting
+control. Attempt 13's original exports are retained unchanged; final workflow will
+verify corrected attribution. No runtime/assertion changes after this local pass.
+
+13 local integrated SDK gate invocations; measured bounded adapter spawns total 84
+across attempts 6–13 (8/8/8/12/12/12/12/12). Earlier uninstrumented launches and
+runtime-service child compile/lint processes are not included or fabricated. Final
+production matrix allowance remains unused (one selected final candidate, no retry).
+Failures/logs are ignored under `.toolchains/reports/phase-1h/`; no private paths/logs,
+SDKs or build output enter Git. All correction hypotheses are recorded rather than
+silently restarting a budget. No production dispatch/retry, desktop build or editor
+launch has been used; SDK test-process/adapter counts are reported where instrumented,
+and earlier absent counters are not invented. The 1G historical counters remain intact.
+
+Cheap checks so far: validator 352 files; Q1 rejection/selector audit Pass; retention
+9/9; frontend 91/91/no skips; Rust compilation/formatting; whitespace; actionlint 1.7.12
+workflow validation Pass. New asset-manifest test 1/1, long-history test 1/1 and SDK-result rejection guard 1/1 Pass.
+Focused SDK invocations use:
+`cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture`
+with official archive, disposable profiles/portable token root and native display access.
+These are development observations, not yet final coherent-candidate package proof.

@@ -1,10 +1,10 @@
 # Plan: Phase 1 complete authoring vertical slice
 
-**Updated:** 2026-10-06.<br>
+**Updated:** 2026-10-07.<br>
 **Status:** Phase 1A–1G and CI-SIMPLE accepted and integrated. Phase 1G merged through
 [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17) at `295a189`; both-platform
-native/human and exact-input qualification accepted. Phase 1H remains `not_started`,
-ready only for explicit selection; Phase 1 itself is not closed.<br>
+native/human and exact-input qualification accepted. Phase 1H is selected and `in_progress`,
+with its approved acceptance brief; Phase 1 itself is not closed.<br>
 **Scope:** Production vertical slice; no Phase 2+ implementation
 
 ## Purpose and authority

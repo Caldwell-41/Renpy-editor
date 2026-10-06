@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "title": "Crossroads at Sundown",
+  "precisionInteger": "9223372036854775807",
+  "initial": {
+    "heard_news": false,
+    "trust": "9007199254740993",
+    "route": "unset"
+  },
+  "routes": {
+    "rooftop": {
+      "dialogue": "Rooftop: a shared plan.",
+      "heard_news": true,
+      "trust": "9223372036854775807",
+      "route": "rooftop",
+      "background": "rooftop",
+      "character": "alex happy",
+      "placement": "right"
+    },
+    "riverside": {
+      "dialogue": "Riverside: separate ways.",
+      "heard_news": false,
+      "trust": "-9223372036854775808",
+      "route": "riverside",
+      "background": "riverside",
+      "character": "morgan calm",
+      "placement": "left"
+    }
+  },
+  "assets": {
+    "alex.png": {
+      "bytes": 179,
+      "sha256": "3136c3a0a44a795a5b06b6ba2656804b67cc37fd9a01bd26fa77c690af055063"
+    },
+    "bell.wav": {
+      "bytes": 32044,
+      "sha256": "4044ad0325e0914343fa603206f935dd715afda996210ae25dd3652703785f87"
+    },
+    "booth.png": {
+      "bytes": 180,
+      "sha256": "9e8f5378846d7f42e6547b94af0c2ec1f600c008c29ea2cfb2d8093022d68433"
+    },
+    "morgan.png": {
+      "bytes": 179,
+      "sha256": "c2cd89082ec8e50bd3c32ae7bb86550e8ac275fb7ffe9127626fd4362a7e0d4f"
+    },
+    "riverside.png": {
+      "bytes": 180,
+      "sha256": "faee94eba7a089636e2b13ed5a6bcc6888cbd2f6c79f6943acd33225e0b373d5"
+    },
+    "rooftop.png": {
+      "bytes": 179,
+      "sha256": "bcb8b11e8448d092851dcdd0115a1da6aee133db454d261c5c9af3b59456205d"
+    },
+    "theme.wav": {
+      "bytes": 32044,
+      "sha256": "0dffa5fbadd50a8c91e3867dd02bd230c51a9765b4e32eb5ba4af2250a200083"
+    }
+  },
+  "sceneSources": {
+    "Radio booth": "label ${Radio booth}:\n    scene bg booth with dissolve\n    show alex happy at left\n    show morgan calm at right with fade\n    show alex at center\n    play music music_theme\n    play sound sfx_bell\n    alex \"The shift is over. Where shall we go?\"\n    \"Choose a road at sundown.\"\n    menu:\n        \"Rooftop\":\n            jump ${Rooftop}\n        \"Riverside\":\n            jump ${Riverside}\n",
+    "Rooftop": "label ${Rooftop}:\n    scene bg rooftop with fade\n    show alex happy at right with dissolve\n    show alex happy\n    $ heard_news = True\n    $ trust = 9223372036854775807\n    $ route = \"rooftop\"\n    alex \"Rooftop: a shared plan.\"\n    stop music\n    hide alex with fade\n    jump ${Station platform}\n",
+    "Riverside": "label ${Riverside}:\n    scene bg riverside with fade\n    show morgan calm at left with dissolve\n    show morgan calm\n    $ heard_news = False\n    $ trust = -9223372036854775808\n    $ route = \"riverside\"\n    morgan \"Riverside: separate ways.\"\n    stop music\n    hide morgan with fade\n    jump ${Station platform}\n",
+    "Station platform": "label ${Station platform}:\n    \"We meet again at the station.\"\n    return\n",
+    "Disposable": "label ${Disposable}:\n    return\n"
+  }
+}

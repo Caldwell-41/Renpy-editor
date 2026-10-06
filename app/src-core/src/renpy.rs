@@ -1620,6 +1620,7 @@ fn promote_path_no_replace(from: &Path, to: &Path) -> Result<(), RenpyError> {
 
 #[cfg(test)]
 mod tests {
+    mod phase1h;
     use super::*;
     use std::io::Cursor;
 

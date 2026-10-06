@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 root = Path(__file__).resolve().parents[2]
-paths = subprocess.check_output(["git", "ls-files", "app", ".github/workflows/production-scaffold.yml"], cwd=root, text=True).splitlines()
+paths = subprocess.check_output(["git", "ls-files", "app", "tests/fixtures/phase-1h", ".github/workflows/production-scaffold.yml"], cwd=root, text=True).splitlines()
 inputs = {path: hashlib.sha256((root/path).read_bytes()).hexdigest() for path in paths}
 report = {
     "candidate": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),

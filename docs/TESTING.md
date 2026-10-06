@@ -90,8 +90,19 @@ cargo test -p loomlight-core --release --locked \
 ```
 
 Run SDK gates separately with their pinned archive and exact test path. Supply `--ignored`
-only for the two runtime SDK gates (ignored because they need an explicit archive), and
-always combine it with `--exact`. Specialist persistence/namespace cases stay excluded.
+only for explicitly selected SDK tests needing an archive, and always combine it with
+`--exact`. Specialist persistence/namespace cases stay excluded.
+
+Phase 1H additionally selects
+`renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate` with
+`LOOMLIGHT_RUNTIME_SDK_ARCHIVE` on each supported target. It creates and authors the
+representative game through real services, compares fixed source/media expectations,
+reopens, validates through explicit runtime trust and runs both routes from normal
+entry using the pinned SDK test driver. Original assets and outcome/source expectations
+live in `tests/fixtures/phase-1h/`. Its ignored state means ordinary core does not repeat
+SDK execution; a missing archive is a failure. The production workflow requires the
+named positive Cargo result and completion marker and retains the independent case log.
+The routine core also selects actual authoring/reopen after 4,097 terminal journals.
 
 For changes to starter GUI generation, explicitly select the ignored pinned-SDK
 regression `renpy::tests::official_sdk_starter_contains_runtime_gui_assets` with
