@@ -559,8 +559,11 @@ export function renderSceneAuthoring(
     };
     const scrollDrag=():void=>{
       if(!drag?.active)return;
-      const bounds=list.getBoundingClientRect();
-      if(drag.x>=bounds.left&&drag.x<=bounds.right&&drag.y>=bounds.top&&drag.y<=bounds.bottom){const delta=drag.y<bounds.top+32?-10:drag.y>bounds.bottom-32?10:0;if(delta){list.scrollTop+=delta;updateTarget();}}
+      // The panel owns scrolling; the list can extend far beyond its viewport.
+      const bounds=beatsRegion.getBoundingClientRect(), content=list.getBoundingClientRect();
+      const top=Math.max(bounds.top,content.top,toolbar.getBoundingClientRect().bottom);
+      const bottom=Math.min(bounds.bottom,content.bottom);
+      if(drag.x>=Math.max(bounds.left,content.left)&&drag.x<=Math.min(bounds.right,content.right)&&drag.y>=top&&drag.y<=bottom){const delta=drag.y<top+32?-10:drag.y>bottom-32?10:0;if(delta){beatsRegion.scrollTop+=delta;updateTarget();}}
       scrollFrame=window.requestAnimationFrame(scrollDrag);
     };
     const moveDrag=(event:PointerEvent):void=>{

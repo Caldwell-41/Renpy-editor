@@ -984,6 +984,13 @@ acceptance are recorded in the UI task and HANDOVER, not inferred from screensho
 
 ## Hands-on UI correction regressions
 
+Held Beat edge scrolling must use the actual `.beats-region` scroll owner and visible
+list bounds below its sticky toolbar, not the full-height non-scrolling inner list.
+Retain the regression for continued down/up scrolling with a stationary pointer,
+outside/toolbar refusal, Escape frame/marker cleanup and zero cancellation writes.
+A focused shipped-CSS browser fixture can discriminate container/geometry failures;
+physical WebView2 holding still requires the target-machine retest.
+
 The final Windows review adds rejecting DOM regressions for two observed defects:
 simultaneous Story canvas/thumbnail displays must retain live object URLs until view
 disposal, and acknowledged Source input must update the sidebar dirty count and

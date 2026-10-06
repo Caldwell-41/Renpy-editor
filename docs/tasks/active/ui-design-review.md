@@ -1,6 +1,51 @@
 # UI design review
 
+### Physical Windows edge-scroll correction — 2026-10-06
+
+**Live state: in_progress; WIN-UI-02 Fail pending focused physical retest.**
+Human observation on candidate 4: marker/ghost and Escape cleanup work, but holding
+at either list edge does not scroll. Independent comparison proves all **200 saved
+files unchanged** (`physical-final-step-1-edge-failure.json`); user observations
+remain distinct from agent/native and fixture evidence. The capture session initially
+mixed app controls with other-app pixels; no input used that state. Kernel reset,
+returned-window selection and activation restored consistent native capture.
+
+**WIN-DRAG-01, product defect, correction attempt 1:** drag code scrolled
+`.beats-list`, whose shipped CSS overflow is visible, instead of the scrollable
+`.beats-region`. It also tested full list bounds beyond the visible panel. Correct
+the scroll owner and clip edge detection to the visible list/panel below the sticky
+toolbar. Existing cancellation/protected-range/transaction behavior is retained.
+New rejecting regression fails **0/1** before the fix (`edge-scroll-before-fix.log`);
+all **16 Scene tests pass** afterward (`edge-scroll-focused-tests.log`). Focused
+Chrome fixture with shipped renderer/CSS and a held mouse proves downward scrolling,
+return to top, Escape stopping frames/markers and **zero writes**
+(`edge-scroll-rendered-proof.json`). Its first invocation failed at setup because
+the Windows import path lacked a file URL; configured run passes. This is not native
+WebView2/physical acceptance. TypeScript/Vite, repository validator and whitespace pass.
+
+Candidate 5 production build **Pass 34.97s**, 14,151,168 bytes, SHA256
+`4955035543c07593c4e69e51d34e8bdc80ced6d89cb533c5ab2f47f233aad208`.
+`edge-scroll-build-receipt.json` binds all **132 inputs**; only scene-ui.ts and its
+DOM test differ from candidate 4. Still 8 changed / 124 unchanged versus qualified
+`5b467a4`. Retain candidate 4/failed human evidence; no broad unchanged suite or
+manual CI dispatch. Cumulative Windows: **5 successful production builds + 1
+unqualified direct-Cargo build / 4 failed build/setup attempts / 20 top-level starts /
+0 separate SDK menu starts**. Browser setup failure above is separate, not a build.
+Clean candidate 4 was closed and absence verified before candidate 5 launch; process
+path/hash verified. Original profile restoration remains pending with the app open.
+
+**Next:** candidate 5 → disposable graph review → Story → Scene 1, Saved. Repeat
+only holding at the lower and upper visible list edges, then Escape/release. Keep
+the earlier marker and cancellation successes; do not repeat the other three human
+cancellations. Edge scrolling remains Fail until this native physical retest passes.
+Then finish Explorer coexistence/drop and brief English/hover/visual feedback.
+Scaling remains excluded. Add this affected drag path to the one bounded Mac
+follow-up after Windows freezes; both-platform acceptance/integration remain open.
+
 ### Windows agent work ready for final hands-on session — 2026-10-06
+
+**Earlier agent-ready checkpoint:** candidate 4 is superseded by the live correction
+above; its passing unaffected evidence and failed physical edge scrolling remain.
 
 **State: in_progress; Windows acceptance incomplete.** The user selected completion
 of agent-owned fixes/checks before one final Windows session, with unnecessary
@@ -66,8 +111,8 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 
 | Row | Status | Exact evidence and remaining scope |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; native reorder subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Held ghost/edge scrolling and Explorer coexistence need physical input. |
-| WIN-UI-02 | Unavailable; cancellation/bounds subchecks Pass | User already reported Escape/outside/focus-switch cancellations work; record separately from agent proof. Native same-row/unsubmitted/final-Choice bounds preserve source (`native-beat-English-bounds-review.json`). Only held edge/live marker remains; do not repeat the three completed human cancellations. |
+| WIN-UI-01 | Unavailable; native reorder/physical marker subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Human candidate-4 ghost/marker Pass. Edge scrolling fails under WIN-DRAG-01; Explorer coexistence remains. |
+| WIN-UI-02 | Fail; correction awaits physical retest | Candidate-4 human held top/bottom edge scrolling fails; ghost/Escape cleanup Pass, all 200 files unchanged. Candidate-5 focused correction passes 16 Scene tests and held-pointer Chrome fixture; physical retest pending. Prior cancellation/bounds receipts remain; do not repeat completed human cancellations. |
 | WIN-UI-03 | Unavailable; Browse/service subchecks Pass | Prior selected-media failure retained; WIN-IMPORT-01 correction/native reselection/partial-import proof `259`–`309` passes. `candidate-4-native-import-cleanup-proof.json`: PNG/JPEG preview, Add files, remove all, Cancel/discard/reopen, all 200 project files unchanged. Physical multi-file Explorer drop, off-Assets refusal and coexistence remain. |
 | WIN-UI-04 | Unavailable; agent native English subchecks Pass | Native Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact English commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Short physical English/focus spot-check remains. IME outside scope. |
 | WIN-UI-05 | Pass, native Windows | Existing `108`–`123`, `336`–`374` and discard/reopen receipts: all types reset correctly, both Boolean True values persist; no-write snapshots retained. Native string default also passes on candidate 3. |

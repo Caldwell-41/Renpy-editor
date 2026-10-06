@@ -322,6 +322,51 @@ test("new Beat waits for its receipt, restores failure input, and focuses the sa
  const row=host.querySelector<HTMLElement>('[data-beat-id="added"]')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.beat-select'));assert.equal(row.querySelector('.expanded-beat'),null);assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();
 });
 
+test("held Beat drag scrolls the visible writing panel edges and stops on cancellation", async () => {
+  const browser = installDom();
+  const host = document.querySelector<HTMLElement>("#host")!;
+  let writes = 0;
+  const frames = new Map<number, FrameRequestCallback>();
+  let frameId = 0;
+  window.requestAnimationFrame = callback => { frames.set(++frameId, callback); return frameId; };
+  window.cancelAnimationFrame = id => { frames.delete(id); };
+  const dispose = renderSceneAuthoring(host, document.querySelector("#tree")!, sceneModel(), {
+    status: () => {}, resolution: { width: 1920, height: 1080 },
+    present: async () => { throw Error("unused"); }, apply: async () => { writes++; return sceneModel(); },
+  });
+  try {
+    const panel = host.querySelector<HTMLElement>(".beats-region")!;
+    const list = host.querySelector<HTMLElement>(".beats-list")!;
+    const toolbar = host.querySelector<HTMLElement>(".beats-toolbar")!;
+    const grip = host.querySelector<HTMLButtonElement>(".beat-grip")!;
+    const bounds = (top: number, bottom: number): DOMRect => ({ left: 0, right: 300, top, bottom, x: 0, y: top, width: 300, height: bottom - top, toJSON: () => ({}) });
+    panel.getBoundingClientRect = () => bounds(100, 400);
+    toolbar.getBoundingClientRect = () => bounds(100, 160);
+    list.getBoundingClientRect = () => bounds(160 - panel.scrollTop, 2160 - panel.scrollTop);
+    // Shipped CSS scrolls the panel; the full-height inner list cannot scroll.
+    Object.defineProperty(list, "scrollTop", { configurable: true, get: () => 0, set: () => {} });
+    panel.scrollTop = 150;
+    document.elementFromPoint = () => grip.closest(".beat-card");
+    const pointer = (type: string, y: number) => new browser.PointerEvent(type, { button: 0, pointerId: 1, clientX: 100, clientY: y, bubbles: true }) as unknown as Event;
+    const frame = () => { const [id, callback] = frames.entries().next().value!; frames.delete(id); callback(0); };
+    grip.dispatchEvent(pointer("pointerdown", 220));
+    window.dispatchEvent(pointer("pointermove", 390));
+    frame(); assert.equal(panel.scrollTop, 160, "held pointer at visible bottom must scroll down");
+    frame(); assert.equal(panel.scrollTop, 170, "holding still must keep scrolling");
+    window.dispatchEvent(pointer("pointermove", 170));
+    frame(); assert.equal(panel.scrollTop, 160, "visible top below sticky toolbar must scroll up");
+    window.dispatchEvent(pointer("pointermove", 410));
+    frame(); assert.equal(panel.scrollTop, 160, "outside panel must not scroll");
+    window.dispatchEvent(pointer("pointermove", 140));
+    frame(); assert.equal(panel.scrollTop, 160, "sticky toolbar must not count as a list edge");
+    window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    assert.equal(frames.size, 0);
+    assert.equal(document.querySelector(".beat-drag-ghost"), null);
+    window.dispatchEvent(pointer("pointerup", 170));
+    assert.equal(writes, 0);
+  } finally { dispose(); await browser.happyDOM.close(); }
+});
+
 test("preview reset updates the divider and layout without a hidden slider",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;
  const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()});

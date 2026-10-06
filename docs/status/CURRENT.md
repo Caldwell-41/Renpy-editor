@@ -7,6 +7,23 @@
 
 ## Live continuation
 
+**Physical edge-scroll correction — 2026-10-06; in_progress.** Human candidate-4
+check passes marker/Escape cleanup but fails scrolling at both edges; all 200 saved
+files remain unchanged. WIN-DRAG-01 corrects the scroll owner and visible boundaries.
+Rejecting regression reproduces 0/1; corrected Scene tests 16/16 and focused held
+pointer Chrome/CSS fixture pass, zero writes. Candidate 5 build passes in 34.97s:
+SHA256 `4955035543c07593c4e69e51d34e8bdc80ced6d89cb533c5ab2f47f233aad208`.
+All 132 inputs recorded, only scene-ui.ts and its DOM test differ from candidate 4.
+Native process path verified. **WIN-UI-02 remains Fail pending physical retest.**
+Next: retest only both held-scroll edges on candidate 5, Story → Scene 1, then
+Explorer/English/hover/final feedback. No scale check or broad matrix. Cumulative
+Windows: 5 production builds + 1 unqualified, 4 failed build/setup attempts, 20 starts,
+0 separate SDK menus; no new manual CI. Profile restoration and affected Mac/remote
+qualification remain pending; add held drag to the bounded Mac follow-up. See the
+[live correction ledger](../tasks/active/ui-design-review.md#physical-windows-edge-scroll-correction--2026-10-06).
+
+### Earlier agent-ready checkpoint (candidate 4 superseded)
+
 **Agent work ready for final Windows session — 2026-10-06; in_progress.**
 User selected agent-owned fixes/checks first, minimizing repeats. Two additional
 product fixes now pass: simultaneous Story canvas/thumbnail URLs remain live, and
