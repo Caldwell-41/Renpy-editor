@@ -2,7 +2,7 @@
 
 ## Mac acceptance and combined qualification — 2026-10-06
 
-**State: Mac Pass; preparing the single authorized changed-input remote qualification.**
+**State: Mac Pass; awaiting_ci for the single authorized changed-input qualification.**
 Human reports **“all working”** for held lower/upper edges, toolbar/outside bounds and
 Escape. All **293 cancellation-only project hashes unchanged**; native Saved and
 Undo/Redo disabled. `physical-held-result.json` retains human observations separately
@@ -27,6 +27,26 @@ not a documentation-only duplicate; initial 1/1 and prior two correction dispatc
 remain consumed. No ambiguous retry or additional matrix. Local counters unchanged:
 Mac **19 builds / 77 starts / 7 SDK menus**, Windows **6 production + 1 unqualified /
 4 failed setup / 21 starts / 0 SDK menus**; three local Mac game starts separate.
+
+**Confirmed operations:** both `workflow_dispatch`, feature branch, exact tested
+carrier **`88016acb40caa036a946ef31795ca61235e5ce6d`**, attempt **1**.
+
+| Workflow | Run / current evidence |
+| --- | --- |
+| `quality.yml`, default options | [37459343661](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459343661) **Pass**. Required validator, rejection fixtures and selector audit each success; optional unselected jobs skipped and not claimed. Exact jobs/log retained. |
+| `production-scaffold.yml`, `upload_packages=true` | [37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476), **in_progress** at **2026-10-06 11:53:09 UTC**. Request accepted once, exact SHA/branch/attempt confirmed. No terminal gate/package acceptance yet. |
+
+New allowance consumed: **one coherent qualification set / one production + one
+quality dispatch**. Cumulative production correction dispatches now **3**, initial
+**1/1** unchanged; earlier failed runs preserved. Remote build/start counts for this
+run await actual terminal evidence; do not invent successful counts. `remote-dispatch.json`
+and exact API receipts retained under ignored bounded evidence directory.
+
+**Manual same-chat wait:** no autonomous Goal is active; end this ordinary chat turn
+and stop status checks. User resumes here with “The production run is complete; audit
+37459347476 attempt 1 and continue.” Inspect that recorded run once on resume; if
+pending, wait again without polling or redispatch. No automation or ambiguous retry.
+Later wait-publication docs SHA does not replace tested carrier/input identities.
 
 **Required terminal audit:** Preflight and both native-host jobs; positive named SDK
 lifecycle/download/runtime-service/diagnostic gates, browser actual outcomes, desktop

@@ -7,7 +7,7 @@
 
 ## Live continuation
 
-**Mac acceptance Pass / combined qualification preparing — 2026-10-06.** User's
+**Mac acceptance Pass / combined qualification awaiting_ci — 2026-10-06.** User's
 held-grip feedback **“all working”**, native Saved/Undo and Redo disabled, and all
 **293 cancellation-only hashes unchanged** complete the sixth focused check. All six
 Mac cases Pass in selected native/service/controller/human scopes. Original profile
@@ -19,10 +19,18 @@ All **132** inputs equal frozen `ee5f55e` (**10 changed / 122 unchanged** versus
 docs commits do not replace them. The ten changed inputs justify **one coherent
 required Windows/macOS qualification**: default repository quality plus production
 `upload_packages=true`, no optional diagnostics or duplicate matrix. Workflows unchanged;
-initial 1/1 and prior two correction dispatches preserved. No new dispatch yet.
+initial 1/1 preserved; correction dispatches now **3**. One new production plus default
+quality request accepted once at exact tested carrier
+**`88016acb40caa036a946ef31795ca61235e5ce6d`**, attempt **1**:
+[quality 37459343661](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459343661)
+required steps **Pass**;
+[production 37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476)
+**in_progress** at **2026-10-06 11:53:09 UTC**. No terminal combined acceptance yet.
 Audit actual SDK/service/browser/boundary/cleanup gates, all six runtime cases per host,
 run/attempt/SHA, matching manifests and retained scanned packages before claiming
-combined acceptance. Manual same-chat waiting; final integration remains separate.
+combined acceptance. Stop model polling; user resumes this ordinary chat to audit
+the recorded production run, no automatic retry or new dispatch. Final integration
+remains separate. Later docs publication does not replace tested candidate identity.
 Exact evidence/budgets: [acceptance ledger](../tasks/active/ui-design-review.md#bounded-mac-acceptance-and-combined-qualification--2026-10-06)
 and [handover](HANDOVER.md#mac-acceptance-and-combined-qualification--2026-10-06).
 

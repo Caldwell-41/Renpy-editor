@@ -2,7 +2,7 @@
 
 ### Bounded Mac acceptance and combined qualification — 2026-10-06
 
-**Live state: Mac Pass; preparing one changed-input remote qualification.** Human
+**Live state: Mac Pass; awaiting_ci on one changed-input remote qualification.** Human
 reports **“all working”** for the focused held lower/upper-edge, toolbar/outside and
 Escape session. Native Saved/Undo and Redo disabled; **293/293 cancellation-only
 hashes unchanged**, no intentional/accidental reorder evidence. `physical-held-result.json`
@@ -23,7 +23,21 @@ Select default `quality.yml` validation plus `production-scaffold.yml`,
 `upload_packages=true`; no optional flow/diagnostic/proof run. Initial allowance 1/1
 and prior two correction dispatches preserved; this authorizes exactly one new coherent
 changed-input qualification, not a duplicate unchanged matrix or ambiguous retry.
-No dispatch yet at this acceptance checkpoint. Local cumulative counters unchanged.
+Acceptance carrier published as **`88016acb40caa036a946ef31795ca61235e5ce6d`**;
+both requests accepted once and their SHA/branch/attempt **1** confirmed:
+
+| Operation | Evidence / last state |
+| --- | --- |
+| Default `quality.yml` | [37459343661](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459343661), **Pass**. Actual required validator/rejection-fixture/selector-audit steps success; unselected optional jobs skipped, not acceptance claims. Jobs/log retained. |
+| Production, `upload_packages=true` | [37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476), **in_progress**, observed **2026-10-06 11:53:09 UTC**. No terminal package/gate acceptance claim. |
+
+Consumed **one new qualification set, two workflow requests**; cumulative production
+correction dispatches **3**, initial **1/1** unchanged. Local cumulative counters
+unchanged; current remote build/start counts await actual evidence. `remote-dispatch.json`,
+run API receipts and quality jobs/log retained in ignored bounded evidence directory.
+Publish this wait, end ordinary turn (no autonomous Goal active), resume same chat on
+user command. No polling/automation/retry/second matrix. Later docs carrier cannot
+replace this exact tested SHA. If recorded run remains pending on resume, wait again.
 Terminal audit must verify actual named SDK/service/browser/boundary/privacy/cleanup
 gates, six packaged cases per target, exact run/attempt/SHA,132 matching input hashes,
 retained scanned packages/app/executables and hashes. Confirm identities/publish wait,
