@@ -554,3 +554,22 @@ checkpoint following the tested correction head. It changes no harness/runtime/p
 inputs and does not warrant another package matrix by itself. The existing approval
 question for one corrective production matrix remains pending; no new question or
 implicit retry authority is introduced. Goal runtime remains active pending user action.
+
+### Goal blocker audit — third consecutive decision turn
+
+The previous two turns made progress: published the locally proven corrections and
+terminal failure audit, then verified correction quality and all 46 named regressions
+per first-candidate host. The same required corrective qualification allowance remained
+pending throughout both. This third turn revalidated clean ownership and the retained
+Windows evidence: all three positive SDK cases remain failed, package `not-built`,
+runtime cases skipped. No human approval reply or corrective operation exists.
+
+Authorised independent implementation, focused checks, self-review and available
+evidence audit are exhausted. More local/old-candidate checks cannot establish corrected
+Windows/macOS qualification; a duplicate dispatch would exceed the consumed allowance.
+The genuine blocker is the pending decision for one additional corrective matrix.
+Publish this lifecycle checkpoint and then set the existing Goal `blocked`; tool
+confirmation is the runtime authority, not a repository status label. Phase 1H stays
+`awaiting_decision`, not `review_ready` or complete. No new permission question, matrix,
+package build, polling loop or retry. Continue in the same Goal/chat when the user
+authorises the bounded matrix; preserve all existing counters and failed evidence.

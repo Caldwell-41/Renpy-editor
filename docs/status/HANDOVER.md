@@ -3,7 +3,8 @@
 ## Phase 1H integrated acceptance — 2026-10-07
 
 **State: awaiting_decision; first matrix terminal failure, bounded corrections locally
-proven, no corrective dispatch authorised or pending. Goal runtime pause not claimed.**
+proven, no corrective dispatch authorised or pending. Goal blocking threshold met;
+record lifecycle block after publishing this checkpoint. No runtime pause claimed.**
 Selected outcome: H01–H12 and sections 3–4 to `review_ready` for independent review.
 No merge, Phase 1 closure, Phase 2, optional Git or signing/notarisation.
 Codex/test development host macOS ARM64; final test hosts Windows x64/macOS ARM64.
@@ -99,11 +100,15 @@ advancing-frame samples/repeats, six packaged cases/cleanup, flow/browser/denial
 inventory and package/input identities. Failed/skipped/missing gates stay open. Stop
 at review_ready only after all required evidence; no merge or Phase 1 closure.
 
-**Actual pause control:** Goal remains active until explicit user/client pause;
-awaiting_decision is repository state only. App documentation places Pause/Resume in
-Goal progress row above composer; installed-app UI action not verified. Pause through
-that client control while deciding; resume this SAME chat after the allowance decision.
-No replacement Goal, new chat, automation, polling loop or second writer.
+**Goal blocker and lifecycle:** the same exhausted qualification allowance has remained
+unresolved across three consecutive Goal turns. Corrections, local checks, terminal
+artifact audit and the 46 named target regressions are complete; repeating those checks
+cannot prove the corrected native gates. No human approval reply has arrived. After
+publishing this checkpoint, mark the existing Goal `blocked` on the allowance decision;
+only the tool's confirmed result proves runtime status. This is not completion or a
+claimed client Pause action. Resume this SAME Goal/chat after authorising one corrective
+matrix. A resumed blocked Goal starts a fresh blocked audit; it does not authorise
+extra retries, scope or merge. No replacement Goal, automation or second writer.
 
 **Accepted baseline:** 1G integrated via PR #17 at 295a189; qualified production
 37461862928/1/quality37461858768/1 at c137b67. Original human/profile restoration,
