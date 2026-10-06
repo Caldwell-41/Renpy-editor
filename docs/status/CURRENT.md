@@ -7,6 +7,29 @@
 
 ## Live continuation
 
+**Windows review frozen / Mac follow-up ready — 2026-10-06.** User's final Welcome
+hover/readability and session feedback: **“all working, happy.”** All 14 WIN-UI rows
+Pass in the selected native/physical/rendered scopes; higher DPI remains Unavailable/
+user-excluded, Narrator/full native permutations minimized, agent-native English
+evidence is not a physical-human keyboard claim. Final 242 project-file hashes
+unchanged; Loomlight closed. Original **3,226 Roaming + 282 local profile files**
+restored/hash-identical; review profiles preserved/hash-verified separately.
+
+| Capability | Windows evidence | Remaining acceptance |
+| --- | --- | --- |
+| Six corrected behaviors | Focused rejecting tests, native WebView2 and affected packaged proofs Pass; physical edge/drop/hover/final UX Pass | One bounded native Mac follow-up on the frozen inputs |
+| Candidate identity | Code frozen at `ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1`; candidate-6 EXE SHA256 `4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`; 132 inputs, 10 changed / 122 unchanged versus `5b467a4` | Justified remote Windows/macOS qualification of the same changed inputs |
+| Handover/integration | Evidence/packages/failures/counters retained, profiles restored, no app/game operation pending | Separate integration chat after both platforms pass; PR #17 conflicts and 1G/1H closure untouched |
+
+**Next:** follow the [six-item Mac checklist](HANDOVER.md#bounded-mac-follow-up--frozen-windows-candidate),
+reuse unchanged Mac/remote evidence, then qualify the coherent candidate once. No new
+workflow dispatched, broad unchanged matrix or automation. Cumulative Windows remains
+6 production builds + 1 unqualified / 4 failed build/setup attempts / 21 starts /
+0 separate SDK menus. Exact row statuses, limitations and final receipts are in the
+[Windows completion ledger](../tasks/active/ui-design-review.md#frozen-windows-review-completion--2026-10-06).
+
+### Earlier final Welcome handoff (completed)
+
 **Physical graph hover/readability Pass — 2026-10-06.** User reports “working” for
 the long English node tooltip and connector labels/arrowhead boundaries. All 242
 saved-file hashes remain unchanged. WIN-UI-13 Pass in selected native/physical scope;

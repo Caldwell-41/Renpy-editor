@@ -1,5 +1,88 @@
 # Current outcome handover
 
+## Frozen Windows review transfer — 2026-10-06
+
+**State: review_ready for the bounded Mac follow-up; combined acceptance incomplete.**
+Final user feedback **“all working, happy”** passes Welcome Settings hover/readability
+and selected Windows session visual acceptance. All 14 WIN-UI rows Pass in their
+recorded selected scopes. `physical-final-welcome-result.json` retains distinct human
+observations/native capture/hash proof; all 242 disposable-project hashes unchanged.
+Higher DPI remains Unavailable/user-excluded, Narrator/full native permutations
+minimized, physical-human English typing unclaimed; actual native SendInput English
+proof is retained. No unsupported full-matrix or both-platform acceptance claim.
+
+**Frozen application inputs:** code commit
+`ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1` on
+`feature/phase-1g-branches-runtime`. Later documentation does not replace it.
+Retained production `candidate-6/loomlight.exe`: 14,151,168 bytes, SHA256
+`4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219`.
+`import-preview-build-receipt.json` binds all 132 app/workflow inputs: 10 changed /
+122 unchanged versus qualified `5b467a4`; both passing baseline manifests agree.
+Windows installer/evidence artifacts, original installed-hash exception, all failed
+candidates/tests/probes and unchanged acceptance remain retained locally beyond expiry.
+Candidate 6 is a retained local production EXE; its new installer/remote qualification
+is pending. Do not infer acceptance from later documentation SHAs.
+
+**Cleanup complete:** normal app close and native-window/process absence verified.
+Original profiles restored by checked same-volume moves: **3,226 Roaming + 282 local
+files hash-identical** to `profile-recovery.json`; review profiles preserved with
+3,227/302 files and matching hashes. `profile-restoration-result.json` records exact
+locations; original backup directories now reside at their original profile paths.
+The first sandboxed verification was denied read access; elevated verification and
+restoration passed. No deletion/overwrite or private work modification. No app/game,
+external restore, CI dispatch or automation remains pending. Do not reopen Loomlight
+against restored private profiles for more review; isolate any future retest.
+
+Cumulative Windows: **6 production builds + 1 unqualified direct-Cargo build / 4
+failed build/setup attempts / 21 top-level starts / 0 separate SDK menu starts**.
+Mac/remote counters and failed evidence unchanged. PR #17 remains draft/open/conflicting;
+no conflict resolution, rebase, merge, phase closure or new feature.
+Exact 14-row status/evidence/limitations live in the
+[completion ledger](../tasks/active/ui-design-review.md#frozen-windows-review-completion--2026-10-06).
+
+### Bounded Mac follow-up — frozen Windows candidate
+
+**Machine/test host:** genuine macOS ARM64 with native packaged Loomlight.
+**Reason:** qualify the six shared behaviors corrected during Windows review together
+before exact-input remote qualification and a separate integration chat.
+Inspect/preserve the existing Mac clone, changes, refs/worktrees; fetch and FF-only
+update the feature branch, never reset/rewrite or overwrite newer work. Read AGENTS,
+CURRENT/HANDOVER, WORKFLOW/TESTING and the selected task ledger. Verify all 132 inputs
+against the retained candidate-6 receipt/code commit before building one coherent Mac
+candidate. macOS and Windows binaries have different hashes; inputs must agree.
+Use disposable projects/isolated profiles and the verified official SDK already
+available; another uncached download is not selected. Agent owns routine checks;
+request physical action only at a demonstrated native-tool limitation.
+
+| Changed behavior | Focused Mac actions and expected result |
+| --- | --- |
+| Source Run / launch lease | Run from Source with a retained draft; verify acceptance/refusal/Cancel preserves drafts and a subsequent Run is not stuck behind a completed lease. Save during play reports an earlier launch; Stop, then rerun latest saved source once. Retain actual diagnostic navigation and close/reopen evidence from the affected runtime path. Reuse unchanged routes; do not rebuild a broad manual matrix. |
+| Acknowledged Source draft inventory | Type an English/Unicode comment in a non-scene Source file. Sidebar shows the correct draft count and UTF-8 bytes after acknowledgement, focus remains stable, no Save/extra write. Undo restores Clean/Saved and original file hashes. |
+| Selected-media content refusal/reselection | Change a chosen import/replacement file externally. Refuse before durable transaction staging, retain editable input and original project bytes, leave no prepared recovery blockage. Reselect and succeed exactly once; partial import does not replay a successful row. Restore temporary external bytes and preserve failure evidence. |
+| Shared Story preview URL | Show the same media simultaneously in canvas and thumbnail/details. Both remain decoded/visible during concurrent loads and view changes; cleanup releases URLs without blanking the live view. |
+| Held Beat edge scrolling | Long list: hold the left grip at lower and upper visible edges; scroll continues while held, respects the sticky toolbar/outside bounds. Escape stops frames and clears marker/ghost without reordering/writing. Verify hashes separately from deliberate moves; retain existing protected-boundary/Undo proof. |
+| Unavailable import preview presentation | Stage PNG/JPEG plus unsupported WebP. Decoded previews/dimensions appear; loading/unavailable/decoder-error states have explanation/Retry and no broken-image box. Retry, remove/Cancel/discard/reopen remain actionable and make no implicit import; selected originals/project files unchanged. WebP decoder expansion is not selected. |
+
+Affected paths: `app/src-core/src/authoring.rs`, `app/src-core/src/lib.rs`,
+`app/src/scene-ui.ts`, `app/src/source-ui.ts`, `app/src/asset-import-ui.ts`;
+corresponding Scene/Source/import tests, native browser driver and bounded
+`ui_refresh_probe.js` diagnostics also changed (10 paths total). Probe timing/required
+assertions were not relaxed. Run focused affected checks/build/native paths and record
+Pass/Fail/Unavailable, package/input hashes and cumulative counters in the existing
+ledger. Reuse unchanged Mac physical/Finder/layout/CONFIG-01 and baseline qualification.
+
+After the bounded Mac pass, justify **one coherent changed-input Windows/macOS remote
+qualification** through the existing workflow and saved budgets. It must prove actual
+required SDK/service/browser/boundary/cleanup gates and six packaged runtime cases,
+retain matching manifests/packages, and verify exact run/attempt/SHA. Do not dispatch
+twice after ambiguous acceptance, repeat an unchanged matrix or poll with automation.
+No dispatch has occurred for this candidate. A new defect requires the smallest
+correction and affected retest; only affected changed behavior returns to Windows.
+Once both platforms pass, publish the combined handover for the final separate
+integration chat; do not resolve PR #17 conflicts/merge/close 1G/1H in this review.
+
+## Earlier final Welcome handoff (completed)
+
 ## Live final Welcome handoff — 2026-10-06
 
 **State: in_progress; WIN-UI-13 Pass in selected native/physical scope.** User says

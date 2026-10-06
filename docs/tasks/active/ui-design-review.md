@@ -1,5 +1,49 @@
 # UI design review
 
+### Frozen Windows review completion — 2026-10-06
+
+**Live state: review_ready for bounded Mac follow-up; combined acceptance incomplete.**
+User's final Welcome Settings-hover/readability/session feedback: **“all working,
+happy.”** WIN-UI-12 Pass in selected native/physical scope; all 14 rows now Pass in
+their documented selected scopes. `physical-final-welcome-result.json` and
+`candidate-6-physical-welcome-final` retain human observations separately from native
+capture/hash verification; all **242 saved-project hashes unchanged**. Higher DPI
+remains Unavailable/user-excluded, Narrator/full native permutations minimized;
+native SendInput English proof is not a physical-human keyboard claim. Earlier failed
+input/build/probe/preview/edge-scroll evidence remains failed/superseded, not waived.
+
+Application corrections are **frozen at `ee5f55eeb36f734e6c4c2cc6e4d53edd417c3bd1`**.
+Candidate 6 production EXE 14,151,168 bytes, SHA256
+`4e436903da2fe4803f0cd76d6f4f176e69572ee19588219b7fea4e0b61da5219` retained.
+`import-preview-build-receipt.json`: 132 inputs, **10 changed / 122 unchanged** versus
+qualified `5b467a4`; identical Windows/Mac baseline manifests. Later documentation
+does not replace tested input identities. Latest relevant checks: 6 import tests,
+16 Scene tests, 44 earlier focused controller/renderer tests, Source/rendered browser
+reviews, candidate-3 route-b/runtime-error and candidate-4 isolated ui-refresh Pass;
+mapped unchanged results reused. Genuine native WebView2 and human evidence are
+distinguished. No new broad unchanged matrix or remote dispatch.
+
+**Cleanup Pass:** app closed normally, absence verified. Original **3,226 Roaming +
+282 local files** restored/hash-identical to pre-review; current review profiles
+preserved/hash-verified separately (**3,227 / 302 files**). Checked native same-volume
+moves preserve both, no deletion/overwrite. `profile-restoration-result.json` binds
+locations/counts; original backup directories now reside at original profile paths.
+Initial sandboxed backup verification returned Access denied; elevated preflight/
+restoration succeeds. This is a tooling permission failure, not profile corruption.
+No app/game/external restore/workflow operation remains pending. Do not reopen review
+against restored private profiles; isolate any affected future retest.
+
+Cumulative Windows unchanged: **6 production builds + 1 unqualified / 4 failed
+build/setup attempts / 21 top-level starts / 0 separate SDK menu starts**. Mac/remote
+totals unchanged. All original packages, evidence, failed candidates and review data
+are retained locally beyond GitHub expiry; no deletion/polling automation.
+
+**Next:** [six-item bounded Mac checklist](../../status/HANDOVER.md#bounded-mac-follow-up--frozen-windows-candidate)
+on the exact frozen inputs, then justified coherent Windows/macOS remote qualification.
+Reuse unchanged Mac/Windows evidence; new corrections retest only affected behavior.
+Both-platform acceptance and final separate integration remain pending. PR #17
+conflicts/rewrite/merge/1G/1H closure/new phases untouched.
+
 ### Physical graph completion and final Welcome handoff — 2026-10-06
 
 **Live state: in_progress; WIN-UI-13 Pass in selected native/physical scope.** User
@@ -234,7 +278,7 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 | WIN-UI-09 | Pass, selected native/rendered scope | Native divider/reset/reopen, Chapter/sidebar/Writing focus `632`–`658`; candidate 3 no-file Source and candidate 4 Light laptop views. Existing rendered six-surface/both-palette/three-width comparison reused. Full native permutation/Narrator evidence Unavailable, minimized; no screen-reader pass. |
 | WIN-UI-10 | Pass, selected native/approved-driver scope | `candidate-4-stale-beat-proof.json`: stale external source refuses without changing any saved file, input retained, exact external bytes restored, explicit retry writes exactly one collapsed Narration revealed in the long list. Existing delayed-receipt browser/DOM tests prove disabled duplicate/Cancel and saved-row focus. Every Beat type was not newly inserted natively; repetition minimized. |
 | WIN-UI-11 | Pass, selected native/packaged scope | WIN-RUN-01 correction `148`–`174`; native tabs/draft close/reopen `694`–`724`; graph/details X/Escape `596`–`689`; fixed draft counter/Undo receipt. Candidate 3 route-b/runtime-error and candidate 4 ui-refresh pass. Exact SDK failing-line navigation is packaged synthetic input; native graph Source navigation selects the correct file/mapped-range end, not an exact line-start claim. |
-| WIN-UI-12 | Unavailable; automated/native stages Pass | Genuine uncached verified official SDK `15`–`20`, CONFIG-01 `21`–`31`, staged creation `32`–`33`, fresh menus `51`–`56`, Dark Welcome `95`, candidate 4 Light Welcome/recent reopen. Earlier-project distinction remains, no silent repair. Hover/final human visual feedback remains; no repeated download/build/menu matrix. |
+| WIN-UI-12 | Pass, selected native/physical scope | Genuine uncached verified official SDK `15`–`20`, CONFIG-01 `21`–`31`, staged creation `32`–`33`, fresh menus `51`–`56`, Dark Welcome `95`, candidate-4 Light Welcome/recent reopen retained. Candidate-6 human Settings hover/Welcome readability/final session feedback “all working, happy”; physical-final-welcome-result.json, all 242 files unchanged. Earlier-project distinction retained; no repeated download/build/menu matrix or higher-DPI claim. |
 | WIN-UI-13 | Pass, selected native/physical scope | Six-scene saved geometry/navigation, reciprocal/duplicate/self/same-layer/backward/terminal/missing/custom, both palettes zoom/pan/Fit `596`–`689`, terminal source receipt retained. Candidate-6 human full long-name tooltip/connector labels/arrowhead boundaries Pass, physical-final-graph-result.json; all 242 files unchanged. No new physical Dark-graph or DPI claim. |
 | WIN-UI-14 | Pass, selected current-scaling native/physical scope | Columns/selection/Retry/external-file recovery `214`–`334`, candidate-3 Character Grid/List/Variable columns, candidate-4 staging/add/remove/discard/empty reopen retained. Human candidate-5 Explorer highlight/three-file drop/PNG/JPEG Pass. WIN-IMPORT-PREVIEW-01 broken box failure retained; candidate-6 native decoded PNG/JPEG, unavailable WebP/Retry/discard Pass, all 230 files/originals unchanged. Story shared previews corrected. Higher DPI Unavailable/user-excluded; no Narrator/full native layout permutation claim. |
 
