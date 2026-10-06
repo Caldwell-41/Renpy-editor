@@ -1,5 +1,28 @@
 # UI design review
 
+### Physical Explorer and Beat coexistence completion — 2026-10-06
+
+**Live state: in_progress; WIN-UI-01/03 Pass in selected native/physical scope.**
+Human candidate-6 reply “done working” confirms off-Assets three-file drop refusal,
+post-Explorer Narration reorder, and one Undo restoring the order. Native state is
+Saved, no Import dialog, row 4 “row 02” precedes row 5 “row 03”, Undo disabled/Redo
+available. All **230 pre-existing saved-file hashes match exactly**; only **12 expected
+recovery records** from move/Undo were added (242 total). Do not claim zero writes for
+this intentional saved-history session. `physical-coexistence-result.json` contains
+exact before/after/delta and distinct human/native assertions;
+`candidate-6-physical-coexistence-result` retains the observed native state.
+
+**Minimization:** user requested physical input only at an actual tooling limitation.
+Sky's native English typing/selection/paste/shortcuts already reach actual WebView2;
+existing row-04 receipts satisfy selected native scope. Mark Pass with the physical-
+human evidence limitation explicit; no repeated keyboard exercise or IME expansion.
+Remaining physical work is long-name hover/connector readability, Welcome Settings
+hover and final visual feedback, because Sky has no hover API and subjective visual
+acceptance belongs to the user. Candidate 6 is on Branches → Fit. No new source change,
+build, start, SDK menu or CI; all counters/132-input mapping below unchanged. Scaling
+excluded, profiles protected pending post-session restoration, affected Mac/remote
+qualification and separate integration remain pending.
+
 ### Windows Explorer drop and unavailable-preview correction — 2026-10-06
 
 **Live state: in_progress; candidate-6 affected native checks Pass.** Human
@@ -179,10 +202,10 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 
 | Row | Status | Exact evidence and remaining scope |
 | --- | --- | --- |
-| WIN-UI-01 | Unavailable; native reorder/physical marker subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Physical marker and corrected candidate-5 held scrolling Pass; deliberate reorders preserve source lines. Post-Explorer-drop coexistence remains. |
+| WIN-UI-01 | Pass, selected native/physical scope | Saved reorder/history/reopen IDs `136`–`143`, bounds/English `727`–`755`, physical marker/candidate-5 held scrolling retained. Candidate-5 three-file Explorer drop and candidate-6 post-drop reorder/Undo pass. All 230 pre-existing hashes restored, only 12 expected recovery records added; physical-coexistence-result.json. |
 | WIN-UI-02 | Pass, selected physical/native/automated scope | Candidate-4 held edge failure is preserved. Candidate-5 user reports both directions/Escape work and confirms the four saved reorders were deliberate. Source lines preserved; broader session hashes include intentional writes. Isolated no-write cancellation/protected-boundary regressions and earlier native receipts remain Pass; 16 Scene tests and held-pointer Chrome fixture pass. |
-| WIN-UI-03 | Unavailable; Browse/service/physical Assets drop subchecks Pass | Prior WIN-IMPORT-01 failure and corrected native reselection/partial-import proof `259`–`309` retained. Existing add/remove/Cancel/reopen proof retained. Human candidate-5 highlight/three-file drop and PNG/JPEG Pass; native candidate-6 unavailable preview/Retry/discard Pass, all 230 files/original media unchanged. Off-Assets refusal and post-drop coexistence remain. |
-| WIN-UI-04 | Unavailable; agent native English subchecks Pass | Native Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact English commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Short physical English/focus spot-check remains. IME outside scope. |
+| WIN-UI-03 | Pass, selected native/physical scope | WIN-IMPORT-01 failure and corrected reselection/partial-import `259`–`309`, add/remove/Cancel/reopen proof retained. Human candidate-5 highlight/three-file drop/PNG/JPEG; native candidate-6 unavailable preview/Retry/discard pass, all 230 files/originals unchanged. Candidate-6 human off-Assets refusal/post-drop Beat reorder/Undo Pass; no accidental import, saved source/metadata restored. |
+| WIN-UI-04 | Pass, selected agent-native English scope | Native SendInput Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Actual WebView2, no synthetic-browser substitute. Human typing repeat minimized; no physical-human keyboard claim. IME outside scope. |
 | WIN-UI-05 | Pass, native Windows | Existing `108`–`123`, `336`–`374` and discard/reopen receipts: all types reset correctly, both Boolean True values persist; no-write snapshots retained. Native string default also passes on candidate 3. |
 | WIN-UI-06 | Pass, native Windows | Existing `298`–`334`, `375`–`378`: stable selected/default identities, replacement, Grid/List/reopen, missing-image error, exact restore and independent Retry. Inputs unchanged. |
 | WIN-UI-07 | Pass, native Windows | Both full rename cycles, references, IDs/defaults/custom Unicode, old images and reopen `405`–`494`; collisions/edited alias reject with all 215 files unchanged `496`–`504`. Existing completion receipts retained; all external restore flags false. |

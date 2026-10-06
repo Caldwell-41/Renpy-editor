@@ -1,5 +1,31 @@
 # Current outcome handover
 
+## Live physical coexistence completion — 2026-10-06
+
+**State: in_progress; WIN-UI-01/03 Pass in selected native/physical scope.** User
+reports “done working” for the three-file off-Assets drop, post-drop Narration reorder,
+and Undo. Native Saved/no-import state and original rows 4/5 agree. All 230 pre-existing
+saved files, including source and metadata, match the before hashes exactly; only 12
+expected durable recovery records from move/Undo were added (242 total).
+`physical-coexistence-result.json` and `candidate-6-physical-coexistence-result` retain
+human observations separately from native/file assertions. All earlier drag/drop,
+preview and service evidence is reused unchanged.
+
+Minimize the remaining session using already-passing native English SendInput checks:
+WIN-UI-04 Pass in selected agent-native scope; no physical-human keyboard claim, no
+repeat typing exercise. User required physical requests only at tooling limitations;
+native keyboard automation reaches actual WebView2. IME remains outside scope.
+
+**Next:** candidate 6 on disposable graph review → Branches → Fit. Ask only for hover
+over the truncated long-name node and final connector readability; Sky has no hover
+API. Then Welcome Settings hover/readability and brief final visual feedback. No scale
+action, repeat drag/input/service/SDK checks or new build. Original profile restoration
+waits until session closes; retain review profile. Candidate-6 identity, 132-input
+mapping, budgets and Mac/remote follow-up below are unchanged. No both-platform claim
+or integration. Task ledger's existing 14-row table is the current status authority.
+
+## Earlier drop/preview correction (passing evidence retained)
+
 ## Live Explorer drop and preview correction — 2026-10-06
 
 **State: in_progress; candidate-6 affected native preview checks Pass.** Human

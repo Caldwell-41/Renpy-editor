@@ -7,6 +7,19 @@
 
 ## Live continuation
 
+**Physical Explorer/Beat coexistence Pass — 2026-10-06.** Candidate-6 user says
+“done working” for off-Assets drop refusal, Narration reorder and Undo. Native Saved/
+no-import state and restored row order agree; all 230 pre-existing saved files match
+exactly. Only 12 expected recovery records from the move/Undo were added (242 total).
+WIN-UI-01/03 Pass in selected native/physical scope. Existing native SendInput English
+proof satisfies WIN-UI-04 in selected scope; physical-human typing was minimized,
+not claimed. No new build/start/SDK/CI or app input change. Candidate 6 is now on
+Branches → Fit for remaining long-name hover and final visual feedback, then Welcome
+hover/readability. Scaling remains excluded. Profile restoration and the single
+bounded affected Mac/remote qualification remain pending. See the live task ledger.
+
+### Earlier drop/preview correction (passing evidence retained)
+
 **Explorer drop / import-preview correction — 2026-10-06; in_progress.** Human
 candidate-5 drop highlights Assets and stages all three files; PNG/JPEG previews
 Pass. WebP has the expected unsupported-presentation explanation but an unintended
