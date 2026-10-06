@@ -97,6 +97,12 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
     // Assert defaults to an immediate check in this pinned SDK. Await visible
     // conditions explicitly; teardown exits on failure rather than hanging at
     // the debug screen until the unchanged 60-second process deadline.
+    // Hosted Windows has no guaranteed audio output device. Set the backend in
+    // this disposable driver before Interface.start initializes audio; the
+    // production child environment intentionally does not inherit SDL overrides.
+    // This is real PCM/channel playback into SDL's dummy sink, not an audio mock.
+    let audio_init =
+        "init -999 python:\n    import os\n    os.environ[\"SDL_AUDIODRIVER\"] = \"dummy\"\n\n";
     let mut tests = String::from("after testcase:\n    exit\n\n");
     for (route, button, tag, x_test) in [
         ("rooftop", "Rooftop", "alex", "> 900"),
@@ -118,6 +124,8 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
     assert eval (heard_news is False and trust == 9007199254740993 and route == "unset")
     assert eval (renpy.showing("alex happy") and renpy.showing("morgan calm"))
     assert eval (500 < renpy.get_image_bounds("alex")[0] < 700)
+    $ print("PHASE1H_AUDIO_OBSERVED", __import__("json").dumps(dict(pcmOk=renpy.audio.audio.pcm_ok, soundEnabled=config.sound, dummyOutput=(os.environ.get("SDL_AUDIODRIVER") == "dummy"), music=renpy.music.get_playing(), sound=renpy.music.get_playing(channel="sound"))), flush=True)
+    assert eval (renpy.audio.audio.pcm_ok is True)
     assert eval (renpy.music.get_playing() == {theme_path:?})
     assert eval (renpy.music.get_playing(channel="sound") == {sfx_path:?})
     assert eval (renpy.get_screen("say").scope["what"] == "The shift is over. Where shall we go?")
@@ -202,7 +210,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
         .collect::<Vec<_>>()
         .join("\n");
     let tests = format!(
-        "testsuite phase1h:\n{}\n",
+        "{audio_init}testsuite phase1h:\n{}\n",
         tests
             .lines()
             .map(|line| format!("    {line}"))

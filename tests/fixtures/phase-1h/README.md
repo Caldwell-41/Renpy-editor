@@ -12,6 +12,9 @@ then select each real Choice. They assert dialogue, state, media discovery,
 placement and stopped music. No driver replaces `start` or jumps directly to a route.
 Instrumentation exists only in disposable games and test binaries; it is absent
 from the shipped desktop and from ordinary generated projects.
+The driver selects SDL's dummy audio output before initialization and records actual
+PCM/channel state before assertions. Music and SFX must play through the SDK and stop
+as expected; automated evidence does not claim audible speaker output.
 
 All content and assets are original synthetic test material under the repository's
 MIT licence. No external art, music, fonts, voices or personal game content is used.

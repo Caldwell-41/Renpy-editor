@@ -102,6 +102,10 @@ entry using the pinned SDK test driver. Original assets and outcome/source expec
 live in `tests/fixtures/phase-1h/`. Its ignored state means ordinary core does not repeat
 SDK execution; a missing archive is a failure. The production workflow requires the
 named positive Cargo result and completion marker and retains the independent case log.
+The disposable driver sets SDL's dummy audio output before SDK audio initialization,
+so hosted runners need no speaker device. It records actual PCM initialization and
+music/SFX channel filenames before asserting them, and still requires real playback
+and stopping. This verifies decoding/channel state, not audible speaker output.
 The routine core also selects actual authoring/reopen after 4,097 terminal journals.
 
 For changes to starter GUI generation, explicitly select the ignored pinned-SDK
@@ -528,8 +532,8 @@ increases or unsupported causal claims about application Save routing.
 **Phase 1G completion, 2026-10-06:** both-platform native/human review, required
 qualification and exact-input integration are accepted in the
 [closeout ledger](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06).
-The staged completion sequence is historical. Phase 1H remains unselected; its
-integrated H01–H12 gates still belong to the existing brief. Apply the narrow human
+The staged completion sequence is historical. Phase 1H is selected; its
+integrated H01–H12 gates belong to the active acceptance brief. Apply the narrow human
 reuse policy below; do not automatically repeat the accepted full human session.
 Corrections invalidate affected results and require relevant cross-platform rechecks.
 
@@ -808,8 +812,14 @@ change the transform, retain 500 nodes/2,000 paths, stay visible/focused and mai
 positive clipped graph/representative-node intersection. Representative IDs, positions,
 dimensions and viewport geometry are checked outside the timing interval.
 
-The visible sequence reports both first-rAF and **second-rAF rendering-opportunity**
+The visible sequence reports both first-rAF and **next-advancing-rAF rendering-opportunity**
 intervals against the unchanged <100 ms p95 objective; initial layout remains <2 s.
+The second endpoint requires a timestamp strictly greater than the first. Equal
+timestamps are retained and awaited for at most eight further callbacks, including
+all elapsed wait time in the same input sample. Backward/malformed or exhausted
+sequences still fail; no input is replayed or discarded. Ordinarily this is the
+second callback. The original two-callback endpoint and failures remain historical
+evidence; changed probe identities must qualify again on both targets.
 Neither callback proves physical presentation. Rendering opportunities can include
 previous browser work. Under TEST-P2 all five Chrome timing thresholds are diagnostic;
 functional/evidence failures still block. Fast dispatch does not erase an overrun or
