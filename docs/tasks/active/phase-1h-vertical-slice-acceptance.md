@@ -230,6 +230,68 @@ Run/Stop/save-staleness/reopen, diagnostic navigation, picker/import/progress an
 cancellation. Original packages keep their own identities; automated gates execute
 this acceptance candidate. No repeated broad user session is requested.
 
+### Concrete regression audit prepared during the target run
+
+This is selection/body review, not terminal target acceptance. The local cached release
+inventory lists 236 tests (no tests executed by `--list`); its platform-specific count
+must not substitute for the Windows result. Existing `cargo-log` checks and named
+passing lines in retained target logs are the proof. Keep specialist exclusions intact.
+Alongside the integrated SDK fixture, audit these ordinary regressions:
+
+| IDs | Required named regressions / actual assertions reviewed |
+| --- | --- |
+| H01 | `lifecycle::tests::official_sdk_phase_1c_target_gate` (separate archive gate); `failed_generation_cleans_only_its_stage_and_never_adds_recent`, `cleanup_and_git_failure_are_bounded` in the same module; creation refusal cleans only its stage, keeps destination/recent state |
+| H02 | `authoring::tests::accepted_escaped_string_and_int64_values_reload_exactly`, `appearance_import_keeps_asset_and_relationship_ids_after_reopen`, `stable_entities_round_trip_and_source_is_minimally_patched`; fixed fixture additionally asserts two Characters/Appearances, copied hashes, passive presentation and actual int64 runtime values |
+| H03 | `scene::tests::approved_beat_subset_round_trips_without_runtime_evaluation`, `review_appearance_edit_preserves_ids_and_patches_supported_references`; standalone supported Beat forms and exact neighbouring source, plus new actual SDK staging/audio/state assertions |
+| H04 | `scene::tests::flow_partial_choice_retains_routes_after_missing_and_dynamic_options`, `flow_inventory_custom_duplicate_unreadable_and_lexical_context_are_honest`, `flow_real_commands_history_reopen_and_external_invalidation`; distinct duplicate options, self-loop, later routes, Missing/Unknown under real inventory changes; new fixture proves reconvergence/Return |
+| H05 | `scene::tests::minimal_beat_patch_keeps_unrelated_bytes_and_round_trips_history`, `failed_inverse_does_not_advance_history_or_overwrite_external_metadata`; `transaction::tests::undo_and_redo_stop_at_external_revision_boundaries`, `create_delete_history_uses_actual_commit_identities_repeatedly` |
+| H06 | `scene::tests::chapter_scene_lifecycle_history_and_rpyc_ghost_prevention_are_coherent`, `opaque_boundaries_incoming_edges_and_external_revisions_fail_closed`, `runtime_scene_move_delete_and_real_inverse_refusal_stop_retry`; actual child gate refuses targeted move/delete/inverses without writes and permits retry after Stop; new gate uses real compiled cache bytes |
+| H07 | `source::tests::supported_source_and_scene_edits_share_mapping_history_and_preserve_bom_crlf`, `opaque_source_acceptance_and_adjacent_visual_patch_preserve_exact_custom_bytes`, `clean_external_refreshes_while_dirty_external_requires_exact_apply_both`, `reviewed_combination_transaction_preserves_external_writer_during_commit`, `flow_source_navigation_preserves_draft_caret_and_refuses_stale_ranges`; `lifecycle::tests::apply_both_json_binds_review_and_preserves_draft_and_disk_on_every_stale_identity`, `apply_both_json_refuses_overlap_same_position_and_uncertain_custom_code_boundary` |
+| H08 | Separate `lifecycle::runtime_tests::runtime_official_sdk_service_gate` and `runtime_diagnostics_sdk_gate`; actual saved/saveAll preparation, stale executable/SDK refusal, SDK Run/edit/staleness/no reload/Stop/revoke/reopen, compile/lint Unicode/BOM/CRLF errors and exact revision/UTF-16 navigation; packaged compile/lint/routes/runtime-error remain required |
+| H09 | New representative and long-history close/reopen assertions plus independent metadata-free SDK case; `scene::tests::migration_is_transactional_preserves_ids_unknown_fields_and_reopens`, `authoring::tests::unknown_metadata_fields_and_entity_ids_survive_supported_edits` |
+| H10 | `transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up`, `interrupted_delete_is_recoverable_and_never_loses_the_displaced_source`, `explicit_recovery_resolves_only_proven_keep_or_accept_states`, `prepared_fault_state_can_be_safely_abandoned`, `prepared_abandon_refuses_any_persisted_proposal_evidence`; accepted/backup/external bytes and ambiguity refusal are real disk assertions; Prepared safe finalisation re-registers the project and commits a subsequent real edit |
+| H11 | `lifecycle::tests::failed_candidate_recovery_preserves_current_project`, `project_sessions_are_unique_and_stale_tokens_are_rejected`; `lifecycle::runtime_tests::runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion`, `runtime_dialog_completion_cannot_mutate_replacement_session`, `runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants`; cancelled boundaries assert zero spawn attempts and retained replacement session |
+| H12 | `source::tests::file_and_dirty_buffer_count_limits_retain_existing_drafts`, `aggregate_draft_limit_rejects_only_the_new_draft`; `scene::tests::flow_limits_are_explicit_and_never_truncated`, `flow_entry_uses_source_and_inventory_limits_refuse_without_reading_huge_inputs`; `authoring::tests::pinned_discovery_normalization_covers_case_subdirectories_extensions_and_oversampling`, `untracked_physical_asset_blocks_path_and_discovery_collisions`; new real authoring beyond 4,097 records; `transaction::tests::corrupt_record_beyond_the_former_history_boundary_blocks_real_writes` |
+
+Additional section 3 observations require both service and view evidence:
+
+- Draft preparation: Source `save_all_preflights_every_draft_then_undoes_as_one_history_action`
+  plus real SDK saved/saveAll cases above. Frontend `runtime preparation retains current
+  Source input and Scene forms under the existing lease` covers cancel/saved/saveAll/
+  Return to Scene Commit choices (no implicit commit); `runtime Save All failure releases the Source lease
+  and never prepares execution` rejects attempted execution. Packaged pending Source
+  preparation and validation state are inspected in `runtime_ui_probe.js`.
+- Trust: new zero-process untrusted open/preview/typing and copied-root UUID refusal;
+  real SDK service test explicitly modifies project `external.py` and SDK `config.py`,
+  asserts `STALE_RUNTIME`/no process, restores exact input, rejects unsupported version
+  and revokes running consent. Imported fixture assets use the passive authoring/
+  transaction service before any runtime trust; importer call graph has no SDK executor.
+- Runtime: `transaction::execution::tests::runtime_reservation_drains_in_flight_asset_transaction`,
+  `runtime_streaming_import_is_refused_before_reading_or_staging_then_retries`,
+  `runtime_scripts_and_metadata_save_but_asset_compound_and_inverse_do_not_write`;
+  Scene real history and lifecycle refusal/retry tests above. In
+  `renpy::runtime::tests`, `runtime_long_play_responsive_stop_and_shutdown` deliberately
+  outlives creation smoke; `runtime_natural_exit_and_crash_cleanup_descendant_pipes`
+  means controlled child nonzero exit 17, not a persistence-crash experiment;
+  `runtime_output_flood_is_bounded_and_stop_remains_responsive` checks retained bytes,
+  page bounds, refusal and cleanup.
+- Diagnostics: exact SDK cases above plus
+  `renpy::runtime::diagnostics::tests::runtime_diagnostics_formats_bounds_and_unicode`
+  and frontend inert/stale-location tests. Actual SDK error navigation rejects
+  caller-supplied path, old session, equal-byte replacement identity and deleted file.
+- Graph/view sessions: literal flow IPC and Source range test, frontend Branches
+  distinct duplicate routes, deletion selection invalidation, captured targets,
+  disposal/old-session refusal and incomplete scan retention. Native rendered flow
+  and three real-service budget samples remain separate target gates.
+
+Section 4 also requires named metadata unknown-field/corruption and narrow protocol
+regressions, passive-media size/path refusal, packaged denial/single-instance, actual
+six-case cleanup, terminal privacy/dependency inventory and rendered evidence review.
+Browser fixtures assert reduced motion/focus/widths/overflow but do not prove native
+keyboard delivery; the explicitly mapped unchanged 1G human evidence supplies that
+scope with its original limits. No static inventory or body review is marked as a
+final target pass.
+
 ### Local development failures and cumulative problem record
 
 **H-FIXTURE-1:** first execution of the new fixture/oracle; classification currently
@@ -295,9 +357,9 @@ Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
 Exactly one `production-scaffold.yml` dispatch accepted at 2026-10-06 18:55:50 UTC:
 [**37515083319/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
 `workflow_dispatch`, exact candidate above, `upload_packages=true`. Continuation
-recorded 2026-10-06 19:00 UTC: `in_progress` on the same candidate/attempt; Preflight
+recorded 2026-10-06 19:05 UTC: `in_progress` on the same candidate/attempt; Preflight
 **112445822829** completed success. macOS ARM64 **112446613576** and Windows x64
-**112446613694** confirmed live at Source Save browser regression. No target result
+**112446613694** confirmed live at the independent Rust core suite. No target result
 claimed, no duplicate dispatch/retry or polling loop. Case/log/input/failure and
 requested package artifacts retain the existing seven-day retention; audit/download
 terminal evidence before expiry. Dispatch acceptance is confirmed, never repeat it.

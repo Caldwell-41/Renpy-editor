@@ -51,9 +51,9 @@ failures and limits remain in its archived ledger; no reset.
 **Outstanding operation:** [production 37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
 `production-scaffold.yml`, `workflow_dispatch`, branch above, exact tested SHA
 `3d484ef1b0164e15b21c869f7494410daa3fed9d`, `upload_packages=true`.
-Created 2026-10-06 18:55:50 UTC; continuation recorded 19:00 UTC confirms `in_progress`
+Created 2026-10-06 18:55:50 UTC; continuation audit recorded 19:05 UTC confirms `in_progress`
 on the same SHA/attempt. Preflight 112445822829 completed success; macOS ARM64
-112446613576 and Windows x64 112446613694 are live at Source Save browser regression.
+112446613576 and Windows x64 112446613694 are live at the independent Rust core suite.
 No target pass claimed; no dispatch/retry or polling loop. Retained artifacts seven
 days, audit/download before expiry. Ordinary PR quality
 [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)
@@ -66,8 +66,8 @@ and changed refs/ownership. If pending, pause again with no polling loop/retry. 
 terminal, audit actual named required tests, four integrated SDK reports and three
 correct route captures per host, six packaged cases/cleanup, precise input/package
 identities, observed-flow enforced samples, browsers/denial/single-instance, privacy
-and dependency/licence inventory. Finish H01–H12 and sections 3–4 expected/actual
-matrix, self-review and bounded evidence corrections to `review_ready`. Failed/skipped/
+and dependency/licence inventory. Use the active ledger’s concrete regression audit to check named assertions, not totals.
+Finish H01–H12 and sections 3–4 expected/actual matrix, self-review and bounded evidence corrections to `review_ready`. Failed/skipped/
 missing required evidence remains unresolved. No new dispatch, feature scope or merge.
 Retain Mac Chrome timing-only diagnostic and unsigned/native-input/assistive-tech limits.
 
