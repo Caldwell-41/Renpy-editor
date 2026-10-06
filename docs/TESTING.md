@@ -977,6 +977,13 @@ busy observations and a 1200 ms initial Story read. A separate early-navigation
 regression switches to Source while that read is held and asserts the application
 queues its Source request without contention. Commit drivers wait for the accepted
 form receipt; debounced status copy is not an operation-completion signal. Native
+UI-refresh waits for the rendered draft inventory to acknowledge retention before
+its direct IPC observation; the draft warning alone also covers unretained input.
+`tests/ui-refresh-retention.browser.mjs` reproduces the original probe read/write
+collision, proves exact input retention with the corrected ordering, and rejects a
+genuine refused write without polling the backend. The original backend dirty-count
+assertion and 20-second stage deadline remain required. These fixture controls do
+not close a native target failure; a changed packaged probe requires renewed evidence.
 UI-refresh reports distinguish opening/Story/Source stages and retain bounded failure
 state. The smoke path rejects unavailable clicks. Unit checks retain an
 ambiguous-prefix negative selector case, non-busy rejection and busy-deadline failure.

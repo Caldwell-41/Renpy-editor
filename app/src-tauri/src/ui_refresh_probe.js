@@ -39,6 +39,11 @@
   details.stage='editor';const editor=document.querySelector('.cm-content');check(getComputedStyle(document.querySelector('.cm-editor')).position==='relative','CodeMirror styles accepted by native CSP');
   editor.focus();const selection=getSelection();selection.selectAllChildren(editor);selection.collapseToStart();document.execCommand('insertText',false,'# Native editor check\n');
   details.stage='editor-warning';await wait(()=>document.querySelector('.source-draft-warning')&&!document.querySelector('.source-draft-warning').hidden);
+  // The warning also covers input still queued in the renderer. Direct probe
+  // observations bypass its RequestLane and can refuse that pending draft write.
+  // Observe acknowledged retention in the rendered tree before querying the host;
+  // a refused/missing retention still fails the existing 20-second wait.
+  details.stage='editor-settlement';await wait(()=>document.querySelector('.source-draft-total')?.textContent.startsWith('1 draft'));
   const project=await read('project.current');details.stage='editor-retention';await wait(async()=>{retentionInventory=await read('source.list',{sessionId:project.sessionId});return retentionInventory.dirtyCount===1;});check(true,'Native editor input retained as a session draft');
   const bounds=()=>{const r=document.querySelector('.source-editor-shell').getBoundingClientRect();return [r.x,r.y,r.width,r.height].join(',');};const before=bounds();for(let n=0;n<50;n++)document.querySelector('#app-status').textContent=n%2?'Unsaved Source draft':'Saved';check(bounds()===before,'Status updates preserve native editor geometry');
   details.stage='settings';button('Settings').click();await wait(()=>document.querySelector('.settings-overlay'));button('Close settings').click();check(document.querySelector('.cm-content').textContent.includes('Native editor check'),'Settings return retains draft');
@@ -51,6 +56,7 @@
    appStatus:document.querySelector('#app-status')?.textContent,
    sourceState:document.querySelector('.source-document-state')?.textContent,
    sourceBusy:document.querySelector('[data-source-busy]')?.dataset.sourceBusy,
+   rendererDraftTotal:document.querySelector('.source-draft-total')?.textContent,
    draftWarningHidden:document.querySelector('.source-draft-warning')?.hidden,
    editorPresent:!!document.querySelector('.cm-content'),editorEditable:document.querySelector('.cm-content')?.contentEditable,
    storyReady:!!document.querySelector('.scene-workspace .preview-region'),

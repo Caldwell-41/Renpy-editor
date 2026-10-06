@@ -13,7 +13,7 @@
     "check": "npm run typecheck && npm test",
     "dev": "vite",
     "test": "npm run build:tests && node --test --test-concurrency=1 dist-tests/tests/*.test.js tests/branches-timing-policy.test.mjs",
-    "test:source-browser": "npm run build && node tests/source-save.browser.mjs && node tests/phase-1f-selection.browser.mjs && node tests/ui-refresh.browser.mjs && node tests/native-runtime-driver.browser.mjs",
+    "test:source-browser": "npm run build && node tests/source-save.browser.mjs && node tests/phase-1f-selection.browser.mjs && node tests/ui-refresh.browser.mjs && node tests/ui-refresh-retention.browser.mjs && node tests/native-runtime-driver.browser.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "tauri": "tauri"
   },
