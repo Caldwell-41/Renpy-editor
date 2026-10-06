@@ -1,6 +1,111 @@
 # UI design review
 
+### Windows agent work ready for final hands-on session — 2026-10-06
+
+**State: in_progress; Windows acceptance incomplete.** The user selected completion
+of agent-owned fixes/checks before one final Windows session, with unnecessary
+repetition minimized. OS/display scaling remains excluded. The live checkpoint is
+this section; continuation instructions below are historical unless referenced here.
+No integration, PR #17 conflict work, phase closure or new feature is selected.
+
+Native input uses the computer-use skill's SendInput/UI Automation against the
+verified candidate's WebView2, with fresh window observations. It is agent native
+input, not human physical input. Packaged probes use real WebView2/IPC/service/SDK
+with synthetic DOM input; browser fixtures remain a separate evidence layer.
+Original installer, evidence, failed fixtures, logs and all earlier counters remain
+retained under ignored `.toolchains/reports/final-1g-windows/`.
+
+**Corrections and budgets:**
+
+| Problem | Classification, correction and rejecting evidence | Result / next action |
+| --- | --- | --- |
+| WIN-PREVIEW-01 | Product defect: simultaneous Story canvas/thumbnail awaits created separate object URLs and revoked an image still displayed. Reuse the URL for the same asset cache key; release on disposal. New regression fails before the correction. | Attempt 1 Pass: `candidate-3-story-details-native` shows both decoded views simultaneously; focused tests pass. Affected Mac preview check remains. |
+| WIN-DRAFT-01 | Product defect: acknowledged Source retention updated the document but left sidebar inventory stale. Update that inventory from the acknowledged document, including UTF-8 bytes, without Save, another IPC request or editor replacement. New regression fails before the correction. | Attempt 1 Pass: native café/Unicode comment shows 1 draft / 78 bytes; Undo restores Clean/Saved and all 176 files unchanged (`candidate-3-native-source-draft-proof.json`). Repeated-input/focus regression passes. Affected Mac Source check remains. |
+| UI-refresh gate diagnosis | Prior installed editor failure (51.266s/7 checks), candidate 1 initial-Story failure (31.438s/0 checks), and candidate 3 Character failure (43.922s/2 checks) remain failed. An attempted invoke override recorded no native timings and was removed. Bounded diagnostics now instrument only the probe helper's calls, plus stage/failure UI state. No timeout, fixture or assertion relaxed. | Candidate 4 isolated `ui-refresh` Pass: 31.093s, exit 0, cleanup true, all 11 checks. Prior failures' precise cause remains unresolved; the latest pass does not establish it. No further unchanged probe selected. |
+| Probe setup / compilation | Candidate 4's first probe was forwarded to an already running instance: exit 0, zero reports; runner correctly failed. Preserved `correction-4-probes` and runner log. Verified the normal instance closed before the isolated run. Earlier CLI/PATH/TEMP failures and direct-Cargo build without the required Tauri production protocol remain distinct setup/unqualified evidence. | No ambiguous retry or polling automation. Four successful production builds, one unqualified direct-Cargo build, four failed build/setup attempts, **19 top-level process-start attempts / 0 separate SDK menu starts** cumulative. No new manual CI dispatch. Earlier Mac/remote totals unchanged. |
+
+Both new regressions reproduced **0 passed / 2 failed** before the fixes; final
+focused renderer/controller coverage is **44 passed / 0 failed**, no skips
+(`correction-3-focused-tests.log`). TypeScript/Vite production build passes.
+Existing Source browser Save/focus checks and the full rendered review pass
+(`correction-3-source-browser.log`, `correction-3-rendered-review.log`). The latter
+already covers all six surfaces, both palettes/three widths, no-file Source,
+onboarding, Settings, compact forms, catalogue columns, staging cleanup and the
+approved delayed Beat receipt/duplicate/Cancel/collapsed-row focus. It is fixture
+proof, not native SDK, physical input or screen-reader proof; do not repeat it.
+
+Candidate 3 packaged `route-b` **Pass 80.735s** and `runtime-error` **Pass 72.188s**,
+both exit 0 / cleanup true (`correction-3-runtime/`). These exercise real saved
+routes/rollback, drafts/refused Save All, runtime diagnostics including exact failing
+Source-line navigation, Save during play, Stop and close/reopen. Native earlier
+Source Run/Save/earlier-launch/Stop/latest-saved rerun proof `148`–`174` remains.
+Candidate 4 changes only inactive probe diagnostics relative to candidate 3; their
+renderer/service inputs match exactly, so reuse these affected-path results.
+
+**Candidate identity:** candidate 3 is 14,151,168 bytes,
+SHA256 `335af14238ac5fd912eb7aaa3401f0d96531b6477df3a3dcabbf6755273ddf71`.
+The running candidate 4 is 14,151,168 bytes,
+SHA256 `01ddc25a05f3293dd29ecaca775e163f78120d1f39923a20c8bf129eeefc7d58`,
+at `candidate-4/loomlight.exe`; native window/process identity was verified.
+Pinned Tauri production builds pass in 49.96s and 36.54s respectively. Receipts
+`correction-3-build-receipt.json` / `correction-4-build-receipt.json` bind all
+**132 inputs**, text normalized to LF and binaries hashed unchanged. Candidate 4
+has **8 changed / 124 unchanged** against qualified `5b467a4`: authoring.rs,
+lib.rs, ui_refresh_probe.js, scene-ui.ts, source-ui.ts,
+native-runtime-driver.browser.mjs and the two authoring DOM test files. All 132
+current inputs were reread against the receipt with zero mismatches. Documentation
+publication does not turn the old candidate's acceptance into acceptance of these
+changed inputs. Affected Mac checks and justified remote qualification remain open.
+
+**Live row results (selected current-scaling scope):** Pass below is the stated
+native/automated scope, not all-platform or final human acceptance. Repetitive native
+layout permutations and every Beat-type insertion are minimized using existing
+qualified boundary/service coverage, rendered tests and representative native
+actions. They were not all physically executed; no full original matrix is claimed.
+Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
+
+| Row | Status | Exact evidence and remaining scope |
+| --- | --- | --- |
+| WIN-UI-01 | Unavailable; native reorder subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Held ghost/edge scrolling and Explorer coexistence need physical input. |
+| WIN-UI-02 | Unavailable; cancellation/bounds subchecks Pass | User already reported Escape/outside/focus-switch cancellations work; record separately from agent proof. Native same-row/unsubmitted/final-Choice bounds preserve source (`native-beat-English-bounds-review.json`). Only held edge/live marker remains; do not repeat the three completed human cancellations. |
+| WIN-UI-03 | Unavailable; Browse/service subchecks Pass | Prior selected-media failure retained; WIN-IMPORT-01 correction/native reselection/partial-import proof `259`–`309` passes. `candidate-4-native-import-cleanup-proof.json`: PNG/JPEG preview, Add files, remove all, Cancel/discard/reopen, all 200 project files unchanged. Physical multi-file Explorer drop, off-Assets refusal and coexistence remain. |
+| WIN-UI-04 | Unavailable; agent native English subchecks Pass | Native Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact English commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Short physical English/focus spot-check remains. IME outside scope. |
+| WIN-UI-05 | Pass, native Windows | Existing `108`–`123`, `336`–`374` and discard/reopen receipts: all types reset correctly, both Boolean True values persist; no-write snapshots retained. Native string default also passes on candidate 3. |
+| WIN-UI-06 | Pass, native Windows | Existing `298`–`334`, `375`–`378`: stable selected/default identities, replacement, Grid/List/reopen, missing-image error, exact restore and independent Retry. Inputs unchanged. |
+| WIN-UI-07 | Pass, native Windows | Both full rename cycles, references, IDs/defaults/custom Unicode, old images and reopen `405`–`494`; collisions/edited alias reject with all 215 files unchanged `496`–`504`. Existing completion receipts retained; all external restore flags false. |
+| WIN-UI-08 | Pass, selected current-scaling scope | Prior Dark laptop/minimum and Light minimum `505`–`573` plus `candidate-4-light-laptop-choice-new-scene`: aligned bounded fields/actions. Native Light laptop Cancel/reopen changes no project files (`candidate-4-light-laptop-choice-proof.json`). One saved native route already proved. |
+| WIN-UI-09 | Pass, selected native/rendered scope | Native divider/reset/reopen, Chapter/sidebar/Writing focus `632`–`658`; candidate 3 no-file Source and candidate 4 Light laptop views. Existing rendered six-surface/both-palette/three-width comparison reused. Full native permutation/Narrator evidence Unavailable, minimized; no screen-reader pass. |
+| WIN-UI-10 | Pass, selected native/approved-driver scope | `candidate-4-stale-beat-proof.json`: stale external source refuses without changing any saved file, input retained, exact external bytes restored, explicit retry writes exactly one collapsed Narration revealed in the long list. Existing delayed-receipt browser/DOM tests prove disabled duplicate/Cancel and saved-row focus. Every Beat type was not newly inserted natively; repetition minimized. |
+| WIN-UI-11 | Pass, selected native/packaged scope | WIN-RUN-01 correction `148`–`174`; native tabs/draft close/reopen `694`–`724`; graph/details X/Escape `596`–`689`; fixed draft counter/Undo receipt. Candidate 3 route-b/runtime-error and candidate 4 ui-refresh pass. Exact SDK failing-line navigation is packaged synthetic input; native graph Source navigation selects the correct file/mapped-range end, not an exact line-start claim. |
+| WIN-UI-12 | Unavailable; automated/native stages Pass | Genuine uncached verified official SDK `15`–`20`, CONFIG-01 `21`–`31`, staged creation `32`–`33`, fresh menus `51`–`56`, Dark Welcome `95`, candidate 4 Light Welcome/recent reopen. Earlier-project distinction remains, no silent repair. Hover/final human visual feedback remains; no repeated download/build/menu matrix. |
+| WIN-UI-13 | Unavailable; native graph subchecks Pass | Six-scene saved geometry/navigation, reciprocal/duplicate/self/same-layer/backward/terminal/missing/custom, both palettes zoom/pan/Fit `596`–`689`, terminal source receipt. Full long-name tooltip hover/final readability feedback remains; details already show full text. |
+| WIN-UI-14 | Unavailable; catalogue/preview/cleanup subchecks Pass | Prior columns/selection/Retry/external-file recovery `214`–`334`; candidate 3 Light laptop Character Grid/List and Variable columns; candidate 4 actual PNG 640×480/JPEG 480×640 staging/add/remove/discard/empty reopen, all 200 files unchanged. Story concurrent previews fixed. Physical Explorer drop remains. |
+
+**Next: one final Windows hands-on session.** Current app is candidate 4 on
+Windows Connector Geometry Review → Assets, Saved, Light PaperTeal, 1102×752
+outer pixels, no modal/editor draft/external restoration pending
+(`candidate-4-final-hands-on-state.json`). Use only disposable media in
+`media-drop-review/` (manifest retained). Consolidate: held Beat grip at both list
+edges/visible ghost; Explorer multi-file drop to Assets then Beat reorder, off-surface
+drop and discard; short English/focus and hover/tooltip/final visual feedback.
+Sky offers only complete single-window drags, no mouse-down/hold or hover API;
+these genuine capability gaps justify physical input. Recheck saved hashes after
+cancellations and record user observations separately. No scale action or repeated
+SDK/service checks. Do not claim all 14 full rows passed before that evidence.
+
+Both original profile backups were reverified hash/file-set identical; **3,226
+Roaming + 282 local files** remain protected. Restoration is pending until the app
+is closed after the final session; preserve the review profile for continuation.
+After Windows is frozen, perform one bounded affected Mac check of Source Run/draft
+count, import/replacement refusal/reselection and simultaneous Story previews, then
+justify remote qualification for the exact changed inputs. Do not bounce through
+another unchanged broad matrix. Separate integration handover follows both-platform
+acceptance; PR #17 remains draft/open/conflicting and untouched.
+
 ### Windows evidence and first Source correction — 2026-10-06
+
+**Historical checkpoints below:** superseded by the live agent-ready section above;
+failed evidence and counters remain preserved on their actual candidates.
 
 **User scope amendment — 2026-10-06:** “dont check scale please.” Higher OS/display
 scaling checks in WIN-UI-08/09/12/13/14 and TESTING's final session are excluded at

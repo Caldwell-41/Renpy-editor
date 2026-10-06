@@ -984,6 +984,17 @@ acceptance are recorded in the UI task and HANDOVER, not inferred from screensho
 
 ## Hands-on UI correction regressions
 
+The final Windows review adds rejecting DOM regressions for two observed defects:
+simultaneous Story canvas/thumbnail displays must retain live object URLs until view
+disposal, and acknowledged Source input must update the sidebar dirty count and
+UTF-8 byte total through repeated edits/undo without saving or moving editor focus.
+Native checks additionally compare all saved project files before/after draft Undo
+and import staging cancellation. Keep packaged probe diagnostics bounded and scoped
+to the calls actually instrumented; their timings are not application UI-operation
+timings. Single-instance forwarding with zero intended reports must remain a failed
+runner result even if the process exits zero. Passing native synthetic-input probes
+do not establish held-pointer or Explorer cross-window drag acceptance.
+
 The 2026-10-02 review corrections extend the existing suites rather than selecting a
 new package matrix. `npm run check` includes modal cancellation/staging preservation,
 whole-row selection, composition-safe names, single-confirmation Beat insertion and

@@ -215,6 +215,35 @@ test("pending media is cancelled logically and disposed with the project view", 
   assert.equal(oldImage.src, "");
 });
 
+test("simultaneous Story preview and thumbnail keep their displayed URLs alive", async () => {
+  installDom();
+  const base = sceneModel();
+  const first = base.scenes[0]!;
+  const model = { ...base, scenes: [{ ...first, beats: [
+    { id: "background", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "background" as const, assetId: "bg", transition: "none" as const } },
+    ...first.beats,
+  ] }, base.scenes[1]!] };
+  const revoked = new Set<string>();
+  const originalRevoke = URL.revokeObjectURL;
+  URL.revokeObjectURL = (url: string) => { revoked.add(url); originalRevoke(url); };
+  let dispose: (() => void) | undefined;
+  try {
+    dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+      status: () => {}, resolution: { width: 1280, height: 720 }, apply: async () => model,
+      present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "hash", byteCount: 1, width: 1, height: 1, cacheKey: `${assetId}:hash` }),
+    });
+    await tick();
+    const images = [...document.querySelectorAll<HTMLImageElement>(".preview-background, .asset-thumbnail img")];
+    assert.equal(images.length, 2);
+    for (const image of images) {
+      assert.ok(image.src.startsWith("blob:"));
+      assert.equal(revoked.has(image.src), false, "a currently displayed image URL was revoked");
+    }
+    dispose(); dispose = undefined;
+    for (const image of images) assert.equal(revoked.has(image.src), true, "view disposal must release its image URLs");
+  } finally { dispose?.(); URL.revokeObjectURL = originalRevoke; }
+});
+
 test("closeout: Background clears previously visible Characters", () => {
   const scene = sceneModel().scenes[0]!;
   const actual = deriveScenePreview({ ...scene, beats: [

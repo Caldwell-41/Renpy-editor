@@ -1,5 +1,60 @@
 # Current outcome handover
 
+## Live final Windows hands-on handoff — 2026-10-06
+
+**State: in_progress; agent fixes/checks ready, Windows acceptance incomplete.**
+User requested completion of agent-owned work before one final physical session,
+minimizing repetition. Branch `feature/phase-1g-branches-runtime`; PR #17 remains
+draft/open/conflicting, no integration. Fresh fetch/FF-only pull found 0 ahead/behind
+before this checkpoint; primary and historical detached worktrees preserved.
+
+| Capability | Agent result | Remaining acceptance |
+| --- | --- | --- |
+| Product corrections | Earlier Source Run/import fixes plus Story shared-URL and Source acknowledged-count fixes | Bounded affected Mac checks; coherent changed-input remote qualification |
+| Automated/package gates | 44 focused tests; Source browser/full rendered review; candidate 3 route-b/runtime-error; candidate 4 ui-refresh all 11 checks Pass | No physical input inferred from synthetic probes |
+| Native WebView2 input | English forms, Source/Undo, preview geometry, Choice, stale Beat refusal/single save, catalogue and import cancellation Pass | Held drag/Explorer coexistence/drop, physical English/focus, hover/tooltip and final visual feedback |
+
+Candidate 4 `candidate-4/loomlight.exe`: 14,151,168 bytes, SHA256
+`01ddc25a05f3293dd29ecaca775e163f78120d1f39923a20c8bf129eeefc7d58`.
+Receipts bind 132 inputs (8 changed / 124 unchanged versus qualified `5b467a4`);
+current input comparison has zero mismatches. Candidate 3 differs only in inactive
+probe diagnostics, so its renderer/service runtime results remain applicable.
+Earlier installed/candidate probe failures remain preserved; latest isolated
+ui-refresh passes without changing its 20-second wait or required assertions.
+The first candidate 4 probe was rejected for zero reports after single-instance
+forwarding, then a verified closed-app isolated run passed. No blind retry/polling.
+
+Current app: candidate 4 → Windows Connector Geometry Review → Assets, **Saved**,
+Light PaperTeal, 1102×752 outer pixels; no modal/draft/external-byte restore pending.
+`candidate-4-final-hands-on-state.json` retains the saved hash baseline. Native
+PNG/JPEG staging/add/remove-all/Cancel/discard/reopen changes none of 200 project
+files (`candidate-4-native-import-cleanup-proof.json`). Local evidence/package root
+remains `.toolchains/reports/final-1g-windows/`; do not commit logs/private paths.
+
+**Next action:** conduct one short physical session covering held Beat dragging at
+both list edges/live marker, Explorer multi-file drop into Assets followed by Beat
+reorder, off-surface refusal/discard, and English/focus/hover/final visual feedback.
+Reuse the user's already successful three cancellation observations; no repeat
+download/service/SDK matrix. Sky cannot hold the pointer, hover or drag across
+windows, so these are real tooling gaps. Record human observations separately and
+check saved hashes after cancellation. **Do not inspect/change scale or request it.**
+Repetitive native layout/Beat-type permutations are minimized through existing
+rendered/qualified boundary coverage; Narrator/full native permutations not claimed.
+All 14 original rows are not declared fully passed. Exact Pass/Unavailable subscopes,
+earlier failures and next qualification are in the
+[live task ledger](../tasks/active/ui-design-review.md#windows-agent-work-ready-for-final-hands-on-session--2026-10-06).
+
+Cumulative Windows: **4 successful production builds + 1 unqualified direct-Cargo
+build / 4 failed build/setup attempts / 19 top-level starts / 0 separate SDK menu
+starts**. No new manual CI dispatch; no pending manual workflow. Mac/remote counters
+unchanged. Original 3,226 Roaming + 282 local profile backups reverify identical;
+restore only with the app closed after the final session, preserving review state.
+After Windows freezes, one bounded affected Mac pass (Source Run/count, selected-media
+refusal/reselection, concurrent Story previews) and justified exact-input remote
+qualification remain. Separate integration handover follows both-platform acceptance.
+
+## Historical checkpoints (superseded continuation instructions)
+
 ## Live Windows correction and native handoff — 2026-10-06
 
 **User scope amendment — 2026-10-06:** “dont check scale please.” Cancel the

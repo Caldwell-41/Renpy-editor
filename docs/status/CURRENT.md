@@ -7,6 +7,38 @@
 
 ## Live continuation
 
+**Agent work ready for final Windows session — 2026-10-06; in_progress.**
+User selected agent-owned fixes/checks first, minimizing repeats. Two additional
+product fixes now pass: simultaneous Story canvas/thumbnail URLs remain live, and
+acknowledged Source drafts update the sidebar count/UTF-8 bytes without saving.
+
+| Capability | Implementation / proof | Acceptance still needed |
+| --- | --- | --- |
+| Source Run, import refusal, previews, draft counter | Corrected; focused renderer tests 44/44, Source/browser review Pass, native affected actions Pass | Affected Mac checks and changed-candidate remote qualification |
+| Packaged runtime/UI | route-b and runtime-error Pass on candidate 3; ui-refresh all 11 checks Pass on candidate 4, cleanup true | Final Windows human input/visual acceptance |
+| Catalogue, Choice, sidebar, pending operations | Native representative actions plus existing rendered coverage reused; native import cleanup changes none of 200 files | Held drag/Explorer drop, physical English/focus, hover/visual feedback |
+
+Current binary: `candidate-4/loomlight.exe`, SHA256
+`01ddc25a05f3293dd29ecaca775e163f78120d1f39923a20c8bf129eeefc7d58`.
+All 132 inputs verified: 8 changed / 124 unchanged versus qualified `5b467a4`.
+Only probe diagnostics differ from candidate 3; its renderer/service proof is reusable.
+No timeout/assertion relaxed; earlier failed probes remain failed with precise cause
+unresolved. No new manual CI dispatch or broad unchanged matrix. Cumulative Windows
+counts: 4 production builds + 1 unqualified direct-Cargo build, 4 failed setup/build
+attempts, 19 top-level start attempts, 0 separate SDK menu starts.
+
+**Next action:** one consolidated hands-on Windows session on candidate 4, open on
+the disposable graph project → Assets, Saved, Light PaperTeal, no modal or external
+restore pending. Scaling remains user-excluded; native layout/Beat-type permutations
+are minimized using existing tests, with their limits recorded. Original 3,508-file
+profile backups verify unchanged; restoration waits until the final session closes.
+Exact row statuses, evidence and bounded Mac follow-up are in the
+[live Windows ledger](../tasks/active/ui-design-review.md#windows-agent-work-ready-for-final-hands-on-session--2026-10-06).
+1G/1H remain open; PR #17 conflicts/integration untouched. Both-platform acceptance
+is not claimed for the changed candidate.
+
+### Historical Windows checkpoints (superseded)
+
 **User scope amendment — 2026-10-06:** “dont check scale please.” Display-scaling
 checks are excluded at the user's request; do not open Windows Display settings,
 change scale or request that physical action. The Settings handoff below is cancelled.

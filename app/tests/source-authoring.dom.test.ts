@@ -67,6 +67,38 @@ function sourceActions(overrides: Partial<SourceActions>): SourceActions {
   };
 }
 
+test("acknowledged Source input updates the draft total without saving or moving focus", async () => {
+  installDom();
+  const accepted = documentModel();
+  let model = accepted;
+  let saves = 0;
+  const controller = renderSourceWorkspace(document.querySelector("#host")!, document.querySelector("#tree")!, inventory(), sourceActions({
+    open: async () => model,
+    update: async request => {
+      model = { ...model, text: request.text, dirty: request.text !== accepted.text, state: request.text !== accepted.text ? "dirty" : "clean", draftVersion: model.draftVersion + 1 };
+      return model;
+    },
+    save: async () => { saves += 1; return model; },
+  }));
+  try {
+    await tick();
+    const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
+    editor.focus();
+    for (const text of [`${accepted.text}# café 雪\n`, `${accepted.text}# Second input\n`, accepted.text!]) {
+      editor.value = text;
+      editor.dispatchEvent(new window.Event("input", { bubbles: true }));
+      await tick(); await tick();
+      const total = document.querySelector(".source-draft-total")!.textContent!;
+      if (model.dirty) {
+        assert.match(total, /^1 draft ·/);
+        assert.ok(total.includes(new TextEncoder().encode(text).byteLength.toLocaleString()));
+      } else assert.equal(total, "No unaccepted drafts");
+      assert.equal(document.activeElement, editor);
+      assert.equal(saves, 0);
+    }
+  } finally { controller.dispose(); }
+});
+
 test("Source workspace retains drafts, uses the shared toolbar Save executor, and bridges exact selection", async () => {
   installDom();
   let model = documentModel();

@@ -421,8 +421,11 @@ export function renderSceneAuthoring(
       }
       const media = await pending;
       if (disposed || generation !== mediaGeneration || !image.isConnected) return;
-      const url = presentationUrl(media);
       const replaced = imageCache.get(assetId);
+      // Several images can await the same presentation (canvas and details).
+      // Reuse its URL instead of revoking the URL just assigned to another image.
+      if (replaced?.key === media.cacheKey) { image.src = replaced.url; return; }
+      const url = presentationUrl(media);
       if (replaced) URL.revokeObjectURL(replaced.url);
       imageCache.set(assetId, { key: media.cacheKey, url }); image.src = url;
     } catch (error) {

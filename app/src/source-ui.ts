@@ -330,6 +330,18 @@ export function renderSourceWorkspace(
         });
         if (identityMatches(snapshot.documentGeneration, snapshot.path) && snapshot.sequence >= acknowledgedSequence) {
           acknowledgedSequence = snapshot.sequence;
+          const previous = current;
+          const summary = inventory.files.find(file => file.path === next.path);
+          if (summary) {
+            const bytes = (value: string | undefined): number => new TextEncoder().encode(value ?? "").byteLength;
+            inventory = {
+              ...inventory,
+              files: inventory.files.map(file => file.path === next.path ? { ...file, state: next.state, dirty: next.dirty } : file),
+              dirtyCount: inventory.dirtyCount + Number(next.dirty) - Number(summary.dirty),
+              draftBytes: Math.max(0, inventory.draftBytes + (next.dirty ? bytes(next.text) : 0) - (summary.dirty ? bytes(previous?.text) : 0)),
+            };
+            drawTree();
+          }
           current = next;
           if (latestRetentionFailure && latestRetentionFailure.snapshot.sequence <= snapshot.sequence) latestRetentionFailure = undefined;
           if (latestSnapshot?.sequence === snapshot.sequence) {
