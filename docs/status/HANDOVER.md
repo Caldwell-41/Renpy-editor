@@ -51,6 +51,14 @@ as timing diagnostic overrun. Cause of repeated timestamp not established; no wa
 `a2b6dfc987243cd52a169c78925beb67f7727aff0d9c05d695ff284b972dfadd`; tar/report hashes
 verified, candidate/tree/run/attempt agree. No corrected-candidate package acceptance.
 
+**Additional completed audit:** correction checkpoint `3867329b2f3a90b4d2b74f8d025c1054b99ddb3d`
+quality [37519834637/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37519834637)
+Pass for actual repository/Q1/selector steps; optional profiling/diagnostic jobs skipped,
+no frontend/native/package execution in that run. All 46 named H01–H12 regressions
+were matched to exact passing lines on both first-candidate hosts; the ledger matrix
+now records their actual scope and failures. This later documentation audit changes
+no correction harness/package inputs and creates no additional qualification allowance.
+
 **Corrections at 21c029a:** disposable SDK driver selects SDL dummy output before real
 PCM init, logs actual backend/channel state before assertions and adds required PCM
 check. Music/SFX/stop/hide/original route oracle and 10s/60s deadlines remain. No shipped
@@ -83,7 +91,7 @@ Full failures/counters and named regression audit remain in active ledger.
 **Decision/continuation:** request one additional corrective production matrix on the
 published correction inputs, with package retention and no automatic retry. WORKFLOW's
 budget rule requires a new decision after exhausted caps; ordinary Resume does not
-authorise dispatch. Before user approval no CI work remains pending. Once authorised,
+authorise dispatch. No corrective production operation is pending. Once authorised,
 verify branch/head/ownership and dispatch existing workflow once, record exact run/
 attempt/SHA, then use manual SAME Goal/chat waiting. Resume audits named H01–H12 and
 sections 3–4 tests, PCM/channel logs/29 assertions, four SDK reports/three captures,

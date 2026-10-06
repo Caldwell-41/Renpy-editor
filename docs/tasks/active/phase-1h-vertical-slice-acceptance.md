@@ -193,22 +193,22 @@ missing/zero/ignored/failed required Cargo results and incomplete packaged clean
 
 | ID | Concrete expected observations and selected proof | Current evidence |
 | --- | --- | --- |
-| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | Local staged no-Git creation Pass; normal menus/save/load/history/rollback Pass; final both-target evidence open |
-| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | Local authoring/import/hash/golden/reopen Pass; actual route values/media Pass on local Mac; final both targets open |
-| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | Local golden-source Pass; local Mac runtime assertions Pass; final both targets open |
-| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | Local production flow/source Pass; local Mac routes/reconvergence/Return Pass; final both targets open |
-| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | Local fixture history/reopen Pass; both-target broad history regressions open |
-| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | Local real compile/lifecycle Pass; final candidate both targets open |
-| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | Local custom Source/reopen Pass; existing Source/core/browser/package regressions selected, target evidence open |
-| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | Local real compile/lint Pass; existing runtime service/diagnostic and packaged cases selected, target evidence open |
-| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | Local reopen Pass; metadata-free riverside SDK case Pass on local Mac; final both targets open |
-| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | Existing named routine transaction/recovery gates selected; final target evidence open |
-| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | Existing real dispatch/service and frontend/native gates selected; copied-UUID consent and zero-process untrusted inspection Pass on local Mac; target evidence open |
-| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | New exact native Mac long-history test Pass (1/1, no skip, 77.70s); target suite/resource gates open |
+| H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | First candidate: staged creation/archive lifecycle Pass on both; Mac integrated menus/save/load/history/rollback Pass; Windows integrated sequence stops before those interactions; corrected qualification open |
+| H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | First candidate: authoring/import/hash/golden/reopen Pass on both; Mac route values/media Pass; Windows audio fails before assigned route outcomes; corrected qualification open |
+| H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | First candidate: golden source and supported Beat regressions Pass on both; Mac runtime state/media Pass; Windows audio/remaining route assertions fail or do not execute; corrected qualification open |
+| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | First candidate: production flow/source regressions Pass on both; Mac routes/reconvergence/Return Pass; Windows routes stop before choice; corrected qualification open |
+| H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | First candidate: fixture history/reopen and every named ordinary history/external-boundary regression Pass on both; corrected coherent-candidate qualification still open |
+| H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | First candidate: real compile/cache move/delete/inverse/reopen/incoming refusal and named runtime no-write/Stop/retry regressions Pass on both; corrected qualification open |
+| H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | First candidate: custom Source/reopen and named exact-byte/draft/Apply Both/overlap/core regressions Pass on both; Mac native Source boundary Pass, Windows package missing; corrected qualification open |
+| H08 | Explicit trust and real compile/lint, diagnostics safe navigation, normal Run/Stop, saved edit/launch staleness, no autoreload and asset no-write refusal/retry | First candidate: SDK service/diagnostic gates Pass on both; six Mac packaged cases/cleanup Pass, Windows package missing; corrected qualification open |
+| H09 | Durable accepted source/projections/valid selection after close/reopen; copied game executes same route without `.renpy-editor` | First candidate: editor reopen/metadata preservation Pass on both; Mac metadata-free SDK route Pass, Windows copy fails audio; corrected qualification open |
+| H10 | Non-crashing mixed recovery retains accepted/external/displaced bytes, blocked inspection, safe explicit resolutions/follow-up and ambiguity refusal | First candidate: every named ordinary real-disk recovery/safe-resolution/follow-up/ambiguity regression Pass on both; corrected coherent-candidate qualification still open |
+| H11 | Failed switch preserves project; old-session/delayed/cancelled completion, draft/import/runtime contention and rapid navigation cannot write wrong session or claim false Saved | First candidate: named core dispatch/session/cancel/Stop gates and copied-UUID/zero-process inspection Pass on both; Mac package boundary Pass, Windows package missing; corrected qualification open |
+| H12 | Document/resource/precision/discovery limits refuse without loss; actual Character/Chapter authoring succeeds after 4,097 terminal records and reopens | First candidate: actual authoring after 4,097 records and every named ordinary resource/precision/discovery gate Pass on both; corrected coherent-candidate qualification still open |
 
-This initial mapping records the pre-dispatch local state. The terminal target audit
-and changed-candidate requirements below supersede its pending-target entries; no
-automatic acceptance transfers to the corrected probe.
+The evidence column records the first terminal candidate at `3d484ef`, not acceptance
+of the corrected probe. The terminal audit and changed-candidate requirements below
+retain its exact failures and gaps; no automatic acceptance transfers across SHAs.
 
 Section 3 mapping: graph inventory/partial/missing/unknown/duplicate/self-loop/limits use
 `scene::tests::flow_*`, Source navigation and the fixed reconvergent fixture; preparation
@@ -237,7 +237,8 @@ this acceptance candidate. No repeated broad user session is requested.
 
 ### Concrete regression audit prepared during the target run
 
-This is selection/body review, not terminal target acceptance. The local cached release
+This table records selection/body review plus the later named-line audit below,
+not corrected-candidate target acceptance. The local cached release
 inventory lists 236 tests (no tests executed by `--list`); its platform-specific count
 must not substitute for the Windows result. Existing `cargo-log` checks and named
 passing lines in retained target logs are the proof. Keep specialist exclusions intact.
@@ -526,3 +527,30 @@ samples/bounded repeats, six packaged cases/cleanup and original named regressio
 matrix. If still pending, pause again without polling. No automatic retry or merge.
 If allowance is declined, leave acceptance unresolved for review. Goal is active until
 explicit user/client pause; no runtime pause has been verified by this ledger.
+
+
+### Named regression and correction quality audit
+
+Completed [quality 37519834637/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37519834637)
+Pass at exact correction checkpoint `3867329b2f3a90b4d2b74f8d025c1054b99ddb3d`.
+Required job 112462107082 ended 2026-10-06 19:33:26 UTC with actual repository
+structure/links/privacy, Q1 rejecting fixtures and selector/retained-case audit steps
+Pass. Optional flow profile and Mac browser diagnostic jobs were unselected/skipped;
+this quality run executed no native/package or frontend qualification. No duplicate
+quality dispatch or production retry.
+
+The 46 explicitly named ordinary regressions in the concrete H01–H12 table were
+matched to exact `test ... ... ok` lines in each original target's retained core and
+separate SDK logs: **46/46 Mac, 46/46 Windows, no named result missing**. Ignored
+SDK declarations in the broad-core log were not counted; their separate real executed
+Pass lines supplied evidence. The H01–H12 evidence column now records actual terminal
+observations and unexecuted/failed package/route scope, rather than stale pending-job
+labels. Required assertion bodies remain those reviewed in the concrete table.
+The original candidate's 46 named passes do not supply automated acceptance of the
+changed harness; renewed both-target qualification remains the outstanding decision.
+
+This is a substantive requirement/evidence audit after publication, with a docs-only
+checkpoint following the tested correction head. It changes no harness/runtime/package
+inputs and does not warrant another package matrix by itself. The existing approval
+question for one corrective production matrix remains pending; no new question or
+implicit retry authority is introduced. Goal runtime remains active pending user action.
