@@ -7,6 +7,36 @@
 
 ## Live continuation
 
+**Both-platform acceptance Pass / separate integration ready — 2026-10-06.**
+Corrected [production 37461862928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461862928),
+**attempt 1**, tested **`c137b6706ed2dc05aac8dfe692689829c785a52a`**, and
+[quality 37461858768](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461858768)/1
+Pass after actual gate/artifact audit. Both hosts: named official SDK/service/diagnostic,
+browser functional/evidence, desktop, packaged WebView/single-instance/privacy/inventory
+gates and **all 6 runtime cases/cleanup** Pass. All **132 inputs match both manifests
+and corrected carrier**: **11 changed / 121 unchanged** versus baseline, only one
+`#[cfg(test)]` lifecycle input beyond frozen runtime `ee5f55e`. No runtime/UI change.
+
+| Acceptance | Status |
+| --- | --- |
+| Windows/Mac selected native/human review | **Pass**; Windows “all working, happy”, Mac “all working”; Mac 293 cancellation hashes unchanged, original 3,227 profile hashes restored; Windows profiles previously restored |
+| Retained packages/manifests | **Pass**; four artifact ZIPs verified/downloaded beyond 2026-10-13 expiry, tested EXE/app-tar and NSIS/MSI/DMG hashes verified; mounted Mac DMG executable equals tested ARM64 app |
+| Integration / Phase closure | **Not performed**; PR #17 draft/open/conflicting; main `4d7ba03` and planning `2c5a164` untouched; 1G closeout/1H remain separately selected |
+
+Initial final 1/1 and correction dispatches 4 consumed. Current run 2 builds/16 packaged
+starts; final qualification series **6 builds / 46 starts**. Local Mac 19 builds/77 starts/
+7 SDK menus, Windows 6 production + 1 unqualified/4 failed setup/21 starts/0 SDK menus unchanged.
+All prior failures retained. Mac Chrome timing diagnostics remain Fail under existing
+policy; functional/native/package acceptance Pass. No notarization/signing claim.
+No owned app/game/profile/CI wait remains, no extra matrix/retry/automation.
+**Next:** separate integration chat for PR #17 conflicts/review, exact integrated-tree
+affected/required checks and reviewed merge/1G closeout when selected. **1H not_started**,
+entered after integrated 1G and explicit selection. Exact package identities/evidence:
+[handover](HANDOVER.md#both-platform-acceptance-and-integration-handover--2026-10-06),
+[terminal ledger](../tasks/active/ui-design-review.md#both-platform-terminal-acceptance-and-transfer--2026-10-06).
+
+### Earlier corrected qualification wait (terminal Pass supersedes)
+
 **Corrected qualification awaiting_ci — 2026-10-06.** Necessary test-only lifecycle
 alignment/local official-SDK Pass is published at exact tested carrier
 **`c137b6706ed2dc05aac8dfe692689829c785a52a`**. User **“Go ahead”** authorized one

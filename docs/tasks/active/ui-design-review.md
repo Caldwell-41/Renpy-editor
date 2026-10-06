@@ -1,5 +1,90 @@
 # UI design review
 
+### Both-platform terminal acceptance and transfer — 2026-10-06
+
+**Live state: selected native/human review and corrected remote qualification Pass;
+ready for separate integration.** Production **37461862928/attempt 1** success at
+exact candidate **`c137b6706ed2dc05aac8dfe692689829c785a52a`**, tree
+**`388789432601cd4cf6b0222ed08243541d1f3301`**. Preflight and both host jobs, actual
+required steps all success. Cached verified SDK avoids only uncached download step;
+actual SDK gates run. Quality **37461858768/1** required steps Pass. Current refs/main/
+planning ownership unchanged. This audit adds no build/native start/dispatch.
+
+**Input/identity audit:** both runtime manifests, package-evidence manifests and API
+receipts match exact run/attempt/SHA/tree; **all132 inputs equal each other and the
+corrected carrier**. **11 changed / 121 unchanged** versus `5b467a4`, **131 match frozen
+`ee5f55e`** plus necessary lifecycle `#[cfg(test)]` correction. Production prefix and
+runtime/UI/probe/workflow bytes unchanged; selected human/native evidence reusable.
+Original Windows candidate-6/local Mac package hashes below remain their own identities.
+
+| Required proof | Windows x64 / macOS ARM64 |
+| --- | --- |
+| Core / ordinary protections | **184 Pass,37 intentional ignores,3 filtered / 189 Pass,40 intentional ignores,3 filtered**, no failed core cases; excluded specialist ignores not claimed as executed |
+| Official SDK | Exact named lifecycle/import/Source/Scene/media, download-handoff, runtime-service and compile/lint diagnostic gates each **1 Pass / 0 failed / 0 ignored**, all required positive markers, no skip marker |
+| Service/browser/desktop | 3 fixed observed samples per host Pass; Source/runtime/Branches functional/evidence actual outcomes Pass; desktop **1/1** per host |
+| Packaged boundary | Required navigation/popup/WebView restrictions, lifecycle/supporting/Scene/Source authoring and Source-command traces, primary readiness and secondary rejection Pass |
+| Privacy/dependency | Actual scan **6 files** per host Pass; inventory **97 npm / 519 Cargo** per host, retained |
+| Reports/cleanup | **6/6 each host**; exactly1 passed report each, exit0,no timeout,cleanup true, shared checker rerun on retained reports Pass |
+
+| Case | Windows elapsed seconds | Mac elapsed seconds |
+| --- | --- | --- |
+| compile | 52.219 | 56.745 |
+| lint | 49.469 | 53.816 |
+| route-a | 59.390 | 53.806 |
+| route-b | 67.016 | 63.732 |
+| runtime-error | 46.703 | 46.354 |
+| ui-refresh | 16.594 | 5.347 |
+
+Mac Chrome timing diagnostics remain **Fail** (pan/visible dispatch-to-rAF/rendering
+opportunity p95 **106.6/116.5/218.2ms**); functional/evidence outcomes Pass. This retains
+the existing diagnostic policy and native/packaged acceptance distinctions, not a
+threshold change or a claim that timing passed. Windows Chrome diagnostics Pass.
+
+All four artifacts downloaded and ZIP hashes independently match GitHub; retained
+locally beyond **2026-10-13** expiry. Evidence **11414002628 Windows / 11414472181 Mac**;
+production **11414262577 Windows / 11414227444 Mac**. Full ZIP hashes/bytes/expiry are
+in ignored `correction-4-artifacts/artifact-receipt.json`. Verified exact binaries:
+
+| Retained binary/package | Bytes / SHA256 |
+| --- | --- |
+| AMD64 EXE | **14,145,024**, `866270cc9244987fe42d02e5d99ba9ba463f4948817c972dae5eeb422ba35316` |
+| NSIS installer | **3,545,185**, `bb86cd70dd67598ebba1cc248f9ad1dad890ed697397c5fbbe596193b617942b` |
+| MSI installer | **5,079,040**, `423fd23e950187e9fae3f096d6ab41157d21ac570b73ad939193d5e83cfa0487` |
+| ARM64 app executable | **13,862,720**, `5cb1416aa2fbe0be9f3bf443437c41d07b9d840f27aa654b3d8cb57a82b65e14` |
+| App tar | `130a4b33c103c5a93b2e208167909b9ffa2518e116647c0fe6e715e08e851987` |
+| DMG | **5,197,871**, `7c50b807019726068047dc440e3b44fde81b912cbd43a0696bd83b28ec89a92b` |
+
+App tar hash and enclosed executable/permissions verified. DMG read-only mounted
+executable equals tested app hash/ARM64; only new mount detached. Retained app/EXE,
+installers, manifests, reports, logs and inventory under ignored bounded
+`correction-4-artifacts/`; `correction-4-terminal-audit.json` records independent checks.
+No Developer ID/notarization or new installation/user-input claim.
+
+**Combined selected review:** Windows final **“all working,happy”**, Mac focused
+**“all working”**; six Mac cases Pass, cancellation **293/293 hashes unchanged**.
+Mac original **3,227 hashes restored**, Windows original profiles previously restored;
+temporary media restored, no owned app/game/profile/workflow pending. Human limitations
+remain honestly recorded; no repeated 14-row/scaling/keyboard/SDK-download session.
+Only necessary test alignment changed during this Mac outcome, no runtime correction.
+
+**Cumulative:** initial final allowance **1/1**, correction dispatches **4**, attempt1
+each. Current run **2 app builds/16 packaged starts** (12cases+4boundaryprocesses).
+Final qualification series **6 app builds/46 starts**: initial0/0,P5 2/14,P6 2/16,
+selected-media failure0/0,corrected2/16. Local Mac **19 builds/77 starts/7 SDK menus**;
+Windows **6 production+1unqualified/4failedsetup/21starts/0SDKmenus** unchanged;
+three native Mac game starts separate. QUAL-IMPORT-01 aligned SDK gate now Pass on
+both targets; earlier **37459347476/1**, first local fixture failure and all other
+unique historical failures/archives remain retained, no waiver or reclassification.
+
+**Transfer:** outcome complete; publish combined evidence/handover. Separate selected
+integration chat owns PR#17 review/conflicts, exact combined-tree checks, reviewed
+merge and 1G closeout. None performed here. Main `4d7ba03`, planning `2c5a164` intact;
+PR draft/open/conflicting. 1H **not_started**, requires integrated/accepted1G and
+explicit selection. Agent owns H01–H12; applicable human evidence reused. No optional
+Git, new phase, automatic retry/polling/duplicate unchanged matrix.
+
+### Earlier corrected qualification wait (terminal Pass supersedes)
+
 ### Corrected qualification wait — 2026-10-06
 
 **Live state: awaiting_ci.** Necessary test-only alignment is published at exact

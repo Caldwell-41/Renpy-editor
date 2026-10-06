@@ -1,5 +1,92 @@
 # Current outcome handover
 
+## Both-platform acceptance and integration handover — 2026-10-06
+
+**State: selected native review and corrected remote qualification Pass; ready for a
+separate integration chat.** Final Windows feedback **“all working, happy”** and Mac
+held-grip feedback **“all working”** complete the selected human scopes. Mac six-case
+service/controller/native checks Pass, cancellation **293/293 hashes unchanged**;
+original Mac profile **3,227 hashes restored/identical**, Windows profiles previously
+restored/identical. Temporary external bytes restored, review data/packages retained,
+no owned app/game/profile/workflow operation pending. No new physical session needed.
+
+**Terminal acceptance:** [production 37461862928](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461862928),
+attempt **1**, exact tested carrier **`c137b6706ed2dc05aac8dfe692689829c785a52a`**,
+tree **`388789432601cd4cf6b0222ed08243541d1f3301`**, feature branch, **success**.
+Preflight and Windows x64/macOS ARM64 jobs, every required actual step Pass; only
+uncached SDK-download step skipped because the verified archive was cached.
+[Quality 37461858768](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37461858768)/1
+required validator/rejection-fixture/selector steps Pass. Exact jobs/logs/manifests
+and independent terminal audit retained; badges alone were not used as acceptance.
+
+Both target manifests match **all 132 corrected paths/hashes**, each other and Git
+carrier: **11 changed / 121 unchanged** versus `5b467a4`. Runtime implementation stays
+frozen at `ee5f55e`; necessary `#[cfg(test)]` lifecycle alignment is the sole additional
+input (**131 unchanged** versus frozen). Its production prefix and all renderer/probe/
+workflow inputs remain byte-identical; six native/human cases are reused under the
+recorded impact assessment. Later docs SHA does not replace any tested identity.
+
+**Required proof:** positive exact named lifecycle/import/Source/media SDK gate,
+download-handoff, runtime-service and compile/lint diagnostics gates Pass; Source,
+Runtime and Branches browser functional/evidence outcomes Pass; 3 fixed real-service
+observed samples and desktop **1/1** per target Pass. Packaged WebView restriction/
+navigation/popup, authoring/Source-command trace, single-instance rejection and
+cleanup proofs Pass; privacy scan **6 files per host**, inventory **97 npm / 519 Cargo**
+entries per host Pass. All **six cases per host** (`compile`, `lint`, `route-a`,
+`route-b`, `runtime-error`, `ui-refresh`) have exactly one passed report, exit 0,
+no timeout, cleanup true. Core: Windows **184 Pass / 37 intentional ignores / 3 filtered**;
+Mac **189 Pass / 40 intentional ignores / 3 filtered**. No ignored specialist case
+is claimed as executed acceptance. Mac Chrome timing-only diagnostics stay **Fail**
+at **106.6 / 116.5 / 218.2ms** p95; browser functional outcomes and required packaged/
+native evidence Pass under existing policy. No threshold/failure reclassification.
+
+**Retained exact hosted identities:**
+
+| Target/package | Bytes / SHA256 |
+| --- | --- |
+| Windows tested AMD64 EXE | **14,145,024**, `866270cc9244987fe42d02e5d99ba9ba463f4948817c972dae5eeb422ba35316` |
+| Windows NSIS installer | **3,545,185**, `bb86cd70dd67598ebba1cc248f9ad1dad890ed697397c5fbbe596193b617942b` |
+| Windows MSI installer | **5,079,040**, `423fd23e950187e9fae3f096d6ab41157d21ac570b73ad939193d5e83cfa0487` |
+| Mac tested ARM64 executable | **13,862,720**, `5cb1416aa2fbe0be9f3bf443437c41d07b9d840f27aa654b3d8cb57a82b65e14` |
+| Mac preserved-permission app tar | `130a4b33c103c5a93b2e208167909b9ffa2518e116647c0fe6e715e08e851987` |
+| Mac DMG | **5,197,871**, `7c50b807019726068047dc440e3b44fde81b912cbd43a0696bd83b28ec89a92b` |
+
+All four evidence/package artifact ZIP digests verified against GitHub and downloaded
+beyond **2026-10-13** expiry: Windows evidence **11414002628**, package **11414262577**;
+Mac evidence **11414472181**, package **11414227444**. App tar hash and executable
+inside verified; executable permissions preserved. Mac DMG mounted read-only and
+its executable matches the exact tested hash/ARM64; only new verification mount detached.
+No Developer ID/notarization/wider distribution claim. Original human-review EXE/app/
+DMG identities remain separately preserved, not replaced by these hosted binaries.
+Ignored `.toolchains/reports/bounded-mac-windows-c6/correction-4-artifacts/` retains
+installers, EXE, app/tar, manifests, reports, inventory and logs; independent receipt
+`correction-4-terminal-audit.json`, DMG verification and ZIP receipts retain full hashes.
+
+**Counters/failures:** initial final allowance **1/1**, correction dispatches **4**,
+all attempt 1. Corrected run adds **2 production app builds / 16 app starts**
+(12 case processes + 4 primary/secondary boundary processes). Final qualification
+series cumulative **6 app builds / 46 starts**: initial 0/0, P5 2/14, P6 2/16,
+failed selected-media qualification 0/0, corrected qualification 2/16. Local Mac
+**19 builds / 77 starts / 7 SDK menus**; Windows **6 production + 1 unqualified /
+4 failed setup / 21 starts / 0 SDK menus**, unchanged. Three native Mac game launches
+separate. QUAL-IMPORT-01 closes only after both renewed lifecycle gates Pass; failed
+**37459347476/1**, both failure archives and first local fixture failure remain Fail
+with their unique evidence. Other historical failures/counters remain preserved.
+No extra retry/matrix/automation/polling was used; this audit adds no build/start.
+
+**Next outcome (separate chat, requires selection):** inspect fresh refs/worktree
+ownership and PR #17, review/resolve conflicts without reset/rebase/rewrite, assess
+the exact integrated tree and affected/required checks, then reviewed integration and
+1G documentation closeout when authorized. Do not infer merged-tree qualification
+from this branch evidence or dispatch an unchanged matrix solely for docs/merge.
+This chat did not resolve conflicts, merge, close 1G/1H or start another phase.
+Main remains `4d7ba0333c48d60242a9a42d3e079fea499a5531`, planning worktree `2c5a164`
+untouched, PR #17 draft/open/conflicting. **1H remains not_started**, entered only
+after 1G acceptance/integration and explicit selection; reuse unchanged human
+evidence and retain agent-owned integrated H01–H12 gates. Optional Git stays outside Phase 1.
+
+## Earlier corrected qualification wait (terminal Pass supersedes)
+
 ## Corrected qualification wait — 2026-10-06
 
 **State: awaiting_ci; test-only correction published and one authorized qualification dispatched.**
