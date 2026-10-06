@@ -2,7 +2,20 @@
 
 ### Physical Windows edge-scroll correction — 2026-10-06
 
-**Live state: in_progress; WIN-UI-02 Fail pending focused physical retest.**
+**Live state: in_progress; candidate-5 physical edge scrolling Pass.** User reports
+“all working” for both scroll directions and Escape stopping the drag. Saved-file
+comparison also finds four durable reorder transactions (only Scene 1/source map,
+24 retained recovery files; 206→230 total). Every source-line multiset is preserved.
+The earlier 200→206 transition also retained one later candidate-4 reorder after
+the first no-write comparison; neither transition is attributed to cancellation
+without human clarification. Receipts `physical-edge-retest-candidate-5-result.json`
+and `edge-scroll-replacement-file-delta.json` retain exact snapshots/journals.
+Human clarification is pending: were the candidate-5 reorders deliberate drops/moves
+or changes despite Escape? **No-write physical cancellation remains Unavailable
+pending that answer**, while prior independent cancellation regressions still pass.
+No new build/start/CI/SDK action. Next after clarification: Explorer drop/coexistence.
+
+**Earlier failure and correction (preserved):**
 Human observation on candidate 4: marker/ghost and Escape cleanup work, but holding
 at either list edge does not scroll. Independent comparison proves all **200 saved
 files unchanged** (`physical-final-step-1-edge-failure.json`); user observations
@@ -112,7 +125,7 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 | Row | Status | Exact evidence and remaining scope |
 | --- | --- | --- |
 | WIN-UI-01 | Unavailable; native reorder/physical marker subchecks Pass | Saved reorder/history/reopen IDs `136`–`143` and native bounds/English receipt `727`–`755` retained. Human candidate-4 ghost/marker Pass. Edge scrolling fails under WIN-DRAG-01; Explorer coexistence remains. |
-| WIN-UI-02 | Fail; correction awaits physical retest | Candidate-4 human held top/bottom edge scrolling fails; ghost/Escape cleanup Pass, all 200 files unchanged. Candidate-5 focused correction passes 16 Scene tests and held-pointer Chrome fixture; physical retest pending. Prior cancellation/bounds receipts remain; do not repeat completed human cancellations. |
+| WIN-UI-02 | Unavailable; physical scrolling Pass, no-write attribution pending | Candidate-4 held edge failure is preserved. Candidate-5 user reports both directions/Escape work; 16 Scene tests and held-pointer Chrome fixture pass. Four durable saved reorders occurred during the broader retest, preserving every source line; clarification of deliberate drops versus changes after Escape is pending. No-write physical cancellation is not inferred. Prior cancellation/bounds receipts remain. |
 | WIN-UI-03 | Unavailable; Browse/service subchecks Pass | Prior selected-media failure retained; WIN-IMPORT-01 correction/native reselection/partial-import proof `259`–`309` passes. `candidate-4-native-import-cleanup-proof.json`: PNG/JPEG preview, Add files, remove all, Cancel/discard/reopen, all 200 project files unchanged. Physical multi-file Explorer drop, off-Assets refusal and coexistence remain. |
 | WIN-UI-04 | Unavailable; agent native English subchecks Pass | Native Character/Variable uppercase canonicalization/defaults (`candidate-3-native-character-proof.json`, `candidate-3-native-variable-text-proof.json`); expression/guidance `225`–`241`; narration copy/paste/undo/redo `727`–`755`; Dialogue exact English commit (`candidate-4-native-dialogue-proof.json`); Source Unicode/Undo receipt. Short physical English/focus spot-check remains. IME outside scope. |
 | WIN-UI-05 | Pass, native Windows | Existing `108`–`123`, `336`–`374` and discard/reopen receipts: all types reset correctly, both Boolean True values persist; no-write snapshots retained. Native string default also passes on candidate 3. |

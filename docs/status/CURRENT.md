@@ -7,6 +7,16 @@
 
 ## Live continuation
 
+**Candidate-5 physical scroll retest Pass — 2026-10-06.** User reports both held
+edges and Escape now work. Hash comparison finds four durable saved reorders,
+206→230 files including recovery evidence; all source lines are preserved. Clarify
+whether drops/moves were deliberate or order changed despite Escape before claiming
+physical no-write cancellation. WIN-UI-02 is Unavailable on that remaining assertion;
+old failed edge evidence stays failed. No new build/start/CI/SDK. After clarification,
+continue Explorer drop/coexistence and brief English/hover/visual feedback; no scaling.
+
+### Earlier edge-scroll correction checkpoint (physical retest supersedes wait)
+
 **Physical edge-scroll correction — 2026-10-06; in_progress.** Human candidate-4
 check passes marker/Escape cleanup but fails scrolling at both edges; all 200 saved
 files remain unchanged. WIN-DRAG-01 corrects the scroll owner and visible boundaries.
