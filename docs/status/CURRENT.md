@@ -7,15 +7,19 @@
 
 ## Live continuation
 
-**Resumed after the user's PC-use pause — 2026-10-06.** Fresh fetch/fast-forward-only
-finds the branch unchanged at `0ed6f67`; worktree/refs preserved. Candidate 2 hash
-matches. Native captures `574`–`583` prove the retained empty Choice form, native
-keyboard Size and responsive Saved Story; all 233 project files remain unchanged.
-Light laptop/higher scaling remain pending. Native Windows Settings has no targetable
-window or inventory entry; awaiting only the requested physical opening of Settings
-→ System → Display, leaving scale unchanged. No input proceeds during that handoff.
-`native-resume-window-sizing.json` retains exact state. Both ui-refresh failures
-remain failed/unclassified; no probe, deadline change, build/start/CI dispatch.
+**User scope amendment — 2026-10-06:** “dont check scale please.” Display-scaling
+checks are excluded at the user's request; do not open Windows Display settings,
+change scale or request that physical action. The Settings handoff below is cancelled.
+Continue remaining Windows/native/visual actions at current scaling. Higher-DPI
+results remain Unavailable, user-excluded; no higher-DPI acceptance is inferred.
+
+**Native review resumed with scaling excluded — 2026-10-06.** Candidate 2 remains unchanged. Captures `596`–`629` and `659`–`689` review reciprocal, duplicate, self, same-layer and multi-level backward connectors in both palettes, zoom/pan/Fit, route selection, missing/custom notices and correct scene-file Source navigation. A native saved Choice adds a sixth terminal Return scene; terminal flow has no invented destination edge. `native-terminal-route-commit.json` retains exact saved source and metadata. Source navigation opens the correct file but highlights the end of the mapped range; exact-line focus is not claimed. WIN-UI-13 has substantial native evidence, with tooltip completion still to audit and higher DPI user-excluded.
+
+Captures `632`–`658` prove native pointer preview resize 34→41, Arrow Down→43, Reset layout→34 and reopened value 34; Chapter collapse retains Scene 1, keyboard navigation/tree hide/restore keeps visible focus, and Writing focus restores sidebar choices. Remaining six-surface/compact checks are open. Source overflow `694`–`721` opens fourteen extra files, selects via native Open files, reveals the active tab/file row, closes an inactive tab without changing selection, and retains the exact draft after active-tab close/reopen. Explicit disposable-draft discard leaves every `.rpy` hash and file set unchanged; `native-source-overflow-draft-review.json` retains snapshots. The sidebar says No unaccepted drafts while the non-scene session-only draft exists; classification pending. Source tab 14 is Clean / Draft discarded (`721`); no source-file write occurred.
+
+Captures `727`–`755` add native English narration typing, selection/copy/paste, undo/redo, one saved commit and keyboard Tab/Enter Move up, restoring the intended order. Same-row drag, unsubmitted-input refusal, crossing the final Choice and its disabled grip preserve saved source; `native-beat-English-bounds-review.json` retains hashes and exact assertions. Held edge-scroll/live ghost and Explorer coexistence remain pending. Current app: graph review → Story → Scene 1, Saved, long list at rows 11–21 (`758`); no editor draft or write is pending. `native-held-drag-before.json` records the no-write baseline. Explorer launch returned Computer Use app approval timed out, and fresh window inventory confirmed no Explorer window; no retry or drop occurred. The next physical handoff covers held dragging at both list edges because Sky supports only complete drags, with no mouse-down/hold operation. Record human observations separately; check hashes after cancellation. No OS/display scaling action is requested.
+
+Broken Story image previews and both failed ui-refresh probes remain unclassified; no visual pass or failure waiver is inferred. No source correction, build, top-level start, SDK menu, probe, deadline change or CI dispatch added. Original profile restoration and affected Mac/remote qualification remain pending.
 
 **Earlier PC-use pause:**
 Candidate 2 remains on supported rename review → Story → Scene 1 → Choice →

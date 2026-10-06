@@ -2,22 +2,18 @@
 
 ## Live Windows correction and native handoff — 2026-10-06
 
-**Resumed on user request; awaiting a native tooling handoff.** Fresh origin fetch
-and fast-forward-only pull leave branch `0ed6f67` unchanged, working tree clean,
-historical worktree preserved; retained candidate 2 hash matches. Captures `574`–`583`
-show Saved Story/Scene 1 with the empty Choice creation form retained. Keyboard
-Size works; titlebar drag restores/moves the window but does not establish half-screen
-snap. Last capture is 583×512 visible pixels, x=-1/y=313; all 233 project files
-remain unchanged. Light laptop/higher scaling still pending. Settings has no
-targetable native window or matching inventory entry. User asked to open Windows
-Settings → System → Display and report ready, leaving scale unchanged. Do not send
-input during this physical opening handoff. Then inspect returned Settings windows
-before automation; if still inaccessible, explain the exact remaining capability gap.
-`native-resume-window-sizing.json` retains this state. No write/restoration/CI pending;
-original profile restoration and all remaining rows/Mac/remote requirements remain.
-Both ui-refresh failures remain failed: original dirty-count evidence is missing;
-correction times out before Story readiness. No new probe/deadline/source change,
-build, Loomlight start, SDK menu or CI dispatch.
+**User scope amendment — 2026-10-06:** “dont check scale please.” Cancel the
+Settings-opening handoff below. Do not inspect/change OS scaling or ask the user
+to do so. Continue the remaining review at current scaling; record higher-DPI
+checks Unavailable/user-excluded, with no inferred pass.
+
+**Native review resumed with scaling excluded — 2026-10-06.** Candidate 2 remains unchanged. Captures `596`–`629` and `659`–`689` review reciprocal, duplicate, self, same-layer and multi-level backward connectors in both palettes, zoom/pan/Fit, route selection, missing/custom notices and correct scene-file Source navigation. A native saved Choice adds a sixth terminal Return scene; terminal flow has no invented destination edge. `native-terminal-route-commit.json` retains exact saved source and metadata. Source navigation opens the correct file but highlights the end of the mapped range; exact-line focus is not claimed. WIN-UI-13 has substantial native evidence, with tooltip completion still to audit and higher DPI user-excluded.
+
+Captures `632`–`658` prove native pointer preview resize 34→41, Arrow Down→43, Reset layout→34 and reopened value 34; Chapter collapse retains Scene 1, keyboard navigation/tree hide/restore keeps visible focus, and Writing focus restores sidebar choices. Remaining six-surface/compact checks are open. Source overflow `694`–`721` opens fourteen extra files, selects via native Open files, reveals the active tab/file row, closes an inactive tab without changing selection, and retains the exact draft after active-tab close/reopen. Explicit disposable-draft discard leaves every `.rpy` hash and file set unchanged; `native-source-overflow-draft-review.json` retains snapshots. The sidebar says No unaccepted drafts while the non-scene session-only draft exists; classification pending. Source tab 14 is Clean / Draft discarded (`721`); no source-file write occurred.
+
+Captures `727`–`755` add native English narration typing, selection/copy/paste, undo/redo, one saved commit and keyboard Tab/Enter Move up, restoring the intended order. Same-row drag, unsubmitted-input refusal, crossing the final Choice and its disabled grip preserve saved source; `native-beat-English-bounds-review.json` retains hashes and exact assertions. Held edge-scroll/live ghost and Explorer coexistence remain pending. Current app: graph review → Story → Scene 1, Saved, long list at rows 11–21 (`758`); no editor draft or write is pending. `native-held-drag-before.json` records the no-write baseline. Explorer launch returned Computer Use app approval timed out, and fresh window inventory confirmed no Explorer window; no retry or drop occurred. The next physical handoff covers held dragging at both list edges because Sky supports only complete drags, with no mouse-down/hold operation. Record human observations separately; check hashes after cancellation. No OS/display scaling action is requested.
+
+Broken Story image previews and both failed ui-refresh probes remain unclassified; no visual pass or failure waiver is inferred. No source correction, build, top-level start, SDK menu, probe, deadline change or CI dispatch added. Original profile restoration and affected Mac/remote qualification remain pending.
 
 **Earlier pause by explicit user request for PC use.** No further native input proceeds
 until the user resumes. Candidate 2 is on supported rename review → Story → Scene 1
