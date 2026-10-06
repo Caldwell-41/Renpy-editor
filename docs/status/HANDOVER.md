@@ -1,5 +1,28 @@
 # Current outcome handover
 
+## Live final Welcome handoff — 2026-10-06
+
+**State: in_progress; WIN-UI-13 Pass in selected native/physical scope.** User says
+“working” for the full long-name hover tooltip and connector readability/correct
+arrowhead boundaries. `physical-final-graph-result.json` separates human observations
+from native capture/hash proof: all 242 project-file hashes unchanged. Existing
+both-palette native graph/zoom/pan/Fit/source-navigation evidence is retained; human
+Light graph result does not claim a new Dark or higher-DPI physical check.
+
+**Next:** candidate 6 is Ready on Welcome, Light PaperTeal, no open project/modal or
+draft. Ask only for hover over bottom-right Settings, readable Welcome columns/text/
+buttons and any remaining visual issue from this session. Sky has no hover API.
+`candidate-6-final-welcome-light-before` / `physical-final-welcome-before.json` bind
+the handoff. Then close the app, verify original profile backups, preserve review
+profiles and restore originals; publish a frozen Windows handover for one bounded
+affected Mac follow-up/justified exact-input remote qualification before the separate
+integration chat. No scale action, repeat SDK/runtime/typing matrix or new build.
+All candidate identities/counters and 132-input mapping below unchanged. 13 rows
+Pass in selected scopes; WIN-UI-12 awaits this final feedback. Both-platform acceptance
+and 1G/1H closure remain open; PR #17 conflicts/integration untouched.
+
+## Earlier physical coexistence completion (passing evidence retained)
+
 ## Live physical coexistence completion — 2026-10-06
 
 **State: in_progress; WIN-UI-01/03 Pass in selected native/physical scope.** User

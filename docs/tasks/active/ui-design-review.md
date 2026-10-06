@@ -1,5 +1,26 @@
 # UI design review
 
+### Physical graph completion and final Welcome handoff — 2026-10-06
+
+**Live state: in_progress; WIN-UI-13 Pass in selected native/physical scope.** User
+reports “working” for the full English long-node tooltip and connector readability/
+correct arrowhead boundaries. All **242 saved-file hashes unchanged**.
+`physical-final-graph-result.json` records human observations separately from native
+capture/file verification; `candidate-6-physical-graph-result` retains current native
+graph state. Earlier native both-palette/zoom/pan/Fit/routing/detail/Source evidence is
+reused unchanged. No new physical Dark-graph/DPI claim. One stale accessibility point
+for Close Project was refused before input; native activation/fresh pixel observation
+successfully closes the saved project. Tooling refusal is not a product failure.
+
+**Next:** candidate 6 is Ready on Welcome, Light PaperTeal. Only Settings hover,
+Welcome readability and final session visual feedback remain hands-on (WIN-UI-12).
+`candidate-6-final-welcome-light-before` and `physical-final-welcome-before.json`
+retain exact handoff state. No repeated English typing/SDK/service/drag/scale check.
+After feedback, close app, preserve review profiles, verify/restore original profiles
+and publish the Windows completion handover. Single bounded affected Mac follow-up
+and exact changed-input remote qualification remain pending before integration.
+Counters/input mapping unchanged; both-platform acceptance/phase closure not claimed.
+
 ### Physical Explorer and Beat coexistence completion — 2026-10-06
 
 **Live state: in_progress; WIN-UI-01/03 Pass in selected native/physical scope.**
@@ -214,7 +235,7 @@ Narrator was not exercised. Higher DPI is Unavailable/user-excluded throughout.
 | WIN-UI-10 | Pass, selected native/approved-driver scope | `candidate-4-stale-beat-proof.json`: stale external source refuses without changing any saved file, input retained, exact external bytes restored, explicit retry writes exactly one collapsed Narration revealed in the long list. Existing delayed-receipt browser/DOM tests prove disabled duplicate/Cancel and saved-row focus. Every Beat type was not newly inserted natively; repetition minimized. |
 | WIN-UI-11 | Pass, selected native/packaged scope | WIN-RUN-01 correction `148`–`174`; native tabs/draft close/reopen `694`–`724`; graph/details X/Escape `596`–`689`; fixed draft counter/Undo receipt. Candidate 3 route-b/runtime-error and candidate 4 ui-refresh pass. Exact SDK failing-line navigation is packaged synthetic input; native graph Source navigation selects the correct file/mapped-range end, not an exact line-start claim. |
 | WIN-UI-12 | Unavailable; automated/native stages Pass | Genuine uncached verified official SDK `15`–`20`, CONFIG-01 `21`–`31`, staged creation `32`–`33`, fresh menus `51`–`56`, Dark Welcome `95`, candidate 4 Light Welcome/recent reopen. Earlier-project distinction remains, no silent repair. Hover/final human visual feedback remains; no repeated download/build/menu matrix. |
-| WIN-UI-13 | Unavailable; native graph subchecks Pass | Six-scene saved geometry/navigation, reciprocal/duplicate/self/same-layer/backward/terminal/missing/custom, both palettes zoom/pan/Fit `596`–`689`, terminal source receipt. Full long-name tooltip hover/final readability feedback remains; details already show full text. |
+| WIN-UI-13 | Pass, selected native/physical scope | Six-scene saved geometry/navigation, reciprocal/duplicate/self/same-layer/backward/terminal/missing/custom, both palettes zoom/pan/Fit `596`–`689`, terminal source receipt retained. Candidate-6 human full long-name tooltip/connector labels/arrowhead boundaries Pass, physical-final-graph-result.json; all 242 files unchanged. No new physical Dark-graph or DPI claim. |
 | WIN-UI-14 | Pass, selected current-scaling native/physical scope | Columns/selection/Retry/external-file recovery `214`–`334`, candidate-3 Character Grid/List/Variable columns, candidate-4 staging/add/remove/discard/empty reopen retained. Human candidate-5 Explorer highlight/three-file drop/PNG/JPEG Pass. WIN-IMPORT-PREVIEW-01 broken box failure retained; candidate-6 native decoded PNG/JPEG, unavailable WebP/Retry/discard Pass, all 230 files/originals unchanged. Story shared previews corrected. Higher DPI Unavailable/user-excluded; no Narrator/full native layout permutation claim. |
 
 **Next: one final Windows hands-on session.** Current app is candidate 4 on

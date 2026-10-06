@@ -7,6 +7,19 @@
 
 ## Live continuation
 
+**Physical graph hover/readability Pass — 2026-10-06.** User reports “working” for
+the long English node tooltip and connector labels/arrowhead boundaries. All 242
+saved-file hashes remain unchanged. WIN-UI-13 Pass in selected native/physical scope;
+prior both-palette geometry evidence retained, no new human Dark-graph or DPI claim.
+Candidate 6 is on Welcome, Light PaperTeal, Ready after closing the saved project.
+Only Settings hover/Welcome readability and final session visual feedback remain
+hands-on (WIN-UI-12). No build/start/SDK/CI/input changes; counters unchanged.
+After feedback, close the app, preserve review profiles, verify/restore original
+profiles and publish the Windows handover. Affected Mac/remote qualification remains
+the single bounded follow-up before separate integration; scale stays excluded.
+
+### Earlier physical coexistence completion (passing evidence retained)
+
 **Physical Explorer/Beat coexistence Pass — 2026-10-06.** Candidate-6 user says
 “done working” for off-Assets drop refusal, Narration reorder and Undo. Native Saved/
 no-import state and restored row order agree; all 230 pre-existing saved files match
