@@ -261,6 +261,11 @@ Additional section 3 observations require both service and view evidence:
   Return to Scene Commit choices (no implicit commit); `runtime Save All failure releases the Source lease
   and never prepares execution` rejects attempted execution. Packaged pending Source
   preparation and validation state are inspected in `runtime_ui_probe.js`.
+  `source::tests::invalid_draft_refuses_save_without_losing_draft_or_changing_disk`
+  asserts the wire persistence state remains `PendingValidation` after refusal and
+  exact draft/disk retention. The current visible caption is `Unsaved Source draft`
+  (`main.ts`/`source-ui.ts`, asserted by shell Save regression); UI.md now distinguishes
+  caption from wire state. This terminology clarification changes no behavior or gate.
 - Trust: new zero-process untrusted open/preview/typing and copied-root UUID refusal;
   real SDK service test explicitly modifies project `external.py` and SDK `config.py`,
   asserts `STALE_RUNTIME`/no process, restores exact input, rejects unsupported version
@@ -357,9 +362,10 @@ Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
 Exactly one `production-scaffold.yml` dispatch accepted at 2026-10-06 18:55:50 UTC:
 [**37515083319/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
 `workflow_dispatch`, exact candidate above, `upload_packages=true`. Continuation
-recorded 2026-10-06 19:05 UTC: `in_progress` on the same candidate/attempt; Preflight
-**112445822829** completed success. macOS ARM64 **112446613576** and Windows x64
-**112446613694** confirmed live at the independent Rust core suite. No target result
+recorded 2026-10-06 19:11 UTC: `in_progress` on the same candidate/attempt; Preflight
+**112445822829** completed success. macOS ARM64 **112446613576** confirmed live
+at desktop Rust tests; Windows x64 **112446613694** at runtime foundation/real SDK
+diagnostics gates. No target result
 claimed, no duplicate dispatch/retry or polling loop. Case/log/input/failure and
 requested package artifacts retain the existing seven-day retention; audit/download
 terminal evidence before expiry. Dispatch acceptance is confirmed, never repeat it.

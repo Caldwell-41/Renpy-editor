@@ -51,9 +51,10 @@ failures and limits remain in its archived ledger; no reset.
 **Outstanding operation:** [production 37515083319/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
 `production-scaffold.yml`, `workflow_dispatch`, branch above, exact tested SHA
 `3d484ef1b0164e15b21c869f7494410daa3fed9d`, `upload_packages=true`.
-Created 2026-10-06 18:55:50 UTC; continuation audit recorded 19:05 UTC confirms `in_progress`
+Created 2026-10-06 18:55:50 UTC; continuation audit recorded 19:11 UTC confirms `in_progress`
 on the same SHA/attempt. Preflight 112445822829 completed success; macOS ARM64
-112446613576 and Windows x64 112446613694 are live at the independent Rust core suite.
+112446613576 is live at desktop Rust tests; Windows x64 112446613694 is live at
+the runtime foundation/real SDK diagnostics gates.
 No target pass claimed; no dispatch/retry or polling loop. Retained artifacts seven
 days, audit/download before expiry. Ordinary PR quality
 [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)

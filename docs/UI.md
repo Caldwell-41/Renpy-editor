@@ -459,7 +459,9 @@ shrink the aspect-ratio preview, then collapse inspector/sidebar before reducing
 below its preferred minimum.
 
 The top toolbar always shows persistence truth such as `Saved`, `Saving`,
-`Pending validation`, `Conflict`, or `Recovery required`. The shell owns one
+`Unsaved Source draft`, `Conflict`, or `Recovery required`. The pending Source wire
+state remains `pendingValidation`; its visible caption is `Unsaved Source draft`.
+The shell owns one
 `Ctrl/Cmd+S` route: outside Source it flushes pending accepted work, while a focused
 Source editor settles and accepts its captured draft. A clean settled Source performs
 the ordinary Flush; a refused Source draft never falls through to a false Saved result.
@@ -688,8 +690,8 @@ and acceptance barrier the editor and conflicting navigation/actions are disable
 without replacing the text control, so selection and native draft undo survive a
 refusal. Failed retention preserves the newest local text for retry, copy, or an
 explicitly confirmed discard.
-Dirty drafts show Pending validation and a crash/restart warning. Close, project switch,
-and normal exit offer Save All / Discard All / Cancel. Save All preflights every draft
+Dirty drafts retain `pendingValidation` and show `Unsaved Source draft` with a
+crash/restart warning. Close, project switch, and normal exit offer Save All / Discard All / Cancel. Save All preflights every draft
 before its one recoverable multi-mutation transaction, so a refusal writes nothing.
 Text-focused undo/redo stays native to the draft; committed project history remains a
 separate revision-checked action.
