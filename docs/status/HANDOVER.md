@@ -2,7 +2,24 @@
 
 ## Live Windows correction and native handoff — 2026-10-06
 
-**Paused by explicit user request for PC use.** No further native input proceeds
+**Resumed on user request; awaiting a native tooling handoff.** Fresh origin fetch
+and fast-forward-only pull leave branch `0ed6f67` unchanged, working tree clean,
+historical worktree preserved; retained candidate 2 hash matches. Captures `574`–`583`
+show Saved Story/Scene 1 with the empty Choice creation form retained. Keyboard
+Size works; titlebar drag restores/moves the window but does not establish half-screen
+snap. Last capture is 583×512 visible pixels, x=-1/y=313; all 233 project files
+remain unchanged. Light laptop/higher scaling still pending. Settings has no
+targetable native window or matching inventory entry. User asked to open Windows
+Settings → System → Display and report ready, leaving scale unchanged. Do not send
+input during this physical opening handoff. Then inspect returned Settings windows
+before automation; if still inaccessible, explain the exact remaining capability gap.
+`native-resume-window-sizing.json` retains this state. No write/restoration/CI pending;
+original profile restoration and all remaining rows/Mac/remote requirements remain.
+Both ui-refresh failures remain failed: original dirty-count evidence is missing;
+correction times out before Story readiness. No new probe/deadline/source change,
+build, Loomlight start, SDK menu or CI dispatch.
+
+**Earlier pause by explicit user request for PC use.** No further native input proceeds
 until the user resumes. Candidate 2 is on supported rename review → Story → Scene 1
 → Choice → Create New Scene, empty Choice text, New Scene/Chapter 1, Saved (`573`).
 No write or external-byte restoration is pending; original profiles still await

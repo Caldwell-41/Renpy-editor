@@ -2,6 +2,22 @@
 
 ### Windows evidence and first Source correction — 2026-10-06
 
+**Resumed after PC-use pause; native Settings handoff pending.** Fresh fetch and
+fast-forward-only pull preserve unchanged branch `0ed6f67` and historical worktree;
+candidate 2 executable hash matches. `574`–`583` re-observe Saved Scene 1/Choice,
+empty Create New Scene form retained, native keyboard Size working. Titlebar drag
+restores/moves the window without proving half-screen snap; last visible capture
+583×512 at x=-1/y=313. All 233 project files remain unchanged. Light laptop and
+higher OS scaling remain pending. Windows Settings launch has no targetable window,
+and fresh inventory matches neither Settings display names nor app identifiers.
+Requested only physical opening of Settings → System → Display, scale unchanged;
+native input stops during that handoff. `native-resume-window-sizing.json` retains
+state. No new source change/build/Loomlight start/SDK menu/probe/CI dispatch.
+Static comparison confirms the original ui-refresh report cannot distinguish its
+warning wait from dirtyCount===1 wait; no retained dirty-count evidence exists.
+Correction failure occurs before Story readiness. Both remain failed/unclassified,
+with no changed deadline or blind rerun. All remaining canonical actions stay open.
+
 **User-requested pause for PC use:** native input stopped at capture `573`.
 Candidate 2 remains Saved on supported rename review → Story → Scene 1 → Choice
 → Create New Scene, empty Choice text / New Scene / Chapter 1. No write, external

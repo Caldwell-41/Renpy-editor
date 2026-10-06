@@ -7,7 +7,17 @@
 
 ## Live continuation
 
-**Paused at the user's request for PC use — 2026-10-06.** Native input stopped.
+**Resumed after the user's PC-use pause — 2026-10-06.** Fresh fetch/fast-forward-only
+finds the branch unchanged at `0ed6f67`; worktree/refs preserved. Candidate 2 hash
+matches. Native captures `574`–`583` prove the retained empty Choice form, native
+keyboard Size and responsive Saved Story; all 233 project files remain unchanged.
+Light laptop/higher scaling remain pending. Native Windows Settings has no targetable
+window or inventory entry; awaiting only the requested physical opening of Settings
+→ System → Display, leaving scale unchanged. No input proceeds during that handoff.
+`native-resume-window-sizing.json` retains exact state. Both ui-refresh failures
+remain failed/unclassified; no probe, deadline change, build/start/CI dispatch.
+
+**Earlier PC-use pause:**
 Candidate 2 remains on supported rename review → Story → Scene 1 → Choice →
 Create New Scene, empty Choice text, default New Scene/Chapter 1, Saved (`573`).
 No write, external-byte restoration or CI operation is pending. Original profile
