@@ -19,8 +19,9 @@ CURRENT/HANDOVER own the verified result.
 integrated through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
 [Final closeout](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
 retains exact qualification/merge identities, both-platform feedback and limitations.
-[Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md) is ready for explicit
-selection and remains `not_started`. Phase 1 closure and Phase 2 execution are pending.
+[Phase 1H](tasks/active/phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness)
+is `review_ready` after both-target qualification and the required evidence audit.
+Independent user review, Phase 1 closure and Phase 2 execution remain separate decisions.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
@@ -48,7 +49,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Local hobby-project scope, observed Branches and replacement acceptance | [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) |
 | Historical G1-O1-N native observation experiment and early-stop evidence | [Experiment record](tasks/archive/2026-10-06-phase-1g-g1-o1-n-experiment.md) |
 | Deferred optional local Git safety and UI (GIT.1/GIT.2; not Phase 1) | [tasks/active/optional-local-git.md](tasks/active/optional-local-git.md) |
-| Planned Phase 1H integrated acceptance, twelve IDs with revised Git scope | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
+| Review-ready Phase 1H integrated acceptance and final target evidence | [tasks/active/phase-1h-vertical-slice-acceptance.md](tasks/active/phase-1h-vertical-slice-acceptance.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |

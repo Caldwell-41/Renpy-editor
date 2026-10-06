@@ -2,115 +2,101 @@
 
 ## Phase 1H integrated acceptance — 2026-10-07
 
-**State: awaiting_ci.** The user-approved single fixed-probe dispatch succeeded as
-[37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148).
-Existing production-scaffold.yml, workflow_dispatch, `upload_packages=true`, created
-**2026-10-06 20:47:59 UTC**, exact tested SHA
-**`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
-**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. One initial API snapshot confirms
-`in_progress`, attempt 1, Preflight **112493828798** in progress; target jobs not yet
-assigned. No new target result or further dispatch authority.
-[Exact approved operation/manual wait](../tasks/active/phase-1h-vertical-slice-acceptance.md#confirmed-fixed-probe-matrix-and-manual-wait).
-No local SDK/editor/game process or terminal handle remains. Saved Goal still reports
-the earlier `blocked` state; no client lifecycle Resume/Pause is claimed. Stop model
-polling and resume the SAME goal/chat when the user requests terminal audit.
+**State: review_ready.** Final exact run and complete retained evidence are audited;
+H01–H12/applicable sections 3–4 have no open required gate. The selected outcome is
+complete to independent user review. No pending CI/local SDK/editor/game/profile or
+terminal operation. Do not resume the obsolete CI wait or dispatch another matrix.
+[Final evidence matrix, self-review, limits and package hashes](../tasks/active/phase-1h-vertical-slice-acceptance.md#final-target-audit-and-review-readiness).
 
-**Approved outcome/ownership:** complete H01–H12 and applicable sections 3–4 to
-`review_ready` for independent review. No merge, Phase 1 closure, Phase 2, optional Git
-or signing. Reuse branch `acceptance/phase-1h-vertical-slice`, draft attached
-[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18). Development machine macOS
-ARM64; final native test hosts Windows x64/macOS ARM64. Continue from the published candidate **`ba01a84cd7f860be6e8717e98216bdf747875073`**,
-subject `test: bound Source probe settlement and record corrective matrix audit`,
-following first probe correction `efd8a6bdfd3655b7c3b7a65d989b240eff03d8a5`.
-Only status/ledger docs follow the dispatched candidate; they do not become its tested
-SHA. Fresh PR/ref check confirmed clean matching local/remote head and open/draft PR.
-Main remains `42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`. Planning worktree
-`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, two unpublished commits, other refs/PRs
-and normal profiles remain untouched. Never reset to an old candidate.
+**Ownership/review boundary:** branch `acceptance/phase-1h-vertical-slice`, attached
+[PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), presented for independent
+review. Continue from its latest published review-ready evidence checkpoint following
+exact tested candidate **`ba01a84cd7f860be6e8717e98216bdf747875073`**, tree
+**`4221a1fbb2edcda1048261b795ae732d36ac7aef`**. Correction implementation begins
+`efd8a6b`; `ba01a84` includes the final shared retention deadline and prior terminal
+audit. Subsequent `1910a29` and this completion publication change only docs and do not
+become new tested package SHAs. Main **`42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`**,
+planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`** and its two unpublished
+commits are untouched. No merge, Phase 1 acceptance/closure, Phase 2, optional Git,
+signing or branch deletion. Codex audit machine macOS ARM64; native test hosts Windows
+x64/macOS ARM64. Independent review/acceptance is the next decision, not remaining
+work inside this completed acceptance goal.
 
-**Prior audited terminal operation:** production-scaffold.yml, workflow_dispatch,
-`upload_packages=true`, attempt 1, created 2026-10-06 19:57:34 UTC. Tested SHA
-**`9df1d25a61f3e7953ff06acb89155e9829e52fb5`**, tree
-**`c5df6b86538a2a2b90a48c29b8af05443e57ac68`**. Preflight 112472186077 Pass;
-Mac 112472814807 Pass, ended 20:20:16 UTC; Windows 112472815375 Fail, ended
-20:26:30 UTC. Prior correction `21c029a` audio/frame issues passed on both targets.
-Original failed 37515083319/1 at `3d484ef`, ambiguous HTTP 500 request and authorised
-single dispatch retry remain preserved in the ledger; neither failure is relabelled.
+**Terminal qualification:** [37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148),
+production-scaffold.yml, workflow_dispatch, `upload_packages=true`, exact candidate/tree
+above, created 2026-10-06 **20:47:59 UTC**. Preflight **112493828798** Pass at 20:51:02;
+Mac **112495119976** Pass at **21:05:47**, Windows **112495119964** Pass at
+**21:09:55**. Overall success, attempt 1. Completed quality **37529126800/1** at
+`ba01a84` and **37529411501/1** at docs checkpoint `1910a29` have actual required
+validator/Q1 rejection/selector Pass; optional profile/diagnostic jobs unselected/skipped.
+No new dispatch or expensive local execution in the final audit.
 
-**Audited acceptance at `9df1d25`:** frontend 94/94 and source browsers/preflight Pass;
-broad core 192 Mac/187 Windows with documented ignores, all 46 named regressions per
-host actual executed Pass, all separate real SDK gates Pass. New SDK selected cases
-rooftop/riverside/metadata-free Pass, 29/29 assertions each, actual PCM and exact
-music/SFX paths, exact int64 outcomes/dialogue/showing/bounds/stop/hide, normal entry/
-menus/save/load/history/rollback/reconvergence/Return. Wrong-outcome assertion really
-fails exit 1 and is correctly classified as rejection. Three attributed captures per
-host visually reviewed. Each target has three enforced 500 Scene/2,000 edge real-service
-flow samples Pass. Both browser functional/evidence gates Pass, 30 original + 30 visible,
-strict advancing timestamps and navigation/resize/cleanup; Mac visible rendering
-p95 179.3ms remains diagnostic Fail under existing TESTING policy. No audible-speaker,
-native hardware-input/assistive-tech or signing claim.
+**Requirement proof:** 94/94 frontend/preflight and source-browser controls Pass.
+Routine broad core 192 Mac/187 Windows, documented 41/38 ignored and three specialist
+filters, no failures. All 46 concrete ordinary regressions per host match actual
+executed Pass lines; ten additional runtime/diagnostic/long-history/asset/result controls
+also verified. Separate official archive creation/download/runtime/diagnostic gates
+execute 1/1 each; cache-miss download skip is not a skipped target test. New SDK gate
+1/1 per host, 79.401s Mac/78.051s Windows including cleanup, 12 bounded adapter spawns
+each. Both normal-entry routes and metadata-free copy pass 29/29 assertions: actual
+PCM/channel paths, exact large default/int64 extrema, Boolean/string state, dialogue,
+showing/placement, menus/Prefs/save/load/history/rollback/reconvergence/Return and
+stop/hide. Wrong `trust == 1` assertion genuinely rejects exit 1; no rejecting capture.
+Three correctly attributed route captures per host visually reviewed. Expected manifest
+SHA `d879020258615d45af4456420d9cac1e6b05d56f40417a8d9cfce2adb910c638` matches both
+actual authored manifests; real golden/source/history/reopen/compiled-cache assertions hold.
 
-Both packages built and retain exact receipts. Mac all six native UI cases/cleanup,
-WebView denial/single-instance, privacy, 97 npm/519 Cargo inventory Pass. Windows
-compile/lint/route-a/route-b/runtime-error Pass with cleanup; ui-refresh fails at
-`editor-retention`, 30.969s/exit 1/no process timeout/cleanup true: seven prior checks
-pass, editor contains the input/warning, 506 files, source busy false, backend dirtyCount
-0. Geometry/Settings/preference assertions remain unexecuted. Windows boundary and
-inventory skipped; privacy Pass and retained executable available. These are open
-requirements, not additional demonstrated defects or passes.
+All **six packaged native cases per host Pass**, exit 0/no timeout/cleanup true. Windows
+UI-refresh now passes all 11 checks in **7.781s**, Mac in **4.929s**; acknowledged Source
+retention, backend dirtyCount, geometry, Settings/draft and preferences are required.
+The local collision and genuine refused-write controls remain rejecting; no input replay,
+assertion waiver or larger shared 20s deadline. Real boundary reports prove all nine
+booleans, target-specific synthetic Ctrl/Cmd command trace, denial and actual primary/
+secondary/window activation. Terminal privacy scans Pass and both inventories contain
+97 npm/519 Cargo entries. Runtime browser focus/1100/640/no overflow and Branches
+functional/evidence navigation/held-refresh/resize/cleanup Pass, 30 original +30 visible
+strictly advancing callbacks each. Three enforced real-service 500 Scene/2,000 edge
+samples per target Pass. Source/game content remains authoritative; test instrumentation
+is isolated from normal projects/product paths.
 
-**Correction/discriminant:** direct probe IPC observations bypass the renderer's
-RequestLane; the warning can precede acknowledged retention. Local real-renderer/
-CodeMirror fixture reproduces old ordering's read/write collision, one refused write
-and 162–163 direct reads, then the same seven-check failure. Corrected ordering waits
-for rendered draft inventory acknowledgement, then performs the original backend
-`dirtyCount === 1` assertion: exact input retained, all 11 checks Pass, one inventory
-read/no refusal. Separate genuine refused-write control still fails at
-`editor-settlement` with zero direct inventory reads. Original hosted response code
-was not recorded, so actual Windows cause remains a supported hypothesis needing
-native resolution. If it fails again, inspect bounded rendererDraftTotal/failure stage;
-classify remaining product/service/input behaviour before another correction.
-No assertion/deadline weakening, input replay, production queue/runtime override.
+**Rendered/human limits:** Runtime/Diagnostics captures on both hosts reviewed and
+readable; renewed native Scene/Source/Branches/supporting checks Pass. Final diff has
+only test modules/helper access, fixtures, probes/browser ordering/evidence workflows
+and docs; governing product renderer/native input/CSS/dependencies/IPC/security/runtime
+behavior is unchanged from accepted 1G. Each reused navigation/shortcuts/play/diagnostic/
+resize/scaling/picker/import/cancellation human case has an impact map in the ledger,
+with original Windows “all working, happy” and Mac “all working” identities/limits.
+No repeated human session or new physical-input/screen-reader claim. Mac Chrome
+rendering-opportunity p95 **168.3ms** remains diagnostic Fail under existing TESTING;
+mandatory functional/enforced service gates Pass. Unsigned/not-notarized packages,
+original display/native-input/assistive-tech limits and no audible speaker evidence
+remain. No general cross-SHA automated acceptance or unimplemented reuse policy.
 
-Final self-review shares one 20-second retention deadline across acknowledgement and
-backend observation. Correction includes only packaged test probe/wait/diagnostic, focused browser control
-in existing source-browser command and TESTING documentation. Focused committed-form
-controls and full existing UI browser suite Pass; Node syntax, nine package-retention
-and Q1 rejecting controls, validator 354 files and whitespace Pass. Two prelaunch invocation failures (wrong relative path,
-sandbox listen EPERM) retained; neither launched a browser or SDK. No local native
-build/editor launch. Changed embedded probe/package input requires renewed supported-
-target qualification; old required passes are exact old-SHA evidence, not implemented
-cross-SHA acceptance. Unchanged 1G human evidence remains narrowly reusable under TESTING.
+**Retained evidence:** complete artifacts are downloaded ignored under
+`.toolchains/reports/phase-1h/production-37529174148/{macos,windows}/`, 42 files per host.
+Mac artifact **11444371823** expires **2026-10-13 21:05:38 UTC**, Windows
+**11445325215** expires **21:09:35**. Both 145/145 source hashes, seven browser source
+hashes, executable/bundle/input receipts match exact tested inputs. Mac executable
+`a671f34c9f8918a929da0695a23c1b676e3f059a33898c198e2461803bbaf151`; Windows
+`821dd0016f013b3a28379770c9bdb0d31d026245a930c7eb95ec6812b992ea8d`.
+Exact tar/receipt values and available manual installer artifact IDs are in the ledger;
+installers were not launched during audit. Prior artifacts and all original SDK/audio/
+frame/UI-retention failures remain in production-37515083319/production-37522794804 and
+local logs. No logs, private paths, downloaded SDKs/build output committed.
 
-**Budget:** initial matrix 1/1 + corrective matrix 1/1 consumed; earlier explicit dispatch
-retry 1/1 used; new fixed-probe dispatch 1/1 used. Four production requests, three
-confirmed matrices, including one historical ambiguous HTTP 500. No further retry/
-matrix authority. Pending executions are not counted until actual evidence.
-Integrated fixture cumulative 14 local + 4 CI-host invocations = 18; 96 local + 48 CI
-measured bounded adapter spawns = 144 (earlier uninstrumented/other runtime children
-excluded). Three target package builds, 18 native cases (17 Pass/one Fail), all cleanup
-true; two Mac primary/secondary boundary sequences, Windows boundary unavailable.
-All previous problem attempts remain; this new issue has one native failure and one
-locally proved correction. Approval does not reset those budgets.
+**Budget/result history:** four production requests, three confirmed matrices, one
+ambiguous HTTP 500 retained. All initial/corrective/dispatch-retry/fixed-probe allowances
+used; no further dispatch authority. Integrated fixture cumulative **14 local +6 CI
+invocations =20**, **96 local +72 CI measured spawns =168**; earlier uninstrumented/other
+runtime children excluded. Five target package builds (three Mac/two Windows), 30 native
+cases (29 Pass/one historical Fail), cleanup true; three Mac/one Windows primary-secondary
+boundary sequences. Zero local desktop builds/editor launches. Fixed native retention
+Pass resolves the open acceptance gate; the exact original unrecorded host refusal
+cause remains an inference supported by the reproduced mechanism. Nothing rewrites
+failed results or resets hypotheses/budgets.
 
-**Retained evidence:** complete artifacts ignored under
-`.toolchains/reports/phase-1h/production-37522794804/{macos,windows}/`; Mac artifact
-11441274005 expires 2026-10-13 20:19:41 UTC, Windows 11442422247 expires 20:26:25 UTC.
-Both 144/144 source hashes and seven browser source hashes match exact tested Git
-blobs; executable/bundle/input receipt SHA-256 verified, exact values in ledger.
-Local `ui-retention-*` logs retain controls/attempts. Original matrix artifacts remain
-under production-37515083319. No private paths, logs, SDKs or build output committed.
-
-**Same-thread continuation:** after this exact run is terminal, send **Audit run
-37529174148/1 and continue.** If using the saved Goal, use the client's real Resume
-control for that SAME Goal; agent lifecycle tools cannot activate it. No replacement
-Goal/chat, polling/watcher, second writer, reset or merge. Inspect the recorded attempt
-and changed refs/worktree ownership once. If still pending, checkpoint/wait again
-without redispatch. If terminal, audit all H01–H12/applicable sections 3–4: exact
-required named/core/SDK/browser/flow evidence, actual Windows Source retention and all
-six packaged cases/cleanup, denial/single-instance, privacy/dependency inventory,
-correctly attributed captures and source/package identity. Preserve failed, skipped,
-missing/expired results and old Mac diagnostic/human-input/signing limits. If it fails,
-classify actual evidence and cumulative hypothesis budget before further fixes; no
-retry implied by Resume. Stop at `review_ready` only after every required gate is
-proved for the final candidate; no merge or Phase 1 closure.
+**Next action:** independent review of PR #18 and this exact evidence, then a separately
+authorised acceptance/integration decision. Preserve the active task until that decision;
+archive/consolidate only at authorised closure. No pending process, recovery state or
+manual test is assigned to the user. No additional matrix to validate documentation,
+no polling/watcher/second writer/new goal for this completed outcome, no merge or Phase 2.
