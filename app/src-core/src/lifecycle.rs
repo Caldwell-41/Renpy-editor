@@ -4163,9 +4163,8 @@ mod tests {
             Err(LifecycleError::InvalidMetadata)
         ));
 
-        // Run the deliberately interrupted streaming-import probe only after every
-        // normal lifecycle assertion. A persisted partial is expected to require
-        // recovery and must not poison the successful authoring fixture prematurely.
+        // An ordinary edit after selection must refuse before durable staging,
+        // preserve the project, and allow an explicit reselection on this session.
         let changed_selection = media.join("changed-after-selection.png");
         let mut race_bytes = png.to_vec();
         race_bytes.extend_from_slice(b"unique-race-probe");
@@ -4174,7 +4173,15 @@ mod tests {
         let mut changed = race_bytes;
         let changed_last = changed.len() - 1;
         changed[changed_last] ^= 1;
-        fs::write(&changed_selection, changed).unwrap();
+        fs::write(&changed_selection, &changed).unwrap();
+        let metadata_before = fs::read(final_root.join(".renpy-editor/authoring.json")).unwrap();
+        let declarations_before = fs::read(final_root.join("game/definitions/assets.rpy")).ok();
+        let recovery_count = || {
+            fs::read_dir(final_root.join(".renpy-editor/recovery"))
+                .unwrap()
+                .count()
+        };
+        let recovery_before = recovery_count();
         assert!(matches!(
             service.authoring_import_asset(ImportAssetRequest {
                 authority_id: selected.authority_id,
@@ -4185,10 +4192,51 @@ mod tests {
                 expression: None,
             }),
             Err(LifecycleError::Authoring(
-                crate::authoring::AuthoringError::RecoveryRequired
+                crate::authoring::AuthoringError::UnknownImport
             ))
         ));
         assert!(!final_root.join("game/images/bg race_probe.png").exists());
+        assert_eq!(
+            fs::read(final_root.join(".renpy-editor/authoring.json")).unwrap(),
+            metadata_before
+        );
+        assert_eq!(
+            fs::read(final_root.join("game/definitions/assets.rpy")).ok(),
+            declarations_before
+        );
+        assert_eq!(recovery_count(), recovery_before);
+        assert_eq!(
+            service.authoring_status().unwrap(),
+            PersistenceStatus::Saved
+        );
+        assert_eq!(service.authoring_flush().unwrap(), "saved");
+        let reselected = service.authoring_select_import(&changed_selection).unwrap();
+        let imported = service
+            .authoring_import_asset(ImportAssetRequest {
+                authority_id: reselected.authority_id,
+                kind: crate::authoring::AssetKind::Background,
+                technical_name: "race_probe".into(),
+                display_name: "Race probe".into(),
+                character_id: None,
+                expression: None,
+            })
+            .unwrap();
+        assert_eq!(
+            imported
+                .assets
+                .iter()
+                .filter(|asset| asset.relative_path == "game/images/bg race_probe.png")
+                .count(),
+            1
+        );
+        assert_eq!(
+            fs::read(final_root.join("game/images/bg race_probe.png")).unwrap(),
+            changed
+        );
+        assert_eq!(
+            service.authoring_status().unwrap(),
+            PersistenceStatus::Saved
+        );
         println!("phase-1d-import-authority-gate: passed");
         println!("phase-1c-target-gate: passed");
         println!("phase-1d-target-gate: passed");

@@ -1,5 +1,74 @@
 # UI design review
 
+### QUAL-IMPORT-01 qualification audit and test alignment — 2026-10-06
+
+**Live state: combined qualification Fail; necessary test-only correction verified;
+one corrected qualification authorized.** Production
+[37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476),
+attempt **1**, tested **`88016acb40caa036a946ef31795ca61235e5ce6d`**, is terminal
+failure. Exact run/attempt/feature SHA and package-evidence checkout/tree match.
+Quality **37459343661/1** and Preflight Pass. Windows core **184 Pass / 37 intentional
+ignores / 3 filtered**, Mac **189 Pass / 40 intentional ignores / 3 filtered**;
+both observed-model gates **1 Pass, 3 fixed samples**. Both Source browser and deferred
+Runtime/Branches functional/evidence outcomes Pass. Mac timing diagnostics Fail
+**102.3 / 122.4 / 189.5ms** for pan/dispatch-to-rAF/rendering-opportunity p95 respectively;
+preserved separately under current diagnostic policy, not recast as timing Pass.
+
+**Same first failure on both targets:** official lifecycle gate at old
+`lifecycle.rs:4178` expects `RecoveryRequired` after a same-size selected-file edit
+before confirmation. Windows **77.04s**, Mac **73.20s**, each **0 Pass / 1 Fail**.
+Classification: stale integrated-test assertion conflicts with the accepted ordinary
+pre-staging import fix returning `UnknownImport`. Native and focused service evidence
+already require no prepared-recovery blockage. This fixture does not interrupt streaming.
+
+**Correction attempt 1:** only `#[cfg(test)]` SDK gate in `lifecycle.rs` changes.
+Requires `UnknownImport`, absent imported target, unchanged authoring/declaration
+bytes or absence, unchanged recovery count, Saved/flush, explicit reselection once
+and exact accepted bytes. No application implementation, UI/probe/workflow/toolchain,
+privilege, timeout or marker changes. Local first execution **Fail 45.95s** from a
+new assertion unwrapping optional absent `assets.rpy`; original log retained. Fixture
+assertion corrected to compare absence/bytes. Second execution **Pass 45.74s,
+1 passed / 0 failed / 0 ignored / 231 filtered**, all required SDK lifecycle/import/
+Scene/media/Source markers present, no skip marker. `lifecycle-alignment-sdk-c2.log`.
+Formatting, selector audit, repository validation **340 files** and whitespace Pass.
+One test-alignment correction, two focused local executions; no app rebuild/retest.
+
+**Required downstream evidence remains Unavailable:** SDK handoff/runtime-service/
+diagnostics, desktop, production package, all six packaged cases, WebView boundary,
+single-instance, privacy/dependency/cleanup and runtime-input manifests did not run.
+Missing-case check fails; privacy scans fail ENOENT because no app built. Both manifests
+say `not-built`, six reports missing, no executable hash or retained package. No
+combined acceptance, no invented manifest/package equivalence or skipped-gate Pass.
+Run contributes **0 production app builds / 0 packaged starts**.
+
+Failure evidence archives downloaded, hashes verified against GitHub, retained locally
+beyond **2026-10-13** expiry:
+
+| Artifact | Size / SHA256 |
+| --- | --- |
+| Windows **11412506402** | **209,203 bytes**, `2fd28f2f9883d0b2a0b2d878ea82690bf6ddffc5acc8df07f719781e4c629a2f` |
+| Mac **11412335906** | **246,337 bytes**, `cba420a904ed99242ec3ad425acb63917ffad5b78daf7ed6a0ba8e1c08d102cb` |
+
+Ignored bounded evidence holds raw logs/jobs/receipts, both package manifests,
+`terminal-audit.json`, both local execution logs and `lifecycle-alignment-inputs.json`.
+Impact: **131/132 input hashes still equal frozen `ee5f55e`**; only the SDK test input
+differs, production prefix byte-identical. Against `5b467a4`, correction qualification
+would be **11 changed / 121 unchanged**. All six native/human results remain reusable:
+runtime/service/renderer/probe inputs unchanged. Exact earlier binary/manifests remain
+their tested identities. Original profiles restored, no app/game or external restore pending.
+
+**Budget/next:** initial **1/1**, production correction dispatches **3** consumed;
+no new dispatch/retry/rerun in this audit. Local Mac **19 builds / 77 starts / 7 SDK
+menus**, Windows **6 production + 1 unqualified / 4 failed setup / 21 starts / 0 SDK
+menus** unchanged. Earlier failures preserved. User says **“Go ahead”** after the
+concrete test-only correction/affected SDK Pass: **one further coherent changed-input
+qualification authorized**, default quality plus production `upload_packages=true`.
+Publish/verify corrected carrier, dispatch once, confirm run/attempt/SHA and manually
+wait; no additional retry/matrix on audit/resume alone. No new human session, PR conflict resolution/rewrite/
+merge, 1G/1H closure or next phase.
+
+### Earlier qualification wait (terminal failure supersedes)
+
 ### Bounded Mac acceptance and combined qualification — 2026-10-06
 
 **Live state: Mac Pass; awaiting_ci on one changed-input remote qualification.** Human

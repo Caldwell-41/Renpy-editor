@@ -7,6 +7,35 @@
 
 ## Live continuation
 
+**Combined qualification Fail / test-only correction ready — 2026-10-06.**
+[Production 37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476),
+attempt **1**, exact SHA `88016acb40caa036a946ef31795ca61235e5ce6d`, fails on both
+targets before packaging. Quality/Preflight, ordinary core, fixed observed budgets
+and browser functional/evidence gates Pass; all six packaged cases and required
+downstream SDK/boundary/privacy/cleanup/package evidence remain Unavailable.
+
+**QUAL-IMPORT-01:** old lifecycle assertion expects a recovery blockage for an
+ordinary changed selection, contradicting the accepted pre-staging refusal. Necessary
+test-only correction now checks refusal, unchanged bytes/recovery count, Saved/flush
+and one successful reselection. Corrected real-SDK Mac gate **1 Pass / 0 Fail /
+0 ignored**, **45.74s**, all required markers; first optional-fixture-file assertion
+failure retained. No production implementation change; **131/132 frozen inputs
+unchanged**, only `#[cfg(test)]` lifecycle input differs. Six native/human results
+and original profile restoration remain Pass; no physical retest needed.
+
+Both failure artifacts/logs/hash-verified archives retained, no production package
+was built. Local build/start counts unchanged; initial **1/1** and **3 correction
+dispatches** consumed. User **“Go ahead”** authorizes **one further corrected
+Windows/macOS qualification**. No workflow pending or new dispatch yet. **Next:**
+publish corrected carrier, dispatch existing quality/production once and record exact
+run/attempt/SHA before manual same-chat waiting, then terminal evidence audit;
+combined acceptance/integration still incomplete. PR #17 conflicts/merge and 1G/1H
+closure untouched. Exact failure and correction:
+[ledger](../tasks/active/ui-design-review.md#qual-import-01-qualification-audit-and-test-alignment--2026-10-06),
+[handover](HANDOVER.md#combined-qualification-failure-audit--2026-10-06).
+
+### Earlier qualification wait (terminal failure supersedes)
+
 **Mac acceptance Pass / combined qualification awaiting_ci — 2026-10-06.** User's
 held-grip feedback **“all working”**, native Saved/Undo and Redo disabled, and all
 **293 cancellation-only hashes unchanged** complete the sixth focused check. All six

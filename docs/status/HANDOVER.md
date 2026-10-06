@@ -1,5 +1,74 @@
 # Current outcome handover
 
+## Combined qualification failure audit — 2026-10-06
+
+**State: earlier qualification Fail; verified test-only correction ready; one corrected qualification authorized.**
+Recorded [production run 37459347476](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37459347476),
+attempt **1**, exact tested carrier **`88016acb40caa036a946ef31795ca61235e5ce6d`**,
+feature branch, is terminal **failure** (updated **2026-10-06 12:03:29 UTC**).
+Quality **37459343661/1** and production Preflight Pass. No retry/dispatch/integration.
+
+**QUAL-IMPORT-01 — integrated-test alignment defect, correction attempt 1.** Both
+targets fail `lifecycle::tests::official_sdk_phase_1c_target_gate` at old
+`lifecycle.rs:4178`: an ordinary same-size edit before import confirmation still
+expects `RecoveryRequired`. Frozen Windows correction deliberately returns
+`UnknownImport` before durable staging, preserving Saved and allowing reselection;
+focused service/native evidence already proves that contract. The stale assertion is
+not a streaming-interruption exercise. Necessary correction is confined to that
+`#[cfg(test)]` gate: expect the pre-staging refusal and positively require unchanged
+authoring/declaration bytes or absence, unchanged recovery count, Saved/flush and
+one successful explicit reselection with exact imported bytes. No production code,
+renderer, probe, workflow, SDK, privilege, timeout or required marker changes.
+First local affected SDK retest Fail **45.95s**: new assertion incorrectly unwrapped
+optional missing `assets.rpy`; failure retained, fixture assumption corrected to
+compare absence/bytes. Corrected focused official-SDK gate **Pass 45.74s: 1 passed,
+0 failed / 0 ignored / 231 filtered**, all required 1C/1D/1E/1F positive markers,
+no skip marker; `lifecycle-alignment-sdk-c2.log`. Formatting, selector audit, validator
+and whitespace Pass. No required assertion/timeout weakened. One alignment correction,
+two local gate executions (fixture failure then Pass); no additional production build.
+
+| Target | Independently audited evidence | Required evidence remaining |
+| --- | --- | --- |
+| Windows x64 | Core **184 Pass / 37 intentional ignores / 3 filtered**, observed-model **1 Pass / 3 fixed samples**, Source browser and Runtime/Branches functional/evidence outcomes Pass; lifecycle **Fail 77.04s** | SDK handoff/runtime-service/diagnostics, desktop boundary, production package, all six packaged cases, WebView/single-instance/privacy/inventory/cleanup and runtime-input manifest **Skipped/Unavailable** |
+| macOS ARM64 | Core **189 Pass / 40 intentional ignores / 3 filtered**, observed-model **1 Pass / 3 fixed samples**, Source browser and Runtime/Branches functional/evidence outcomes Pass; lifecycle **Fail 73.20s** | Same required downstream gates **Skipped/Unavailable**, no package or runtime manifest |
+
+Mac Chrome timing diagnostics remain **Fail**: pan p95 **102.3ms**, visible
+dispatch-to-rAF p95 **122.4ms**, rendering-opportunity p95 **189.5ms**. Functional
+browser outcomes Pass; timing diagnostics are retained separately under existing policy.
+Missing-case checker failures and privacy-scan ENOENT are downstream consequences;
+no absent package or skipped SDK gate is a Pass. Both package manifests identify
+**not-built**, exact run/attempt/SHA/tree, no executable digest/retained package,
+six missing reports and absent runtime-input manifest. Current run adds **0 production
+app builds / 0 packaged app starts**; test-binary builds are not production candidates.
+
+Both failure archives verified against GitHub SHA256 and retained locally beyond
+2026-10-13 expiry under ignored `bounded-mac-windows-c6/remote-failure-artifacts/`:
+
+| Evidence artifact | Archive SHA256 |
+| --- | --- |
+| Windows **11412506402**, 209,203 bytes | `2fd28f2f9883d0b2a0b2d878ea82690bf6ddffc5acc8df07f719781e4c629a2f` |
+| Mac **11412335906**, 246,337 bytes | `cba420a904ed99242ec3ad425acb63917ffad5b78daf7ed6a0ba8e1c08d102cb` |
+
+Full logs/jobs/API receipts, `terminal-audit.json`, package manifests and local failed
+retest retained. All six native/human acceptance cases and local package identities
+remain valid for unchanged runtime implementation. Test-only input assessment verifies
+**131/132 frozen input hashes unchanged**; the one changed input is `lifecycle.rs`,
+whose production prefix is byte-identical. New qualification would have **11 changed /
+121 unchanged** against `5b467a4`; this does not replace the tested frozen manifests.
+Original profiles restored, app/game absent, temporary external media restored.
+
+**Continuation authorized:** after the concrete test fix and focused Pass, user says
+**“Go ahead”**, explicitly authorizing **one corrected Windows/macOS qualification**.
+Publish the corrected carrier, then existing default quality plus production with
+`upload_packages=true`, confirm exact run/attempt/SHA, record and manually wait.
+The prior selected qualification was consumed; this is a newly authorized changed-
+input set, not a retry on audit/resume alone. No additional retry/matrix. Existing cumulative
+initial **1/1**, correction dispatches **3**, failed/superseded runs and local counters
+remain intact. No renewed human session is needed for this test-only correction.
+PR #17 conflicts, rewrite/merge, 1G/1H closure and any new phase remain outside scope.
+
+## Earlier qualification wait (terminal failure supersedes)
+
 ## Mac acceptance and combined qualification — 2026-10-06
 
 **State: Mac Pass; awaiting_ci for the single authorized changed-input qualification.**
