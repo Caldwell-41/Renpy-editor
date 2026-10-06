@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-07; Phase 1G accepted/integrated; execution selected by user.
 **Planning:** revised by explicit September 25 user direction; documentation publication authorised.
-**Execution state:** `in_progress`.
+**Execution state:** `awaiting_ci` (Goal runtime pause not claimed).
 **Entry:** Phase 1G closure/integration complete through PR #17 at `295a189`; accepted Phase 1F retained, fresh refs and
 explicit user selection of 1H. Planning publication/merge does not authorise execution.
 **Parent:** [Phase 1 plan](phase-1-vertical-slice.md).
@@ -167,7 +167,7 @@ Windows x64 evidence will use the existing supported-target production workflow.
 `42ca6f9934fd98ddf2dbd80aa80c75a61e0cd0ae`; no matching branch/PR or pending run existed.
 Created `acceptance/phase-1h-vertical-slice`. The separate planning worktree remains
 `2c5a164`, ahead two unpublished commits, and was not modified/published. Other open
-PRs and refs are untouched. No acceptance package matrix has yet been dispatched.
+PRs and refs are untouched. Draft PR #18 and the one confirmed final matrix are below.
 
 ### Representative game and selected gates
 
@@ -195,7 +195,7 @@ missing/zero/ignored/failed required Cargo results and incomplete packaged clean
 | H01 | New authored game uses pinned verified SDK/no Git; prior `official_sdk_phase_1c_target_gate` proves existing optional init; new SDK driver checks normal menus, save/load/history/rollback and creation-failure ordinary regression remains selected | Local staged no-Git creation Pass; normal menus/save/load/history/rollback Pass; final both-target evidence open |
 | H02 | Two Characters/Appearances, 3 original backgrounds, 2 character images, music/SFX; copied hashes and preview match; exact large default and int64 assignments reload/run | Local authoring/import/hash/golden/reopen Pass; actual route values/media Pass on local Mac; final both targets open |
 | H03 | Fixed golden source for dialogue/narration/background/show/appearance/placements/transitions/audio/assignments; SDK asserts state/showing/bounds/playing and stop/hide | Local golden-source Pass; local Mac runtime assertions Pass; final both targets open |
-| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | Local production flow/source Pass; route local Mac runtime assertions Pass; final both targets open |
+| H04 | Standard entry chooses two distinct manifested outcomes, two resolved Choice edges/two reconvergent Jumps/Return, editorial Chapter move leaves flow unchanged | Local production flow/source Pass; local Mac routes/reconvergence/Return Pass; final both targets open |
 | H05 | Three undo/redo cycles recover exact bytes; projections/revisions/IDs survive reopen; external/inverse rejecting regressions remain selected | Local fixture history/reopen Pass; both-target broad history regressions open |
 | H06 | Real compile produces disposable `.rpyc`; move removes old source/cache, Undo restores exact bytes/cache; delete/inverse/reopen and incoming-reference refusal | Local real compile/lifecycle Pass; final candidate both targets open |
 | H07 | Source/Scene mapping, exact opaque neighbours, BOM/CRLF/Unicode, retained drafts, explicit Apply Both/nonoverlap and overlap refusal, truthful partial/stale/navigation | Local custom Source/reopen Pass; existing Source/core/browser/package regressions selected, target evidence open |
@@ -272,11 +272,11 @@ verify corrected attribution. No runtime/assertion changes after this local pass
 13 local integrated SDK gate invocations; measured bounded adapter spawns total 84
 across attempts 6–13 (8/8/8/12/12/12/12/12). Earlier uninstrumented launches and
 runtime-service child compile/lint processes are not included or fabricated. Final
-production matrix allowance remains unused (one selected final candidate, no retry).
+production matrix allowance is now consumed by run 37515083319/1; no retry authorised.
 Failures/logs are ignored under `.toolchains/reports/phase-1h/`; no private paths/logs,
 SDKs or build output enter Git. All correction hypotheses are recorded rather than
-silently restarting a budget. No production dispatch/retry, desktop build or editor
-launch has been used; SDK test-process/adapter counts are reported where instrumented,
+silently restarting a budget. One production dispatch/no retry; zero local desktop builds or editor
+launches. Pending CI target builds/starts are not yet counted as completed; SDK test-process/adapter counts are reported where instrumented,
 and earlier absent counters are not invented. The 1G historical counters remain intact.
 
 Cheap checks so far: validator 352 files; Q1 rejection/selector audit Pass; retention
@@ -286,3 +286,40 @@ Focused SDK invocations use:
 `cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture`
 with official archive, disposable profiles/portable token root and native display access.
 These are development observations, not yet final coherent-candidate package proof.
+
+### Published candidate and manual same-thread wait
+
+Draft [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18), branch
+`acceptance/phase-1h-vertical-slice`, candidate
+**`3d484ef1b0164e15b21c869f7494410daa3fed9d`**, published/remote identity verified.
+Exactly one `production-scaffold.yml` dispatch accepted at 2026-10-06 18:55:50 UTC:
+[**37515083319/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515083319),
+`workflow_dispatch`, exact candidate above, `upload_packages=true`. Last observed
+2026-10-06 18:56 UTC: `in_progress`; Preflight job **112445822829** running frontend
+validation, repository/Q1/selector steps already passed. Windows x64 and macOS ARM64
+jobs await successful Preflight; no target result claimed. Case/log/input/failure and
+requested package artifacts retain the existing seven-day retention; audit/download
+terminal evidence before expiry. Dispatch acceptance is confirmed, never repeat it.
+Ordinary PR quality [37515065625/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37515065625)
+on the same SHA: actual repository/Q1 rejection/selector steps Pass; unselected flow
+profile and browser diagnostic jobs skipped. No separate quality matrix dispatched.
+
+This docs-only wait publication changes no tested app/workflow/fixture inputs. The
+production run tests `3d484ef` and does not retroactively execute its documentation
+follow-up SHA. No second package matrix is justified for this wait record.
+
+Remaining: on user resume in the SAME Goal/chat, inspect this exact run/attempt once.
+If still pending, wait again without a loop or duplicate dispatch. If terminal, audit
+actual named required core/SDK/diagnostic tests, four integrated case reports and three
+correctly attributed captures per host, six packaged UI case reports/cleanup, compiled
+lifecycle, observed-flow samples/bounds, browsers, denial/single-instance, privacy,
+licences/inventory, exact manifests/package hashes and H01–H12/sections 3–4. Fill final
+expected/actual/target/identity matrix and self-review before `review_ready`; failures,
+skips and missing artifacts stay open. No new retry, feature scope or merge on resume.
+
+Model polling stops here. Goal remains active until a supported user pause action;
+repository `awaiting_ci` is not a verified runtime pause. Official app documentation
+places Pause/Resume in the Goal progress row above the composer; direct installed-app
+UI inspection was unavailable, so no UI action or changed lifecycle state is claimed.
+Use that client control and later resume this chat with: `The workflow is complete;
+audit run 37515083319/1 and continue the existing goal.`
