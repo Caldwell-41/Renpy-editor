@@ -40,16 +40,14 @@ The user reported macOS Allow for run 2, but its deadline had already expired.
 Computer Use cannot access SecurityAgent; chat approval alone does not authenticate
 the OS request. Preserve both failures; no more automatic retry. Preliminary remembered
 status in another process does not turn either failed run into an acceptance pass.
-Signed upgrade, locked-login store and installer proof remain unqualified. The user
-requires ordinary rebuilds/updates without repeated account-password entry, plus
-native Touch ID on Mac and Windows Hello PIN when app authentication is needed.
-No per-discovery/per-generation prompt is intended. Read-only `codesign --display -r -`
-inspection found the current package's designated requirement is build-specific
-`cdhash`, not a stable signer identity. Touch ID is not implemented; Windows is a
-stub. Neither unchanged-package reopen nor a Hello consent dialog alone proves
-cross-build identity or protection of stored secrets. These acceptance gaps remain
-open; select a stable signing/authentication approach before further Mac proof,
-without weakening OS trust or adding per-request prompts. The
+Signed upgrade, locked-login store and installer proof remain unqualified. Routine
+remembered credentials must work without per-discovery/per-generation prompts for
+the same trusted app/unlocked store. The user withdrew the subsequently added
+rebuild/update password guarantee, mandatory Touch ID/Windows Hello PIN integration
+and new two-changed-build gate pending separate research. Do not implement or block
+the selected slice on those additions. Read-only signing inspection found the tested
+Mac package has a build-specific `cdhash` designated requirement; preserve this
+research evidence without claiming changed-build trust. The
 app-owned synthetic entry reopened/read without the helper-entry access prompt;
 the cross-helper entry path failed. Qualify repeat native reads/reopen on Windows
 within existing runs; do not add generation sends or global OS trust changes.
@@ -82,11 +80,9 @@ unchanged. Generation stays excluded. Historical source Windows 2/2/3, Mac 3/3/3
 **Next Windows action:** pull while preserving local work, read AGENTS/CURRENT/this
 handover and the two selected Studio/host-handoff ledger sections plus Mac results.
 Implement trusted Windows secure entry/Credential Manager in `ai_native.rs`, retaining
-namespace/ownership and error contracts and the clarified native Windows Hello PIN
-requirement. Normal remembered access/reopen must remain prompt-free; authentication
-must use the OS surface and distinguish cancellation/unavailability. Record the
-cross-build identity/authentication proof achieved within the existing allowance;
-do not silently treat it as already passed. Complete focused Windows checks and native
+namespace/ownership and error contracts. Qualify repeat native reads/reopen under
+normal conditions within existing runs; do not add Touch ID/Hello or a new cross-build
+gate from the withdrawn clarification. Complete focused Windows checks and native
 proof under its existing allowance, review/fix in scope and push/verify the same branch.
 Record missing Mac discovery/removal/owned cleanup distinctly; further Mac qualification
 requires a separate explicit budget/access decision. Never request direct Mac access,

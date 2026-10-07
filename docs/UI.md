@@ -913,12 +913,10 @@ Configured capacity stays explicitly unverified. Private-network HTTP needs a
 separate unencrypted-transport opt-in; saving or opening Settings never discovers
 models. Native Enter/Replace credential returns status only; removal explains that
 it does not revoke the provider key. Failed cleanup has a visible explicit retry.
-Remembered access must stay prompt-free during normal use and across ordinary app
-rebuilds/updates. When app authentication is needed, support the native Touch ID /
-Windows Hello PIN surface; Loomlight never collects the device password or PIN.
-Preserve saved credentials on cancellation and report unavailable access accurately.
-OS-required password fallback remains possible. Stable build identity and these
-authentication methods are pending implementation/qualification under ADR 0011.
+Normal remembered access with the same trusted app and unlocked store should not
+add a prompt per operation. Rebuild/update password guarantees and Touch ID/Windows
+Hello PIN integration are deferred research questions under ADR 0011, not current
+UI implementation or acceptance requirements.
 **Refresh models** performs one authenticated GET for the saved configuration;
 unsaved edits disable it and saved revision changes invalidate availability.
 The status says discovery only, without implying generation readiness or capacity.

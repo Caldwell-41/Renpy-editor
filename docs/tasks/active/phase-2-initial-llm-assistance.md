@@ -3569,7 +3569,7 @@ No persistent/global trust change is requested or applied by this clarification.
 ADR 0011 and HANDOVER now make repeat-use usability explicit for continued native
 qualification; no extra Mac launch, GET, generation, budget or implementation change.
 
-**Stronger credential UX requirement — 2026-10-08:** the user explicitly rejects
+**Stronger credential UX requirement — 2026-10-08 (withdrawn pending research; see below):** the user explicitly rejects
 full account-password entry for each Loomlight build and requests Touch ID on Mac /
 Windows Hello PIN on Windows. Ordinary rebuilt/updated app identity must retain
 credential access; normal remembered use remains prompt-free. When app authentication
@@ -3609,3 +3609,23 @@ allowance decision because zero Mac builds/runs remain. Windows may implement it
 native path under the existing 2-build/2-run allowance; retain honest cross-build and
 authentication proof limits. No package/native launch, GET, generation, credential
 access/change or budget consumption occurred during this read-only design update.
+
+**Withdrawal pending research — 2026-10-08:** the user considers the added credential
+requirements potentially more work than wanted and explicitly requested reversal
+until another-chat research establishes the tradeoffs. Withdraw the guarantees of no
+full password entry across ordinary rebuilds/updates, mandatory native Touch ID /
+Windows Hello PIN (and added biometric integration), and the new two-changed-build
+acceptance gate. The preceding stronger-requirement entry is historical and superseded,
+not authority to implement or add blockers. Restore the earlier normal-use contract:
+no per-operation prompt/re-entry for the same trusted app and unlocked available store;
+OS interaction for locked storage or changed identity remains possible and unqualified.
+Existing stable identity/storage, ownership, secrecy and cancellation contracts remain.
+
+ADR 0011/UI/CURRENT/HANDOVER now distinguish the deferred questions from selected
+Studio implementation and acceptance. Preserve the read-only signing observation,
+official references, failed native attempts and unresolved cleanup as research inputs.
+Provide a research-only prompt for a separate chat; do not dispatch an agent, select
+a signing/authentication approach or change code/credentials/OS trust. No additional
+build, native run, provider GET or generation is authorised or consumed. Existing
+Windows continuation and all recorded budgets remain unchanged. Publication of this
+correction follows the same authorised branch; verify the remote checkpoint.
