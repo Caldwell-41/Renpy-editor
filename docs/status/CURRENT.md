@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (Mac-only Actions setup correction).
+**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (awaiting corrected Mac-only Actions).
 **Phase 1: accepted, integrated and closed.**
 
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
@@ -44,12 +44,15 @@ repository root instead of the pinned `app/` directory. Its artifact/index and f
 logs are downloaded and verified; cleanup passed. All other jobs skipped. Cumulative
 counts remain Windows **2/2/3**, Mac **2/2/2**.
 
-The user explicitly approved finding/fixing issues and **one additional dispatch**.
-The helper now checks tools from `app/` and retains their versions. Existing pinned
-local tools verify the correction; all 139 inputs and 23 original Mac evidence files
-remain unchanged. The unused one-build/one-native/one-SDK allowance, caps 20/5/10
-minutes, is assigned exclusively to the next Mac-only run. No automatic retry follows
-that dispatch. Windows proof is reused unchanged.
+The user explicitly approved the setup fix and **one additional dispatch**.
+[Run 37581016311/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311)
+is confirmed **in_progress** at the recorded snapshot, testing `1ac8068`.
+Only Mac ARM64 runs; other jobs skip. The helper checks pinned tools from `app/` and
+retains their versions. Validation passed; all 139 frozen inputs and 23 original Mac
+evidence files remain unchanged. The unused one-build/one-native/one-SDK allowance,
+caps 20/5/10 minutes, is reserved exclusively to this run. Two workflow dispatches
+are consumed; actual expensive-operation counts await artifact audit. No further retry
+is authorized. Windows proof is reused unchanged.
 
 Qualification is incomplete/not accepted. Raw Windows archives still require transfer
 and member verification; Actions approval did not waive that gap. Frozen app/test/probe

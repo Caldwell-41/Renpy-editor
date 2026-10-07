@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Corrected source foundation — authorized Mac-only Actions setup correction, 2026-10-07
+## Corrected source foundation — corrected Mac-only Actions awaiting audit, 2026-10-07
 
 **State:** Windows x64 corrected-input qualification PASS; final-input Mac qualification
 INCOMPLETE. [Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
@@ -12,10 +12,11 @@ merge, release, provider/AI or following deliverable.
 owns detailed commands, approval, hashes, audit, failures and cumulative budgets.
 
 **Checkout/publication:** original Mac project, branch `codex/nested-source-foundation`.
-Published wait checkpoint `761f185c8beae0d08d57584966c12a7eb154891b` is the parent of
-this correction. Failed run tested `878de2a8b30e1ce0e3adf36fdba2859056bb4b86`.
-The commit carrying this record owns the corrected helper; verify its exact published
-SHA before dispatch. Original HEAD `45c64c5` was safely fast-forwarded to corrected
+Published corrected helper checkpoint is
+`1ac80686bb96acda20fb56ecdc518a68a91b1809`, parent of this status-only wait record.
+Failed run tested `878de2a8b30e1ce0e3adf36fdba2859056bb4b86`; its wait record `761f185`
+is preserved in history. The new run tests `1ac8068`; this later documentation record
+does not change workflow/helper/frozen inputs. Original HEAD `45c64c5` was safely fast-forwarded to corrected
 Windows checkpoint `a49e536163d5cea2e220894f97f780f4bd301668`; previous local docs remain
 in exact copies, binary patch and retained named stash
 `23c69ff7cc3262981b8a23b32c55a23bb2ab0c27`. Historical planning worktree `2c5a164` is
@@ -51,18 +52,28 @@ failures and 138 superseded input bytes remain retained/indexed; earlier executa
 Official SDK 8.5.3 SHA
 `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` stays required.
 
-**Dispatch/allowance:** ONE additional NEW workflow 354880113 run on this branch,
-`source_foundation_macos=true`, all three other manual inputs false, attempt 1 only.
-Record exact published SHA, zero existing candidate runs, allowance and exclusive
-second-request marker before dispatch. First failed run remains preserved. Unused
-Mac one-build/one-native/one-SDK allowance belongs exclusively to this new run, caps
-**1,200/300/600 seconds**, zero subsequent retries/duplicate requests. Cumulative
-Windows **2/2/3**, Mac **2/2/2**; first workflow dispatch consumed one, second explicitly
-authorized. Count each actual operation marker regardless of outcome. Existing helper
-requires eight core/EOF and three renderer preflights, exact ARM64 release/test binaries,
-all 33 native checks/one terminal report/extension-complete/external-write/cleanup, and
-EOF-produced SDK source/owners, true/false six actual assertions each plus real rejecting
-wrong-outcome failure. Always retain full logs/failures and contained cleanup/index.
+**Confirmed pending operation:** [run 37581016311/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311),
+workflow **354880113**, Mac job **112660446339**, exact tested SHA
+`1ac80686bb96acda20fb56ecdc518a68a91b1809`, source branch. Run snapshot
+**2026-10-07 06:21:14 UTC** and job snapshot **06:21:24 UTC** are **in_progress**,
+conclusion null. Other three jobs are completed/skipped; no Windows dispatch.
+`source_foundation_macos=true`, other manual inputs false. Fresh pre-dispatch query
+found zero candidate runs. Exclusive second-request marker/allowance/exact commands
+were written before ONE request, followed by one unique confirmed run identity;
+local raw API/request/receipt evidence is retained in `actions-second-dispatch/`.
+State **awaiting_ci**. Artifact expected `source-foundation-macos-37581016311-1`,
+seven-day retention. Do not poll further until user resume.
+
+**Allowance:** two workflow dispatches consumed; first failed before expensive execution.
+Unused Mac one-build/one-native/one-SDK allowance belongs exclusively to run 37581016311,
+caps **1,200/300/600 seconds**, zero further retries/duplicate requests. Cumulative
+Windows **2/2/3**, Mac **2/2/2** before actual new operation markers are audited. Count
+each dispatch regardless of outcome; the workflow request does not prove commands ran.
+No local or second executor may spend this allowance. Helper requires eight core/EOF
+and three renderer preflights, exact ARM64 release/test binaries, all 33 native checks/
+one terminal report/extension-complete/external-write/cleanup, and EOF-produced SDK
+source/owners, true/false six actual assertions each plus real rejecting wrong-outcome
+failure. Always retain full logs/failures and contained cleanup/index.
 
 **Windows proof/gap:** unchanged build 55.078s, native33 13.312s, SDK108.359s PASS at
 final inputs. Binary/test/EOF hashes are recorded in section 23 and manifest. Original
@@ -72,12 +83,13 @@ Windows raw archives have not arrived: corrected inputs ZIP expected
 Hosted Actions approval does not waive transfer/member verification. Qualification and
 acceptance stay incomplete while that separate gap remains.
 
-**Next action/resume:** publish correction, verify branch/frozen blobs, dispatch once,
-record confirmed run/attempt/tested SHA/status/artifact name, then publish meaningful
-wait continuation and stop model polling. Resume same chat on user command; inspect
-only recorded run and relevant ref/worktree changes. If pending, wait again without a
-loop. If terminal, download artifact before seven-day expiry, verify index/input copies/
-identities/binaries/exact checks/SDK assertions/cleanup/dispatch counts. Audit failure
-without another dispatch. No autonomous Goal is active and no runtime-pause control is
-claimed. Codex host is original Mac ARM64; evidence host is hosted macOS ARM64, reusing
-Windows proof unchanged.
+**Next action/resume:** stop model polling and resume this same chat on user command,
+“Resume and audit run 37581016311.” Inspect only that recorded run/attempt and relevant
+ref/worktree changes. If pending, wait again without a loop. If terminal, download
+artifact before expiry, verify index/all 139 retained input copies/run/SHA identity/
+ARM64 binaries/exact native checks/EOF source and owners/actual SDK assertions/rejecting
+case/cleanup/dispatch counts. Preserve and classify any failure without another dispatch.
+Update section 23/CURRENT/HANDOVER with exact results and counts; raw Windows transfer
+remains separately unresolved. No autonomous Goal is active and no runtime-pause control
+is claimed. Codex host is original Mac ARM64; evidence host is hosted macOS ARM64,
+reusing Windows proof unchanged.

@@ -1968,3 +1968,39 @@ Use a NEW run/attempt 1, preserving failed run 37580108751/1; do not rerun that 
 Capture confirmed identity and pause manually in this same chat. Audit its actual
 operation markers/results after user resume. Remaining raw Windows ZIP transfer/member
 verification is still unresolved and no two-target qualification/acceptance is claimed.
+
+
+**Corrected Mac-only additional dispatch confirmed / manual wait — 2026-10-07:**
+Published correction checkpoint **`1ac80686bb96acda20fb56ecdc518a68a91b1809`** verified
+against fresh remote source ref. Every one of 139 committed input blobs matches final
+digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Fresh query found zero workflow 354880113 runs at this SHA. Before ONE request, exclusive
+`actions-second-dispatch/one-request-marker.json` and `published-selection.json` record
+user approval, exact input SHA/digest/commands, unused allowance/caps, cumulative counts,
+workflow dispatch ordinal **2** and zero further retries. Request uses ONLY
+source_foundation_macos true, all three other inputs false. Successful request returned
+no body; ONE follow-up candidate query confirmed exactly one matching new run, without
+repeating dispatch. Failed run 37580108751/1 and original Mac failures remain preserved.
+
+Confirmed [run **37581016311/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311),
+workflow **354880113**, branch `codex/nested-source-foundation`, exact tested SHA
+`1ac80686bb96acda20fb56ecdc518a68a91b1809`, Mac job **112660446339**.
+Run snapshot **2026-10-07 06:21:14 UTC**, job snapshot **06:21:24 UTC**: **in_progress**,
+conclusion null. Existing matrix, repository validator and macOS browser diagnostic
+jobs completed/skipped; Windows is not executed. Artifact expected
+`source-foundation-macos-37581016311-1`, seven-day retention. Full request/stdout/stderr/
+run/job/selection/marker/receipt evidence is locally retained under ignored
+`mac-corrected-qualification/actions-second-dispatch/`.
+
+Two workflow dispatches consumed; per-operation cumulative remains Windows **2/2/3**,
+Mac **2/2/2** until actual new markers are audited. Existing unused Mac **one/one/one**
+build/native/SDK allowance is exclusively assigned to this run, caps **20/5/10 minutes**.
+No duplicate request, future automatic retry, local execution or second executor.
+The commit carrying this continuation is a later status-only successor with unchanged
+workflow/helper/app inputs. State **awaiting_ci**, qualification/acceptance incomplete.
+Stop model polling; resume this same chat with “Resume and audit run 37581016311.”
+Then inspect the recorded run/attempt once, download and strictly audit required evidence
+if terminal, or wait again if pending. Preserve any failure, count actual dispatches
+regardless of outcome, and reassess without another execution. Raw original Windows
+archive transfer/member audit remains unresolved and is not waived. No autonomous Goal
+or verified runtime-pause control is claimed.
