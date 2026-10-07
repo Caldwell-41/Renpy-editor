@@ -3568,3 +3568,44 @@ access to that app](https://support.apple.com/en-ie/guide/keychain-access/kyca12
 No persistent/global trust change is requested or applied by this clarification.
 ADR 0011 and HANDOVER now make repeat-use usability explicit for continued native
 qualification; no extra Mac launch, GET, generation, budget or implementation change.
+
+**Stronger credential UX requirement — 2026-10-08:** the user explicitly rejects
+full account-password entry for each Loomlight build and requests Touch ID on Mac /
+Windows Hello PIN on Windows. Ordinary rebuilt/updated app identity must retain
+credential access; normal remembered use remains prompt-free. When app authentication
+is needed, use the native OS method, not an account-password/PIN field in Loomlight,
+and retain credentials on cancellation. OS-required fallback remains outside app
+control. This supersedes the weaker unchanged-trusted-package-only usability clause;
+it is not an extra build/run allowance or authorisation for global trust changes.
+
+Read-only `codesign --display -r -` on the existing tested bundle returned
+`designated => cdhash H"c73efa05544a65f94bdff9ebc22426c751111ddb"`.
+This is build-specific identity, so the current package cannot prove stable rebuild
+trust. The adapter only uses generic Keychain password operations, without
+LocalAuthentication; Windows is still unavailable. No implementation or acceptance
+claim is made for Touch ID/Hello or changed-build access in this clarification.
+
+Official design references checked:
+[Apple TN3127](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements)
+explains unsigned/ad hoc identity and stable designated requirements;
+[Apple code-signature guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/AboutCS/AboutCS.html)
+documents local self-signed identities as a development option for Keychain identity,
+distinct from distribution trust. This is an available design route, not a selected
+certificate, signing purchase or applied trust change.
+[Apple native biometric Keychain sample](https://developer.apple.com/documentation/localauthentication/accessing-keychain-items-with-face-id-or-touch-id)
+uses Security/LocalAuthentication; do not add per-item user-presence prompting to
+every read and thereby violate normal-use UX. Existing helper-owned credentials must
+remain untouched; storage migration/authentication design requires review before code.
+[Windows desktop Hello interop](https://learn.microsoft.com/en-us/windows/win32/api/userconsentverifierinterop/nn-userconsentverifierinterop-iuserconsentverifierinterop)
+supports PIN/Hello/fingerprint verification (Windows build 22000+); an affirmative
+consent result alone is not cryptographic binding of the Credential Manager entry.
+[Apple Touch ID safeguards](https://support.apple.com/en-us/105095) retain OS-required
+password validation after restart/logout and other system conditions. Never promise
+that Loomlight can override those conditions.
+
+ADR 0011/CURRENT/HANDOVER carry these pending acceptance requirements into the same
+Studio slice. Further Mac implementation/proof needs an explicit remaining-work/
+allowance decision because zero Mac builds/runs remain. Windows may implement its
+native path under the existing 2-build/2-run allowance; retain honest cross-build and
+authentication proof limits. No package/native launch, GET, generation, credential
+access/change or budget consumption occurred during this read-only design update.

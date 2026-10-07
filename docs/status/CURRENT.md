@@ -26,6 +26,10 @@ desktop **1** and focused browser checks PASS; native run 1's **9 checks PASS**.
 Two later native runs timed out at macOS access to the existing qualification entry,
 before any GET. Mac discovery/removal proof and one disabled disposable cleanup
 reference remain unresolved; no timeout is an acceptance pass.
+The user also requires no repeated account-password entry across ordinary builds/
+updates, native Mac Touch ID and Windows Hello PIN when authentication is needed.
+Current ad hoc Mac signing/native adapter does not satisfy this clarified UX;
+stable identity and native authentication qualification remain open under ADR 0011.
 
 The [Mac ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
 owns exact inputs, failures, recovery and the user-authorised extra native run.

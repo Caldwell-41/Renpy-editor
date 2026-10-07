@@ -55,11 +55,21 @@ OS storage is convenient at-rest protection, not a sandbox against same-user mal
 software or compromised application code. Session-only avoids deliberate persistence,
 but requires re-entry after app exit and cannot guarantee absence from OS memory/swap.
 Routine remembered-key use must not require per-discovery/per-generation approval
-or re-entry with the same trusted application and an unlocked available store.
-Locked-store access and changed application trust/identity can require OS interaction;
-repeat access, app reopen and update identity must be qualified separately. This is
-a usability requirement, not permission to bypass OS trust or relax global Keychain
-settings. Generation remains outside the current slice.
+or re-entry with an unlocked available store. Ordinary local rebuilds and updates
+must preserve trusted application identity rather than require a full account
+password for each build. Qualify repeat access, process reopen and two changed
+builds retaining the same credential; unchanged-package reopen alone is insufficient.
+When application authentication is needed, support native macOS Touch ID and Windows
+Hello PIN (and enrolled Hello biometrics), without collecting an account password,
+PIN or fingerprint in Loomlight. Do not introduce authentication on every request.
+OS-required password fallback, such as restoring Touch ID after restart, remains an
+OS decision; cancellation must preserve credentials and explain unavailable access.
+The present Mac adapter has no LocalAuthentication integration, its tested package
+has a build-specific ad hoc designated requirement, and Windows remains a stub.
+These usability requirements are not yet satisfied. Resolve stable signing and
+native authentication before claiming acceptance; no global trust relaxation,
+plaintext fallback, service/signing purchase or budget renewal is authorised here.
+Generation remains outside the current slice.
 
 Local removal does not revoke the provider key. Project movement requires new device
 profile/credential setup. Adapter persistence/access attributes must match this intent;
