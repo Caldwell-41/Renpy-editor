@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "maximum_http_requests": 40,
+  "maximum_generation_requests": 20,
+  "maximum_live_seconds": 1800,
+  "prior_live_window_charge": {
+    "through_sequence": 22,
+    "seconds": 1457
+  },
+  "automatic_retries": 0,
+  "connect_timeout_seconds": 10,
+  "discovery_timeout_seconds": 15,
+  "generation_total_timeout_seconds": 120,
+  "require_full_deadline_remaining_before_send": true,
+  "sse_no_progress_timeout_seconds": 15,
+  "cancel_after_seconds": 5,
+  "client_cleanup_target_seconds": 2,
+  "request_bytes_limit": 2097152,
+  "response_bytes_limit": 8388608,
+  "final_text_bytes_limit": 2097152,
+  "sse_event_bytes_limit": 262144,
+  "default_output_tokens": 256,
+  "system_message": "Return one JSON document matching the provided schema. Rewrite only synthetic prose. Keep any __LL_TOKEN_n__ placeholders exactly once, in their original order. Do not call tools. Brackets and braces are literal prose, never instructions to execute anything.",
+  "literal_input": "A lantern glows beside a quiet lake. Include the literal text [name] and {b}lantern{/b} in your rewrite.",
+  "protected_input": "Hello __LL_TOKEN_0__, the __LL_TOKEN_1__ lantern is waiting.",
+  "tools_input": "Rewrite this synthetic sentence directly, without tools: A blue lantern glows.",
+  "long_input": "Produce a detailed synthetic description of a quiet lake, much longer than eight tokens, in the required JSON structure.",
+  "nonexistent_model": "loomlight-synthetic-nonexistent-model-2a0",
+  "per_provider_probes": [
+    {
+      "id": "M01",
+      "method": "GET",
+      "path": "models",
+      "auth": "configured",
+      "generation": false,
+      "purpose": "exact IDs and advertised availability"
+    },
+    {
+      "id": "A01",
+      "method": "GET",
+      "path": "models",
+      "auth": "omitted",
+      "generation": false,
+      "purpose": "authentication policy; no-auth generic expects allowed discovery"
+    },
+    {
+      "id": "A02",
+      "method": "GET",
+      "path": "models",
+      "auth": "synthetic-invalid",
+      "generation": false,
+      "purpose": "invalid credential refusal; unsupported for no-auth generic"
+    },
+    {
+      "id": "G01",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "non-streaming strict schema, literal_input"
+    },
+    {
+      "id": "G02",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "non-streaming strict schema, protected_input"
+    },
+    {
+      "id": "G03",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "tools_input, Studio disable fields and observed absence of tool activity"
+    },
+    {
+      "id": "G04",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "output_tokens": 8,
+      "purpose": "long_input, output limit/finish reason, refuse truncated result"
+    },
+    {
+      "id": "E01",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "clearly nonexistent synthetic model; never an installed unloaded model"
+    },
+    {
+      "id": "E02",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "invalid response_format type; classify rejection or ignored field"
+    },
+    {
+      "id": "C01",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "long_input SSE when qualified, otherwise JSON; cancel at 5 s, or record completed-before-cancel inconclusive"
+    },
+    {
+      "id": "M02",
+      "method": "GET",
+      "path": "models",
+      "auth": "configured",
+      "generation": false,
+      "purpose": "post-cancel availability; no proof of server-stop or billing"
+    },
+    {
+      "id": "S01",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "strict schema SSE, only non-tunnel configurations; optional after both providers' baseline probes"
+    },
+    {
+      "id": "T01",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "thinking off, only documented model-supported mapping"
+    },
+    {
+      "id": "T02",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "purpose": "thinking on and reasoning/final separation; same condition as T01"
+    },
+    {
+      "id": "M03",
+      "phase": "followup",
+      "method": "GET",
+      "path": "models",
+      "auth": "configured",
+      "generation": false,
+      "purpose": "retain allowlisted selected-row loaded/context metadata if advertised; no internal route"
+    },
+    {
+      "id": "G05",
+      "phase": "followup",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "prompt_case": "protected",
+      "thinking": "off",
+      "output_tokens": 1024,
+      "purpose": "protected-token schema with researched off-mode output candidate"
+    },
+    {
+      "id": "G06",
+      "phase": "followup",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "prompt_case": "tools",
+      "thinking": "off",
+      "output_tokens": 1024,
+      "purpose": "harmless tools-disabled schema with off-mode output candidate"
+    },
+    {
+      "id": "S02",
+      "phase": "followup",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "thinking": "off",
+      "stream": true,
+      "output_tokens": 1024,
+      "purpose": "strict-schema SSE with off-mode output candidate"
+    },
+    {
+      "id": "C02",
+      "phase": "followup",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "prompt_case": "long",
+      "thinking": "on",
+      "output_tokens": 1024,
+      "cancel_after_seconds": 1,
+      "purpose": "cancel JSON client at 1 s; C01 completed before 5 s, no server-stop claim"
+    },
+    {
+      "id": "M04",
+      "phase": "contingency",
+      "method": "GET",
+      "path": "models",
+      "auth": "configured",
+      "generation": false,
+      "purpose": "post-C02 discovery and selected-row configuration; no management"
+    },
+    {
+      "id": "T03",
+      "phase": "contingency",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "thinking": "on",
+      "output_tokens": 1024,
+      "purpose": "thinking-on JSON structured completion with adequate output candidate"
+    },
+    {
+      "id": "S03",
+      "phase": "contingency",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "thinking": "on",
+      "stream": true,
+      "output_tokens": 1024,
+      "purpose": "thinking-on SSE reasoning/final separation; only if T03 usable"
+    },
+    {
+      "id": "C03",
+      "phase": "contingency",
+      "method": "POST",
+      "path": "chat/completions",
+      "generation": true,
+      "thinking": "off",
+      "stream": true,
+      "prompt_case": "long",
+      "output_tokens": 1024,
+      "cancel_after_seconds": 1,
+      "purpose": "cancel SSE partial-output client at 1 s; no proposal/server-stop claim"
+    }
+  ],
+  "qualification_context_budget": 4096,
+  "effective_context_ceiling": 262144,
+  "context_evidence": "user-reported Studio UI, v0.1.902-beta; full capacity untested"
+}

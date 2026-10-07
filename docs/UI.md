@@ -835,6 +835,14 @@ This remains a hybrid hierarchy-and-constraint editor, not a freeform drawing ca
 Unsupported code stays at its source location and marks only the affected screen region
 partially visual.
 
+Selected Phase 3 Story integration exposes **Show screen**, **Hide screen** and
+**Call screen** with a picker for owned parameterless screens. Show leaves a panel
+visible while Story continues; Hide dismisses it. Call waits for **Finish interaction**
+before continuing at the following Beat. Keep screen calls distinct from Scene calls;
+show the selected target and preserve draft/history behavior. Dynamic arguments and
+captured return values are deferred. [3B.2a](tasks/active/phase-3-initial-wysiwyg-release.md#4-3b--supported-screen-designer)
+owns source, action-context and normal-play proof. This is planned, not implemented.
+
 ### Animation/audio timeline
 
 | Track list | Time canvas | Inspector/transport |

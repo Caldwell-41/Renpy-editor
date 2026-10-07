@@ -85,6 +85,12 @@ Investigate managed load/unload during 2A.0. If a documented stable public inter
 
 ## 4. Shared provider and credential architecture
 
+The concrete 2A.0 contract is [ADR 0013](../../adr/0013-provider-request-and-transport-contract.md).
+The corrected Studio-scoped reference/design is accepted for the first bounded
+remembered-profile 2A.1 slice. Generic/full-phase acceptance remains incomplete;
+the [qualification ledger](#25-provider-qualification-ledger--2026-10-07)
+distinguishes deterministic proof, partial production preparation and missing native evidence.
+
 Keep privileged effects in Rust/core and the trusted desktop host. Add narrow services for provider profiles, credential references, request execution, context assembly and proposal preparation. Keep the existing IPC envelope and deny-by-default WebView capability model. Renderer actions reference opaque configuration/request/proposal IDs; no generic HTTP, shell or filesystem capability.
 
 Candidate module boundaries, to confirm against accepted Phase 1 before coding:
@@ -233,6 +239,31 @@ Use a versioned, closed proposal schema with typed semantic operations and propo
 
 Responses cannot choose arbitrary paths, patch custom source, rename technical identifiers implicitly, execute code, import assets, invoke tools or write outside the allowed target set. Enforce existing string/metadata/integer/source bounds, including exact decimal representation for large integers.
 
+**Generated text boundary (selected 2026-10-07):** generated dialogue, narration,
+choice captions and other displayed source strings are literal prose by default.
+Core must encode them for both the source string and Ren'Py's display-text syntax;
+escaping quotes/backslashes alone does not neutralize interpolation or text tags.
+Model-supplied bracket/brace syntax must not become active Python interpolation,
+hyperlinks, control-flow tags or asset references. This is operation validation,
+not content filtering. Cards/lore remain ordinary metadata text; do not apply runnable
+text escaping to their stored prose.
+
+For rewrites, preserve existing reviewed placeholders and formatting through opaque,
+revision-bound tokens owned by core. The model may rewrite literal segments but may
+not supply, alter, reorder, duplicate or remove protected tokens. Show preserved tokens
+in the review and restore their exact original source representation. Refuse a target
+when its literal/token boundaries cannot be established safely; do not silently strip
+markup or escape the entire existing line. New active markup/expression generation is
+outside this initial contract. Manual Source editing remains unchanged. Final emitted
+source and the preview digest must reflect this validation before acceptance.
+
+Before the first applicable rewrite, add focused planner/emission tests for expression
+and function-call interpolation, action-bearing tags, ordinary literal brackets/braces,
+existing placeholders/formatting, token tampering and unsupported-target refusal.
+Use harmless synthetic strings and a bounded pinned-SDK assertion that accepted literal
+text displays literally; no hostile payload execution is needed. Rejected proposals
+write nothing, and valid accepted changes retain ordinary undo/reopen behavior.
+
 Validation order:
 
 1. Require successful protocol completion, a single final result and a usable finish reason. Truncation, refusal, empty response or interrupted stream is non-applicable.
@@ -351,7 +382,8 @@ external JSON/PNG import/export.
 
 These are dependency checkpoints, not mandatory chat boundaries. Select one coherent
 outcome with internal implementation/test/review checkpoints under [WORKFLOW](../../WORKFLOW.md);
-resume that same outcome/chat after a wait. All implementation states remain `not_started`.
+resume that same outcome/chat after a wait. Section 25 owns the selected first
+Studio 2A.1 preparation/access state; remaining production checkpoints stay `not_started`.
 The original provider requirements and approval boundaries remain; planning does not
 authorize provider connections or execution.
 
@@ -362,7 +394,7 @@ authorize provider connections or execution.
 | 2A.2 — Request service | Background transport, non-streaming and qualified SSE, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test each adapter without project writes. |
 | 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; bounded route cycles; no silent truncation; input/output budget accounting. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
-| 2C.1 — Proposal planner | Strict schemas, semantic/dependency checks and non-mutating batch-to-patch preparation. | Malicious/invalid output writes nothing; same-file batch edits, new IDs, terminal constraints, Unicode/custom preservation and exact previewed mutations. |
+| 2C.1 — Proposal planner | Strict schemas, semantic/dependency checks, literal generated text/protected existing tokens and non-mutating batch-to-patch preparation. | Malicious/invalid output writes nothing; interpolation/tag and token-tampering checks, same-file batch edits, new IDs, terminal constraints, Unicode/custom preservation and exact previewed mutations. |
 | 2C.2 — Proposal acceptance | Semantic/file review, dependency-valid subsets, stale rejection, one transaction/undo and explicit transient lifetime. | Core/renderer/native acceptance, duplicate-click/retry protection, concurrent drafts, external edits, interrupted-acceptance recovery using non-crashing fault/state fixtures, no partial success claims. |
 | 2C.3 — Character and lore completion | LLM draft/update of Character cards and lorebook entries, separate runnable definitions, statuses, provenance and approvals on the manual foundation from 2B.1. | No implicit lore approval or source execution; migration/reopen, stale citations, missing entities, repeated undo/redo and metadata-free game behavior. |
 | 2C.4 — Integrated acceptance | Real authoring workflow through every action/provider and supported client target. | Required matrix below passes; remaining limitations explicit; complete independent review; no automatic merge or new execution scope. Selected 3A overlap follows section 19. |
@@ -401,11 +433,11 @@ Share source/transaction fixtures and test the narrowest actual controller/servi
 | Requests | Final response, auth/protocol error, timeout/cancel, stale completion and responsive Save | Fake-server failures routinely; bounded synthetic Studio and one representative generic configuration live. |
 | Prompts/context | Exact payload, edit/reset/undo/reopen/update, selected approved revisions, exclusions and budget refusal | Controller/dispatch integration and milestone native send review; no exhaustive models/providers. |
 | References | Manual/generated review, rejected replacement retains approved text, stale/missing links, malformed/newer schema refusal and migration | Shared deterministic fixtures and representative native forms. |
-| Proposals | Rewrite/same-file batch, valid subset, invalid/stale output writes nothing, external conflict, one undo and ordinary interrupted acceptance | First complete user action early, then integrated milestone. |
+| Proposals | Literal text/protected-token emission, rewrite/same-file batch, valid subset, invalid/stale output writes nothing, external conflict, one undo and ordinary interrupted acceptance | First complete user action early, including harmless pinned-SDK literal-display proof, then integrated milestone. |
 | 3A Story | Conditional routes, all-false continuation, call/return, nested edits and source preservation | Targeted pinned-SDK normal-play assertions on affected supported hosts. |
 | 3B Screens | Nested round trip, opaque neighbor, representative dialogue/choice/menu behavior and cancel/undo | Early Ren'Py layout/interaction comparison. |
 | 3C Timeline/media | Placement, idle continuity, qualified profile/mask/end state, transform/audio order and save/load/rollback | Early actual media/runtime risk proof; combined final 3C checks, not a full matrix per increment. |
-| 3D State/launch | Normal-play equivalence, stale/unknown refusal, save isolation and scratch cleanup | Qualified normal versus reconstructed launch at supported boundaries. |
+| 3D State/launch | Normal-play equivalence, unresolved screen-effect refusal, passive/conventional-screen eligibility, screen-revision invalidation, save isolation and scratch cleanup | Qualified normal versus reconstructed launch at supported boundaries; no interaction recorder required. |
 | Milestones | Representative game, close/reopen, metadata-free play and package privacy | Coherent-candidate affected-platform qualification; both targets at 3F. |
 
 Keep rejecting assertions and ordinary external-edit/data-loss coverage. Use controlled
@@ -904,6 +936,7 @@ do not silently turn it into delivery of the remaining phase.
 | Conditional Story logic | Author supported nested conditions/choice guards; Story, Source and Branches agree; native routes match the declared variables. | Necessary 3A.1–3A.4 after shared foundation/first rewrite. Can overlap remaining Phase 2. |
 | Scene calls and Story completion | Call a Scene, return to the following Beat and preserve guarded continuation/return labels through edits and persistence; qualify 3A's combined behavior. | Remaining 3A.1–3A.4; build on conditional source/flow. |
 | Screen round trip | One supported custom screen can be edited via synchronized canvas/tree/properties, undone and reopened; unsupported neighbors survive and native layout agrees. | Bounded 3B.1/3B.2/3B.4; accepted Phase 2 and 3A. Introduce shared scratch runtime job once. |
+| Custom screen Story connection | Visually Show/Hide an owned panel or Call an owned screen and finish its interaction before returning to the following Beat; normal play, source, undo and reopen agree. | 3B.2a after Screen round trip, before Screen completion; typed parameterless subset and 3D effect summaries. |
 | Dialogue and choice screens | Edit declared dialogue/choice layout/style slots without breaking speaking, choices or required bindings in the actual game. | Bounded 3B.3 on the proven screen services. |
 | Menu screens and Screen completion | Complete the declared menu/preferences/save/load adapters and remaining supported inventory; qualify native interactions, Source reconciliation and persistence. | Remaining 3B.1–3B.4; split adapters further in the brief if required. |
 | Static character staging | Drag/resize and numeric/keyboard edits give accurate native placement at game resolution/window sizes; one gesture is one undo and Escape writes nothing. | Bounded 3C.1/3C.2; independent of full Timeline UI. Can overlap Screen round trip after shared runtime/asset contracts agree. |
@@ -913,8 +946,8 @@ do not silently turn it into delivery of the remaining phase.
 | Play-once video | Declared disappear/hold-last/supplied-still end states and replacement/restore behavior work in native playback. | Next 3C.1a/3C.3; no frame-exact resume promise. |
 | Transform Timeline | Add/move/edit supported keyframes and interpolation on the same source/placement/history model; native state/timing agrees. | Remaining transform parts of 3C.1/3C.2/3C.4. |
 | Audio Timeline and 3C completion | Place declared music/SFX cues, waits/fades/queues and interaction boundaries; qualify combined staging/idles/video/transforms/audio. | Remaining 3C.3/3C.4. Full selected inventory still required. |
-| State inspection | A chosen finite route shows known values, provenance and explicit unknowns without executing project code. | 3D.1/3D.2 after accepted 3A; accepted 3C descriptors for supported effects. |
-| Run from Scene entry | An isolated scratch launch matches normal play at a supported Scene entry and preserves real project/saves; refuse unknown or stale state. | 3D.3 with qualified 3A/3C semantics and shared runtime service. |
+| State inspection | A chosen finite route shows known values, provenance and explicit unknowns, including unresolved screen interactions, without executing project code. | 3D.1/3D.2 after accepted 3A; accepted 3B screen-effect summaries for screen-dependent state and 3C descriptors for supported effects. |
+| Run from Scene entry | An isolated scratch launch matches normal play at a supported Scene entry and preserves real project/saves; refuse unknown or stale state. | 3D.3 with qualified 3A/3C semantics, relevant 3B effect summaries and shared runtime service. |
 | Run from supported Beat boundaries | Extend only to proven stable statement boundaries; qualifying normal/reconstructed runs agree and unsupported starts refuse. | 3D.4 after Scene-entry proof; active call-stack reconstruction remains excluded. |
 | Integrated initial release | Complete one real authoring workflow across writing, Assist, Screens, Timeline and State; close the required combined acceptance evidence. | 3F after all required capabilities, not a new feature sweep. Git remains deferred. |
 
@@ -928,6 +961,11 @@ release consume their accepted semantics. The exact sequence follows dependencie
 not a requirement to serialize every row of this table.
 
 ### Completion loop and stop boundary
+
+When both local platforms are required, follow [host handoff](../../WORKFLOW.md#test-host-routing-and-ownership):
+finish available local work, publish/verify the same branch, then give the user a
+pull-and-continue prompt for the other platform. No direct other-machine access;
+one active writer, unchanged outcome/budget and both-target acceptance gates.
 
 1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
    baseline, required dependencies, affected test hosts and finite execution allowance.
@@ -969,6 +1007,7 @@ Repository: Caldwell-41/Renpy-editor
 Continuation: <current branch/PR, published checkpoint or explicit local-only state>
 Codex machine: <actual execution host>
 Test hosts: <affected Windows x64/macOS ARM64 requirements and accessible prerequisites>
+Host handoff: <completed local work, remaining other-platform work; pull same branch>
 Reason: <why this result is next and which accepted dependencies it uses>
 Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
 Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation agents
@@ -2191,3 +2230,1171 @@ history remain active because Phase2 is unfinished. The portable qualification r
 retains historical pre-Mac fields; they grant no current allowance. Next proposed
 outcome is 2A.0 synthetic Studio/generic qualification/contracts, returning for its
 existing review before production integration; it has not started.
+
+## 24. Selected review corrections — 2026-10-07
+
+The user requested the Phase 2/3 plan review remain read-only; the review's initial
+record additions were fully removed and the working tree verified clean. The user
+then explicitly selected findings 1 and 2 for correction. This outcome updates plans
+and canonical architecture only: literal generated display text/protected existing
+tokens before applicable AI rewrites, and conservative screen-effect uncertainty and
+launch refusal in 3D. The user subsequently accepted the recommended visual connection
+for finding 3: typed Show/Hide/Call screen Beats with a bounded finish/dismiss path.
+Phase 3 section 4/3B.2a owns the parameterless owned-screen contract and normal-play
+proof; UI and the deliverable queue are aligned. This is selected future scope, not
+authorization to start screen implementation ahead of its prerequisites.
+
+Phase 2 section 7 and 2C.1 own the text contract, harmless interpolation/tag fixtures,
+token preservation/refusal and literal-display proof. Phase 3 sections 4/6 own screen
+effect summaries, relevant read revisions, uncertainty/refusal, passive/conventional
+eligibility and invalidation checks. Full screen-interaction recording/replay remains
+deferred. Architecture and the component/deliverable maps are aligned. These refine
+existing operation/state guarantees without changing manual source or implementing
+provider, planner, screen or state services.
+
+Baseline: local `5f448ca`, `codex/nested-source-foundation`; initial working tree clean.
+Existing source qualification, historical planning worktree, recovery/evidence and
+budgets remain unchanged. No build/native/SDK/provider/CI execution, commit, push or
+merge is selected. The five-document correction is local-only; 2A.0 remains the next
+proposed outcome with its existing selection and review boundary. Repository validation
+passed for 365 files; whitespace and scope/contract self-review passed. The user requested
+a next-work prompt; it selects bounded 2A.0 qualification when submitted, preserving
+these local plan changes and the existing provider-access/review boundary.
+
+## 25. Provider qualification ledger — 2026-10-07
+
+### Selected outcome, baseline and ownership
+
+The user submitted the bounded **2A.0 qualification/contracts** instruction, selecting
+synthetic Studio and one representative generic endpoint, at most 40 live HTTP
+requests/20 generation attempts/30 live minutes, no automatic retries, builds,
+SDK execution, CI dispatch, push, merge, release, project sends or 2A.1/2A.2 work.
+One owner; no helpers or other writers. No Codex Goal lifecycle was created.
+State: `in_progress` after authenticated discovery and the user's continuation;
+remaining native key entry/probes are pending. This repository state is not a runtime
+Goal pause. Initial missing-access checkpoints remain recorded below.
+That entry state is historical. The current Studio review disposition is in
+[Studio qualification contract review](#studio-qualification-contract-review--2026-10-08);
+no native entry/probe is pending, generic remains deferred and full acceptance is incomplete.
+
+Fresh fetch/remote-ref and PR inspection found accepted main and source checkout at
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`. PR19 is merged; no qualification
+branch/PR existed. Open PRs 10/11 (dependency updates) and abandoned 12 are unrelated.
+Created local `codex/provider-qualification` in the existing checkout with all five
+accepted modified documents carried intact. No new worktree, reset, stash mutation,
+branch deletion or remote write. Historical planning worktree at `2c5a164` and source
+branch/recovery material remain preserved. The first sandbox fetch/PR reads failed
+on `.git` write/network restrictions; approved elevated read/ref refresh succeeded.
+These are setup failures, not provider failures or allowance consumption.
+
+Accepted-input SHA-256 before additions:
+
+| File | SHA-256 |
+| --- | --- |
+| ARCHITECTURE | `9ab6c11fe9a35feec994b5709f6f0fb6226ad16d6eba52c9dd813d34c5d8cbb7` |
+| UI | `3d7783d5583dcbe9b3e56b6813d1c310e260f65910d6a696c51aa3735a969e7a` |
+| HANDOVER | `9c6cefdc1fdd9b0c5b32858f01611c319f024b34211afa2b21afb14eebd69e75` |
+| Phase 2 | `ba843c107157b0d91be36eee6b567f7ad5d2aa394466fb7c496d3fcadbcdc3e3` |
+| Phase 3 | `6d9c263cb2a28299430e37217bf370ab25adfe1a7b16bc8ccb330a47066b9810` |
+
+Full original five-file bytes and patch were additionally preserved in a temporary
+local safety copy; no private/absolute host path enters committed documentation.
+Section 24 owns accepted generated-text/screen plan corrections. HANDOVER will replace
+superseded continuation wording while retaining its decisions/recovery references.
+
+### Configuration and explicit access prerequisite
+
+**User setup update:** approved local Studio `http://192.168.1.13:8888` and the
+requested synthetic tests, with no Studio paid limit; requested generation deadline
+120 s. The representative generic-compatible endpoint is **deferred by the user**,
+not passed. Studio requires an API key; user asked how to supply it or suggested
+temporary keyless access. Preserve the authenticated Studio contract: use a native
+macOS hidden-input dialog, keep the key only in the isolated probe process memory,
+and never write it to chat, logs, config, files or subprocess arguments/environment.
+Disclosed that LAN HTTP transports key/content unencrypted. No production credential
+store or keyless Studio acceptance is implemented. Version/loaded model/context and
+server tool policy were requested; discovery may precede their generation confirmation.
+
+| Configuration | Studio | Representative generic |
+| --- | --- | --- |
+| Address/origin/proxy/tunnel | approved `http://192.168.1.13:8888/v1`; direct LAN HTTP | deferred by user |
+| Installed version/backend | unknown | unknown |
+| Exact loaded model/quantization | user supplied `unsloth/gemma-4-12B-it-qat-GGUF`; loaded state/returned API ID/quantization pending discovery | user-deferred |
+| Authentication and credential source | Bearer required; source unavailable | mode/source unknown |
+| Effective loaded context/output mapping | unknown; `max_tokens` documentation candidate | unknown |
+| Permitted synthetic usage/cost | synthetic plan approved; no paid limit | deferred; no calls authorized |
+
+Asked for URLs without secrets, version/model/configuration, auth mode, credential
+environment-variable name or host-local file path only, allowed probes and paid limit.
+Never requested key values. No environment enumeration, credential database/console
+scraping, port scan, provider launch/install, download or endpoint request occurred.
+User must make an existing model/endpoint available; agents perform the actual
+qualification after explicit setup rather than transferring tests to the user.
+
+`spikes/provider-qualification/live_studio.py` is the manually commanded Studio-only
+runner. It opens native hidden key entry, then waits for explicit probe commands.
+It counts/reserves attempts before connect, has no redirect/proxy/retry, caps bytes/
+total deadlines, discards error bodies and closes/joins its owned worker on cancel.
+Receipt file is ignored local evidence; only fixed categories, allowlisted metadata
+and reviewed synthetic results are retained. The runner will not generate until
+loaded-model and tools-disabled confirmation is recorded. No key is entered/read yet
+at this record update, and no HTTP has been sent. This is a probe, not 2A.2 production.
+
+Current Studio-only selection is **14 HTTP/10 generation attempts** maximum; the
+original two-provider input plan remains preserved, but generic probes are not selected.
+The original 40/20/1800 hard allowance is unchanged. Native key entry was started in
+PTY session **52580**; at the last observation it was awaiting input and produced no
+credential-ready status. No probe command was sent. The hidden dialog times out after
+300 s with no credential persistence. No secret value is available to the assistant.
+After waiting for native entry, no credential-ready status or setup response was
+received. The owner interrupted and closed session 52580 before the external wait;
+no probe command, HTTP request or credential persistence occurred. Reopen the current
+reviewed runner only when the user is ready for entry. No provider failure is inferred
+from incomplete credential setup. Generic remains user-deferred, not live-qualified.
+
+**Same-thread continuation:** user supplied model
+`unsloth/gemma-4-12B-it-qat-GGUF`. Relevant remote main/source refs still equal
+`5f448ca`; the qualification branch remains local at that baseline with all changes
+intact, and worktree ownership is unchanged. Requested loaded-state/tool-policy and
+optional version/context/quantization details. Reopen native session-key entry, then
+send M01 discovery only when credential-ready status is observed. No generation
+until the returned ID and loaded/tool-policy prerequisites are established. This
+setup continuation grants no retries, generic calls or new allowance.
+
+Native entry was reopened in session **42127**, still awaiting input at its first
+observations; no credential-ready status or probe command. The supplied model's
+[upstream card](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF) was read, not
+downloaded. It documents thinking controls at the template/model layer, making
+T01/T02 relevant candidates; this does not prove Studio's installed mapping or selected
+quantization, loaded context, schema decoding or reasoning/final separation. Preserve
+the `enable_thinking` Studio candidates and measure rather than injecting model-specific
+control tokens into a reviewed payload or stripping reasoning heuristically.
+
+Before the next external setup wait, queued exactly `M01` plus process exit in
+session 42127. The command waits behind native key entry; after entry it can make
+one approved discovery request (15 s total) and then exit/clear session-key ownership.
+No generation is queued. Last receipt inspection: **0 recorded HTTP attempts /
+0 generations**; reserve one possible HTTP slot for the queued M01 until session/
+receipt evidence establishes completion or no-send exit. Do not requeue or open a
+second runner on resume. Inspect session 42127 and ignored receipts first; a terminal
+credential-entry timeout/cancellation with no receipt means no HTTP was attempted.
+No credential-ready status or live result was observed before this record update.
+
+### Planned probes and pre-send limits
+
+[Probe plan](../../../spikes/provider-qualification/probe-plan.json) preserves exact
+synthetic messages, schema resource, IDs, per-probe purposes and limits before any send.
+[ADR 0013](../../adr/0013-provider-request-and-transport-contract.md) defines proposed
+request/credential/transport behavior, distinct from measured provider capabilities.
+
+Per provider: M01 configured discovery, A01 omitted auth, A02 synthetic invalid auth,
+G01 literal structured rewrite, G02 protected-token structured rewrite, G03 disabled
+tools, G04 eight-token truncation, E01 nonexistent synthetic model, E02 invalid
+response-format type, S01 schema SSE, T01/T02 thinking off/on, C01 cancellation and
+M02 post-cancel availability. All ten POST attempts count as generation, even errors.
+Never use another installed/unloaded model for E01; model-management side effects
+must not be induced. A01/A02 do not replace/remove the real credential.
+
+Maximum planned: **28 HTTP / 20 generations** across two providers. Remaining twelve
+HTTP slots are reserved for explicitly recorded necessary non-generation diagnostics,
+not an automatic expansion; no generation reserve. Unsupported optional mappings,
+no-auth A02 or tunnel SSE are recorded separately, not passes. No automatic retries,
+format fallback, repaired generation or continuation. Discovery 15 s total; generation
+**120 s total** (user increased from 60 s for local-model cold loading); connect 10 s
+within total; SSE semantic idle 15 s after first generated content/reasoning, with
+startup bounded by the total generation deadline; cancellation at 5 s; client cleanup
+target 2 s. This does not authorize loading/switching models or extend the 30-minute
+cumulative live-execution cap. Complete both providers' required baseline/error/limit/
+cancel/cleanup probes before optional S01/T01/T02. All twenty generations at their
+maximum deadlines would exceed the time cap: check actual remaining allowance before
+each send and require its full deadline plus cleanup time to fit. Stop at the first
+cap; pending probes remain incomplete. External setup waiting consumes no live time.
+
+Before first send, record exact approved address/auth/model/configuration/context,
+cost permission and capability-specific conditional selection. Initial plan requested
+resident/server-wide tool confirmation; the later user-authorized inference continuation
+and proportionate request-level gate reassessment are recorded below. Never fabricate
+those unknown confirmations. Every Studio generation sets
+`enable_tools=false`, `enabled_tools=[]`, no session/client tools. G03 uses harmless
+prose; never request tool execution to challenge the server. Absence of returned tools
+alone does not prove internal server suppression: record disabled configuration and
+bounded provider-monitor evidence where available; otherwise mark that guarantee
+unknown. No enabling tools, model loading/unloading or server restart for testing.
+
+For each attempted send, persist a redacted receipt before/after the operation:
+sequence/probe ID, synthetic input/body digest, configuration identity, attempt time,
+HTTP/generation cumulative count, elapsed time, status/content type/byte counts,
+finish/model/usage where available, validation/cleanup result and useful synthetic
+response only after reviewing it for echoed credentials. Raw headers, key values,
+server errors/exceptions and private paths never enter logs or repository artifacts.
+Interrupted/ambiguous sends consume allowance and remain unknown; do not retry them.
+Only the same outcome resumes after external waits; no polling or CI operation exists.
+
+### Upstream investigation (not installed-version proof)
+
+Official pages checked 2026-10-07: [API overview](https://unsloth.ai/docs/basics/api),
+[HTTP guide](https://unsloth.ai/docs/integrations/connect-curl-and-http-to-unsloth),
+[Python/schema guide](https://unsloth.ai/docs/integrations/connect-python-sdk-to-unsloth),
+and [documentation index](https://unsloth.ai/docs/llms.txt). They document v1 discovery,
+Chat Completions, schema responses, thinking/tool controls and tunnel non-streaming.
+No stable public external HTTP load/unload contract was established in those pages.
+The [official CLI source](https://github.com/unslothai/unsloth/blob/main/unsloth_cli/commands/studio.py)
+contains internal lifecycle routing; that is not an adopted external management API.
+[Upstream issue 10610](https://github.com/unslothai/unsloth/issues/10610) reports
+residency/management differences and possible automatic loading; it is a caution,
+not live Loomlight evidence. Do not equate the discovery catalogue with loaded-only
+availability where version-specific metadata differs. Require user-confirmed loaded
+model; leave load/unload user-managed. Investigate the selected generic provider's
+public management docs once identified; no guessed routes or management calls.
+
+[OpenAI Chat Completions reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)
+was opened to check schema/output-limit wire fields. It does not select an OpenAI
+endpoint, grant billing permission or qualify any compatible provider.
+
+### Deterministic attempts and review
+
+Isolated `spikes/provider-qualification` only; no `app/` edits/imports or native/Ren'Py
+execution. First focused run: **27 tests, 26 pass/1 fail**, invalid bracket authority
+`http://[bad]` was accepted by the reference normalizer on this Python runtime.
+Classified as URL-validation defect; bounded correction requires bracketed authority
+to parse as IPv6. No live attempt occurred. Corrected run: **27/27 pass**, no skips,
+0.075 s. Self-review added dangling-port refusal and escaped unpaired-Unicode rejection,
+and aligned the generation deadline/plan to the user's 120 s correction; final affected
+run **27/27 pass**, no skips, 0.077 s. No second correction of the same failed hypothesis.
+
+Host: macOS ARM64; system Python **3.9.6**, standard library only. Commands:
+`python3 -m unittest discover -s spikes/provider-qualification/tests -v`,
+`python3 scripts/validate.py`, `git diff --check`. Validation passed for **371 files**
+with privacy/local-link checks and whitespace clean before final status edits; rerun
+documentation validation after those edits. No native Loomlight/OS-key adapter, SDK,
+GPU/provider launch or CI ran. Every-byte SSE splitting includes UTF-8 and CRLF, plus
+malformed/unknown/tool/truncated frames. Cancellation/close fixtures are serial models,
+not real concurrent worker/Save responsiveness or measured socket cleanup.
+
+After Studio setup approval, six bounded live-runner fixtures were added: reservation/
+single-attempt behavior, auth error body non-reflection, decoded credential-echo refusal,
+loaded-model/tools confirmation, owned-worker cancellation and pre-connect time-cap
+refusal. **33/33 pass**, no skips, 0.094 s, with network connections replaced by fake
+connections. A semantic-progress callback now drives live SSE idle deadlines after
+first generated content/reasoning; it does not extend the total deadline. No real
+provider behavior is inferred. Repository validation passes **373 files**, whitespace
+clean. An initial `py_compile` encountered the macOS Python cache outside writable
+roots; subsequent checks explicitly use a temporary Python cache. This is a local
+verification environment limitation, not a provider failure. No native app build ran.
+
+Self-review checked selected corrections, request bounds, separate reasoning/final data,
+model/tool/finish rejection, origin/address classes, proposal scope and no ambient
+network path. ARCHITECTURE/UI/Phase 3 accepted input bytes were verified unchanged
+before the new architecture cross-reference; Phase 2's accepted sections 7/24 are
+retained. Credential lifecycle is a documented proposal, not an OS-store test claim.
+Existing core `ureq` SDK download is synchronous with a 600 s timeout/no redirects;
+cancellable generation reuse remains unproved for 2A.2, no dependency changed.
+
+The proposed product resource bounds (including 2 s cleanup target) and credential
+namespace/access attributes require 2A.0 review and later actual client evidence.
+They are not claimed measured on this fixture. Public management research did not
+establish a stable external Studio load/unload API; generic remains unselected.
+
+### Live result matrix and remaining scope
+
+| Capability | Studio | Generic |
+| --- | --- | --- |
+| Actual version/model/configuration | user-reported v0.1.902-beta; exact Gemma 12B ID; API loaded/UD-Q4_K_XL and context metadata 262144; full capacity/backend/sampling unmeasured | user-deferred; unqualified |
+| Discovery/auth | PASS M01/M02/M03/M04; missing/invalid auth 401; M04 after actual cancel available | unknown; not attempted |
+| Non-streaming structured response | PASS thinking-off/1024 G05 protected tokens and G06 harmless tools-disabled JSON; on/default truncation FAIL | unknown; not attempted |
+| Tools disabled | explicit disable flags accepted, no returned tools, no client tools/session; global/internal suppression unknown | unknown; not attempted |
+| SSE/thinking/output limits | off/1024 schema SSE PASS; default SSE truncated FAIL; on JSON 1024 unusable FAIL, on SSE unknown/not sent; 8-token cap/rejection PASS | unknown; not attempted |
+| Errors/cancellation/client cleanup | invalid format 400; nonexistent-ID routing FAIL but identity guard PASS; actual JSON/SSE cancels and all 22 released workers PASS; server-stop unknown | unknown; not attempted |
+| Public model-management contract | not established; user-managed baseline | unknown pending provider selection |
+
+**Current consumed allowance: 22/40 HTTP, 16/20 generation attempts.** HTTP durations
+sum 67.767 s; conservative cumulative closed-window charge **1457/1800 s**. Remaining
+**18 HTTP/4 generations/343 s**, no pending operation. Three of five authorized extra
+probes used; two remain contingent, no inferred added time. Studio scope/contracts
+ready for review; full two-provider 2A.0 acceptance incomplete with generic deferred.
+No production integration permission; 2A.1/2A.2/screens remain unstarted.
+
+**Explicit dialog reopen:** user requested the API-key dialog. Session 42127
+was no longer available; receipt inspection confirmed 0 HTTP/0 generations, so the
+previous queued M01 did not send. Opened native entry in session **61665** and
+queued only M01+exit under the existing approval. No generation queued. Check that
+owned session/receipts on resume before any further runner or send. This is credential
+setup continuation, not a retry of an HTTP attempt or a new allowance.
+
+### Authenticated discovery and user continuation
+
+User entered the key in native UI and instructed continuation of the initial outcome.
+Session 61665 performed **M01: HTTP 200**, JSON, 607 bytes, 0.234 s, owned worker
+released. Returned IDs include exact selected
+`unsloth/gemma-4-12B-it-qat-GGUF` plus two other catalogue IDs; no other model is selected
+or invoked. Receipt is in ignored local `studio-receipts.json`; M01 will not be repeated.
+**Consumed: 1/40 HTTP, 0/20 generations, 0.234/1800 live seconds.** Its queued exit
+released the memory-only key. One further native entry is required for the remaining
+probe session; keep that session through the finite probes, then close it.
+
+Reassessment of a self-imposed probe gate: no evidence establishes Studio's server-wide
+tool policy or loaded/resident state. User explicitly selected this model and approved
+synthetic generations, including cold-loading deadline accommodation; discovery confirms
+its exact API ID. Do not falsely set `loaded_confirmed` or `tools_disabled_confirmed`.
+Instead the runner binds generation to the user-selected/discovered exact ID and checks
+every serialized body contains `enable_tools=false`, `enabled_tools=[]`, no tool
+definitions/session. Harmless probes measure request-level disable behavior and reject
+unexpected tool results; internal/server-wide suppression stays unknown without monitor
+evidence. No separate model-management route or installed model substitution is allowed.
+This removes an unsupported setup blocker without claiming resident/global-policy proof.
+Production readiness remains bound to the measured configuration and review boundary.
+
+Before remaining sends: A01/A02 omitted/invalid auth; G01–G04 schema/literal/token/tool/
+output-limit cases; E01/E02 nonexistent-model/invalid-format errors; C01 client cancel
+and M02 post-cancel discovery; optional S01/T01/T02 SSE/thinking. Same recorded inputs,
+120 s generation and 15 s discovery deadlines; no retry, repair or format downgrade.
+Version/backend/quantization/context and global tool-policy remain unknown. Generic
+remains user-deferred. No native build/SDK/CI/push/merge/production integration.
+
+Bounded gate-change checks: **34/34 pass**, no skips, 0.096 s; repository validation
+373 files and whitespace pass. New native entry is owned by session **87160**.
+Queued **A01, A02, G01** behind entry; no exit is queued yet so the same key can serve
+the remaining tests without repeated entry. Last observed receipt state still M01
+only: one HTTP, no generations, 0.234 s. On any external pause or completion, terminate
+the owned credential session after accounting for queued/active operations; no silent
+background retries or second runner. Key readiness and new live results not yet observed.
+
+### Authentication, output-limit finding and settings reassessment
+
+Session 87160 successfully received the key. A01 omitted auth and A02 synthetic
+invalid auth both returned **401** (0.033 s / 0.023 s); error bodies were discarded,
+owned workers released. G01 returned HTTP 200 but **failed usable-response validation**:
+`finish_reason=length`, output allowance/completion usage 256, prompt usage 95,
+total usage 351, separate reasoning field 1054 bytes, no returned tool fields,
+exact returned model match. Response 1750 bytes, elapsed 8.790 s, worker released.
+Default thinking and schema acceptance are not a valid proposal pass. No repair/retry
+or source write followed. **Consumed: 4 HTTP / 1 generation / 9.080 live seconds.**
+
+User reiterated leaving Studio/model available overnight. Do not unload, restart,
+stop or switch it; only the owned probe client may be closed. No provider lifecycle
+action was performed. No queued request remains after G01.
+
+User explicitly requested one independent read-only API-settings helper. It researched
+official guides/source/model cards with no endpoint calls, credentials or edits.
+Public request controls distinguish `max_tokens` output allowance from loaded context;
+`enable_thinking=false` is documented. Temperature/top-p are documented overrides;
+other controls in current source require installed-version proof. No documented chat
+field resizes loaded context. Model-card native capacity is not runtime capacity.
+Current upstream `/v1/models` may advertise conditional loaded/context metadata,
+but this discovery receipt retained IDs only. Internal/UI status routes are not an
+adopted stable external API; none is probed. Installed version/context remain unknown.
+
+Research recommends a **not-yet-tested** 1024-token/thinking-off candidate, with
+sampling omitted. Existing authenticated process has fixed pre-recorded probes and
+no runtime settings override; restarting requires native key entry while the user is
+asleep. Do not export/recover its key or inject code. Move preplanned T01 ahead of
+other generations as a distinct **256-token, thinking-off** small-envelope diagnostic,
+same exact schema/model/tool-disable fields, 120 s deadline. This is a deliberate
+setting comparison, not a repeat of G01 or a tested 1024-token claim. If usable, it
+qualifies only this bounded response; default/on length failure stays recorded.
+
+T01 completed HTTP 200/`stop`, exact model, **whole-document schema valid**, no
+reasoning field and no returned tool fields. Usage input 97/output 91/total 188;
+891 response bytes, 8.122 s, worker released. Its synthetic text retained the requested
+literal `[name]` and `{b}lantern{/b}`. This is a non-streaming schema PASS with
+thinking explicitly off and output cap 256, not Ren'Py encoding/display proof.
+Consumed now **5 HTTP / 2 generations / 17.202 live seconds**.
+
+Remaining baseline probes retain their already-recorded default-thinking/256 allocation:
+G02 protected tokens, G03 harmless tools-disabled response, G04 intentional 8-token
+limit, E01 nonexistent synthetic ID, E02 invalid format, C01 JSON client cancellation,
+M02 availability. Their results qualify that precise configuration, including failures;
+they cannot establish the successful thinking-off profile's protected-token behavior.
+No settings/credentials are silently changed. Optional S01/T02 measure SSE and explicit
+thinking-on separately after those terminal results; no repeated T01 or repaired G01.
+
+G02/G03 both exhausted 256 tokens under default thinking; protected-token structured
+success remains unproved. G03 accepted request disable fields and returned no tool
+fields, but truncated output is not a proposal/tools-suppression pass. G04 intentionally
+allocated 8 tokens and returned usage 8/`length`; rejecting it is the limit-handling
+PASS, distinct from usable-generation failure. E02 invalid format returned HTTP 400.
+**E01 did not reject the nonexistent ID:** HTTP 200, returned identity differed from
+requested synthetic ID, and the client rejected `model_mismatch`. No substitute model
+was selected by the client; provider routing guarantee FAIL for this probe. Returned
+alias was not retained, so the actual fallback identity is unknown. Do not claim 404
+behavior or downloaded/loaded a different model. C01 finished in 3.024 s before the
+5 s cancellation trigger; cancellation is **inconclusive**, not PASS. M02 discovery
+still returned the selected catalogue ID, HTTP 200; that is availability evidence,
+not server cancellation or unchanged model-residency proof. All workers released.
+
+After those baseline results, execute pre-recorded optional S01 (strict-schema SSE,
+direct LAN, default thinking/256) and T02 (JSON thinking-on/256), each once, 120 s
+total and S01 15 s semantic idle deadline. Do not infer streaming support from JSON
+success, repair a truncated stream, or treat reasoning as final content.
+
+
+### Initial live batch closure and bounded continuation
+
+All initial Studio IDs attempted exactly once, in this order. Actual receipt categories
+below distinguish expected rejecting tests from failed usable responses. No request
+was automatically retried. The ignored local receipt contains allowlisted metrics and
+T01 synthetic prose only; SHA-256 of the terminal 14-attempt file is
+`a201791850b7ce43b775be231f25a970376366dfb24ff4792fd664edd2cad89b`.
+
+| Sequence/probe | HTTP | Recorded outcome | Seconds | Request-body SHA-256 |
+| --- | --- | --- | --- | --- |
+| 1 M01 | 200 | discovery_parsed | 0.234 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 2 A01 | 401 | http_error | 0.033 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 3 A02 | 401 | http_error | 0.023 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 4 G01 | 200 | finish_unusable | 8.79 | `1429ff15febd2fda1d0cd89b7d9590b32acc8370abb1dbc47634087b1e2a88e7` |
+| 5 T01 | 200 | structured_valid | 8.122 | `f736e6b0e67e11c345405264d73023d3db3f81a77f36334a4339193c6899cb50` |
+| 6 G02 | 200 | finish_unusable | 3.209 | `4dbbfaa7285b2b96f71d73e1cfcfede3f35cfe6836a5795d518cb9a3f1d10d83` |
+| 7 G03 | 200 | finish_unusable | 2.887 | `9b2675e584677502c06f66357671d50f5cb10898d51b054888001592fb14ab01` |
+| 8 G04 | 200 | finish_unusable | 0.463 | `d85b8c97273d931058ac1ce4c5073f8f737d6f7bf2c0013e0b858b45167d736e` |
+| 9 E01 | 200 | model_mismatch | 4.016 | `bb87150ec790b3869000b30652710a5648bbb9af060f4722a31ccdef7ec0d3c4` |
+| 10 E02 | 400 | http_error | 0.294 | `3425d59948eeffacd11533131f6a80dc41e5a169b6b4f426267b4a8a62b0c35b` |
+| 11 C01 | 200 | finish_unusable | 3.024 | `88bbae2453c1d3415233f0873035f264ac6e67a7afffe8f8ee424f42a3c164e5` |
+| 12 M02 | 200 | discovery_parsed | 1.715 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 13 S01 | 200 | finish_unusable | 3.283 | `65bca2c9a470949ff6a56d293e140ac7804e423815ff3955e0fb343475895fc2` |
+| 14 T02 | 200 | finish_unusable | 2.634 | `e91be9d243f76bfdc5368d6af30c9c98b6d77bea4cf7c6737e6be461f326f25a` |
+
+T01 retained safe synthetic final prose: “The [name] sits by the water, where a
+{b}lantern{/b} casts a steady beam.” It is fixture data, never applied to project/source.
+S01 returned HTTP 200/event-stream and reached an unusable finish; it is partial SSE
+transport evidence, not a successful schema stream. The runner did not retain partial
+SSE byte/usage/reasoning counts, so those remain unknown. T02 explicit thinking-on
+returned separate reasoning (951 bytes), usage 95 input/256 output/351 total, and
+`length`; that profile has no usable-response pass. All 14 workers/resources released
+with reported cleanup 0.000 s (rounded); no active cancellation/late-publication or
+server-stop claim. No real timeout was exercised; 120 s is a configured deadline,
+not measured cold-load latency capacity.
+
+E01's fallback-like outcome is consistent with current official
+[selection source](https://github.com/unslothai/unsloth/blob/main/studio/backend/routes/inference.py#L10173),
+which permits some unknown labels to use resident routing. Installed mechanism and
+actual returned alias are unknown. Retain exact response-identity rejection; discovery
+membership cannot guarantee the requested model was used. The research helper did no
+live requests and owns no implementation files.
+
+**Time accounting:** first send 11:49:25 UTC; last completion no later than 12:11:37
+UTC (rounded outward): 22 min 12 s, conservatively charged in full. HTTP durations
+sum 38.727 s. External setup waiting need not consume live time, but this batch does
+not reclaim it. Updated executable plan carries the 1332 s charge through sequence
+14 and counts follow-up wall time between probes as well as attempted HTTP duration.
+All continuation sends must still fit their full 120 s/15 s deadline plus 2 s cleanup
+inside the remaining 468 s; stop on exhaustion. Session-only key waiting with no
+probes after batch closure is not ongoing live execution.
+
+**Pre-recorded follow-up, not sent:** M03 selected-row advertised loaded/quant/context
+metadata (15 s); G05 protected-token JSON, G06 harmless tools-disabled JSON and S02
+SSE use thinking off/output 1024 (120 s each, S02 semantic idle 15 s); C02 JSON uses
+thinking on/output 1024, client cancellation at 1 s, cleanup target 2 s. C01 completed
+before 5 s, so C02 changes the cancel boundary deliberately rather than retrying the
+same attempt. These five candidates add at most five HTTP/four generation attempts;
+none is an automatic retry, undocumented context resize or model-management call.
+Version/native/runtime/advisory capacity distinctions remain explicit. Metadata is
+conditional/source-version-dependent; omission remains unknown. Sampling stays omitted.
+
+The updated runner reads fixed recorded candidates and rejects unrecorded command
+settings; it cannot alter the already-running process. Session **87160** remains
+idle with its original memory-only credential and no requests queued, at the user's
+overnight availability instruction. Studio/model/server are untouched. Do not extract
+or share that key, inject code, unload models or claim another agent has the key.
+The updated runner requires native key entry on continuation: close only the old
+owned client when replacing it, then launch the revised finite runner and enter in
+native UI; do not send a secret in chat. No second live writer or background polling.
+This secure-entry dependency is an actual remaining setup need, not a new permission
+request or unavailable endpoint claim. Generic qualification remains user-deferred.
+
+Final affected offline run after prospective runner/plan correction: **38/38 pass**,
+no skips, 0.099 s. Added rejecting unrecorded-settings assertion, actual serialized
+request tool flags, off-mode output/input selection, allowlisted metadata and conservative
+elapsed-window gate. These remain deterministic proof only. Finish repository validation
+and self-review before transfer; do not start 2A.1/2A.2 or screens.
+
+### Final self-review and local review delivery
+
+Final focused check **38/38 PASS**, no skips, 0.093 s after rejecting ignored stream
+overrides/non-string probe IDs and checking the cumulative 19-HTTP/14-generation
+Studio candidate selection. Repository validator **373 files PASS**, whitespace PASS.
+UI/Phase 3 accepted bytes, Phase 2 sections 7/24 and ARCHITECTURE's accepted text
+plus only the contract cross-reference were rechecked against entry safety copies.
+HANDOVER's live continuation was replaced as required; unique source recovery facts
+and accepted plan ownership remain linked. No app, dependency, workflow, SDK, native
+or production settings/service/screen implementation changed.
+
+Fresh completion remote main/source refs still equal `5f448ca`; no remote qualification
+branch. Current checkout/worktree ownership and recovery stash unchanged; no attached
+worktree/PR. Completion PR refresh could not connect to GitHub and was not retried;
+entry fresh PR inspection remains the last observed PR state, not a claimed new refresh.
+No push, commit, merge, release, CI dispatch, secret persistence or provider management.
+All work remains local/uncommitted on `codex/provider-qualification`. Contract proposals
+and partial live results are ready for review; **2A.0 remains incomplete** at the actual
+secure-entry/live-evidence boundary. Do not represent mocks or unknowns as a pass.
+
+Same-outcome continuation prompt (not a new goal or next-phase instruction):
+
+> Resume Phase 2A.0 in this same chat on local `codex/provider-qualification` at
+> `5f448ca` plus all uncommitted edits and five accepted planning corrections.
+> Read HANDOVER and Phase 2 section 25; verify changed refs/ownership/receipts.
+> Keep Studio/model at `http://192.168.1.13:8888` running. Replace only idle owned
+> probe session 87160 with the revised finite runner using native hidden key entry;
+> never ask for a key in chat or extract/share it. Execute remaining recorded
+> M03/G05/G06/S02/C02 serially, exact selected Gemma 12B ID, synthetic only,
+> output 1024 candidate, no sampling overrides/retries/management. Carry consumed
+> 14 HTTP/10 generations/1332 conservatively charged seconds; remaining
+> 26 HTTP/10 generations/468 seconds, full 120 s generation deadline plus cleanup
+> must fit before each send. Generic stays user-deferred. Preserve success/failure/
+> unknown, finish focused checks/self-review and update contracts/ledger/HANDOVER.
+> Return review results; do not implement 2A.1/2A.2/screens, push, merge or release.
+> Codex machine: repository host with explicit endpoint access. Test hosts: portable
+> deterministic checks and actual approved endpoints. Reason: establish provider
+> compatibility before production settings/request services.
+
+### Same-outcome resume — 2026-10-08
+
+User explicitly resumed M03/G05/G06/S02/C02 using native entry, preserving local work
+and Studio/model availability. Fresh main/source refs and local qualification HEAD
+remain `5f448ca`; checkout/planning worktree ownership unchanged. PR read could not
+connect to GitHub; no retry or inferred new PR state. Receipt still exactly the
+recorded 14 terminal attempts/digest, all workers released. No other live attempts
+or local edits were observed. Closed **only** idle owned client 87160 (normal exit),
+not Studio/model. Launch revised native-entry client, queue M03 only initially;
+inspect its metadata before remaining serial recorded probes. Same allowance carries:
+14 HTTP/10 generations/1332 conservatively charged seconds, 468 seconds remaining.
+No key extraction, retries, generic calls, later phases or publication.
+
+Native launch detail: first sandboxed client exited with the fixed unavailable/
+cancelled category before any send. The authorized native-UI launch is owned session
+**74466**; M03 alone is queued behind key entry. Last observed process output has
+not reported key readiness or M03 completion; counts remain 14/10 and no generation
+is queued. Native entry has a 300 s timeout; if it expires before entry, no queued
+HTTP is sent. Check actual session/receipts on continuation rather than duplicating it.
+
+### Credential-reuse correction requested by user — 2026-10-08
+
+User rejected repeated key entry. The owner acknowledges tying credentials to fixed
+probe-process lifetime caused avoidable re-entry and corrects qualification setup;
+this does not select production 2A.1/settings implementation. Client 74466 terminated
+unavailable/cancelled before any send; counts remain 14/10. No memory-only key can
+be recovered; no extraction or provider credential-database access was attempted.
+
+Revised native hidden entry explicitly offers **Remember for qualification**.
+Only that native click stores a non-sync macOS Keychain generic password in separate
+service `app.loomlight.desktop.ai.test`, opaque UUIDs and qualification account component.
+Origin-bound ignored reference contains no secret. Later probe processes retrieve
+only this owned entry into backend memory; no read-secret CLI/renderer IPC/export,
+argv/environment inheritance or plaintext fallback. Missing/unavailable remembered
+key refuses rather than automatically reopening entry. Publish reference after
+store/read verification; failed publish cleans only the staged owned entry. Retain
+remembered key for user-requested reuse; no removal/revocation or Studio/model change.
+Production packaged identity/replacement/storage UX remains unimplemented/unqualified.
+
+Deterministic checks **42/42 PASS**, no skips, 0.101 s: reuse without second entry,
+missing-key/no-auto-entry, foreign-origin refusal and failed-save cleanup assertions.
+Actual native Security/CoreFoundation APIs, no build or HTTP: disposable synthetic
+entry round-trip PASS, read in second Python process PASS, delete/absence PASS.
+Only booleans printed; random sentinel never logged/files/argv/environment; synthetic
+entry removed. [Apple Keychain API](https://developer.apple.com/documentation/security/adding-a-password-to-the-keychain)
+and non-sync attributes reviewed. This proves this host's qualification seam only;
+locked-store/signed-app/Windows and production entry remain separate gates.
+
+Correction validation: repository text/privacy/link checks **375 files PASS**,
+whitespace PASS; nonsecret qualification reference is ignored. No real remembered
+key or new HTTP has yet been observed. Owned client **43647** awaits explicit
+Remember entry with M03 alone queued; no generation queued. After Remember succeeds,
+restart/revised probe processes reuse the owned Keychain reference without API-key
+entry. Studio/model untouched, same 14/10 counts and 468 live seconds remain.
+
+
+User reported missing dialog and explicitly authorized reopening plus continuation.
+Session 43647 had closed unavailable/cancelled; no reference saved, receipt digest/count
+unchanged (14/10). Reopened native Remember in owned session **44134**, M03 alone
+queued; no generation. User additionally authorized **up to five contingency probes
+if needed** beyond the recorded five. No extra probe selected/sent yet; retain original
+40 HTTP/20 generation/1800 s caps and 468 s remaining, no assumed added time.
+Native entry is setup, not an HTTP retry. After successful Remember, do not ask for
+API-key entry again on routine runner replacement; use the owned Keychain reference.
+
+Native Remember succeeded in session 44134: keychain-ready status only; owned
+nonsecret reference saved, no key output. M03 sequence 15 HTTP 200, 587 bytes,
+1.639 s, worker released. Selected ID advertises `loaded=false`, quant `UD-Q4_K_XL`;
+no context/native/advisory lengths present. This is discovery/configuration evidence,
+not confirmed runtime residency or context. Under the existing explicitly selected
+model/cold-loading authorization and prior gate reassessment, proceed only with that
+exact ID via ordinary inference, no management/server lifecycle/model substitution.
+G05/G06/S02/C02 retain pre-recorded settings/deadlines; every returned identity must
+match and every request disables tools. Failures/aliases remain rejected, no retries.
+
+
+### Recorded follow-up results and four contingency probes
+
+M03/G05/G06/S02/C02 terminal; G05 protected-token JSON PASS (88 output/89 input),
+G06 tools-disabled JSON PASS (78 output/83 input), both HTTP 200/stop/exact model,
+no reasoning/tool fields. S02 schema SSE PASS, HTTP 200/event-stream, 26814 bytes,
+stop/DONE, exact model, validated literal fixture prose. SSE usage/reasoning metrics
+were not retained and remain unknown; JSON metrics do not qualify SSE reasoning.
+C02 client cancel PASS at 1.004 s, worker released/cleanup 0.001 s, no proposal;
+no HTTP status before abort and no server-stop claim. G05 8.623 s, G06 1.609 s,
+S02 2.031 s. Owned client 44134 exited normally after these terminal results;
+remembered credential retained, Studio/model untouched.
+
+Consumed **19 HTTP/14 generation attempts**, HTTP durations total 53.633 s.
+Follow-up window first floor 16:44:54 UTC, last C02 start floor 16:45:56 + 1.004 s
+with less than one second unknown timestamp fraction: conservatively round last
+bound upward to 16:45:59, charge **65 s**. Cumulative charge **1397/1800 s**,
+remaining **21 HTTP/6 generation attempts/403 s**. Setup waiting after this closed
+batch does not count. Executable checkpoint advances through sequence 19; later
+between-probe wall time still counts and full timeout+cleanup must fit before send.
+
+User's five contingency probes: select **four**, before sends, all same approved
+origin/model/schema/tool-disable flags/sampling omitted. M04 post-actual-cancel
+/models discovery/allowlisted selected metadata (15 s); T03 thinking-on JSON at
+output 1024 (120 s); S03 thinking-on SSE/output 1024 only if T03 usable (120 s total,
+15 s semantic idle); C03 thinking-off SSE/long synthetic input/output 1024, cancel
+at 1 s, 2 s cleanup (120 s total cap). These are distinct setting/transport probes,
+not automatic retries. At most four HTTP/three generations; one contingency remains
+unselected. No generic calls, model management, SDK/build/CI or production integration.
+Saved Keychain reference will be reused for the new client; no new API-key entry.
+
+User reports selected model's Studio UI context opened as **262144** and Studio
+version **v0.1.902-beta**. Record as user-reported UI configuration, not discovered
+API runtime capacity or a full-context stress pass. For remaining tiny fixtures,
+preflight complete serialized body byte count as a conservative token estimate plus
+max(128, ceil(10% estimate)) plus output 1024 <= local **4096** total budget <=
+reported 262144 ceiling. This sends no context resize field and does not clamp/drop
+input or change the server. Backend/kernel/native effective capacity remains unmeasured.
+New partial-SSE cancellation fixture proves no partial proposal, reader/worker cleanup
+and retained safe byte count. **43/43 offline checks PASS**, no skips, 0.113 s.
+
+Client 1632 reused real remembered credential without dialog/API-key re-entry.
+M04 post-C02 discovery HTTP 200, 628 bytes, 2.282 s, worker released. Selected row
+now advertises loaded=true and context_length/native_context_length/max_context_length
+all **262144**, quant **UD-Q4_K_XL**, matching user's context report. This is actual
+API metadata, not stress proof of maximum effective capacity; maximum/native/runtime
+meanings remain distinct. No management call occurred.
+
+T03 thinking-on/1024 JSON **FAIL usable completion**: HTTP 200/exact model,
+finish length, 3829 reasoning bytes, usage 95 input/1024 output/1119 total,
+4671 response bytes, 10.846 s; no returned tools, worker released. Do not increase
+tokens again/repair or treat thinking as final prose. S03 prerequisite (usable T03)
+failed, so **S03 not attempted/unknown**, not pass/unsupported. Send C03 as recorded
+for active off-mode SSE cancellation, then close only owned client; remembered key
+and Studio/model remain available. No further allowance is required for this scope.
+
+
+### Final Studio review delivery — 2026-10-08
+
+C03 active partial-SSE cancel **PASS**: HTTP 200/event-stream, 2393 bytes consumed,
+client cancelled at 1.006 s, cleanup 0.000 s rounded, worker released, no proposal.
+This does not prove server computation stopped. Client 1632 exited normally;
+all 22 attempts terminal/workers released, no pending operation or hidden queue.
+Remembered Keychain entry retained for reuse, no further API-key entry requested.
+Studio/model remain running; generic stays user-deferred. No further allowance needed.
+
+| Sequence/probe | HTTP | Recorded outcome | Seconds | Request-body SHA-256 |
+| --- | --- | --- | --- | --- |
+| 15 M03 | 200 | discovery_parsed | 1.639 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 16 G05 | 200 | structured_valid | 8.623 | `3af830f7f7172fc546070dff04430ba447d73e0b84a9a324eae90b9b63b3389e` |
+| 17 G06 | 200 | structured_valid | 1.609 | `aa96f37cd072855f4614350d793daa0db59f31f63224d8a5d972ba45cb4bd4e7` |
+| 18 S02 | 200 | structured_valid | 2.031 | `61c5c5b6df6d3f3a6505c29d9ebba689dc16eed69b410b43bcc5dd74cb046cd4` |
+| 19 C02 | not observed before cancel | client_cancelled | 1.004 | `0afd20c1fc13bd73bfdff18706815708f87d5c28c367fbfc0503ab48115ec1fd` |
+| 20 M04 | 200 | discovery_parsed | 2.282 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| 21 T03 | 200 | finish_unusable | 10.846 | `74738b4dea3e3213b096a95854e1445cdca40edc603dff0588d862e9554f07a5` |
+| 22 C03 | 200 | client_cancelled | 1.006 | `3fa1d5ef4eb381ed57c6d5135334f4a50f73182e82fce355eeff82ded62057c5` |
+
+Safe G05 result: “Greetings __LL_TOKEN_0__, the __LL_TOKEN_1__ lantern is waiting.”
+G06: “A cerulean lantern emits a soft radiance.” S02 preserves literal fixture tags/
+interpolation in a validated envelope. These are wire-fixture data only, never source
+changes. No partial C03 reply or provider reasoning text retained. Final ignored
+receipt SHA-256 `44027a6cfb0a74d9be7f629c77ec7f5131a1145a34cc3446f9c0dc27fe669f92`.
+
+Final allowance: **22 HTTP/16 generations**, HTTP elapsed **67.767 s**. Contingency
+window floor first 16:49:22 UTC, last start floor 16:50:18 + 1.006 s and less than
+one-second timestamp fraction: outward bound 16:50:21, charge **59 s**. Self-review
+corrected initial window's outward bound by **one second** (original 1332 charge
+becomes 1333; no past attempt/duration altered). Cumulative **1333+65+59=1457 s**,
+remaining **18 HTTP/4 generations/343 s**. Executable plan advances checkpoint through
+sequence 22 at 1457 s. Three contingency probes used (M04/T03/C03); S03 conditional
+not attempted after T03 failure, fifth never selected: two contingent unused, not
+an automatic authorization to spend them or expand original caps. No budget reset.
+
+ADR 0013 is the final concrete contract proposal for review: qualified off/1024
+JSON/SSE, strict identity/schema/tool/literal-token boundary, context/output separation,
+bounded transport/cancellation and native credential ownership. Credential setup
+correction stays isolated; no production 2A.1/2A.2 or full Ren'Py emission/UX proof.
+Full-context stress, effective backend/sampling, internal tool suppression, server-stop,
+TLS/tunnel/proxy and generic evidence remain explicit limits. Thinking-on 1024 is a
+failure at that allowance, not a claim every possible thinking allocation is broken.
+No automatic retries/increases/downgrades or invented API/model management.
+
+Same-outcome review continuation (supersedes the previous key-entry prompt):
+
+> Review Studio Phase 2A.0 results/contracts from HANDOVER and Phase 2 section 25 in
+> this same chat on local `codex/provider-qualification`, `5f448ca` plus all uncommitted
+> work/five accepted plan corrections. Keep Studio/model and the remembered native
+> qualification Keychain entry available; no routine key re-entry or secret export.
+> Recorded Studio probes are terminal. Generic remains deferred and full 2A.0
+> acceptance incomplete; obtain explicit disposition before closure or next phases.
+> Carry 22 HTTP/16 generations/1457 conservatively charged seconds; remaining
+> 18 HTTP/4 generations/343 s, generation deadline 120 s, no automatic retries.
+> If more provider qualification is selected, establish exact setup/usage and record
+> finite probes before sending; request additional allowance only if actually needed.
+> Update canonical contracts/ledger/HANDOVER with review decisions. Keep work local;
+> no 2A.1/2A.2/screens, push, merge or release. Machine: repository host with explicit
+> endpoint access. Test hosts: portable checks and actual approved endpoints.
+> Reason: establish compatibility before production settings/request services.
+
+
+Final affected verification **43/43 PASS**, no skips, 0.121 s; repository validation
+**375 files PASS**, whitespace PASS. Accepted UI/Phase 3 bytes and Phase 2 sections
+7/24 rechecked unchanged; architecture accepted text retained with the contract link.
+Self-review bounded native invalid-UTF8 credential data to a fixed safe category,
+updated latest result/status/README references and cumulative time checkpoint.
+No further provider call after C03; all owned clients exited, remembered key retained.
+Final remote-ref recheck failed DNS resolution; no retry/new ref assertion. Earlier
+resume refs at `5f448ca` remain last observed remote state; local HEAD/worktrees
+unchanged. PR refresh unavailable as already recorded. Requested contract panel open
+was queued by the app; opening is not acceptance. Work stays uncommitted/local,
+no app/dependency/workflow changes, native build/SDK/CI or publication.
+
+### Studio qualification contract review — 2026-10-08
+
+**Selection and disposition:** the user selected an audit of the unpublished Studio
+candidate and request/settings, credential, structured/protected-token, tool, transport,
+cancellation and classification contracts. One owner, no helpers or second writer;
+the shared contract review was useful serial work. Review delivery is complete with
+**three P2 findings; corrections requested before candidate reuse/integration**.
+The ADR 0013 design remains a proposal, not user-accepted production authority.
+Measured Studio passes survive this review; none of the newly reproduced failures
+was observed in the live receipts. Generic remains explicitly user-deferred, not
+failed/passed/unsupported. Full two-provider 2A.0 acceptance remains incomplete.
+No production implementation, provider requests, native builds, SDK, CI, management,
+push, merge or release was selected or performed. No autonomous Goal was created.
+
+**Fresh state:** HEAD/local `codex/provider-qualification` remains
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`, qualification and five accepted planning
+corrections uncommitted. Read-only remote heads confirm main/source at the same SHA,
+no remote qualification branch; connector open-PR inspection confirms unrelated
+10/11 and abandoned 12 only. Shell DNS failures were resolved by an elevated read-only
+`git ls-remote --heads origin`; no fetch/reset/ref write. Worktree ownership remains
+this checkout and historical planning worktree at `2c5a164`; stash
+`23c69ff7cc3262981b8a23b32c55a23bb2ab0c27` unchanged; no task attachments.
+Sandbox process inventory was unavailable (`ps` refused), not a provider failure.
+Terminal receipts and the previous recorded client exits establish the continuation;
+this review launched no live client or pending operation and claims no fresh server
+liveness/credential-store read. Original code/plan/schema/tests were hashed before
+the audit; reviewed eight-input manifest is ignored
+`.toolchains/reports/provider-qualification/review-inputs.json`, SHA-256
+`f48b0db4ee40993b2c64618751eb6be56003d0ab3d25d993cde7454d2038ecaa`.
+
+**Evidence audit:** actual `studio-receipts.json` still hashes to
+`44027a6cfb0a74d9be7f629c77ec7f5131a1145a34cc3446f9c0dc27fe669f92`.
+All **22/22 request-body digests** reproduce from current exact synthetic inputs,
+model/settings mappings and serialization (including E02's deliberate format mutation).
+Sequence/probe uniqueness, HTTP/generation counts, terminal/released status, 67.767 s
+HTTP sum and executable 1457 s checkpoint agree. Four retained proposals
+T01/G05/G06/S02 revalidate against the closed schema; G05 keeps both tokens exactly
+once/in order. Actual raw replies/SSE were deliberately not retained: their original
+protocol completion cannot be independently replayed now. The actual parser/request
+paths and receipt classifications were audited; fixtures are not fresh live evidence.
+Native disposable Keychain round-trip/second-process/delete remains the recorded
+historical host result, not a new review execution; no separate raw native receipt
+exists in the inspected qualification directory. Remembered reuse is consistent with
+the current origin-bound, separate-service code and recorded replacement-client results.
+No remembered key/reference contents were retrieved, exported, removed or changed.
+
+| Contract | Review result and boundary |
+| --- | --- |
+| Request/settings | Exact selected ID; one `max_tokens` field, explicit off/on override or omitted default; schema resource shared; output and context budgets distinct. Off/1024 JSON and literal SSE remain measured passes. Backend/default sampling and full capacity unknown. No settings/production UI exists. |
+| Credentials/secrecy | Native entry status/reference boundary, non-sync test namespace, origin/UUID checks and reuse without automatic re-entry agree with the selected seam. Diagnostics do not intentionally retain headers/keys/error bodies. R2 exposes missing failed-cleanup recovery. Production identity/replacement/removal/session/Windows proof remains later work. |
+| Structured/protected text | Exact identity/finish/schema/one target and token order/count checks reject recorded truncation/substitution. Tokens are fixed fixture placeholders: revision binding and literal Ren'Py emission are future 2C.1 gates. R1/R3 expose uncovered response-boundary failures. |
+| Tools | All rebuilt Studio generation bodies set `enable_tools=false`, `enabled_tools=[]`, omit tools/session. Request-field acceptance/no returned tools is measured; server/internal suppression remains unknown. Harmless probes cannot establish the stronger guarantee. |
+| SSE/thinking | Off/1024 S02 passes recorded strict SSE/whole-document validation; thinking-on S03 was not sent after T03's failed prerequisite. SSE usage/reasoning metrics unknown. Thinking output-cap truncation is a failed usable completion at that setting, not unsupported thinking. |
+| Cancellation/cleanup | C01 completed early/inconclusive; separate actual C02 JSON/C03 partial-SSE cancels released workers and published no proposal. M04 proves post-C02 discovery. No server-stop, production async adapter, Save responsiveness, deadline/cold-load capacity or TLS/tunnel/proxy claim. |
+| Classifications | Preserve expected G04 truncation rejection, E01 server routing failure plus client identity-guard pass, and E02 HTTP 400 without inferring an unavailable provider error code. Terminal/released alone is not a success classification; R1 requires repair. |
+
+**Actionable findings (all candidate/harness defects, not deployed product defects):**
+
+1. **R1 / P2 — classify malformed `choices` before collecting metrics.**
+   [live_studio.py](../../../spikes/provider-qualification/live_studio.py) lines
+   235–236 assumes a list before `validate_response`. HTTP-200 JSON with the correct
+   model and `choices=null`, `7` or `{"0":{}}` raises uncaught worker TypeError/KeyError.
+   Lines 258–259 do not classify those exceptions; lines 290–295 still save/print a
+   terminal/released receipt **without `outcome`**. No proposal was published in the
+   reproductions, but failure reporting is incomplete and normal threading emits a
+   traceback outside the safe diagnostic boundary. Validate the envelope shape before
+   indexing/metrics, require a fixed failure outcome for every worker exit and add
+   rejecting actual-runner fixtures. Preserve useful allowlisted truncation metrics;
+   do not solve this by exposing exception text or treating terminal as pass.
+2. **R2 / P2 — retain the staged credential reference when cleanup fails.**
+   [macos_credential.py](../../../spikes/provider-qualification/macos_credential.py)
+   lines 158–164 deletes the pending reference before trying staged-key cleanup. A
+   reference-publish OSError followed by store-delete refusal leaves the owned Keychain
+   item, no saved/pending reference, and only the cleanup error. The next process cannot
+   identify/reuse or explicitly retire that item and can prompt/create another entry.
+   ADR 0011/0013 requires explicit failed-cleanup state with a nonsecret owned reference;
+   no cross-store atomicity is promised. Retain a bounded recovery reference/phase
+   through publish and cleanup failures; preserve the primary failure and disable sends
+   from incomplete state. Add fake-store/filesystem failure-ordering assertions, including
+   unrelated-entry preservation and subsequent bounded cleanup. Do not touch the real key.
+3. **R3 / P2 — reject exponent overflow across the whole JSON envelope.**
+   [contract.py](../../../spikes/provider-qualification/contract.py) lines 129–141
+   rejects explicit NaN/Infinity via `parse_constant` but never checks parsed floats.
+   `1e999` becomes Python infinity; a normal valid response with
+   `usage.completion_tokens=1e999` is accepted as a proposal. This contradicts the strict
+   nonfinite policy and the existing test's claimed coverage. Reject nonfinite decoded
+   floats (or use bounded numeric parsing) at any nesting level, including ignored
+   metadata/SSE envelopes; add positive/negative exponent-overflow rejection fixtures.
+   Preserve valid finite JSON and the exact schema boundary; no parser downgrade.
+
+**Focused verification and retained failures:**
+`python3 -m unittest discover -s spikes/provider-qualification/tests -v`:
+**43/43 PASS**, zero skips, 0.114 s. Additional offline synthetic reproductions used
+the existing fake HTTP connection/store with temporary receipt/reference files:
+**five failed contract checks** (R1's three shapes, R2 cleanup ordering, R3 overflow),
+command exit 1 retained deliberately. These are uncovered failures, not waived by the
+existing green suite. Ignored `review-reproductions.json` preserves expected/actual
+results, SHA-256 `f2b37ed988cb48c95b92fb27bc065f8ae5b6a4306e59f086afc617d983465958`.
+No socket/native-store/provider request was used. Review changes are documentation
+only (ledger, live status, ADR status/clarification and spike README); all reviewed
+code/plan/schema/test bytes and accepted planning corrections remain intact.
+
+**User clarification on thinking limits:** user suggested `max_new_tokens` may explain
+the cut-short reply. Reproduced T02/T03 bodies contain `max_tokens=256`/`1024`, not a
+`max_new_tokens` wire field. T03 exact-model HTTP 200 reports `finish_reason=length`,
+1024 completion tokens and 3829 reasoning bytes. This supports output-cap exhaustion,
+not a protocol failure or proof of unsupported thinking. Current official
+[request schema](https://github.com/unslothai/unsloth/blob/main/studio/backend/models/inference.py)
+and [route source](https://github.com/unslothai/unsloth/blob/main/studio/backend/routes/inference.py)
+checked 2026-10-08 resolve the Chat Completions output field into backend generation
+limits (`max_new_tokens` on the native generation path). They are current-source
+corroboration, not installed v0.1.902-beta proof. A larger cap's usability remains
+unknown; the earlier phrase “adequate output candidate” described a hypothesis, not
+demonstrated sufficiency. No new field, token increase or retest was selected.
+
+**Allowance/pending/publication:** unchanged **22 HTTP/16 generations consumed;
+18 HTTP/4 generations/343 s remain**, 1457/1800 s cumulative charge, 120 s generation
+deadline. Review consumed zero live allowance. No pending operation/external wait,
+commit/push/PR/merge/release or production change. The review is delivered; the next
+dependency-ready outcome is bounded offline R1–R3 correction, not 2A.1/2A.2 or generic
+qualification. User acceptance/next-phase scope remains an explicit subsequent decision.
+
+**Next proposed prompt, not started:**
+
+```text
+Deliver the Phase 2A.0 Studio review corrections: fix R1–R3 in the isolated qualification
+spike and demonstrate safe malformed-response classification, retained owned credential
+cleanup recovery and whole-document nonfinite rejection.
+Repository: Caldwell-41/Renpy-editor
+Continuation: local codex/provider-qualification at 5f448ca plus all uncommitted work
+and five accepted planning corrections; preserve every edit and original live receipt.
+Codex machine: current repository host with the unpublished candidate/redacted evidence.
+Test hosts: focused portable synthetic checks; no OS-specific build or native key access.
+Reason: correct the reviewed contract reference before production integration.
+Read AGENTS.md, CURRENT, HANDOVER, Phase 2 section 25's Studio qualification contract
+review, and ADR 0011/0013. Follow WORKFLOW/TESTING selectively.
+Use one GPT-6.1 Sol High owner; helpers only for useful independent assignments.
+Scope: R1–R3 code/fixtures and necessary documentation; preserve measured Studio results,
+thinking output-cap interpretation, accepted planning corrections and generic deferral.
+Prove each rejecting boundary and run the focused qualification suite/document checks.
+No provider calls, real credential read/write/delete, native builds, SDK, CI, management,
+production implementation, push, merge or release. Carry the existing allowance unchanged:
+22 HTTP/16 generations consumed; 18 HTTP/4 generations/343 seconds remain.
+Update the existing ledger/HANDOVER and return the corrected candidate's disposition
+and next dependency-ready prompt without starting that outcome. Keep all work local.
+Resume this same correction outcome/chat after any external wait.
+```
+
+**Review completion verification:** repository validator **375 files PASS**;
+`git diff --check` PASS. Reviewed eight code/plan/schema/test hashes and the original
+live receipt hash still match. Changes since review entry are confined to the five
+review documents named above; ARCHITECTURE/UI/Phase 3 and original Phase 2 sections
+remain preserved. Production/dependency/workflow/script trees are unchanged. HANDOVER
+is 973 words; CURRENT is near its 400-word target with retained closure/recovery links.
+No test rerun was needed after documentation-only updates; the 43 passes and five
+new failing checks retain their distinct dispositions. No external wait occurred.
+
+### Studio review corrections and owner review — 2026-10-08
+
+**Selection:** the user instructed the same owner to continue, fix R1–R3, review the
+corrected work and return the next prompt under the documented workflow. This selects
+the preceding bounded offline correction prompt; no production/provider/publication
+scope is added. One owner, no helpers or second writer. State `in_progress` at entry;
+all prior edits, failure evidence, planning corrections and remembered credential retained.
+Fresh HEAD/worktrees and read-only remote heads remain as recorded (`5f448ca` local
+candidate/main/source; planning worktree `2c5a164`), no remote qualification branch.
+Open-PR connector refresh confirms unrelated 10/11 and abandoned 12 only.
+Allowance unchanged: 22 HTTP/16 generations consumed; 18 HTTP/4 generations/343 s
+remain. No live runner, native key access or external wait selected.
+
+**Implementation and disposition:** R1–R3 are corrected in the isolated spike;
+state **`review_ready`**, owner review complete with no remaining actionable in-scope
+finding. Recommend accepting the Studio-scoped reference/design for a separately
+selected first 2A.1 slice. This is not full two-provider acceptance, production
+integration permission or a new live pass. Generic remains user-deferred. The original
+review findings, five failed checks and 43-test historical result remain above.
+
+- **R1:** validate the `choices` list/cardinality/object before metric access. Start
+  every worker with a safe failure outcome; classify unexpected exceptions without
+  traceback/exception-text reflection. Close response and connection independently;
+  cleanup failure is explicit and removes any proposal. New actual-runner fixtures
+  cover the three original malformed shapes plus empty/scalar-item/multiple lists,
+  unexpected worker and cleanup exceptions, and retained length/usage/reasoning metrics.
+- **R2:** save the version-1 origin/service/owned-UUID reference in `.pending` before
+  native store addition. Publish by rename only after store/read verification. Keep
+  the reference until deletion and record removal both succeed on setup failure.
+  `CredentialSetupFailure` preserves the fixed primary category and nonsecret
+  cleanup-pending flag. Startup refuses entry/use before native access when pending.
+  `cleanup_pending` is one explicit attempt, never startup/automatic retry: validate
+  reference ownership, refuse conflicting published state, delete only that entry,
+  then remove the record. Tests prove pre-write ordering, failed publish/deletion,
+  unavailable/read-failed stores, unrelated-entry preservation, no re-entry/read/send
+  while pending, repeated bounded cleanup and refusal of foreign/malformed/conflicting
+  references. Existing published version-1 references/reuse stay compatible; no real
+  credential/reference was read, moved, exported, deleted or changed.
+- **R3:** inspect all decoded JSON floats and reject nonfinite values, including
+  exponent overflow in ignored metadata and terminal SSE usage. Positive/negative
+  overflow now refuses; finite exponents and literal string `1e999` remain valid.
+  Strict duplicate/depth/Unicode/schema/protected-token boundaries are retained.
+
+**Focused evidence:** final command
+`python3 -m unittest discover -s spikes/provider-qualification/tests -v`:
+**61/61 PASS**, zero skips, 0.135 s (original 43 plus 18 meaningful regressions).
+First corrected 57-check pass was followed by two store-failure cases and stronger
+retained-record assertions (59 PASS). Final owner review added fixed classification
+for unexpected native-store construction/read errors plus two rejecting cases (61 PASS).
+No failed correction attempt or automatic retry occurred.
+All transport/native store interactions in these tests are fake/temp-only.
+
+To prove the rejecting gates, reconstructed the three original source files from
+the correction delta and **matched their original review-input hashes exactly**;
+plan/schema also remain original. Ran three focused boundaries against those original
+files with socket/native-store construction forbidden: original exit 1, five assertion
+failures/three errors including malformed-receipt subcases. The same boundaries against
+the corrected candidate pass **3/3**, exit 0. This checks original behavior, not an
+invented mutation, and creates no new provider/native evidence. Ignored receipt
+`correction-gate-results.json` SHA-256
+`c262cedc04975c65dad7f389ea9bd6ed65bcc857de51acc7576f2fc68104143a`
+preserves both dispositions; verified original code is under ignored
+`correction-gate-baseline/`. Earlier `review-reproductions.json` remains untouched.
+
+Corrected eight-input manifest `correction-inputs.json` SHA-256
+`f3f0d2da59d671d2122b24671d6ab262e7dd32422904e4165f15d5602ac9cd9e`
+identifies final code/plan/schema/tests. The intermediate 59-check manifest is retained
+as `correction-inputs-59.json`. Final guarded boundary checks still pass 3/3; ignored
+`correction-final-verification.json` SHA-256
+`54794a8dfd965cffa4d74127c2b4a5d8cd5f1d04772ec6f16572fe42c1cf7641`
+binds final inputs, the 61-check result and original rejection evidence. Original live receipt SHA-256 remains
+`44027a6cfb0a74d9be7f629c77ec7f5131a1145a34cc3446f9c0dc27fe669f92`:
+**22/22 request hashes reproduce, four retained proposals revalidate**, including G05
+tokens. No body settings, schema/plan, live counts or time checkpoint changed.
+New native recovery ordering is proven offline only; packaged native identity/recovery,
+Windows and production services remain unqualified. Raw live HTTP/SSE replay, internal
+tools suppression, server-stop, full capacity and larger thinking-cap usability remain
+unknown. Thinking `max_tokens` interpretation and every recorded live failure survive.
+
+**Owner review:** inspected the exact correction delta against hash-verified original
+files, failure ordering and actual worker/store seams. Confirmed published-reference
+compatibility, owned cleanup/refusal, fixed diagnostics, no proposal on failure/cancel,
+finite-number acceptance and unchanged requests. New tests exercise rejecting behavior
+and original-candidate gates; no specialist attack/crash programme. No second reviewer
+or native/live requalification is claimed. Code changes are limited to three spike
+modules and their three test files; README/ADR/status/ledger record the behavior and
+disposition. Accepted planning corrections and app/dependency/workflow/script trees
+are preserved. No production code or extra dependency was added.
+
+**Pending/budget/publication:** none; no external wait or autonomous Goal. Everything
+remains uncommitted/local at the same branch/HEAD. Zero provider calls, real credential
+access, native builds, SDK, CI, management, push/PR/merge/release. Existing allowance
+unchanged: **22 HTTP/16 generations consumed; 18 HTTP/4 generations/343 s remain**,
+1457/1800 s conservative charge, 120 s generation deadline. Historical source-native
+counts remain Windows 2/2/3, Mac 3/3/3; those allowances are not reopened.
+
+**Next proposed outcome, not started:** the first production 2A.1 Studio remembered-key
+profile slice. Split the broad settings/credentials target at this ordinary user action
+to prove native entry/store/request/replacement/removal on both affected targets before
+expanding session-only/generic controls. Section 20 permits this bounded split; full
+2A.1 and generic/full-phase gates remain unchanged. Submitting the prompt below explicitly
+selects Studio-scoped contract acceptance and that production slice; it does not count
+generic as qualified or accept the full phase. Its new native/discovery allowance is a
+**proposal only**, activated by user selection, not spending permission in this correction.
+Windows native access is unverified on this host; verify agent-owned target capability
+at entry and retain a genuine missing-host blocker rather than transfer testing to the user.
+
+```text
+Deliver the first Phase 2A.1 Studio settings/credential slice: create a remembered-key
+profile, save/reopen it, explicitly check discovery readiness, replace/remove its owned
+credential safely, and prove the native path on Windows x64 and macOS ARM64.
+Repository: Caldwell-41/Renpy-editor
+Continuation: local codex/provider-qualification at 5f448ca plus all uncommitted work
+and five accepted planning corrections. Preserve the original live/failure receipts,
+remembered qualification key and historical worktree/recovery.
+Codex machine: current repository host with the corrected candidate; no reset/transfer
+required. Verify agent-owned Windows native access before promising target proof.
+Test hosts: focused portable checks plus narrow packaged Windows x64/macOS ARM64 native
+credential proof; no SDK or installer/release matrix.
+Reason: reviewed Studio contracts are ready for the first native production path.
+Submitting this prompt accepts the Studio-scoped ADR 0013/reference disposition for
+this bounded slice. Generic stays deferred; full 2A.0/2A.1/Phase 2 acceptance is incomplete.
+Read AGENTS.md, CURRENT, HANDOVER, Phase 2 sections 4–5/10/20/25 and ADR 0011/0013.
+Use one GPT-6.1 Sol High owner; bounded helpers only for useful independent assignments.
+Scope: versioned device profiles, Studio endpoint/model/context/output controls, private
+HTTP opt-in/origin binding, native Remember entry/store, opaque status IPC, explicit
+GET /models readiness and staged replacement/removal with retained failure cleanup.
+Keep project-open offline; no project prose, generations, 2A.2 generation service,
+session-only/generic completion, screens, model management or new credential export.
+Use isolated test profiles/owned entries; do not copy/delete the qualification credential.
+Prove the smallest native production path early on both targets, then complete the
+slice with focused ordering/secrecy/reopen/invalidation/no-network-default checks.
+Proposed allowance: at most 2 package builds and 2 targeted native qualification runs
+per OS, recording actual launches; no CI, SDK, full matrix or automatic retries.
+At most 4 explicitly recorded Studio GET discovery requests across both hosts, 15 s
+each plus 2 s cleanup, no generations. Carry 22 HTTP/16 generations consumed and
+18 HTTP/4 generations/343 s remaining; charge sends/time without resetting that budget.
+Complete implementation, focused verification, owner review and bounded fixes; update
+canonical docs/the existing ledger/HANDOVER. Keep all work local; no push, merge or release.
+Return disposition and the next dependency-ready prompt without starting it. Resume
+this same slice/chat after any external wait; missing target/access evidence is not a pass.
+```
+
+**Final correction closure checks:** repository validator **375 files PASS** and
+`git diff --check` PASS. Final eight-input hashes match the manifest; original live
+receipt, review manifest and failed reproduction hashes remain unchanged. Six spike
+code/test files changed; plan/schema and six other entry documents are byte-preserved.
+Original Phase 2 content before this review/correction is recoverable byte-for-byte
+by removing only the review's documented state insertion and appended sections.
+App/dependency/workflow/script trees remain unchanged. Final HANDOVER is 987 words;
+CURRENT is 462 words, retaining exact source-closure/recovery links and provider limits
+beside its live disposition rather than dropping those still-relevant facts.
+Next prompt is 2725 characters and has machine, evidence hosts, reason, proposed finite
+allowance and explicit selection boundaries. No further testing is selected after
+these documentation-only updates. Correction/owner review is delivered; no pending
+operation, next outcome or runtime pause was started.
+
+
+### First Studio settings/credential slice — 2026-10-08
+
+**Selected outcome and disposition:** the user accepted the corrected Studio-scoped
+ADR 0013/reference and selected remembered-profile create/save/reopen, explicit
+GET discovery readiness and safe owned-credential replacement/removal. Generic stays
+deferred; full 2A.0/2A.1/Phase 2 acceptance remains incomplete. State **blocked** at
+native-access prerequisite, with bounded portable preparation complete. This is not a
+completed production slice or a runtime Goal pause. No generation/project prose,
+2A.2 service, session-only/generic completion, screens, model management, CI, SDK,
+full matrix, push/merge/release is selected. Keep work local.
+
+**Entry/ownership:** current Mac ARM64 repository host; same local
+`codex/provider-qualification` at `5f448ca683a905f4ea77d4580bbc89fda69f2b93`, all
+uncommitted work/five accepted planning corrections retained. `git worktree list`
+confirmed the historical planning worktree at `2c5a164`; stash
+`23c69ff7cc3262981b8a23b32c55a23bb2ab0c27` remains. Read-only `git ls-remote --heads
+origin` confirmed main/source at HEAD, no remote qualification branch. Initial
+sandbox DNS failure was a capability restriction; elevated read succeeded. No fetch,
+reset, checkout, commit, push, branch/worktree removal or second writer. One owner,
+no helper assigned. Required test hosts remain packaged Windows x64/macOS ARM64.
+Reason: first native production credential path after reviewed contracts.
+
+**Windows prerequisite:** app task inventory confirms connected SUNDOWN and existing
+Windows tasks, but this caller exposes local command execution only. No SSH config/
+route is configured on the Mac. Reading an existing remote task confirms historical
+Windows commands, not present executable/file-transfer access for this owner. Requested
+permission to use an existing Windows task for qualification only, or an existing direct
+route; no answer/route received at this checkpoint. No task message, remote dispatch,
+helper, infrastructure setup or file transfer occurred. Missing evidence is not a pass.
+Native entry/store/discovery/replacement/removal and package work wait for verified
+agent-owned execution and candidate transfer; do not transfer qualification to the user.
+
+**Portable preparation:** added `app/src-core/src/ai_profiles.rs` and bounded
+`LifecycleService` read/write methods. Strict schema v1 Studio records contain model,
+canonical endpoint, private-HTTP opt-in, unverified context ceiling, total budget,
+maximum response, opaque credential/origin/revision and retained cleanup references;
+no key field. Reads/saves do not access native storage, DNS or network. Endpoint
+validation refuses userinfo/query/fragment, ambiguous paths, public/link-local plaintext
+IP destinations and malformed ports; opt-in hostname destinations still require future
+connect-time validated-address/DNS proof. Active/cleanup IDs cannot alias. Origin
+changes and disable state refuse credential use. File writes reuse existing anchored
+flush/replace/verification and compare the full prior record, refusing stale and ordinary
+external edits even when their revision is unchanged. Invalid/newer/unknown/oversized
+existing data remains untouched. Changed profile revisions must advance; reusing an
+entry ID to change its origin is refused. No renderer/IPC/native adapter exposed yet.
+
+**Focused checks and bounded correction:** pinned Rust 1.90.0 on ARM64;
+`cargo test --manifest-path app/Cargo.toml -p loomlight-core --locked ai_profiles::tests
+-- --nocapture` final **5 PASS, 0 FAIL, 0 ignored**, 245 unrelated tests filtered;
+execution 0.06 s. Tests exercise actual core save/reopen, changed limits, stale/full-record
+external refusal, retention of malformed/newer/unknown/oversized records, origin
+invalidation and cleanup uniqueness. Initial preparation run 3/3 and intermediate 5/5
+passed; owner extended the rejecting endpoint fixture and reproduced out-of-range port
+`99999` silently becoming default port. One bounded correction parses the explicit
+port suffix strictly; final fixture also refuses nonnumeric ports. Preserve failure
+`port-before.log` (one intended test FAIL, cargo exit 101), not a historical pass.
+This is a portable product-validation defect, not a native/environment failure.
+
+**Owner review/remaining seam:** inspected added module and lifecycle delta; no native
+calls, new dependency, operation allowlist, renderer privilege or networking added.
+Prepared store/reference types are not a complete credential service. A native owner
+must persist staged cleanup references before OS addition, publish before retirement,
+disable before removal and retain failed cleanup. Post-rename flush/verification can
+return error after publication: reread/reconcile before deleting a staged/newly active
+entry; never infer old-reference retention from an error alone. That combined-path
+failure ordering, unavailable store, secrecy/status IPC, native input, discovery,
+readiness revisions and packaged identity/reopen still need implementation/proof.
+No slice-level review-ready or acceptance claim.
+
+**Evidence:** ignored `.toolchains/reports/studio-settings/` retains initial/final logs,
+rejecting port log and `preparation-receipt.json` SHA-256
+`b5d672b360482363727d9e4cb3fbe575460c0871f353c7328d7b3e4ab4548710`.
+Final code inputs:
+
+| File | SHA-256 |
+| --- | --- |
+| `ai_profiles.rs` | `1eaf3e455e6beaf02459f4b27a013ca78658f19bf320d549b5de63ae82775bf4` |
+| `lib.rs` | `2f15f406e4a82d0a0045c4e8ac0a864dcf4be377480c1dba8a3df18ce0691293` |
+| `lifecycle.rs` | `b1563358f73498c50fa915f59895e775dcd2106464c33c5834c5e7590052adbd` |
+
+Original `studio-receipts.json` rehash remains
+`44027a6cfb0a74d9be7f629c77ec7f5131a1145a34cc3446f9c0dc27fe669f92`;
+qualification credential/reference and earlier receipts/recovery remain untouched.
+
+**Cumulative allowance:** first-slice actual package builds/native qualification runs
+**Windows 0/0; Mac 0/0**, each has 2 builds/2 targeted runs remaining. **0/4 Studio
+GETs**, all four remain (15 s each plus 2 s cleanup); reserve/record actual launches
+and sends, no automatic retries. Provider cumulative **22 HTTP/16 generations consumed;
+18 HTTP/4 generations/343 s remain**, 1457/1800 s conservative charge unchanged.
+Generations remain excluded. Historical source-native counts **Windows 2/2/3;
+Mac 3/3/3** are separate and not reopened. No pending executable, key dialog, HTTP,
+CI or helper; only Windows access question pending. No autonomous Goal created.
+
+**Resume/next action:** establish the existing agent-owned Windows execution/input-
+transfer route (or receive task-specific qualification-helper authorization), then
+prove the smallest native production path on both affected targets before broader
+implementation. Resume this same slice/chat; retain preparation/current candidate and
+all allowances, no restart/reset. Client Pause is available if the client requires a
+pause control; writing this blocked record does not pause a runtime. The next distinct
+outcome is not dependency-ready, so do not start or select 2A.2 yet.
+
+**Final checkpoint checks:** `cargo fmt --check --all --manifest-path app/Cargo.toml`
+PASS; repository validator **376 files PASS**; `git diff --check` PASS. Final code
+hashes reproduce the receipt. UI and Phase 3 documents still match their five-correction
+entry hashes exactly. CURRENT/HANDOVER are 487/663 words; CURRENT's modest excess over
+the review target preserves the source closure and acceptance limits. No package,
+native, provider, SDK, CI, task/helper dispatch or publication occurred. Windows route
+question remains unanswered; resume the same slice after access is established.
+
+### Local completion and serial host handoff — 2026-10-08
+
+The user approved the brief Phase 2/3 host-handoff rule and publication of the existing
+branch, then selected a **Mac-agent continuation prompt**: finish authorised Mac work
+before moving to Windows. This supersedes the first-slice direct-Windows-access
+prerequisite and local-only publication limit above. Preserve the original attempt,
+checks, failure and budgets; direct other-machine access is never needed or requested.
+
+The next owner continues the same Studio 2A.1 slice on macOS ARM64: complete available
+implementation, focused Mac proof, review and bounded fixes, then commit/push/verify
+`codex/provider-qualification` and give the user a Windows x64 pull-and-continue prompt.
+Windows work and both-target acceptance remain pending; no 2A.2 or new outcome is selected.
+One active writer and all cumulative allowances survive transfer. Credentials and raw
+ignored evidence stay on their existing host; never copy a key into Git.
+
+This update changes workflow/continuation only. A misread clarification briefly started
+new implementation; those edits were removed and agents stopped. Pre-existing profile
+preparation and qualification work remain unchanged. Its focused core checks were
+rerun: **5 PASS, 0 FAIL, 0 ignored**; qualification fixtures **61 PASS**. No native/package/provider/SDK/manual-CI operation occurred;
+no expensive allowance was consumed. Documentation/privacy/link validation and whitespace
+checks apply to publication; HANDOVER identifies the published preparation checkpoint.

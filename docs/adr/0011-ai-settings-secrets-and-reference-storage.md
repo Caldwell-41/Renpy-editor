@@ -1,6 +1,6 @@
 # ADR 0011: AI settings, secrets and reference storage
 
-**Status:** Accepted design; implementation not started or qualified.
+**Status:** Accepted design; bounded Studio profile-record preparation started, native implementation/qualification incomplete.
 **Date:** 2026-10-07.
 **Authority:** the user selected project-local prompts, native references with basic
 scope/notes, localhost/LAN/HTTPS and adaptive helpers; accepted the omission/credential
@@ -66,6 +66,10 @@ No service/signing purchase or enterprise-policy qualification is required by th
 
 ## Evidence and implementation gates
 
+- [ADR 0013](0013-provider-request-and-transport-contract.md) proposes the concrete
+  request/credential-origin/transport contract accepted for the bounded Studio 2A.1
+  remembered-profile slice. Full compatibility/native qualification remains incomplete;
+  this does not change storage policy or authorize generic/generation integration.
 - [Credential spike](../research/CREDENTIAL_STORE_SPIKE_RESULTS.md): packaged native
   storage evidence and its no-entry-UI/locked-store/signing limits.
 - [Phase 2 contracts and gates](../tasks/active/phase-2-initial-llm-assistance.md):

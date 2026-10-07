@@ -38,6 +38,20 @@ profile writes have recoverable ordering, not cross-store atomicity. Request cod
 injects authentication; renderer IPC carries opaque references/status only. Prompts,
 reference prose and raw replies stay out of routine diagnostics and game builds.
 This is future design; Phase 1 exposes no provider/credential operation.
+The Studio-scoped accepted [request/credential/transport contract](adr/0013-provider-request-and-transport-contract.md)
+adds concrete origin binding, immutable send snapshots, schema/tool rejection and
+cancellable bounded transport. Its isolated deterministic spike is not production
+integration or live provider qualification; the Phase 2 ledger owns missing evidence.
+
+The first 2A.1 slice has portable preparation in core `ai_profiles`: bounded strict
+Studio records, canonical endpoints, private-HTTP opt-in, origin binding and opaque
+active/cleanup references. `LifecycleService` reads/safely replaces the device record
+without native access or networking; a full prior-record comparison refuses ordinary
+external edits, including edits retaining the revision. Malformed/newer records are
+retained and refused. These APIs are not exposed through IPC/settings yet. A native
+owner must reconcile post-rename save errors before deleting any referenced entry;
+safe file replacement is not cross-store atomicity. Native entry, store, discovery and
+replacement/removal remain incomplete; finish local work before the recorded host handoff.
 
 ## System boundaries
 
@@ -152,6 +166,13 @@ sequenceDiagram
 ```
 
 LLM operations enter at the first step as proposals and cannot bypass review.
+Planned Phase 2 generated display text is literal by default, encoded for Ren'Py text
+syntax as well as source-string syntax. Core protects existing reviewed interpolation
+and formatting as immutable revision-bound tokens; unsupported target boundaries or
+token changes refuse before acceptance. Model prose cannot introduce active expressions
+or action-bearing tags. This does not alter manual Source editing or stored reference
+prose. The [Phase 2 proposal contract](tasks/active/phase-2-initial-llm-assistance.md#7-structured-proposals-and-source-preparation)
+owns preparation and proof; this is selected design, not implemented behavior.
 External file-watch events enter the source service with a content hash; supported
 changes update the visual model, while unsupported regions remain visible custom code
 and mark the owning scene or screen partially visual.
@@ -381,6 +402,15 @@ The selected official SDK remains the fidelity authority. Phase 1 provides norma
 `Run From Here` is deferred until state simulation can establish the required prior
 state. Unsupported displayables, Python-driven state, screens, ATL, and platform
 behavior require the official runtime.
+
+Planned Phase 3 reconstructed starts also account for screen effects: a Story route
+alone cannot establish variable changes made by buttons during an interaction.
+3B supplies conservative effect summaries and supporting revisions; 3D marks unresolved
+effects unknown and refuses affected starts. Qualified conventional interactions and
+proven passive screens remain eligible. Relevant screen/action edits invalidate launch
+preparation. Full screen-interaction recording/replay is deferred; manual values cannot
+erase unknown side effects. The [3D contract](tasks/active/phase-3-initial-wysiwyg-release.md#6-3d--supported-state-and-run-from-here)
+owns the eligible subset and rejecting tests; no current implementation is claimed.
 
 ## Resolved Phase 0 boundaries and implementation risks
 

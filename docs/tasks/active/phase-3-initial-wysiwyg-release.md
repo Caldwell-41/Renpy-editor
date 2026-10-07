@@ -19,6 +19,9 @@ helpers according to independent work.
 owns the shared sequence/team. Its [bounded deliverable queue and completion loop](phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
 selects one tested result at a time, then docs/handover and a next-outcome prompt.
 Exact feature subsets remain reviewable.
+Cross-platform work uses [local completion and host handoff](../../WORKFLOW.md#test-host-routing-and-ownership):
+finish on the current machine, push the same branch, then supply the other-platform
+agent's pull-and-continue prompt; direct access is never a prerequisite.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
 [ROADMAP](../../ROADMAP.md) owns the overall sequence, and
 [PRODUCT](../../PRODUCT.md) retains the initial-release commitment.
@@ -257,6 +260,22 @@ screens may be edited only after proving safe ownership and round-trip mapping;
 do not rewrite the full generated screen file. Arbitrary existing-project import,
 dynamic screen Python, unrestricted actions and complete WYSIWYG fidelity are excluded.
 
+**Selected Story connection (2026-10-07):** provide a small typed set of Story Beats
+for owned custom screens: **Show screen**, **Hide screen** and **Call screen**. Show
+leaves the screen displayed while the story continues; Hide removes it. Call waits
+for the screen interaction to finish, then continues at the following Beat. A called
+screen's supported **Finish interaction** button emits `Return()`; a shown panel uses
+Hide for dismissal. Keep Call screen distinct from Call Scene and Story Return.
+
+Start with explicitly owned, parameterless screens and no captured return values,
+dynamic screen names or arbitrary action expressions. Core resolves stable screen IDs
+to source names and emits ordinary `show screen`, `hide screen` and `call screen`
+statements through the existing preparation/transaction path. Reconcile source edits,
+missing references and screen renames/deletions without silently retargeting a Beat.
+Runtime screen presence and possible action effects feed the conservative 3D contract;
+an unresolved active screen interaction is not an eligible reconstructed starting point.
+These operations do not expand Phase 2's AI allowlist.
+
 **Completion checks:** create/edit/reorder supported nodes through canvas and keyboard
 hierarchy; compare the selected layout and interaction states against real Ren'Py at
 the chosen resolution and a second supported aspect. Reconcile a supported Source
@@ -276,10 +295,19 @@ layout/text/color properties; simple styles and `use` of an explicitly owned com
 Show/Hide/Return and typed variable-setting actions form the first action builder.
 Game-menu actions are selected by template adapters, not arbitrary Python entry.
 
+Screen adapters also expose a bounded effect summary for 3D: passive presentation,
+qualified conventional interaction, or possible variable/presentation/control-flow
+changes with affected IDs where known. Include relevant screen, component, action and
+binding revisions. Unknown/custom actions remain unknown rather than being treated as
+passive. This supplies conservative refusal; it does not add interaction recording or
+general screen execution to the editor. Establish this contract with 3B.1–3B.3 before
+3D consumes screen-dependent state.
+
 | Step | Concrete implementation | Proof before proceeding |
 | --- | --- | --- |
 | 3B.1 — Screen source service | Add proposed core `screens` service with declaration inventory, typed nodes/properties, source spans and protected opaque children, using the shared block/mutation layer. New screens get a collision-checked owned file; existing screens are edited in place, not duplicated under a new definition. | One nested custom screen containing an unsupported neighbor round-trips and accepts a minimal property edit through the transaction layer. |
 | 3B.2 — Canvas, tree and inspector | Add proposed `screen-ui.ts`: synchronized hierarchy and canvas selection, drag/resize/snapping plus numeric and keyboard editing, typed asset/style pickers, action builder and inert hover/selected samples. Store editor layout/selection metadata only; renderable properties remain in source. | Drag is one undo entry; Escape cancels; parent layout rules constrain child movement. Distinguish absolute pixel coordinates, relative coordinates and anchor values rather than coercing every drag into `xalign`/`yalign`. |
+| 3B.2a — Story screen connection | Add typed Show/Hide/Call screen Beats with an owned-screen picker and exact source navigation. Expose Hide for shown panels and Finish interaction for called screens; qualify these contexts before offering the actions. Share references, history and effect summaries with the screen service. | Create and connect one custom screen in normal play: Show persists through dialogue, Hide removes it, Call waits and Finish continues at the following Beat exactly once. Verify source round trip, missing-reference refusal, cancel, undo/reopen and conservative 3D uncertainty; scratch preview alone is insufficient. |
 | 3B.3 — Real game screen adapters | Add schema-aware adapters for the pinned generated `say`, `choice`, main-menu/navigation, preferences and save/load templates. Expose supported layout/style slots while preserving required parameters/IDs, action bindings and dynamic list/slot logic. Support reused components by explicit owned definitions. | Change dialogue box/name placement, choice styling and menu layout in a generated project; continue dialogue, choose a route, change a preference and save/load normally in the SDK. Unsupported template versions fall back to source. |
 | 3B.4 — Preview and completion | Use the shared scratch preview job with synthetic `who`/`what`, menu choices and other template inputs. Compare supported layout/hit targets against actual Ren'Py, plus full-game screen integration. Offer an explicit rerun after edits. | Native fonts/scaling/focus at project resolution and a second aspect, accessible tree/property operations, Source edit/reconcile, undo and reopen. Record preview approximations; browser geometry alone cannot qualify native output. |
 
@@ -518,6 +546,27 @@ claim. Manual values remain visibly synthetic and cannot erase unknown runtime s
 effects. The first launch subset may be Scene boundaries with no active call stack;
 that restriction must be explicit before implementation, not discovered at acceptance.
 
+**Screen interactions (selected 2026-10-07):** a selected Scene route does not establish
+which screen buttons were clicked during dialogue. Consume 3B's effect summaries as
+well as 3A/3C semantics. When an available screen action could change relevant variables,
+presentation or control flow and the chosen trace cannot establish its effects, mark
+the affected state unknown and refuse the reconstructed launch with a specific reason.
+Manual value overrides cannot remove this uncertainty. Full screen-interaction capture
+and replay are deferred; they are not needed to complete this conservative subset.
+
+Do not block every route merely because a screen exists. Qualified conventional
+say/choice adapters can use their established interaction semantics and selected choices;
+proven passive screens introduce no extra state uncertainty. Include relevant screen,
+component/action and binding revisions in the launch read set so changes invalidate
+prepared starts. Where possible effects or active-screen identity cannot be bounded,
+refuse rather than silently assume the default templates or no interaction.
+
+The focused gate includes a screen button that sets a branch variable during dialogue:
+the initial reducer must report uncertainty and reject that reconstructed start without
+launching. Also prove a passive/qualified conventional screen remains eligible, and a
+screen/action edit invalidates a prepared launch. Existing normal-play equivalence
+checks still apply to eligible starts; no full interaction recorder is required.
+
 **Completion checks:** compare a normal play-through and a supported start at the
 same target for relevant variables, route, return behavior and presentation. Change
 a prerequisite revision and verify invalidation. Custom effects refuse or expose
@@ -540,8 +589,8 @@ effect remains unavailable for a reconstructed launch; normal Run remains availa
 
 | Step | Concrete implementation | Proof before proceeding |
 | --- | --- | --- |
-| 3D.1 — Shared trace/state reducer | Add proposed core `state` service over the 3A source-derived structure and 3C effect descriptors. Track typed values, selected choices, bounded call frames, presentation/audio descriptors and exact read revisions. Every value is known-with-provenance or unknown-with-reason. | A deterministic selected trace matches expected guarded branches and returns; repeats consume a finite step/depth budget. Unsupported custom effects invalidate potentially affected state conservatively. No project code runs during inspection. |
-| 3D.2 — State inspector | Show target, route decisions, current values, source citations and blocking unknowns. Offer a separate synthetic preset for explicit manual values; it is labelled synthetic rather than proven reachable. Saved presets persist only typed data/references and invalidate on relevant edits. | Change a supporting variable, card-independent source revision, asset or route and reject the stale prepared launch. Context references/lore never silently become runtime values. |
+| 3D.1 — Shared trace/state reducer | Add proposed core `state` service over the 3A source-derived structure, 3B screen effect summaries and 3C effect descriptors. Track typed values, selected choices, bounded call frames, presentation/audio descriptors and exact read revisions. Every value is known-with-provenance or unknown-with-reason. | A deterministic selected trace matches expected guarded branches and returns; repeats consume a finite step/depth budget. Unresolved screen interactions and unsupported custom effects invalidate potentially affected state conservatively; screen-dependent starts refuse while qualified passive/conventional cases remain eligible. No project code runs during inspection. |
+| 3D.2 — State inspector | Show target, route decisions, current values, source citations and blocking unknowns, including unresolved screen actions. Offer a separate synthetic preset for explicit manual values; it is labelled synthetic rather than proven reachable. Saved presets persist only typed data/references and invalidate on relevant edits. | Change a supporting variable, card-independent source revision, screen/action/binding, asset or route and reject the stale prepared launch. Manual values do not clear unknown screen effects. Context references/lore never silently become runtime values. |
 | 3D.3 — Isolated launcher | Extend the shared explicit preview/runtime job to copy an accepted manifest into a scratch project, exclude saves/cache/editor-private files, and generate a collision-checked bootstrap label. Apply typed state via safely emitted Ren'Py statements, restore the declared settled visuals/audio, and jump to the target. Bind trust and preparation to snapshot/target/state digest. | Compare with normal play at the same target; source project and ordinary saves/persistent data are untouched; cancellation, launch failure, stale completion and Stop clean up the owned process and retain useful diagnostics. |
 | 3D.4 — Bounded entry extension | After Scene-entry proof, add a temporary target label at a proven statement boundary in the scratch copy only. Support resolved prior calls that have already returned; launching with an active call stack stays excluded until a separate reconstruction design is proven. | Normal-run versus reconstructed-run values, available choices, return behavior and settled presentation agree for each supported target; unsupported targets refuse rather than partially pretending success. |
 

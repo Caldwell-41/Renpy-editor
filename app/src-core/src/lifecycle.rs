@@ -835,6 +835,103 @@ impl LifecycleService {
             })
     }
 
+    /// Profile reads never access credentials, resolve DNS, or connect to a provider.
+    /// Unlike UI preferences, malformed/newer AI data must not become defaults.
+    pub fn read_ai_profiles(&self) -> Result<crate::ai_profiles::ProfileStore, LifecycleError> {
+        let name = OsStr::new("ai-profiles.json");
+        if self
+            .data_anchor
+            .entry_absent(name)
+            .map_err(|_| LifecycleError::UnsafePath)?
+        {
+            return Ok(crate::ai_profiles::ProfileStore::default());
+        }
+        let file = self
+            .data_anchor
+            .open_file(name)
+            .map_err(|_| LifecycleError::UnsafePath)?;
+        if file.metadata().map_err(|_| LifecycleError::Io)?.len()
+            > crate::ai_profiles::MAX_PROFILE_BYTES
+        {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let mut bytes = Vec::new();
+        file.take(crate::ai_profiles::MAX_PROFILE_BYTES + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| LifecycleError::Io)?;
+        if bytes.len() as u64 > crate::ai_profiles::MAX_PROFILE_BYTES {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let store: crate::ai_profiles::ProfileStore =
+            serde_json::from_slice(&bytes).map_err(|_| LifecycleError::InvalidMetadata)?;
+        if !store.valid() {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        Ok(store)
+    }
+
+    /// The single desktop profile owner serializes mutations. Compare the full prior
+    /// record so external edits retaining the revision cannot be overwritten.
+    /// A post-rename flush/verification error has an uncertain publication outcome:
+    /// the native owner must reread before deciding which owned entry to retire.
+    pub fn write_ai_profiles(
+        &self,
+        store: &crate::ai_profiles::ProfileStore,
+        expected: &crate::ai_profiles::ProfileStore,
+    ) -> Result<(), LifecycleError> {
+        if !store.valid() {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let current = self.read_ai_profiles()?;
+        if &current != expected || expected.revision.checked_add(1) != Some(store.revision) {
+            return Err(LifecycleError::StaleSession);
+        }
+        for profile in &store.profiles {
+            match current
+                .profiles
+                .iter()
+                .find(|p| p.profile_id == profile.profile_id)
+            {
+                Some(previous) if previous == profile => (),
+                Some(previous) if previous.revision.checked_add(1) == Some(profile.revision) => {
+                    if let (Some(old), Some(new)) = (&previous.credential, &profile.credential) {
+                        if old != new
+                            && (old.credential_id == new.credential_id
+                                || old.revision.checked_add(1) != Some(new.revision))
+                        {
+                            return Err(LifecycleError::InvalidMetadata);
+                        }
+                    }
+                }
+                None if profile.revision == 1 => (),
+                _ => return Err(LifecycleError::StaleSession),
+            }
+        }
+        let bytes = serde_json::to_vec(store).map_err(|_| LifecycleError::InvalidMetadata)?;
+        if bytes.len() as u64 > crate::ai_profiles::MAX_PROFILE_BYTES {
+            return Err(LifecycleError::InvalidMetadata);
+        }
+        let name = format!(".ai-profiles-{}.tmp", uuid::Uuid::new_v4());
+        let temporary = OsStr::new(&name);
+        let destination = OsStr::new("ai-profiles.json");
+        let result = (|| {
+            let mut file = self
+                .data_anchor
+                .create_new_file(temporary)
+                .map_err(|_| LifecycleError::UnsafePath)?;
+            file.write_all(&bytes).map_err(|_| LifecycleError::Io)?;
+            crate::transaction::flush_open_file(&file).map_err(|_| LifecycleError::Io)?;
+            drop(file);
+            self.data_anchor.flush().map_err(|_| LifecycleError::Io)?;
+            replace_recent_file(&self.data_anchor, temporary, destination)?;
+            verify_recent_commit(&self.data_anchor, destination, &bytes)
+        })();
+        if result.is_err() {
+            let _ = self.data_anchor.remove_file_if_exists(temporary);
+        }
+        result
+    }
+
     pub fn read_preferences(&self) -> crate::preferences::Preferences {
         let read = || -> Option<crate::preferences::Preferences> {
             let mut file = self

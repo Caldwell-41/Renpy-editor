@@ -772,6 +772,24 @@ authorize a production dispatch during Q1-PREP.
 
 ## Result recording
 
+For the selected 2A.0 contract spike, run
+`python3 -m unittest discover -s spikes/provider-qualification/tests -v`, repository
+validation and whitespace/link/privacy checks. These offline fixtures do not qualify
+an actual provider or production/native credentials. The [existing 2A.0 ledger](tasks/active/phase-2-initial-llm-assistance.md#25-provider-qualification-ledger--2026-10-07)
+owns explicit endpoint/model access, finite live probes and separate unknown results;
+no native build, SDK run or CI dispatch is required for this outcome.
+
+The first Studio 2A.1 record preparation uses
+`cargo test -p loomlight-core --locked ai_profiles::tests`. It covers actual core
+save/reopen, stale/external-write refusal, malformed/newer/unknown/oversized record
+retention, endpoint policy, origin invalidation and cleanup-reference uniqueness.
+It neither invokes an OS credential store nor qualifies native entry/readiness or
+replacement/removal. The [slice ledger](tasks/active/phase-2-initial-llm-assistance.md#first-studio-settingscredential-slice--2026-10-08)
+owns the two builds/two targeted runs per OS and four combined Studio discovery GET
+caps; no package/native request has been launched. Windows evidence remains outstanding;
+finish Mac work before branch handoff under WORKFLOW. No generation, CI, SDK or full
+matrix is selected.
+
 Spike and CI results record exact command, OS/architecture, dependency and SDK
 versions, fixture revision, outcome, timings where relevant, and known exclusions. A
 green Linux-only test cannot close a Windows/macOS criterion. Flaky tests are defects

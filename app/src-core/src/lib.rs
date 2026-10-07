@@ -1,3 +1,4 @@
+pub mod ai_profiles;
 pub mod authoring;
 pub mod dispatch;
 pub mod lifecycle;

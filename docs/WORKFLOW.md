@@ -217,6 +217,14 @@ without moving the Codex session. Do not assume dispatch, native drivers or host
 exist: verify actual capabilities before promising them. Never start a second writer
 or install remote/self-hosted infrastructure to work around an unavailable capability.
 
+For work requiring both local platforms, each agent finishes all authorised work,
+checks and review possible on its own machine. Never require or request direct access
+to the other machine. Record completed work, outstanding tests and remaining budget;
+commit/push the same branch within publication authority and verify its remote checkpoint.
+Tell the user which platform agent is needed and provide a short prompt to pull and
+continue the same outcome. Transfer one active writer; both-platform evidence remains
+required before acceptance. Missing other-host access does not block local progress.
+
 | Work | Codex machine | Evidence host |
 | --- | --- | --- |
 | Docs, planning and portable logic | Any suitable host with repository access | Cheap relevant checks; no native run merely for docs |
