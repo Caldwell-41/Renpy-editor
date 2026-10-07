@@ -35,6 +35,15 @@ def inputs():
     return manifest
 
 
+def pinned_tools():
+    # Rustup resolves app/rust-toolchain.toml from the command's working directory.
+    commands = {"node": ["node", "--version"], "npm": ["npm", "--version"],
+                "rustc": ["rustc", "--version"], "cargo": ["cargo", "--version"],
+                "rustup": ["rustup", "show", "active-toolchain"]}
+    return {name: subprocess.check_output(command, cwd=ROOT / "app", text=True).strip()
+            for name, command in commands.items()}
+
+
 def descendants(pid):
     pairs = [tuple(map(int, line.split())) for line in subprocess.check_output(
         ["ps", "-axo", "pid=,ppid="], text=True).splitlines()]
@@ -142,9 +151,14 @@ def main():
                XDG_CACHE_HOME=str(scratch / "cache"),
                LOOMLIGHT_FOUNDATION_EVIDENCE_DIR=str(output / "sdk"))
     if args.mode == "prepare":
-        assert subprocess.check_output(["node", "--version"], text=True).strip() == "v24.19.0"
-        assert subprocess.check_output(["npm", "--version"], text=True).strip() == "11.9.0"
-        assert subprocess.check_output(["rustc", "--version"], text=True).startswith("rustc 1.90.0 ")
+        versions = pinned_tools()
+        write(output / "tool-versions.json", versions)
+        print(json.dumps(versions), flush=True)
+        assert versions["node"] == "v24.19.0", versions
+        assert versions["npm"] == "11.9.0", versions
+        assert versions["rustc"].startswith("rustc 1.90.0 "), versions
+        assert versions["cargo"].startswith("cargo 1.90.0 "), versions
+        assert versions["rustup"].startswith("1.90.0-aarch64-apple-darwin"), versions
         assert sha(Path(env["LOOMLIGHT_RUNTIME_SDK_ARCHIVE"])) == SDK_HASH
         write(output / "inputs.json", manifest)
         write(output / "selection.json", dict(inputDigest=DIGEST, priorCumulative=manifest["cumulative"],

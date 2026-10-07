@@ -1,100 +1,83 @@
 # Current outcome handover
 
-## Corrected bounded source foundation — approved Mac-only Actions proof, 2026-10-07
+## Corrected source foundation — authorized Mac-only Actions setup correction, 2026-10-07
 
-**State:** Windows x64 corrected-input qualification PASS; final-input Mac proof
-INCOMPLETE. The user approved one hosted Mac-only Actions run, pinned CI setup and
-necessary workflow publication, replacing the original-Mac execution requirement.
-Windows is reused unchanged. No full matrix, retry, merge, release, provider/AI work
-or following deliverable. Overall qualification/acceptance remains incomplete pending
-Mac evidence audit and original Windows archive transfer/member verification.
+**State:** Windows x64 corrected-input qualification PASS; final-input Mac qualification
+INCOMPLETE. [Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
+failed during tool-version preflight, before release build/native launch/SDK execution.
+The user explicitly approved finding/fixing issues and **one additional dispatch**.
+Hosted Mac ARM64 setup/publication remains authorized. No Windows repeat, full matrix,
+merge, release, provider/AI or following deliverable.
 [Phase 2 section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
-owns the exact history, approval, commands, hashes, failures and cumulative budgets.
+owns detailed commands, approval, hashes, audit, failures and cumulative budgets.
 
-**Checkout/checkpoint:** original Mac project, same branch `codex/nested-source-foundation`.
-Original HEAD `45c64c5` was fast-forwarded to
-`a49e536163d5cea2e220894f97f780f4bd301668` after preserving all local documentation
-edits in exact copies, a binary Git patch and named Git stash. Historical planning
-worktree `2c5a164597779331af9ff81bf0eb3bdabb41ddb7` remains untouched. New workflow/
-helper/status files form the next coherent publication checkpoint. The commit carrying
-this record owns the Actions implementation; resolve and verify its exact published SHA
-before dispatch. No reset or force push. Phase 1/release identities remain unchanged.
+**Checkout/publication:** original Mac project, branch `codex/nested-source-foundation`.
+Published wait checkpoint `761f185c8beae0d08d57584966c12a7eb154891b` is the parent of
+this correction. Failed run tested `878de2a8b30e1ce0e3adf36fdba2859056bb4b86`.
+The commit carrying this record owns the corrected helper; verify its exact published
+SHA before dispatch. Original HEAD `45c64c5` was safely fast-forwarded to corrected
+Windows checkpoint `a49e536163d5cea2e220894f97f780f4bd301668`; previous local docs remain
+in exact copies, binary patch and retained named stash
+`23c69ff7cc3262981b8a23b32c55a23bb2ab0c27`. Historical planning worktree `2c5a164` is
+untouched. No reset/force push or release identity changes.
 
-**Inputs/evidence:** every one of 139 actual Mac working inputs matches final digest
-`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939` and the newer
-portable [final manifest/Windows receipt](../tasks/active/source-foundation-qualified-inputs.json).
-Frozen app/test/probe bytes are unchanged. Original committed/reviewed 138-input
-manifests are historical. All 23 original Mac evidence files, earlier failures and
-138 superseded input bytes remain retained/indexed under ignored
-`.toolchains/reports/source-foundation/`, including `mac-corrected-qualification/`.
-Earlier Mac executable hash
-`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7` proves older inputs only.
-Local official SDK archive reverified as
-`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+**Failure evidence:** workflow 354880113, Mac job 112657582469, terminal failure
+2026-10-07 06:11:33 UTC. Pinned Rust selection from `app/` succeeded; helper's root-cwd
+Rust version check failed. Cache logs confirm installed 1.90.0 ARM64. Setup failure,
+not an application failure. All other jobs skipped. Full logs ZIP hash
+`04f574fa4450cecce7cfe53da1be87c015e691b9e0e1d010e85193ae905db263` and artifact
+11464785180 (`source-foundation-macos-37580108751-1`) hash
+`9a90b0c9ea231bb368aa31a42fb2c0875c69cd665b9ee51d4f29a7a4baca5d84` are locally retained
+with API records, safe extraction and verified evidence index under ignored
+`.toolchains/reports/source-foundation/mac-corrected-qualification/actions-audit-37580108751-1/`.
+Terminal confirms new build/native/SDK dispatches **0/0/0**, cleanup true and
+qualification false. There are no final Mac binaries/native/SDK acceptance results.
 
-**Selected dispatch:** existing Repository quality workflow **354880113**,
-`.github/workflows/quality.yml`, on this source branch. Only
-`source_foundation_macos=true`; other three manual inputs false. All existing jobs
-skip for this mode. One `macos-26` ARM64 job uses pinned tools/actions/cache and verified
-SDK, cheap eight-test core/EOF plus three-test renderer preflights, one no-bundle release
-build, the existing source-foundation-only native runner and one exact SDK gate.
-`scripts/qualify-source-foundation-macos.py` records exclusive markers/caps before each
-operation, refuses attempts >1, verifies input hashes before/after, retains binaries/
-profile/EOF bytes/owners/full failure logs, enforces all 33 exact native checks and
-true/false six actual assertions plus real wrong-outcome failure, and indexes uploaded
-evidence after contained scratch retention/cleanup. Artifact name includes run ID/attempt,
-seven-day retention. A green workflow alone does not qualify the target.
+**Correction/preflight:** only qualification helper tool inspection changed. Every
+Node/npm/Rust/Cargo/Rustup subprocess now runs from `app/`, resolving the repository
+Rust pin; exact versions are retained/printed before assertions. Pinned versions/gates
+remain required. Existing local tools pass, including Rustup resolving app TOML with
+the explicit environment override removed. Python syntax, all **139** frozen input
+hashes and all **23** original Mac evidence hashes pass. Unchanged core eight tests/
+non-SDK EOF fixture, three renderer tests and rejecting evidence audits are reused.
+No expensive local dispatch or infrastructure installation occurred.
 
-**Preflight:** eight focused core tests PASS (one SDK wrapper ignored), three affected
-renderer tests PASS, exact non-SDK EOF fixture PASS, typecheck/syntax/Actions lint and
-rejecting gate checks PASS. Old eleven-check native proof, zero SDK assertions and a
-wrong-outcome success marker are rejected. Initial cheap cwd/lint mistakes were fixed
-before dispatch and preserved in the ledger/logs. No release/native/SDK allowance was
-used locally. Unchanged broader checks are reused.
+**Exact inputs/preservation:** final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939` matches every current
+file and [portable final manifest](../tasks/active/source-foundation-qualified-inputs.json).
+Earlier committed/reviewed 138 manifests are historical only. Original raw Mac evidence,
+failures and 138 superseded input bytes remain retained/indexed; earlier executable hash
+`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7` proves older inputs.
+Official SDK 8.5.3 SHA
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` stays required.
 
-**Confirmed pending operation:** [run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
-workflow 354880113, branch `codex/nested-source-foundation`, exact tested SHA
-`878de2a8b30e1ce0e3adf36fdba2859056bb4b86`, Mac job **112657582469**.
-At **2026-10-07 06:11:26 UTC**, run/job were **in_progress**, conclusion null.
-All three existing validator/matrix/diagnostic jobs are skipped. ONE dispatch request
-confirmed by GitHub; exclusive local marker/response retained. State **awaiting_ci**.
-No more model polling. Artifact expected `source-foundation-macos-37580108751-1`,
-seven-day retention from upload. The commit carrying this wait record is a later
-status-only successor; the run tests `878de2a`, with unchanged workflow/helper/inputs.
+**Dispatch/allowance:** ONE additional NEW workflow 354880113 run on this branch,
+`source_foundation_macos=true`, all three other manual inputs false, attempt 1 only.
+Record exact published SHA, zero existing candidate runs, allowance and exclusive
+second-request marker before dispatch. First failed run remains preserved. Unused
+Mac one-build/one-native/one-SDK allowance belongs exclusively to this new run, caps
+**1,200/300/600 seconds**, zero subsequent retries/duplicate requests. Cumulative
+Windows **2/2/3**, Mac **2/2/2**; first workflow dispatch consumed one, second explicitly
+authorized. Count each actual operation marker regardless of outcome. Existing helper
+requires eight core/EOF and three renderer preflights, exact ARM64 release/test binaries,
+all 33 native checks/one terminal report/extension-complete/external-write/cleanup, and
+EOF-produced SDK source/owners, true/false six actual assertions each plus real rejecting
+wrong-outcome failure. Always retain full logs/failures and contained cleanup/index.
 
-**Budget:** prior cumulative builds/native launches/SDK gates Windows **2/2/3**, Mac
-**2/2/2**. New Mac **one/one/one** reserved for this ONE Actions run, hard caps
-**1,200/300/600 seconds**, zero retries/duplicate or ambiguous dispatches. The job's
-70-minute outer ceiling includes setup/cheap compilation/retention and does not extend
-expensive caps. Count actual operation markers on audit, regardless of outcome. Do not
-spend the reserved allowance locally, message another executor to run it or dispatch a
-second workflow. One workflow dispatch is consumed; the actual per-operation markers remain to be audited.
-The original three allowances are reserved exclusively to this run, never available
-for another local/remote executor. No claim that all commands have started.
-
-**Windows unchanged proof:** build 55.078s, native 33 checks/one terminal report/
-external write/cleanup 13.312s, exact SDK 108.359s; true/false each six passing assertions,
-wrong-outcome exit 1/FAILED without marker. Published release x64 binary hash
-`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`, test binary
-`5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`, EOF-produced source
-`d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`.
-Raw archives remain local on Windows: corrected inputs ZIP expected
+**Windows proof/gap:** unchanged build 55.078s, native33 13.312s, SDK108.359s PASS at
+final inputs. Binary/test/EOF hashes are recorded in section 23 and manifest. Original
+Windows raw archives have not arrived: corrected inputs ZIP expected
 `acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2`, evidence ZIP
 `1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
-No existing Actions artifact/self-hosted runner can access them. Hosted Mac approval
-is not a waiver or completed raw-evidence transfer; preserve that separate gap.
+Hosted Actions approval does not waive transfer/member verification. Qualification and
+acceptance stay incomplete while that separate gap remains.
 
-**Next action / same-thread resume:** stop model polling now. When the user resumes,
-inspect only recorded run 37580108751 attempt 1 and relevant ref/worktree changes.
-If still pending, record and wait again without a loop. If terminal, download artifact
-`source-foundation-macos-37580108751-1` before expiry; verify the evidence index, all 139
-retained input copies, run/SHA identity, exact ARM64 binaries, one complete 33-check
-native report/external write/cleanup, EOF-generated SDK source/owners, true/false six
-actual assertions each, deliberate wrong-outcome failure and every dispatch/result/
-cleanup marker. Audit failures rather than retrying. Update exact target results and
-cumulative counts in section 23/CURRENT/HANDOVER. Raw Windows archive transfer/member
-audit remains unresolved and cannot be silently waived. No qualification/acceptance,
-merge, release or following deliverable is implied by resume. No autonomous Goal is
-active here; no runtime-pause control is claimed. A normal message “Resume and audit
-run 37580108751” in this same chat is sufficient. Codex host is original Mac ARM64;
-selected evidence host is GitHub macOS ARM64, reusing Windows x64 proof unchanged.
+**Next action/resume:** publish correction, verify branch/frozen blobs, dispatch once,
+record confirmed run/attempt/tested SHA/status/artifact name, then publish meaningful
+wait continuation and stop model polling. Resume same chat on user command; inspect
+only recorded run and relevant ref/worktree changes. If pending, wait again without a
+loop. If terminal, download artifact before seven-day expiry, verify index/input copies/
+identities/binaries/exact checks/SDK assertions/cleanup/dispatch counts. Audit failure
+without another dispatch. No autonomous Goal is active and no runtime-pause control is
+claimed. Codex host is original Mac ARM64; evidence host is hosted macOS ARM64, reusing
+Windows proof unchanged.

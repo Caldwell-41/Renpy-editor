@@ -1912,3 +1912,59 @@ resume is not permission for retry, another run, source correction, merge or rel
 Raw Windows input/evidence ZIP transfer/member verification remains a separate
 unresolved gap; do not declare requested two-target qualification or acceptance complete.
 No autonomous Goal is active in this chat and no runtime-pause control is claimed.
+
+
+**Mac-only Actions failure audit and explicitly authorized setup correction — 2026-10-07:**
+The user resumed run 37580108751 and then explicitly instructed: “You can find and
+fix the issues, then run another dispatch.” This authorizes ONE additional Mac-only
+workflow dispatch after the concrete correction; no automatic renewal, full matrix,
+Windows execution or app-input change. The original per-operation allowance remains
+entirely unused and is reassigned exclusively to that additional run, caps
+**1,200/300/600 seconds** for one release no-bundle build/native launch/exact SDK gate.
+
+Audited [37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
+workflow 354880113, Mac job 112657582469, exact tested SHA
+`878de2a8b30e1ce0e3adf36fdba2859056bb4b86`; terminal **failure** at
+2026-10-07 06:11:33 UTC. Checkout/frozen-input guard, Node/npm install, pinned Rust
+selection and cached SDK retrieval passed. Cheap-preflight failed at the helper's
+`rustc --version` assertion: that subprocess used repository-root cwd, outside
+`app/rust-toolchain.toml`. Runner cache output confirms Rust 1.90.0 ARM64 was present;
+Rust selection from `app/` succeeded. This is qualification setup failure, not an
+application or source-foundation failure. Core preflight, release build, native launch
+and SDK gate never dispatched. Existing validator/matrix/diagnostic jobs all skipped;
+no Windows execution.
+
+Downloaded artifact **11464785180**, `source-foundation-macos-37580108751-1`, 588 bytes,
+SHA-256 `9a90b0c9ea231bb368aa31a42fb2c0875c69cd665b9ee51d4f29a7a4baca5d84` matches
+GitHub digest. Staged extraction passed entry containment/link checks. Its only evidence
+member `terminal.json` hashes to
+`ac489e4ee8dc952b0669bce5cf91e08375a57f13b61e95b8700d8482428e379d`, exactly matching
+`evidence-sha256.json`. Terminal records qualification false, new dispatches **0/0/0**,
+cumulative Mac **2/2/2**, scratchRemoved true and twoTargetAcceptance false. Full logs
+ZIP SHA-256 `04f574fa4450cecce7cfe53da1be87c015e691b9e0e1d010e85193ae905db263`;
+full job/artifact API records, ZIPs, safely staged extracted logs and `audit.json` are
+preserved locally under ignored
+`mac-corrected-qualification/actions-audit-37580108751-1/`. No binary/native/SDK
+acceptance evidence exists for this failed attempt. Windows cumulative remains **2/2/3**.
+Workflow dispatches consumed **one**; the next approved request is the **second** total.
+
+Correction is limited to `scripts/qualify-source-foundation-macos.py`: all pinned tool
+inspection subprocesses now use `cwd=ROOT / "app"`, matching every existing bounded
+build/test subprocess and the workflow's Rust selection step. Before assertions the
+helper retains/prints exact Node/npm/Rust/Cargo/Rustup versions. Assertions still require
+Node 24.19.0, npm 11.9.0, Rust/Cargo 1.90.0 and ARM64 Rustup. No version fallback or
+weakened gate. Existing local pinned tools pass the corrected inspection; with
+RUSTUP_TOOLCHAIN removed, the existing Rustup independently resolves the pinned app TOML
+and reports 1.90.0 ARM64. Python syntax, frozen-input audit and all **23** original
+Mac evidence hashes pass; all **139** app/test/probe hashes still match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Unchanged eight-test core/EOF, three-test renderer and rejecting audit proof is reused.
+Repository validator PASS (364 files), Actions lint PASS and whitespace PASS.
+
+Publish the coherent correction/failure record to the same branch, verify exact published
+SHA and zero existing runs at that SHA, record exclusive second-dispatch marker/request/
+allowance before one workflow 354880113 request with ONLY source_foundation_macos true.
+Use a NEW run/attempt 1, preserving failed run 37580108751/1; do not rerun that attempt.
+Capture confirmed identity and pause manually in this same chat. Audit its actual
+operation markers/results after user resume. Remaining raw Windows ZIP transfer/member
+verification is still unresolved and no two-target qualification/acceptance is claimed.

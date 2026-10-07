@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (awaiting Mac-only Actions).
+**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (Mac-only Actions setup correction).
 **Phase 1: accepted, integrated and closed.**
 
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
@@ -38,13 +38,18 @@ exact SDK gate 108.359s. All 139 frozen input hashes match digest
 `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`, including this Mac
 checkout after preserved fast-forward. Original Mac evidence covers earlier inputs only.
 
-The user approved ONE hosted macOS ARM64 Actions proof, pinned CI setup and workflow
-publication. [Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
-is **in_progress** at the recorded snapshot, testing exact workflow checkpoint `878de2a`. The existing quality workflow gains an isolated Mac-only mode; other
-jobs and Windows execution are excluded from that dispatch. Focused core (8), renderer
-(3), non-SDK EOF fixture and workflow/audit preflights pass. New Mac one-build/one-native/
-one-SDK allowance is reserved for this run, caps 20/5/10 minutes, zero retries. Cumulative
-counts remain Windows 2/2/3 and Mac 2/2/2 until actual operation markers arrive.
+[Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
+failed before any expensive operation: the qualification helper checked Rust from
+repository root instead of the pinned `app/` directory. Its artifact/index and full
+logs are downloaded and verified; cleanup passed. All other jobs skipped. Cumulative
+counts remain Windows **2/2/3**, Mac **2/2/2**.
+
+The user explicitly approved finding/fixing issues and **one additional dispatch**.
+The helper now checks tools from `app/` and retains their versions. Existing pinned
+local tools verify the correction; all 139 inputs and 23 original Mac evidence files
+remain unchanged. The unused one-build/one-native/one-SDK allowance, caps 20/5/10
+minutes, is assigned exclusively to the next Mac-only run. No automatic retry follows
+that dispatch. Windows proof is reused unchanged.
 
 Qualification is incomplete/not accepted. Raw Windows archives still require transfer
 and member verification; Actions approval did not waive that gap. Frozen app/test/probe
