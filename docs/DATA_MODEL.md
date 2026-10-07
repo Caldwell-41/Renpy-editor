@@ -230,6 +230,16 @@ keys use the OS store or explicit backend-memory-only session mode. See
 [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and the
 [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
 
+The implemented first Studio slice uses strict schema-v1 device records with a store
+revision, up to 32 profiles and 128 owned cleanup references. Each profile has an
+opaque UUID, monotonic revision, label/canonical endpoint/exact model, private-HTTP
+opt-in, unverified capacity and total/response token defaults, disabled state and an
+optional opaque credential ID/origin/revision. Cleanup identifies only an owned
+profile/credential pair; no key value is a record field. A full-record digest binds
+renderer mutations to their saved snapshot. Native discovery availability stays in
+memory and is invalidated by configuration/credential changes or app restart. Project
+bindings, session/generic modes and project reference/prompt schemas remain planned.
+
 Phase 2 lore has subject/category/text, entity links, explicit applicability,
 citations/provenance and `proposed`, `approved`, `superseded` or `rejected` revisions.
 Contradictory alternatives remain visible without automatic selection. Structured

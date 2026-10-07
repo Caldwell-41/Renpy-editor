@@ -3493,3 +3493,66 @@ authorised **one extra Mac targeted native run** of the unchanged package. This
 grants run 3 only, no build/generation/GET-cap increase or automatic retry. Reserve
 run 3 and one still-unsent Studio GET within the original four combined GET cap.
 Windows allowance and provider cumulative budget remain unchanged until a send.
+
+**Extra run 3 final / reassessment:** unchanged package, explicit user extension,
+process exit 1 after 300.79 s. Native watchdog recorded FAIL/timeout with runtime
+cleanup. The original qualification-entry read again waited for OS access; the
+fixture remained at its synthetic endpoint/model and never imported or sent a GET.
+Two OS-auth waits have now failed; stop this hypothesis/run loop, with no automatic
+renewal. The user-facing OS question is superseded by the terminal result. No native
+proof process or HTTP request remains pending. Same-machine authentication/access
+and any further Mac proof allowance need a separate explicit decision; Windows
+cannot close these Mac gates. This is a capability/budget limit, not a provider
+failure, no-network pass or completed both-target acceptance.
+
+**Owned recovery:** retained pre-cleanup disposable records locally, then operational
+fixture recovery disabled the profile and moved its owned reference to cleanup before
+attempting native deletion. The attempt returned an exception and did not confirm
+removal; retain one disabled profile/one cleanup reference. Exact exception category
+was not retained, so do not infer whether deletion or subsequent publication failed.
+The reference supports an idempotent explicit cleanup later. This ignored-fixture
+recovery used a bounded same-host script, not application IPC, and is **not** product
+removal/cleanup acceptance evidence. It never addressed/read/changed/deleted the
+original qualification entry. Existing key/reference, raw evidence, source worktree
+and stash remain; do not transfer secrets or claim recovered entries were deleted.
+
+**Review and final verification:** owner reviewed core ordering/error reconciliation,
+strict endpoint/discovery boundaries, native namespace/access flags, secret-free typed
+IPC, transient readiness and UI action guards. No generation service, renderer host
+privilege, project code execution, SDK or manual CI was added/run. Core **13 PASS,
+0 FAIL/ignored** (245 unrelated filtered), frontend **97 PASS, 0 FAIL/skipped**,
+desktop **1 PASS**, focused browser PASS with visually inspected light/dark wide/compact
+screenshots. Artifact pattern scan **3 files PASS**; no key field or raw response is
+saved/published. Repository validator and formatting/whitespace checks pass. Retained
+initial allowlist/invocation/sandbox/auth failures are not replaced by later passes.
+Signed upgrade, locked-login-store and installer behavior remain unqualified.
+
+**Candidate/evidence:** implementation checkpoint
+`19957189cd984596d7c75e81a11a707ef8f7b370`; all **97** packaged source/config hashes
+still match aggregate `ad4250456ab2a6f0ccc8177e10d284e10f8fe6395300977f1ece5a97f08d9f1e`.
+The same executable hash is
+`c5619a9a0049b930d5363cbe9eab5080ec23e9f21bd8487e7977b2015b503b6a`.
+Ignored `.toolchains/reports/studio-settings/` retains core/frontend/desktop/build/
+browser/native logs, launch/exit records, screenshots, full input manifest,
+pre-cleanup records and owned-recovery receipt. `mac-handoff-receipt.json` SHA-256
+`45f902d016debd9316e8852181fc2ea75f1181f7ed80ec51b319e0c8745a597b`.
+Evidence is host-local, not a branch-transfer artifact or a pass on another OS.
+
+**Final cumulative allowance / handoff:** slice Mac builds **2 launched** (one
+invocation FAIL, one package PASS); Mac native **3 launched** (one 9-check PASS,
+two OS-auth timeout FAILs; run 3 was explicitly authorised). **Zero Mac builds/runs
+remain.** Windows **0 builds/0 runs**, still **2 builds/2 targeted runs** available.
+Discovery **0/4 sent**, all **4 combined GETs remain**, 15 s + 2 s cleanup per GET;
+no automatic retry. Provider cumulative remains **22 HTTP/16 generations consumed;
+18 HTTP/4 generations/343 s remaining**, 1457/1800 s conservative charge unchanged.
+Generation stays excluded. Historical source counts Windows 2/2/3, Mac 3/3/3 unchanged.
+
+Bounded Mac implementation and available proof are ready for same-branch transfer,
+with missing Mac discovery/native removal/cleanup qualification explicitly retained.
+Next Windows agent pulls the published successor, completes the Windows native
+adapter/secure entry and focused proof under its unchanged allowance, reviews/fixes
+in scope and records the remaining Mac gate. It must not request direct Mac access,
+renew Mac/GET/provider budgets, claim full acceptance, start 2A.2, merge or release.
+Canonical architecture/data/UI/testing docs and the approved mockup/prompt are updated.
+CURRENT/HANDOVER replace the superseded preparation continuation; publication is
+user-authorised and must be verified at the remote tip. No receipt-only SHA chase.
