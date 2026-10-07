@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (awaiting corrected Mac-only Actions).
+**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (Mac proof audited; Windows transfer pending).
 **Phase 1: accepted, integrated and closed.**
 
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
@@ -38,25 +38,23 @@ exact SDK gate 108.359s. All 139 frozen input hashes match digest
 `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`, including this Mac
 checkout after preserved fast-forward. Original Mac evidence covers earlier inputs only.
 
-[Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
-failed before any expensive operation: the qualification helper checked Rust from
-repository root instead of the pinned `app/` directory. Its artifact/index and full
-logs are downloaded and verified; cleanup passed. All other jobs skipped. Cumulative
-counts remain Windows **2/2/3**, Mac **2/2/2**.
+Mac ARM64 proof PASS after audit of
+[run 37581016311/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311)
+at `1ac8068`: release build 295.604s, native all 33 exact checks 11.304s (wrapper
+11.477s), exact SDK gate 194.514s. True/false each executed six passing assertions;
+deliberate wrong outcome exited 1/FAILED without its success marker. EOF-produced source,
+stable owners, external-write evidence, cleanup, retained ARM64 binaries and all 905
+indexed evidence members pass audit. Every retained/current/committed input matches.
 
-The user explicitly approved the setup fix and **one additional dispatch**.
-[Run 37581016311/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311)
-is confirmed **in_progress** at the recorded snapshot, testing `1ac8068`.
-Only Mac ARM64 runs; other jobs skip. The helper checks pinned tools from `app/` and
-retains their versions. Validation passed; all 139 frozen inputs and 23 original Mac
-evidence files remain unchanged. The unused one-build/one-native/one-SDK allowance,
-caps 20/5/10 minutes, is reserved exclusively to this run. Two workflow dispatches
-are consumed; actual expensive-operation counts await artifact audit. No further retry
-is authorized. Windows proof is reused unchanged.
+Earlier setup failure [37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
+is preserved; it dispatched no expensive operations. Both workflow dispatches are
+accounted for. Cumulative builds/native launches/SDK gates: Windows **2/2/3**, Mac
+**3/3/3**. The Mac allowance is exhausted; no further execution/retry is authorized.
+Original 23 Mac evidence files and frozen app/test/probe inputs remain unchanged.
 
 Qualification is incomplete/not accepted. Raw Windows archives still require transfer
 and member verification; Actions approval did not waive that gap. Frozen app/test/probe
 inputs, original Mac evidence/failures and historical planning worktree `2c5a164` remain
 preserved. No full matrix, merge, release, provider/AI work or following deliverable.
 [Section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
-owns exact attempts/results and allowance; [HANDOVER](HANDOVER.md) owns dispatch/wait state.
+owns exact attempts/results and allowance; [HANDOVER](HANDOVER.md) owns the transfer blocker and continuation.

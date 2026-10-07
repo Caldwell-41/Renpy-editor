@@ -992,7 +992,7 @@ Loomlight decisions, not a mandated OpenAI milestone count or new orchestration 
 
 ## 21. First bounded source-foundation assignment
 
-**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Original target proof is preserved; final changed inputs are not target-qualified or accepted. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Mac ARM64 gates passed and raw evidence is audited; Windows x64 PASS is recorded and reused unchanged. Requested two-target qualification/acceptance remains incomplete pending original Windows archive transfer/member verification. Original proof/failures are preserved. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
 **Reason:** prove stable child ownership before AI planning grows around flat Scenes.
 No provider access or credentials are needed.
 
@@ -2004,3 +2004,112 @@ if terminal, or wait again if pending. Preserve any failure, count actual dispat
 regardless of outcome, and reassess without another execution. Raw original Windows
 archive transfer/member audit remains unresolved and is not waived. No autonomous Goal
 or verified runtime-pause control is claimed.
+
+
+**Corrected Mac ARM64 terminal evidence audit — 2026-10-07:**
+User resumed only recorded [run **37581016311/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311).
+Workflow **354880113**, Mac job **112660446339**, branch `codex/nested-source-foundation`,
+exact tested SHA **`1ac80686bb96acda20fb56ecdc518a68a91b1809`** match the pre-dispatch
+selection. Run terminal **success** at **2026-10-07 06:32:11 UTC**. Only Mac job ran;
+all three historical validator/matrix/browser diagnostic jobs skipped. No Windows
+execution, duplicate request or retry. Fresh local/remote source checkpoint `3ec9105`
+was unchanged and clean on resume; historical planning worktree remains untouched.
+
+Downloaded artifact **11464029580**, `source-foundation-macos-37581016311-1`,
+**14,546,223 bytes**, SHA-256
+`879dea0bd7df572b08f28ca09a240589075f9813ba95991f8263905a1982b830`, matching GitHub
+metadata/digest, run/branch/tested SHA and unexpired retention (2026-10-14 06:31:12 UTC).
+Archive entries passed relative containment, duplicate and unsupported-link checks
+before staged extraction. All **905** indexed retained files match their SHA-256,
+with no extra/missing files. Evidence-index hash
+`207bb447ba9d469b5eef0539338708df1c51212e706539018317237228be24cc`.
+Full workflow logs ZIP SHA-256
+`b2e310c9d861d0f879bba4cdf55fc6a55300e5e0b50842be49d0a72178b5dd83`.
+Raw API records, ZIPs, extracted artifact/logs and independent `audit.json` are retained
+under ignored `mac-corrected-qualification/actions-audit-37581016311-1/`.
+All **139** retained exact-input copies, current working files and exact tested commit
+blobs independently match the portable final manifest and digest
+**`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`**.
+All **23** original Mac evidence files remain unchanged; earlier failures/superseded
+bytes/named stash remain preserved. Frozen app/test/probe inputs were not modified.
+
+Pinned Node **24.19.0**, npm **11.9.0**, Rust/Cargo **1.90.0**, Rustup ARM64 app-TOML
+selection and host macOS **26.6.2 ARM64** are retained. Official SDK archive hash remains
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`; prepare succeeded
+only after exact archive verification. Cheap actual Mac core/EOF preflight **8 PASS,
+1 deliberately ignored SDK wrapper**, 236 filtered out, 43.488s wrapper / 4.51s tests;
+exact non-SDK EOF fixture executed and passed. Renderer **3 PASS**, typecheck, renderer
+compilation and extended-probe syntax pass. Missing/ignored wrapper is not reused as
+SDK evidence; the exact ignored SDK gate separately executed below.
+
+Actual expensive dispatch markers were written before execution, each once, exact
+commands matching recorded selection, retries 0; results show exit 0/no timeout:
+
+| Mac operation | Exact selection | Duration / hard cap | Audited result |
+| --- | --- | --- | --- |
+| Release build | `npm exec -- tauri build --no-bundle -- --locked` from app | 295.604s / 1,200s | PASS; exact ARM64 executable retained |
+| Native | Existing `run-runtime-ui-probes.py`, retained executable, ONLY `source-foundation` | 11.477s / 300s; runner 11.304s | PASS; all 33 exact checks, one terminal report |
+| SDK | `cargo test -p loomlight-core --locked renpy::tests::source_foundation::source_foundation_bool_sdk_gate -- --ignored --exact --nocapture` from app | 194.514s / 600s; test 193.19s | PASS; 1 selected test, 0 ignored, 244 filtered out |
+
+Retained release executable **13,960,704 bytes**, SHA-256
+`ff70cec37e8de3357d2fd5aec5dd7466033dd29bc8c050e338532d962e37ddb8`;
+actual SDK test executable SHA-256
+`8170673ac4ad85f5463f3f25a8e2d64009b5992a3b86150c77657e999156bb5a`.
+Both hashes and actual retained Mach-O ARM64 architecture independently verified.
+
+Native raw log has exactly one external-ready checkpoint and one terminal packaged
+source-foundation report. Ordered check list exactly equals all **33** final checks,
+retaining the original eleven plus root move/drag and Otherwise/body-trivia insertion
+refusals, safe edits outside group, stable child IDs/owners, EOF append/Undo/Redo/reopen,
+exact retained Story/Source drafts, and normal shell close/reopen after external refusal.
+`extendedChecksComplete=true`, stage complete, externalErrors empty, cleanupComplete
+true. Runner-owned external write verified from retained final source: stripping exactly
+`# ordinary external writer` and newline reproduces before hash
+`9f883355125a6b76bbdae0d2c625c2cbfa97564a5d2ff7f7036c781987aa623d`; final hash is
+`292848afe1e4f7501209df1e73261057fc524a765df4da9056e1691c94465722`.
+One external-written marker is retained. Contained native profile was retained then
+removed; no live scratch/profile remains in artifact; terminal scratchRemoved true.
+
+SDK raw cases independently audited, not merely its green Rust wrapper. **true/false**
+each exit **0**, Status PASSED, route marker present and **six actual assertions, six
+passed, zero failed/xfailed/xpassed**. **wrong-outcome** exit **1**, Status FAILED and
+real AssertionError, with **two assertions / one passed / one failed**, no
+`SOURCE_FOUNDATION_ROUTE wrong-outcome` success marker. Frozen test code invokes the
+real corrected EOF root-append action, writes its accepted result, then asserts unchanged
+scene bytes after every SDK case; actual route assertions reach Foundation continuation
+and verify the opaque Python neighbor. EOF-before is unterminated; produced bytes are
+exactly before plus CRLF + indented continuation + CRLF. Two distinct children retain
+identical before/after IDs, one group and distinct branches. Retained source/owner hashes:
+
+- EOF before: `31f4fc121e308a5fb1735c126837bc9a957447afbd25b5d089c520af1e1b4347`
+- EOF produced: `c0fa5ab8035c3c1a84924952e8e4ad03268208c2135b063c6400a1295c2b9a8c`
+- EOF owners: `edc9bf7a465f632ca60b2e04776c6ff55d7b9945bfbdde350d164244772c68bd`
+
+Mac generated fixture hash differs from the recorded Windows hash. Fresh projects
+generate per-instance technical scene labels/identities, so produced-source hashes are
+per-instance evidence. Mac bytes are retained/audited; a byte-for-byte comparison with
+raw Windows source is unavailable until transfer. Frozen input hashes remain identical. SDK terminal reports exactly one
+PASS/cleanup true; exact Rust test passes only after its contained temporary tree is
+removed. Native and SDK cleanup plus outer scratch retention/removal all pass.
+
+**Both target results/counts:** final-input Mac ARM64 gates **PASS, raw evidence audited**;
+Windows x64 previously recorded **PASS**, reused unchanged (build55.078s, native33
+13.312s, SDK108.359s; true/false six assertions each and wrong-outcome exit1/FAILED).
+Windows release/test/EOF hashes remain respectively
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`,
+`5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`,
+`d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`.
+Count each new dispatch: Mac now **3 builds / 3 native launches / 3 SDK gates**;
+Windows remains **2/2/3**. Both workflow dispatches consumed; first setup failure
+37580108751/1 added **0/0/0**, second added **1/1/1**. Remaining Mac expensive allowance
+**0/0/0**; no further dispatch/retry/installation or second executor is authorized.
+
+**Remaining blocker:** original Windows corrected input/evidence ZIPs still have not
+been directly transferred or member-verified on Mac. Expected archive hashes remain
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` and
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+The published 139-input receipt/committed blobs are not the missing raw transfer.
+Hosted Mac approval did not waive that requirement. Therefore the requested overall
+two-target qualification/acceptance is **INCOMPLETE**, despite passing Mac execution.
+No pending CI operation remains. Next work is direct archive access/transfer/hash/member
+audit without any new qualification execution; no merge/release/provider/following work.
