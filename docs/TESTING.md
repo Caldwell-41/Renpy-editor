@@ -1137,3 +1137,16 @@ Synthetic DOM input is distinct from physical native keyboard/human acceptance. 
 production matrix or specialist exercise is selected by this case. A supported-target
 proof remains necessary on both Windows x64 and macOS ARM64; current allowance/results
 belong in the [owning ledger](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).
+
+
+The manual `quality.yml` input `source_foundation_macos` isolates the approved
+hosted Mac ARM64 source-foundation proof; all other manual inputs must be false and
+all existing matrix/diagnostic jobs skip. Its orchestration helper lives outside
+frozen app/test/probe inputs, uses the existing selectors/runner/exact SDK gate,
+requires the 139-input digest and exact 33-check report, and records exclusive
+one-dispatch markers with 20/5/10-minute caps. No job/run retries are accepted.
+The source-foundation artifact retains hashes, binaries, generated EOF source/owners,
+profiles, full failures and cleanup. Audit downloaded evidence rather than a green
+badge. Existing Windows proof is reused; this mode cannot transfer raw files held
+only on another local host or waive missing raw evidence. Section 23 owns allowance
+and the exact selected run; no full matrix is selected by this input.

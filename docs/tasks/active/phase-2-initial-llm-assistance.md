@@ -1726,3 +1726,148 @@ committed manifest remains historical. Raw evidence, binaries/PDB, caches, logs 
 SDKs remain ignored/local; exact bundles and hashes support direct Mac evidence
 transfer. This remote update does not imply completed Mac transfer/qualification,
 acceptance, merge or release. No expensive checks or allowances are renewed.
+
+
+**Mac corrected-qualification continuation / direct-transfer access stop — 2026-10-07:**
+The user selected only the remaining macOS ARM64 qualification, preserving Windows
+proof and every earlier failure. Original Mac checkout is the current project root;
+fresh Git confirms `codex/nested-source-foundation` at
+`45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`, initially clean. Historical planning
+worktree remains `2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, untouched. No reset,
+application/probe edit, commit, push, merge or new deliverable occurred.
+
+Read original AGENTS/CURRENT/HANDOVER and sections 21/23. Read-only inspection of the
+connected Windows task discovered its later published checkpoint; one fetch verified
+`origin/codex/nested-source-foundation` at
+`a49e536163d5cea2e220894f97f780f4bd301668`. Mac HEAD/worktree were not advanced.
+That checkpoint's newer portable `source-foundation-qualified-inputs.json` and all
+139 Git blobs independently match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+This is remote blob inspection, **not** direct archive transfer or a final Mac working
+input audit. Original committed 138-input and reviewed 138-input manifests remain
+historical and cannot substitute for the final qualification tree.
+
+Windows published receipt records build PASS 55.078s, native PASS 13.312s/all 33
+checks/one terminal report/cleanup true, exact SDK PASS 108.359s with six actual
+assertions per passing true/false route and deliberate wrong-outcome exit 1/FAILED
+without its marker. Release x64 SHA-256
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`,
+SDK test binary `5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`,
+EOF-produced source `d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`.
+Reuse unchanged Windows proof; raw Windows evidence is not yet available on Mac.
+
+Ignored `mac-corrected-qualification/entry-state.json` records fresh refs/status;
+`superseded-mac-bytes/` preserves all 138 earlier input bytes and original status/
+ledger/manifests, with copy hashes checked. `entry-evidence-sha256.json` indexes all
+23 original foundation evidence files, including failures and retained Mac executable.
+The original executable hash remains
+`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`.
+No original evidence was overwritten. Existing native Mac desktop surfaces are
+agent-accessible; pinned Node 24.19.0/npm 11.9.0/Rust 1.90.0, command-line build tools
+and caches exist. Official archive SHA-256 reverified as
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Fetched probe JS syntax and Python runner AST pass inspection. The real extended
+probe and non-SDK EOF fixture preflight remain pending on transferred working inputs.
+
+**Actual blocker:** no direct Windows file-transfer tool, mounted share or SSH
+configuration is available here; local resolution of `SUNDOWN`/`SUNDOWN.local`
+returned no address. Capability discovery found no suitable existing transfer
+connector. Requested an existing direct route or explicit authorization to coordinate
+with Windows task “Qualify Nested Source Foundation”; no route/authorization received
+at this checkpoint. No task message or infrastructure installation was attempted.
+Both required archives remain untransferred, their hashes and `evidence-sha256.json`
+unverified locally. Expected archive hashes remain inputs
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` and Windows evidence
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+
+`allowance.json` records the new unused Mac one-build/one-native/one-SDK allowance,
+1,200/300/600-second hard caps and zero retries. Exact build is
+`npm exec -- tauri build --no-bundle -- --locked`; native runner selects ONLY
+`source-foundation`; SDK is ONLY
+`cargo test -p loomlight-core --locked renpy::tests::source_foundation::source_foundation_bool_sdk_gate -- --ignored --exact --nocapture`.
+No expensive dispatch or one-dispatch marker exists. Cumulative counts stay
+**Windows 2/2/3; Mac 2/2/2**. Mac corrected qualification and two-target qualification
+remain incomplete/not accepted. Continue in this chat after transfer access exists:
+verify/extract both archives into fresh staging, audit evidence members, reconcile
+all 139 exact frozen inputs with backups, then cheap preflights and the three single
+dispatches with exclusive markers and caps. Stop/reassess failure or ambiguity;
+no automatic renewal. New status/evidence is local-only; no publication authorized.
+
+
+**GitHub Actions alternative investigated — 2026-10-07:** user asked to coordinate
+with Actions again. Read-only GitHub API checks confirm zero runs on the corrected
+branch, zero existing self-hosted runners, and no matching foundation/corrected/transfer
+artifact among all 21 repository artifacts. Existing production workflow selects
+both targets and broad gates with CI tool/dependency setup; it was not dispatched.
+A targeted hosted Mac-only workflow could produce the remaining Mac evidence while
+reusing Windows proof, but changes the original-Mac/existing-tools requirements and
+needs a published workflow/pinned CI setup. Asked for that explicit scope decision;
+no workflow or expensive allowance has been dispatched. Actions does not automatically
+access either existing Windows archive, which remains a separate transfer prerequisite
+unless the user explicitly changes that requirement. Assessment is retained in ignored
+`mac-corrected-qualification/actions-access-assessment.json`. Cumulative Windows/Mac
+counts remain 2/2/3 and 2/2/2; all new Mac allowances remain unused.
+
+
+**Hosted Mac-only Actions selection approved — 2026-10-07:** after the agent explained
+that Actions changes the original Mac/existing-tools execution boundary and requires
+pinned CI setup plus workflow publication, the user answered “Yes approved”. This
+selects ONE Mac-only Actions run consuming the existing unused Mac build/native/SDK
+allowance, with unchanged 1,200/300/600-second caps and zero retries. It does not
+renew budgets, repeat Windows qualification, select a full matrix, authorize merge/
+release or waive direct raw Windows evidence transfer/member verification.
+
+All three earlier local status/ledger edits were copied byte-exactly with a binary
+Git patch, then preserved in a named Git stash before fast-forwarding the original
+Mac checkout from `45c64c5` to published corrected checkpoint
+`a49e536163d5cea2e220894f97f780f4bd301668`. The preserved Mac continuation is
+reconciled above alongside the complete newer Windows ledger. Original Mac evidence
+index still matches all 23 files; historical planning worktree remains untouched.
+All 139 actual Mac working inputs now match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+No frozen app/test/probe input was modified; the new runner is outside those inputs.
+
+The existing `quality.yml` workflow (GitHub workflow ID **354880113**) gains isolated
+manual input `source_foundation_macos=true`. Other manual inputs must be false;
+all existing matrix/diagnostic/validator jobs skip for this mode. Only one `macos-26`
+ARM64 job runs. Reusing an existing workflow avoids changing main merely to register
+a new dispatchable workflow. Pinned action revisions and existing cache/tool/SDK
+setup conventions are retained; official archive checksum is rechecked. New
+`scripts/qualify-source-foundation-macos.py` wraps existing focused preflights,
+no-bundle build, native runner and exact SDK gate. It records exclusive dispatch
+markers/commands/caps before each operation, refuses run/job attempt >1, verifies
+frozen inputs before/after, kills owned processes at hard caps, retains exact inputs/
+executable/test binary/native profile/EOF source/owners/full logs, strictly audits
+33 native checks and six actual SDK assertions per route plus wrong-outcome rejection,
+and indexes terminal evidence for upload even on failure. Finishing retains scratch
+before contained cleanup. The 70-minute job ceiling includes setup/cheap compilation/
+retention; expensive operation caps remain 20/5/10 minutes.
+
+Local cheap preparation PASS: eight focused core tests including the exact non-SDK
+EOF fixture (one SDK wrapper deliberately ignored), three affected renderer tests,
+TypeScript/typecheck, Python AST, Actions lint, whitespace and frozen 139-input audit.
+Audit rejects the original eleven-check native green result, zero-assertion SDK result
+and a wrong-outcome result with its success marker; historical SDK output validates
+the parser only, not these final target inputs. Unchanged wider proof is reused.
+Initial local core preflight was run from repository root and failed before tests
+(no Cargo.toml); corrected `app/` cwd passes, both logs retained. Initial workflow
+lint caught runner context in job env; moved the paths into step env/GITHUB_ENV.
+No expensive dispatch occurred during these cheap corrections.
+
+Fresh remote refs are source branch `a49e536`, main `aba200f`; existing quality
+workflow is active. Publish this coherent workflow/helper/status checkpoint on the
+same source branch without force, verify its exact SHA and frozen blobs, then make
+ONE dispatch of workflow 354880113 at that branch with only the Mac input true.
+Capture its confirmed run/attempt/exact tested SHA and continuation before the
+manual same-thread wait. No status polling or automatic retry. Current cumulative
+counts remain Windows **2/2/3**, Mac **2/2/2** until per-operation dispatch evidence;
+the unused Mac allowance is reserved for this one run and may not be spent locally
+or by another executor. Frozen inputs and prior failures remain unchanged.
+
+Raw Windows archive transfer is still unresolved, with expected input/evidence ZIP
+hashes `acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` /
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+Hosted Actions cannot read files held only on Windows. Approval of the hosted Mac
+proof does not claim those archives arrived or waive their member audit. Even a
+passing Mac job requires evidence download/hash/count/cleanup audit; overall requested
+qualification/acceptance remains incomplete while the raw Windows evidence gap remains.

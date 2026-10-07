@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      source_foundation_macos:
+        description: One bounded Mac ARM64 source-foundation proof; reuse Windows evidence
+        required: false
+        type: boolean
+        default: false
       phase1g_flow_profile:
         description: Run bounded G1-OBS core, rendered interaction and three-sample budgets (no package)
         required: false
@@ -27,7 +32,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic) }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -45,7 +50,7 @@ jobs:
 
 
   phase1g-flow-profile:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -189,7 +194,7 @@ jobs:
           retention-days: 7
 
   phase1g-macos-browser-diagnostic:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_macos_browser_diagnostic }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: R2-P1 macOS browser diagnostic
     runs-on: macos-26
     timeout-minutes: 10
@@ -305,4 +310,96 @@ jobs:
           name: r2-p1-macos-browser-diagnostic
           path: ${{ runner.temp }}/macos-browser-diagnostic/
           if-no-files-found: error
+          retention-days: 7
+
+
+  source-foundation-macos:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_foundation_macos }}
+    name: Bounded source foundation — macOS ARM64
+    runs-on: macos-26
+    timeout-minutes: 70
+    concurrency:
+      group: source-foundation-macos-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      CARGO_TERM_COLOR: never
+      NO_COLOR: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out exact workflow candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require isolated first-attempt selection and frozen inputs
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          FOUNDATION_EVIDENCE: ${{ runner.temp }}/source-foundation-macos
+          FLOW_PROFILE: ${{ inputs.phase1g_flow_profile }}
+          MAC_DIAGNOSTIC: ${{ inputs.phase1g_macos_browser_diagnostic }}
+          CANDIDATE_PROOF: ${{ inputs.phase1g_candidate_proof }}
+        run: |
+          python3 - <<'PYSELECT'
+          import os, pathlib, runpy
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              for key in ['LOOMLIGHT_RUNTIME_SDK_ARCHIVE', 'FOUNDATION_EVIDENCE']:
+                  stream.write(key + '=' + os.environ[key] + '\n')
+          assert os.environ['GITHUB_RUN_ATTEMPT'] == '1', 'No workflow retries authorized'
+          assert all(os.environ[k] == 'false' for k in ['FLOW_PROFILE', 'MAC_DIAGNOSTIC', 'CANDIDATE_PROOF'])
+          assert os.environ['GITHUB_REF'] == 'refs/heads/codex/nested-source-foundation'
+          namespace = runpy.run_path('scripts/qualify-source-foundation-macos.py')
+          namespace['inputs']()
+          pathlib.Path(os.environ['FOUNDATION_EVIDENCE']).mkdir(exist_ok=False)
+          PYSELECT
+      - name: Select pinned Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select pinned npm and install locked dependencies
+        working-directory: app
+        run: |
+          npm install --global npm@11.9.0
+          npm ci --ignore-scripts
+      - name: Select repository-pinned Rust
+        working-directory: app
+        run: rustup show active-toolchain
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-macos-26
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Restore official pinned SDK archive
+        id: foundation-sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-macOS-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Download official SDK on cache miss
+        if: steps.foundation-sdk-cache.outputs.cache-hit != 'true'
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
+            --max-time 300 --output "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE.partial" \
+            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+          mv "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE.partial" "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE"
+      - name: Cheap foundation and EOF fixture preflights
+        run: python3 scripts/qualify-source-foundation-macos.py prepare "$FOUNDATION_EVIDENCE"
+      - name: One no-bundle release build — hard cap 20 minutes
+        run: python3 scripts/qualify-source-foundation-macos.py build "$FOUNDATION_EVIDENCE"
+      - name: One source-foundation native launch — hard cap 5 minutes
+        run: python3 scripts/qualify-source-foundation-macos.py native "$FOUNDATION_EVIDENCE"
+      - name: One exact SDK foundation gate — hard cap 10 minutes
+        run: python3 scripts/qualify-source-foundation-macos.py sdk "$FOUNDATION_EVIDENCE"
+      - name: Retain terminal evidence and clean contained scratch
+        if: always()
+        run: python3 scripts/qualify-source-foundation-macos.py finish "$FOUNDATION_EVIDENCE"
+      - name: Upload source-foundation evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: source-foundation-macos-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/source-foundation-macos
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
