@@ -399,7 +399,7 @@ jobs:
             | tee "$RUNNER_TEMP/browser-outcomes.log"
       - name: Upload bounded production failure and package evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: phase-1-q1-package-evidence-${{ matrix.runner }}
           path: |
@@ -428,7 +428,7 @@ jobs:
       - name: Upload packaged application for manual runs
         if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.upload_packages }}
         continue-on-error: true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: phase-1-production-package-${{ matrix.runner }}
           path: app/target/release/bundle/**

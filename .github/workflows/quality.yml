@@ -182,7 +182,7 @@ jobs:
       - name: Upload flow profile
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: phase-1g-flow-profile-${{ matrix.runner }}
           path: |
@@ -305,7 +305,7 @@ jobs:
           PYAUDIT
       - name: Upload diagnostic evidence including failures
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: r2-p1-macos-browser-diagnostic
           path: ${{ runner.temp }}/macos-browser-diagnostic/
@@ -396,7 +396,7 @@ jobs:
         run: python3 scripts/qualify-source-foundation-macos.py finish "$FOUNDATION_EVIDENCE"
       - name: Upload source-foundation evidence including failures
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: source-foundation-macos-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/source-foundation-macos
