@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (Mac-only Actions selected).
+**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (awaiting Mac-only Actions).
 **Phase 1: accepted, integrated and closed.**
 
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
@@ -39,7 +39,8 @@ exact SDK gate 108.359s. All 139 frozen input hashes match digest
 checkout after preserved fast-forward. Original Mac evidence covers earlier inputs only.
 
 The user approved ONE hosted macOS ARM64 Actions proof, pinned CI setup and workflow
-publication. The existing quality workflow gains an isolated Mac-only mode; other
+publication. [Run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751)
+is **in_progress** at the recorded snapshot, testing exact workflow checkpoint `878de2a`. The existing quality workflow gains an isolated Mac-only mode; other
 jobs and Windows execution are excluded from that dispatch. Focused core (8), renderer
 (3), non-SDK EOF fixture and workflow/audit preflights pass. New Mac one-build/one-native/
 one-SDK allowance is reserved for this run, caps 20/5/10 minutes, zero retries. Cumulative

@@ -1871,3 +1871,44 @@ Hosted Actions cannot read files held only on Windows. Approval of the hosted Ma
 proof does not claim those archives arrived or waive their member audit. Even a
 passing Mac job requires evidence download/hash/count/cleanup audit; overall requested
 qualification/acceptance remains incomplete while the raw Windows evidence gap remains.
+
+
+**Mac-only Actions dispatch confirmed / manual same-thread wait — 2026-10-07:**
+Published/verified workflow checkpoint
+`878de2a8b30e1ce0e3adf36fdba2859056bb4b86` on `codex/nested-source-foundation`.
+All 139 committed input blobs still match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Fresh pre-dispatch query confirmed zero runs at that SHA. Local exclusive
+`actions-one-dispatch.json` was written before ONE REST dispatch request to existing
+workflow 354880113, with `source_foundation_macos=true` and all three other inputs
+false. GitHub's response confirmed run ID; no ambiguous or duplicate request/retry.
+
+Confirmed [run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
+workflow 354880113, exact tested SHA `878de2a8b30e1ce0e3adf36fdba2859056bb4b86`,
+branch `codex/nested-source-foundation`. One required post-dispatch snapshot at
+**2026-10-07 06:11:26 UTC** records **in_progress**, conclusion null, Mac job
+**112657582469** in progress. Validate, historical macOS browser diagnostic and
+Phase 1G matrix jobs are all skipped as intended; no Windows execution. No subsequent
+model polling. Full API/dispatch/request/job/receipt evidence is retained locally in
+ignored `mac-corrected-qualification/`.
+
+One workflow dispatch is consumed. The existing one-build/one-native/one-SDK Mac
+allowance is exclusively reserved to this run, with original hard caps 20/5/10
+minutes and zero retries. Prior cumulative Windows **2/2/3**, Mac **2/2/2**;
+per-operation dispatch markers/results from the artifact must determine exact updated
+Mac counts. A workflow request is not a claim that all three commands have executed.
+No local expensive execution or second executor is selected. Preserve any skipped,
+failed/cancelled/partial result and do not renew the allowance automatically.
+
+State is **awaiting_ci**, not completed/accepted. Stop model polling and resume this
+same chat on the user's command. Then inspect this recorded run/attempt and relevant
+ref/worktree changes once. If still pending, wait again without a loop. If terminal,
+download `source-foundation-macos-37580108751-1` before its seven-day expiry, verify
+its evidence index/all 139 exact input copies, SHA/run identities, ARM64 release/test
+binaries, one terminal report/all 33 exact checks/extension-complete/external writer,
+EOF-before/produced source/owner arrays, true/false six actual assertions each and
+real rejecting wrong-outcome/cleanup/counts. Continue only remaining authorized audit;
+resume is not permission for retry, another run, source correction, merge or release.
+Raw Windows input/evidence ZIP transfer/member verification remains a separate
+unresolved gap; do not declare requested two-target qualification or acceptance complete.
+No autonomous Goal is active in this chat and no runtime-pause control is claimed.

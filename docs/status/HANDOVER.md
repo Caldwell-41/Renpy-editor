@@ -52,13 +52,25 @@ wrong-outcome success marker are rejected. Initial cheap cwd/lint mistakes were 
 before dispatch and preserved in the ledger/logs. No release/native/SDK allowance was
 used locally. Unchanged broader checks are reused.
 
+**Confirmed pending operation:** [run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
+workflow 354880113, branch `codex/nested-source-foundation`, exact tested SHA
+`878de2a8b30e1ce0e3adf36fdba2859056bb4b86`, Mac job **112657582469**.
+At **2026-10-07 06:11:26 UTC**, run/job were **in_progress**, conclusion null.
+All three existing validator/matrix/diagnostic jobs are skipped. ONE dispatch request
+confirmed by GitHub; exclusive local marker/response retained. State **awaiting_ci**.
+No more model polling. Artifact expected `source-foundation-macos-37580108751-1`,
+seven-day retention from upload. The commit carrying this wait record is a later
+status-only successor; the run tests `878de2a`, with unchanged workflow/helper/inputs.
+
 **Budget:** prior cumulative builds/native launches/SDK gates Windows **2/2/3**, Mac
 **2/2/2**. New Mac **one/one/one** reserved for this ONE Actions run, hard caps
 **1,200/300/600 seconds**, zero retries/duplicate or ambiguous dispatches. The job's
 70-minute outer ceiling includes setup/cheap compilation/retention and does not extend
 expensive caps. Count actual operation markers on audit, regardless of outcome. Do not
 spend the reserved allowance locally, message another executor to run it or dispatch a
-second workflow. No expensive dispatch or confirmed workflow operation at this checkpoint.
+second workflow. One workflow dispatch is consumed; the actual per-operation markers remain to be audited.
+The original three allowances are reserved exclusively to this run, never available
+for another local/remote executor. No claim that all commands have started.
 
 **Windows unchanged proof:** build 55.078s, native 33 checks/one terminal report/
 external write/cleanup 13.312s, exact SDK 108.359s; true/false each six passing assertions,
@@ -72,12 +84,17 @@ Raw archives remain local on Windows: corrected inputs ZIP expected
 No existing Actions artifact/self-hosted runner can access them. Hosted Mac approval
 is not a waiver or completed raw-evidence transfer; preserve that separate gap.
 
-**Next action:** publish/verify the coherent checkpoint, inspect existing runs and
-acquire the local exclusive workflow-dispatch marker, then send one dispatch request.
-Record confirmed run/attempt/branch/exact tested SHA before waiting. Ambiguity consumes
-the request; never dispatch a duplicate. Follow manual same-thread waiting without
-model polling. On user resume inspect only that run/ref state, download evidence before
-expiry, audit all hashes/counts/markers/cleanup/cumulative counts and update section 23/
-CURRENT/HANDOVER. Still pending: pause again; failed/partial: stop/reassess without retry.
-No runtime pause is claimed. Codex host is original Mac ARM64; selected evidence host
-is GitHub macOS ARM64, reusing qualified Windows x64 because both clients require proof.
+**Next action / same-thread resume:** stop model polling now. When the user resumes,
+inspect only recorded run 37580108751 attempt 1 and relevant ref/worktree changes.
+If still pending, record and wait again without a loop. If terminal, download artifact
+`source-foundation-macos-37580108751-1` before expiry; verify the evidence index, all 139
+retained input copies, run/SHA identity, exact ARM64 binaries, one complete 33-check
+native report/external write/cleanup, EOF-generated SDK source/owners, true/false six
+actual assertions each, deliberate wrong-outcome failure and every dispatch/result/
+cleanup marker. Audit failures rather than retrying. Update exact target results and
+cumulative counts in section 23/CURRENT/HANDOVER. Raw Windows archive transfer/member
+audit remains unresolved and cannot be silently waived. No qualification/acceptance,
+merge, release or following deliverable is implied by resume. No autonomous Goal is
+active here; no runtime-pause control is claimed. A normal message “Resume and audit
+run 37580108751” in this same chat is sufficient. Codex host is original Mac ARM64;
+selected evidence host is GitHub macOS ARM64, reusing Windows x64 proof unchanged.
