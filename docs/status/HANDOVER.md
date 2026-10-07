@@ -40,7 +40,11 @@ The user reported macOS Allow for run 2, but its deadline had already expired.
 Computer Use cannot access SecurityAgent; chat approval alone does not authenticate
 the OS request. Preserve both failures; no more automatic retry. Preliminary remembered
 status in another process does not turn either failed run into an acceptance pass.
-Signed upgrade, locked-login store and installer proof remain unqualified.
+Signed upgrade, locked-login store and installer proof remain unqualified. Routine remembered credentials must work without
+per-discovery/per-generation prompts for the same trusted app/unlocked store. The
+app-owned synthetic entry reopened/read without the helper-entry access prompt;
+the cross-helper entry path failed. Qualify repeat native reads/reopen on Windows
+within existing runs; do not add generation sends or global OS trust changes.
 
 All 97 packaged inputs match aggregate
 `ad4250456ab2a6f0ccc8177e10d284e10f8fe6395300977f1ece5a97f08d9f1e`.

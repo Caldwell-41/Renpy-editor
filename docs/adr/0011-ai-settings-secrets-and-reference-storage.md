@@ -54,6 +54,13 @@ but had no renderer or native entry dialog. It is not production credential UX e
 OS storage is convenient at-rest protection, not a sandbox against same-user malicious
 software or compromised application code. Session-only avoids deliberate persistence,
 but requires re-entry after app exit and cannot guarantee absence from OS memory/swap.
+Routine remembered-key use must not require per-discovery/per-generation approval
+or re-entry with the same trusted application and an unlocked available store.
+Locked-store access and changed application trust/identity can require OS interaction;
+repeat access, app reopen and update identity must be qualified separately. This is
+a usability requirement, not permission to bypass OS trust or relax global Keychain
+settings. Generation remains outside the current slice.
+
 Local removal does not revoke the provider key. Project movement requires new device
 profile/credential setup. Adapter persistence/access attributes must match this intent;
 packaged reopen/update identity, especially unsigned macOS prompts, needs actual proof.

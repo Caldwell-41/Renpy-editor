@@ -3556,3 +3556,15 @@ renew Mac/GET/provider budgets, claim full acceptance, start 2A.2, merge or rele
 Canonical architecture/data/UI/testing docs and the approved mockup/prompt are updated.
 CURRENT/HANDOVER replace the superseded preparation continuation; publication is
 user-authorised and must be verified at the remote tip. No receipt-only SHA chase.
+
+**User usability clarification:** the user asked whether every generation would
+require the Keychain interaction. No per-generation/repeated-discovery authentication
+prompt is intended for an unchanged trusted app and unlocked available store. The
+app-created synthetic entry already returned configured status after process reopen;
+the blocked path was the new unsigned packaged app accessing the separate helper's
+qualification entry. This does not qualify signed/changed-build identity or generation.
+Apple documents that [Allow Once is one access, while Always Allow grants subsequent
+access to that app](https://support.apple.com/en-ie/guide/keychain-access/kyca1243/mac).
+No persistent/global trust change is requested or applied by this clarification.
+ADR 0011 and HANDOVER now make repeat-use usability explicit for continued native
+qualification; no extra Mac launch, GET, generation, budget or implementation change.
