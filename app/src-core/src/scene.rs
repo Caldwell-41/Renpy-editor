@@ -30,7 +30,7 @@ const MAX_BEATS_PER_SCENE: usize = 4096;
 const MAX_CHAPTERS: usize = 256;
 const MAX_SCENES: usize = 4096;
 const MAX_TEXT_BYTES: usize = 10_000;
-type ForcedBeatId = (String, String, String);
+type ForcedBeatId = (String, String, String, Option<usize>);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -152,6 +152,10 @@ pub struct ChoiceOption {
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SceneBeat {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub owner: Option<crate::metadata::BeatOwner>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub conditional_branch: Option<crate::metadata::ConditionalBranch>,
     pub id: String,
     pub byte_start: u64,
     pub byte_end: u64,
@@ -271,6 +275,14 @@ pub enum SceneCommand {
         beat_id: String,
         beat: BeatPayload,
     },
+    UpdateChildDialogue {
+        scene_id: String,
+        expected_source_revision: String,
+        beat_id: String,
+        expected_owner: crate::metadata::BeatOwner,
+        character_id: String,
+        text: String,
+    },
     ContinueDialogue {
         scene_id: String,
         expected_source_revision: String,
@@ -319,6 +331,7 @@ pub enum SceneError {
 
 #[derive(Clone)]
 struct ParsedBeat {
+    nesting: Option<ParsedNesting>,
     start: usize,
     end: usize,
     payload: BeatPayload,
@@ -332,6 +345,19 @@ struct Loaded {
     source_map_bytes: Vec<u8>,
     source_map_revision: Revision,
     authoring: AuthoringMetadata,
+}
+
+#[derive(Clone)]
+enum ParsedNesting {
+    Branch {
+        group_start: usize,
+        variable_id: String,
+        otherwise: bool,
+    },
+    Child {
+        group_start: usize,
+        branch_start: usize,
+    },
 }
 
 impl AuthoringService {
@@ -381,7 +407,7 @@ impl AuthoringService {
             .validate(None)
             .map_err(|_| SceneError::InvalidMetadata)?;
         source_map.schema_version = SOURCE_MAP_SCHEMA_VERSION;
-        source_map.scene_mappings.clear();
+        let previous_mappings = std::mem::take(&mut source_map.scene_mappings);
         let authoring = self
             .list(project, project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
@@ -394,12 +420,52 @@ impl AuthoringService {
                 source_map.sources.push(scene.source_path.clone());
             }
             let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            let previous = previous_mappings.iter().find(|m| m.scene_id == scene.id);
+            let mut legacy = previous.cloned();
+            let mut forced = Vec::new();
+            if let Some(old) = legacy.as_mut() {
+                // Migration may refine an old opaque child, never rewrite source.
+                // Reuse IDs only for exactly matching source ranges and bytes.
+                let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
+                if old.source_revision != revision.sha256 {
+                    return Err(SceneError::SourceConflict);
+                }
+                if old.path != scene.source_path
+                    || old.beats.len() != parsed.len()
+                    || old.beats.iter().zip(&parsed).any(|(mapped, parsed)| {
+                        mapped.byte_start as usize != parsed.start
+                            || mapped.byte_end as usize != parsed.end
+                            || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
+                            || mapped.kind != parsed.payload.kind()
+                                && !(mapped.kind == "customCode"
+                                    && matches!(parsed.nesting, Some(ParsedNesting::Child { .. })))
+                    })
+                {
+                    return Err(SceneError::InvalidMetadata);
+                }
+                for parsed in parsed {
+                    let hash = sha256(&bytes[parsed.start..parsed.end]);
+                    if let Some(mapped) = old.beats.iter().find(|m| {
+                        m.byte_start as usize == parsed.start
+                            && m.byte_end as usize == parsed.end
+                            && m.source_sha256 == hash
+                    }) {
+                        forced.push((
+                            parsed.payload.kind().into(),
+                            hash,
+                            mapped.id.clone(),
+                            Some(parsed.start),
+                        ));
+                    }
+                }
+                old.source_revision.clear();
+            }
             let (mapping, _) = build_mapping(
                 scene,
                 &bytes,
                 &revision.sha256,
-                None,
-                &[],
+                legacy.as_ref(),
+                &forced,
                 Some((&metadata, &authoring)),
             )?;
             source_map.scene_mappings.push(mapping);
@@ -713,6 +779,25 @@ impl AuthoringService {
                 BeatEdit::Update {
                     id: beat_id,
                     payload: beat,
+                },
+            ),
+            SceneCommand::UpdateChildDialogue {
+                scene_id,
+                expected_source_revision,
+                beat_id,
+                expected_owner,
+                character_id,
+                text,
+            } => self.beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                BeatEdit::ChildDialogue {
+                    id: beat_id,
+                    owner: expected_owner,
+                    character_id,
+                    text,
                 },
             ),
             SceneCommand::ContinueDialogue {
@@ -1357,6 +1442,7 @@ impl AuthoringService {
                     beat.payload.kind().into(),
                     sha256(&rendered),
                     beat.id.clone(),
+                    None,
                 ));
             }
             if proposed == bytes {
@@ -1562,6 +1648,12 @@ impl AuthoringService {
 }
 
 enum BeatEdit {
+    ChildDialogue {
+        id: String,
+        owner: crate::metadata::BeatOwner,
+        character_id: String,
+        text: String,
+    },
     Insert {
         before: Option<String>,
         payload: BeatPayload,
@@ -1601,12 +1693,81 @@ fn apply_beat_edit(
     {
         return Err(SceneError::InvariantBlocked);
     }
+    // Nested edits require their dedicated revision-bound owner assertion. No
+    // structural operation may accidentally promote a child to a root statement.
+    let target = match &edit {
+        BeatEdit::Insert { before, .. } => before.as_deref(),
+        BeatEdit::Update { id, .. }
+        | BeatEdit::ContinueDialogue { id, .. }
+        | BeatEdit::Remove { id }
+        | BeatEdit::Reorder { id, .. }
+        | BeatEdit::Move { id, .. } => Some(id.as_str()),
+        BeatEdit::ChildDialogue { .. } => None,
+    };
+    if target.is_some_and(|id| beats.iter().any(|b| b.id == id && b.owner.is_some())) {
+        return Err(SceneError::InvariantBlocked);
+    }
     let newline = if source.windows(2).any(|window| window == b"\r\n") {
         "\r\n"
     } else {
         "\n"
     };
     match edit {
+        BeatEdit::ChildDialogue {
+            id,
+            owner,
+            character_id,
+            text,
+        } => {
+            let beat = beats
+                .iter()
+                .find(|beat| beat.id == id)
+                .ok_or(SceneError::UnknownEntity)?;
+            if beat.owner.as_ref() != Some(&owner) || beat.protected {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let BeatPayload::Dialogue {
+                character_id: previous,
+                ..
+            } = &beat.payload
+            else {
+                return Err(SceneError::InvalidPayload);
+            };
+            // This bounded operation changes existing dialogue text only.
+            if previous != &character_id {
+                return Err(SceneError::InvalidPayload);
+            }
+            validate_payload(
+                &BeatPayload::Dialogue {
+                    character_id,
+                    text: text.clone(),
+                },
+                loaded,
+            )?;
+            let original =
+                std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
+                    .map_err(|_| SceneError::UnsupportedSource)?;
+            let (quote_start, quote_end) =
+                dialogue_quotes(original).ok_or(SceneError::UnsupportedSource)?;
+            let replacement = escape_string(&text)?;
+            let mut rendered = original.to_owned();
+            rendered.replace_range(quote_start + 1..quote_end, &replacement);
+            let mut output = source.to_vec();
+            output.splice(
+                beat.byte_start as usize..beat.byte_end as usize,
+                rendered.bytes(),
+            );
+            Ok((
+                output,
+                vec![(
+                    "dialogue".into(),
+                    sha256(rendered.as_bytes()),
+                    id,
+                    Some(beat.byte_start as usize),
+                )],
+            ))
+        }
+
         BeatEdit::Insert { before, payload } => {
             validate_payload(&payload, loaded)?;
             if matches!(payload, BeatPayload::CustomCode { .. }) {
@@ -1639,7 +1800,7 @@ fn apply_beat_edit(
                     );
                     return Ok((
                         output,
-                        vec![(payload.kind().into(), sha256(rendered.as_bytes()), id)],
+                        vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)],
                     ));
                 }
                 if requested.is_some() {
@@ -1660,19 +1821,38 @@ fn apply_beat_edit(
                     }
                 })
             };
+            if root_insertion_is_nested(beats, insertion) {
+                return Err(SceneError::InvariantBlocked);
+            }
             if boundary_is_opaque(beats, insertion) {
                 return Err(SceneError::OpaqueBoundary);
             }
             let rendered = render_payload(&payload, loaded, newline)?;
             let id = uuid::Uuid::new_v4().to_string();
+            let mut forced = vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)];
             let mut output = Vec::with_capacity(source.len() + rendered.len());
             output.extend_from_slice(&source[..insertion]);
+            // An EOF child can have no line terminator. Separate the new root
+            // statement without changing any existing source bytes.
+            if insertion > 0 && source[insertion - 1] != b'\n' {
+                output.extend_from_slice(newline.as_bytes());
+                // The separator extends the preceding Beat's physical range;
+                // retain its identity despite the changed range hash.
+                if let Some(previous) = beats
+                    .iter()
+                    .find(|beat| beat.byte_end as usize == insertion)
+                {
+                    forced.push((
+                        previous.payload.kind().into(),
+                        sha256(&output[previous.byte_start as usize..]),
+                        previous.id.clone(),
+                        Some(previous.byte_start as usize),
+                    ));
+                }
+            }
             output.extend_from_slice(rendered.as_bytes());
             output.extend_from_slice(&source[insertion..]);
-            Ok((
-                output,
-                vec![(payload.kind().into(), sha256(rendered.as_bytes()), id)],
-            ))
+            Ok((output, forced))
         }
         BeatEdit::Update { id, payload } => {
             validate_payload(&payload, loaded)?;
@@ -1700,7 +1880,7 @@ fn apply_beat_edit(
             );
             Ok((
                 output,
-                vec![(payload.kind().into(), sha256(rendered.as_bytes()), id)],
+                vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)],
             ))
         }
         BeatEdit::ContinueDialogue {
@@ -1738,8 +1918,14 @@ fn apply_beat_edit(
                         committed.kind().into(),
                         sha256(committed_source.as_bytes()),
                         id,
+                        None,
                     ),
-                    (next.kind().into(), sha256(next_source.as_bytes()), next_id),
+                    (
+                        next.kind().into(),
+                        sha256(next_source.as_bytes()),
+                        next_id,
+                        None,
+                    ),
                 ],
             ))
         }
@@ -1768,6 +1954,9 @@ fn apply_beat_edit(
             }
             let (first, last) = (from.min(to_index), from.max(to_index));
             let window = &beats[first..=last];
+            if window.iter().any(|b| b.owner.is_some()) {
+                return Err(SceneError::InvariantBlocked);
+            }
             if window.iter().any(|b| b.protected)
                 || window.windows(2).any(|p| p[0].byte_end != p[1].byte_start)
             {
@@ -1784,7 +1973,12 @@ fn apply_beat_edit(
             for beat in order {
                 let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
                 output.extend_from_slice(bytes);
-                forced.push((beat.payload.kind().into(), sha256(bytes), beat.id.clone()));
+                forced.push((
+                    beat.payload.kind().into(),
+                    sha256(bytes),
+                    beat.id.clone(),
+                    None,
+                ));
             }
             output.extend_from_slice(&source[beats[last].byte_end as usize..]);
             Ok((output, forced))
@@ -1799,6 +1993,9 @@ fn apply_beat_edit(
                 MoveDirection::Down => (index + 1 < beats.len()).then_some(index + 1),
             }
             .ok_or(SceneError::InvariantBlocked)?;
+            if beats[other].owner.is_some() {
+                return Err(SceneError::InvariantBlocked);
+            }
             if beats[index].protected || beats[other].protected {
                 return Err(SceneError::OpaqueBoundary);
             }
@@ -1827,7 +2024,12 @@ fn apply_beat_edit(
                 .into_iter()
                 .map(|beat| {
                     let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
-                    (beat.payload.kind().into(), sha256(bytes), beat.id.clone())
+                    (
+                        beat.payload.kind().into(),
+                        sha256(bytes),
+                        beat.id.clone(),
+                        None,
+                    )
                 })
                 .collect();
             Ok((output, forced))
@@ -2046,6 +2248,99 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
     Ok(())
 }
 
+/// Locate a single quoted dialogue token without interpreting Python or comments.
+fn dialogue_quotes(line: &str) -> Option<(usize, usize)> {
+    let start = line.find('"')?;
+    let mut escaped = false;
+    for (offset, ch) in line[start + 1..].char_indices() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if ch == '\\' {
+            escaped = true;
+            continue;
+        }
+        if ch == '"' {
+            return Some((start, start + 1 + offset));
+        }
+    }
+    None
+}
+
+fn nested_dialogue(
+    line: &str,
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+) -> Option<BeatPayload> {
+    let body = line.strip_prefix("        ")?;
+    if body.starts_with(char::is_whitespace) {
+        return None;
+    }
+    let (_, end) = dialogue_quotes(body)?;
+    let suffix = body[end + 1..].trim();
+    if !suffix.is_empty() && !suffix.starts_with('#') {
+        return None;
+    }
+    let payload = parse_line(&format!("    {}", &body[..end + 1]), loaded)?;
+    matches!(payload, BeatPayload::Dialogue { .. }).then_some(payload)
+}
+
+/// Intentionally narrow: one bool-variable if/else with direct dialogue and trivia.
+/// Unknown bodies remain wholly opaque; no expression evaluation or code execution.
+fn parse_bool_group(
+    lines: &[(usize, usize, &str)],
+    index: usize,
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+) -> Option<(usize, Vec<ParsedBeat>)> {
+    let (group_start, _, header) = lines[index];
+    let name = header.strip_prefix("    if ")?.strip_suffix(':')?;
+    let variable = loaded?
+        .1
+        .variables
+        .iter()
+        .find(|v| v.technical_name == name && v.variable_type == VariableType::Bool)?;
+    let mut result = Vec::new();
+    let mut branch_start = group_start;
+    let mut otherwise = false;
+    let mut dialogues = [0, 0];
+    let mut next = index;
+    while next < lines.len() {
+        let (start, end, body) = lines[next];
+        if next == index || body == "    else:" && !otherwise {
+            if next != index {
+                otherwise = true;
+                branch_start = start;
+            }
+            let mut parsed = custom(start, end, body);
+            parsed.nesting = Some(ParsedNesting::Branch {
+                group_start,
+                variable_id: variable.id.clone(),
+                otherwise,
+            });
+            result.push(parsed);
+        } else if body.trim().is_empty() || body.trim_start().starts_with('#') {
+            result.push(custom(start, end, body));
+        } else if let Some(payload) = nested_dialogue(body, loaded) {
+            dialogues[usize::from(otherwise)] += 1;
+            result.push(ParsedBeat {
+                start,
+                end,
+                payload,
+                nesting: Some(ParsedNesting::Child {
+                    group_start,
+                    branch_start,
+                }),
+            });
+        } else if body.starts_with("        ") || !otherwise {
+            return None;
+        } else {
+            break;
+        }
+        next += 1;
+    }
+    (otherwise && dialogues.iter().all(|n| *n > 0)).then_some((next, result))
+}
+
 fn parse_scene(
     scene: &SceneMetadata,
     bytes: &[u8],
@@ -2084,6 +2379,11 @@ fn parse_scene(
         if body.starts_with("label ") && body.ends_with(':') {
             return Err(SceneError::UnsupportedSource);
         }
+        if let Some((next, nested)) = parse_bool_group(&lines, index, loaded) {
+            beats.extend(nested);
+            index = next;
+            continue;
+        }
         if body == "    menu:" {
             let menu_start = start;
             index += 1;
@@ -2118,6 +2418,7 @@ fn parse_scene(
             }
             if !options.is_empty() {
                 beats.push(ParsedBeat {
+                    nesting: None,
                     start: menu_start,
                     end: menu_end,
                     payload: BeatPayload::Choice { options },
@@ -2132,6 +2433,7 @@ fn parse_scene(
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
         beats.push(ParsedBeat {
+            nesting: None,
             start,
             end,
             payload,
@@ -2341,7 +2643,7 @@ pub(crate) fn build_mapping(
             return Err(SceneError::InvalidMetadata);
         }
     }
-    let mut ids: HashMap<(String, String), VecDeque<String>> = HashMap::new();
+    let mut ids: HashMap<(String, String), VecDeque<(String, Option<usize>)>> = HashMap::new();
     let old_extra: HashMap<String, Map<String, Value>> = previous
         .map(|mapping| {
             mapping
@@ -2351,11 +2653,11 @@ pub(crate) fn build_mapping(
                 .collect()
         })
         .unwrap_or_default();
-    let forced_ids: HashSet<_> = forced.iter().map(|(_, _, id)| id.as_str()).collect();
-    for (kind, hash, id) in forced {
+    let forced_ids: HashSet<_> = forced.iter().map(|(_, _, id, _)| id.as_str()).collect();
+    for (kind, hash, id, anchor) in forced {
         ids.entry((kind.clone(), hash.clone()))
             .or_default()
-            .push_back(id.clone());
+            .push_back((id.clone(), *anchor));
     }
     if let Some(previous) = previous {
         for beat in &previous.beats {
@@ -2364,19 +2666,30 @@ pub(crate) fn build_mapping(
             }
             ids.entry((beat.kind.clone(), beat.source_sha256.clone()))
                 .or_default()
-                .push_back(beat.id.clone());
+                .push_back((beat.id.clone(), None));
         }
     }
     let mut mappings = Vec::new();
     let mut beats = Vec::new();
+    let nesting = parsed
+        .iter()
+        .map(|p| (p.start, p.nesting.clone()))
+        .collect::<Vec<_>>();
     for parsed in parsed {
         let hash = sha256(&bytes[parsed.start..parsed.end]);
         let kind = parsed.payload.kind().to_owned();
         let id = ids
             .get_mut(&(kind.clone(), hash.clone()))
-            .and_then(VecDeque::pop_front)
+            .and_then(|queue| {
+                let index = queue
+                    .iter()
+                    .position(|(_, anchor)| anchor.is_none_or(|start| start == parsed.start))?;
+                queue.remove(index).map(|(id, _)| id)
+            })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         mappings.push(BeatSourceMapping {
+            owner: None,
+            conditional_branch: None,
             id: id.clone(),
             kind,
             byte_start: parsed.start as u64,
@@ -2385,12 +2698,74 @@ pub(crate) fn build_mapping(
             extra: old_extra.get(&id).cloned().unwrap_or_default(),
         });
         beats.push(SceneBeat {
+            owner: None,
+            conditional_branch: None,
             id,
             byte_start: parsed.start as u64,
             byte_end: parsed.end as u64,
             protected: matches!(parsed.payload, BeatPayload::CustomCode { .. }),
             payload: parsed.payload,
         });
+    }
+    let ids_by_start: HashMap<_, _> = mappings
+        .iter()
+        .map(|m| (m.byte_start as usize, m.id.clone()))
+        .collect();
+    let mut groups = HashMap::new();
+    for (start, nested) in &nesting {
+        if let Some(ParsedNesting::Branch {
+            group_start,
+            otherwise: false,
+            ..
+        }) = nested
+        {
+            let header_id = &ids_by_start[start];
+            let group_id = previous
+                .and_then(|p| p.beats.iter().find(|m| &m.id == header_id))
+                .and_then(|m| m.conditional_branch.as_ref())
+                .map(|b| b.group_id.clone())
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+            groups.insert(*group_start, group_id);
+        }
+    }
+    for ((_, nested), (mapped, beat)) in nesting
+        .into_iter()
+        .zip(mappings.iter_mut().zip(beats.iter_mut()))
+    {
+        match nested {
+            Some(ParsedNesting::Branch {
+                group_start,
+                variable_id,
+                otherwise,
+            }) => {
+                let branch = crate::metadata::ConditionalBranch {
+                    group_id: groups[&group_start].clone(),
+                    variable_id,
+                    otherwise,
+                };
+                mapped.conditional_branch = Some(branch.clone());
+                beat.conditional_branch = Some(branch);
+            }
+            Some(ParsedNesting::Child {
+                group_start,
+                branch_start,
+            }) => {
+                let owner = crate::metadata::BeatOwner {
+                    group_id: groups[&group_start].clone(),
+                    branch_id: ids_by_start[&branch_start].clone(),
+                };
+                mapped.owner = Some(owner.clone());
+                beat.owner = Some(owner);
+            }
+            None => {}
+        }
+    }
+    if let Some(old) = previous.filter(|m| m.source_revision == revision) {
+        if old.beats.iter().zip(&mappings).any(|(old, new)| {
+            old.owner != new.owner || old.conditional_branch != new.conditional_branch
+        }) {
+            return Err(SceneError::InvalidMetadata);
+        }
     }
     Ok((
         SceneSourceMapping {
@@ -2487,6 +2862,7 @@ fn command_source_paths(
         | SceneCommand::DeleteScene { scene_id, .. }
         | SceneCommand::InsertBeat { scene_id, .. }
         | SceneCommand::UpdateBeat { scene_id, .. }
+        | SceneCommand::UpdateChildDialogue { scene_id, .. }
         | SceneCommand::ContinueDialogue { scene_id, .. }
         | SceneCommand::RemoveBeat { scene_id, .. }
         | SceneCommand::MoveBeat { scene_id, .. }
@@ -2797,6 +3173,7 @@ fn physical_lines(source: &str) -> Vec<(usize, usize, &str)> {
 
 fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
     ParsedBeat {
+        nesting: None,
         start,
         end,
         payload: BeatPayload::CustomCode {
@@ -2804,6 +3181,28 @@ fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         },
     }
+}
+
+/// A root statement may precede a whole group or follow its last child, but
+/// cannot split headers, children or the trivia between them.
+fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
+    let mut group_start = None;
+    for beat in beats {
+        if beat
+            .conditional_branch
+            .as_ref()
+            .is_some_and(|b| !b.otherwise)
+        {
+            group_start = Some(beat.byte_start as usize);
+        }
+        if beat.owner.is_some()
+            && group_start.is_some_and(|start| start < insertion)
+            && insertion < beat.byte_end as usize
+        {
+            return true;
+        }
+    }
+    false
 }
 
 fn boundary_is_opaque(beats: &[SceneBeat], insertion: usize) -> bool {
@@ -3761,7 +4160,7 @@ mod tests {
         assert_eq!(project["futureProjectField"], "kept");
         assert_eq!(map["futureMapField"], true);
         assert_eq!(project["schemaVersion"], 2);
-        assert_eq!(map["schemaVersion"], 2);
+        assert_eq!(map["schemaVersion"], SOURCE_MAP_SCHEMA_VERSION);
         fixture.service.unregister_project(&fixture.project);
         let reopened = fixture.service.register_project(&fixture.root).unwrap();
         fixture

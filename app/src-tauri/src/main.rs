@@ -138,6 +138,40 @@ fn core_request(
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
     }
+    // Read-only handshake: only the external native runner writes this fixed fixture.
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("source-foundation") {
+        let operation = request.get("operation").and_then(Value::as_str);
+        if matches!(
+            operation,
+            Some("probe.foundationExternalReady" | "probe.foundationExternalStatus")
+        ) {
+            let profile = std::env::temp_dir().join(format!(
+                "loomlight-r2-probe-{}-source-foundation",
+                std::process::id()
+            ));
+            if operation == Some("probe.foundationExternalReady") {
+                let path = request["payload"]["path"]
+                    .as_str()
+                    .ok_or("probe source path")?;
+                if !path.starts_with("game/chapters/")
+                    || !path.ends_with(".rpy")
+                    || path.contains("..")
+                    || path.contains('\\')
+                {
+                    return Err("probe source path");
+                }
+                println!(
+                    "{}",
+                    json!({"evidence":"foundation-external-ready","profile":profile,"path":path})
+                );
+                let _ = std::io::stdout().flush();
+            }
+            return Ok(CoreResponse::success(
+                "foundation-external".into(),
+                json!({"written":profile.join("external-written").is_file()}),
+            ));
+        }
+    }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").is_ok()
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
@@ -522,7 +556,9 @@ fn main() {
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
                 if data.exists() { return Err("probe destination already exists".into()); }
-                if matches!(case.as_str(), "branches-performance" | "branches-interactive" | "ui-refresh") {
+                if case == "source-foundation" {
+                    LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
+                } else if matches!(case.as_str(), "branches-performance" | "branches-interactive" | "ui-refresh") {
                     LifecycleService::prepare_branches_ui_probe(data).map_err(std::io::Error::other)?
                 } else {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("probe SDK archive required")?;
@@ -577,7 +613,7 @@ fn main() {
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(2));
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
-                    if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                    if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("branches_ui_probe.js"))).expect("branches probe injection");

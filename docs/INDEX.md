@@ -22,8 +22,9 @@ retains exact qualification/merge identities, both-platform feedback and limitat
 [Phase 1H](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
 is accepted and integrated through [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18).
 Phase 1 is closed after independent review, both-target qualification and required main quality.
-Unique failures and acceptance limits remain in the archived ledger. Phase 2 execution
-requires separate user selection.
+Unique failures and acceptance limits remain in the archived ledger. The bounded Phase 2
+source foundation is reviewed and qualified on both targets, ready for integration;
+provider/AI execution requires separate user selection. CURRENT/HANDOVER own live state.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
@@ -57,7 +58,10 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
-| Selected shared foundations, staged Phase 2/3 overlap and Sol High owner/two-lane assignments | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
+| Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
+| Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
+| Planned AI settings, OS/session keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
+| First bounded source target: nested child edit | [Source foundation](tasks/active/phase-2-initial-llm-assistance.md#21-first-bounded-source-foundation-assignment) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |

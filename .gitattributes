@@ -22,3 +22,6 @@
 *.7z binary
 *.dmg binary
 *.exe binary
+
+# Preserve the BOM and mixed newlines used by the qualified source fixture.
+tests/fixtures/source-foundation/scene.rpy -text whitespace=cr-at-eol

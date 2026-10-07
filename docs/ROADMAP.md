@@ -28,7 +28,9 @@ Production 37529174148/1 at exact `ba01a84` proves required Windows x64/macOS AR
 H01–H12/sections 3–4 gates; main quality 37536967028/1 Pass and exact integrated-input
 audit prove integration. The [closure ledger](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
 retains identities, both earlier failed matrices, cumulative attempts and limits.
-Phase 2/3 remain planning only; no next implementation is selected.
+The bounded Phase 2 source foundation is independently reviewed and qualified on both
+targets, ready for integration. Provider/AI and remaining Phase 3 implementation are
+unstarted; CURRENT/HANDOVER own the next selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
@@ -84,17 +86,17 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 **Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
-The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. It is planning only; Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
+The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. The bounded source foundation is qualified; provider/AI implementation remains unstarted. Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
 The selected delivery sequence brings forward bounded 3A source foundations alongside
 provider feasibility, then targets a complete reviewed dialogue rewrite using manual
 cards/lorebook and configurable prompts/limits. Remaining Phase 2 actions/provider
 coverage and 3A Story logic can then overlap.
 [Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
-own the detailed dependency gates and GPT-6.1 Sol High owner/two-agent allocation.
+own the detailed gates and GPT-6.1 Sol High owner with zero to two useful independent helpers.
 Phase 2 still requires final integrated acceptance; these stages do not enlarge its
 AI operation allowlist or authorize implementation.
-[The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+[The deliverable queue](tasks/active/phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
 maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
 under WORKFLOW, not mandatory chat transfers.
 
@@ -107,6 +109,12 @@ Execute separately scoped internal briefs after Phase 1 acceptance and explicit 
 | 2C — Structured proposals and acceptance | Scene, runnable Character, Character-card and lorebook draft/update actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
 
 **Exit criteria:** every send reveals destination/locality/context/estimated size; remote sensitive-content warnings and explicit consent work; unsupported schemas/paths/identifiers and malicious output are refused; partial acceptance cannot omit required definitions or dependencies; stale/cancelled responses cannot mutate a replacement session. No source or lore becomes canonical without review. Credentials and these safety gates are Phase 2 prerequisites, not deferred Phase 3 release polish.
+
+The 2026-10-07 refinement selects native references/basic Scene/route scope and knowledge
+notes, project prompts, device-local profiles and OS/session-only keys. [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md)
+owns persistence/privacy. External interoperability and a shared prompt library stay
+deferred. Component tests reuse existing gates, early risk proofs and combined milestone
+qualification rather than full package matrices at every increment.
 
 State simulation/Run From Here remain Phase 3; broader reachability/state and narrative inference remain Phase 4. Phase 2 must not claim knowledge those later capabilities have not established.
 
@@ -126,8 +134,8 @@ code seams, early risk proofs and completion gates. The user selected **Story lo
 The selected shared-foundation sequence allows scoped 3A work before Phase 2
 completion; after accepted Phase 2/3A, Screens and Timeline can use parallel lanes.
 State/Run From Here consumes qualified story/effect semantics, and release qualification
-follows all required capabilities. This plans ahead alongside Phase 1G; it neither
-starts Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
+follows all required capabilities. Phase 1 is accepted/integrated/closed; this plan
+does not select Phase 2/3 implementation. Exact screen/Timeline subsets, Run From Here
 entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |

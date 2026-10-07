@@ -48,6 +48,10 @@ pub struct SourceDiagnostic {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceRange {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub owner: Option<crate::metadata::BeatOwner>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub conditional_branch: Option<crate::metadata::ConditionalBranch>,
     pub scene_id: String,
     pub beat_id: String,
     pub kind: String,
@@ -843,6 +847,8 @@ impl AuthoringService {
         let ranges = beats
             .into_iter()
             .map(|beat| SourceRange {
+                owner: beat.owner,
+                conditional_branch: beat.conditional_branch,
                 scene_id: scene.id.clone(),
                 beat_id: beat.id,
                 kind: beat.payload.kind().into(),
@@ -1195,6 +1201,7 @@ fn build_reconciled_mapping(
                 kind.to_owned(),
                 after[0].source_sha256.clone(),
                 before[0].id.clone(),
+                Some(after[0].byte_start as usize),
             ));
         }
     }

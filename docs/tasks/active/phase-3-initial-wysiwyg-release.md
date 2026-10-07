@@ -1,7 +1,8 @@
 # Phase 3 — Initial WYSIWYG release
 
 **Planning date:** 2026-10-02. **State:** researched implementation-plan draft;
-implementation `not_started`.
+full milestone implementation `not_started`. Bounded section 21 source foundations
+are implemented locally with qualification incomplete; [Phase 2 section 23](phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07) owns evidence. No 3A acceptance is claimed.
 **Latest user direction:** accept only native Ren'Py video/animation formats at this
 stage, with no conversion; 3C explicitly covers character drag/resize, pre-rendered
 playback and dialogue-time idle loops. Earlier direction removed 3E/Git and requested
@@ -12,7 +13,8 @@ plan. The steps below supply a proposed technical approach and proof checkpoints
 research is not SDK qualification or approval to start coding.
 **Sequence:** selected staged overlap brings bounded 3A source foundations forward
 and completes 3A alongside remaining Phase 2 work after the first safe rewrite.
-Story logic precedes Screens; Screens and Timeline then use two implementation lanes.
+Story logic precedes Screens; Screens and Timeline may use two lanes, with zero to two
+helpers according to independent work.
 [The Phase 2 delivery section](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
 owns the shared sequence/team. Its [bounded deliverable queue and completion loop](phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
 selects one tested result at a time, then docs/handover and a next-outcome prompt.
@@ -100,7 +102,7 @@ existing APIs. Keep the current Rust core / TypeScript / Tauri stack.
 | Existing code | Finding and implementation consequence |
 | --- | --- |
 | [scene.rs](../../../app/src-core/src/scene.rs), `BeatPayload`, `parse_scene`, `is_terminal_payload` | Current Beats are flat, menu recognition expects unconditional jump destinations, and Choice is terminal. Nested conditions, menu fallthrough and returning calls require a structural extension, not just new form fields. |
-| [source.rs](../../../app/src-core/src/source.rs), [metadata.rs](../../../app/src-core/src/metadata.rs) | Source ranges currently identify Scene/Beat ownership; project/source-map schemas are version 2. Add typed nested/screen/transform locations and an explicit migration while preserving byte offsets versus editor positions. |
+| [source.rs](../../../app/src-core/src/source.rs), [metadata.rs](../../../app/src-core/src/metadata.rs) | Source ranges currently identify Scene/Beat ownership; project schema remains v2; the bounded local source foundation adds source-map v3 ownership under ADR 0012 (native qualification pending). Extend typed nested/screen/transform locations and an explicit migration while preserving byte offsets versus editor positions. |
 | [scene/flow.rs](../../../app/src-core/src/scene/flow.rs) | Extend this observed projection with condition/call/continuation information; do not build a separate graph store or reinterpret cached edges as write authority. |
 | [scene-ui.ts](../../../app/src/scene-ui.ts), `deriveScenePreview` | Current preview is a scene-local TypeScript projection. Keep a lightweight renderer, but put new shared expression/state semantics in core rather than creating different truth in each workspace. |
 | [transaction](../../../app/src-core/src/transaction), [dispatch.rs](../../../app/src-core/src/dispatch.rs) | Reuse revision checks, history/recovery, session ownership and cancellable background work. New screens/transforms use the same prepared-mutation path. |
@@ -643,7 +645,7 @@ are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-
 | --- | --- |
 | Story logic before screen design | User-selected 2026-10-02. |
 | Shared foundations and overlap | User-selected: bounded 3A foundations, first Phase 2 rewrite, overlapping Phase 2/3A completion, then two lanes for 3B/3C. Phase 2 section 19 owns details. |
-| Team | One GPT-6.1 Sol High owner and two GPT-6.1 Sol High implementation agents; no implementation agents/worktrees launched by this docs update. |
+| Team | One GPT-6.1 Sol High owner and zero to two implementation helpers; single writers for shared contracts. Measure the first paired assignment. |
 | State and release | 3D consumes qualified 3A/3C semantics/effects; final 3F follows all required milestone gates. |
 | Condition grammar and call parameters | Concrete grammar and no-parameter first-call design above; qualify the pinned SDK and migration in 3A.1–2. |
 | Screen properties/actions and generated-screen ownership | Recommended inventory and template adapters above; accept inventory/mockups and prove source ownership before 3B UI expansion. |
@@ -654,7 +656,7 @@ are specified in its [interaction journey](phase-2-initial-llm-assistance.md#18-
 | Git | Deferred by user direction; absent from Phase 3 and release acceptance. |
 | Release audience, signing access and schedule | Open until release planning; no service or signing purchases selected. |
 
-Planning branch: `codex/phase-2-3-planning`, forked from local Phase 1G checkpoint
+**Historical planning provenance/continuation (2026-10-02):** `codex/phase-2-3-planning`, forked from local Phase 1G checkpoint
 `de2fdad21193bb4d1089d00702d8d71600b4750d`. Phase 1G remains active in its original
 checkout. This branch changes docs only and does not qualify or accept Phase 1.
 The existing HANDOVER carries a short concurrent-planning note; no second handover
@@ -673,6 +675,22 @@ Planning validation: repository validator passed across 315 files; whitespace an
 six-document scope review passed. Phase 1 application, tests and workflow files are
 unchanged in this planning diff. No native/app/provider check was run. Publication
 target is the separate origin planning branch; no PR or merge is selected.
+
+### 2026-10-07 refinement
+
+Earlier branch/publication/next-step wording in this section and the research ledger
+is historical, superseded by live HANDOVER and Phase 2 section 22. Preserve the old
+unpublished commits and failure evidence; do not retry their publication incidentally.
+
+The user retained all capabilities and animation order, with adaptive helpers and
+proportionate component tests. Phase 2 sections 19-20 own the live delivery sequence;
+section 21 defines the next source-foundation target. Phase 1 is accepted/closed;
+inspect fresh refs/other work before implementation. Historical branch/research records
+below are provenance, not pending publication or a continuation branch. Provider-access
+delays need not stop independent authorised portable work. Default 3B/3C entry stays
+accepted Phase 2/3A; any explicitly selected early slice must prove actual source/
+asset/history/runtime dependencies and cannot waive milestone gates. The Phase 2 test
+map supplements this brief; no executable selector or requirement was weakened.
 
 ## 9. Research and continuation record — 2026-10-02
 

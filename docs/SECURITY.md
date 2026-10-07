@@ -58,6 +58,23 @@ change. New acceptance follows ADR 0010 and the change-based TESTING policy.
 | Logs/diagnostics | Paths, prompts, tokens, private content in support bundle | Structured redaction, bounded excerpts, preview bundle contents, explicit export consent |
 | Dependencies/build | Compromised package/action or licence conflict | Lock/pin, Dependabot review, provenance/SBOM plan, licence inventory, minimal dependencies, secret scan |
 
+## Planned AI credentials and private writing
+
+[ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) selects Keychain /
+Credential Manager by default, with explicit backend-memory session-only keys. Generic
+local servers may use no authentication; Studio requires its key. No plaintext fallback,
+renderer read-secret API, key export or subprocess inheritance. Replacement/removal
+failures preserve usable references or explicit cleanup state; local deletion does not
+revoke a provider key. OS protection is at rest, not a sandbox against same-user software
+or a compromised Loomlight. Production packaged entry/reopen identity still needs proof.
+
+Profiles hold endpoints but no keys. Projects hold private prompts/style/reference prose;
+exclude those and raw replies from game builds and routine diagnostics. Future explicit
+support export previews/redacts contents. Loopback HTTP and verified HTTPS are allowed;
+private-network/VPN HTTP needs per-profile unencrypted-transport opt-in and ordinary
+address/redirect checks. No blanket WebView networking or endpoints activated by project
+text. These plans do not implement Phase 1 features or grant new signing/release authority.
+
 ## Desktop-shell baseline
 
 ADR 0003 selects Tauri 2. Explicitly enable only named capabilities; scope application

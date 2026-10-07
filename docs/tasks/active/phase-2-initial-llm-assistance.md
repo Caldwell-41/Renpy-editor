@@ -1,11 +1,11 @@
 # Phase 2 — Initial LLM assistance
 
-**Planning date:** 2026-09-22; delivery sequencing reviewed 2026-10-02.
-**State:** detailed planning checkpoint; implementation not started or authorised.
-**User direction:** review and plan Phase 2 without touching existing Phase 1 work; add Unsloth Studio as a first-class provider and incorporate the reviewed suggestions.
+**Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
+**State:** provider/AI implementation not started; section 21 source foundation independently reviewed and qualified on Windows x64/macOS ARM64, ready for integration. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
+**User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
-**Isolation:** preserve Phase 1 code, tests, workflows and acceptance ledgers. The original September publication also left CURRENT/HANDOVER untouched. The October concurrent-planning branch adds only a short planning note there, preserving the active Phase 1 continuation; it does not claim or alter Phase 1 acceptance.
+**Isolation:** preserve unrelated work, accepted Phase 1 evidence, release identities and the historical planning worktree. CURRENT/HANDOVER record the source-foundation continuation and publication boundary. Earlier branch/publication instructions in historical planning records are superseded by section 23 and live HANDOVER; they are not pending operations.
 
 Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents),
 including plain interface language, optional technical help, completion/submission
@@ -68,7 +68,7 @@ One API-page reasoning example has contradictory prose/flag direction. Use the H
 | --- | --- |
 | U1 | Named Unsloth Studio provider, setup instructions and dedicated connection diagnostics. It is not presented as an untested generic preset. |
 | U2 | Accept the actual Studio endpoint; normalise an origin or /v1 base exactly once, preserve explicitly configured proxy prefixes, and reject ambiguous completion-path input with useful guidance. Never assume one fixed port or scan ports. |
-| U3 | Native secret entry; OS credential storage; core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
+| U3 | Native secret entry; OS-backed remembered or explicit app-session-only keys; core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
 | U4 | Explicit authenticated Refresh models; use returned IDs unchanged, keep friendly names separate, allow manual IDs when discovery is unavailable. Do not treat loaded models as a complete downloadable catalogue. |
 | U5 | Distinguish untested, ready, no loaded model, selected model unavailable, authentication failure, unreachable, busy, interrupted and unsupported capability. Only show loading/OOM/version claims when actual evidence supports them. |
 | U6 | JSON-schema output is the preferred tested mode. Validate a synthetic schema probe against the selected configuration; invalidate capability evidence after relevant changes. A capability test is evidence, not a proof of every future response. |
@@ -97,11 +97,51 @@ Candidate module boundaries, to confirm against accepted Phase 1 before coding:
 
 Keep existing HTTP infrastructure if it meets cancellation and streaming requirements. Add or change a dependency only after a documented gap/licence review; do not conduct a broad stack replacement.
 
-A provider profile stores a UUID, provider kind, label, canonical endpoint, optional selected model, credential reference, transport choice, capability evidence and bounded generation settings. Profiles/secrets are machine-local; project metadata may reference a non-secret logical profile without copying machine addresses or credentials. Moving a project requires resolving an unavailable profile explicitly.
+A provider profile stores a UUID, provider kind, label, canonical endpoint, optional selected model, authentication/storage mode, opaque credential reference, transport choice, capability evidence and bounded generation settings. Profiles and project-to-profile bindings are machine-local. Moving a project requires explicit profile selection and credential setup; project text never imports or activates an endpoint. [ADR 0011](../../adr/0011-ai-settings-secrets-and-reference-storage.md) records the accepted design, not implemented behavior.
 
-Credential entry, replace and delete use native controls. OS-store failure is actionable and cannot fall back to plaintext. Renderer sees only configured/missing/unavailable state. Key changes invalidate prepared sends. There is no read-secret IPC. Memory/swap/OS internals are not claimed perfectly secret.
+Credential entry, replace and delete use native controls. Offer **Remember on this
+computer** (OS store, default) and **Use for this app session** (backend memory only,
+cleared on app exit or explicit removal; no automatic fallback from a remembered key).
+A generic profile may choose **No authentication**; Studio requires its API key.
+Authenticated v1 profiles use Bearer keys, not arbitrary headers or OAuth. OS-store
+failure is actionable and cannot fall back to plaintext. Renderer sees only mode and
+configured/missing/unavailable state; there is no read-secret IPC. Key changes
+invalidate prepared sends. Never pass keys to Ren'Py, Git, subprocess environments,
+request previews or diagnostics. Memory/swap/OS internals are not claimed perfectly secret.
 
-Endpoint policy: permit HTTP on loopback; require verified TLS for ordinary non-loopback connections. Plain HTTP to a user-controlled private-network/VPN endpoint requires a distinct opt-in with clear transport disclosure, tested address classification and an ADR before implementation; never globally disable TLS verification. Show connection location and inference locality separately, including unknown. Do not infer confidentiality from a hostname. Reject credentials in URLs, unsupported schemes and unreviewed redirects; bind the credential to the exact reviewed origin. Explicitly govern proxies and DNS/address changes so credentials cannot be redirected silently. No endpoint is imported or activated from project/model text.
+### Storage ownership and credential lifecycle
+
+| Content | Planned location and contract |
+| --- | --- |
+| Profiles and device-local project bindings | Versioned `ai-profiles.json` under the existing application-data root; validated safe replacement, separate from UI preferences. Defaults/capability evidence bind to model/configuration. |
+| Remembered keys | macOS Keychain / Windows Credential Manager through the native adapter; stable application namespace and opaque profile/credential IDs. |
+| Session-only keys | Trusted backend memory, cleared on app exit/removal; no project/config/history persistence. Closing a project is not app exit; disclose the lifetime before entry. |
+| Bundled prompts | One versioned packaged prompts resource directory; no duplicate handler literals. |
+| Project prompts/style notes | Versioned `.renpy-editor/ai.json`, full override text plus baseline version/digest; existing metadata transaction/history/recovery. |
+| Cards/lore | Versioned `.renpy-editor/references.json`, shared record service with separate collections; section 9 owns the format. |
+| Prepared requests/replies | Memory-only; section 8 governs explicitly saved proposed references. |
+
+OS entries and profile files cannot share one filesystem transaction. Prepare a
+replacement key under a fresh opaque credential ID, then safely switch the validated
+profile reference. A failed profile write preserves the previous working reference
+and attempts cleanup of the new entry. Delete obsolete entries only after the switch.
+Report cleanup failures and retain their references for bounded retry. For removal,
+make the profile unusable for sends before deleting its owned OS entry; a failure
+retains a non-secret cleanup reference and reports incomplete removal. Apply the same
+publish-before-retire rule to session-key/mode replacement: a failed profile save retains
+the prior usable state. Never delete another profile's entry. Use deterministic failure fixtures, not a new transaction
+framework or hostile/crash programme.
+
+Local removal does not revoke a provider key; explain revocation separately. Project
+copies/backups contain no credentials. Key export, cloud sync and portable vaults are
+deferred. Specify native adapter persistence/access attributes to match machine-local
+storage; keep application/entry identifiers stable across updates and test namespaces
+separate. Qualify packaged reopen/update identity, retaining unsigned macOS prompt
+limits without requiring a signing purchase. The credential spike had no entry UI;
+it cannot qualify production entry/store/request/replace/delete behavior.
+
+
+Endpoint policy: permit loopback HTTP and verified HTTPS. Private-network/VPN HTTP is selected with distinct per-profile opt-in and unencrypted-transport disclosure; ADR 0011 records the choice. Test ordinary address classification and credential/redirect mistakes, reject non-private plaintext destinations, and never globally disable TLS verification. Show connection location and inference locality separately, including unknown. Do not infer confidentiality from a hostname. Reject credentials in URLs, unsupported schemes and unreviewed redirects; bind the credential to the exact reviewed origin. Explicitly govern proxies and DNS/address changes so credentials cannot be redirected silently. No endpoint is imported or activated from project/model text.
 
 Unsloth provider setup explains that Studio can inspect request content in its own monitor; Loomlight's log redaction does not control provider retention. A sensitive-content warning identifies remote/unknown inference or an intermediary service without content filtering.
 
@@ -162,8 +202,11 @@ Store editable task prompt resources in one versioned prompts directory; no dupl
 Expose the actual system/authoring instructions for each assistance action in Settings.
 Users can inspect and edit them, save project-local overrides, and choose **Restore
 baseline** for the selected prompt or explicitly for all prompts. Show the bundled
-baseline version and whether the current prompt is customized; app updates never
-silently overwrite saved customizations. Reset restores that version's bundled text
+baseline version and whether the current prompt is customized. Uncustomized prompts
+use the installed app's baseline; a changed version/digest appears on the next send
+review. Updates never overwrite custom text. Show its saved baseline version and allow
+comparison with the installed baseline. Restore baseline removes the override and
+restores the installed app's bundled text
 through the ordinary undoable metadata change path, leaving cards, lore, credentials
 and generation settings intact. Changing or resetting a prompt invalidates prepared
 sends and requires a fresh preview. Baseline prompts remain maintained in one versioned
@@ -175,6 +218,12 @@ system prompts. Core-owned schema, path, operation and transaction validation is
 visible as the response contract but is not disabled by editing prompt prose. Prompt
 editing does not introduce application-level content filtering. Protect unsaved prompt
 edits across navigation; persisted overrides and reset/undo survive normal reopen.
+
+Custom prompts belong to each Ren'Py game project, not this chat or a personal shared
+library. An override replaces that action's authoring prose; project style notes remain
+separately visible. V1 uses literal text and core-owned context assembly: no executable
+templates, recursive macros or card-supplied system-prompt overrides. Save/reset use
+project metadata history; editing prose cannot disable the response/operation contract.
 
 A prepared-send token binds the exact request body, profile/model/capability configuration, read-set revisions and disclosure. Send rechecks that token before dispatch. Relevant edits require rebuilding and reviewing; unrelated changes should not invalidate a provably unaffected request. Never rebuild silently after consent.
 
@@ -263,6 +312,41 @@ Saving a proposed fact is distinct from approving it. Only explicit approval ena
 
 Provide list/edit/filter/approve/reject/supersede controls for cards and lorebook entries with undo and reopen tests. Preserve unknown metadata fields, validate migrations and bound accepted data so it remains reloadable. Lore never changes runnable variables automatically and the game must remain runnable without this metadata.
 
+### Native format, scope and revision rules
+
+Use JSON with `schemaVersion`, `cards` and `loreEntries`; one service owns their IDs,
+revisions, approval, citations, migrations and undo. Shared records have a stable ID
+and revisions with revision ID, title, tags, status, provenance/citations, scope,
+optional supersession link and preserved extension data. Cards contain the descriptive
+fields above, optional runnable Character ID and linked lore IDs. Lore contains text,
+category, subject/entity links and knowledge notes. Relationships may link entity IDs
+with explanatory prose; missing links stay visible and do not cascade-delete content.
+
+V1 scope is project-wide, selected Scene IDs, or an explicit finite selected route
+retaining repeated visits. Scope aids author selection; it does not infer reachability
+or inject references silently. Use written knowledge/spoiler notes. Structured
+before/after variants, game-day/time validity, keyword/recursive injection and runtime
+knowledge inference are deferred. Only the reviewed approved revision is sent.
+An approved revision remains available while a replacement is proposed/reviewed,
+unless its own citations become stale. Rejection preserves the approved text; approval
+explicitly supersedes it. Existing history supports undo. Manual Save may explicitly
+approve the author's own text without an additional approval ritual.
+
+Before the 2B.1 editor, record concrete schema/fixtures for required/optional fields,
+IDs/links/scope, revision selection, string/record/file bounds, migrations and unknown
+fields. Derive bounds from existing metadata/reload and selected-context limits. Keep
+useful approved/proposed state in the document; history owns undo rather than an
+unbounded reply archive. A missing document means an empty library; malformed existing
+or unsupported newer data is retained with a diagnostic, never replaced as empty.
+Project AI/reference metadata is editor-only and excluded from game distributions.
+
+Research reviewed 2026-10-07: [Character Card V2](https://github.com/malfoyslastname/character-card-spec-v2),
+[V3](https://github.com/kwaroran/character-card-spec-v3/blob/main/SPEC_V3.md) and
+[SillyTavern World Info](https://docs.sillytavern.app/usage/core-concepts/worldinfo/)
+offer useful descriptive fields. Their roleplay prompt overrides and keyword/recursive
+inclusion do not fit exact reviewed authoring context. Retain native storage and defer
+external JSON/PNG import/export.
+
 ## 10. Checkpoint sequence and gates
 
 These are dependency checkpoints, not mandatory chat boundaries. Select one coherent
@@ -274,7 +358,7 @@ authorize provider connections or execution.
 | Checkpoint | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
 | 2A.0 — Provider qualification and contracts | Bounded synthetic Studio/generic probes; version/capability matrix; request/credential/transport ADR; confirm limits and management-API findings. | Record actual success/failure/unknown per provider. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
-| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Native credential round-trip/delete/locked-store behavior, zero secret reflection, no requests on project open, origin binding and profile invalidation. |
+| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Production native entry/store/request/replace/delete, session-only/no-auth, packaged reopen/identity, controlled unavailable-store failures, zero reflection, no requests on project open, origin binding and invalidation. Physical locked-store/signed-upgrade behavior is proved where accessible or retained as a limit; no enterprise-policy gate. |
 | 2A.2 — Request service | Background transport, non-streaming and qualified SSE, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test each adapter without project writes. |
 | 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; bounded route cycles; no silent truncation; input/output budget accounting. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
@@ -304,11 +388,40 @@ Both client platforms may connect to the same controlled inference host; GPU inf
 
 Use current repository commands from AGENTS/TESTING and add focused test commands in each implementing brief once actual paths exist. Preserve failed evidence and exact run/attempt/SHA. No full package matrix for this documentation-only plan; no duplicate unchanged acceptance runs or model polling during external waits.
 
+### Component selection and proof cost
+
+This selection supplements sections 10-11 and existing TESTING selectors; it does not
+waive requirement IDs or implement new evidence reuse. Map focused cases to requirements
+and record counts/skips, affected hosts and finite expensive allowance before execution.
+Share source/transaction fixtures and test the narrowest actual controller/service seam.
+
+| Component | Decisive focused proof | Native/live boundary |
+| --- | --- | --- |
+| Profiles/keys | Persistence, replacement/removal failure ordering, unavailable store, session exit/clear, no-auth, origin/redirect refusal and no reflection | Early packaged entry/store/request/reopen path on both targets; mocks do not prove physical locked stores or signed upgrades. |
+| Requests | Final response, auth/protocol error, timeout/cancel, stale completion and responsive Save | Fake-server failures routinely; bounded synthetic Studio and one representative generic configuration live. |
+| Prompts/context | Exact payload, edit/reset/undo/reopen/update, selected approved revisions, exclusions and budget refusal | Controller/dispatch integration and milestone native send review; no exhaustive models/providers. |
+| References | Manual/generated review, rejected replacement retains approved text, stale/missing links, malformed/newer schema refusal and migration | Shared deterministic fixtures and representative native forms. |
+| Proposals | Rewrite/same-file batch, valid subset, invalid/stale output writes nothing, external conflict, one undo and ordinary interrupted acceptance | First complete user action early, then integrated milestone. |
+| 3A Story | Conditional routes, all-false continuation, call/return, nested edits and source preservation | Targeted pinned-SDK normal-play assertions on affected supported hosts. |
+| 3B Screens | Nested round trip, opaque neighbor, representative dialogue/choice/menu behavior and cancel/undo | Early Ren'Py layout/interaction comparison. |
+| 3C Timeline/media | Placement, idle continuity, qualified profile/mask/end state, transform/audio order and save/load/rollback | Early actual media/runtime risk proof; combined final 3C checks, not a full matrix per increment. |
+| 3D State/launch | Normal-play equivalence, stale/unknown refusal, save isolation and scratch cleanup | Qualified normal versus reconstructed launch at supported boundaries. |
+| Milestones | Representative game, close/reopen, metadata-free play and package privacy | Coherent-candidate affected-platform qualification; both targets at 3F. |
+
+Keep rejecting assertions and ordinary external-edit/data-loss coverage. Use controlled
+fault/state fixtures; no renewed hostile/crash, enterprise-policy or exhaustive-model
+programme. Repeat native/live checks for relevant changed inputs, not documentation.
+Missing access stays missing evidence. Explicit connection/capability checks disclose
+potential provider billing; this plan grants no paid calls, installation or downloads.
+Non-streaming is the first workflow; SSE remains separately qualified. Exclude keys,
+raw replies, prompts and reference prose from routine diagnostics; future explicit
+support exports preview/redact their contents. Do not transfer routine checks to users.
+
 ## 12. Entry risks and decisions
 
 | Issue | Disposition |
 | --- | --- |
-| Phase 1 is not accepted | Blocks implementation entry, not this plan. Preserve its existing workstream. |
+| Phase 1 prerequisite | Accepted/integrated/closed on 2026-10-07. Inspect live state and preserve other work; no implementation selected by this update. |
 | Actual installed Studio compatibility | 2A.0 must qualify the configured version/model. Documentation alone is insufficient. |
 | Tools disabled and inference locality | Mandatory Studio qualification and disclosure; no silent fallback if unsupported. |
 | Managed load/unload | Public stable interface not established in reviewed docs; explicit follow-on investigation, no guessed private APIs. |
@@ -333,61 +446,13 @@ Implementation ledger fields per checkpoint: state, authorising instruction, bra
 
 ## 14. October milestone sequencing
 
-The user selected planning Phases 2 and 3 while Phase 1G continues. This is a docs-only
-successor to the original four-file publication scope in section 13. Branch:
-`codex/phase-2-3-planning`, based on `de2fdad`; no existing provider requirement is
-removed and Phase 1 through 1H remains the implementation prerequisite.
-
-**First usable result:** explicitly select dialogue, inspect its destination/context,
-generate a rewrite using a manually authored card and selected lore entry, inspect
-exact changes, accept and undo it. Include prompt editing/reset and size controls.
-Prove that complete
-path early with one qualified provider before expanding to all five actions. This
-orders work; it does not reduce the final two-provider or five-action commitment.
-
-| Outcome | Existing checkpoints covered | Reviewable result |
-| --- | --- | --- |
-| Shared source foundations | Bounded 3A.1/3A.2 portion selected under section 19 | Stable parent/block-aware locations; one nested child edit with undo/reopen before expanded AI planning. |
-| Provider feasibility | 2A.0 | Measured compatibility of available Studio/generic configurations; credential/request ADR and concrete production plan. |
-| First safe rewrite | Necessary parts of 2A.1–2A.2, 2B.1–2B.2 and 2C.1–2C.2 | One complete rewrite using selected manual cards/lorebook, editable/resettable prompts and size controls, with native credentials, revision checks, strict proposal review, one transaction and undo. |
-| Scene and provider completion | Remaining provider coverage plus continue/draft Scene and dependency-valid acceptance | Real authored scenes and selected subsets; no hidden source changes or silent provider fallback. |
-| Character and lore | 2C.3 plus related context/actions | LLM-generated/updated Character cards and lorebook, separate runnable Character proposals, explicit approval, provenance, invalidation and reopen. |
-| Milestone acceptance | 2C.4 | Five actions, two provider paths and both client targets with honest live evidence and known limitations. |
-
-The first rewrite outcome needs a bounded execution brief after 2A.0; it is not
-permission to implement all transport modes or proposal families at once. Non-streaming
-is the first path. Optional SSE follows only after separate qualification. Required
-selected-context, credential, revision and acceptance checks cannot be postponed as
-polish to accelerate that demo. Cross-reference checkpoint IDs in the execution ledger
-so early shared work is not reimplemented or retested without changed inputs.
-
-The main uncertainties are actual provider capabilities and multi-operation source
-preparation. Prove a small batch touching the same file before expanding proposal UI;
-retain operation grouping, stale rejection and one undo entry. Phase 0's
-[credential spike](../../research/CREDENTIAL_STORE_SPIKE_RESULTS.md) is supporting
-evidence only: production native secret entry, unavailable/locked-store handling and
-packaged identity behavior need their own affected-target checks. Do not repeat the
-stack comparison or claim the old no-renderer probe qualifies new settings UI.
-
-Recheck official provider documentation and installed versions at 2A.0; section 2
-records September research, not a newly verified compatibility claim. No provider
-was contacted in this October planning task. Availability of suitable inference hosts
-and models is unresolved. Missing live access is a recorded gate, not an implicit
-permission to install models, spend money or substitute mocks for required evidence.
-
-Apply ADR 0010 and current TESTING selection: retain ordinary external edits and
-interrupted acceptance with non-crashing fixtures, avoid retired specialist experiments,
-prove real user-action boundaries and gate rejection, and keep cumulative problem
-budgets. Agent-owned checks cover development; physical user review is limited to
-genuinely human interaction/visual acceptance. No native builds are needed for planning.
-
-Phase 2 is complete only at its existing integrated gate. The selected
-[shared-foundation sequence](#19-selected-shared-foundations-and-two-lane-delivery)
-brings forward bounded 3A source work, then allows 3A completion alongside remaining
-Phase 2 work after the first safe rewrite. Screens/Timeline follow accepted Phase 2
-and 3A. New Phase 3 constructs do not silently expand Phase 2's permitted proposal
-operations or imply state/reachability knowledge. This replaces the earlier blanket
-Phase-2-before-any-Phase-3 implementation ordering; feature outcomes/gates are retained.
+Section 19 owns the single live scheduling/ownership map; section 20 maps bounded
+results to existing requirement gates. This anchor preserves links. The duplicate
+October delivery table was consolidated on 2026-10-07; Git history retains it. The
+first useful rewrite still includes manual references, prompt/reset and size controls,
+native credentials, exact reviewed send, strict review, one transaction and undo.
+It does not replace five-action/two-provider acceptance. Section 21 defines the first
+bounded source assignment; provider qualification can be selected independently.
 
 ## 15. Provider expansion recommendation — 2026-10-02
 
@@ -610,8 +675,8 @@ revision IDs; a reference editor's scope is guidance, not a runtime knowledge cl
 ### Settings, prompts and baseline restore
 
 Provider profiles offer only Unsloth Studio and OpenAI-compatible. Show endpoint input
-and normalized destination, credential configured/missing/unavailable status, native
-Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
+and normalized destination, authentication mode, OS-remembered/session-only credential
+status, native Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
 settings. No renderer API-key text field or provider buttons implying extra verified
 support. Distinguish Refresh models, synthetic connection/capability tests and a project
 generation; tests do not send project content. Changed configurations are Untested until
@@ -620,9 +685,9 @@ their actual probes pass. Model loading stays an explicit action in Studio.
 Use two real tabs, Provider profile and System prompts, with only the selected editor
 shown; the generated simultaneous panes are an overview of both, not the tab behavior.
 Keep machine-local profile defaults distinct from project-local prompt templates.
-Per-action system-prompt editing shows effective scope, baseline version and customized
+Per-action system-prompt editing shows effective scope, saved/installed baseline versions and customized
 status; task instructions and project style notes have their own labels. Save prompt
-is explicit. Restore baseline previews the versioned replacement against current text,
+is explicit. Restore baseline previews the installed app's bundled replacement against current text,
 then applies only that prompt after confirmation. Cancel preserves custom text; applying
 is undoable, with the previous text retained, and saving/reopening preserves the restored
 revision. Restore does not reset references, credentials, other prompts or size limits.
@@ -633,7 +698,7 @@ restore preview; the written interaction is authoritative.
 
 | State | Visible recovery without losing author input |
 | --- | --- |
-| No configured profile/model; key or OS store unavailable | Explain the specific missing item and open its settings/native action; no silent model substitution or plaintext fallback. |
+| No configured profile/model; required key or selected OS store unavailable | Explain the specific missing item and open its settings/native action; no silent model substitution or plaintext fallback. |
 | Provider unavailable/busy, timeout or interrupted response | Retain task/selected references and show actual known cause; Retry means a new explicit reviewed send, never an automatic request. |
 | Malformed/truncated/unsupported/tool response | No applicable proposal; show bounded inert diagnostics and return to preparation. Do not auto-repair or downgrade modes. |
 | Over budget or stale reference | Name the failing total/revision; explicit correction rebuilds preview and requires review. |
@@ -672,7 +737,7 @@ limits are stored in the [design index](../../design/phase-2-llm/README.md).
 No application implementation, configured project-provider request, native build, SDK
 execution or CI dispatch is part of this outcome. Image generation used the built-in
 image tool. The parent reviewed the subagent deliverable and handles publication on
-the same planning branch; no merge or new planning PR is selected.
+the same planning branch; no merge or new planning PR was selected in that historical record.
 
 Parent review and verification — 2026-10-02: inspected all four concepts, reconciled
 schematic controls against sections 5–9, and retained explicit author approval without
@@ -754,8 +819,10 @@ The owner coordinates shared UI controls and field-validation contracts using th
 [accepted UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents);
 both lanes reuse the same patterns.
 
-Use **one GPT-6.1 Sol owner at high reasoning effort and two GPT-6.1 Sol implementation
-agents at high reasoning effort** when an implementation outcome is selected.
+Use **one GPT-6.1 Sol owner at high reasoning effort and zero, one or two GPT-6.1 Sol
+implementation agents at high reasoning effort** for useful independent assignments.
+Two lanes are a maximum, not an occupancy target. Short fixes and shared contract/
+migration work remain serial; the owner can implement them directly.
 
 - The owner defines contracts and task/file boundaries, resolves shared-model decisions,
   reviews both lanes, integrates coherent changes and verifies the combined outcome.
@@ -776,21 +843,32 @@ agents at high reasoning effort** when an implementation outcome is selected.
   a separate pass. This team plan creates no new reviewer mandate or CI allowance and
   does not authorize merges, service installation, spending or provider requests.
 
+Record the first paired assignment's useful output, waiting, integration rework and
+duplicate checks in the existing ledger. Report timing/usage only when available;
+never invent speedup/cost savings. Continue parallelism where output outweighs overhead.
+Source versus provider feasibility and Screens versus Timeline are suitable candidates;
+shared schema/transaction/runtime changes need a single writer. No recursive agent tree.
+
+Technical prerequisites differ from scheduling defaults. Missing provider access need
+not stop independent authorised portable work. Stage 4 defaults to accepted Phase 2/3A;
+a narrower earlier 3B/3C slice requires explicit selection and accepted source/asset/
+history/runtime prerequisites, not an automatic phase waiver. Final gates are unchanged.
+
 No agents, implementation worktrees or execution were launched by this planning update.
 At implementation entry reconcile the accepted Phase 1 APIs with these proposed seams,
 select the first bounded source/provider tasks, and record their actual ownership and
 branch/checkpoint in CURRENT/HANDOVER and the existing task ledgers. Do not implement
 against this planning branch's inherited historical application tree.
 
-Delivery-plan verification: repository structure/text/privacy/local-link validation
+**Historical delivery-plan verification/publication record (2026-10-02):** repository structure/text/privacy/local-link validation
 passed for 329 files; whitespace and six-document scope review passed. Checked the
 Phase 2/3 entry gates, first-rewrite dependency, provider-qualification review boundary,
 separate milestone acceptance, operation allowlist and unchanged deferred Git scope.
 No application/native/provider checks were run for these documentation changes.
-Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its remote
-head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
-Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
-implementation selection after Phase 1 acceptance.
+That checkpoint selected publication to `origin/codex/phase-2-3-planning`; it is
+historical, not a pending instruction for this update. Section 22/live HANDOVER own
+current local-only continuation; the original worktree and unpublished commits remain
+preserved. No new PR, merge, build/CI allowance or implementation is selected here.
 
 ## 20. Bounded deliverables and next-outcome prompts
 
@@ -853,7 +931,7 @@ not a requirement to serialize every row of this table.
 
 1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
    baseline, required dependencies, affected test hosts and finite execution allowance.
-2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and up to two
+2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and zero to two
    GPT-6.1 Sol High implementation agents on independent declared files/contracts.
    Use one writer for shared mutable code; sequence dependent work. A short serial
    target need not occupy both implementation agents. No recursive agent tree.
@@ -893,8 +971,8 @@ Codex machine: <actual execution host>
 Test hosts: <affected Windows x64/macOS ARM64 requirements and accessible prerequisites>
 Reason: <why this result is next and which accepted dependencies it uses>
 Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
-Use one GPT-6.1 Sol High owner and up to two GPT-6.1 Sol High implementation agents
-for independent bounded assignments with declared file/contract ownership.
+Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation agents
+only for useful independent assignments with declared file/contract ownership.
 Scope: <included operations and explicit exclusions>.
 Prove: <decisive user-action/source/persistence checks and required native evidence>.
 Allowance: <finite builds/dispatches plus existing problem budget, not a fresh reset>.
@@ -911,3 +989,1176 @@ team. [OpenAI's multi-agent guidance](https://developers.openai.com/api/docs/gui
 supports concrete independent assignments and serial ownership of dependent/shared
 work. These inform the cadence; the deliverable queue and repository gates are
 Loomlight decisions, not a mandated OpenAI milestone count or new orchestration system.
+
+## 21. First bounded source-foundation assignment
+
+**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Windows x64/macOS ARM64 qualification complete; accepted as the bounded source-foundation checkpoint and ready for integration. User explicitly removed cross-machine archive transfer as a blocker. Original proof/failures are preserved; full Phase 2/3A remains unfinished. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**Reason:** prove stable child ownership before AI planning grows around flat Scenes.
+No provider access or credentials are needed.
+
+Recognise one `if <declared bool variable>:` / `else:` group in a Loomlight-owned Scene,
+with a dialogue child in each body. Add the parent/branch/child identities, revision-bound
+locations and preparation needed to display/select/edit one existing child through
+Story controller, core dispatch and transaction. A minimal nested outline suffices;
+the synthetic source fixture supplies the group. Preserve opaque neighbors and old
+non-nested behavior. Group creation/move/unwrap, full expressions, guarded choices,
+calls, AI, Screens, Timeline and state simulation are outside this target.
+
+Prove unchanged Phase 1 fixture reopening/no-op bytes/IDs, a minimal child patch,
+comments/Unicode/newlines/custom-neighbor preservation, undo/redo/reopen, ordinary
+external conflict and retained draft on stale/session ownership. Include a rejecting
+child-owner assertion and a real renderer-to-service action. Keep mapping migration
+focused and record its implementing ADR. Normal SDK play of the bool true/false fixture
+checks preserved syntax, not complete 3A support. Both clients need affected native
+action evidence; portable work can proceed while genuinely unavailable evidence is
+recorded. Do not replace native proof with a mock or transfer it to the user.
+
+At selection inspect fresh refs/worktrees, create/reuse a `codex/` implementation branch
+from accepted main (not the historical fork), preserve local planning edits and fixed
+release identities, and record ownership in the existing ledger/HANDOVER. Use helpers
+only for a declared independent task. Cheap focused checks are routine; record finite
+targeted native/build allowance before execution. No full package matrix, provider
+request, paid action, release, merge or following deliverable is implied. Stop at
+review-ready only when selected required gates pass; otherwise record the actual
+blocker/remaining evidence and same-target continuation. Do not waive missing native proof.
+
+## 22. Agreed planning refinement — 2026-10-07
+
+The user reviewed Phase 2/3, selected prompt/reference/connection/agent defaults,
+accepted the omission review and requested this document update, self-check and start
+prompt. Full Phase 3 scope and animation order remain. Native references/basic scope,
+project prompts, localhost/LAN/HTTPS, OS keys with explicit session-only mode and
+adaptive zero-to-two helpers are selected. ADR 0011/canonical docs own durable design.
+No implementation, provider connection, key change, native/build/CI, push or release
+operation was selected here. Work is local-only on current main; the historical
+planning worktree is untouched. Concurrent 0.1.0 publication completed independently;
+preserve its fixed tag and archived ledger. The next selected implementation can use
+section 21 without live-provider access.
+
+**Verification:** documentation structure/text/privacy/local-link validator PASS (356
+files); whitespace and 12-document scope review PASS. Self-review corrected historical
+publication instructions, credential-mode wording and installed-baseline reset alignment.
+App/test/workflow/dependency trees and archived evidence are unchanged; no app/native/
+provider/CI execution was needed. Final checks repeated after those documentation fixes.
+Local-only continuation is main `aba200f` plus this working diff, not a published SHA.
+
+## 23. Source-foundation implementation ledger — 2026-10-07
+
+**Selected:** section 21 only; one owner, no helper assignments. Local implementation
+branch `codex/nested-source-foundation` starts at accepted main `aba200f`, carrying
+all twelve uncommitted planning files. Fresh remote refs confirm main `aba200f` and
+planning `267ec2a`; historical planning checkout `2c5a164` is untouched. No push,
+merge, release, provider action or subsequent deliverable is authorized.
+
+**Allowance/access:** focused local core/renderer checks; at most one targeted native
+build/proof on each Windows x64/macOS ARM64 host, no automatic retry/full matrix.
+Mac ARM64 local project toolchain, locked dependencies and pinned SDK archive exist.
+No Windows shell/checkout access has been established; no SSH config is present.
+Actions cannot consume unpublished working inputs, so no workflow dispatch is selected.
+Existing packaged runtime runner can select individual optional cases; extend it with
+one source-foundation case rather than running the production matrix. Expensive native
+allowance remains unconsumed at entry. Missing target evidence is not acceptance.
+
+**Implementation decision:** retain disjoint source ranges and the existing Beat IDs;
+add explicit group/branch identity and child-owner locations to source-map v3. Project
+schema stays v2. Migration reuses exact byte/hash IDs, preserves unknown fields and
+never writes `.rpy`. A dedicated child-dialogue command requires the displayed owner
+and source revision; root operations refuse children. Structural rows are read-only.
+Only direct dialogue plus trivia inside a declared bool if/else is recognized; other
+conditions/bodies remain opaque. No condition execution/state simulation is added.
+
+**Preflight and self-review:** real dispatcher foundation 5 PASS, 1 explicitly ignored
+SDK case; Scene selector 31 PASS/7 specialist ignored; Source 16 PASS; metadata 3 PASS.
+Frontend `npm run check` 96 PASS, including execution of the shipped source-foundation
+driver against a strict renderer fixture. Rust format, JS parse and whitespace checks
+PASS. Validator PASS (360 files before final status updates).
+
+The initial routine broad-core attempt produced 195 PASS, 1 FAIL, 42 ignored, 3 filtered.
+Its stronger second-child-identical-to-first assertion caught swapped IDs: the prepared
+child tuple still lacked its exact anchor. Corrected that tuple and reran the rejecting
+foundation selector successfully, then the affected Scene/Source/metadata selectors.
+The initial failure is retained locally; no broad green result is inferred. Unchanged
+4,097-journal stress paths are not repeated. Initial compile/type/assertion feedback
+was corrected during preflight. The native driver fixture twice lacked Close Project
+after Story redraw: inspection showed it incorrectly placed the shell control inside
+the tree. Corrected the fixture ownership; all shipped-driver steps now pass. This
+was renderer-driver compatibility, not a native run or a native acceptance claim.
+
+**Mac native attempt 1 selected:** project-local pinned tools; one `tauri build
+--no-bundle --locked`, one existing runner `source-foundation` case, and the one exact
+ignored pinned-SDK source-foundation gate (compile/lint, true/false and rejecting wrong
+outcome). No installers/full matrix. Verify candidate input hashes before execution;
+retain logs/reports under ignored `.toolchains/reports/source-foundation/`. Build/proof
+allowance is consumed by this attempt regardless of result; no automatic retry. Windows
+attempt count remains zero. No external CI operation is pending.
+
+**Mac build attempt 1 result:** frontend production build PASS; native Cargo build
+NOT STARTED. The invocation placed `--no-bundle` after Tauri's Cargo argument separator,
+so Cargo rejected it (`unexpected argument '--no-bundle' found`) before compilation.
+Correct invocation is `npm exec -- tauri build --no-bundle -- --locked`; it is recorded
+for a newly selected allowance, not automatically executed. No native application
+was built or launched and no WebView pass is claimed. The separately selected SDK
+proof remains part of attempt 1; it is dispatched once, without a retry. Candidate
+app/fixture input digest before proof is
+`6954a274d8a344e814058ce006166074c7846e8ee08bfef37f0aba6fa784f719`.
+Ignored local manifest/logs retain exact working input hashes and base/branch identity.
+
+**SDK attempt 1 result/classification:** verified official 8.5.3 archive install and
+SDK compile/lint completed with exit 0. Normal entry displayed the edited true-branch
+dialogue; flag and real say-widget assertions passed (four SDK assertions passed).
+The case still FAILS: after advancing to main menu, `opaque_neighbor` is no longer
+in the game context and the post-return assertion raised `NameError`. Terminal
+cleanup PASS. False and rejecting wrong-outcome cases were not reached; neither is
+claimed. The exact failed log/case output is retained locally in `mac-sdk.log` and
+`sdk-cases.json`. No retry occurred.
+
+**Bounded correction:** add one synthetic continuation dialogue after the existing
+Python neighbor and assert its value there, before Return; then require main menu.
+This changes the proof fixture/oracle, not condition parsing or production state
+semantics. Focused checks are repeated on that final fixture; native/SDK qualification
+remains missing. `cargo check -p loomlight-desktop --locked` PASS on Mac; it is only
+compilation evidence, not a native application action.
+
+**Final local continuation:** final app/fixture digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515` (separate from
+failed attempt inputs); branch `codex/nested-source-foundation` at base `aba200f` plus
+uncommitted working changes. Source/Story TypeScript ranges now share the explicit
+owner contract. The corrected SDK driver retains all three independent reports and
+rejects the combined result if any case fails; it has not been run natively. Foundation
+checks on the revised continuation fixture PASS (5, SDK wrapper ignored); frontend
+96 PASS and final typecheck PASS. Historical planning worktree remains clean. No
+external or runtime operation remains pending. Required WebView action on both OSes
+and complete true/false/rejecting SDK evidence remain missing. Mac attempt 1 is
+consumed; Windows attempt 0/access unestablished. Resume the same selected outcome
+only with established Windows access and an explicitly renewed narrow Mac allowance.
+No accepted source-foundation or Phase 2/3 completion claim, commit/push/merge/release
+or automatic next deliverable.
+
+**Final document/self-review check:** validator PASS (360 files), whitespace PASS;
+CURRENT 366 words and HANDOVER 703 words, within workflow review targets. Reviewed
+parser refusal, disjoint ranges, anchored identical-child ID reuse, same-revision owner
+validation, migration conflict refusal, exact quoted-token patches, typed IPC and
+retained form controls. No secrets/private content/absolute user paths or generated
+logs are added to versioned files. No expensive operation or allowance is pending.
+
+**Same-outcome continuation / Mac replacement attempt 2 selected:** the user explicitly
+authorized one replacement targeted Mac build/WebView/SDK proof using the corrected
+command and oracle. Codex machine macOS ARM64; required test hosts Windows x64/macOS
+ARM64; reason remains nested-child ownership proof before AI planning. Preserve all
+local changes and historical worktree; no full matrix, automatic retry, push, merge,
+release or subsequent deliverable. Fresh remote main/planning refs remain `aba200f` /
+`267ec2a`; implementation branch is unpublished. Historical `2c5a164` checkout is clean.
+All tracked/untracked app/fixture hashes exactly match final digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`.
+Separate ignored `mac-attempt-2/inputs.json` preserves this candidate.
+
+Replacement selection: one `npm exec -- tauri build --no-bundle -- --locked`, one
+`run-runtime-ui-probes.py` invocation with only `source-foundation`, and exact ignored
+`renpy::tests::source_foundation::source_foundation_bool_sdk_gate` (official verified
+8.5.3 compile/lint, true/false/rejecting outcomes and cleanup). Project-local pinned
+Node 24.19.0 / Rust 1.90.0; all evidence goes under the separate ignored attempt
+directory. Dispatch consumes this replacement allowance regardless of outcome.
+Windows has no usable connected project or local SSH configuration; access clarification
+is pending and its unused allowance must not be dispatched before access is confirmed.
+
+**Windows routing decision:** the user confirmed Windows will be a different Codex
+run on a different machine. This Mac run has no established Windows execution route
+and will not consume its allowance. The unpublished candidate must first be transferred
+without losing local work; the Windows run must verify the exact app/fixture manifest,
+its actual x64 desktop access and existing pinned tools before the one targeted proof.
+No push, Actions dispatch, infrastructure install or second writer is selected here.
+
+**Mac replacement build:** PASS, release ARM64 executable built in 24.98s using the
+corrected argument order. Retained executable SHA-256
+`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`;
+separate execution manifest includes exact source digest, host/tool versions and layer.
+The existing native runner was dispatched once against that retained executable with
+only `source-foundation`. The launch was mistakenly made inside the restricted shell
+sandbox: macOS desktop-service connection errors appeared, no probe report arrived,
+and a one-second read-only stack sample showed the AppKit event loop waiting without
+an observed proof action. Provisional classification is environment/startup limitation;
+this does not prove the application's native path passes. No relaunch or production-code
+correction was selected. The separate exact SDK gate
+was dispatched once with desktop access, using the corrected continuation oracle.
+
+**Mac replacement terminal audit:** SDK PASS: exactly 1 selected Rust test, 0 ignored,
+241 filtered; 84.86s. Official checksum verification/install, compile and lint succeeded.
+True and false each returned 0, emitted their expected route marker and passed all six
+SDK assertions, including the continuation/custom-neighbor assertion before Return.
+Wrong-outcome returned 1 with an actual failed required dialogue assertion and no success
+marker; the wrapper correctly accepted this expected rejection. All three retained case
+reports pass; terminal cleanup is true. Strict report/count/marker audit PASS. Original
+failed SDK evidence remains unchanged; no cross-input qualification is claimed.
+
+Native FAIL / missing evidence: after 162.789s the exact owned launch was stopped with
+SIGTERM following desktop-service errors, an idle AppKit stack and absence of both the
+disposable profile and any probe report. Runner returned 1, recorded child exit -15,
+`timedOut: false`, `reports: []`, `passed: false`. This is a cancelled startup-blocked
+proof, not a timeout or passed action/cleanup gate. No project fixture was created.
+Read-only diagnostic evidence and all logs/executable/manifests remain separately under
+ignored `mac-attempt-2/`; no historical evidence was overwritten. This run's shell
+sandbox launch was an execution mistake; sandbox/startup limitation remains a provisional
+classification, not a product diagnosis. Desktop-access execution of the retained binary
+is the smallest remaining discriminating action and needs a new explicit native-only
+allowance. No automatic relaunch, rebuild or source correction is authorized.
+
+Cumulative source-foundation native problem budget: Mac build invocations 2 (first failed
+before Cargo compilation, replacement PASS); native launches 1 (startup-blocked/cancelled);
+exact SDK proofs 2 (first oracle FAIL, corrected replacement PASS). Windows builds/native/
+SDK proofs 0, targeted allowance unused; user-selected separate Windows machine/run must
+confirm access and exact candidate before spending it. No operation remains pending.
+Qualification stays incomplete, not review-ready or accepted; AI planning/provider work
+and subsequent deliverables remain outside scope. No commit, push, merge or release.
+
+**Transfer/self-review checkpoint:** prepared ignored
+`.toolchains/reports/source-foundation/windows-candidate-transfer.zip` with a full
+tracked binary patch, untracked source/fixture/ADR bytes, exact app/fixture manifest
+and preservation/Windows-byte-check instructions. No SDK, binary, logs, `.git` or
+historical worktree is transferred. Archive CRC/patch/untracked bytes are verified;
+`windows-transfer-receipt.json` retains its checksum. The same application digest
+still matches every tracked/untracked input. No source/probe fix was made this run.
+Documentation validator PASS (360 files), whitespace PASS; live status stays compact
+and preserves the actual missing proof, exhausted Mac allowance and unused Windows
+allowance. Final bundle is refreshed once after these status edits, without a
+receipt-only commit. All local changes and the clean historical worktree remain;
+no publication or pending process/operation is claimed.
+
+**Mac native-only attempt 3 selected:** user explicitly answered “Yes you can” to
+one native-only Mac probe with desktop access, using the retained executable without
+rebuilding. The previous one-shot cap is extended only for this single launch;
+no SDK rerun, full matrix, automatic retry, push, merge, release or following deliverable.
+All app/fixture manifest hashes still match digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`;
+retained executable hash still matches `d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`.
+Run only existing optional `source-foundation` with desktop access; retain separate
+`mac-native-attempt-3/` inputs/log/result. Dispatch consumes this native-only allowance.
+Historical worktree and all local changes remain preserved. Windows remains the
+user-selected separate machine/run with its unused allowance; no Windows access or
+execution is claimed here.
+
+**Mac native-only attempt 3 terminal audit:** PASS, runner exit 0, native exit 0,
+no timeout, 4.22s, exactly one successful terminal report and cleanup true. All eleven
+expected checks passed: shared group/distinct branch ownership, BOM/mixed-newline/
+Unicode fixture, disabled structural controls, actual Story minimal quoted-token
+commit preserving neighbors and every Beat ID, Undo/Redo exact bytes, real-core
+wrong-owner `SCENE_INVARIANT`, retained exact Story and concurrent Source drafts,
+and close/reopen exact IDs/source. Stage is complete. Layer is release WKWebView
+with actual Story controller/IPC/service and synthetic DOM editor input; no physical
+keyboard, human or installer claim. Strict count/check/report/cleanup audit PASS.
+Retained executable and every app/fixture input remained unchanged. Desktop-access
+execution succeeds where the earlier sandboxed startup never prepared its fixture;
+no product/probe change, rebuild or SDK rerun was required. Failed evidence is retained.
+
+Mac source-foundation proof is now complete on the coherent recorded working inputs:
+replacement build PASS, corrected official-SDK true/false/rejecting gate PASS, native
+Story action PASS. Overall qualification remains incomplete pending the user-selected
+separate Windows x64 run; it is not review-ready/accepted. Cumulative Mac builds 2,
+native launches 2 (sandboxed cancellation, explicitly authorized desktop-access PASS),
+SDK proofs 2; no additional Mac allowance. Windows builds/native/SDK proofs 0 and its
+one targeted allowance remains unused until access/candidate/tools are verified there.
+All commands terminal; no push/merge/release or subsequent deliverable. Preserve local
+changes and historical worktree; refresh live status and transfer bundle with this result.
+
+**Post-proof self-review/transfer:** validator PASS (360 files), whitespace PASS.
+CURRENT/HANDOVER retain the live Mac PASS / Windows pending distinction and the actual
+unused Windows allowance. Updated ignored transfer bundle/receipt includes the exact
+latest tracked patch and untracked bytes; CRC/byte checks PASS. App/fixture hashes and
+historical worktree remain unchanged. No rebuild, SDK repeat, publication or pending
+operation. Continue only the remaining targeted Windows proof after machine access
+and byte-identical candidate verification.
+
+**Remote publication selected — 2026-10-07:** the user explicitly requested pushing
+the up-to-date repository so Windows can pull it. This supersedes the earlier no-push
+boundary for one coherent source-foundation/planning checkpoint on
+`codex/nested-source-foundation`; no merge, release, PR, provider work, subsequent
+deliverable or extra native/SDK execution is selected. Fresh remote main/planning refs
+remain `aba200f` / `267ec2a`; no corresponding source-foundation remote branch exists.
+Account noreply Git identity is already repository-local. Historical planning worktree
+remains clean and untouched. Preserve the planning refinements/ADR 0011 together with
+the implementation/ADR 0012; publish no ignored logs, executable, SDK or credentials.
+
+[Published input manifest](source-foundation-inputs.json) contains only relative
+app/fixture paths, hashes, base/branch and the reproducible input digest. Git's default
+LF normalization would alter the mixed-newline source fixture, so an exact-path
+`.gitattributes` exception preserves its bytes and permits CR at EOL. This is a
+publication/checkout correction; no app/fixture bytes or qualified inputs changed.
+Verify both staged/committed blobs and a fresh checkout against every manifest hash.
+Windows must pull this implementation branch and verify the same hashes; the ignored
+transfer ZIP is now optional historical fallback, not the primary continuation.
+
+Production packaging is dispatch-only and quality pushes are main-only; this branch
+push does not select a full matrix. Run cheap validator/whitespace/index-byte checks,
+commit this coherent checkpoint and push without force, then verify remote HEAD and
+record the exact publication receipt locally. The commit carrying this record and the
+input manifest identifies the candidate; do not create receipt-only commits chasing
+its own SHA. Mac proof remains complete; Windows allowance remains one unused targeted
+build/native/SDK proof after actual host/tool/archive access is confirmed there.
+
+**Publication preflight:** validator PASS (361 files), whitespace PASS; staged privacy/
+scope audit includes 30 intended files and excludes all ignored toolchains/evidence.
+All 138 staged app/fixture blobs exactly match Mac-qualified per-file hashes, including
+BOM and six CRLF endings in the source fixture. A fresh index checkout with
+`core.autocrlf=true` also matches every hash. No qualified source byte, dependency or
+workflow changed; no Mac proof is repeated. Commit-object hashes and remote branch
+identity will be verified before handing Windows the exact published candidate.
+
+**Windows attempt 1 selected — 2026-10-07:** user requested latest remote branch;
+fetch verified `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`. Separate Windows checkout
+preserves the old feature checkout/local HANDOVER and historical trees. Remote branch
+and committed manifest supersede the unavailable historical transfer ZIP. All 138
+working files and committed blobs match digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`;
+fixture retains BOM, six CRLF and eleven total LF bytes. Actual Windows desktop
+window enumeration/capture succeeds; existing Node 24.19.0/npm 11.9.0/Rust 1.90.0,
+MSVC 14.50.35717/SDK 10.0.26100.0 and official Ren'Py 8.5.3 archive are verified.
+Existing matching dependencies are copied, not installed. Restricted-shell MSVC/write
+preflight limitations were resolved through authorized desktop-user shell access;
+no build or proof was consumed by preflight. One owner, no helpers.
+
+Consume exactly one `npm exec -- tauri build --no-bundle -- --locked`, one existing
+runtime runner selecting only `source-foundation` against its retained executable,
+and one exact ignored SDK gate from TESTING. Dispatch markers prevent another attempt.
+Evidence: ignored `.toolchains/reports/source-foundation/windows-attempt-1/`, including
+all exact input bytes, committed/working hash audit, dependency audit, host/tools,
+commands, logs/results and retained executable/PDB. No matrix, infrastructure install,
+automatic retry, Mac rerun, push, merge, release, provider or following deliverable.
+Qualification is incomplete until terminal audits pass; no acceptance is inferred.
+
+**Windows attempt 1 terminal audit — 2026-10-07:** build PASS, 196.016s total
+(native release target 187s); 14,273,536-byte x64 executable retained, SHA-256
+`85156032081f1ebd5cb573404f8d9b2fbcd1b7fc2ba7c9c9b06f4a1162844ffd`.
+Only existing `source-foundation` runner invoked: PASS, native exit 0, runner exit 0,
+7.968s, no timeout, exactly one terminal report, all eleven exact checks and cleanup
+true. Actual Story controller/IPC/core action changes only the dialogue token; BOM,
+six CRLF, Unicode/comments/custom neighbors and every Beat ID survive. Undo/Redo and
+close/reopen preserve exact source/IDs; wrong owner returns `SCENE_INVARIANT`;
+refusal retains exact Story text and concurrent dirty Source draft. This is release
+WebView2 with synthetic DOM input, not physical/human/installer acceptance. A Chromium
+class-unregistration teardown diagnostic (error 1411) is retained; the report/exit and
+independent owned-process cleanup audit still pass. No extra launch follows it.
+
+Exact SDK gate FAIL, Cargo exit 101: 0 passed/1 failed/0 ignored/233 filtered;
+84.78s test, 115.469s including 30.46s compilation. Panic is
+`source_foundation.rs:30`, `install_supported_sdk_from_archive(...).unwrap()`:
+`Err(InvalidSdk)`. This precedes LifecycleService/SDK registration, project creation,
+compile/lint and every true/false/wrong-outcome case. None of those SDK cases is
+claimed; there are zero case reports. Terminal report is `passed:false`,
+`cleanupComplete:true`; the SDK scratch root was removed. Classification: Windows
+managed SDK install/admission failure, not a demonstrated nested-dialogue/runtime
+assertion failure. The returned error does not identify which installer/validation
+substep failed; environment versus product cause remains unresolved. Official archive
+checksum still matches pinned 8.5.3. No second install, version probe, SDK run or fix
+was attempted. Further diagnosis/proof requires separately selected scope/allowance.
+
+Strict audit retains PASS build/native/input identity and FAIL SDK/absent case outputs.
+All 138 app/fixture hashes and the retained binary are unchanged after execution.
+Native synthetic profile's 53 files were copied byte-identically before removing its
+exact contained scratch directory; accepted source independently matches the original
+fixture plus generated technical label and single quoted-text patch, SHA-256
+`a9e7810dc0acdfcf9f336449ac862f431660a5aee0a7dd8ceeec7fb82a699e56`.
+Both terminal cleanup reports and final zero-owned-app/SDK-process audit pass.
+Retained exact input tree, executable/PDB, SDK test executable, checksums, dispatch
+markers, complete logs, results, fixture and audit files live in ignored
+`.toolchains/reports/source-foundation/windows-attempt-1/`.
+
+A cheap post-proof fixture audit first assumed `scene_001` was the technical label;
+that oracle failed while the actual source hash matched the native report. The
+original script/error is retained; reading the generated label from retained project
+metadata corrects the audit without another application/SDK attempt. Earlier
+restricted-shell write/MSVC limitations and minimized desktop capture were preflight
+only, resolved before dispatch; they do not add build/native/SDK attempts.
+
+**Cumulative state/stop:** Windows builds 1 PASS, native launches 1 PASS, SDK proofs
+1 FAIL; its one targeted allowance is exhausted. Mac remains builds 2/native launches
+2/SDK proofs 2 with the previously recorded final PASS evidence; no Mac rerun.
+Both native Story paths now pass on the same 138 inputs, but required Windows SDK
+true/false/rejecting proof is missing. Overall source foundation remains incomplete,
+not review-ready and not accepted. No expensive retry, infrastructure install, full
+matrix, provider action, AI planning, push, merge, release or following deliverable.
+All operations are terminal; one owner/no helpers. Documentation/evidence remain
+local-only atop fetched candidate `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+Next is separately selected diagnosis of this exact Windows SDK failure; preserve
+passing unchanged build/native proof and all failures. No renewed allowance is implied.
+
+
+**Windows SDK-only attempt 2 selected — 2026-10-07:** user explicitly granted
+another allowance to continue this same outcome. Select one replacement exact ignored
+SDK gate only, with no automatic retry; reuse unchanged passing build/native evidence.
+All 138 app/fixture hashes and retained binary still match; archive checksum verified.
+Actual desktop enumeration remains available; existing pinned tools/caches are reused.
+Read-only archive/path audit identifies a discriminating environment correction:
+old candidate root 220 characters, Windows Python launcher 254, 1,427 SDK paths over
+259 (maximum 290). The new contained scratch root gives candidate 133, launcher 167,
+maximum member path 203, with zero over 259. Long-path admission failure is a hypothesis,
+not a confirmed root cause. Set only process-scoped TEMP/TMP to the new shorter root;
+no application/test/fixture byte or system setting is changed. No extra version launch
+or preliminary SDK installation. Retain separate ignored
+`.toolchains/reports/source-foundation/windows-sdk-attempt-2/` input/path audit,
+dispatch/log/result/case evidence; preserve attempt 1 and its failed audit unchanged.
+Dispatch consumes this single SDK-only allowance. No build/native repeat, Mac rerun,
+full matrix, infrastructure install, helper, push, merge, release/provider/AI work or
+following deliverable. Qualification remains incomplete pending terminal audit.
+
+
+**Windows SDK-only attempt 2 terminal audit — 2026-10-07:** PASS, Cargo exit 0;
+1 passed/0 failed/0 ignored/233 filtered, 108.25s test / 108.734s total. No source,
+fixture, dependency or probe changes; Cargo reused the existing test executable
+(0.37s preparation). Official 8.5.3 admission, project creation, compile/lint and all
+three retained cases succeeded as required: true/false exit 0 with their exact route
+markers and six passed assertions each; wrong-outcome exit 1, one actually failed
+required dialogue assertion, FAILED status and no success route marker. Terminal
+report exactly once, passed true and cleanup true. Strict count/marker/assertion/output
+and unchanged-input/executable audit PASS. The SDK test removed its scratch tree;
+zero owned app/SDK processes and an empty short root were confirmed before removing
+the root. No further SDK launch or production build/native repeat was performed.
+
+Changing only the process-scoped scratch path resolves the observed admission failure.
+Classify attempt 1 as a deep-scratch Windows SDK admission limitation, with the exact
+internal failing substep uninstrumented. The static length audit and passing same-input
+short-path run support that classification; they do not establish broad long-path
+support or a product-source correction. Attempt 1's SDK FAIL, raw logs/executables,
+failed cheap fixture oracle and all historical Mac failures remain retained unchanged.
+All 138 working app/fixture hashes retain digest
+`14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`; original Windows
+release executable and SDK test executable remain byte-identical. Attempt 2 evidence
+and combined Windows proof binding live in ignored
+`.toolchains/reports/source-foundation/windows-sdk-attempt-2/`. Attempt 1 supplies the
+unchanged build/native results and retained exact inputs/53-file native fixture;
+recorded Mac build/SDK/native proof is reused on identical qualified inputs.
+
+**Review-ready stop:** all selected Windows x64/macOS ARM64 build/native/SDK proof
+now passes. This bounded source-foundation outcome is review-ready, **not accepted**;
+full 3A and AI/provider work remain unselected. Cumulative Windows builds/native/SDK
+proofs are **1/1/2** (SDK initial FAIL, explicitly authorized replacement PASS); Mac
+remains **2/2/2**. The new single SDK-only allowance is consumed. No process/CI/action
+pending, no automatic retry, full matrix, infrastructure install, helpers, push, PR,
+merge, release or following deliverable. Status/operational documentation and raw
+evidence remain local-only atop published candidate `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+Next is a separately selected independent review/acceptance decision using the frozen
+input manifest and both platforms' evidence, without repeating unchanged expensive
+checks or starting AI planning. Documentation/whitespace/self-review checks follow.
+
+**Independent review and bounded correction selected — 2026-10-07:** the user requested
+research, fixes for both P1 ownership findings, and a check of the work. Same Windows
+x64 checkout at `45c64c5`, preserving five existing local documentation edits and all
+historical evidence. No helpers, provider/AI work, push, merge, release, following
+deliverable or expensive native/SDK rerun is selected. Focused compilation/core and
+renderer regressions plus cheap documentation/format checks are authorized.
+
+Review found root move/reorder can cross a neighboring child, and root insertion can
+split If from Otherwise through a header/trivia anchor. Cheap actual-renderer probes
+emitted both commands; static core tracing found no rejecting guard. The first probe
+had a selector-only error before action, then a corrected selector succeeded; original
+outputs remain in the review conversation. Independent audit verified 138 working and
+committed inputs against the original digest and all 253 indexed Windows evidence
+files. Mac raw proof is unavailable on this machine; section 23 records the reused
+proof and failures. Both P1 findings defer the acceptance recommendation.
+
+Rejecting real-dispatch and renderer regressions are added before correcting core/UI.
+Retain cheap-check outputs separately under ignored
+`.toolchains/reports/source-foundation/review-corrections/`. Original qualified input
+manifest and Windows/Mac evidence remain historical proof of the original candidate;
+changed inputs must not inherit exact-input qualification or acceptance. Restricted
+shell write access failed before any test ran; the existing desktop-user toolchain
+is used for focused checks, with no installation or system setting change.
+
+**Correction results/self-review — 2026-10-07:** repository research and official
+[Ren'Py conditional](https://www.renpy.org/doc/html/conditional.html) and
+[block syntax](https://www.renpy.org/doc/html/language_basics.html#indentation-and-blocks)
+references confirmed the structural boundary. Before-fix core regression FAIL: real
+dispatch returned success and wrote the unsafe root/child swap. Before-fix renderer
+regression FAIL: root Move Up remained enabled. Both failure logs stay retained.
+
+Core now rejects movement ranges containing children and root insertion inside the
+span from the first header to the last child, including Otherwise/intervening trivia.
+Story applies matching move/drop and Add change here guards. Safe root movement and
+insertion before/after the group retain child IDs/owners. Dedicated child token editing,
+transaction/history/revision protections and fixture bytes remain unchanged.
+
+Final focused selector PASS: 6 passed/0 failed/1 explicitly ignored SDK/228 filtered,
+6.38s; the ignored gate supplies no changed-input SDK proof. Five exact existing
+flat-Scene round-trip, continuation, migration, minimal-patch/history and opaque/conflict
+regressions PASS. Full renderer suite 97 PASS/0 fail/0 skipped (15.273s); after adding
+trivia/safe-after-group assertions, final affected renderer tests 3 PASS/0 fail/0 skipped.
+Final TypeScript source/test compilation, Rust format, validator (358 files) and
+whitespace PASS. Self-review checked destination/range guards, both insertion endpoints,
+source/map refusal bytes, stable IDs/owners and safe root behavior. No new blocking
+finding was identified in this self-review; independent acceptance is still pending.
+
+Current correction digest is
+`a1966e1c6821a440ec42fe9efd3732ff17bec17e1fa4c3800974440bc80fd5ec`.
+All four changed app/test inputs and the final patch/test executable/logs are separately
+recorded under ignored `review-corrections/`; original committed input manifest is
+unchanged. Initial cheap failure logs are retained; normal focused recompilation
+replaced the mutable test target, so no archived before-fix regression executable is
+claimed. Original retained native/SDK executables and all 253 indexed Windows evidence
+files remain unchanged. Mac raw files remain on their original host.
+
+Three focused Cargo compilations/executions (before-fix FAIL, initial/final PASS) are
+cheap correction checks, not native builds or SDK proofs. Native/SDK cumulative counts
+remain Windows 1/1/2 and Mac 2/2/2; no renewed expensive allowance or rerun. Changes are
+local-only atop `45c64c5`, not accepted or qualified by the old input digest. All
+commands are terminal; no provider/helper/push/merge/release or following deliverable.
+Next is independent review of the corrected working inputs and an explicit decision
+about any changed-input native qualification; no additional execution is inferred.
+
+**Corrected-input independent review and bounded EOF correction — 2026-10-07:**
+the user selected independent review with exactly one review subagent, implementation
+ownership retained by main, bounded in-scope fixes and focused checks. Native build/
+launch/SDK allowances were explicitly not renewed; provider/AI, installation,
+publication/integration and the following deliverable remained excluded. Fresh local
+Git confirmed branch `codex/nested-source-foundation`, HEAD and remote-tracking ref
+`45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`, with all eleven existing modified files
+preserved. No fetch/reset/commit/push or desktop/SDK dispatch occurred. The one reviewer
+read corrected inputs independently and performed subsequent re-review; main made
+every implementation/test change. This selection supersedes earlier no-helper wording
+only for that one independent reviewer.
+
+Both previous P1 guards passed review: root move/reorder cannot cross nested children;
+root insertion cannot split headers, bodies or intervening trivia. Existing core/UI
+regressions and safe outside-group edits remain intact. Reviewer identified one further
+**P1 EOF append defect**: a recognized group ending in a dialogue child without a final
+newline accepts root append at the child's end and joins both statements on one physical
+line. Initial regression failed at Source Save because the harness supplied a second
+BOM; that setup failure is retained as `eof-before.log`. The corrected BOM-free Source
+draft reproduced the actual defect through production `scene.apply` dispatch;
+`eof-before-corrected-fixture.log` retains the exact byte mismatch. No terminal Beat
+requirement prevented this supported EOF case.
+
+First bounded correction inserted the required separator but changed the final child's
+range hash and UUID; `core-after.log` retains that rejecting ID assertion (6 PASS/
+1 FAIL/1 SDK ignored). Final correction also anchors that preceding Beat's updated
+range/hash to its existing ID, preserving owners and extra mapping fields through the
+existing reconciliation path. Existing source bytes remain an exact prefix; only
+the necessary LF/CRLF separator and new root statement are inserted. Added real-core
+regression exercises both LF/CRLF, retained single BOM/Unicode, child IDs/owners,
+exact Undo bytes, Redo and reopen. No application grammar/scope expansion.
+
+Final focused command `cargo test -p loomlight-core --locked --offline source_foundation`
+PASS: **7 passed/0 failed/1 explicitly ignored SDK/228 filtered**, test 8.11s,
+focused compilation 11.93s. Five affected flat-Scene checks re-executed against the
+final test executable PASS, one intended test each/zero ignored, because the separator
+change also affects root insertion. Their logs retain exact selectors. Unchanged
+renderer suite 97 PASS/final affected 3 PASS and source/test typecheck from the prior
+correction are reused; UI/test inputs have not changed in this selection.
+
+A narrow retained headless evidence adapter compiled against the corrected cached core
+library connects shipped Story `renderSceneAuthoring`/`settleSceneDraft`, protocol bridge
+and actual `ApplicationHost::dispatch`; refusal responses are not mocked. Final run
+PASS **10 assertions**, actual `DIRTY_SOURCE`, `SOURCE_CONFLICT` and
+`STALE_PROJECT_SESSION`; it verifies exact Story text/unsubmitted state, exact concurrent
+Source draft, unchanged source/map bytes on refusal, minimal child token edit, child
+IDs/owners and Undo/Redo/reopen. Adapter exit 0, empty stderr, owned successful profile
+removed. This is actual controller/core proof with a synthetic DOM and stdio transport,
+not desktop/main-shell/WebView or SDK qualification.
+
+Adapter failures stay distinct: Windows slash-normalization assertion before process
+launch; omitted `.scene-workspace` class (no commit dispatched); two 45-second helper
+reopen timeouts, with their logs and failed scratch profiles retained. Traced timeout
+reached external refusal/retention successfully, then stopped at helper reopen; its
+exact internal blocking substep was not proven. Final run refreshes Source before
+helper close/reopen, consistent with production close's Source refresh requirement.
+It does not qualify the raw unrefreshed helper sequence. Renewed native proof should
+exercise normal shell close/reopen after ordinary external refusal.
+
+Reviewer independently audited the final anchored correction and successful logs:
+**no remaining actionable in-scope defect**. Original corrected-input findings,
+before-fix byte/ID failures and adapter failures remain preserved. Four focused Cargo
+test executions (invalid fixture, demonstrated defect, separator-only ID failure,
+final PASS), two cheap core-library builds and two adapter compilations occurred;
+five headless adapter invocations are recorded (no desktop/native launches).
+No archived before-fix executable is claimed; final core test executable and final
+adapter/source/compiled-controller identities are retained. Existing toolchains,
+dependencies and caches were reused offline; initial restricted shell evidence-directory
+write failed before compilation, then authorized focused operations used reviewed
+local-user access within the worktree. No infrastructure was installed.
+
+Final 138-input digest is
+`bd0b1406e001b51572d9c464ae3078293febf0e4e03063af428d3f23aedcc690`, recorded in
+ignored `.toolchains/reports/source-foundation/independent-review/inputs-final.json`.
+Only `scene.rs` and `lifecycle/runtime_probe.rs` changed since prior corrected digest
+`a1966e1c6821a440ec42fe9efd3732ff17bec17e1fa4c3800974440bc80fd5ec`; all four working
+app/test changes relative to published `45c64c5` remain local/uncommitted/unpublished.
+Exact final corrected files, full patch, adapter source/binary, final test binary,
+logs/result, review report and audit are separately retained in `independent-review/`.
+Audit confirms 232 indexed `windows-attempt-1` files, 21 `windows-sdk-attempt-2`
+files (253 total), and all 17 indexed prior correction files byte-identical. Fixture
+BOM/six CRLF unchanged. Original digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`
+and committed manifest remain historical original-candidate qualification; Mac raw
+evidence remains on its original host. No corrected-input native/SDK proof is inferred.
+
+Native/SDK cumulative counts remain **Windows 1/1/2; macOS 2/2/2**, all original
+allowances consumed. All current operations terminal/no owned process or pending
+CI/publication. Final Rust format, repository validator (358 files) and whitespace
+PASS; results accompany the retained receipt. **Source review complete; qualification
+incomplete; not accepted.** Next is
+the explicitly selected minimum qualification in HANDOVER's ready-to-paste prompt:
+prepare/cheaply validate bounded native/SDK probe additions, freeze exact final inputs,
+then one build/one native launch/one SDK gate per target with finite time caps and
+zero retries. That prompt is a proposal, not an allowance granted by this review.
+
+**Corrected-input qualification selected — 2026-10-07:** the user selected the
+minimum two-target qualification above. Fresh Windows Git confirms branch
+`codex/nested-source-foundation`, HEAD `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`,
+and eleven modified files, all preserved. Reviewed 138 working inputs match
+`bd0b1406e001b51572d9c464ae3078293febf0e4e03063af428d3f23aedcc690` exactly.
+Entry evidence index preserves 1,035 prior evidence files; original manifests remain
+historical. New evidence is isolated in ignored
+`.toolchains/reports/source-foundation/corrected-qualification/`.
+
+Allowance recorded before expensive execution: **per target one release no-bundle
+build (1,200 seconds), one source-foundation-only native launch (300 seconds), one
+exact pinned-SDK gate (600 seconds), zero retries/duplicate or ambiguous dispatches**.
+Prior cumulative Windows counts **1/1/2**, macOS **2/2/2**. Preparation and focused
+checks consume no expensive allowance. Windows uses existing pinned tools/caches;
+Mac session, original evidence and direct transfer are not currently accessible.
+Agent-owned Mac access was requested; missing access leaves qualification incomplete.
+No infrastructure installation, full matrix, provider/AI work, publication, merge,
+release or subsequent deliverable is selected. Failures require reassessment.
+
+**Final qualification inputs frozen:** 139 app/fixture inputs, digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`,
+in ignored `corrected-qualification/inputs-final.json` and byte-exact `exact-inputs/`.
+The extra input is the extended native probe. Existing eleven checks are retained;
+33 checks now cover real core move/reorder and Otherwise/two-trivia insertion refusal,
+safe outside-group edits, child IDs/owners, EOF append through Story, Undo/Redo/reopen,
+exact dirty Source/Story drafts and external refusal followed by normal shell reopening.
+The external write belongs to the independent native runner, using a read-only
+probe handshake and fixed disposable profile. SDK true/false/wrong-outcome routes
+now execute continuation source produced by root append after an unterminated child,
+retaining the original six route assertions and wrong-outcome rejection.
+
+Cheap proof: 7 focused core PASS; 3 affected renderer PASS; 1 exact SDK-fixture
+preflight PASS without SDK execution; 33 shipped-probe checks through real Story
+controller/bridge/core PASS. Initial cheap extended-probe failure was a harness
+assumption that history survives close/reopen; failure is retained. Undo/Redo now
+precede reopen and EOF append uses actual Story Add Beat. Existing unchanged broader
+checks are reused. A final rerun after the ID assertion passes 33 checks. Runner
+syntax, probe syntax and whitespace PASS. Existing pinned Windows tools and official
+archive SHA-256 `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`
+verified. Windows short process-scoped TEMP/TMP is workspace-contained `q3s`.
+Transfer archive SHA-256
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2`
+is staged locally; no Mac transfer or matching-host audit has occurred.
+
+Windows build attempt 2 is selected for one dispatch on these frozen inputs,
+`npm exec -- tauri build --no-bundle -- --locked`, 1,200-second hard cap. Native/SDK
+follow only a passing prerequisite, each with its own one-dispatch marker and cap.
+No retries, automatic renewal or changed-input reuse of original target proof.
+
+**Windows corrected build attempt 2 PASS:** exit 0, 55.078 seconds, no timeout;
+retained x64 executable 14,285,312 bytes, SHA-256
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`.
+Executable/PDB, exact inputs, dispatch and full build log are retained separately.
+Native attempt 2 selected on that exact executable with only `source-foundation`,
+300-second hard cap, one dispatch/no retry. Windows cumulative after build **2/1/2**;
+native dispatch consumes the one new launch allowance regardless of outcome.
+
+**Windows corrected native attempt 2 PASS:** runner exit 0/native exit 0,
+13.312 seconds, no timeout; exactly one terminal report, all 33 expected checks
+(including original eleven), extension-complete and cleanup true. Runner-owned
+external write and normal shell close/reopen pass; disposable profile is retained
+before contained deletion. WebView2 teardown error 1411 is retained as a diagnostic.
+Layer remains release native WebView/real controller/IPC/core with synthetic DOM
+input; no physical/human/installer acceptance. Frozen input and executable hashes
+remain unchanged. Windows cumulative **2/2/2**.
+
+Windows exact pinned-SDK attempt 3 is selected: only
+`renpy::tests::source_foundation::source_foundation_bool_sdk_gate --ignored --exact
+--nocapture`, 600-second hard cap, one dispatch/no retry. Actual EOF-generated source,
+true/false six assertions each and deliberate wrong-outcome rejection must pass.
+Native report identity/count and exact short-root/profile cleanup are prerequisites.
+Dispatch consumes the single new SDK allowance regardless of outcome; no Mac run,
+full package matrix or other SDK selector is authorized.
+
+**Windows corrected SDK attempt 3 PASS:** exit 0, 108.359 seconds total/107.83-second
+test, no timeout, exactly 1 passed/0 failed/0 ignored/236 filtered. Compile/lint and
+normal-entry true/false each exit 0 with six actual passed assertions and expected
+route marker. Deliberate wrong-outcome exits 1/FAILED without its success marker.
+Exactly one terminal PASS/cleanup true; archive, fixture, expected rejecting results,
+EOF-before/produced bytes and owner arrays are retained. Produced source SHA-256
+`d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`;
+retained test executable SHA-256
+`5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`.
+Strict terminal audit PASS on all 20 checks, including six actual assertions per
+route, real wrong-outcome failure, all 139 frozen/retained input hashes, executable
+identity, exact 33 native checks, native profile/source retention and SDK cleanup.
+All 1,035 entry-indexed prior evidence files remain byte-identical. Initial cheap
+probe failure/log/profile remain retained. No retry or duplicate dispatch occurred.
+
+**Target result / access stop:** Windows x64 corrected-input build/native/SDK
+qualification PASS on digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+macOS ARM64 **INCOMPLETE — unavailable agent-owned host/session, original raw evidence
+and direct transfer**. The session exposes local Windows only; no usable existing
+SSH connection was found. Access was requested while independent Windows work
+continued, with no response/connection received. No Mac operation was dispatched,
+no remote input-hash match was verified, and original Mac proof remains historical
+on its original host. Staged transfer archives are preparation, not transfer evidence.
+Both-target qualification remains incomplete and the corrected foundation is **not
+accepted**. No source or probe edits occurred after input freeze.
+
+Cumulative builds/native launches/SDK gates: **Windows 2/2/3; macOS 2/2/2**.
+New Windows allowance fully consumed; new Mac allowance **one/one/one remains unused**,
+with original 20/5/10-minute caps and zero retries. Next action is to establish actual
+agent-owned Mac desktop access, inspect/preserve its checkout and original evidence,
+transfer frozen inputs/evidence directly, prove all 139 hashes match, cheaply verify
+existing pinned tools/cache/archive/profile prerequisites, then consume only the
+remaining Mac allowances. Windows passing unchanged proof is reused. Missing access
+does not authorize installation, a full matrix, provider/AI work, publication,
+integration/release or the following deliverable. All Windows execution is terminal.
+
+**Final retention/cleanup:** zero owned native/SDK/test processes; native profile and
+new short-root cache retained before contained cleanup. Native/SDK scratch and short
+root removed, cleanup audit PASS. Final Rust format, repository validator (359 files)
+and whitespace PASS. All original local work remains preserved, HEAD/branch unchanged;
+no commit, push or publication. Verified staged Windows evidence archive is 30,159,079
+bytes, SHA-256 `1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`,
+with 1,221 individually verified evidence members, including exact inputs/binaries,
+all new failures/results, profile, cleanup and status snapshots. `transfer-receipt.json`
+records that actual transfer is false; this archive is ready for direct transfer only
+after Mac access exists. Frozen input digest and target results remain as recorded above.
+
+**Remote checkpoint selected — 2026-10-07:** the user requested “Ensure remote is
+updated” after receiving the Mac continuation prompt. Fresh remote fetch confirms
+`codex/nested-source-foundation` still at `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+The corrected implementation/probes, existing operational/status edits and a separate
+[portable final input manifest and Windows receipt](source-foundation-qualified-inputs.json)
+are checkpointed together as `fix: qualify corrected nested source foundation on Windows`
+and pushed without force to the same branch. Verify all 139 staged/committed blobs
+against the frozen manifest; qualified application inputs do not change. The original
+committed manifest remains historical. Raw evidence, binaries/PDB, caches, logs and
+SDKs remain ignored/local; exact bundles and hashes support direct Mac evidence
+transfer. This remote update does not imply completed Mac transfer/qualification,
+acceptance, merge or release. No expensive checks or allowances are renewed.
+
+
+**Mac corrected-qualification continuation / direct-transfer access stop — 2026-10-07:**
+The user selected only the remaining macOS ARM64 qualification, preserving Windows
+proof and every earlier failure. Original Mac checkout is the current project root;
+fresh Git confirms `codex/nested-source-foundation` at
+`45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`, initially clean. Historical planning
+worktree remains `2c5a164597779331af9ff81bf0eb3bdabb41ddb7`, untouched. No reset,
+application/probe edit, commit, push, merge or new deliverable occurred.
+
+Read original AGENTS/CURRENT/HANDOVER and sections 21/23. Read-only inspection of the
+connected Windows task discovered its later published checkpoint; one fetch verified
+`origin/codex/nested-source-foundation` at
+`a49e536163d5cea2e220894f97f780f4bd301668`. Mac HEAD/worktree were not advanced.
+That checkpoint's newer portable `source-foundation-qualified-inputs.json` and all
+139 Git blobs independently match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+This is remote blob inspection, **not** direct archive transfer or a final Mac working
+input audit. Original committed 138-input and reviewed 138-input manifests remain
+historical and cannot substitute for the final qualification tree.
+
+Windows published receipt records build PASS 55.078s, native PASS 13.312s/all 33
+checks/one terminal report/cleanup true, exact SDK PASS 108.359s with six actual
+assertions per passing true/false route and deliberate wrong-outcome exit 1/FAILED
+without its marker. Release x64 SHA-256
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`,
+SDK test binary `5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`,
+EOF-produced source `d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`.
+Reuse unchanged Windows proof; raw Windows evidence is not yet available on Mac.
+
+Ignored `mac-corrected-qualification/entry-state.json` records fresh refs/status;
+`superseded-mac-bytes/` preserves all 138 earlier input bytes and original status/
+ledger/manifests, with copy hashes checked. `entry-evidence-sha256.json` indexes all
+23 original foundation evidence files, including failures and retained Mac executable.
+The original executable hash remains
+`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`.
+No original evidence was overwritten. Existing native Mac desktop surfaces are
+agent-accessible; pinned Node 24.19.0/npm 11.9.0/Rust 1.90.0, command-line build tools
+and caches exist. Official archive SHA-256 reverified as
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Fetched probe JS syntax and Python runner AST pass inspection. The real extended
+probe and non-SDK EOF fixture preflight remain pending on transferred working inputs.
+
+**Actual blocker:** no direct Windows file-transfer tool, mounted share or SSH
+configuration is available here; local resolution of `SUNDOWN`/`SUNDOWN.local`
+returned no address. Capability discovery found no suitable existing transfer
+connector. Requested an existing direct route or explicit authorization to coordinate
+with Windows task “Qualify Nested Source Foundation”; no route/authorization received
+at this checkpoint. No task message or infrastructure installation was attempted.
+Both required archives remain untransferred, their hashes and `evidence-sha256.json`
+unverified locally. Expected archive hashes remain inputs
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` and Windows evidence
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+
+`allowance.json` records the new unused Mac one-build/one-native/one-SDK allowance,
+1,200/300/600-second hard caps and zero retries. Exact build is
+`npm exec -- tauri build --no-bundle -- --locked`; native runner selects ONLY
+`source-foundation`; SDK is ONLY
+`cargo test -p loomlight-core --locked renpy::tests::source_foundation::source_foundation_bool_sdk_gate -- --ignored --exact --nocapture`.
+No expensive dispatch or one-dispatch marker exists. Cumulative counts stay
+**Windows 2/2/3; Mac 2/2/2**. Mac corrected qualification and two-target qualification
+remain incomplete/not accepted. Continue in this chat after transfer access exists:
+verify/extract both archives into fresh staging, audit evidence members, reconcile
+all 139 exact frozen inputs with backups, then cheap preflights and the three single
+dispatches with exclusive markers and caps. Stop/reassess failure or ambiguity;
+no automatic renewal. New status/evidence is local-only; no publication authorized.
+
+
+**GitHub Actions alternative investigated — 2026-10-07:** user asked to coordinate
+with Actions again. Read-only GitHub API checks confirm zero runs on the corrected
+branch, zero existing self-hosted runners, and no matching foundation/corrected/transfer
+artifact among all 21 repository artifacts. Existing production workflow selects
+both targets and broad gates with CI tool/dependency setup; it was not dispatched.
+A targeted hosted Mac-only workflow could produce the remaining Mac evidence while
+reusing Windows proof, but changes the original-Mac/existing-tools requirements and
+needs a published workflow/pinned CI setup. Asked for that explicit scope decision;
+no workflow or expensive allowance has been dispatched. Actions does not automatically
+access either existing Windows archive, which remains a separate transfer prerequisite
+unless the user explicitly changes that requirement. Assessment is retained in ignored
+`mac-corrected-qualification/actions-access-assessment.json`. Cumulative Windows/Mac
+counts remain 2/2/3 and 2/2/2; all new Mac allowances remain unused.
+
+
+**Hosted Mac-only Actions selection approved — 2026-10-07:** after the agent explained
+that Actions changes the original Mac/existing-tools execution boundary and requires
+pinned CI setup plus workflow publication, the user answered “Yes approved”. This
+selects ONE Mac-only Actions run consuming the existing unused Mac build/native/SDK
+allowance, with unchanged 1,200/300/600-second caps and zero retries. It does not
+renew budgets, repeat Windows qualification, select a full matrix, authorize merge/
+release or waive direct raw Windows evidence transfer/member verification.
+
+All three earlier local status/ledger edits were copied byte-exactly with a binary
+Git patch, then preserved in a named Git stash before fast-forwarding the original
+Mac checkout from `45c64c5` to published corrected checkpoint
+`a49e536163d5cea2e220894f97f780f4bd301668`. The preserved Mac continuation is
+reconciled above alongside the complete newer Windows ledger. Original Mac evidence
+index still matches all 23 files; historical planning worktree remains untouched.
+All 139 actual Mac working inputs now match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+No frozen app/test/probe input was modified; the new runner is outside those inputs.
+
+The existing `quality.yml` workflow (GitHub workflow ID **354880113**) gains isolated
+manual input `source_foundation_macos=true`. Other manual inputs must be false;
+all existing matrix/diagnostic/validator jobs skip for this mode. Only one `macos-26`
+ARM64 job runs. Reusing an existing workflow avoids changing main merely to register
+a new dispatchable workflow. Pinned action revisions and existing cache/tool/SDK
+setup conventions are retained; official archive checksum is rechecked. New
+`scripts/qualify-source-foundation-macos.py` wraps existing focused preflights,
+no-bundle build, native runner and exact SDK gate. It records exclusive dispatch
+markers/commands/caps before each operation, refuses run/job attempt >1, verifies
+frozen inputs before/after, kills owned processes at hard caps, retains exact inputs/
+executable/test binary/native profile/EOF source/owners/full logs, strictly audits
+33 native checks and six actual SDK assertions per route plus wrong-outcome rejection,
+and indexes terminal evidence for upload even on failure. Finishing retains scratch
+before contained cleanup. The 70-minute job ceiling includes setup/cheap compilation/
+retention; expensive operation caps remain 20/5/10 minutes.
+
+Local cheap preparation PASS: eight focused core tests including the exact non-SDK
+EOF fixture (one SDK wrapper deliberately ignored), three affected renderer tests,
+TypeScript/typecheck, Python AST, Actions lint, whitespace and frozen 139-input audit.
+Audit rejects the original eleven-check native green result, zero-assertion SDK result
+and a wrong-outcome result with its success marker; historical SDK output validates
+the parser only, not these final target inputs. Unchanged wider proof is reused.
+Initial local core preflight was run from repository root and failed before tests
+(no Cargo.toml); corrected `app/` cwd passes, both logs retained. Initial workflow
+lint caught runner context in job env; moved the paths into step env/GITHUB_ENV.
+No expensive dispatch occurred during these cheap corrections.
+
+Fresh remote refs are source branch `a49e536`, main `aba200f`; existing quality
+workflow is active. Publish this coherent workflow/helper/status checkpoint on the
+same source branch without force, verify its exact SHA and frozen blobs, then make
+ONE dispatch of workflow 354880113 at that branch with only the Mac input true.
+Capture its confirmed run/attempt/exact tested SHA and continuation before the
+manual same-thread wait. No status polling or automatic retry. Current cumulative
+counts remain Windows **2/2/3**, Mac **2/2/2** until per-operation dispatch evidence;
+the unused Mac allowance is reserved for this one run and may not be spent locally
+or by another executor. Frozen inputs and prior failures remain unchanged.
+
+Raw Windows archive transfer is still unresolved, with expected input/evidence ZIP
+hashes `acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` /
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+Hosted Actions cannot read files held only on Windows. Approval of the hosted Mac
+proof does not claim those archives arrived or waive their member audit. Even a
+passing Mac job requires evidence download/hash/count/cleanup audit; overall requested
+qualification/acceptance remains incomplete while the raw Windows evidence gap remains.
+
+
+**Mac-only Actions dispatch confirmed / manual same-thread wait — 2026-10-07:**
+Published/verified workflow checkpoint
+`878de2a8b30e1ce0e3adf36fdba2859056bb4b86` on `codex/nested-source-foundation`.
+All 139 committed input blobs still match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Fresh pre-dispatch query confirmed zero runs at that SHA. Local exclusive
+`actions-one-dispatch.json` was written before ONE REST dispatch request to existing
+workflow 354880113, with `source_foundation_macos=true` and all three other inputs
+false. GitHub's response confirmed run ID; no ambiguous or duplicate request/retry.
+
+Confirmed [run 37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
+workflow 354880113, exact tested SHA `878de2a8b30e1ce0e3adf36fdba2859056bb4b86`,
+branch `codex/nested-source-foundation`. One required post-dispatch snapshot at
+**2026-10-07 06:11:26 UTC** records **in_progress**, conclusion null, Mac job
+**112657582469** in progress. Validate, historical macOS browser diagnostic and
+Phase 1G matrix jobs are all skipped as intended; no Windows execution. No subsequent
+model polling. Full API/dispatch/request/job/receipt evidence is retained locally in
+ignored `mac-corrected-qualification/`.
+
+One workflow dispatch is consumed. The existing one-build/one-native/one-SDK Mac
+allowance is exclusively reserved to this run, with original hard caps 20/5/10
+minutes and zero retries. Prior cumulative Windows **2/2/3**, Mac **2/2/2**;
+per-operation dispatch markers/results from the artifact must determine exact updated
+Mac counts. A workflow request is not a claim that all three commands have executed.
+No local expensive execution or second executor is selected. Preserve any skipped,
+failed/cancelled/partial result and do not renew the allowance automatically.
+
+State is **awaiting_ci**, not completed/accepted. Stop model polling and resume this
+same chat on the user's command. Then inspect this recorded run/attempt and relevant
+ref/worktree changes once. If still pending, wait again without a loop. If terminal,
+download `source-foundation-macos-37580108751-1` before its seven-day expiry, verify
+its evidence index/all 139 exact input copies, SHA/run identities, ARM64 release/test
+binaries, one terminal report/all 33 exact checks/extension-complete/external writer,
+EOF-before/produced source/owner arrays, true/false six actual assertions each and
+real rejecting wrong-outcome/cleanup/counts. Continue only remaining authorized audit;
+resume is not permission for retry, another run, source correction, merge or release.
+Raw Windows input/evidence ZIP transfer/member verification remains a separate
+unresolved gap; do not declare requested two-target qualification or acceptance complete.
+No autonomous Goal is active in this chat and no runtime-pause control is claimed.
+
+
+**Mac-only Actions failure audit and explicitly authorized setup correction — 2026-10-07:**
+The user resumed run 37580108751 and then explicitly instructed: “You can find and
+fix the issues, then run another dispatch.” This authorizes ONE additional Mac-only
+workflow dispatch after the concrete correction; no automatic renewal, full matrix,
+Windows execution or app-input change. The original per-operation allowance remains
+entirely unused and is reassigned exclusively to that additional run, caps
+**1,200/300/600 seconds** for one release no-bundle build/native launch/exact SDK gate.
+
+Audited [37580108751/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37580108751),
+workflow 354880113, Mac job 112657582469, exact tested SHA
+`878de2a8b30e1ce0e3adf36fdba2859056bb4b86`; terminal **failure** at
+2026-10-07 06:11:33 UTC. Checkout/frozen-input guard, Node/npm install, pinned Rust
+selection and cached SDK retrieval passed. Cheap-preflight failed at the helper's
+`rustc --version` assertion: that subprocess used repository-root cwd, outside
+`app/rust-toolchain.toml`. Runner cache output confirms Rust 1.90.0 ARM64 was present;
+Rust selection from `app/` succeeded. This is qualification setup failure, not an
+application or source-foundation failure. Core preflight, release build, native launch
+and SDK gate never dispatched. Existing validator/matrix/diagnostic jobs all skipped;
+no Windows execution.
+
+Downloaded artifact **11464785180**, `source-foundation-macos-37580108751-1`, 588 bytes,
+SHA-256 `9a90b0c9ea231bb368aa31a42fb2c0875c69cd665b9ee51d4f29a7a4baca5d84` matches
+GitHub digest. Staged extraction passed entry containment/link checks. Its only evidence
+member `terminal.json` hashes to
+`ac489e4ee8dc952b0669bce5cf91e08375a57f13b61e95b8700d8482428e379d`, exactly matching
+`evidence-sha256.json`. Terminal records qualification false, new dispatches **0/0/0**,
+cumulative Mac **2/2/2**, scratchRemoved true and twoTargetAcceptance false. Full logs
+ZIP SHA-256 `04f574fa4450cecce7cfe53da1be87c015e691b9e0e1d010e85193ae905db263`;
+full job/artifact API records, ZIPs, safely staged extracted logs and `audit.json` are
+preserved locally under ignored
+`mac-corrected-qualification/actions-audit-37580108751-1/`. No binary/native/SDK
+acceptance evidence exists for this failed attempt. Windows cumulative remains **2/2/3**.
+Workflow dispatches consumed **one**; the next approved request is the **second** total.
+
+Correction is limited to `scripts/qualify-source-foundation-macos.py`: all pinned tool
+inspection subprocesses now use `cwd=ROOT / "app"`, matching every existing bounded
+build/test subprocess and the workflow's Rust selection step. Before assertions the
+helper retains/prints exact Node/npm/Rust/Cargo/Rustup versions. Assertions still require
+Node 24.19.0, npm 11.9.0, Rust/Cargo 1.90.0 and ARM64 Rustup. No version fallback or
+weakened gate. Existing local pinned tools pass the corrected inspection; with
+RUSTUP_TOOLCHAIN removed, the existing Rustup independently resolves the pinned app TOML
+and reports 1.90.0 ARM64. Python syntax, frozen-input audit and all **23** original
+Mac evidence hashes pass; all **139** app/test/probe hashes still match final digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Unchanged eight-test core/EOF, three-test renderer and rejecting audit proof is reused.
+Repository validator PASS (364 files), Actions lint PASS and whitespace PASS.
+
+Publish the coherent correction/failure record to the same branch, verify exact published
+SHA and zero existing runs at that SHA, record exclusive second-dispatch marker/request/
+allowance before one workflow 354880113 request with ONLY source_foundation_macos true.
+Use a NEW run/attempt 1, preserving failed run 37580108751/1; do not rerun that attempt.
+Capture confirmed identity and pause manually in this same chat. Audit its actual
+operation markers/results after user resume. Remaining raw Windows ZIP transfer/member
+verification is still unresolved and no two-target qualification/acceptance is claimed.
+
+
+**Corrected Mac-only additional dispatch confirmed / manual wait — 2026-10-07:**
+Published correction checkpoint **`1ac80686bb96acda20fb56ecdc518a68a91b1809`** verified
+against fresh remote source ref. Every one of 139 committed input blobs matches final
+digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Fresh query found zero workflow 354880113 runs at this SHA. Before ONE request, exclusive
+`actions-second-dispatch/one-request-marker.json` and `published-selection.json` record
+user approval, exact input SHA/digest/commands, unused allowance/caps, cumulative counts,
+workflow dispatch ordinal **2** and zero further retries. Request uses ONLY
+source_foundation_macos true, all three other inputs false. Successful request returned
+no body; ONE follow-up candidate query confirmed exactly one matching new run, without
+repeating dispatch. Failed run 37580108751/1 and original Mac failures remain preserved.
+
+Confirmed [run **37581016311/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311),
+workflow **354880113**, branch `codex/nested-source-foundation`, exact tested SHA
+`1ac80686bb96acda20fb56ecdc518a68a91b1809`, Mac job **112660446339**.
+Run snapshot **2026-10-07 06:21:14 UTC**, job snapshot **06:21:24 UTC**: **in_progress**,
+conclusion null. Existing matrix, repository validator and macOS browser diagnostic
+jobs completed/skipped; Windows is not executed. Artifact expected
+`source-foundation-macos-37581016311-1`, seven-day retention. Full request/stdout/stderr/
+run/job/selection/marker/receipt evidence is locally retained under ignored
+`mac-corrected-qualification/actions-second-dispatch/`.
+
+Two workflow dispatches consumed; per-operation cumulative remains Windows **2/2/3**,
+Mac **2/2/2** until actual new markers are audited. Existing unused Mac **one/one/one**
+build/native/SDK allowance is exclusively assigned to this run, caps **20/5/10 minutes**.
+No duplicate request, future automatic retry, local execution or second executor.
+The commit carrying this continuation is a later status-only successor with unchanged
+workflow/helper/app inputs. State **awaiting_ci**, qualification/acceptance incomplete.
+Stop model polling; resume this same chat with “Resume and audit run 37581016311.”
+Then inspect the recorded run/attempt once, download and strictly audit required evidence
+if terminal, or wait again if pending. Preserve any failure, count actual dispatches
+regardless of outcome, and reassess without another execution. Raw original Windows
+archive transfer/member audit remains unresolved and is not waived. No autonomous Goal
+or verified runtime-pause control is claimed.
+
+
+**Corrected Mac ARM64 terminal evidence audit — 2026-10-07:**
+User resumed only recorded [run **37581016311/1**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311).
+Workflow **354880113**, Mac job **112660446339**, branch `codex/nested-source-foundation`,
+exact tested SHA **`1ac80686bb96acda20fb56ecdc518a68a91b1809`** match the pre-dispatch
+selection. Run terminal **success** at **2026-10-07 06:32:11 UTC**. Only Mac job ran;
+all three historical validator/matrix/browser diagnostic jobs skipped. No Windows
+execution, duplicate request or retry. Fresh local/remote source checkpoint `3ec9105`
+was unchanged and clean on resume; historical planning worktree remains untouched.
+
+Downloaded artifact **11464029580**, `source-foundation-macos-37581016311-1`,
+**14,546,223 bytes**, SHA-256
+`879dea0bd7df572b08f28ca09a240589075f9813ba95991f8263905a1982b830`, matching GitHub
+metadata/digest, run/branch/tested SHA and unexpired retention (2026-10-14 06:31:12 UTC).
+Archive entries passed relative containment, duplicate and unsupported-link checks
+before staged extraction. All **905** indexed retained files match their SHA-256,
+with no extra/missing files. Evidence-index hash
+`207bb447ba9d469b5eef0539338708df1c51212e706539018317237228be24cc`.
+Full workflow logs ZIP SHA-256
+`b2e310c9d861d0f879bba4cdf55fc6a55300e5e0b50842be49d0a72178b5dd83`.
+Raw API records, ZIPs, extracted artifact/logs and independent `audit.json` are retained
+under ignored `mac-corrected-qualification/actions-audit-37581016311-1/`.
+All **139** retained exact-input copies, current working files and exact tested commit
+blobs independently match the portable final manifest and digest
+**`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`**.
+All **23** original Mac evidence files remain unchanged; earlier failures/superseded
+bytes/named stash remain preserved. Frozen app/test/probe inputs were not modified.
+
+Pinned Node **24.19.0**, npm **11.9.0**, Rust/Cargo **1.90.0**, Rustup ARM64 app-TOML
+selection and host macOS **26.6.2 ARM64** are retained. Official SDK archive hash remains
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`; prepare succeeded
+only after exact archive verification. Cheap actual Mac core/EOF preflight **8 PASS,
+1 deliberately ignored SDK wrapper**, 236 filtered out, 43.488s wrapper / 4.51s tests;
+exact non-SDK EOF fixture executed and passed. Renderer **3 PASS**, typecheck, renderer
+compilation and extended-probe syntax pass. Missing/ignored wrapper is not reused as
+SDK evidence; the exact ignored SDK gate separately executed below.
+
+Actual expensive dispatch markers were written before execution, each once, exact
+commands matching recorded selection, retries 0; results show exit 0/no timeout:
+
+| Mac operation | Exact selection | Duration / hard cap | Audited result |
+| --- | --- | --- | --- |
+| Release build | `npm exec -- tauri build --no-bundle -- --locked` from app | 295.604s / 1,200s | PASS; exact ARM64 executable retained |
+| Native | Existing `run-runtime-ui-probes.py`, retained executable, ONLY `source-foundation` | 11.477s / 300s; runner 11.304s | PASS; all 33 exact checks, one terminal report |
+| SDK | `cargo test -p loomlight-core --locked renpy::tests::source_foundation::source_foundation_bool_sdk_gate -- --ignored --exact --nocapture` from app | 194.514s / 600s; test 193.19s | PASS; 1 selected test, 0 ignored, 244 filtered out |
+
+Retained release executable **13,960,704 bytes**, SHA-256
+`ff70cec37e8de3357d2fd5aec5dd7466033dd29bc8c050e338532d962e37ddb8`;
+actual SDK test executable SHA-256
+`8170673ac4ad85f5463f3f25a8e2d64009b5992a3b86150c77657e999156bb5a`.
+Both hashes and actual retained Mach-O ARM64 architecture independently verified.
+
+Native raw log has exactly one external-ready checkpoint and one terminal packaged
+source-foundation report. Ordered check list exactly equals all **33** final checks,
+retaining the original eleven plus root move/drag and Otherwise/body-trivia insertion
+refusals, safe edits outside group, stable child IDs/owners, EOF append/Undo/Redo/reopen,
+exact retained Story/Source drafts, and normal shell close/reopen after external refusal.
+`extendedChecksComplete=true`, stage complete, externalErrors empty, cleanupComplete
+true. Runner-owned external write verified from retained final source: stripping exactly
+`# ordinary external writer` and newline reproduces before hash
+`9f883355125a6b76bbdae0d2c625c2cbfa97564a5d2ff7f7036c781987aa623d`; final hash is
+`292848afe1e4f7501209df1e73261057fc524a765df4da9056e1691c94465722`.
+One external-written marker is retained. Contained native profile was retained then
+removed; no live scratch/profile remains in artifact; terminal scratchRemoved true.
+
+SDK raw cases independently audited, not merely its green Rust wrapper. **true/false**
+each exit **0**, Status PASSED, route marker present and **six actual assertions, six
+passed, zero failed/xfailed/xpassed**. **wrong-outcome** exit **1**, Status FAILED and
+real AssertionError, with **two assertions / one passed / one failed**, no
+`SOURCE_FOUNDATION_ROUTE wrong-outcome` success marker. Frozen test code invokes the
+real corrected EOF root-append action, writes its accepted result, then asserts unchanged
+scene bytes after every SDK case; actual route assertions reach Foundation continuation
+and verify the opaque Python neighbor. EOF-before is unterminated; produced bytes are
+exactly before plus CRLF + indented continuation + CRLF. Two distinct children retain
+identical before/after IDs, one group and distinct branches. Retained source/owner hashes:
+
+- EOF before: `31f4fc121e308a5fb1735c126837bc9a957447afbd25b5d089c520af1e1b4347`
+- EOF produced: `c0fa5ab8035c3c1a84924952e8e4ad03268208c2135b063c6400a1295c2b9a8c`
+- EOF owners: `edc9bf7a465f632ca60b2e04776c6ff55d7b9945bfbdde350d164244772c68bd`
+
+Mac generated fixture hash differs from the recorded Windows hash. Fresh projects
+generate per-instance technical scene labels/identities, so produced-source hashes are
+per-instance evidence. Mac bytes are retained/audited; a byte-for-byte comparison with
+raw Windows source is unavailable until transfer. Frozen input hashes remain identical. SDK terminal reports exactly one
+PASS/cleanup true; exact Rust test passes only after its contained temporary tree is
+removed. Native and SDK cleanup plus outer scratch retention/removal all pass.
+
+**Both target results/counts:** final-input Mac ARM64 gates **PASS, raw evidence audited**;
+Windows x64 previously recorded **PASS**, reused unchanged (build55.078s, native33
+13.312s, SDK108.359s; true/false six assertions each and wrong-outcome exit1/FAILED).
+Windows release/test/EOF hashes remain respectively
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`,
+`5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`,
+`d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`.
+Count each new dispatch: Mac now **3 builds / 3 native launches / 3 SDK gates**;
+Windows remains **2/2/3**. Both workflow dispatches consumed; first setup failure
+37580108751/1 added **0/0/0**, second added **1/1/1**. Remaining Mac expensive allowance
+**0/0/0**; no further dispatch/retry/installation or second executor is authorized.
+
+**Remaining blocker:** original Windows corrected input/evidence ZIPs still have not
+been directly transferred or member-verified on Mac. Expected archive hashes remain
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2` and
+`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
+The published 139-input receipt/committed blobs are not the missing raw transfer.
+Hosted Mac approval did not waive that requirement. Therefore the requested overall
+two-target qualification/acceptance is **INCOMPLETE**, despite passing Mac execution.
+No pending CI operation remains. Next work is direct archive access/transfer/hash/member
+audit without any new qualification execution; no merge/release/provider/following work.
+
+
+**User removes optional cross-machine transfer / qualified checkpoint complete — 2026-10-07:**
+After confirming Windows was already verified by its original agent, the user asked
+whether transferring its raw archives had a practical benefit and explained that the
+requirement came from an agent-generated prompt. The owner explained its archival/
+independent-audit benefit and recommended removing it as an acceptance blocker. The
+user explicitly agreed: “excellent, lets forgot about that then. Whats the next goal
+and prompt?” This supersedes the earlier transfer prerequisite. It does not claim the
+ZIPs were copied or their members independently re-audited on Mac. Original Windows
+raw evidence remains preserved on Windows; that agent's verified result and portable
+final-input receipt are reused unchanged. Optional archive consolidation can remain
+housekeeping, with no new execution or evidence-transfer task selected.
+
+**Result:** corrected bounded source-foundation two-target qualification **COMPLETE**;
+accepted as the section 21 checkpoint, ready for integration. All139 final-input hashes
+match digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Windows PASS at `a49e536` and independently audited Mac PASS at run37581016311/1,
+exact tested `1ac80686bb96acda20fb56ecdc518a68a91b1809`, retain all33 native checks,
+actual six-assertion true/false SDK routes, rejecting wrong-outcome and cleanup evidence.
+All original/superseded failures remain. Cumulative build/native/SDK Windows **2/2/3**,
+Mac **3/3/3**; remaining expensive allowance **0/0/0**. No retry/build/native/SDK,
+provider/AI, merge or release occurred in this documentation closure.
+
+**Next proposed goal, not started:** review and integrate the qualified source branch
+into main through a PR, preserving exact139 qualified app/test/probe hashes and reusing
+recorded independent source review/target evidence. Fresh Git confirms source branch
+`4de9939`, main `aba200f`, no existing source-branch PR. Inspect the final diff and
+current policy, create/reuse PR, require normal lightweight quality checks, merge only
+if review/checks pass, verify main's qualified input equivalence, close the bounded
+ledger/status and return the **2A.0 provider qualification** prompt. This prompt only
+selects the integration outcome when the user uses it; no merge is authorized by asking
+for a next prompt. No fresh independent review mandate is introduced; review actual
+remaining delta against the already recorded source review.
+
+Current workflow audit: `production-scaffold.yml` is **manual-only**, despite older
+TESTING wording describing production main-push execution. `quality.yml` executes
+lightweight validator/Q1 rejection/retention/selector gates on PR/main; expensive
+source-foundation/profile/diagnostic jobs require explicit manual inputs. Therefore
+proposed integration can use normal PR/main checks with **zero** new release/native/SDK
+or manual workflow dispatches. Recheck actual workflows/policy at integration entry;
+never bypass required checks or silently start a duplicate matrix. This documentation
+closure corrects the stale TESTING cadence sentence to match the executable workflow.
+Canonical scope/ADR status are reconciled now; provider feasibility/credentials/request
+implementation remains unstarted and is a distinct next goal after integration.
+
+Closure verification: repository structure/text/privacy/link validator PASS (364 files),
+whitespace PASS, documentation-only scope review PASS; all139 frozen inputs and original23
+Mac evidence files remain unchanged. No application or qualification command rerun.

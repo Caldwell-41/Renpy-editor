@@ -28,6 +28,17 @@ label `main`, and names only `allow-loomlight-core`; no general Tauri filesystem
 shell/process, HTTP, opener, or credential plugin is present. Git, credentials, and
 network providers remain unavailable to renderer operations.
 
+## Planned Phase 2 persistence boundary
+
+[ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) selects device-local
+`ai-profiles.json`, native OS-store keys or explicit backend-memory session keys, and
+project `ai.json`/`references.json` under `.renpy-editor/`. Project changes use existing
+metadata transaction/history; profiles use safe device-local replacement. OS-store/
+profile writes have recoverable ordering, not cross-store atomicity. Request code
+injects authentication; renderer IPC carries opaque references/status only. Prompts,
+reference prose and raw replies stay out of routine diagnostics and game builds.
+This is future design; Phase 1 exposes no provider/credential operation.
+
 ## System boundaries
 
 ```mermaid
@@ -263,6 +274,15 @@ inserted or patched only after every relevant mapping and the expected file revi
 are verified; unrelated/unsupported bytes, Unicode, formatting, and line endings remain
 untouched. This recognizer is intentionally not a general Ren'Py parser. Phase 1F
 reuses it for bounded Source mapping and leaves all unproved syntax visibly opaque.
+
+The bounded source foundation adds a declared-bool If/Otherwise outline with direct
+dialogue children on source-map v3. `updateChildDialogue` verifies revision and explicit
+group/branch ownership, then patches only the existing quoted text through the same
+transaction/history service. Root mutations refuse nested child targets, movement
+ranges containing children and insertion inside a group's headers/body trivia. Structural
+rows stay read-only, unsupported bodies stay opaque, and preview does not infer a
+branch route. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) owns the migration
+and minimal preparation contract; full condition/call semantics remain planned.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
