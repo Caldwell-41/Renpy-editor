@@ -93,3 +93,15 @@ exact payload dispatch, source acceptance and persistence require real implement
 checks. No configured project LLM provider was contacted or capability qualified; only the
 built-in image-generation tool was used. Mockups are not runtime,
 accessibility or target acceptance evidence.
+
+## Approved first remembered Studio slice
+
+[Remembered Studio profile](studio-remembered-profile-light-v1.png) was generated
+with the built-in imagegen tool and approved by the user on 2026-10-08. Its
+[prompt](studio-remembered-profile-light-v1.txt) uses the earlier AI settings image
+as a structural/theme reference. This bounded slice excludes project prompts,
+generation tests and generic/session modes. The implemented Settings dialog keeps
+its existing Application tabs/category rail; native secure entry stays outside the
+WebView. Exact model ID text plus discovery choices replaces the illustrative loaded
+model dropdown. Shared paper/teal and charcoal/copper tokens govern actual controls;
+images are concepts, not provider or native proof.

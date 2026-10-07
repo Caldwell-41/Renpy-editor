@@ -26,9 +26,9 @@ and asset-ID media presentation. Every operation is schema checked and session b
 in core. The capability is local, scoped to WebView
 label `main`, and names only `allow-loomlight-core`; no general Tauri filesystem,
 shell/process, HTTP, opener, or credential plugin is present. Git, credentials, and
-network providers remain unavailable to renderer operations.
+network providers have no general renderer API. The bounded Studio settings commands below return redacted state only.
 
-## Planned Phase 2 persistence boundary
+## Phase 2 persistence boundary
 
 [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) selects device-local
 `ai-profiles.json`, native OS-store keys or explicit backend-memory session keys, and
@@ -37,21 +37,41 @@ metadata transaction/history; profiles use safe device-local replacement. OS-sto
 profile writes have recoverable ordering, not cross-store atomicity. Request code
 injects authentication; renderer IPC carries opaque references/status only. Prompts,
 reference prose and raw replies stay out of routine diagnostics and game builds.
-This is future design; Phase 1 exposes no provider/credential operation.
+The broader design remains planned; the selected remembered Studio slice below is implemented on Mac.
 The Studio-scoped accepted [request/credential/transport contract](adr/0013-provider-request-and-transport-contract.md)
 adds concrete origin binding, immutable send snapshots, schema/tool rejection and
 cancellable bounded transport. Its isolated deterministic spike is not production
 integration or live provider qualification; the Phase 2 ledger owns missing evidence.
 
-The first 2A.1 slice has portable preparation in core `ai_profiles`: bounded strict
-Studio records, canonical endpoints, private-HTTP opt-in, origin binding and opaque
-active/cleanup references. `LifecycleService` reads/safely replaces the device record
-without native access or networking; a full prior-record comparison refuses ordinary
-external edits, including edits retaining the revision. Malformed/newer records are
-retained and refused. These APIs are not exposed through IPC/settings yet. A native
-owner must reconcile post-rename save errors before deleting any referenced entry;
-safe file replacement is not cross-store atomicity. Native entry, store, discovery and
-replacement/removal remain incomplete; finish local work before the recorded host handoff.
+The first 2A.1 Studio slice uses strict core `ai_profiles` records and
+`ai_credentials` lifecycle ordering. `LifecycleService` reads/replaces the device
+record without native access or networking. Full-record comparison and a renderer
+snapshot digest refuse stale/external edits, including unchanged revisions; malformed
+or newer records remain intact. Cleanup ownership is durable before OS addition;
+replacement publishes before retiring the prior entry; removal unpublishes/disables
+before deletion. Uncertain post-rename saves are reread before any cleanup. Failed
+cleanup retains its opaque reference for an explicit retry, without cross-store
+atomicity claims.
+
+The desktop `ai_settings` owner exposes schema-checked profile read/save, native
+entry, owned removal/cleanup and explicit discovery through the existing main-window
+core envelope. macOS `ai_native` uses AppKit secure native text entry and a stable
+`app.loomlight.desktop.ai.v1` Keychain namespace with synchronization disabled.
+Keys never enter a serializable request/response/record. Windows native store/entry
+is an explicit unavailable seam until the next-host implementation/proof. No
+plaintext fallback, session mode, generic provider or generation is exposed.
+
+`ai_discovery` sends one explicit authenticated `/models` GET, with a 15-second
+whole-call bound, 128 KiB JSON body, 32-level nesting and 256 model-ID limits. It
+rejects duplicate JSON keys/model IDs and invalid IDs. A checked resolver validates
+all returned HTTP addresses and connects to that address set while retaining HTTPS
+hostname/TLS verification. Ambient proxies, redirects and automatic application
+retries are disabled. Network work runs outside the project service checkout, so it
+does not own the authoring/Save lock. Availability evidence is transient and bound
+to the full saved configuration/credential revision; stale results are discarded.
+Discovery does not qualify generation or maximum context capacity. The
+[Mac implementation ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
+owns actual proof, budgets and remaining Windows/OS identity limitations.
 
 ## System boundaries
 

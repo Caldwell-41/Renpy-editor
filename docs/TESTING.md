@@ -779,16 +779,24 @@ an actual provider or production/native credentials. The [existing 2A.0 ledger](
 owns explicit endpoint/model access, finite live probes and separate unknown results;
 no native build, SDK run or CI dispatch is required for this outcome.
 
-The first Studio 2A.1 record preparation uses
-`cargo test -p loomlight-core --locked ai_profiles::tests`. It covers actual core
-save/reopen, stale/external-write refusal, malformed/newer/unknown/oversized record
-retention, endpoint policy, origin invalidation and cleanup-reference uniqueness.
-It neither invokes an OS credential store nor qualifies native entry/readiness or
-replacement/removal. The [slice ledger](tasks/active/phase-2-initial-llm-assistance.md#first-studio-settingscredential-slice--2026-10-08)
-owns the two builds/two targeted runs per OS and four combined Studio discovery GET
-caps; no package/native request has been launched. Windows evidence remains outstanding;
-finish Mac work before branch handoff under WORKFLOW. No generation, CI, SDK or full
-matrix is selected.
+The first Studio 2A.1 remembered-profile slice uses
+`cargo test -p loomlight-core --locked ai_`, desktop checks/tests and `npm run check`.
+The core selector retains record/external-write/endpoint tests and adds native-store
+failure seams, durable staging, publish-before-retire, disable-before-delete,
+post-rename reconciliation, retained cleanup and strict discovery parser boundaries.
+`node tests/studio-settings.browser.mjs` exercises actual Settings controls with a
+mock bridge: no default discovery, explicit saved actions, invalidation, secret-free
+payloads and both themes/wide/compact screenshots. This is browser evidence only.
+The explicit packaged `studio-settings` probe uses a disposable application-data root
+and native secure-entry actions, then a second process reopens it and checks explicit
+production discovery/removal. The test-only Mac qualification-reuse seam is enabled
+only in that isolated fixture, returns booleans, and preserves the original entry.
+Keep native access prompts separate from unavailable-store controlled fixtures;
+do not change login Keychain security to manufacture a passing test.
+The [Mac slice ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
+owns actual launches, failures, two builds/two targeted runs per OS and four combined
+Studio GET caps. Windows native adapter/entry/proof remains outstanding. No generation,
+CI, SDK or full matrix is selected; no automatic retry or allowance renewal at handoff.
 
 Spike and CI results record exact command, OS/architecture, dependency and SDK
 versions, fixture revision, outcome, timings where relevant, and known exclusions. A

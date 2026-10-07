@@ -1,6 +1,6 @@
 # ADR 0011: AI settings, secrets and reference storage
 
-**Status:** Accepted design; bounded Studio profile-record preparation started, native implementation/qualification incomplete.
+**Status:** Accepted design; bounded Studio remembered-profile/Mac native implementation present; Windows and both-target qualification incomplete.
 **Date:** 2026-10-07.
 **Authority:** the user selected project-local prompts, native references with basic
 scope/notes, localhost/LAN/HTTPS and adaptive helpers; accepted the omission/credential

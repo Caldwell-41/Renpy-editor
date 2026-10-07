@@ -3398,3 +3398,98 @@ preparation and qualification work remain unchanged. Its focused core checks wer
 rerun: **5 PASS, 0 FAIL, 0 ignored**; qualification fixtures **61 PASS**. No native/package/provider/SDK/manual-CI operation occurred;
 no expensive allowance was consumed. Documentation/privacy/link validation and whitespace
 checks apply to publication; HANDOVER identifies the published preparation checkpoint.
+
+### Mac implementation and native proof — 2026-10-08
+
+**Selection/entry:** continued the same Studio 2A.1 remembered-profile slice from
+published `877e5d55fad50865bded4e4edc417f45c7ea4859`; fetch/fast-forward confirmed
+up to date and clean. Historical worktrees, stash, qualification key and evidence
+retained. No helper, Windows-access request, generation or next feature. User
+approved a new imagegen Settings mockup in this thread; existing Settings shell,
+shared palettes and written rules take precedence over generated shell details.
+
+**Implementation in progress:** transactional remembered-key staging/switch/removal,
+retained cleanup and post-rename reconciliation; Mac native secure entry and
+non-synchronized Keychain adapter; narrow redacted settings IPC; explicit bounded
+GET discovery without ambient proxy/redirects; revision-bound transient availability;
+shared-theme Settings controls. Windows adapter/secure entry remains an explicit
+next-host seam, unavailable rather than a plaintext fallback.
+
+**Focused checkpoint:** 12 core checks PASS (5 retained records, 6 new lifecycle
+failures/action boundaries, 1 strict discovery parser). Desktop check/typecheck PASS.
+Initial frontend run exposed the historical exact operation allowlist fixture;
+updated its exact list and retained rejection of arbitrary host/secret/generation
+operations. Initial browser launch could not bind loopback inside the sandbox;
+rerun uses approved local preview execution, not a product correction.
+
+**Reserved next operation:** Mac package build 1 of 2, then targeted native run 1
+of 2 with disposable device records and synthetic secure native input. Run 1
+preserves its remembered test entry for process-reopen run 2; host-owned cleanup
+is required afterward. No discovery or provider request in run 1. Run 2 is planned
+to privately reuse the existing same-host qualification key without re-entry,
+change/removal/export of its original entry, and send at most one explicit Studio
+GET through the production adapter. Record actual sends before/after launch; no
+automatic retry. Windows allowance remains 2 builds/2 runs; four combined GETs
+remain before any actual discovery dispatch. Final results/inputs follow here.
+
+**Build attempt 1:** frontend production build completed, but the package command
+`npm exec -- tauri build -- --locked --bundles app` passed `--bundles` to Cargo
+and exited 1 before Rust compilation/package creation. Classification: invocation
+error, not product/runtime failure. Retained `mac-build-1.log`. Conservatively
+charged as build 1 of 2; one Mac build remains. Correct command for build 2:
+`npm exec -- tauri build --bundles app -- --locked`. No native run/GET occurred.
+Additional self-review added a rejecting reconciliation-unavailable fixture and
+32-level discovery nesting bound: final focused core 13 PASS. Frontend 97 PASS;
+focused browser PASS with wide/compact light/dark screenshots visually reviewed.
+
+**Mac build 2 / native run 1:** corrected app-only package build PASS (release
+compile 22.68 s); both Mac build attempts now consumed, no build remains. Packaged
+executable SHA-256 `c5619a9a0049b930d5363cbe9eab5080ec23e9f21bd8487e7977b2015b503b6a`,
+97 source/config input hashes and aggregate digest recorded locally (final audit
+will verify count/digest). Native secure text-field actions were driven through
+macOS accessibility with disposable synthetic values; no real key was typed or
+returned through WebView IPC. Native run 1 retains its owned test entry/records
+for the second process-reopen run. No discovery GET yet.
+
+**Reserved next operation:** native Mac run 2 of 2, same package and disposable
+root. Reserve one Studio GET (15 s + 2 s cleanup, conservative 17 s charge) through
+the explicit Refresh models action, with private same-host reuse of the existing
+qualification key; preserve/recheck the original. No automatic retry. After this
+reservation: at most 3 combined GETs and provider 17 HTTP/4 generations/326 s
+remain if the reserved send occurs. Windows retains 2 builds/2 targeted native
+runs; Mac native allowance will be exhausted by the launch.
+
+**Native run 1 final:** 9 checks PASS, process exit 0, 36.725 s, owned runtime
+cleanup confirmed. Actual native secure field entry/replacement/cancel, status IPC,
+changed limits, Settings reopen and renderer-key injection refusal passed. The
+remembered entry was retained deliberately for process-reopen proof.
+
+**Native run 2 failure:** the second process displayed the retained configured
+credential and response default 768, then the fixture's first read of the original
+qualification entry raised macOS Keychain authorization. Computer Use refuses
+SecurityAgent; the agent requested only user handling of that native OS login/access
+step, not provider-key re-entry or routine test execution. The user reported Allow,
+but the 300-second native watchdog had already recorded FAIL/timeout and runtime
+cleanup; the Python launcher also retained its `TimeoutExpired` failure. No pass or
+automatic retry. Disposable records remain at the original synthetic endpoint/model,
+revision 4 with one owned remembered entry and no cleanup reference; therefore the
+fixture never reached import/save or discovery. **0 GETs sent**, all four remain;
+provider budget unchanged at 22 HTTP/16 generations consumed, 18 HTTP/4 generations/
+343 s remaining. The GET reservation is unsent, not a charge. Original Studio receipt
+hash remains `44027a6cfb0a74d9be7f629c77ec7f5131a1145a34cc3446f9c0dc27fe669f92`.
+
+Both Mac builds/native launches are consumed (build 1 invocation FAIL, build 2 PASS;
+native 1 PASS, native 2 OS-auth timeout FAIL). Windows still has 2 builds/2 native
+runs. Requested a genuine budget decision: one extra Mac targeted run of the unchanged
+package, or publish partial Mac evidence with the unresolved gate explicitly retained.
+No extra launch is authorised by the OS Allow response alone. No code changed since
+the package; all 97 input hashes match aggregate
+`ad4250456ab2a6f0ccc8177e10d284e10f8fe6395300977f1ece5a97f08d9f1e`.
+Retain disposable records/owned entry until that decision and perform owned cleanup
+without modifying the original qualification entry. No runtime Goal was created.
+
+**Explicit allowance extension:** after the recorded OS-auth timeout the user
+authorised **one extra Mac targeted native run** of the unchanged package. This
+grants run 3 only, no build/generation/GET-cap increase or automatic retry. Reserve
+run 3 and one still-unsent Studio GET within the original four combined GET cap.
+Windows allowance and provider cumulative budget remain unchanged until a send.

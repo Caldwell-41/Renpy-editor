@@ -1,3 +1,5 @@
+pub mod ai_credentials;
+pub mod ai_discovery;
 pub mod ai_profiles;
 pub mod authoring;
 pub mod dispatch;
@@ -33,6 +35,13 @@ pub const OPERATIONS: &[&str] = &[
     "system.version",
     "preferences.read",
     "preferences.write",
+    "ai.profiles",
+    "ai.saveProfile",
+    "ai.enterCredential",
+    "ai.removeCredential",
+    "ai.removeProfile",
+    "ai.cleanup",
+    "ai.discover",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",

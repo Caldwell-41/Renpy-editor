@@ -906,6 +906,22 @@ personal template library in v1. References show approved and proposed revisions
 stale/missing citations, basic Scene/route scope and written knowledge/spoiler notes.
 These are Phase 2 plans, not implemented Phase 1 controls.
 
+The first remembered Studio slice adds **Application → AI providers** within the
+existing Settings dialog. Choose a saved profile or New Studio profile, edit the
+name/base endpoint/exact model ID and token defaults, then **Save profile**.
+Configured capacity stays explicitly unverified. Private-network HTTP needs a
+separate unencrypted-transport opt-in; saving or opening Settings never discovers
+models. Native Enter/Replace credential returns status only; removal explains that
+it does not revoke the provider key. Failed cleanup has a visible explicit retry.
+**Refresh models** performs one authenticated GET for the saved configuration;
+unsaved edits disable it and saved revision changes invalidate availability.
+The status says discovery only, without implying generation readiness or capacity.
+The Mac native adapter is implemented; Windows and both-target acceptance remain
+pending. Session/no-auth/generic/project prompts remain outside this slice. The
+[approved remembered-profile mockup](design/phase-2-llm/studio-remembered-profile-light-v1.png)
+is a visual reference, not native/provider evidence; shared theme tokens and the
+existing shell determine light/dark/compact behavior.
+
 ## Resolution and accessibility checks
 
 - Author at project resolution (default `1920×1080`) while previewing alternative

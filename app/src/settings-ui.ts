@@ -1,5 +1,6 @@
 import { preferenceError, readPreferences, subscribePreferences, updatePreferences } from "./preferences.ts";
 import { requestCore } from "./bridge.ts";
+import { mountStudioSettings } from "./ai-settings-ui.ts";
 interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void }
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text = "", className = ""): HTMLElementTagNameMap[K] { const el = document.createElement(tag); el.textContent = text; el.className = className; return el; }
 export function openSettings(context?: SettingsContext): void {
@@ -15,7 +16,7 @@ export function openSettings(context?: SettingsContext): void {
   scope.append(application,project);header.append(node("h1", "Settings"),scope,close);
   let applicationCategory="Workspace";
   const categorySelect=node("select","","settings-category-select");categorySelect.ariaLabel="Settings category";
-  const categories=["Workspace","Source editor","Keyboard shortcuts","About"];
+  const categories=["Workspace","Source editor","AI providers","Keyboard shortcuts","About"];
   categories.forEach(category=>{const option=node("option",category);option.value=category;categorySelect.append(option);});
   categorySelect.addEventListener("change",()=>draw(categorySelect.value));
   application.addEventListener("click",()=>draw(applicationCategory));project.addEventListener("click",()=>draw("Current project"));
@@ -52,6 +53,8 @@ export function openSettings(context?: SettingsContext): void {
       const reset = node("button", "Reset layout", "button"); reset.addEventListener("click", () => { void updatePreferences({layouts:{}}); window.dispatchEvent(new Event("loomlight-reset-layout")); }); row("Restore default layout", "Your project content and appearance preferences stay unchanged.", reset);
       content.append(node("h3","Source text"));row("Source text size","Adjust code text independently of the interface.",select([10,12,14,16,18,20,24].map(n=>[String(n),`${n} px`]),String(prefs.sourceFontSize),v=>void updatePreferences({sourceFontSize:Number(v)})));content.append(node("pre",'label start:\n    scene bg apartment_night\n    "Another long day…"',"source-sample"));
       const source=node("button","More Source editor preferences","text-button");source.addEventListener("click",()=>draw("Source editor"));content.append(source);
+    } else if (category === "AI providers") {
+      mountStudioSettings(content,footer);
     } else if (category === "Source editor") {
       row("Text size", "Change code text without changing the rest of the interface.", select([10,12,14,16,18,20,24].map(n => [String(n), `${n} px`]),String(prefs.sourceFontSize),v => void updatePreferences({sourceFontSize:Number(v)})));
       content.append(node("pre", 'label start:\n    scene bg apartment_night\n    "Another long day…"', "source-sample"));

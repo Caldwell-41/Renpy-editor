@@ -641,3 +641,11 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 /* Source-owned nested dialogue; structural controls remain read-only. */
 .beat-card.nested-dialogue { margin-inline-start: 1.5rem; border-inline-start: 3px solid var(--accent-primary); }
 .beat-card.conditional-branch .beat-select { font-weight: 600; }
+
+/* Studio settings use the shared palette and compact Settings layout. */
+.studio-settings { min-width: 0; }
+.studio-settings > select { width: 100%; margin-bottom: var(--space-3, 12px); }
+.studio-settings .setting-row input:not([type="checkbox"]) { width: min(100%, 320px); min-width: 0; }
+.studio-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.studio-settings p { overflow-wrap: anywhere; }
+@media (max-width: 700px) { .studio-settings .setting-row { flex-direction: column; align-items: stretch; } .studio-settings .setting-row input:not([type="checkbox"]) { width: 100%; } }

@@ -1,3 +1,5 @@
+mod ai_native;
+mod ai_settings;
 use loomlight_core::{
     dispatch::ApplicationHost, lifecycle::LifecycleService, validate_request, CoreResponse,
 };
@@ -137,6 +139,30 @@ fn core_request(
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
+    }
+    #[cfg(target_os = "macos")]
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
+        && request.get("operation").and_then(Value::as_str)
+            == Some("probe.studioReuseQualification")
+    {
+        if request.get("payload") != Some(&json!({})) {
+            return Err("Probe payload refused.");
+        }
+        let host = state
+            .0
+            .lock()
+            .map_err(|_| "Probe service unavailable.")?
+            .clone()
+            .ok_or("Probe service unavailable.")?;
+        let id = request
+            .get("requestId")
+            .and_then(Value::as_str)
+            .ok_or("Probe request ID missing.")?
+            .to_owned();
+        return Ok(match ai_settings::reuse_qualification(&host) {
+            Ok(value) => CoreResponse::success(id, value),
+            Err(message) => CoreResponse::failure(id, "STUDIO_PROBE_REFUSED", message),
+        });
     }
     // Read-only handshake: only the external native runner writes this fixed fixture.
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("source-foundation") {
@@ -317,6 +343,15 @@ fn core_request(
             .as_ref()
             .cloned()
             .ok_or("Desktop lifecycle state is unavailable.")?;
+        if operation.starts_with("ai.") {
+            return Ok(ai_settings::dispatch(
+                &app,
+                &host,
+                request_id,
+                &operation,
+                Value::Object(validated.payload.clone()),
+            ));
+        }
         if matches!(
             operation.as_str(),
             "project.chooseParent"
@@ -555,8 +590,11 @@ fn main() {
                 .map_err(|_| "application data path is unavailable")?;
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
-                if data.exists() { return Err("probe destination already exists".into()); }
-                if case == "source-foundation" {
+                if case == "studio-settings" {
+                    let data = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Studio probe root required")?);
+                    if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n| n.to_string_lossy().starts_with("loomlight-studio-")) { return Err("Studio probe root refused".into()); }
+                    LifecycleService::new(data).map_err(|_|"Studio probe initialization failed")?
+                } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "source-foundation" {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "branches-performance" | "branches-interactive" | "ui-refresh") {
                     LifecycleService::prepare_branches_ui_probe(data).map_err(std::io::Error::other)?
@@ -613,7 +651,10 @@ fn main() {
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(2));
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
-                    if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
+                    if case == "studio-settings" {
+                        main.show().expect("probe show"); main.set_focus().expect("probe focus");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
+                    } else if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("branches_ui_probe.js"))).expect("branches probe injection");
