@@ -1,11 +1,11 @@
 # Phase 2 — Initial LLM assistance
 
-**Planning date:** 2026-09-22; delivery sequencing reviewed 2026-10-02.
-**State:** detailed planning checkpoint; implementation not started or authorised.
-**User direction:** review and plan Phase 2 without touching existing Phase 1 work; add Unsloth Studio as a first-class provider and incorporate the reviewed suggestions.
+**Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
+**State:** provider/AI implementation not started; section 21 source foundation selected and implemented locally, target qualification incomplete.
+**User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
-**Isolation:** preserve Phase 1 code, tests, workflows and acceptance ledgers. The original September publication also left CURRENT/HANDOVER untouched. The October concurrent-planning branch adds only a short planning note there, preserving the active Phase 1 continuation; it does not claim or alter Phase 1 acceptance.
+**Isolation:** preserve unrelated work, accepted Phase 1 evidence, release identities and the historical planning worktree. CURRENT/HANDOVER record the source-foundation continuation and publication boundary. Earlier branch/publication instructions in historical planning records are superseded by section 23 and live HANDOVER; they are not pending operations.
 
 Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents),
 including plain interface language, optional technical help, completion/submission
@@ -68,7 +68,7 @@ One API-page reasoning example has contradictory prose/flag direction. Use the H
 | --- | --- |
 | U1 | Named Unsloth Studio provider, setup instructions and dedicated connection diagnostics. It is not presented as an untested generic preset. |
 | U2 | Accept the actual Studio endpoint; normalise an origin or /v1 base exactly once, preserve explicitly configured proxy prefixes, and reject ambiguous completion-path input with useful guidance. Never assume one fixed port or scan ports. |
-| U3 | Native secret entry; OS credential storage; core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
+| U3 | Native secret entry; OS-backed remembered or explicit app-session-only keys; core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
 | U4 | Explicit authenticated Refresh models; use returned IDs unchanged, keep friendly names separate, allow manual IDs when discovery is unavailable. Do not treat loaded models as a complete downloadable catalogue. |
 | U5 | Distinguish untested, ready, no loaded model, selected model unavailable, authentication failure, unreachable, busy, interrupted and unsupported capability. Only show loading/OOM/version claims when actual evidence supports them. |
 | U6 | JSON-schema output is the preferred tested mode. Validate a synthetic schema probe against the selected configuration; invalidate capability evidence after relevant changes. A capability test is evidence, not a proof of every future response. |
@@ -97,11 +97,51 @@ Candidate module boundaries, to confirm against accepted Phase 1 before coding:
 
 Keep existing HTTP infrastructure if it meets cancellation and streaming requirements. Add or change a dependency only after a documented gap/licence review; do not conduct a broad stack replacement.
 
-A provider profile stores a UUID, provider kind, label, canonical endpoint, optional selected model, credential reference, transport choice, capability evidence and bounded generation settings. Profiles/secrets are machine-local; project metadata may reference a non-secret logical profile without copying machine addresses or credentials. Moving a project requires resolving an unavailable profile explicitly.
+A provider profile stores a UUID, provider kind, label, canonical endpoint, optional selected model, authentication/storage mode, opaque credential reference, transport choice, capability evidence and bounded generation settings. Profiles and project-to-profile bindings are machine-local. Moving a project requires explicit profile selection and credential setup; project text never imports or activates an endpoint. [ADR 0011](../../adr/0011-ai-settings-secrets-and-reference-storage.md) records the accepted design, not implemented behavior.
 
-Credential entry, replace and delete use native controls. OS-store failure is actionable and cannot fall back to plaintext. Renderer sees only configured/missing/unavailable state. Key changes invalidate prepared sends. There is no read-secret IPC. Memory/swap/OS internals are not claimed perfectly secret.
+Credential entry, replace and delete use native controls. Offer **Remember on this
+computer** (OS store, default) and **Use for this app session** (backend memory only,
+cleared on app exit or explicit removal; no automatic fallback from a remembered key).
+A generic profile may choose **No authentication**; Studio requires its API key.
+Authenticated v1 profiles use Bearer keys, not arbitrary headers or OAuth. OS-store
+failure is actionable and cannot fall back to plaintext. Renderer sees only mode and
+configured/missing/unavailable state; there is no read-secret IPC. Key changes
+invalidate prepared sends. Never pass keys to Ren'Py, Git, subprocess environments,
+request previews or diagnostics. Memory/swap/OS internals are not claimed perfectly secret.
 
-Endpoint policy: permit HTTP on loopback; require verified TLS for ordinary non-loopback connections. Plain HTTP to a user-controlled private-network/VPN endpoint requires a distinct opt-in with clear transport disclosure, tested address classification and an ADR before implementation; never globally disable TLS verification. Show connection location and inference locality separately, including unknown. Do not infer confidentiality from a hostname. Reject credentials in URLs, unsupported schemes and unreviewed redirects; bind the credential to the exact reviewed origin. Explicitly govern proxies and DNS/address changes so credentials cannot be redirected silently. No endpoint is imported or activated from project/model text.
+### Storage ownership and credential lifecycle
+
+| Content | Planned location and contract |
+| --- | --- |
+| Profiles and device-local project bindings | Versioned `ai-profiles.json` under the existing application-data root; validated safe replacement, separate from UI preferences. Defaults/capability evidence bind to model/configuration. |
+| Remembered keys | macOS Keychain / Windows Credential Manager through the native adapter; stable application namespace and opaque profile/credential IDs. |
+| Session-only keys | Trusted backend memory, cleared on app exit/removal; no project/config/history persistence. Closing a project is not app exit; disclose the lifetime before entry. |
+| Bundled prompts | One versioned packaged prompts resource directory; no duplicate handler literals. |
+| Project prompts/style notes | Versioned `.renpy-editor/ai.json`, full override text plus baseline version/digest; existing metadata transaction/history/recovery. |
+| Cards/lore | Versioned `.renpy-editor/references.json`, shared record service with separate collections; section 9 owns the format. |
+| Prepared requests/replies | Memory-only; section 8 governs explicitly saved proposed references. |
+
+OS entries and profile files cannot share one filesystem transaction. Prepare a
+replacement key under a fresh opaque credential ID, then safely switch the validated
+profile reference. A failed profile write preserves the previous working reference
+and attempts cleanup of the new entry. Delete obsolete entries only after the switch.
+Report cleanup failures and retain their references for bounded retry. For removal,
+make the profile unusable for sends before deleting its owned OS entry; a failure
+retains a non-secret cleanup reference and reports incomplete removal. Apply the same
+publish-before-retire rule to session-key/mode replacement: a failed profile save retains
+the prior usable state. Never delete another profile's entry. Use deterministic failure fixtures, not a new transaction
+framework or hostile/crash programme.
+
+Local removal does not revoke a provider key; explain revocation separately. Project
+copies/backups contain no credentials. Key export, cloud sync and portable vaults are
+deferred. Specify native adapter persistence/access attributes to match machine-local
+storage; keep application/entry identifiers stable across updates and test namespaces
+separate. Qualify packaged reopen/update identity, retaining unsigned macOS prompt
+limits without requiring a signing purchase. The credential spike had no entry UI;
+it cannot qualify production entry/store/request/replace/delete behavior.
+
+
+Endpoint policy: permit loopback HTTP and verified HTTPS. Private-network/VPN HTTP is selected with distinct per-profile opt-in and unencrypted-transport disclosure; ADR 0011 records the choice. Test ordinary address classification and credential/redirect mistakes, reject non-private plaintext destinations, and never globally disable TLS verification. Show connection location and inference locality separately, including unknown. Do not infer confidentiality from a hostname. Reject credentials in URLs, unsupported schemes and unreviewed redirects; bind the credential to the exact reviewed origin. Explicitly govern proxies and DNS/address changes so credentials cannot be redirected silently. No endpoint is imported or activated from project/model text.
 
 Unsloth provider setup explains that Studio can inspect request content in its own monitor; Loomlight's log redaction does not control provider retention. A sensitive-content warning identifies remote/unknown inference or an intermediary service without content filtering.
 
@@ -162,8 +202,11 @@ Store editable task prompt resources in one versioned prompts directory; no dupl
 Expose the actual system/authoring instructions for each assistance action in Settings.
 Users can inspect and edit them, save project-local overrides, and choose **Restore
 baseline** for the selected prompt or explicitly for all prompts. Show the bundled
-baseline version and whether the current prompt is customized; app updates never
-silently overwrite saved customizations. Reset restores that version's bundled text
+baseline version and whether the current prompt is customized. Uncustomized prompts
+use the installed app's baseline; a changed version/digest appears on the next send
+review. Updates never overwrite custom text. Show its saved baseline version and allow
+comparison with the installed baseline. Restore baseline removes the override and
+restores the installed app's bundled text
 through the ordinary undoable metadata change path, leaving cards, lore, credentials
 and generation settings intact. Changing or resetting a prompt invalidates prepared
 sends and requires a fresh preview. Baseline prompts remain maintained in one versioned
@@ -175,6 +218,12 @@ system prompts. Core-owned schema, path, operation and transaction validation is
 visible as the response contract but is not disabled by editing prompt prose. Prompt
 editing does not introduce application-level content filtering. Protect unsaved prompt
 edits across navigation; persisted overrides and reset/undo survive normal reopen.
+
+Custom prompts belong to each Ren'Py game project, not this chat or a personal shared
+library. An override replaces that action's authoring prose; project style notes remain
+separately visible. V1 uses literal text and core-owned context assembly: no executable
+templates, recursive macros or card-supplied system-prompt overrides. Save/reset use
+project metadata history; editing prose cannot disable the response/operation contract.
 
 A prepared-send token binds the exact request body, profile/model/capability configuration, read-set revisions and disclosure. Send rechecks that token before dispatch. Relevant edits require rebuilding and reviewing; unrelated changes should not invalidate a provably unaffected request. Never rebuild silently after consent.
 
@@ -263,6 +312,41 @@ Saving a proposed fact is distinct from approving it. Only explicit approval ena
 
 Provide list/edit/filter/approve/reject/supersede controls for cards and lorebook entries with undo and reopen tests. Preserve unknown metadata fields, validate migrations and bound accepted data so it remains reloadable. Lore never changes runnable variables automatically and the game must remain runnable without this metadata.
 
+### Native format, scope and revision rules
+
+Use JSON with `schemaVersion`, `cards` and `loreEntries`; one service owns their IDs,
+revisions, approval, citations, migrations and undo. Shared records have a stable ID
+and revisions with revision ID, title, tags, status, provenance/citations, scope,
+optional supersession link and preserved extension data. Cards contain the descriptive
+fields above, optional runnable Character ID and linked lore IDs. Lore contains text,
+category, subject/entity links and knowledge notes. Relationships may link entity IDs
+with explanatory prose; missing links stay visible and do not cascade-delete content.
+
+V1 scope is project-wide, selected Scene IDs, or an explicit finite selected route
+retaining repeated visits. Scope aids author selection; it does not infer reachability
+or inject references silently. Use written knowledge/spoiler notes. Structured
+before/after variants, game-day/time validity, keyword/recursive injection and runtime
+knowledge inference are deferred. Only the reviewed approved revision is sent.
+An approved revision remains available while a replacement is proposed/reviewed,
+unless its own citations become stale. Rejection preserves the approved text; approval
+explicitly supersedes it. Existing history supports undo. Manual Save may explicitly
+approve the author's own text without an additional approval ritual.
+
+Before the 2B.1 editor, record concrete schema/fixtures for required/optional fields,
+IDs/links/scope, revision selection, string/record/file bounds, migrations and unknown
+fields. Derive bounds from existing metadata/reload and selected-context limits. Keep
+useful approved/proposed state in the document; history owns undo rather than an
+unbounded reply archive. A missing document means an empty library; malformed existing
+or unsupported newer data is retained with a diagnostic, never replaced as empty.
+Project AI/reference metadata is editor-only and excluded from game distributions.
+
+Research reviewed 2026-10-07: [Character Card V2](https://github.com/malfoyslastname/character-card-spec-v2),
+[V3](https://github.com/kwaroran/character-card-spec-v3/blob/main/SPEC_V3.md) and
+[SillyTavern World Info](https://docs.sillytavern.app/usage/core-concepts/worldinfo/)
+offer useful descriptive fields. Their roleplay prompt overrides and keyword/recursive
+inclusion do not fit exact reviewed authoring context. Retain native storage and defer
+external JSON/PNG import/export.
+
 ## 10. Checkpoint sequence and gates
 
 These are dependency checkpoints, not mandatory chat boundaries. Select one coherent
@@ -274,7 +358,7 @@ authorize provider connections or execution.
 | Checkpoint | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
 | 2A.0 — Provider qualification and contracts | Bounded synthetic Studio/generic probes; version/capability matrix; request/credential/transport ADR; confirm limits and management-API findings. | Record actual success/failure/unknown per provider. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
-| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Native credential round-trip/delete/locked-store behavior, zero secret reflection, no requests on project open, origin binding and profile invalidation. |
+| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Production native entry/store/request/replace/delete, session-only/no-auth, packaged reopen/identity, controlled unavailable-store failures, zero reflection, no requests on project open, origin binding and invalidation. Physical locked-store/signed-upgrade behavior is proved where accessible or retained as a limit; no enterprise-policy gate. |
 | 2A.2 — Request service | Background transport, non-streaming and qualified SSE, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test each adapter without project writes. |
 | 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; bounded route cycles; no silent truncation; input/output budget accounting. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
@@ -304,11 +388,40 @@ Both client platforms may connect to the same controlled inference host; GPU inf
 
 Use current repository commands from AGENTS/TESTING and add focused test commands in each implementing brief once actual paths exist. Preserve failed evidence and exact run/attempt/SHA. No full package matrix for this documentation-only plan; no duplicate unchanged acceptance runs or model polling during external waits.
 
+### Component selection and proof cost
+
+This selection supplements sections 10-11 and existing TESTING selectors; it does not
+waive requirement IDs or implement new evidence reuse. Map focused cases to requirements
+and record counts/skips, affected hosts and finite expensive allowance before execution.
+Share source/transaction fixtures and test the narrowest actual controller/service seam.
+
+| Component | Decisive focused proof | Native/live boundary |
+| --- | --- | --- |
+| Profiles/keys | Persistence, replacement/removal failure ordering, unavailable store, session exit/clear, no-auth, origin/redirect refusal and no reflection | Early packaged entry/store/request/reopen path on both targets; mocks do not prove physical locked stores or signed upgrades. |
+| Requests | Final response, auth/protocol error, timeout/cancel, stale completion and responsive Save | Fake-server failures routinely; bounded synthetic Studio and one representative generic configuration live. |
+| Prompts/context | Exact payload, edit/reset/undo/reopen/update, selected approved revisions, exclusions and budget refusal | Controller/dispatch integration and milestone native send review; no exhaustive models/providers. |
+| References | Manual/generated review, rejected replacement retains approved text, stale/missing links, malformed/newer schema refusal and migration | Shared deterministic fixtures and representative native forms. |
+| Proposals | Rewrite/same-file batch, valid subset, invalid/stale output writes nothing, external conflict, one undo and ordinary interrupted acceptance | First complete user action early, then integrated milestone. |
+| 3A Story | Conditional routes, all-false continuation, call/return, nested edits and source preservation | Targeted pinned-SDK normal-play assertions on affected supported hosts. |
+| 3B Screens | Nested round trip, opaque neighbor, representative dialogue/choice/menu behavior and cancel/undo | Early Ren'Py layout/interaction comparison. |
+| 3C Timeline/media | Placement, idle continuity, qualified profile/mask/end state, transform/audio order and save/load/rollback | Early actual media/runtime risk proof; combined final 3C checks, not a full matrix per increment. |
+| 3D State/launch | Normal-play equivalence, stale/unknown refusal, save isolation and scratch cleanup | Qualified normal versus reconstructed launch at supported boundaries. |
+| Milestones | Representative game, close/reopen, metadata-free play and package privacy | Coherent-candidate affected-platform qualification; both targets at 3F. |
+
+Keep rejecting assertions and ordinary external-edit/data-loss coverage. Use controlled
+fault/state fixtures; no renewed hostile/crash, enterprise-policy or exhaustive-model
+programme. Repeat native/live checks for relevant changed inputs, not documentation.
+Missing access stays missing evidence. Explicit connection/capability checks disclose
+potential provider billing; this plan grants no paid calls, installation or downloads.
+Non-streaming is the first workflow; SSE remains separately qualified. Exclude keys,
+raw replies, prompts and reference prose from routine diagnostics; future explicit
+support exports preview/redact their contents. Do not transfer routine checks to users.
+
 ## 12. Entry risks and decisions
 
 | Issue | Disposition |
 | --- | --- |
-| Phase 1 is not accepted | Blocks implementation entry, not this plan. Preserve its existing workstream. |
+| Phase 1 prerequisite | Accepted/integrated/closed on 2026-10-07. Inspect live state and preserve other work; no implementation selected by this update. |
 | Actual installed Studio compatibility | 2A.0 must qualify the configured version/model. Documentation alone is insufficient. |
 | Tools disabled and inference locality | Mandatory Studio qualification and disclosure; no silent fallback if unsupported. |
 | Managed load/unload | Public stable interface not established in reviewed docs; explicit follow-on investigation, no guessed private APIs. |
@@ -333,61 +446,13 @@ Implementation ledger fields per checkpoint: state, authorising instruction, bra
 
 ## 14. October milestone sequencing
 
-The user selected planning Phases 2 and 3 while Phase 1G continues. This is a docs-only
-successor to the original four-file publication scope in section 13. Branch:
-`codex/phase-2-3-planning`, based on `de2fdad`; no existing provider requirement is
-removed and Phase 1 through 1H remains the implementation prerequisite.
-
-**First usable result:** explicitly select dialogue, inspect its destination/context,
-generate a rewrite using a manually authored card and selected lore entry, inspect
-exact changes, accept and undo it. Include prompt editing/reset and size controls.
-Prove that complete
-path early with one qualified provider before expanding to all five actions. This
-orders work; it does not reduce the final two-provider or five-action commitment.
-
-| Outcome | Existing checkpoints covered | Reviewable result |
-| --- | --- | --- |
-| Shared source foundations | Bounded 3A.1/3A.2 portion selected under section 19 | Stable parent/block-aware locations; one nested child edit with undo/reopen before expanded AI planning. |
-| Provider feasibility | 2A.0 | Measured compatibility of available Studio/generic configurations; credential/request ADR and concrete production plan. |
-| First safe rewrite | Necessary parts of 2A.1–2A.2, 2B.1–2B.2 and 2C.1–2C.2 | One complete rewrite using selected manual cards/lorebook, editable/resettable prompts and size controls, with native credentials, revision checks, strict proposal review, one transaction and undo. |
-| Scene and provider completion | Remaining provider coverage plus continue/draft Scene and dependency-valid acceptance | Real authored scenes and selected subsets; no hidden source changes or silent provider fallback. |
-| Character and lore | 2C.3 plus related context/actions | LLM-generated/updated Character cards and lorebook, separate runnable Character proposals, explicit approval, provenance, invalidation and reopen. |
-| Milestone acceptance | 2C.4 | Five actions, two provider paths and both client targets with honest live evidence and known limitations. |
-
-The first rewrite outcome needs a bounded execution brief after 2A.0; it is not
-permission to implement all transport modes or proposal families at once. Non-streaming
-is the first path. Optional SSE follows only after separate qualification. Required
-selected-context, credential, revision and acceptance checks cannot be postponed as
-polish to accelerate that demo. Cross-reference checkpoint IDs in the execution ledger
-so early shared work is not reimplemented or retested without changed inputs.
-
-The main uncertainties are actual provider capabilities and multi-operation source
-preparation. Prove a small batch touching the same file before expanding proposal UI;
-retain operation grouping, stale rejection and one undo entry. Phase 0's
-[credential spike](../../research/CREDENTIAL_STORE_SPIKE_RESULTS.md) is supporting
-evidence only: production native secret entry, unavailable/locked-store handling and
-packaged identity behavior need their own affected-target checks. Do not repeat the
-stack comparison or claim the old no-renderer probe qualifies new settings UI.
-
-Recheck official provider documentation and installed versions at 2A.0; section 2
-records September research, not a newly verified compatibility claim. No provider
-was contacted in this October planning task. Availability of suitable inference hosts
-and models is unresolved. Missing live access is a recorded gate, not an implicit
-permission to install models, spend money or substitute mocks for required evidence.
-
-Apply ADR 0010 and current TESTING selection: retain ordinary external edits and
-interrupted acceptance with non-crashing fixtures, avoid retired specialist experiments,
-prove real user-action boundaries and gate rejection, and keep cumulative problem
-budgets. Agent-owned checks cover development; physical user review is limited to
-genuinely human interaction/visual acceptance. No native builds are needed for planning.
-
-Phase 2 is complete only at its existing integrated gate. The selected
-[shared-foundation sequence](#19-selected-shared-foundations-and-two-lane-delivery)
-brings forward bounded 3A source work, then allows 3A completion alongside remaining
-Phase 2 work after the first safe rewrite. Screens/Timeline follow accepted Phase 2
-and 3A. New Phase 3 constructs do not silently expand Phase 2's permitted proposal
-operations or imply state/reachability knowledge. This replaces the earlier blanket
-Phase-2-before-any-Phase-3 implementation ordering; feature outcomes/gates are retained.
+Section 19 owns the single live scheduling/ownership map; section 20 maps bounded
+results to existing requirement gates. This anchor preserves links. The duplicate
+October delivery table was consolidated on 2026-10-07; Git history retains it. The
+first useful rewrite still includes manual references, prompt/reset and size controls,
+native credentials, exact reviewed send, strict review, one transaction and undo.
+It does not replace five-action/two-provider acceptance. Section 21 defines the first
+bounded source assignment; provider qualification can be selected independently.
 
 ## 15. Provider expansion recommendation — 2026-10-02
 
@@ -610,8 +675,8 @@ revision IDs; a reference editor's scope is guidance, not a runtime knowledge cl
 ### Settings, prompts and baseline restore
 
 Provider profiles offer only Unsloth Studio and OpenAI-compatible. Show endpoint input
-and normalized destination, credential configured/missing/unavailable status, native
-Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
+and normalized destination, authentication mode, OS-remembered/session-only credential
+status, native Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
 settings. No renderer API-key text field or provider buttons implying extra verified
 support. Distinguish Refresh models, synthetic connection/capability tests and a project
 generation; tests do not send project content. Changed configurations are Untested until
@@ -620,9 +685,9 @@ their actual probes pass. Model loading stays an explicit action in Studio.
 Use two real tabs, Provider profile and System prompts, with only the selected editor
 shown; the generated simultaneous panes are an overview of both, not the tab behavior.
 Keep machine-local profile defaults distinct from project-local prompt templates.
-Per-action system-prompt editing shows effective scope, baseline version and customized
+Per-action system-prompt editing shows effective scope, saved/installed baseline versions and customized
 status; task instructions and project style notes have their own labels. Save prompt
-is explicit. Restore baseline previews the versioned replacement against current text,
+is explicit. Restore baseline previews the installed app's bundled replacement against current text,
 then applies only that prompt after confirmation. Cancel preserves custom text; applying
 is undoable, with the previous text retained, and saving/reopening preserves the restored
 revision. Restore does not reset references, credentials, other prompts or size limits.
@@ -633,7 +698,7 @@ restore preview; the written interaction is authoritative.
 
 | State | Visible recovery without losing author input |
 | --- | --- |
-| No configured profile/model; key or OS store unavailable | Explain the specific missing item and open its settings/native action; no silent model substitution or plaintext fallback. |
+| No configured profile/model; required key or selected OS store unavailable | Explain the specific missing item and open its settings/native action; no silent model substitution or plaintext fallback. |
 | Provider unavailable/busy, timeout or interrupted response | Retain task/selected references and show actual known cause; Retry means a new explicit reviewed send, never an automatic request. |
 | Malformed/truncated/unsupported/tool response | No applicable proposal; show bounded inert diagnostics and return to preparation. Do not auto-repair or downgrade modes. |
 | Over budget or stale reference | Name the failing total/revision; explicit correction rebuilds preview and requires review. |
@@ -672,7 +737,7 @@ limits are stored in the [design index](../../design/phase-2-llm/README.md).
 No application implementation, configured project-provider request, native build, SDK
 execution or CI dispatch is part of this outcome. Image generation used the built-in
 image tool. The parent reviewed the subagent deliverable and handles publication on
-the same planning branch; no merge or new planning PR is selected.
+the same planning branch; no merge or new planning PR was selected in that historical record.
 
 Parent review and verification — 2026-10-02: inspected all four concepts, reconciled
 schematic controls against sections 5–9, and retained explicit author approval without
@@ -754,8 +819,10 @@ The owner coordinates shared UI controls and field-validation contracts using th
 [accepted UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents);
 both lanes reuse the same patterns.
 
-Use **one GPT-6.1 Sol owner at high reasoning effort and two GPT-6.1 Sol implementation
-agents at high reasoning effort** when an implementation outcome is selected.
+Use **one GPT-6.1 Sol owner at high reasoning effort and zero, one or two GPT-6.1 Sol
+implementation agents at high reasoning effort** for useful independent assignments.
+Two lanes are a maximum, not an occupancy target. Short fixes and shared contract/
+migration work remain serial; the owner can implement them directly.
 
 - The owner defines contracts and task/file boundaries, resolves shared-model decisions,
   reviews both lanes, integrates coherent changes and verifies the combined outcome.
@@ -776,21 +843,32 @@ agents at high reasoning effort** when an implementation outcome is selected.
   a separate pass. This team plan creates no new reviewer mandate or CI allowance and
   does not authorize merges, service installation, spending or provider requests.
 
+Record the first paired assignment's useful output, waiting, integration rework and
+duplicate checks in the existing ledger. Report timing/usage only when available;
+never invent speedup/cost savings. Continue parallelism where output outweighs overhead.
+Source versus provider feasibility and Screens versus Timeline are suitable candidates;
+shared schema/transaction/runtime changes need a single writer. No recursive agent tree.
+
+Technical prerequisites differ from scheduling defaults. Missing provider access need
+not stop independent authorised portable work. Stage 4 defaults to accepted Phase 2/3A;
+a narrower earlier 3B/3C slice requires explicit selection and accepted source/asset/
+history/runtime prerequisites, not an automatic phase waiver. Final gates are unchanged.
+
 No agents, implementation worktrees or execution were launched by this planning update.
 At implementation entry reconcile the accepted Phase 1 APIs with these proposed seams,
 select the first bounded source/provider tasks, and record their actual ownership and
 branch/checkpoint in CURRENT/HANDOVER and the existing task ledgers. Do not implement
 against this planning branch's inherited historical application tree.
 
-Delivery-plan verification: repository structure/text/privacy/local-link validation
+**Historical delivery-plan verification/publication record (2026-10-02):** repository structure/text/privacy/local-link validation
 passed for 329 files; whitespace and six-document scope review passed. Checked the
 Phase 2/3 entry gates, first-rewrite dependency, provider-qualification review boundary,
 separate milestone acceptance, operation allowlist and unchanged deferred Git scope.
 No application/native/provider checks were run for these documentation changes.
-Publish the coherent update on `origin/codex/phase-2-3-planning` and verify its remote
-head. No new PR, merge, agent launch, build/CI allowance or implementation is selected.
-Resolve this checkpoint's SHA from Git; next remains subset/UX review and bounded
-implementation selection after Phase 1 acceptance.
+That checkpoint selected publication to `origin/codex/phase-2-3-planning`; it is
+historical, not a pending instruction for this update. Section 22/live HANDOVER own
+current local-only continuation; the original worktree and unpublished commits remain
+preserved. No new PR, merge, build/CI allowance or implementation is selected here.
 
 ## 20. Bounded deliverables and next-outcome prompts
 
@@ -853,7 +931,7 @@ not a requirement to serialize every row of this table.
 
 1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
    baseline, required dependencies, affected test hosts and finite execution allowance.
-2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and up to two
+2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and zero to two
    GPT-6.1 Sol High implementation agents on independent declared files/contracts.
    Use one writer for shared mutable code; sequence dependent work. A short serial
    target need not occupy both implementation agents. No recursive agent tree.
@@ -893,8 +971,8 @@ Codex machine: <actual execution host>
 Test hosts: <affected Windows x64/macOS ARM64 requirements and accessible prerequisites>
 Reason: <why this result is next and which accepted dependencies it uses>
 Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
-Use one GPT-6.1 Sol High owner and up to two GPT-6.1 Sol High implementation agents
-for independent bounded assignments with declared file/contract ownership.
+Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation agents
+only for useful independent assignments with declared file/contract ownership.
 Scope: <included operations and explicit exclusions>.
 Prove: <decisive user-action/source/persistence checks and required native evidence>.
 Allowance: <finite builds/dispatches plus existing problem budget, not a fresh reset>.
@@ -911,3 +989,312 @@ team. [OpenAI's multi-agent guidance](https://developers.openai.com/api/docs/gui
 supports concrete independent assignments and serial ownership of dependent/shared
 work. These inform the cadence; the deliverable queue and repository gates are
 Loomlight decisions, not a mandated OpenAI milestone count or new orchestration system.
+
+## 21. First bounded source-foundation assignment
+
+**State:** selected and implemented locally; required native/SDK evidence incomplete. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**Reason:** prove stable child ownership before AI planning grows around flat Scenes.
+No provider access or credentials are needed.
+
+Recognise one `if <declared bool variable>:` / `else:` group in a Loomlight-owned Scene,
+with a dialogue child in each body. Add the parent/branch/child identities, revision-bound
+locations and preparation needed to display/select/edit one existing child through
+Story controller, core dispatch and transaction. A minimal nested outline suffices;
+the synthetic source fixture supplies the group. Preserve opaque neighbors and old
+non-nested behavior. Group creation/move/unwrap, full expressions, guarded choices,
+calls, AI, Screens, Timeline and state simulation are outside this target.
+
+Prove unchanged Phase 1 fixture reopening/no-op bytes/IDs, a minimal child patch,
+comments/Unicode/newlines/custom-neighbor preservation, undo/redo/reopen, ordinary
+external conflict and retained draft on stale/session ownership. Include a rejecting
+child-owner assertion and a real renderer-to-service action. Keep mapping migration
+focused and record its implementing ADR. Normal SDK play of the bool true/false fixture
+checks preserved syntax, not complete 3A support. Both clients need affected native
+action evidence; portable work can proceed while genuinely unavailable evidence is
+recorded. Do not replace native proof with a mock or transfer it to the user.
+
+At selection inspect fresh refs/worktrees, create/reuse a `codex/` implementation branch
+from accepted main (not the historical fork), preserve local planning edits and fixed
+release identities, and record ownership in the existing ledger/HANDOVER. Use helpers
+only for a declared independent task. Cheap focused checks are routine; record finite
+targeted native/build allowance before execution. No full package matrix, provider
+request, paid action, release, merge or following deliverable is implied. Stop at
+review-ready only when selected required gates pass; otherwise record the actual
+blocker/remaining evidence and same-target continuation. Do not waive missing native proof.
+
+## 22. Agreed planning refinement — 2026-10-07
+
+The user reviewed Phase 2/3, selected prompt/reference/connection/agent defaults,
+accepted the omission review and requested this document update, self-check and start
+prompt. Full Phase 3 scope and animation order remain. Native references/basic scope,
+project prompts, localhost/LAN/HTTPS, OS keys with explicit session-only mode and
+adaptive zero-to-two helpers are selected. ADR 0011/canonical docs own durable design.
+No implementation, provider connection, key change, native/build/CI, push or release
+operation was selected here. Work is local-only on current main; the historical
+planning worktree is untouched. Concurrent 0.1.0 publication completed independently;
+preserve its fixed tag and archived ledger. The next selected implementation can use
+section 21 without live-provider access.
+
+**Verification:** documentation structure/text/privacy/local-link validator PASS (356
+files); whitespace and 12-document scope review PASS. Self-review corrected historical
+publication instructions, credential-mode wording and installed-baseline reset alignment.
+App/test/workflow/dependency trees and archived evidence are unchanged; no app/native/
+provider/CI execution was needed. Final checks repeated after those documentation fixes.
+Local-only continuation is main `aba200f` plus this working diff, not a published SHA.
+
+## 23. Source-foundation implementation ledger — 2026-10-07
+
+**Selected:** section 21 only; one owner, no helper assignments. Local implementation
+branch `codex/nested-source-foundation` starts at accepted main `aba200f`, carrying
+all twelve uncommitted planning files. Fresh remote refs confirm main `aba200f` and
+planning `267ec2a`; historical planning checkout `2c5a164` is untouched. No push,
+merge, release, provider action or subsequent deliverable is authorized.
+
+**Allowance/access:** focused local core/renderer checks; at most one targeted native
+build/proof on each Windows x64/macOS ARM64 host, no automatic retry/full matrix.
+Mac ARM64 local project toolchain, locked dependencies and pinned SDK archive exist.
+No Windows shell/checkout access has been established; no SSH config is present.
+Actions cannot consume unpublished working inputs, so no workflow dispatch is selected.
+Existing packaged runtime runner can select individual optional cases; extend it with
+one source-foundation case rather than running the production matrix. Expensive native
+allowance remains unconsumed at entry. Missing target evidence is not acceptance.
+
+**Implementation decision:** retain disjoint source ranges and the existing Beat IDs;
+add explicit group/branch identity and child-owner locations to source-map v3. Project
+schema stays v2. Migration reuses exact byte/hash IDs, preserves unknown fields and
+never writes `.rpy`. A dedicated child-dialogue command requires the displayed owner
+and source revision; root operations refuse children. Structural rows are read-only.
+Only direct dialogue plus trivia inside a declared bool if/else is recognized; other
+conditions/bodies remain opaque. No condition execution/state simulation is added.
+
+**Preflight and self-review:** real dispatcher foundation 5 PASS, 1 explicitly ignored
+SDK case; Scene selector 31 PASS/7 specialist ignored; Source 16 PASS; metadata 3 PASS.
+Frontend `npm run check` 96 PASS, including execution of the shipped source-foundation
+driver against a strict renderer fixture. Rust format, JS parse and whitespace checks
+PASS. Validator PASS (360 files before final status updates).
+
+The initial routine broad-core attempt produced 195 PASS, 1 FAIL, 42 ignored, 3 filtered.
+Its stronger second-child-identical-to-first assertion caught swapped IDs: the prepared
+child tuple still lacked its exact anchor. Corrected that tuple and reran the rejecting
+foundation selector successfully, then the affected Scene/Source/metadata selectors.
+The initial failure is retained locally; no broad green result is inferred. Unchanged
+4,097-journal stress paths are not repeated. Initial compile/type/assertion feedback
+was corrected during preflight. The native driver fixture twice lacked Close Project
+after Story redraw: inspection showed it incorrectly placed the shell control inside
+the tree. Corrected the fixture ownership; all shipped-driver steps now pass. This
+was renderer-driver compatibility, not a native run or a native acceptance claim.
+
+**Mac native attempt 1 selected:** project-local pinned tools; one `tauri build
+--no-bundle --locked`, one existing runner `source-foundation` case, and the one exact
+ignored pinned-SDK source-foundation gate (compile/lint, true/false and rejecting wrong
+outcome). No installers/full matrix. Verify candidate input hashes before execution;
+retain logs/reports under ignored `.toolchains/reports/source-foundation/`. Build/proof
+allowance is consumed by this attempt regardless of result; no automatic retry. Windows
+attempt count remains zero. No external CI operation is pending.
+
+**Mac build attempt 1 result:** frontend production build PASS; native Cargo build
+NOT STARTED. The invocation placed `--no-bundle` after Tauri's Cargo argument separator,
+so Cargo rejected it (`unexpected argument '--no-bundle' found`) before compilation.
+Correct invocation is `npm exec -- tauri build --no-bundle -- --locked`; it is recorded
+for a newly selected allowance, not automatically executed. No native application
+was built or launched and no WebView pass is claimed. The separately selected SDK
+proof remains part of attempt 1; it is dispatched once, without a retry. Candidate
+app/fixture input digest before proof is
+`6954a274d8a344e814058ce006166074c7846e8ee08bfef37f0aba6fa784f719`.
+Ignored local manifest/logs retain exact working input hashes and base/branch identity.
+
+**SDK attempt 1 result/classification:** verified official 8.5.3 archive install and
+SDK compile/lint completed with exit 0. Normal entry displayed the edited true-branch
+dialogue; flag and real say-widget assertions passed (four SDK assertions passed).
+The case still FAILS: after advancing to main menu, `opaque_neighbor` is no longer
+in the game context and the post-return assertion raised `NameError`. Terminal
+cleanup PASS. False and rejecting wrong-outcome cases were not reached; neither is
+claimed. The exact failed log/case output is retained locally in `mac-sdk.log` and
+`sdk-cases.json`. No retry occurred.
+
+**Bounded correction:** add one synthetic continuation dialogue after the existing
+Python neighbor and assert its value there, before Return; then require main menu.
+This changes the proof fixture/oracle, not condition parsing or production state
+semantics. Focused checks are repeated on that final fixture; native/SDK qualification
+remains missing. `cargo check -p loomlight-desktop --locked` PASS on Mac; it is only
+compilation evidence, not a native application action.
+
+**Final local continuation:** final app/fixture digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515` (separate from
+failed attempt inputs); branch `codex/nested-source-foundation` at base `aba200f` plus
+uncommitted working changes. Source/Story TypeScript ranges now share the explicit
+owner contract. The corrected SDK driver retains all three independent reports and
+rejects the combined result if any case fails; it has not been run natively. Foundation
+checks on the revised continuation fixture PASS (5, SDK wrapper ignored); frontend
+96 PASS and final typecheck PASS. Historical planning worktree remains clean. No
+external or runtime operation remains pending. Required WebView action on both OSes
+and complete true/false/rejecting SDK evidence remain missing. Mac attempt 1 is
+consumed; Windows attempt 0/access unestablished. Resume the same selected outcome
+only with established Windows access and an explicitly renewed narrow Mac allowance.
+No accepted source-foundation or Phase 2/3 completion claim, commit/push/merge/release
+or automatic next deliverable.
+
+**Final document/self-review check:** validator PASS (360 files), whitespace PASS;
+CURRENT 366 words and HANDOVER 703 words, within workflow review targets. Reviewed
+parser refusal, disjoint ranges, anchored identical-child ID reuse, same-revision owner
+validation, migration conflict refusal, exact quoted-token patches, typed IPC and
+retained form controls. No secrets/private content/absolute user paths or generated
+logs are added to versioned files. No expensive operation or allowance is pending.
+
+**Same-outcome continuation / Mac replacement attempt 2 selected:** the user explicitly
+authorized one replacement targeted Mac build/WebView/SDK proof using the corrected
+command and oracle. Codex machine macOS ARM64; required test hosts Windows x64/macOS
+ARM64; reason remains nested-child ownership proof before AI planning. Preserve all
+local changes and historical worktree; no full matrix, automatic retry, push, merge,
+release or subsequent deliverable. Fresh remote main/planning refs remain `aba200f` /
+`267ec2a`; implementation branch is unpublished. Historical `2c5a164` checkout is clean.
+All tracked/untracked app/fixture hashes exactly match final digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`.
+Separate ignored `mac-attempt-2/inputs.json` preserves this candidate.
+
+Replacement selection: one `npm exec -- tauri build --no-bundle -- --locked`, one
+`run-runtime-ui-probes.py` invocation with only `source-foundation`, and exact ignored
+`renpy::tests::source_foundation::source_foundation_bool_sdk_gate` (official verified
+8.5.3 compile/lint, true/false/rejecting outcomes and cleanup). Project-local pinned
+Node 24.19.0 / Rust 1.90.0; all evidence goes under the separate ignored attempt
+directory. Dispatch consumes this replacement allowance regardless of outcome.
+Windows has no usable connected project or local SSH configuration; access clarification
+is pending and its unused allowance must not be dispatched before access is confirmed.
+
+**Windows routing decision:** the user confirmed Windows will be a different Codex
+run on a different machine. This Mac run has no established Windows execution route
+and will not consume its allowance. The unpublished candidate must first be transferred
+without losing local work; the Windows run must verify the exact app/fixture manifest,
+its actual x64 desktop access and existing pinned tools before the one targeted proof.
+No push, Actions dispatch, infrastructure install or second writer is selected here.
+
+**Mac replacement build:** PASS, release ARM64 executable built in 24.98s using the
+corrected argument order. Retained executable SHA-256
+`d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`;
+separate execution manifest includes exact source digest, host/tool versions and layer.
+The existing native runner was dispatched once against that retained executable with
+only `source-foundation`. The launch was mistakenly made inside the restricted shell
+sandbox: macOS desktop-service connection errors appeared, no probe report arrived,
+and a one-second read-only stack sample showed the AppKit event loop waiting without
+an observed proof action. Provisional classification is environment/startup limitation;
+this does not prove the application's native path passes. No relaunch or production-code
+correction was selected. The separate exact SDK gate
+was dispatched once with desktop access, using the corrected continuation oracle.
+
+**Mac replacement terminal audit:** SDK PASS: exactly 1 selected Rust test, 0 ignored,
+241 filtered; 84.86s. Official checksum verification/install, compile and lint succeeded.
+True and false each returned 0, emitted their expected route marker and passed all six
+SDK assertions, including the continuation/custom-neighbor assertion before Return.
+Wrong-outcome returned 1 with an actual failed required dialogue assertion and no success
+marker; the wrapper correctly accepted this expected rejection. All three retained case
+reports pass; terminal cleanup is true. Strict report/count/marker audit PASS. Original
+failed SDK evidence remains unchanged; no cross-input qualification is claimed.
+
+Native FAIL / missing evidence: after 162.789s the exact owned launch was stopped with
+SIGTERM following desktop-service errors, an idle AppKit stack and absence of both the
+disposable profile and any probe report. Runner returned 1, recorded child exit -15,
+`timedOut: false`, `reports: []`, `passed: false`. This is a cancelled startup-blocked
+proof, not a timeout or passed action/cleanup gate. No project fixture was created.
+Read-only diagnostic evidence and all logs/executable/manifests remain separately under
+ignored `mac-attempt-2/`; no historical evidence was overwritten. This run's shell
+sandbox launch was an execution mistake; sandbox/startup limitation remains a provisional
+classification, not a product diagnosis. Desktop-access execution of the retained binary
+is the smallest remaining discriminating action and needs a new explicit native-only
+allowance. No automatic relaunch, rebuild or source correction is authorized.
+
+Cumulative source-foundation native problem budget: Mac build invocations 2 (first failed
+before Cargo compilation, replacement PASS); native launches 1 (startup-blocked/cancelled);
+exact SDK proofs 2 (first oracle FAIL, corrected replacement PASS). Windows builds/native/
+SDK proofs 0, targeted allowance unused; user-selected separate Windows machine/run must
+confirm access and exact candidate before spending it. No operation remains pending.
+Qualification stays incomplete, not review-ready or accepted; AI planning/provider work
+and subsequent deliverables remain outside scope. No commit, push, merge or release.
+
+**Transfer/self-review checkpoint:** prepared ignored
+`.toolchains/reports/source-foundation/windows-candidate-transfer.zip` with a full
+tracked binary patch, untracked source/fixture/ADR bytes, exact app/fixture manifest
+and preservation/Windows-byte-check instructions. No SDK, binary, logs, `.git` or
+historical worktree is transferred. Archive CRC/patch/untracked bytes are verified;
+`windows-transfer-receipt.json` retains its checksum. The same application digest
+still matches every tracked/untracked input. No source/probe fix was made this run.
+Documentation validator PASS (360 files), whitespace PASS; live status stays compact
+and preserves the actual missing proof, exhausted Mac allowance and unused Windows
+allowance. Final bundle is refreshed once after these status edits, without a
+receipt-only commit. All local changes and the clean historical worktree remain;
+no publication or pending process/operation is claimed.
+
+**Mac native-only attempt 3 selected:** user explicitly answered “Yes you can” to
+one native-only Mac probe with desktop access, using the retained executable without
+rebuilding. The previous one-shot cap is extended only for this single launch;
+no SDK rerun, full matrix, automatic retry, push, merge, release or following deliverable.
+All app/fixture manifest hashes still match digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`;
+retained executable hash still matches `d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`.
+Run only existing optional `source-foundation` with desktop access; retain separate
+`mac-native-attempt-3/` inputs/log/result. Dispatch consumes this native-only allowance.
+Historical worktree and all local changes remain preserved. Windows remains the
+user-selected separate machine/run with its unused allowance; no Windows access or
+execution is claimed here.
+
+**Mac native-only attempt 3 terminal audit:** PASS, runner exit 0, native exit 0,
+no timeout, 4.22s, exactly one successful terminal report and cleanup true. All eleven
+expected checks passed: shared group/distinct branch ownership, BOM/mixed-newline/
+Unicode fixture, disabled structural controls, actual Story minimal quoted-token
+commit preserving neighbors and every Beat ID, Undo/Redo exact bytes, real-core
+wrong-owner `SCENE_INVARIANT`, retained exact Story and concurrent Source drafts,
+and close/reopen exact IDs/source. Stage is complete. Layer is release WKWebView
+with actual Story controller/IPC/service and synthetic DOM editor input; no physical
+keyboard, human or installer claim. Strict count/check/report/cleanup audit PASS.
+Retained executable and every app/fixture input remained unchanged. Desktop-access
+execution succeeds where the earlier sandboxed startup never prepared its fixture;
+no product/probe change, rebuild or SDK rerun was required. Failed evidence is retained.
+
+Mac source-foundation proof is now complete on the coherent recorded working inputs:
+replacement build PASS, corrected official-SDK true/false/rejecting gate PASS, native
+Story action PASS. Overall qualification remains incomplete pending the user-selected
+separate Windows x64 run; it is not review-ready/accepted. Cumulative Mac builds 2,
+native launches 2 (sandboxed cancellation, explicitly authorized desktop-access PASS),
+SDK proofs 2; no additional Mac allowance. Windows builds/native/SDK proofs 0 and its
+one targeted allowance remains unused until access/candidate/tools are verified there.
+All commands terminal; no push/merge/release or subsequent deliverable. Preserve local
+changes and historical worktree; refresh live status and transfer bundle with this result.
+
+**Post-proof self-review/transfer:** validator PASS (360 files), whitespace PASS.
+CURRENT/HANDOVER retain the live Mac PASS / Windows pending distinction and the actual
+unused Windows allowance. Updated ignored transfer bundle/receipt includes the exact
+latest tracked patch and untracked bytes; CRC/byte checks PASS. App/fixture hashes and
+historical worktree remain unchanged. No rebuild, SDK repeat, publication or pending
+operation. Continue only the remaining targeted Windows proof after machine access
+and byte-identical candidate verification.
+
+**Remote publication selected — 2026-10-07:** the user explicitly requested pushing
+the up-to-date repository so Windows can pull it. This supersedes the earlier no-push
+boundary for one coherent source-foundation/planning checkpoint on
+`codex/nested-source-foundation`; no merge, release, PR, provider work, subsequent
+deliverable or extra native/SDK execution is selected. Fresh remote main/planning refs
+remain `aba200f` / `267ec2a`; no corresponding source-foundation remote branch exists.
+Account noreply Git identity is already repository-local. Historical planning worktree
+remains clean and untouched. Preserve the planning refinements/ADR 0011 together with
+the implementation/ADR 0012; publish no ignored logs, executable, SDK or credentials.
+
+[Published input manifest](source-foundation-inputs.json) contains only relative
+app/fixture paths, hashes, base/branch and the reproducible input digest. Git's default
+LF normalization would alter the mixed-newline source fixture, so an exact-path
+`.gitattributes` exception preserves its bytes and permits CR at EOL. This is a
+publication/checkout correction; no app/fixture bytes or qualified inputs changed.
+Verify both staged/committed blobs and a fresh checkout against every manifest hash.
+Windows must pull this implementation branch and verify the same hashes; the ignored
+transfer ZIP is now optional historical fallback, not the primary continuation.
+
+Production packaging is dispatch-only and quality pushes are main-only; this branch
+push does not select a full matrix. Run cheap validator/whitespace/index-byte checks,
+commit this coherent checkpoint and push without force, then verify remote HEAD and
+record the exact publication receipt locally. The commit carrying this record and the
+input manifest identifies the candidate; do not create receipt-only commits chasing
+its own SHA. Mac proof remains complete; Windows allowance remains one unused targeted
+build/native/SDK proof after actual host/tool/archive access is confirmed there.
+
+**Publication preflight:** validator PASS (361 files), whitespace PASS; staged privacy/
+scope audit includes 30 intended files and excludes all ignored toolchains/evidence.
+All 138 staged app/fixture blobs exactly match Mac-qualified per-file hashes, including
+BOM and six CRLF endings in the source fixture. A fresh index checkout with
+`core.autocrlf=true` also matches every hash. No qualified source byte, dependency or
+workflow changed; no Mac proof is repeated. Commit-object hashes and remote branch
+identity will be verified before handing Windows the exact published candidate.

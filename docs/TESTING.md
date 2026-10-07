@@ -1094,3 +1094,22 @@ browser at three widths/both palettes, including a wider English font and a trun
 long caption. Routing checks use measured widths for label/channel separation and Fit
 bounds. Packaged route-a/route-b reports assert actual native SVG text width plus
 padding and fitted pill bounds; synthetic selection remains distinct from native input.
+
+## Bounded nested-dialogue foundation
+
+Use `cargo test -p loomlight-core --locked source_foundation` for focused production
+dispatch/minimal-byte/ownership, migration/history/reopen, dirty draft, external writer,
+stale session, identical sibling and unsupported-body regressions. The SDK test is
+explicitly ignored here; this command alone never establishes SDK acceptance. Select
+`renpy::tests::source_foundation::source_foundation_bool_sdk_gate` with `--ignored
+--exact --nocapture` and `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` for verified archive install,
+compile/lint and normal-entry true/false/reject-wrong-outcome cases. Missing archive
+is a failure. `npm run check` retains child-owner dispatch/draft/keyboard assertions.
+
+The existing runtime UI runner accepts optional `source-foundation` to run just the
+disposable one-Scene native fixture. It exercises actual Story commit, exact source,
+ID preservation, Undo/Redo/reopen, wrong-owner refusal and retained Story/Source drafts.
+Synthetic DOM input is distinct from physical native keyboard/human acceptance. No
+production matrix or specialist exercise is selected by this case. A supported-target
+proof remains necessary on both Windows x64 and macOS ARM64; current allowance/results
+belong in the [owning ledger](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).

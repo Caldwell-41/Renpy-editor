@@ -1,48 +1,110 @@
 # Current outcome handover
 
-## 0.1.0 published — 2026-10-07
+## Bounded source foundation — 2026-10-07
 
-**State: accepted and published; selected publication outcome complete.**
-[Loomlight 0.1.0](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0) is an
-early public prerelease, **405202404**, published **2026-10-06 22:55:53 UTC**.
-The user explicitly approved the one-off unsigned/non-notarized/public-preview and
-unqualified-installer exception. General future-release policy remains in force.
-Codex machine macOS ARM64; original qualification Windows x64/macOS ARM64.
+**State:** selected Phase 2 section 21 implementation; qualification incomplete,
+not review-ready/accepted. One owner, no helpers. User authorized one checkpoint/push
+for Windows pull; no merge, PR, release, provider work or subsequent deliverable. [Phase 2 section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
+owns exact commands, decisions, attempts, failures and cumulative allowance;
+[ADR 0012](../adr/0012-bounded-nested-dialogue-ownership.md) owns the mapping boundary.
 
-**Exact identities:** annotated tag **`v0.1.0`**, object
-**`2f66b9244369cc16d6a34296b5adbcb0d77fcfd5`**, peeled commit
-**`45ffe24068eac6754fc2a84dd2368e638506c75c`**. Do not move/rewrite it.
-Original packages remain production **37529174148/1** at
-**`ba01a84cd7f860be6e8717e98216bdf747875073`**. Only documentation follows the
-qualified inputs. No new package build/SDK/native launch or matrix. Main contains
-publication closeout documentation after the fixed tag. [Archived release ledger](../tasks/archive/2026-10-07-release-0.1.0.md)
-records exact approval, published tag/asset identities, checksums and verification.
+**Continuation/ownership:** branch `codex/nested-source-foundation`; the commit
+carrying this handover and [input manifest](../tasks/active/source-foundation-inputs.json)
+is the coherent candidate for Windows pull. Implementation base is accepted main
+`aba200fe60bc6d49db24bcf5e6897dbeb2a5b410`; planning refinements and implementation
+are preserved in this checkpoint. Fresh remote main/planning refs remain `aba200f` /
+`267ec2a`; the selected push creates the source-foundation remote branch without force.
+Verify its fetched head before Windows execution. Historical planning worktree
+`2c5a164597779331af9ff81bf0eb3bdabb41ddb7` remains clean and untouched with its two
+unpublished commits. Never reset/switch to that historical application tree.
 
-**Published evidence:** eleven assets, including Windows NSIS/MSI and Mac ARM64 DMG,
-LICENSE/NOTICE, dependency inventories, original build-input receipts, provenance and
-checksums. Each server digest and independent re-download matches staged bytes;
-all ten checksum entries verified. Mac DMG integrity and staged privacy scan Pass.
-Actual public metadata is draft=false/prerelease=true; latest promotion disabled.
-Preparation quality **37538304596/1**, job **112524778258**, actual required validator,
-Q1 rejection/nine retention/selector checks Pass. Closure documentation receives the
-ordinary main-quality check; no receipt-only commit chasing its own SHA.
-Raw receipts/re-downloads remain ignored under `.toolchains/releases/0.1.0/`.
+Every app/fixture byte matches Mac proof input digest
+`14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`.
+The committed manifest owns all per-file hashes and the digest algorithm. Exact-path
+Git attributes preserve the BOM/mixed-newline fixture during commit and Windows
+checkout; do not normalize its source. Staged blobs and a fresh checkout with `core.autocrlf=true` both match all 138
+app/fixture hashes; confirm committed blobs before pushing. Original ignored manifests, failed older inputs and all native/
+SDK/build evidence remain local and retained separately.
 
-**Retained limitations:** unsigned/non-notarized packages; exact installer installation/
-uninstallation and installed-app launch not separately qualified. CI proves packaged
-application behavior, not those paths. Original Mac Chrome 168.3ms advisory timing
-Fail, human/physical-input/display/assistive-tech limits and no audible-speaker claim
-remain. Release notes disclose them. Phase 1 failures, cumulative budgets and complete
-raw evidence remain in the [closure ledger](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07).
-No pending CI-dispatch/native/SDK/editor/game/profile/recovery operation or user test.
+**Implemented:** declared-bool If/Otherwise with direct dialogue/trivia children,
+protected structural/opaque rows, group/branch/child UUID ownership and revision-bound
+locations. Story selects indented children and dispatches `updateChildDialogue` with
+the displayed owner, changing only quoted text. Root/structural/speaker child commands
+refuse. Source-map v3 migration preserves old IDs/unknown fields and refuses stale
+mappings without writing `.rpy`; project remains v2. Existing transactions/history
+provide Undo/Redo/reopen. Preview is partial and never executes branch bodies. Full
+expressions, condition authoring, calls, AI/providers, Screens, Timeline and state
+simulation remain excluded.
 
-**Preserved work:** planning worktree **`2c5a164597779331af9ff81bf0eb3bdabb41ddb7`**,
-unpublished **`6330291`**/**`2c5a164`**, remote planning **`267ec2a`**, other PRs/refs and
-archive tags untouched. No branch deletion in release publication. Phase 1 remains
-accepted/closed through PR #18 merge `82d4518`, closure `a3d89c2` and required qualities
-37536967028/1 and 37537337718/1. Phase 2/3 and optional Git remain unselected.
+**Focused evidence:** foundation 5 PASS/1 deliberately ignored SDK wrapper; Scene
+31 PASS/7 specialist ignored; Source 16 PASS; metadata 3 PASS; frontend 96 PASS,
+including strict native-driver renderer-fixture preflight and owner/draft/session
+refusal coverage. Format/typecheck/JS parse/whitespace/docs checks passed. Mac desktop
+`cargo check` PASS is compilation only. Initial broad core 195 PASS/1 FAIL/42 ignored/
+3 filtered caught swapped identical-child IDs; anchored preparation fixed it and
+rejecting/affected selectors passed. No broad green result or repeated 4,097-journal
+stress is claimed. The renderer fixture's twice-failing Close Project placement was
+corrected and passes; it never counted as native evidence.
 
-**Next action:** await separate user selection of a bounded outcome. Same-thread
-recovery uses current main and the fixed release/tag identities above; do not recreate
-the Release, rebuild unchanged packages or infer approval for another unsigned public
-release from this exception.
+**Mac replacement results:** user explicitly authorized one corrected targeted
+build/WebView/SDK replacement, no automatic retry/full matrix. Correct build command
+`npm exec -- tauri build --no-bundle -- --locked` PASS (24.98s). Release ARM64 executable
+is retained under ignored `.toolchains/reports/source-foundation/mac-attempt-2/loomlight`;
+SHA-256 `d990ac7b5ee63ea4436ff27ef5588fa1ee7b49a916751966af1fad7b1bac14b7`.
+Execution manifest binds it to the exact working inputs and pinned tool/host versions.
+No installer or physical-input acceptance is inferred.
+
+Corrected exact SDK gate PASS: 1 selected/0 ignored/241 filtered, 84.86s; official
+8.5.3 verified install/compile/lint, true and false routes each with six successful
+assertions, actual rejection of a wrong required outcome and terminal cleanup.
+Continuation checks the preserved custom neighbor before Return. All three retained
+case reports and strict count/marker audit PASS. First attempt's post-return `NameError`
+remains a failed result; it is not overwritten.
+
+**Mac native-only attempt 3:** user explicitly authorized one launch with desktop
+access of the retained executable, without rebuilding. PASS: 4.22s, exit 0, no timeout,
+exactly one terminal report, all eleven exact checks and cleanup true. Actual Story
+commit preserved source neighbors/BOM and every Beat ID; Undo/Redo and close/reopen
+restored exact source/IDs; real core rejected the wrong owner with `SCENE_INVARIANT`;
+refused editing retained exact Story and concurrent Source drafts. Evidence lives in
+ignored `.toolchains/reports/source-foundation/mac-native-attempt-3/`, including the
+strict audit and unchanged source/binary manifests. This is release WKWebView with
+real controller/IPC/service and synthetic DOM input, not physical/human acceptance.
+
+Mac proof is complete on the coherent recorded working inputs. Prior sandboxed launch
+was cancelled after 162.789s with no fixture/report (runner 1, child -15), and remains
+failed evidence under `mac-attempt-2/native/`; the desktop-access run succeeds without
+an application/probe change. First build and SDK-oracle failures remain in the ledger.
+
+**Budget/next action:** cumulative Mac builds 2 (initial pre-compilation failure,
+replacement PASS), native launches 2 (sandboxed cancellation, explicitly authorized
+desktop-access PASS), SDK proofs 2 (first oracle FAIL, corrected PASS). No additional
+Mac launch, rebuild or SDK run is authorized or needed for unchanged inputs. Overall
+qualification remains incomplete/not review-ready until Windows x64 proves the same
+selected foundation; do not begin another deliverable.
+
+Codex machine for this run is macOS ARM64. Required test hosts are Windows x64 and
+macOS ARM64; reason is nested-child ownership proof before AI planning. User confirmed
+Windows will be a different Codex run on a different machine. This run has no established
+Windows access; its one targeted allowance is unused. On Windows inspect refs/worktrees
+and preserve local work, then fetch/pull `origin/codex/nested-source-foundation` without
+resetting or overwriting conflicts. Verify the exact fetched candidate and all committed
+manifest hashes, then confirm actual x64 desktop/pinned-tool/official-SDK access. Then use the same corrected build command, only optional native
+`source-foundation`, and the exact ignored SDK gate in TESTING. The earlier ignored transfer ZIP remains a
+historical fallback; remote branch plus committed manifest is the primary route.
+No Actions dispatch, infrastructure install,
+full matrix or automatic retry. Do not qualify remote main or
+the historical fork as this candidate. Do not begin AI/provider work while required
+native proof remains missing.
+
+**Publication/next action:** this checkpoint is selected for a single branch push;
+Windows must fetch and verify that `origin/codex/nested-source-foundation` points to
+this commit before using it. Exact commit/remote receipt is retained locally after
+verification; no receipt-only successor is required to name this commit. No active
+native/SDK test or CI dispatch. If publication fails, preserve the local checkpoint
+and report that limitation; never force push. No merge/release. Logs, binaries, SDKs
+and transfer files stay ignored, never committed. Next is the user-selected Windows
+run of this same outcome; no second writer or runtime pause is claimed. Fixed accepted
+Phase 1 baseline and `v0.1.0`/release `405202404` remain unchanged; archived ledgers own
+those histories. This checkpoint also preserves planning decisions; future AI/Phase 3
+implementation remains unselected.

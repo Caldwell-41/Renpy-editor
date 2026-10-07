@@ -57,7 +57,10 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
-| Selected shared foundations, staged Phase 2/3 overlap and Sol High owner/two-lane assignments | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
+| Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
+| Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
+| Planned AI settings, OS/session keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
+| First bounded source target: nested child edit | [Source foundation](tasks/active/phase-2-initial-llm-assistance.md#21-first-bounded-source-foundation-assignment) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |

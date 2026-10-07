@@ -219,14 +219,22 @@ authored or LLM-proposed; approving a card does not modify the runnable definiti
 The lorebook groups editable entries with titles/categories/tags and references.
 Approved current cards/entries are included only through the reviewed context manifest.
 Changes invalidate affected prepared sends/proposals; unresolved links are retained.
-Exact versioned schemas/migrations remain Phase 2 design work. Project prompt overrides
-record the baseline version and content digest; machine provider profiles own context
-and output limits. See the [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
+Planned storage is versioned `.renpy-editor/references.json`, one record/revision
+service with separate card/lore collections. Scope is project-wide, selected Scenes or
+an explicit finite route, with written knowledge/spoiler notes. Approved text remains
+while a replacement is reviewed unless its own citations are stale; rejection preserves
+it. Exact field/bound/migration fixtures precede the 2B.1 editor. Project prompt overrides/
+style notes live in `.renpy-editor/ai.json`, with full text and baseline version/digest.
+Machine-local `ai-profiles.json` owns endpoints, model defaults and project bindings;
+keys use the OS store or explicit backend-memory-only session mode. See
+[ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and the
+[Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
 
-A lore fact records subject, category, canonical text, characters who know it,
-route applicability, valid game-day/time range, source scenes/decisions, contradictory
-alternatives, provenance, review status, and last review/change. Lore remains a later
-feature; its status vocabulary is `proposed`, `approved`, `superseded`, or `rejected`.
+Phase 2 lore has subject/category/text, entity links, explicit applicability,
+citations/provenance and `proposed`, `approved`, `superseded` or `rejected` revisions.
+Contradictory alternatives remain visible without automatic selection. Structured
+story-stage/game-day/time validity, computed knowledge and external import/export are
+later work, not Phase 2 storage requirements.
 
 Future state snapshots record provenance and whether they are reachable, saved-route,
 or manual/synthetic. They contain variable values, prior decisions, day/time, known
@@ -322,6 +330,15 @@ last-open Chapter/Scene selection. Reopen validates every relationship and sourc
 mapping. Move/delete selects the nearest deterministic surviving Scene; at least one
 Chapter and one Scene remain, and the entry Scene cannot be deleted. Display rename
 changes neither labels, source paths, nor UUIDs.
+
+Source-map v3 adds optional `conditionalBranch` and child `owner` fields to those
+disjoint ordered ranges. A protected header Beat identifies a branch and carries a
+separate group UUID, bool Variable UUID and `otherwise` flag. A direct dialogue child
+addresses its group/branch UUIDs; the enclosing Scene revision and exact range/hash
+remain write authority. Migration from v2 reuses every exact-byte Beat UUID, including
+previously opaque children, and preserves unknown fields without writing `.rpy`.
+Project remains v2; authoring remains v1. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md)
+defines the implemented local boundary and pending native qualification.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing

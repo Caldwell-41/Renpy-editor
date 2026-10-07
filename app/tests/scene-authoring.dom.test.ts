@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
 import {
   deriveScenePreview,
@@ -67,6 +68,52 @@ function sceneModel(): SceneWorkspace {
     },
   };
 }
+
+function foundationModel(): SceneWorkspace {
+  const base = sceneModel();
+  const group = { groupId: "group", variableId: "flag", otherwise: false };
+  const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
+    { id:"if", byteStart:15, byteEnd:28, protected:true, conditionalBranch:group, payload:{type:"customCode",source:"    if flag:",reason:"Protected source"} },
+    { id:"child", byteStart:28, byteEnd:60, protected:false, owner:{groupId:"group",branchId:"if"}, payload:{type:"dialogue",characterId:"alice",text:"True café 雪"} },
+    { id:"else", byteStart:60, byteEnd:70, protected:true, conditionalBranch:{...group,otherwise:true}, payload:{type:"customCode",source:"    else:",reason:"Protected source"} },
+    { id:"other", byteStart:70, byteEnd:100, protected:false, owner:{groupId:"group",branchId:"else"}, payload:{type:"dialogue",characterId:"alice",text:"False café 雪"} },
+    { id:"return",byteStart:100,byteEnd:111,protected:false,payload:{type:"return"} },
+  ] }], authoring:{...base.authoring,variables:[{id:"flag",technicalName:"flag",variableType:"bool",defaultValue:true}]} };
+  return model;
+}
+
+test("nested child commits carry owner and retain input on stale/session refusal", async () => {
+  const browser = installDom(); const model = foundationModel();
+  const calls: SceneCommand[] = [];
+  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
+    apply:async command=>{ calls.push(command); throw Error(calls.length===1 ? "SOURCE_CONFLICT" : "STALE_SESSION"); },
+  });
+  let card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
+  assert.ok(card.classList.contains("nested-dialogue"));
+  assert.equal(document.querySelectorAll(".conditional-branch").length, 2);
+  assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button,.beat-grip")].every(b=>b.disabled));
+  card.querySelector<HTMLButtonElement>(".beat-select")!.click();
+  card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
+  const text = card.querySelector<HTMLTextAreaElement>("textarea")!;
+  assert.ok(card.querySelector<HTMLSelectElement>("select")!.disabled);
+  text.value = "Retained café 雪"; text.dispatchEvent(new Event("input",{bubbles:true}));
+  for (let n=0;n<2;n++) {
+    // Shift+Enter remains a text-only child edit; it cannot create another child.
+    text.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));
+    await tick();
+    assert.equal(calls[n]!.type,"updateChildDialogue");
+    assert.deepEqual(calls[n]!.expectedOwner,{groupId:"group",branchId:"if"});
+    assert.equal(calls[n]!.text,"Retained café 雪");
+    assert.equal(calls[n]!.expectedSourceRevision,model.scenes[0]!.sourceRevision);
+    assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && hasSceneDraft(document.querySelector("#host")!));
+    assert.ok(!text.disabled && card.querySelector<HTMLSelectElement>("select")!.disabled);
+  }
+  const preview = deriveScenePreview(model.scenes[0]!);
+  assert.equal(preview.partial,true); assert.equal(preview.variablesUnknown,true);
+  assert.notEqual(preview.overlay?.text,"False café 雪","outline must not execute both branches");
+  dispose(); browser.happyDOM.abort();
+});
 
 test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuation, and Create New Scene", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
@@ -387,4 +434,65 @@ test("pointer Beat reorder cancels outside, on Escape and across protected bound
  hit=target;for(const cancel of ['pointercancel','blur','lostpointercapture']){grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));if(cancel==='lostpointercapture')grip.dispatchEvent(pointer(cancel,30));else window.dispatchEvent(cancel==='blur'?new window.Event('blur'):pointer(cancel,30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);}
  click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!.click();
  hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);assert.equal(calls[0]!.type,'reorderBeat');assert.equal(calls[0]!.toIndex,1);assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
+});
+
+
+test("shipped source-foundation native driver completes against strict renderer fixture", async () => {
+  const browser = installDom();
+  let model = foundationModel(), saved = model, draft: string | undefined;
+  const original = readFileSync(new URL("../../../tests/fixtures/source-foundation/scene.rpy", import.meta.url), "utf8").replace(/^\uFEFF/, "");
+  let text = original, accepted = text, dispose: (()=>void) | undefined;
+  let report!: (value: { passed: boolean; error?: string; checks: string[] })=>void;
+  const completed = new Promise<{ passed: boolean; error?: string; checks: string[] }>(resolve=>{report=resolve;});
+  const dispatch = async (operation: string, payload: Record<string, any> = {}): Promise<any> => {
+    switch(operation) {
+      case "project.current": return {sessionId:"native-fixture-session"};
+      case "scene.list": return model;
+      case "source.open": return {text:draft ?? text,hasBom:true,baseRevision:model.scenes[0]!.sourceRevision,dirty:draft!==undefined};
+      case "source.updateDraft": draft=payload.text; return {};
+      case "source.discard": draft=undefined; return {};
+      case "probe.runtimeUiReport": report(payload as {passed:boolean;checks:string[]}); return {};
+      case "scene.apply": {
+        const command = payload.command as SceneCommand;
+        if (command.type === "updateChildDialogue") {
+          const child = model.scenes[0]!.beats.find(b=>b.id===command.beatId)!;
+          if (JSON.stringify(command.expectedOwner)!==JSON.stringify(child.owner)) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
+          if(draft!==undefined)throw Object.assign(Error("dirty source"),{code:"DIRTY_SOURCE"});
+          text = original.replace("True café 雪",command.text as string); accepted=text;
+          model={...model,canUndo:true,canRedo:false,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:command.text as string}}:b)}]};
+          saved=model;
+        } else if(command.type==="undo") { text=original;model={...foundationModel(),canRedo:true}; }
+        else if(command.type==="redo") { text=accepted;model=saved; }
+        else throw Error(`Unexpected command ${command.type}`);
+        return model;
+      }
+      default:throw Error(`Unexpected operation ${operation}`);
+    }
+  };
+  const welcome=():void=>{
+    dispose?.();document.querySelector("#native-close")?.remove();document.querySelector("#host")!.replaceChildren();document.querySelector("#tree")!.replaceChildren();
+    const recent=document.createElement("button");recent.textContent="Source foundation fixture";document.querySelector("#host")!.append(recent);
+    recent.addEventListener("click",()=>{
+      dispose=renderSceneAuthoring(document.querySelector("#host")!,document.querySelector("#tree")!,model,{
+        status:message=>{document.querySelector("#app-status")!.textContent=message;},resolution:{width:1280,height:720},present:async()=>{throw Error("unexpected media");},
+        apply:(command,expected)=>dispatch("scene.apply",{...expected,command}),
+      });
+      const close=document.createElement("button");close.id="native-close";close.textContent="Close Project";close.addEventListener("click",welcome);document.body.append(close);
+    });
+  };
+  document.querySelector("#status")!.id="app-status";
+  Object.assign(browser, {
+    __TAURI_INTERNALS__: {
+      invoke: async (_name: string, args: any) => {
+        try { return { ok: true, value: await dispatch(args.request.operation, args.request.payload) }; }
+        catch (error) { return { ok: false, error: { code: (error as {code?: string}).code ?? "UNEXPECTED" } }; }
+      },
+    },
+  });
+  welcome();
+  browser.eval(readFileSync(new URL("../../src-tauri/src/native_editor_probe.js",import.meta.url),"utf8"));
+  browser.eval(readFileSync(new URL("../../src-tauri/src/source_foundation_probe.js",import.meta.url),"utf8"));
+  const result=await completed;
+  assert.equal(result.passed,true,JSON.stringify(result));assert.ok(result.checks.length>=10);
+  dispose?.();browser.happyDOM.abort();
 });

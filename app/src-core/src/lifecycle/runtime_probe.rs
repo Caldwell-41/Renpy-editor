@@ -3,6 +3,107 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// One Scene, no SDK execution. Uses ordinary service authoring and Source Save.
+    pub fn prepare_source_foundation_probe(data: PathBuf) -> Result<Self, String> {
+        let mut service = Self::new(data).map_err(|e| format!("probe state: {e:?}"))?;
+        let root = service.data_root.join("synthetic-project");
+        for directory in [
+            "game/definitions",
+            "game/chapters/chapter_01",
+            ".renpy-editor/recovery",
+        ] {
+            fs::create_dir_all(root.join(directory)).map_err(|e| e.to_string())?;
+        }
+        let (metadata, source_map, script, _) = build_overlay_model(
+            "Source foundation fixture",
+            "synthetic-project",
+            Resolution {
+                width: 1280,
+                height: 720,
+            },
+        );
+        let scene = &metadata.scenes[0];
+        for (path, source) in [
+            ("game/script.rpy", script.as_str()),
+            ("game/options.rpy", ""),
+            ("game/gui.rpy", ""),
+            ("game/screens.rpy", ""),
+            (
+                "game/definitions/characters.rpy",
+                "# Character definitions are added by Loomlight.\n",
+            ),
+            (
+                "game/definitions/variables.rpy",
+                "# Variable definitions are added by Loomlight.\n",
+            ),
+        ] {
+            fs::write(root.join(path), source).map_err(|e| e.to_string())?;
+        }
+        fs::write(
+            root.join(&scene.source_path),
+            format!("label {}:\n    return\n", scene.technical_label),
+        )
+        .map_err(|e| e.to_string())?;
+        metadata.write(&root).map_err(|e| format!("{e:?}"))?;
+        source_map.write(&root).map_err(|e| format!("{e:?}"))?;
+        fs::write(
+            root.join(".renpy-editor/authoring.json"),
+            serde_json::to_vec_pretty(&AuthoringMetadata::empty(metadata.project_id.clone()))
+                .unwrap(),
+        )
+        .map_err(|e| e.to_string())?;
+        service.open_path(&root).map_err(|e| format!("{e:?}"))?;
+        service
+            .authoring_create_character(CreateCharacterRequest {
+                technical_name: "bec".into(),
+                display_name: "Bec".into(),
+                dialogue_color: "#ffffff".into(),
+            })
+            .map_err(|e| format!("{e:?}"))?;
+        service
+            .authoring_create_variable(CreateVariableRequest {
+                technical_name: "flag".into(),
+                variable_type: crate::authoring::VariableType::Bool,
+                default_value: json!(true),
+            })
+            .map_err(|e| format!("{e:?}"))?;
+        let opened = service
+            .source_open(SourceOpenRequest {
+                path: scene.source_path.clone(),
+                expected_revision: None,
+                selection_start: None,
+                selection_end: None,
+                byte_start: None,
+                byte_end: None,
+            })
+            .map_err(|e| format!("{e:?}"))?;
+        let source = include_str!("../../../../tests/fixtures/source-foundation/scene.rpy")
+            .trim_start_matches('\u{feff}')
+            .replace(
+                "label scene_one:",
+                &format!("label {}:", scene.technical_label),
+            );
+        // Preserve a BOM explicitly in the accepted synthetic source.
+        let source = format!("\u{feff}{source}");
+        let draft = service
+            .source_update_draft(SourceDraftRequest {
+                path: scene.source_path.clone(),
+                expected_base_revision: opened.base_revision,
+                text: source,
+                selection_start: 0,
+                selection_end: 0,
+            })
+            .map_err(|e| format!("{e:?}"))?;
+        service
+            .source_save(SourceSaveRequest {
+                path: scene.source_path.clone(),
+                expected_base_revision: draft.base_revision,
+                expected_draft_version: draft.draft_version,
+            })
+            .map_err(|e| format!("{e:?}"))?;
+        service.close().map_err(|e| format!("{e:?}"))?;
+        Ok(service)
+    }
     /// Inspection-only full workload. No SDK installation or project execution.
     pub fn prepare_branches_ui_probe(data: PathBuf) -> Result<Self, String> {
         use sha2::{Digest, Sha256};
@@ -212,6 +313,339 @@ label oracle_hold:
 #[cfg(test)]
 mod branches_tests {
     use super::*;
+
+    fn foundation(temporary: &tempfile::TempDir) -> (LifecycleService, PathBuf) {
+        let mut service =
+            LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile"))
+                .unwrap();
+        let root = service.data_root.join("synthetic-project");
+        service.open_path(&root).unwrap();
+        (service, root)
+    }
+
+    fn child_command(model: &serde_json::Value, text: &str) -> serde_json::Value {
+        let scene = &model["scenes"][0];
+        let child = scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["owner"].is_object())
+            .unwrap();
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{
+            "type":"updateChildDialogue","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":child["id"],"expectedOwner":child["owner"],"characterId":child["payload"]["characterId"],"text":text}})
+    }
+
+    #[test]
+    fn source_foundation_dispatch_minimal_patch_owners_history_reopen() {
+        use crate::lifecycle::acceptance::ipc;
+        let temporary = tempfile::tempdir().unwrap();
+        let (mut service, root) = foundation(&temporary);
+        let model = ipc(&mut service, "scene.list", json!({}));
+        let path = model["scenes"][0]["sourcePath"].as_str().unwrap();
+        let original = fs::read(root.join(path)).unwrap();
+        let children = model["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|b| b["owner"].is_object())
+            .collect::<Vec<_>>();
+        assert_eq!(children.len(), 2);
+        assert_eq!(
+            children[0]["owner"]["groupId"],
+            children[1]["owner"]["groupId"]
+        );
+        assert_ne!(
+            children[0]["owner"]["branchId"],
+            children[1]["owner"]["branchId"]
+        );
+        let mut wrong = child_command(&model, "lost");
+        wrong["command"]["expectedOwner"] = children[1]["owner"].clone();
+        wrong["sessionId"] = json!(service.current().unwrap().session_id);
+        let refused = crate::lifecycle::tests::closeout_ipc(&mut service, "scene.apply", wrong);
+        assert_eq!(refused["ok"], false, "wrong branch must reject: {refused}");
+        assert_eq!(fs::read(root.join(path)).unwrap(), original);
+        let changed = ipc(
+            &mut service,
+            "scene.apply",
+            child_command(&model, "Edited café 雪"),
+        );
+        let expected = String::from_utf8(original.clone())
+            .unwrap()
+            .replacen("True café 雪", "Edited café 雪", 1)
+            .into_bytes();
+        assert_eq!(
+            fs::read(root.join(path)).unwrap(),
+            expected,
+            "only quoted text may change"
+        );
+        let ids = |m: &serde_json::Value| {
+            m["scenes"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|b| b["id"].clone())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(ids(&model), ids(&changed));
+        assert_eq!(
+            changed["scenes"][0]["beats"][2]["conditionalBranch"],
+            model["scenes"][0]["beats"][2]["conditionalBranch"]
+        );
+        let source = ipc(&mut service, "source.open", json!({"path":path}));
+        assert_eq!(
+            source["ranges"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|r| r["owner"].is_object())
+                .count(),
+            2
+        );
+        ipc(
+            &mut service,
+            "scene.apply",
+            json!({"expectedProjectRevision":changed["projectRevision"],"expectedSourceMapRevision":changed["sourceMapRevision"],"command":{"type":"undo"}}),
+        );
+        assert_eq!(fs::read(root.join(path)).unwrap(), original);
+        let undone = ipc(&mut service, "scene.list", json!({}));
+        ipc(
+            &mut service,
+            "scene.apply",
+            json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
+        );
+        assert_eq!(fs::read(root.join(path)).unwrap(), expected);
+        service.close().unwrap();
+        service.open_path(&root).unwrap();
+        let reopened = ipc(&mut service, "scene.list", json!({}));
+        assert_eq!(ids(&reopened), ids(&model));
+        assert_eq!(fs::read(root.join(path)).unwrap(), expected);
+        // v2 refinement preserves every old opaque/non-nested ID and unknown field.
+        service.close().unwrap();
+        let map_path = root.join(".renpy-editor/source-map.json");
+        let mut map: crate::metadata::SourceMapMetadata =
+            serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+        map.schema_version = 2;
+        for beat in &mut map.scene_mappings[0].beats {
+            if beat.owner.is_some() {
+                beat.kind = "customCode".into();
+            }
+            beat.owner = None;
+            beat.conditional_branch = None;
+            beat.extra.insert("futureField".into(), json!("kept"));
+        }
+        fs::write(&map_path, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+        service.open_path(&root).unwrap();
+        let migrated = ipc(&mut service, "scene.list", json!({}));
+        assert_eq!(ids(&migrated), ids(&model));
+        assert_eq!(fs::read(root.join(path)).unwrap(), expected);
+        let saved: crate::metadata::SourceMapMetadata =
+            serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+        assert!(saved.scene_mappings[0]
+            .beats
+            .iter()
+            .all(|b| b.extra["futureField"] == "kept"));
+        let map_bytes = fs::read(&map_path).unwrap();
+        service.close().unwrap();
+        service.open_path(&root).unwrap();
+        assert_eq!(fs::read(&map_path).unwrap(), map_bytes, "reopen is a no-op");
+        service.close().unwrap();
+    }
+
+    #[test]
+    fn source_foundation_external_conflict_dirty_draft_and_stale_session_reject() {
+        use crate::lifecycle::acceptance::ipc;
+        let temporary = tempfile::tempdir().unwrap();
+        let (mut service, root) = foundation(&temporary);
+        let model = ipc(&mut service, "scene.list", json!({}));
+        let path = model["scenes"][0]["sourcePath"].as_str().unwrap();
+        let opened = ipc(&mut service, "source.open", json!({"path":path}));
+        let retained = format!(
+            "{}# retained source draft\n",
+            opened["text"].as_str().unwrap()
+        );
+        ipc(
+            &mut service,
+            "source.updateDraft",
+            json!({"path":path,"expectedBaseRevision":opened["baseRevision"],"text":retained,"selectionStart":0,"selectionEnd":0}),
+        );
+        let mut command = child_command(&model, "Must not save");
+        command["sessionId"] = json!(service.current().unwrap().session_id);
+        let refused =
+            crate::lifecycle::tests::closeout_ipc(&mut service, "scene.apply", command.clone());
+        assert_eq!(refused["ok"], false);
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":path}))["text"],
+            retained
+        );
+        ipc(&mut service, "source.discard", json!({"path":path}));
+        let external = fs::read(root.join(path))
+            .unwrap()
+            .into_iter()
+            .chain(b"# ordinary external writer\n".iter().copied())
+            .collect::<Vec<_>>();
+        fs::write(root.join(path), &external).unwrap();
+        let refused =
+            crate::lifecycle::tests::closeout_ipc(&mut service, "scene.apply", command.clone());
+        assert_eq!(refused["ok"], false, "stale source revision must reject");
+        assert_eq!(fs::read(root.join(path)).unwrap(), external);
+        ipc(&mut service, "source.open", json!({"path":path}));
+        service.close().unwrap();
+        service.open_path(&root).unwrap();
+        let refused = crate::lifecycle::tests::closeout_ipc(&mut service, "scene.apply", command);
+        assert_eq!(refused["ok"], false, "old session must reject");
+        assert_eq!(fs::read(root.join(path)).unwrap(), external);
+        service.close().unwrap();
+    }
+
+    #[test]
+    fn source_foundation_identical_children_keep_ids_and_root_commands_reject() {
+        use crate::lifecycle::acceptance::ipc;
+        let temporary = tempfile::tempdir().unwrap();
+        let (mut service, root) = foundation(&temporary);
+        let model = ipc(&mut service, "scene.list", json!({}));
+        let path = model["scenes"][0]["sourcePath"].as_str().unwrap();
+        let opened = ipc(&mut service, "source.open", json!({"path":path}));
+        let source = opened["text"]
+            .as_str()
+            .unwrap()
+            .replace(" # keep true suffix", "")
+            .replace(" # keep false suffix", "");
+        let draft = ipc(
+            &mut service,
+            "source.updateDraft",
+            json!({"path":path,"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}),
+        );
+        ipc(
+            &mut service,
+            "source.save",
+            json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+        );
+        let before = ipc(&mut service, "scene.list", json!({}));
+        let second = before["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|b| b["owner"].is_object())
+            .nth(1)
+            .unwrap();
+        let mut duplicate = child_command(&before, "True café 雪");
+        duplicate["command"]["beatId"] = second["id"].clone();
+        duplicate["command"]["expectedOwner"] = second["owner"].clone();
+        let after = ipc(&mut service, "scene.apply", duplicate);
+        let old = before["scenes"][0]["beats"].as_array().unwrap();
+        let new = after["scenes"][0]["beats"].as_array().unwrap();
+        assert_eq!(
+            old.iter().map(|b| &b["id"]).collect::<Vec<_>>(),
+            new.iter().map(|b| &b["id"]).collect::<Vec<_>>()
+        );
+        let child = new.iter().find(|b| b["owner"].is_object()).unwrap();
+        let accepted = fs::read(root.join(path)).unwrap();
+        for command in [
+            json!({"type":"updateBeat","beatId":child["id"],"beat":child["payload"]}),
+            json!({"type":"removeBeat","beatId":child["id"]}),
+            json!({"type":"moveBeat","beatId":child["id"],"direction":"up"}),
+            json!({"type":"reorderBeat","beatId":child["id"],"toIndex":0}),
+            json!({"type":"insertBeat","beforeBeatId":child["id"],"beat":child["payload"]}),
+            json!({"type":"continueDialogue","beatId":child["id"],"characterId":child["payload"]["characterId"],"text":"new"}),
+        ] {
+            let mut command = command;
+            command["sceneId"] = after["scenes"][0]["id"].clone();
+            command["expectedSourceRevision"] = after["scenes"][0]["sourceRevision"].clone();
+            let session_id = service.current().unwrap().session_id;
+            let response = crate::lifecycle::tests::closeout_ipc(
+                &mut service,
+                "scene.apply",
+                json!({"sessionId":session_id,"expectedProjectRevision":after["projectRevision"],"expectedSourceMapRevision":after["sourceMapRevision"],"command":command}),
+            );
+            assert_eq!(
+                response["ok"], false,
+                "root operation must reject child: {response}"
+            );
+            assert_eq!(fs::read(root.join(path)).unwrap(), accepted);
+        }
+        service.close().unwrap();
+    }
+
+    #[test]
+    fn source_foundation_unknown_condition_or_body_stays_opaque() {
+        use crate::lifecycle::acceptance::ipc;
+        for (condition, body) in [
+            ("flag and True", "bec \"True\""),
+            ("missing", "bec \"True\""),
+            ("flag", "$ unknown = 1"),
+            ("flag", "if flag:\n            bec \"nested\""),
+        ] {
+            let temporary = tempfile::tempdir().unwrap();
+            let (mut service, _) = foundation(&temporary);
+            let model = ipc(&mut service, "scene.list", json!({}));
+            let scene = &model["scenes"][0];
+            let source = format!("label {}:\n    if {condition}:\n        {body}\n    else:\n        bec \"False\"\n    return\n", scene["technicalLabel"].as_str().unwrap());
+            let opened = ipc(
+                &mut service,
+                "source.open",
+                json!({"path":scene["sourcePath"]}),
+            );
+            let draft = ipc(
+                &mut service,
+                "source.updateDraft",
+                json!({"path":scene["sourcePath"],"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}),
+            );
+            ipc(
+                &mut service,
+                "source.save",
+                json!({"path":scene["sourcePath"],"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+            );
+            let result = service.scene_workspace().unwrap();
+            assert!(result.scenes[0]
+                .beats
+                .iter()
+                .all(|b| b.owner.is_none() && b.conditional_branch.is_none()));
+            assert!(result.scenes[0].partial);
+            service.close().unwrap();
+        }
+    }
+
+    #[test]
+    fn source_foundation_quoted_token_corpus_preserves_every_neighbor() {
+        use crate::lifecycle::acceptance::ipc;
+        let temporary = tempfile::tempdir().unwrap();
+        let (mut service, root) = foundation(&temporary);
+        for text in [
+            "quote \" and slash \\",
+            "hash # is dialogue",
+            "line one\nline two",
+            "雪 café 👋",
+            "",
+        ] {
+            let before = ipc(&mut service, "scene.list", json!({}));
+            let path = before["scenes"][0]["sourcePath"].as_str().unwrap();
+            let original = fs::read(root.join(path)).unwrap();
+            let child = before["scenes"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|b| b["owner"].is_object())
+                .unwrap();
+            let start = child["byteStart"].as_u64().unwrap() as usize;
+            let end = child["byteEnd"].as_u64().unwrap() as usize;
+            let after = ipc(&mut service, "scene.apply", child_command(&before, text));
+            let new_child = after["scenes"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|b| b["id"] == child["id"])
+                .unwrap();
+            let new_end = new_child["byteEnd"].as_u64().unwrap() as usize;
+            let accepted = fs::read(root.join(path)).unwrap();
+            assert_eq!(&accepted[..start], &original[..start]);
+            assert_eq!(&accepted[new_end..], &original[end..]);
+            assert_eq!(new_child["payload"]["text"], text);
+            assert!(std::str::from_utf8(&accepted[start..new_end])
+                .unwrap()
+                .ends_with(" # keep true suffix\r\n"));
+        }
+        service.close().unwrap();
+    }
 
     #[test]
     fn branches_native_fixture_has_full_workload_without_sdk_or_execution() {

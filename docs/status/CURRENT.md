@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** main.
+**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation (Windows handoff checkpoint).
 **Phase 1: accepted, integrated and closed.**
 
 [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18) merged at
@@ -32,7 +32,23 @@ non-notarized packages and unqualified installer paths as a one-off public-previ
 exception. [Archived publication](../tasks/archive/2026-10-07-release-0.1.0.md) owns exact
 approval, tag/build identities, asset hashes and limitations.
 
-**Next actual state:** no implementation selected. Phase 2/3 remain planning only and
-optional Git remains deferred. Planning worktree `2c5a164` and its two unpublished
-commits are untouched. [HANDOVER](HANDOVER.md) owns the completed publication record
-and preserved-work details.
+**Current selected outcome:** Phase 2 section 21 source foundation is implemented
+on accepted main `aba200f` plus preserved planning refinements. Story recognizes
+a declared-bool If/Otherwise group and edits existing dialogue children through
+explicit ownership, core dispatch and the existing transaction/history path.
+[ADR 0012](../adr/0012-bounded-nested-dialogue-ownership.md) owns source-map v3; project
+schema remains v2. Full 3A and provider/AI implementation remain unaccepted/unstarted.
+
+Focused core/renderer checks pass. Mac ARM64 source-foundation proof is complete on
+recorded app/fixture inputs: replacement build PASS, official 8.5.3 SDK
+true/false/rejecting gate and cleanup PASS, native WebView
+Story action PASS (11 checks, cleanup true). The native action uses synthetic DOM
+input; no physical-input, human or installer acceptance is inferred. Earlier failed
+build/oracle and cancelled sandbox-startup evidence remain retained. The
+[section 23 ledger](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
+owns exact inputs, results and cumulative allowance. Overall qualification remains
+**incomplete pending Windows x64**, not review-ready/accepted. Windows proof will be
+a separate Codex run on a different machine; access is unconfirmed here and its one
+targeted allowance is unused. User authorized branch publication for Windows pull;
+no further Mac run, merge, release or subsequent deliverable. Historical worktree
+`2c5a164` and planning refinements/ADR 0011 are preserved. [HANDOVER](HANDOVER.md) owns the exact transfer and next action.

@@ -25,7 +25,11 @@ export type BeatPayload =
   | { readonly type: "return" }
   | { readonly type: "customCode"; readonly source: string; readonly reason: string };
 
+export interface BeatOwner { readonly groupId: string; readonly branchId: string }
+export interface ConditionalBranch { readonly groupId: string; readonly variableId: string; readonly otherwise: boolean }
 export interface SceneBeat {
+  readonly owner?: BeatOwner;
+  readonly conditionalBranch?: ConditionalBranch;
   readonly id: string;
   readonly byteStart: number;
   readonly byteEnd: number;
@@ -119,6 +123,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
   const unknownBeatIds: string[] = [];
   for (const beat of scene.beats.slice(0, limit + 1)) {
     const payload = beat.payload;
+    if (beat.owner && beat.id !== throughBeatId) continue;
     if (payload.type === "customCode") {
       unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
       characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
@@ -584,18 +589,20 @@ export function renderSceneAuthoring(
     const escapeDrag=(event:KeyboardEvent):void=>{if(event.key==="Escape"&&drag){event.preventDefault();const grip=drag.grip;cancelDrag();grip.focus();}};
     scene.beats.forEach((beat, index) => {
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
+      if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
+      if (beat.conditionalBranch) card.classList.add("conditional-branch");
       const compact = document.createElement("div"); compact.className = "beat-compact";
-      const select = button(`${index + 1}. ${beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
-      const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beatSummary(beat.payload, model);
+      const select = button(`${index + 1}. ${beat.conditionalBranch ? (beat.conditionalBranch.otherwise ? "Otherwise" : "If " + (model.authoring.variables.find(v=>v.id===beat.conditionalBranch?.variableId)?.technicalName ?? "missing bool variable")) : beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
+      const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.conditionalBranch ? "Read-only condition branch" : beatSummary(beat.payload, model);
       select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || beat.protected || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
       up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || beat.protected || scene.beats[index + 1]?.protected === true || scene.sourceConflict;
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || scene.beats[index + 1]?.protected === true || scene.sourceConflict;
       down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
-      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = beat.protected || beat.payload.type === "return" || scene.sourceConflict;
+      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || beat.payload.type === "return" || scene.sourceConflict;
       remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));
-      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=beat.protected||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
+      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
       grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
       grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasSceneDraft(host)||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
       controls.append(up, down, remove); compact.append(grip,select, controls); card.append(compact);
@@ -612,6 +619,7 @@ export function renderSceneAuthoring(
       protectedPanel.append(explanation, source); card.append(protectedPanel); return;
     }
     const editor = buildBeatEditor(model, beat.payload);
+    if (beat.owner) editor.host.querySelectorAll("select").forEach(control=>control.disabled=true);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "choice") {
       const createDestination = button("Create New Scene", "button secondary");
@@ -648,19 +656,21 @@ export function renderSceneAuthoring(
       try {
         const payload = editor.read();
         panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=true);
-        if (continueDialogue && payload.type === "dialogue") {
+        if (continueDialogue && !beat.owner && payload.type === "dialogue") {
           const oldIds = new Set(model.scenes.find((item) => item.id === scene.id)?.beats.map((item) => item.id));
           await mutate({ type: "continueDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, characterId: payload.characterId, text: payload.text }, (_before, next) => {
             saved=true;selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
           });
         } else {
-          await mutate({ type: "updateBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, beat: payload }, () => { saved=true;selectedBeatId = undefined; });
+          await mutate(beat.owner && payload.type === "dialogue"
+            ? { type: "updateChildDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedOwner: beat.owner, characterId: payload.characterId, text: payload.text }
+            : { type: "updateBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, beat: payload }, () => { saved=true;selectedBeatId = undefined; });
         }
       } catch (error) {
         actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
         editor.focus();
       }
-      if(!saved&&panel.isConnected){panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=false);editor.focus();}
+      if(!saved&&panel.isConnected){panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=!!beat.owner && c instanceof HTMLSelectElement);editor.focus();}
       return saved;
     };
     if(beat.payload.type==="dialogue")saveDialogue=()=>save(false);

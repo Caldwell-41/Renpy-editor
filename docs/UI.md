@@ -888,6 +888,16 @@ Before Send, show the effective prompt, selected card/lore entries and token bre
 over-budget input requires a visible correction. Prompt reset is undoable and does
 not reset references, credentials or size settings. These controls are not Phase 1 UI.
 
+Planned AI Settings separates Application connections from Current project prompts.
+Offer **Remember on this computer**, explicit **Use for this app session**, and generic
+**No authentication**. Session means app lifetime; native entry never returns key text
+to the WebView. Report incomplete removal and explain provider revocation separately.
+Private-network HTTP needs unencrypted-transport opt-in. Project prompts show saved/
+installed baseline versions, text comparison and undoable Restore baseline. No shared
+personal template library in v1. References show approved and proposed revisions,
+stale/missing citations, basic Scene/route scope and written knowledge/spoiler notes.
+These are Phase 2 plans, not implemented Phase 1 controls.
+
 ## Resolution and accessibility checks
 
 - Author at project resolution (default `1920×1080`) while previewing alternative
@@ -1030,3 +1040,13 @@ retain their existing independent harness behavior. OS termination still uses sh
 Project closure is ordered behind shared-service saved-state observations and Source
 retention, so a passive read cannot race its single close request. Runtime Stop and
 other token-bound controls stay independent; ambiguous writes are never replayed.
+
+## Bounded source-foundation Story outline
+
+An existing declared-bool If/Otherwise group with direct dialogue children is displayed
+with read-only branch rows and indented selectable dialogue. Commit edits only the
+existing child text; Speaker, move, delete and continuation are disabled for that
+child. A refused revision/owner/session save retains the entered draft and focus.
+The preview remains partial and does not choose or execute a branch. Full condition
+authoring and group operations remain Phase 3 work. Local implementation and target
+evidence are tracked in [Phase 2 section 23](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).

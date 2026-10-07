@@ -1,4 +1,5 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
+import type { BeatOwner, ConditionalBranch } from "./scene-ui.ts";
 import { sourceEditor, type SourceEditor } from "./source-editor.ts";
 import type { EditorState } from "@codemirror/state";
 import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
@@ -26,6 +27,8 @@ export interface SourceDiagnostic {
 }
 
 export interface SourceRange {
+  readonly owner?: BeatOwner;
+  readonly conditionalBranch?: ConditionalBranch;
   readonly sceneId: string;
   readonly beatId: string;
   readonly kind: string;

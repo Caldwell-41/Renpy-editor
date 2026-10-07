@@ -91,10 +91,10 @@ provider feasibility, then targets a complete reviewed dialogue rewrite using ma
 cards/lorebook and configurable prompts/limits. Remaining Phase 2 actions/provider
 coverage and 3A Story logic can then overlap.
 [Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
-own the detailed dependency gates and GPT-6.1 Sol High owner/two-agent allocation.
+own the detailed gates and GPT-6.1 Sol High owner with zero to two useful independent helpers.
 Phase 2 still requires final integrated acceptance; these stages do not enlarge its
 AI operation allowlist or authorize implementation.
-[The existing brief](tasks/active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+[The deliverable queue](tasks/active/phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
 maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
 under WORKFLOW, not mandatory chat transfers.
 
@@ -107,6 +107,12 @@ Execute separately scoped internal briefs after Phase 1 acceptance and explicit 
 | 2C — Structured proposals and acceptance | Scene, runnable Character, Character-card and lorebook draft/update actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
 
 **Exit criteria:** every send reveals destination/locality/context/estimated size; remote sensitive-content warnings and explicit consent work; unsupported schemas/paths/identifiers and malicious output are refused; partial acceptance cannot omit required definitions or dependencies; stale/cancelled responses cannot mutate a replacement session. No source or lore becomes canonical without review. Credentials and these safety gates are Phase 2 prerequisites, not deferred Phase 3 release polish.
+
+The 2026-10-07 refinement selects native references/basic Scene/route scope and knowledge
+notes, project prompts, device-local profiles and OS/session-only keys. [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md)
+owns persistence/privacy. External interoperability and a shared prompt library stay
+deferred. Component tests reuse existing gates, early risk proofs and combined milestone
+qualification rather than full package matrices at every increment.
 
 State simulation/Run From Here remain Phase 3; broader reachability/state and narrative inference remain Phase 4. Phase 2 must not claim knowledge those later capabilities have not established.
 
@@ -126,8 +132,8 @@ code seams, early risk proofs and completion gates. The user selected **Story lo
 The selected shared-foundation sequence allows scoped 3A work before Phase 2
 completion; after accepted Phase 2/3A, Screens and Timeline can use parallel lanes.
 State/Run From Here consumes qualified story/effect semantics, and release qualification
-follows all required capabilities. This plans ahead alongside Phase 1G; it neither
-starts Phase 2/3 nor changes Phase 1 acceptance. Exact screen/Timeline subsets, Run From Here
+follows all required capabilities. Phase 1 is accepted/integrated/closed; this plan
+does not select Phase 2/3 implementation. Exact screen/Timeline subsets, Run From Here
 entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |

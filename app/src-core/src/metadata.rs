@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 2;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 3;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
 
@@ -112,6 +112,10 @@ pub struct SceneSourceMapping {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BeatSourceMapping {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner: Option<BeatOwner>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditional_branch: Option<ConditionalBranch>,
     pub id: String,
     pub kind: String,
     pub byte_start: u64,
@@ -119,6 +123,22 @@ pub struct BeatSourceMapping {
     pub source_sha256: String,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
+}
+
+/// Identities are source-derived; ranges/revisions remain on the enclosing map.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BeatOwner {
+    pub group_id: String,
+    pub branch_id: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ConditionalBranch {
+    pub group_id: String,
+    pub variable_id: String,
+    pub otherwise: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -292,7 +312,7 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
@@ -320,6 +340,8 @@ impl SourceMapMetadata {
             validate_relative_path(&scene.path)?;
             let mut beat_ids = HashSet::new();
             let mut last_end = scene.label_start;
+            let mut groups = HashSet::new();
+            let mut active_branch: Option<(&str, &str)> = None;
             for beat in &scene.beats {
                 if !valid_id(&beat.id)
                     || !beat_ids.insert(beat.id.clone())
@@ -333,6 +355,35 @@ impl SourceMapMetadata {
                     return Err(MetadataError::InvalidStructure);
                 }
                 last_end = beat.byte_end;
+                if self.schema_version < 3
+                    && (beat.owner.is_some() || beat.conditional_branch.is_some())
+                {
+                    return Err(MetadataError::InvalidStructure);
+                }
+                if let Some(branch) = &beat.conditional_branch {
+                    if beat.owner.is_some()
+                        || beat.kind != "customCode"
+                        || !valid_id(&branch.group_id)
+                        || !valid_id(&branch.variable_id)
+                        || beat_ids.contains(&branch.group_id)
+                        || if branch.otherwise {
+                            active_branch.is_none_or(|(group, _)| group != branch.group_id)
+                        } else {
+                            !groups.insert(branch.group_id.as_str())
+                        }
+                    {
+                        return Err(MetadataError::InvalidStructure);
+                    }
+                    active_branch = Some((&branch.group_id, &beat.id));
+                }
+                if let Some(owner) = &beat.owner {
+                    if beat.kind != "dialogue"
+                        || active_branch
+                            != Some((owner.group_id.as_str(), owner.branch_id.as_str()))
+                    {
+                        return Err(MetadataError::InvalidStructure);
+                    }
+                }
             }
         }
         Ok(())

@@ -637,3 +637,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .preview-canvas .preview-overlay {box-sizing:border-box;max-height:88%;min-height:0;overflow:auto}
 .import-preview-status {font-size:.85em;color:var(--text-muted);overflow-wrap:anywhere}
 .import-staged-toolbar {display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* Source-owned nested dialogue; structural controls remain read-only. */
+.beat-card.nested-dialogue { margin-inline-start: 1.5rem; border-inline-start: 3px solid var(--accent-primary); }
+.beat-card.conditional-branch .beat-select { font-weight: 600; }
