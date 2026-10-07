@@ -39,16 +39,50 @@ explicit ownership, core dispatch and the existing transaction/history path.
 [ADR 0012](../adr/0012-bounded-nested-dialogue-ownership.md) owns source-map v3; project
 schema remains v2. Full 3A and provider/AI implementation remain unaccepted/unstarted.
 
-Focused core/renderer checks pass. Mac ARM64 source-foundation proof is complete on
-recorded app/fixture inputs: replacement build PASS, official 8.5.3 SDK
-true/false/rejecting gate and cleanup PASS, native WebView
-Story action PASS (11 checks, cleanup true). The native action uses synthetic DOM
-input; no physical-input, human or installer acceptance is inferred. Earlier failed
-build/oracle and cancelled sandbox-startup evidence remain retained. The
-[section 23 ledger](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
-owns exact inputs, results and cumulative allowance. Overall qualification remains
-**incomplete pending Windows x64**, not review-ready/accepted. Windows proof will be
-a separate Codex run on a different machine; access is unconfirmed here and its one
-targeted allowance is unused. User authorized branch publication for Windows pull;
-no further Mac run, merge, release or subsequent deliverable. Historical worktree
-`2c5a164` and planning refinements/ADR 0011 are preserved. [HANDOVER](HANDOVER.md) owns the exact transfer and next action.
+**Corrected-input Windows qualification complete; macOS qualification incomplete.**
+Independent review/re-review found no remaining actionable in-scope defect after the
+bounded EOF separator/identity correction. Minimum target qualification is now selected.
+Extended native probes retain the original eleven checks and require 33 checks for
+boundary refusals, safe outside-group edits, EOF append, IDs/owners, history/reopen and
+exact retained drafts, including normal shell reopening after an external refusal.
+The SDK gate executes source produced by EOF append with true/false and deliberate
+wrong-outcome assertions. Cheap core/renderer/fixture/controller checks pass; existing
+unchanged broader passing checks are reused. One initial cheap harness failure is retained.
+
+Final frozen **139-input** digest:
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`, in ignored
+`.toolchains/reports/source-foundation/corrected-qualification/inputs-final.json`.
+The [portable final input manifest and Windows receipt](../tasks/active/source-foundation-qualified-inputs.json)
+is checkpointed with the corrected app/probe bytes. The original committed manifest and reviewed 138-input digest
+`bd0b1406e001b51572d9c464ae3078293febf0e4e03063af428d3f23aedcc690` remain historical.
+No application/probe input changed after freeze.
+
+**Windows x64 PASS:** one release no-bundle build 55.078s; one native launch 13.312s,
+all 33 exact checks/one terminal report/cleanup true; one exact pinned-SDK gate
+108.359s, true/false each six actual passing assertions and deliberate wrong-outcome
+exit 1/FAILED. All gates remain within 20/5/10-minute caps; no retry/duplicate.
+Strict 20-check terminal audit passes input/binary/source identity, assertion counts,
+rejecting outcome and retention/cleanup. All 1,035 entry-indexed prior evidence files
+remain unchanged; new exact inputs, binaries, logs, profile and failure evidence are
+retained separately. Zero owned processes; new contained short scratch/cache retained
+before cleanup. Synthetic native DOM input is distinct from physical/human/installer proof.
+
+**macOS ARM64 INCOMPLETE:** this session exposes only the local Windows host; no
+agent-owned Mac connection, original Mac evidence or direct transfer is available.
+Access was requested, but no connection supplied. Local transfer archives are staged;
+no corrected-input Mac hash match, build, launch or SDK execution is claimed.
+Original Mac proof remains on its original host and does not qualify changed inputs.
+**Both-target qualification incomplete; corrected foundation not accepted.**
+
+Continuation remains `codex/nested-source-foundation`; the user selected publication
+of the corrected-input checkpoint `fix: qualify corrected nested source foundation on Windows`
+on this branch, based on `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`. Resolve the branch
+tip for its exact commit; the final 139 app/fixture hashes must match the portable
+manifest. Raw Windows binaries/logs remain locally retained for direct evidence transfer.
+[Section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
+owns exact results and cumulative counts **Windows 2 builds/2 launches/3 SDK;
+macOS 2/2/2**. New Windows allowances consumed; new Mac one/one/one remains unused,
+with 20/5/10-minute caps and zero retries. [HANDOVER](HANDOVER.md) owns access/transfer
+and Mac continuation. No process or CI is pending. No infrastructure installation,
+full matrix, provider/AI work, merge, release or following deliverable. Publication is
+limited to the user-requested branch checkpoint and portable qualification receipt.

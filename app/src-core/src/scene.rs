@@ -1821,19 +1821,38 @@ fn apply_beat_edit(
                     }
                 })
             };
+            if root_insertion_is_nested(beats, insertion) {
+                return Err(SceneError::InvariantBlocked);
+            }
             if boundary_is_opaque(beats, insertion) {
                 return Err(SceneError::OpaqueBoundary);
             }
             let rendered = render_payload(&payload, loaded, newline)?;
             let id = uuid::Uuid::new_v4().to_string();
+            let mut forced = vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)];
             let mut output = Vec::with_capacity(source.len() + rendered.len());
             output.extend_from_slice(&source[..insertion]);
+            // An EOF child can have no line terminator. Separate the new root
+            // statement without changing any existing source bytes.
+            if insertion > 0 && source[insertion - 1] != b'\n' {
+                output.extend_from_slice(newline.as_bytes());
+                // The separator extends the preceding Beat's physical range;
+                // retain its identity despite the changed range hash.
+                if let Some(previous) = beats
+                    .iter()
+                    .find(|beat| beat.byte_end as usize == insertion)
+                {
+                    forced.push((
+                        previous.payload.kind().into(),
+                        sha256(&output[previous.byte_start as usize..]),
+                        previous.id.clone(),
+                        Some(previous.byte_start as usize),
+                    ));
+                }
+            }
             output.extend_from_slice(rendered.as_bytes());
             output.extend_from_slice(&source[insertion..]);
-            Ok((
-                output,
-                vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)],
-            ))
+            Ok((output, forced))
         }
         BeatEdit::Update { id, payload } => {
             validate_payload(&payload, loaded)?;
@@ -1935,6 +1954,9 @@ fn apply_beat_edit(
             }
             let (first, last) = (from.min(to_index), from.max(to_index));
             let window = &beats[first..=last];
+            if window.iter().any(|b| b.owner.is_some()) {
+                return Err(SceneError::InvariantBlocked);
+            }
             if window.iter().any(|b| b.protected)
                 || window.windows(2).any(|p| p[0].byte_end != p[1].byte_start)
             {
@@ -1971,6 +1993,9 @@ fn apply_beat_edit(
                 MoveDirection::Down => (index + 1 < beats.len()).then_some(index + 1),
             }
             .ok_or(SceneError::InvariantBlocked)?;
+            if beats[other].owner.is_some() {
+                return Err(SceneError::InvariantBlocked);
+            }
             if beats[index].protected || beats[other].protected {
                 return Err(SceneError::OpaqueBoundary);
             }
@@ -3156,6 +3181,28 @@ fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         },
     }
+}
+
+/// A root statement may precede a whole group or follow its last child, but
+/// cannot split headers, children or the trivia between them.
+fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
+    let mut group_start = None;
+    for beat in beats {
+        if beat
+            .conditional_branch
+            .as_ref()
+            .is_some_and(|b| !b.otherwise)
+        {
+            group_start = Some(beat.byte_start as usize);
+        }
+        if beat.owner.is_some()
+            && group_start.is_some_and(|start| start < insertion)
+            && insertion < beat.byte_end as usize
+        {
+            return true;
+        }
+    }
+    false
 }
 
 fn boundary_is_opaque(beats: &[SceneBeat], insertion: usize) -> bool {

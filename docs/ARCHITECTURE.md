@@ -278,7 +278,8 @@ reuses it for bounded Source mapping and leaves all unproved syntax visibly opaq
 The bounded source foundation adds a declared-bool If/Otherwise outline with direct
 dialogue children on source-map v3. `updateChildDialogue` verifies revision and explicit
 group/branch ownership, then patches only the existing quoted text through the same
-transaction/history service. Root mutations refuse nested child targets. Structural
+transaction/history service. Root mutations refuse nested child targets, movement
+ranges containing children and insertion inside a group's headers/body trivia. Structural
 rows stay read-only, unsupported bodies stay opaque, and preview does not infer a
 branch route. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) owns the migration
 and minimal preparation contract; full condition/call semantics remain planned.

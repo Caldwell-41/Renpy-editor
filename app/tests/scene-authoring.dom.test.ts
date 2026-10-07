@@ -115,6 +115,60 @@ test("nested child commits carry owner and retain input on stale/session refusal
   dispose(); browser.happyDOM.abort();
 });
 
+test("root controls respect nested children and conditional insertion boundaries", async () => {
+  const browser = installDom();
+  const base = foundationModel();
+  const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
+    ...base.scenes[0]!.beats.slice(0, 2),
+    { id: "if-trivia", byteStart: 60, byteEnd: 65, protected: true, payload: { type: "customCode", source: "        # before Otherwise", reason: "Protected" } },
+    { ...base.scenes[0]!.beats[2]!, byteStart: 65, byteEnd: 75 },
+    { id: "else-trivia", byteStart: 75, byteEnd: 80, protected: true, payload: { type: "customCode", source: "        # before child", reason: "Protected" } },
+    { ...base.scenes[0]!.beats[3]!, byteStart: 80 },
+    { id: "root-one", byteStart: 100, byteEnd: 120, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Root one" } },
+    { id: "root-two", byteStart: 120, byteEnd: 140, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Root two" } },
+    { ...base.scenes[0]!.beats[4]!, byteStart: 140, byteEnd: 151 },
+  ] }] };
+  const host = document.querySelector<HTMLElement>("#host")!;
+  const calls: SceneCommand[] = [];
+  const dispose = renderSceneAuthoring(host, document.querySelector("#tree")!, model, {
+    status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("unused"); },
+    apply: async command => { calls.push(command); return model; },
+  });
+  try {
+    const root = host.querySelector<HTMLElement>('[data-beat-id="root-one"]')!;
+    const controls = root.querySelectorAll<HTMLButtonElement>(".beat-controls button");
+    assert.equal(controls[0]!.disabled, true, "root cannot move above an Otherwise child");
+    assert.equal(controls[1]!.disabled, false, "root-to-root move stays available");
+    const grip = root.querySelector<HTMLButtonElement>(".beat-grip")!;
+    const child = host.querySelector<HTMLElement>('[data-beat-id="other"]')!;
+    document.elementFromPoint = () => child;
+    const pointer = (type: string, x: number): Event => new browser.PointerEvent(type, { button: 0, pointerId: 1, clientX: x, clientY: 20, bubbles: true }) as unknown as Event;
+    grip.dispatchEvent(pointer("pointerdown", 10));
+    window.dispatchEvent(pointer("pointermove", 30));
+    assert.equal(child.classList.contains("drop-before"), false);
+    window.dispatchEvent(pointer("pointerup", 30));
+    await tick();
+    assert.equal(calls.length, 0, "root drag must not cross a child");
+    for (const id of ["else", "child", "if-trivia", "else-trivia"]) {
+      host.querySelector<HTMLButtonElement>(`[data-beat-id="${id}"] .beat-select`)!.click();
+      const additions = host.querySelectorAll<HTMLButtonElement>(".provenance-row button:last-child");
+      assert.ok(additions.length > 0);
+      assert.ok([...additions].every(button => button.disabled), "Add change here cannot insert inside a branch");
+      assert.equal(host.querySelector(".new-beat"), null);
+      host.querySelector<HTMLButtonElement>(`[data-beat-id="${id}"] .beat-select`)!.click();
+    }
+    host.querySelector<HTMLButtonElement>('[data-beat-id="if"] .beat-select')!.click();
+    const safeAdd = host.querySelector<HTMLButtonElement>(".provenance-row button:last-child")!;
+    assert.equal(safeAdd.disabled, false, "insertion before the whole group is safe");
+    safeAdd.click();
+    assert.ok(host.querySelector(".new-beat"));
+    assert.equal(calls.length, 0);
+    host.querySelector<HTMLButtonElement>(".new-beat .text-button")!.click();
+    host.querySelector<HTMLButtonElement>('[data-beat-id="root-one"] .beat-select')!.click();
+    assert.equal(host.querySelector<HTMLButtonElement>(".provenance-row button:last-child")!.disabled, false, "insertion after the group stays available");
+  } finally { dispose(); await browser.happyDOM.close(); }
+});
+
 test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuation, and Create New Scene", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
   renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {

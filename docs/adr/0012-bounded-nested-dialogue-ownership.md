@@ -1,6 +1,6 @@
 # ADR 0012: Bounded nested dialogue ownership
 
-- Status: Implemented locally; supported-target qualification incomplete
+- Status: Independently reviewed corrections; Windows qualified, macOS pending; not accepted
 - Date: 2026-10-07
 - Scope: Phase 2 section 21, bounded 3A.1/3A.2 foundation
 
@@ -30,7 +30,12 @@ revision and the existing Character ID. Preparation checks that owner and refuse
 speaker changes. It patches only the quoted text using the existing transaction,
 history, conflict and recovery services. Anchored forced-ID reuse prevents a new
 identical line from taking a sibling's ID. Root insert/move/remove/update/continuation
-commands refuse child targets; group headers remain protected.
+commands refuse child targets and movement ranges containing children. Root insertion
+cannot split the group through branch headers or intervening trivia; insertion before
+the whole group or after its last child remains available. Group headers stay protected.
+Appending after a child without a final line ending adds only the necessary separator
+using the existing newline policy. Its extended range/hash is anchored to the same
+Beat ID, preserving ownership and unknown mapping fields.
 
 Recognition accepts exact four-space bool headers, an explicit Else body, and direct
 eight-space canonical dialogue plus blank/comment trivia. Both bodies need dialogue.
@@ -48,5 +53,5 @@ later selected outcome. Existing Source reconciliation and runtime adapters rema
 shared. Core/renderer regressions reject wrong owners, stale sessions/revisions and
 root operations, and compare exact bytes/IDs across migration/history/reopen. The
 optional packaged `source-foundation` case and separately selected pinned-SDK gate
-qualify real native action and true/false syntax outcomes. Missing Windows/native
-evidence is recorded in the [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07), never inferred from a fixture.
+qualify real native action and true/false syntax outcomes. Supported-target proof and earlier failure
+evidence are recorded in the [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07), never inferred from a fixture.

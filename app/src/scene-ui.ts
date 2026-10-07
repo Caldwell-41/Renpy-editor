@@ -37,6 +37,18 @@ export interface SceneBeat {
   readonly payload: BeatPayload;
 }
 
+function rootInsertionIsNested(scene: SceneDocument, beforeBeatId: string | null): boolean {
+  if (beforeBeatId === null) return false;
+  const insertion = scene.beats.find(beat => beat.id === beforeBeatId)?.byteStart;
+  if (insertion === undefined) return false;
+  let groupStart: number | undefined;
+  for (const beat of scene.beats) {
+    if (beat.conditionalBranch && !beat.conditionalBranch.otherwise) groupStart = beat.byteStart;
+    if (beat.owner && groupStart !== undefined && groupStart < insertion && insertion < beat.byteEnd) return true;
+  }
+  return false;
+}
+
 export interface SceneDocument {
   readonly id: string;
   readonly chapterId: string;
@@ -404,6 +416,10 @@ export function renderSceneAuthoring(
 
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
+    if (rootInsertionIsNested(scene, beforeBeatId)) {
+      actions.status("Add a root Beat before or after the whole condition group.", "error");
+      return;
+    }
     selectedBeatId = undefined;
     draw();
     const current = model.scenes.find((item) => item.id === scene.id);
@@ -485,7 +501,7 @@ export function renderSceneAuthoring(
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
       const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
       if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null)); row.append(add); provenance.append(row);
+      const add = button("Add change here", "text-button"); add.disabled = rootInsertionIsNested(scene, selectedBeatId ?? null); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null)); row.append(add); provenance.append(row);
     };
     contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
@@ -559,7 +575,7 @@ export function renderSceneAuthoring(
       const target=scene.beats.findIndex(b=>b.id===card.dataset.beatId);
       if(target<0||target===drag.from)return;
       const interval=scene.beats.slice(Math.min(target,drag.from),Math.max(target,drag.from)+1);
-      if(interval.some(b=>b.protected||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
+      if(interval.some(b=>b.owner||b.protected||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
       drag.target=target;card.classList.add(target>drag.from?"drop-after":"drop-before");
     };
     const scrollDrag=():void=>{
@@ -596,9 +612,9 @@ export function renderSceneAuthoring(
       const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.conditionalBranch ? "Read-only condition branch" : beatSummary(beat.payload, model);
       select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
       up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || scene.beats[index + 1]?.protected === true || scene.sourceConflict;
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || scene.sourceConflict;
       down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
       const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || beat.payload.type === "return" || scene.sourceConflict;
       remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));

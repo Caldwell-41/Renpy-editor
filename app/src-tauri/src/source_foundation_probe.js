@@ -50,7 +50,8 @@
     await call('source.updateDraft', { sessionId: project.sessionId, path: scene.sourcePath, expectedBaseRevision: accepted.baseRevision, text: accepted.text + '# dirty source draft\n', selectionStart: 0, selectionEnd: 0 });
     await click('Commit Beat'); await wait(() => !retainedEditor.disabled && document.querySelector('#app-status')?.textContent !== 'Saving…');
     check(retainedEditor.isConnected && retainedEditor.value === 'Retained Story draft' && retainedEditor.closest('.scene-draft').dataset.unsubmitted === 'true', 'Refused child edit retains exact Story draft');
-    check((await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).dirty, 'Concurrent Source draft retained');
+    const retainedSource = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
+    check(retainedSource.dirty && retainedSource.text === accepted.text + '# dirty source draft\n', 'Concurrent Source draft retained');
     await call('source.discard', { sessionId: project.sessionId, path: scene.sourcePath }); await click('Cancel');
     details.stage = 'close';
     await click('Close Project'); details.stage = 'welcome-after-close'; await wait(() => find('Source foundation fixture'));
@@ -58,6 +59,7 @@
     const reopenedProject = await read('project.current'), reopened = await read('scene.list', { sessionId: reopenedProject.sessionId });
     check(ids(model) === ids(reopened), 'Native close/reopen preserves child and structural IDs');
     check((await read('source.open', { sessionId: reopenedProject.sessionId, path: scene.sourcePath })).text === accepted.text, 'Native close/reopen preserves accepted source');
+    if (window.__loomlightFoundationExtended) await window.__loomlightFoundationExtended({ details, check, wait, click, call, read });
     details.stage = 'complete'; details.passed = true;
   } catch (error) {
     details.passed = false; details.error = String(error);

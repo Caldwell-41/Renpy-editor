@@ -992,7 +992,7 @@ Loomlight decisions, not a mandated OpenAI milestone count or new orchestration 
 
 ## 21. First bounded source-foundation assignment
 
-**State:** selected and implemented locally; required native/SDK evidence incomplete. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Original target proof is preserved; final changed inputs are not target-qualified or accepted. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
 **Reason:** prove stable child ownership before AI planning grows around flat Scenes.
 No provider access or credentials are needed.
 
@@ -1298,3 +1298,431 @@ BOM and six CRLF endings in the source fixture. A fresh index checkout with
 `core.autocrlf=true` also matches every hash. No qualified source byte, dependency or
 workflow changed; no Mac proof is repeated. Commit-object hashes and remote branch
 identity will be verified before handing Windows the exact published candidate.
+
+**Windows attempt 1 selected — 2026-10-07:** user requested latest remote branch;
+fetch verified `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`. Separate Windows checkout
+preserves the old feature checkout/local HANDOVER and historical trees. Remote branch
+and committed manifest supersede the unavailable historical transfer ZIP. All 138
+working files and committed blobs match digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`;
+fixture retains BOM, six CRLF and eleven total LF bytes. Actual Windows desktop
+window enumeration/capture succeeds; existing Node 24.19.0/npm 11.9.0/Rust 1.90.0,
+MSVC 14.50.35717/SDK 10.0.26100.0 and official Ren'Py 8.5.3 archive are verified.
+Existing matching dependencies are copied, not installed. Restricted-shell MSVC/write
+preflight limitations were resolved through authorized desktop-user shell access;
+no build or proof was consumed by preflight. One owner, no helpers.
+
+Consume exactly one `npm exec -- tauri build --no-bundle -- --locked`, one existing
+runtime runner selecting only `source-foundation` against its retained executable,
+and one exact ignored SDK gate from TESTING. Dispatch markers prevent another attempt.
+Evidence: ignored `.toolchains/reports/source-foundation/windows-attempt-1/`, including
+all exact input bytes, committed/working hash audit, dependency audit, host/tools,
+commands, logs/results and retained executable/PDB. No matrix, infrastructure install,
+automatic retry, Mac rerun, push, merge, release, provider or following deliverable.
+Qualification is incomplete until terminal audits pass; no acceptance is inferred.
+
+**Windows attempt 1 terminal audit — 2026-10-07:** build PASS, 196.016s total
+(native release target 187s); 14,273,536-byte x64 executable retained, SHA-256
+`85156032081f1ebd5cb573404f8d9b2fbcd1b7fc2ba7c9c9b06f4a1162844ffd`.
+Only existing `source-foundation` runner invoked: PASS, native exit 0, runner exit 0,
+7.968s, no timeout, exactly one terminal report, all eleven exact checks and cleanup
+true. Actual Story controller/IPC/core action changes only the dialogue token; BOM,
+six CRLF, Unicode/comments/custom neighbors and every Beat ID survive. Undo/Redo and
+close/reopen preserve exact source/IDs; wrong owner returns `SCENE_INVARIANT`;
+refusal retains exact Story text and concurrent dirty Source draft. This is release
+WebView2 with synthetic DOM input, not physical/human/installer acceptance. A Chromium
+class-unregistration teardown diagnostic (error 1411) is retained; the report/exit and
+independent owned-process cleanup audit still pass. No extra launch follows it.
+
+Exact SDK gate FAIL, Cargo exit 101: 0 passed/1 failed/0 ignored/233 filtered;
+84.78s test, 115.469s including 30.46s compilation. Panic is
+`source_foundation.rs:30`, `install_supported_sdk_from_archive(...).unwrap()`:
+`Err(InvalidSdk)`. This precedes LifecycleService/SDK registration, project creation,
+compile/lint and every true/false/wrong-outcome case. None of those SDK cases is
+claimed; there are zero case reports. Terminal report is `passed:false`,
+`cleanupComplete:true`; the SDK scratch root was removed. Classification: Windows
+managed SDK install/admission failure, not a demonstrated nested-dialogue/runtime
+assertion failure. The returned error does not identify which installer/validation
+substep failed; environment versus product cause remains unresolved. Official archive
+checksum still matches pinned 8.5.3. No second install, version probe, SDK run or fix
+was attempted. Further diagnosis/proof requires separately selected scope/allowance.
+
+Strict audit retains PASS build/native/input identity and FAIL SDK/absent case outputs.
+All 138 app/fixture hashes and the retained binary are unchanged after execution.
+Native synthetic profile's 53 files were copied byte-identically before removing its
+exact contained scratch directory; accepted source independently matches the original
+fixture plus generated technical label and single quoted-text patch, SHA-256
+`a9e7810dc0acdfcf9f336449ac862f431660a5aee0a7dd8ceeec7fb82a699e56`.
+Both terminal cleanup reports and final zero-owned-app/SDK-process audit pass.
+Retained exact input tree, executable/PDB, SDK test executable, checksums, dispatch
+markers, complete logs, results, fixture and audit files live in ignored
+`.toolchains/reports/source-foundation/windows-attempt-1/`.
+
+A cheap post-proof fixture audit first assumed `scene_001` was the technical label;
+that oracle failed while the actual source hash matched the native report. The
+original script/error is retained; reading the generated label from retained project
+metadata corrects the audit without another application/SDK attempt. Earlier
+restricted-shell write/MSVC limitations and minimized desktop capture were preflight
+only, resolved before dispatch; they do not add build/native/SDK attempts.
+
+**Cumulative state/stop:** Windows builds 1 PASS, native launches 1 PASS, SDK proofs
+1 FAIL; its one targeted allowance is exhausted. Mac remains builds 2/native launches
+2/SDK proofs 2 with the previously recorded final PASS evidence; no Mac rerun.
+Both native Story paths now pass on the same 138 inputs, but required Windows SDK
+true/false/rejecting proof is missing. Overall source foundation remains incomplete,
+not review-ready and not accepted. No expensive retry, infrastructure install, full
+matrix, provider action, AI planning, push, merge, release or following deliverable.
+All operations are terminal; one owner/no helpers. Documentation/evidence remain
+local-only atop fetched candidate `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+Next is separately selected diagnosis of this exact Windows SDK failure; preserve
+passing unchanged build/native proof and all failures. No renewed allowance is implied.
+
+
+**Windows SDK-only attempt 2 selected — 2026-10-07:** user explicitly granted
+another allowance to continue this same outcome. Select one replacement exact ignored
+SDK gate only, with no automatic retry; reuse unchanged passing build/native evidence.
+All 138 app/fixture hashes and retained binary still match; archive checksum verified.
+Actual desktop enumeration remains available; existing pinned tools/caches are reused.
+Read-only archive/path audit identifies a discriminating environment correction:
+old candidate root 220 characters, Windows Python launcher 254, 1,427 SDK paths over
+259 (maximum 290). The new contained scratch root gives candidate 133, launcher 167,
+maximum member path 203, with zero over 259. Long-path admission failure is a hypothesis,
+not a confirmed root cause. Set only process-scoped TEMP/TMP to the new shorter root;
+no application/test/fixture byte or system setting is changed. No extra version launch
+or preliminary SDK installation. Retain separate ignored
+`.toolchains/reports/source-foundation/windows-sdk-attempt-2/` input/path audit,
+dispatch/log/result/case evidence; preserve attempt 1 and its failed audit unchanged.
+Dispatch consumes this single SDK-only allowance. No build/native repeat, Mac rerun,
+full matrix, infrastructure install, helper, push, merge, release/provider/AI work or
+following deliverable. Qualification remains incomplete pending terminal audit.
+
+
+**Windows SDK-only attempt 2 terminal audit — 2026-10-07:** PASS, Cargo exit 0;
+1 passed/0 failed/0 ignored/233 filtered, 108.25s test / 108.734s total. No source,
+fixture, dependency or probe changes; Cargo reused the existing test executable
+(0.37s preparation). Official 8.5.3 admission, project creation, compile/lint and all
+three retained cases succeeded as required: true/false exit 0 with their exact route
+markers and six passed assertions each; wrong-outcome exit 1, one actually failed
+required dialogue assertion, FAILED status and no success route marker. Terminal
+report exactly once, passed true and cleanup true. Strict count/marker/assertion/output
+and unchanged-input/executable audit PASS. The SDK test removed its scratch tree;
+zero owned app/SDK processes and an empty short root were confirmed before removing
+the root. No further SDK launch or production build/native repeat was performed.
+
+Changing only the process-scoped scratch path resolves the observed admission failure.
+Classify attempt 1 as a deep-scratch Windows SDK admission limitation, with the exact
+internal failing substep uninstrumented. The static length audit and passing same-input
+short-path run support that classification; they do not establish broad long-path
+support or a product-source correction. Attempt 1's SDK FAIL, raw logs/executables,
+failed cheap fixture oracle and all historical Mac failures remain retained unchanged.
+All 138 working app/fixture hashes retain digest
+`14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`; original Windows
+release executable and SDK test executable remain byte-identical. Attempt 2 evidence
+and combined Windows proof binding live in ignored
+`.toolchains/reports/source-foundation/windows-sdk-attempt-2/`. Attempt 1 supplies the
+unchanged build/native results and retained exact inputs/53-file native fixture;
+recorded Mac build/SDK/native proof is reused on identical qualified inputs.
+
+**Review-ready stop:** all selected Windows x64/macOS ARM64 build/native/SDK proof
+now passes. This bounded source-foundation outcome is review-ready, **not accepted**;
+full 3A and AI/provider work remain unselected. Cumulative Windows builds/native/SDK
+proofs are **1/1/2** (SDK initial FAIL, explicitly authorized replacement PASS); Mac
+remains **2/2/2**. The new single SDK-only allowance is consumed. No process/CI/action
+pending, no automatic retry, full matrix, infrastructure install, helpers, push, PR,
+merge, release or following deliverable. Status/operational documentation and raw
+evidence remain local-only atop published candidate `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+Next is a separately selected independent review/acceptance decision using the frozen
+input manifest and both platforms' evidence, without repeating unchanged expensive
+checks or starting AI planning. Documentation/whitespace/self-review checks follow.
+
+**Independent review and bounded correction selected — 2026-10-07:** the user requested
+research, fixes for both P1 ownership findings, and a check of the work. Same Windows
+x64 checkout at `45c64c5`, preserving five existing local documentation edits and all
+historical evidence. No helpers, provider/AI work, push, merge, release, following
+deliverable or expensive native/SDK rerun is selected. Focused compilation/core and
+renderer regressions plus cheap documentation/format checks are authorized.
+
+Review found root move/reorder can cross a neighboring child, and root insertion can
+split If from Otherwise through a header/trivia anchor. Cheap actual-renderer probes
+emitted both commands; static core tracing found no rejecting guard. The first probe
+had a selector-only error before action, then a corrected selector succeeded; original
+outputs remain in the review conversation. Independent audit verified 138 working and
+committed inputs against the original digest and all 253 indexed Windows evidence
+files. Mac raw proof is unavailable on this machine; section 23 records the reused
+proof and failures. Both P1 findings defer the acceptance recommendation.
+
+Rejecting real-dispatch and renderer regressions are added before correcting core/UI.
+Retain cheap-check outputs separately under ignored
+`.toolchains/reports/source-foundation/review-corrections/`. Original qualified input
+manifest and Windows/Mac evidence remain historical proof of the original candidate;
+changed inputs must not inherit exact-input qualification or acceptance. Restricted
+shell write access failed before any test ran; the existing desktop-user toolchain
+is used for focused checks, with no installation or system setting change.
+
+**Correction results/self-review — 2026-10-07:** repository research and official
+[Ren'Py conditional](https://www.renpy.org/doc/html/conditional.html) and
+[block syntax](https://www.renpy.org/doc/html/language_basics.html#indentation-and-blocks)
+references confirmed the structural boundary. Before-fix core regression FAIL: real
+dispatch returned success and wrote the unsafe root/child swap. Before-fix renderer
+regression FAIL: root Move Up remained enabled. Both failure logs stay retained.
+
+Core now rejects movement ranges containing children and root insertion inside the
+span from the first header to the last child, including Otherwise/intervening trivia.
+Story applies matching move/drop and Add change here guards. Safe root movement and
+insertion before/after the group retain child IDs/owners. Dedicated child token editing,
+transaction/history/revision protections and fixture bytes remain unchanged.
+
+Final focused selector PASS: 6 passed/0 failed/1 explicitly ignored SDK/228 filtered,
+6.38s; the ignored gate supplies no changed-input SDK proof. Five exact existing
+flat-Scene round-trip, continuation, migration, minimal-patch/history and opaque/conflict
+regressions PASS. Full renderer suite 97 PASS/0 fail/0 skipped (15.273s); after adding
+trivia/safe-after-group assertions, final affected renderer tests 3 PASS/0 fail/0 skipped.
+Final TypeScript source/test compilation, Rust format, validator (358 files) and
+whitespace PASS. Self-review checked destination/range guards, both insertion endpoints,
+source/map refusal bytes, stable IDs/owners and safe root behavior. No new blocking
+finding was identified in this self-review; independent acceptance is still pending.
+
+Current correction digest is
+`a1966e1c6821a440ec42fe9efd3732ff17bec17e1fa4c3800974440bc80fd5ec`.
+All four changed app/test inputs and the final patch/test executable/logs are separately
+recorded under ignored `review-corrections/`; original committed input manifest is
+unchanged. Initial cheap failure logs are retained; normal focused recompilation
+replaced the mutable test target, so no archived before-fix regression executable is
+claimed. Original retained native/SDK executables and all 253 indexed Windows evidence
+files remain unchanged. Mac raw files remain on their original host.
+
+Three focused Cargo compilations/executions (before-fix FAIL, initial/final PASS) are
+cheap correction checks, not native builds or SDK proofs. Native/SDK cumulative counts
+remain Windows 1/1/2 and Mac 2/2/2; no renewed expensive allowance or rerun. Changes are
+local-only atop `45c64c5`, not accepted or qualified by the old input digest. All
+commands are terminal; no provider/helper/push/merge/release or following deliverable.
+Next is independent review of the corrected working inputs and an explicit decision
+about any changed-input native qualification; no additional execution is inferred.
+
+**Corrected-input independent review and bounded EOF correction — 2026-10-07:**
+the user selected independent review with exactly one review subagent, implementation
+ownership retained by main, bounded in-scope fixes and focused checks. Native build/
+launch/SDK allowances were explicitly not renewed; provider/AI, installation,
+publication/integration and the following deliverable remained excluded. Fresh local
+Git confirmed branch `codex/nested-source-foundation`, HEAD and remote-tracking ref
+`45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`, with all eleven existing modified files
+preserved. No fetch/reset/commit/push or desktop/SDK dispatch occurred. The one reviewer
+read corrected inputs independently and performed subsequent re-review; main made
+every implementation/test change. This selection supersedes earlier no-helper wording
+only for that one independent reviewer.
+
+Both previous P1 guards passed review: root move/reorder cannot cross nested children;
+root insertion cannot split headers, bodies or intervening trivia. Existing core/UI
+regressions and safe outside-group edits remain intact. Reviewer identified one further
+**P1 EOF append defect**: a recognized group ending in a dialogue child without a final
+newline accepts root append at the child's end and joins both statements on one physical
+line. Initial regression failed at Source Save because the harness supplied a second
+BOM; that setup failure is retained as `eof-before.log`. The corrected BOM-free Source
+draft reproduced the actual defect through production `scene.apply` dispatch;
+`eof-before-corrected-fixture.log` retains the exact byte mismatch. No terminal Beat
+requirement prevented this supported EOF case.
+
+First bounded correction inserted the required separator but changed the final child's
+range hash and UUID; `core-after.log` retains that rejecting ID assertion (6 PASS/
+1 FAIL/1 SDK ignored). Final correction also anchors that preceding Beat's updated
+range/hash to its existing ID, preserving owners and extra mapping fields through the
+existing reconciliation path. Existing source bytes remain an exact prefix; only
+the necessary LF/CRLF separator and new root statement are inserted. Added real-core
+regression exercises both LF/CRLF, retained single BOM/Unicode, child IDs/owners,
+exact Undo bytes, Redo and reopen. No application grammar/scope expansion.
+
+Final focused command `cargo test -p loomlight-core --locked --offline source_foundation`
+PASS: **7 passed/0 failed/1 explicitly ignored SDK/228 filtered**, test 8.11s,
+focused compilation 11.93s. Five affected flat-Scene checks re-executed against the
+final test executable PASS, one intended test each/zero ignored, because the separator
+change also affects root insertion. Their logs retain exact selectors. Unchanged
+renderer suite 97 PASS/final affected 3 PASS and source/test typecheck from the prior
+correction are reused; UI/test inputs have not changed in this selection.
+
+A narrow retained headless evidence adapter compiled against the corrected cached core
+library connects shipped Story `renderSceneAuthoring`/`settleSceneDraft`, protocol bridge
+and actual `ApplicationHost::dispatch`; refusal responses are not mocked. Final run
+PASS **10 assertions**, actual `DIRTY_SOURCE`, `SOURCE_CONFLICT` and
+`STALE_PROJECT_SESSION`; it verifies exact Story text/unsubmitted state, exact concurrent
+Source draft, unchanged source/map bytes on refusal, minimal child token edit, child
+IDs/owners and Undo/Redo/reopen. Adapter exit 0, empty stderr, owned successful profile
+removed. This is actual controller/core proof with a synthetic DOM and stdio transport,
+not desktop/main-shell/WebView or SDK qualification.
+
+Adapter failures stay distinct: Windows slash-normalization assertion before process
+launch; omitted `.scene-workspace` class (no commit dispatched); two 45-second helper
+reopen timeouts, with their logs and failed scratch profiles retained. Traced timeout
+reached external refusal/retention successfully, then stopped at helper reopen; its
+exact internal blocking substep was not proven. Final run refreshes Source before
+helper close/reopen, consistent with production close's Source refresh requirement.
+It does not qualify the raw unrefreshed helper sequence. Renewed native proof should
+exercise normal shell close/reopen after ordinary external refusal.
+
+Reviewer independently audited the final anchored correction and successful logs:
+**no remaining actionable in-scope defect**. Original corrected-input findings,
+before-fix byte/ID failures and adapter failures remain preserved. Four focused Cargo
+test executions (invalid fixture, demonstrated defect, separator-only ID failure,
+final PASS), two cheap core-library builds and two adapter compilations occurred;
+five headless adapter invocations are recorded (no desktop/native launches).
+No archived before-fix executable is claimed; final core test executable and final
+adapter/source/compiled-controller identities are retained. Existing toolchains,
+dependencies and caches were reused offline; initial restricted shell evidence-directory
+write failed before compilation, then authorized focused operations used reviewed
+local-user access within the worktree. No infrastructure was installed.
+
+Final 138-input digest is
+`bd0b1406e001b51572d9c464ae3078293febf0e4e03063af428d3f23aedcc690`, recorded in
+ignored `.toolchains/reports/source-foundation/independent-review/inputs-final.json`.
+Only `scene.rs` and `lifecycle/runtime_probe.rs` changed since prior corrected digest
+`a1966e1c6821a440ec42fe9efd3732ff17bec17e1fa4c3800974440bc80fd5ec`; all four working
+app/test changes relative to published `45c64c5` remain local/uncommitted/unpublished.
+Exact final corrected files, full patch, adapter source/binary, final test binary,
+logs/result, review report and audit are separately retained in `independent-review/`.
+Audit confirms 232 indexed `windows-attempt-1` files, 21 `windows-sdk-attempt-2`
+files (253 total), and all 17 indexed prior correction files byte-identical. Fixture
+BOM/six CRLF unchanged. Original digest `14b4f6c94fe3f36b46b8585e9e875557c642d3ca706240140e3b8326f640a515`
+and committed manifest remain historical original-candidate qualification; Mac raw
+evidence remains on its original host. No corrected-input native/SDK proof is inferred.
+
+Native/SDK cumulative counts remain **Windows 1/1/2; macOS 2/2/2**, all original
+allowances consumed. All current operations terminal/no owned process or pending
+CI/publication. Final Rust format, repository validator (358 files) and whitespace
+PASS; results accompany the retained receipt. **Source review complete; qualification
+incomplete; not accepted.** Next is
+the explicitly selected minimum qualification in HANDOVER's ready-to-paste prompt:
+prepare/cheaply validate bounded native/SDK probe additions, freeze exact final inputs,
+then one build/one native launch/one SDK gate per target with finite time caps and
+zero retries. That prompt is a proposal, not an allowance granted by this review.
+
+**Corrected-input qualification selected — 2026-10-07:** the user selected the
+minimum two-target qualification above. Fresh Windows Git confirms branch
+`codex/nested-source-foundation`, HEAD `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`,
+and eleven modified files, all preserved. Reviewed 138 working inputs match
+`bd0b1406e001b51572d9c464ae3078293febf0e4e03063af428d3f23aedcc690` exactly.
+Entry evidence index preserves 1,035 prior evidence files; original manifests remain
+historical. New evidence is isolated in ignored
+`.toolchains/reports/source-foundation/corrected-qualification/`.
+
+Allowance recorded before expensive execution: **per target one release no-bundle
+build (1,200 seconds), one source-foundation-only native launch (300 seconds), one
+exact pinned-SDK gate (600 seconds), zero retries/duplicate or ambiguous dispatches**.
+Prior cumulative Windows counts **1/1/2**, macOS **2/2/2**. Preparation and focused
+checks consume no expensive allowance. Windows uses existing pinned tools/caches;
+Mac session, original evidence and direct transfer are not currently accessible.
+Agent-owned Mac access was requested; missing access leaves qualification incomplete.
+No infrastructure installation, full matrix, provider/AI work, publication, merge,
+release or subsequent deliverable is selected. Failures require reassessment.
+
+**Final qualification inputs frozen:** 139 app/fixture inputs, digest
+`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`,
+in ignored `corrected-qualification/inputs-final.json` and byte-exact `exact-inputs/`.
+The extra input is the extended native probe. Existing eleven checks are retained;
+33 checks now cover real core move/reorder and Otherwise/two-trivia insertion refusal,
+safe outside-group edits, child IDs/owners, EOF append through Story, Undo/Redo/reopen,
+exact dirty Source/Story drafts and external refusal followed by normal shell reopening.
+The external write belongs to the independent native runner, using a read-only
+probe handshake and fixed disposable profile. SDK true/false/wrong-outcome routes
+now execute continuation source produced by root append after an unterminated child,
+retaining the original six route assertions and wrong-outcome rejection.
+
+Cheap proof: 7 focused core PASS; 3 affected renderer PASS; 1 exact SDK-fixture
+preflight PASS without SDK execution; 33 shipped-probe checks through real Story
+controller/bridge/core PASS. Initial cheap extended-probe failure was a harness
+assumption that history survives close/reopen; failure is retained. Undo/Redo now
+precede reopen and EOF append uses actual Story Add Beat. Existing unchanged broader
+checks are reused. A final rerun after the ID assertion passes 33 checks. Runner
+syntax, probe syntax and whitespace PASS. Existing pinned Windows tools and official
+archive SHA-256 `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`
+verified. Windows short process-scoped TEMP/TMP is workspace-contained `q3s`.
+Transfer archive SHA-256
+`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2`
+is staged locally; no Mac transfer or matching-host audit has occurred.
+
+Windows build attempt 2 is selected for one dispatch on these frozen inputs,
+`npm exec -- tauri build --no-bundle -- --locked`, 1,200-second hard cap. Native/SDK
+follow only a passing prerequisite, each with its own one-dispatch marker and cap.
+No retries, automatic renewal or changed-input reuse of original target proof.
+
+**Windows corrected build attempt 2 PASS:** exit 0, 55.078 seconds, no timeout;
+retained x64 executable 14,285,312 bytes, SHA-256
+`f6d0d2be4535759549bf66d4fa5daeb7993fcb1a417b758db7ddccfb3dbd4be2`.
+Executable/PDB, exact inputs, dispatch and full build log are retained separately.
+Native attempt 2 selected on that exact executable with only `source-foundation`,
+300-second hard cap, one dispatch/no retry. Windows cumulative after build **2/1/2**;
+native dispatch consumes the one new launch allowance regardless of outcome.
+
+**Windows corrected native attempt 2 PASS:** runner exit 0/native exit 0,
+13.312 seconds, no timeout; exactly one terminal report, all 33 expected checks
+(including original eleven), extension-complete and cleanup true. Runner-owned
+external write and normal shell close/reopen pass; disposable profile is retained
+before contained deletion. WebView2 teardown error 1411 is retained as a diagnostic.
+Layer remains release native WebView/real controller/IPC/core with synthetic DOM
+input; no physical/human/installer acceptance. Frozen input and executable hashes
+remain unchanged. Windows cumulative **2/2/2**.
+
+Windows exact pinned-SDK attempt 3 is selected: only
+`renpy::tests::source_foundation::source_foundation_bool_sdk_gate --ignored --exact
+--nocapture`, 600-second hard cap, one dispatch/no retry. Actual EOF-generated source,
+true/false six assertions each and deliberate wrong-outcome rejection must pass.
+Native report identity/count and exact short-root/profile cleanup are prerequisites.
+Dispatch consumes the single new SDK allowance regardless of outcome; no Mac run,
+full package matrix or other SDK selector is authorized.
+
+**Windows corrected SDK attempt 3 PASS:** exit 0, 108.359 seconds total/107.83-second
+test, no timeout, exactly 1 passed/0 failed/0 ignored/236 filtered. Compile/lint and
+normal-entry true/false each exit 0 with six actual passed assertions and expected
+route marker. Deliberate wrong-outcome exits 1/FAILED without its success marker.
+Exactly one terminal PASS/cleanup true; archive, fixture, expected rejecting results,
+EOF-before/produced bytes and owner arrays are retained. Produced source SHA-256
+`d1c800f8d652d3aa5c9faedb53bf204db867f6a2fc174384babb675818bcd2f2`;
+retained test executable SHA-256
+`5ea11a61856b4950bc3359ff1eb3315c68f0e0a45d3580e5e0b9fbe05977a9fd`.
+Strict terminal audit PASS on all 20 checks, including six actual assertions per
+route, real wrong-outcome failure, all 139 frozen/retained input hashes, executable
+identity, exact 33 native checks, native profile/source retention and SDK cleanup.
+All 1,035 entry-indexed prior evidence files remain byte-identical. Initial cheap
+probe failure/log/profile remain retained. No retry or duplicate dispatch occurred.
+
+**Target result / access stop:** Windows x64 corrected-input build/native/SDK
+qualification PASS on digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+macOS ARM64 **INCOMPLETE — unavailable agent-owned host/session, original raw evidence
+and direct transfer**. The session exposes local Windows only; no usable existing
+SSH connection was found. Access was requested while independent Windows work
+continued, with no response/connection received. No Mac operation was dispatched,
+no remote input-hash match was verified, and original Mac proof remains historical
+on its original host. Staged transfer archives are preparation, not transfer evidence.
+Both-target qualification remains incomplete and the corrected foundation is **not
+accepted**. No source or probe edits occurred after input freeze.
+
+Cumulative builds/native launches/SDK gates: **Windows 2/2/3; macOS 2/2/2**.
+New Windows allowance fully consumed; new Mac allowance **one/one/one remains unused**,
+with original 20/5/10-minute caps and zero retries. Next action is to establish actual
+agent-owned Mac desktop access, inspect/preserve its checkout and original evidence,
+transfer frozen inputs/evidence directly, prove all 139 hashes match, cheaply verify
+existing pinned tools/cache/archive/profile prerequisites, then consume only the
+remaining Mac allowances. Windows passing unchanged proof is reused. Missing access
+does not authorize installation, a full matrix, provider/AI work, publication,
+integration/release or the following deliverable. All Windows execution is terminal.
+
+**Final retention/cleanup:** zero owned native/SDK/test processes; native profile and
+new short-root cache retained before contained cleanup. Native/SDK scratch and short
+root removed, cleanup audit PASS. Final Rust format, repository validator (359 files)
+and whitespace PASS. All original local work remains preserved, HEAD/branch unchanged;
+no commit, push or publication. Verified staged Windows evidence archive is 30,159,079
+bytes, SHA-256 `1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`,
+with 1,221 individually verified evidence members, including exact inputs/binaries,
+all new failures/results, profile, cleanup and status snapshots. `transfer-receipt.json`
+records that actual transfer is false; this archive is ready for direct transfer only
+after Mac access exists. Frozen input digest and target results remain as recorded above.
+
+**Remote checkpoint selected — 2026-10-07:** the user requested “Ensure remote is
+updated” after receiving the Mac continuation prompt. Fresh remote fetch confirms
+`codex/nested-source-foundation` still at `45c64c5e03e03f4c6bdfeaa08f13315d41eedc50`.
+The corrected implementation/probes, existing operational/status edits and a separate
+[portable final input manifest and Windows receipt](source-foundation-qualified-inputs.json)
+are checkpointed together as `fix: qualify corrected nested source foundation on Windows`
+and pushed without force to the same branch. Verify all 139 staged/committed blobs
+against the frozen manifest; qualified application inputs do not change. The original
+committed manifest remains historical. Raw evidence, binaries/PDB, caches, logs and
+SDKs remain ignored/local; exact bundles and hashes support direct Mac evidence
+transfer. This remote update does not imply completed Mac transfer/qualification,
+acceptance, merge or release. No expensive checks or allowances are renewed.

@@ -1047,6 +1047,9 @@ An existing declared-bool If/Otherwise group with direct dialogue children is di
 with read-only branch rows and indented selectable dialogue. Commit edits only the
 existing child text; Speaker, move, delete and continuation are disabled for that
 child. A refused revision/owner/session save retains the entered draft and focus.
+Root move/drop controls cannot cross a child, and Add change here is disabled inside
+the group, including Otherwise and intervening trivia. Root insertion before or after
+the complete group stays available.
 The preview remains partial and does not choose or execute a branch. Full condition
 authoring and group operations remain Phase 3 work. Local implementation and target
 evidence are tracked in [Phase 2 section 23](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).

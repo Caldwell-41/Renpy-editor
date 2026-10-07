@@ -1099,16 +1099,40 @@ padding and fitted pill bounds; synthetic selection remains distinct from native
 
 Use `cargo test -p loomlight-core --locked source_foundation` for focused production
 dispatch/minimal-byte/ownership, migration/history/reopen, dirty draft, external writer,
-stale session, identical sibling and unsupported-body regressions. The SDK test is
-explicitly ignored here; this command alone never establishes SDK acceptance. Select
+stale session, identical sibling and unsupported-body regressions. The root-boundary
+regression also rejects moves/reorders
+crossing a child and insertion before Otherwise or internal trivia, comparing exact
+source/map bytes and retaining child IDs/owners across safe outside-group edits. It is
+covered by the same selector. The SDK test is explicitly ignored here; this command
+also checks LF/CRLF append after an unterminated EOF child, single-BOM/exact-prefix
+preservation, stable child IDs/owners and undo/redo/reopen. The independently reviewed
+headless controller/bridge/ApplicationHost check retains exact Story drafts on real
+dirty-Source, external-conflict and stale-session dispatch refusals; its evidence
+is distinct from native WebView proof.
+The selector alone never establishes SDK acceptance. Select
 `renpy::tests::source_foundation::source_foundation_bool_sdk_gate` with `--ignored
 --exact --nocapture` and `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` for verified archive install,
 compile/lint and normal-entry true/false/reject-wrong-outcome cases. Missing archive
 is a failure. `npm run check` retains child-owner dispatch/draft/keyboard assertions.
 
+On Windows, keep archive-backed SDK test `TEMP`/`TMP` at a short contained scratch
+root; deeply nested evidence paths can exceed SDK library path limits during admission.
+Evidence output may remain separate. The source-foundation replacement qualified the
+same inputs with a short scratch root; it does not qualify general long-path support.
+
 The existing runtime UI runner accepts optional `source-foundation` to run just the
 disposable one-Scene native fixture. It exercises actual Story commit, exact source,
 ID preservation, Undo/Redo/reopen, wrong-owner refusal and retained Story/Source drafts.
+The extended probe retains those original eleven checks and requires 33 total checks,
+including root move/drag and Otherwise/body-trivia insertion refusals, safe edits
+outside the group, EOF append without a final newline, stable IDs/owners, and normal
+shell close/reopen after external refusal. The runner performs one ordinary external
+write in the fixed disposable profile through a read-only handshake, retains the
+profile before contained cleanup, and rejects absent/partial extended reports.
+The exact SDK gate now runs source produced by root append after an unterminated
+child. A cheap non-SDK preflight proves fixture construction/append/ownership before
+expensive execution; true/false still require six passing assertions each and the
+deliberate wrong-outcome case must actually fail its expected dialogue assertion.
 Synthetic DOM input is distinct from physical native keyboard/human acceptance. No
 production matrix or specialist exercise is selected by this case. A supported-target
 proof remains necessary on both Windows x64 and macOS ARM64; current allowance/results

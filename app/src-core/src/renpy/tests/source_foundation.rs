@@ -2,6 +2,74 @@ use super::*;
 use crate::lifecycle::{acceptance::ipc, CreateProjectRequest, LifecycleService};
 use serde_json::json;
 
+fn eof_source(label: &str) -> String {
+    let source = include_str!("../../../../../tests/fixtures/source-foundation/scene.rpy")
+        .trim_start_matches('\u{feff}')
+        .replace("label scene_one:", &format!("label {label}:"));
+    source[..source.find("    python:").unwrap()]
+        .trim_end()
+        .replace(
+            "    if flag:",
+            "    python:\n        opaque_neighbor = \"kept\"\n    if flag:",
+        )
+}
+
+#[test]
+fn source_foundation_sdk_eof_fixture_preflight() {
+    let temporary = tempfile::tempdir().unwrap();
+    let mut service =
+        LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile"))
+            .unwrap();
+    let root = temporary.path().join("profile/synthetic-project");
+    service.open_path(&root).unwrap();
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let scene = &model["scenes"][0];
+    let source = eof_source(scene["technicalLabel"].as_str().unwrap());
+    let opened = ipc(
+        &mut service,
+        "source.open",
+        json!({"path":scene["sourcePath"]}),
+    );
+    let draft = ipc(
+        &mut service,
+        "source.updateDraft",
+        json!({"path":scene["sourcePath"],"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}),
+    );
+    ipc(
+        &mut service,
+        "source.save",
+        json!({"path":scene["sourcePath"],"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+    );
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let before = fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    assert!(!before.ends_with(b"\n"));
+    let appended = ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Foundation continuation"}}}),
+    );
+    assert_eq!(
+        fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
+        [
+            before.as_slice(),
+            b"\r\n    \"Foundation continuation\"\r\n"
+        ]
+        .concat()
+    );
+    let children = |m: &serde_json::Value| {
+        m["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|b| b["owner"].is_object())
+            .map(|b| (b["id"].clone(), b["owner"].clone()))
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(children(&model).len(), 2);
+    assert_eq!(children(&model), children(&appended));
+    service.close().unwrap();
+}
+
 #[test]
 #[ignore = "explicit pinned-SDK source-foundation gate; missing archive is a failure"]
 fn source_foundation_bool_sdk_gate() {
@@ -57,12 +125,10 @@ fn run(temporary: &tempfile::TempDir) {
     );
     let variable_id = authoring["variables"][0]["id"].clone();
     let scene = service.scene_workspace().unwrap().scenes[0].clone();
-    let source = include_str!("../../../../../tests/fixtures/source-foundation/scene.rpy")
-        .trim_start_matches('\u{feff}')
-        .replace(
-            "label scene_one:",
-            &format!("label {}:", scene.technical_label),
-        );
+    // Keep the opaque Python neighbor, then end exactly at the final child.
+    // The continuation must be produced by the corrected root EOF append path.
+    let source = eof_source(&scene.technical_label);
+    assert!(!source.ends_with('\n'));
     let opened = ipc(
         &mut service,
         "source.open",
@@ -90,7 +156,45 @@ fn run(temporary: &tempfile::TempDir) {
         "scene.apply",
         json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"updateChildDialogue","sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beatId":child["id"],"expectedOwner":child["owner"],"characterId":child["payload"]["characterId"],"text":"Edited café 雪"}}),
     );
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let children = |model: &serde_json::Value| {
+        model["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|beat| beat["owner"].is_object())
+            .map(|beat| (beat["id"].clone(), beat["owner"].clone()))
+            .collect::<Vec<_>>()
+    };
+    let before_append = fs::read(root.join(&scene.source_path)).unwrap();
+    let appended = ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Foundation continuation"}}}),
+    );
+    assert_eq!(children(&appended), children(&model));
     let accepted = fs::read(root.join(&scene.source_path)).unwrap();
+    assert_eq!(
+        accepted,
+        [
+            before_append.as_slice(),
+            b"\r\n    \"Foundation continuation\"\r\n"
+        ]
+        .concat()
+    );
+    if let Some(directory) = std::env::var_os("LOOMLIGHT_FOUNDATION_EVIDENCE_DIR") {
+        fs::create_dir_all(&directory).unwrap();
+        fs::write(Path::new(&directory).join("eof-produced.rpy"), &accepted).unwrap();
+        fs::write(Path::new(&directory).join("eof-before.rpy"), &before_append).unwrap();
+        fs::write(
+            Path::new(&directory).join("eof-owners.json"),
+            serde_json::to_vec_pretty(
+                &json!({"before":children(&model),"after":children(&appended)}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    }
     let mut reports = Vec::new();
     for (name, value, expected, reject) in [
         ("true", true, "Edited café 雪", false),

@@ -567,6 +567,201 @@ mod branches_tests {
     }
 
     #[test]
+    fn source_foundation_root_operations_preserve_nested_boundaries() {
+        use crate::lifecycle::acceptance::ipc;
+        let temporary = tempfile::tempdir().unwrap();
+        let (mut service, root) = foundation(&temporary);
+        let initial = ipc(&mut service, "scene.list", json!({}));
+        let scene = &initial["scenes"][0];
+        let path = scene["sourcePath"].as_str().unwrap();
+        let source = format!(
+            "label {}:\n    if flag:\n        bec \"True\"\n        # before Otherwise\n    else:\n        # before child\n        bec \"False\"\n    bec \"Root one\"\n    bec \"Root two\"\n    return\n",
+            scene["technicalLabel"].as_str().unwrap()
+        );
+        let opened = ipc(&mut service, "source.open", json!({"path":path}));
+        let draft = ipc(
+            &mut service,
+            "source.updateDraft",
+            json!({"path":path,"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}),
+        );
+        ipc(
+            &mut service,
+            "source.save",
+            json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+        );
+        let model = ipc(&mut service, "scene.list", json!({}));
+        let beats = model["scenes"][0]["beats"].as_array().unwrap();
+        let first_root = beats
+            .iter()
+            .find(|b| b["payload"]["text"] == "Root one")
+            .unwrap();
+        let child_index = beats
+            .iter()
+            .position(|b| b["payload"]["text"] == "False")
+            .unwrap();
+        let accepted_source = fs::read(root.join(path)).unwrap();
+        let accepted_map = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+        let mut commands = vec![
+            json!({"type":"moveBeat","beatId":first_root["id"],"direction":"up"}),
+            json!({"type":"reorderBeat","beatId":first_root["id"],"toIndex":child_index}),
+        ];
+        // Headers and trivia inside either body must not become root insertion anchors.
+        for beat in beats.iter().filter(|b| {
+            b["conditionalBranch"]["otherwise"] == true
+                || b["payload"]["source"]
+                    .as_str()
+                    .is_some_and(|s| s.trim_start().starts_with('#'))
+        }) {
+            commands.push(json!({"type":"insertBeat","beforeBeatId":beat["id"],"beat":{"type":"narration","text":"Unsafe root"}}));
+        }
+        for mut command in commands {
+            command["sceneId"] = model["scenes"][0]["id"].clone();
+            command["expectedSourceRevision"] = model["scenes"][0]["sourceRevision"].clone();
+            let session_id = service.current().unwrap().session_id;
+            let response = crate::lifecycle::tests::closeout_ipc(
+                &mut service,
+                "scene.apply",
+                json!({"sessionId":session_id,"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":command}),
+            );
+            assert_eq!(response["error"]["code"], "SCENE_INVARIANT", "{response}");
+            assert_eq!(fs::read(root.join(path)).unwrap(), accepted_source);
+            assert_eq!(
+                fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+                accepted_map
+            );
+            assert_eq!(ipc(&mut service, "scene.list", json!({})), model);
+        }
+        // Ordinary root moves and insertion outside the group remain available.
+        let moved = ipc(
+            &mut service,
+            "scene.apply",
+            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"moveBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beatId":first_root["id"],"direction":"down"}}),
+        );
+        assert_eq!(
+            fs::read(root.join(path)).unwrap(),
+            String::from_utf8(accepted_source)
+                .unwrap()
+                .replace(
+                    "    bec \"Root one\"\n    bec \"Root two\"",
+                    "    bec \"Root two\"\n    bec \"Root one\""
+                )
+                .as_bytes()
+        );
+        let inserted = ipc(
+            &mut service,
+            "scene.apply",
+            json!({"expectedProjectRevision":moved["projectRevision"],"expectedSourceMapRevision":moved["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":moved["scenes"][0]["sourceRevision"],"beforeBeatId":beats[0]["id"],"beat":{"type":"narration","text":"Safe root"}}}),
+        );
+        assert_eq!(
+            inserted["scenes"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|b| b["owner"].is_object())
+                .count(),
+            2
+        );
+        let after_group = ipc(
+            &mut service,
+            "scene.apply",
+            json!({"expectedProjectRevision":inserted["projectRevision"],"expectedSourceMapRevision":inserted["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beforeBeatId":first_root["id"],"beat":{"type":"narration","text":"After group"}}}),
+        );
+        let old_children = beats
+            .iter()
+            .filter(|b| b["owner"].is_object())
+            .map(|b| (&b["id"], &b["owner"]))
+            .collect::<Vec<_>>();
+        let new_children = after_group["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|b| b["owner"].is_object())
+            .map(|b| (&b["id"], &b["owner"]))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            old_children, new_children,
+            "safe root edits preserve child IDs and owners"
+        );
+        service.close().unwrap();
+    }
+
+    #[test]
+    fn source_foundation_append_after_unterminated_child_preserves_group() {
+        use crate::lifecycle::acceptance::ipc;
+        for newline in ["\n", "\r\n"] {
+            let temporary = tempfile::tempdir().unwrap();
+            let (mut service, root) = foundation(&temporary);
+            let initial = ipc(&mut service, "scene.list", json!({}));
+            let scene = &initial["scenes"][0];
+            let path = scene["sourcePath"].as_str().unwrap();
+            let source = format!(
+                "label {}:{newline}    if flag:{newline}        bec \"True café 雪\"{newline}    else:{newline}        bec \"False\"",
+                scene["technicalLabel"].as_str().unwrap()
+            );
+            let opened = ipc(&mut service, "source.open", json!({"path":path}));
+            let draft = ipc(
+                &mut service,
+                "source.updateDraft",
+                json!({"path":path,"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}),
+            );
+            ipc(
+                &mut service,
+                "source.save",
+                json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+            );
+            let model = ipc(&mut service, "scene.list", json!({}));
+            let children = |m: &serde_json::Value| {
+                m["scenes"][0]["beats"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .filter(|b| b["owner"].is_object())
+                    .map(|b| (b["id"].clone(), b["owner"].clone()))
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(children(&model).len(), 2);
+            let accepted = fs::read(root.join(path)).unwrap();
+            let appended = ipc(
+                &mut service,
+                "scene.apply",
+                json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Safe root"}}}),
+            );
+            let expected = [
+                accepted.as_slice(),
+                format!("{newline}    \"Safe root\"{newline}").as_bytes(),
+            ]
+            .concat();
+            assert_eq!(
+                fs::read(root.join(path)).unwrap(),
+                expected,
+                "append must separate the root statement from the unterminated child"
+            );
+            assert_eq!(children(&appended), children(&model));
+            ipc(
+                &mut service,
+                "scene.apply",
+                json!({"expectedProjectRevision":appended["projectRevision"],"expectedSourceMapRevision":appended["sourceMapRevision"],"command":{"type":"undo"}}),
+            );
+            assert_eq!(fs::read(root.join(path)).unwrap(), accepted);
+            let undone = ipc(&mut service, "scene.list", json!({}));
+            assert_eq!(children(&undone), children(&model));
+            ipc(
+                &mut service,
+                "scene.apply",
+                json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
+            );
+            service.close().unwrap();
+            service.open_path(&root).unwrap();
+            assert_eq!(
+                children(&ipc(&mut service, "scene.list", json!({}))),
+                children(&model)
+            );
+            assert_eq!(fs::read(root.join(path)).unwrap(), expected);
+            service.close().unwrap();
+        }
+    }
+
+    #[test]
     fn source_foundation_unknown_condition_or_body_stays_opaque() {
         use crate::lifecycle::acceptance::ipc;
         for (condition, body) in [
