@@ -23,7 +23,7 @@ retains exact qualification/merge identities, both-platform feedback and limitat
 is accepted and integrated through [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18).
 Phase 1 is closed after independent review, both-target qualification and required main quality.
 Unique failures and acceptance limits remain in the archived ledger. The bounded Phase 2
-source foundation is reviewed and qualified on both targets, ready for integration;
+source foundation is reviewed, qualified on both targets and integrated through PR19;
 provider/AI execution requires separate user selection. CURRENT/HANDOVER own live state.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
@@ -61,7 +61,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
 | Planned AI settings, OS/session keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
-| First bounded source target: nested child edit | [Source foundation](tasks/active/phase-2-initial-llm-assistance.md#21-first-bounded-source-foundation-assignment) |
+| Source foundation integration closure | [tasks/archive/2026-10-07-source-foundation-integration.md](tasks/archive/2026-10-07-source-foundation-integration.md) |
+| Accepted bounded source target: nested child edit | [Source foundation](tasks/active/phase-2-initial-llm-assistance.md#21-first-bounded-source-foundation-assignment) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |
 | Boundaries, project convention, persistence and preview | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Source, characters, appearances, assets, variables and transactions | [DATA_MODEL.md](DATA_MODEL.md) |

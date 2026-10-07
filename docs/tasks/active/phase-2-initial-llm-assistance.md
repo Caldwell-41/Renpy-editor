@@ -1,7 +1,7 @@
 # Phase 2 — Initial LLM assistance
 
 **Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
-**State:** provider/AI implementation not started; section 21 source foundation independently reviewed and qualified on Windows x64/macOS ARM64, ready for integration. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
+**State:** provider/AI implementation not started; section 21 source foundation independently reviewed and qualified on Windows x64/macOS ARM64 and integrated through PR19; this bounded outcome is closed. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
 **User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
@@ -992,7 +992,7 @@ Loomlight decisions, not a mandated OpenAI milestone count or new orchestration 
 
 ## 21. First bounded source-foundation assignment
 
-**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Windows x64/macOS ARM64 qualification complete; accepted as the bounded source-foundation checkpoint and ready for integration. User explicitly removed cross-machine archive transfer as a blocker. Original proof/failures are preserved; full Phase 2/3A remains unfinished. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Windows x64/macOS ARM64 qualification complete; accepted and integrated as the bounded source-foundation checkpoint through [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19); integration closed. User explicitly removed cross-machine archive transfer as a blocker. Original proof/failures are preserved; full Phase 2/3A remains unfinished. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
 **Reason:** prove stable child ownership before AI planning grows around flat Scenes.
 No provider access or credentials are needed.
 
@@ -2162,3 +2162,32 @@ implementation remains unstarted and is a distinct next goal after integration.
 Closure verification: repository structure/text/privacy/link validator PASS (364 files),
 whitespace PASS, documentation-only scope review PASS; all139 frozen inputs and original23
 Mac evidence files remain unchanged. No application or qualification command rerun.
+
+
+**Review/integration selected and completed — 2026-10-07:** user explicitly selected
+review of the qualified final delta, PR creation/reuse, lightweight PR/main quality,
+merge, exact 139-input main verification and closure. This supersedes earlier no-PR/
+merge boundaries for this bounded integration only. One owner/no helper or provider
+work. Fresh main `aba200f` and source head `809653b` were unchanged; local work,
+historical planning checkout, stash and all original evidence remain preserved.
+
+Final delta agrees with the recorded independent source review: child-owner/minimal
+patch, root movement/insertion boundary guards and anchored EOF separator/identity
+correction remain intact. Qualification additions strengthen native/SDK evidence;
+post-`a49e536` changes are orchestration/documentation only, with all 139 qualified blobs
+unchanged. No new actionable in-scope defect found. Lightweight local validator,
+Q1 rejecting-gate controls, nine package-retention tests, selector/workflow audit and
+whitespace pass. [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19) merged
+passing reviewed head at `40786404175f3d3f35c6cafd0aa718149f34c647`; PR/main quality
+37585772522/1 and 37585868535/1 pass. Whole merge tree equals PR head and every qualified
+input hash/digest matches. Original 23 Mac files and 905 corrected artifact members
+independently rehashed unchanged. Cumulative Windows 2/2/3, Mac 3/3/3 unchanged; zero
+new expensive operations/manual dispatches. No release or provider request.
+
+The [archived bounded integration closure](../archive/2026-10-07-source-foundation-integration.md)
+owns exact integration/audit evidence. ADR 0012, ROADMAP, TESTING and live status now
+record integration. This overall Phase2 plan and section 23's unique source/proof/failure
+history remain active because Phase2 is unfinished. The portable qualification receipt
+retains historical pre-Mac fields; they grant no current allowance. Next proposed
+outcome is 2A.0 synthetic Studio/generic qualification/contracts, returning for its
+existing review before production integration; it has not started.

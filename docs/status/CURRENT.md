@@ -1,42 +1,35 @@
 # Current status
 
-**Updated:** 2026-10-07. **Branch:** codex/nested-source-foundation; qualified source foundation, integration pending.
+**Updated:** 2026-10-07. **Baseline:** source foundation integrated on main; next outcome unselected.
 
-**Phase 1 accepted/integrated/closed:** [PR18](https://github.com/Caldwell-41/Renpy-editor/pull/18)
-merged at `82d45189d003239b622bc946c85b639a093f46a1`, main tree equal to reviewed
-`cfa8314`. Production [37529174148/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37529174148)
-at `ba01a84cd7f860be6e8717e98216bdf747875073` remains both-target H01–H12 proof;
-required main quality37536967028 passed. The
-[closure ledger](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
-retains exact identities, failures, original human/physical/accessibility limits and
-Mac Chrome advisory timing failure. Raw Phase1 evidence is downloaded.
+Phase 1 is accepted/integrated/closed through [PR18](https://github.com/Caldwell-41/Renpy-editor/pull/18)
+at `82d45189d003239b622bc946c85b639a093f46a1`. Both-target H01–H12 proof and its
+limits remain in the [Phase 1 closure ledger](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07).
+The public [Loomlight 0.1.0 prerelease](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0)
+retains release 405202404, tag 45ffe24 and all eleven original asset hashes. Its unsigned,
+non-notarized and unqualified installer limits remain unchanged; no new release was selected.
 
-**Published:** [Loomlight0.1.0](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0),
-early public prerelease405202404, tag targets45ffe24. Eleven original asset hashes
-verified; unsigned/non-notarized packages and unqualified installer paths remain the
-explicit one-off preview exception. [Publication ledger](../tasks/archive/2026-10-07-release-0.1.0.md)
-owns release proof and limits; identities remain unchanged.
+The bounded nested source foundation is **reviewed, qualified, integrated and closed**.
+[PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19) merged reviewed head
+`809653b9fd382e629d2c568ec6f42f5042ebe4a1` at
+`40786404175f3d3f35c6cafd0aa718149f34c647`; the full merge tree equals the PR head.
+PR quality 37585772522/1 and main quality 37585868535/1 passed every lightweight validation
+step; all expensive jobs skipped by design. All 139 qualified input hashes and aggregate
+digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939` match main.
+[Integration closure](../tasks/archive/2026-10-07-source-foundation-integration.md) owns the audit;
+[Phase 2 section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
+retains original independent findings, fixes, target proof and failures.
 
-**Completed bounded source foundation:** independently reviewed corrected inputs and
-Windows x64/macOS ARM64 qualification **PASS**, accepted as Phase2 section21 checkpoint.
-Every one of139 frozen inputs matches final digest
-`be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
-Windows original-agent proof at a49e536 is reused: build55.078s, native33 13.312s,
-SDK108.359s. Mac [37581016311/1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/37581016311)
-at exact1ac8068 is audited: build295.604s, native33 11.304s, SDK194.514s; true/false
-six actual passing assertions each, deliberate wrong-outcome rejection, EOF source/
-stable owners, external-write evidence and cleanup. All905 evidence members and exact
-ARM64 binaries verified. Original23 Mac evidence files/failures remain unchanged.
+| Capability | Implementation and proof | Acceptance limits |
+| --- | --- | --- |
+| Existing bool if/else dialogue child | Stable owner/location, minimal transaction patch, undo/redo/reopen; independent review and both-target 33 native checks/SDK routes PASS | Bounded existing-child text edit; no full conditions/calls/state simulation; synthetic DOM input, no physical/human/installer claim |
+| Provider/AI and remaining Phase 2/3 | Planned; unstarted | 2A.0 live synthetic qualification requires actual endpoint/model access and its existing review boundary |
 
-User removed cross-machine archive copying as an acceptance requirement; original
-Windows proof remains verified on its host. Consolidation is optional housekeeping.
-Cumulative build/native/SDK Windows **2/2/3**, Mac **3/3/3**; two workflow dispatches
-consumed, first setup failure preserved. Expensive allowance exhausted. Full Phase2/3A
-and provider/AI work remain unfinished.
+Cumulative build/native/SDK counts remain **Windows 2/2/3; Mac 3/3/3**; integration
+added zero expensive operations/manual dispatches. Original evidence and failures are
+preserved; Windows archives remain on Windows and cross-machine consolidation is optional.
+The historical planning worktree, implementation checkout/ignored evidence and stash remain.
 
-**Next proposed goal:** review/integrate the qualified branch via PR and normal
-lightweight quality checks, preserving inputs/reusing proof. No new native/build/SDK,
-manual dispatch or release. No PR/merge has started. After integration: 2A.0 synthetic
-provider qualification. [Section23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
-owns completion and the superseded transfer requirement; [HANDOVER](HANDOVER.md) owns
-integration readiness. Historical planning worktree and local evidence/stash preserved.
+**Next proposed outcome:** Phase 2A.0 synthetic Unsloth Studio and one generic-compatible
+provider qualification/contracts. It has not started. [HANDOVER](HANDOVER.md) gives the
+fresh-baseline entry and approval boundary. The overall Phase 2 plan stays active.

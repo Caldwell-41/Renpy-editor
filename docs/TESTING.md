@@ -1151,3 +1151,14 @@ profiles, full failures and cleanup. Audit downloaded evidence rather than a gre
 badge. Existing Windows proof is reused; this mode cannot transfer raw files held
 only on another local host or waive missing raw evidence. Section 23 owns allowance
 and the exact selected run; no full matrix is selected by this input.
+
+
+**Source-foundation integration, 2026-10-07:** [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19)
+merged at `40786404175f3d3f35c6cafd0aa718149f34c647`, whole tree equal to reviewed
+`809653b`. PR quality 37585772522/1 and main quality 37585868535/1 passed every lightweight
+step; all manual-only expensive jobs skipped. Independent hash audit proves all 139
+qualified inputs match Windows `a49e536` and Mac `1ac8068`; completed target proof is
+reused without a new build/native/SDK run. Cumulative Windows 2/2/3 and Mac 3/3/3 remain.
+The [integration closure](tasks/archive/2026-10-07-source-foundation-integration.md)
+records exact scope and limits. The portable manifest is a historical Windows receipt,
+not a live allowance; its pre-Mac fields are superseded by section 23/current status.

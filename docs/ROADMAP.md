@@ -29,7 +29,7 @@ H01–H12/sections 3–4 gates; main quality 37536967028/1 Pass and exact integr
 audit prove integration. The [closure ledger](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
 retains identities, both earlier failed matrices, cumulative attempts and limits.
 The bounded Phase 2 source foundation is independently reviewed and qualified on both
-targets, ready for integration. Provider/AI and remaining Phase 3 implementation are
+targets and integrated through [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19). Provider/AI and remaining Phase 3 implementation are
 unstarted; CURRENT/HANDOVER own the next selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
@@ -86,7 +86,7 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 **Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
-The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. The bounded source foundation is qualified; provider/AI implementation remains unstarted. Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
+The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. The bounded source foundation is qualified and integrated; provider/AI implementation remains unstarted. Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
 
 The selected delivery sequence brings forward bounded 3A source foundations alongside
 provider feasibility, then targets a complete reviewed dialogue rewrite using manual
