@@ -298,10 +298,11 @@ complexity. Runs 34732252587, 34732654915, and 34733107607 remain failed evidenc
 sampler attribution, comparison-vs-diagnostic exit criteria, and macOS filter-yield
 flakiness. ADR 0003 supports Tauri 2 from the bounded gate set. The macOS observation
 may omit launchd-owned WKWebView/XPC services and cannot support total-memory savings.
-The Phase 1A production workflow runs the full Windows x64/macOS ARM64 package matrix
-for relevant production changes pushed to `main` and by explicit manual dispatch. It
-does not run on pull requests, so a reviewed change is not charged once before merge
-and again after merge, and documentation-only changes do not launch desktop packaging.
+The current production-scaffold workflow runs the full Windows x64/macOS ARM64
+package matrix only by explicit manual dispatch. It does not run automatically on
+pull requests or main pushes. Repository quality runs lightweight checks on PR/main;
+its expensive profile/diagnostic/source-foundation jobs require their manual inputs.
+Review and documentation publication do not themselves select desktop packaging.
 Routine runs retain lightweight packaged smoke and dependency/licence evidence only;
 full application bundles are uploaded only for manual production runs. The workflow
 continues to use locked npm/Cargo dependencies and commit-pinned checkout, Node setup,

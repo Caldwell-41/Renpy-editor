@@ -1,7 +1,7 @@
 # Phase 2 — Initial LLM assistance
 
 **Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
-**State:** provider/AI implementation not started; section 21 source foundation selected and implemented locally, target qualification incomplete.
+**State:** provider/AI implementation not started; section 21 source foundation independently reviewed and qualified on Windows x64/macOS ARM64, ready for integration. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
 **User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
@@ -992,7 +992,7 @@ Loomlight decisions, not a mandated OpenAI milestone count or new orchestration 
 
 ## 21. First bounded source-foundation assignment
 
-**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Mac ARM64 gates passed and raw evidence is audited; Windows x64 PASS is recorded and reused unchanged. Requested two-target qualification/acceptance remains incomplete pending original Windows archive transfer/member verification. Original proof/failures are preserved. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
+**State:** independent corrected-input review complete with no remaining actionable in-scope defect after EOF append/identity correction. Final-input Windows x64/macOS ARM64 qualification complete; accepted as the bounded source-foundation checkpoint and ready for integration. User explicitly removed cross-machine archive transfer as a blocker. Original proof/failures are preserved; full Phase 2/3A remains unfinished. [Section 23](#23-source-foundation-implementation-ledger--2026-10-07) owns attempts and continuation.
 **Reason:** prove stable child ownership before AI planning grows around flat Scenes.
 No provider access or credentials are needed.
 
@@ -2113,3 +2113,52 @@ Hosted Mac approval did not waive that requirement. Therefore the requested over
 two-target qualification/acceptance is **INCOMPLETE**, despite passing Mac execution.
 No pending CI operation remains. Next work is direct archive access/transfer/hash/member
 audit without any new qualification execution; no merge/release/provider/following work.
+
+
+**User removes optional cross-machine transfer / qualified checkpoint complete — 2026-10-07:**
+After confirming Windows was already verified by its original agent, the user asked
+whether transferring its raw archives had a practical benefit and explained that the
+requirement came from an agent-generated prompt. The owner explained its archival/
+independent-audit benefit and recommended removing it as an acceptance blocker. The
+user explicitly agreed: “excellent, lets forgot about that then. Whats the next goal
+and prompt?” This supersedes the earlier transfer prerequisite. It does not claim the
+ZIPs were copied or their members independently re-audited on Mac. Original Windows
+raw evidence remains preserved on Windows; that agent's verified result and portable
+final-input receipt are reused unchanged. Optional archive consolidation can remain
+housekeeping, with no new execution or evidence-transfer task selected.
+
+**Result:** corrected bounded source-foundation two-target qualification **COMPLETE**;
+accepted as the section 21 checkpoint, ready for integration. All139 final-input hashes
+match digest `be497aadca699904efa29f84a8c19485a86b39741bdfb9d15bc32e9e5099c939`.
+Windows PASS at `a49e536` and independently audited Mac PASS at run37581016311/1,
+exact tested `1ac80686bb96acda20fb56ecdc518a68a91b1809`, retain all33 native checks,
+actual six-assertion true/false SDK routes, rejecting wrong-outcome and cleanup evidence.
+All original/superseded failures remain. Cumulative build/native/SDK Windows **2/2/3**,
+Mac **3/3/3**; remaining expensive allowance **0/0/0**. No retry/build/native/SDK,
+provider/AI, merge or release occurred in this documentation closure.
+
+**Next proposed goal, not started:** review and integrate the qualified source branch
+into main through a PR, preserving exact139 qualified app/test/probe hashes and reusing
+recorded independent source review/target evidence. Fresh Git confirms source branch
+`4de9939`, main `aba200f`, no existing source-branch PR. Inspect the final diff and
+current policy, create/reuse PR, require normal lightweight quality checks, merge only
+if review/checks pass, verify main's qualified input equivalence, close the bounded
+ledger/status and return the **2A.0 provider qualification** prompt. This prompt only
+selects the integration outcome when the user uses it; no merge is authorized by asking
+for a next prompt. No fresh independent review mandate is introduced; review actual
+remaining delta against the already recorded source review.
+
+Current workflow audit: `production-scaffold.yml` is **manual-only**, despite older
+TESTING wording describing production main-push execution. `quality.yml` executes
+lightweight validator/Q1 rejection/retention/selector gates on PR/main; expensive
+source-foundation/profile/diagnostic jobs require explicit manual inputs. Therefore
+proposed integration can use normal PR/main checks with **zero** new release/native/SDK
+or manual workflow dispatches. Recheck actual workflows/policy at integration entry;
+never bypass required checks or silently start a duplicate matrix. This documentation
+closure corrects the stale TESTING cadence sentence to match the executable workflow.
+Canonical scope/ADR status are reconciled now; provider feasibility/credentials/request
+implementation remains unstarted and is a distinct next goal after integration.
+
+Closure verification: repository structure/text/privacy/link validator PASS (364 files),
+whitespace PASS, documentation-only scope review PASS; all139 frozen inputs and original23
+Mac evidence files remain unchanged. No application or qualification command rerun.

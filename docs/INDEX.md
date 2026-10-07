@@ -22,8 +22,9 @@ retains exact qualification/merge identities, both-platform feedback and limitat
 [Phase 1H](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
 is accepted and integrated through [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18).
 Phase 1 is closed after independent review, both-target qualification and required main quality.
-Unique failures and acceptance limits remain in the archived ledger. Phase 2 execution
-requires separate user selection.
+Unique failures and acceptance limits remain in the archived ledger. The bounded Phase 2
+source foundation is reviewed and qualified on both targets, ready for integration;
+provider/AI execution requires separate user selection. CURRENT/HANDOVER own live state.
 The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
 contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
 The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains

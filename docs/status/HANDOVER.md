@@ -1,19 +1,19 @@
 # Current outcome handover
 
-## Corrected source foundation — Mac proof passed; raw Windows transfer pending, 2026-10-07
+## Corrected source foundation — both targets qualified; integration ready, 2026-10-07
 
-**State:** corrected final-input Mac ARM64 build/native/SDK gates **PASS and raw evidence
-audited**. Windows x64 previously recorded PASS is reused unchanged. Requested overall
-two-target qualification/acceptance remains **INCOMPLETE** because original Windows
-input/evidence archives have not been directly transferred/member-verified. No pending
-CI operation remains. No Windows repeat, full matrix, provider/AI, merge, release or
-following deliverable.
+**State:** corrected final-input Windows x64/macOS ARM64 qualification **COMPLETE**;
+accepted as the bounded source-foundation checkpoint and ready for integration. Windows
+verification by its original agent is reused unchanged; Mac raw evidence is audited here.
+The user explicitly removed cross-machine archive copying as an acceptance requirement.
+Raw Windows archives remain on Windows; no claim of transfer/member re-audit on Mac.
+Full Phase 2/3A is unfinished. No pending CI operation or integration PR exists.
 [Phase 2 section 23](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07)
 owns exact commands, hashes, approvals, failures, audit and cumulative budgets.
 
 **Checkout/publication:** original Mac project, branch `codex/nested-source-foundation`.
-Published wait checkpoint `3ec91055214872b7f95fa6444dc727cf14669fc0` was clean/unchanged
-on resume. This audit/status-only successor does not alter qualified inputs. Hosted
+Published audit checkpoint `4de9939326bbbb2691143e982f255513958993c7` was clean/unchanged
+at this closure. This documentation-only successor does not alter qualified inputs. Hosted
 Mac run tested correction `1ac80686bb96acda20fb56ecdc518a68a91b1809`; Windows proof
 checkpoint is `a49e536163d5cea2e220894f97f780f4bd301668`. Original base `45c64c5`
 was safely fast-forwarded, with exact prior documentation copies, binary patch and
@@ -66,16 +66,31 @@ commands; zero retries/timeouts. Remaining Mac allowance **0/0/0**. No further r
 local/remote expensive execution, retry or installation is authorized. Windows unchanged
 PASS: build55.078s, native33 13.312s, SDK108.359s; hashes remain in ledger/receipt.
 
-**Remaining access / next action:** direct transfer from the original Windows checkout's
-`.toolchains/reports/source-foundation/corrected-qualification/`:
-`corrected-inputs-transfer.zip` SHA
-`acb1fe181f7d18c675ee6db628beadc7be2eb6b3784f65286889fa81d24512b2`,
-`windows-evidence-transfer.zip` SHA
-`1fdee686254e6596edf2c9487cdaaf71acfc383f918a91f9a55bcbda89f47120`.
-No direct transport is currently available; hosted Actions approval did not waive this
-requirement. Obtain archive access, verify both hashes, safely stage without overwriting
-work, verify evidence-sha256.json and all139 final inputs, then reconcile raw Windows
-proof with existing Mac audit without rerunning qualification. Keep acceptance incomplete
-until required transfer/member audit passes. Same-chat continuation; no CI polling or
-new execution. Codex host is original Mac ARM64, Mac evidence host is approved hosted
-macOS ARM64, Windows proof is reused. No autonomous Goal/runtime pause is claimed.
+**Transfer decision:** user accepted removing the agent-generated raw-copy requirement
+after its practical archival benefit was explained. Original Windows evidence remains
+preserved and trusted through its original verified result. Optional consolidation is
+housekeeping, not a qualification blocker. Expected archive identities remain in the
+historical ledger; no copy or hash/member audit is falsely claimed here.
+
+**Next proposed goal / approval boundary:** review and integrate this source branch into
+main using a PR; no PR currently exists. Fresh main `aba200fe60bc6d49db24bcf5e6897dbeb2a5b410`
+is unchanged. Read AGENTS, live status and Phase 2 sections21/23, inspect fresh Git and
+the final delta against the recorded independent source review. Reuse exact139-input
+qualification only after verifying hashes/tree equivalence. Create/reuse PR, require
+normal repository quality, merge only reviewed/passing work under current policy,
+verify main's qualified input hashes and close this bounded outcome. Preserve all local
+changes, original evidence, stash and historical planning worktree. Do not retire a
+branch/worktree still owning unique ignored evidence. No automatic next feature.
+
+**Proposed integration tests/limits:** any Codex host with repository/GitHub access;
+no new native host needed because affected-target proof is complete and unchanged.
+Zero new build/native/SDK or manual workflow dispatches; ordinary automatic PR/main
+lightweight quality checks only. Current production workflow is manual-only; expensive
+quality jobs are manual-input-only. The older TESTING production main-push sentence was corrected to match
+the executable workflow during this documentation closure. Recheck fresh
+policy/workflows before merge and preserve failure/ambiguity without automatic retries.
+User asking for a next prompt does not authorize running that next goal or merging now.
+After integration, return a 2A.0 synthetic Studio/generic provider qualification prompt;
+provider access/loaded model availability must be established then, with no project sends
+or installation assumed. This phase plan stays active; section23 retains completed
+source-foundation history rather than archiving the unfinished overall Phase2 plan.

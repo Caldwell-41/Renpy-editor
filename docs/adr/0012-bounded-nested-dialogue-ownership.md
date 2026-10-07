@@ -1,6 +1,6 @@
 # ADR 0012: Bounded nested dialogue ownership
 
-- Status: Independently reviewed corrections; Windows qualified, macOS pending; not accepted
+- Status: Accepted bounded checkpoint; independently reviewed and Windows/macOS qualified; integration pending
 - Date: 2026-10-07
 - Scope: Phase 2 section 21, bounded 3A.1/3A.2 foundation
 
