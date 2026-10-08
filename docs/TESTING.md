@@ -822,9 +822,23 @@ The [acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studi
 owns the current-slice gate mapping and proposed complete Windows schedule. Preparation
 must retain full phase-1/2 assertions, add Windows replacement/reload-required proof,
 complete input/dependency inventories and whole final-store checks. It requires
-separately reviewed fixture/controller work before native approval; current runner IDs
-and Mac-only selector do not implement the proposal. No review-only package matrix or
-current allowance renewal.
+separately reviewed fixture/controller work before native approval. The
+[prepared Windows schedule](tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+adds opt-in build 3/run 6–7 in a distinct receipt/root namespace, preserving exhausted
+historical identities. Full run-6 PASS, exact package/root bytes, normal exit and external
+PID absence are prerequisites for run 7; partial-entry reuse is forbidden there.
+The Windows beta snapshot seam, capture acknowledgement, all original markers plus
+three reload/Retry markers, whole final revision/foreign/active-generation store and
+byte comparisons reject missing proof. Captured action order and cumulative entry,
+confirmation/GET/exit deadlines are required. Installed Node bytes, locked Cargo archive
+and installed-file checksums, resolved features, compiler/SDK/environment and generated
+inputs supplement the independent source inventory; optional absence and all permission
+TOMLs are mandatory, including three explicitly required permissions even if absent
+from both the actual tree and submitted manifests. Fault/restore output collisions
+refuse before native inspection or profile mutation. Reload Retry requires exactly
+its one `ai.profiles` request plus the probe's read-only comparison request; enabling
+controls without a read is rejected by a DOM counterexample. No review-only package
+matrix or current allowance renewal.
 Historical Windows build-1/2 manifests omitted eight current inputs; those receipts
 prove their exact binaries and recorded subset, not complete candidate equivalence.
 Do not backfill old manifests with current hashes or waive the corrected reuse gate.

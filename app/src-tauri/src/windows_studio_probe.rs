@@ -35,7 +35,7 @@ pub fn phase(root: &Path) -> Result<Option<u8>, &'static str> {
     validate(&store, phase)?;
     Ok(Some(phase))
 }
-fn validate(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
+pub(crate) fn validate(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
     let fixture: ProfileStore =
         serde_json::from_str(FIXTURE).map_err(|_| "Windows fixture invalid")?;
     if !fixture.valid()
@@ -52,14 +52,17 @@ fn validate(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
             .any(|(p, f)| p.profile_id != f.profile_id || p.settings != f.settings || p.disabled)
         || (phase == 1 && *store != fixture)
         || (phase == 2
-            && store.profiles.iter().any(|p| {
-                p.revision != 2
-                    || p.credential.as_ref().is_none_or(|c| {
-                        !c.storage.is_native()
-                            || c.origin != "http://127.0.0.1:46082"
-                            || c.revision != 1
-                    })
-            }))
+            && (store.revision != 5
+                || store.profiles.iter().any(|p| {
+                    p.revision != 2
+                        || p.credential.as_ref().is_none_or(|c| {
+                            !c.storage.is_native()
+                                || c.service
+                                    != loomlight_core::ai_profiles::CredentialService::Legacy
+                                || c.origin != "http://127.0.0.1:46082"
+                                || c.revision != 1
+                        })
+                })))
     {
         return Err("Windows fixture state refused");
     }
@@ -87,6 +90,9 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
             | "reopened"
             | "beta-entry"
             | "beta-saved"
+            | "beta-reload-required"
+            | "beta-reloaded"
+            | "beta-reload-observed"
             | "removed"
             | "complete"
     ) {
@@ -101,6 +107,12 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
     }
     host.with_service(|s| {
         let root = s.ai_data_root();
+        if step == "beta-reload-observed" {
+            if phase != "2" { return Err("Windows reload observation phase refused"); }
+            let acknowledged = std::fs::read(root.join(".studio-windows-reload-observed.json"))
+                .ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+            return Ok(json!({"observed":acknowledged == Some(json!({"run":7,"phase":2,"observed":true}))}));
+        }
         let marker = json!({"phase":phase,"step":step});
         std::fs::write(root.join(".studio-windows-step.json"), marker.to_string())
             .map_err(|_| "Windows fixture step unavailable")?;
@@ -111,6 +123,8 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
                 | "cancelled"
                 | "reopened"
                 | "beta-saved"
+                | "beta-reload-required"
+                | "beta-reloaded"
                 | "removed"
                 | "complete"
         ) {

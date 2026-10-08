@@ -5,23 +5,33 @@ import { Window } from "happy-dom";
 import { mountStudioSettings } from "../src/ai-settings-ui.ts";
 const script = readFileSync("src-tauri/src/windows_studio_probe.js", "utf8");
 const fixture = JSON.parse(readFileSync("tests/fixtures/windows-studio-credentials.json", "utf8"));
-async function scenario(phase:number, failedGet=false) {
+const reload = JSON.parse(readFileSync("tests/fixtures/windows-studio-credential-reload-failure.json", "utf8"));
+async function scenario(phase:number, failedGet=false, reloadProof=false, defect="") {
   const browser = new Window(); Object.assign(globalThis,{window:browser,document:browser.document});
   let profiles=fixture.profiles.map((p:{profileId:string;settings:Record<string,unknown>})=>({profileId:p.profileId,settings:structuredClone(p.settings),revision:phase===1?1:2,disabled:false,credentialStatus:phase===1?"missing":"configured",discovery:null as null|{selectedAvailable:boolean;models:string[];status:string}}));
-  let entries=0,gets=0,removals=0;
+  let entries=0,gets=0,removals=0,reloadReads=0,confirmed=false;
   const snapshot=()=>structuredClone({token:profiles.map((p:{revision:number})=>p.revision).join("-"),profiles,cleanup:[{profileId:fixture.profiles[0].profileId,deferred:false}]});
   const reports:Record<string,unknown>[]=[];
   Object.assign(browser,{
     __loomlightWindowsStudioPhase:phase,
-    __loomlightProbeFindButton:(name:string)=>[...document.querySelectorAll("button")].find(b=>b.textContent===name),
+    __loomlightWindowsReloadProof:reloadProof,
+    __loomlightProbeFindButton:(name:string)=>{
+      const found=[...document.querySelectorAll("button")].find(b=>b.textContent===name);
+      if(defect==="retry-noop"&&confirmed&&name==="Retry")return {disabled:false,click:()=>{
+        [...document.querySelectorAll("button")].find(b=>b.textContent==="Save profile")!.disabled=false;
+      }};
+      return found;
+    },
     __TAURI_INTERNALS__:{invoke:async (_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
       const {operation,payload}=request;
       assert.ok(!Object.keys(payload).some(k=>["key","password","secret"].includes(k)),"No secret IPC");
       let value:unknown;
       const p=profiles.find((p:{profileId:string})=>p.profileId===payload.profileId);
       switch(operation){
-        case "ai.profiles":value=snapshot();break;
-        case "probe.windowsStudioStep":value={recorded:true};break;
+        case "ai.profiles":
+          if(confirmed){reloadReads++;if(defect==="retry-mutates"&&reloadReads===2)profiles[0]!.revision++;}
+          value=snapshot();break;
+        case "probe.windowsStudioStep":value=payload.step==="beta-reload-observed"?{observed:true}:{recorded:true};break;
         case "ai.enterCredential":
           entries++; assert.ok(p);
           if(phase===1&&entries===3){value={cancelled:true};break;}
@@ -38,13 +48,18 @@ async function scenario(phase:number, failedGet=false) {
         case "probe.runtimeUiReport":reports.push(payload);value={recorded:true};break;
         default:throw Error(`Unexpected ${operation}`);
       }
+      if(operation==="ai.enterCredential"&&phase===2&&reloadProof){
+        confirmed=true;
+        if(defect!=="absent-reload")value=structuredClone(reload.expectedResponse);
+        if(defect==="wrong-response")value={...(value as object),cleanupPending:false};
+      }
       return {protocolVersion:1,requestId:request.requestId,ok:true,value};
     }}
   });
   try {
     document.body.innerHTML="<button>Settings</button><button>AI providers</button><main></main><footer></footer>";
     document.querySelectorAll("button")[1]!.addEventListener("click",()=>mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!));
-    await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals};
+    await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals,reloadReads};
   }finally{await browser.happyDOM.close();}
 }
 test("prepared Windows probe drives both actual Settings phases with exact secret-free operations",{timeout:10000},async()=>{
@@ -52,4 +67,21 @@ test("prepared Windows probe drives both actual Settings phases with exact secre
 });
 test("Windows probe rejects failed discovery despite earlier availability",{timeout:5000},async()=>{
   const result=await scenario(2,true);assert.equal(result.report.passed,false);assert.equal(result.gets,2);
+});
+test("Windows beta reload branch drives actual disabled controls and one read-only Retry, retaining original phase assertions",{timeout:5000},async()=>{
+  const result=await scenario(2,false,true);
+  assert.equal(result.report.passed,true,JSON.stringify(result.report));
+  assert.deepEqual(result.report.reloadResponse,reload.expectedResponse);
+  assert.equal(result.entries,1);assert.equal(result.gets,2);assert.equal(result.removals,2);
+  for(const marker of reload.checks)assert.ok((result.report.checks as string[]).includes(marker));
+});
+test("Windows beta reload gate rejects missing response, wrong pending status and Retry mutation",{timeout:5000},async()=>{
+  for(const defect of ["absent-reload","wrong-response","retry-mutates"]){
+    const result=await scenario(2,false,true,defect);
+    assert.equal(result.report.passed,false,defect);assert.equal(result.entries,1);assert.equal(result.gets,1);assert.equal(result.removals,0);
+  }
+});
+test("Windows beta reload gate rejects a Retry that enables controls without reading profiles",{timeout:5000},async()=>{
+  const result=await scenario(2,false,true,"retry-noop");
+  assert.equal(result.report.passed,false);assert.equal(result.entries,1);assert.equal(result.gets,1);assert.equal(result.removals,0);
 });

@@ -167,7 +167,12 @@ proof and corrected Mac section-15
 packaged proof on source `37e3ab3`; Windows target proof remains missing. The original
 packaged inputs and their historical evidence remain distinct. The
 [acceptance-gap disposition](../tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09) retains Windows complete-manifest/full-flow
-blockers and proposes a combined replacement/reload proof. Windows cross-build
+blockers and proposes a combined replacement/reload proof. Its
+[prepared qualification fixture](../tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+uses only the existing post-confirmation snapshot seam on an isolated Windows beta
+replacement; it changes no persistent bytes, production credential behavior or Mac
+policy. Source/DOM/controller PASS prepares the schedule; Windows native proof still
+requires separate allowance and an actual packaged x64 executable. Windows cross-build
 continuity remains outside the selected same-package slice; no update guarantee is
 accepted. Generic/session-only/no-auth and full 2A.1 remain deferred/incomplete.
 

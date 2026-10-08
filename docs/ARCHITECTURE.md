@@ -67,14 +67,22 @@ A process-owned Mac qualification selector can refuse one post-confirmation Sett
 snapshot at this same response seam. Startup requires exclusive isolated Studio
 mode/development phase 1 and the exact public A/B/C fixture; entry requires unchanged C
 ownership, and confirmation checks the complete expected published store. Reads,
-failed saves, Cancel and mismatched confirmation do not consume it. Normal Mac startup
-and Windows dispatch have no selector state. It changes no profile/credential bytes,
+failed saves, Cancel and mismatched confirmation do not consume it. Normal startup
+has no selector state. It changes no profile/credential bytes,
 secret IPC, transaction ordering, native-reference deferral or signing policy.
-The corrected Mac section-15 packaged proof passed on source `37e3ab3`. Windows has
-no reload selector state; that target branch remains unproved. The
+The corrected Mac section-15 packaged proof passed on source `37e3ab3`. The prepared
+Windows-only `beta-post-save-snapshot-once` selector uses this same seam. It requires
+exclusive Studio phase 2, a new isolated acceptance root, the complete reopened A/B
+store and the beta-entry marker. After confirmed A replacement, it verifies the whole
+published store (including unchanged B and foreign/active-generation metadata) before
+refusing exactly one response read. Reads, Cancel, failed Save and mismatches never
+consume it. A bounded host capture acknowledgement holds the disabled UI before one
+read-only Retry; the original phase assertions then continue. The Windows target
+branch remains natively unproved. The
 [acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-maps the remaining proof and proposes Windows-only fixture preparation before any
-native allowance.
+maps the remaining proof; the [finalized preparation schedule](tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+owns source checks and separate publication/native approval. Mac selector, storage,
+entry callbacks, transaction behavior and signing policy are unchanged.
 
 The selected temporary Mac backend is core `ai_file_secrets`, injected through `Secrets`
 using the same approved application-data root as profiles. RustCrypto XChaCha20-Poly1305

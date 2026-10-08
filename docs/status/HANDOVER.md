@@ -1,96 +1,65 @@
 # Current outcome handover
 
-## Studio 2A.1 acceptance-gap review: complete, publication approved
+## Windows acceptance preparation: reviewed publication, native preflight next
 
-**Outcome/authority:** user selected an evidence-backed current-slice disposition and
-smallest concrete Windows proof proposal. One serial GPT-6.1 Sol High owner, zero
-subagents, local macOS ARM64. Review allowance **0 builds, launches, credential-store
-operations, provider calls or CI**; no runtime changes, PR, merge, release or request
-lifecycle. The review is complete and **review_ready**, not current Studio-slice or
-full 2A.1 acceptance. No new native operation/preparation is started or authorized.
-User explicitly approved commit/push of the seven reviewed documentation paths.
-The checkpoint carrying this record owns publication; verify its exact remote SHA
-in the response. Native allowance still requires separate approval. Continue in
-this same chat; the Windows preparation proposal remains unstarted.
+**Authority/result:** user requested "Review your work, if issues fix, then publish"
+and a prompt for step 2 which completes/reviews/fixes native input/capture preflight
+and returns a prompt for step 3. This authorizes the sixteen-path preparation candidate,
+bounded review fixes and normal commit/push on the existing branch. Local Windows x64,
+one serial owner under the requested GPT-6.1 Sol High constraint, zero subagents.
+Source/controller/DOM checks and original host-local receipt inspection only;
+**0 package builds, app launches, credential-store operations, provider calls or CI**.
+Native acceptance execution and 2A.2 remain unselected. Step 2 is a separate next task,
+not executed by publication.
 
-**Continuation/ownership:** repository Caldwell-41/Renpy-editor, same local branch
-`codex/provider-qualification`, clean entry/published checkpoint
-`4e1f877c21d4dabe6a35ab35a09e0bbc91f57242`. Fresh read-only remote lookup confirms that
-SHA and main `5f448ca683a905f4ea77d4580bbc89fda69f2b93`, contained in HEAD. Initial
-sandbox DNS failure was resolved by authorized read-only host lookup. No fetch/reset/
-branch replacement/stash/second writer. Planning worktree at `2c5a164` remains clean;
-historical stash/ignored evidence/private signing ownership preserved.
-The seven documentation paths are the approved publication scope; index was empty
-at recheck. No active PR. Remote refs and repository noreply identity match the
-review; no runtime inputs or other paths changed.
+**Location/checkpoint:** Caldwell-41/Renpy-editor, local
+`worktrees/provider-qualification`, branch `codex/provider-qualification`, preparation
+base **`57f4fedefb5619fb16f43e388952fe1320ab8746`**. The checkpoint carrying this record
+identifies the reviewed publication; resolve it with `git log` and verify exact remote
+branch equality before continuation. The publication response owns the confirmed SHA;
+no receipt-only successor commit. Fresh remote recheck before staging: qualification
+57f4fed, main 5f448ca (contained), no open PR for this branch. Push triggers target main
+or the separate runtime branch; this publication selects neither and dispatches no CI.
+Noreply identity verified. No reset/stash/force push, PR, merge or release; unrelated
+primary edits and other worktrees preserved.
 
-**Disposition/evidence:** [owning review and schedule](../tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-map each current remembered Studio gate to source/named tests and actual prior evidence.
-The [Windows independent review](../tasks/active/phase-2-initial-llm-assistance.md#windows-independent-review-and-publication-checkpoint--2026-10-08)
-retains exact-binary receipts but rejects both incomplete legacy manifests. Original
-phase-1 full entry/alpha-alpha discovery never passed. Mac corrected reload proof is
-complete on source `37e3ab3`, [public metadata](../tasks/evidence/2026-10-09-mac-section15.json),
-while Windows reload-required target UI remains missing: selector routing is Mac-only.
-Shared source/DOM or Mac UI cannot imply its Windows acceptance. These three current
-proof gaps remain open. Existing Windows run-3 Retry/saves/stale refusal, run-4 reopen/
-auth/replacement/removal, and run-5 targeted Cancel remain scoped evidence. Runs 1–3
-stay FAIL; run 4 PASS/40.062 s; run 5 targeted PASS/115.500 s with packaged full-flow
-FAIL/exit 1. No historical manifest backfill, waiver or new evidence-reuse rule.
+**Owning records:** [prepared schedule and receipt audit](../tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+and [publication review / next outcome](../tasks/active/phase-2-initial-llm-assistance.md#windows-preparation-publication-review--2026-10-09).
+Changed paths: existing Windows Python runner/tests; `ai_reload_fixture.rs`,
+`ai_settings.rs`, `main.rs`, Windows probe Rust/JS; Windows probe DOM test; new public
+reload fixture; app README; ARCHITECTURE, TESTING, ADR 0011; ledger; CURRENT/HANDOVER.
+No production native adapter, transaction, frontend product, dependency, identity or
+signing change. Raw receipts/packages/captures, input inventory and original/revised
+candidate manifests/patches remain ignored under `.toolchains`; do not publish them.
 
-Generic/session-only/no-auth, real Studio/generation and full 2A.1 remain deferred/
-incomplete rather than added requirements for this slice. Actual locked-store behavior
-remains an accessible-host limit; no enterprise-policy exercise. Windows cross-build
-continuity was not proved and is outside selected same-package scope, not a production
-update guarantee. Clean OS/data-deleting reinstall is excluded from persistence promises.
-Mac same-login encrypted-file compromise and deferred native ownership stay explicit;
-failed historical signed-update reuse and signing protections remain preserved.
+**Review/checks:** explicit required-permission gate now rejects equally incomplete
+actual-tree/manifests; fault and restoration collisions refuse before native inspection
+or fixture mutation; Retry must dispatch exactly one read plus the probe comparison.
+Rejecting tests exposed those gaps before correction. Final Python **17 PASS**, focused
+Settings/Windows DOM **9 PASS**, frontend/test TypeScript compilation PASS. Original
+**16 desktop PASS** and formatter evidence retained: all five reviewed Rust files have
+identical hashes. Historical independent-review JSON hash is unchanged. Original
+runs 1–3 FAIL, run 4 PASS, targeted run-5 Cancel PASS with packaged full-flow FAIL,
+eight manifest omissions and recovery limits all remain. Final validation and publication
+checks belong in the owning ledger. Source tests still prove no native UI behavior.
 
-**Concrete proposal/prerequisite:** after separately selected preparation, **1 Windows
-x64 package build, 1 copy/root, 2 launches, 4 native entries, 5 Save attempts (3 success,
-2 intended refusal), 1 Cancel, 1 read-only Retry, 4 loopback GETs, 2 server lifetimes,
-3 created/retired/deleted owned entries and 5 fixed presence-audit reads**. Build cap
-1200 s; each whole launch 300 s, entry 120 s, confirmation/Retry/exit 15 s, each GET
-15 s + 2 s cleanup, all within the whole-launch cap. No automatic retry or partial-flow
-input to acceptance. Full phase 1 alpha/alpha must PASS before phase 2 alpha/beta;
-combine Windows post-confirmation reload refusal/read-only Retry with beta replacement,
-retain every original assertion and complete byte/state/exit evidence. No third launch
-or second build/update test is proposed. The ledger owns exact order, manifests,
-rejecting gates, deadlines and failure recovery boundary.
+**Prepared native proposal, unapproved:** new exclusive build-3/run-6–7 namespace and
+isolated root; full original phase 1/alpha-alpha before phase 2/alpha-beta/reload/removal.
+Maximum 1 build/EXE copy/root, 2 launches, 4 entries, 5 Saves (3 success/2 refusal),
+1 Cancel, 1 read-only Settings Retry, 4 loopback GETs/2 server lifetimes, 3 owned entries,
+5 fixed presence reads. Build 1200 s +2 termination/+2 reap; launch 300 s; each whole
+entry 120 s; confirmation/capture acknowledgement/Retry/exit 15 s; GET 15 s +2 cleanup.
+No partial resume, retry, observer launch, installer, real endpoint or renewed budget.
+Windows totals remain **2/2 builds, 5/5 launches, 2/4 GETs**, 3 entries/5 audit reads;
+future selected amended totals **3/3, 7/7, 6/8**, 6 entries/10 reads. Old unused GETs
+unselected. Mac section-15 PASS/exhausted; other Mac/provider budgets unchanged.
 
-Existing runner's build 1/2, run 1–5 IDs/root are exhausted; it cannot dispatch this
-proposal. A **later local Windows x64 serial owner** first inspects original ignored
-receipts/files read-only (no OS credential calls or native audit helper), preserving
-private host paths/logs. Mac did not inspect those host-local files. Prepare exclusive
-build-3/run-6–7 identities, complete inventory/whole-store gates and a narrowly armed
-Windows-only one-shot beta-replacement snapshot-read refusal plus UI/Retry markers in
-the existing fixture/controller. That qualification code is proposed, not implemented
-here. The source/controller diff and focused rejecting checks must be reviewed before
-any native authorization; return a concrete blocker if combination is unsafe/unavailable.
-No direct other-host access or second writer. Windows machine is required for later
-native proof; this review used source/docs on Mac only.
-
-**Budgets/pending/recovery:** current review consumed zero executable allowance. Windows
-remains **2/2 builds, 5/5 launches, 2/4 GETs**, 3 owned entries and 5 fixed audit reads;
-2 unused GETs unselected. If separately approved/fully consumed, proposal totals would
-be **3/3 builds, 7/7 launches, 6/8 GETs**, 6 owned entries and 10 audit reads. This is an
-amendment proposal, never a reset. Mac development totals 3 pairs/3 copies/6 launches/
-11 entries/11 saves/1 historical Cancel/8 GETs; historical Mac identity 2/2 builds,
-4/4 launches, 4/8 GETs remains separate; section-15 allowance exhausted. Live provider
-qualification retains 22 HTTP/16 generations/1457 s charged, 18 HTTP/4 generations/
-343 s remaining but unselected here. No app/server/CI/external operation pending, no
-runtime Goal pause claimed. Windows original packages/receipts/root recovery remain
-host-local; Mac section-15 packages and receipts remain under ignored
-`.toolchains/releases/section15-37e3ab3/0.1.0` and
-`.toolchains/reports/mac-section15-37e3ab3/`, including `state.json` ownership. No private
-credential, path, log, SDK, package or signing material enters Git.
-
-**Verification/publication/next action:** fresh portable Windows controller tests
-**6 PASS, 0 failed/skipped**; validator/privacy/local-link and whitespace results live
-in the review ledger. No unchanged source/DOM/desktop/native matrix repeated. The
-user approved commit/push of only app README, ARCHITECTURE, TESTING, ADR 0011,
-Phase 2 ledger and CURRENT/HANDOVER, title
-`Record Studio acceptance gaps and Windows proof proposal`. Fresh refs/index and the
-seven-path scope were rechecked. Commit/push normally on this branch and verify
-remote SHA; no receipt-only successor, PR, CI or merge. Approval of publication does not approve preparation/native execution.
-Return the later Windows receipt-inspection/fixture-preparation prompt with zero native
-allowance; do not start it. 2A.2 remains unselected/dependency-incomplete.
+**Next action:** run only the separate [step-2 prompt](../tasks/active/phase-2-initial-llm-assistance.md#step-2-windows-native-inputcapture-preflight-prompt)
+after selecting it. Establish actual supported Windows input/capture and guarded file
+actions without Loomlight, its store, acceptance-root preparation or native budgets.
+Current computer-use surface disables native APIs: capability is unverified, a concrete
+blocker until resolved through a supported route. Never substitute DOM/browser evidence
+or unsupported workarounds. Preflight must review/fix its work and publish scoped evidence
+as its own selected outcome, then return a precise step-3 prompt for separate native
+approval only if readiness passes. Preserve original root ownership, private artifacts
+and failures. No app/server/CI/external operation pending; do not start 2A.2.

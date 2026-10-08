@@ -1,4 +1,4 @@
-//! One-shot public Mac qualification fault; never changes persistent bytes.
+//! One-shot public qualification faults; never change persistent bytes.
 use loomlight_core::{
     ai_credentials::{self as credentials, Records, SaveOutcome},
     ai_profiles::{CleanupReference, CredentialService, ProfileStore},
@@ -9,11 +9,14 @@ use std::{path::PathBuf, sync::Mutex};
 
 pub const SELECTOR: &str = "post-save-snapshot-once";
 pub const PROFILE: &str = "cc000000-0000-4000-8000-000000000003";
+pub const WINDOWS_SELECTOR: &str = "beta-post-save-snapshot-once";
+pub const WINDOWS_PROFILE: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 pub struct State(pub Mutex<ReloadFixture>);
 pub struct ReloadFixture {
     root: PathBuf,
     original: ProfileStore,
     consumed: bool,
+    windows: bool,
 }
 fn original() -> ProfileStore {
     let fixture: Value = serde_json::from_str(include_str!(
@@ -69,7 +72,57 @@ impl ReloadFixture {
             root: root.to_owned(),
             original,
             consumed: false,
+            windows: false,
         })
+    }
+    #[cfg(target_os = "windows")]
+    pub fn arm_windows(
+        selector: &str,
+        mode: &str,
+        phase: &str,
+        conflicting_mode: bool,
+        service: &LifecycleService,
+    ) -> credentials::Result<Self> {
+        let root = service.ai_data_root();
+        if selector != WINDOWS_SELECTOR
+            || mode != "studio-settings"
+            || phase != "2"
+            || conflicting_mode
+            || root.parent()
+                != Some(
+                    std::env::temp_dir()
+                        .canonicalize()
+                        .map_err(|_| "Temporary root unavailable.")?
+                        .as_path(),
+                )
+            || !root.file_name().is_some_and(|n| {
+                n.to_string_lossy()
+                    .starts_with("loomlight-studio-windows-acceptance-")
+            })
+            || root
+                .symlink_metadata()
+                .map_err(|_| "Windows reload root missing.")?
+                .file_type()
+                .is_symlink()
+        {
+            return Err("Windows reload fixture requires exclusive acceptance phase 2.");
+        }
+        let original = service.read()?;
+        crate::windows_studio_probe::validate(&original, 2)?;
+        if original.revision != 5 {
+            return Err("Windows reload fixture requires complete phase-1 state.");
+        }
+        Ok(Self {
+            root: root.to_owned(),
+            original,
+            consumed: false,
+            windows: true,
+        })
+    }
+    pub fn permits_operation(&self, operation: &str) -> bool {
+        !self.pending()
+            || operation == "ai.enterCredential"
+            || (self.windows && operation == "ai.discover")
     }
     /// Check before native entry. Reads, failed entry and Cancel never consume the fault.
     pub fn check_entry(
@@ -78,10 +131,24 @@ impl ReloadFixture {
         before: &ProfileStore,
         id: &str,
     ) -> credentials::Result<()> {
+        let profile = if self.windows {
+            WINDOWS_PROFILE
+        } else {
+            PROFILE
+        };
         if !self.consumed
-            && (service.ai_data_root() != self.root || *before != self.original || id != PROFILE)
+            && (service.ai_data_root() != self.root || *before != self.original || id != profile)
         {
             return Err("Reload fixture target/state refused.");
+        }
+        if self.windows && self.pending() {
+            let marker = std::fs::read(self.root.join(".studio-windows-step.json"))
+                .map_err(|_| "Windows beta entry marker missing.")?;
+            if serde_json::from_slice::<Value>(&marker).ok()
+                != Some(serde_json::json!({"phase":"2", "step":"beta-entry"}))
+            {
+                return Err("Windows beta entry marker refused.");
+            }
         }
         Ok(())
     }
@@ -101,6 +168,31 @@ impl ReloadFixture {
         }
         if service.ai_data_root() != self.root || outcome != SaveOutcome::SavedCleanupPending {
             return Err("Reload fixture confirmation refused.");
+        }
+        if self.windows {
+            let before = self.original.profiles[0].credential.as_ref().unwrap();
+            let credential = actual
+                .profiles
+                .first()
+                .and_then(|p| p.credential.as_ref())
+                .ok_or("Windows replacement publication missing.")?;
+            if !credential.storage.is_native()
+                || credential.service != CredentialService::Legacy
+                || credential.origin != before.origin
+                || credential.revision != 2
+                || credential.credential_id == before.credential_id
+            {
+                return Err("Windows replacement ownership refused.");
+            }
+            let mut expected = self.original.clone();
+            expected.revision += 3;
+            expected.profiles[0].revision += 1;
+            expected.profiles[0].credential = Some(credential.clone());
+            if actual != expected {
+                return Err("Windows complete replacement publication refused.");
+            }
+            self.consumed = true;
+            return Err("Qualification fixture refused one post-save Settings snapshot read.");
         }
         let credential = actual
             .profiles
@@ -145,6 +237,135 @@ impl ReloadFixture {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(target_os = "windows")]
+    pub(super) fn windows_original() -> ProfileStore {
+        let mut store: ProfileStore =
+            serde_json::from_str(crate::windows_studio_probe::FIXTURE).unwrap();
+        store.revision = 5;
+        for (p, id) in store.profiles.iter_mut().zip([
+            "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+            "ffffffff-ffff-4fff-8fff-ffffffffffff",
+        ]) {
+            p.revision = 2;
+            p.credential = Some(
+                serde_json::from_value(serde_json::json!({
+                    "credentialId":id,"origin":"http://127.0.0.1:46082","revision":1
+                }))
+                .unwrap(),
+            );
+        }
+        store
+    }
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn windows_activation_and_confirmation_reject_mismatch_without_consuming_or_writing() {
+        let root = tempfile::Builder::new()
+            .prefix("loomlight-studio-windows-acceptance-")
+            .tempdir()
+            .unwrap();
+        let service = LifecycleService::new(root.path().to_owned()).unwrap();
+        let before = windows_original();
+        std::fs::write(
+            root.path().join("ai-profiles.json"),
+            serde_json::to_vec(&before).unwrap(),
+        )
+        .unwrap();
+        for (selector, mode, phase, conflict) in [
+            ("unknown", "studio-settings", "2", false),
+            (WINDOWS_SELECTOR, "", "2", false),
+            (WINDOWS_SELECTOR, "studio-settings", "1", false),
+            (WINDOWS_SELECTOR, "studio-settings", "2", true),
+        ] {
+            assert!(ReloadFixture::arm_windows(selector, mode, phase, conflict, &service).is_err());
+        }
+        let mut fault =
+            ReloadFixture::arm_windows(WINDOWS_SELECTOR, "studio-settings", "2", false, &service)
+                .unwrap();
+        let path = root.path().join("ai-profiles.json");
+        let bytes = std::fs::read(&path).unwrap();
+        assert!(fault
+            .check_entry(&service, &before, WINDOWS_PROFILE)
+            .is_err());
+        std::fs::write(
+            root.path().join(".studio-windows-step.json"),
+            r#"{"phase":"2","step":"beta-entry"}"#,
+        )
+        .unwrap();
+        assert!(fault
+            .check_entry(&service, &before, WINDOWS_PROFILE)
+            .is_ok());
+        assert!(fault
+            .check_entry(&service, &before, &before.profiles[1].profile_id)
+            .is_err());
+        assert!(fault.permits_operation("ai.discover"));
+        assert!(!fault.permits_operation("ai.removeProfile"));
+        // Cancel/read/unpublished confirmation never consume the fault.
+        assert_eq!(service.read().unwrap(), before);
+        assert!(fault
+            .snapshot_after_save(&service, SaveOutcome::SavedCleanupPending)
+            .is_err());
+        assert!(fault.pending());
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+        let mut actual = before.clone();
+        actual.revision += 3;
+        actual.profiles[0].revision += 1;
+        let c = actual.profiles[0].credential.as_mut().unwrap();
+        c.revision += 1;
+        c.credential_id = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeef".into();
+        for mutate in 0..6 {
+            let mut wrong = actual.clone();
+            match mutate {
+                0 => wrong.revision += 1,
+                1 => wrong.profiles[1].settings.label.push_str(" changed"),
+                2 => wrong.cleanup.clear(),
+                3 => wrong.active_development_generation = None,
+                4 => {
+                    wrong.profiles[0].credential.as_mut().unwrap().service =
+                        CredentialService::Loomlight
+                }
+                _ => {
+                    wrong.profiles[0].credential.as_mut().unwrap().credential_id = before.profiles
+                        [0]
+                    .credential
+                    .as_ref()
+                    .unwrap()
+                    .credential_id
+                    .clone()
+                }
+            }
+            let bytes = serde_json::to_vec(&wrong).unwrap();
+            std::fs::write(&path, &bytes).unwrap();
+            assert!(fault
+                .snapshot_after_save(&service, SaveOutcome::SavedCleanupPending)
+                .is_err());
+            assert!(fault.pending());
+            assert_eq!(std::fs::read(&path).unwrap(), bytes);
+        }
+        let bytes = serde_json::to_vec(&actual).unwrap();
+        std::fs::write(&path, &bytes).unwrap();
+        assert_eq!(
+            fault
+                .snapshot_after_save(&service, SaveOutcome::SavedCleanupPending)
+                .unwrap_err(),
+            "Qualification fixture refused one post-save Settings snapshot read."
+        );
+        assert!(!fault.pending());
+        assert_eq!(
+            fault
+                .snapshot_after_save(&service, SaveOutcome::SavedCleanupPending)
+                .unwrap(),
+            actual
+        );
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+        assert!(ReloadFixture::arm_windows(
+            WINDOWS_SELECTOR,
+            "studio-settings",
+            "2",
+            false,
+            &service
+        )
+        .is_err());
+    }
     fn seeded(root: &std::path::Path) -> LifecycleService {
         let service = LifecycleService::new(root.to_owned()).unwrap();
         service

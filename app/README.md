@@ -300,7 +300,14 @@ records the remaining Windows current-slice blockers: complete candidate inputs,
 phase-1 entry/alpha-alpha flow, and the confirmed-save/reload-required branch. Mac
 section-15 proof is complete. A proposed one-build/two-launch/four-loopback-GET schedule
 combines Windows reload proof with beta replacement after separately reviewed Windows
-fixture/controller preparation. It is not executable authorization: current runner IDs
-are consumed and the reload selector is Mac-only. No old manifest is backfilled; the
+fixture/controller preparation. The [finalized Windows preparation](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+adds `--acceptance` to the existing runner for exclusive build 3/run 6–7 receipts under
+`.toolchains/windows-studio-acceptance` and a new isolated root. The opt-in Windows
+`LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE=beta-post-save-snapshot-once` selector is armed
+only on phase 2's exact beta replacement. Full run-6 PASS is required; the combined
+phase holds the reload UI for bounded native capture, then makes one read-only Retry
+and continues every original assertion. Complete installed/generated inputs, whole
+stores and action deadlines are rejecting gates. These switches grant no allowance;
+publication and native execution require separate approval. No old manifest is backfilled; the
 existing corrected manifest gate still rejects those legacy packages. Cross-build
 Windows continuity, generic/session-only/no-auth and full 2A.1 remain unqualified.

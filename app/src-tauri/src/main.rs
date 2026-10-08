@@ -682,6 +682,18 @@ fn main() {
                 )?;
                 app.manage(ai_reload_fixture::State(Mutex::new(fixture)));
             }
+            #[cfg(target_os = "windows")]
+            if let Some(selector) = std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE") {
+                let fixture = ai_reload_fixture::ReloadFixture::arm_windows(
+                    selector.to_str().ok_or("Windows reload selector refused")?,
+                    &std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap_or_default(),
+                    &std::env::var("LOOMLIGHT_STUDIO_WINDOWS_PHASE").unwrap_or_default(),
+                    std::env::var_os("LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE").is_some()
+                        || std::env::var_os("LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE").is_some(),
+                    &lifecycle,
+                )?;
+                app.manage(ai_reload_fixture::State(Mutex::new(fixture)));
+            }
             *app.state::<DesktopState>()
                 .0
                 .lock()
@@ -738,7 +750,8 @@ fn main() {
                         main.show().expect("probe show"); main.set_focus().expect("probe focus");
                         #[cfg(target_os = "windows")]
                         if let Some(phase) = windows_phase {
-                            main.eval(&format!("window.__loomlightWindowsStudioPhase = {phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("windows_studio_probe.js"))).expect("Windows Studio probe injection");
+                            let reload = std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE").is_some();
+                            main.eval(&format!("window.__loomlightWindowsStudioPhase = {phase}; window.__loomlightWindowsReloadProof = {reload};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("windows_studio_probe.js"))).expect("Windows Studio probe injection");
                         } else {
                             main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
                         }

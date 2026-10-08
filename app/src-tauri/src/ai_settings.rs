@@ -541,6 +541,142 @@ mod tests {
     }
     #[cfg(target_os = "windows")]
     #[test]
+    fn windows_confirmed_entry_controller_and_snapshot_seam_use_no_os_store_and_retry_is_read_only()
+    {
+        use crate::ai_reload_fixture::{WINDOWS_PROFILE, WINDOWS_SELECTOR};
+        use loomlight_core::ai_profiles::OwnedCredential;
+        struct Memory(std::cell::RefCell<std::collections::HashMap<String, String>>);
+        impl Secrets for Memory {
+            fn read(
+                &self,
+                _: &str,
+                c: &OwnedCredential,
+            ) -> credentials::Result<Option<credentials::Secret>> {
+                Ok(self
+                    .0
+                    .borrow()
+                    .get(&c.credential_id)
+                    .cloned()
+                    .map(credentials::Secret::new))
+            }
+            fn add(&self, _: &str, c: &OwnedCredential, key: &str) -> credentials::Result<()> {
+                self.0
+                    .borrow_mut()
+                    .insert(c.credential_id.clone(), key.into());
+                Ok(())
+            }
+            fn delete(&self, _: &str, c: &OwnedCredential) -> credentials::Result<()> {
+                if !c.storage.is_native() {
+                    return Err("Foreign Mac reference retained");
+                }
+                self.0.borrow_mut().remove(&c.credential_id);
+                Ok(())
+            }
+        }
+        let root = tempfile::Builder::new()
+            .prefix("loomlight-studio-windows-acceptance-")
+            .tempdir()
+            .unwrap();
+        let service =
+            loomlight_core::lifecycle::LifecycleService::new(root.path().to_owned()).unwrap();
+        let mut store: ProfileStore =
+            serde_json::from_str(crate::windows_studio_probe::FIXTURE).unwrap();
+        let memory = Memory(Default::default());
+        service.write(&store, &ProfileStore::default()).unwrap();
+        for (id, key) in [
+            (WINDOWS_PROFILE, "public-alpha"),
+            ("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "public-gamma"),
+        ] {
+            credentials::replace(&service, &memory, &credentials::token(&store), id, key).unwrap();
+            store = service.read().unwrap();
+        }
+        let mut fixture =
+            ReloadFixture::arm_windows(WINDOWS_SELECTOR, "studio-settings", "2", false, &service)
+                .unwrap();
+        std::fs::write(
+            root.path().join(".studio-windows-step.json"),
+            r#"{"phase":"2","step":"beta-entry"}"#,
+        )
+        .unwrap();
+        fixture
+            .check_entry(&service, &store, WINDOWS_PROFILE)
+            .unwrap();
+        let host = ApplicationHost::new(service);
+        let target = json!({"token":credentials::token(&store),"profileId":WINDOWS_PROFILE});
+        for payload in [
+            json!({"token":"stale","profileId":WINDOWS_PROFILE}),
+            json!({"token":credentials::token(&store),"profileId":store.profiles[1].profile_id}),
+            json!({"token":credentials::token(&store),"profileId":WINDOWS_PROFILE,"key":"refused-public-input"}),
+        ] {
+            let refused = serde_json::to_value(dispatch_settings_with_fixture(
+                &host,
+                "reject-fixture".into(),
+                "ai.enterCredential",
+                payload,
+                |_| panic!("Windows fixture mismatch must refuse before native entry"),
+                Some(&mut fixture),
+            ))
+            .unwrap();
+            assert_eq!(refused["ok"], false);
+            assert!(fixture.pending());
+        }
+        let cancelled = serde_json::to_value(dispatch_settings_with_fixture(
+            &host,
+            "cancel-fixture".into(),
+            "ai.enterCredential",
+            target.clone(),
+            |_| Ok(None),
+            Some(&mut fixture),
+        ))
+        .unwrap();
+        assert_eq!(cancelled["value"]["cancelled"], true);
+        assert!(fixture.pending());
+        let (events, receive) = std::sync::mpsc::sync_channel(2);
+        let (results, reply) = std::sync::mpsc::sync_channel(1);
+        events
+            .send(EntryEvent::Save(credentials::Secret::new(
+                "public-beta".into(),
+            )))
+            .unwrap();
+        // Queue the same confirmed event the native dialog emits after Save.
+        events
+            .send(EntryEvent::Finished(Ok(Some(
+                credentials::SaveOutcome::SavedCleanupPending,
+            ))))
+            .unwrap();
+        let response = serde_json::to_value(dispatch_settings_with_fixture(
+            &host,
+            "beta-fixture".into(),
+            "ai.enterCredential",
+            target,
+            |entry| drive_entry(&host, &memory, entry, receive, results),
+            Some(&mut fixture),
+        ))
+        .unwrap();
+        assert_eq!(
+            reply.recv().unwrap().unwrap(),
+            credentials::SaveOutcome::SavedCleanupPending
+        );
+        let bytes = std::fs::read(root.path().join("ai-profiles.json")).unwrap();
+        let regression: Value = serde_json::from_str(include_str!(
+            "../../tests/fixtures/windows-studio-credential-reload-failure.json"
+        ))
+        .unwrap();
+        assert_eq!(response["value"], regression["expectedResponse"]);
+        assert!(!response.to_string().contains("public-beta"));
+        assert!(!fixture.pending());
+        // Actual read-only snapshot seam, no native entry or second transaction.
+        let retry = host.with_service(|s| s.read()).unwrap().unwrap();
+        assert_eq!(retry.profiles[0].revision, 3);
+        assert_eq!(retry.profiles[1], store.profiles[1]);
+        assert_eq!(
+            std::fs::read(root.path().join("ai-profiles.json")).unwrap(),
+            bytes
+        );
+        assert_eq!(memory.0.borrow().len(), 2);
+    }
+    #[cfg(target_os = "windows")]
+    #[test]
     fn windows_dispatch_refuses_secret_payload_and_stale_token_before_entry() {
         let temp = tempfile::tempdir().unwrap();
         let service =
@@ -757,7 +893,7 @@ pub fn dispatch(
     operation: &str,
     payload: Value,
 ) -> CoreResponse {
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
     {
         use tauri::Manager;
         if let Some(state) = app.try_state::<crate::ai_reload_fixture::State>() {
@@ -822,7 +958,10 @@ fn dispatch_settings_with_fixture(
             }
             return view(host);
         }
-        if fixture.as_ref().is_some_and(|f| f.pending()) && operation != "ai.enterCredential" {
+        if fixture
+            .as_ref()
+            .is_some_and(|f| !f.permits_operation(operation))
+        {
             return Err("Reload fixture permits only C entry and read-only Settings reload.");
         }
         if operation == "ai.saveProfile" {

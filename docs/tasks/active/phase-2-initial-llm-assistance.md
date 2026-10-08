@@ -6198,3 +6198,289 @@ carrying this record owns publication; commit/push normally and verify its exact
 remote SHA in the response. No receipt-only successor or native/preparation execution.
 All proof limits and cumulative allowances stay unchanged. The next Windows prompt
 above is still proposed/unstarted; publication approval grants no native allowance.
+
+### Windows acceptance schedule preparation — 2026-10-09
+
+**Authority/result:** user selected preparation of the existing controller and narrow
+Windows qualification fixture, local Windows x64, one serial owner with the requested
+GPT-6.1 Sol High setting, **zero subagents**. Source/controller/DOM checks and local
+receipt inspection only; **0 package builds, app launches, credential-store operations,
+provider calls or CI**. No production behavior change, publication, PR, merge, release
+or request lifecycle. Preparation is **review_ready, local only**. Native acceptance
+and Studio 2A.1/Phase 2 remain open; 2A.2 is unselected.
+
+**Entry/ref recovery:** clean local Windows checkout was at published `73a4fc1` with
+stale status records. Authorized read-only remote fetch/lookup found the approved
+review tip **`57f4fedefb5619fb16f43e388952fe1320ab8746`**. Fast-forwarded the same
+`codex/provider-qualification` worktree; no reset, stash, branch replacement or other
+worktree edits. Original sandbox DNS failure was resolved by host-access lookup.
+Mac source section-15 proof is complete on `37e3ab3`; no other-host access was used.
+The earlier review/preparation proposals above remain historical; this is their selected
+source-only continuation, not native authorization.
+
+**Original Windows receipt inspection:** inspected the actual ignored local build-1/2
+attempts, 12 logs, package copies, five attempt/launch/terminal/stdout sets, partial
+alpha/gamma and reopened/beta/removed snapshots, fault/backup/restoration files,
+run-5 Cancel/after bytes, post-qualification restored state, original independent
+review script/JSON and historical completion audit. Read-only assertions **PASS**;
+no native audit helper or credential API was run. Both EXE sizes/digests and package-2
+installer digest match their original receipts. Package-2 EXE remains
+`9e3e14c5ea3957620b9c001a83a9299aa9bcf8db24309cffcd1265716eda5102`, 14,804,480 bytes.
+Final restored empty-profile/foreign-generation bytes hash
+`904ccb5e041ba1121fd653359b9f4f1e9a52ae79e45ee38853641acd2760e141`.
+Original independent audit JSON remains SHA256
+`2965096e8134c0fbb5170cb26fa6a1c515fe8bf4719ede2edc207b8f6cb6df2e`.
+
+Runs 1–3 remain **FAIL**; run 4 **PASS/40.062 s**; run 5 targeted Cancel
+**PASS/115.500 s**, packaged full-flow **FAIL/exit 1**. Presence/retained-field
+observations are retained historical host evidence, not fresh observation. Run 1's
+missing original `run` field and build 1's missing original installer digest remain
+limits. All recorded package-2 source hashes match the published Windows candidate
+`73a4fc1`; later Mac fixture/routing changes and this preparation are distinct inputs.
+The eight original omissions remain eight; newly added files/presence markers are not
+retroactively labeled original omissions. Legacy complete manifests still reject.
+Private raw receipts, paths, logs and packages stay local. New inspection evidence is
+under ignored `app/.toolchains/windows-studio-preparation/receipt-audit.py/json`;
+no original evidence/root file was rewritten.
+
+**Prepared code/gates:**
+
+- Existing Python runner gains explicit `--acceptance`, exclusive **build 3/run 6–7**
+  under `.toolchains/windows-studio-acceptance`, and a new temp-root prefix
+  `loomlight-studio-windows-acceptance-`. Historical mode/IDs remain; partial/targeted
+  Cancel options are forbidden in acceptance mode. Colliding attempt/launch/terminal/
+  log/package outputs refuse before dispatch. No new acceptance root or attempt exists.
+- Independent source inventory covers app root/config/source/probes/scripts/fixtures,
+  every permission TOML, optional public/app/workspace `.cargo` presence and contents.
+  Installed Node bytes, resolved Cargo features and registry archive/install manifests,
+  tool versions/binary hashes, Rust target/MSVC/SDK libraries/headers, safe environment
+  digest, commit/diff and generated-input disposition supplement it. Registry archives
+  must match Cargo.lock checksums and installed files. Vendor checksum manifests are
+  checked where present; ordinary registry absence is recorded. Pre/post inventory
+  changes fail. `dist`, Tauri schemas and release build-script outputs are captured and
+  rechecked before launches. The existing external-runner exception remains narrow;
+  no runtime/fixture/dependency changes are allowed between build and proof.
+- Process-owned Windows selector `beta-post-save-snapshot-once` requires exclusive
+  Studio phase 2, the new isolated root, complete revision-5 reopened A/B store and
+  beta-entry marker. Entry/state mismatch, read, Cancel or failed Save never consumes
+  it. Only a confirmed revision-8 native A replacement with unchanged B/settings and
+  foreign/active-generation metadata consumes the single response-read refusal.
+  Native adapter/callbacks, transaction order, persistent bytes, normal startup, Mac
+  selector and signing policy are unchanged.
+- Packaged Windows phase 2 captures the exact typed reload response, disabled mutation/
+  discovery controls and enabled read-only Retry. It holds that UI at
+  `beta-reload-required` until an externally captured, bounded acknowledgement, then
+  performs exactly one Retry and retains every original phase-2 assertion. Snapshots
+  before/after Retry must have identical bytes. Full original run-6 marker/alpha-alpha
+  gates, exit 0, external PID absence, same EXE and complete root bytes are prerequisites
+  for run 7. Partial entry is never an acceptance input. Final expected store is exactly
+  revision **14**, no profiles, with all original foreign/active-generation metadata.
+- Ordered native action receipts reject missing/refused/skipped results, wrong phase,
+  extra GETs, missing capture, changed whole stores or missed deadlines. Host captures
+  stay local and are checked for exact file hash/size/ownership; no secret IPC/logging
+  path was added. Current source/DOM tests do not claim a native observation.
+
+#### Finalized schedule for separate publication and native approval
+
+This fixes the existing proposal's concrete identities/protocol; its maximum remains
+**1 build, 1 EXE copy/root, 2 launches, 4 entry sessions, 5 Save attempts (3 confirmed,
+2 intended refusal), 1 native Cancel, 1 read-only Settings Retry, 4 loopback GETs,
+2 server lifetimes, 3 created/retired/deleted owned entries, 5 fixed audit reads**.
+It is a proposal, **not execution approval**. No installer, observation launch, real
+endpoint/key, generation, store enumeration, CI, second build or third launch.
+
+| Order | Exact prepared route / required evidence | Blocking deadline |
+| --- | --- | --- |
+| Before authorization/dispatch | Review/publish this named candidate only with separate approval. Recheck tip/hashes and original ownership. Resolve pinned Node/npm/toolchain route, generated permission presence, isolated target/output and complete inputs. Prove a supported native Windows input/capture route and guarded file actions without starting Loomlight or touching its store. Refuse competing app/listener, stale outputs, unavailable capture route or ambiguous state. | No exploratory launch; stop before build if prerequisites unavailable. |
+| Prepare + build 3 | From `app/`, future `python scripts/windows-studio-credentials.py prepare --acceptance`, then `build --acceptance --build 3`. New exact empty-key A/B root; original root untouched. One locked offline release/NSIS invocation; complete pre/post inventories equal, exact copied EXE/installer size/hash, no installer execution. | Build process 1200 s; owned termination/reap 2 s + 2 s; no retry. |
+| Run 6 / phase 1 | Future `launch --acceptance --phase 1 --run 6 --build 3`. Same masked native entry order as original phase 1. A alpha unreadable-record refusal, exact restore, retained-field native Retry without retyping; B gamma successful Save; A replacement stale-origin refusal at unused loopback 46083, exact restore and Escape Cancel. Use existing `corrupt/restore --acceptance --step alpha` or `--step cancel` only at the current recorded entry. Capture before restore/Retry/Cancel. Complete Cancel bytes equal gamma/pre-Cancel; two explicit alpha/alpha GETs, full original markers and normal exit 0. Two fixed presence reads require present entries. | Whole launch 300 s from pre-dispatch clock; each whole entry 120 s including fault/restore; each confirmation 15 s, each GET 15 s + cleanup 2 s, exit 15 s, all within whole cap. |
+| Run 7 / phase 2 | Future `launch --acceptance --phase 2 --run 7 --build 3`, **only after full run-6 PASS**. Same EXE/root bytes; both configured with zero automatic discovery. Alpha GET; A beta replacement/one Save. Capture exact saved/cleanup-pending/reload-required UI with disabled controls. Write the host observation receipt and use `confirm-reload --acceptance` during its fixed hold. One read-only Retry restores configured A, with unchanged persisted bytes and no entry/Save/GET. Beta GET; remove A key/profile preserving B, then B key/profile preserving whole foreign metadata/revision-14 store. All original plus three reload markers, normal exit/PID absence; three exact alpha/beta/gamma audit reads require absence. | Whole launch 300 s; entry 120 s; confirmation, capture acknowledgement, Retry and exit each 15 s; each GET 15 s + cleanup 2 s, within whole cap. |
+
+**Observation protocol:** receipts are exclusively host-local
+`run-6-observed.json` / `run-7-observed.json` in the acceptance namespace. Each has
+its exact run/phase, ordered `events` with `name`, monotonic `startSeconds`/
+`endSeconds` relative to launch `startedMonotonic`, and `passed:true` only for observed
+success. GET events additionally record `requestSeconds` (≤15) and `cleanupSeconds`
+(≤2). The runner's `validate_observations` owns exact names/required boolean
+observations; zero/missing/out-of-order/over-budget data reject. Entry elapsed budgets
+span open/input through final confirmation/Cancel, never reset at a fault or tool yield.
+Final native capture audit must check original retained input/refusal/restoration and
+byte evidence, not treat booleans alone as native proof.
+
+Before the phase-2 probe advances, host-local `run-7-reload-observed.json` requires
+`run:7`, `phase:2`, exact `saveStatus`, `controlsDisabled:true`, `retryEnabled:true`,
+`profilesSha256` matching `.studio-windows-2-beta-reload-required.json`, bounded
+`startSeconds/endSeconds`, and owned PNG `captures` with filename/SHA256/bytes.
+`confirm-reload` verifies the live recorded PID/current marker/deadline and these
+receipts before exclusively acknowledging the fixed root. Missing acknowledgement
+fails the probe; never populate one in advance or from DOM evidence. Prepare the host
+capture/file sequence before dispatch; indexed-button input and model/tool round trips
+must not repeat the historical failure. This session's computer-use surface explicitly
+disables native APIs, so **native input/capture capability is unverified here**. A later
+approved native run must establish that route before consuming any build/launch; absent
+capability is a concrete preflight blocker, not permission for an observer launch or
+waiver. No native proof was attempted now.
+
+**Failure/recovery:** any reserved/ambiguous attempt consumes its identity; no automatic
+retry, third launch, second build or partial-flow acceptance. Preserve failed receipt,
+stdout/error, snapshots, faults/backups, possibly created credentials and exact root.
+After confirmed exit use only external PID/files/receipts; do not reacquire an exited
+UI. Interrupted/unknown owned state needs a specific recovery decision before store
+actions. Native absence/presence audits remain the five fixed reads selected above;
+they were not executed during preparation.
+
+**Cumulative budget unchanged:** **2/2 builds, 5/5 launches, 2/4 GETs**, 3 owned
+entries and 5 fixed audit reads consumed. Old two unused GETs remain unselected. If
+separately approved and fully consumed, ceilings/totals become **3/3 builds, 7/7
+launches, 6/8 GETs**, 6 entries and 10 audit reads; no reset. Mac development/identity/
+section-15 histories and provider 22 HTTP/16 generations/1457 s remain separate,
+unchanged and unselected.
+
+**Focused verification/review:** Python controller **15 PASS**; Windows desktop
+**16 PASS, 0 failed/ignored/filtered**; focused Settings/Windows probe DOM **8 PASS,
+0 failed/skipped/cancelled/todo**; frontend/test TypeScript compilation and Rust
+formatter PASS. Desktop checks use native-refusal, in-memory or file-only seams;
+the new Windows integration drives actual typed fixture dispatch/entry events and
+post-confirmation response without OS-store calls. No unchanged core/browser/native/CI
+matrix repeated. Complete-input collector was exercised through read-only local
+offline metadata/version/file inspection; installed dependency/toolchain results are
+retained under ignored `input-preflight.json`, not a build receipt.
+
+**Failures/corrections retained:** initial Python temp-directory sandbox error; corrected
+to the existing workspace temp for tests. Three command-relative path mistakes were
+corrected before any check executed. Rust sandbox toolchain access denied; authorized
+offline host-access tests then ran. First desktop result **15 PASS/1 FAIL**: synthetic
+revision-5 seed incorrectly used the ordinary revision-advancing writer. Corrected the
+test's direct public snapshot seed; no product fix; final **16 PASS**. Collector first
+rejected absent vendor `.cargo-checksum.json`; the installed registry uses cached
+archives. Corrected it to verify locked archive checksums and every installed archive
+file, recording optional vendor-manifest absence. Original assertion strength was
+retained. Review also added the bounded native capture hold and strict phase/whole-
+store/dependency/deadline counterexamples. No assertion/failure/budget was waived.
+
+**Review disposition/next action:** owner self-review of the complete source/controller/
+fixture/test/canonical-doc/status diff, zero subagents. Existing production native
+adapter/entry, shared transaction layer, frontend product behavior, dependencies and
+Mac identity/signing files remain unchanged. The source candidate is local, with empty
+index and no publication. Canonical README/ARCHITECTURE/TESTING/ADR 0011 plus ledger,
+CURRENT/HANDOVER own the durable result. Return it for **separate publication approval**;
+after publication, native approval must select this exact candidate and finite schedule
+and resolve the native input/capture preflight. Do not run it or start 2A.2.
+
+**Final owner audit:** read-only final input preflight **PASS**: 139 source/presence
+entries, 4,498 installed Node files, 292 locked Cargo registry packages; Node 24.19.0,
+npm 11.9.0, Tauri CLI 2.11.4, Rust/Cargo 1.90.0, Python 3.13.15, MSVC 14.50.35717,
+Windows SDK 10.0.26100.0. Exact private input data remains ignored; it is not a package
+receipt or proof of future build inputs. Final desktop 16 and recompiled focused DOM 8
+PASS after actual Windows dispatch integration. Validator/privacy/local links **411
+files PASS**, including the untracked public fixture; whitespace and formatter PASS.
+Sixteen-path reviewed candidate, empty index and unchanged native/problem budgets;
+named hashes and complete reverse-apply-checked patch retained under ignored preparation
+evidence. No remaining in-scope source finding; native input/capture preflight and all
+three current packaged acceptance gaps remain explicitly unproved.
+
+### Windows preparation publication review — 2026-10-09
+
+**Authority:** user selected step 1: "Review your work, if issues fix, then publish",
+then return a prompt for step 2 that completes/reviews/fixes its work and returns the
+step-3 prompt. This supersedes the preparation's local-only publication boundary;
+normal commit/push of these sixteen paths and bounded review fixes is authorized.
+It grants no package build, app launch, credential API, provider/CI, PR/merge/release,
+native schedule execution or 2A.2. One serial requested GPT-6.1 Sol High owner,
+zero subagents, original local Windows receipts only.
+
+**Re-review/findings fixed:**
+
+1. A permission missing from the actual tree and both supplied source maps could
+   evade the map comparison (the collector separately rejected it). Both gates now
+   explicitly require the three owned permission files; the reload fixture is also
+   explicit. The independent complete source inventory remains required.
+2. Fault/restoration receipt collision was detected after possible fixture mutation.
+   Reserve backup/fault/restored outputs before native liveness inspection or profile
+   writes; exclusive receipt creation and exact fault-hash restoration stay intact.
+3. Reload Retry accepted any count of read-only operations. Require exactly the Retry's
+   one `ai.profiles` operation followed by the probe's comparison read. A no-op Retry
+   that merely enables controls now fails before discovery/removal.
+
+**Counterexamples/results:** Python pre-fix **17 tests, four failed assertions**
+(one missing-permission assertion and three fault-collision subcases); no OS API was
+called because the test replaced WinDLL with a rejecting stub. DOM pre-fix **8 PASS,
+1 cancelled/timeout**: no-op Retry was not rejected and later waited on a disabled
+control. Preserve this failure as regression evidence, not native observation. After
+bounded fixes Python **17 PASS**, focused Settings/Windows DOM **9 PASS, 0 failed/
+cancelled/skipped/todo**; app/test TypeScript compilation PASS. Rust files unchanged
+against the original sixteen-path candidate's exact hashes: retain desktop **16 PASS**
+and formatter PASS, no unchanged desktop/package/native matrix repeated. Original
+independent audit JSON SHA256 remains
+`2965096e8134c0fbb5170cb26fa6a1c515fe8bf4719ede2edc207b8f6cb6df2e`.
+Original failures, whole-store assertions, eight manifest omissions and cumulative
+budgets stay intact. The native proposal above is finalized, unexecuted and unapproved.
+
+**Publication checks/disposition:** fresh qualification/main remote refs remain
+57f4fed/5f448ca before staging; main contained; no open PR for this branch. Repository
+noreply identity verified, no active local Git hooks. Workflow push selectors target
+main or the separate runtime branch; no CI dispatch selected. Complete diff self-review
+covers all sixteen paths including the public JSON fixture. Only controller/probe/test
+fixes and canonical TESTING/status/ledger updates were added to the reviewed preparation.
+Original reviewed-candidate manifest/patch preserved; revised publication candidate
+hashes/patch stay ignored. Final validator/privacy/local-link **411 files PASS** and
+whitespace PASS before staging. The checkpoint carrying this record owns the user-approved normal
+publication; verify the exact resulting remote SHA in the response, with no receipt-only
+successor. No production adapter/entry/transaction, product frontend, dependencies,
+identity/signing policy or other worktree changes.
+
+**Next outcome:** supported native Windows input/capture preflight, separately selected
+using the prompt below. Capability is unverified: the current surface disables native
+APIs. No host handoff, unsupported workaround or native budget consumption. Step 2 must
+complete its available work, review/fix/check and record actual readiness or a concrete
+capability blocker, then return the step-3 prompt only when readiness genuinely passes.
+Publication does not execute step 2; step 3 still needs separate native approval.
+
+#### Step 2 Windows native input/capture preflight prompt
+
+```text
+Complete step 2: Windows Studio native input/capture preflight, not qualification.
+Repository: Caldwell-41/Renpy-editor
+Branch: codex/provider-qualification at the published preparation checkpoint carrying
+"Windows preparation publication review — 2026-10-09"; verify exact local/remote SHA.
+Codex machine: Local Windows x64; one GPT-6.1 Sol High owner, serial, zero subagents.
+Test hosts: Local Windows native capability and source/controller/DOM checks only.
+Host handoff: Original Windows receipts locally; no other-host access.
+Reason: Before the finite native schedule, prove supported input/capture and guarded
+file actions can meet its deadlines without consuming a Loomlight build or launch.
+
+Read AGENTS.md, CURRENT/HANDOVER, the Phase 2 acceptance-gap review/finalized Windows
+schedule, publication review and linked Windows independent review. Preserve the
+published candidate, original assertions/failures, private evidence and all budgets.
+
+Discover the actually available supported native control/capture route; apply its
+skill/instructions. Verify real native Windows keyboard/button input and owned PNG
+capture with bounded timing, plus a guarded file/receipt handoff rehearsal in disposable
+synthetic files. Use an already-open benign native surface or at most one visible
+disposable native test dialog (120 s total, public masked text only, no credential
+backend). No installation, security/accessibility configuration change or unsupported
+shell/Win32/UIAutomation bypass of disabled computer-use APIs. Browser/DOM proof cannot
+establish native readiness. Do not stop at a plan if supported capabilities exist.
+
+Prepare the concrete serial run-6/run-7 action/capture/receipt sequence, exact fault/
+restore/confirm-reload commands and toolchain routes; demonstrate that capture plus
+acknowledgement fits the 15 s hold, whole entries 120 s and launches 300 s. Rehearse
+only disposable synthetic files: never invoke acceptance prepare/build/launch/fault/
+confirm-reload or touch old/new Loomlight roots or credential stores.
+
+Allowance: 0 package builds, Loomlight launches, installers, store operations/provider
+calls or CI. No production behavior/request lifecycle, PR, merge, release or 2A.2.
+Complete focused checks, review the whole diff/evidence, fix in-scope issues and rerun
+changed checks; retain failed attempts and cumulative budgets. Update canonical docs,
+ledger and handover; commit/push scoped preflight changes on this branch after review,
+verify the remote SHA, and dispatch no CI. Keep captures/logs/private paths out of Git.
+
+Return actual readiness evidence and a copyable prompt under 4,000 characters for step
+3, for separate approval only. It must select the exact published candidate and finalized
+1 build/2 launches/4 loopback GETs schedule, preserve all deadlines/assertions/failure
+recovery, require full run-6 PASS before run 7, review/fix/audit its outcome and retain
+cumulative totals. Never execute step 3 or start 2A.2. If supported native capability
+is unavailable, finish independent preparation, record the exact blocker and required
+remedy; return a remediation prompt instead of falsely asserting readiness or providing
+an executable qualification prompt.
+```
