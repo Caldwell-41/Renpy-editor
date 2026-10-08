@@ -438,7 +438,7 @@ dispatch without changing snapshot bytes. Settings DOM/controller coverage check
 exact message, disabled controls, refused Retry and restored selected configured C. No real key,
 endpoint, provider request or native operation is part of this preparation.
 
-If packaged proof is selected later, the smallest proposed schedule is **one fresh signed
+The separately proposed schedule, selected by the user and completed on 2026-10-09, is **one fresh signed
 app/DMG package pair, one isolated copy, one launch, one native entry session, one save,
 zero GETs**. Use the existing certificate/pin and permanent names; no Applications
 installation or replacement of historical fixture copies. Seed only the original public
@@ -467,14 +467,17 @@ no files/launch/server and the historical runner rejects inherited selectors.
 [The fixture preparation ledger](phase-2-initial-llm-assistance.md#mac-one-shot-reload-fixture-preparation--2026-10-08)
 owns exact source/DOM/controller checks, corrections and owner review. The user approved
 source publication after recheck on 2026-10-09; the checkpoint carrying CURRENT/HANDOVER
-records that source transfer, with the exact remote SHA verified in the final response. Corrected packaged
-proof remains open: neither old binaries nor a new package build alone prove this branch.
-The one-launch external receipt/UI schedule must be concretized within the separately
-approved allowance before execution; the existing four-phase runner is not that schedule.
+records that source transfer, with published source SHA
+`37e3ab3bbdbab943600a2cbc3df93b9078814c26`. The separate native selection now passes
+the corrected branch: exact status and 13 disabled fields/actions, Retry restoring
+selected configured C, unchanged complete store/files, and normal full exit.
+[The native ledger](phase-2-initial-llm-assistance.md#mac-section-15-corrected-packaged-proof--2026-10-09)
+records the external receipt/UI schedule prepared before execution, exact hashes and
+bounded results. The original four-phase runner was not executed.
 
 Proposed deadlines: **20 minutes** for the single signed package pair; **3 minutes** for
 the whole launch, **2 minutes** for native entry, **15 seconds** for its one save and
 **15 seconds** for full quit. No retries, reopens or server. Stop/preserve on failure or
-ambiguity. These native counts require separate selection; the original
-native budget is exhausted. Review/publication approval can assess the corrected local
-diff with this explicit proof limit; neither starts Windows or closes Phase 2.
+ambiguity. This separate allowance is now exhausted; the original native budget remains
+exhausted and untransferred. The user approved publication of the six reviewed docs/evidence paths; the checkpoint
+carrying this record is verified by exact remote SHA in the publication response. This proof does not start Windows or close Studio 2A.1/Phase 2.

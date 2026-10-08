@@ -1,0 +1,618 @@
+{
+  "outcome": "PASS",
+  "sourceSHA": "37e3ab3bbdbab943600a2cbc3df93b9078814c26",
+  "buildInputs": {
+    "files": {
+      "app/Cargo.lock": "2b8f1f934189670d7cc7faa66550cbad0898978aa304e7fbda447e7fd3edd2ee",
+      "app/Cargo.toml": "341283d36a41a247d6ef1d5ac900d54ba75076e585c9fb4322957c9d092dcd82",
+      "app/README.md": "12954b42d862d2adda95a8fcabdea2634f3d539443f99dd1d40bc6ed33b7e7fd",
+      "app/index.html": "1c26b6a69a9a0afc59307f23d6b86ce65820ceca59b26f0007ff22e0c395d903",
+      "app/package-lock.json": "14e55e147b8de51501c8569ec61b0d6827d73ec256aeebd2d5634ee391af61b7",
+      "app/package.json": "7c94f13243540ed1150143371ca112f03a9e336a32ac3af8dadcc48dd3895222",
+      "app/rust-toolchain.toml": "4a0a7590572c5859a0487da76cddeffd17d175e34b7338914d2915ce18bc0d3d",
+      "app/scripts/check-q1-prep-gates.py": "2ea512b7e4cb82954bc7152ecf7f82ff0fdb6e5a545d15f19b21c3797f9f4e4e",
+      "app/scripts/dependency-inventory.mjs": "28ed5e424167341d3fdcaebf8acccc9685286f25c34e9303eea57fea1fb1efbb",
+      "app/scripts/macos-development-credentials.py": "b154bbdcac6db25cfbefa8ccd183549576083f20ac9e6cf1956decfdeaa7eb91",
+      "app/scripts/macos-identity-probe.py": "242cd655b7e8a641fd146293a95281a88cf59b74336fd86b09a8bf9ddd81e366",
+      "app/scripts/macos-package.py": "6f7529e262f9308a1a7ed980ca68f8d490d77e76b9cc9b74c155bff2a65c3aa5",
+      "app/scripts/record-runtime-inputs.py": "37c9b0f64f25eaa69fb6d0306a296c8a3fe859d06f31939483088eb284dca910",
+      "app/scripts/retain-q1-package.py": "01c3ee78ac92c5a04f1735f755c76c289a8a7fb4d7d5ffffe3c66f0cd42029ae",
+      "app/scripts/run-runtime-ui-probes.py": "b4a08d95d369b5f48595287dec80c7a13b9e4f57493c0efe097e2b78eb1da10e",
+      "app/scripts/runtime_probe_cases.py": "117ef4da248b9566ecee02ab22a4462ffb8af72c4b242033eb77c311dd69c69b",
+      "app/scripts/scan-artifacts.mjs": "e4e786dccd796be35f20722205444a4b9bc8a42e3df40783eb0b5e9e4e63e6a6",
+      "app/scripts/test-q1-package-retention.py": "3c39de79079459ce01b610a50ccf8571ec4cb505ac0ff37f0ea44de85c503b75",
+      "app/scripts/test_macos_development_credentials.py": "e1c15aaef172e4dd243a427463f1e49c8c24b42a89c185d6401a318c8a7a3763",
+      "app/scripts/test_macos_identity_probe.py": "3a39068754701fe73600b252cb421cbd49b1777fc26bfec788f1d4d96f7392e5",
+      "app/scripts/test_macos_package.py": "4d0b2037417c4d49061457b2569af8a29e480b07ef0748289f27efcdebd76da3",
+      "app/scripts/test_windows_studio_credentials.py": "2593cac0439f66889462979bba8dfb82a6f7b87278c1db0f5f32e57df461008d",
+      "app/scripts/windows-studio-credentials.py": "08cb1b894a684fbde2373e40f05a09ef1ce50ffa0f55a63926f7e40770cf05af",
+      "app/src/ai-settings-ui.ts": "7c312772b249f4b656ea9e72227da45d39df51f775d5663ead08747f0bbfe7a6",
+      "app/src/asset-import-ui.ts": "d4c43c0a07973096ffa05df8df31daf25e1158a72b146ca68a9e6eb159ce6bbe",
+      "app/src/authoring-input.ts": "b8b26f55e610a3d53d009abc973909d71893e3231834b851d1ca1cd5e1c9faf6",
+      "app/src/bootstrap.ts": "13a8719363eb1b936d878f1cd94fb010e608cc27948648992e3f2164f0df95a7",
+      "app/src/branches-routing.ts": "576abc0e2eb3087e4a2a0de9c4e2e289d266ffc7bc6911f235923ae98922d819",
+      "app/src/branches-ui.ts": "3a476b3a9dcbe3ad5abe2b8b5ac77aed76dce42eb3be24f367b4ac7ea01e876a",
+      "app/src/bridge.ts": "92c03dd90855e7c6ee7513a7585c945eb486801163fd978ad88997a4ce5c5316",
+      "app/src/catalog-dialog.ts": "ccd56b1519a14c43062527ff23e0f06503e94dcdb1ca9120ebadb1db2aa17aa0",
+      "app/src/catalog-ui.ts": "76e60eb3e0ff8f3c458c41a5138708eb92dd146a83510dc788d3ab4a44abff17",
+      "app/src/icons.ts": "76bc16d359df73316970a8818dc0ac2cf1b7521f2b0f9ecf835a99fcd40d1cac",
+      "app/src/main.ts": "799ab3c538f813dc6a99970f7c13ff84d679dd7b4e1f2f56f74d0595cf8b39a8",
+      "app/src/operation-progress.ts": "a34117262fbdea59b3db66e8a57be5cf560efb9cd96d322d56f10c8bde0a5f6a",
+      "app/src/ports.ts": "71d41ee7cb87e2e53237f6552a773e5de1b5007d02fda6366af1683b642ed171",
+      "app/src/preferences.ts": "06a0f6a4a68aa5ce59e26f67c031b43fbd34db271492849d92366c538e56d57f",
+      "app/src/protocol.ts": "e4691b2141e718a46fbdec7914a1116aa6cbee7c3ce9dfeae5ec955d540c6396",
+      "app/src/request-lane.ts": "7970b8b762797287a53f8803bcfefa309b77ce4970be9d9f1d383830d9ac476c",
+      "app/src/runtime-preparation.ts": "8a1df9f142733c4996d28109f398576fffb477e0d76df9c887734bff17918d4a",
+      "app/src/runtime-ui.ts": "85d52e2dc3f63147e9732674335826bdfbc9c938b11e447ce797637cc5110b9e",
+      "app/src/scene-ui.ts": "cce5455292f7e1cf1c0c05241e8b640248793e76b2e5921252697fc25ebe9738",
+      "app/src/settings-ui.ts": "bb111076f92778ec2840fb9726c506bd98f8fb5c09c22dba8e2e4d919ef37d35",
+      "app/src/source-editor.ts": "d13a42ba4c414243cc0ab5d8ab7bcd427972ab572045338cbbb81b853a8d687e",
+      "app/src/source-textarea.ts": "e804cbdb86fde1efce003f6f60d94c391d8979551903a0214883fb06d7ef212a",
+      "app/src/source-ui.ts": "f4061df381ab7b5a9c2d25479ecdbb6663e40a1bcb27fd835c6e96b64bf287ff",
+      "app/src/styles.css": "daf7ac41fcfd6a40b1ccd0af88fca0ebcf3609489ea7422bb4ded3f692fdd95f",
+      "app/src/ui-refresh.css": "e77e002f39147437df9b8fe45f3d5e9bd550967f86801d2730ee58c78539b390",
+      "app/src/vite-env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "app/src-core/Cargo.toml": "5d4fb9a12c9c6fcc8da6cb4504dba6427980b29e7dd17789a0ad759911346a42",
+      "app/src-core/src/ai_credentials/tests.rs": "5b072c78afca0c0d67b3a36856bf7abc2c0f885383da0f886a25f3f7d16ad076",
+      "app/src-core/src/ai_credentials.rs": "fde7a50f873a952de231afb2aa7847080889c56f8997186b7bca6596fc20c875",
+      "app/src-core/src/ai_discovery.rs": "1a161786d54fe8334e4ee0febe4af9b921aff4223922ed15294c3f5eb4fc0d81",
+      "app/src-core/src/ai_file_secrets/tests.rs": "9add5ad5693bf79eb0b17cfd3db3f40079becac37f0b9da4fa13e776a543d259",
+      "app/src-core/src/ai_file_secrets.rs": "0ae435f69af80ee8f1af872df652ccb56ae60cbeab3803796a813f374b4f84cc",
+      "app/src-core/src/ai_profiles.rs": "7657bbf7d46621390c9ebac0df1fad06860ffa76f9832c9c65aa14ecb5fddd29",
+      "app/src-core/src/authoring.rs": "96e7e98bfcbecce587fe9958ab5d4ca4f623cb757fecd849fcc32d82e69f2cef",
+      "app/src-core/src/dispatch.rs": "190ab8a485a18d439e2cbab4e59f93c24e644535b6211c6d72a0c032c398a6ad",
+      "app/src-core/src/lib.rs": "3d4a343e45cf2e10c11aa6e19781bb3f9b1743c251837ef7ec03aad20d89a560",
+      "app/src-core/src/lifecycle/acceptance.rs": "316cc598d457ccad72273c30b266f46db58edb8a9313e4ffc59362da5005f76a",
+      "app/src-core/src/lifecycle/runtime.rs": "d535678202c1cd391527031dbb595ec881e99eb092e0c211391327c627a8b409",
+      "app/src-core/src/lifecycle/runtime_probe.rs": "94388cf729609754bf6485f4899d36dd393f6981fb46cf579e9dea854c8861f7",
+      "app/src-core/src/lifecycle/runtime_tests.rs": "4c0cdcc1f764580bbdea09114c7d2fecd0d2f5f79be4745f97ca54ba34086a71",
+      "app/src-core/src/lifecycle.rs": "4f18382b16c4cf7808d7f4bc3910ed1eac0d89382e8e3507573d459bdb8a2dca",
+      "app/src-core/src/media.rs": "8310b8fac6e4abc99a150fa19610f0d740313ab57c304b82ba1c029f372eeb12",
+      "app/src-core/src/metadata.rs": "233476641ba0201556ec46cb7ace5724456ecdfdb07b1d451db1b3be13170a96",
+      "app/src-core/src/ports.rs": "7560e61112852212a0eeb93cbc9d520fe618ab3cf42af64b33b1ef365191fab7",
+      "app/src-core/src/preferences.rs": "103cc0cee066580c025ab37e4d0d16253fd0c1c306df80529e4bbe1a444273c8",
+      "app/src-core/src/progress.rs": "e05533ce23f10fb834a55997ebbb3f8d3b347c30cb5142d9f58a578a2b6f7fb2",
+      "app/src-core/src/renpy/reconciliation_tests.rs": "b829ee11a38bdd5dac35c99f373dfd302fbe455c4bee0298a1386ae6f930fbbc",
+      "app/src-core/src/renpy/runtime/diagnostics.rs": "eb709c06d1a3a496bdaf8049e88ee6d1e5fe90b23bc07d9755da33dac702da53",
+      "app/src-core/src/renpy/runtime/platform/windows.rs": "f368ee48d79cb75dd9e98117fa691f5eef491a007217028a0d13c8990dbf3144",
+      "app/src-core/src/renpy/runtime/platform.rs": "3cab5dd360d3db9760d99713415835a833c048ee58eb2c611ea074688014ae18",
+      "app/src-core/src/renpy/runtime/tests.rs": "2578736cb19a717bc75154ccdc1e55eb002a3e7a8b96eb971e43546e27ab71c9",
+      "app/src-core/src/renpy/runtime.rs": "4568f9c5fcb25cdd51a5262cb8ca061734a7843952d65b48ddb334d00fd423dd",
+      "app/src-core/src/renpy/tests/phase1h.rs": "7ecfe4559dae8ddfcc847d39874df31246f66dc77eca6fc9d14859f4ebf43e1c",
+      "app/src-core/src/renpy/tests/source_foundation.rs": "b24e3934c0b0185497c6544c4a16c689b0440913eeb63b4d0833425c92007bb3",
+      "app/src-core/src/renpy.rs": "22f1bdb94af2406d61a5c270e8a602bd12ea6ce0e4d3ababf3382442d07d8695",
+      "app/src-core/src/runtime_work.rs": "1f4d419028bebb767cb197f9f57da9e07c22f9e02849f2f3db455a920b65abc8",
+      "app/src-core/src/scene/flow/candidate.rs": "9309a7d8cae5b25813ffef22d38af4157eb470e4bd975178f1e5e0483d856aa2",
+      "app/src-core/src/scene/flow.rs": "3ef8e41ec9cbf85821ac1eace5ca7b48857dcb4182cb7f85d1f06e40b21a7c4d",
+      "app/src-core/src/scene/tests/candidate_proof.rs": "7a139e2dce40d2a8a77a0470d004b6a64393c4bc45e70901c64f4bab43e7288f",
+      "app/src-core/src/scene/tests/observed.rs": "1cbd9da372d284ead5669c10b7ae7be77426ab66ac9597b698e5c697b3293381",
+      "app/src-core/src/scene.rs": "9a042cad763440d2278c351a1922cd46e176bf0d1f6053b44d60821831a5a47e",
+      "app/src-core/src/source.rs": "8a2319b686ad46e2e054d5a790f846849689062df113e784fb5ef7264f109600",
+      "app/src-core/src/transaction/candidate.rs": "7665028fb124fad120d3f8547d47d1deab242b1952aa7fc48e3cf17766c9707a",
+      "app/src-core/src/transaction/execution.rs": "a2e95f8ba82fa5ffc4391db41921e2d145a9091d7de23dac838fe97bacf2184e",
+      "app/src-core/src/transaction/history.rs": "826b0144004968dcf932fc500fb3c07bb9bf23a2750dd09731b98cddb1d98869",
+      "app/src-core/src/transaction/identity.rs": "2beb2afa88079d1ea49b2e7291d941745eb52b6cc4136731dc0c094dbd8f7fa4",
+      "app/src-core/src/transaction/journal.rs": "d410c3a08a467e0b31b582944faa2771052c6d85aef06e1cb0a3490c4ac0a79f",
+      "app/src-core/src/transaction/manifest.rs": "ddc8129bf011480d950347fcbc5fd4233182005c6b6141709e3a4d19d69480eb",
+      "app/src-core/src/transaction/mod.rs": "a62a2748c1cc9c7269c616bc01d4b66137c2996d14d04e2b8567160534f57f8c",
+      "app/src-core/src/transaction/observation.rs": "1606db7867ede3bbcb2a387a359742a93ac7631707f1c603ccb47c5271c096e1",
+      "app/src-core/src/transaction/path.rs": "fab6237aa0b0a012061f6b04c35d69874a47743e4c834cc952a29d3c673b8550",
+      "app/src-core/src/transaction/platform/candidate/native.rs": "fb9acbdcd67616d0551308845fe2a47b961ed1dd22a7f41db0fe87a65d81a2c8",
+      "app/src-core/src/transaction/platform/candidate.rs": "6ad62c2affb4a716c3370c7ecb18b3c91c2816c92b6648a513ec43de61bbf7be",
+      "app/src-core/src/transaction/platform.rs": "7c38d5286081f71b3f2c4c9354f88d5bc6633bbf14053d2700ea915c418f2b0f",
+      "app/src-core/src/transaction/tests/native_boundary.rs": "5f8235a32d2ef49ab69495bc0334277fcf8ccd41aadbb3f24f839f1d2f3c1f30",
+      "app/src-core/src/transaction/tests.rs": "cecc37b720596d1ca34d193e979f0600e2a5df8625a9842c2c4a39e4bda92f24",
+      "app/src-tauri/Cargo.toml": "4a18585c3bc7fade8ec4dc7b2c613130065ebd2d2d6bff80be2ce1d3d73b852f",
+      "app/src-tauri/build.rs": "5dd37c6d6403c32889282bce63f631ddec54f244aa12819848ab9bfbc35064f5",
+      "app/src-tauri/capabilities/main.json": "b914fa968ccf98c51f499f9b34d38fa45caccb43086674d4dbd7c1e69ee43e63",
+      "app/src-tauri/icons/128x128.png": "d3da27204bdcbbe61c5f9c8677cd294c976fbf47ef6cc53cef2c1913d548e408",
+      "app/src-tauri/icons/32x32.png": "719844ad8719dbe61a72fcf8c34502efce0252f30e2e21a86f29846ad4c4c268",
+      "app/src-tauri/icons/icon.icns": "7f32ab125fd0012834424d8691837b4ec6063288a2a411f4df0d214a5bc54200",
+      "app/src-tauri/icons/icon.ico": "278118c8f111b8801ce73973563b11a83eadf39ad12cbd96a395c46cfb1cefc1",
+      "app/src-tauri/icons/icon.svg": "88760454dfa3ab7013fd25cf5d70415f9b8e68b7713332ea8f3f984d90516a79",
+      "app/src-tauri/identity_policy.rs": "7459e30b229f5496c0121baf5d8daeb0002c787e26eb740b12ae3ea0da55e64f",
+      "app/src-tauri/macos-signing.json": "52b9ea73a64154829691a9dff5bcb99fbb11f5c72372e6710a409bfce830e694",
+      "app/src-tauri/permissions/autogenerated/complete_application_close.toml": "b669185056a05a5ebd0bf6422322a66618c10a077c890445fb163a3cf773b703",
+      "app/src-tauri/permissions/autogenerated/core_request.toml": "4f7a14f4d5c338950654b6287d0c59b7213bcd24acdbe651accbb3be9693ba5a",
+      "app/src-tauri/permissions/core-request.toml": "e5f6059c8438ba4c980d25c4412287952b2f26d52d12b6a37695f8da145c19c0",
+      "app/src-tauri/src/ai_native/windows.rs": "42b1e35ddc2c7f718c2a39f57cdad98ae818b09626fb04d100d11ecc56c63146",
+      "app/src-tauri/src/ai_native.rs": "380092b647078910edfa67dba236905062fb8f7ded45089bb4086bc9ea264ade",
+      "app/src-tauri/src/ai_reload_fixture.rs": "aa7ef408230a45b2c378a0772879602f4669f4f0aacf8394d6134105400a1d72",
+      "app/src-tauri/src/ai_settings.rs": "7e0f2b25d0be6e42176a5cbf218db8621d5c97e8d2b325e567837904dd0aa16b",
+      "app/src-tauri/src/branches_ui_probe.js": "ce699f2f64f53e3733cfc39ca2ff42f23ec165d631da242bb5d2f32d6431d3a4",
+      "app/src-tauri/src/identity_probe.rs": "8f248fe755a7b7e9ba184796b673b4762a1175fcdd9621f7fffc7cd300b8fc1d",
+      "app/src-tauri/src/main.rs": "aaad333a7309aa49ad779e1bc2aa77fb27ba0380e2c8bca42ccedf15e1ae23c0",
+      "app/src-tauri/src/native_editor_probe.js": "072f640dd9424a9a27aa1439b054e723fdc993ce7f9c161281c3b2744b323485",
+      "app/src-tauri/src/runtime_ui_probe.js": "9742d5e72aa511ba624364ca59f08be6329c4e7cc591d4bbbaac46a09403f005",
+      "app/src-tauri/src/smoke_probe.js": "36927edf0cb64283db84e3e9726ae22968791c394e42c0cb08c405c5a9194476",
+      "app/src-tauri/src/source_foundation_extended_probe.js": "2da96b282822fcec7d80d5f43f4a0daec5574beff93682698940601d3d2a719a",
+      "app/src-tauri/src/source_foundation_probe.js": "bd3ba4baae5e2b2b7cc16edb79b8d72ad1bb740afb2f83511872810c72d89924",
+      "app/src-tauri/src/studio_identity_probe.js": "25023753ba82142a58465ad80116c70b6c31ae2154a13157f587d35bfb46a8f0",
+      "app/src-tauri/src/studio_settings_probe.js": "94cb2e627449246b851a053fa1935d8c3e8314a90dbfa7203913d5130cd063e1",
+      "app/src-tauri/src/ui_refresh_probe.js": "95d1ed95ed9d2e4df287d12fc0fcc0d3285e46535d38b69f8ed1e6df576a6d9d",
+      "app/src-tauri/src/unauthorised_probe.js": "08f3248a87ad19a49f9f8d60702643ac9e842ef200309221a2adc2cb1d83d7dd",
+      "app/src-tauri/src/windows_studio_probe.js": "941104562ce18460ea4082b640483a8506f14b0d5c8401c4321988283e451f00",
+      "app/src-tauri/src/windows_studio_probe.rs": "484944ef31ac8c8d7cb5ec59fd192d8c1608a8cbe130c080caf321f55e22a913",
+      "app/src-tauri/tauri.conf.json": "c64addc9217465f1e6e7f89b7dace63b979264dee8db2277322004ba74b01865",
+      "app/tests/ai-settings.dom.test.ts": "9e329b8cce6104c9e0d0399e175e615fbc7df3706c93c31b4795d1360334b84c",
+      "app/tests/branches-frame-sampling.mjs": "2036eefefade3e5a6dff2b4f268f4f6e840845a218f0b5abf78fb0a16950a65b",
+      "app/tests/branches-routing.test.ts": "c0e90c988748f2781f7ed02352dd4214de5f9f31bb61bb73ef02322a2bb87d21",
+      "app/tests/branches-timing-policy.mjs": "a072f7a7fe15e7d528e915e00ec845dd2fc3ef03e5a4cfc426e36145b33e261f",
+      "app/tests/branches-timing-policy.test.mjs": "e62f822781a6f51e029d1baab3d3d9bdcec10e6347bfea20116ef83ebc8be404",
+      "app/tests/branches.browser.mjs": "7a2d5349dc7aebdbba303afe9f8970ca934409ceb454abdda1442bb6944f6cd4",
+      "app/tests/branches.dom.test.ts": "c0ec3e38d715b0dacfab842f7c206ac8063a8651d051f1f28477a1738f2b0312",
+      "app/tests/fixtures/macos-development-credential-reload-failure.json": "fd7c1f5c7ccfa5d022298294825590fafdb42838265b8344ba89430532dcae93",
+      "app/tests/fixtures/macos-development-credentials.json": "9183cf3b359289ab495e52357bd8a271b3d69396a78cd6095a294cdca60e36ce",
+      "app/tests/fixtures/windows-studio-credentials.json": "7855c2639c9d68766592a88e635b5e2af4828fb1283b13dbbc9106e79baa391a",
+      "app/tests/identity-probe.dom.test.ts": "54f25367d3d1fb83ac7df390b7f3158d55a9aab5d9709841bb099a470b9b5081",
+      "app/tests/native-probe-driver.test.ts": "dfca98d56fe234c67608dafc2c5f3c69418c6a048f3eb7d2c9c100426130d9ea",
+      "app/tests/native-runtime-driver.browser.mjs": "6ffd8d1f887a57de6b28ea1fe466dbb615edac7b226bc14d07ebed1fa99eda34",
+      "app/tests/phase-1f-selection.browser.mjs": "04b0c461b310966282e01ddd6f698ea0aad49576e51a3769dd08040bae963701",
+      "app/tests/protocol.test.ts": "b45127687b6ce303a67b0611ffa8511cf1f77a5f5467d4d93db6191876eebf25",
+      "app/tests/request-lane.test.ts": "52cc48d9c29f95507718180406f6dc3e7fc1eae9777a2c52a9bb1f55c93bdbab",
+      "app/tests/review/phase-1f-scene.repro.mts": "b3e67039c109d63c45b13bf65061b4636f944aae4477c186dbd7d01bb36e823a",
+      "app/tests/review/phase-1f-source.repro.mts": "8392235053c2f5723796d2ada82557f4a5ae241c06ece7bbc269da7713ed9239",
+      "app/tests/review-corrections.dom.test.ts": "c97134b0ae99938949c15c3f2b8bd167d3ce7badaffe94b0775b9c38c95acb19",
+      "app/tests/runtime-probe-fixture.mjs": "998d85343744bf62534b316bc43fb46308f1125c317598fefa904a4ac6e3c64b",
+      "app/tests/runtime-ui.browser.mjs": "8d530b03c691f2fdf78ded181b0b5a60b86733b5c0287daf5021427f8d9189a4",
+      "app/tests/runtime-ui.dom.test.ts": "180b652cc75cb20e162771505c36c068200f161f1ca1fca0c2ac2c924f4d1afe",
+      "app/tests/save-command.dom.test.ts": "74a84ed6c3fc2fecc50dcc2c64877a0278d0ac0f910c384b5b68ec5d8c4f0709",
+      "app/tests/scene-authoring.dom.test.ts": "84268f2885a0119ea0e31dfe6e4e9ae2210dff51830dd400007e5e50ef6af8a1",
+      "app/tests/smoke-report.dom.test.ts": "399a6d5e075a0da006c64a6677e98f73f10dcce5fa8c4e43636820a6e55c6329",
+      "app/tests/source-authoring.dom.test.ts": "edef466849ed46122ae0f4d56683d4967706cc6c0abce45cf9f3c3ffd3c266db",
+      "app/tests/source-editor-browser-proof.ts": "10b6f40061e4d505d94d5343b773da3039608c36c5a8f4aba3566c2d5339bd4f",
+      "app/tests/source-leave.dom.test.ts": "64b81cadbba5ca165b4c9fd19540469529c4577ce5a4145596c7c5f816d06314",
+      "app/tests/source-save-browser.html": "207033b943a8c4cab99baeeeb0c6348a2b09fac20ad9eb74e58c5951262c57de",
+      "app/tests/source-save-browser.ts": "0a73008234b695f0bd6e3fdf120b8ae023e054091b0e79e8a343d0647f722ee5",
+      "app/tests/source-save.browser.mjs": "a8e5da0a26e170e94501129044f6ee801ad324f95c9aa4162f97e6d26d04eac2",
+      "app/tests/source-textarea.test.ts": "723afb9156dc51959e7f3e0ba79c40873e8722558cf1ae5a2a8a7f6a7df9c61d",
+      "app/tests/studio-settings.browser.mjs": "9d62b73a2e8386005378cf76c8ea9e9ae73067d1cebcb46239eff8ee1a2a62ec",
+      "app/tests/supporting-authoring.dom.test.ts": "4399cf7f22fdf5e48a9d0b6995e27dbd7d0105648855c8231d91097a4d209034",
+      "app/tests/ui-refresh-fixture.ts": "a8c44d8df5e3efab364e5b022481325b847f72e271830c397e14ac7d57e84b3e",
+      "app/tests/ui-refresh-interactions.test.ts": "8dade3632b21f4f9d3fea27573e2e7adbfe208edc475c3d918c9811c9b0f999c",
+      "app/tests/ui-refresh-retention.browser.mjs": "ec5dc4862ac057c473464fd7414e676c85a35b33f0732cf7fa84bb0c6839579e",
+      "app/tests/ui-refresh.browser.mjs": "69a521f663fbb4383cdf5bcc85eb188184ca3fec7d381705e0b2db436c24fba7",
+      "app/tests/windows-studio-probe.dom.test.ts": "e13552baf9b4912ebfcfae30ddc370424515b9fdab9a071995f097fb8eca9df5",
+      "app/tsconfig.json": "ddb4f0f709e721d18d114acacc2bbcf5ee1832312d35ad254133d0d59dc63ba4",
+      "app/tsconfig.tests.json": "f2849bc7e7586a96c2d30ac76aba2d55848e7bdd713cb4fbdb5a01b645fd4b76",
+      "app/vite.config.ts": "1d46c61b1e9ed01dac9d0f9c389e3c6a745785868d48a6df29cac44dcb9822f4"
+    },
+    "fullLocalManifestSHA256": "4aa3651c14c92f298b2a53e983601164675e3e3454183914ddc44e4bd638865a",
+    "installedNodeDependencyFileCount": 4512,
+    "installedNodeDependencyManifestSHA256": "86ddf562d72b83a87292e4a038d8c1f8a647cf21f82f8ac4004d94281a46ffe4",
+    "tools": {
+      "node": "v24.19.0",
+      "npm": "11.9.0",
+      "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)\nbinary: rustc\ncommit-hash: 1159e78c4747b02ef996e55082b704c09b970588\ncommit-date: 2025-09-14\nhost: aarch64-apple-darwin\nrelease: 1.90.0\nLLVM version: 20.1.8",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "macOS": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+      "tauri": "tauri-cli 2.11.4"
+    },
+    "optionalPublicAndCargoInputsIncludedIfPresent": true,
+    "registryChecksumManifestCount": 0
+  },
+  "packageIdentity": {
+    "bundle": "Loomlight.app",
+    "identifier": "app.loomlight.desktop",
+    "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+    "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+    "bundleVersion": "0.1.0",
+    "executableSHA256": "f811d92a0a2df2c6e2969e8d508de023333f22c3972bb03d97cb16e03a987d44",
+    "strictSignatureVerified": true,
+    "installerSHA256": "27b00098d2ff1018591f4df9f772c4f406df913e74e5e0ee49f123e71ef679f9",
+    "installerContentsVerified": true
+  },
+  "bundleFileManifest": {
+    "Contents/Info.plist": {
+      "sha256": "dbd7b20aafc1a68185dd744978d31a8892a89c78216389de610497d6699cf038",
+      "size": 970
+    },
+    "Contents/MacOS/loomlight": {
+      "sha256": "f811d92a0a2df2c6e2969e8d508de023333f22c3972bb03d97cb16e03a987d44",
+      "size": 14406704
+    },
+    "Contents/Resources/icon.icns": {
+      "sha256": "7f32ab125fd0012834424d8691837b4ec6063288a2a411f4df0d214a5bc54200",
+      "size": 28349
+    },
+    "Contents/_CodeSignature/CodeResources": {
+      "sha256": "b2b3fb4e2217393c8eb36ae390c0beb29dcb7edee5f38f7b20625f931526bea3",
+      "size": 2440
+    }
+  },
+  "publicFixtureSHA256": "9183cf3b359289ab495e52357bd8a271b3d69396a78cd6095a294cdca60e36ce",
+  "reloadFixtureSHA256": "fd7c1f5c7ccfa5d022298294825590fafdb42838265b8344ba89430532dcae93",
+  "evidence": {
+    "before": {
+      "store": {
+        "schemaVersion": 1,
+        "revision": 1,
+        "profiles": [
+          {
+            "profileId": "aa000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "settings": {
+              "label": "Development A",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "bb000000-0000-4000-8000-000000000002",
+            "revision": 1,
+            "settings": {
+              "label": "Development B",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "cc000000-0000-4000-8000-000000000003",
+            "revision": 1,
+            "settings": {
+              "label": "Deferred native C",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": {
+              "credentialId": "cc000000-0000-4000-8000-000000000004",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1
+            },
+            "disabled": false
+          }
+        ],
+        "cleanup": [
+          {
+            "profileId": "dd000000-0000-4000-8000-000000000005",
+            "credential": {
+              "credentialId": "dd000000-0000-4000-8000-000000000006",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1,
+              "service": "app.loomlight"
+            }
+          }
+        ]
+      },
+      "files": {
+        "ai-profiles.json": {
+          "mode": "0o600",
+          "size": 1769,
+          "sha256": "96b513fce8f6dc793f35c149a7ffd3de68aa9c928243ac6ba2f0924b16b26067"
+        }
+      }
+    },
+    "confirmed": {
+      "store": {
+        "schemaVersion": 2,
+        "revision": 3,
+        "profiles": [
+          {
+            "profileId": "aa000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "settings": {
+              "label": "Development A",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "bb000000-0000-4000-8000-000000000002",
+            "revision": 1,
+            "settings": {
+              "label": "Development B",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "cc000000-0000-4000-8000-000000000003",
+            "revision": 2,
+            "settings": {
+              "label": "Deferred native C",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": {
+              "credentialId": "4bb2b4b3-6d11-46dd-8e1c-149cb46f8be2",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 2,
+              "service": "app.loomlight",
+              "storage": {
+                "kind": "developmentFile",
+                "generationId": "9a490d62-dd17-4713-884f-fca185819255"
+              }
+            },
+            "disabled": false
+          }
+        ],
+        "cleanup": [
+          {
+            "profileId": "dd000000-0000-4000-8000-000000000005",
+            "credential": {
+              "credentialId": "dd000000-0000-4000-8000-000000000006",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1,
+              "service": "app.loomlight"
+            }
+          },
+          {
+            "profileId": "cc000000-0000-4000-8000-000000000003",
+            "credential": {
+              "credentialId": "cc000000-0000-4000-8000-000000000004",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1
+            }
+          }
+        ],
+        "developmentGenerations": [
+          "9a490d62-dd17-4713-884f-fca185819255"
+        ],
+        "activeDevelopmentGeneration": "9a490d62-dd17-4713-884f-fca185819255"
+      },
+      "files": {
+        "ai-profiles.json": {
+          "mode": "0o600",
+          "size": 1675,
+          "sha256": "dc409311f63761fe7da7d933c7794b95cb3d0b480f1dfb1dae72af2010f0fc2a"
+        },
+        "credentials-dev": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255": {
+          "mode": "0o700",
+          "size": 128,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/master.key": {
+          "mode": "0o600",
+          "size": 38,
+          "sha256": "5dd263a5cf8349656cf314c1c6fbb80f50a3b613c011a85d35c0236b205354a4"
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/records": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/records/4bb2b4b3-6d11-46dd-8e1c-149cb46f8be2.sealed": {
+          "mode": "0o600",
+          "size": 78,
+          "sha256": "f37cd59aad698e19fc97df6210f0ced442a9998eaa5862cfe0e7d0d7d1038dc0"
+        }
+      }
+    },
+    "retry": {
+      "store": {
+        "schemaVersion": 2,
+        "revision": 3,
+        "profiles": [
+          {
+            "profileId": "aa000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "settings": {
+              "label": "Development A",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "bb000000-0000-4000-8000-000000000002",
+            "revision": 1,
+            "settings": {
+              "label": "Development B",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": null,
+            "disabled": false
+          },
+          {
+            "profileId": "cc000000-0000-4000-8000-000000000003",
+            "revision": 2,
+            "settings": {
+              "label": "Deferred native C",
+              "endpoint": "http://127.0.0.1:46081/v1",
+              "model": "loomlight-public-synthetic",
+              "privateHttp": false,
+              "contextCeiling": 8192,
+              "contextBudget": 4096,
+              "maximumResponse": 1024
+            },
+            "credential": {
+              "credentialId": "4bb2b4b3-6d11-46dd-8e1c-149cb46f8be2",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 2,
+              "service": "app.loomlight",
+              "storage": {
+                "kind": "developmentFile",
+                "generationId": "9a490d62-dd17-4713-884f-fca185819255"
+              }
+            },
+            "disabled": false
+          }
+        ],
+        "cleanup": [
+          {
+            "profileId": "dd000000-0000-4000-8000-000000000005",
+            "credential": {
+              "credentialId": "dd000000-0000-4000-8000-000000000006",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1,
+              "service": "app.loomlight"
+            }
+          },
+          {
+            "profileId": "cc000000-0000-4000-8000-000000000003",
+            "credential": {
+              "credentialId": "cc000000-0000-4000-8000-000000000004",
+              "origin": "http://127.0.0.1:46081",
+              "revision": 1
+            }
+          }
+        ],
+        "developmentGenerations": [
+          "9a490d62-dd17-4713-884f-fca185819255"
+        ],
+        "activeDevelopmentGeneration": "9a490d62-dd17-4713-884f-fca185819255"
+      },
+      "files": {
+        "ai-profiles.json": {
+          "mode": "0o600",
+          "size": 1675,
+          "sha256": "dc409311f63761fe7da7d933c7794b95cb3d0b480f1dfb1dae72af2010f0fc2a"
+        },
+        "credentials-dev": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255": {
+          "mode": "0o700",
+          "size": 128,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/master.key": {
+          "mode": "0o600",
+          "size": 38,
+          "sha256": "5dd263a5cf8349656cf314c1c6fbb80f50a3b613c011a85d35c0236b205354a4"
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/records": {
+          "mode": "0o700",
+          "size": 96,
+          "sha256": null
+        },
+        "credentials-dev/generations/9a490d62-dd17-4713-884f-fca185819255/records/4bb2b4b3-6d11-46dd-8e1c-149cb46f8be2.sealed": {
+          "mode": "0o600",
+          "size": 78,
+          "sha256": "f37cd59aad698e19fc97df6210f0ced442a9998eaa5862cfe0e7d0d7d1038dc0"
+        }
+      }
+    },
+    "quitUnchanged": true,
+    "profileHashes": {
+      "before": "96b513fce8f6dc793f35c149a7ffd3de68aa9c928243ac6ba2f0924b16b26067",
+      "confirmed": "dc409311f63761fe7da7d933c7794b95cb3d0b480f1dfb1dae72af2010f0fc2a",
+      "retry": "dc409311f63761fe7da7d933c7794b95cb3d0b480f1dfb1dae72af2010f0fc2a"
+    },
+    "nativeUI": {
+      "exactSaveStatus": "API key saved; cleanup pending; saved profiles could not be reloaded. Retry reading before further changes.",
+      "disabledControls": [
+        "Saved Studio profile",
+        "Profile name",
+        "Endpoint",
+        "Model ID",
+        "Allow private-network HTTP",
+        "Configured capacity \u2014 unverified",
+        "Total context budget",
+        "Maximum response",
+        "Save profile",
+        "Re-enter API key",
+        "Remove credential",
+        "Refresh models",
+        "Remove profile"
+      ],
+      "readOnlyRetryEnabled": true,
+      "restoredSelectedProfile": "Deferred native C",
+      "restoredCredentialStatus": "configured",
+      "restoredDiscoveryStatus": "Not checked for this saved configuration",
+      "restoredControlsEnabled": true,
+      "retainedNativeCleanup": true
+    },
+    "UIReceiptHashes": {
+      "initial-c-confirmed.ax.txt": "07c6c6e4048614fac4956ef13ae82ac827e61865aee9883616ccd020140a2d54",
+      "native-entry.ax.txt": "405b8528728bdf010563c0e47b309cf14f64705ffec67e1e5a7c1c12801fa271",
+      "native-filled.ax.txt": "6fc6f6fae293d251d7b20d19a1e8e4c84052b0e002febe2e80066153405c5fc0",
+      "confirmed.ax.txt": "f7906d3b530833e9260fd960dbcd64c6945a7d61a159c41a09d1c5975556b276",
+      "confirmed-scrolled.ax.txt": "f7906d3b530833e9260fd960dbcd64c6945a7d61a159c41a09d1c5975556b276",
+      "retry.ax.txt": "e3dc0eac0ac62da20d9cf23dafeaba2027c1856d049c471a37685ae136b26da9",
+      "confirmed.png": "3a57f7be0e80dc43fb5f5162c14a456046767ed074abc8fc36b97321724add30",
+      "retry.png": "f6467c6a6fe2ee1940f3e8cb4de33a1f821dacf25250d20aa9f2aa91b985e2c0"
+    },
+    "externalControllerSHA256": "694623f91dd245245c4d12f384feedbeba08ae7f14fc71d0b7b6c1ba267738f5",
+    "exactRunningCopyVerified": true,
+    "pid": 50884,
+    "exitCode": 0,
+    "processStopped": true
+  },
+  "allowance": {
+    "signedPackagePairs": 1,
+    "isolatedCopiesAndRoots": 1,
+    "launches": 1,
+    "nativeEntrySessions": 1,
+    "saveAttempts": 1,
+    "readOnlyRetries": 1,
+    "quits": 1,
+    "GETs": 0,
+    "servers": 0,
+    "reopens": 0,
+    "executionRetries": 0
+  },
+  "timings": {
+    "launchSeconds": 141.43,
+    "nativeEntryToConfirmedSeconds": 35.559,
+    "saveMarkerToConfirmedSeconds": 12.035,
+    "quitMarkerToExitUpperSeconds": 7.937,
+    "packageLogToReceiptUpperSeconds": 23.359
+  },
+  "limits": [
+    "Native exact response status evidenced through actual UI and reviewed response path; no new runtime IPC logging/injection.",
+    "Zero provider operations follows the sole entry/Retry/quit sequence, unchanged unperformed discovery status and reviewed entry/read paths; no server or packet observer.",
+    "Complete repository build-input superset plus installed Node hashes and locked Rust/toolchain versions; no full system/toolchain or Cargo registry source byte attestation claimed.",
+    "Raw logs, AX, PNGs, dependency manifest, generated credentials, roots, packages and old target snapshots remain local ignored evidence; only public metadata/hashes are recorded here.",
+    "Acceptance limited to corrected Mac section-15 branch; no Windows or Phase-2/release acceptance."
+  ]
+}

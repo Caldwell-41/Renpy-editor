@@ -214,7 +214,10 @@ not packaged native UI/reuse. See [format/ownership](../docs/DATA_MODEL.md) and
 If Settings cannot reload after a confirmed save, its visible status still reports
 cleanup pending where applicable, and mutations wait for read-only reload. The independent
 review corrected this response after the original native sequence; source/DOM evidence
-covers the correction, while its packaged branch remains unqualified.
+covers the correction. The separately approved [Mac section-15 packaged proof](../docs/tasks/active/phase-2-initial-llm-assistance.md#mac-section-15-corrected-packaged-proof--2026-10-09)
+now confirms the exact saved/cleanup-pending/reload-required UI, disabled controls and
+read-only Retry restoring selected configured C with unchanged persistent bytes on
+source `37e3ab3`. This narrow result does not accept Studio 2A.1/Phase 2 or release.
 The reviewed source now includes a deterministic public-fixture selector:
 `LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE=post-save-snapshot-once`, with isolated
 `studio-settings` mode and development phase `1`. It requires the exact original
@@ -226,7 +229,8 @@ is used. Read-only Retry restores configured C without another save/request. The
 checks fresh/private fixture state and returns the explicit environment without launching
 anything. The original four-phase runner refuses inherited fault selectors.
 [Mac plan section 15](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
-owns the separately unapproved package schedule. This selector grants no native allowance.
+owns the separately approved and completed package schedule. Its single-use allowance
+is exhausted; this selector grants no further native operations.
 
 All legacy/native Mac API-key reads, deletes, imports and cleanup are deferred, with
 owned references preserved. Historical identity/helper fixtures below are recovery
