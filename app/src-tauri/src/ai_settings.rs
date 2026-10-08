@@ -109,7 +109,6 @@ mod tests {
         assert_eq!(store.0.get(), 1);
         assert_eq!(profile, before);
     }
-    #[cfg(target_os = "macos")]
     #[test]
     fn confirmed_save_reload_failure_keeps_cleanup_pending_visible() {
         let regression: Value = serde_json::from_str(include_str!(
@@ -169,15 +168,20 @@ mod tests {
             }
         }
         std::fs::write(temp.path().join("ai-profiles.json"), persisted).unwrap();
-        let reloaded = view(&host).unwrap();
-        assert_eq!(reloaded["profiles"][2]["credentialStatus"], "configured");
-        assert!(reloaded["cleanup"]
-            .as_array()
-            .unwrap()
+        let reloaded = snapshot(&host).unwrap();
+        assert_eq!(
+            credential_view(
+                &reloaded.profiles[2],
+                &loomlight_core::ai_file_secrets::FileSecrets::open(temp.path()).unwrap()
+            )
+            .0,
+            "configured"
+        );
+        assert!(reloaded
+            .cleanup
             .iter()
-            .any(|c| c["profileId"] == profile && c["deferred"] == true));
+            .any(|c| c.profile_id == profile && c.credential.storage.is_native()));
     }
-    #[cfg(target_os = "macos")]
     #[test]
     fn native_event_retry_and_cancel_keep_service_available_and_never_retarget() {
         use loomlight_core::{
@@ -312,7 +316,7 @@ mod tests {
             });
             if !cancel {
                 assert_eq!(
-                    view(&host).unwrap()["profiles"][0]["credentialStatus"],
+                    credential_view(&snapshot(&host).unwrap().profiles[0], &secrets).0,
                     "configured"
                 );
                 assert!(
@@ -324,6 +328,59 @@ mod tests {
                 );
             }
         }
+    }
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn windows_dispatch_refuses_secret_payload_and_stale_token_before_entry() {
+        let temp = tempfile::tempdir().unwrap();
+        let service =
+            loomlight_core::lifecycle::LifecycleService::new(temp.path().to_owned()).unwrap();
+        credentials::save(
+            &service,
+            &credentials::token(&service.read().unwrap()),
+            None,
+            StudioSettings {
+                label: "Synthetic".into(),
+                endpoint: "http://127.0.0.1:46081/v1".into(),
+                model: "synthetic-model".into(),
+                private_http: false,
+                context_ceiling: 8192,
+                context_budget: 4096,
+                maximum_response: 1024,
+            },
+        )
+        .unwrap();
+        let host = ApplicationHost::new(service);
+        let before = snapshot(&host).unwrap();
+        let target =
+            json!({"token":credentials::token(&before), "profileId":before.profiles[0].profile_id});
+        let mut injected = target.clone();
+        injected["key"] = "public-synthetic-refused".into();
+        let mut stale = target.clone();
+        stale["token"] = "stale".into();
+        for payload in [injected, stale] {
+            let response = serde_json::to_value(dispatch_settings(
+                &host,
+                "reject".into(),
+                "ai.enterCredential",
+                payload,
+                |_| panic!("refused request must not open native UI"),
+            ))
+            .unwrap();
+            assert_eq!(response["ok"], false);
+            assert!(!response.to_string().contains("public-synthetic-refused"));
+            assert_eq!(snapshot(&host).unwrap(), before);
+        }
+        let response = serde_json::to_value(dispatch_settings(
+            &host,
+            "cancel".into(),
+            "ai.enterCredential",
+            target,
+            |_| Ok(None),
+        ))
+        .unwrap();
+        assert_eq!(response["value"]["cancelled"], true);
+        assert_eq!(snapshot(&host).unwrap(), before);
     }
     #[cfg(target_os = "macos")]
     #[test]
@@ -629,15 +686,28 @@ fn native_save(
     secrets: &impl Secrets,
     entry: &mut credentials::CredentialEntry,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
+    #[cfg(target_os = "windows")]
+    let owner = {
+        use tauri::Manager;
+        app.get_webview_window("main")
+            .ok_or("Secure entry owner unavailable.")?
+            .hwnd()
+            .map_err(|_| "Secure entry owner unavailable.")?
+            .0 as usize
+    };
     let (events, receive) = std::sync::mpsc::sync_channel(1);
     let (results, reply) = std::sync::mpsc::sync_channel(1);
     app.run_on_main_thread(move || {
-        let result = ai_native::enter(|key| {
+        let save = |key: &str| {
             events
                 .send(EntryEvent::Save(credentials::Secret::new(key.into())))
                 .map_err(|_| "Secure entry unavailable.")?;
             reply.recv().map_err(|_| "Secure entry unavailable.")?
-        });
+        };
+        #[cfg(target_os = "windows")]
+        let result = ai_native::enter_owned(owner, save);
+        #[cfg(not(target_os = "windows"))]
+        let result = ai_native::enter(save);
         let _ = events.send(EntryEvent::Finished(result));
     })
     .map_err(|_| "Secure entry unavailable.")?;

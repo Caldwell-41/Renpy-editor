@@ -210,6 +210,16 @@ One explicitly selected cleanup attempt validates ownership before deleting that
 and removes the record only on success. No automatic cleanup, key export or real-key
 removal was performed during the portable correction; native recovery execution is unqualified.
 
+The selected Windows adapter retains shared fixed legacy/current services, with
+targets `<service>/provider/<profile UUID>/<credential UUID>` and an ownership digest
+bound to origin/revision/reference. New Windows entries use the legacy service;
+namespace changes are not implicit. Credential Manager's 2560-byte blob bound causes
+an explicit native save refusal above that limit, retaining input. App-owned masked
+entry, Retry/Cancel, transactional switching, unsupported Mac-file retention and
+fixed-loopback discovery use production desktop services. The Windows ledger owns
+bounded packaged proof; this does not qualify real Studio, generation, generic,
+every future build or clean-OS reinstall behavior.
+
 HTTP diagnostics retain status, safe category, elapsed time, byte/token counts and
 opaque request ID only. Never surface raw server error bodies, headers, URLs with
 secrets, prompts/replies/reasoning or exception representations. Classify 401/403 as

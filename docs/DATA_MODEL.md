@@ -249,7 +249,17 @@ with the verified credential switch. No independent pointer or automatic migrati
 Older apps must refuse v2/unknown fields without resetting data; no downgrade support.
 Newer/malformed/over-limit data remains unchanged and newer schemas have an explicit
 incompatibility message. Windows keeps native routing and v1 serialization; this shared
-schema support does not qualify Windows native credentials.
+schema support does not alone qualify Windows native credentials. The Windows adapter
+stores generic OS credentials at `<service>/provider/<profile UUID>/<credential UUID>`
+with local-machine persistence. UserName is fixed `app.loomlight.desktop/Studio/v1`;
+Comment is `Loomlight Studio v1:` plus SHA-256 of the UTF-8 JSON array `[profileId,ownedCredential]`
+using canonical shared serialization, binding origin, revision, service and storage.
+New Windows entries retain the legacy service; both fixed services remain addressable.
+Occupied targets are not overwritten; mismatched ownership/type/persistence refuses
+read/delete. The blob holds 1–2560 printable non-space ASCII bytes. Larger shared-valid
+keys fail explicitly with retained native input; shared 4096-byte validation is unchanged.
+No blob/read-secret IPC. Mac file references and generation/cleanup ownership stay
+unchanged; replacement does not migrate/delete them and can report cleanup pending.
 
 Temporary files under `credentials-dev/generations/<generation>/` use owner-only
 0700 directories and 0600 files. `master.key` is 38 bytes: `LLKEY`, version byte 1 and

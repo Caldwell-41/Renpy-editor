@@ -795,8 +795,35 @@ Keep native access prompts separate from unavailable-store controlled fixtures;
 do not change login Keychain security to manufacture a passing test.
 The [Mac slice ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
 owns actual launches, failures, two builds/two targeted runs per OS and four combined
-Studio GET caps. Windows native adapter/entry/proof remains outstanding. No generation,
+Studio GET caps. The Windows adapter/entry implementation and focused source gates
+now exist locally; its [Windows continuation ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+owns exact native outcomes and amended caps. Native proof includes retained-field
+Retry/stale refusal and a passed separate reopen/replacement/removal/discovery phase.
+The separately approved zero-GET targeted failed-save Cancel check passed after the
+earlier entry-step tool timeout; all failed receipts remain failed. The unchanged
+Save-expecting full-flow probe rejects Cancel, while a separate host gate proves
+only the selected Cancel status, retained input, exact bytes and zero requests.
+Original full entry-flow completion is not claimed. No generation,
 CI, SDK or full matrix is selected; no automatic retry or allowance renewal at handoff.
+
+Windows fixed-fixture gates use
+`python -m unittest discover -s app/scripts -p test_windows_studio_credentials.py -v`
+from the repository root, plus actual Settings DOM/controller tests included in
+`npm run check`. They reject missing/wrong native references, changed foreign cleanup
+or other profiles, zero/skipped/failed/missing native report markers, wrong request
+labels/routes/methods, excess GETs, inconsistent report envelopes, incomplete saved
+snapshots and changed packaged inputs. Partial reuse requires the exact failed marker
+set and complete alpha/gamma stores; it never accepts Cancel or the failed full flow.
+Only the external host runner may change without rebuilding; both original/current
+runner hashes are recorded. The manifest includes package/build/toolchain/frontend
+entry configuration, custom permissions and optional public/.cargo inputs as well as
+runtime/probe/dependency files. Missing required manifest entries refuse reuse.
+Historical Windows build-1/2 manifests omitted eight current inputs; those receipts
+prove their exact binaries and recorded subset, not complete candidate equivalence.
+Do not backfill old manifests with current hashes or waive the corrected reuse gate.
+The [independent review](tasks/active/phase-2-initial-llm-assistance.md#windows-independent-review-and-publication-checkpoint--2026-10-08)
+records that limitation without renewing exhausted budgets. These tests do not substitute
+for native retained input, Credential Manager storage or full process reopen.
 
 The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
 has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.

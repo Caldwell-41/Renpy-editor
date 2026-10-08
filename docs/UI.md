@@ -939,8 +939,13 @@ remain deferred; no automatic migration or OS trust/ACL changes.
 unsaved edits disable it and saved revision changes invalidate availability.
 The status says discovery only, without implying generation readiness or capacity.
 The temporary Mac file adapter/native entry are implemented locally; bounded synthetic
-packaged Mac qualification passed. Windows native work and both-target acceptance remain
-pending. Session/no-auth/generic/project prompts remain outside this slice. The
+packaged Mac qualification passed on its recorded inputs. Windows has an app-owned
+native password dialog and Credential Manager adapter; bounded packaged results belong
+in the Windows ledger. Its dialog discloses same-login storage, provider revocation and
+the OS 2560-character limit. Failed saves retain the field for Retry save/Cancel;
+stale profile/origin changes refuse switching. Cleanup pending remains saved, including
+reload-required responses. Both-target slice acceptance remains pending.
+Session/no-auth/generic/project prompts remain outside this slice. The
 [approved remembered-profile mockup](design/phase-2-llm/studio-remembered-profile-light-v1.png)
 is a visual reference, not native/provider evidence; shared theme tokens and the
 existing shell determine light/dark/compact behavior.

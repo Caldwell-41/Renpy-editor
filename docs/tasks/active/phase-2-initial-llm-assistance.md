@@ -1,7 +1,7 @@
 # Phase 2 — Initial LLM assistance
 
 **Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
-**State:** Studio profiles/discovery and temporary Mac development credentials are implemented locally; bounded synthetic packaged Mac credential proof passed, with broader Studio/Windows/Phase 2 acceptance incomplete. Section 21 source foundation is independently reviewed/qualified on both targets and integrated through PR19; that bounded outcome is closed. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
+**State:** Studio profiles/discovery and temporary Mac development credentials are implemented locally; bounded synthetic packaged Mac credential proof passed. Windows remembered credentials now have focused local source/native qualification, independently reviewed with controller gate corrections, publication approved; complete package-input equivalence and broader Studio/both-target/Phase 2 acceptance remain incomplete. Section 21 source foundation is independently reviewed/qualified on both targets and integrated through PR19; that bounded outcome is closed. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
 **User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
@@ -5113,3 +5113,468 @@ corrected packaged branch is still pending; it is not silently archived as fully
 Publication verification records the actual remote tip in the final response. The
 checkpoint carrying this section/HANDOVER is identified by branch tip rather than a
 receipt-only successor that chases its own SHA.
+
+### Windows remembered-credential continuation — 2026-10-08
+
+**Selection/ownership:** user selected completion on local Windows x64, actual packaged
+Loomlight, ending at a reviewable local diff without publication. Fetch confirmed remote
+`codex/provider-qualification` exactly `c9f3e37f1fd43200cc1efbbb804a347927932351`.
+No matching local branch/worktree existed. A worktree on that same tracking branch was
+created at `worktrees/provider-qualification` within the existing Windows repository;
+the primary Phase 1 checkout's unrelated one-line HANDOVER edit and all earlier worktrees
+remain untouched. No reset, stash, commit, push, subagent, PR, Actions, merge or release.
+Actual process inventory found no running Loomlight; Computer Use returned accessible
+Windows windows. Other applications, production profiles and real Studio are untouched.
+
+**Implementation:** Windows-only generic Credential Manager adapter, local-machine
+persistence, exact fixed-service/profile/credential targets and ownership marker bound to
+origin/revision/reference. No enumeration, overwrite of existing targets or deletion of
+mismatched entries. New Windows entries retain the existing legacy service; both fixed
+schema services remain addressable. Mac file references refuse Windows access/removal
+and remain owned through explicit replacement. App-owned modal Win32 password field
+retains input on failed saves and uses the existing service-released entry-event/controller
+path. Windows enforces Credential Manager's 2560-byte blob bound explicitly; the shared
+4096-byte validation/schema remains unchanged, larger input stays native for correction
+or Cancel. No Mac store, signing policy, production schema or request-service change.
+
+**Cheap proof before dispatch:** core `cargo test -p loomlight-core --locked ai_`
+**30 PASS, 237 filtered, 0 failed/ignored**; Windows desktop **11 PASS, 0 failed/ignored/
+filtered**; frontend typecheck/test compilation and original **102 PASS, 0 failed/skipped**;
+new actual Settings DOM fixture **2 PASS** including failed-discovery rejection; Python
+fixture gates **2 PASS** including missing/wrong/native/foreign ownership and zero/skipped/
+failed/over-budget report rejection. Formatter/whitespace PASS; validator **408 files PASS**
+before the final fixture additions. Initial offline dependency miss, missing frontendDist
+and sandbox Tauri generated-file denial were environment/preparation failures; host
+locked downloads/builds and frontend production build resolved them, with zero packages/
+native runs. Initial Windows DOM selector failed **0/2** before correction; corrected
+selector **2/2 PASS**. No acceptance threshold relaxed. Final checks follow after native proof.
+
+**Reconciled allowance and reserved schedule (recorded before dispatch):** prior Windows
+host has **0/2 package builds, 0/2 targeted runs, 0/4 combined Studio GETs** consumed.
+Earlier source/UI Windows packages are other outcomes; all Mac budgets stay separate,
+unchanged and untransferred. Select **one NSIS package build**, then **two launches of
+its exact packaged executable**; a second package build remains only an unused ceiling,
+not an automatic retry. Fixed fixture `app/tests/fixtures/windows-studio-credentials.json`
+SHA256 `7855c2639c9d68766592a88e635b5e2af4828fb1283b13dbbc9106e79baa391a`;
+two public synthetic profiles A/B, model `loomlight-synthetic-model`, endpoint
+`http://127.0.0.1:46082/v1`. One foreign Mac file cleanup reference/generation is synthetic
+metadata only and must remain unchanged; no Mac file/key is created or accessed.
+
+| Dispatch | Exact selected operations | Enforced bound |
+| --- | --- | --- |
+| Build 1 | Tauri release + NSIS, locked dependencies; copy exact resulting app EXE into isolated ignored package directory; record all source/package hashes. No installer execution. | 1200 s process-tree deadline; retain attempt/log, no automatic retry. |
+| Native run 1 | 3 native entry sessions; A alpha: one failed Save with unreadable fixture records, restore exact bytes, Retry without retyping succeeds; B gamma: one successful Save; A cancel: one failed Save after ordinary external same-revision origin change to unused loopback port 46083, restore exact bytes, Cancel. **4 Save clicks = 2 success + 2 intended refusals, 1 Cancel**. Two explicit authenticated A alpha GETs; full process exit. | 300 s external and packaged watchdog; fixed loopback server accepts exactly 2 GETs; each production GET 15 s plus 2 s cleanup. |
+| Native run 2 | Reopen same package/root without entry; A alpha GET, one native A beta replacement/save, A beta GET; remove A key then profile, B key then profile. Preserve B through A replacement/removal and all foreign cleanup metadata. Full exit. | 300 s external and packaged watchdog; exactly 2 GETs, same 15 s + 2 s cleanup. |
+
+Total reserved: **1 package build, 2 runs, 4 native entry sessions, 5 Save clicks
+(3 confirmed + 2 intended refusals), 1 Cancel, 4 GETs (alpha/alpha + alpha/beta)**.
+Production creates 3 native entries and retires/deletes those 3; no unrelated native
+entry is read or removed. Fixed external OS presence audit reads exactly 2 created
+targets after run 1 and 3 retired/removed targets after run 2, never enumerating or
+returning blobs. Read-only Settings/status/controller verification reads are part of
+these bounded flows, with no automatic HTTP. Fixture faults use only the isolated
+profile bytes, with exact hash-checked restoration; retained input and stale-origin
+refusal must be visibly observed before the approved Retry/Cancel. Fixture runner
+keeps exclusive build/run attempt markers, root/source/package identity, exact mandatory
+check markers, GET labels/counts and terminal exit/cleanup receipts. It stops on unexpected
+failure; no ambiguous dispatch retry. Native input uses Windows Computer Use only.
+
+**Boundary:** source review/corrections and remaining cheap checks remain in scope;
+only the above fixture/build/native operations are selected. No real credentials or
+endpoints, session/no-auth/generic expansion, biometrics, AI generation, SDK game run,
+Mac operation, installer/system change or publication. Studio 2A.1 and Phase 2 stay open.
+
+**Build/native attempt 1:** package build 1 PASS, **161.343 s**, actual EXE **14,804,480
+bytes**, SHA256 `461955dbe5fba2082de4dcd15a01e4abc1f3ba0fbb76c23548bbd3088d744b3e`.
+NSIS installer produced, not executed; app/installer/source hashes preserved under
+ignored `.toolchains/windows-studio/package-1` and `build-1.json`/`build-1.log`.
+Native run 1 PID **31684**, **FAIL**, **123.437 s**, exit **1**, stopped and cleanup
+true. Stage `alpha-entry` timed out. Computer Use `get_window_state` returned
+**“Computer Use app approval timed out”**; no native typing/click was dispatched.
+One entry dispatch was requested, but native dialog visibility/result is unverified.
+**0 Save clicks, 0 Cancel, 0 native entries created/deleted, 0 GETs**. Profile fixture
+remains byte-identical. Failed `phase-1.json`, launch/attempt/stdout/stderr receipts are
+retained. No run remained live at authoritative process/session inspection.
+
+Classification: verified native-observation/input capability failure; a product-native
+refusal cannot be ruled out because the original fixture waited for expected success
+and masked an immediate error with a timeout. Correct the Windows fixture to report
+the actual fixed native status as soon as entry finishes. This changes diagnostics/gate
+timing only, not native storage/controller behavior. DOM **2/2 PASS**, Python **2/2 PASS**
+after correction. Keep the original failure; do not turn it into a pass.
+
+**Explicit user amendment:** user grants native UI access and **3 native runs total**
+(failed first run + one entry-flow retry + separate reopen). This is exactly one added
+run; **package cap remains 2, combined GET cap remains 4**. No Mac transfer or other
+allowance renewal. Reserve remaining **build 2** for the corrected fixture diagnostics;
+runtime source is otherwise unchanged. Reserve **run 2** for the original run-1 fixture
+schedule and **run 3** for the original run-2 reopen/replace/removal schedule above,
+same root, public values/counts and 1200/300/15+2-second deadlines. Preserve exclusive
+old receipts and package; retry receives separate `phase-1-retry` receipts, reopen
+`phase-2`. Before this dispatch: **1/2 builds, 1/3 runs, 0/4 GETs consumed**. The added
+run is user-authorized, not an automatic retry. No third build or further run is selected.
+
+**Build/native attempt 2:** build 2 PASS, **43.046 s**, EXE **14,804,480 bytes**,
+SHA256 `9e3e14c5ea3957620b9c001a83a9299aa9bcf8db24309cffcd1265716eda5102`;
+NSIS SHA256 `ecdf5b954dff3e1f782939334560058bd38356d67aeba5cdc1c061e2470fa839`.
+Both build slots are consumed. Run 2, PID **876**, **FAIL**, **86.610 s**, exit **1**,
+stopped/cleanup true. Native app-owned dialog and masked public alpha input were
+observed. The indexed button click selected Cancel although its accessibility index
+was reported as Remember. The app correctly returned cancellation; **1 entry session,
+1 public input, 1 unintended Cancel, 0 Save, 0 created/deleted entries, 0 GETs**.
+This is an input-driver failure; no native-save product result has been established.
+Next discriminating input is keyboard Return from the observed field, followed by
+fresh observation. Do not repeat the failed indexed-button hypothesis.
+
+The isolated unreadable-record fault was applied while run 2 was live. Live restoration
+then refused the already-terminal run, leaving the synthetic fault on disk. After
+external process-stop verification, exact fault/backup hashes were checked, the fault
+was preserved separately, and the original fixture bytes were restored offline.
+`alpha-offline-restored.json` records the original fixture SHA256. Failed run-2 receipts,
+fault and backup remain preserved. No production profile or native credential was changed.
+
+**Current budget/decision:** **2/2 builds, 2/3 native runs, 0/4 GETs consumed**. One
+run remains. Entry-flow retry plus separate reopen require two runs, so a cap of four
+has been requested and is pending explicit user approval. No run 3 or 4 is dispatched
+while that decision is pending. Package 2 runtime/probe inputs remain available;
+host-controller receipt identities need a bounded correction before another launch.
+
+**Final portable checks while awaiting the decision:** frontend typecheck/test compile
+and **104 PASS, 0 failed/skipped/cancelled/todo**; host-controller **3 PASS**, adding a
+rejecting package-reuse gate test. Package-2 runtime/probe/dependency/fixture inputs
+match exactly; only `scripts/windows-studio-credentials.py` differs. It now preserves
+`phase-1-final` run-3 retry receipts/fault backups separately and permits a proposed
+run-4 separate reopen identity. This executable selection is not launch authorization.
+Reuse compares every packaged input and records built/current external-controller
+hashes; changes to Rust, probe JS, fixture or dependency inputs still refuse launch.
+No source-equivalence claim is made for the external controller itself.
+
+Self-review covered native callback lifetime/thread ownership, secret-buffer disposal,
+exact targets/markers, bounded blob validation, reference publication/retirement,
+foreign-reference refusal, shared/Mac conditional routing and secret-free probe IPC.
+No remaining in-scope source finding identified. Native save/refusal/Retry/storage/
+reopen/replacement/removal and four authenticated GET results remain **unproved**.
+The confirmed-save/unavailable-reload correction is covered by source/DOM regression;
+this fixed Windows native schedule does not inject that separate branch.
+
+Final formatter **PASS** with host toolchain access after sandbox **access denied**;
+validator/link/privacy checks **408 repository files PASS** (includes nonignored
+untracked additions); `git diff --check` **PASS**. First final `npm run check` failed
+before tests because nested `npm` was absent from PATH; configured local wrapper PATH
+resolved it, with the complete 104-test pass above. No package/native budget used by
+these checks. CURRENT/HANDOVER replaced with live Windows local-only state; old Mac
+continuation/evidence remains in Git history and its owning ledger. HEAD stays
+`c9f3e37`, no staging/commit/publication. Pending cap decision remains explicit;
+**2/2 builds, 2/3 runs, 0/4 GETs**, no live app/server and fixture restored.
+
+**Blocked audit:** the run-cap decision remains unanswered across three consecutive
+goal turns. Independent source/docs verification and local review delivery are complete;
+the review patch includes all seven new files and passed reverse `git apply --check`.
+Fresh attempt inventory still contains only builds 1/2 and native runs 1/2; external
+inspection confirms no live Loomlight process or fixture listener. No approval or
+additional dispatch is inferred from automatic continuation. Mark the goal blocked
+on this genuine decision, retaining its full objective. One run remains under the
+approved cap of three, but the pending proposed two-launch entry/reopen sequence needs
+an explicit choice before dispatch. Same-chat resume after the cap reply preserves
+all counts and the existing package; no Mac/build/GET allowance is renewed.
+
+**Second explicit user amendment:** user says **"Approved 4 native run total"**.
+This resolves the cap decision: four cumulative launches, including the two failed
+attempts; no additional build and still four combined GETs. Before dispatch:
+**2/2 builds, 2/4 runs, 0/4 GETs**. Reuse exact package 2/runtime/probe inputs and the
+same restored root/fixture. Run **3**, phase **1**, uses separate `phase-1-final`
+receipts: 3 native entry sessions, 4 keyboard Return save attempts (2 success,
+2 intentional refusals), one Escape Cancel, two alpha GETs. The unreadable-record
+fault is restored before Retry without retyping; ordinary same-revision origin
+change is restored before Cancel. Run **4**, phase **2**, after a passed run 3 and
+full exit: reopen both keys, alpha GET, one beta replacement/native Save and beta
+GET, owned A then B key/profile removal, preserve all foreign metadata, full exit.
+Exactly 3 created/retired native entries across these two runs; fixed post-exit
+presence audits inspect 2 then 3 exact owned targets without returning blobs.
+Both process deadlines remain **300 seconds**, each GET **15+2 seconds**, exactly
+two GETs per phase. No observer launches, indexed-button retry, automatic extra run,
+third package, Mac allowance transfer, real key/endpoint or publication. User-approved
+synthetic input and removals remain within the original selected fixture scope.
+
+**Run 3 result and run-4 input correction:** run 3 PID **8736**, **FAIL**, **244.906 s**,
+exit **1**, stopped/cleanup true, **0 GETs**. Native observation proves alpha refused
+an unreadable snapshot with masked input retained, then exact restoration + keyboard
+Return Retry without retyping saved A. B gamma saved. Same-revision external origin
+change refused replacement with input retained. The restore/Cancel tool call was delayed
+until the packaged **120-second `cancel-entry` step deadline** expired. Live restoration
+then correctly refused a terminal run; Escape reported **"foreground window did not
+report a process id"** after exit, so Cancel was not delivered/proved. Outer 300-second
+bound was not exceeded. This is a tool-latency/fixture-step timeout; do not classify
+the partial flow as PASS. **3 entry sessions, 4 Return attempts, 2 saves + 2 intended
+refusals, 0 confirmed Cancel, 2 native entries created, 0 deleted, 0 GETs**.
+
+After external stop verification, exact fault/backup hashes and both saved snapshots
+were checked, the fault preserved, and saved gamma snapshot restored offline. Exactly
+the two created owned targets were present in the fixed OS audit (2 reads, no blobs
+returned). Run 3 remains failed; Cancel preservation and its two discovery actions
+remain unproved. A separately tested external-controller correction allows **only
+run 4/phase 2/package 2** to reuse this exact terminal timeout and validated alpha/gamma
+snapshots. It rejects wrong/missing saves, changed other profiles/foreign data, any GET,
+nonterminal/wrong phase/run/error, elapsed over 300 or a claimed prior PASS. A fixed
+readiness receipt records restored bytes, two keys present and **Cancel proof false**.
+This changes the independent reopen's input provenance, not its mandatory assertions
+or acceptance of failed run 3; controller tests **4 PASS**. No packaged runtime input
+changed and no new build. Record next dispatch at **2/2 builds, 3/4 runs, 0/4 GETs**.
+The already-approved run-4 operations/deadlines are unchanged; it sends exactly 2 GETs
+(alpha/beta), performs one beta Save and removes all 3 created owned identities.
+Full failed-save-then-Cancel proof remains a separate gap after this final allowed run.
+
+**Run 4 result:** PID **52160**, phase 2 **PASS**, **40.062 s**, exit **0**, stopped
+and cleanup true. All 11 required markers passed with exactly two accepted GETs:
+alpha then beta. Reopened profile bytes equal the validated saved gamma snapshot;
+both native credentials configured and discovery initially absent. Beta replacement
+preserved B and retired only owned alpha; A removal disabled it before deletion and
+preserved B; final A/B key/profile removals retained the original foreign Mac cleanup,
+generation and active-generation metadata. Fixed post-exit audit confirmed all three
+created targets absent (3 reads, no blobs returned). Run 3 remains failed, not superseded
+as a pass; run 4 has independent qualified input provenance and strict phase-2 results.
+
+**Cumulative Windows result:** **2/2 package builds, 4/4 native runs, 2/4 GETs**.
+Three runs failed (access/input/step-timeout), one independent reopen phase passed.
+Five observed native entry sessions plus the first unobserved dispatch; five public
+inputs, five Return Save attempts = three saves + two intentional refusals; one
+confirmed Cancel in run 2 and one unsuccessful post-exit Escape in run 3. Exactly
+three native entries created/retired/deleted; five fixed presence audit reads total.
+No live app/server, installer execution, production-data/real-key/provider access,
+Mac operation or publication. Source checks remain core 30, desktop 11, frontend 104;
+external-controller rejecting checks are now **5 PASS**. All packaged runtime inputs
+remain package-2-equivalent; later runner changes are external only.
+
+**Remaining native proof and prepared proposal (not authorized):** failed Save with
+retained input followed by Cancel and exact unchanged complete profile bytes. Retry,
+stale refusal, persistence, separate reopen, replacement/removal, foreign ownership
+and authenticated production GETs now have Windows native evidence. The original
+entry-flow complete marker and alpha/alpha GET pair were not achieved; no full run-3
+pass is claimed. The corrected confirmed-save/unavailable-reload response remains
+source/DOM-only on both hosts; no broader target/release closure is implied.
+
+Propose raising only the native cap to **5 total**, one additional targeted Cancel
+run with **0 builds, 0 GETs, 0 native entries created/deleted**. Reuse package 2 and the
+same isolated root; preserve final removed state, then restore the exact public
+empty-key fixture. Phase 1 opens its first native entry; enter a public value, apply
+the fixed unreadable-record fault, Return to observe refusal/retained masked input,
+restore exact bytes, Escape Cancel promptly. Use guarded nonsecret filesystem writes
+through the existing Node controller to avoid a separate host-approval round trip
+inside the 120-second entry step. Outer **300 s**, existing inner **120 s**, no network
+request selected; loopback server has zero GET allowance and rejects any request.
+No Retry/save success, second entry, replacement/removal or new storage is selected.
+
+The unchanged packaged full-flow fixture expects Save and therefore reports its
+explicit Cancel rejection/exit 1. A separate targeted host assertion requires that
+exact Cancel status/error/initial marker set, failed-save retained-input observation,
+exact restored bytes before Cancel and exact final complete-byte snapshot, stopped
+process and zero GETs. It records `cancelProofPassed` separately from
+`packagedFullFlowPassed:false`; it cannot turn the original phase-1 gate/run 3 green.
+The source test rejects saved/wrong-status/exit/GET/snapshot/observation/missing-marker
+results. `--run 5 --phase 1 --build 2 --cancel-only` is prepared, not dispatched.
+Keep caps at 2 builds/4 GETs, preserve all prior failures, and obtain explicit user
+approval for the fifth launch before resetting the isolated fixture or dispatching.
+
+**Third explicit user amendment:** user says **"Approved requested run"** in response
+to the exact fifth-run/zero-build/zero-GET/no-native-creation-or-deletion proposal.
+Native cap is now **5 total**; build/GET caps remain **2/4**. Before dispatch:
+**2/2 builds, 4/5 runs, 2/4 GETs**. Select only run 5/phase 1/package 2 `--cancel-only`:
+preserve final removed snapshot, restore exact original public empty-key fixture;
+one native entry, one public input, one keyboard Return with unreadable-record
+refusal, observe retained masked field, exact guarded restoration, one Escape Cancel.
+No successful save, Retry, second entry, GET, native read/write/delete audit or other
+operation selected. Existing outer **300 s** and inner **120 s** bounds remain; zero
+GET allowance rejects any request. Prepare Node filesystem guards before launch so
+fault/restore does not require another host-shell approval while entry is waiting.
+Targeted Cancel assertion is separate from the unchanged packaged full-flow rejection;
+preserve all earlier failures and stop on unexpected state, with no automatic retry.
+
+**Run 5 result:** PID **52032**, targeted failed-save/Cancel assertion **PASS**,
+**115.500 s**, stopped/cleanup true, **0 GETs**. The native unreadable-record Save
+refusal retained masked input in the same field; exact hash-checked restoration then
+Escape returned `Credential entry cancelled; saved profile unchanged.` Complete
+before/after profile bytes match the original fixture SHA256. One native entry/public
+input, one Return refusal, one confirmed Escape Cancel; zero credentials created,
+read/audited, written or deleted. `targeted-cancel-result.json` records
+`cancelProofPassed:true`, `packagedFullFlowPassed:false`, `sameSnapshot:true`.
+The unchanged Save-expecting packaged flow deliberately reports its Cancel rejection
+and exit **1**; that is expected for this separately selected assertion, not an
+accepted original full-flow pass. All initial markers/status/error/zero-GET/deadline/
+byte-preservation gates passed. The earlier three failed runs remain failed.
+
+The proposed Node filesystem preparation returned **EPERM** on the isolated host root
+before defining/mutating fault helpers. Native controller remained available. Existing
+guarded host fault/restore commands were used successfully, and their exit results
+were checked before Escape. No access rule bypass, extra run or budget renewal.
+The passed Cancel after-snapshot was preserved as `run-5-after-cancel.bin`, then the
+isolated root restored to the preserved completed run-4 removed snapshot after stop.
+`post-qualification-restored.json` records both exact hashes. Final profiles are empty,
+original foreign metadata unchanged, and no process/listener remains.
+
+**Focused Windows outcome:** implementation, rejecting regressions, self-review,
+bounded native proof and local review delivery are complete, **review_ready** for
+independent review/publication approval. No remaining in-scope source finding. Native
+evidence across run 3 (Retry/saves/stale refusal), run 4 (reopen/auth/replacement/removal)
+and targeted run 5 (failed-save Cancel/exact bytes) proves the selected Windows actions.
+Final totals **2/2 builds, 5/5 native runs, 2/4 GETs**; six observed entry sessions plus
+first unobserved dispatch, six public inputs, six Return Save attempts (three saves,
+three intentional refusals), two confirmed Cancels plus one unsuccessful post-exit
+Escape. Three native entries created/retired/deleted, five fixed OS presence reads;
+remaining native/build allowance **0**, two GETs unused and no further action selected.
+
+Limits: original full phase-1 sequence and its alpha/alpha GET pair never passed; no
+retroactive green status. The separate alpha/beta discovery assertions are complete.
+Confirmed-save/unavailable-reload remains source/DOM-only; no actual locked-store,
+cross-build Windows credential continuity, clean-OS/data-deleting reinstall, real
+Studio/generation, Mac corrected packaged branch, whole Studio 2A.1/Phase 2 or release
+qualification claimed. Mac behavior/signing/deferred native ownership remain intact;
+Mac plan/evidence stays active as a reference. No commit/push/PR/Actions/merge/release.
+
+**Final completion audit/delivery:** requirement-by-requirement audit **10/10 PASS**
+against the actual retained receipts, source/package hashes and byte snapshots.
+Current runtime/probe/dependency/fixture inputs equal package 2; only the external
+runner differs, explicitly recorded at dispatch. Shared core/frontend production
+sources, Mac native adapter/entry, identity policy/probe, signing config/build gates
+and bundle config are unchanged against the fetched checkpoint. Initial audit helper
+used the wrong location for `identity_policy.rs` and rejected that missing Git path;
+corrected to its real `src-tauri/` location, with no product/source correction.
+Final validator/privacy/local-link checks **408 files PASS**, whitespace **PASS**;
+prior formatter and core/desktop/frontend/runner results are reused on unchanged
+validated inputs, with no duplicated package/native/test matrix. Source/self-review
+counts remain **30/11/104/5 PASS**, no failed/ignored/skipped intended tests.
+
+Complete local patch `app/.toolchains/windows-studio/windows-local-review.patch`
+contains all tracked edits and seven new files; reverse `git apply --check` **PASS**.
+`local-completion-audit.json` records scoped completion, exact budgets and broader
+proof limits; the read-only application/native audit helper is preserved alongside it.
+CURRENT/HANDOVER now identify Windows **review_ready**, same local branch/base/worktree,
+no live operation or remaining selected execution, and independent review/publication
+as the next approval boundary. HEAD remains `c9f3e37`; index is empty. Primary checkout's
+unrelated 1-line HANDOVER typo remains unchanged. No goal/Studio/Phase-2 scope widening,
+commit/push/PR/Actions/merge/release or credential disclosure. Public v0.1.0 unchanged.
+
+
+### Windows independent review and publication checkpoint — 2026-10-08
+
+**Selection:** a new independent reviewer inspected the entire actual local diff,
+including all seven untracked files, against fresh refs. User authorized in-scope
+corrections and relevant portable/source/unit/DOM/controller checks; **zero** further
+package builds, native launches, credential-store operations, provider requests or CI
+dispatches. Existing **2/2 builds, 5/5 runs, 2/4 GETs** remain consumed; unused GETs
+are unselected. Commit/push require the user's next explicit approval in this same chat.
+No subagent, new branch, reset, staging, PR, merge, release or other worktree mutation.
+
+**Fresh state:** HEAD/tracking/remote `codex/provider-qualification` remain
+`c9f3e37f1fd43200cc1efbbb804a347927932351`; remote main refreshed from stale local
+`aba200f` to `5f448ca683a905f4ea77d4580bbc89fda69f2b93`, already contained by this
+continuation. Working changes remain local in `worktrees/provider-qualification`.
+The primary checkout's unrelated HANDOVER edit and all other worktrees are preserved.
+
+**Independent source review:** examined Windows CredRead/Write/Delete/Free and
+blob disposal, fixed target/service plus complete-reference ownership digest,
+occupied-target refusal, foreign-file refusal and the 2560-byte bound. Reviewed
+Win32 resource alignment, callback context lifetime, same-process/window-thread owner,
+modal password field, panic boundary, retained Retry/Cancel input and zeroizing copies.
+Traced actual dispatch, typed secret-free IPC, channels, service release/reacquisition,
+exact profile/origin/revision recheck and stage/verify/publish/retire/remove ordering.
+Reviewed shared and conditional Mac paths, unchanged signing/identity gates, fixtures,
+Settings DOM and external-controller gates. No actionable production-code defect found
+within the selected scope. Same-user namespace attack races remain outside routine
+acceptance under ADR 0010; no broader threat-model gate added.
+
+**Corrected findings (P2 qualification-controller defects):**
+
+1. `validate_saved` previously checked selected fields but allowed extra/duplicate/
+   reordered profiles, unknown fields, an unexpected store revision or replacement
+   using a retired identity. It now compares the complete fixed-fixture expected store,
+   including +2 staging/publication and +3 replacement/retirement revisions, and rejects
+   unknown credential fields and reused IDs. Partial-entry reuse requires the exact
+   four failed-flow markers and consistent failed report envelope. Full/Cancel gates
+   require the packaged Studio report identity and inner status; full discovery also
+   requires exact GET method/path. Meaningful regressions reject each counterexample.
+2. Package equivalence omitted `package.json`, `index.html`, `vite.config.ts`,
+   `tsconfig.json`, `rust-toolchain.toml` and permissions. The inventory now includes
+   them plus optional public/.cargo trees; required manifest entries must exist on both
+   sides. Missing/incomplete manifests fail, including two empty manifests. No current
+   hash is inserted into an old receipt.
+3. The build CLI permits an omitted `--build`; `build(None)` could previously create
+   a third `build-None` attempt. Build selection now rejects missing/out-of-budget
+   numbers before input preparation or any process. A regression proves that boundary.
+
+**Retained evidence audit:** new ignored `independent-review-audit.py/json` checks
+all five terminal reports against their original stdout, exact build EXE hashes/bytes,
+package-2 installer digest, attempt counts and deadlines, run-3 partial saved stores,
+run-4 reopen/beta/final stores under the strengthened complete-snapshot gate, run-5
+Cancel status/failed full-flow distinction and exact fixture before/after bytes, fault
+restorations and final removed-root bytes/foreign metadata. **PASS**. Three earlier
+runs remain **FAIL**; run 4 **PASS** at 40.062 s with alpha/beta GETs; run 5 targeted
+Cancel **PASS** at 115.500 s with zero GETs and packaged full-flow **FAIL/exit 1**.
+Run-1 receipt predates its `run` field; filename/attempt/launch and original stdout
+retain its identity. Build-1 installer exists and was hashed during review, but its
+original receipt contains no installer digest. Package-2 EXE remains
+`9e3e14c5ea3957620b9c001a83a9299aa9bcf8db24309cffcd1265716eda5102`.
+Prior native-presence results and retained-field host observations remain original
+controller/host evidence; no OS-store API or native observation was repeated.
+
+**Evidence correction:** all original recorded package-2 inputs except the external
+runner still match. Eight inputs were never recorded: the five app root files above,
+`src-tauri/permissions/core-request.toml` and the two generated permission TOMLs.
+Current tracked omissions are unchanged against HEAD, but that cannot retrospectively
+prove their bytes at build time. The corrected complete-equivalence gate **rejects
+both legacy manifests**. Earlier all-input/completion-audit claims are superseded to
+this precise subset limit; preserve the old audit/patch/receipts as historical evidence.
+Review changes only external runner/tests and documentation; **no packaged runtime,
+probe, fixture, dependency or build input changed**. Prior native action receipts
+still cover their exact binaries; none is invalidated by a product correction, and
+none proves complete candidate equivalence. No additional allowance is required to
+publish this honestly limited source checkpoint. Any future required complete-manifest
+native qualification needs a concrete separately approved allowance; no gate is waived.
+
+**Fresh verification:**
+
+| Check | Pass | Failure / skipped / ignored / filtered |
+| --- | ---: | --- |
+| Core `cargo test -p loomlight-core --locked --offline ai_` | 30 | 0 / 0 / 0 / 237 |
+| Desktop `cargo test -p loomlight-desktop --locked --offline` | 11 | 0 / 0 / 0 / 0 |
+| Frontend typecheck/test compilation + serial Node test command matching package scripts | 104 | 0 failed/skipped/cancelled/todo |
+| Python Windows controller suite after corrections | 6 | 0 failed/skipped |
+| Independent retained-receipt/snapshot audit | PASS | No native/OS-store operation |
+
+Formatter **PASS**. Initial sandbox toolchain access was denied before tests; the
+same authorized offline checks passed with host access. The new audit initially
+rejected absent legacy run/installer fields; its explicit legacy handling records
+those limits rather than modifying receipts. Final repository validator/privacy/links
+and whitespace both **PASS**: validator checked **408 repository files**, including
+untracked intended additions. Reviewed complete patch reverse-apply **PASS**; named-file
+hash manifest retained under ignored evidence for the publication recheck. CURRENT is
+301 words and HANDOVER 778, within workflow review targets.
+
+**Review disposition/publication proposal:** independent review and corrections complete;
+no remaining in-scope source finding. Complete-manifest native equivalence remains
+missing evidence, alongside the original full phase-1/alpha-alpha sequence,
+confirmed-save/unavailable-reload packaged branch, actual locked-store, cross-build
+Windows continuity, clean-OS reinstall, real Studio/generation and Mac corrected
+packaged proof. Studio 2A.1/Phase 2 and release remain open. Proposed single commit:
+`Add reviewed Windows Studio credential storage and qualification gates`, containing
+only the 22 reviewed implementation/test/canonical-doc/ledger/live-status files on
+`codex/provider-qualification`. Ignored packages/evidence, credentials and personal
+data stay out of Git. Await explicit approval to commit and push; after approval,
+recheck refs/state, stage only the reviewed named files, verify the staged diff,
+commit/push the same branch and verify the exact remote SHA. No force-push/history
+rewrite, PR, merge or release. Resume this same chat for publication; the next-outcome
+prompt is returned only after verified publication and is never executed here.
+
+
+**Publication approval and recheck:** user replied **"i approve"** to the explicit
+22-file commit/push request after the proof limits were explained. Fresh remote
+provider/main refs remained `c9f3e37`/`5f448ca`; branch/base/index and all 22 reviewed
+file hashes matched the approval candidate. Only the already-reviewed live records
+were then updated to record approval and the next proposed outcome. Commit only the
+named 22 files with the approved title, push `codex/provider-qualification`, and verify
+the exact remote SHA in the publication response. This commit identifies itself by
+branch tip rather than creating a receipt-only successor. Native/problem totals stay
+unchanged. The next dependency-ready proposal is Mac plan section 15's deterministic
+fixture-only post-save snapshot-read refusal selector and rejecting source/DOM proof,
+with zero native/package/store/provider/CI allowance and a separate publication
+approval boundary. It prepares missing proof; it neither executes the proposed Mac
+native schedule nor resolves Windows complete-manifest equivalence or Studio 2A.1.

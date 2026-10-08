@@ -77,13 +77,25 @@ All Mac native/legacy API-key reads, additions, deletes, historical qualificatio
 and cleanup now return deferred status without Keychain calls. Service values retain
 namespace ownership (`app.loomlight.desktop.ai.v1` default, `app.loomlight` explicit),
 separate from the file discriminator. There is no automatic import/migration. The Windows
-native unavailable seam is unchanged; shared v1 records remain compatible, while v2
+native adapter uses generic Credential Manager records with local-machine persistence.
+Exact fixed-service/profile/credential targets and ownership markers bind origin,
+revision and reference. Reads/deletes refuse mismatched items; adds refuse occupied
+targets. App-owned masked entry retains its field for Retry/Cancel through the same
+controller/channels. Windows explicitly refuses keys above the OS 2560-byte blob bound
+without truncation or profile switching. Shared v1 records remain compatible, while v2
 file-generation records have explicit downgrade limits. Signing gates remain intact and
 need separate approval. No plaintext API-key fallback, session mode, generic provider or
 generation is exposed. Bounded synthetic packaged Mac qualification passed for retained
 native input, recovery and reuse across two builds; source tests alone do not qualify those paths.
 [The development ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-development-file-storage-implementation--2026-10-08)
 owns actual proof, preserved failures and its limits.
+
+Windows accepts shared v2 records while keeping native entry serialization unchanged.
+Mac file references remain unavailable and owned on Windows; explicit new native entry
+can replace them, with unsupported old-file cleanup reported pending. No automatic file
+migration, Mac key access or generation deletion. The
+[Windows ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+owns its separate packaged qualification.
 
 `ai_discovery` sends one explicit authenticated `/models` GET, with a 15-second
 whole-call bound, 128 KiB JSON body, 32-level nesting and 256 model-ID limits. It

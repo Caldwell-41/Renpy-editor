@@ -1,8 +1,7 @@
 //! Stable, machine-local owned entries; no shell, plaintext fallback or secret IPC.
-use loomlight_core::{
-    ai_credentials::{Result, Secrets},
-    ai_profiles::OwnedCredential,
-};
+use loomlight_core::ai_credentials::{Result, Secrets};
+#[cfg(not(target_os = "windows"))]
+use loomlight_core::ai_profiles::OwnedCredential;
 pub struct NativeSecrets;
 /// Mac legacy/native ownership is retained, with zero Keychain API-key calls.
 #[cfg(target_os = "macos")]
@@ -46,8 +45,12 @@ pub fn secrets(_: &std::path::Path) -> Result<impl Secrets> {
     Ok(NativeSecrets)
 }
 
-// Windows native entry/store is the explicit next-host implementation seam.
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "windows")]
+mod windows;
+#[cfg(target_os = "windows")]
+pub use windows::enter_owned;
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 impl Secrets for NativeSecrets {
     fn read(
         &self,
@@ -104,7 +107,7 @@ pub fn enter(
         }
     }
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 pub fn enter(
     _: impl FnMut(&str) -> Result<loomlight_core::ai_credentials::SaveOutcome>,
 ) -> Result<Option<loomlight_core::ai_credentials::SaveOutcome>> {

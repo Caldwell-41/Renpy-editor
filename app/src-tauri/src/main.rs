@@ -5,6 +5,8 @@ mod ai_settings;
 mod identity_policy;
 #[cfg(target_os = "macos")]
 mod identity_probe;
+#[cfg(target_os = "windows")]
+mod windows_studio_probe;
 use loomlight_core::{
     dispatch::ApplicationHost, lifecycle::LifecycleService, validate_request, CoreResponse,
 };
@@ -144,6 +146,20 @@ fn core_request(
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
+    }
+    #[cfg(target_os = "windows")]
+    if request.get("operation").and_then(Value::as_str) == Some("probe.windowsStudioStep") {
+        let host = state
+            .0
+            .lock()
+            .map_err(|_| "Probe state unavailable")?
+            .clone()
+            .ok_or("Probe host unavailable")?;
+        let value = windows_studio_probe::step(
+            &host,
+            request.get("payload").cloned().unwrap_or(Value::Null),
+        )?;
+        return Ok(CoreResponse::success("windows-studio-step".into(), value));
     }
     #[cfg(target_os = "macos")]
     if request.get("operation").and_then(Value::as_str) == Some("probe.studioIdentityAudit") {
@@ -613,8 +629,13 @@ fn main() {
         .setup(move |app| {
             #[cfg(target_os = "macos")]
             let identity_config = identity_probe::from_env()?;
-            #[cfg(not(target_os = "macos"))]
+            #[cfg(not(any(target_os = "macos", target_os = "windows")))]
             let identity_config: Option<Value> = None;
+            #[cfg(target_os = "windows")]
+            let windows_phase = if std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_PHASE").is_some() {
+                let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Windows fixture root required")?);
+                windows_studio_probe::phase(&root)?
+            } else { None };
             #[cfg(target_os = "macos")]
             let development_phase = if let Ok(phase) = std::env::var("LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE") {
                 if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() != Ok("studio-settings") || identity_config.is_some() {
@@ -698,6 +719,13 @@ fn main() {
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
                     if case == "studio-settings" {
                         main.show().expect("probe show"); main.set_focus().expect("probe focus");
+                        #[cfg(target_os = "windows")]
+                        if let Some(phase) = windows_phase {
+                            main.eval(&format!("window.__loomlightWindowsStudioPhase = {phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("windows_studio_probe.js"))).expect("Windows Studio probe injection");
+                        } else {
+                            main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
+                        }
+                        #[cfg(not(target_os = "windows"))]
                         if let Some(config) = identity_config {
                             main.eval(&format!("window.__loomlightIdentityProbe = {};\n{}\n{}",config,include_str!("native_editor_probe.js"),include_str!("studio_identity_probe.js"))).expect("Identity probe injection");
                         } else {

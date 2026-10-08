@@ -96,7 +96,8 @@ through the app's real native dialog: `loomlight-disposable-alpha` for the initi
 `loomlight-disposable-beta` for replacement. They are not real provider credentials.
 No test secret passes through WebView IPC; the app's Rust adapter creates/reads/deletes
 its own Keychain items. An opt-in Rust audit retains only owned references in memory
-and verifies retired entries are absent. Normal startup and Windows paths stay unchanged.
+and verifies retired entries are absent. This historical Mac identity probe leaves
+normal startup and Windows routing unchanged.
 
 | Phase | Signed package | App-owned action | Local GETs |
 | --- | --- | --- | --- |
@@ -192,6 +193,9 @@ keys may require one-time native re-entry; retain their references and pending c
 
 ## Temporary Mac development credentials
 
+The Windows remembered-profile adapter is described in
+[Windows native Studio credentials](#windows-native-studio-credentials) below.
+
 The selected [development plan](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md)
 uses encrypted local records plus an unencrypted random local unlock key. Software under
 the same login can decrypt them. Native AppKit entry stays outside the web view; failed
@@ -214,7 +218,8 @@ covers the correction, while its packaged branch remains unqualified.
 
 All legacy/native Mac API-key reads, deletes, imports and cleanup are deferred, with
 owned references preserved. Historical identity/helper fixtures below are recovery
-evidence, not an executable allowance for the new mode. Windows routing remains unchanged.
+evidence, not an executable allowance for the new mode. That Mac file-storage change
+preserves Windows routing; the later Windows adapter is described below.
 No Keychain migration, session escape, signing-policy/certificate/trust/ACL change or
 plaintext API-key fallback. The macOS package identity gates above remain mandatory;
 file storage does not eliminate signing-private-key access.
@@ -243,3 +248,33 @@ requires explicit allowance before packaging/signing or runtime execution. The
 records the passed bounded sequence and retained failures; it grants no further operation.
 After a native quit, verify the external receipt/PID and do not call a UI observer or
 `getApp` on the exited app: reacquisition can implicitly launch it without fixture state.
+
+## Windows native Studio credentials
+
+Windows remembered Studio keys use an app-owned modal password field and generic
+Windows Credential Manager entries for the current Windows login. The renderer and
+IPC receive only references/status. Failed saves retain native input for Retry save
+or Cancel; confirmed saves remain successful when old owned cleanup is pending.
+Windows accepts 1–2560 printable non-space ASCII characters; the shared schema's
+4096-character bound is unchanged. Larger input stays in the native dialog for correction.
+
+Exact service/profile/credential targets and ownership markers bind entries to their
+origin and revision. Replacement publishes the new reference before retiring the old
+owned entry; removal disables the profile before deletion. Existing targets and
+mismatched markers are never overwritten/deleted. Foreign Mac development-file
+references remain preserved and require explicit Windows re-entry; no Mac key/file
+operation is attempted. See [ADR 0011](../docs/adr/0011-ai-settings-secrets-and-reference-storage.md)
+and [the data model](../docs/DATA_MODEL.md).
+
+The fixed public fixture is `tests/fixtures/windows-studio-credentials.json`;
+`scripts/windows-studio-credentials.py` records exclusive attempts, package/source
+identity, isolated loopback request counts, native snapshots and external process exit.
+Input uses Windows Computer Use against the actual packaged app. The
+[Windows ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+owns exact allowance, failed attempts and remaining native proof. Commands do not grant
+new allowance. Source tests: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
+No installer execution, real endpoint, production key or credential enumeration is selected.
+Reuse requires complete saved snapshots, exact terminal marker/envelope/request gates
+and the full input manifest. Old Windows manifests lack eight current inputs and are
+rejected by the corrected reuse gate; retain their exact-binary evidence without
+claiming complete candidate equivalence. See the independent review in the ledger.

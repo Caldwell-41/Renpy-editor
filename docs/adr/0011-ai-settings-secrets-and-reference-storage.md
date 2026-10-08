@@ -67,8 +67,18 @@ a bounded Mac outcome: routine remembered use across reopen and two different pa
 signed with the established certificate identity. This narrower signing outcome is now
 approved for implementation/focused checks. Packaged save/reopen passed, but changed-build
 reuse failed despite the same certificate and designated requirement. Biometric
-integration and Windows changes remain excluded. The active ledger owns allowances and
+integration and Windows changes were excluded from that identity selection. The active ledger owns allowances and
 per-step approvals, not this ADR.
+
+The subsequently selected Windows continuation implements native secure entry and
+generic Credential Manager records through the transactional lifecycle, without
+biometrics or Mac identity work. Exact owned targets and reference-bound markers use
+local-machine persistence; no enumeration or occupied-target overwrite. The OS blob
+limit is 2560 bytes: larger shared-valid input remains native with explicit failure,
+never truncation/plaintext fallback. Shared v1/v2 records stay compatible; Mac file
+references/cleanup remain owned without Windows migration/deletion. The
+[Windows ledger](../tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+owns selected operations, actual evidence and the independent-review boundary.
 
 The permanent new credential service is user-selected `app.loomlight`; bundle identifier
 remains `app.loomlight.desktop`. An optional fixed-enum service on each owned reference
@@ -130,7 +140,8 @@ fresh generation, preserving original files/references. Missing records with hea
 can reuse that generation. Read-only Settings/Retry never creates keys or sends requests.
 Newer/malformed profiles and newer credential formats remain refused and unchanged.
 Schema 1 native serialization/default services stay compatible; file staging explicitly
-uses schema 2 with no downgrade support. Windows native behavior remains unchanged.
+uses schema 2 with no downgrade support. This Mac file-storage selection preserves
+Windows routing; the later Windows adapter follows the continuation decision above.
 
 Native entry retains its secure field on save failure for Retry/Cancel. The service is
 released during the dialog; target/settings tokens are checked again before writes.
