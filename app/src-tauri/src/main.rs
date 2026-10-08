@@ -1,5 +1,10 @@
 mod ai_native;
 mod ai_settings;
+#[cfg(test)]
+#[path = "../identity_policy.rs"]
+mod identity_policy;
+#[cfg(target_os = "macos")]
+mod identity_probe;
 use loomlight_core::{
     dispatch::ApplicationHost, lifecycle::LifecycleService, validate_request, CoreResponse,
 };
@@ -141,9 +146,31 @@ fn core_request(
         return Err("Command is not authorised for this window.");
     }
     #[cfg(target_os = "macos")]
+    if request.get("operation").and_then(Value::as_str) == Some("probe.studioIdentityAudit") {
+        if identity_probe::from_env()?.is_none() || request.get("payload") != Some(&json!({})) {
+            return Err("Identity probe not enabled or payload refused");
+        }
+        let host = state
+            .0
+            .lock()
+            .map_err(|_| "Probe service unavailable")?
+            .clone()
+            .ok_or("Probe service unavailable")?;
+        let id = request
+            .get("requestId")
+            .and_then(Value::as_str)
+            .ok_or("Probe request ID missing")?
+            .to_owned();
+        return Ok(match identity_probe::audit(&host) {
+            Ok(value) => CoreResponse::success(id, value),
+            Err(message) => CoreResponse::failure(id, "IDENTITY_PROBE_REFUSED", message),
+        });
+    }
+    #[cfg(target_os = "macos")]
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
         && request.get("operation").and_then(Value::as_str)
             == Some("probe.studioReuseQualification")
+        && std::env::var_os("LOOMLIGHT_STUDIO_IDENTITY_PHASE").is_none()
     {
         if request.get("payload") != Some(&json!({})) {
             return Err("Probe payload refused.");
@@ -584,6 +611,20 @@ fn main() {
         }))
         .manage(DesktopState(Mutex::new(None)))
         .setup(move |app| {
+            #[cfg(target_os = "macos")]
+            let identity_config = identity_probe::from_env()?;
+            #[cfg(not(target_os = "macos"))]
+            let identity_config: Option<Value> = None;
+            #[cfg(target_os = "macos")]
+            let development_phase = if let Ok(phase) = std::env::var("LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE") {
+                if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() != Ok("studio-settings") || identity_config.is_some() {
+                    return Err("Development fixture requires exclusive isolated Studio mode".into());
+                }
+                let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Development root required")?);
+                Some(identity_probe::development_phase(&phase, &root)?)
+            } else { None };
+            #[cfg(not(target_os = "macos"))]
+            let development_phase: Option<u8> = None;
             let data_root = app
                 .path()
                 .app_data_dir()
@@ -646,6 +687,10 @@ fn main() {
             if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let main = app.get_webview_window("main").ok_or("probe main window missing")?;
                 if case == "route-b" { main.set_size(tauri::LogicalSize::new(640.0,720.0)).map_err(std::io::Error::other)?; }
+                if development_phase.is_some() {
+                    main.show().expect("development fixture show");
+                    main.set_focus().expect("development fixture focus");
+                } else {
                 let probe_host = app.state::<DesktopState>().0.lock().unwrap().clone().ok_or("probe host missing")?;
                 let started = Instant::now();
                 thread::spawn(move || {
@@ -653,7 +698,11 @@ fn main() {
                     main.eval(&format!("window.__loomlightRuntimeProbeCase = {};",serde_json::to_string(&case).unwrap())).expect("probe case");
                     if case == "studio-settings" {
                         main.show().expect("probe show"); main.set_focus().expect("probe focus");
+                        if let Some(config) = identity_config {
+                            main.eval(&format!("window.__loomlightIdentityProbe = {};\n{}\n{}",config,include_str!("native_editor_probe.js"),include_str!("studio_identity_probe.js"))).expect("Identity probe injection");
+                        } else {
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
+                        }
                     } else if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
@@ -668,6 +717,7 @@ fn main() {
                     let _ = std::io::stdout().flush();
                     std::process::exit(1);
                 });
+            }
             }
             if std::env::var("LOOMLIGHT_SCAFFOLD_SMOKE").as_deref() == Ok("1") {
                 let denied = Arc::clone(&unauthorised_denied);

@@ -11,6 +11,8 @@ struct Fixture {
     native_unavailable: Cell<bool>,
     deletion_unavailable: Cell<bool>,
     deleted: RefCell<Vec<String>>,
+    service: Cell<CredentialService>,
+    deleted_services: RefCell<Vec<CredentialService>>,
 }
 impl Fixture {
     fn read(&self) -> Result<ProfileStore> {
@@ -28,6 +30,8 @@ impl Fixture {
             native_unavailable: Cell::new(false),
             deletion_unavailable: Cell::new(false),
             deleted: RefCell::new(vec![]),
+            service: Cell::new(CredentialService::Legacy),
+            deleted_services: RefCell::new(vec![]),
         }
     }
     fn init(&self) -> String {
@@ -48,7 +52,7 @@ impl Fixture {
         .unwrap();
         self.records.borrow().profiles[0].profile_id.clone()
     }
-    fn replace(&self, id: &str, key: &str) -> Result<()> {
+    fn replace(&self, id: &str, key: &str) -> Result<SaveOutcome> {
         replace(self, self, &token(&self.read()?), id, key)
     }
 }
@@ -79,11 +83,19 @@ impl Records for Fixture {
     }
 }
 impl Secrets for Fixture {
-    fn read(&self, _: &str, c: &OwnedCredential) -> Result<Option<String>> {
+    fn service(&self) -> CredentialService {
+        self.service.get()
+    }
+    fn read(&self, _: &str, c: &OwnedCredential) -> Result<Option<Secret>> {
         if self.native_unavailable.get() {
             Err("native unavailable")
         } else {
-            Ok(self.keys.borrow().get(&c.credential_id).cloned())
+            Ok(self
+                .keys
+                .borrow()
+                .get(&c.credential_id)
+                .cloned()
+                .map(Secret::new))
         }
     }
     fn add(&self, id: &str, c: &OwnedCredential, key: &str) -> Result<()> {
@@ -104,6 +116,7 @@ impl Secrets for Fixture {
         Ok(())
     }
     fn delete(&self, _: &str, c: &OwnedCredential) -> Result<()> {
+        self.deleted_services.borrow_mut().push(c.service);
         assert!(
             !self.records.borrow().profiles.iter().any(|p| p
                 .credential
@@ -118,6 +131,46 @@ impl Secrets for Fixture {
         self.deleted.borrow_mut().push(c.credential_id.clone());
         Ok(())
     }
+}
+#[test]
+fn namespace_replacement_keeps_legacy_cleanup_and_reopens_current_reference() {
+    let f = Fixture::new();
+    let id = f.init();
+    f.replace(&id, "legacy-synthetic").unwrap();
+    let old = f.read().unwrap().profiles[0].credential.clone().unwrap();
+    f.service.set(CredentialService::Loomlight);
+    f.deletion_unavailable.set(true);
+    assert_eq!(
+        f.replace(&id, "current-synthetic"),
+        Ok(SaveOutcome::SavedCleanupPending)
+    );
+    let store = f.read().unwrap();
+    assert_eq!(
+        store.profiles[0].credential.as_ref().unwrap().service,
+        CredentialService::Loomlight
+    );
+    assert_eq!(store.cleanup[0].credential, old);
+    let reopened: ProfileStore =
+        serde_json::from_slice(&serde_json::to_vec(&store).unwrap()).unwrap();
+    assert_eq!(reopened, store);
+    assert!(reopened.valid());
+    f.deletion_unavailable.set(false);
+    cleanup_profile(&f, &f, &id).unwrap();
+    assert_eq!(
+        f.deleted_services.borrow().last(),
+        Some(&CredentialService::Legacy)
+    );
+    assert_eq!(
+        Secrets::read(&f, &id, store.profiles[0].credential.as_ref().unwrap())
+            .unwrap()
+            .as_deref(),
+        Some("current-synthetic")
+    );
+    remove(&f, &f, &token(&f.read().unwrap()), &id, false).unwrap();
+    assert_eq!(
+        f.deleted_services.borrow().last(),
+        Some(&CredentialService::Loomlight)
+    );
 }
 #[test]
 fn actual_replace_remove_ordering_and_no_serialized_key() {
@@ -183,7 +236,10 @@ fn cleanup_failure_is_retained_and_owned_retry_is_explicit() {
     let id = f.init();
     f.replace(&id, "old-key").unwrap();
     f.deletion_unavailable.set(true);
-    assert!(f.replace(&id, "new-key").is_err());
+    assert_eq!(
+        f.replace(&id, "new-key"),
+        Ok(SaveOutcome::SavedCleanupPending)
+    );
     assert_eq!(f.records.borrow().cleanup.len(), 1);
     assert_eq!(f.keys.borrow().len(), 2);
     f.deletion_unavailable.set(false);
@@ -191,7 +247,10 @@ fn cleanup_failure_is_retained_and_owned_retry_is_explicit() {
     assert!(f.records.borrow().cleanup.is_empty());
     assert_eq!(f.keys.borrow().len(), 1);
     f.deletion_unavailable.set(true);
-    assert!(remove(&f, &f, &token(&Records::read(&f).unwrap()), &id, true).is_err());
+    assert_eq!(
+        remove(&f, &f, &token(&Records::read(&f).unwrap()), &id, true),
+        Ok(SaveOutcome::SavedCleanupPending)
+    );
     assert!(f.records.borrow().profiles.is_empty());
     assert_eq!(f.records.borrow().cleanup.len(), 1);
 }
@@ -235,4 +294,27 @@ fn unavailable_reconciliation_never_deletes_possibly_active_entry() {
         1,
         "old entry retained for reconciliation/explicit cleanup"
     );
+}
+
+#[test]
+fn retained_entry_retry_rechecks_origin_and_settings_and_cancel_does_not_write() {
+    let f = Fixture::new();
+    let id = f.init();
+    let old = f.read().unwrap();
+    let mut entry = CredentialEntry::new(&old, &token(&old), &id).unwrap();
+    f.fail_write.set(f.writes.get() + 1);
+    assert!(entry.save(&f, &f, "synthetic-retained").is_err());
+    assert_eq!(f.read().unwrap(), old);
+    assert_eq!(
+        entry.save(&f, &f, "synthetic-retained"),
+        Ok(SaveOutcome::Saved)
+    );
+    let next = f.read().unwrap();
+    let mut entry = CredentialEntry::new(&next, &token(&next), &id).unwrap();
+    f.records.borrow_mut().profiles[0].settings.endpoint = "http://127.0.0.1:9999/v1".into();
+    let writes = f.writes.get();
+    assert!(entry.save(&f, &f, "synthetic-retained").is_err());
+    assert_eq!(f.writes.get(), writes);
+    drop(entry);
+    assert_eq!(f.writes.get(), writes);
 }

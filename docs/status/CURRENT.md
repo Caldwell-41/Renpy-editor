@@ -1,46 +1,45 @@
 # Current status
 
-**Updated:** 2026-10-08. Source foundation is integrated/closed; Studio-scoped 2A.0
-reference accepted; Studio 2A.1 Mac implementation present with partial native proof.
-Windows and both-platform acceptance remain pending. Generic is user-deferred;
-2A.2 and later phases remain unstarted.
+**Updated:** 2026-10-08. Source foundation is accepted/closed. Temporary Mac development
+credentials are **independently reviewed/corrected; publication authorized for Windows handoff**.
+The original bounded public synthetic packaged sequence passed on its recorded inputs;
+the corrected reload-required cleanup-pending response has source/DOM proof and awaits
+packaged proof. Studio 2A.1/Phase 2, Windows and production release remain incomplete.
 
-Phase 1 closed through [PR18](https://github.com/Caldwell-41/Renpy-editor/pull/18)
-at `82d45189d003239b622bc946c85b639a093f46a1`; its
-[closure ledger](../tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
-retains both-target H01–H12 proof and limits. Public v0.1.0 remains unchanged,
-unsigned/non-notarized, with unqualified installer limits and no selected release.
+| Capability | Implementation / automated proof | Native acceptance |
+| --- | --- | --- |
+| Phase 1 source foundation | Integrated through PR19. | Both-target evidence accepted. |
+| Studio settings/discovery | Mac source/focused tests present. | Earlier partial Mac proof; Windows/both-target acceptance pending. |
+| Temporary Mac encrypted files | Rust-only records/local unlock key, owned generations/recovery and retained-entry controller; core 32, desktop 10, frontend 102, fixture Python 6 PASS. | Original four controlled phases passed: Retry/Cancel, recovery, reopen, two-build reuse and native ownership. Corrected pending-status/reload branch remains source/DOM-only. |
+| Existing Mac signing policy | Certificate-backed gates/names/identities preserved. | Historical signed-update Keychain reuse failed; no renewed allowance. |
 
-The source foundation closed through [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19)
-at `40786404175f3d3f35c6cafd0aa718149f34c647`. Reviewed head/tree, 139 qualified
-inputs and lightweight main/PR checks remain audited in the
-[source integration ledger](../tasks/archive/2026-10-07-source-foundation-integration.md).
-Existing nested dialogue editing remains bounded to qualified existing children.
-Historical build/native/SDK counts remain Windows 2/2/3 and Mac 3/3/3.
+Same-login software may decrypt the local-key store: accepted temporary policy, not
+production secret-storage qualification. Missing/damaged storage permits explicit native
+re-entry while preserving old files/references/settings; all native Mac API-key operations
+remain deferred. No automatic Keychain migration/deletion. Session escape, generation,
+generic providers and Apple Development work remain deferred.
 
-**Active outcome:** remembered Studio 2A.1 profiles on `codex/provider-qualification`,
-implementation `19957189cd984596d7c75e81a11a707ef8f7b370`, followed by live evidence/status
-updates. Mac secure entry/Keychain, settings/status IPC, ordered replacement/removal,
-retained cleanup and explicit discovery are implemented. Core **13**, frontend **97**,
-desktop **1** and focused browser checks PASS; native run 1's **9 checks PASS**.
-Two later native runs timed out at macOS access to the existing qualification entry,
-before any GET. Mac discovery/removal proof and one disabled disposable cleanup
-reference remain unresolved; no timeout is an acceptance pass.
-The user withdrew the added rebuild/update password guarantees and mandatory Touch
-ID/Windows Hello PIN requirements pending separate research. They are not selected
-implementation work or new acceptance gates; the existing remembered-use contract
-and recorded native proof limits remain.
+Continuation remains `codex/provider-qualification`, base `4c0ebbf`; the approved source/docs transfer checkpoint is the commit carrying this
+record. Verify/pull the actual published branch tip before Windows continuation. Separate planning worktree/unrelated work and historical packages,
+failures/receipts/recovery remain preserved. [Independent review ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
+owns findings, exact checks, preservation audit and native limits. [Plan section 15](../tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+prepares a narrow Mac follow-up proposal; no native operation is authorized. The
+[next proposed Windows outcome](../tasks/active/phase-2-initial-llm-assistance.md#reviewed-mac-publication-and-proposed-windows-continuation--2026-10-08)
+is native secure entry/Credential Manager plus focused synthetic qualification; printing
+its prompt does not start it.
+[HANDOVER](HANDOVER.md) owns exact continuation.
 
-The [Mac ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
-owns exact inputs, failures, recovery and the user-authorised extra native run.
-Mac has consumed 2 builds/3 native launches and has zero remaining; Windows retains
-2 builds/2 targeted runs. All four combined GETs remain; provider budget remains
-18 HTTP/4 generations/343 s, with generation excluded. Original credentials/evidence
-stay on Mac. No executable or HTTP request is pending.
+Review added **0 native operations**. Consumed development allowance: **2 package pairs,
+2 isolated copies, 5 launches (4 controlled/1 unintended), 10 entries, 10 saves (9
+confirmed/1 intended refusal), 1 Cancel, 8 GETs**; remaining **0**. Historical identity
+counts remain **2/2 builds, 4/4 launches, 4/8 GETs**, separate. No workflow/native operation
+pending from this outcome. UI observers must not reacquire an exited app; use external
+receipt/PID. Original preflight/observer failures remain in the owning ledger.
 
-**Next:** serial Windows x64 agent continuation under the
-[approved handoff rule](../WORKFLOW.md#test-host-routing-and-ownership), completing its
-native adapter/entry and focused qualification. No direct other-machine access,
-new feature, SDK, CI matrix, merge or release. Further Mac proof/owned cleanup needs
-explicit scope/allowance and OS-access resolution; Windows cannot close that gate.
-[HANDOVER](HANDOVER.md) owns exact continuation/publication and recovery.
+Phase 1 closure: [PR18](https://github.com/Caldwell-41/Renpy-editor/pull/18),
+`82d45189d003239b622bc946c85b639a093f46a1`; source foundation:
+[PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19),
+`40786404175f3d3f35c6cafd0aa718149f34c647`.
+Public v0.1.0 remains unchanged, unsigned/non-notarized, with installer limits and no
+selected release. [Deferred identity recovery](../tasks/active/phase-2-initial-llm-assistance.md#preserved-deferred-identity-recovery-record--2026-10-08)
+retains historical cleanup/signing evidence.

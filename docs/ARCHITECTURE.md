@@ -47,7 +47,7 @@ The first 2A.1 Studio slice uses strict core `ai_profiles` records and
 `ai_credentials` lifecycle ordering. `LifecycleService` reads/replaces the device
 record without native access or networking. Full-record comparison and a renderer
 snapshot digest refuse stale/external edits, including unchanged revisions; malformed
-or newer records remain intact. Cleanup ownership is durable before OS addition;
+or newer records remain intact. Cleanup ownership is durable before credential addition;
 replacement publishes before retiring the prior entry; removal unpublishes/disables
 before deletion. Uncertain post-rename saves are reread before any cleanup. Failed
 cleanup retains its opaque reference for an explicit retry, without cross-store
@@ -55,11 +55,35 @@ atomicity claims.
 
 The desktop `ai_settings` owner exposes schema-checked profile read/save, native
 entry, owned removal/cleanup and explicit discovery through the existing main-window
-core envelope. macOS `ai_native` uses AppKit secure native text entry and a stable
-`app.loomlight.desktop.ai.v1` Keychain namespace with synchronization disabled.
-Keys never enter a serializable request/response/record. Windows native store/entry
-is an explicit unavailable seam until the next-host implementation/proof. No
-plaintext fallback, session mode, generic provider or generation is exposed.
+core envelope. macOS `ai_native` retains AppKit secure input through persistence and
+explicit Retry/Cancel. Rust channels carry the input to the save controller; the project
+service is held only during an attempt, never across the modal dialog. Stale target/
+origin changes retain input and refuse writes. Uncertain publication is reconciled
+against the exact candidate before retry; confirmed saves report cleanup pending
+separately, even when a subsequent Settings reload fails. The reload-required response
+retains that qualifier in its visible status, as well as its typed pending flag.
+
+The selected temporary Mac backend is core `ai_file_secrets`, injected through `Secrets`
+using the same approved application-data root as profiles. RustCrypto XChaCha20-Poly1305
+0.10.1 uses a random generation key and fresh random nonce; associated data binds format,
+generation, profile, credential, revision and canonical origin. Private encrypted records
+and an unencrypted local unlock key are a development compromise: same-login software
+can decrypt them. Generations are durably owned before key creation; active selection
+shares the verified profile-switch transaction. Reopening never creates keys. Missing/
+damaged storage exposes explicit recovery, preserving original files and references.
+Retained generations stay addressable; abandoned/recovery generations are not swept.
+
+All Mac native/legacy API-key reads, additions, deletes, historical qualification imports
+and cleanup now return deferred status without Keychain calls. Service values retain
+namespace ownership (`app.loomlight.desktop.ai.v1` default, `app.loomlight` explicit),
+separate from the file discriminator. There is no automatic import/migration. The Windows
+native unavailable seam is unchanged; shared v1 records remain compatible, while v2
+file-generation records have explicit downgrade limits. Signing gates remain intact and
+need separate approval. No plaintext API-key fallback, session mode, generic provider or
+generation is exposed. Bounded synthetic packaged Mac qualification passed for retained
+native input, recovery and reuse across two builds; source tests alone do not qualify those paths.
+[The development ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-development-file-storage-implementation--2026-10-08)
+owns actual proof, preserved failures and its limits.
 
 `ai_discovery` sends one explicit authenticated `/models` GET, with a 15-second
 whole-call bound, 128 KiB JSON body, 32-level nesting and 256 model-ID limits. It

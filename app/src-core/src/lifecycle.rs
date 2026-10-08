@@ -124,6 +124,7 @@ pub enum LifecycleError {
     UnsafePath,
     UnknownAuthority,
     InvalidMetadata,
+    AiProfilesUnsupported,
     UnsupportedSdk,
     GitUnavailable,
     GenerationFailed,
@@ -837,6 +838,11 @@ impl LifecycleService {
 
     /// Profile reads never access credentials, resolve DNS, or connect to a provider.
     /// Unlike UI preferences, malformed/newer AI data must not become defaults.
+    /// Stable approved root, also used by the Rust-only development secret adapter.
+    pub fn ai_data_root(&self) -> &Path {
+        &self.data_root
+    }
+
     pub fn read_ai_profiles(&self) -> Result<crate::ai_profiles::ProfileStore, LifecycleError> {
         let name = OsStr::new("ai-profiles.json");
         if self
@@ -862,12 +868,12 @@ impl LifecycleService {
         if bytes.len() as u64 > crate::ai_profiles::MAX_PROFILE_BYTES {
             return Err(LifecycleError::InvalidMetadata);
         }
-        let store: crate::ai_profiles::ProfileStore =
-            serde_json::from_slice(&bytes).map_err(|_| LifecycleError::InvalidMetadata)?;
-        if !store.valid() {
-            return Err(LifecycleError::InvalidMetadata);
-        }
-        Ok(store)
+        crate::ai_profiles::decode(&bytes).map_err(|e| match e {
+            crate::ai_profiles::ProfileDecodeError::Unsupported => {
+                LifecycleError::AiProfilesUnsupported
+            }
+            crate::ai_profiles::ProfileDecodeError::Invalid => LifecycleError::InvalidMetadata,
+        })
     }
 
     /// The single desktop profile owner serializes mutations. Compare the full prior

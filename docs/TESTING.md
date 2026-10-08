@@ -789,14 +789,30 @@ mock bridge: no default discovery, explicit saved actions, invalidation, secret-
 payloads and both themes/wide/compact screenshots. This is browser evidence only.
 The explicit packaged `studio-settings` probe uses a disposable application-data root
 and native secure-entry actions, then a second process reopens it and checks explicit
-production discovery/removal. The test-only Mac qualification-reuse seam is enabled
-only in that isolated fixture, returns booleans, and preserves the original entry.
+production discovery/removal. The historical Mac qualification-reuse seam is now deferred without native-store
+calls; its old receipts remain evidence, not a route for importing credentials.
 Keep native access prompts separate from unavailable-store controlled fixtures;
 do not change login Keychain security to manufacture a passing test.
 The [Mac slice ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
 owns actual launches, failures, two builds/two targeted runs per OS and four combined
 Studio GET caps. Windows native adapter/entry/proof remains outstanding. No generation,
 CI, SDK or full matrix is selected; no automatic retry or allowance renewal at handoff.
+
+The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
+has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
+Its Step 1 checks are the same focused `ai_` core selector, desktop tests, `npm run check`,
+`python3 -m unittest discover -s app/scripts -p test_macos_package.py -v` from the repository
+root, formatting, repository validation and whitespace review. These cover legacy/current
+service ownership, retained cleanup, unchanged legacy record serialization, non-looping
+access-error UI and rejecting identity assertions. They neither access live Keychain
+items nor prove prompt-free runtime access. Do not run live locked-Keychain exercises.
+Mac release compilation now refuses an absent/unpinned/ad-hoc signing selector; existing
+unconfigured Mac package CI cannot be treated as runnable/passable. No CI is selected.
+Use [the signed local build route](../app/README.md#macos-local-package-identity) only after
+the applicable approval. It checks actual bundle and installer contents; native proof
+must still verify exact launched path, app-owned synthetic creation, repeat reads/GETs,
+full exit/reopen, replacement/deletion and two different signed executables at one stable
+installation path. The old cross-helper import must not be reused for this proof.
 
 Spike and CI results record exact command, OS/architecture, dependency and SDK
 versions, fixture revision, outcome, timings where relevant, and known exclusions. A
@@ -1188,3 +1204,73 @@ reused without a new build/native/SDK run. Cumulative Windows 2/2/3 and Mac 3/3/
 The [integration closure](tasks/archive/2026-10-07-source-foundation-integration.md)
 records exact scope and limits. The portable manifest is a historical Windows receipt,
 not a live allowance; its pre-Mac fields are superseded by section 23/current status.
+
+
+## Local Mac signed-identity qualification (historical, deferred)
+
+The [bounded app-owned sequence](../app/README.md#bounded-remembered-key-qualification)
+qualifies the selected stable-signing outcome in four real packaged processes, with
+2/2/4/0 authenticated loopback GETs. Native entry uses only public synthetic fixture inputs;
+no real key enters chat/logs/arguments or a helper-created Keychain item. Repeated native
+reads, full quit/reopen, a different executable/version with the same exact-certificate
+requirement, replacement and deletion are distinct assertions. The final process verifies
+persisted deletion. The app's opt-in Rust audit checks retired owned entries are absent.
+
+The runner refuses attempts after a failed/incomplete prior phase or an existing attempt
+marker; retains logs/receipts/profile ownership on failure; verifies the actual process
+path/PID; and enforces the expected authentication sequence and total request allowance.
+It never builds, installs, changes trust/locks or retries. Each meaningful execution step
+still requires user confirmation and the existing owning ledger's cumulative allowance.
+Pure policy tests, actual Settings DOM tests with mocked IPC and desktop unit tests are
+preparation evidence only. No live locked-Keychain test belongs in this routine sequence.
+The existing helper-qualification proof and unresolved owned cleanup remain separate.
+
+## Temporary Mac development credential checks
+
+Selected source-only checks from `app/`: `cargo test -p loomlight-core --locked --offline ai_`,
+`cargo test -p loomlight-desktop --locked --offline`, `cargo fmt --check --all` and
+`npm run check`; from the root, `python3 scripts/validate.py` and `git diff --check`.
+The prepared native fixture controller has a separate cheap selector:
+`python3 -m unittest discover -s scripts -p test_macos_development_credentials.py -v`.
+It checks the immutable fixture, rejecting request/transition/isolation boundaries and
+out-of-order/unconfirmed-save evidence; it does not launch, bind a server or sign.
+Assert positive selected counts and zero selected ignored/skipped cases. No broad-core,
+SDK, package build, signing, app launch or live secret access is included. Dependencies
+are pinned in the lockfile; focused test compilation is not a packaged-app allowance.
+
+Core fixtures exercise actual same-root profile/file services, independent reopen,
+private creation, fresh nonces, authenticated metadata tampering, missing/damaged keys
+and records, retained generations/settings/native ownership, strict v1/v2/newer profiles,
+unsupported file formats, links/non-regular entries, ordinary write/flush/publication
+faults, cleanup-pending and uncertain-publication reconciliation without replay.
+Read-only inspection and deferred cleanup assert no file creation/native access;
+the public prepared native fixture rejects invalid identities. Desktop tests exercise
+production retained-entry event handling against the actual service with injected native
+events, service availability between attempts, retry/cancel and stale-origin refusal.
+Settings DOM tests prove explicit read-only Retry, deferred ownership, disabled discovery,
+secret-free payloads and confirmed-save status despite cleanup/reload failure, including
+the visible cleanup-pending qualifier. The desktop reload-failure regression performs
+a real synthetic C file save, then obstructs only the temporary profile snapshot read
+and checks the response against
+`app/tests/fixtures/macos-development-credential-reload-failure.json`; restoring the
+snapshot retains its configured file reference and deferred cleanup. Fixture-controller
+save gates check all A/B/C owned references, key/record sizes and version headers;
+Cancel compares the complete persistent snapshot, not just profile metadata.
+
+These checks cannot qualify AppKit secure-input retention, permission behavior in the
+actual packaged app, full process quit/reopen or reuse after replacement with a different
+build. Those paths now have separate actual packaged evidence from the approved
+public synthetic fixture; [the result ledger](tasks/active/phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+records exact counts, retained preflight/observer failures and limits. The
+later [independent review](tasks/active/phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
+corrected the reload-required pending message. Old packages do not qualify that changed
+response branch; its current evidence is source/DOM only. The prepared targeted native
+proposal grants no operations and requires a deterministic isolated snapshot-read fault
+selector before dispatch, rather than an external timing race. The
+[prepared schedule](tasks/active/2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
+does not grant another run. Use host capabilities for signing/process checks and external
+receipt/PID verification after quit; never reacquire the exited app through a UI observer,
+which can launch it without the fixture environment. The old 2/2-build, 4/4-launch,
+4/8-GET consumption is unchanged; remaining GETs grant no launch and are not transferred. No Keychain API-key operation or Apple Development
+experiment belongs in the new fixture. Preserve historical packages, attempt markers,
+failed receipts and unresolved native cleanup.

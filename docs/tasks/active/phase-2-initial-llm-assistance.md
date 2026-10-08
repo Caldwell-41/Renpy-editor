@@ -1,7 +1,7 @@
 # Phase 2 — Initial LLM assistance
 
 **Planning date:** 2026-09-22; storage, references, testing and delivery refined 2026-10-07.
-**State:** provider/AI implementation not started; section 21 source foundation independently reviewed and qualified on Windows x64/macOS ARM64 and integrated through PR19; this bounded outcome is closed. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
+**State:** Studio profiles/discovery and temporary Mac development credentials are implemented locally; bounded synthetic packaged Mac credential proof passed, with broader Studio/Windows/Phase 2 acceptance incomplete. Section 21 source foundation is independently reviewed/qualified on both targets and integrated through PR19; that bounded outcome is closed. User removed cross-machine archive transfer as an acceptance requirement; section 23 preserves proof, failures and that decision.
 **User direction:** retain Unsloth Studio and existing Phase 2/3 scope; record the reviewed storage/reference contracts, project-local prompts, localhost/LAN/HTTPS, proportionate tests and adaptive subagents. The section 22 refinement was documentation only; the subsequent section 21 selection and its evidence are recorded in section 23.
 **Owner:** this brief owns Phase 2 scope, requirements, checkpoint gates and planning continuation, plus the selected cross-phase delivery sequence in section 19. [ROADMAP](../../ROADMAP.md) owns phase boundaries.
 **Entry:** accepted Phase 1 through 1H, fresh inspection of actual refs/state, and explicit approval of one bounded Phase 2 checkpoint.
@@ -117,10 +117,17 @@ request previews or diagnostics. Memory/swap/OS internals are not claimed perfec
 
 ### Storage ownership and credential lifecycle
 
+The selected [temporary Mac development plan](2026-10-08-macos-development-credential-storage.md)
+supersedes Mac API-key storage only. Native entry/Rust-only secrets remain; Keychain
+API-key operations, session escape and Apple Development signing are deferred. Source/
+synthetic implementation is separate from the bounded packaged reuse/recovery result.
+That sequence passed on its recorded inputs; subsequent review corrections have their
+own evidence boundary in the [independent review](#mac-development-independent-local-review--2026-10-08).
+
 | Content | Planned location and contract |
 | --- | --- |
 | Profiles and device-local project bindings | Versioned `ai-profiles.json` under the existing application-data root; validated safe replacement, separate from UI preferences. Defaults/capability evidence bind to model/configuration. |
-| Remembered keys | macOS Keychain / Windows Credential Manager through the native adapter; stable application namespace and opaque profile/credential IDs. |
+| Remembered keys | Baseline macOS Keychain / Windows Credential Manager design; the selected temporary Mac development exception uses encrypted local files and an unencrypted local unlock key, retaining all native ownership as deferred. |
 | Session-only keys | Trusted backend memory, cleared on app exit/removal; no project/config/history persistence. Closing a project is not app exit; disclose the lifetime before entry. |
 | Bundled prompts | One versioned packaged prompts resource directory; no duplicate handler literals. |
 | Project prompts/style notes | Versioned `.renpy-editor/ai.json`, full override text plus baseline version/digest; existing metadata transaction/history/recovery. |
@@ -3629,3 +3636,1480 @@ a signing/authentication approach or change code/credentials/OS trust. No additi
 build, native run, provider GET or generation is authorised or consumed. Existing
 Windows continuation and all recorded budgets remain unchanged. Publication of this
 correction follows the same authorised branch; verify the remote checkpoint.
+
+### Stable macOS identity and remembered keys — 2026-10-08
+
+**Selection/authority:** same-chat outcome on the local Mac, with this Mac's real packaged
+app as the test host, to qualify native Keychain and signing behavior. User approved
+Step 1 repository changes/focused checks and a new allowance of **2 package builds,
+4 app launches, 8 loopback-only authenticated GETs**. Each meaningful implementation/
+test step still needs confirmation. Certificate creation/import, trust changes and
+installation need separate approval. No subagents, Actions, real endpoints, generation,
+SDK, push, merge or release. Prior Mac allowance remains exhausted, not reset.
+
+**Naming decision:** user clarified that the requested name was the Keychain service
+and explicitly selected **`app.loomlight`** (not `app.loomlighta`). Preserve bundle ID
+`app.loomlight.desktop`, executable `loomlight` and current product/Finder/menu name
+`Loomlight`; final artifacts are `Loomlight.app` and `Loomlight.dmg`. Version differences
+belong in metadata/output directories. Changes require explicit approval. The user also
+requires no personal identifying information in the proposed self-signed certificate:
+only generic common name `Loomlight Local Development`; no personal name, email,
+organization, location, username, hostname or identifying extensions. Public label,
+public key, serial, dates and fingerprint remain visible and link signed builds.
+
+**Entry/ownership:** read-only investigation at local and freshly inspected remote
+`codex/provider-qualification` `4c0ebbf1ce08fc1a1bbded74b0651311fce27d22`; clean working
+tree, no corresponding open PR. Remote main is `5f448ca683a905f4ea77d4580bbc89fda69f2b93`.
+Separate planning worktree retains two unpublished commits; historical stash and source
+branch retained. App inventory showed no other active repository writer; no messages,
+helpers or other-host operations were dispatched. Step 1 remains local/uncommitted.
+
+**Read-only evidence/problem:** retained tested package is
+`app/target/release/bundle/macos/Loomlight.app`, executable SHA-256
+`c5619a9a0049b930d5363cbe9eab5080ec23e9f21bd8487e7977b2015b503b6a`.
+Its Info.plist names/ID are correct, but the signature is linker ad-hoc, signing identifier
+`loomlight-01f9e14627ef0525`, and designated requirement
+`cdhash H"c73efa05544a65f94bdff9ebc22426c751111ddb"`. Info.plist/resources are unbound;
+strict verification fails with “code has no resources but signature indicates they must
+be present”. The installed Applications copy is different: executable SHA-256
+`36328bbb46be07b1ad64274048f7a5c223065d9152f9daade1fe5046f6e75de1`, correct signing ID,
+valid sealed ad-hoc signature but still a build-specific cdhash. No running Loomlight
+process was found. No current signing config/environment override; host identity metadata
+inspection found zero code-signing identities. A stable name is not stable signing proof.
+
+Metadata-only Keychain queries confirmed both production and helper qualification
+services exist; no secret data requested. Sandboxed metadata queries initially returned
+unavailable; authorized host metadata inspection succeeded, so absence was not inferred.
+Historical app-owned reopen/read passed, while cross-helper access timed out twice;
+these are different ownership paths, not evidence of universally broken persistence.
+The old failed runs and one disabled profile/owned cleanup reference remain intact.
+No new attempt was made to read/delete the original helper key or outstanding old entry.
+
+**Hypothesis and smallest correction:** retain a persistent certificate-backed signing
+identity and generated identifier+certificate requirement across builds. Inspect actual
+bundles and qualify app-created entries, avoiding the failed cross-helper import.
+Local self-signing can establish continuity without buying Developer ID/notarization;
+it confers no distribution/Gatekeeper trust. References:
+[Apple signing guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html),
+[Tauri signing guide](https://v2.tauri.app/distribute/sign/macos/), and
+[pinned Tauri signing path](https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/crates/tauri-bundler/src/bundle/macos/sign.rs).
+The scoped interaction suppression follows the file-based Keychain limitation also
+[documented in Chromium's implementation](https://chromium.googlesource.com/chromium/src/crypto/+/refs/heads/main/apple/scoped_keychain_user_interaction_allowed.cc).
+No actual certificate/trust change has occurred; hypothesis remains unqualified.
+
+**Migration explained before edits:** changing only the service constant would strand
+saved/cleanup references. An optional fixed-enum service now defaults missing fields to
+legacy `app.loomlight.desktop.ai.v1`, omitted when reserialized. New/replaced Mac entries
+use `app.loomlight`; active/cleanup references retain exact service ownership. Opening
+never copies, rewrites or deletes entries. Existing lifecycle staging/publish/retirement
+is retained, including uncertain saves and failed cleanup. Older binaries reject new
+service fields without rewriting the record. Old signing trust may require separate
+one-time native re-entry/OS access; identifiers alone cannot migrate that trust.
+
+**Step 1 implementation:** effective Tauri config/name checks and required matching
+certificate fingerprint for Mac release builds; no ad-hoc fallback. Local package script
+requires a selected existing identity, builds once, checks actual bundle names/signature/
+certificate/requirement, creates permanently named DMG and inspects its included app
+read-only. It never installs or imports a certificate. Existing unconfigured Mac package
+CI will fail closed; no Actions authorized. Windows packaging/native seam unchanged.
+Mac native operations suppress prompt UI in a serialized process-local scope, restoring
+prior state, with no ACL/global setting change. Fixed access errors survive into Settings;
+retry remains explicit. Native entry/Rust-only secrets and lifecycle ordering remain.
+Canonical build/ADR/architecture/data/UI/testing and agent rules updated; protected signing
+reuse/recovery documented without credentials or private signing material.
+
+**Step 1 checks:** focused core `cargo test -p loomlight-core --locked ai_`: **15 PASS,
+0 FAIL/ignored, 245 unrelated filtered**. Desktop `cargo test -p loomlight-desktop --locked`:
+**5 PASS** (no live credential access). `npm run check`: **98 PASS, 0 FAIL/skipped** including
+actual Settings mounting/access-error display and explicit-only reload. Package rejecting
+unit checks: **4 PASS**. Retained ad-hoc bundle rejected by the real verification command
+(exit 1 at strict codesign verification), as required; this is rejecting-gate evidence,
+not a new package acceptance failure. Initial locked core invocation refused the newly
+added direct build dependency edges; regenerated metadata offline, reviewed lock diff
+(two dependency edges, no version changes), then the focused tests passed. This was a
+pre-execution lockfile alignment issue, not a package/native attempt.
+Final review added an approved public certificate fingerprint record (initially null);
+environment/CLI values cannot override it. Re-ran affected desktop tests: **5 PASS**;
+package-policy checks: **4 PASS**. Build deadline covers compilation/packaging/signature
+inspection, with bounded owned-process cleanup on timeout. No actual build executed.
+Formatting and whitespace checks PASS; repository validation PASS (391 repository files).
+The initial ad-hoc rejection preceded the new public-pin guard; the current command
+also refuses an unset/unapproved pin before signing or packaging. Remaining native
+claims are explicitly unproved, including the new process-local suppression behavior.
+
+**Budget/continuation:** current outcome **0/2 builds, 0/4 launches, 0/8 local GETs**.
+Limits: 20 minutes/build, 5 minutes/app launch, 15 seconds + 2 seconds cleanup per GET.
+No automatic retries. Historical Studio Mac remains 2 builds/3 launches consumed and
+0/4 real Studio GETs; provider cumulative remains 22 HTTP/16 generations, 18 HTTP/
+4 generations/343 seconds remaining, with real endpoints/generation excluded here.
+Windows original 2-build/2-run allowance is unchanged, not selected for concurrent work.
+No process/request/OS prompt is pending. Next separate approval: certificate setup
+with generic-only public subject, persistent private key outside Git, inspect generated
+certificate/requirement before package/runtime proof. Two different executable builds,
+reopen/update, replace/delete and absence of routine prompts remain unproved.
+
+
+**Step 2 certificate setup — approved, local only:** user approved certificate creation/
+import with generic-only subject and subsequently RSA-4096 (the native assistant did
+not offer RSA-3072). Ten-year validity and no personal certificate fields remain required.
+The native wizard restored a country field despite blank UI; post-creation inspection
+caught this before any signing. Rejected identity SHA-1
+`820B5EF4957F95ECAF8944157E294473C0798401` remains unused in login Keychain pending
+explicit deletion approval. Its country value is intentionally not recorded here.
+
+An explicit generic-CN-only certificate was then generated with the private key held
+in process memory/pipes and imported using native Security APIs into login Keychain,
+with default key access controls. No private key file/export, secret argument, allow-all
+ACL, trust setting or partition-list change. The first scripted attempt stopped before
+import because the extension checker misclassified the extension-section heading;
+correcting that parser and checking the public fixture resolved it. Import then returned
+status 0. Actual persisted public certificate matches the generated DER, subject and
+issuer contain only `CN=Loomlight Local Development`, RSA-4096/SHA-256, validity
+2026-10-08 through 2036-10-08. Only Key Usage (Digital Signature), Extended Key Usage
+(Code Signing) and Subject Key Identifier extensions are present; no country/email/SAN.
+
+Selected public SHA-1: `358372708164C7273A551D746449357C12A3A806`.
+Public SHA-256: `e1ea7fc92dfb99c824b0fdc633bc8cd46e9558fb8f160a4709d04d23a2767d72`.
+Recorded the public pin in `app/src-tauri/macos-signing.json`; private material stays
+outside Git. Ignored receipt/public DER: `.toolchains/reports/macos-identity/`.
+No backup export has been authorized or made; recovery guidance remains in app README.
+
+Read-only `security find-identity -p codesigning` confirms both private-key associations,
+but both report `CSSMERR_TP_NOT_TRUSTED`; valid-only identity count is zero. User/admin
+trust settings are unchanged, with no custom trust settings. This is not a signature
+failure: nothing has yet been signed. Apple's
+[TN2206](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+distinguishes default Keychain DR tracking (self-signed identities supported) from
+trusted-anchor policy, and the signing guide says trust settings are not consulted by
+requirements without `anchor trusted`. Do not infer that adding trust is necessary.
+
+**Next approval:** one signing preflight on an isolated copy of the retained app, one
+attempt/two-minute bound, strict signature/certificate/generated-DR inspection, no
+build/launch/GET, installation, API credential operation or trust change. A native signing
+private-key authorization dialog is possible and distinct from runtime Keychain access.
+Rejected-identity deletion needs explicit permission. Package allowance remains
+**0/2 builds, 0/4 launches, 0/8 local GETs**; no new package has been produced. Step 1
+and certificate-pin/docs changes remain uncommitted/unpublished. Actual new-code runtime
+reuse, update continuity and generated requirement remain unproved.
+
+Step 2 bookkeeping checks: public pin/DER/receipt agree; repository validation PASS
+(391 files); whitespace check PASS. No package or live API-key tests were run.
+
+
+**Approved signing preflight and rejected-identity cleanup:** user approved both after
+Step 2. Exactly one signing attempt ran on an isolated copy at
+`.toolchains/reports/macos-identity/signing-preflight/Loomlight.app`; original retained
+bundle and installed copy remain untouched. No compilation or app launch. User confirmed
+local native authorization for the signing private key; SecurityAgent is inaccessible
+to computer-use tools, so the dialog was not inspected or completed by the agent.
+This signing-key authorization is not runtime API-credential prompt evidence.
+
+Signing exited 0; full preflight took 20.76 seconds (two-minute bound). The initial
+repository verifier rejected the generated DR because it expected `anchor H` but the
+actual requirement is:
+
+```text
+identifier "app.loomlight.desktop" and certificate leaf = H"358372708164c7273a551d746449357c12a3a806"
+```
+
+This binds the identifier and exact selected certificate; no cdhash/identifier-only
+fallback. Keep the rejection result, and obtain explicit approval before changing the
+acceptance rule. Subsequent read-only inspection outside the sandbox confirmed strict
+verification exit 0, valid on disk/satisfies DR, certificate SHA-1 matches the pin,
+Info.plist entries bound, sealed resources and expected names/ID/executable/version.
+Sandboxed display had misleadingly reported unbound Info.plist/unavailable authority;
+host inspection resolved it. A separate certificate-extraction invocation exposed the
+optional-argument syntax requirement: use `--extract-certificates=PREFIX`, not a separate
+argument. The corrected read-only inspection succeeded; no repeat signing occurred.
+Receipts/diagnostics remain in the ignored preflight directory. This is signature proof
+on old app code, not new-code package or remembered-key acceptance.
+
+Cleanup used `security delete-identity` with only the rejected exact fingerprint and
+login Keychain; no trust-removal flag. Before deletion, native metadata obtained its
+associated private-key application label without exporting key bytes. After deletion,
+that private-key query returned `errSecItemNotFound`; rejected certificate/identity
+absent and selected certificate/private-key identity retained. Ignored receipt:
+`.toolchains/reports/macos-identity/rejected-identity-cleanup.json`. User/admin trust
+settings still contain no custom settings. No old API key/profile/cleanup record changed.
+
+**Next step awaiting approval:** correct the verifier to require the observed exact-leaf
+certificate plus unchanged bundle identifier, fix extraction syntax, add focused rejecting
+checks and prepare the existing packaged-app probe for app-owned synthetic loopback
+save/read/reopen/update/replace/delete proof. No new generation feature, helper-created
+credential or real endpoint. This preparation step consumes no package builds, app launches
+or GETs. The full **2 builds/4 launches/8 local GETs** allowance remains available; execution
+still requires the next meaningful-step confirmation. No process or OS dialog is pending.
+
+
+**Step 3 — approved preparation completed locally:** user approved the verifier corrections,
+focused checks and app-owned synthetic test preparation. Ref/worktree inspection retained
+`codex/provider-qualification` at published base `4c0ebbf`; separate planning worktree
+and all unrelated/unpublished work remain untouched. Fresh app task inventory found no
+other active repository writer; no messages/subagents/Actions dispatched.
+
+The bundle gate now requires exactly the observed bundle identifier AND selected leaf
+certificate fingerprint. Rejects anchor alternatives, identifier-only/cdhash rules,
+wrong certificate/name, case drift in the identifier and widened alternatives. Certificate
+extraction uses `--extract-certificates=PREFIX`. The corrected real read-only verifier
+PASSed the already signed preflight copy, with exact pin, strict signature and bound
+metadata; signed executable SHA-256
+`0d8ca042456e425852caee25c62b306c61060c11681fd509670386c7a10f35d7`.
+No second signing attempt or new package was involved. Earlier verifier rejection remains
+in its original receipt rather than being rewritten as a pass.
+
+Prepared `studio_identity_probe.js`, Mac-only Rust `identity_probe.rs` and
+`app/scripts/macos-identity-probe.py` within the existing isolated Studio packaged-probe
+route. Native entry remains the actual secure dialog; no renderer key field or secret IPC.
+Only public disposable alpha/beta fixture inputs are allowed. The app creates entries
+through the production Rust adapter; test-only Rust audit holds owned references in
+memory and verifies replacement/deletion removed retired entries. Historical helper-reuse
+entry is refused during this mode. The runner binds only IPv4 loopback, authenticates
+exact 2/2/4/0 GET schedules without logging headers/secret bytes, and retains failures.
+Four phases: save/repeat, reopen/repeat, signed update/reuse/replace/reuse/delete, final
+reopen of disabled/missing state then disposable profile removal. No generation added.
+
+The runner checks no existing Loomlight process, exact stable bundle/process path/PID,
+strict signature/pin, phase ordering, different executable/version only at update, full
+process exit/cleanup, expected request counts/authentication and exactly one successful
+report. Exclusive attempt markers refuse accidental reruns after ambiguity/failure.
+Native operations and requests retain the agreed bounds. Fixture state/root is created
+only at approved phase-1 execution, never points at the historical Studio recovery root,
+and is retained on failure. No server, socket, app or fixture credential was started here.
+
+**Step 3 focused checks:** desktop **6 PASS**, frontend **100 PASS**, Python package/runner
+policy **7 PASS**, zero selected failures/ignored/skips at completion. Prior focused core
+**15 PASS** remains unchanged (no Step 3 core edit). DOM tests drive all four prepared
+flows through the actual Settings component with fake IPC, and reject a failed second
+discovery despite stale first-success evidence. Python checks reject wrong authentication,
+route/method/excess requests, invalid update transitions and missing/failed prior phases.
+These are preparation checks, not live Keychain/network acceptance. Initial Python test
+fixture lacked codesign's separating newline (6 passed/1 failed); corrected fixture then
+passed. Initial frontend run was 99 passed/1 failed because the DOM emulator did not
+reflect ariaLabel properties into selector attributes; the new probe now locates fields
+by their actual ariaLabel property. Targeted two probe tests and full 100 then passed.
+No real package/native attempt consumed by these harness corrections. Final formatter,
+JavaScript syntax, whitespace and repository validation (396 files) PASS.
+
+**Next proposed Step 4:** one first signed package build, max 20 minutes/no retry, using
+pinned identity and metadata version 0.1.0. Retain the original old bundle before the
+build output is regenerated. New outputs will be
+`.toolchains/releases/identity/0.1.0/Loomlight.app` and `Loomlight.dmg`, with strict bundle
+and mounted-installer-content inspection. Paths are currently absent. No installation,
+app launch or local GET in this step. macOS may request private-signing-key authorization
+again; never change trust or silently fall back. Later installation/phase execution and
+the second 0.1.1 build each need the next meaningful-step confirmation. Proposed stable
+test path `.toolchains/installed/identity/Loomlight.app` and runtime evidence directory
+`.toolchains/reports/macos-identity/runtime` are also absent and not yet authorized for
+execution. Full budget remains **0/2 builds, 0/4 launches, 0/8 local GETs** consumed.
+All changes remain local, uncommitted/unpublished. No pending process/OS dialog.
+
+
+**Step 4 approved — first package attempt:** user approved one first signed build,
+20-minute bound/no retry, with bundle and mounted-DMG inspection only. No installation,
+launch or GET. Preserved original old bundle unchanged at
+`.toolchains/reports/macos-identity/original/Loomlight.app`; executable matches original
+`c5619a9a0049b930d5363cbe9eab5080ec23e9f21bd8487e7977b2015b503b6a`.
+Build/source manifest includes tracked and untracked app inputs in ignored
+`.toolchains/reports/macos-identity/build-1-inputs.json`. Selected pin unchanged;
+no external signing/config overrides at dispatch. Target output is
+`.toolchains/releases/identity/0.1.0/`; one authorized attempt, no fallback/retry.
+
+
+**Step 4 result — first signed package PASS:** the single authorized command exited 0;
+no retry/fallback, install or app launch. Rust release compilation took 20.43 seconds;
+all build/sign/package inspections completed within the 20-minute wrapper deadline.
+Actual outputs are `.toolchains/releases/identity/0.1.0/Loomlight.app` and
+`.toolchains/releases/identity/0.1.0/Loomlight.dmg` (5,954,725 bytes). Version and short
+version are both 0.1.0; bundle/display names Loomlight, executable loomlight, identifier
+app.loomlight.desktop. The extracted app AND installer certificates match selected
+SHA-1 `358372708164C7273A551D746449357C12A3A806`. Strict app and DMG signature checks
+PASS; read-only mounted DMG inspection confirmed the enclosed app matches the verified
+bundle. The mount was detached. Generated designated requirement is unchanged from
+the preflight's identifier plus exact leaf certificate. This is real produced-package
+identity evidence, not just configuration or a unit check.
+
+Executable SHA-256: `974d367531294854e43f88da2b35fdc70c6a9df5641f94ad4f88cdeeb0c92de6`.
+DMG SHA-256: `c4c368e74839422030714c6ccfffb6688c1cb880284413ba575e9d900d253385`.
+Build log and `identity-receipt.json` are in the versioned output directory; final
+public-certificate/Info.plist/input audit is ignored at
+`.toolchains/reports/macos-identity/build-1-final-inspection.json`. All 158 recorded
+tracked/untracked source inputs remained byte-identical across the build. Vite's existing
+large-chunk warning is nonblocking; Tauri explicitly skipped notarization as expected
+for this selected local self-signed route. No Apple distribution trust is claimed.
+
+**Budget:** **1/2 builds, 0/4 launches, 0/8 local GETs** consumed. One build/four launches/
+eight GETs remain. Original old bundle, installed Applications copy, helper key and
+historical owned cleanup are preserved. No live API credential operation, runtime
+acceptance, process or OS dialog is pending; all repository changes remain local-only.
+
+**Next proposed Step 5:** obtain approval to place the verified first package at stable
+test installation path `.toolchains/installed/identity/Loomlight.app`, verify the copy,
+and run prepared phases 1 and 2 with a fresh disposable root. Two packaged launches,
+five minutes each/no retry, four local authenticated GETs total. Enter only the public
+synthetic alpha input once through native secure entry; app creates and reads its own
+item. Fully exit and reopen the same signed path with no re-entry. Automation owns the
+checks; user intervention only for protected OS dialogs if unavoidable. Phase-1 runtime
+evidence directory `.toolchains/reports/macos-identity/runtime` must be absent. No real
+endpoint/key, helper import, lock/trust change, update build or existing cleanup deletion
+is authorized by this proposal until confirmed. Later 0.1.1 build and update proof remain.
+
+
+**Step 5 approved — installation and initial save/reopen:** user approved stable test
+installation plus phases 1–2, two launches/four loopback GETs, five minutes each/no retry.
+Installed verified 0.1.0 copy at `.toolchains/installed/identity/Loomlight.app`; signature,
+requirement and executable match build receipt. Native read-only status confirmed login
+Keychain unlocked before testing. No Keychain setting changed. Ignored installation
+receipt: `.toolchains/reports/macos-identity/test-installation.json`.
+
+Phase 1 PASS: PID 31151, 12.508 seconds, exit 0/cleanup complete. Actual native secure
+entry received only the documented disposable alpha input via UI automation. App-owned
+save, two explicit repeated reads, native audit and two authenticated loopback GETs PASS.
+Process-reported executable path/PID matches inspected installed copy. Profile metadata
+confirms service `app.loomlight`, one configured profile and zero cleanup references.
+No runtime password/Touch ID authorization interaction was needed; UI observation saw
+only the app's secure entry dialog and Loomlight menu. App then exited before the final
+UI snapshot, which reported app quit; runner confirms successful full exit rather than
+an app failure. No extra launch was made to inspect it. Phase 2 is the next already
+approved launch. Cumulative **1/2 builds, 1/4 launches, 2/8 local GETs**.
+
+
+**Step 5 result — save and full quit/reopen PASS:** phase 2 PID 31244 (different process),
+2.638 seconds, exit 0/cleanup complete, same exact verified executable/path and signing
+requirement. No native re-entry, password/Touch ID interaction or manual recovery.
+Repeated production native reads and two further authenticated loopback GETs PASS;
+earlier discovery readiness correctly did not persist across processes. Across phases
+1–2: four accepted authenticated GETs total, no real endpoint/generation. Native entry
+was performed once (phase 1) with only the public synthetic alpha input. App-created
+credential service is `app.loomlight`. Final read-only check confirmed profile metadata
+unchanged by reopen, one active profile, zero cleanup, login Keychain still unlocked and
+no remaining Loomlight process. No trust/lock/ACL changes, no helper credential import.
+
+Exact runtime evidence is ignored under `.toolchains/reports/macos-identity/runtime/`:
+`phase-1.json`, `phase-2.json`, attempt/launch/log records, `state.json` with the retained
+root/port, and `save-reopen-receipt.json`. Keep the active synthetic credential/profile
+for update proof; do not clean it up early. Historical disabled profile/owned-cleanup
+record stays separate and untouched. Menu observation during native entry showed
+Loomlight; produced names and actual launched path remain consistent.
+
+**Budget/next decision:** **1/2 builds, 2/4 launches, 4/8 local GETs** consumed.
+One build/two launches/four GETs remain. Proposed Step 6: one second signed build,
+metadata 0.1.1, `.toolchains/releases/identity/0.1.1/Loomlight.app` and `Loomlight.dmg`,
+20-minute bound/no retry. Inspect both packages and compare against 0.1.0: same selected
+certificate/DR/names, different executable and version. Do not replace the installed test
+copy or launch during Step 6. A subsequent explicit step must approve replacement at
+the same test path and phases 3–4 for unchanged-key reuse, beta replacement/old-key
+absence, deletion/final reopen. No pending process/OS dialog; no push/merge/release.
+
+
+**Step 6 approved — second build dispatched once:** user approved one 0.1.1 build,
+20-minute bound/no retry, app/DMG inspection and comparison only. Same 158 recorded
+source inputs as build 1; only Tauri's explicit version metadata override differs.
+Retained installed executable and profile-metadata digests are in ignored
+`.toolchains/reports/macos-identity/build-2-inputs.json`. No signing/config override
+present, selected certificate pin unchanged, output directory absent before dispatch.
+Target `.toolchains/releases/identity/0.1.1/`; installation/profile/key not changed.
+Build allowance now **2/2 dispatched**, runtime remains **2/4 launches, 4/8 local GETs**.
+No retry, installation/update or launch is authorized by this step.
+
+
+**Step 6 result — second signed package/comparison PASS:** single command exited 0,
+no retry/fallback. Rust release compilation took 15.43 seconds; complete signing/package
+inspection stayed within the 20-minute deadline. Actual 0.1.1 outputs are
+`.toolchains/releases/identity/0.1.1/Loomlight.app` and `Loomlight.dmg` (5,954,736 bytes).
+Strict signatures and mounted-installer app comparison PASS; mount detached. Extracted
+app/DMG certificates match selected pin. Actual Info.plist names/identifier/executable
+remain permanent, both version fields are 0.1.1. Designated requirement is identical
+to 0.1.0 (bundle identifier AND exact selected leaf certificate).
+
+0.1.1 executable SHA-256: `26ab79916034fce44a3462d4b103f911270edeec7f3e1e78eeaadd71a46debe5`.
+0.1.1 DMG SHA-256: `9563ac037bd43e4fd9eb16586da9ed70bd19f2cc70e9313de27c32d090d59e67`.
+The executable differs from 0.1.0's
+`974d367531294854e43f88da2b35fdc70c6a9df5641f94ad4f88cdeeb0c92de6`.
+All 158 source inputs stayed unchanged. Explicit Tauri version metadata override is the
+selected build difference. Read-only comparison verified installed 0.1.0 executable and
+retained synthetic profile metadata unchanged. Comparison receipt:
+`.toolchains/reports/macos-identity/build-2-comparison.json`; build log and identity receipt
+in the 0.1.1 output directory. No installation/update, app launch or credential read was
+performed during Step 6. Local self-signed/non-notarized distribution limit unchanged.
+
+**Budget/next approval:** **2/2 builds, 2/4 launches, 4/8 local GETs** consumed; no build
+allowance remains. Proposed Step 7: replace only the test installation at
+`.toolchains/installed/identity/Loomlight.app` with verified 0.1.1, retaining the prior
+copy for rollback; no re-signing or key/profile edits during replacement. Run phases 3–4
+once each, five minutes/launch/no retry, four loopback GETs total. First prove retained
+alpha authentication after the update with no re-entry; then native beta replacement,
+old-entry absence, beta authentication, deletion; final process confirms deletion and
+removes the disposable profile. Exact fixture state/root/port remains the existing runtime
+`state.json`. No real keys/endpoints, historical cleanup, trust/lock/ACL changes or builds.
+No process/OS dialog pending. Await this meaningful-step approval in the same chat.
+
+
+**Step 7 approved — update reuse FAILED; allowance exhausted:** replaced only the
+stable test installation with verified 0.1.1, retaining 0.1.0 at
+`.toolchains/installed/identity/previous/Loomlight.app`. Strict signatures and unchanged
+profile metadata were verified; no re-signing or key edits. Update receipt:
+`.toolchains/reports/macos-identity/test-update.json`. Phase 3 ran once, PID 32709,
+3.005 seconds, exit 1: `Remembered native read 1`. It stopped before authentication,
+replacement or deletion, with zero GETs and complete process exit. Phase 4 did not run.
+The report omitted the returned safe credential error/OS status, so it does not establish
+that status. This is a genuine failed update proof, not a timeout or signing failure.
+
+A UI inspection raced the completed run and inadvertently relaunched the app normally.
+This agent error consumed the fourth launch; it was disclosed and the app quit normally.
+No project, credential entry or GET was performed in that extra launch. Exact failure
+receipts are in `.toolchains/reports/macos-identity/runtime/phase-3.json` and
+`update-failure-state.json`. Final allowance: **2/2 builds, 4/4 launches, 4/8 local GETs**.
+No retries, builds or launches remain. Four local GETs remain but cannot be exercised
+without a newly approved launch. No process/request/OS prompt is pending. The synthetic
+alpha item/profile is retained, one active profile and zero new cleanup references;
+metadata unchanged, login Keychain unlocked. Historical cleanup is untouched.
+
+**Read-only diagnosis — separate build-bound Keychain partition:** exact synthetic-item
+metadata inspection used native APIs with NULL password output, without reading secret
+data or changing ACLs/settings. It found one trusted application for secret access and
+partition `cdhash:6d89dc5d3741bf95b81dee577888225ce1ebeb23`. That matches creating 0.1.0;
+updated 0.1.1 has CDHash `fa43780e61cdef5a2ba6dc399ccff1c8c490b97f`. Both still have the
+same approved certificate and exact designated requirement. Receipts:
+`runtime/owned-acl-metadata.json` and `runtime/partition-comparison.json` under the
+identity reports directory. This mismatch is strong evidence explaining the failed
+read; the runtime report itself did not capture the precise OS denial status.
+
+[Apple securityd source](https://github.com/apple-oss-distributions/Security/blob/main/securityd/src/clientid.cpp)
+assigns recognized Apple development/distribution identities a team partition, while
+other signed code falls back to its CDHash. Thus a persistent self-signed certificate
+and stable designated requirement alone do not establish update continuity for this
+observed Keychain path. Adding local root trust would not satisfy the Apple certificate
+chain requirement. Earlier generalized self-signed Keychain guidance is insufficient;
+README/ADR are corrected without changing the approved pin or policy. No ACL workaround
+or trust change is selected.
+
+One earlier metadata-script request was rejected by automatic approval review because
+it included a temporary Keychain interaction setting. That script did not execute.
+The successful replacement used only metadata reads and no settings calls.
+
+**Next decision:** no additional build/launch allowance requested yet. First select a
+supported signing route after bounded read-only research of Apple-issued development
+identity availability, privacy and cost constraints. No purchase is required or approved;
+no certificate/account/trust/install changes are authorized. Repeating the same self-signed
+packages is not a justified experiment. A concrete changed route needs an explicit
+implementation/migration decision and a new finite proof allowance. Preserve both
+packages, installed failed candidate and retained synthetic key; do not silently roll
+back, delete or reset attempt markers. All work remains local/uncommitted/unpublished.
+
+
+**Research-only continuation approved — 2026-10-08:** user approved investigation of
+supported signing options, privacy and free development signing. No new implementation,
+account/certificate/trust/installation changes, build, app launch or loopback request.
+Only Command Line Tools are selected; no Xcode bundle was found at its standard path
+or in Spotlight's bundle-identifier search. No account was opened or queried.
+
+**Supported candidate, not a qualification claim:** Apple Development via a free
+Personal Team is a credible next local-development signing route. Apple's
+[WWDR certificate policy, section 4.2](https://images.apple.com/certificateauthority/pdf/Apple_WWDR_CPS_v1.32.pdf)
+permits issuing Apple Development certificates to a valid Apple Account without paid
+program membership. The [Xcode workflow](https://help.apple.com/xcode/mac/current/en.lproj/dev60b6fbbc7.html)
+provides Personal Teams; [Tauri's guidance](https://v2.tauri.app/distribute/sign/macos/)
+explicitly supports free accounts for testing/development, without notarization.
+The prior securityd source analysis supplies the reason to test this different route:
+an eligible Apple development chain can receive a stable team partition instead of the
+self-signed CDHash fallback. Actual certificate eligibility, designated requirement,
+new app-owned item partition and cross-build reuse must still be inspected locally.
+No local Apple-issued identity has been created or qualified.
+
+**Provisioning nuance:** Apple's [account overview](https://developer.apple.com/help/account/basics/about-your-developer-account/)
+lists seven-day free provisioning limits. However,
+[TN3125](https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles)
+says Mac apps without restricted entitlements need no provisioning profile. Read-only
+inspection of produced 0.1.1 found no entitlements and no embedded profile; current
+native code uses the existing login-Keychain path, not a new access group. Therefore do
+not incorrectly promise or impose a seven-day app lifetime here. The actual development
+certificate's expiry/renewal still needs inspection; no indefinite-use guarantee.
+Do not add entitlements/profiles or change secret storage just to adopt this route.
+
+**Privacy decision required before setup:** unlike the approved generic-only self-signed
+identity, Apple development certificates identify a developer. Apple's
+[certificate overview](https://developer.apple.com/help/account/certificates/certificates-overview/)
+and [DTS clarification](https://developer.apple.com/forums/thread/824806) distinguish
+the personal development name/member identifier from the Team ID in subject OU.
+Apple's published subject examples also contain an organization/personal name and
+country. Expect these identifying fields to be visible to anyone possessing the signed
+package: [TN3161](https://developer.apple.com/documentation/technotes/tn3161-inside-code-signing-certificates)
+explains that its public certificate chain is embedded and extractable. A portal's
+computer-name label is not evidence that the hostname is embedded. Inspect all issued
+subject/extension fields before signing; do not promise absent email/location fields
+without that inspection. Do not print/store personal values in Git or routine logs.
+A generic CSR or Keychain label cannot be assumed to anonymize Apple-issued credentials.
+No anonymous supported route meeting every current constraint was established.
+
+**Distribution alternative:** Developer ID plus notarization is for external Mac
+software distribution, not required for this local experiment. Apple's
+[enrollment page](https://developer.apple.com/programs/enroll/) lists USD 99/year with
+regional pricing; [Developer ID](https://developer.apple.com/developer-id/) requires
+program membership. No purchase/enrollment/notarization is selected. Neither a
+Developer ID certificate nor a development certificate should be represented as anonymous.
+
+**Next approval and bounded estimate:** user must first decide whether the identifying
+Apple-issued certificate is acceptable. If yes, separately approve Xcode installation,
+local Apple Account sign-in and creation/import of one Apple Development identity;
+inspect public fields, validity and chain before approving its use or changing the pin.
+Human interaction may be needed for account sign-in/2FA, installation and signing-key
+authorization; passwords stay in native UI. This setup uses zero Loomlight builds,
+launches or local GETs. No trust override is proposed.
+
+After a suitable identity exists, propose repository verifier/pin changes and focused
+checks as a separate approved step. The existing two differently built executables can
+be copied and re-signed/repackaged, avoiding recompilation if runtime inputs stay
+unchanged. Planning ceiling: **two signing/package operations, four launches and eight
+local GETs total (four additional GETs beyond the four remaining)**, no retries; this is
+an estimate, not renewed authorization. Use fresh output/fixture state, preserve failed
+self-signed evidence, and first check the newly app-created item's team partition before
+spending update launch budget. An unsuitable identity/partition stops the experiment.
+Any runtime code correction would instead require a separately approved compilation
+budget. Old self-signed/ad-hoc keys will not automatically transfer to a new identity;
+plan explicit native re-entry, preserve old references and owned cleanup, and never
+claim an automatic migration. App name, bundle ID and `app.loomlight` service stay fixed.
+
+Research consumed **0 builds, 0 launches, 0 local GETs**; cumulative **2/2, 4/4, 4/8**
+unchanged. No OS operation/prompt pending. Outcome remains unqualified across updates;
+await privacy/signing-route decision in this chat. All work local/uncommitted/unpublished.
+
+
+**Comparable-app check requested by user:** Keychain itself is a conventional choice,
+not evidence of an unsuitable architecture. [Zed's provider documentation](https://zed.dev/docs/ai/use-a-gateway)
+stores API keys in the system keychain; its [Mac packaging source](https://github.com/zed-industries/zed/blob/main/script/bundle-mac)
+uses a named Apple signing team and notarization for its signed distribution path.
+[VS Code](https://code.visualstudio.com/docs/configure/settings-sync#_troubleshooting-keychain-issues)
+uses Electron safeStorage for persisted authentication. [Electron](https://www.electronjs.org/docs/latest/api/safe-storage)
+stores the encryption key in macOS Keychain and explicitly warns that inconsistent app
+signing can cause prompts on updates. That encrypted-file pattern still depends on
+Keychain identity; it is not a reason to add a new vault to Loomlight.
+The mistaken assumption was that persistent self-signing alone satisfied every Keychain
+access check. This comparison supports retaining OS-managed storage while reassessing
+signing and the exact native path, not claiming Apple-account setup is already approved
+or that another wrapper would remove signing constraints. No implementation/OS changes
+or allowance consumption. Privacy/signing-route decision remains pending.
+
+
+**User-authorized research subagent:** explicitly requested GPT-6 Luna at high reasoning
+for deep online research of Apple development signing. Spawned one research-only agent,
+`development_signing_research`, in this same chat/outcome. Scope: primary-source proof
+of free Apple Development eligibility, classic-Keychain team partition/update continuity,
+certificate privacy and renewal, profile-expiry distinctions, official setup and smallest
+local experiment. No nested agents, repository edits, account/certificate/trust changes,
+signing/builds/launches or Actions authorized. Prior no-subagent constraint is relaxed
+only for this explicit research request. Runtime budgets unchanged; report pending.
+
+
+**Luna/high research complete:** the authorized research-only subagent independently
+supports free Apple Development as the next credible signing experiment. The specific
+connection is now verified: Apple's WWDR CPS section 4.11.23 assigns unified Apple
+Development certificates the Mac development leaf OID `1.2.840.113635.100.6.1.12`.
+Together with a valid Apple anchor and recognized WWDR intermediate, this matches
+securityd's development classifier, which uses subject OU/Team ID for its partition.
+This is materially different from the observed self-signed CDHash fallback. Public
+sources linked above support free issuance through Xcode, no-profile Mac eligibility
+and identifying certificate fields; none proves this app's runtime success yet.
+
+Parent review also checked [TN3127](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements):
+its Xcode Apple Development DR binds the app identifier, Apple anchor, WWDR issuer
+marker and leaf common name. Do not conflate a stable team partition with all other
+identity checks. Actual codesign/Tauri-generated requirements must be inspected and
+both bundles checked against each other's DR; renewal must also preserve whatever
+fields the actual recorded requirement requires. The documented development example
+is not pinned to a single leaf hash, but this is not a blanket renewal guarantee.
+No source established the actual lifetime of a newly issued free development leaf;
+inspect NotAfter instead of borrowing the seven-day provisioning-profile limit.
+
+Smallest first proof after separately approved setup/policy changes: two disposable
+copies of the already differently built apps, two re-sign operations, two launches,
+one app-owned synthetic save/read followed by changed-build read (2+2 local GETs using
+the four remaining). Inspect the created item partition before the second launch.
+No new compilation, real-key access, item ACL rewrite, or reset of old attempt records.
+This isolates the failed update hypothesis early; the complete reopen/replace/delete
+acceptance still needs the later bounded continuation already described, and should
+reuse the successful new fixture/evidence rather than restarting proof. Preparation
+must explicitly adapt the existing four-phase runner before selecting a different
+schedule; never bypass its phase/attempt guards by editing evidence. All these are
+proposals, not renewed allowance or signing approval.
+
+The subagent's suggestion that older items might need first authorization does not
+select an ACL refresh workaround. Preserve older signing ownership and explain native
+re-entry separately before any real-key migration. No reason established to replace
+Keychain or change APIs solely for this partition issue. No Apple-account setup,
+purchase, certificate/OS changes, packaging or runtime tests occurred. Cumulative
+allowance remains 2/2 builds, 4/4 launches, 4/8 local GETs; no research agent remains
+working. Next decision: accept or reject identifying Apple Development certificate
+fields, then separately approve concrete Xcode/certificate setup if selected.
+
+
+**Same-agent alternative research explicitly approved:** user requested the same
+Luna/high agent investigate a different way. Continued `development_signing_research`
+with online-only scope: alternatives to identifying Apple-issued development signing,
+including Data Protection Keychain requirements, secure self-signed/CA requirements,
+OS credential services and common local-app approaches. Must distinguish compliant
+routes from solutions that merely move identity checks or violate no-new-vault/no-ACL-
+weakening/native-Rust constraints. No new agent, repo edits by the agent, implementation,
+certificate/trust/install changes or runtime budget. Findings pending; previous proposed
+Apple Development setup is not selected or approved.
+
+
+**Same-agent alternative research completed:** Luna/high found no documented drop-in
+self-signed route satisfying every current requirement; this is a bounded research
+finding, not a proof of universal impossibility. Classic securityd partition selection
+still falls back to CDHash for non-recognized signing chains even when the designated
+requirement is certificate-backed. No supported custom-DR or self-signed-CA change was
+found that changes this classification without altering access restrictions.
+
+The modern backend is not an established escape hatch:
+[Apple TN3137](https://developer.apple.com/documentation/technotes/tn3137-on-mac-keychains)
+ties Data Protection Keychain groups to code-signing entitlements;
+[TN3125](https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles)
+requires profile authorization for Keychain access groups. The
+[macOS app-group documentation](https://developer.apple.com/documentation/xcode/accessing-app-group-containers)
+explicitly excludes Keychain Access Groups from the unprovisioned team-prefixed group
+form. Parent checked that exclusion. A backend switch would also require migration,
+not repair the existing classic item partition.
+
+Strongest genuinely different proposal: an unchanged, narrowly scoped Rust helper
+owns future classic-Keychain items and serves the changing app over authenticated IPC.
+[Apple's XPC requirement API](https://developer.apple.com/documentation/foundation/nsxpcconnection/setcodesigningrequirement(_:))
+provides peer signature enforcement (parent verified documentation); that API's existence
+is not proof of this overall design. Bind clients to approved certificate and app ID,
+not identifier alone. Helper cdhash remaining unchanged could preserve its own item
+partition, but this is untested and later helper updates can recreate the same problem.
+It adds a security-critical process/protocol, packaging/lifecycle and migration burden.
+Existing app-owned items do not automatically become helper-owned; preserve all old
+references and cleanup. This is not the previously failed cross-helper import test,
+but would require separately approved synthetic app/helper-owned proof and broader
+architecture scope. It is not recommended as a small fix or authorized for implementation.
+
+Per-build OS reauthorization relaxes the no-routine-prompts outcome and is not a passing
+solution. Encrypted files still need key protection and would add the excluded vault;
+plaintext/shared-Apple-tool/allow-all access is not selected. No basis to promise that
+another wrapper removes OS identity checks. Straightforward candidate remains free
+Apple Development signing, subject to user privacy acceptance and actual qualification;
+if that is unacceptable, reassess constraints or explicitly select the larger helper
+experiment instead of silently redesigning. No cert/OS/app changes or allowance used;
+research agent finished. Same chat/outcome remains pending user decision.
+
+
+**User deferral — 2026-10-08:** user explicitly requested saving the Apple Development
+route as deferred and opening a separate chat to explore other options. The stable Mac
+identity/remembered-key outcome is deferred, not complete or accepted. Free Apple
+Development setup/qualification remains a saved candidate only: full Xcode and account
+sign-in, explicit acceptance/inspection of identifying public certificate fields, one
+certificate creation/import, approved signing-policy changes, then synthetic app-owned
+proof. No setup or test authorization is implied by deferral. First proposed proof can
+reuse two differently built binaries with two re-sign operations/two launches and four
+remaining local GETs; further reopen/replace/delete and any migration need their own
+approved continuation. Preserve all failed evidence and owned cleanup.
+
+The requested new chat is research/discussion only, with no repository writes, runtime
+or OS changes, subagents, Actions, push/merge/release or spending of the existing budget.
+It may compare alternatives and identify required constraint changes, but must not
+silently relax them or resume this implementation. This explicit new-chat request
+supersedes the earlier same-chat preference only for the separate options exploration.
+All implementation stays local/uncommitted/unpublished on codex/provider-qualification.
+Allowance remains 2/2 builds, 4/4 launches, 4/8 local GETs consumed. No operation pending.
+
+Separate read-only options chat created: `01a1199f-851f-7451-a89f-58343cbf5bd8`
+(Explore Loomlight credential-storage alternatives), local existing project checkout.
+It has no implementation or runtime authorization.
+
+### Mac development file-storage plan — 2026-10-08
+
+In the separate options chat, the user deferred all Apple Keychain API-key work,
+rejected routine re-entry/Electron suggestions, selected a Mac development compromise
+of encrypted files plus a locally persisted unencrypted unlock key, and accepted
+that software running under the same login can potentially decrypt the credentials.
+The user required clear errors and native re-entry after storage failures, then
+requested a Markdown plan, an agent prompt and an omission/assumption review.
+
+Created the [development storage plan](2026-10-08-macos-development-credential-storage.md)
+and [agent prompt](2026-10-08-macos-development-credential-storage-agent-prompt.md).
+This new planning/documentation authorization supersedes the options chat's earlier
+no-repository-write constraint for these records and minimal live routing updates.
+The no-new-vault restriction is relaxed only for the selected temporary Mac backend;
+Keychain/signing candidates remain deferred. No code, credentials, certificates,
+packages, OS state, signing policy or test allowances changed. No subagent used.
+
+Self-review found and addressed generation-pointer transaction/ownership, legacy
+cleanup routing, ambiguous save versus cleanup failure, native retained-input retry,
+strict schema/downgrade limits, unimplemented session behavior, reinstall/backup limits
+and signing-key-access assumptions. Plan section 12 records the corrections.
+
+Entry/final branch remains `codex/provider-qualification`, base `4c0ebbf`, with
+substantial prior dirty/unpublished implementation preserved. The separate planning
+worktree is untouched. Docs are local/uncommitted; no push, Actions, merge or release.
+Runtime budget remains 2/2 builds, 4/4 launches, 4/8 local GETs consumed; no process or
+OS prompt pending. Source implementation is selected only when the user supplies the
+prompt; native tests require a fresh explicit allowance, not the remaining GETs.
+
+Planning verification: repository structural/privacy/link validator **PASS (398 files)**;
+`git diff --check` **PASS**. Agent prompt **3,269 characters**, below the 4,000-character
+transfer-prompt cap, with machine/test-host/reason and authorization limits preserved.
+No code/native tests selected for this docs-only change. HANDOVER intentionally retains
+its longer deferred recovery record; this planning scope does not discard unique
+failed-package/fixture/owned-cleanup state. Next action: deliver plan/prompt, then the
+user's implementation agent continues from fresh state within their selected scope.
+
+### Mac development file-storage implementation — 2026-10-08
+
+User supplied the selected implementation prompt. Source/doc work, focused synthetic
+file tests and self-review are authorized; packaging/signing, application launches,
+installation, native qualification, publication and subagents are excluded. Native
+proof must use this Mac's actual packaged app after a separate concrete allowance.
+Session escape remains deferred. Keychain API-key calls and Apple Development work
+remain deferred; existing service/product/bundle/signing ownership is unchanged.
+
+Entry: actual checkout `codex/provider-qualification`, published base `4c0ebbf`;
+prior dirty/unpublished signing, native, UI and documentation changes preserved.
+Separate planning worktree remains `codex/phase-2-3-planning`, two commits ahead and
+clean. Existing stash/branches untouched; no attached managed worktree. Remote refs
+and open-PR inspection failed because the sandbox could not resolve GitHub; cached
+refs are observations only. No reset, branch creation or second writer.
+
+Implementation design: version-2 profiles only when file storage is selected;
+version-1 native data remains byte-compatible and reads/default service unchanged.
+Durable generation ownership and active selection share the profile transaction.
+Retain abandoned/recovery generations rather than sweeping directories. Pinned
+RustCrypto XChaCha20-Poly1305 0.10.1 (Apache-2.0/MIT), OS randomness and best-effort
+zeroization address the missing authenticated-file-store seam; toolchain is Rust 1.90.
+[Library guidance](https://docs.rs/chacha20poly1305/0.10.1/chacha20poly1305/)
+defines 256-bit keys, 192-bit nonces and associated-data authentication. Offline
+resolution failed because this crate was not cached (environment limitation, no
+product failure); bounded dependency resolution requested through sandbox review.
+No API secrets or native store operations used.
+
+Work in progress; final focused counts, source self-review, fixture and native
+allowance proposal follow here before handoff. Old identity allowance remains
+2/2 builds, 4/4 launches, 4/8 GETs consumed; none are transferred.
+
+Focused implementation progression (source/synthetic only): initial core selector
+ran **24**, **23 PASS / 1 FAIL**. Failure was a harness version mismatch: the existing
+“future schema” fixture still selected 2, which this implementation supports; changed
+the refusing fixture to 3. Added explicit version-1 byte/digest and version-2 ownership
+fixtures. Next core progression **27 PASS**, then **28 PASS**, zero ignored/skipped,
+245 unrelated filtered. Desktop initially **6 PASS**; added retained-entry channel/service
+integration then encountered a test-channel inference error (harness compilation),
+fixed its explicit result type; **7 PASS** thereafter. This tests the production channel
+handler and actual profile/file service with injected entry events, not AppKit behavior.
+
+Frontend baseline **100 PASS**. Added recovery/deferred-cleanup/saved-status tests:
+first new compilation rejected two strict array indexes (harness typing, corrected);
+next **101 PASS / 1 FAIL** of 102. Failure was a DOM fixture selector using an ARIA
+property as an attribute in the test environment; corrected to the actual field ID.
+No production behavior was changed to hide these harness failures. Final coherent
+counts will be recorded after self-review. Repository validator **400 files PASS**
+at the intermediate source checkpoint. All historical failures remain above/in their
+original ledger sections. No package, signing, app launch, installation or GET used.
+
+
+### Preserved deferred identity recovery record — 2026-10-08
+
+Moved from the prior live HANDOVER (content preserved; relative links adjusted) during the selected file-store source
+implementation. This is historical/deferred recovery evidence, not an active execution
+authorization. New continuation is in HANDOVER and the development implementation ledger.
+
+#### Deferred: stable macOS identity and remembered AI keys
+
+**State:** user explicitly deferred implementation and the Apple Development candidate
+on 2026-10-08, and requested a separate read-only options chat. This outcome is not
+complete or accepted. Preserve local work, packages, signing identity and owned state.
+
+**Deferred outcome:** enter a key once and reuse
+it under normal unlocked-login conditions across reads, quit/reopen and updates signed
+with the established identity. Test host is this Mac's packaged app. Native entry and
+Rust-only secrets remain. Real endpoints, generation, new vaults/plaintext fallback,
+global trust weakening, subagents, Actions, push, merge and release are excluded.
+
+**Continuation/ownership:** local `codex/provider-qualification`, published base
+`4c0ebbf1ce08fc1a1bbded74b0651311fce27d22`. Steps 1–3 changes are **local, uncommitted and
+unpublished**. No matching open PR at fresh entry inspection. Preserve separate planning
+worktree/two unpublished commits, historical branches and stash. No second writer was
+active at the most recent app inventory; recheck on continuation, without dispatching
+another agent or resetting to a historical checkpoint. Remote main at entry was
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`.
+
+**Approvals:** user approved Step 1 repository changes and focused checks, plus a new
+allowance of 2 builds/4 app launches/8 loopback-only authenticated GETs. Each meaningful
+implementation/test step needs explanation and confirmation. Step 2 certificate creation/import was separately approved, including RSA-4096.
+One signing preflight, rejected-identity cleanup and Step 3 verifier/probe preparation
+were also approved and completed.
+Steps 4–7 builds, test installation and update proof were subsequently approved.
+Trust changes and further installation remain unapproved. Exact chosen new service is
+`app.loomlight`; retain current product/Finder/menu `Loomlight`, `Loomlight.app`,
+`Loomlight.dmg`, executable `loomlight` and bundle ID `app.loomlight.desktop`. Versions
+belong in metadata/output directories. The selected certificate has generic common
+name `Loomlight Local Development` only, without personal name/email/organization/location/
+username/hostname or identifying extensions. Public cryptographic metadata correlates
+builds; no private key/export password may be printed or committed.
+
+**Implemented locally:** optional fixed service enum defaults existing active/cleanup
+references to `app.loomlight.desktop.ai.v1`, preserving their serialized form. New Mac
+entries/replacements target `app.loomlight`; no live keys or records have been migrated.
+Durable ownership, replacement-before-retirement, disable-before-delete and cleanup
+retention remain. Settings exposes fixed access errors; process-local scoped Keychain
+UI suppression avoids authorization waits without changing item ACLs or system settings.
+Effective Tauri configuration checks prevent name/ID drift and require a selected matching
+certificate fingerprint for Mac release builds. The local package route verifies actual
+bundle signature, certificate and requirement and inspects the DMG contents; it never
+installs or silently falls back to ad-hoc. Unconfigured Mac package CI now fails closed;
+no CI is selected. Windows native seam and package behavior remain unchanged.
+
+**Evidence:** focused core **15 PASS** (245 unrelated filtered; unchanged Step 1 evidence),
+desktop **6 PASS**, frontend **100 PASS**, Python package/runner **7 PASS**. No selected
+ignored/skipped cases. Formatter, JS syntax, whitespace and validator (396 files) PASS.
+New DOM tests exercise all four prepared flows through actual Settings with fake IPC;
+rejecting checks cover stale discovery success, wrong auth/routes/counts and invalid
+signed-update transitions. These do not prove live Keychain or packaged behavior.
+Earlier failed harness checks and corrections are preserved in the
+[owning identity ledger](phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08).
+
+**Produced packages:** both signed app/DMG pairs PASS, with actual metadata, strict
+signatures, extracted app/DMG certificates and read-only mounted contents verified:
+`.toolchains/releases/identity/0.1.0/` and `.toolchains/releases/identity/0.1.1/`, each
+containing `Loomlight.app`, `Loomlight.dmg`, build log and `identity-receipt.json`.
+Same approved pin/DR/names; versions and executables differ. Executable SHA-256:
+0.1.0 `974d367531294854e43f88da2b35fdc70c6a9df5641f94ad4f88cdeeb0c92de6`;
+0.1.1 `26ab79916034fce44a3462d4b103f911270edeec7f3e1e78eeaadd71a46debe5`.
+Latest DMG SHA-256 `9563ac037bd43e4fd9eb16586da9ed70bd19f2cc70e9313de27c32d090d59e67`.
+All 158 source inputs unchanged; explicit version override was the build difference.
+Installed test copy is now 0.1.1; previous 0.1.0 is retained at
+`.toolchains/installed/identity/previous/Loomlight.app`. Synthetic metadata is unchanged.
+Comparison receipt: `.toolchains/reports/macos-identity/build-2-comparison.json`.
+Builds used no runtime launch/GET; local signing is not notarized distribution.
+
+**Recovery:** original old bundle preserved unchanged at
+`.toolchains/reports/macos-identity/original/Loomlight.app`, executable SHA-256
+`c5619a9a0049b930d5363cbe9eab5080ec23e9f21bd8487e7977b2015b503b6a`.
+The normal build-output directory now contains the new signed package. The installed
+Applications copy is different, ad-hoc and untouched.
+App-owned synthetic reopen/read previously passed; helper-owned access failed twice.
+The [historical Mac ledger](phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
+retains exact failures and 97-input manifest. Original helper key and evidence untouched.
+One disabled disposable profile/one owned cleanup reference remains at the root recorded
+in ignored `.toolchains/reports/studio-settings/mac-native-state.json`. Preserve its
+pre-cleanup record and `owned-cleanup-receipt.json`; removal remains unconfirmed. Do not
+reuse the cross-helper import for the new proof or discard old cleanup ownership.
+
+**Budgets/pending:** new outcome **2/2 builds, 4/4 app launches, 4/8 local GETs** consumed;
+20 minutes/build, 5 minutes/launch, 15 seconds + 2 seconds cleanup/GET, no automatic retry.
+Historical Studio Mac remains 2 builds/3 launches consumed with zero allowance remaining;
+Windows still has its original 2 builds/2 native runs, not concurrent work. Historical
+real Studio GETs remain 0/4; provider totals 22 HTTP/16 generations consumed, 18 HTTP/
+4 generations/343 seconds remaining. No live API-credential access/change, trust change, installation, app process,
+HTTP request or OS dialog is pending.
+
+**Certificate setup:** selected login-Keychain identity has generic common name only
+in subject and issuer, RSA-4096/SHA-256, validity 2026-10-08 through 2036-10-08.
+Public SHA-1 `358372708164C7273A551D746449357C12A3A806` is pinned in
+`app/src-tauri/macos-signing.json`; no private material is in Git or a disk export.
+Public DER/import receipt is ignored at `.toolchains/reports/macos-identity/`.
+The selected identity/private-key association persists without adding trust. Self-signed
+trust diagnostics are not runtime failure evidence. Rejected country-bearing identity
+and private key were deleted with approval; cleanup receipt is ignored at
+`.toolchains/reports/macos-identity/rejected-identity-cleanup.json`. No API credentials
+or historical cleanup records were changed by certificate setup.
+
+**Established requirement:** `identifier "app.loomlight.desktop" and certificate leaf = H"358372708164c7273a551d746449357c12a3a806"`.
+One approved old-code signing preflight passed strict verification after native signing-key
+authorization. Step 3 corrected the verifier to the actual exact-leaf requirement and
+certificate-extraction syntax; earlier rejected receipt remains in
+`.toolchains/reports/macos-identity/signing-preflight/`. No repeat signing preflight or
+trust change. Full setup failures/corrections and sources are in the owning ledger.
+
+**Prepared proof:** `app/scripts/macos-identity-probe.py` uses existing isolated Studio
+mode, `studio_identity_probe.js` and Mac-only `identity_probe.rs`. Actual native entry
+and production Rust key operations; no helper creation/secret IPC. Public disposable
+alpha/beta inputs are documented in app README. Four separately selected processes:
+initial save/read (2 GETs), reopen/read (2), updated executable reuse/replace/read/delete
+(4), final reopen deleted-state/profile removal (0). Rust audits retired owned entries
+absent; runner verifies strict bundle identity, actual process path/PID, same/different
+version/executable by phase, full exit, auth counts and successful reports. Attempt
+markers prohibit reruns after ambiguity/failure. Preparation created no live state; approved runtime fixture details follow.
+Historical cleanup stays separate.
+
+**Step 5 actual runtime PASS:** installed verified path
+`.toolchains/installed/identity/Loomlight.app`, same 0.1.0 executable hash above. Login
+Keychain confirmed unlocked before and after. Phase 1 PID 31151, 12.508 seconds: actual
+native secure entry of public synthetic alpha once, app-created key, repeated reads,
+two authenticated loopback GETs and full exit. Phase 2 PID 31244, 2.638 seconds: full
+process reopen, repeated remembered reads and two further accepted GETs, no native
+re-entry/password/Touch ID interaction. Both exit 0/cleanup complete; no app remains.
+Actual executable path/PID match receipts. Profile metadata unchanged after reopen,
+service `app.loomlight`, one active profile/key, zero owned cleanup. Preserve this key
+for the update test. Runtime receipts/logs/attempts are in
+`.toolchains/reports/macos-identity/runtime/`; `state.json` owns exact disposable root
+and loopback port, `save-reopen-receipt.json` confirms final read-only checks. No real key,
+endpoint, generation, helper import or global Keychain/ACL/trust change was involved.
+
+**Step 7 failure/diagnosis:** phase 3 PID 32709 exited 1 after 3.005 seconds at
+`Remembered native read 1`, before GETs, replacement or deletion. Phase 4 was not run.
+A subsequent UI inspection accidentally relaunched the already exited app normally;
+this consumed launch 4, was disclosed, and the app was quit. No process remains.
+Runtime `phase-3.json` and `update-failure-state.json` retain evidence: unchanged metadata,
+one active synthetic alpha key/profile, zero new cleanup, unlocked login Keychain.
+The report did not capture the precise OS denial status.
+
+Read-only exact-item metadata inspection found a separate Keychain partition matching
+0.1.0's CDHash `6d89dc5d3741bf95b81dee577888225ce1ebeb23`, whereas 0.1.1 is
+`fa43780e61cdef5a2ba6dc399ccff1c8c490b97f`. No secret data or settings/ACL changes.
+See runtime `owned-acl-metadata.json` and `partition-comparison.json` plus the ledger's
+Apple securityd source analysis. Stable self-signing alone did not qualify update reuse.
+An earlier metadata approach was rejected before execution for an interaction-setting
+call; the successful approach used only read operations.
+
+**Research-only continuation complete:** Apple documentation and Tauri support free
+Apple Development signing for local development. This is a credible team-partition
+candidate, not a proven fix. Produced 0.1.1 has no entitlements/embedded profile; TN3125
+says this Mac configuration needs no provisioning profile, so free seven-day profile
+limits must not be equated with a seven-day Loomlight lifetime. Certificate validity/
+renewal and real item partition still need inspection. Only Command Line Tools are
+selected; no Xcode bundle was found at the standard location or in Spotlight.
+
+Comparable-app research: Zed uses the system keychain for API keys and Apple signing
+for distribution; VS Code/Electron use Keychain-backed encryption and document signing
+continuity requirements. Sources are in the owning ledger. No storage rewrite selected.
+
+**Authorized Luna/high research completed:** independent primary-source review confirms
+Apple Development certificates carry the Mac-development marker recognized by securityd
+for team partitions. Parent checked TN3127: development DRs can also bind the certificate
+common name, so same Team ID alone is not a renewal guarantee. Inspect actual DRs and
+expiry. No agent remains working or runtime budget consumed. Smallest initial proposal:
+re-sign copies of the two existing builds, two app launches and four remaining GETs
+to isolate update reuse; completing all acceptance requires further bounded continuation.
+The runner needs approved schedule preparation, preserving its guards and old receipts.
+
+**Alternative research completed:** the same Luna/high agent found no documented
+self-signed drop-in route preserving all constraints. Data Protection Keychain requires
+authorized access groups and is not a signing escape hatch. A stable Rust helper with
+certificate-bound peer authentication is a possible, unproven architecture experiment;
+it adds a security-critical process/migration and helper updates can recreate the same
+issue. No helper implementation selected. Per-build prompts relax the outcome and
+are not a pass. Sources and parent verification are in the owning ledger. Agent finished.
+
+**Resume condition:** explicit user selection to return to this implementation. The
+saved Apple Development candidate would require privacy acceptance, Xcode installation,
+native account sign-in/2FA, one certificate creation/import and actual public-field/
+chain/expiry inspection before signing-policy approval. It is not selected or approved.
+No purchase or trust override is required/selected. Setup requires zero Loomlight builds/
+launches/GETs. Changing the pin/verification policy remains separately approved work.
+The separate options chat is research/discussion only, no implementation or OS changes,
+no agents/Actions or budget renewal. It must preserve all local/unpublished work and
+identify proposed constraint changes rather than silently apply them.
+
+Tentative proof after setup: reuse the two different existing binaries with **two
+signing/package operations (no recompilation), four launches and eight GETs, requiring
+four additional GETs**. No retries. This is a planning ceiling, not authorization; runtime
+code changes would need a compilation allowance. Fresh fixtures and early item-partition
+inspection prevent repeating the failed hypothesis. Explain one-time native re-entry
+for old signing ownership separately; preserve every old reference/cleanup record.
+
+Preserve installed failed candidate, previous package, fixture alpha and historical
+cleanup; no automatic rollback/deletion or attempt-marker reset. **No builds/launches
+remain; 4 local GETs remain.** Research used none. No process/request/OS dialog pending.
+Work remains local/uncommitted/unpublished. Implementation is deferred; resume only
+on explicit user selection. No push/merge/release authorized.
+
+Separate read-only options chat created: `01a1199f-851f-7451-a89f-58343cbf5bd8`
+(Explore Loomlight credential-storage alternatives), local existing project checkout.
+It has no implementation or runtime authorization.
+
+### Mac development source self-review and local handoff — 2026-10-08
+
+Implementation is review-ready for the authorized source/synthetic selection; native
+qualification remains pending, not passed. Core now uses `Secret` without Debug/Serialize,
+pinned AEAD, OS randomness, authenticated format/generation/profile/credential/revision/
+origin metadata, bounded private files, explicit storage routing and generation ownership.
+Schema 1 native bytes/service defaulting remain compatible. Schema 2 file staging and
+active selection share the profile transaction; all staged/recovery generations remain
+owned. Newer/malformed profiles remain intact. No Keychain API-key path remains active
+on Mac, including historical qualification import/read/delete/cleanup. Windows native
+routing remains the existing unavailable seam; no Windows acceptance claim.
+
+Native entry source retains the same AppKit field through failure and Retry/Cancel.
+Production Rust event handling keeps the project service free between attempts; stale
+profile/origin changes refuse writes. Exact candidate reconciliation resolves ambiguous
+publication without replay. Saved/cleanup-pending and confirmed-save/reload-failure are
+distinct from failed save. Deferred references remain owned after profile removal;
+cleanup continues over healthy file entries even when an earlier deferred entry remains.
+Session escape is deferred. No app/package, signing policy, product/service/bundle name,
+certificate, trust, ACL, legacy key or private artifact was changed.
+
+Self-review bounded corrections: recognized oversized malformed master envelopes as
+key-loss recovery without overwriting originals; refused key symlinks/hardlinked records;
+recognized newer file format before rejecting oversize; retained strict duplicate-field
+rejection by decoding original profile bytes after version inspection. Found that a
+confirmed save/reload-failure left some Settings mutation buttons enabled: disabled all
+mutations until read-only reload and strengthened its DOM assertions. Added production
+dispatch/service tests for the public fixture, deferred status, save/pending, recovery,
+profile removal, stale/secret-bearing payload refusal and newer-profile preservation.
+These corrections were source-review findings, not observed native failures.
+
+Final coherent commands (from `app/`, using the existing pinned local tools):
+
+- `cargo test -p loomlight-core --locked --offline ai_`: **31 PASS**, **245 unrelated
+  filtered**, **0 ignored/skipped/failed**. Includes 13 file-store fixtures, 9 credential
+  lifecycle/entry cases, 8 profile/schema cases and 1 discovery-parser case. Intended
+  counts positive; ordinary injected faults and known invalid/tampered fixtures reject.
+- `cargo test -p loomlight-desktop --locked --offline`: **8 PASS**, **0 ignored/skipped/
+  filtered/failed**. Includes real dispatch/service/file boundary and retained-entry
+  event tests, deferred native operations and preserved signing/name policy assertions.
+- `npm run check`: typecheck/test compile **PASS**, **102 tests PASS**, **0 skipped/
+  cancelled/failed**. Actual Settings controller/helper with mock IPC; no app launch.
+- `cargo fmt --check --all`, `git diff --check`: **PASS**.
+- `python3 scripts/validate.py`: **401 files PASS** after repairing two relative links
+  in the moved historical handover text. Initial moved-text validator failure preserved:
+  two links still had the old status-directory base (documentation relocation defect).
+
+Synthetic write/flush/publication cases assert valid durable ownership/no unverified
+switch after each injected failure. Unknown publication requires successful reread and
+candidate reconciliation; no replay/write occurs when its new reference is already active.
+Native AppKit input retention, actual packaged file permissions, full quit/reopen and
+different-build reuse remain **unproven**. Browser mocks/independent Rust store reopen
+are preparation evidence only. No broader core, SDK, package matrix or native run.
+
+Dependency resolution first regenerated transitive selections; bounded correction
+retained the existing lock selections and prior desktop dependencies, adding only the
+needed encryption dependencies/dev fixture dependency. Restored the unrelated Tauri
+TOML dependency selection; final locked checks pass. No npm/service/toolchain install.
+Read-only remote retry under sandbox approval now confirms implementation branch
+`4c0ebbf1ce08fc1a1bbded74b0651311fce27d22`, main
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`, no matching open PR. Local HEAD unchanged.
+Planning worktree remains clean/two commits ahead at `2c5a164`; stash/branches preserved.
+Three prior tracked patches (AGENTS, build policy, main wiring) compare exactly to the
+entry snapshot. Prior signing/package/probe files were not edited. No second writer.
+
+Prepared public fixture SHA-256:
+`9183cf3b359289ab495e52357bd8a271b3d69396a78cd6095a294cdca60e36ce`.
+[Plan section 13](2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
+owns the proposed smallest complete native schedule/counts/deadlines. Fixture JSON and
+its rejecting validation tests are concrete; no isolated runtime root/server, package or
+app was created/launched. Proposal remains unapproved. Native server/automation must
+retain existing attempt/identity/path guards and be verified before any approved launch.
+
+Outcome consumption remains **0 new package builds, 0 signing operations, 0 app launches,
+0 installations and 0 GETs**; no Keychain API-key operations, real secrets/endpoints,
+generation, subagents, Actions, commit/push, merge or release. Old identity usage remains
+2/2 builds, 4/4 launches, 4/8 GETs; remaining GETs confer no new launch/transfer. No app,
+request, native store access or OS prompt pending. All source/docs are local/uncommitted/
+unpublished. Canonical ADR/architecture/data/UI/README/TESTING updated. CURRENT/HANDOVER
+replace stale planning status; the longer prior deferred recovery text is preserved in
+its owning ledger above, with links repaired. Live status lengths remain proportionate.
+Next action: deliver the local diff/counts and request only the separate concrete native
+allowance if the user chooses that continuation. Phase 2 and native acceptance stay open.
+
+### Approved development-file native sequence — 2026-10-08
+
+The user explicitly approved plan section 13: "I approved your proposed sequence".
+Separate allowance: **2 signed app/DMG builds (20 minutes each), 2 isolated test-copy
+publications, 4 launches (5/2/15/3 minutes), 10 native openings, 10 saves (9 success,
+1 controlled refusal), 1 Cancel, 8 GETs (2/2/3/1)**. Dialog actions 2 minutes, saves/
+quit 15 seconds, GETs 15 seconds plus 2 seconds cleanup. No retry or extra operation.
+Versions 0.1.2/0.1.3 retain permanent names/ID/pinned certificate; old packages/recovery
+artifacts and planning worktree remain untouched. No certificate/trust/ACL change,
+Applications installation, commit/push, Actions, merge or release is authorized.
+Manual Settings/AppKit fixture mode is being prepared and checked before packaging;
+it adds no credential IPC or helper credential writer. Native counts currently **0/2
+builds, 0/2 copies, 0/4 launches, 0/10 dialogs, 0/10 saves, 0/1 Cancel, 0/8 GETs**.
+Historical identity counts stay **2/2 builds, 4/4 launches, 4/8 GETs**, untransferred.
+
+Preparation checks passed: desktop **9/9**, fixture Python **3/3**, repository validator
+**403 files**, whitespace/formatter. Manual packaged mode suppresses historical injected
+identity scripts only under its separate explicit isolated-root opt-in; normal production
+and historical modes remain intact. Harness validates exact fixture SHA, fixed loopback
+port/routes/auth/counts, immutable settings, private regular entries, ordered steps,
+previous successful receipt, same path/certificate and changed version/executable only
+at launch 3. No server, signing or app process was started by these checks.
+
+Build A attempt selected: existing package route, version **0.1.2**, fresh output
+`.toolchains/releases/dev-credentials/0.1.2`, established certificate pin. Deadline
+**20 minutes**, no retry. Reserve first of **2** build/signing sequences; all native
+launch/dialog/save/GET counts remain zero. Source includes the checked manual fixture
+mode and no API-key Keychain operations. Attempt/result receipt remains in that output.
+
+Build A **STOPPED at preflight**, exit 1: `Selected certificate/private-key identity
+is unavailable; no fallback.` The package command ran inside the execution sandbox.
+It stopped before output-directory creation, compiler, signing or DMG work. Sandbox
+read-only checks showed zero identities and unavailable process enumeration; a separately
+approved read-only outside-sandbox check confirms the exact established fingerprint
+`358372708164C7273A551D746449357C12A3A806` / `Loomlight Local Development` remains present
+(with historical self-signed trust status unchanged), and no Loomlight process runs.
+This is a sandbox capability restriction, **not a product/key-loss failure**. No
+certificate/trust/ACL or policy was changed. The preflight should have used the host
+capability initially; preserve this attempt instead of silently rerunning it.
+
+Per section 13's explicit halt/no-automatic-retry instruction, **no second package
+attempt or native phase was dispatched**. Counts: **1 stopped package attempt; 0 actual
+builds, 0 signing sequences, 0/2 copies, 0/4 launches, 0/10 dialogs, 0/10 saves, 0/1
+Cancel, 0/8 GETs**. No isolated runtime root/server, output package directory or operation
+is pending. Old identity counts and artifacts remain unchanged. Native proof is pending.
+
+Smallest restart request: **one retry of the stopped Build A command outside the
+sandbox**, existing pin/version 0.1.2, same fresh output and 20-minute deadline. This
+renews only the stopped preflight attempt; the previously approved complete schedule
+remains capped at **2 actual builds/signing sequences, 2 copies, 4 launches, 10 native
+openings, 10 saves (9 successes/1 controlled refusal), 1 Cancel and 8 GETs**, with all
+original deadlines/no-extra-retry conditions. No trust/certificate/ACL changes or
+publication. Before restart, check changed source/refs/ownership and verify no process.
+
+Stopped preflight receipt preserved in ignored
+`.toolchains/qualification/dev-credentials-preflight/attempt-1.json`; package output
+0.1.2 was never created. Final self-review tightened prepared harness checks for root/
+file ownership/mode/link count, unchanged B after shared-generation recovery, B active-
+generation recovery/removal and both deferred cleanup namespaces. These changes remain
+source-only; no native result is inferred. Live CURRENT/HANDOVER now record the actual
+approval, failed attempt, zero native operations and exact restart request.
+
+Final preparation self-review/checks: Python fixture controller **4/4 PASS** (added
+out-of-order/false-save rejection), desktop **9/9 PASS**, retained focused core
+**31/31 PASS** (245 unrelated filtered) and frontend **102/102 PASS**. No selected
+ignored/skipped/failed tests. Formatter/whitespace **PASS**, repository validator
+**403 files PASS**. Runtime-controller tests never bind the port, launch an app or
+create credentials. Canonical README/TESTING now explain the manual fixture selector
+and sandbox-versus-host capability distinction. No package/signing/native retry,
+commit/push/Actions/merge/release occurred. Source/doc outcome remains local review-ready;
+actual native qualification is held at the explicitly recorded restart boundary.
+
+### Build A host retry authorized — 2026-10-08
+
+User: "I approve your 1 retry". This authorizes exactly one retry of the stopped
+Build A package command outside the sandbox: unchanged established pin, version 0.1.2,
+fresh `.toolchains/releases/dev-credentials/0.1.2`, 20-minute deadline. Existing complete
+native schedule/counts remain unchanged. Original sandbox preflight receipt is retained.
+Continuation refs/worktree/dirty ownership unchanged; host read-only preflight confirms
+existing identity and no Loomlight process. No certificate/trust/ACL/policy change.
+Dispatching authorized retry; result pending. No further retry is authorized.
+
+Approved Build A retry **PASS**, version 0.1.2, strict app/DMG certificate/pin, designated
+requirement, permanent names/ID and actual installer contents verified. Executable SHA256
+`2707537ff732d52f824ea95877f6248ac58be2dc3490a932e7dd6f04ecc3688b`; DMG
+`6aae739a4ad31d72f570f41085d4221c29340cfe2f888efea2ce2c7d53a91636`.
+Receipt/build log retained in `.toolchains/releases/dev-credentials/0.1.2`; compiled source
+hash inventory in sibling `source-inputs.json`. No signing prompt, password entry or
+certificate/trust/ACL change. One stopped sandbox preflight remains historical.
+
+Isolated publication **1/2**: fresh `.toolchains/installed/dev-credentials/Loomlight.app`.
+Old Applications/identity candidates remain untouched. Launch 1 selected: Build A,
+fresh synthetic fixture root, fixed port 46081, **300 seconds**, 2 native saves (A alpha,
+B gamma), 2 explicit authenticated A GETs, deferred C/owned cleanup inspection, full quit.
+Harness output `.toolchains/qualification/dev-credentials`; exclusive launch/step receipts.
+Counts before launch: **1/2 builds/signing sequences, 1/2 copies, 0/4 launches, 0/10
+dialogs, 0/10 saves, 0/1 Cancel, 0/8 GETs**. No retry/next phase on unexpected failure.
+
+Native launch 1 **PASS**: actual packaged PID 40259, native AppKit A alpha/B gamma,
+**2/2 saves** confirmed “API key saved”, configured status, disclosure present; C
+“Credential: deferred” and native-owned cleanup retained. **2/2 authenticated GETs**
+accepted, model available; no automatic request/native Keychain dialog. Actual root
+modes/regular entries/settings/reference evidence passed; native Cmd-Q exit **0**,
+process stopped in deadline. Receipt `.toolchains/qualification/dev-credentials/phase-1.json`.
+Counts **1/2 builds, 1/2 copies, 1/4 launches, 2/10 dialogs, 2/10 saves (2 success),
+0/1 Cancel, 2/8 GETs**. Launch 2 selected: same package/path/root, **120 seconds**, two
+A GETs without entry, unchanged metadata/settings/reference/storage, full quit. No retry.
+
+Launch 2 **PASS**, actual PID 40370, no credential dialog/re-entry, A configured,
+**2/2 GETs** accepted/model available, byte-identical store/files/settings/references
+on reopen, full Cmd-Q exit **0**, process stopped. Receipt `phase-2.json`; source hash
+inventory remains exact. Counts **1/2 builds, 1/2 copies, 2/4 launches, 2/10 dialogs/
+saves (2 success), 0/1 Cancel, 4/8 GETs**. Same-login repeated reuse is now actual
+packaged evidence; changed-build/recovery/retained failure still pending.
+
+Build B selected: existing route/pin, fresh output
+`.toolchains/releases/dev-credentials/0.1.3`, version **0.1.3**, same compiled source
+except metadata override, **20-minute deadline**, no retry. This is the second and
+final approved actual build/signing sequence. Old packages remain preserved.
+
+Build B **PASS**, version 0.1.3, strict app/DMG identity/content checks passed. Executable
+`182f9684f7bca35ff3b16a02529cbc3fd9c7f6928bc558c83d9884917dcbff39`; DMG
+`7aee865c1e96c20d7d07b255035728d8fe00cd1e22346a84848fddb210eb0c34`.
+Different executable/version verified with identical certificate/DR/identifier and exact
+unchanged compiled source inventory. No signing prompt/password/trust/ACL change.
+Isolated publication **2/2**: retained prior copy under `previous-0.1.2/Loomlight.app`,
+new copy replaces the same stable isolated `Loomlight.app` path. Old identity artifacts
+untouched. Both approved actual build/signing sequences and copies are now consumed.
+
+Launch 3 selected: Build B, same synthetic root/path, **900 seconds**, sequence in plan
+section 13. GET labels alpha/beta/eta, **3 maximum**. Eight native entry sessions,
+8 save attempts (7 success/1 controlled refusal), 1 Cancel. Fixed synthetic fault paths
+and retained originals only. Current counts **2/2 builds, 2/2 copies, 2/4 launches,
+2/10 dialogs, 2/10 saves (2 success), 0/1 Cancel, 4/8 GETs**. No unexpected retry.
+
+Launch 3 **PASS**, actual PID 40825, **225.969 seconds** (900-second limit), full
+Cmd-Q exit **0** and process stopped; all 18 ordered steps complete, **3/3 GETs**
+accepted (alpha remembered across replacement, beta replacement, eta after retained
+Retry). Missing beta record preserved before removal; delta reused healthy generation.
+Master key moved to retained report artifact without regeneration; epsilon selected a
+fresh generation, B original settings/reference unchanged. Tamper originals/damaged
+ciphertext retained; UI explained uncertain component, zeta selected another fresh
+generation without altering B. Old generations/ownership remained addressable.
+
+Controlled records-directory obstruction caused exactly **1 refused save**, with native
+field still masked/nonempty and “Retry save”; active reference/settings remained exact.
+Restored only obstruction, pressed Retry without typing, eta confirmed saved/cleanup
+pending. Separate native Cancel retained exact store. C deferred re-entry theta showed
+“API key saved; cleanup pending”; removal retained its legacy native cleanup reference.
+B iota recovered into active healthy generation, then credential removal preserved
+settings/disabled B and unreadable original ownership. Both deferred namespaces remained.
+Private modes, regular/link-count checks and immutable settings passed at each snapshot.
+No Keychain API-key dialog, import/read/delete or automatic provider request observed;
+source adapter routes remain deferred. AppKit proof is actual, not the injected test seam.
+
+**Unexpected UI-control launch after phase 3:** `pressKey(super+q)` plus subsequent
+`getAXState()` returned a new homepage. Read-only host inspection identified **PID
+40885**, the same isolated bundle executable, but ordinary homepage/recent-project
+metadata instead of fixture state: UI observer implicitly relaunched the exited app
+without its fixture environment. The original test process/receipt remains **PASS**;
+this new process is **unqualified**, not launch 4 acceptance. No project or AI Settings
+was opened, no real credential was retrieved, and no request/dialog/save occurred in
+it. Do not retain ordinary recent-project text in Git or evidence. Positively verified
+its exact executable before SIGTERM; process stopped and host confirms zero Loomlight
+processes. User-data mutation is not claimed absent from this unintended startup merely
+because no editing was initiated; fixture profile/storage remains byte/hash-identical to
+the completed phase-3 receipt. This is a **UI-control isolation/budget failure**, not a
+credential-store failure. Preserve `.toolchains/qualification/dev-credentials/unexpected-observer-launch.json`.
+
+Per explicit halt/no-extra-launch rule, **phase 4 was not dispatched**. Exact new
+allowance consumption: **2/2 actual builds/signing sequences, 2/2 isolated copies,
+4/4 total launches (3 controlled qualified + 1 unintended/unqualified), 10/10 native
+entry sessions, 10/10 saves (9 confirmed success + 1 controlled refusal), 1/1 Cancel,
+7/8 authenticated GETs**. Historical identity budget is unchanged, not transferred.
+One old sandbox preflight and its one approved successful retry remain preserved.
+No process/server/dialog/package/GET pending. No commit/push/Actions/merge/release.
+
+Smallest remaining qualification request: **one additional controlled launch**, existing
+Build B/same isolated path/root, **180 seconds**, **one remaining approved eta GET**
+(15 seconds plus 2 cleanup), no entry/save/Cancel/build/sign/copy. Verify B disabled/settings
+retained, C absent/native ownership and old recovery artifacts intact; full quit within
+15 seconds. After quit, do **not** call CUA observation/getApp: verify the harness receipt
+and process absence with external host checks. No launch budget is inferred from the
+remaining GET. This request is unapproved; final controlled reopen remains pending.
+
+Final controlled reopen explicitly authorized — user: "if you need another reopen you
+can, i approve". Select exactly the remaining request above: **1 additional controlled
+launch, 180 seconds, 1 remaining eta GET, no entry/save/Cancel/build/sign/copy**; same
+Build B/path/synthetic root, state/old ownership inspection, full quit (15 seconds),
+external receipt/process verification without post-quit CUA reacquisition. Total launch
+cap becomes **5 (4 controlled + retained unintended launch)**; GET cap remains **8**.
+Phase 4 exclusive marker has not been created; source/fixture hashes remain unchanged.
+Dispatching phase 4; no automatic retry or further operation is authorized.
+
+### Development-file native qualification result — 2026-10-08
+
+Final controlled launch 4 **PASS**, actual PID 41017, **69.539 seconds** (180-second
+limit), no credential entry, A configured/eta authenticated GET accepted, B settings
+retained/key absent/disabled and discovery disabled, C absent from chooser/native
+ownership retained. Store/files/settings/references/recovery generations byte/hash-
+identical to phase 3. Native Cmd-Q was followed only by external harness/process
+verification: exit **0**, stopped, host process listing empty. No unintended relaunch.
+Receipt `phase-4.json`; `verification-summary.json` audits all four receipts, exact
+requests, unchanged compiled source, private modes/entries, three owned generations,
+and four retained fault artifacts (missing record, lost master, original/tampered record).
+
+**Final exact counts:** source **31 core PASS** (245 unrelated filtered), **9 desktop
+PASS**, **102 frontend PASS**, **4 fixture-controller Python PASS**; zero selected
+ignored/skipped/failed. Native **4/4 controlled phases PASS**, GETs **2/2, 2/2, 3/3,
+1/1 = 8/8**, **2/2 signed app/DMG package pairs**, **2/2 isolated copy publications**,
+**5/5 total launches (4 controlled + 1 preserved unintended/unqualified)** after explicit
+extra-reopen approval, **10/10 native entry sessions**, **10/10 saves (9 confirmed
+success + 1 intended refusal)**, **1/1 Cancel**. Both version/executable hashes differ;
+certificate/DR/permanent names/ID and compiled source remain unchanged. No Keychain
+API-key operation, real credential/endpoint, AI text generation, Windows operation,
+Applications install, certificate/trust/ACL/policy change, subagent, commit/push, Actions,
+merge or release. All selected native allowance is consumed; no process/server/dialog/
+request/signing/build pending. Historical identity budget/artifacts unchanged.
+
+**Evidence boundaries:** actual AppKit retained field/Retry/Cancel, file permissions,
+confirmed/pending distinction, loss/tamper recovery, native ownership, full process
+quit/reopen and different-build retained-store reuse are now narrow packaged evidence.
+Unit/controller/DOM proof remains responsible for publication/flush/stale-token/newer-
+schema cases; those are not all reclassified as native tests. Independent service
+availability during entry is proved by the production event-controller test; no game
+editing or real project was opened for this synthetic native fixture. No clean OS/data-
+deleting reinstall, every future build, Windows native or production release acceptance
+is claimed. The unexpected observer launch and initial sandbox preflight remain visible,
+not waived/erased. UI automation must never reacquire an app after quit; inspect the
+external receipt/PID instead. Signing/native controls require actual host capability.
+
+**Delivery:** selected implementation and approved bounded native sequence complete,
+review-ready local diff on the same unfinished branch; integration/publication remains
+unapproved. Keep the active plan as the local review/authorization checklist until an
+explicit integration/closure selection; do not close Studio 2A.1 or Phase 2, discard unique
+failed artifacts, resume Apple Development/Keychain/session/generic work or renew budgets.
+
+Final documentation/self-review: CURRENT/HANDOVER and canonical ADR/architecture/UI/
+README/TESTING now state the actual bounded native result and separate unapproved
+integration/broader acceptance. No failed/unqualified run is counted as a controlled
+pass; no native game-editing/service-availability result is invented. Compiled inputs
+remain hash-identical to both qualified packages; only docs changed after native proof.
+Repository validator **403 files PASS** and whitespace **PASS**; source check counts
+retained without duplicate unchanged test/package runs. No native operation pending.
+
+### Mac development independent local review — 2026-10-08
+
+**Authority/outcome:** user selected independent review and bounded in-scope source/docs
+corrections plus focused synthetic temporary-file tests. Reuse the actual unfinished
+`codex/provider-qualification` checkout; publication approval is the finish boundary.
+No native build/signing/install/launch/UI reacquisition/request, Keychain API-key access,
+real secret/endpoint, generation, Windows implementation, subagent, commit/push/PR/Actions/
+merge/release is authorized. The same-login local-key compromise remains accepted scope,
+not a finding requiring a different architecture. This review did none of those operations.
+
+**Entry/preservation:** HEAD and locally recorded origin branch remain
+`4c0ebbf1ce08fc1a1bbded74b0651311fce27d22`. Local main remains `aba200f`; last recorded
+remote main is `5f448ca`, not freshly fetched. Network/PR inspection was intentionally
+not repeated under the no-network instruction. Planning worktree remains clean at
+`2c5a164`, two unpublished commits ahead, on `codex/phase-2-3-planning`; existing stash,
+branches and ownership are unchanged. All tracked dirty and untracked source/tests/docs
+were inventoried before edits. Entry source hashes exactly matched the retained package
+source inventory. Review-entry source copies/hashes were kept only in a disposable local
+temporary directory, not committed. Prior signing/package/identity changes were read
+as dependencies and preserved; they are not newly attributed to this review. No blanket
+staging/reset/checkout or second writer. Packages, receipts, failure/recovery files and
+private signing ownership remain untouched.
+
+**Selected review coverage:** complete file adapter and its untracked tests/fixtures;
+credential lifecycle/entry controller, profile schema/transaction seam, desktop routing/
+response/native dialog, frontend controller/tests and fixture runner; dependencies and
+the applicable canonical contracts/evidence. Checked pinned AEAD/nonce/AAD/size bounds,
+private anchored creation/read/link refusal, ownership before generation creation,
+readback verification before reference switching, uncertain-save reconciliation,
+key-loss/authentication/missing-record recovery, retained native Retry/Cancel and stale
+target/origin state, save-versus-cleanup classification, secret-free IPC and deferred
+native references, schema-v1 bytes/default services and unchanged Windows routing.
+No additional in-scope architecture, data-loss, encryption or switching defect found.
+Native controller service availability is synthetic/source evidence, not actual native
+game-editing proof; the original ledger already distinguishes it correctly.
+
+| Finding | Classification / correction | Evidence |
+| --- | --- | --- |
+| R1, P2: confirmed save plus failed Settings reload hid cleanup pending | Product status defect. `with_outcome` already returned `saved=true`, `cleanupPending=true` and `reloadRequired=true`, but the renderer displays only `saveStatus`; that message dropped the pending qualifier. Preserve it for save/removal fallback responses. | New desktop test uses actual synthetic C file persistence, a temporary malformed snapshot, exact response, restored configured reference and deferred ownership. DOM assertion checks the full message and disabled mutations/discovery. |
+| R2, P2: fixture accepted insufficient save/Cancel evidence | Harness gate defect. A required B/C save could pass with a changed native-only reference and no file storage; A checked existence only. Cancel compared only profiles. Validate all A/B/C owned active generations, canonical UUIDs/origin/revisions, enabled state, key/record sizes and version headers; compare complete Cancel snapshot. | Controlled temporary-file reproduction: entry gate incorrectly accepts B native-only/no-file save; corrected gate rejects it. Six Python tests include missing/native/unowned/wrong-active/disabled/wrong-revision/wrong-origin references, missing/malformed/newer files and changed Cancel files. No app/server operation. |
+| R3: exact size-boundary coverage incomplete | Verification gap. No runtime crypto change. Add round trips at 1/4096 bytes, refuse empty/4097/space/non-ASCII keys without writes, reject supported-format 46/4143-byte records and preserve bytes/references on refused deletion. | Focused core regression passes. |
+| R4: live Phase 2 contract still called original packaged qualification pending | Documentation alignment defect. Link the passed original result and subsequent correction boundary; canonical UI/architecture/ADR/README/TESTING distinguish visible pending status and source versus packaged proof. | Repository validator and whitespace checks below. |
+
+One bounded correction per identified issue; no unsuccessful product correction or
+automatic retry budget. Self-review compared corrections against the entry copy,
+confirmed no production crypto/profile/native/signing/Windows-route change, and checked
+that fixture strengthening never rewrites old receipts or claims to replay native steps.
+
+**Focused checks (existing pinned local tools, offline Rust; no dependency installs):**
+
+| Command / selection | Pass | Fail | Ignored / skipped | Filtered |
+| --- | ---: | ---: | ---: | ---: |
+| `cargo test -p loomlight-core --locked --offline ai_` | 32 | 0 | 0 / 0 | 245 |
+| `cargo test -p loomlight-desktop --locked --offline` | 10 | 0 | 0 / 0 | 0 |
+| `npm run check` (typecheck + test compilation included) | 102 | 0 | 0 / 0 | 0 |
+| After strengthening the DOM assertion: `npm run build:tests`, then `node --test dist-tests/tests/ai-settings.dom.test.js` | 3 | 0 | 0 / 0 | 0 |
+| `python3 -m unittest discover -s app/scripts -p test_macos_development_credentials.py -v` | 6 | 0 | 0 / 0 | 0 |
+
+Rust has no separate skip count beyond ignored cases in this selector; no selected
+ignored cases occurred. Frontend cancelled/todo counts are 0. Positive intended counts
+were inspected. Desktop was repeated after expanding its public-fixture regression;
+the first expanded run's terminal output was not captured, so the final cheap run above
+supplies confirmed evidence. No broad-core/SDK/package matrix or unchanged expensive run.
+`cargo fmt --check --all` PASS. `python3 scripts/validate.py`: **404 repository files
+PASS**. `git diff --check`: **PASS**. No selected check failed. CURRENT/HANDOVER are
+361/743 words, within the workflow review targets. Entry-hash comparison confirms only
+the 14 intended source/test/doc paths changed; the one new path is the public reload-
+failure fixture. Prior unrelated dirty/untracked files remain byte-identical to entry.
+
+**Read-only native receipt audit:** all four original phase receipts still say passed,
+stopped, exit 0, no timeout, GETs 2/2/3/1. All nine confirmed saved-step snapshots contain
+owned active file-generation references and 0600 key/record entries within exact size
+bounds, including B/C. The eta-saved/Cancel snapshots are fully identical. This addresses
+the newly identified evidence gaps using retained metadata/hash snapshots; it is not
+a new native replay, decryption, live secret retrieval or independently observed UI pass.
+Historical input, format headers and actual native observations remain in original
+receipts/source tests; no failure is reclassified or deleted.
+
+**Native evidence boundary:** original packages/source inventory remain the accepted
+inputs for the four controlled phases. Review changes the runtime fallback status in
+`app/src-tauri/src/ai_settings.rs`; `ai_file_secrets/tests.rs` also changes only test code.
+No compiled-input equivalence for the corrected source is claimed. Original evidence
+still documents retained entry, recovery, reuse and normal saved/pending paths on its
+tested inputs. The corrected snapshot-reload/pending response is **source/DOM-proved,
+packaged proof pending**; it was not an original native observation. Do not claim the
+old package validates the changed branch or the whole current candidate.
+
+Concrete prepared regression fixture:
+`app/tests/fixtures/macos-development-credential-reload-failure.json`, used by the
+desktop test. [Plan section 15](2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+proposes the smallest separate native allowance: **1 signed app/DMG pair, 1 isolated
+copy, 1 launch, 1 native entry, 1 save, 0 GETs**; 20-minute build, 180-second launch,
+120-second entry, 15-second save/quit. Deterministic fixture-only post-confirmation
+snapshot-read refusal is an explicit preparation prerequisite, not an implemented
+packaged selector or permission to create a timing race. No renewal or request dispatched.
+
+**Consumption/continuation:** additional native operations **0**. Existing development
+consumption remains **2 package pairs, 2 copies, 5 launches (4 controlled/1 unintended),
+10 entry sessions, 10 saves (9 confirmed/1 intended refusal), 1 Cancel, 8 GETs**; remaining
+native allowance **0**. Historical identity budget remains **2/2 builds, 4/4 launches,
+4/8 GETs**, separate/untransferred. No workflow/native operation pending. All prior
+preflight/observer failures, packages and recovery receipts remain preserved. Source
+corrections/review are complete locally for publication approval; no residual in-scope
+source finding, no new schema migration or Windows behavior. Publication and any narrow
+native follow-up require separate selection. Phase 2/Studio 2A.1/release remain open.
+
+### Reviewed Mac publication and proposed Windows continuation — 2026-10-08
+
+**User selection:** after independent review, the user authorized publication if no
+issues remained and requested the next work prompt, anticipating Windows. No in-scope
+source finding remains; the explicitly reported corrected Mac response has source/DOM
+proof and pending packaged proof. Publication is a same-branch checkpoint for transfer,
+not full native/Studio/Phase 2 acceptance, integration into main or a release. The
+publication selection does not renew native budgets or start Windows work.
+
+Read-only remote inspection confirms `codex/provider-qualification` still at `4c0ebbf`
+and main at `5f448ca`; no existing PR for this head. Initial sandbox GitHub API inspection
+failed to connect; the authorized host read succeeded. Git's noreply identity is already
+configured. Branch-push workflow triggers were inspected: this existing branch is not
+an Actions push target. Publish the coherent reviewed implementation with its required
+prior signing/identity dependencies, public synthetic source/tests/fixtures and canonical
+documentation. Exclude all ignored packages, keys, receipts/logs, recovery artifacts and
+the unrelated planning worktree. No PR, Actions dispatch, merge or release is selected.
+Preserve all historical failed/native evidence; it stays host-local with existing paths.
+
+**Next proposed outcome (not started/selected by publication):** complete the Windows
+x64 remembered Studio profile path under ADR 0011/0013, using native secure entry and
+Windows Credential Manager through the existing `Secrets`/transactional lifecycle seam.
+Mac encrypted-file storage is a platform-specific temporary exception, not a new Windows
+architecture. Retain shared v1/v2 parsing/default namespaces, bounded native input and
+status-only IPC. Preserve explicit provider-origin binding, retained input on failed
+save with Retry/Cancel, stale target/origin refusal and confirmed-save/cleanup-pending/
+reload-required distinctions. Disable/unpublish before owned deletion; never touch other
+applications' entries. Qualify synthetic native save/read, full quit/reopen, replacement,
+removal, failure retention and explicit authenticated discovery on the actual packaged
+Windows app, not browser mocks or the old standalone credential spike.
+
+Machine/native host is local Windows x64. Transfer serially: pull the published branch
+in the existing Windows repository after inspecting refs, dirty work and ownership.
+No direct Mac access/second writer/subagent needed. Mac ignored secrets/evidence do not
+transfer through Git. Its passed original native paths and corrected-status proof limit
+remain separate; do not restart Mac packaging/native work to make Windows progress.
+
+Existing Windows slice consumption remains **0 builds/0 native runs**, remaining at most
+**2 package builds/2 targeted native runs**. Original combined Studio GET allowance has
+**0/4 sent**, distinct from later Mac development/identity synthetic request allowances.
+Before any Windows dispatch, reconcile this history and relevant host receipts, record
+the exact synthetic fixture/schedule, entry/save/request counts and enforced deadlines
+within the remaining caps. Use only public synthetic credentials and isolated loopback
+fixtures. A changed count/category or unavailable host capability needs a genuine decision;
+no silent renewal, automatic retry or unchanged expensive run. Earlier live-provider
+budget is not permission to retrieve real credentials or make real provider calls.
+
+Use the focused core credential/profile selector, desktop tests, frontend checks,
+formatter/validator/whitespace and Windows adapter/controller tests; select packages only
+under the recorded Windows allowance. Include rejecting tests at actual frontend/dispatch/
+service seams and classify faults before correction. Complete one coherent Windows
+outcome through implementation, focused verification, bounded fixes and self-review;
+update canonical behavior and this ledger/HANDOVER. Return a reviewable local Windows
+diff and exact source/native results for independent review/publication approval.
+No automatic commit/push/PR/Actions/merge/release, Mac operation, session/no-auth/generic
+feature, biometric integration, AI generation, real endpoint or wider provider work.
+
+The Mac active plan remains an evidence/local-qualification reference because its
+corrected packaged branch is still pending; it is not silently archived as fully accepted.
+Publication verification records the actual remote tip in the final response. The
+checkpoint carrying this section/HANDOVER is identified by branch tip rather than a
+receipt-only successor that chases its own SHA.

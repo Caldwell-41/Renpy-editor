@@ -61,6 +61,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
 | Planned AI settings, OS/session keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
+| Selected temporary Mac file credentials, recovery workflow and implementation prompt; code/native proof not started | [Development credential plan](tasks/active/2026-10-08-macos-development-credential-storage.md) |
 | Studio-scoped accepted provider/credential contract; partial first settings slice, incomplete native proof | [ADR 0013](adr/0013-provider-request-and-transport-contract.md), [provider ledger](tasks/active/phase-2-initial-llm-assistance.md#25-provider-qualification-ledger--2026-10-07) |
 | Source foundation integration closure | [tasks/archive/2026-10-07-source-foundation-integration.md](tasks/archive/2026-10-07-source-foundation-integration.md) |
 | Accepted bounded source target: nested child edit | [Source foundation](tasks/active/phase-2-initial-llm-assistance.md#21-first-bounded-source-foundation-assignment) |

@@ -913,14 +913,33 @@ Configured capacity stays explicitly unverified. Private-network HTTP needs a
 separate unencrypted-transport opt-in; saving or opening Settings never discovers
 models. Native Enter/Replace credential returns status only; removal explains that
 it does not revoke the provider key. Failed cleanup has a visible explicit retry.
-Normal remembered access with the same trusted app and unlocked store should not
-add a prompt per operation. Rebuild/update password guarantees and Touch ID/Windows
-Hello PIN integration are deferred research questions under ADR 0011, not current
-UI implementation or acceptance requirements.
+The selected temporary Mac mode discloses encrypted local files plus a saved,
+unencrypted random unlock key; other software under the same login may decrypt it.
+Healthy compatible storage is intended to survive normal quit/reopen and app replacement
+without native re-entry. The bounded public synthetic packaged Mac fixture passed. Missing/damaged
+storage says **Your saved API key couldn't be read. Re-enter it to restore AI access.**
+Condition-specific detail explains key loss, uncertain authentication, access problems
+or newer-format incompatibility. **Re-enter API key** opens native entry; **Retry** only
+reloads saved state. Unsupported newer formats disable entry and retain data.
+Errors affect the relevant AI credential, preserving profile settings and game editing.
+
+Native persistence failure retains the same secure input for explicit **Retry save** or
+**Cancel**. Each retry reloads and checks the target/origin; uncertain publication is
+resolved before another write. Cancel clears native temporary input. **API key saved**
+means encryption, read/decrypt verification and profile publication succeeded, without
+claiming provider validity. Cleanup failure separately says **API key saved; cleanup
+pending**, preserving the new reference; reload failure after confirmed save keeps both
+success and the visible **cleanup pending** qualifier and requires read-only reload
+before another mutation. Deferred native cleanup
+has an explanatory retained-ownership message without a Keychain retry action.
+All old/native read/delete/import/cleanup remains deferred and performs zero Keychain
+calls. Mandatory biometric integration, Keychain recovery and Apple Development signing
+remain deferred; no automatic migration or OS trust/ACL changes.
 **Refresh models** performs one authenticated GET for the saved configuration;
 unsaved edits disable it and saved revision changes invalidate availability.
 The status says discovery only, without implying generation readiness or capacity.
-The Mac native adapter is implemented; Windows and both-target acceptance remain
+The temporary Mac file adapter/native entry are implemented locally; bounded synthetic
+packaged Mac qualification passed. Windows native work and both-target acceptance remain
 pending. Session/no-auth/generic/project prompts remain outside this slice. The
 [approved remembered-profile mockup](design/phase-2-llm/studio-remembered-profile-light-v1.png)
 is a visual reference, not native/provider evidence; shared theme tokens and the

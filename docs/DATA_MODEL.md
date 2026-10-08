@@ -230,15 +230,49 @@ keys use the OS store or explicit backend-memory-only session mode. See
 [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and the
 [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
 
-The implemented first Studio slice uses strict schema-v1 device records with a store
-revision, up to 32 profiles and 128 owned cleanup references. Each profile has an
-opaque UUID, monotonic revision, label/canonical endpoint/exact model, private-HTTP
-opt-in, unverified capacity and total/response token defaults, disabled state and an
-optional opaque credential ID/origin/revision. Cleanup identifies only an owned
-profile/credential pair; no key value is a record field. A full-record digest binds
-renderer mutations to their saved snapshot. Native discovery availability stays in
-memory and is invalidated by configuration/credential changes or app restart. Project
-bindings, session/generic modes and project reference/prompt schemas remain planned.
+The implemented Studio slice uses strict device records with a store revision, up to
+32 profiles and 128 owned cleanup references, bounded to 128 KiB. Profiles retain opaque
+UUIDs, monotonic revisions, label/canonical endpoint/exact model, private-HTTP opt-in,
+unverified capacity/token defaults, disabled state and optional credential ID/origin/
+revision/service. Missing service remains legacy `app.loomlight.desktop.ai.v1`, omitted
+on serialization; explicit `app.loomlight` retains its owned native namespace. Unknown
+services are rejected. Service values never choose a backend or form a file path.
+
+Missing credential `storage` means native and remains omitted: old schema-v1 records
+preserve their serialized form/digest, including cleanup. Explicit temporary Mac file
+storage uses `{kind:"developmentFile",generationId:<UUID-v4>}` on active and cleanup
+references. First file staging upgrades to schema 2, with `developmentGenerations`
+(maximum 64 unique UUID-v4 values, including abandoned/recovery stages) and optional
+`activeDevelopmentGeneration`. Every file reference and active selection must be owned
+in that list. Ownership precedes filesystem creation; active selection is published
+with the verified credential switch. No independent pointer or automatic migration.
+Older apps must refuse v2/unknown fields without resetting data; no downgrade support.
+Newer/malformed/over-limit data remains unchanged and newer schemas have an explicit
+incompatibility message. Windows keeps native routing and v1 serialization; this shared
+schema support does not qualify Windows native credentials.
+
+Temporary files under `credentials-dev/generations/<generation>/` use owner-only
+0700 directories and 0600 files. `master.key` is 38 bytes: `LLKEY`, version byte 1 and
+32 random unencrypted key bytes. `records/<credential>.sealed` is `LLREC`, version byte
+1, a fresh 24-byte nonce, 1–4096 encrypted bytes and a 16-byte authentication tag
+(47–4142 bytes total). Associated data is the unambiguous JSON array
+`[1,generationId,profileId,credentialId,credentialRevision,canonicalOrigin]`.
+Unknown versions, malformed sizes, links/non-regular entries and unsafe ownership/modes
+are refused. Auth failure never supplies partial plaintext. Only explicit save/recovery
+creates a generation; a missing key for an existing generation is never regenerated.
+Save flushes a new key before dependent records, verifies decryption before switching,
+and retains unreadable recovery generations rather than sweeping or promising erasure.
+
+No API-key value is a profile/project record or renderer payload. Native/deferred cleanup
+retains the original namespace and ownership after replacement or profile removal;
+healthy retired file records can be deleted only after unpublishing, while unreadable
+records remain owned. A full-record digest binds mutations to their saved snapshot.
+Native discovery evidence stays in memory and is invalidated by configuration/credential
+changes or restart. Project bindings, session/generic modes and reference/prompt schemas
+remain planned. Coherent device backup/restore requires profiles, generation metadata,
+master keys and ciphertext; possession of those files permits decryption. App replacement
+is intended to retain compatible user data, while app-data deletion/cleaners, lost disks
+and clean OS installation do not preserve credentials automatically.
 
 Phase 2 lore has subject/category/text, entity links, explicit applicability,
 citations/provenance and `proposed`, `approved`, `superseded` or `rejected` revisions.

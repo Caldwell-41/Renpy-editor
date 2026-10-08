@@ -1,5 +1,6 @@
 pub mod ai_credentials;
 pub mod ai_discovery;
+pub mod ai_file_secrets;
 pub mod ai_profiles;
 pub mod authoring;
 pub mod dispatch;
@@ -778,6 +779,7 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
             "UNKNOWN_SELECTION",
             "The approved selection is no longer available.",
         ),
+        LifecycleError::AiProfilesUnsupported => ("AI_PROFILES_UNSUPPORTED", "Saved profiles use a newer unsupported format; existing data retained."),
         LifecycleError::InvalidMetadata => (
             "INVALID_LOOMLIGHT_PROJECT",
             "This is not a valid supported Loomlight project.",

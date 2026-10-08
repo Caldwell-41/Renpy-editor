@@ -4,6 +4,54 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, net::IpAddr};
 
 pub const MAX_PROFILE_BYTES: u64 = 128 * 1024;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ProfileDecodeError {
+    Invalid,
+    Unsupported,
+}
+pub fn decode(bytes: &[u8]) -> Result<ProfileStore, ProfileDecodeError> {
+    if bytes.len() as u64 > MAX_PROFILE_BYTES {
+        return Err(ProfileDecodeError::Invalid);
+    }
+    let value: serde_json::Value =
+        serde_json::from_slice(bytes).map_err(|_| ProfileDecodeError::Invalid)?;
+    if value
+        .get("schemaVersion")
+        .and_then(|v| v.as_u64())
+        .is_some_and(|v| v > 2)
+    {
+        return Err(ProfileDecodeError::Unsupported);
+    }
+    // Deserialize the original bytes: Value would silently collapse duplicate fields.
+    let store: ProfileStore =
+        serde_json::from_slice(bytes).map_err(|_| ProfileDecodeError::Invalid)?;
+    if !store.valid() {
+        return Err(ProfileDecodeError::Invalid);
+    }
+    Ok(store)
+}
+
+/// Fixed owned namespaces, never a caller-supplied Keychain service.
+/// Missing fields in existing profiles AND cleanup records retain the old service.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CredentialService {
+    #[default]
+    #[serde(rename = "app.loomlight.desktop.ai.v1")]
+    Legacy,
+    #[serde(rename = "app.loomlight")]
+    Loomlight,
+}
+impl CredentialService {
+    pub fn is_legacy(&self) -> bool {
+        *self == Self::Legacy
+    }
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Legacy => "app.loomlight.desktop.ai.v1",
+            Self::Loomlight => "app.loomlight",
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -19,11 +67,41 @@ pub struct StudioSettings {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum CredentialStorage {
+    Native,
+    DevelopmentFile {
+        #[serde(rename = "generationId")]
+        generation_id: String,
+    },
+}
+impl Default for CredentialStorage {
+    fn default() -> Self {
+        Self::Native
+    }
+}
+impl CredentialStorage {
+    pub fn is_native(&self) -> bool {
+        *self == Self::Native
+    }
+    pub fn generation(&self) -> Option<&str> {
+        match self {
+            Self::Native => None,
+            Self::DevelopmentFile { generation_id } => Some(generation_id),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OwnedCredential {
     pub credential_id: String,
     pub origin: String,
     pub revision: u64,
+    #[serde(default, skip_serializing_if = "CredentialService::is_legacy")]
+    pub service: CredentialService,
+    #[serde(default, skip_serializing_if = "CredentialStorage::is_native")]
+    pub storage: CredentialStorage,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,6 +129,11 @@ pub struct ProfileStore {
     pub profiles: Vec<StudioProfile>,
     /// Persist before native addition, retain on failed cleanup; never use for sends.
     pub cleanup: Vec<CleanupReference>,
+    /// Durable ownership, including abandoned stages and recovery generations.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub development_generations: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_development_generation: Option<String>,
 }
 
 impl Default for ProfileStore {
@@ -60,11 +143,13 @@ impl Default for ProfileStore {
             revision: 0,
             profiles: Vec::new(),
             cleanup: Vec::new(),
+            development_generations: Vec::new(),
+            active_development_generation: None,
         }
     }
 }
 
-fn uuid(value: &str) -> bool {
+pub(crate) fn uuid(value: &str) -> bool {
     uuid::Uuid::parse_str(value)
         .is_ok_and(|id| id.get_version_num() == 4 && id.to_string() == value)
 }
@@ -190,7 +275,25 @@ impl StudioProfile {
 
 impl ProfileStore {
     pub fn valid(&self) -> bool {
-        if self.schema_version != 1 || self.profiles.len() > 32 || self.cleanup.len() > 128 {
+        if !matches!(self.schema_version, 1 | 2)
+            || self.profiles.len() > 32
+            || self.cleanup.len() > 128
+            || self.development_generations.len() > 64
+        {
+            return false;
+        }
+        let mut generations = HashSet::new();
+        if !self
+            .development_generations
+            .iter()
+            .all(|g| uuid(g) && generations.insert(g.as_str()))
+            || self
+                .active_development_generation
+                .as_ref()
+                .is_some_and(|g| !generations.contains(g.as_str()))
+            || (self.schema_version == 1
+                && (!generations.is_empty() || self.active_development_generation.is_some()))
+        {
             return false;
         }
         let mut profiles = HashSet::new();
@@ -198,6 +301,9 @@ impl ProfileStore {
         let valid_credential = |c: &OwnedCredential| {
             uuid(&c.credential_id)
                 && c.revision > 0
+                && c.storage
+                    .generation()
+                    .is_none_or(|g| self.schema_version == 2 && generations.contains(g))
                 && canonical_endpoint(&c.origin, true).is_ok_and(|(_, origin)| origin == c.origin)
         };
         self.profiles.iter().all(|p| {
@@ -220,6 +326,29 @@ impl ProfileStore {
 mod tests {
     use super::*;
 
+    #[test]
+    fn missing_service_keeps_legacy_profiles_cleanup_and_digest() {
+        let mut store = fixture();
+        store.cleanup.push(CleanupReference {
+            profile_id: uuid::Uuid::new_v4().to_string(),
+            credential: OwnedCredential {
+                credential_id: uuid::Uuid::new_v4().to_string(),
+                origin: "http://127.0.0.1:8888".into(),
+                revision: 1,
+                service: CredentialService::Legacy,
+                storage: CredentialStorage::Native,
+            },
+        });
+        let bytes = serde_json::to_vec(&store).unwrap();
+        assert!(!String::from_utf8_lossy(&bytes).contains("service"));
+        let reopened: ProfileStore = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(reopened, store);
+        assert_eq!(serde_json::to_vec(&reopened).unwrap(), bytes);
+        let mut value = serde_json::to_value(&store).unwrap();
+        value["cleanup"][0]["credential"]["service"] = "unowned.other.service".into();
+        assert!(serde_json::from_value::<ProfileStore>(value).is_err());
+    }
+
     pub(crate) fn fixture() -> ProfileStore {
         ProfileStore {
             revision: 1,
@@ -240,6 +369,8 @@ mod tests {
                     credential_id: uuid::Uuid::new_v4().to_string(),
                     origin: "http://127.0.0.1:8888".into(),
                     revision: 1,
+                    service: CredentialService::Legacy,
+                    storage: CredentialStorage::Native,
                 }),
             }],
             ..ProfileStore::default()
@@ -359,7 +490,7 @@ mod tests {
         let root = temp.path().join("isolated-device");
         let service = LifecycleService::new(root.clone()).unwrap();
         let mut future = fixture();
-        future.schema_version = 2;
+        future.schema_version = 3;
         let mut unknown = serde_json::to_value(fixture()).unwrap();
         unknown["unexpected"] = serde_json::json!(true);
         for bytes in [
@@ -375,5 +506,78 @@ mod tests {
                 .is_err());
             assert_eq!(std::fs::read(root.join("ai-profiles.json")).unwrap(), bytes);
         }
+    }
+}
+
+#[cfg(test)]
+mod development_schema_tests {
+    use super::*;
+    #[test]
+    fn v1_native_bytes_stay_compatible_and_v2_generation_ownership_is_strict() {
+        let native = tests::fixture();
+        let original = serde_json::to_vec(&native).unwrap();
+        let restored = decode(&original).unwrap();
+        assert_eq!(serde_json::to_vec(&restored).unwrap(), original);
+        assert!(!String::from_utf8_lossy(&original).contains("storage"));
+        assert!(!String::from_utf8_lossy(&original).contains("Generation"));
+        let mut file = native.clone();
+        let g = uuid::Uuid::new_v4().to_string();
+        file.schema_version = 2;
+        file.development_generations.push(g.clone());
+        file.active_development_generation = Some(g.clone());
+        file.profiles[0].credential.as_mut().unwrap().storage =
+            CredentialStorage::DevelopmentFile { generation_id: g };
+        assert!(file.valid());
+        assert_eq!(decode(&serde_json::to_vec(&file).unwrap()).unwrap(), file);
+        let mut bad = file.clone();
+        bad.development_generations.clear();
+        assert!(!bad.valid());
+        bad = file.clone();
+        bad.schema_version = 1;
+        assert!(!bad.valid());
+        bad = file.clone();
+        bad.development_generations
+            .push(bad.development_generations[0].clone());
+        assert!(!bad.valid());
+        let mut json = serde_json::to_value(&file).unwrap();
+        json["profiles"][0]["credential"]["storage"]["kind"] = "other".into();
+        assert_eq!(
+            decode(&serde_json::to_vec(&json).unwrap()),
+            Err(ProfileDecodeError::Invalid)
+        );
+        json = serde_json::to_value(&file).unwrap();
+        json["schemaVersion"] = 99.into();
+        json["futureField"] = true.into();
+        assert_eq!(
+            decode(&serde_json::to_vec(&json).unwrap()),
+            Err(ProfileDecodeError::Unsupported)
+        );
+    }
+}
+
+#[cfg(test)]
+mod duplicate_profile_fields {
+    use super::*;
+    #[test]
+    fn schema_inspection_does_not_collapse_duplicate_profile_fields() {
+        let bytes = serde_json::to_string(&tests::fixture()).unwrap();
+        let duplicate = bytes.replacen(
+            "\"schemaVersion\":1",
+            "\"schemaVersion\":1,\"schemaVersion\":1",
+            1,
+        );
+        assert_eq!(
+            decode(duplicate.as_bytes()),
+            Err(ProfileDecodeError::Invalid)
+        );
+        let duplicate = bytes.replacen(
+            "\"disabled\":false",
+            "\"disabled\":false,\"disabled\":false",
+            1,
+        );
+        assert_eq!(
+            decode(duplicate.as_bytes()),
+            Err(ProfileDecodeError::Invalid)
+        );
     }
 }

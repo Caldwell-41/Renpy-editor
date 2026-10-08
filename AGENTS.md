@@ -28,6 +28,18 @@ version-pinned staged project creation.
   and isolate version-specific CLI behavior behind an adapter.
 - Do not send project content to an LLM until the user initiates an operation.
 - Do not add application-level content filtering.
+- Permanent Mac product, Finder/menu, bundle and installer names are `Loomlight`,
+  `Loomlight.app` and `Loomlight.dmg`; executable `loomlight`, bundle identifier
+  `app.loomlight.desktop`, new credential service `app.loomlight`. No phase, branch,
+  date, hash or version suffixes in these names. Versions belong in metadata/output
+  directories. Name, identifier, namespace or signing-policy changes require explicit
+  user approval. Preserve legacy credential/cleanup service ownership.
+- Mac release packages require the established certificate-backed identity and
+  produced-bundle checks in [app/README.md](app/README.md#macos-local-package-identity).
+  Never silently fall back to ad-hoc signing or weaken a Keychain ACL. Certificate
+  creation/import, trust changes and installation require separate approval. Keep
+  private signing material outside Git. A local certificate must contain no personal
+  name, email, organization, location, username or hostname; explain its public fields.
 - Do not commit secrets, personal data, real private game content, absolute user
   paths, logs, downloaded SDKs, build output, or credentials.
 

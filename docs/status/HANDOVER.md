@@ -1,90 +1,100 @@
 # Current outcome handover
 
-## Studio 2A.1 — Windows continuation; Mac proof remains partial
+## Reviewed Mac credential checkpoint: next Windows selection
 
-**Selected outcome:** remembered Studio profile create/save/reopen, explicit bounded
-GET discovery and safe owned-key replacement/removal. Mac implementation/available
-checks are complete within the authorised budget, but native discovery/removal and
-both-platform acceptance remain incomplete. Generic/session-only, generation/project
-sends, 2A.2, SDK, full matrix, merge and release remain excluded.
+**Authority/state:** the user selected independent review, bounded source/doc corrections
+and focused synthetic temporary-file tests, ending at a reviewable local diff for
+publication approval. Review and corrections are complete; the user now authorizes
+publication because no source finding remains, and requests a Windows continuation prompt. Original bounded
+native qualification passed on its recorded source; the corrected reload-required
+cleanup-pending response has source/DOM proof, with packaged proof pending. Publication is authorized; integration and full Studio
+2A.1/Phase 2 closure remain unapproved. Same-login decryption
+is the accepted temporary development compromise. Session escape, Keychain API-key
+operations, Apple Development signing, generation and wider provider work stay deferred.
 
-**Candidate/publication:** same branch `codex/provider-qualification`, implementation
-checkpoint `19957189cd984596d7c75e81a11a707ef8f7b370`, followed by this live ledger/status
-successor. Fetch/pull its fresh published tip; never reset to the earlier preparation
-SHA. Publication is user-authorised; the closing response reports the verified remote
-checkpoint. One active writer; preserve historical planning/source branches, worktree,
-stash and ignored host-local evidence. No helper or other-machine dispatch occurred.
+**Continuation/ownership:** same local Mac checkout, `codex/provider-qualification`,
+HEAD/published base `4c0ebbf1ce08fc1a1bbded74b0651311fce27d22`. The reviewed
+implementation and required prior identity dependencies are selected for one coherent
+source/docs checkpoint; the branch tip carrying this handover is that transfer checkpoint. Local main is `aba200f`; last recorded remote
+main `5f448ca`, no matching open PR at the earlier inspection. Publication read confirms remote qualification still `4c0ebbf`, remote main `5f448ca`,
+and no matching PR. No PR is created; this branch push is outside Actions push triggers. The separate planning worktree
+remains clean at `2c5a164`, two unpublished commits ahead on `codex/phase-2-3-planning`.
+Stash, branches, prior unpublished signing/package/probe work and private artifacts are
+preserved. No reset, new branch, blanket staging, second writer or subagent.
 
-**Implemented Mac path:** core `ai_credentials` stages durable cleanup ownership before
-native addition, publishes replacements before retirement, disables/unpublishes before
-removal, reconciles uncertain post-rename saves and retains cleanup failures. Typed
-main-window `ai.*` IPC carries settings/redacted state only, rejects supplied keys and
-binds writes to a full-record digest. AppKit secure entry and non-synchronized Keychain
-use stable namespace `app.loomlight.desktop.ai.v1`; no plaintext fallback. Windows
-native store/entry deliberately returns unavailable until next-host implementation.
+**Review/fixes:** encryption bounds/private permissions, generation ownership/verification/
+switching, recovery, retained input/stale state, outcomes, IPC, deferred native references,
+v1/v2 compatibility and documented evidence were reviewed. Corrected the visible status
+when confirmed persistence with cleanup pending cannot reload Settings: pending remains
+visible and mutations require read-only reload. Strengthened A/B/C fixture save gates
+and complete Cancel snapshot comparison. Added exact key/record size-boundary coverage
+and repaired the stale Phase 2 packaged-pending contract. No production crypto, schema,
+reference switching, AppKit entry, signing or Windows-routing change. No remaining
+in-scope source finding. [Owning independent review](../tasks/active/phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
+holds classifications, corrections, self-review and preservation evidence.
 
-`ai_discovery` performs explicit 15-second direct `/models` GET, validates resolved
-HTTP destinations at connect, preserves HTTPS verification, refuses redirects/ambient
-proxies, bounds strict JSON/model lists and keeps availability transient/revision-bound.
-Network work does not own the project service checkout. Settings uses existing
-Application/category layout and both shared themes. The approved
-[mockup/prompt](../design/phase-2-llm/README.md#approved-first-remembered-studio-slice)
-are references; discovery is not generation readiness or capacity qualification.
+**Exact source proof:** core **32 PASS**, **245 filtered**, **0 failed/ignored/skipped**;
+desktop **10 PASS**, **0 failed/ignored/skipped/filtered**; frontend typecheck/test compile
+and **102 PASS**, **0 failed/skipped/cancelled/todo**, followed by **3/3 targeted DOM PASS**
+after strengthening that assertion; fixture-controller **6 PASS**, **0 failed/skipped**.
+Formatter PASS. Final validator/whitespace results are recorded in the owning review.
+The concrete reload-failure fixture is checked in and exercised by the desktop test:
+actual synthetic C save, unreadable temporary snapshot, exact pending-success response,
+restored configured reference and deferred cleanup. No actual native dialog is implied.
 
-**Evidence/limits:** core 13/13, frontend 97/97, desktop 1/1, focused browser and
-package privacy checks PASS. Mac app build 2 PASS; build 1 invocation failed before
-Rust compilation. Native run 1 passed 9 actual settings/native-entry/replacement/
-cancellation/reopen/secrecy checks. Runs 2 and 3 both hit the 300-second OS-auth
-watchdog before qualification import/discovery; run 3 was explicitly user-authorised.
-The user reported macOS Allow for run 2, but its deadline had already expired.
-Computer Use cannot access SecurityAgent; chat approval alone does not authenticate
-the OS request. Preserve both failures; no more automatic retry. Preliminary remembered
-status in another process does not turn either failed run into an acceptance pass.
-Signed upgrade, locked-login store and installer proof remain unqualified. Routine
-remembered credentials must work without per-discovery/per-generation prompts for
-the same trusted app/unlocked store. The user withdrew the subsequently added
-rebuild/update password guarantee, mandatory Touch ID/Windows Hello PIN integration
-and new two-changed-build gate pending separate research. Do not implement or block
-the selected slice on those additions. Read-only signing inspection found the tested
-Mac package has a build-specific `cdhash` designated requirement; preserve this
-research evidence without claiming changed-build trust. The
-app-owned synthetic entry reopened/read without the helper-entry access prompt;
-the cross-helper entry path failed. Qualify repeat native reads/reopen on Windows
-within existing runs; do not add generation sends or global OS trust changes.
+**Original native evidence:** four controlled phases passed, **95.782/30.828/225.969/
+69.539 seconds**, inside their deadlines, exit 0 and stopped; GETs **2/2/3/1**. Original
+fixture SHA256 `9183cf3b359289ab495e52357bd8a271b3d69396a78cd6095a294cdca60e36ce`.
+Native retained-field Retry/Cancel, missing/lost/tampered storage recovery, generation/
+profile preservation, native ownership, full reopen and two-build reuse remain evidence
+of those tested inputs. Read-only review confirmed nine saved-step snapshots have owned
+private bounded files and the complete Cancel snapshot is unchanged. Original package
+source hashes matched review entry; current `ai_settings.rs` differs in runtime response
+wording and test additions, with core test-only changes too. **Old package evidence does
+not validate the corrected response branch or establish whole-current-source equivalence.**
+No Windows, clean-OS/data-deleting reinstall, every-future-build or release proof claimed.
 
-All 97 packaged inputs match aggregate
-`ad4250456ab2a6f0ccc8177e10d284e10f8fe6395300977f1ece5a97f08d9f1e`.
-The [Mac ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
-owns exact commands, binary/receipt hashes, results and failure classification.
-Raw logs/screenshots/manifests remain in ignored `.toolchains/reports/studio-settings/`
-on Mac. Existing qualification key/reference/Studio receipts remain untouched; never
-copy a key or private endpoint/evidence into branch-transfer inputs.
+**Budget/pending:** review added **0 native operations**. Development consumption remains
+**2 signed package pairs, 2 isolated copies, 5 launches (4 controlled + 1 unintended),
+10 entry sessions, 10 saves (9 confirmed + 1 intended refusal), 1 Cancel, 8 GETs**;
+remaining native allowance **0**. Historical identity allowance remains **2/2 builds,
+4/4 launches, 4/8 GETs**, separate and untransferred. No process/server/dialog/request/
+build/signing/Actions operation was started or remains pending from this review.
 
-**Pending operation/recovery:** no native proof process or HTTP request remains pending.
-The ended fixture retained a synthetic key. Operational ignored-fixture recovery
-saved disabled state and an owned cleanup reference before attempting deletion; the
-attempt did not confirm removal. One disabled profile/one cleanup reference remains
-at the disposable root identified by `mac-native-state.json`. Retain pre-cleanup record
-and `owned-cleanup-receipt.json`; deletion versus later-publication failure is uncertain.
-This scripted recovery is not product IPC/cleanup acceptance. Do not delete the original
-qualification entry or treat this retained reference as transferable Windows work.
-No runtime Goal was created or paused. A late OS/chat response grants no extra launch.
+**Preserved artifacts/failures:** original sandbox preflight/approved host retry and
+unintended observer relaunch/approved extra reopen remain in the original ledger. The
+observer accessed ordinary production homepage/recent metadata; no claim that production
+data was never accessed. Exact process was stopped. Never reacquire an exited Loomlight
+app through CUA/getApp/getAXState; inspect external receipt/PID instead. Ignored artifacts:
+`.toolchains/releases/dev-credentials/{0.1.2,0.1.3}` plus `source-inputs.json`,
+`.toolchains/installed/dev-credentials/Loomlight.app` and `previous-0.1.2`,
+`.toolchains/qualification/dev-credentials` phase/step/launch/attempt/request receipts,
+retained fault files, `unexpected-observer-launch.json`, `verification-summary.json` and
+synthetic root in `state.json`; sibling `dev-credentials-preflight`. Earlier identity
+packages, Applications/prior bundles, cleanup, certificate/pin and recovery record remain
+untouched. [Original result](../tasks/active/phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+and [identity recovery](../tasks/active/phase-2-initial-llm-assistance.md#preserved-deferred-identity-recovery-record--2026-10-08)
+own detailed receipts/failures.
 
-**Remaining budgets:** Mac builds 2/native launches 3 consumed (one explicit extra
-native run), **zero Mac builds/runs remain**. Windows has **2 builds/2 targeted native
-runs**; 0 launched. **0/4 combined Studio GETs sent**, all four remain, 15 s + 2 s cleanup
-per GET, reserve/record sends without automatic retry. Provider cumulative 22 HTTP/
-16 generations consumed; **18 HTTP/4 generations/343 s remain**, 1457/1800 s charge
-unchanged. Generation stays excluded. Historical source Windows 2/2/3, Mac 3/3/3 unchanged.
+**Next action/boundary:** the user may select the proposed Windows outcome after this
+approved source/docs checkpoint is pushed and its remote tip verified. Its exact candidate
+is the commit carrying this handover on `codex/provider-qualification`, not historical
+base `4c0ebbf`; inspect/fetch the actual tip on Windows.
+[Owning handoff scope](../tasks/active/phase-2-initial-llm-assistance.md#reviewed-mac-publication-and-proposed-windows-continuation--2026-10-08)
+records that serial host continuation: local Windows x64, actual packaged Loomlight
+app; native secure entry and Credential Manager, focused synthetic proof and reviewable
+local diff. Inspect the Windows repository/ownership and pull the actual published branch
+without resetting local work. Existing Windows cap is 2 builds/2 targeted native runs
+(0 used), original combined Studio GET cap 4 (0 used); reconcile actual host receipts and
+record exact synthetic operation counts/deadlines before dispatch. No live provider,
+real credential retrieval, generation, biometrics, session/no-auth/generic feature,
+subagent or direct Mac access. Windows publication/PR/Actions/merge/release remains a
+separate approval after its review; do not start Windows work from the Mac publication.
 
-**Next Windows action:** pull while preserving local work, read AGENTS/CURRENT/this
-handover and the two selected Studio/host-handoff ledger sections plus Mac results.
-Implement trusted Windows secure entry/Credential Manager in `ai_native.rs`, retaining
-namespace/ownership and error contracts. Qualify repeat native reads/reopen under
-normal conditions within existing runs; do not add Touch ID/Hello or a new cross-build
-gate from the withdrawn clarification. Complete focused Windows checks and native
-proof under its existing allowance, review/fix in scope and push/verify the same branch.
-Record missing Mac discovery/removal/owned cleanup distinctly; further Mac qualification
-requires a separate explicit budget/access decision. Never request direct Mac access,
-renew budgets or declare both-platform acceptance from Windows-only results. Any new
-UI design follows existing themes and uses imagegen for user-approved mockup/refinement.
+Mac corrected packaged proof remains pending. [Plan section 15](../tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+holds its separate 1-pair/1-copy/1-launch/1-entry/1-save/0-GET proposal; deterministic
+fixture-only snapshot-read refusal still needs preparation. No Mac allowance renewed.
+The Mac plan/evidence stays active as a reference, without full acceptance/closure claims.
+No integration into main or release selected. Credentials, signing private material and
+ignored evidence remain on the Mac; transfer only the verified source/docs branch.
+Continue the same branch; a Windows chat is the next host outcome only when selected.
