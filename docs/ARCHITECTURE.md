@@ -62,6 +62,14 @@ origin changes retain input and refuse writes. Uncertain publication is reconcil
 against the exact candidate before retry; confirmed saves report cleanup pending
 separately, even when a subsequent Settings reload fails. The reload-required response
 retains that qualifier in its visible status, as well as its typed pending flag.
+A process-owned Mac qualification selector can refuse one post-confirmation Settings
+snapshot at this same response seam. Startup requires exclusive isolated Studio
+mode/development phase 1 and the exact public A/B/C fixture; entry requires unchanged C
+ownership, and confirmation checks the complete expected published store. Reads,
+failed saves, Cancel and mismatched confirmation do not consume it. Normal Mac startup
+and Windows dispatch have no selector state. It changes no profile/credential bytes,
+secret IPC, transaction ordering, native-reference deferral or signing policy.
+The source/DOM fixture is preparation for separately approved packaged proof.
 
 The selected temporary Mac backend is core `ai_file_secrets`, injected through `Secrets`
 using the same approved application-data root as profiles. RustCrypto XChaCha20-Poly1305

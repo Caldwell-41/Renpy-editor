@@ -73,3 +73,56 @@ test("failed entry preserves profile fields and confirmed save with unavailable 
     button("Enter credential…").click();await settle();assert.equal(document.querySelector('[role="status"]')!.textContent,"API key saved; cleanup pending; saved profiles could not be reloaded. Retry reading before further changes.");assert.equal(button("Save profile").disabled,true);assert.equal(button("Retry").disabled,false);assert.equal(button("Enter credential…").disabled,true);assert.equal(button("Remove credential").disabled,true);assert.equal(button("Remove profile").disabled,true);assert.equal(button("Refresh models").disabled,true);
   }finally{await browser.happyDOM.close();}
 });
+
+test("public one-shot reload fixture keeps all controls disabled until read-only Retry restores C", async () => {
+  const {readFileSync} = await import("node:fs");
+  const regression = JSON.parse(readFileSync("tests/fixtures/macos-development-credential-reload-failure.json", "utf8"));
+  const fixture = JSON.parse(readFileSync("tests/fixtures/macos-development-credentials.json", "utf8"));
+  const browser = new Window(); Object.assign(globalThis, {window:browser, document:browser.document});
+  const calls: {operation:string;payload:Record<string,unknown>}[] = [];
+  let saved = false, reads = 0;
+  const snapshot = () => ({token:saved?"confirmed":"original", cleanup:[{profileId:"legacy",deferred:true}, {profileId:regression.profileId,deferred:true}], profiles:fixture.profileStore.profiles.map((p:{profileId:string;revision:number;settings:unknown}) => ({...p, revision:saved&&p.profileId===regression.profileId?2:1, disabled:false, credentialStatus:saved&&p.profileId===regression.profileId?"configured":"deferred", discovery:null}))});
+  Object.assign(browser, {__TAURI_INTERNALS__:{invoke:async (_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}}) => {
+    calls.push(request);
+    if(request.operation === "ai.enterCredential") {
+      assert.equal(saved, false, "another save must never be sent");
+      saved = true;
+      return {protocolVersion:1,requestId:request.requestId,ok:true,value:regression.expectedResponse};
+    }
+    assert.equal(request.operation, "ai.profiles", "Retry must never mutate or discover");
+    assert.deepEqual(request.payload, {});
+    if(saved && ++reads === 1) return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"AI_SETTINGS_REFUSED",message:"Snapshot still unavailable; retained."}};
+    return {protocolVersion:1,requestId:request.requestId,ok:true,value:snapshot()};
+  }}});
+  const button = (label:string) => [...document.querySelectorAll("button")].find(b=>b.textContent===label)!;
+  const settle = () => new Promise(resolve=>setTimeout(resolve,20));
+  const disabled = () => {
+    for(const label of regression.disabledActions) assert.equal(button(label)?.disabled, true, label);
+    for(const n of document.querySelectorAll<HTMLInputElement|HTMLSelectElement>("input,select")) assert.equal(n.disabled, true);
+    assert.equal(button("Retry").disabled, false);
+    assert.equal(button("Reload saved profiles").disabled, false);
+  };
+  try {
+    document.body.innerHTML="<main></main><footer></footer>";
+    mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!); await settle();
+    const chooser = document.querySelector<HTMLSelectElement>("select")!;
+    chooser.value=regression.profileId; chooser.dispatchEvent(new window.Event("change"));
+    button("Enter credential…").click(); await settle();
+    assert.equal(document.querySelector('[role="status"]')!.textContent,regression.expectedResponse.saveStatus);
+    assert.deepEqual(calls[1]!.payload,{profileId:regression.profileId,token:"original"});
+    disabled();
+    for(const label of regression.disabledActions) button(label).click();
+    assert.equal(calls.length,2,"disabled controls cannot dispatch");
+    button("Retry").click(); await settle(); disabled();
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Snapshot still unavailable; retained.");
+    button("Retry").click(); await settle();
+    assert.equal(chooser.value,regression.profileId);
+    assert.equal(document.querySelector('.studio-settings')!.textContent!.includes("Credential: configured"),true);
+    assert.equal(document.querySelector('.studio-settings')!.textContent!.includes("Apple Keychain cleanup deferred; owned references retained."),true);
+    assert.equal(button("Replace credential…").disabled,false);
+    assert.equal(button("Refresh models").disabled,false);
+    assert.equal(button("Save profile").disabled,false);
+    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.enterCredential","ai.profiles","ai.profiles"]);
+    assert.equal(document.querySelectorAll('input[type="password"]').length,0);
+  } finally {await browser.happyDOM.close();}
+});

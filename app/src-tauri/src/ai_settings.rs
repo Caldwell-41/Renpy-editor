@@ -1,4 +1,4 @@
-use crate::ai_native;
+use crate::{ai_native, ai_reload_fixture::ReloadFixture};
 use loomlight_core::{
     ai_credentials::{self as credentials, Records, Secrets},
     ai_profiles::{ProfileStore, StudioProfile, StudioSettings},
@@ -181,6 +181,216 @@ mod tests {
             .cleanup
             .iter()
             .any(|c| c.profile_id == profile && c.credential.storage.is_native()));
+    }
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn one_shot_reload_fixture_runs_through_confirmed_entry_dispatch_and_read_only_retry() {
+        use crate::ai_reload_fixture::{PROFILE, SELECTOR};
+        let regression: Value = serde_json::from_str(include_str!(
+            "../../tests/fixtures/macos-development-credential-reload-failure.json"
+        ))
+        .unwrap();
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../tests/fixtures/macos-development-credentials.json"
+        ))
+        .unwrap();
+        assert_eq!(regression["selector"]["value"], SELECTOR);
+        assert_eq!(regression["profileId"], PROFILE);
+        let store: ProfileStore = serde_json::from_value(fixture["profileStore"].clone()).unwrap();
+        let temp = tempfile::Builder::new()
+            .prefix("loomlight-studio-dev-credentials-")
+            .tempdir()
+            .unwrap();
+        let service =
+            loomlight_core::lifecycle::LifecycleService::new(temp.path().to_owned()).unwrap();
+        service.write(&store, &ProfileStore::default()).unwrap();
+        let mut fault =
+            ReloadFixture::arm(SELECTOR, "studio-settings", "1", false, &service).unwrap();
+        let host = ApplicationHost::new(service);
+        let target = json!({"profileId":PROFILE,"token":credentials::token(&store)});
+        let no_entry = |_: &mut credentials::CredentialEntry| -> credentials::Result<Option<credentials::SaveOutcome>> { panic!("reject before native entry") };
+        for (op, payload) in [
+            (
+                "ai.enterCredential",
+                json!({"profileId":PROFILE,"token":"stale"}),
+            ),
+            (
+                "ai.enterCredential",
+                json!({"profileId":store.profiles[0].profile_id,"token":credentials::token(&store)}),
+            ),
+            (
+                "ai.enterCredential",
+                json!({"profileId":PROFILE,"token":credentials::token(&store),"key":"renderer-refused"}),
+            ),
+            ("ai.discover", target.clone()),
+            ("ai.cleanup", target.clone()),
+            ("ai.removeCredential", target.clone()),
+            ("ai.saveProfile", json!({})),
+        ] {
+            assert!(!dispatch_settings_with_fixture(
+                &host,
+                "reject".into(),
+                op,
+                payload,
+                no_entry,
+                Some(&mut fault)
+            )
+            .is_success());
+            assert!(fault.pending());
+            assert_eq!(snapshot(&host).unwrap(), store);
+        }
+        // Initial/repeated reads, ordinary refused save and Cancel leave it armed.
+        for _ in 0..2 {
+            assert!(dispatch_settings_with_fixture(
+                &host,
+                "read".into(),
+                "ai.profiles",
+                json!({}),
+                no_entry,
+                Some(&mut fault)
+            )
+            .is_success());
+            assert!(fault.pending());
+        }
+        assert!(!dispatch_settings_with_fixture(
+            &host,
+            "failed".into(),
+            "ai.enterCredential",
+            target.clone(),
+            |entry| host
+                .with_service(|s| entry.save(
+                    s,
+                    &loomlight_core::ai_file_secrets::FileSecrets::open(temp.path())?,
+                    "invalid key"
+                ))
+                .unwrap()
+                .map(Some),
+            Some(&mut fault)
+        )
+        .is_success());
+        let cancel = serde_json::to_value(dispatch_settings_with_fixture(
+            &host,
+            "cancel".into(),
+            "ai.enterCredential",
+            target.clone(),
+            |_| Ok(None),
+            Some(&mut fault),
+        ))
+        .unwrap();
+        assert_eq!(cancel["value"], json!({"cancelled":true}));
+        assert!(fault.pending());
+        assert!(!temp.path().join("credentials-dev").exists());
+        let unconfirmed = serde_json::to_value(dispatch_settings_with_fixture(
+            &host,
+            "fake-confirmation".into(),
+            "ai.enterCredential",
+            target.clone(),
+            |_| Ok(Some(credentials::SaveOutcome::SavedCleanupPending)),
+            Some(&mut fault),
+        ))
+        .unwrap();
+        assert!(unconfirmed["value"].get("reloadRequired").is_none());
+        assert!(fault.pending());
+        assert_eq!(snapshot(&host).unwrap(), store);
+        let input = fixture["nativeInputs"][regression["nativeInputLabel"].as_str().unwrap()]
+            .as_str()
+            .unwrap();
+        let mut confirmed_bytes = None;
+        let saved = serde_json::to_value(dispatch_settings_with_fixture(
+            &host,
+            "saved".into(),
+            "ai.enterCredential",
+            target,
+            |entry| {
+                let outcome = host
+                    .with_service(|s| {
+                        entry.save(
+                            s,
+                            &loomlight_core::ai_file_secrets::FileSecrets::open(temp.path())?,
+                            input,
+                        )
+                    })
+                    .unwrap()?;
+                assert_eq!(outcome, credentials::SaveOutcome::SavedCleanupPending);
+                assert!(confirmed_publication(&snapshot(&host).unwrap(), &store));
+                confirmed_bytes =
+                    Some(std::fs::read(temp.path().join("ai-profiles.json")).unwrap());
+                Ok(Some(outcome))
+            },
+            Some(&mut fault),
+        ))
+        .unwrap();
+        assert_eq!(saved["ok"], true);
+        assert_eq!(saved["value"], regression["expectedResponse"]);
+        assert!(!saved.to_string().contains(input));
+        assert!(!fault.pending());
+        let confirmed_bytes = confirmed_bytes.unwrap();
+        assert_eq!(
+            std::fs::read(temp.path().join("ai-profiles.json")).unwrap(),
+            confirmed_bytes
+        );
+        let before = snapshot(&host).unwrap();
+        let file_snapshot = |dir: &std::path::Path| {
+            fn collect(dir: &std::path::Path, files: &mut Vec<(std::path::PathBuf, Vec<u8>)>) {
+                for item in std::fs::read_dir(dir).unwrap() {
+                    let path = item.unwrap().path();
+                    if path.is_dir() {
+                        collect(&path, files);
+                    } else {
+                        files.push((path.clone(), std::fs::read(path).unwrap()));
+                    }
+                }
+            }
+            let mut files = Vec::new();
+            collect(dir, &mut files);
+            files.sort();
+            files
+        };
+        let files = file_snapshot(temp.path());
+        for _ in 0..2 {
+            let retry = serde_json::to_value(dispatch_settings_with_fixture(
+                &host,
+                "retry".into(),
+                "ai.profiles",
+                json!({}),
+                no_entry,
+                Some(&mut fault),
+            ))
+            .unwrap();
+            assert_eq!(retry["ok"], true);
+            assert_eq!(
+                retry["value"]["profiles"][2]["credentialStatus"],
+                "configured"
+            );
+            assert_eq!(retry["value"]["token"], credentials::token(&before));
+            assert_eq!(retry["value"]["cleanup"].as_array().unwrap().len(), 2);
+            assert_eq!(snapshot(&host).unwrap(), before);
+            assert_eq!(file_snapshot(temp.path()), files);
+        }
+        assert_eq!(
+            host.with_service(
+                |s| fault.snapshot_after_save(s, credentials::SaveOutcome::SavedCleanupPending)
+            )
+            .unwrap()
+            .unwrap(),
+            before
+        );
+        assert_eq!(file_snapshot(temp.path()), files);
+    }
+    fn confirmed_publication(actual: &ProfileStore, original: &ProfileStore) -> bool {
+        actual.revision == original.revision + 2
+            && actual.profiles[2].revision == 2
+            && actual.profiles[2]
+                .credential
+                .as_ref()
+                .unwrap()
+                .storage
+                .generation()
+                .is_some()
+            && actual
+                .cleanup
+                .iter()
+                .any(|c| c.credential == original.profiles[2].credential.clone().unwrap())
     }
     #[test]
     fn native_event_retry_and_cancel_keep_service_available_and_never_retarget() {
@@ -523,7 +733,9 @@ mod tests {
     }
 }
 fn view(host: &ApplicationHost) -> credentials::Result<Value> {
-    let store = snapshot(host)?;
+    view_store(host, snapshot(host)?)
+}
+fn view_store(host: &ApplicationHost, store: ProfileStore) -> credentials::Result<Value> {
     let token = credentials::token(&store);
     let secrets = secrets(host)?;
     let evidence = evidence()
@@ -545,10 +757,40 @@ pub fn dispatch(
     operation: &str,
     payload: Value,
 ) -> CoreResponse {
-    dispatch_settings(host, id, operation, payload, |entry| {
-        native_save(app, host, &secrets(host)?, entry)
-    })
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::Manager;
+        if let Some(state) = app.try_state::<crate::ai_reload_fixture::State>() {
+            let mut fixture = match state.0.try_lock() {
+                Ok(fixture) => fixture,
+                Err(_) => {
+                    return CoreResponse::failure(
+                        id,
+                        "AI_SETTINGS_REFUSED",
+                        "Another AI settings operation is in progress.",
+                    )
+                }
+            };
+            return dispatch_settings_with_fixture(
+                host,
+                id,
+                operation,
+                payload,
+                |entry| native_save(app, host, &secrets(host)?, entry),
+                Some(&mut fixture),
+            );
+        }
+    }
+    dispatch_settings_with_fixture(
+        host,
+        id,
+        operation,
+        payload,
+        |entry| native_save(app, host, &secrets(host)?, entry),
+        None,
+    )
 }
+#[cfg(test)]
 fn dispatch_settings(
     host: &ApplicationHost,
     id: String,
@@ -557,6 +799,18 @@ fn dispatch_settings(
     entry_driver: impl FnOnce(
         &mut credentials::CredentialEntry,
     ) -> credentials::Result<Option<credentials::SaveOutcome>>,
+) -> CoreResponse {
+    dispatch_settings_with_fixture(host, id, operation, payload, entry_driver, None)
+}
+fn dispatch_settings_with_fixture(
+    host: &ApplicationHost,
+    id: String,
+    operation: &str,
+    payload: Value,
+    entry_driver: impl FnOnce(
+        &mut credentials::CredentialEntry,
+    ) -> credentials::Result<Option<credentials::SaveOutcome>>,
+    mut fixture: Option<&mut ReloadFixture>,
 ) -> CoreResponse {
     let result = (|| -> credentials::Result<Value> {
         let _active = ACTIVE
@@ -567,6 +821,9 @@ fn dispatch_settings(
                 return Err("Invalid AI settings payload.");
             }
             return view(host);
+        }
+        if fixture.as_ref().is_some_and(|f| f.pending()) && operation != "ai.enterCredential" {
+            return Err("Reload fixture permits only C entry and read-only Settings reload.");
         }
         if operation == "ai.saveProfile" {
             let p: Save =
@@ -592,12 +849,30 @@ fn dispatch_settings(
             {
                 return Err("Profile missing.");
             }
+            if let Some(fixture) = fixture.as_ref() {
+                host.with_service(|s| fixture.check_entry(s, &before, &p.profile_id))
+                    .map_err(|_| "Reload fixture busy.")??;
+            }
             let mut entry = credentials::CredentialEntry::new(&before, &p.token, &p.profile_id)?;
             let outcome = entry_driver(&mut entry)?;
             let Some(outcome) = outcome else {
                 return Ok(json!({"cancelled":true}));
             };
             // Persistence was confirmed by the controller even if later view reload fails.
+            if let Some(fixture) = fixture.as_mut() {
+                let reloaded = host
+                    .with_service(|s| fixture.snapshot_after_save(s, outcome))
+                    .map_err(|_| "Reload fixture busy.")
+                    .and_then(|r| r)
+                    .and_then(|store| view_store(host, store));
+                // A confirmation mismatch must not look like the selected fault.
+                // Preserve the real save outcome and reload normally; qualification
+                // will reject the absence of the required reload-required response.
+                if fixture.pending() {
+                    return Ok(with_outcome(host, outcome, "API key saved"));
+                }
+                return Ok(outcome_view(outcome, "API key saved", reloaded));
+            }
             return Ok(with_outcome(host, outcome, "API key saved"));
         } else if matches!(operation, "ai.removeCredential" | "ai.removeProfile") {
             let outcome = host
@@ -656,8 +931,15 @@ fn dispatch_settings(
 }
 
 fn with_outcome(host: &ApplicationHost, outcome: credentials::SaveOutcome, label: &str) -> Value {
+    outcome_view(outcome, label, view(host))
+}
+fn outcome_view(
+    outcome: credentials::SaveOutcome,
+    label: &str,
+    reloaded: credentials::Result<Value>,
+) -> Value {
     let pending = outcome == credentials::SaveOutcome::SavedCleanupPending;
-    match view(host) {
+    match reloaded {
         Ok(mut value) => {
             value["saveStatus"] = json!(if pending {
                 format!("{label}; cleanup pending")

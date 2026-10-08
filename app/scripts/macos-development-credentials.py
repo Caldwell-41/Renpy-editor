@@ -44,6 +44,22 @@ def fixture():
     return json.loads(raw)
 
 
+def reload_failure_environment(state):
+    """Read-only preparation only. No launch, server, save or allowance renewal."""
+    root = isolated_root(state)
+    if snapshot(root)["store"] != fixture()["profileStore"] or (root / "credentials-dev").exists():
+        raise ValueError("Reload fixture requires exact fresh public state")
+    definition = json.loads((FIXTURE.parent / "macos-development-credential-reload-failure.json").read_text())
+    selector = definition["selector"]
+    if selector != dict(environmentVariable="LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE",
+                        value="post-save-snapshot-once", runtimeMode="studio-settings", developmentPhase="1"):
+        raise ValueError("Reload fixture selector changed; review required")
+    return {"LOOMLIGHT_RUNTIME_UI_PROBE": selector["runtimeMode"],
+            "LOOMLIGHT_STUDIO_PROBE_ROOT": str(root),
+            "LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE": selector["developmentPhase"],
+            selector["environmentVariable"]: selector["value"]}
+
+
 def write(path, value, exclusive=False):
     with path.open("x" if exclusive else "w") as file:
         os.chmod(path, 0o600)
@@ -237,6 +253,11 @@ def step(output, phase, name):
     print(json.dumps({"step": name, "recorded": True}), flush=True)
 
 
+def inherited_fixture_overrides(environment):
+    return any(k.startswith("LOOMLIGHT_") and any(marker in k for marker in
+               ("PROBE", "SMOKE", "CREDENTIAL_PHASE", "RELOAD_FAILURE")) for k in environment)
+
+
 def run(bundle, output, phase):
     if os.uname().sysname != "Darwin":
         raise ValueError("Actual Mac packaged host required")
@@ -245,7 +266,7 @@ def run(bundle, output, phase):
     info = package.verify(bundle, pin, deadline=time.monotonic() + 30)
     if subprocess.run(["pgrep", "-x", "loomlight"], capture_output=True, timeout=5).returncode != 1:
         raise ValueError("Existing Loomlight process; no launch")
-    if any(k.startswith("LOOMLIGHT_") and ("PROBE" in k or "SMOKE" in k or "CREDENTIAL_PHASE" in k) for k in os.environ):
+    if inherited_fixture_overrides(os.environ):
         raise ValueError("Inherited fixture overrides refused")
     if phase == 1:
         output.mkdir(mode=0o700, parents=True, exist_ok=False)

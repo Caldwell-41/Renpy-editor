@@ -432,8 +432,10 @@ Concrete public follow-up fixture:
 section 13 profile fixture, C's UUID and public `theta` input. The passing desktop
 regression creates a verified C file credential with native cleanup pending, refuses
 the subsequent snapshot read, checks the exact saved/pending/reload-required response,
-then restores the snapshot and checks configured state/retained cleanup. Settings DOM
-coverage checks that message and all disabled mutation/discovery actions. No real key,
+then restores the snapshot and checks configured state/retained cleanup. The subsequent
+fixture-only outcome adds a deterministic process-owned refusal through actual entry
+dispatch without changing snapshot bytes. Settings DOM/controller coverage checks the
+exact message, disabled controls, refused Retry and restored selected configured C. No real key,
 endpoint, provider request or native operation is part of this preparation.
 
 If packaged proof is selected later, the smallest proposed schedule is **one fresh signed
@@ -448,16 +450,31 @@ must recover C's configured state without another save, while native ownership r
 Quit once and inspect only external receipt/PID. Retain the original/corrected profile
 and file hashes plus response/UI evidence; no secret bytes in receipts.
 
-**Readiness limit:** the source fixture is concrete and passing, but the packaged app
-has no deterministic one-shot post-save snapshot-read refusal selector. Before any
-approved launch, prepare/review a fixture-only selector constrained by the existing
-isolated-root/Studio-mode guards and asserting zero normal-root activation; do not use
-a timed external writer or mutate historical/production data. This additional fixture
-preparation is not claimed implemented here. No package build alone proves the branch.
+**Prepared dependency (source only):**
+`LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE=post-save-snapshot-once` selects the reviewed
+one-shot seam, with `LOOMLIGHT_RUNTIME_UI_PROBE=studio-settings`,
+`LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE=1` and the existing explicit temporary development
+root. The exact original public fixture and absent credential directory are required;
+identity/Windows modes, other roots/phases and mismatched fixture state refuse. C entry
+must still match the original target/token. Reads, failed saves and Cancel leave it armed;
+only complete confirmed file publication with both deferred native cleanup references
+consumes it. A mismatched confirmation cannot masquerade as the selected fault. Read-only
+Retry preserves the complete saved store and file bytes. Normal Mac and Windows operation
+use the existing path without selector state. No timer, external writer, native access or
+persistent fault marker is introduced. The pure controller environment helper prepares
+no files/launch/server and the historical runner rejects inherited selectors.
+
+[The fixture preparation ledger](phase-2-initial-llm-assistance.md#mac-one-shot-reload-fixture-preparation--2026-10-08)
+owns exact source/DOM/controller checks, corrections and owner review. The user approved
+source publication after recheck on 2026-10-09; the checkpoint carrying CURRENT/HANDOVER
+records that source transfer, with the exact remote SHA verified in the final response. Corrected packaged
+proof remains open: neither old binaries nor a new package build alone prove this branch.
+The one-launch external receipt/UI schedule must be concretized within the separately
+approved allowance before execution; the existing four-phase runner is not that schedule.
 
 Proposed deadlines: **20 minutes** for the single signed package pair; **3 minutes** for
 the whole launch, **2 minutes** for native entry, **15 seconds** for its one save and
 **15 seconds** for full quit. No retries, reopens or server. Stop/preserve on failure or
-ambiguity. These counts and fixture preparation require separate selection; the original
+ambiguity. These native counts require separate selection; the original
 native budget is exhausted. Review/publication approval can assess the corrected local
 diff with this explicit proof limit; neither starts Windows or closes Phase 2.

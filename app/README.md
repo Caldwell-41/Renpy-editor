@@ -215,6 +215,18 @@ If Settings cannot reload after a confirmed save, its visible status still repor
 cleanup pending where applicable, and mutations wait for read-only reload. The independent
 review corrected this response after the original native sequence; source/DOM evidence
 covers the correction, while its packaged branch remains unqualified.
+The reviewed source now includes a deterministic public-fixture selector:
+`LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE=post-save-snapshot-once`, with isolated
+`studio-settings` mode and development phase `1`. It requires the exact original
+A/B/C fixture at a fresh temporary development root, refuses other mutation/discovery
+operations while armed, and consumes one Settings snapshot refusal only after confirmed
+C file publication with deferred native cleanup. No persistent fault file or timed writer
+is used. Read-only Retry restores configured C without another save/request. The pure
+`reload_failure_environment` helper in `scripts/macos-development-credentials.py`
+checks fresh/private fixture state and returns the explicit environment without launching
+anything. The original four-phase runner refuses inherited fault selectors.
+[Mac plan section 15](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+owns the separately unapproved package schedule. This selector grants no native allowance.
 
 All legacy/native Mac API-key reads, deletes, imports and cleanup are deferred, with
 owned references preserved. Historical identity/helper fixtures below are recovery

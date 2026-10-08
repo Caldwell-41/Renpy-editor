@@ -5578,3 +5578,184 @@ fixture-only post-save snapshot-read refusal selector and rejecting source/DOM p
 with zero native/package/store/provider/CI allowance and a separate publication
 approval boundary. It prepares missing proof; it neither executes the proposed Mac
 native schedule nor resolves Windows complete-manifest equivalence or Studio 2A.1.
+
+
+### Mac one-shot reload fixture preparation — 2026-10-08
+
+**Selection/authority:** user selected the section-15 dependency under sections 19–20:
+fixture-only deterministic one-shot post-save snapshot-read refusal, shared transaction/
+status/Settings source and rejecting source/dispatch/DOM/controller proof. Local macOS
+ARM64 owner, serial work, zero implementation subagents or other-host access. Explicit
+commit/push approval is required after the reviewed local diff; no PR/merge/release.
+Allowance: focused source/unit/portable DOM/controller checks only; **zero** package
+builds, signing operations, native app launches, app credential-store operations,
+provider GETs and CI dispatches. Disposable synthetic file services/mocked IPC only.
+No request lifecycle, production credential filtering or wider feature work selected.
+
+**Fresh continuation/preservation:** clean Mac checkout started at `c9f3e37`. Authorized
+fetch confirmed `origin/codex/provider-qualification` at
+`73a4fc177e8329f6f0426a5443af3f027009f81b`; safely fast-forwarded the same branch to that
+Windows publication. Main tracking ref is `5f448ca683a905f4ea77d4580bbc89fda69f2b93`.
+Initial sandbox fetch could not write FETCH_HEAD; authorized host fetch succeeded.
+No reset/stash/staging/commit/push or second writer. Planning worktree at `2c5a164`,
+existing stash, unrelated refs and all ignored historical packages/failure/recovery/
+private signing artifacts remain preserved. Windows independent review/publication is
+the base, not a new Windows execution allowance. No local entry changes were discarded.
+
+**Implementation:** new `ai_reload_fixture` owns process-local one-shot state, managed
+only on selected Mac startup. `LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE=post-save-snapshot-once`
+requires isolated Studio mode, development phase 1, no identity/Windows mode and the
+exact original public A/B/C profile store with absent credential directory. The
+canonical temporary parent handles macOS's system `/private` alias while retaining
+strict direct-child/prefix isolation and the existing raw-root unsupported-link guard.
+Entry rechecks unchanged C/whole-store/token before native input. While armed, unrelated
+mutation/discovery dispatch refuses. Reads, invalid save, Cancel, fake confirmation and
+mismatched complete post-save stores do not consume the fault. Only confirmed C file
+publication, owned generation/reference, +2 store/+1 profile revisions and exact retained
+native cleanup consume one refused Settings snapshot. A mismatched confirmation falls
+back to the actual normal reload, so it cannot masquerade as the selected fault.
+
+Reused the production outcome/status response: saved/cleanup-pending/reload-required
+remain truthful and secret-free. Retry follows ordinary `ai.profiles` and restores
+selected configured C with no save, cleanup or request; source proof compares every
+persistent profile/credential byte. The fixture has no persistent fault marker/writer,
+timer, secret IPC, transaction/crypto/schema/native-reference/signing change. Normal
+Mac has no managed selector or extra lock; Windows always passes no selector. Shared
+view/outcome extraction preserves the existing no-selector read/status behavior.
+The original malformed-snapshot test remains as ordinary failure coverage.
+
+The existing Python controller now has a pure `reload_failure_environment` preparation
+helper. It verifies exact fresh/private public state and returns four explicit variables
+without writes, launch or server. The historical four-phase runner rejects inherited
+reload selectors; it is not reused as the one-launch follow-up schedule. Public JSON
+records the selector; source and DOM/controller tests consume its contract.
+
+**Corrections/classification:** the first expanded desktop run had **10 PASS/3 FAIL**:
+the new guard compared canonical service roots with uncanonicalized system temp roots.
+This was a fixture product-gate defect, corrected once by canonicalizing the trusted
+system temporary parent. The first new DOM compile had one happy-dom Event typing
+error; the subsequently emitted test also failed its accessibility-attribute lookup
+(**3 PASS/1 FAIL**). These were test-harness defects; fixed the event constructor and
+property-backed select lookup. That failed compile/emitted run is not acceptance.
+The next desktop **13 PASS** and DOM **4 PASS** established those fixes. Owner review
+then added complete post-publication rejection/rearm coverage, invalid-save/fake-confirmation
+checks, controller preparation/override gates, and kept the fixture lock out of normal
+Mac operation. No repeated unsuccessful hypothesis or native retry occurred.
+
+**Final focused verification (pinned existing tools, offline Rust; no installs):**
+
+| Command / selector | Pass | Fail / ignored / skipped / filtered |
+| --- | ---: | --- |
+| `cargo test -p loomlight-core --locked --offline ai_` | 32 | 0 / 0 / 0 / 245 |
+| `cargo test -p loomlight-desktop --locked --offline -- --test-threads=1` | 14 | 0 / 0 / 0 / 0 |
+| Frontend `npm run typecheck`, `npm run build:tests` | PASS | no compile errors |
+| Serial Node Settings DOM + Windows probe DOM | 6 (4 Settings, 2 portable Windows) | 0 failed/skipped/cancelled/todo |
+| `python3 -m unittest discover -s scripts -p test_macos_development_credentials.py -v` | 8 | 0 failed/skipped |
+
+Positive selected counts inspected. Formatter, repository privacy/local-link validator
+and whitespace final results are recorded below. No full frontend/broad-core/SDK/package
+matrix or runtime launch. Source tests use injected native-entry drivers and public
+synthetic file stores only; Windows DOM uses mock IPC, not Credential Manager.
+
+**Owner review/disposition:** reviewed the complete named diff, initialization/activation,
+actual entry controller/publication seam, full ownership/state comparisons, response
+fallback, concurrency, one-shot lifetime, rejecting tests and documentation. Corrected
+the potential ordinary-operation blocking introduced by an unnecessary fixture mutex:
+state is now managed only on selected startup and uses nonblocking ownership. No
+remaining in-scope source finding; **review_ready, local-only**. This is serial owner
+review, not a newly claimed independent review. Prior independent reviews remain
+historical evidence on their actual inputs.
+
+**Changed packaged inputs/proof limits:** `app/src-tauri/src/main.rs`, `ai_settings.rs`,
+and new `ai_reload_fixture.rs` change Mac compiled runtime inputs. The unchanged original
+A/B/C JSON is newly embedded by that module; the changed reload-failure JSON is used
+only by tests/controller proof. Source tests/DOM/controller/canonical docs also change;
+production frontend,
+Cargo dependencies/lock, crypto/storage/schema/native adapters, permissions and signing
+inputs do not. No whole-source/package equivalence is claimed for old Mac or Windows
+binaries. Corrected Mac packaged proof and Windows complete-manifest equivalence/full
+phase-1 flow remain open. Shared no-selector dispatch/view helpers are touched; the
+portable Windows probe DOM passed here, but this is no Windows source compilation/native
+proof. On later selected Windows source verification, use the same branch and focused
+core `ai_`, desktop unit and portable Settings/probe DOM selectors; no build/launch/GET
+renewal. Windows credential behavior/routing remains unchanged, so no new Windows
+implementation transfer is selected by this fixture outcome.
+
+**Budgets/pending:** added native/package/signing/store/provider/CI operations **0**.
+Windows totals remain **2/2 builds, 5/5 launches, 2/4 GETs**, two GETs unselected.
+Mac development remains **2 package pairs, 2 copies, 5 launches, 10 entry sessions,
+10 saves (9 confirmed/1 intended refusal), 1 Cancel, 8 GETs**, no allowance remaining.
+Historical identity **2/2 builds, 4/4 launches, 4/8 GETs** stays separate/exhausted for
+build/launch, untransferred. No external operation pending or runtime pause claimed.
+
+**Next boundary:** request explicit approval to commit/push the 14 named source/test/
+fixture/canonical-doc/ledger/status paths on this branch; recheck refs/diff and exclude
+ignored artifacts before publication. Proposed title:
+`Prepare deterministic Mac confirmed-save reload fixture`.
+No PR, CI, merge or release. Continue publication in this same chat after approval.
+The separate section-15 native proposal remains **unapproved**: one fresh certificate-
+backed signed app/DMG pair (20 min), one new isolated copy/root, one launch (180 s),
+one public theta native entry (120 s), one save (15 s), read-only Retry and one quit
+(15 s), zero GETs/server/reopen/retry. Retain a complete build-input manifest and source/
+bundle/fixture hashes, exact response/UI and before/confirmed/Retry profile/file evidence,
+external PID/exit receipt. No historical copy replacement, Applications install, signing
+identity/trust/ACL change or Mac native credential API. Stop and preserve on ambiguity/
+failure. Approval of source publication does not select that schedule or request lifecycle.
+Studio 2A.1/Phase 2 and release remain incomplete.
+
+
+**Final documentation/scope check:** `cargo fmt --check --all` PASS;
+`python3 scripts/validate.py` **412 repository files PASS**; `git diff --check` PASS.
+CURRENT/HANDOVER are **315/812 words**, within workflow review targets. Final status
+has exactly the 14 intended local paths (including the new reload-fixture module);
+index remains unstaged. Other worktree/stash state is preserved. No commit/push or
+native operation performed. Publication approval is the next action in this same chat.
+
+Final read-only remote recheck confirms qualification/main remain
+`73a4fc177e8329f6f0426a5443af3f027009f81b`/
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`; no remote drift before approval.
+
+
+**Publication recheck and approval — 2026-10-09:** the user instructed a renewed owner
+recheck, in-scope fixes if needed, then same-branch remote publication and a plan-based
+next prompt. This authorizes the source commit/push, not the separate native proposal.
+Fresh qualification/main remote refs remain `73a4fc1`/`5f448ca`; local base, the exact
+14-path scope and empty index match the prior reviewable candidate. Noreply Git identity
+is already configured. This branch is not an Actions push trigger. No subagent, reset,
+other worktree mutation, PR/merge/release or native allowance renewal.
+
+Recheck traced selector startup, native entry/controller confirmation, source ownership,
+normal/Windows no-selector paths, statuses, one-shot/Retry, DOM/controller rejecting
+gates, tests and canonical docs. Two in-scope findings corrected:
+
+- Fixture freshness used `exists()` on `credentials-dev`, which treats a dangling
+  unsupported link as absent. A disposable missing-target-link counterexample failed
+  at the actual activation guard (**0 PASS/1 FAIL, 13 filtered**). Correction uses
+  non-following metadata and accepts only an explicit NotFound result. It preserves
+  the link and missing target, rejects metadata failures, and changes no ordinary
+  app operation. This is a basic fixture-link refusal, not an attack/race experiment.
+- Packaged-input docs incorrectly described reload-failure JSON as runtime-embedded.
+  It is included only in tests and consumed by the pure controller. Corrected live
+  input descriptions: three Rust runtime files change, with the original unchanged
+  A/B/C fixture newly embedded by `ai_reload_fixture`. The reload-failure JSON remains
+  changed proof input. No old package acceptance/equivalence is asserted.
+
+One successful guard correction; source tests cover its rejecting case without actual
+OS-store/native/provider access. Final affected desktop selection and formatter results
+are recorded below. Prior unchanged core/DOM/controller/typecheck evidence above is
+retained; no unchanged broad suite/package matrix repeated. No remaining in-scope source
+finding after recheck. Native/CI/store/GET operations added: **0**, all budgets unchanged.
+The next selected outcome remains only a proposed corrected Mac packaged proof under
+section 15; Windows complete-manifest equivalence/full-flow and Studio 2A.1/Phase 2
+remain open. Commit the 14 named files as
+`Prepare deterministic Mac confirmed-save reload fixture`, push without force to the
+same branch and verify the exact remote SHA; no receipt-only successor commit.
+
+
+**Final recheck evidence:** corrected desktop suite **14 PASS**, **0 failed/ignored/
+skipped/filtered**; `cargo fmt --check --all` PASS. Repository validator **412 files
+PASS** and whitespace PASS after publication-state/input-doc updates. The final guard
+correction introduced no other runtime/fixture dependency change. Approved publication
+includes the same 14 named files; private/ignored artifacts and all historical evidence
+remain excluded. Native proof proposal remains unapproved and is returned for separate
+selection, without executing it in this publication outcome.

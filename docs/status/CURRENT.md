@@ -1,31 +1,33 @@
 # Current status
 
-**Updated:** 2026-10-08. Source foundation is accepted/closed. Windows Studio credentials
-are implemented and independently reviewed on `codex/provider-qualification`, based on
-published `c9f3e37`. Controller qualification gaps are corrected; the 22-file local diff
-is **review_ready**; the user approved commit/push in this same chat. This publication
-checkpoint is identified by the commit carrying these records; the final response
-verifies its exact remote SHA.
-Studio 2A.1/Phase 2 and release remain open.
+**Updated:** 2026-10-09. Source foundation is accepted/closed. The deterministic Mac
+confirmed-save/cleanup-pending/reload-required fixture is implemented, owner-reviewed
+and rechecked/corrected for approved source publication on
+`codex/provider-qualification`, based on `73a4fc1`. The checkpoint is the commit
+carrying these records; the publication response verifies its exact remote SHA.
+Studio 2A.1/Phase 2 and release remain incomplete.
 
 | Capability | Implementation / automated proof | Native acceptance |
 | --- | --- | --- |
-| Phase 1 source foundation | Integrated through PR19; fresh main `5f448ca` is contained in this continuation. | Both-target evidence accepted. |
-| Windows Studio credentials | Native password dialog/Credential Manager through shared transactions; independent review; fresh core 30, desktop 11, frontend 104, controller 6 PASS. | Retained package receipts prove selected Retry/stale refusal, reopen/replacement/removal/alpha-beta discovery and separate failed-save Cancel. Full package-input equivalence is incomplete; older manifests are now rejected for reuse. |
-| Temporary Mac encrypted files | Independently reviewed/corrected at the published base. | Original bounded proof retained; corrected pending-status/reload branch remains source/DOM-only. |
-| Mac signing policy | Certificate-backed names/identity/gates preserved. | Historical signed-update Keychain reuse failure remains; no renewed allowance. |
+| Phase 1 source foundation | Integrated through PR19; tracking main `5f448ca` is contained in this continuation. | Both-target evidence accepted. |
+| Mac one-shot reload fixture | Exact isolated Studio/public-state guards; real synthetic C entry/save dispatch; immutable Retry; core 32, desktop 14, Settings/probe DOM 6, controller 8 PASS. | Dependency prepared; corrected packaged proof remains unapproved/open. |
+| Temporary Mac encrypted files | Independently reviewed/corrected foundation; same-login local-key compromise remains accepted for development. | Original bounded native proof retained on its original inputs. |
+| Windows Studio credentials | Independently reviewed source published at `73a4fc1`; behavior/routing preserved. | Retained selected native actions remain evidence; complete-manifest equivalence and original full phase-1 flow remain open. |
+| Mac signing policy | Certificate-backed permanent names/identity/gates preserved. | Historical signed-update Keychain reuse failure retained; no renewed allowance. |
 
-[Independent Windows review](../tasks/active/phase-2-initial-llm-assistance.md#windows-independent-review-and-publication-checkpoint--2026-10-08)
-owns findings, corrections and the read-only receipt audit. All recorded package-2 runtime
-inputs match; eight package/build/frontend/permission inputs lack original hashes.
-No packaged input changed during review. Three failed native attempts remain failed;
-original full entry-flow completion is unproved. Existing **2/2 builds, 5/5 runs,
-2/4 GETs** remain consumed; unused GETs are unselected. No further native/store/provider/
-CI action is authorized. [HANDOVER](HANDOVER.md) owns publication recovery.
+[Fixture ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-one-shot-reload-fixture-preparation--2026-10-08)
+owns scope, corrections, exact checks and owner review. Shared no-selector view/status
+behavior is preserved; portable Windows DOM is mocked evidence, not Windows compilation
+or native proof. [Windows review](../tasks/active/phase-2-initial-llm-assistance.md#windows-independent-review-and-publication-checkpoint--2026-10-08)
+retains failed attempts and manifest gaps. [Mac plan section 15](../tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+now has its deterministic dependency, while the 1-package-pair/1-copy/1-launch/1-entry/
+1-save/0-GET native proposal remains unapproved.
 
-The primary checkout's unrelated edit and older worktrees are preserved. Mac references,
-file storage and signing policy remain intact; no Mac allowance transfer, generation,
-session/no-auth/generic expansion, PR, merge or release. [Mac pending proof proposal](../tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
-remains unapproved. Public v0.1.0 is unchanged, unsigned/non-notarized with installer limits.
-Phase 1 closure: [PR18](https://github.com/Caldwell-41/Renpy-editor/pull/18), `82d4518`;
-source foundation: [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19), `4078640`.
+This outcome added **0** package/signing/native/store/provider/CI operations. Windows
+consumption remains **2/2 builds, 5/5 launches, 2/4 GETs**; unused GETs are unselected.
+Mac development and historical identity budgets remain exhausted/separate, with no
+transfer/reset. No external operation pending. Historical packages, failures/recovery,
+private signing artifacts, stash and unrelated planning worktree remain preserved.
+No generation/request lifecycle, native Mac credential API, signing/trust change, PR,
+merge or release selected. Public v0.1.0 remains unchanged, unsigned/non-notarized.
+[HANDOVER](HANDOVER.md) owns exact continuation/publication boundaries.

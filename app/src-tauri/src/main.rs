@@ -1,4 +1,6 @@
 mod ai_native;
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+mod ai_reload_fixture;
 mod ai_settings;
 #[cfg(test)]
 #[path = "../identity_policy.rs"]
@@ -646,6 +648,10 @@ fn main() {
             } else { None };
             #[cfg(not(target_os = "macos"))]
             let development_phase: Option<u8> = None;
+            #[cfg(target_os = "macos")]
+            if std::env::var_os("LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE").is_some() && development_phase != Some(1) {
+                return Err("Reload fixture requires development phase 1".into());
+            }
             let data_root = app
                 .path()
                 .app_data_dir()
@@ -665,6 +671,17 @@ fn main() {
                     LifecycleService::prepare_runtime_ui_probe(data, std::path::Path::new(&archive), &case).map_err(std::io::Error::other)?
                 }
             } else { LifecycleService::new(data_root).map_err(|_| "project lifecycle service could not start")? };
+            #[cfg(target_os = "macos")]
+            if let Some(selector) = std::env::var_os("LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE") {
+                let fixture = ai_reload_fixture::ReloadFixture::arm(
+                    selector.to_str().ok_or("Reload fixture selector refused")?,
+                    &std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap_or_default(),
+                    &std::env::var("LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE").unwrap_or_default(),
+                    identity_config.is_some() || std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_PHASE").is_some(),
+                    &lifecycle,
+                )?;
+                app.manage(ai_reload_fixture::State(Mutex::new(fixture)));
+            }
             *app.state::<DesktopState>()
                 .0
                 .lock()

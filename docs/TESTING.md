@@ -1276,11 +1276,23 @@ production retained-entry event handling against the actual service with injecte
 events, service availability between attempts, retry/cancel and stale-origin refusal.
 Settings DOM tests prove explicit read-only Retry, deferred ownership, disabled discovery,
 secret-free payloads and confirmed-save status despite cleanup/reload failure, including
-the visible cleanup-pending qualifier. The desktop reload-failure regression performs
-a real synthetic C file save, then obstructs only the temporary profile snapshot read
-and checks the response against
-`app/tests/fixtures/macos-development-credential-reload-failure.json`; restoring the
-snapshot retains its configured file reference and deferred cleanup. Fixture-controller
+the visible cleanup-pending qualifier. The historical malformed-snapshot regression is
+retained. The new deterministic public selector performs a real synthetic C file save
+through entry dispatch, verifies complete confirmed publication, then refuses exactly
+one Settings snapshot without altering files. Its response matches
+`app/tests/fixtures/macos-development-credential-reload-failure.json`. Read-only Retry
+retains every profile/credential byte, configured C and deferred cleanup. Rejecting
+source checks cover wrong modes/roots/state/ownership, stale/secret-bearing targets,
+failed save, Cancel, fake confirmation and mismatched post-save stores. DOM/controller
+coverage rejects dispatch from disabled mutation/discovery controls, keeps controls
+blocked after a failed read-only Retry, then restores selected configured C. The pure
+Python environment-preparation gate rejects changed/nonfresh/private-root violations
+without launching or writing. The original runner rejects inherited fault selectors.
+For this fixture-only outcome, run desktop tests serially (`-- --test-threads=1`),
+frontend typecheck/test compilation, then
+`node --test --test-concurrency=1 dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/windows-studio-probe.dom.test.js`
+from `app/`; the portable Windows probe uses mocked IPC. Positive intended counts and
+zero selected failures/skips remain required. Fixture-controller
 save gates check all A/B/C owned references, key/record sizes and version headers;
 Cancel compares the complete persistent snapshot, not just profile metadata.
 
@@ -1292,8 +1304,8 @@ records exact counts, retained preflight/observer failures and limits. The
 later [independent review](tasks/active/phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
 corrected the reload-required pending message. Old packages do not qualify that changed
 response branch; its current evidence is source/DOM only. The prepared targeted native
-proposal grants no operations and requires a deterministic isolated snapshot-read fault
-selector before dispatch, rather than an external timing race. The
+proposal grants no operations; its reviewed deterministic isolated snapshot-read selector
+is now prepared without an external timing race. The
 [prepared schedule](tasks/active/2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
 does not grant another run. Use host capabilities for signing/process checks and external
 receipt/PID verification after quit; never reacquire the exited app through a UI observer,

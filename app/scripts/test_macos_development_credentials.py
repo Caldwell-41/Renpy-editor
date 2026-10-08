@@ -11,6 +11,39 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class DevelopmentFixtureTests(unittest.TestCase):
+    def test_reload_selector_preparation_is_read_only_and_rejects_changed_fixture(self):
+        with tempfile.TemporaryDirectory(prefix='loomlight-studio-dev-credentials-') as directory:
+            root = Path(directory)
+            probe.write(root/'ai-profiles.json', probe.fixture()['profileStore'], exclusive=True)
+            before = probe.snapshot(root)
+            env = probe.reload_failure_environment({'root':directory})
+            self.assertEqual(env, dict(LOOMLIGHT_RUNTIME_UI_PROBE='studio-settings',
+                LOOMLIGHT_STUDIO_PROBE_ROOT=directory, LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE='1',
+                LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE='post-save-snapshot-once'))
+            self.assertEqual(probe.snapshot(root), before)
+            for change in ['revision', 'cleanup', 'profiles', 'credential', 'disabled']:
+                wrong = copy.deepcopy(before['store'])
+                if change == 'revision': wrong['revision'] += 1
+                elif change == 'cleanup': wrong['cleanup'] = []
+                elif change == 'profiles': wrong['profiles'].reverse()
+                elif change == 'credential': wrong['profiles'][2]['credential'] = None
+                else: wrong['profiles'][2]['disabled'] = True
+                probe.write(root/'ai-profiles.json', wrong)
+                preserved = probe.snapshot(root)
+                with self.assertRaises(ValueError): probe.reload_failure_environment({'root':directory})
+                self.assertEqual(probe.snapshot(root), preserved)
+            probe.write(root/'ai-profiles.json', before['store'])
+            (root/'credentials-dev').mkdir(mode=0o700)
+            with self.assertRaises(ValueError): probe.reload_failure_environment({'root':directory})
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(ValueError): probe.reload_failure_environment({'root':directory})
+
+    def test_historical_runner_rejects_inherited_reload_selector(self):
+        self.assertFalse(probe.inherited_fixture_overrides({'UNRELATED': 'value'}))
+        for name in ['LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE', 'LOOMLIGHT_RUNTIME_UI_PROBE',
+                     'LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE', 'LOOMLIGHT_PACKAGED_SMOKE']:
+            self.assertTrue(probe.inherited_fixture_overrides({name: ''}))
+
     def test_exact_fixture_and_all_request_boundaries(self):
         fixture = probe.fixture()
         self.assertEqual([p['profileId'] for p in fixture['profileStore']['profiles']], list(probe.IDS.values()))
