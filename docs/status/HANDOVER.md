@@ -1,65 +1,81 @@
 # Current outcome handover
 
-## Windows acceptance preparation: reviewed publication, native preflight next
+## Windows step-2 preflight: failed readiness, remediation next
 
-**Authority/result:** user requested "Review your work, if issues fix, then publish"
-and a prompt for step 2 which completes/reviews/fixes native input/capture preflight
-and returns a prompt for step 3. This authorizes the sixteen-path preparation candidate,
-bounded review fixes and normal commit/push on the existing branch. Local Windows x64,
-one serial owner under the requested GPT-6.1 Sol High constraint, zero subagents.
-Source/controller/DOM checks and original host-local receipt inspection only;
-**0 package builds, app launches, credential-store operations, provider calls or CI**.
-Native acceptance execution and 2A.2 remain unselected. Step 2 is a separate next task,
-not executed by publication.
+**Authority/result:** user selected native input/capture preflight, independent
+source/controller/DOM and disposable file/receipt preparation, whole review/bounded fixes
+and scoped commit/push. Local Windows x64, one serial owner under requested GPT-6.1 Sol
+High constraint, zero subagents; original Windows evidence only, no other-host access.
+**Failed preflight / qualification blocked.** No production change or step-3 execution;
+2A.2 unselected. User's later "sure, ask again" authorized retry of the native editor
+approval request, not a time-budget reset or qualification.
 
 **Location/checkpoint:** Caldwell-41/Renpy-editor, local
-`worktrees/provider-qualification`, branch `codex/provider-qualification`, preparation
-base **`57f4fedefb5619fb16f43e388952fe1320ab8746`**. The checkpoint carrying this record
-identifies the reviewed publication; resolve it with `git log` and verify exact remote
-branch equality before continuation. The publication response owns the confirmed SHA;
-no receipt-only successor commit. Fresh remote recheck before staging: qualification
-57f4fed, main 5f448ca (contained), no open PR for this branch. Push triggers target main
-or the separate runtime branch; this publication selects neither and dispatches no CI.
-Noreply identity verified. No reset/stash/force push, PR, merge or release; unrelated
-primary edits and other worktrees preserved.
+`worktrees/provider-qualification`, branch `codex/provider-qualification`. Entry local/
+tracking/remote preparation SHA **`12e162e9d3b00e7bc8b40f8d07a7ce0a7e5e9a02`**;
+main **`5f448ca683a905f4ea77d4580bbc89fda69f2b93`**, contained. Initial remote DNS failure
+resolved through authorized host access. The checkpoint carrying this record identifies
+the five-path preflight publication; publication response owns exact verified remote
+SHA, no receipt-only successor. Recheck refs before continuation; do not reset/stash/
+force-push. Primary checkout's unrelated HANDOVER edit and other worktrees preserved.
+Workflow push selectors target main or the separate runtime branch; no CI dispatch.
 
-**Owning records:** [prepared schedule and receipt audit](../tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
-and [publication review / next outcome](../tasks/active/phase-2-initial-llm-assistance.md#windows-preparation-publication-review--2026-10-09).
-Changed paths: existing Windows Python runner/tests; `ai_reload_fixture.rs`,
-`ai_settings.rs`, `main.rs`, Windows probe Rust/JS; Windows probe DOM test; new public
-reload fixture; app README; ARCHITECTURE, TESTING, ADR 0011; ledger; CURRENT/HANDOVER.
-No production native adapter, transaction, frontend product, dependency, identity or
-signing change. Raw receipts/packages/captures, input inventory and original/revised
-candidate manifests/patches remain ignored under `.toolchains`; do not publish them.
+**Owning evidence:** [preflight ledger](../tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09),
+[prepared host sequence](../TESTING.md#windows-native-preflight-and-prepared-host-sequence),
+[finalized schedule](../tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09).
+Only app README, TESTING, ledger, CURRENT and this HANDOVER changed. Runtime/controller/
+fixtures/dependencies remain identical to 12e162e. Private captures, paths, logs, attempts,
+synthetic file rehearsal and original evidence remain ignored under `.toolchains`.
+No acceptance namespace/runtime root was created or read; no credential API executed.
+Original independent audit JSON hash unchanged; its historical results were retained,
+not freshly re-observed. Runs 1–3 FAIL, run 4 PASS, run-5 targeted Cancel PASS/full-flow
+FAIL, eight original manifest omissions and complete-equivalence limits all survive.
 
-**Review/checks:** explicit required-permission gate now rejects equally incomplete
-actual-tree/manifests; fault and restoration collisions refuse before native inspection
-or fixture mutation; Retry must dispatch exactly one read plus the probe comparison.
-Rejecting tests exposed those gaps before correction. Final Python **17 PASS**, focused
-Settings/Windows DOM **9 PASS**, frontend/test TypeScript compilation PASS. Original
-**16 desktop PASS** and formatter evidence retained: all five reviewed Rust files have
-identical hashes. Historical independent-review JSON hash is unchanged. Original
-runs 1–3 FAIL, run 4 PASS, targeted run-5 Cancel PASS with packaged full-flow FAIL,
-eight manifest omissions and recovery limits all remain. Final validation and publication
-checks belong in the owning ledger. Source tests still prove no native UI behavior.
+**Native facts/blocker:** applied Computer Use skill/instructions. Supported
+`node_repl`/`@oai/sky` discovery works; the PowerShell-owned form was not returned, and
+the skill prohibits terminal automation.
+Script authorization failed without changing policy. One visible public masked form
+closed at **65.0100175 s**, no native input/capture of it. First native editor input was
+not approved; user-authorized approval retry succeeded. Native Ctrl+N/snapshot **6.1427193
+s**, New toolbar button created another blank tab; both disposable tabs closed and absence
+verified, no user document modified/text typed. Snapshot was JPEG and could precede input
+settling. PNG gate refused JPEG; `sharp` import and system Python/Pillow failed. Existing
+bundled Python/Pillow then encoded owned PNG offline, **188,342 bytes**, hash in ledger.
+The **15 s capture/visual acknowledgement/exclusive receipt did not pass**, masked text
+entry and whole entry/launch timing remain missing. Editor active rehearsal **67.469327
+s**; combined visible/active work **at least 132.4793445 s**, over the **120 s total**,
+with earlier denial/selection work additional. No further native attempt authorized.
+No app/helper/server/CI operation pending. Repeated attempts must retain these failures.
 
-**Prepared native proposal, unapproved:** new exclusive build-3/run-6–7 namespace and
-isolated root; full original phase 1/alpha-alpha before phase 2/alpha-beta/reload/removal.
-Maximum 1 build/EXE copy/root, 2 launches, 4 entries, 5 Saves (3 success/2 refusal),
-1 Cancel, 1 read-only Settings Retry, 4 loopback GETs/2 server lifetimes, 3 owned entries,
-5 fixed presence reads. Build 1200 s +2 termination/+2 reap; launch 300 s; each whole
-entry 120 s; confirmation/capture acknowledgement/Retry/exit 15 s; GET 15 s +2 cleanup.
-No partial resume, retry, observer launch, installer, real endpoint or renewed budget.
-Windows totals remain **2/2 builds, 5/5 launches, 2/4 GETs**, 3 entries/5 audit reads;
-future selected amended totals **3/3, 7/7, 6/8**, 6 entries/10 reads. Old unused GETs
-unselected. Mac section-15 PASS/exhausted; other Mac/provider budgets unchanged.
+**Independent readiness preparation:** exact future run-6/run-7 command references,
+fault/restore/confirm-reload order, owned PNG receipt fields/controller monotonic clock,
+verified pinned tools and bundled encoder route are in TESTING. Disposable file-only
+rehearsal passed eight rejecting guards; handoff **0.0912122 s**, total **0.2296482 s**.
+Synthetic placeholder is not native evidence. Fresh controller **17 PASS**, test
+compilation PASS, focused Settings/Windows DOM **9 PASS**, zero skipped/cancelled/todo.
+Wrong first DOM working directory and npm relative path retained; corrected commands
+passed. Unchanged desktop 16/formatter proof retained; no Rust/package matrix repeated.
+Whole five-path diff/evidence reviewed; validator/privacy/links **411 files PASS** and
+whitespace PASS before publication. No unsafe assertion waiver or production correction.
 
-**Next action:** run only the separate [step-2 prompt](../tasks/active/phase-2-initial-llm-assistance.md#step-2-windows-native-inputcapture-preflight-prompt)
-after selecting it. Establish actual supported Windows input/capture and guarded file
-actions without Loomlight, its store, acceptance-root preparation or native budgets.
-Current computer-use surface disables native APIs: capability is unverified, a concrete
-blocker until resolved through a supported route. Never substitute DOM/browser evidence
-or unsupported workarounds. Preflight must review/fix its work and publish scoped evidence
-as its own selected outcome, then return a precise step-3 prompt for separate native
-approval only if readiness passes. Preserve original root ownership, private artifacts
-and failures. No app/server/CI/external operation pending; do not start 2A.2.
+**Budgets unchanged:** step 2 used **0 package builds, Loomlight launches, installers,
+credential-store operations, provider calls or CI**. Windows remains **2/2 builds,
+5/5 launches, 2/4 GETs**, 3 owned entries/5 audit reads. Future unapproved schedule
+**1 build/2 launches/4 GETs**, 4 entries/5 Saves (3 success/2 refusal), 1 Cancel,
+1 read-only Retry, 2 server lifetimes/3 owned entries/5 reads; amended totals **3/3,
+7/7, 6/8**, 6 entries/10 reads. Two old unused GETs unselected. Build 1200 s +2 terminate/
++2 reap; launch 300; whole entry 120; confirmation/capture acknowledgement/Retry/exit 15;
+GET 15 +2 cleanup. Every original marker/whole-store/byte gate and full run-6 PASS before
+run 7 required; no partial resume/retry/observer launch/installer. Preserve partial root/
+credentials on unknown interruption pending a specific recovery decision. Mac histories/
+section-15 exhausted allowance and provider 22 HTTP/16 generations/1457 s unchanged.
+
+**Next action:** remediation only, no executable qualification prompt. Select an explicit
+new finite native preflight allowance retaining at least 132.4793445 s plus earlier
+attempts; get supported approval before timing a benign nonterminal masked public input
+surface, prestage bundled PNG encoding and controller-clock/guarded file receipt route,
+then prove capture plus visual acknowledgement <=15 s, whole entry <=120 s and prepared
+launch envelope <=300 s without Loomlight/store access. Review/bounded fixes/receipt audit
+and publish scoped result. Only actual readiness PASS may return a <4,000-character
+step-3 prompt for separate native approval selecting exact published candidate/finalized
+schedule. Never execute step 3 or start 2A.2 here.

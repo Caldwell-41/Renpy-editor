@@ -6484,3 +6484,130 @@ is unavailable, finish independent preparation, record the exact blocker and req
 remedy; return a remediation prompt instead of falsely asserting readiness or providing
 an executable qualification prompt.
 ```
+
+### Windows native input/capture preflight — 2026-10-09
+
+**Authority/outcome:** user selected step 2 against published preparation
+`12e162e9d3b00e7bc8b40f8d07a7ce0a7e5e9a02`, including bounded review/fixes,
+canonical docs/ledger/handover and normal scoped commit/push. Local Windows x64,
+one serial owner under the requested GPT-6.1 Sol High constraint, zero subagents;
+original Windows evidence locally, no other-host access. **Preflight failed/blocked;
+qualification unselected.** No production change, request lifecycle, PR/merge/release
+or 2A.2. User subsequently asked why Notepad++ was chosen and said **"sure, ask again"**,
+authorizing another supported approval request for the same disposable blank-tab action.
+This did not renew the 120-second total rehearsal limit or approve qualification.
+
+**Refs/ownership:** initial worktree clean; local HEAD/branch/tracking exactly 12e162e,
+origin Caldwell-41/Renpy-editor. Sandbox remote lookup failed DNS; authorized host-access
+lookup confirmed qualification **12e162e** and main
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`. Primary checkout's unrelated HANDOVER edit,
+other worktrees and all old packages/receipts preserved. No reset/stash/history rewrite.
+Only app README, TESTING, this ledger and CURRENT/HANDOVER are selected for publication;
+app executable inputs/controller/tests remain identical to 12e162e. The new published
+checkpoint carries this record; verify remote equality, no receipt-only successor.
+
+**Supported native route discovered:** read Computer Use SKILL.md, guidance, API and
+confirmations; initialize `@oai/sky` in supported `node_repl` succeeded. Returned native
+apps/windows were available despite the separate browser CUA surface disabling native
+APIs. Those earlier unavailable-surface statements remain historical and do not describe
+all tools available in this session. No browser evidence was used as native proof.
+
+**Actual attempts and failures, all retained:**
+
+- Background disposable-form launch produced no targetable window; direct `.ps1`
+  execution failed **AuthorizationManager check failed / UnauthorizedAccess**. No
+  execution-policy flag/change, installation, security/accessibility change or custom
+  input/capture helper was used. An inline form in the existing command session was
+  not returned by native discovery and was interrupted; no native input was injected.
+- Host-access creation showed the single visible disposable masked-text form, with no
+  credential backend. Its automatic close receipt is **65.0100175 seconds**. Supported
+  Computer Use did not return this PowerShell-owned surface; its skill also prohibits
+  controlling terminal applications. No typing/click/capture of this form succeeded. It closed;
+  no helper/app/server/CI operation remains pending.
+- Already-open native editor was selected to open blank disposable tabs without modifying
+  user documents. First keyboard request failed **Computer Use was not approved to use
+  Notepad++**. After the user's explicit retry request, supported Ctrl+N plus snapshot
+  completed in **6.1427193 seconds**, exposing a blank tab. Supported New toolbar input
+  created another blank tab; subsequent native state showed it. Both owned tabs were
+  closed and their absence verified. No document text was typed or changed; masking/
+  literal native text entry remains unproved. No further native attempt is selected.
+- The native snapshot returned **JPEG**, so the PNG signature gate correctly refused it.
+  Immediate snapshot preceded the button's later visible result: stale title evidence
+  was not promoted to a button-confirmation receipt. `sharp` import failed with
+  **Unsupported import specifier "../package.json"**. System Python conversion failed
+  **ModuleNotFoundError: No module named 'PIL'**. Reassessed available bundled dependencies;
+  existing bundled Python/Pillow exported the original owned JPEG offline to PNG, no
+  installation. Owned PNG **188,342 bytes**, SHA256
+  `1c4527f0ff74f491016e8c45a51249e096254d0dc2aad95c24fa6ebba9a36e7e`.
+  Capture/visual acknowledgement/receipt publication within the **15-second hold did
+  not pass**; offline encoding does not retrospectively prove the hold.
+- Active native-editor rehearsal lasted **67.469327 seconds** through owned-tab cleanup.
+  Together with the form this is **at least 132.4793445 seconds**, exceeding the user's
+  **120-second total**. Earlier selection/denial/invisible-form work is additional, not
+  silently subtracted. This is a preflight budget failure, not a new allowance or a
+  qualification failure. Stop native experimentation; any renewed bounded preflight
+  needs an explicitly selected allowance preserving these cumulative attempts.
+
+Private original capture, offline PNG/hash, launch/close/cleanup receipts, file rehearsal,
+source-check logs and attempt summary remain ignored under
+`app/.toolchains/windows-native-preflight/`. No screenshots/logs/private absolute paths
+are selected for Git. Screenshots include unrelated native-editor UI metadata; keep
+original evidence local and do not publish it.
+
+**Independent file/receipt preparation:** no acceptance CLI action was invoked. Exclusive
+`files-1` disposable synthetic directory, public bytes only, exact backup/fault hash
+restoration and exclusive capture/acknowledgement rehearsal **PASS**. Eight guards
+rejected traversal, absolute path, output collision, restoration mismatch, capture
+mismatch, snapshot mismatch, expired acknowledgement and duplicate acknowledgement.
+Synthetic placeholder PNG is explicitly labeled synthetic, never native proof.
+File-only handoff **0.0912122 seconds**, whole file rehearsal **0.2296482 seconds**;
+these timings do not include native capture or visual acknowledgement. No original/new
+Loomlight runtime root or credential store was read/mutated. Original independent-review
+JSON still hashes to
+`2965096e8134c0fbb5170cb26fa6a1c515fe8bf4719ede2edc207b8f6cb6df2e`;
+original receipt-audit result/limitations retained rather than rerunning its root audit.
+
+**Prepared sequence/routes:** [canonical TESTING runbook](../../TESTING.md#windows-native-preflight-and-prepared-host-sequence)
+now owns exact future prepare/build-3/run-6/run-7/fault/restore/confirm-reload command
+references, native action/capture/receipt order, controller monotonic-clock bridge and
+exclusive PNG receipt protocol. Full run-6 PASS/normal exit/PID absence/complete package
+and root equality precedes run 7. Future qualification remains finalized **1 build /
+2 launches / 4 loopback GETs**, every original assertion and failure/recovery rule intact.
+Planning envelopes fit 300 seconds arithmetically; actual whole-entry/launch/hold native
+readiness is **not demonstrated**. Controller Python 3.13.15, Node 24.19.0, existing npm
+CLI 11.9.0, Tauri 2.11.4 and process-selected Rust/Cargo 1.90.0 version routes verified;
+no compiler/package build or new complete installed inventory claimed. Existing MSVC/
+SDK identities/inventory remain preparation evidence. No missing package is installed.
+
+**Focused checks/review:** controller **17 PASS**, native calls mocked/rejected and
+all file mutations disposable; frontend test compilation PASS and focused Settings/
+Windows DOM **9 PASS**, zero failed/cancelled/skipped/todo. First DOM command used the
+wrong working directory and failed ENOENT before the corrected `app/` route; both logs
+retained. npm route first had one too few parent components; corrected version-only
+invocation PASS. No acceptance prepare/build/launch/fault/confirm-reload CLI, credential
+API, network/provider GET, installer, CI or unchanged Rust/package matrix was executed.
+Whole five-path diff/evidence review completed; validator/privacy/local links **411 files
+PASS**, whitespace PASS. Publication selects only these reviewed five documentation paths.
+All historical assertions, run 1–3 FAIL, run 4 PASS, run-5 targeted
+Cancel PASS/full-flow FAIL, eight original manifest omissions and private evidence stay
+intact; no native success relabels them.
+
+**Cumulative qualification budgets unchanged:** Windows **2/2 builds, 5/5 launches,
+2/4 GETs**, 3 created/retired/deleted entries and 5 fixed audit reads. Future unapproved
+amended totals remain **3/3, 7/7, 6/8**, 6 entries/10 reads; old unused two GETs unselected.
+Mac development history remains 3 pairs/3 copies/6 launches/11 entries/11 saves/
+1 historical Cancel/8 GETs; identity 2/2 builds, 4/4 launches, 4/8 GETs separate;
+section-15 exhausted. Provider 22 HTTP/16 generations/1457 seconds unchanged/unselected.
+This step consumed **0 package builds, Loomlight launches, installers, credential-store
+operations, provider calls or CI**. Native preflight time failed its own allowance.
+
+**Exact blocker/remedy/next selection:** supported native keyboard/button control and
+capture exist after app approval, but masked native entry and an observed capture +
+PNG encoding + visual acknowledgement + exclusive receipt within 15 seconds are missing;
+the 120-second cumulative rehearsal allowance is exceeded. No executable qualification
+prompt is issued. Return a remediation prompt selecting a new explicit finite native
+preflight allowance, an approved benign nonterminal surface with masked public input,
+and the prestaged bundled encoding/file route. Keep all attempts/cumulative time,
+rehearse whole entry/launch timing without Loomlight, review/bounded fixes/receipt audit
+and publish scoped results. Only actual readiness PASS may produce a step-3 prompt for
+separate native approval; do not execute step 3 or start 2A.2.

@@ -846,6 +846,125 @@ The [independent review](tasks/active/phase-2-initial-llm-assistance.md#windows-
 records that limitation without renewing exhausted budgets. These tests do not substitute
 for native retained input, Credential Manager storage or full process reopen.
 
+### Windows native preflight and prepared host sequence
+
+The [2026-10-09 preflight ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09)
+owns actual attempts and the failed readiness decision. The finalized schedule above
+remains unchanged. Discovery of a supported API is distinct from permission for an
+app, a targetable masked field, and timely owned capture/acknowledgement. Browser/DOM
+checks cannot establish any of these native gates. Remediation must establish them
+without consuming a qualification build/launch or renewing cumulative budgets.
+
+Use the Computer Use skill's `node_repl` import of `@oai/sky`, returned unique windows,
+and observe/one-action/refresh cells. The form's PowerShell-owned window was not returned
+by the native API. The skill prohibits controlling terminal applications; do not try
+to operate them even when they own a disposable form.
+No shell, Win32 or UIAutomation input/capture workaround, installation or security/
+accessibility configuration change is selected. App approval must complete before a
+timed action. After an input, a snapshot can precede its UI effect; require the actual
+result before recording success or acting again. Retain denied/ambiguous attempts.
+
+On this host screenshots are `data:image/jpeg;base64`, not PNG. Save the returned
+owned bytes for evidence; resolve the bundled workspace Python via
+`load_workspace_dependencies` and use its existing Pillow for PNG encoding. System
+Python lacks Pillow and `sharp` import in `node_repl` failed; neither is the chosen
+encoding route. Saving/exporting for evidence does not require another native snapshot.
+Prestage the encoder and file route, then rehearse capture, visual acknowledgement and
+exclusive receipt publication together under 15 seconds. Offline conversion of an
+older capture proves only file encoding. Do not acknowledge uninspected or stale UI.
+
+**Prepared toolchain route:** from repository root, Python 3.13.15 is the controller;
+bundled Node is 24.19.0. Existing npm CLI 11.9.0 is at
+`../../repo/.toolchains/npm-11.9.0/package/bin/npm-cli.js` (from `app/`, add one `..`).
+Use Node to invoke this CLI, not an unavailable/default `npm` command. Set the
+process-local `LOOMLIGHT_WINDOWS_NPM_CLI` to its resolved path and prepend its existing
+`package/bin` directory for Tauri's npm before-build hook. Tauri entry is
+`app/node_modules/@tauri-apps/cli/tauri.js`, version 2.11.4. Existing workspace
+`.tools/cargo/bin` shims plus `.tools/rustup`, pinned
+`RUSTUP_TOOLCHAIN=1.90.0-x86_64-pc-windows-msvc`, and no-update check provide Rust/Cargo
+1.90.0. Import only the existing MSVC x64 developer environment (14.50.35717, SDK
+10.0.26100.0); no installer or persistent environment changes. Future qualification
+must resolve a new isolated target directory, never the historical target, and prove
+the complete installed/generated/environment inventory equal before/after build and
+before launches. This preflight verified versions and source checks, not a new package
+or compiler/SDK build. Private absolute routes stay in ignored evidence.
+
+**Future commands, references only; separate native approval required.** Working
+directory is `app/`; `python` denotes the verified controller interpreter. Never run
+these during preflight. Each launch runs in its owned external command session while
+the serial owner performs native actions; do not wait for launch completion before
+controlling its UI. Reserve outputs before dispatch and keep original evidence.
+
+```text
+python scripts/windows-studio-credentials.py prepare --acceptance
+python scripts/windows-studio-credentials.py build --acceptance --build 3
+python scripts/windows-studio-credentials.py launch --acceptance --phase 1 --run 6 --build 3
+python scripts/windows-studio-credentials.py corrupt --acceptance --step alpha
+python scripts/windows-studio-credentials.py restore --acceptance --step alpha
+python scripts/windows-studio-credentials.py corrupt --acceptance --step cancel
+python scripts/windows-studio-credentials.py restore --acceptance --step cancel
+python scripts/windows-studio-credentials.py launch --acceptance --phase 2 --run 7 --build 3
+python scripts/windows-studio-credentials.py confirm-reload --acceptance
+```
+
+Run 6 sequence is initial missing-key/zero-discovery observation; alpha entry/input,
+current-marker unreadable-record fault; Return once; capture retained masked field/
+refusal; exact restore and restoration receipt; Return Retry without retyping; capture
+confirmation/whole expected store; gamma entry/Save/confirmation; A replacement input,
+current-marker stale-origin fault to unused loopback 46083; Return refusal, capture;
+exact restore, record restoration, Escape Cancel; equal complete pre-Cancel/gamma
+bytes; alpha/alpha GETs; every original phase-1 marker; exit 0/PID absence and exactly
+two presence reads. Fault/restore never reset the whole entry clock. Use Return/Escape
+on observed current focus, not guessed indexed Save/Cancel buttons.
+
+Run 7 requires **full run-6 PASS**, complete root/package byte equality, exit 0 and
+external PID absence. Reopen both configured with no entry/discovery; alpha GET; beta
+entry/one Save; confirmed publication then exact reload-required status, all fields/
+choosers/mutation/discovery disabled and read-only Retry enabled. Capture before Retry;
+write the reload observation; acknowledge with `confirm-reload` within the fixed hold;
+one read-only Retry, unchanged persisted bytes/configured A/restored controls; beta
+GET; remove A key/profile preserving B, then B key/profile preserving exact whole
+foreign/active-generation metadata and revision-14 store. Require all original and
+three reload markers, exit 0/PID absence and exactly three owned absence reads.
+
+Use host-local exclusive `run-6-observed.json`/`run-7-observed.json`. Run-6 ordered events:
+`alpha-entry`, `alpha-refusal`, `alpha-retry`, `gamma-entry`, `gamma-confirmation`,
+`cancel-entry`, `stale-refusal`, `cancel`, `get-alpha-1`, `get-alpha-2`, `exit`.
+Run-7 events: `get-alpha`, `beta-entry`, `beta-confirmation`, `reload-required`,
+`read-only-retry`, `get-beta`, `exit`. Required observed booleans are defined exactly
+by `validate_observations`; never
+prepopulate success. `startSeconds`/`endSeconds` are Python `time.monotonic()` relative
+to the launch receipt's `startedMonotonic`, not Node's process-relative clock or UTC.
+Prestage a file-only bridge to the controller clock; record starts before dispatch and
+ends after confirmed results. Required GET subdurations are request <=15 seconds and
+cleanup <=2 seconds. Native capture must substantiate each observed field/status.
+
+During `beta-reload-required`, record a start before native capture, encode the owned
+PNG into the acceptance output with exclusive creation, inspect actual status/control
+state, hash/size it and the exact `.studio-windows-2-beta-reload-required.json` snapshot,
+then exclusively write `run-7-reload-observed.json`: run 7, phase 2, exact fixture
+`saveStatus`, `controlsDisabled:true`, `retryEnabled:true`, `profilesSha256`, relative
+start/end and `captures:[{file,sha256,bytes}]`. Capture filenames must be direct output
+children with owned PNG bytes. Run the acknowledgement command immediately; its live
+PID/current marker/deadline/hash/size checks and exclusive root receipt remain required.
+Never derive native observation booleans from DOM tests. Audit original receipts/images
+after confirmed stop; no reacquisition of an exited UI.
+
+**Blocking limits:** build 1200 seconds +2 termination/+2 reap; whole launch 300;
+whole entry 120 including fault/restore; confirmation/capture acknowledgement/Retry/
+exit 15; GET 15 +2 cleanup, all inside the whole caps. Missing/wrong/skipped/failed/
+late evidence fails. No partial resume, exploratory/observer/third launch, second build,
+automatic retry, installer, real endpoint/key, generation, enumeration, CI or budget
+reset. Ambiguous dispatch consumes its reserved identity. Preserve failed receipts,
+logs, faults/backups, snapshots and possibly created credentials/root; interrupted or
+unknown ownership needs a specific recovery decision before store actions.
+
+Planning targets (not measured native PASS): run 6 entry envelopes 70+35+70 seconds,
+two GET envelopes 34, exit 15 and other observations 26 =250 seconds; run 7 beta
+envelope 70, GETs 34, hold/Retry 30, removal/observations 40 and exit 15 =189 seconds.
+Actual preflight did not prove those targets, whole native entry timing, or the 15-second
+hold. Qualification remains blocked until a newly selected bounded preflight passes.
+
 The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
 has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
 Its Step 1 checks are the same focused `ai_` core selector, desktop tests, `npm run check`,

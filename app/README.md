@@ -311,3 +311,12 @@ stores and action deadlines are rejecting gates. These switches grant no allowan
 publication and native execution require separate approval. No old manifest is backfilled; the
 existing corrected manifest gate still rejects those legacy packages. Cross-build
 Windows continuity, generic/session-only/no-auth and full 2A.1 remain unqualified.
+
+The [Windows native preflight](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09)
+found the supported Computer Use `node_repl`/`@oai/sky` route. Approval retry proved
+keyboard/button input on disposable blank native-editor tabs; an owned JPEG was
+exported offline to PNG. The capture/acknowledgement hold and masked entry remain
+unproved, and the combined native rehearsal exceeded its 120-second limit. Read the
+[prepared host sequence](../docs/TESTING.md#windows-native-preflight-and-prepared-host-sequence)
+before remediation. This is a failed preflight, not native qualification; no build,
+Loomlight launch, acceptance root or credential operation was consumed.
