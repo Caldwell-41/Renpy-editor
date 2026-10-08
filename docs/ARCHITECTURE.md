@@ -37,7 +37,8 @@ metadata transaction/history; profiles use safe device-local replacement. OS-sto
 profile writes have recoverable ordering, not cross-store atomicity. Request code
 injects authentication; renderer IPC carries opaque references/status only. Prompts,
 reference prose and raw replies stay out of routine diagnostics and game builds.
-The broader design remains planned; the selected remembered Studio slice below is implemented on Mac.
+The broader design remains planned; the selected remembered Studio slice below is
+implemented on Mac and Windows, with current-slice native acceptance incomplete.
 The Studio-scoped accepted [request/credential/transport contract](adr/0013-provider-request-and-transport-contract.md)
 adds concrete origin binding, immutable send snapshots, schema/tool rejection and
 cancellable bounded transport. Its isolated deterministic spike is not production
@@ -69,7 +70,11 @@ ownership, and confirmation checks the complete expected published store. Reads,
 failed saves, Cancel and mismatched confirmation do not consume it. Normal Mac startup
 and Windows dispatch have no selector state. It changes no profile/credential bytes,
 secret IPC, transaction ordering, native-reference deferral or signing policy.
-The source/DOM fixture is preparation for separately approved packaged proof.
+The corrected Mac section-15 packaged proof passed on source `37e3ab3`. Windows has
+no reload selector state; that target branch remains unproved. The
+[acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+maps the remaining proof and proposes Windows-only fixture preparation before any
+native allowance.
 
 The selected temporary Mac backend is core `ai_file_secrets`, injected through `Secrets`
 using the same approved application-data root as profiles. RustCrypto XChaCha20-Poly1305

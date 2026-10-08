@@ -162,8 +162,14 @@ reuse passed in the separately approved public synthetic fixture. The
 retains exact counts, failures and limits. Source tests and this bounded native proof
 do not imply Windows or production-release acceptance.
 Subsequent independent review corrected the visible cleanup-pending qualifier when a
-confirmed save cannot reload Settings. That changed response is source/DOM-proved only;
-the original packaged inputs and their historical evidence remain distinct.
+confirmed save cannot reload Settings. That changed response has shared source/DOM
+proof and corrected Mac section-15
+packaged proof on source `37e3ab3`; Windows target proof remains missing. The original
+packaged inputs and their historical evidence remain distinct. The
+[acceptance-gap disposition](../tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09) retains Windows complete-manifest/full-flow
+blockers and proposes a combined replacement/reload proof. Windows cross-build
+continuity remains outside the selected same-package slice; no update guarantee is
+accepted. Generic/session-only/no-auth and full 2A.1 remain deferred/incomplete.
 
 Local removal does not revoke the provider key. Project movement requires new device
 profile/credential setup. Adapter persistence/access attributes must match this intent;

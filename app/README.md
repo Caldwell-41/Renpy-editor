@@ -294,3 +294,13 @@ Reuse requires complete saved snapshots, exact terminal marker/envelope/request 
 and the full input manifest. Old Windows manifests lack eight current inputs and are
 rejected by the corrected reuse gate; retain their exact-binary evidence without
 claiming complete candidate equivalence. See the independent review in the ledger.
+
+The [Studio acceptance-gap review](../docs/tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+records the remaining Windows current-slice blockers: complete candidate inputs, full
+phase-1 entry/alpha-alpha flow, and the confirmed-save/reload-required branch. Mac
+section-15 proof is complete. A proposed one-build/two-launch/four-loopback-GET schedule
+combines Windows reload proof with beta replacement after separately reviewed Windows
+fixture/controller preparation. It is not executable authorization: current runner IDs
+are consumed and the reload selector is Mac-only. No old manifest is backfilled; the
+existing corrected manifest gate still rejects those legacy packages. Cross-build
+Windows continuity, generic/session-only/no-auth and full 2A.1 remain unqualified.

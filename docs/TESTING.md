@@ -818,6 +818,13 @@ Only the external host runner may change without rebuilding; both original/curre
 runner hashes are recorded. The manifest includes package/build/toolchain/frontend
 entry configuration, custom permissions and optional public/.cargo inputs as well as
 runtime/probe/dependency files. Missing required manifest entries refuse reuse.
+The [acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+owns the current-slice gate mapping and proposed complete Windows schedule. Preparation
+must retain full phase-1/2 assertions, add Windows replacement/reload-required proof,
+complete input/dependency inventories and whole final-store checks. It requires
+separately reviewed fixture/controller work before native approval; current runner IDs
+and Mac-only selector do not implement the proposal. No review-only package matrix or
+current allowance renewal.
 Historical Windows build-1/2 manifests omitted eight current inputs; those receipts
 prove their exact binaries and recorded subset, not complete candidate equivalence.
 Do not backfill old manifests with current hashes or waive the corrected reuse gate.

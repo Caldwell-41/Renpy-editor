@@ -1,32 +1,31 @@
 # Current status
 
-**Updated:** 2026-10-09. Source foundation is accepted/closed. The corrected Mac
-section-15 packaged proof **passes** on published source
-`37e3ab3bbdbab943600a2cbc3df93b9078814c26`, `codex/provider-qualification`.
-The user approved publication of the six reviewed docs/public hash-evidence paths.
-The checkpoint carrying this record is the publication record; the response verifies
-its exact remote SHA. Studio 2A.1/Phase 2 and release remain incomplete.
+**Updated:** 2026-10-09. Source foundation is accepted/closed. The Studio 2A.1
+acceptance-gap review is complete, **publication approved**. The checkpoint carrying
+this record owns publication; the response verifies its exact remote SHA.
+The current remembered Studio slice, full 2A.1/Phase 2 and release remain incomplete.
+Same branch `codex/provider-qualification`, published/entry checkpoint
+`4e1f877c21d4dabe6a35ab35a09e0bbc91f57242`; runtime source unchanged by this review.
 
-| Capability | Implementation / automated proof | Native acceptance |
-| --- | --- | --- |
-| Phase 1 source foundation | Integrated through PR19; tracking main `5f448ca` is contained in this continuation. | Both-target evidence accepted. |
-| Mac one-shot reload fixture | Reviewed fixture/source; core 32, desktop 14, Settings/probe DOM 6, controller 8 PASS retained. | Corrected signed Mac section-15 proof PASS: exact saved/cleanup-pending/reload-required status, disabled controls, read-only Retry restoring selected configured C, unchanged persistent bytes and normal exit. |
-| Temporary Mac encrypted files | Reviewed/corrected foundation; same-login local-key compromise accepted for development. | Original native proof preserved on its inputs; corrected narrow branch now proven on `37e3ab3`. |
-| Windows Studio credentials | Independently reviewed source published at `73a4fc1`; behavior/routing preserved. | Selected native actions retained; complete-manifest equivalence and original full phase-1 flow remain open. |
-| Mac signing policy | Certificate-backed permanent names/identity/gates preserved. | New pair signature/pin/DMG contents PASS; historical signed-update Keychain reuse failure retained. |
+| Capability | Proof / disposition |
+| --- | --- |
+| Phase 1 source foundation | Integrated through PR19; remote main `5f448ca` remains contained in this continuation. |
+| Mac corrected save/reload response | Section-15 packaged PASS on source `37e3ab3`: saved/cleanup-pending/reload-required status, disabled controls, read-only Retry, unchanged persistent bytes and normal exit. No repeat Mac proof proposed. |
+| Windows remembered Studio credentials | Independently reviewed implementation and exact-binary native action receipts retained. Current blockers: complete-manifest candidate equivalence, original full phase-1/alpha-alpha flow, Windows confirmed-save/reload-required native branch. No retrospective acceptance. |
+| Broader provider/settings work | Generic/session-only/no-auth, real Studio/generation and full 2A.1 remain deferred/incomplete. Windows cross-build continuity is unproved outside this same-package slice; physical locked stores remain explicit accessible-host limits. |
+| Mac storage/signing | Same-login encrypted-file compromise and deferred native ownership retained; permanent certificate-backed identity preserved. Historical signed-update Keychain reuse failure remains. |
 
-[Native ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-section-15-corrected-packaged-proof--2026-10-09)
-owns approved schedule, complete inputs, UI/file/exit receipts and bounded result;
-[public metadata evidence](../tasks/evidence/2026-10-09-mac-section15.json) contains hashes
-and before/confirmed/Retry state. [Mac plan section 15](../tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
-records this separate proof, with allowance exhausted. No wider milestone acceptance.
+[Owning disposition/schedule](../tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+proposes **1 Windows build, 2 launches, 4 loopback GETs**, combining full entry/reopen/
+replacement/removal with reload-required proof. It first requires a later serial Windows
+owner to inspect original host-local receipts and prepare the existing controller plus
+Windows-only qualification fixture. Neither preparation nor native execution is started.
+The current runner has exhausted IDs; its reload selector is Mac-only. The proposal is
+not an allowance or acceptance decision. 2A.2 is not dependency-ready/selected.
 
-Added **1 signed app/DMG pair, 1 isolated copy/root, 1 launch, 1 public entry, 1 Save,
-1 read-only Retry, 1 quit; 0 GETs/server/reopens/retries/CI**. Whole launch 141.430 s;
-Save confirmation 12.035 s; quit 7.937 s. Windows consumption remains **2/2 builds,
-5/5 launches, 2/4 GETs**; historical Mac allowances remain separate and untransferred.
-No external operation pending. All historical packages/failures/recovery/private signing
-material, stash and unrelated planning worktree are preserved. No installation, signing/
-trust/ACL/native Mac credential API change, request lifecycle, PR, merge or release.
-Public v0.1.0 remains unchanged, unsigned/non-notarized. [HANDOVER](HANDOVER.md) owns
-continuation and the next proposed acceptance-gap review.
+Review consumed **0 builds/launches/store operations/provider calls/CI**. Windows remains
+**2/2 builds, 5/5 launches, 2/4 GETs**; historical Mac budgets stay separate, section-15
+allowance exhausted. All failed receipts/packages, private signing/recovery artifacts,
+stash and unrelated planning worktree remain preserved. No external operation pending,
+PR/merge/release or installation; public v0.1.0 unchanged, unsigned/non-notarized.
+[HANDOVER](HANDOVER.md) owns publication and the unstarted Windows preparation proposal.
