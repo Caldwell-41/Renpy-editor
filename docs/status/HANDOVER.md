@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Manual reference library: reviewed correction, build decision pending
+## Manual reference library: reviewed correction, third build attempt failed
 
 Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`, with one serial
 Local Mac ARM64 owner. No other-host execution or second writer. The explicitly
@@ -25,9 +25,11 @@ light wide layout was observed. A separate process preserved exact metadata byte
 `e74ab6a0fa0be5e3de76267ca73276dd15bf6f7dfce0087f7a40b87d82d09300`, card counter 3,
 current/approved pointers, superseded r2/approved r3 and the external extension.
 
-**Counts:** Mac **2 builds / 5 starts consumed**, user-approved launch ceiling now **7**.
-Build ceiling is still **2**. One additional package build has been requested for the
-reviewed retention correction; approval is pending. Windows **0/2 builds, 0/3 starts**.
+**Counts:** Mac **3/3 package-build attempts, 5/7 starts** consumed. The user approved
+one third build; it failed before compilation when the owner activated the pinned
+toolchain using a root-relative path while in `app/`. The shell continued into Tauri,
+which could not run Cargo metadata. Count the failed launcher invocation. No app
+started; both remaining native launches are unused. Windows **0/2 builds, 0/3 starts**.
 No push authorization. Prior request budgets/failures remain separate and unchanged.
 
 Unique failures remain in the owning ledger: start 1 package-1 external reload/Save
@@ -58,17 +60,19 @@ qualify this changed production input. The prepared native probe now covers this
 retention correction plus repeated-route scope, knowledge/lore links and stale/missing
 citations/links, restoring exact baseline through project Undo before observations.
 
-**Next dependent action requires build approval.** If approved, record cumulative
-ceiling 3 builds/7 starts, build package 3 once with the existing identity/output
-policy, then run fresh phase 1 in a new owned synthetic root with promptly released
-physical observation markers (manual Save, light, dark, narrow). Do not let a
-compaction or unrelated investigation consume a live observation pause. Use start 7
-for phase-2 byte-exact reopen, then clean owned resources. One package failure is not
-automatic retry authorization. If build approval is declined, preserve the tested fix
-and stop with missing native evidence. Windows remains unaccepted. Finish focused
-review/in-scope fixes, canonical acceptance/status and a scoped local commit; ask before
-publishing the concrete reviewed result. Do not claim full 2B.1/Phase 2 or start a next
-feature. Both-target acceptance remains required.
+**Next dependent action requires a replacement build allowance.** The corrected
+fail-stop preparation from `app/` is `source ../.toolchains/enter-macos.sh && ...`;
+Cargo 1.90.0, Node 24.19.0, npm 11.9.0 and locked/offline Cargo metadata now pass.
+Failed `manual-reference-mac-03/build.log` is retained; it contains no game prose.
+No package was produced. If another build is explicitly approved, record cumulative
+ceiling 4 build attempts/7 starts, use a fresh `manual-reference-mac-04` package
+output directory and existing identity policy, then use starts 6/7 for fresh phase 1
+and exact phase-2 reopen. Release physical observation markers promptly (Save,
+light/dark/narrow); no unrelated work or compaction during live pauses. No automatic
+retry. Clean resources, finish acceptance records/local commit, then ask before
+publishing. The tested production correction remains `483407c`; no native evidence
+qualifies that correction yet. Windows remains required and unaccepted. Do not claim
+full 2B.1/Phase 2 or start another feature. Both-target acceptance remains required.
 
 ## Conditional Windows pull-and-continue prompt
 

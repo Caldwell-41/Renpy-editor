@@ -23,13 +23,15 @@ corrected-package layout/reopen proof remain required. Pinned SDK 8.5.3 default
 classification excludes the hidden metadata directory from distributions without
 executing game code; custom author distribution overrides are outside that proof.
 
-**User renewed two more Mac launches:** cumulative **2/2 builds, 5/7 starts**.
-One additional package build for the concrete retention fix has been requested;
-approval is pending. No build/start while that decision is pending. Owned process,
-fixture and raw prose baseline are cleaned. [HANDOVER](HANDOVER.md) and the owning
-ledger retain all unique failures and exact remaining evidence. Windows remains
-**0/2 builds, 0/3 starts**; both-target acceptance is required. Work is local-only;
-no push approved or attempted. No full manual-library acceptance is claimed.
+**Allowance stop:** Mac **3/3 package-build attempts, 5/7 app starts**. The user
+approved build 3, but a working-directory mistake left Cargo unavailable and Tauri
+stopped before compilation. The failed attempt is counted; the corrected pinned
+Cargo/Node/npm and locked/offline metadata preflight pass. A replacement package build
+requires renewed approval. Both remaining native starts are unused. Owned processes
+and synthetic fixtures are cleaned. [HANDOVER](HANDOVER.md) and the owning ledger
+retain failures and exact remaining evidence. Windows remains **0/2 builds, 0/3 starts**;
+both-target acceptance is required. Work is local-only; no push approved or attempted.
+No full manual-library acceptance is claimed.
 
 The branch entered clean at published `54f562d`; refreshed remote refs matched.
 Unrelated planning worktree is untouched. Prior bounded Studio request/credential

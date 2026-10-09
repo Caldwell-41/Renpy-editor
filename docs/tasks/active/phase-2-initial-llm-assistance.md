@@ -57,21 +57,20 @@ Revised preview checks passed direct editing/Save/Discard, both themes, lore and
 list-to-form return without script errors/overflow. Repository validation and diff
 whitespace checks passed. No production/native behavior is proved by these checks.
 
-**Current allowance, cumulative across chats/handoffs:** Mac **2/2 builds, 5/7 app
-starts** after explicit launch-only renewals; Windows **0/2 builds, 0/3 starts**.
-One additional Mac package build is requested for the tested review correction;
-approval is pending. Reserves require diagnosed failure/recorded correction;
-ambiguous dispatch must be resolved; reassess after two unsuccessful corrections of
-one hypothesis. Prior request budgets/failures remain separate. Initial sandboxed
-browser rendering failed; isolated rendering passed; previews consume no native
-allowance.
+**Current allowance, cumulative across chats/handoffs:** Mac **3/3 package-build
+attempts, 5/7 app starts**; Windows **0/2 builds, 0/3 starts**. The user approved the
+additional third build, but it failed before compilation because the owner sourced
+the pinned toolchain from the wrong working-directory-relative path. Count this
+failed launcher attempt. The corrected pinned-toolchain/metadata preflight passes;
+a replacement package build requires renewed approval. Both remaining native starts
+are unused. Historical failures and independent request budgets remain unchanged.
 
 **Remaining:** native qualification of the relationship retention correction,
 representative scope/link/knowledge behavior, dark/narrow observations and final
 corrected-package reopen. Earlier corrected-package authoring/reopen evidence and
 focused deterministic checks pass, but phase 1's visual pause timed out. Review found
-and fixed nested unknown-field loss on relationship-target edits. The existing
-package predates that correction. Stop dependent packaging until the build decision;
+and fixed nested unknown-field loss on relationship-target edits. Existing package 2
+predates the correction. Stop dependent packaging under the exhausted build allowance;
 no push approved or attempted. Windows remains required and unstarted. See the latest
 ledger and HANDOVER for exact attempts, missing proof and conditional continuation.
 No full 2B.1 or Phase 2 completion claim.
@@ -212,6 +211,25 @@ Windows stays **0/2 builds, 0/3 launches**; no publish is authorized. Remaining 
 proof is the corrected relationship form, representative scope/knowledge/link Save,
 dark theme and narrow layout, and final corrected-package reopen. No full 2B.1 or
 Phase 2 completion claim.
+
+### Third package attempt: toolchain launcher failure — 2026-10-09
+
+User approval granted a third package build, with launch ceiling 7 unchanged.
+The owner ran the launcher from `app/` but incorrectly used root-relative paths for
+the preceding ledger update and toolchain activation. Those commands failed, and the
+shell continued into packaging without the pinned Cargo path. Tauri exited 1 at
+`cargo metadata --no-deps --format-version 1`: Cargo was unavailable. No Rust/frontend
+compilation, signature, installer or app launch occurred. This avoidable owner error
+is counted as build attempt **3/3**, not reclassified as free preflight. Two launches
+remain unused (**5/7**). Failed `manual-reference-mac-03/build.log` is retained locally.
+
+Corrected fail-stop preparation uses `source ../.toolchains/enter-macos.sh && ...`
+from `app/`; Cargo 1.90.0, Node 24.19.0, npm 11.9.0 and locked/offline workspace
+metadata preflight pass. No security/identity changes were made. A replacement build
+must use a fresh output directory and requires explicit allowance renewal before the
+launcher is invoked. Production correction stays committed/tested at `483407c`.
+No native retry, push or other-host execution occurred. Updated live status/handover
+record exact missing acceptance and the required decision.
 
 ## Windows synthetic request selection — 2026-10-09
 
