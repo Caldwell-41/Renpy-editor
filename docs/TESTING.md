@@ -1349,12 +1349,35 @@ requests and the stalled connection closed. Supported Remove profile must leave 
 active profile/cleanup/sealed record before the controller removes its precisely
 marked task root. Preserve receipts; no unrelated credential access or recovery.
 
-Windows affected-request verification remains necessary: packaged visible Send/
+Windows affected-request verification requires packaged visible Send/
 completion/unknown usage/cancel/auth error plus Source editing/Save during a stalled
 POST, stale profile/project result rejection, shutdown and owned-worker/listener
 cleanup using the established remembered Windows credential. Reuse unchanged
 Windows credential acceptance; do not rerun its store/refusal/replacement qualification.
 This Mac synthetic result cannot claim Windows requests, full 2A.2 or live Studio.
+
+The selected Windows continuation uses `scripts/windows-studio-request.py`, reusing
+the fixed-body loopback server, `studio-request` native fixture and existing Windows
+locked-input/package controller. `--build 1` produces an NSIS package without installing
+it; `--launch 1 --package 1` reserves an exact new attempt. These are references,
+not permission to replay consumed identities. The owning ledger preserves the two-build/
+three-launch ceiling and historical counts. A reserve needs a diagnosed failure and
+recorded correction. Exact LF ownership-marker bytes are checked before launch.
+
+The fifth explicit POST stalls until normal native exit, after the four completion/
+cancel/auth/unknown-usage cases. Observe client socket closure before stopping the
+server. After active-request exit, the accepted exact-target Windows metadata cleanup
+flow validates the entire seed-to-saved profile transition and OS ownership fields,
+deletes only that newly created synthetic target and verifies absence without reading
+its blob. Only then remove the precisely marked fixture root; preserve receipts.
+No cleanup relaunch or unrelated credential enumeration/recovery is needed.
+
+Desktop `ai_requests` tests now run on both targets through an injected fixture reader,
+without exercising the OS credential backend. The synchronized Save/completion race
+must preserve valid output after the service returns, while cancel/configuration/
+shutdown during the same wait must discard it. Core limits also reject partial usage
+reports exceeding saved input or reasoning limits. Run the focused core/desktop tests
+on Mac for those shared corrections; prior unaffected native/credential proof is reused.
 
 The [completed Mac walkthrough](tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
 records the native four-request proof, a 161 ms successful Source Save with a stalled

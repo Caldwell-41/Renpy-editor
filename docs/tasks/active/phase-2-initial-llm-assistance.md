@@ -6,7 +6,7 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-Read the current contract for Windows work, then only the relevant requirement
+Read the Windows synthetic request selection for current Windows work, then only the relevant requirement
 sections. Detailed planning/source/provider/native attempts through `015579a` are in
 the [historical ledger](../archive/2026-10-09-phase-2-execution-history.md); old prompts
 there are evidence, not live instructions. Future capabilities require their own
@@ -16,6 +16,120 @@ Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepte
 including plain interface language, optional technical help, completion/submission
 validation and shared control ownership. These guide future implementation; they do
 not claim the current application already satisfies every interaction.
+
+## Windows synthetic request selection — 2026-10-09
+
+The user selected review, focused fixes and packaged Windows x64 qualification of
+the non-streaming Studio synthetic request lifecycle, continuing published `0a91e20`.
+One serial Local Windows owner; no subagents or other-host execution. The existing
+clean `codex/provider-qualification` worktree fast-forwarded from `9d7a6d6` after
+ref/ancestry inspection. Preserve accepted Windows/Mac credential evidence and Mac
+request acceptance; do not repeat unaffected credential scenarios.
+
+Required proof: explicit Send only; immutable native configuration/credential capture;
+pre-send refusal; bounded off-thread transport and parsing; truthful status/usage;
+cancel/deadlines/size/error handling; stale configuration/project/shutdown rejection;
+no retry/provider switch/output application. A compact packaged native walkthrough
+must show completion, unknown usage, cancellation/error, editing and Save during a
+stall, normal exit and active-request exit/cleanup. Deterministic checks supplement
+visible observations. Public synthetic keys and isolated loopback only.
+
+Selected ceiling is **two package builds / three application launches**, currently
+**1/2 and 2/3** (one build and one launch remain). Historical Windows **7 builds / 12 launches** and completed Mac request
+**1 build / 2 launches** remain unchanged. Reserves require diagnosed failure and a
+concrete correction; ambiguous dispatch must be resolved before retry. Establish
+supported native input/capture and the approved build route before spending an attempt.
+Operator observations have separate bounds from product response deadlines. Preserve
+all original captures, failed receipts and cumulative accounting outside Git.
+
+Complete scoped review/fixes/checks and ownership-aware credential/fixture/process/
+listener cleanup, update acceptance/CURRENT/HANDOVER and commit locally. **No push
+before explicit user approval of the concrete reviewed result.** No real endpoints,
+project-content sends, SSE/provider/auth expansion, proposals, policy/install changes,
+CI, other host, merge/release or next feature. No full 2A.2/live Studio claim.
+
+### Windows request review and preflight
+
+Native accessibility, keyboard focus and literal typing passed on a precisely owned
+Explorer preflight folder after the user approved the app-access retry. The user
+waived screenshots. Preserve the earlier unrelated-window automatic-review refusal,
+app-access timeout and click geometry failure; no package/launch was consumed.
+The existing pinned MSVC/SDK, Rust 1.90.0, Node/npm and offline Tauri NSIS route is
+reused without installation/security changes. Sandbox loopback and Tauri build-script
+access failed; host loopback passed all eight original request tests.
+
+Focused regressions demonstrated two shared defects: partial usage with prompt 4097
+was accepted against context 4096, and completion while Save checked out the service
+was incorrectly expired. Corrections bound every reported usage component and defer
+publication off-thread while Save owns the service, retaining cancellation/configuration/
+shutdown guards and the original response deadline. All six desktop request tests now
+run on Windows with an injected test-only public credential reader and isolated native
+references, without OS credential operations. Initial test-fixture revision/name and
+controller manifest-separator failures are retained as harness failures.
+
+The compact native selection uses the existing fixed-body server and fresh request
+fixture: reported completion, stall/edit/Save/cancel, authentication error, unknown
+usage completion, and a fifth stalled request followed by normal native exit. The
+accepted exact-target ownership-metadata removal flow will clean the one newly
+app-created Windows credential after active-request exit, without blob inspection,
+enumeration or a cleanup relaunch. Package/launch receipts preserve source inputs,
+identities and all original failures. Operator observation 180 s, walkthrough 1800 s,
+application response 600 s, connection 1 s and client cleanup 2 s are distinct bounds.
+
+Mac's four native scenarios and credential foundation are unchanged, but corrected
+shared behavior needs a focused Mac `ai_request` and `ai_requests` test recheck. No
+other-host execution or new Mac native/package run is selected here.
+
+### Windows request acceptance and capability blocker — 2026-10-09
+
+**State: incomplete, blocked on supported native input/capture permission.** No push
+is authorized or requested while native acceptance remains incomplete. Shared product
+fixes are committed locally as `0cec43ff7785713d9d9ba0a8f53391cd92ccdfe1`; controller,
+verification and blocker records accompany the local continuation. Entry was published
+`0a91e20`; no unrelated work was reset, no delegation or other-host execution occurred.
+
+| Gate | Evidence/result |
+| --- | --- |
+| Production review | Explicit Send is the sole request dispatch. Native profile/body/credential capture and pre-send validation, off-thread bounded loopback transport, safe errors/unknown usage, no retry/provider switch/output application, and cancel/config/project/shutdown guards inspected. |
+| Demonstrated defects | Partial prompt/reasoning usage could escape saved bounds; valid completion during a busy Save boundary was falsely expired. Rejecting regressions reproduced both before correction. Fixes preserve credential backends, namespaces, identity and security policy. |
+| Focused checks | Core request 8, desktop request 6 (including synchronized completion/Save with cancel/change/shutdown), fresh fixture 1, frontend/protocol 11, Windows controller 6 and affected shared controller 4 PASS. TypeScript, scoped Rust formatting and repository validation pass. |
+| Package | Build 1 PASS, 70.224 s; existing offline pinned Tauri NSIS route; privacy scan passes two artifacts. Executable SHA256 `b293c4340dd52af528ff5c5b5467f51273698984b4339e7a745dff49b1848266`; installer SHA256 `a73e4ec2c440be3f83bef8cf3d0819d26abf336d7d5db4d3c5dfa8fe047c42fb`. No installation. |
+| Launch 1 | Controller failure before window: Windows text write changed marker LF to CRLF; native fixture refused, exit 101 at 0.886 s. Zero HTTP/credentials. Corrected byte write and regression before reserve launch. Original marker hex/error/receipts retained; exact marker-only root removed. |
+| Launch 2 | Same binary opened the synthetic welcome screen. Accessibility observations passed; native Tab/F6 left focus on the WebView container, and current-app accessibility click refused with `coordinate input geometry is unavailable`. Zero HTTP/credential references. Native Alt-F4 exited normally, code 0 at 509.029 s; native cleanup receipt says zero active workers/complete. |
+| Required native request/UI/Save proof | **MISSING:** explicit Send, completion/reported and unknown usage, cancel/auth error, source editing/Save during a stall, and active-request exit. No internal test or welcome-screen observation substitutes for these. |
+| Cleanup | Both exact app PIDs absent; both listener lifetimes stopped; Windows listener query succeeds with no listener on fixture port. Both exact roots removed after marker/seed ownership checks. Zero native credentials created/accessed/deleted. Preflight window closed and its task file removed; original observations/receipts retained. |
+| Mac consequence | Prior native four-request/credential evidence remains valid for unchanged scenarios. Corrected partial-usage and busy-Save publication behavior still needs focused Mac `cargo test -p loomlight-core ai_request --locked` and `cargo test -p loomlight-desktop ai_requests --locked`. No Mac execution or full current cross-platform acceptance claimed. |
+
+The user said screenshots were not needed. Automatic approval review then rejected
+an optional task-app screenshot on that basis. Native capture is needed by this tool's
+click geometry; keyboard alternatives and an actual current-app accessibility click
+failed to enter the WebView. A clarification asking to allow task-app captures for
+input remains unanswered. Stop at this capability decision; do not spend launch 3
+unchanged. The initial unrelated-window capture refusal, app-access approval timeout,
+first observation wrapper's undefined-state error, sandbox loopback/Tauri/TEMP failures,
+test scaffolding corrections and all failed receipts remain failures. An external
+`connect_ex` audit assertion failed before preserving its return value, so no port-refusal
+result is claimed; the later successful Windows listener metadata query supplies absence.
+
+**Cumulative:** this Windows request selection **1/2 builds, 2/3 launches, 0 HTTP,
+0 credentials, 2 removed roots, 2 stopped listener lifetimes**. Historical Windows
+7 builds/12 launches become **8 builds/14 launches**; Mac request totals remain
+1 build/2 launches. No allowance reset. Native operator captures were individually
+recorded; the first tool approval/wrapper failure has no saved duration and is not a
+passed bounded observation. Launch 2 was within the 1800-second whole-walkthrough cap.
+One build/one launch remain; reserves require a concrete diagnosed correction.
+
+Private originals are under ignored `app/.toolchains/windows-studio-request/`:
+`build-1-{attempt,preflight,runtime,terminal}.json`, package artifacts, both launch
+folders with state/launch/exit/cleanup receipts, native accessibility originals,
+pre/post-fix test logs, `listener-audit.json` and `blocked-final-audit.json`.
+[Public partial metadata](../evidence/2026-10-09-windows-studio-request-partial.json)
+contains only safe identities/results. Never publish the ignored logs or private paths.
+For continuation, resolve capture permission and prove native click/focus on a task-owned
+preflight window, record `launch-3-correction.json`, verify unchanged package/runtime
+hashes, then use the final launch for the compact five-request walkthrough. Do not
+reacquire exited windows or repeat credential qualification. No full 2A.2/live Studio,
+CI, merge/release, policy changes or next feature is selected.
 
 ## Current Windows qualification contract
 

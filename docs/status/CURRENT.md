@@ -1,32 +1,34 @@
 # Current status
 
-**Updated:** 2026-10-09. The selected Mac Studio authenticated non-streaming synthetic
-request lifecycle is **implemented, qualified and cleaned up**. One serial Local
-macOS ARM64 owner completed the work on `codex/provider-qualification`; implementation
-candidate `3f3aaf3` and walkthrough continuation `e42597b` use the same verified signed
-package. The final records checkpoint is published and its exact SHA verified in the
-response. No integration, CI or release is selected.
+**Updated:** 2026-10-09. The selected Windows Studio non-streaming synthetic request
+lifecycle is **reviewed and corrected, but native acceptance is blocked** on input/
+capture permission. This is a concrete capability stop, not completion or a push
+approval checkpoint. Work is local on `codex/provider-qualification`, continuing
+published `0a91e20`; shared fixes are committed as `0cec43f`. Nothing has been pushed.
 
-[Final Mac acceptance](../tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
-owns exact proof, failures and cumulative accounting. Four explicit fixed-body
-loopback POSTs passed through the packaged production app: completion with reported
-usage, stalled request/cancellation, safe authentication error and completion with
-unknown usage. Native source editing and Save remained responsive during the stall;
-Save was 161 ms with one worker active before and after. Normal native quit returned
-code 0. Owned app/listener absence, product removal of the one synthetic credential,
-and exact fixture cleanup are verified. Original failed launch 1 and its operator
-bound overrun remain preserved. Screenshots requested for user review stay outside Git.
+[The owning Windows request acceptance record](../tasks/active/phase-2-initial-llm-assistance.md#windows-request-acceptance-and-capability-blocker--2026-10-09)
+records exact evidence, package hashes, failures and cumulative accounting. Focused
+regressions exposed and fixed partial usage escaping saved bounds and a valid response
+being discarded when completion overlaps Save. Core/desktop/fixture/frontend/controller
+checks pass. One Windows NSIS package passed, without installation or policy changes.
 
-Final selected consumption is **1/2 builds, 2/3 launches**. No operation, task-created
-credential/root, listener or request is pending. This outcome is closed; unused
-allowance does not select additional work. [HANDOVER](HANDOVER.md) retains recovery,
-package/evidence ownership and the remaining acceptance boundary.
+Launch 1 failed on a controller CRLF ownership marker and was corrected. Launch 2
+opened the synthetic welcome screen, but native clicks require capture geometry and
+keyboard navigation did not enter the WebView. The user waived screenshots; automatic
+approval review interpreted this as prohibiting capture. Clarification allowing captures
+needed for input remains pending. Zero HTTP requests or credentials were created.
+Native Alt-F4 exited launch 2 normally with zero workers. Both exact roots, app PIDs
+and listeners are cleaned/stopped; original failures and accessibility receipts remain.
 
-[Completed Windows credential qualification](../tasks/active/phase-2-initial-llm-assistance.md#final-windows-acceptance-and-cleanup--2026-10-09)
-and valid Mac credential evidence are reused unchanged. Mac's development encrypted
-files/saved unlock key, same-login limitation, deferred native ownership, approved
-signing identity and legacy cleanup ownership remain. Phase 1 remains accepted through
-PR19/main `5f448ca`; public v0.1.0 is unchanged. Windows needs focused affected request/
-UI/Save/cancel/stale/shutdown proof without repeating credential qualification.
-Full 2A.1/2A.2/Phase 2 and live Studio compatibility remain incomplete. No next feature,
-other-host work, installation/security change or merge/release is authorized by closure.
+Selected consumption is **1/2 builds, 2/3 launches**; cumulative Windows history is
+**8 builds/14 launches**. One build/one launch remain, requiring a diagnosed correction.
+Packaged Send/completion/unknown usage/cancel/error, stalled edit/Save and active-request
+exit are still missing. [HANDOVER](HANDOVER.md) owns the exact continuation route.
+
+[Archived Mac request acceptance](../tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
+and accepted Windows/Mac credential evidence are reused for unchanged scenarios.
+The two shared corrections require focused Mac `ai_request` and `ai_requests` tests;
+no other-host execution occurred. Credential backends, identities and policies are
+unchanged. Phase 1 remains accepted through PR19/main `5f448ca`. Full 2A.1/2A.2,
+Phase 2 and live Studio compatibility remain incomplete; public v0.1.0 is unchanged.
+No installation, security change, CI, merge/release or next feature is selected.

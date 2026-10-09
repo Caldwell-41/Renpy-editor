@@ -40,25 +40,13 @@ def manifest():
     for folder in ['src','src-core/src','src-tauri/src','src-tauri/permissions','src-tauri/capabilities','tests/fixtures/studio-request']:
         files.extend(p for p in (package.APP/folder).rglob('*') if p.is_file())
     files.extend(package.APP/p for p in ['Cargo.toml','Cargo.lock','src-core/Cargo.toml','src-tauri/Cargo.toml','src-tauri/build.rs','src-tauri/identity_policy.rs','src-tauri/macos-signing.json','src-tauri/tauri.conf.json','package.json','package-lock.json','index.html','tsconfig.json','vite.config.ts'])
-    return {str(p.relative_to(package.APP)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(set(files)) if p.exists()}
+    return {p.relative_to(package.APP).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(set(files)) if p.exists()}
 
 def accepted(method,path,auth,body):
     expected={'model':'synthetic-model','messages':[{'role':'user','content':PROMPT}],'stream':False,'max_tokens':1024,'enable_thinking':False,'enable_tools':False,'enabled_tools':[]}
     return method=='POST' and path=='/v1/chat/completions' and hmac.compare_digest(auth,'Bearer '+PUBLIC_KEY) and body==expected
 
-def launch(bundle,output,number=1):
-    if output.exists():raise ValueError('Launch output exists; ambiguous/repeated dispatch refused')
-    if number not in (1,2,3) or output.name!=f'launch-{number}':raise ValueError('Exact bounded launch identity required')
-    for prior in range(1,number):
-        folder=output.parent/f'launch-{prior}'
-        terminal=json.loads((folder/'exit.json').read_text())
-        cleaned=json.loads((folder/'cleanup.json').read_text())
-        if terminal['normal'] or not cleaned['ownedFixtureRemoved']:raise ValueError('Reserve requires a failed terminal cleaned attempt and a separately identified correction')
-    if subprocess.run(['pgrep','-x','loomlight'],capture_output=True).returncode==0:raise ValueError('A Loomlight process already exists; no second owner')
-    identity=package.verify(bundle,package.approved_fingerprint(json.loads((package.APP/'src-tauri/macos-signing.json').read_text())['certificateSha1']))
-    output.mkdir(parents=True,mode=0o700)
-    root=Path(tempfile.mkdtemp(prefix='loomlight-studio-request-'));os.chmod(root,0o700);(root/'.request-owner').write_text(OWNER);os.chmod(root/'.request-owner',0o600)
-    write(output/'state.json',{'root':str(root),'bundle':str(bundle),'identity':identity,'source':subprocess.check_output(['git','rev-parse','HEAD'],cwd=package.APP,text=True).strip(),'manifest':manifest(),'allowance':{'builds':2,'launches':3},'launch':number})
+def start_server(output,count=4):
     events=[];gate=threading.Lock();stop=threading.Event()
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*_):pass
@@ -70,10 +58,10 @@ def launch(bundle,output,number=1):
             except (ValueError,UnicodeError):body=None
             with gate:
                 index=len(events)+1
-                good=index<=4 and accepted(self.command,self.path,self.headers.get('Authorization',''),body)
-                event={'sequence':index,'accepted':good,'method':self.command,'bodyBytes':len(raw),'bodySha256':hashlib.sha256(raw).hexdigest(),'variant':{1:'complete',2:'stall-until-cancel',3:'authentication-error',4:'complete-usage-unknown'}.get(index,'refused')}
+                good=index<=count and accepted(self.command,self.path,self.headers.get('Authorization',''),body)
+                event={'sequence':index,'accepted':good,'method':self.command,'bodyBytes':len(raw),'bodySha256':hashlib.sha256(raw).hexdigest(),'variant':{1:'complete',2:'stall-until-cancel',3:'authentication-error',4:'complete-usage-unknown',5:'stall-until-exit'}.get(index,'refused')}
                 events.append(event);write(output/f'request-{index}-start.json',event)
-            if good and index==2:
+            if good and index in (2,5):
                 self.connection.settimeout(1)
                 closed=False
                 while not stop.is_set() and time.monotonic()-started<900:
@@ -98,6 +86,22 @@ def launch(bundle,output,number=1):
         do_DELETE=handle_request
     server=ThreadingHTTPServer(('127.0.0.1',PORT),Handler);server.daemon_threads=False
     listener=threading.Thread(target=server.serve_forever);listener.start()
+    return server,listener,stop,events
+
+def launch(bundle,output,number=1):
+    if output.exists():raise ValueError('Launch output exists; ambiguous/repeated dispatch refused')
+    if number not in (1,2,3) or output.name!=f'launch-{number}':raise ValueError('Exact bounded launch identity required')
+    for prior in range(1,number):
+        folder=output.parent/f'launch-{prior}'
+        terminal=json.loads((folder/'exit.json').read_text())
+        cleaned=json.loads((folder/'cleanup.json').read_text())
+        if terminal['normal'] or not cleaned['ownedFixtureRemoved']:raise ValueError('Reserve requires a failed terminal cleaned attempt and a separately identified correction')
+    if subprocess.run(['pgrep','-x','loomlight'],capture_output=True).returncode==0:raise ValueError('A Loomlight process already exists; no second owner')
+    identity=package.verify(bundle,package.approved_fingerprint(json.loads((package.APP/'src-tauri/macos-signing.json').read_text())['certificateSha1']))
+    output.mkdir(parents=True,mode=0o700)
+    root=Path(tempfile.mkdtemp(prefix='loomlight-studio-request-'));os.chmod(root,0o700);(root/'.request-owner').write_text(OWNER);os.chmod(root/'.request-owner',0o600)
+    write(output/'state.json',{'root':str(root),'bundle':str(bundle),'identity':identity,'source':subprocess.check_output(['git','rev-parse','HEAD'],cwd=package.APP,text=True).strip(),'manifest':manifest(),'allowance':{'builds':2,'launches':3},'launch':number})
+    server,listener,stop,events=start_server(output)
     env={k:v for k,v in os.environ.items() if not k.startswith('LOOMLIGHT_')}
     env.update(LOOMLIGHT_RUNTIME_UI_PROBE='studio-request',LOOMLIGHT_STUDIO_PROBE_ROOT=str(root))
     process=None;start=time.monotonic();code=None;forced=False

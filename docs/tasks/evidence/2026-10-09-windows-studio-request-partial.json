@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-09",
+  "platform": "Windows x64",
+  "branch": "codex/provider-qualification",
+  "publishedContinuation": "0a91e20cbb7d8abedc5cfc84b566bf9ccbc65723",
+  "sharedFixCommit": "0cec43ff7785713d9d9ba0a8f53391cd92ccdfe1",
+  "state": "native-input-capability-blocked",
+  "nativeAcceptance": false,
+  "selected": {
+    "builds": 1,
+    "buildLimit": 2,
+    "launches": 2,
+    "launchLimit": 3,
+    "httpRequests": 0,
+    "credentialsCreated": 0,
+    "rootsRemoved": 2,
+    "listenersStopped": 2
+  },
+  "cumulativeWindows": {
+    "builds": 8,
+    "launches": 14
+  },
+  "macRequestHistory": {
+    "builds": 1,
+    "launches": 2
+  },
+  "package": {
+    "executableSha256": "b293c4340dd52af528ff5c5b5467f51273698984b4339e7a745dff49b1848266",
+    "installerSha256": "a73e4ec2c440be3f83bef8cf3d0819d26abf336d7d5db4d3c5dfa8fe047c42fb",
+    "buildSeconds": 70.22369270003401,
+    "runtimeInputsUnchangedAfterBuild": true
+  },
+  "checks": {
+    "coreRequest": 8,
+    "desktopRequest": 6,
+    "freshFixture": 1,
+    "frontendProtocol": 11,
+    "windowsController": 6,
+    "affectedSharedController": 4
+  },
+  "launches": [
+    {
+      "number": 1,
+      "exitCode": 101,
+      "seconds": 0.8857804998988286,
+      "classification": "controller marker CRLF failure",
+      "passed": false
+    },
+    {
+      "number": 2,
+      "exitCode": 0,
+      "seconds": 509.02907300007064,
+      "normalExit": true,
+      "classification": "native input/capture permission blocker",
+      "passed": false
+    }
+  ],
+  "cleanup": {
+    "ownedPidsAbsent": true,
+    "ownedRootsAbsent": true,
+    "listenerMetadataQueryPassed": true,
+    "nativeCredentialsCreated": 0,
+    "unrelatedCredentialAccess": false
+  },
+  "missingNativeProof": [
+    "Send",
+    "completion",
+    "unknown usage",
+    "cancel/error",
+    "edit and Save during stall",
+    "active-request exit"
+  ],
+  "requiredMacRecheck": [
+    "cargo test -p loomlight-core ai_request --locked",
+    "cargo test -p loomlight-desktop ai_requests --locked"
+  ],
+  "pushed": false
+}
