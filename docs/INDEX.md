@@ -123,3 +123,6 @@ An archive link does not require reading the whole ledger. Git history supplies 
 CURRENT/HANDOVER wording. [Status-document maintenance](WORKFLOW.md#status-document-maintenance)
 defines ownership, replacement at handoff and soft size targets; future continuation
 records must not accumulate completed checkpoints.
+
+- [Project prompts and context preparation](PROMPTS_CONTEXT.md): one action's project-local
+  prompt Save/restore/history and exact bounded read-only reference/context preview.

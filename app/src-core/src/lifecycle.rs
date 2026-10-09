@@ -25,7 +25,7 @@ use crate::{
     },
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Map;
+use serde_json::{Map, Value};
 use std::{
     collections::HashMap,
     ffi::OsStr,
@@ -136,6 +136,7 @@ pub enum LifecycleError {
     Authoring(AuthoringError),
     Scene(SceneError),
     Reference(crate::references::ReferenceError),
+    Prompt(crate::prompts::PromptError),
     Source(SourceError),
     Media(MediaError),
     Io,
@@ -656,6 +657,18 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn prompts(&self) -> Result<crate::prompts::PromptWorkspace,LifecycleError> {
+        let (authority,id)=self.authoring_context()?;self.authoring.prompts(&authority,&id).map_err(LifecycleError::Prompt)
+    }
+    pub fn prompts_apply(&self,request:crate::prompts::PromptRequest)->Result<crate::prompts::PromptWorkspace,LifecycleError>{
+        let(authority,id)=self.authoring_context()?;self.authoring.prompts_apply(&authority,&id,request).map_err(LifecycleError::Prompt)
+    }
+    pub fn context_options(&self)->Result<Value,LifecycleError>{
+        let(authority,id)=self.authoring_context()?;self.authoring.context_options(&authority,&id).map_err(LifecycleError::Prompt)
+    }
+    pub fn context_preview(&self,session:&str,request:crate::prompts::PreviewRequest)->Result<Value,LifecycleError>{
+        let(authority,id)=self.authoring_context()?;self.authoring.context_preview(&authority,&id,session,request).map_err(LifecycleError::Prompt)
+    }
     pub fn references(&self) -> Result<crate::references::Workspace,LifecycleError> {
         let (authority,project_id)=self.authoring_context()?;
         self.authoring.references(&authority,&project_id).map_err(LifecycleError::Reference)

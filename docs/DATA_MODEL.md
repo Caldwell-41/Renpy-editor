@@ -516,3 +516,10 @@ The projection is limited to 256 records and at most 4 KiB per message; raw outp
 retains the existing 2 MiB limit with 32 KiB pages. Known pinned SDK compile/traceback
 and lint locations are recognised; all other text remains bounded fallback output.
 No diagnostic is independent document truth or authority to mutate/open arbitrary files.
+
+## Project assistance prose and prepared context
+
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md) owns `.renpy-editor/ai.json` v1 project prompt
+overrides, separate style notes, baseline version/digest, bounds and shared history.
+The selected one-Beat preview records exact approved reference revisions and bounded
+source/metadata read sets without storing payloads or mutating runnable source.

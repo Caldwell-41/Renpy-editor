@@ -1,7 +1,8 @@
 import { preferenceError, readPreferences, subscribePreferences, updatePreferences } from "./preferences.ts";
 import { requestCore } from "./bridge.ts";
+import { mountPromptPreparation, type PromptActions, type PromptController } from "./prompt-ui.ts";
 import { mountStudioSettings } from "./ai-settings-ui.ts";
-interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void }
+interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void; prompts?: PromptActions }
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text = "", className = ""): HTMLElementTagNameMap[K] { const el = document.createElement(tag); el.textContent = text; el.className = className; return el; }
 export function openSettings(context?: SettingsContext): void {
   if (document.querySelector('[aria-modal="true"]')) return;
@@ -25,7 +26,8 @@ export function openSettings(context?: SettingsContext): void {
   const footer = node("footer", "", "settings-footer"); footer.role = "status";
   const notify = (): void => { footer.textContent = preferenceError() || "Preferences save automatically on this device."; footer.dataset.kind = preferenceError() ? "error" : "normal"; };
   const unsubscribe = subscribePreferences(notify);
-  const finish = (): void => { unsubscribe(); overlay.remove(); if (background) background.inert = false; previous?.focus(); };
+  let promptController:PromptController|undefined;
+  const finish = (): void => { if(promptController&&!promptController.canLeave())return;promptController?.dispose(); unsubscribe(); overlay.remove(); if (background) background.inert = false; previous?.focus(); };
   close.addEventListener("click", finish);
   function row(label: string, description: string, control: HTMLElement): void {
     const line = node("div", "", "setting-row"); const copy = node("div"); const text = node("label", label); const id = `setting-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`; text.htmlFor = id; control.id = id;control.ariaLabel=label;
@@ -37,6 +39,7 @@ export function openSettings(context?: SettingsContext): void {
     values.forEach(([value,label])=>{const b=node("button",label);b.role="radio";b.ariaChecked=String(value===chosen);b.tabIndex=value===chosen?0:-1;const choose=():void=>{group.querySelectorAll<HTMLButtonElement>("button").forEach(button=>{button.ariaChecked=String(button===b);button.tabIndex=button===b?0:-1;});change(value);};b.addEventListener("click",choose);b.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();const buttons=[...group.querySelectorAll<HTMLButtonElement>("button")];const next=buttons[(buttons.indexOf(b)+(e.key==="ArrowRight"?1:buttons.length-1))%buttons.length]!;next.click();next.focus();});group.append(b);});return group;
   }
   function draw(category: string): void {
+    if(promptController&&!promptController.canLeave())return;promptController?.dispose();promptController=undefined;
     content.replaceChildren(); const prefs = readPreferences();
     const projectScope=category==="Current project";
     if(!projectScope)applicationCategory=category;
@@ -70,6 +73,7 @@ export function openSettings(context?: SettingsContext): void {
       row("Game resolution", "Read-only here; this is independent of interface size.",node("span",`${context.resolution.width} × ${context.resolution.height}`));
       const manage=node("button","Manage SDK & execution trust","button"); manage.addEventListener("click",()=>{finish();context.runtime();});
       row("Preview & Run", "Inspect SDK selection and session trust using the existing runtime controls.",manage);
+      if(context.prompts)promptController=mountPromptPreparation(content,context.prompts);
     } else if (category === "About") {
       const version=node("p","Loading version…"); content.append(version);
       void requestCore<{applicationVersion:string;protocolVersion:number}>("system.version").then(r=>{ if(overlay.isConnected) version.textContent = r.ok ? `Loomlight ${r.value.applicationVersion}` : "Version unavailable"; }).catch(()=>version.textContent="Version unavailable");
@@ -78,9 +82,10 @@ export function openSettings(context?: SettingsContext): void {
   }
   categories.forEach(category => { const b=node("button",category,"settings-category"); b.disabled=category==="Current project" && !context; if(b.disabled)b.title="Open a project to view its settings"; b.addEventListener("click",()=>draw(category)); rail.append(b); });
   overlay.addEventListener("keydown",event=>{
+    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="s"&&promptController){event.preventDefault();event.stopPropagation();content.querySelector<HTMLButtonElement>(".prompt-actions .primary")?.click();return;}
     if(event.key==="Escape"){event.preventDefault();finish();}
     if(event.key!=="Tab")return;
-    const controls=[...overlay.querySelectorAll<HTMLElement>('button:not(:disabled),input,select,[tabindex="0"]')]; const first=controls[0],last=controls.at(-1);
+    const controls=[...overlay.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]')].filter(n=>!n.closest('[hidden]')); const first=controls[0],last=controls.at(-1);
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
   });
   body.append(categorySelect,rail,content); overlay.append(header,body,footer); document.body.append(overlay); draw("Workspace");notify();close.focus();

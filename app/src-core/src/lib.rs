@@ -11,6 +11,7 @@ pub mod ports;
 pub mod preferences;
 pub mod progress;
 pub mod references;
+pub mod prompts;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
@@ -67,6 +68,10 @@ pub const OPERATIONS: &[&str] = &[
     "sdk.browse",
     "sdk.install",
     "authoring.list",
+    "prompts.list",
+    "prompts.apply",
+    "context.options",
+    "context.preview",
     "references.list",
     "references.apply",
     "character.create",
@@ -115,7 +120,7 @@ const GENERIC_ERROR: &str = "The request could not be completed.";
 #[serde(rename_all = "camelCase")]
 pub struct CoreError {
     code: &'static str,
-    message: &'static str,
+    message: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -141,13 +146,13 @@ impl CoreResponse {
         }
     }
 
-    pub fn failure(request_id: String, code: &'static str, message: &'static str) -> Self {
+    pub fn failure(request_id: String, code: &'static str, message: impl Into<String>) -> Self {
         Self {
             protocol_version: PROTOCOL_VERSION,
             request_id,
             ok: false,
             value: None,
-            error: Some(CoreError { code, message }),
+            error: Some(CoreError { code, message:message.into() }),
         }
     }
 
@@ -516,6 +521,18 @@ pub fn handle_application_request(
                 })
                 .and_then(to_value)
         }
+        "prompts.list" | "context.options" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload).and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| if validated.operation == "prompts.list" { lifecycle.prompts().and_then(to_value) } else { lifecycle.context_options() })
+        }
+        "prompts.apply" => session_payload(validated.payload)
+            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload|serde_json::from_value::<prompts::PromptRequest>(Value::Object(payload)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
+            .and_then(|request| lifecycle.prompts_apply(request)).and_then(to_value),
+        "context.preview" => session_payload(validated.payload)
+            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| (session,payload)))
+            .and_then(|(session,payload)|serde_json::from_value::<prompts::PreviewRequest>(Value::Object(payload)).map(|request|(session,request)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
+            .and_then(|(session,request)| lifecycle.context_preview(&session,request)),
         "references.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload).and_then(|session| lifecycle.require_session(&session))
                 .and_then(|_| lifecycle.references()).and_then(to_value)
@@ -828,6 +845,18 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
             "This request belongs to a closed or replaced project session.",
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
+        LifecycleError::Prompt(error) => {
+            use prompts::PromptError::*;
+            let (code,message)=match error {
+                Invalid => ("INVALID_PROMPT", "Check prompt/task text and positive size limits. Nothing was saved or prepared.".into()),
+                Unavailable => ("PROMPT_UNAVAILABLE", "Project prompt or reference metadata is unreadable, unsupported or over its file limit. Existing data was retained.".into()),
+                StaleReference {record,revision} => ("STALE_CONTEXT", format!("Selected {record} revision {revision} is missing, no longer approved or has stale/missing citations. Reload saved choices explicitly and select a valid revision.")),
+                Stale => ("STALE_CONTEXT", "The prompt, target or selected approved reference revision changed or has stale/missing citations. Reload choices explicitly and review again.".into()),
+                Draft => ("CONTEXT_DRAFT", "Save or discard drafts/conflicts in the selected source or dependencies before previewing.".into()),
+                Budget {total,budget,capacity} => ("CONTEXT_BUDGET", format!("Total {total} estimated tokens exceeds budget {budget}, capacity {capacity} or the 2 MiB body limit. Nothing was dropped or shortened.")),
+                History(e) => return scene_failure(request_id,e),
+            };return CoreResponse::failure(request_id,code,message);
+        }
         LifecycleError::Reference(error) => {
             use references::ReferenceError::*;
             let (code,message)=match error {

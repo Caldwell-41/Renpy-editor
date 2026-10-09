@@ -1,3 +1,4 @@
+import type { Options, PromptModel, Preview } from "./prompt-ui.ts";
 import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
 import { catalogDialog } from "./catalog-dialog.ts";
 import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
@@ -267,7 +268,7 @@ function shell(content: HTMLElement): void {
   const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
-  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => openSettings(currentProject ? { ...currentProject, runtime: () => { if(runtimeWorkspace){ runtimeWorkspace.panel.hidden=false; runtimeWorkspace.panel.focus(); } } } : undefined));
+  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}const owner={};openSettings({...project,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
   footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 

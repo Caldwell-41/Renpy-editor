@@ -161,3 +161,11 @@ request/credential evidence. Builds/launches and failures belong to the owning l
 Reference prose stays out of routine diagnostics, logs and game distributions.
 No `.rpy` mutation, HTTP, generation, import/export, injection/retrieval or runtime
 inference is introduced. Pinned SDK 8.5.3 default distribution classification excludes the hidden metadata directory; trusted classifier helpers were verified against the synthetic project without executing game code. Custom author build overrides are outside that default-path proof.
+
+## Explicit preparation consumer
+
+The [prompt/context contract](PROMPTS_CONTEXT.md) consumes exact approved revisions
+from this library. Supporting stale/missing citations refuse selection, while ordinary
+links are disclosed without automatic inclusion. Unknown extensions stay persisted but
+are excluded from the would-be payload. This does not add generation, automatic
+retrieval, provider sends or a full 2B.1 claim.

@@ -17,6 +17,131 @@ including plain interface language, optional technical help, completion/submissi
 validation and shared control ownership. These guide future implementation; they do
 not claim the current application already satisfies every interaction.
 
+## Prompts and context preparation selection — 2026-10-10
+
+User-selected new outcome on published `92a33180604ce851aa8ebc47e5c336da81aedf57`,
+branch `codex/provider-qualification`. One GPT-6.1 Sol High serial owner, no subagents.
+Local Mac ARM64 first; publish/verify this branch, then transfer one owner to Windows
+x64 without direct other-host execution. The clean Mac checkout safely fast-forwarded
+from `dc889d6`; the unrelated planning worktree is preserved.
+
+Scope: project-local `rewriteDialogue` authoring prose, explicit Save, installed baseline
+comparison/confirmed restore, shared Undo/Redo and reopen; exact approved card/lore
+revision selection and deterministic bounded read-only preview for one saved dialogue
+or narration Beat. Show effective system instructions, separate task/style notes,
+core response/authority contract, inclusion/exclusion, dependencies, source/metadata
+read revisions and full serialized content/size accounting. Refuse stale selections,
+relevant drafts/conflicts and over-budget totals; never truncate or silently drop.
+Provider sends, credential/HTTP changes, proposals/application, generated references,
+automatic retrieval, import/export, finite-route expansion, full 2B.1 and Phase 2 claims
+are excluded. Bundled prompts have one versioned resource location; overrides use the
+canonical `.renpy-editor/ai.json` and existing transactional metadata history.
+
+User-authorized publication is limited to this outcome on the same branch. No merge,
+release or installation. Cumulative ceiling per target: **3 package builds / 4 app
+launches** including handoffs and implicit launches. Current usage: Mac **0/3, 0/4**;
+Windows **0/3, 0/4**. Diagnose a failure before retry; two-correction reassessment applies.
+Focused core and controller/dispatch proof precedes affected signed native qualification.
+Disposable fixtures only; unchanged manual-library/provider evidence is reused.
+
+### Prompt/context focused gates and package preflight — 2026-10-10
+
+Five core production-handler tests pass: prompt Save/restore/consecutive Undo/Redo,
+source and unrelated-settings preservation, reopen/isolation, deterministic exact card/lore
+payload and dependencies, exact budget/capacity boundaries, stale selections/citations,
+external prompt edit, invalid/newer/duplicate-key metadata, relevant Source draft and
+prompt size refusals, installed baseline update retaining custom prose/extensions.
+Two controller DOM tests and ten selected protocol/reference tests pass. The real
+controller → `ApplicationHost` dispatch → persistence integration passes Save,
+restore preview/cancel/confirm, Undo/Redo, complete payload and budget refusal. The
+native report gate rejects missing/zero/partial checks, failed results and incomplete
+cleanup. Typecheck, native JS syntax, Python source compilation and desktop test
+compilation pass. No provider sends or SDK/game execution.
+
+Cheap preflight failures were diagnosed before correction: positive fixture initially
+contained proposed lore, then its unresolved citation was correctly refused; the
+positive fixture now explicitly supplies approved uncited lore. Controller/protocol
+allowlist expectation lacked the four new typed operations; updated that contract.
+Probe-only Rust conversion was corrected. Python bytecode output initially targeted
+a non-writable system cache; source compilation and an owned temp cache pass.
+No package or app launch was consumed by those cheap checks.
+
+**Package attempt 1/3** stopped before compilation: the sandboxed signing lookup
+returned zero identities. Identical read-only lookup outside the sandbox found the
+exact pinned `358372708164C7273A551D746449357C12A3A806` local development identity.
+Classified as sandbox access limitation; no signing/trust/ACL/credential policy change.
+No bundle/build log directory or app process was produced. **Attempt 2/3** uses the
+same reviewed wrapper and pinned identity outside that sandbox. App starts remain
+Mac **0/4**, Windows **0/4**; Windows builds remain **0/3**.
+
+### Prompt/context review corrections and final Mac candidate — 2026-10-10
+
+Package attempt **2/3** passed the unchanged identity/signature/installer gates.
+Executable SHA256 `24b078a9a02584b422b73e34507932b7bfd0a2c7585a3169b7d96f65dfe93147`;
+installer `726b70a8955fd87da76bb3e92fbd88efc2b41534e393953cb104ed3cd470ed73`.
+It was not launched. Review identified two in-scope findings before native attempts:
+
+- A native textarea normalizes CRLF to LF. Comparing displayed text against raw saved
+  text would falsely mark an unchanged override dirty and block navigation indefinitely.
+  Compare with the captured displayed baseline; untouched stored bytes are never saved.
+  Actual Chrome reproduces the prior comparison, then passes the corrected controller
+  with zero writes. The browser first failed inside the sandbox, then its disposable
+  HTML harness lacked an HTML content type; neither result was a product pass. The
+  corrected harness explicitly exercises the previous comparator as the rejecting
+  control and the current comparator as the passing case. Probe-author input uses LF,
+  matching actual textarea input; core tests separately retain exact CRLF prompt bytes.
+- Dependency disclosure initially covered linked lore and unresolved issues but omitted
+  resolved links, relationship/knowledge/citation edges and included speaking/default
+  definitions. These are now enumerated without automatic expansion. Stale-reference
+  diagnostics name the exact record/revision. Unknown nested extensions remain excluded
+  from payload and preserved on disk. Undo/Redo labels correctly describe shared project
+  history, and hidden controls are excluded from Settings focus trapping.
+
+Five prompt core tests, controller tests/typecheck and probe syntax pass after corrections.
+**Package attempt 3/3** rebuilds those changed inputs with the same pinned identity;
+no further Mac package attempt remains after it. Native starts remain Mac **0/4**;
+Windows remains **0/3 builds, 0/4 starts**. Same outcome and cumulative allowance.
+
+### Final signed candidate and locked-Mac qualification stop — 2026-10-10
+
+Final package attempt **3/3** passed approved bundle name/identifier, pinned certificate,
+certificate-bound designated requirement, strict signature and installer-content gates.
+Executable SHA256 `fe90b9069630db56b156ddab9f26dd49bc4dda60219608d329a3e3a6988edf0e`;
+installer `82d97392b7c4da69f3933ae1e61ee58f293156dadeee8d1f11cd996a7054f1a9`.
+Privacy scan passed for all five app/installer files. Signed package, receipts and
+source-input hashes remain ignored under `.toolchains/releases/prompt-context-mac-03`.
+No installation, SDK/game execution, provider send or signing-policy change occurred.
+Final real-controller/production-dispatch integration, core/controller/typecheck and
+three actual-transaction history-continuity regressions pass. Repository link/privacy
+validation passes for 467 files. Self-review corrected the two scoped findings above;
+no independent reviewer was requested/delegated.
+
+**Native launch 1/4**, PID 85833, reached `manual-save` after synthetic form entry.
+Computer Use reported the Mac locked and automatic unlock unavailable. The user was
+asked to unlock and reply ready. No physical Save, focus, screenshot/layout observation
+or marker release occurred; **zero native acceptance checks**. The WebView remained
+at the pause after more than three minutes, consistent with unavailable locked-screen
+observation/suspended timers. Stop only that owned PID with SIGTERM; the runner exits
+failed rather than accepting absent results. This is **cancelled, missing evidence**,
+not a product pass. PID absence was confirmed outside the filesystem sandbox, and the
+exact owned synthetic root was removed. No process/fixture/pending operation remains.
+The log and structural `phase-1-cancelled.json` retain hashes under
+`.toolchains/reports/prompt-context-mac-01`; no success phase-1 or reopen receipt exists.
+
+**Current state: blocked on required native UI access**, with implementation/focused
+proof reviewed and complete for the selected portable paths. Cumulative usage is Mac
+**3/3 package attempts, 1/4 launches**; Windows **0/3 builds, 0/4 launches**. The final
+unchanged signed package may use a remaining Mac launch after actual unlock/capability
+restoration; use a fresh owned root and new output directory, then phase 2 on the same
+accepted fixture for byte-exact process reopen. No new package allowance, automatic
+retry, other-host execution/ownership transfer or next feature is selected.
+
+Work is committed locally for recovery. The user's sequence is finish this host,
+publish/verify, then transfer Windows; publication is therefore pending required Mac
+qualification rather than a new approval request. The remote checkpoint remains
+`92a3318`. HANDOVER contains a same-host continuation, not a next-distinct outcome.
+Both-target acceptance, full 2B.1 and Phase 2 remain incomplete.
+
 ## Manual reference library selection — 2026-10-09
 
 Selected by the user after accepted Phase 1/source foundations and bounded synthetic

@@ -41,6 +41,10 @@ const CARD: &[&str] = &[
 ];
 const LORE: &[&str] = &["text", "category", "subject", "knowledge"];
 
+pub(crate) fn content_keys(kind: &str) -> Vec<&'static str> {
+ COMMON.iter().chain(if kind == "card" { CARD } else { LORE }).copied().collect()
+}
+
 #[derive(Debug)]
 pub enum ReferenceError {
     Invalid,
