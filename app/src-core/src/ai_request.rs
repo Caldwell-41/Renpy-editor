@@ -481,6 +481,14 @@ pub fn execute(
             .is_some_and(|n| n > u64::from(prepared.profile.settings.maximum_response))
             || completion
                 .usage
+                .reasoning_tokens
+                .is_some_and(|n| n > u64::from(prepared.profile.settings.maximum_response))
+            || completion
+                .usage
+                .prompt_tokens
+                .is_some_and(|n| n > u64::from(prepared.profile.settings.context_budget))
+            || completion
+                .usage
                 .total_tokens
                 .is_some_and(|n| n > u64::from(prepared.profile.settings.context_budget))
         {
@@ -857,18 +865,22 @@ mod tests {
     }
     #[test]
     fn undeclared_oversized_body_and_reported_output_limit_are_rejected() {
-        for oversize in [true, false] {
+        for variant in 0..4 {
             let listener = TcpListener::bind("127.0.0.1:0").unwrap();
             let port = listener.local_addr().unwrap().port();
             let server = thread::spawn(move || {
                 let (mut socket, _) = listener.accept().unwrap();
                 request(&mut socket);
                 socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n").unwrap();
-                let bytes = if oversize {
+                let bytes = if variant == 0 {
                     vec![b' '; MAX_RESPONSE + 1]
                 } else {
                     let mut value = valid();
-                    value["usage"] = json!({"completion_tokens":1025});
+                    value["usage"] = match variant {
+                        1 => json!({"completion_tokens":1025}),
+                        2 => json!({"prompt_tokens":4097}),
+                        _ => json!({"completion_tokens_details":{"reasoning_tokens":1025}}),
+                    };
                     serde_json::to_vec(&value).unwrap()
                 };
                 let _ = socket.write_all(&bytes);

@@ -259,6 +259,11 @@ project changes and shutdown arbitrate final publication through one native guar
 Worker completion drops the agent/socket/body/credential before publication; bounded
 terminal text/status may remain in memory until replacement/cancel/shutdown. Native
 Save responsiveness and client resource cleanup require actual packaged target proof.
+If Save temporarily owns the project service when the response completes, publication
+waits off-thread within the captured response deadline. A busy service alone is not
+stale configuration. Cancel, configuration/project changes and shutdown still invalidate
+that waiting result. Each reported usage component remains bounded even when other
+usage fields are absent; missing fields remain unknown.
 This selection excludes SSE, general providers/auth modes and live Studio compatibility;
 it does not close full 2A.2 or Phase 2. Windows requires focused affected-request proof,
 without repeating unchanged remembered-credential qualification.

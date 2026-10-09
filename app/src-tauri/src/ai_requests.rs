@@ -52,6 +52,8 @@ struct State {
 pub struct Service {
     state: Mutex<State>,
     returned: Condvar,
+    #[cfg(test)]
+    publication_attempted: Mutex<Option<std::sync::mpsc::Sender<()>>>,
 }
 static SERVICE: OnceLock<Arc<Service>> = OnceLock::new();
 pub fn service() -> &'static Arc<Service> {
@@ -109,6 +111,21 @@ impl Service {
         host: &ApplicationHost,
         payload: Value,
     ) -> Result<Value, &'static str> {
+        self.send_with_reader(host, payload, |s, profile| {
+            crate::ai_native::secrets(s.ai_data_root())?
+                .read(&profile.profile_id, profile.credential.as_ref().unwrap())?
+                .ok_or(Failure::Credential.message())
+        })
+    }
+    fn send_with_reader(
+        self: &Arc<Self>,
+        host: &ApplicationHost,
+        payload: Value,
+        read: impl FnOnce(
+            &loomlight_core::lifecycle::LifecycleService,
+            &loomlight_core::ai_profiles::StudioProfile,
+        ) -> credentials::Result<credentials::Secret>,
+    ) -> Result<Value, &'static str> {
         let input: Send =
             serde_json::from_value(payload).map_err(|_| "Invalid synthetic request payload.")?;
         let mut state = self
@@ -144,9 +161,7 @@ impl Service {
                 if !profile.credential_bound() {
                     return Err(Failure::Credential.message());
                 }
-                let key = crate::ai_native::secrets(s.ai_data_root())?
-                    .read(&profile.profile_id, profile.credential.as_ref().unwrap())?
-                    .ok_or(Failure::Credential.message())?;
+                let key = read(s, &profile)?;
                 ai_request::prepare(profile, key, input.timeout_seconds).map_err(Failure::message)
             })
             .map_err(|_| "Project service is busy; no request was sent.")??;
@@ -172,6 +187,7 @@ impl Service {
         let service = self.clone();
         let host = host.clone();
         let worker_id = id.clone();
+        let timeout = prepared.timeout;
         let worker = thread::Builder::new()
             .name("studio-request".into())
             .spawn(move || {
@@ -200,23 +216,27 @@ impl Service {
                 }))
                 .unwrap_or(Err(Failure::Connection));
                 cancel.close_socket();
-                let mut s = service.state.lock().unwrap();
-                let closing = s.closing;
-                if let Some(p) = s.pending.as_mut().filter(|p| p.id == worker_id) {
-                    // Hold both the publication guard and short service boundary while
-                    // validating the immutable snapshot and publishing its outcome.
-                    let valid = host
-                        .with_service(|native| {
-                            let valid = !closing
-                                && native.current().map(|p| p.session_id) == p.session
+                let mut result = Some(result);
+                loop {
+                    let mut s = service.state.lock().unwrap();
+                    let closing = s.closing;
+                    let Some(p) = s.pending.as_mut().filter(|p| p.id == worker_id) else {
+                        break;
+                    };
+                    if !closing && !p.cancel.cancelled() && p.state != "expired" {
+                        // Save temporarily checks out the service. Unavailable is not
+                        // stale: wait off-thread, without the publication guard held.
+                        // Each attempt still atomically revalidates and publishes.
+                        let valid = host.with_service(|native| {
+                            let valid = native.current().map(|p| p.session_id) == p.session
                                 && native
                                     .read()
                                     .is_ok_and(|v| credentials::token(&v) == p.token);
-                            if p.state != "expired" && !p.cancel.cancelled() && valid {
-                                match result {
+                            if valid {
+                                match result.take().unwrap() {
                                     Ok(value) => {
                                         p.state = "completed";
-                                        p.result = Some(value)
+                                        p.result = Some(value);
                                     }
                                     Err(e) => {
                                         p.state = if e == Failure::Timeout {
@@ -224,21 +244,38 @@ impl Service {
                                         } else {
                                             "failed"
                                         };
-                                        p.failure = Some(e)
+                                        p.failure = Some(e);
                                     }
                                 }
                             }
                             valid
-                        })
-                        .unwrap_or(false);
-                    if !valid && p.state != "cancelled" {
-                        expire(p);
+                        });
+                        #[cfg(test)]
+                        if let Some(signal) = service.publication_attempted.lock().unwrap().as_ref()
+                        {
+                            let _ = signal.send(());
+                        }
+                        match valid {
+                            Ok(true) => (),
+                            Ok(false) => expire(p),
+                            Err(_) if p.started.elapsed() < timeout => {
+                                p.state = "validating";
+                                drop(s);
+                                thread::sleep(Duration::from_millis(5));
+                                continue;
+                            }
+                            Err(_) => {
+                                expire(p);
+                                p.failure = Some(Failure::Timeout);
+                            }
+                        }
                     }
                     p.http = http;
                     p.done = true;
                     p.elapsed_ms = p.started.elapsed().as_millis();
+                    service.returned.notify_all();
+                    break;
                 }
-                service.returned.notify_all();
             })
             .map_err(|_| {
                 state.pending = None;
@@ -341,11 +378,10 @@ impl Service {
     }
 }
 
-#[cfg(all(test, target_os = "macos"))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use loomlight_core::{
-        ai_file_secrets::FileSecrets,
         ai_profiles::{ProfileStore, StudioSettings},
         lifecycle::LifecycleService,
     };
@@ -353,6 +389,18 @@ mod tests {
         io::{Read, Write},
         net::TcpListener,
     };
+
+    impl Service {
+        fn send_fixture(
+            self: &Arc<Self>,
+            host: &ApplicationHost,
+            payload: Value,
+        ) -> Result<Value, &'static str> {
+            self.send_with_reader(host, payload, |_, _| {
+                Ok(credentials::Secret::new("loomlight-public-request".into()))
+            })
+        }
+    }
     fn setup(port: u16) -> (tempfile::TempDir, ApplicationHost, Value) {
         let root = tempfile::tempdir().unwrap();
         let s = LifecycleService::new(root.path().to_owned()).unwrap();
@@ -372,14 +420,19 @@ mod tests {
         )
         .unwrap();
         let initial = s.read().unwrap();
-        credentials::replace(
-            &s,
-            &FileSecrets::open(root.path()).unwrap(),
-            &credentials::token(&initial),
-            &initial.profiles[0].profile_id,
-            "loomlight-public-request",
-        )
-        .unwrap();
+        // Request ownership tests use an isolated reference and injected native
+        // reader. They neither qualify nor operate any OS credential backend.
+        let mut saved = initial.clone();
+        saved.revision += 1;
+        saved.profiles[0].revision += 1;
+        saved.profiles[0].credential = Some(
+            serde_json::from_value(json!({
+                "credentialId":uuid::Uuid::new_v4().to_string(), "revision":1,
+                "origin":format!("http://127.0.0.1:{port}")
+            }))
+            .unwrap(),
+        );
+        s.write(&saved, &initial).unwrap();
         let saved = s.read().unwrap();
         let input = json!({"token":credentials::token(&saved),"profileId":saved.profiles[0].profile_id,"sessionId":null,"timeoutSeconds":600});
         (root, ApplicationHost::new(s), input)
@@ -450,16 +503,19 @@ mod tests {
                 b
             },
         ] {
-            assert!(service.send(&host, bad).is_err())
+            assert!(service.send_fixture(&host, bad).is_err())
         }
         let (received, server) = accept(listener);
-        let started = service.send(&host, input.clone()).unwrap();
+        let started = service.send_fixture(&host, input.clone()).unwrap();
         received.recv_timeout(Duration::from_secs(2)).unwrap();
         assert!(
             host.with_service(|s| s.read()).unwrap().is_ok(),
             "network released service boundary"
         );
-        assert!(service.send(&host, input).is_err(), "one worker, no queue");
+        assert!(
+            service.send_fixture(&host, input).is_err(),
+            "one worker, no queue"
+        );
         let cancelled = service
             .cancel(json!({"requestId":started["requestId"]}))
             .unwrap();
@@ -490,15 +546,15 @@ mod tests {
             let (_root, host, input) = setup(port);
             let service = Arc::new(Service::default());
             let (received, server) = accept(listener);
-            let started = service.send(&host, input.clone()).unwrap();
+            let started = service.send_fixture(&host, input.clone()).unwrap();
             received.recv_timeout(Duration::from_secs(2)).unwrap();
             if shutdown {
                 assert!(service.shutdown());
-                assert!(service.send(&host, input).is_err());
+                assert!(service.send_fixture(&host, input).is_err());
                 assert!(service.state.lock().unwrap().pending.is_none());
             } else {
                 let guard = service.change();
-                assert!(service.send(&host, input).is_err());
+                assert!(service.send_fixture(&host, input).is_err());
                 drop(guard);
                 let v = finish(&service, &host, &started["requestId"]);
                 assert_eq!(v["state"], "expired");
@@ -515,7 +571,7 @@ mod tests {
             let (root, host, input) = setup(port);
             let service = Arc::new(Service::default());
             let (received, server) = accept(listener);
-            let started = service.send(&host, input).unwrap();
+            let started = service.send_fixture(&host, input).unwrap();
             received.recv_timeout(Duration::from_secs(2)).unwrap();
             if project {
                 // The active request captured None; opening a real synthetic project invalidates it.
@@ -584,7 +640,7 @@ mod tests {
                 write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap();
                 socket.write_all(body).unwrap();
             });
-            let started = service.send(&host, input).unwrap();
+            let started = service.send_fixture(&host, input).unwrap();
             let v = finish(&service, &host, &started["requestId"]);
             assert_eq!(v["state"], "completed");
             assert_eq!(v["completion"]["usage"]["totalTokens"], Value::Null);
@@ -610,7 +666,7 @@ mod tests {
         let (_root, host, input) = setup(port);
         let service = Arc::new(Service::default());
         let (received, server) = accept(listener);
-        let started = service.send(&host, input).unwrap();
+        let started = service.send_fixture(&host, input).unwrap();
         received.recv_timeout(Duration::from_secs(2)).unwrap();
         let (ready, ready_rx) = std::sync::mpsc::channel();
         let (release, release_rx) = std::sync::mpsc::channel();
@@ -636,5 +692,79 @@ mod tests {
             .unwrap();
         server.join().unwrap();
         assert!(service.shutdown());
+    }
+    #[test]
+    fn completion_during_save_boundary_waits_and_preserves_invalidation() {
+        for action in ["complete", "cancel", "change", "shutdown"] {
+            let (listener, port) = stalled();
+            let (_root, host, input) = setup(port);
+            let service = Arc::new(Service::default());
+            let (attempted, attempt_rx) = std::sync::mpsc::channel();
+            *service.publication_attempted.lock().unwrap() = Some(attempted);
+            let (respond, response_rx) = std::sync::mpsc::channel();
+            let server = thread::spawn(move || {
+                let (mut socket, _) = listener.accept().unwrap();
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(2)))
+                    .unwrap();
+                let mut bytes = Vec::new();
+                let mut b = [0; 4096];
+                loop {
+                    let n = socket.read(&mut b).unwrap();
+                    assert!(n > 0);
+                    bytes.extend_from_slice(&b[..n]);
+                    if let Some(pos) = bytes.windows(4).position(|b| b == b"\r\n\r\n") {
+                        let headers = String::from_utf8_lossy(&bytes[..pos]);
+                        let length: usize = headers
+                            .lines()
+                            .find_map(|line| {
+                                line.to_ascii_lowercase()
+                                    .strip_prefix("content-length:")
+                                    .map(|s| s.trim().parse().unwrap())
+                            })
+                            .unwrap();
+                        if bytes.len() >= pos + 4 + length {
+                            break;
+                        }
+                    }
+                }
+                response_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+                let body=br#"{"model":"synthetic-model","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"valid during Save"}}]}"#;
+                write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap();
+                socket.write_all(body).unwrap();
+            });
+            let started = service.send_fixture(&host, input).unwrap();
+            host.with_service(|_| {
+                respond.send(()).unwrap();
+                attempt_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+                match action {
+                    "cancel" => {
+                        service
+                            .cancel(json!({"requestId":started["requestId"]}))
+                            .unwrap();
+                    }
+                    "change" => {
+                        drop(service.change());
+                    }
+                    "shutdown" => {
+                        assert!(service.shutdown());
+                    }
+                    _ => (),
+                }
+            })
+            .unwrap();
+            if action != "shutdown" {
+                let outcome = finish(&service, &host, &started["requestId"]);
+                if action == "complete" {
+                    assert_eq!(outcome["state"], "completed");
+                    assert_eq!(outcome["completion"]["text"], "valid during Save");
+                } else {
+                    assert_ne!(outcome["state"], "completed");
+                    assert_eq!(outcome["completion"], Value::Null);
+                }
+            }
+            server.join().unwrap();
+            assert!(service.shutdown());
+        }
     }
 }
