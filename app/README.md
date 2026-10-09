@@ -329,3 +329,11 @@ root remain preserved; no native launch or GET occurred. The external controller
 uses an owned wrapper calling the pinned Node/npm CLI directly, verifies the actual
 hook version and records exclusive build terminal receipts. These corrections require
 new package proof; no original receipt is repaired and no allowance is renewed.
+
+Under the user's explicit ten-combined-attempt amendment, replacement build 4 passed
+complete input checks and packaging. Original run 6 failed at the native entry deadline;
+late masked input is retained as failure, no Save/GET occurred and run 7 remains blocked.
+The external file-only native clock now rejects expired/terminal input before dispatch,
+and actual exit receipts remain bounded. [The ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
+owns exact package hashes, failures, remaining combined attempts and the proposed
+replacement scope; current remembered Studio qualification remains incomplete.

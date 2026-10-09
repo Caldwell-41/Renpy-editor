@@ -987,6 +987,18 @@ original runs 6/7 (with `--build 4`); do not repeat prepare or build 3. The cont
 rejects ten consumed acceptance attempt files and retains fixed launch identities.
 Keep all native-operation/GET caps, assertions, deadlines and recovery rules.
 
+Original run 6 subsequently failed at alpha-entry timeout, including late masked
+input at 122.6991984 s. Its exit-1/PID-absence/empty-key-root receipts remain preserved;
+run 7 is blocked and no partial reuse is selected. Call the file-only controller
+`native-clock --acceptance --combined-attempts 10 --run 6 --entry-start-seconds 0`
+immediately before every supported native input, with an entry start recorded before
+actual dispatch. Initial entry may conservatively use launch-relative zero. A terminal
+run or expired/invalid clock refuses input; never reacquire an exited UI. Initialize
+state variables before deferred helpers and forward the owned images for inspection.
+The external controller awaits the host's actual exit receipt only within the existing
+15-second exit/300-second whole caps; no missing observation is synthesized. New
+launch/root identities and any increased native-entry cap need explicit selection.
+
 The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
 has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
 Its Step 1 checks are the same focused `ai_` core selector, desktop tests, `npm run check`,

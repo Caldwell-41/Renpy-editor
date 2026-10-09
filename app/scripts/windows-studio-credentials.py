@@ -183,6 +183,36 @@ def validate_observations(phase, value):
     for first, final in pairs:
         validate_elapsed(events[final]["endSeconds"] - events[first]["startSeconds"], 120)
 
+def await_observations(prefix, started, exited_monotonic=None):
+    # The host must observe actual exit before publishing its receipt. Waiting
+    # shares the original exit/whole-launch caps; it never reacquires native UI.
+    deadline = min((exited_monotonic if exited_monotonic is not None else time.monotonic()) + 15,
+                   started + RUN_SECONDS)
+    path = OUTPUT / f"{prefix}-observed.json"
+    while not path.is_file():
+        if time.monotonic() >= deadline:
+            raise ValueError("Actual native observation receipt missing within exit/launch cap")
+        time.sleep(0.02)
+    if time.monotonic() >= deadline:
+        raise ValueError("Actual native observation receipt late")
+    return read(path)
+
+def native_input_clock(run, entry_start_seconds):
+    """File-only clock guard to call immediately before supported native input."""
+    if not ACCEPTANCE or run not in (6, 7):
+        raise ValueError("Selected native launch clock required")
+    prefix = f"run-{run}"
+    if (OUTPUT / f"{prefix}.json").exists():
+        raise ValueError("Native run is terminal; no UI reacquisition/input")
+    launch = read(OUTPUT / f"{prefix}-launch.json")
+    now = time.monotonic()
+    elapsed = now - launch["startedMonotonic"]
+    if (not isinstance(entry_start_seconds, (int, float)) or isinstance(entry_start_seconds, bool)
+            or not 0 <= entry_start_seconds <= elapsed < RUN_SECONDS
+            or elapsed - entry_start_seconds >= 120):
+        raise ValueError("Whole entry/launch clock exhausted; native input refused")
+    return {"monotonic":now,"seconds":elapsed,"entryElapsedSeconds":elapsed-entry_start_seconds}
+
 def pid_absent(pid):
     listing = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"], capture_output=True, text=True, timeout=2, check=True).stdout
     return f'"{pid}"' not in listing
@@ -637,7 +667,7 @@ def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
             if not absent:
                 raise ValueError("External PID absence unproved")
             if ACCEPTANCE:
-                validate_observations(phase, read(OUTPUT / f"{prefix}-observed.json"))
+                validate_observations(phase, await_observations(prefix, started, started + elapsed))
             fixture = read(FIXTURE)
             if cancel_only:
                 pass
@@ -677,6 +707,10 @@ def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
                 identities = [reopened["profiles"][0], beta["profiles"][0], beta["profiles"][1]]
                 if any(native_present(p) for p in identities):
                     raise ValueError("Retired/removed native entries still present")
+            if ACCEPTANCE:
+                validate_elapsed(time.monotonic() - (started + elapsed), 15)
+                elapsed = time.monotonic() - started
+                validate_elapsed(elapsed, RUN_SECONDS)
             passed = True
         finally:
             write(OUTPUT / f"{prefix}.json", {"passed": passed, "run": run, "exitCode": code, "stopped": process.poll() is not None,
@@ -748,7 +782,7 @@ def fault(action, name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["prepare", "build", "launch", "corrupt", "restore", "confirm-reload"])
+    parser.add_argument("action", choices=["prepare", "build", "launch", "corrupt", "restore", "confirm-reload", "native-clock"])
     parser.add_argument("--phase", type=int, choices=[1, 2])
     parser.add_argument("--run", type=int, choices=[1, 2, 3, 4, 5, 6, 7])
     parser.add_argument("--build", type=int, choices=range(1,13))
@@ -756,6 +790,7 @@ if __name__ == "__main__":
     parser.add_argument("--combined-attempts", type=int, choices=[3,10], default=3,
                         help="Explicit approved step-3 combined build/launch cap; never resets consumed attempts")
     parser.add_argument("--step", choices=["alpha", "cancel"])
+    parser.add_argument("--entry-start-seconds", type=float)
     parser.add_argument("--resume-partial-entry", action="store_true")
     parser.add_argument("--cancel-only", action="store_true")
     args = parser.parse_args()
@@ -765,4 +800,5 @@ if __name__ == "__main__":
     elif args.action == "build": build(args.build)
     elif args.action == "launch": launch(args.phase, args.run, args.build, args.resume_partial_entry, args.cancel_only)
     elif args.action == "confirm-reload": confirm_reload()
+    elif args.action == "native-clock": print(json.dumps(native_input_clock(args.run,args.entry_start_seconds)))
     else: fault(args.action, args.step)

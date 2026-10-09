@@ -13,6 +13,27 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_native_clock_refuses_actual_late_input_terminal_run_and_invalid_entry_start(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory);probe.write(out/"run-6-launch.json",{"startedMonotonic":100})
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe.time,"monotonic",return_value=222.6991984):
+                with self.assertRaises(ValueError):probe.native_input_clock(6,0)
+                for start in [None,-1,True,float('nan'),float('inf'),123]:
+                    with self.subTest(start=start),self.assertRaises(ValueError):probe.native_input_clock(6,start)
+                self.assertEqual(probe.native_input_clock(6,10)["entryElapsedSeconds"],112.6991984)
+                probe.write(out/"run-6.json",{"passed":False})
+                with self.assertRaises(ValueError):probe.native_input_clock(6,10)
+
+    def test_actual_exit_receipt_wait_refuses_whole_launch_expiry_and_missing_proof(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            with patch.object(probe,"OUTPUT",out),patch.object(probe.time,"monotonic",return_value=500):
+                with self.assertRaises(ValueError):probe.await_observations("run-6",0)
+                probe.write(out/"run-6-observed.json",{"actualExit":True})
+                with self.assertRaises(ValueError):probe.await_observations("run-6",0)
+                self.assertEqual(probe.await_observations("run-6",400),{"actualExit":True})
+                with self.assertRaises(ValueError):probe.await_observations("run-6",400,480)
+
     def test_selected_combined_budget_counts_failed_builds_and_launches_without_reset(self):
         with tempfile.TemporaryDirectory() as directory:
             out=Path(directory)

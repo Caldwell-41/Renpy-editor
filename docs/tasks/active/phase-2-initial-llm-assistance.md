@@ -6605,6 +6605,109 @@ correction/evidence publication is authorized; verify the carrying checkpoint's 
 SHA, then keep HEAD/packaged inputs unchanged through both native launches. Subsequent
 actual build/native results will be recorded separately; no qualification PASS yet.
 
+#### Replacement build 4 and original run 6 result
+
+**Published correction/tested inputs:** scoped seven-path correction was published
+as **`841cd02bf0f2f169d190dd40dc72279c32750836`**, remote equality verified, clean
+worktree at build dispatch; no CI. Original product/native/probe/fixture/dependency
+sources remain unchanged against the initial `2ec2c35` selection. Build 4 used the
+explicit ten-combined selection and a new isolated target: step-3 attempt **2/10**.
+It passed locked/offline NSIS packaging and complete pre/post source/installed/
+toolchain/environment/generated-schema equality in **202.2284538 s**. Build terminal
+is exit **0**, stopped/external PID absent, monotonic **202.2790596 s**; no termination
+required. One new isolated EXE/installer copy was produced; installer never executed.
+
+| Build-4 output | Bytes | SHA256 |
+| --- | ---: | --- |
+| EXE | 14,829,568 | `d81f08afcf809a53b918521c62475cd5d67f05410beeb2d1a7923421b3974400` |
+| NSIS installer | 3,683,313 | `8f604f7a2256ebb24ec19bc202fde78815eb9080d4c3d89a1450b935e5580bfa` |
+
+**External receipt correction before run 6:** exit observations cannot be completed
+before actual exit. The existing external controller now awaits the exclusive host
+observation receipt inside the original **15-second exit/300-second whole-launch**
+caps, validates every original field/order/boolean/deadline, and includes that wait
+in whole elapsed accounting. Ready/expired file guards passed; no native action or
+extra launch was used. This is the existing external-controller exception only:
+HEAD and all other packaged inputs stayed fixed through launch. Run-6 attempt records
+the distinct built/current controller hashes and complete package-input equality.
+No assertion or deadline was waived.
+
+**Run 6: FAIL; original phase 1 uncompleted.** Exact package-4 EXE launched as combined
+attempt **3/10**. Actual Computer Use selected the unique returned Loomlight window.
+The first state request ended with the owner's receipt error **`qState is not defined`**;
+its state was not preserved. One corrected observation recovered the live owned
+main/dialog captures at **83.2472917–84.7691706 s**. Initial missing credential status
+and native masked-entry dialog were visible; native field focus click/capture was
+**102.3986562–104.3759524 s**. UI Automation's focus label remained the parent dialog;
+the actual field caret was visible in the screenshot. No browser/DOM input substitute
+or unsupported native API was used.
+
+The owner then typed the public alpha fixture at **122.6991984–124.5422458 s**, after
+the original whole-entry deadline. The field was visibly masked, but this is **late
+proof/FAIL**, not successful readiness. The owner failed to guard the clock before
+dispatch; no time is subtracted for observation errors, approval/selection work,
+model latency, encoding or receipt overhead. Further native input stopped. No Save,
+fault, restore, Cancel, Retry or GET was issued. No alpha/gamma/cancel snapshots or
+owned credential references were created; there is no partial-entry reuse claim.
+
+The packaged process returned **exit 1** at **123.7205103 s**, cleanupComplete true,
+stage **alpha-entry**, native status **Working…**, error **`Error: Timeout: alpha-entry`**,
+and exactly the three initial mandatory checks. External PID absence is recorded
+and independently rechecked. Two required GETs and remaining markers are missing;
+the original rejecting gate refused the report. No complete host observation receipt
+was fabricated. No forced termination was needed. **Run 7 was not dispatched**, since
+full run-6 PASS is mandatory. The server was stopped; no app/helper/server/CI remains.
+
+**Post-failure bounded repairs/checks:** initialize native state explicitly before
+deferred observation functions, forward owned images for inspection, and wire the
+existing controller's new file-only **`native-clock`** guard immediately before each
+supported native click/type/key. It refuses terminal runs, invalid entry starts,
+120-second entry expiry and 300-second whole expiry before any UI dispatch. It does
+not extend clocks or perform native input/credential access. An entry start must be
+at or before actual dispatch; fault/restore never reset it. State/window are invalidated
+after confirmed exit; only saved files/external PID proof are used afterward.
+Controller **23 PASS**, including the actual **122.6991984 s** counterexample, terminal
+run/invalid-start and expired exit-receipt rejection. The 9 Settings/Windows DOM and
+app/test compilation PASS remain unchanged. No source/runtime/package repeat or dummy
+native rehearsal was used to test these corrections.
+
+**Final full receipt/capture audit:** ignored step-3 `final-run6-audit.json` validates
+both exact package hashes/sizes, build/launch monotonic receipts and distinct controller
+hashes, packaged failure against original stdout, independent PID absence, exact initial
+fixture bytes and the sole alpha-entry marker, no saved/fault/backup artifacts, no run-7
+attempt, and all original historical file hashes. Three actual observations retain
+six owned original JPEGs and six PNGs with sizes/SHA256/dimensions; decoded original
+JPEG pixels equal their PNG exports. Late capture times remain late. A first audit
+reader failed on an optional `kind` field; its log is retained, the reader was fixed,
+and the corrected full audit PASS records **qualification FAIL**. No native credential
+API or presence helper was invoked during audit. Post-run controller/test changes
+are recorded; build 4's original manifest is never rewritten to current hashes.
+
+**Actual cumulative/remaining:** step 3 **3/10 combined attempts used, seven remain**
+(failed build 3, passed build 4, failed launch 6). Earlier history remains two builds/
+five launches; Windows cumulative is **four build attempts/six launches, 2/8 GETs**.
+New native-entry sessions **1/4**, Saves **0/5**, Cancel **0/1**, read-only Retry **0/1**,
+GETs **0/4**, server lifetimes **1/2**, newly owned credential entries **0/3**, fixed
+presence reads **0/5**. Prior three owned entries/five reads and six/ten selected
+cumulative ceilings remain. The old two unused GETs remain unselected. All prior
+failures, eight manifest omissions, preflight minimum 132.4793445 s plus earlier
+attempts and Mac/provider budgets remain unchanged.
+
+**Decision needed:** seven combined attempts do not authorize reusing consumed run 6
+or bypassing its full-PASS prerequisite. Repeating full phase 1 plus phase 2 would
+consume four more native entries, exceeding the four-entry cap after the one failed
+entry; the single allowed root/EXE copy is also already used. Proposed replacement:
+**one build 5 and two launches (run 8 original phase 1, run 9 original phase 2), one
+additional isolated root/EXE copy, native-entry cap five and server-lifetime cap three total**. This uses three of
+the existing seven combined attempts; retain all five Save/one Cancel/one Retry/four
+GET/three owned-entry/five-read caps and deadlines. Require full replacement phase-1
+PASS before phase 2, same binary/root, whole stores/bytes/all original+reload markers,
+normal exits and external PID absence. Preserve failed run 6/root/captures/receipts.
+New run/root identities are not enabled or dispatched before explicit selection.
+Current remembered Studio slice, full 2A.1/Phase 2 and release remain incomplete;
+2A.2 is unselected. Publish reviewed scoped failure/repairs, then request this concrete
+schedule amendment; no automatic recovery or further native attempt.
+
 ### Windows native input/capture preflight — 2026-10-09
 
 **Authority/outcome:** user selected step 2 against published preparation
