@@ -2,6 +2,10 @@
 
 ## Authority and identity
 
+The selected manual card/lore foundation has a concrete pre-editor
+[reference-library v1 contract](REFERENCE_LIBRARY.md), with shared records,
+revision selection, bounds and fixtures. It is not yet implemented or accepted.
+
 Runnable truth lives in `.rpy` files. Editor metadata references source; it never
 silently replaces it. Every supported visual object receives a stable editor UUID
 mapped to a file revision/hash and source range. Human-authored Ren'Py identifiers

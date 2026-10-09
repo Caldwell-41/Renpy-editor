@@ -38,6 +38,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 
 | Concern | Canonical document |
 | --- | --- |
+| Manual Character-card/lore schema, bounds, lifecycle and fixtures | [REFERENCE_LIBRARY.md](REFERENCE_LIBRARY.md) |
 | Accepted UI designs, implementation, review and final integration evidence | [UI design review](tasks/archive/2026-10-06-ui-design-review.md) |
 | Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
 | Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |

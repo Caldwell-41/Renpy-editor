@@ -17,6 +17,52 @@ including plain interface language, optional technical help, completion/submissi
 validation and shared control ownership. These guide future implementation; they do
 not claim the current application already satisfies every interaction.
 
+## Manual reference library selection — 2026-10-09
+
+Selected by the user after accepted Phase 1/source foundations and bounded synthetic
+request evidence: manually create/edit/approve/organize cards and lore with one
+versioned references service, coherent history, lossless saved prose and reopen.
+This is only the manual portion of 2B.1; full 2B.1, 2A.1/2A.2 and Phase 2 remain incomplete.
+Use one serial Local Mac ARM64 owner and zero subagents. Windows follows on the same
+branch after reviewed Mac implementation and explicit publication approval; no direct
+other-host execution or second writer. Required evidence hosts: Mac ARM64 and Windows x64.
+
+**Entry:** clean checkout and existing worktree `codex/provider-qualification` at
+published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`. Ref refresh confirms remote equality;
+no fast-forward/reset necessary. Unrelated planning worktree is untouched.
+
+**Prepared before the editor:** [v1 schema/bounds](../../REFERENCE_LIBRARY.md) and
+public `app/tests/fixtures/reference-library/` empty/replacement/newer/malformed files.
+Schema defines shared lifecycle, bounded current/approved/prior revision retention,
+extensions, source citations, missing/stale links and exact transaction/history ownership.
+No production code changed. The current commit is preparation, not implementation.
+
+**UI decision pending:** user requires A/B approval and requested images when the inline
+preview was not visible. [A/B layout review](../../design/manual-reference-library/README.md)
+records A (persistent list beside editor), B (full-width editor with return to list),
+both themes and compact preview limitations. Do not treat the recommendation or preview
+interactions as approval. Resume this same outcome after the user's selection.
+
+**Allowance, cumulative across chats/handoffs:** Mac **0/2 builds, 0/3 app launches**;
+Windows **0/2 builds, 0/3 app launches**. Reserves require diagnosed failure/recorded
+correction; ambiguous dispatch must be resolved; reassess after two unsuccessful
+corrections of one hypothesis. Prior request budgets/failures are unchanged and not
+transferred. Initial sandboxed browser rendering failed; escalated isolated rendering
+passed. Browser previews consume no Loomlight package/native allowance.
+
+**Remaining:** implement core schema/validators, shared transactional service and typed
+dispatch, then approved UI and real UI-to-dispatch-to-file proof early. Focused tests
+must cover review/replacement, Undo/Redo/reopen exact IDs/statuses, invalid/newer data,
+extensions/bounds, external edits/recovery, missing/stale entities and project switching.
+Native forms must prove keyboard/focus, compact widths and both themes on both targets.
+Verify diagnostics/distribution exclusion. Finish Mac checks/review/fixes, clean owned
+resources and commit locally; ask before push, then provide the same-outcome Windows
+pull-and-continue prompt. No Windows handoff or next distinct deliverable yet.
+
+Generation, provider/credential/network work, prompt/context/payload work, proposal
+application, runnable source changes, import/export, injection/retrieval and runtime
+inference are excluded. No installation/security changes, CI, merge/release or next feature.
+
 ## Windows synthetic request selection — 2026-10-09
 
 The user selected review, focused fixes and packaged Windows x64 qualification of
