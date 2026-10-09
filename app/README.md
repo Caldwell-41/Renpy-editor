@@ -320,3 +320,12 @@ unproved, and the combined native rehearsal exceeded its 120-second limit. Read 
 [prepared host sequence](../docs/TESTING.md#windows-native-preflight-and-prepared-host-sequence)
 before remediation. This is a failed preflight, not native qualification; no build,
 Loomlight launch, acceptance root or credential operation was consumed.
+
+The later [step-3 selection](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
+superseded that task's synthetic-preflight prerequisite and selected the actual package
+schedule. Build 3 failed before compilation because the extracted npm `npm.cmd`
+resolved its CLI under an absent directory. The original failure and isolated empty-key
+root remain preserved; no native launch or GET occurred. The external controller now
+uses an owned wrapper calling the pinned Node/npm CLI directly, verifies the actual
+hook version and records exclusive build terminal receipts. These corrections require
+new package proof; no original receipt is repaired and no allowance is renewed.

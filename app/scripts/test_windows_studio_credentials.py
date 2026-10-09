@@ -6,12 +6,72 @@ import unittest
 import tempfile
 import time
 from unittest.mock import patch
+from unittest.mock import Mock
 
 spec = importlib.util.spec_from_file_location("windows_probe", Path(__file__).with_name("windows-studio-credentials.py"))
 probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_selected_combined_budget_counts_failed_builds_and_launches_without_reset(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"COMBINED_ATTEMPTS",10):
+                probe.write(out/"build-3-attempt.json",{"priorFailed":True})
+                self.assertEqual(probe.combined_budget_check(),{"combinedAttemptLimit":10,"combinedAttemptsBefore":1})
+                for number in range(4,11):probe.write(out/f"build-{number}-attempt.json",{})
+                probe.write(out/"run-6-attempt.json",{});probe.write(out/"run-7-attempt.json",{})
+                with patch.object(probe,"configure_npm_hook",side_effect=AssertionError("No input preparation")),patch.object(probe.subprocess,"Popen",side_effect=AssertionError("No dispatch")):
+                    with self.assertRaises(ValueError):probe.build(11)
+                self.assertFalse((out/"build-11-attempt.json").exists())
+                self.assertTrue(probe.read(out/"build-3-attempt.json")["priorFailed"])
+
+    def test_npm_hook_uses_verified_cli_and_refuses_wrong_version_or_existing_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory);node=out/"node.exe";node.write_bytes(b"unit-only node")
+            cli=out/"npm-cli.js";cli.write_bytes(b"unit-only cli")
+            with patch.object(probe,"OUTPUT",out),patch.object(probe.shutil,"which",return_value=str(node)),patch.dict(probe.os.environ,{"LOOMLIGHT_WINDOWS_NPM_CLI":str(cli),"PATH":"existing"}),patch.object(probe.subprocess,"run") as run:
+                run.return_value=Mock(stdout="11.9.0\n",stderr="")
+                first=probe.configure_npm_hook();probe.configure_npm_hook()
+                hook=out/"npm-hook/npm.cmd"
+                self.assertIn(f'"{node}" "{cli}" %*',hook.read_text())
+                self.assertEqual(first["sha256"],probe.sha(hook))
+                self.assertEqual(probe.os.environ["PATH"].split(probe.os.pathsep).count(str(hook.parent)),1)
+                self.assertEqual(run.call_args.args[0],["cmd.exe","/d","/c","npm --version"])
+                run.return_value.stdout="other version"
+                with self.assertRaises(ValueError):probe.configure_npm_hook()
+                hook.write_bytes(b"unexpected existing hook");run.reset_mock()
+                with self.assertRaises(ValueError):probe.configure_npm_hook()
+                run.assert_not_called();self.assertEqual(hook.read_bytes(),b"unexpected existing hook")
+
+    def test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory);process=Mock(pid=123);process.wait.return_value=1;process.poll.return_value=1
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"configure_npm_hook"),patch.object(probe,"source_inputs",return_value={}),patch.object(probe,"qualification_inputs",return_value={}),patch.object(probe,"pid_absent",return_value=True),patch.object(probe.subprocess,"Popen",return_value=process) as dispatch:
+                with self.assertRaises(ValueError):probe.build(3)
+                terminal=probe.read(out/"build-3-terminal.json");attempt=probe.read(out/"build-3-attempt.json")
+                self.assertFalse(terminal["passed"]);self.assertEqual(terminal["exitCode"],1)
+                self.assertTrue(terminal["stopped"] and terminal["pidAbsent"])
+                self.assertEqual(terminal["startedMonotonic"],attempt["startedMonotonic"])
+                self.assertGreater(terminal["endedMonotonic"],terminal["startedMonotonic"])
+                self.assertFalse((out/"build-3.json").exists())
+                before=(out/"build-3-terminal.json").read_bytes()
+                with self.assertRaises(ValueError):probe.build(3)
+                self.assertEqual(dispatch.call_count,1)
+                self.assertEqual((out/"build-3-terminal.json").read_bytes(),before)
+
+    def test_ambiguous_build_dispatch_stays_failed_with_unknown_pid_proof(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"configure_npm_hook"),patch.object(probe,"source_inputs",return_value={}),patch.object(probe,"qualification_inputs",return_value={}),patch.object(probe.subprocess,"Popen",side_effect=OSError("unit dispatch unavailable")):
+                with self.assertRaises(OSError):probe.build(3)
+                terminal=probe.read(out/"build-3-terminal.json")
+                self.assertFalse(terminal["passed"])
+                self.assertIsNone(terminal["pid"]);self.assertIsNone(terminal["pidAbsent"])
+                self.assertIsNone(terminal["exitCode"])
+                self.assertTrue((out/"build-3-attempt.json").exists())
+                self.assertFalse((out/"build-3.json").exists())
+
     def test_permission_absent_from_actual_tree_and_both_manifests_still_refuses(self):
         broken=probe.source_inputs();broken.pop("src-tauri/permissions/autogenerated/core_request.toml")
         with patch.object(probe,"source_inputs",return_value=broken):

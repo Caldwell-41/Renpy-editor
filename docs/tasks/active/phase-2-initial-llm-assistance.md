@@ -6485,6 +6485,126 @@ remedy; return a remediation prompt instead of falsely asserting readiness or pr
 an executable qualification prompt.
 ```
 
+### Windows step-3 packaged selection — 2026-10-09
+
+**New authority:** user selected execution of the finalized packaged Windows Studio
+schedule on exact published candidate `2ec2c35cacd68a84c07fd2c67b956072a8522ae2`
+in this separate chat, Local Windows x64, one serial owner, zero subagents, original
+Windows receipts locally and no other-host access. This selection supersedes the
+prior task's synthetic-preflight prerequisite and step-3 ban. The failed native
+preflight remains failed, including at least **132.4793445 s** plus prior attempts.
+No Notepad/dummy-dialog testing or automatic extra allowance is selected.
+
+Maximum addition: **one build (3), one isolated EXE copy/root, two launches (6/7),
+four native entries, five Saves (three confirmed/two refusals), one Cancel, one
+read-only Retry, four loopback GETs/two server lifetimes, three owned entries and
+five fixed presence reads**. Full original run-6 PASS is required before run 7;
+no partial reuse. Selected cumulative ceilings are **3/3 builds, 7/7 launches,
+6/8 GETs, six owned entries/ten reads**; the old two unused GETs remain unselected.
+Build 1200 s +2 terminate/+2 reap; launch 300 s; whole entry 120 s including
+fault/restore; confirmation/capture acknowledgement/Retry/exit 15 s; GET 15 s +2
+cleanup, all inside whole caps. Missing/wrong/skipped/late evidence fails; ambiguous
+dispatch consumes its identity. Preserve failures, backups, partial roots/credentials;
+unknown recovery needs specific approval. No installer, real endpoint/key,
+generation, enumeration, observer launch, CI, PR/merge/release or 2A.2.
+
+Focused checks, complete source/installed/generated/toolchain/environment inventories,
+actual ordered native observations with controller-monotonic timestamps/capture hashes,
+whole-store/byte gates, receipt audit, whole-diff review/bounded controller fixes and
+scoped evidence publication on the same branch are selected. HEAD and packaged
+inputs stay unchanged through the native launches.
+
+**Execution result: FAIL / qualification incomplete.** Fresh local/tracking/remote
+refs matched `2ec2c35`; remote main remains `5f448ca`, contained. Entry worktree was
+clean; unrelated worktrees and primary HANDOVER were preserved. Applied supported
+Computer Use instructions and initialized `node_repl`/`@oai/sky`; listed current
+windows without sending input. Pre-staged exclusive native observation files,
+controller-monotonic clock bridge and existing bundled Python/Pillow 12.3.0 PNG
+export, preserving originals. No synthetic native rehearsal was attempted.
+
+The exact `prepare --acceptance` route created one isolated empty-key fixture.
+The exact `build --acceptance --build 3` route froze the complete source/installed
+Node/locked Cargo archive and installed-file/resolved-feature/toolchain/MSVC/SDK/
+environment/generated-schema inventory before dispatch. Its build log reports
+**`beforeBuildCommand npm run build failed with exit code 1`**: the extracted npm
+wrapper sought `bin/node_modules/npm/bin/npm-prefix.js` and `npm-cli.js`, which do
+not exist. Frontend/Cargo compilation did not start; no EXE/installer or package
+receipt was produced. Build 3 is consumed; never delete/reuse its attempt.
+
+The prepared route was a harness/environment defect. A direct npm CLI version check
+had not exercised `npm.cmd`; following that unchecked wrapper route consumed the
+build. The original controller recorded no build PID, monotonic elapsed time or
+failed terminal receipt, so those proofs remain **missing**, not retrospectively
+inferred from file timestamps. The outer log-display command masked the controller
+failure in its own exit status; original error/log bytes remain preserved. No timing,
+full inventory-equivalence or package acceptance PASS is claimed for build 3.
+
+**Bounded corrections and verification:** only external controller/tests and canonical
+docs changed after failure. The controller now creates an owned, fixed-path Node/npm
+hook under ignored acceptance output, refuses different existing bytes, verifies the
+actual `npm --version` route and freezes its hash/process-local PATH. This is a local
+command wrapper, not an installation or system configuration change. Actual version-only
+readiness **PASS: npm 11.9.0**, hook SHA256
+`986afdb341b735e50d72f8a0354c460f488e0f932dca3702c9ddf74e142e0fb9`.
+Build attempts now record command/start before dispatch, preserve exclusive terminal
+failure/unknown state with elapsed/exit/PID evidence, and require successful external
+PID absence before packaging/launch. Original build-3 receipts remain untouched.
+
+Focused controller **20 PASS** including wrong npm version/changed wrapper,
+failed-build no-redispatch and ambiguous-dispatch unknown-proof rejection. Settings/
+Windows DOM **9 PASS**, zero failed/cancelled/skipped/todo; app/test TypeScript
+compilation PASS. First controller run had three sandbox-temp access errors; rerouting
+disposable files into the approved workspace passed. A wrong-cwd DOM run failed
+ENOENT; its original log survives and the correct app-cwd run passed. Unchanged
+desktop **16 PASS** remains retained, not rerun. No package/native proof follows from
+these checks, and no test exercises a credential API or native input workaround.
+
+**Receipt audit:** ignored `.toolchains/windows-studio-step3/` holds read-only original
+audit, failed-build audit, complete post-failure inventory, route/test logs, encoder/
+clock preparation and review evidence. Original five runs/two packages/logs/faults/
+restores/snapshots and independent audit hash
+`2965096e8134c0fbb5170cb26fa6a1c515fe8bf4719ede2edc207b8f6cb6df2e`
+are unchanged. New root contains only exact initial fixture bytes, SHA256
+`7855c2639c9d68766592a88e635b5e2af4828fb1283b13dbbc9106e79baa391a`;
+no step/saved-store markers or credentials were created. Installed Node/Cargo,
+resolved features, tool binaries/headers/libs and generated-schema bytes match the
+pre-build inventory. Post-failure controller/test and npm-hook/environment changes
+are explicit; whole build equivalence is not claimed. Runs 6/7, four selected GETs,
+all native entries/Saves/Cancel/Retry, server lifetimes and five presence reads remain
+**unexecuted**. No native credential API was called.
+
+**Cumulative actual/limits:** Windows **3/3 build attempts, 5/7 launches, 2/8 GETs**,
+three prior owned entries/five prior reads against selected ceilings six/ten. The four
+new selected GETs remain unused; the two old unused GETs remain unselected. Runs 1–3
+FAIL, run 4 PASS, run 5 targeted Cancel PASS/full-flow FAIL and eight original manifest
+omissions survive. Prior preflight remains FAIL at least **132.4793445 s** plus earlier
+attempts. Mac/provider histories and budgets are unchanged. No app/helper/server/CI
+operation is pending, and there was no installer, real provider/key, generation,
+PR/merge/release or 2A.2.
+
+**Selected allowance amendment:** user subsequently said "you have an allowance of
+10", then clarified **"10 combined build/launch attempts"**. Owner stated the counting
+rule before further dispatch: ten for this step-3 task, including failed build 3 as
+attempt **1/10**, while retaining the earlier two builds/five launches as historical
+usage. This explicit amendment supersedes the exhausted one-build allowance; it is
+not an automatic reset. Nine step-3 combined attempts remain at this checkpoint.
+Only the original run-6/run-7/four-GET/native-operation scope remains selected; no
+extra native launch, GET, partial reuse or unknown credential recovery is inferred.
+
+The existing runner adds explicit `--combined-attempts 10`, counts every failed or
+successful acceptance build/run attempt without deleting records, enables unused
+build identities 4–12 only with that explicit selection, and refuses exhausted
+combined allowance before preparation/dispatch. Default selection still permits
+only build 3; launches remain exactly runs 6/7 and retain full phase assertions.
+Controller **21 PASS**, including exhausted combined-budget/no-redispatch rejection.
+The next selected dispatch is **build 4**, a new isolated target with frozen corrected
+inputs, then original run 6 and run 7 only after full run-6 PASS, same binary/root and
+complete exit/PID proof. Failed build 3 and unused exact fixture are preserved.
+All original deadlines/GET caps/entry counts and recovery rules remain. Scoped
+correction/evidence publication is authorized; verify the carrying checkpoint's remote
+SHA, then keep HEAD/packaged inputs unchanged through both native launches. Subsequent
+actual build/native results will be recorded separately; no qualification PASS yet.
+
 ### Windows native input/capture preflight — 2026-10-09
 
 **Authority/outcome:** user selected step 2 against published preparation

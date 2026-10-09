@@ -850,7 +850,11 @@ for native retained input, Credential Manager storage or full process reopen.
 
 The [2026-10-09 preflight ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09)
 owns actual attempts and the failed readiness decision. The finalized schedule above
-remains unchanged. Discovery of a supported API is distinct from permission for an
+retains its assertions and deadlines. The later [step-3 selection](tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
+explicitly superseded that prior task's synthetic-preflight prerequisite and step-3
+ban; the failed preflight remains failed. Build 3 was then consumed by an npm-wrapper
+failure before compilation, with no package or native launch. No retry is authorized
+by these command references. Discovery of a supported API is distinct from permission for an
 app, a targetable masked field, and timely owned capture/acknowledgement. Browser/DOM
 checks cannot establish any of these native gates. Remediation must establish them
 without consuming a qualification build/launch or renewing cumulative budgets.
@@ -878,7 +882,14 @@ bundled Node is 24.19.0. Existing npm CLI 11.9.0 is at
 `../../repo/.toolchains/npm-11.9.0/package/bin/npm-cli.js` (from `app/`, add one `..`).
 Use Node to invoke this CLI, not an unavailable/default `npm` command. Set the
 process-local `LOOMLIGHT_WINDOWS_NPM_CLI` to its resolved path and prepend its existing
-`package/bin` directory for Tauri's npm before-build hook. Tauri entry is
+CLI route using the controller's owned `.toolchains/windows-studio-acceptance/npm-hook`
+wrapper for Tauri's npm before-build hook. **Do not prepend the extracted npm
+`package/bin` directory:** its `npm.cmd` expects `bin/node_modules/npm`, which is absent.
+The direct CLI version command did not test that wrapper and build 3 failed there.
+`configure_npm_hook` writes fixed Node/CLI paths, refuses differing existing bytes,
+verifies the actual `npm --version` resolution, and freezes the wrapper digest and
+process-local PATH. This creates no installation or persistent environment change.
+Tauri entry is
 `app/node_modules/@tauri-apps/cli/tauri.js`, version 2.11.4. Existing workspace
 `.tools/cargo/bin` shims plus `.tools/rustup`, pinned
 `RUSTUP_TOOLCHAIN=1.90.0-x86_64-pc-windows-msvc`, and no-update check provide Rust/Cargo
@@ -887,7 +898,12 @@ process-local `LOOMLIGHT_WINDOWS_NPM_CLI` to its resolved path and prepend its e
 must resolve a new isolated target directory, never the historical target, and prove
 the complete installed/generated/environment inventory equal before/after build and
 before launches. This preflight verified versions and source checks, not a new package
-or compiler/SDK build. Private absolute routes stay in ignored evidence.
+or compiler/SDK build. New build attempts record their command and monotonic start
+before dispatch and an exclusive terminal receipt even on failure; launch requires
+complete build exit/PID proof. Build 3 predates that fix: its missing original
+PID/elapsed/terminal proof remains missing, and no receipt is backfilled. Preserve
+the process return code when redirecting controller output; a final log-display
+command must not mask failure. Private absolute routes stay in ignored evidence.
 
 **Future commands, references only; separate native approval required.** Working
 directory is `app/`; `python` denotes the verified controller interpreter. Never run
@@ -963,7 +979,13 @@ Planning targets (not measured native PASS): run 6 entry envelopes 70+35+70 seco
 two GET envelopes 34, exit 15 and other observations 26 =250 seconds; run 7 beta
 envelope 70, GETs 34, hold/Retry 30, removal/observations 40 and exit 15 =189 seconds.
 Actual preflight did not prove those targets, whole native entry timing, or the 15-second
-hold. Qualification remains blocked until a newly selected bounded preflight passes.
+hold. The user's later step-3 selection superseded the synthetic-preflight prerequisite;
+qualification remains incomplete after build 3 failed. The later explicit ten-combined
+build/launch allowance counts failed build 3 as the first step-3 attempt and preserves
+historical usage. Use `--combined-attempts 10` on the selected replacement build 4 and
+original runs 6/7 (with `--build 4`); do not repeat prepare or build 3. The controller
+rejects ten consumed acceptance attempt files and retains fixed launch identities.
+Keep all native-operation/GET caps, assertions, deadlines and recovery rules.
 
 The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
 has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
