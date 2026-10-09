@@ -1372,6 +1372,13 @@ deletes only that newly created synthetic target and verifies absence without re
 its blob. Only then remove the precisely marked fixture root; preserve receipts.
 No cleanup relaunch or unrelated credential enumeration/recovery is needed.
 
+The [completed Windows selection](tasks/active/phase-2-initial-llm-assistance.md#final-windows-request-acceptance--2026-10-09)
+used one package build and all three permitted launches. Its final five-request native
+walkthrough includes a 280 ms successful Source Save with the stalled worker still
+active, reported/unknown usage, cancellation/auth error and active-request normal exit.
+Exact cleanup passed. Original captures and failed attempts remain outside Git; do not
+replay consumed launch identities or interpret this completion as full 2A.2/live Studio.
+
 Desktop `ai_requests` tests now run on both targets through an injected fixture reader,
 without exercising the OS credential backend. The synchronized Save/completion race
 must preserve valid output after the service returns, while cancel/configuration/

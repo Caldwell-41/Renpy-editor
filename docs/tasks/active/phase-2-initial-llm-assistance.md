@@ -35,7 +35,7 @@ stall, normal exit and active-request exit/cleanup. Deterministic checks supplem
 visible observations. Public synthetic keys and isolated loopback only.
 
 Selected ceiling is **two package builds / three application launches**, currently
-**1/2 and 2/3** (one build and one launch remain). Historical Windows **7 builds / 12 launches** and completed Mac request
+**1/2 and 3/3** (final Windows acceptance complete; no launches remain). Historical Windows **7 builds / 12 launches** and completed Mac request
 **1 build / 2 launches** remain unchanged. Reserves require diagnosed failure and a
 concrete correction; ambiguous dispatch must be resolved before retry. Establish
 supported native input/capture and the approved build route before spending an attempt.
@@ -81,6 +81,9 @@ shared behavior needs a focused Mac `ai_request` and `ai_requests` test recheck.
 other-host execution or new Mac native/package run is selected here.
 
 ### Windows request acceptance and capability blocker — 2026-10-09
+
+**Historical stop, subsequently resolved by explicit capture approval and the final
+acceptance below.** This section and its partial metadata preserve the failed attempts.
 
 **State: incomplete, blocked on supported native input/capture permission.** No push
 is authorized or requested while native acceptance remains incomplete. Shared product
@@ -130,6 +133,55 @@ preflight window, record `launch-3-correction.json`, verify unchanged package/ru
 hashes, then use the final launch for the compact five-request walkthrough. Do not
 reacquire exited windows or repeat credential qualification. No full 2A.2/live Studio,
 CI, merge/release, policy changes or next feature is selected.
+
+### Final Windows request acceptance — 2026-10-09
+
+**Selected Windows scope: complete and ready for explicit push approval.** The user
+approved task-app captures after the earlier waiver was interpreted as a prohibition.
+Before consuming launch 3, native screenshot-backed clicking selected the exact public
+Explorer fixture and focused literal typing was visibly verified. A quoted Windows
+path corrected the initial Explorer dispatch that did not open the intended folder.
+The exact correction receipt preceded launch; package/runtime identity was unchanged.
+
+| Gate | Final evidence/result |
+| --- | --- |
+| Explicit Send boundary | Native project opening, settings/profile loading, public credential entry and request-panel loading produced zero HTTP. The five native Send actions produced exactly five accepted POSTs, each the same 279-byte fixed synthetic body, SHA256 `27d6a326c2a7543348d55e518ca744a8cad4b1a8463fdc3e7342dfa7661e860f`. No project content, extra GET, retry, provider switch or output application. |
+| Completion | Native UI showed Completed, HTTP 200, 8025 ms, finish stop, usage input 42/output 4/total 46/reasoning 0 and the fixed response text. |
+| Stalled edit/Save | Native source editor accepted the public comment `# Windows synthetic Save during stalled request`; Save visibly returned to Saved/Clean while the panel still showed sending. Production Save receipt: success, 280 ms, active workers 1 before and after. Server still had exactly two requests and the second connection remained active. |
+| Cancellation/error | Native Cancel showed client cancelled, HTTP status unknown, and the server observed client closure. A separate explicit Send showed the safe HTTP 401 authentication error in 3 ms, without displaying the untrusted response body. |
+| Unknown usage | Native completion showed HTTP 200 in 4 ms and input/output/total/reasoning all unknown, not fabricated zeros. |
+| Active-request exit | Fifth explicit Send was observed active; native Alt-F4 exited normally, code 0, no forced termination. The stalled client connection closed before server teardown; app receipt reports zero active workers and cleanup complete. Whole launch 273.953 s. Launch 2 separately established ordinary idle normal exit. |
+| Deterministic supplementation | Previously passed core 8 cover immutable body/destination/context refusal, usage variants, malformed/deep/invalid UTF-8/truncated/oversized/unsupported responses, auth/error/no retry, cancellation before connect/during headers/body, unavailable server and response deadline. Desktop 6 cover one owned worker/native capture, stale payloads, configuration/project/shutdown/late-result rejection and synchronized Save races. No unchanged passed credential scenarios repeated. |
+| Cleanup | All three exact app PIDs/fixture roots absent, three listener lifetimes stopped, final Windows listener query empty on 46082. One app-created synthetic native credential removed through the accepted exact-target ownership-metadata flow, then absence checked. No enumeration/blob inspection/uncertain ownership recovery. Exact preflight window/file removed; all original captures/receipts retained outside Git. |
+
+The final native modal initially returned an unavailable cached accessibility index.
+Freshly observed modal screenshot geometry resolved input, with no duplicate credential
+save or request dispatch. Preserve this tool failure alongside earlier failures; it is
+not a demonstrated product defect. All **29** saved launch-3 native observations took
+at most **2448 ms**, below the separate 180-second operator bound. The whole walkthrough
+was below 1800 s. Application response 600 s, connection 1 s and cleanup 2 s remained
+their own limits; cancellation/exit connection elapsed times are not response deadlines.
+
+**Final accounting:** selected **1/2 builds, 3/3 launches, 5 HTTP requests, one credential
+created/removed, three roots removed and three stopped listener lifetimes**. Historical
+Windows 7 builds/12 launches becomes **8 builds/15 launches**; Mac remains 1 build/2
+launches. No reset or fourth launch. Build 1 executable/installer hashes above remain
+valid; no UI production changes or second package build were needed.
+
+Private originals remain in ignored `app/.toolchains/windows-studio-request/`, including
+launch-3 captures, source-save/exit/credential cleanup receipts, corrected preflight,
+`final-listener-audit.json` and `final-audit.json` with original JSON hashes. The
+[public final metadata](../evidence/2026-10-09-windows-studio-request-final.json) contains
+safe results only; the prior partial snapshot is retained as history. Shared fixes
+are local `0cec43f`; controller/checks/historical blocker records are local `d8139eb`;
+final records follow locally. Nothing has been pushed.
+
+The exact outstanding Mac consequence remains the two focused core `ai_request` and
+desktop `ai_requests` test commands above. No other-host execution, current full
+cross-platform acceptance, full 2A.2 or live Studio compatibility is claimed. Credential
+backends/ownership/package identities/security policy remain unchanged. No real key or
+endpoint, project-content send, SSE, provider/auth expansion, proposals, installation,
+CI, merge/release or next feature was added.
 
 ## Current Windows qualification contract
 

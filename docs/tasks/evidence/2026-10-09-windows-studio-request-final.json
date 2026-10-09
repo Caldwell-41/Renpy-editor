@@ -1,0 +1,130 @@
+{
+  "date": "2026-10-09",
+  "platform": "Windows x64",
+  "branch": "codex/provider-qualification",
+  "publishedContinuation": "0a91e20cbb7d8abedc5cfc84b566bf9ccbc65723",
+  "sharedFixCommit": "0cec43ff7785713d9d9ba0a8f53391cd92ccdfe1",
+  "state": "selected-windows-acceptance-complete-awaiting-push-approval",
+  "nativeAcceptance": true,
+  "selected": {
+    "builds": 1,
+    "buildLimit": 2,
+    "launches": 3,
+    "launchLimit": 3,
+    "httpRequests": 5,
+    "credentialsCreated": 1,
+    "rootsRemoved": 3,
+    "listenersStopped": 3,
+    "credentialsRemoved": 1
+  },
+  "cumulativeWindows": {
+    "builds": 8,
+    "launches": 15
+  },
+  "macRequestHistory": {
+    "builds": 1,
+    "launches": 2
+  },
+  "package": {
+    "executableSha256": "b293c4340dd52af528ff5c5b5467f51273698984b4339e7a745dff49b1848266",
+    "installerSha256": "a73e4ec2c440be3f83bef8cf3d0819d26abf336d7d5db4d3c5dfa8fe047c42fb",
+    "buildSeconds": 70.22369270003401,
+    "runtimeInputsUnchangedAfterBuild": true
+  },
+  "checks": {
+    "coreRequest": 8,
+    "desktopRequest": 6,
+    "freshFixture": 1,
+    "frontendProtocol": 11,
+    "windowsController": 6,
+    "affectedSharedController": 4
+  },
+  "launches": [
+    {
+      "number": 1,
+      "exitCode": 101,
+      "seconds": 0.8857804998988286,
+      "classification": "controller marker CRLF failure",
+      "passed": false
+    },
+    {
+      "number": 2,
+      "exitCode": 0,
+      "seconds": 509.02907300007064,
+      "normalExit": true,
+      "classification": "native input/capture permission blocker",
+      "passed": false
+    },
+    {
+      "number": 3,
+      "exitCode": 0,
+      "seconds": 273.95280349999666,
+      "normalExit": true,
+      "classification": "five-request packaged native acceptance",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "ownedPidsAbsent": true,
+    "ownedRootsAbsent": true,
+    "listenerMetadataQueryPassed": true,
+    "nativeCredentialsCreated": 1,
+    "unrelatedCredentialAccess": false,
+    "nativeCredentialsRemoved": 1,
+    "credentialAbsenceVerified": true,
+    "secretValuesRead": false,
+    "activeWorkersAfterExit": 0,
+    "stalledClientsClosedBeforeServerTeardown": true
+  },
+  "missingNativeProof": [],
+  "requiredMacRecheck": [
+    "cargo test -p loomlight-core ai_request --locked",
+    "cargo test -p loomlight-desktop ai_requests --locked"
+  ],
+  "pushed": false,
+  "native": {
+    "zeroRequestsBeforeExplicitSend": true,
+    "identicalFixedBodyBytes": 279,
+    "bodySha256": "27d6a326c2a7543348d55e518ca744a8cad4b1a8463fdc3e7342dfa7661e860f",
+    "reportedCompletion": {
+      "http": 200,
+      "elapsedMs": 8025,
+      "input": 42,
+      "output": 4,
+      "total": 46,
+      "reasoning": 0
+    },
+    "stalledSourceSave": {
+      "activeWorkersAfter": 1,
+      "activeWorkersBefore": 1,
+      "elapsedMs": 280,
+      "evidence": "studio-request-source-save",
+      "success": true
+    },
+    "cancelVisible": true,
+    "safeAuthenticationError": {
+      "http": 401,
+      "elapsedMs": 3
+    },
+    "unknownUsageCompletion": {
+      "http": 200,
+      "elapsedMs": 4,
+      "input": null,
+      "output": null,
+      "total": null,
+      "reasoning": null
+    },
+    "activeRequestNormalExit": true,
+    "observations": 29,
+    "maxObservationMs": 2448,
+    "operatorObservationLimitSeconds": 180,
+    "wholeWalkthroughLimitSeconds": 1800,
+    "applicationResponseLimitSeconds": 600,
+    "connectionLimitSeconds": 1,
+    "cleanupLimitSeconds": 2,
+    "originalCapturesRetainedOutsideGit": true
+  },
+  "unchangedCredentialEvidenceReused": true,
+  "macRecheckExecuted": false,
+  "full2A2OrLiveStudioClaim": false
+}
