@@ -70,8 +70,9 @@ reopen; keyboard/focus, light/dark and compact layout were observed. See
 [final Mac acceptance](#final-manual-library-mac-acceptance--2026-10-09) for evidence
 layers and limits. All historical failures below remain failed historical attempts.
 Implementation and self-review are complete on Mac. The user approved the normal push;
-implementation checkpoint `f48c446` is published and verified. Windows remains required and
-unstarted; no full 2B.1 or Phase 2 completion.
+implementation checkpoint `f48c446` is published and verified. The later
+[Windows acceptance](#final-manual-library-windows-acceptance--2026-10-10) completes
+this selected both-target outcome; no full 2B.1 or Phase 2 completion.
 
 ### Manual-library Mac implementation and first native run — 2026-10-09
 
@@ -526,6 +527,75 @@ reopen within the two remaining launches. If capability remains unavailable, ret
 this blocked state and exact missing proof. No Windows acceptance, both-target
 completion, full 2B.1 or Phase 2 completion is claimed. Do not push this local
 records-only continuation without the user's approval.
+
+### Final manual-library Windows acceptance — 2026-10-10
+
+**Selected manual-library outcome: accepted on Windows x64 and Mac.** The preceding
+pause remains the historical result of launch 1. At the user's request, Computer
+Use window access was retried using the retained production package, without an
+allowance increase, product code change, package rebuild or other-host execution.
+One serial Windows owner used no subagents. The worktree is based on published
+`dc889d65f85beeeb388ce8581f8e7d977b292f18`, including Mac implementation
+`f48c446e629c238d9d190c33b9c727cd73002b7e`.
+
+The Windows x64 NSIS executable SHA256 is
+`86192e75dfdea3e4435bef1f3e672519b00f5bd2745c5bbd9fe26e8420d546cc`;
+installer SHA256 is
+`7f9b975ae16dbb1e87df41b0a8b61659ace39990a41b4b19d4b6e100d57f95c1`.
+Both passed privacy scanning. Build attempt 1 failed before compilation at a
+diagnosed Tauri CLI argument separator; the corrected attempt 2 built and packaged
+offline. The host's missing `npm` was handled by an ignored build-only shim running
+the repository's exact TypeScript/Vite commands. Cumulative builds: **2/2**.
+
+Launch 1, PID 14960, timed out awaiting Computer Use access before native input;
+its failed receipt remains failed. Launch 2, PID 21212, obtained the packaged
+WebView window. A physical Ctrl+S produced Saving then Saved; direct UI and disk
+readback confirmed a new approved card, revision counter 1 and current/approved
+revision `53cb9644-908e-404d-97c3-bc0e67a36242` before the runner advanced.
+Physical Tab then moved Name focus to Aliases. Subsequent synthetic form input
+used real production UI, IPC and storage; it was not browser-mock acceptance.
+
+Launch 2's phase-1 receipt passed **29** assertions, exit 0 and
+`cleanupComplete:true`: card replacement and lore creation, ordinary Save/Discard,
+bounded refusal preserving draft/data, search/tag filter, stale external Save
+conflict then explicit Reload/Save, malformed/newer refusal and restored data,
+unknown extension retention, stale citation and missing link, repeated route,
+linked lore, knowledge notes, source-text preservation, exact native
+Undo/Undo/Redo/Redo and repeated Undo. The form has no manual review controls.
+Final card ID `e3067b71-9232-426b-af48-582d3dbcd08b`, counter 3,
+current/approved revision `598d4e41-0e3b-4045-b125-4198f3b6153f` (r3
+approved); retained r2 `bd0471c7-30e0-44dd-a1e8-137d71d1e07e` is superseded.
+The complete metadata SHA256 was
+`78f45911a83206fd4bb1109185a64fc03ace4679a5eb2778ffd576b4328ffbba`.
+
+In the same launch, visible wide light and dark forms showed top creation and
+ordinary Save/Discard without control collisions. Compact dark list and form
+remained usable with visible Save/Discard. Search focus, physical Tab/Tab and
+Return opened a card and focused Name. The observation did not independently
+establish compact vertical scrolling. The runner released observation markers
+only after these actual observations. Launch 3, PID 18108, passed **3**
+separate-process reopen assertions in 4.16 seconds, exit 0 and
+`cleanupComplete:true`: both collections, exact revision/status data and the
+external unknown extension persisted. Its full metadata hash was identical to
+phase 1, establishing byte-exact process reopen. Cumulative launches: **3/3**.
+
+Windows focused gates passed before packaging: TypeScript typecheck, Python/JS
+probe syntax, 15 selected frontend/protocol/controller tests, eleven reference
+core tests plus incidental preferences, three history-continuity regressions and
+the external history boundary. The first sandboxed core run failed at temporary
+profile creation before a reference operation; identical checks passed outside
+the filesystem sandbox. Real core dispatch covers project isolation, ordering,
+recovery and extended malformed/bounds cases; native probe covers the
+representative scenarios above. Mac final acceptance provides the other required
+target. No custom author distribution override or game execution was tested.
+
+Ignored `app/.toolchains/manual-reference-windows/final-audit.json` records both
+passing reports, the matching metadata hash and log hashes. All three PIDs were
+confirmed absent and the exact owned synthetic root was removed; the package and
+receipts remain ignored local evidence. No product code changed. Only acceptance
+and live status records were updated. Both-target acceptance applies to this
+selected manual-library outcome alone; full 2B.1, Phase 2 and live Studio remain
+incomplete. This local documentation checkpoint requires approval before push.
 
 ## Windows synthetic request selection — 2026-10-09
 

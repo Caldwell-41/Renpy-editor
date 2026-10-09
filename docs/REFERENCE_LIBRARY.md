@@ -1,11 +1,12 @@
 # Manual reference library v1
 
-**State:** implemented and reviewed locally. Mac packaged authoring, consecutive
-Undo/Redo, byte-exact process reopen, keyboard/focus, both themes and compact layout
-pass. Shared-history regressions preserve real external boundaries. UI A remains
-approved; Windows production acceptance is required and unstarted. The
-[owning acceptance ledger](tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09)
-distinguishes native forms from deterministic bounds/recovery/project-isolation proof.
+**State:** selected manual-library outcome accepted on packaged Mac and Windows x64.
+Native authoring, consecutive Undo/Redo, byte-exact process reopen, keyboard/focus,
+both themes and compact layout pass on both targets. Shared-history regressions
+preserve real external boundaries. UI A remains approved. The
+[Mac acceptance](tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09)
+and [Windows acceptance](tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-windows-acceptance--2026-10-10)
+distinguish native forms from deterministic bounds/recovery/project-isolation proof.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
 manual approval workflow. Select an entry, edit directly, then Save changes or
