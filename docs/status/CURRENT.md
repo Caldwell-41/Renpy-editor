@@ -13,18 +13,20 @@ removed manual approval/status controls; internal revisions/statuses remain stor
 | Reference integrity | Malformed/newer data retained; stale/missing citations and links preserved; nested extensions retained on edits. Project/session isolation and ordinary recovery pass core tests. | Representative Mac native cases pass. |
 | Layout and focus | Direct editing, keyboard Save, focus restoration, list/form navigation, fixed Save controls and shared themes. | Mac physical keyboard/focus, wide light/dark and narrow dark observations pass. Windows required. |
 
-The selected Mac work is reviewed and ready for local publication approval; both-target
-acceptance remains incomplete. The owning ledger preserves all failures and the two
+The selected Mac work is reviewed and published with user approval at implementation
+checkpoint `f48c446`; both-target acceptance remains incomplete. Windows verification
+is next, with code changes permitted only for a demonstrated acceptance blocker.
+The owning ledger preserves all failures and the two
 explicitly requested read-only subagent assessments. One serial implementation writer;
 no further delegation or other-host execution. [HANDOVER](HANDOVER.md) owns continuation.
 
 **Cumulative manual-library allowance:** Mac **7/9 builds, 10/13 starts**; Windows
-**0/2 builds, 0/3 starts**. Owned fixtures/processes are cleaned. No push approved or
-attempted. Unchanged credential/request evidence is reused; its independent totals
+**0/2 builds, 0/3 starts**. Owned fixtures/processes are cleaned. The normal push was
+approved and its remote checkpoint verified. Unchanged credential/request evidence is reused; its independent totals
 remain Mac **1 build/2 starts**, Windows **8 builds/15 starts**, without transfer.
 
-Entry refs matched published `54f562d`; the branch preserves six earlier scoped local
-commits and the repair/acceptance changes. Unrelated planning worktree is untouched.
+Entry refs matched published `54f562d`; the branch preserves the seven scoped manual
+library commits through `f48c446` plus this transfer record. Unrelated planning worktree is untouched.
 Phase 1 remains accepted through PR19/main `5f448ca`; full 2A.1/2A.2, full 2B.1, Phase 2
 and live Studio compatibility remain incomplete. Public v0.1.0 is unchanged.
 Generation, provider/credential/HTTP, prompt/context/proposal, runnable-source changes,

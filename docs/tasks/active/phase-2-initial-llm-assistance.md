@@ -69,8 +69,8 @@ authoring/replacement, consecutive history, refusal/data retention and exact pro
 reopen; keyboard/focus, light/dark and compact layout were observed. See
 [final Mac acceptance](#final-manual-library-mac-acceptance--2026-10-09) for evidence
 layers and limits. All historical failures below remain failed historical attempts.
-Implementation and self-review are complete on Mac; local commit/publication approval
-is the next boundary. No push is approved or attempted. Windows remains required and
+Implementation and self-review are complete on Mac. The user approved the normal push;
+implementation checkpoint `f48c446` is published and verified. Windows remains required and
 unstarted; no full 2B.1 or Phase 2 completion.
 
 ### Manual-library Mac implementation and first native run — 2026-10-09
@@ -453,7 +453,26 @@ other-host action, install/security change, CI or merge/release. Both explicitly
 requested read-only subagents remain complete, with one implementation writer.
 Unchanged credential/request evidence and its budgets are reused unchanged. Windows
 acceptance still gates the selected outcome; full 2B.1/Phase 2 and live Studio
-compatibility are incomplete. Conditional same-outcome Windows prompt is in HANDOVER.
+compatibility are incomplete. Same-outcome Windows prompt is in HANDOVER.
+
+### Approved publication and Windows transfer — 2026-10-09
+
+The user approved pushing the reviewed seven scoped local commits and requested the
+Windows prompt, with code changes only if necessary. Entry inspection found clean
+`f48c446` on the correct branch and preserved the unrelated planning worktree. Fetch
+confirmed remote `54f562d` remained an ancestor; normal push succeeded without reset,
+history rewriting or force. `git ls-remote` verified
+`f48c446e629c238d9d190c33b9c727cd73002b7e` on the exact remote branch. CURRENT/HANDOVER
+and this transfer record are updated in a subsequent docs-only commit, published under
+the same approval; the final remote tip is verified after that push.
+
+Windows is verification first. Code changes require a demonstrated required-acceptance
+blocker, exact diagnosis and focused reproducer; apply only the smallest necessary
+correction. Harness failures and missing evidence are not automatically product defects.
+Passing checks mean unchanged code with acceptance/status updates only. No redesign,
+refactor, speculative improvements or new feature. Windows remains **0/2 builds,
+0/3 starts**; no Mac build/start or other-host execution was added by publication.
+Both-target acceptance remains required. No full 2B.1/Phase 2 completion claimed.
 
 ## Windows synthetic request selection — 2026-10-09
 

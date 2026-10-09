@@ -6,9 +6,13 @@ Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`. One serial Lo
 Mac ARM64 owner has completed implementation, focused checks, native verification
 and self-review. Entry refs matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`;
 preserve subsequent local commits and the unrelated planning worktree, never reset
-to that entry checkpoint. This result is local only. **Next action: obtain approval
-to push the reviewed result**, then verify the published checkpoint and transfer the
-same outcome to one Windows x64 writer. No other-host execution or second active writer.
+to that entry checkpoint. The user approved publication; the normal push and remote
+checkpoint `f48c446e629c238d9d190c33b9c727cd73002b7e` were verified. This transfer record
+is a subsequent docs-only commit on the same branch. **Next action: one Windows x64
+owner pulls and verifies the published branch, then qualifies the same outcome.**
+No other-host execution or second active writer. The user's transfer constraint is
+verification first: change code only when demonstrably necessary to resolve a required
+acceptance blocker; no speculative improvements, refactoring or redesign.
 
 Read the [owning selection/attempt ledger](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
 [Mac acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09),
@@ -69,13 +73,14 @@ subagents completed; no further delegation is selected. Full 2B.1, Phase 2 and l
 Studio compatibility remain incomplete. Do not return/start a next distinct feature
 until required both-target acceptance.
 
-## Conditional Windows pull-and-continue prompt
+## Windows pull-and-continue prompt
 
-Use after publication is approved and completed; local-only commits are not remotely
-available yet. Replace the checkpoint placeholder with the verified pushed commit:
+Publication is approved and the implementation checkpoint is verified. Pull the
+published branch tip including this transfer record; never reset to its earlier checkpoint.
 
 > Continue the same manual reference-library outcome in Caldwell-41/Renpy-editor,
-> branch codex/provider-qualification, from [verified published Mac commit]. Inspect
+> branch codex/provider-qualification. Pull its published tip, verifying it contains
+> Mac implementation checkpoint f48c446e629c238d9d190c33b9c727cd73002b7e. Inspect
 > refs/branch/worktrees/local changes, preserve unrelated work and fast-forward safely;
 > never reset to the older 54f562d checkpoint. Read CURRENT/HANDOVER, owning manual-library
 > acceptance, REFERENCE_LIBRARY, Phase 2 sections 9/10/11/19/20, ADR 0011 and applicable
@@ -84,6 +89,12 @@ available yet. Replace the checkpoint placeholder with the verified pushed commi
 > retain internal statuses without a manual review toolbar. Windows allowance is
 > 0/2 builds and 0/3 app starts, cumulative for this outcome; count implicit UI launches.
 > Reuse unchanged credential/request evidence and passed portable cases where valid.
+> This is a verification-first continuation. Make code changes only when a demonstrated
+> defect or unavailable harness capability blocks required acceptance and the smallest
+> correction is necessary. Diagnose the exact failure and establish a focused reproducer
+> before editing or retrying; distinguish product defects from harness failures or missing
+> evidence. No speculative fixes, refactors, redesign, new features or changes merely for
+> style. If checks pass, leave code unchanged and update only acceptance/status records.
 > Verify affected shared-history regressions, actual production UI/dispatch/metadata
 > card/lore creation/update, replacement, consecutive Undo/Undo/Redo/Redo and exact
 > process-reopen IDs/statuses/bytes, bounds/refusals, external edits, malformed/newer and
