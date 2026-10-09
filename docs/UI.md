@@ -717,6 +717,15 @@ for later maturity but must not be falsely presented as Phase 1-complete feature
 
 ## Character supporting surface
 
+The selected manual reference library follows the user's 2026-10-09 correction:
+select a Character card/lore entry, edit fields directly, Save changes or Discard
+changes. Creation is a clearly named workspace action (New character card / New lore
+entry); new forms use Create card / Create lore entry and Cancel. No Edit unlock or
+manual Approve/Reject/Supersede controls. Save is one undoable metadata operation.
+Optional source/link/knowledge fields expand on demand. The
+[revised A/B layouts](design/manual-reference-library/README.md) await selection;
+mockups do not establish native acceptance or change runnable Character definitions.
+
 Phase 1 Character fields are deliberately small:
 
 - technical variable/ID;

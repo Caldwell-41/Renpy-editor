@@ -4,6 +4,12 @@
 not implemented or accepted. Phase 2 section 9 and ADR 0011 own the product rules.
 UI selection and both-target production evidence remain required.
 
+**Manual UX correction, 2026-10-09:** the user's latest direction replaces the
+manual approval workflow. Select an entry, edit directly, then Save changes or
+Discard changes. No Edit unlock, Save as proposed, Approve, Reject or Supersede
+controls in this manual outcome. Save records the author's text as current in one
+transaction; revision/status storage supports later generated-content review.
+
 ## Ownership and persistence
 
 One core reference service owns `.renpy-editor/references.json`, containing
@@ -18,8 +24,8 @@ Loading other project surfaces must remain possible. Writes are blocked until th
 library can be read safely; it must never be reinitialized over invalid data.
 
 All writes use the active project authority, anchored transaction snapshot, expected
-file revision and shared `AuthoringService::commit_history` path. One save, approval,
-rejection, supersession or reordering is one history entry. References use the existing
+file revision and shared `AuthoringService::commit_history` path. One manual save
+or reordering is one history entry. References use the existing
 project history, ordinary external-edit boundary, recovery and flush policy. No second
 reference-specific Undo stack. Undo/redo restores exact persisted bytes/status/IDs;
 history is session-local, while useful saved revisions survive reopen.
@@ -70,23 +76,25 @@ context selection. Linking alone does not claim source-derived evidence or stale
 
 ## Lifecycle
 
-New/save-as-proposed creates a proposed revision. Saving a replacement leaves the prior
-approved revision and pointer intact. Rejected replacement text remains inspectable;
-its rejection does not remove or alter prior approved text. Saving another replacement
-allocates a new revision and retains the bounded inspection set above.
+Selecting an entry opens editable fields immediately. Save changes creates a new
+revision of the author's text with internal `approved` status and updates both
+current/approved pointers atomically. Prior approved text becomes `superseded` with
+reciprocal revision links and remains in the bounded set/history. This is an ordinary
+save, not a separate approval ritual. New entries use Create card / Create lore entry.
+No-change Save is disabled; invalid submissions preserve fields without writes.
 
-Explicit Approve or Save and approve reviews that exact revision and its citations.
-Known stale/unresolved citations refuse approval, preserving input and data; the author
-must explicitly correct/remove them in a new revision. Approving a replacement marks
-the prior approved revision superseded, records reciprocal revision links, and moves
-the approved pointer atomically. No automatic approval on Save as proposed.
+Discard changes restores the saved form; it never undoes a committed Save. Navigation
+with unsaved changes uses the existing draft-loss guard. A stale or missing supporting
+citation is retained and shown under source notes, without preventing a manual prose
+save. Future default context eligibility remains false while evidence is unresolved
+or stale. Saving must not silently update a citation's captured source revision.
 
-Reject acts on a proposed current revision. Supersede explicitly withdraws a reviewed
-revision, optionally recording a replacement link; withdrawing the approved revision
-clears its pointer. Missing replacement targets are retained as unresolved. Reapproval
-of rejected/superseded prose requires a new content revision and explicit approval.
+`proposed`, `rejected` and `superseded` remain valid stored states for later generated
+review and fixture compatibility; no manual status-management toolbar is selected.
+Future generated changes still cannot approve themselves. Their saved proposals must
+retain approved text during review; generation/review UI is outside this outcome.
 Records are retained; deletion is outside this selected outcome. Reorder is explicit
-within the same collection; search/status/category/tag filtering never changes order.
+within the same collection; name/prose/category/tag filtering never changes order.
 
 ## Bounds and extension retention
 
@@ -125,19 +133,21 @@ and its independent byte/token budgets are excluded from this outcome.
 Public synthetic fixtures live in `app/tests/fixtures/reference-library/`.
 `empty.json` is a valid empty v1 document; `replacement.json` demonstrates an approved
 card plus proposed replacement, linked lore, repeated route visits, missing entities,
-an unresolved citation and nested unknown data. `newer.json` and `malformed.json`
+an unresolved citation and nested unknown data. `manual-save.json` shows the same
+card after an ordinary manual Save: current r2 approved internally, r1 superseded,
+exact prior text and reciprocal links retained. `newer.json` and `malformed.json`
 are deliberately refused and must remain byte-for-byte intact.
 
-Before packaging, core/service fixtures must prove create/edit/review/reorder,
+Before packaging, core/service fixtures must prove create/edit/save/reorder,
 exact undo/redo/reopen, unknown-field inheritance, missing/stale citations/links,
 boundary and boundary-plus-one input (including escaped Unicode), malformed/newer
 retention, external file edits, recovery refusal and session/project switching.
-UI/controller-to-production-dispatch evidence must begin with one real card save,
-approval and file readback, before expanding form coverage. Missing or wrong expected
+UI/controller-to-production-dispatch evidence must begin with one real card save
+and file readback, before expanding form coverage. Missing or wrong expected
 results must fail the evidence gate; browser mocks cannot establish native acceptance.
 
-Native representative forms on Mac ARM64 and Windows x64 must demonstrate saved
-proposed text, explicit replacement approval/rejection, Undo/Redo, close/reopen with
+Native representative forms on Mac ARM64 and Windows x64 must demonstrate manual
+creation/update/Save, Discard changes, refused submission, Undo/Redo, close/reopen with
 exact IDs/statuses and keyboard/focus, compact layout and both themes. Reuse unchanged
 request/credential evidence. Builds/launches and failures belong to the owning ledger.
 

@@ -39,6 +39,12 @@ but had no renderer or native entry dialog. It is not production credential UX e
   Keep approved text while reviewing its replacement unless its own evidence is stale.
   Scope is project-wide, selected Scenes or an explicit finite route; use written
   knowledge/spoiler notes. No inferred knowledge or automatic keyword injection.
+- For the manual-library outcome, the user's 2026-10-09 correction selects direct
+  editing and ordinary Save/Discard rather than a manual approval workflow. Save
+  makes the author's text current through one undoable metadata transaction. Internal
+  lifecycle states and future generated-content review remain distinct; unresolved
+  citations are retained and still affect future context eligibility. The
+  [concrete manual contract](../REFERENCE_LIBRARY.md) owns this selected behavior.
 - Project metadata edits reuse transaction/history/recovery. Device profiles use safe
   replacement. Retain malformed/newer existing data; migrations do not rewrite scripts.
   Concrete schema/limit fixtures precede the reference editor implementation.

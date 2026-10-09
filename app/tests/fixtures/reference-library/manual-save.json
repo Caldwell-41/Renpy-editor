@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "projectId": "10000000-0000-4000-8000-000000000001",
+  "futureLibrary": {
+    "orderNote": "retain",
+    "nested": {
+      "value": 7
+    }
+  },
+  "cards": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "revisionCounter": 2,
+      "currentRevisionId": "30000000-0000-4000-8000-000000000002",
+      "approvedRevisionId": "30000000-0000-4000-8000-000000000002",
+      "futureRecord": {
+        "retain": true
+      },
+      "revisions": [
+        {
+          "id": "30000000-0000-4000-8000-000000000001",
+          "number": 1,
+          "status": "superseded",
+          "createdAt": "2026-10-09T00:00:00Z",
+          "reviewedAt": "2026-10-09T00:01:00Z",
+          "reviewNote": "Manually reviewed.",
+          "supersedes": null,
+          "supersededBy": {
+            "recordId": "20000000-0000-4000-8000-000000000001",
+            "revisionId": "30000000-0000-4000-8000-000000000002"
+          },
+          "content": {
+            "title": "Mara",
+            "tags": [
+              "station",
+              "night shift"
+            ],
+            "scope": {
+              "type": "project",
+              "futureScope": "retain"
+            },
+            "knowledgeNotes": "Knows the timetable, not the cause of the delays.",
+            "provenance": {
+              "kind": "userAuthored",
+              "notes": "Public synthetic author intent.",
+              "futureProvenance": 4
+            },
+            "citations": [],
+            "links": [],
+            "linkedCharacterId": null,
+            "aliases": [
+              "M"
+            ],
+            "description": "A station attendant who stays late.",
+            "appearanceNotes": "Worn coat; no image or Appearance changes.",
+            "personality": "Reserved, observant.",
+            "motivations": "Keep everyone safely on their way.",
+            "background": "Grew up near the old station.",
+            "relationships": [],
+            "speakingStyle": "Short sentences, gentle humour.",
+            "exampleDialogue": "“Last tram?”\r\nShe checks the clock.\n",
+            "linkedLoreIds": [
+              "40000000-0000-4000-8000-000000000001"
+            ],
+            "futureContent": {
+              "retain": [
+                "α",
+                "β",
+                null
+              ]
+            }
+          }
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "number": 2,
+          "status": "approved",
+          "createdAt": "2026-10-09T00:02:00Z",
+          "reviewedAt": "2026-10-09T00:04:00Z",
+          "reviewNote": "Manual Save changes makes authored text current.",
+          "supersedes": {
+            "recordId": "20000000-0000-4000-8000-000000000001",
+            "revisionId": "30000000-0000-4000-8000-000000000001"
+          },
+          "supersededBy": null,
+          "futureRevision": {
+            "retain": "review extension"
+          },
+          "content": {
+            "title": "Mara",
+            "tags": [
+              "station",
+              "night shift"
+            ],
+            "scope": {
+              "type": "route",
+              "sceneIds": [
+                "50000000-0000-4000-8000-000000000001",
+                "50000000-0000-4000-8000-000000000002",
+                "50000000-0000-4000-8000-000000000001"
+              ],
+              "futureScope": "retain"
+            },
+            "knowledgeNotes": "Proposed: recognises the passenger, but keeps this quiet.",
+            "provenance": {
+              "kind": "userAuthored",
+              "notes": "Public synthetic revision."
+            },
+            "citations": [],
+            "links": [
+              {
+                "type": "character",
+                "id": "60000000-0000-4000-8000-000000000001",
+                "futureLink": "retain missing"
+              }
+            ],
+            "linkedCharacterId": "60000000-0000-4000-8000-000000000001",
+            "aliases": [
+              "M"
+            ],
+            "description": "A station attendant who remembers every passenger.",
+            "appearanceNotes": "Worn coat; no image or Appearance changes.",
+            "personality": "Reserved, observant, quietly protective.",
+            "motivations": "Keep everyone safely on their way.",
+            "background": "Grew up near the old station.",
+            "relationships": [
+              {
+                "target": null,
+                "text": "Wary of the station manager.",
+                "futureRelationship": true
+              }
+            ],
+            "speakingStyle": "Short sentences, gentle humour.",
+            "exampleDialogue": "“You were here yesterday.”\n",
+            "linkedLoreIds": [
+              "40000000-0000-4000-8000-000000000001"
+            ],
+            "futureContent": {
+              "retain": [
+                "α",
+                "β",
+                null
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "loreEntries": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "revisionCounter": 1,
+      "currentRevisionId": "30000000-0000-4000-8000-000000000003",
+      "approvedRevisionId": null,
+      "revisions": [
+        {
+          "id": "30000000-0000-4000-8000-000000000003",
+          "number": 1,
+          "status": "proposed",
+          "createdAt": "2026-10-09T00:03:00Z",
+          "reviewedAt": null,
+          "reviewNote": "",
+          "supersedes": null,
+          "supersededBy": null,
+          "content": {
+            "title": "The last tram",
+            "tags": [
+              "transport",
+              "night"
+            ],
+            "scope": {
+              "type": "scenes",
+              "sceneIds": [
+                "50000000-0000-4000-8000-000000000001"
+              ]
+            },
+            "knowledgeNotes": "Timetable intent; no runtime inference.",
+            "provenance": {
+              "kind": "sourceDerived",
+              "notes": "Synthetic missing-Scene citation."
+            },
+            "citations": [
+              {
+                "target": {
+                  "type": "scene",
+                  "id": "50000000-0000-4000-8000-000000000001"
+                },
+                "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "notes": "Unresolved until the matching Scene exists.",
+                "futureCitation": {
+                  "retain": true
+                }
+              }
+            ],
+            "links": [],
+            "text": "The final tram leaves at midnight.\nDelays are possible.",
+            "category": "World rule",
+            "subject": "Station timetable",
+            "knowledge": [
+              {
+                "characterId": "60000000-0000-4000-8000-000000000001",
+                "notes": "Mara knows the published timetable.",
+                "futureKnowledge": 3
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

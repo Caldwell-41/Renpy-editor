@@ -27,21 +27,34 @@ Use one serial Local Mac ARM64 owner and zero subagents. Windows follows on the 
 branch after reviewed Mac implementation and explicit publication approval; no direct
 other-host execution or second writer. Required evidence hosts: Mac ARM64 and Windows x64.
 
+**User correction, 2026-10-09:** manual authoring must be ordinary Save updates, not
+Approve/Reject/Supersede. The first A/B layouts were rejected as messy; Edit unlocking
+was unclear and creation placement was criticized. Select an entry, edit directly,
+Save changes or Discard changes; Save updates the current authored revision in one
+undoable transaction. Status/revision/provenance preservation remains internal.
+The user explicitly authorized one research subagent to compare apps/UI practice;
+that agent researched only, wrote no files and spawned no agents. Implementation
+remains one serial owner. This correction supersedes original manual UI requirements
+in sections 9/18 and the initial selection, not later generated-content review rules.
+
 **Entry:** clean checkout and existing worktree `codex/provider-qualification` at
 published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`. Ref refresh confirms remote equality;
 no fast-forward/reset necessary. Unrelated planning worktree is untouched.
 
 **Prepared before the editor:** [v1 schema/bounds](../../REFERENCE_LIBRARY.md) and
-public `app/tests/fixtures/reference-library/` empty/replacement/newer/malformed files.
+public `app/tests/fixtures/reference-library/` empty/replacement/manual-save/newer/malformed files.
 Schema defines shared lifecycle, bounded current/approved/prior revision retention,
 extensions, source citations, missing/stale links and exact transaction/history ownership.
 No production code changed. The current commit is preparation, not implementation.
 
 **UI decision pending:** user requires A/B approval and requested images when the inline
 preview was not visible. [A/B layout review](../../design/manual-reference-library/README.md)
-records A (persistent list beside editor), B (full-width editor with return to list),
+records revised A (Browse and write), B (Focused writing),
 both themes and compact preview limitations. Do not treat the recommendation or preview
 interactions as approval. Resume this same outcome after the user's selection.
+Revised preview checks passed direct editing/Save/Discard, both themes, lore and 390 px
+list-to-form return without script errors/overflow. Repository validation and diff
+whitespace checks passed. No production/native behavior is proved by these checks.
 
 **Allowance, cumulative across chats/handoffs:** Mac **0/2 builds, 0/3 app launches**;
 Windows **0/2 builds, 0/3 app launches**. Reserves require diagnosed failure/recorded
@@ -52,7 +65,7 @@ passed. Browser previews consume no Loomlight package/native allowance.
 
 **Remaining:** implement core schema/validators, shared transactional service and typed
 dispatch, then approved UI and real UI-to-dispatch-to-file proof early. Focused tests
-must cover review/replacement, Undo/Redo/reopen exact IDs/statuses, invalid/newer data,
+must cover manual save/replacement/discard, Undo/Redo/reopen exact IDs/statuses, invalid/newer data,
 extensions/bounds, external edits/recovery, missing/stale entities and project switching.
 Native forms must prove keyboard/focus, compact widths and both themes on both targets.
 Verify diagnostics/distribution exclusion. Finish Mac checks/review/fixes, clean owned
@@ -735,6 +748,11 @@ Initial transient context snapshots and generated proposal reviews are memory-on
 
 ## 9. Character cards and lorebook
 
+For the selected manual-library outcome, the
+[2026-10-09 user correction](#manual-reference-library-selection--2026-10-09) replaces
+manual status controls with directly editable forms and ordinary Save/Discard.
+The shared schema retains lifecycle states for later generated-content review.
+
 ### Character cards
 
 A Character card is persistent editor-only reference material, distinct from Ren'Py's
@@ -1094,6 +1112,11 @@ resume generation. Explicitly saved proposed card/lore records are durable witho
 becoming approved. This distinction must remain visible at close/reopen.
 
 ### Character cards and Lorebook
+
+The selected manual-library UI now follows ordinary direct editing and Save/Discard,
+with no Edit unlock or manual Approve/Reject/Supersede toolbar, under the
+[2026-10-09 correction](#manual-reference-library-selection--2026-10-09). The original
+generated review behavior below remains a later, separately selected outcome.
 
 Characters retains runnable Game character controls and adds the Character card tab.
 Cards may be unlinked; linking does not create a runnable Character. The editor groups
