@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-09",
+  "outcome": "Mac Studio bounded authenticated non-streaming synthetic request lifecycle",
+  "state": "qualified and cleaned; scoped publication verified separately",
+  "implementationCandidate": "3f3aaf31546272b5fc7fba7ce0c03b1011be1443",
+  "walkthroughSource": "e42597b1e42fe8db731149362caaa4dd7483778d",
+  "executableSHA256": "a0ca6fd22e1359ace2c8dbc080232dd01bda75d4e020d9a32b9ad1a9b21b6ab2",
+  "installerSHA256": "1b418456dae2b7aaff585fa5a0c204b8dd4aafee64b734e0d93013f1c02b41f6",
+  "runtimeInputsUnchanged": true,
+  "strictSignatureVerifiedOnHost": true,
+  "host": {
+    "platform": "macOS ARM64",
+    "version": "26.6.2",
+    "build": "25G83",
+    "renderer": "packaged WKWebView",
+    "hardwareModel": "unknown",
+    "independentWebKitVersion": "unknown"
+  },
+  "focusedChecks": {
+    "coreRequest": 8,
+    "discovery": 1,
+    "desktopOwnership": 5,
+    "freshFixture": 1,
+    "protocolAndRequestDom": 11,
+    "controller": 5,
+    "packagePolicy": 5
+  },
+  "native": {
+    "launch": 2,
+    "requests": 4,
+    "allAuthenticatedFixedBodyAccepted": true,
+    "bodyBytes": 279,
+    "bodySHA256": "27d6a326c2a7543348d55e518ca744a8cad4b1a8463fdc3e7342dfa7661e860f",
+    "visibleSendCompletionCancelError": true,
+    "reportedUsage": {
+      "input": 42,
+      "output": 4,
+      "total": 46,
+      "reasoning": 0
+    },
+    "missingUsageDisplayedUnknown": true,
+    "sourceEditDuringStall": true,
+    "save": {
+      "success": true,
+      "elapsedMs": 161,
+      "activeWorkersBefore": 1,
+      "activeWorkersAfter": 1
+    },
+    "cancelStalledSocketClosed": true,
+    "cancelTotalStallMs": 31140.801,
+    "normalExit": true,
+    "exitCode": 0,
+    "forced": false,
+    "wholeWalkthroughMs": 204940.437,
+    "wholeWalkthroughCapSeconds": 1800,
+    "individualObservationCapSeconds": 180,
+    "activeRequestNativeQuitScenario": false,
+    "optionalCleanupStdoutReceiptPresent": false
+  },
+  "cleanup": {
+    "ownedPidAbsent": true,
+    "listenerAbsent": true,
+    "hostPortConnectError": 61,
+    "ownedFixtureRemoved": true,
+    "profiles": 0,
+    "cleanupReferences": 0,
+    "sealedRecords": 0,
+    "credentialsCreated": 1,
+    "credentialRemovedThroughProduct": true,
+    "unrelatedCredentialAccess": false
+  },
+  "allowance": {
+    "packageBuildsConsumed": 1,
+    "packageBuildsCeiling": 2,
+    "launchesConsumed": 2,
+    "launchesCeiling": 3
+  },
+  "originalFailuresRetained": [
+    "launch 1 locked Mac, exit -15, operator 180-second cap exceeded",
+    "sandbox strict signature unavailable; host passed unchanged policy",
+    "sandbox audit port error 1 corrected by host refusal error 61"
+  ],
+  "originalPartialEvidence": "2026-10-09-mac-studio-request-partial.json",
+  "screenshots": "User review only; six originals outside Git",
+  "windowsCredentialAcceptanceReused": true,
+  "macCredentialAcceptanceReused": true,
+  "windowsRequestQualification": false,
+  "full2A2": false,
+  "liveStudioCompatibility": false,
+  "limits": [
+    "literal-loopback HTTP synthetic fixed message only",
+    "active shutdown/configuration/project races and response variants qualified by deterministic focused checks",
+    "one native functional Save sample; no percentile performance claim",
+    "no real endpoint, project content, SSE, generic provider, proposal application or automatic retry"
+  ]
+}

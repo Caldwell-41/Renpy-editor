@@ -62,6 +62,10 @@ Client cancellation does not promise that server computation/billing stopped.
 
 Focused checks and the task-specific signed-app walkthrough are described in
 [TESTING](../docs/TESTING.md#studio-synthetic-non-streaming-request).
+The [Mac acceptance record](../docs/tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
+qualifies this packaged synthetic subset, including responsive Source Save during a
+stalled request and scoped cleanup. Windows request-service proof remains separate;
+unchanged Mac/Windows credential qualification is reused.
 
 ## macOS local package identity
 

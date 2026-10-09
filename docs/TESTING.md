@@ -1355,3 +1355,11 @@ POST, stale profile/project result rejection, shutdown and owned-worker/listener
 cleanup using the established remembered Windows credential. Reuse unchanged
 Windows credential acceptance; do not rerun its store/refusal/replacement qualification.
 This Mac synthetic result cannot claim Windows requests, full 2A.2 or live Studio.
+
+The [completed Mac walkthrough](tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
+records the native four-request proof, a 161 ms successful Source Save with a stalled
+worker active before/after, normal exit and exact credential/fixture/process/listener
+cleanup. It preserves the earlier locked-host failure and sandbox capability failures.
+Active-request shutdown and the broader response/race variants use focused deterministic
+checks; the native walkthrough did not quit with a request still active. User-review
+screenshots remain outside Git and are not a new mandatory acceptance gate.
