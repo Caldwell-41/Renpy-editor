@@ -278,6 +278,91 @@ before handing ownership to Windows. Final repository validation passes for 468 
 with clean whitespace and compact live records. No force-push,
 merge, release, new feature or direct other-host execution.
 
+### Windows prompt/context packaged acceptance — 2026-10-10
+
+The serial Windows x64 owner fast-forwarded the clean existing
+`codex/provider-qualification` checkout from `92a3318` to verified published
+`baf7dbf`, retaining implementation `33bf97f` and preserving unrelated work.
+Mac acceptance remains valid at **4/5 package attempts, 4/4 launches**. Windows
+entry was **0/3 builds, 0/4 launches**. The same selected scope/exclusions and
+cumulative allowance apply; no subagents or direct other-host execution.
+
+Focused Windows proof: five `prompts::tests` core cases passed outside the
+filesystem sandbox. Initial sandboxed failures were all `probe state: Io` at
+temporary-profile creation, before prompt behavior. Typecheck, 17 selected
+prompt UI/protocol/request-lane tests and the Python native-gate self-test passed.
+Actual controller → held `ApplicationHost` dispatch → persistence covered busy
+refusal/explicit reload, Save/restore/history, full preview and budget refusal.
+Its sandboxed run likewise failed at profile creation. Outside the sandbox,
+functional assertions passed but the driver exited 101 while removing its
+Windows-held fixture. A one-line test-driver correction drops the shutdown host
+before fixture removal; the exact rerun passed exit 0. Actual Chrome
+failing-first/corrected CRLF and Save/refusal/reload focus checks passed outside
+the loopback-restricted sandbox. No production behavior/dependency change was
+made on Windows.
+
+Final repository validation passed for 465 files and `git diff --check` passed.
+The changed example passed direct `rustfmt --check`. Whole-workspace
+`cargo fmt --check --all` reports formatting drift in unchanged source files
+already present at `baf7dbf`; that global formatting gate is not claimed as a
+pass and no unrelated formatting rewrite was made.
+
+Windows package attempt **1/3** built the production x64 executable and NSIS
+bundle offline, using the already diagnosed Tauri `build --bundles nsis -- --locked`
+separator and ignored build-only npm shim. Both retained artifacts passed the
+repository privacy scanner. Executable SHA256:
+`39f790e530e8daf5f43ad0a775e888326ae345544ba136b9a26bc080e18c71f6`;
+installer SHA256:
+`f69772a55efca62d585f9e2df8dcdd9521118a788b42e3b39443243aa1543c76`.
+No installation, SDK/game execution, provider send or profile change occurred.
+
+Launch **1/4**, PID 24948, reached `manual-save` in a fresh owned fixture.
+Computer Use listed exactly the retained package window but timed out getting
+its state; the 180-second observation gate expired. The runtime emitted
+`passed:false`, `cleanupComplete:true`, zero checks and exit 1. This is failed
+missing observation evidence, not a product PASS. PID absence and exact fixture
+cleanup were verified; the failed report/log remain ignored. Before retry, the
+owner diagnosed window-access failure, verified the same package hash and used
+separate window-list, binding, activation and state calls. No rebuild or product
+change occurred.
+
+Launch **2/4**, PID 50364, passed **32 checks/all 21 required phase-1 gates**,
+exit 0 and cleanupComplete on the unchanged package. Physical Ctrl+S persisted
+exact custom prose, and actual Tab/Shift+Tab moved focus to Restore baseline and
+back to the enabled prompt editor. The production UI/IPC path passed installed/
+current baseline preview, Cancel/confirmed restore, shared Undo/Redo, guarded
+draft, Settings/project reopen, exact approved card/lore revision inclusion,
+complete deterministic serialized payload, explicit dependency/exclusion/read
+accounting, budget/stale selection/external prompt refusal without losing author
+input, explicit reload, and unchanged game source. Direct Windows observations
+passed wide light/dark plus compact dark: revision choices, input/output/margin
+totals, disclosure contents and the wrapped complete payload remained reachable
+by scrolling. A disclosure-index click initially mapped outside window bounds;
+fresh screenshot/coordinate selection succeeded in the same launch, with no
+skipped required observation or product correction.
+
+Launch **3/4**, PID 54296, passed **five checks/all four required phase-2 gates**,
+exit 0 and cleanupComplete. Separate-process reopen retained confirmed baseline
+restore, displayed the actual installed baseline, rebuilt the effective preview
+and preserved every game source. Whole `ai.json` bytes match before/after reopen
+at SHA256 `2bd97c8092d138973bfe02d2e9842541f8465af6967e0c84054f96b96379ac64`;
+whole `references.json` bytes match at SHA256
+`66d6beb553b5a73c0d064789cbce5a05d6c54a36032baff949e93fc6fa0eb566`.
+Ignored `app/.toolchains/prompt-context-windows/final-audit.json` rechecks phase
+reports, log/package hashes, metadata identity and exact PID/fixture cleanup.
+PIDs 24948/50364/54296 are absent and the sole accepted synthetic root was
+removed. Failed launch 1 remains failed evidence; no native observation of an
+exited app or implicit start occurred.
+
+**Final cumulative use:** Windows **1/3 package builds, 3/4 launches**; Mac
+**4/5 package attempts, 4/4 launches**. Remaining attempts are unused. Selected
+both-target Prompts and context preparation is accepted; full 2B.1, Phase 2,
+provider sends, credentials/HTTP, proposal application, generated references,
+automatic retrieval/import-export and release remain open. Self-review and
+canonical CURRENT/HANDOVER reconciliation are complete. Publish/verify the
+same branch under the selected outcome authority. The next distinct queue item
+is First safe dialogue rewrite; it is not started by this result.
+
 ## Manual reference library selection — 2026-10-09
 
 Selected by the user after accepted Phase 1/source foundations and bounded synthetic

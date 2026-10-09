@@ -52,5 +52,6 @@ fn main() {
         thread.join().unwrap();
     }
     assert!(host.shutdown());
+    drop(host);
     std::fs::remove_dir_all(root).unwrap();
 }
