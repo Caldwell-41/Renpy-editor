@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-09. The selected outcome remains the
+**Updated:** 2026-10-10. The selected outcome remains the
 [manual reference library](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09).
 The user approved UI A: a list beside directly editable fields, top creation control,
 ordinary Save changes / Discard changes and shared app themes. The user's correction
@@ -8,25 +8,29 @@ removed manual approval/status controls; internal revisions/statuses remain stor
 
 | Capability | Implementation and proof | Acceptance |
 | --- | --- | --- |
-| Cards and lore | Versioned service, bounds/fixtures, typed IPC, forms/search/filter/order and shared transactions. Focused service/controller tests pass. | Mac packaged authoring/replacement/refusals pass; Windows required. |
-| Lossless history/storage | Consecutive Undo/Redo correction passes failing-first real-dispatch, compound/interleaved/branch and external-boundary tests. Exact metadata and unknown data survive reopen. | Mac native multi-step history and separate-process byte-exact reopen pass. Windows required. |
+| Cards and lore | Versioned service, bounds/fixtures, typed IPC, forms/search/filter/order and shared transactions. Focused Windows service/controller tests pass. | Mac packaged authoring/replacement/refusals pass; Windows native Save was not observed. |
+| Lossless history/storage | Consecutive Undo/Redo correction passes real-dispatch, interleaved/branch and external-boundary tests on Windows. Exact metadata and unknown data survive Mac reopen. | Mac native multi-step history and separate-process byte-exact reopen pass. Windows required. |
 | Reference integrity | Malformed/newer data retained; stale/missing citations and links preserved; nested extensions retained on edits. Project/session isolation and ordinary recovery pass core tests. | Representative Mac native cases pass. |
-| Layout and focus | Direct editing, keyboard Save, focus restoration, list/form navigation, fixed Save controls and shared themes. | Mac physical keyboard/focus, wide light/dark and narrow dark observations pass. Windows required. |
+| Layout and focus | Direct editing, keyboard Save, focus restoration, list/form navigation, fixed Save controls and shared themes. | Mac physical keyboard/focus, wide light/dark and narrow dark observations pass. Windows window access timed out before observation. |
 
-The selected Mac work is reviewed and published with user approval at implementation
-checkpoint `f48c446`; both-target acceptance remains incomplete. Windows verification
-is next, with code changes permitted only for a demonstrated acceptance blocker.
+The selected Mac work is reviewed and published at checkpoint `f48c446`. The Windows
+worktree fast-forwarded to published `dc889d6` with no code change. Focused checks
+pass and a production x64 NSIS package passed privacy scanning. Native launch 1
+reached the Save pause, but Computer Use access timed out; the probe failed without
+a physical Save or visual assertion. Windows and both-target acceptance remain
+incomplete. [The owning pause record](../tasks/active/phase-2-initial-llm-assistance.md#manual-library-windows-verification-pause--2026-10-10)
+separates the observation failure from product behavior.
 The owning ledger preserves all failures and the two
 explicitly requested read-only subagent assessments. One serial implementation writer;
 no further delegation or other-host execution. [HANDOVER](HANDOVER.md) owns continuation.
 
 **Cumulative manual-library allowance:** Mac **7/9 builds, 10/13 starts**; Windows
-**0/2 builds, 0/3 starts**. Owned fixtures/processes are cleaned. The normal push was
-approved and its remote checkpoint verified. Unchanged credential/request evidence is reused; its independent totals
+**2/2 builds, 1/3 starts**. The Windows package is retained; owned fixtures/processes
+are cleaned. Window observation/input capability is needed before another launch.
+This records-only continuation is local and requires approval before push. Unchanged
+credential/request evidence is reused; its independent totals
 remain Mac **1 build/2 starts**, Windows **8 builds/15 starts**, without transfer.
 
-Entry refs matched published `54f562d`; the branch preserves the seven scoped manual
-library commits through `f48c446` plus this transfer record. Unrelated planning worktree is untouched.
 Phase 1 remains accepted through PR19/main `5f448ca`; full 2A.1/2A.2, full 2B.1, Phase 2
 and live Studio compatibility remain incomplete. Public v0.1.0 is unchanged.
 Generation, provider/credential/HTTP, prompt/context/proposal, runnable-source changes,

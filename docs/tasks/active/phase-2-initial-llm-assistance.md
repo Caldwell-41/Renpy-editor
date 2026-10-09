@@ -474,6 +474,59 @@ refactor, speculative improvements or new feature. Windows remains **0/2 builds,
 0/3 starts**; no Mac build/start or other-host execution was added by publication.
 Both-target acceptance remains required. No full 2B.1/Phase 2 completion claimed.
 
+### Manual-library Windows verification pause — 2026-10-10
+
+**State: blocked on native observation capability; Windows acceptance is incomplete.**
+The clean Windows worktree fast-forwarded from `de29e49` to the published
+`dc889d65f85beeeb388ce8581f8e7d977b292f18`, containing Mac checkpoint
+`f48c446`. No product code changed. The unrelated worktrees and local changes were
+preserved. One serial Windows owner used no subagents or other-host execution.
+
+Focused Windows checks: TypeScript typecheck, Python probe compilation and native
+JavaScript syntax passed; 15 selected frontend/protocol/controller tests passed.
+Eleven reference tests plus one incidental preferences test, three shared-history
+continuity tests and the external Undo/Redo boundary test passed outside the
+filesystem sandbox. Their first sandboxed run failed before any reference operation
+at temporary profile creation (`probe state: Io`); a single identical test passed
+outside the sandbox, identifying a host restriction rather than a product defect.
+The unchanged Mac and prior credential/request evidence remains valid only for its
+recorded cases.
+
+Windows package attempt **1/2** failed at the Tauri CLI argument parser, exit 2:
+direct `build --locked --bundles nsis` put Cargo's `--locked` before Tauri's `--`
+separator. No compilation/package occurred. CLI help established the exact cause;
+the recorded correction used `build --bundles nsis -- --locked` on attempt **2/2**.
+That attempt built the production frontend, release executable and x64 NSIS bundle
+offline. The host lacks `npm`, so an ignored build-only shim executed the repository's
+exact `tsc -p tsconfig.json` and `vite build` commands for Tauri's
+`beforeBuildCommand`; the preflight completed before the package attempt. Retained
+executable SHA256 `86192e75dfdea3e4435bef1f3e672519b00f5bd2745c5bbd9fe26e8420d546cc`;
+installer SHA256 `7f9b975ae16dbb1e87df41b0a8b61659ace39990a41b4b19d4b6e100d57f95c1`.
+Both artifacts passed the privacy scan. No installation or policy change occurred.
+
+Native launch **1/3**, PID **14960**, reached `manual-save` in the packaged WebView
+after synthetic form entry. Computer Use listed exactly one Loomlight window, then
+timed out requesting access to its state. The required physical Ctrl+S and visual
+observation never occurred; the probe's 240-second observation pause expired, emitted
+`passed:false` with `Observation timeout at manual-save`, and exited with code 1.
+There are zero accepted native assertions, no saved reference metadata and no phase-2
+reopen proof. Classify this as unavailable observation capability/missing evidence,
+not a demonstrated product defect. No unchanged retry is justified until window
+access can be established before launch. The failed receipt and package are retained
+under ignored `app/.toolchains/manual-reference-windows/`; the exact owned fixture
+root was removed after PID absence was checked. No app or owned fixture remains.
+
+**Cumulative Windows allowance: 2/2 package attempts, 1/3 app launches; 0 builds
+and 2 launches remain.** The accepted Mac allowance remains 7/9 builds and 10/13
+starts. Resolve the Computer Use access timeout before another launch; use the
+retained package and a fresh owned launch identity, then verify window access
+promptly. Production Save/readback must
+come first, followed by the remaining representative native checks and process
+reopen within the two remaining launches. If capability remains unavailable, retain
+this blocked state and exact missing proof. No Windows acceptance, both-target
+completion, full 2B.1 or Phase 2 completion is claimed. Do not push this local
+records-only continuation without the user's approval.
+
 ## Windows synthetic request selection — 2026-10-09
 
 The user selected review, focused fixes and packaged Windows x64 qualification of
