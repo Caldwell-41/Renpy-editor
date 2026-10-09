@@ -1,101 +1,103 @@
 # Current outcome handover
 
-## Manual reference library: shared-history blocker, assessment complete
+## Manual reference library: Mac verified, Windows required
 
-Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`, with one serial
-Local Mac ARM64 writer. Entry refs matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`.
-Preserve local commits and unrelated planning worktree; never reset to the entry SHA.
-The requested GPT-6.1 Sol High independent read-only assessment is complete. It
-confirms the history diagnosis, predicts symmetric Redo failure and identifies
-preventable qualification mistakes. It made no edits/builds/launches or other-host
-execution. Implementation is stopped under exhausted allowance. Earlier requested
-UI research is finished.
+Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`. One serial Local
+Mac ARM64 owner has completed implementation, focused checks, native verification
+and self-review. Entry refs matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`;
+preserve subsequent local commits and the unrelated planning worktree, never reset
+to that entry checkpoint. This result is local only. **Next action: obtain approval
+to push the reviewed result**, then verify the published checkpoint and transfer the
+same outcome to one Windows x64 writer. No other-host execution or second active writer.
 
 Read the [owning selection/attempt ledger](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
+[Mac acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09),
 [references contract](../REFERENCE_LIBRARY.md), Phase 2 sections 9/10/11/19/20,
-ADR 0011 and applicable UI/WORKFLOW/TESTING guidance. Approved UI A uses direct editing,
-ordinary Save/Discard, top creation control and shared themes. No manual review toolbar.
-Storage revisions/statuses remain internal for future generated review.
+ADR 0011 and applicable WORKFLOW/TESTING/UI guidance. Approved UI A uses directly
+editable forms, ordinary Save/Discard and top creation controls. The user rejected
+manual Approve/Reject/Supersede and an Edit unlock; preserve internal lifecycle data
+for future generated-content review. No new UI design approval is pending.
 
-Implemented locally: schema/bounds/fixtures, one references service, typed IPC,
-Character cards/Lorebook and shell Save/Command-S, shared transaction/history and
-external-edit/recovery. Focused renderer/core checks pass for previously covered
-single-step behavior, but new multi-step Undo failure is a real product blocker.
-Native passing assertions prove authoring/replacement/single Undo/Redo/refusal,
-external reload/Save, malformed/newer retention, lore, scope/knowledge/lore links,
-stale/missing citations and relationship target nested extension retention. Physical
-Name/Tab focus and Command-S passed. Light wide layout observed; native dark/narrow
-are unperformed. Earlier separate-process byte-exact reopen is valid for unchanged
-storage code; it cannot accept the broken multi-step history.
+Implemented: concrete schema/bounds/public fixtures, one references service and typed
+IPC, cards/Lorebook list/edit/search/filter/order, scope/knowledge/source notes,
+shared transaction/history/recovery and external-edit handling. Manual Save creates
+an internally approved current revision, preserves prior text as superseded, and
+never refreshes stale citations implicitly. Missing libraries stay empty; malformed
+or newer files remain retained and diagnosed. Unknown fields, unresolved links and
+reference prose survive supported edits. Reference work does not mutate runnable source.
 
-**Budget exhausted:** Mac **5/5 package-build attempts, 7/7 starts**. Windows **0/2
-builds, 0/3 starts**. No further package/native attempt or publication authorized.
-Prior request/credential evidence and independent budgets remain unchanged.
-All prior failures are retained in the owning ledger: first external-reload/focus
-product defects (fixed), unintended CUA restart, single-instance rejection, visual
-pause timeout, wrong-working-directory/Cargo launcher failure, then key-order-only
-probe assertion (corrected). The latest failure is consecutive Undo, not another
-semantic-key-order issue. Do not inspect a stopped Mac app via CUA: it may relaunch.
-Inspect process ownership by CLI before any future authorized start.
+The shared-history defect is fixed: accepted Undo/Redo propagates actual replacement
+identity only to the nearest connected entry touching each path when both full prior
+revision and exact bytes match. Real external replacements remain boundaries, even
+with identical content. Failing-first production-dispatch consecutive history, three
+actual-transaction continuity regressions, all reference cases, existing Source/Scene
+history cases, renderer/probe tests and typecheck pass. Project switching, order,
+recovery and detailed bounds are core-dispatch proof; representative native forms
+cover authoring/history/refusal. No claim of exhaustive physical input coverage.
 
-Latest package (attempt 5) preserves identity and passed strict signature/installer
-verification. Executable SHA256
-`fe69ccde3a31e32b3cb5194862a02b33c0978d9f23577fd7ec07d984bfc1ccfd`;
-installer `ec6c7f67bb6ca320f19c07e640f81228309c8ab5fab06d466f449b7e16f5ac51`.
-Native start 7 PID 77043 passed 23 assertions, then its first representative Undo
-committed counter 5 → 4 and the second refused. Final metadata retained current/
-approved pointers and superseded r3/approved r4; hash
-`e2f9c7f87274df1d354485e98862f26ca1039cef8b76d27af804bffc54452c91`.
-The exact native returned error code was not captured. A minimal real production-
-dispatch reproducer (two Saves/two Undos, no external edit) returns `HISTORY_BOUNDARY`.
-Tracked tests were restored after the diagnostic; ignored `manual-reference-mac-07`
-retains its fragment, failed receipt and structural readback without prose. No owned
-process, synthetic root or preflight file remains.
+Signed package attempt 7 passed unchanged identity, strict signature and installer
+content checks. Executable SHA256
+`047ef606a7720700808350449531c9d9734d18356b9bb356236e88f160892c5f`;
+installer `9db9cb203d133c31baaf92bb9c22cb8b9993e8c67471f0ca46a968cba33d5dba`.
+Native start 9 PID 79201 passed 29 authoring assertions, including consecutive
+Undo/Undo/Redo/Redo and repeated Undo restoring exact metadata. Physical Command-S,
+post-save Name/Tab focus, wide light/dark and narrow dark list/editor keyboard
+navigation/scrolling/fixed Save controls were observed. Programmatic narrow resize
+did not visibly apply; native edge dragging established the compact layout during
+the same observation pause, without another start. Separate-process start 10 PID
+79253 passed three reopen assertions and byte-exact metadata comparison. The same
+saved hash before/after is
+`7744980072c1d1dae9420f1ae845705059086ec1b6833e6db7539b4e431a71e1`.
+Structural receipts remain ignored under `.toolchains/reports/manual-reference-mac-09`;
+packages remain under `.toolchains/releases/manual-reference-mac-07`.
 
-The likely defect is in `HistoryStack::accepted_undo_with_revisions`: it refreshes
-only the undone entry's before identity after transaction replacement, leaving the
-previous entry touching that path with its old after identity. The next Undo sees a
-false external boundary. The independent assessment confirms this diagnosis; symmetric
-Redo has a code-derived flaw and needs a real-dispatch regression. A correction must preserve real external-edit boundaries, and handle interleaved
-paths/multi-file mutations plus branching after Undo. Do not weaken identity checks
-or bypass shared history. This affects the existing owner, not a second reference
-Undo stack. No fix has been made for this newly confirmed defect at budget stop.
+**Current cumulative allowance:** Mac **7/9 package builds, 10/13 app starts**;
+Windows **0/2 builds, 0/3 starts**. Reserve Mac attempts need diagnosed failure and
+recorded correction; no unchanged repeat is needed. Prior credential/request evidence
+and budgets remain independent and unchanged. No HTTP, SDK/game execution,
+installation, identity/security changes or other-host work occurred in this outcome.
+Default pinned-SDK distribution exclusion is reused unchanged. Custom author build
+classification overrides are outside that proof. Owned fixture roots, processes and
+preflight file are cleaned; no pending operation remains. Do not call Mac CUA getApp
+or observe a stopped app: it can implicitly launch and consumes allowance.
 
-The independent assessment has been reported to the user. Before any more native
-work, improve required-mutation failure capture and expected-result gates in the probe;
-not-busy alone includes refusals. If work is explicitly resumed with a renewed allowance, implement/review the smallest shared-history
-correction with a failing-first real-dispatch consecutive Save/Undo/Redo regression
-and external-boundary tests, then package/native authoring/layout/reopen qualification.
-Do not spend native allowance on undiagnosed dispatch or unverified harness assertions.
-Finish canonical acceptance/status and a local scoped commit, then ask before pushing
-an actually reviewed result. Windows remains required; no full 2B.1/Phase 2 acceptance
-or next distinct deliverable until required acceptance.
+All earlier failures remain in the owning ledger, including the confirmed history
+boundary and the later read-only Tauri trace-hook limitation. That harness correction
+now reads the controller's completed mutation outcome and exact safe error code;
+it does not override Tauri internals. Both explicitly user-requested read-only
+subagents completed; no further delegation is selected. Full 2B.1, Phase 2 and live
+Studio compatibility remain incomplete. Do not return/start a next distinct feature
+until required both-target acceptance.
 
 ## Conditional Windows pull-and-continue prompt
 
-Use only after the shared-history blocker is fixed, Mac work is accepted, and publication is approved and completed; do not run another
-host now or treat local commits as remotely available:
+Use after publication is approved and completed; local-only commits are not remotely
+available yet. Replace the checkpoint placeholder with the verified pushed commit:
 
 > Continue the same manual reference-library outcome in Caldwell-41/Renpy-editor,
-> branch codex/provider-qualification, from the newly approved published Mac commit.
-> Inspect refs/branch/worktrees/local changes, preserve unrelated work and fast-forward
-> safely; never reset to the older 54f562d checkpoint. Read CURRENT/HANDOVER, owning
-> manual-library acceptance, REFERENCE_LIBRARY, Phase 2 sections 9/10/11/19/20,
-> ADR 0011 and applicable WORKFLOW/TESTING/UI guidance. Use one Windows x64 serial
-> writer, no subagents or direct other-host execution. The approved UI is A with
-> direct editing and ordinary Save/Discard; keep internal statuses without a manual
-> review toolbar. Windows allowance for this outcome is 0/2 builds and 0/3 app starts;
-> count every start, including implicit UI-tool launches. Reuse unchanged request and
-> credential evidence. Verify actual production UI/dispatch/metadata card and lore
-> authoring, replacement, exact Undo/Redo/reopen IDs/statuses, malformed/newer and
-> unknown data, bounds/refusals, external edits/recovery, missing/stale links, project
-> switching, keyboard/focus, narrow layouts and both themes. Establish production
-> save/readback early; browser mocks alone cannot qualify native behavior. Clean owned
-> fixtures/processes; finish focused review and necessary in-scope fixes, update
-> canonical contracts/acceptance/CURRENT/HANDOVER and commit locally. Ask before
-> publishing. No generation, HTTP/provider/credential, prompt/context/proposal,
-> runnable source, import/export, injection/runtime inference, installation/security,
-> CI, merge/release or next-feature work. Stop at exhausted allowance, unavailable
-> capability or material decision with exact missing proof. Both-target acceptance
-> remains required; do not claim full 2B.1 or Phase 2 completion. Return a distinct
-> next-deliverable prompt only after the selected outcome is actually accepted.
+> branch codex/provider-qualification, from [verified published Mac commit]. Inspect
+> refs/branch/worktrees/local changes, preserve unrelated work and fast-forward safely;
+> never reset to the older 54f562d checkpoint. Read CURRENT/HANDOVER, owning manual-library
+> acceptance, REFERENCE_LIBRARY, Phase 2 sections 9/10/11/19/20, ADR 0011 and applicable
+> WORKFLOW/TESTING/UI guidance. Use one Windows x64 serial writer, no subagents or direct
+> other-host execution. Approved UI A uses direct editing and ordinary Save/Discard;
+> retain internal statuses without a manual review toolbar. Windows allowance is
+> 0/2 builds and 0/3 app starts, cumulative for this outcome; count implicit UI launches.
+> Reuse unchanged credential/request evidence and passed portable cases where valid.
+> Verify affected shared-history regressions, actual production UI/dispatch/metadata
+> card/lore creation/update, replacement, consecutive Undo/Undo/Redo/Redo and exact
+> process-reopen IDs/statuses/bytes, bounds/refusals, external edits, malformed/newer and
+> unknown data, missing/stale links, project isolation, keyboard/focus, compact layout
+> and both themes. Establish production Save/readback early; browser mocks alone do
+> not qualify native behavior. The opt-in probe/runner provides Mac-tested representative
+> cases; inspect Windows compatibility and required mutation gates cheaply before
+> consuming an attempt. Native pauses are bounded; observe promptly, release markers
+> only after actual observation and never inspect an exited app as a free launch.
+> Clean owned fixtures/processes; finish focused review/in-scope corrections, update
+> canonical contracts/acceptance/CURRENT/HANDOVER and commit locally. Ask before pushing.
+> No generation, HTTP/provider/credential, prompt/context/proposal, runnable-source,
+> import/export, injection/runtime inference, installation/security, CI, merge/release
+> or next-feature work. Stop at exhausted allowance, unavailable capability or material
+> decision, recording exact missing proof. Both-target acceptance remains required;
+> do not claim full 2B.1 or Phase 2 completion. Return a distinct next-deliverable prompt
+> only after this selected outcome is actually accepted.

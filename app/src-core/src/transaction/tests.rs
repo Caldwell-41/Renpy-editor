@@ -2431,3 +2431,167 @@ fn g1_o1_counterexample_same_byte_replacement_after_leaf_open() {
 
 #[cfg(windows)]
 mod native_boundary;
+
+fn history_record(f: &Fixture, history: &mut HistoryStack, changes: &[(&str, &[u8])]) {
+    let mutations: Vec<_> = changes
+        .iter()
+        .map(|(path, bytes)| f.mutation(path, bytes))
+        .collect();
+    let CommitOutcome::Committed {
+        transaction_id,
+        revisions,
+    } = f.service.commit(&f.project, f.proposal(mutations.clone()))
+    else {
+        panic!("fixture commit failed")
+    };
+    history.push(HistoryEntry {
+        transaction_id,
+        mutations: mutations
+            .into_iter()
+            .zip(revisions)
+            .map(|(m, after_revision)| HistoryMutation {
+                path: m.path,
+                before_revision: m.base,
+                before_bytes: m.expected_bytes,
+                after_revision,
+                after_bytes: m.proposed,
+            })
+            .collect(),
+    });
+}
+fn history_current(f: &Fixture, paths: Vec<RelativePath>) -> HashMap<RelativePath, Revision> {
+    paths
+        .into_iter()
+        .map(|path| {
+            let revision = f
+                .service
+                .snapshot_optional(&f.project, path.clone())
+                .unwrap()
+                .map_or_else(Revision::expected_absence, |(_, r)| r);
+            (path, revision)
+        })
+        .collect()
+}
+fn history_step(f: &Fixture, history: &mut HistoryStack, redo: bool) {
+    let paths = if redo {
+        history.redo_paths()
+    } else {
+        history.undo_paths()
+    }
+    .unwrap();
+    let current = history_current(f, paths);
+    let proposal = if redo {
+        history.redo_proposal(&current)
+    } else {
+        history.undo_proposal(&current)
+    }
+    .unwrap();
+    let CommitOutcome::Committed { revisions, .. } = f.service.commit(&f.project, proposal) else {
+        panic!("history commit failed")
+    };
+    if redo {
+        history.accepted_redo_with_revisions(&revisions)
+    } else {
+        history.accepted_undo_with_revisions(&revisions)
+    }
+    .unwrap();
+}
+#[test]
+fn history_continuity_handles_interleaved_paths_multi_file_commits_and_branching() {
+    let f = Fixture::new();
+    let mut history = HistoryStack::default();
+    let original_one = fs::read(f.root.join("game/one.rpy")).unwrap();
+    let original_two = fs::read(f.root.join("game/two.rpy")).unwrap();
+    history_record(&f, &mut history, &[("game/one.rpy", b"one-1\n")]);
+    history_record(&f, &mut history, &[("game/two.rpy", b"two-1\n")]);
+    history_record(
+        &f,
+        &mut history,
+        &[("game/one.rpy", b"one-2\n"), ("game/two.rpy", b"two-2\n")],
+    );
+    for _ in 0..3 {
+        history_step(&f, &mut history, false);
+        assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), b"one-1\n");
+        assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), b"two-1\n");
+        history_step(&f, &mut history, false);
+        assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), original_two);
+        history_step(&f, &mut history, false);
+        assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), original_one);
+        assert!(!history.can_undo());
+        for _ in 0..3 {
+            history_step(&f, &mut history, true);
+        }
+        assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), b"one-2\n");
+        assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), b"two-2\n");
+        assert!(!history.can_redo());
+    }
+    history_step(&f, &mut history, false);
+    history_record(&f, &mut history, &[("game/one.rpy", b"branched\n")]);
+    assert!(!history.can_redo());
+    for _ in 0..3 {
+        history_step(&f, &mut history, false);
+    }
+    assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), original_one);
+    assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), original_two);
+}
+#[test]
+fn history_continuity_does_not_cross_external_replacements_between_entries() {
+    for same_content in [false, true] {
+        let f = Fixture::new();
+        let mut history = HistoryStack::default();
+        history_record(&f, &mut history, &[("game/one.rpy", b"saved\n")]);
+        let external = if same_content {
+            b"saved\n".as_slice()
+        } else {
+            b"external\n".as_slice()
+        };
+        let replacement = f.root.join("game/external.tmp");
+        fs::write(&replacement, external).unwrap();
+        fs::rename(replacement, f.root.join("game/one.rpy")).unwrap();
+        history_record(&f, &mut history, &[("game/one.rpy", b"after external\n")]);
+        history_step(&f, &mut history, false);
+        let current = history_current(&f, history.undo_paths().unwrap());
+        assert_eq!(
+            history.undo_proposal(&current),
+            Err(ErrorCode::HistoryBoundary)
+        );
+        assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), external);
+        assert!(history.can_undo() && history.can_redo());
+        // Refusal does not move the cursor: redo of the last accepted edit is still available.
+        history_step(&f, &mut history, true);
+        assert_eq!(
+            fs::read(f.root.join("game/one.rpy")).unwrap(),
+            b"after external\n"
+        );
+    }
+}
+#[test]
+fn history_continuity_refuses_external_replacements_after_undo_without_cursor_changes() {
+    for same_content in [false, true] {
+        let f = Fixture::new();
+        let mut history = HistoryStack::default();
+        history_record(&f, &mut history, &[("game/one.rpy", b"first\n")]);
+        history_record(&f, &mut history, &[("game/one.rpy", b"second\n")]);
+        history_step(&f, &mut history, false);
+        let external = if same_content {
+            b"first\n".as_slice()
+        } else {
+            b"external\n".as_slice()
+        };
+        let replacement = f.root.join("game/external.tmp");
+        fs::write(&replacement, external).unwrap();
+        fs::rename(replacement, f.root.join("game/one.rpy")).unwrap();
+        let undo_current = history_current(&f, history.undo_paths().unwrap());
+        let redo_current = history_current(&f, history.redo_paths().unwrap());
+        assert_eq!(
+            history.undo_proposal(&undo_current),
+            Err(ErrorCode::HistoryBoundary)
+        );
+        assert_eq!(
+            history.redo_proposal(&redo_current),
+            Err(ErrorCode::HistoryBoundary)
+        );
+        assert!(history.can_undo() && history.can_redo());
+        assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), external);
+    }
+}

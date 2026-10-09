@@ -45,8 +45,8 @@ no fast-forward/reset necessary. Unrelated planning worktree is untouched.
 public `app/tests/fixtures/reference-library/` empty/replacement/manual-save/newer/malformed files.
 Schema defines shared lifecycle, bounded current/approved/prior revision retention,
 extensions, source citations, missing/stale links and exact transaction/history ownership.
-Schema/fixtures preceded the editor; the implementation is now local and incomplete
-in native acceptance. Preparation history remains in the scoped earlier commits.
+Schema/fixtures preceded the editor; the implementation is local with Mac native
+acceptance complete and Windows required. Preparation history remains in the scoped earlier commits.
 
 **UI approved:** user requires A/B approval and requested images when the inline
 preview was not visible. [A/B layout review](../../design/manual-reference-library/README.md)
@@ -57,20 +57,21 @@ Revised preview checks passed direct editing/Save/Discard, both themes, lore and
 list-to-form return without script errors/overflow. Repository validation and diff
 whitespace checks passed. No production/native behavior is proved by these checks.
 
-**Current allowance, cumulative across chats/handoffs:** Mac **5/5 package-build
-attempts, 7/7 starts**, exhausted; Windows **0/2 builds, 0/3 starts**. Preserve all
-failures and independent request budgets. No more native/build work is authorized.
+**Current allowance, cumulative across chats/handoffs:** Mac **7/9 package-build
+attempts, 10/13 starts** after the user's renewed allowance; Windows **0/2 builds,
+0/3 starts**. Preserve all failures and independent request budgets. Reserve attempts
+require a diagnosed failure and recorded correction; no unchanged repeat is needed.
 
-**Blocker:** consecutive manual Undos hit a false `HISTORY_BOUNDARY` after atomic
-replacement changes the file identity. Native start 7 committed the first Undo and
-refused the second without data loss; an isolated real-dispatch reproducer confirms
-the false boundary with no external edit. Earlier single Undo/Redo and reopen passes
-do not qualify coherent multi-step history. Native dark/narrow observations remain
-unperformed. The relationship-target extension correction is independently tested
-and has native passing assertions; the overall native walkthrough remains failed.
-The GPT-6.1 Sol independent read-only assessment confirms the diagnosis and preventable qualification mistakes. Implementation is
-stopped under exhausted allowance; no publish is approved or
-attempted. Windows remains required/unstarted. No full 2B.1 or Phase 2 completion.
+**Current result:** the independently confirmed shared-history boundary defect is
+fixed without weakening external-edit checks. Failing-first production dispatch and
+actual transaction regressions pass. The corrected signed Mac package passes manual
+authoring/replacement, consecutive history, refusal/data retention and exact process
+reopen; keyboard/focus, light/dark and compact layout were observed. See
+[final Mac acceptance](#final-manual-library-mac-acceptance--2026-10-09) for evidence
+layers and limits. All historical failures below remain failed historical attempts.
+Implementation and self-review are complete on Mac; local commit/publication approval
+is the next boundary. No push is approved or attempted. Windows remains required and
+unstarted; no full 2B.1 or Phase 2 completion.
 
 ### Manual-library Mac implementation and first native run — 2026-10-09
 
@@ -327,6 +328,132 @@ native allowance. Native multi-step history, dark/narrow layouts, post-history r
 and Windows qualification remain required. Card knowledge/lore-link assertions do not
 qualify every lore knowledge annotation control. Assessment delivered to user;
 implementation stays stopped under exhausted allowance, no publish authorization.
+
+### Shared-history repair allowance — 2026-10-09
+
+The user resumed the same outcome and approved four additional Mac package-build
+attempts and six launches. Cumulative ceilings are **9 builds / 13 starts**, with
+**5 builds / 7 starts consumed** on resume. Windows remains **0/2 builds, 0/3 starts**.
+Follow the independent assessment: failing-first real-dispatch and shared-history
+coverage, both directions and real external boundaries, cheap harness checks, then
+native authoring/layout/post-history reopen. No further subagents, other-host execution
+or publish is authorized. Resume found clean `e1718c1`, the intended branch and
+unchanged unrelated worktree. Preserve all earlier failures and evidence.
+
+### Shared-history repair: deterministic gate — 2026-10-09
+
+The real-dispatch reference regression was extended from one cycle to repeated
+consecutive Undo/Undo/Redo/Redo, including deletion/recreation of the initial metadata
+file. It failed first with `HISTORY_BOUNDARY`, then passed after correction. Accepted
+Undo/Redo now propagates returned file identity to the nearest connected entry touching
+each path, only when both the prior full revision and bytes match that historical
+transition. Real external boundaries stay intact; no identity check was weakened.
+
+Passing focused core checks: three new actual-transaction continuity tests cover
+interleaved paths/multi-file commits/repeated cycles/branching, changed-content and
+same-content external replacements between entries, and both-direction refusal after
+Undo without cursor changes. All 11 references tests plus one incidental preferences
+test passed; existing create/delete identity and external-history-boundary tests passed.
+Source/Scene shared-history and Save All/failed-inverse regressions passed. Typecheck
+passed. No package/native allowance consumed by these checks.
+
+The initial revised opt-in probe attempted to observe actual reference IPC replies,
+requiring success or the exact expected refusal, capturing only command type/status/
+error code, checking state after each consecutive Undo/Redo and restoring baseline
+through history. Its interception assumption failed natively as recorded below and
+was replaced by controller outcome observation. A cheap VM regression initially used
+a writable mock; it checked failure-code capture, expected refusal and canonical
+comparisons without logging reference prose. Its first source extraction
+also selected probe teardown; corrected selection passed before any packaging. The
+runner rejects reused phase logs before launching. Existing renderer form and four
+persistence-lane tests passed (5/5). No visual product redesign was made.
+
+At this checkpoint the selected next action was build attempt 6, fresh native phase 1 and separate
+post-history process reopen under launch ceiling 13. Reserve attempts require a new
+diagnosed failure and recorded correction. No push or other-host execution authorized.
+
+### Build 6 / launch 8: native trace-hook limitation — 2026-10-09
+
+Build attempt 6 passed unchanged identity/signature/installer gates. Executable
+`6050712ff152dbdcf4c2e60f3340c1647ea58699b9bd409ab56a3933b904ce80`, installer
+`d2c006700258317756f6e0b784faac3ec33cfed1330a3ec0f2a8941d4fbb2a35`.
+Native start 8 PID 78593 proved physical initial Save/focus; its next update committed
+counter 2, but the probe timed out waiting for a trace reply. Pinned Tauri 2.11.5
+`core.js` defines `invoke` as read-only; the attempted interception silently did not
+install. The cheap mock incorrectly modeled a writable property. This is a diagnosed
+harness capability failure, not history acceptance. Failed overall receipt/readback
+are retained under ignored `manual-reference-mac-08`; owned fixture/process are cleaned.
+
+Correction: controller records completed mutation sequence, command, committed/refused
+outcome and fixed error code in its existing DOM state, without reference prose. The
+probe reads that state; it does not override Tauri internals or add capabilities.
+Renderer regression verifies refused code/sequence, successful completion and code
+clearance. Probe regression models read-only invoke and verifies expected refusal and
+semantic equality. Both tests and typecheck pass before retry; native JS syntax passes.
+Build attempt 7 is justified by this correction. Cumulative usage before retry is
+**6/9 builds, 8/13 starts**; shared-history core gates remain valid unchanged.
+
+### Final manual-library Mac acceptance — 2026-10-09
+
+Build attempt **7** contains the shared-history correction and controller-based
+mutation outcome probe. Unchanged signing identity, strict signature and installer
+content verification passed. Executable SHA256
+`047ef606a7720700808350449531c9d9734d18356b9bb356236e88f160892c5f`;
+installer `9db9cb203d133c31baaf92bb9c22cb8b9993e8c67471f0ca46a968cba33d5dba`.
+Native start **9**, PID **79201**, passed **29** required assertions; separate-process
+start **10**, PID **79253**, passed **3** reopen assertions and the runner's whole-file
+byte comparison. Overall receipts report passed and cleanupComplete, exit code 0.
+
+| Requirement | Decisive evidence | Result/limit |
+| --- | --- | --- |
+| UI → dispatch → persisted authoring | Physical Command-S creates the card; native controller Save replaces it and creates lore; IDs/current/approved pointers and prior superseded text checked. | Mac PASS. Synthetic inputs plus physical initial Save; no mock requester. |
+| Consecutive shared history | Native Undo/Undo/Redo/Redo compares exact seeded/edited/pre-fixture documents, then repeats Undo twice to restore baseline. Core regression repeats three cycles including initial file deletion/recreation. | PASS; exact revisions/statuses and bytes, no fixture restoration credited as Undo. |
+| External edits and refused actions | Native stale Save returns REFERENCE_CONFLICT and retains draft; Reload/Save retains external extension. 161-byte title returns INVALID_REFERENCE without writes. Core same-content/changed-content history boundaries preserve cursor/data. | PASS; actual safe refusal codes captured. |
+| Malformed/newer/unknown data | Native Reload diagnoses retained malformed/newer files and disables creation; explicit restored data reloads. Core duplicate/wrong-project/depth/file/array/counter/boundary cases pass. Nested relationship target extension survives form edit. | PASS; malformed/newer byte retention also covered in core. |
+| Links and scope | Native stale citation/missing link visible; relationship edit, repeated route, linked lore and knowledge notes persist; original citations/links retained exactly in meaning. | PASS; no inferred knowledge or refreshed citation revision. |
+| Reopen/source preservation | Native close/reopen same project compares full document; separate process compares whole metadata file bytes. Source text readbacks unchanged. | PASS; saved metadata hash before/after below. |
+| Ordering/project isolation/recovery | Real core dispatch moves card, undoes exact bytes, shares Source history, switches to another empty project and refuses old session. Non-crashing prepared recovery blocks Save retaining library. | PASS at core production dispatch; native representative probe reopens same project rather than switching to a second one. |
+| Keyboard/focus | Native Personality focus + Command-S; after Save Name focus is enabled and Tab selects alias M. Compact All character cards focuses Search; Tab/Tab/Return opens card and focuses Name. | Mac physical PASS. |
+| Themes/layout | Wide light card and dark lore observed; no collisions in new controls. Compact dark list/form navigation and vertical scroll retain reachable fixed Save/Discard controls. | Mac PASS. Programmatic resize did not visibly apply; native right-edge drag during the same pause produced a 1424-pixel capture (about 712 logical width), activating the compact layout. No extra launch. |
+| Prose/privacy/distribution | Safe fixed diagnostics and primitive structural receipts; source unchanged; unchanged trusted pinned-SDK default classifier excludes hidden metadata. | PASS for selected default path; no game execution/custom author classification override proof. |
+| Windows x64 | No Windows execution selected on Mac. | REQUIRED, 0/2 builds and 0/3 starts consumed. |
+
+Ignored structural receipts `.toolchains/reports/manual-reference-mac-09/phase-1.json`
+SHA256 `ec4e9f17f07a63819b6ac8eadc2352e0419389e862d561f09659efe6167941d9`;
+phase-2.json `64986988c07ef917e80817e7f089ad90633ddc0809451ec2f0d4b6d6dfc79a3b`.
+Both metadata hashes:
+`7744980072c1d1dae9420f1ae845705059086ec1b6833e6db7539b4e431a71e1`.
+Structural current card: stable ID `eb1a81c2-b339-40a4-b100-0db4a5b2b94f`,
+counter 3, current/approved `40225ae0-86b8-4d9c-8c64-27611cb70e35`;
+retained r2 `8d0f7526-4abf-4798-aceb-fbcf78a2df5c` superseded, r3 approved.
+Both collections and exact complete metadata survive process reopen.
+
+Focused checks were not repeated unchanged: all 11 reference tests plus one incidental
+preferences test, three actual-transaction continuity regressions, existing external
+boundary/create-delete history, Source/Scene shared mapping history, Save All and failed
+inverse cases pass. Renderer form plus four persistence-lane cases passed (5/5);
+after the diagnosed trace correction renderer/probe helper cases passed (2/2),
+typecheck/test compilation/native JS syntax passed. Cheap probe tests explicitly
+model read-only Tauri invoke; they remain harness tests, not native acceptance.
+
+Self-review checked the actual history propagation, service/controller ownership,
+unknown-field retention, mutation gates and history/refusal regressions. No further
+blocking finding remains on Mac. Review preserves exact boundary checks, shared history,
+narrow IPC and existing signing/credential policy. Canonical DATA_MODEL/reference
+contracts and live status/handover now describe the final behavior. Final repository
+validation/whitespace/privacy review and the scoped local commit complete this local
+checkpoint; push requires explicit approval. Repository validation passed for 453
+files and diff whitespace checks passed. CURRENT is 332 words and HANDOVER 879,
+within the status-maintenance review targets; no excess explanation is needed.
+
+**Cumulative:** Mac **7/9 builds, 10/13 starts**; Windows **0/2, 0/3**. Both native PIDs
+were confirmed exited before cleanup; owned synthetic root and preflight file removed.
+Structural receipts/packages remain ignored local evidence. No pending process, HTTP,
+other-host action, install/security change, CI or merge/release. Both explicitly
+requested read-only subagents remain complete, with one implementation writer.
+Unchanged credential/request evidence and its budgets are reused unchanged. Windows
+acceptance still gates the selected outcome; full 2B.1/Phase 2 and live Studio
+compatibility are incomplete. Conditional same-outcome Windows prompt is in HANDOVER.
 
 ## Windows synthetic request selection — 2026-10-09
 

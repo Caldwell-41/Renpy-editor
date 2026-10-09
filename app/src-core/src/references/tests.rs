@@ -112,14 +112,29 @@ fn real_dispatch_manual_save_history_and_reopen_preserve_exact_revisions() {
     let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
     assert_eq!(redo["ok"], true);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), second);
+    // Ordinary consecutive Undo/Redo must cross the preceding transaction, even
+    // though each committed replacement allocates a fresh platform file identity.
+    let mut state = redo["value"].clone();
+    for _ in 0..3 {
+        let undo_one = f.apply(&state["revision"], json!({"type":"undo"}));
+        assert_eq!(undo_one["ok"], true, "{undo_one}");
+        assert_eq!(fs::read(f.root.join(PATH)).unwrap(), first);
+        let undo_two = f.apply(&undo_one["value"]["revision"], json!({"type":"undo"}));
+        assert_eq!(undo_two["ok"], true, "{undo_two}");
+        assert!(!f.root.join(PATH).exists());
+        let redo_one = f.apply(&undo_two["value"]["revision"], json!({"type":"redo"}));
+        assert_eq!(redo_one["ok"], true, "{redo_one}");
+        assert_eq!(fs::read(f.root.join(PATH)).unwrap(), first);
+        let redo_two = f.apply(&redo_one["value"]["revision"], json!({"type":"redo"}));
+        assert_eq!(redo_two["ok"], true, "{redo_two}");
+        assert_eq!(fs::read(f.root.join(PATH)).unwrap(), second);
+        state = redo_two["value"].clone();
+    }
     f.service.close().unwrap();
     let p = f.service.open_path(&f.root).unwrap();
     f.session = p.session_id;
     assert_eq!(f.list()["document"], *doc);
-    assert_eq!(
-        fs::read(f.root.join("game/script.rpy")).unwrap(),
-        sources
-    );
+    assert_eq!(fs::read(f.root.join("game/script.rpy")).unwrap(), sources);
 }
 #[test]
 fn proposals_extensions_and_missing_links_survive_manual_replacement() {
@@ -360,10 +375,7 @@ fn reorder_and_source_changes_share_history_and_other_projects_stay_isolated() {
     let undo = f.apply(&moved["value"]["revision"], json!({"type":"undo"}));
     assert_eq!(undo["ok"], true);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), original);
-    let opened = f.request(
-        "source.open",
-        json!({"path":"game/script.rpy"}),
-    );
+    let opened = f.request("source.open", json!({"path":"game/script.rpy"}));
     assert_eq!(opened["ok"], true);
     let text = opened["value"]["text"].as_str().unwrap().to_string();
     let draft=f.request("source.updateDraft",json!({"path":"game/script.rpy","expectedBaseRevision":opened["value"]["baseRevision"],"text":format!("{text}# reference shared history fixture\n"),"selectionStart":0,"selectionEnd":0}));
@@ -413,7 +425,9 @@ fn prepared_recovery_blocks_reference_save_without_losing_the_library() {
     assert_eq!(r["ok"], true);
     let original = fs::read(f.root.join(PATH)).unwrap();
     let tx = TransactionService::default();
-    let p = tx.register_trusted_project(&fs::canonicalize(&f.root).unwrap()).unwrap();
+    let p = tx
+        .register_trusted_project(&fs::canonicalize(&f.root).unwrap())
+        .unwrap();
     let path = RelativePath::new(PATH).unwrap();
     let (bytes, base) = tx.snapshot(&p, path.clone()).unwrap();
     let outcome = tx.commit_with_injector(
@@ -440,10 +454,35 @@ fn prepared_recovery_blocks_reference_save_without_losing_the_library() {
 }
 
 #[test]
-fn explicit_reload_after_external_replace_allows_a_fresh_manual_save(){
-    let mut f=Fixture::new();let initial=f.list();let a=f.apply(&initial["revision"],json!({"type":"save","kind":"card","recordId":null,"fields":fields(Kind::Card)}));assert_eq!(a["ok"],true);let id=a["value"]["document"]["cards"][0]["id"].clone();
-    let b=f.apply(&a["value"]["revision"],json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"Edited"}}));assert_eq!(b["ok"],true);let undo=f.apply(&b["value"]["revision"],json!({"type":"undo"}));let redo=f.apply(&undo["value"]["revision"],json!({"type":"redo"}));assert_eq!(redo["ok"],true);
-    let mut doc=redo["value"]["document"].clone();doc["externalExtension"]=json!({"retained":true});let next=f.root.join(".renpy-editor/external.json");fs::write(&next,serde_json::to_vec(&doc).unwrap()).unwrap();fs::rename(&next,f.root.join(PATH)).unwrap();
-    let refused=f.apply(&redo["value"]["revision"],json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"External edit reviewed."}}));assert_eq!(refused["error"]["code"],"REFERENCE_CONFLICT");
-    let fresh=f.list();let accepted=f.apply(&fresh["revision"],json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"External edit reviewed."}}));assert_eq!(accepted["ok"],true,"{accepted}");assert_eq!(accepted["value"]["document"]["cards"][0]["revisionCounter"],3);
+fn explicit_reload_after_external_replace_allows_a_fresh_manual_save() {
+    let mut f = Fixture::new();
+    let initial = f.list();
+    let a = f.apply(
+        &initial["revision"],
+        json!({"type":"save","kind":"card","recordId":null,"fields":fields(Kind::Card)}),
+    );
+    assert_eq!(a["ok"], true);
+    let id = a["value"]["document"]["cards"][0]["id"].clone();
+    let b = f.apply(
+        &a["value"]["revision"],
+        json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"Edited"}}),
+    );
+    assert_eq!(b["ok"], true);
+    let undo = f.apply(&b["value"]["revision"], json!({"type":"undo"}));
+    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    assert_eq!(redo["ok"], true);
+    let mut doc = redo["value"]["document"].clone();
+    doc["externalExtension"] = json!({"retained":true});
+    let next = f.root.join(".renpy-editor/external.json");
+    fs::write(&next, serde_json::to_vec(&doc).unwrap()).unwrap();
+    fs::rename(&next, f.root.join(PATH)).unwrap();
+    let refused=f.apply(&redo["value"]["revision"],json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"External edit reviewed."}}));
+    assert_eq!(refused["error"]["code"], "REFERENCE_CONFLICT");
+    let fresh = f.list();
+    let accepted=f.apply(&fresh["revision"],json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"External edit reviewed."}}));
+    assert_eq!(accepted["ok"], true, "{accepted}");
+    assert_eq!(
+        accepted["value"]["document"]["cards"][0]["revisionCounter"],
+        3
+    );
 }

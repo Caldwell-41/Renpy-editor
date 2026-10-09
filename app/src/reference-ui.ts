@@ -47,7 +47,7 @@ function currentRevision(record:ReferenceRecord):ReferenceRevision{return record
 function errorMessage(error:unknown):string{return error instanceof Error?error.message:"The reference could not be saved. Your changes are still in the form.";}
 
 export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initial:ReferenceWorkspace,actions:ReferenceActions):ReferenceController {
-  let model=initial, selected:string|null=null, draft=emptyReference(kind), baseline="", busy=false, disposed=false;
+  let model=initial, selected:string|null=null, draft=emptyReference(kind), baseline="", busy=false, disposed=false, mutationSequence=0;
   const root=el("section","","reference-library");root.dataset.kind=kind;
   const create=button(kind==="card"?"New character card":"New lore entry",()=>{void select(null,true);});create.prepend(icon("plus"));actions.creationHost.append(create);
   const toolbar=el("div","","reference-history");
@@ -152,10 +152,10 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
     if(formInvalid){formInvalid.setAttribute("aria-invalid","true");const error=editor.querySelector(`#${formInvalid.getAttribute("aria-describedby")}`);if(error)error.textContent="Enter a value before saving.";feedback("Complete the required fields before saving.",true);formInvalid.focus();return;}
     await mutate({type:"save",kind,recordId:selected,fields:knownContent(draft,kind)});
   }
-  async function mutate(command:ReferenceCommand):Promise<void>{if(busy||!active()||!model.document)return;if(command.type!=="save"&&dirty()){feedback("Save or discard your changes first.",true);return;}busy=true;synchronize();actions.status("Saving…");
-    try{const next=await actions.apply(command,model.revision);if(!active())return;model=next;if(command.type==="save"&&command.recordId===null)selected=records().at(-1)?.id??null;const record=records().find(r=>r.id===selected);if(!record)selected=records()[0]?.id??null;draft=record?knownContent(currentRevision(record).content,kind):selected?knownContent(currentRevision(records()[0]!).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);list.querySelector(".reference-order")?.remove();redrawList();drawEditor();feedback(next.diagnostic??"Saved");busy=false;synchronize();editor.querySelector<HTMLInputElement>('input[name="title"]')?.focus();}
-    catch(error){if(active())feedback(errorMessage(error),true);}
-    finally{busy=false;if(active())synchronize();}
+  async function mutate(command:ReferenceCommand):Promise<void>{if(busy||!active()||!model.document)return;if(command.type!=="save"&&dirty()){feedback("Save or discard your changes first.",true);return;}busy=true;root.dataset.mutationCommand=command.type;root.dataset.mutationOutcome="pending";delete root.dataset.mutationErrorCode;synchronize();actions.status("Saving…");
+    try{const next=await actions.apply(command,model.revision);root.dataset.mutationOutcome="committed";if(!active())return;model=next;if(command.type==="save"&&command.recordId===null)selected=records().at(-1)?.id??null;const record=records().find(r=>r.id===selected);if(!record)selected=records()[0]?.id??null;draft=record?knownContent(currentRevision(record).content,kind):selected?knownContent(currentRevision(records()[0]!).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);list.querySelector(".reference-order")?.remove();redrawList();drawEditor();feedback(next.diagnostic??"Saved");busy=false;synchronize();editor.querySelector<HTMLInputElement>('input[name="title"]')?.focus();}
+    catch(error){root.dataset.mutationOutcome="refused";const code=(error as {code?:unknown})?.code;root.dataset.mutationErrorCode=typeof code==="string"&&/^[A-Z_]+$/.test(code)?code:"REFERENCE_ACTION_FAILED";if(active())feedback(errorMessage(error),true);}
+    finally{root.dataset.mutationSequence=String(++mutationSequence);busy=false;if(active())synchronize();}
   }
   async function refresh():Promise<void>{if(busy||!active())return;busy=true;synchronize();try{const next=await actions.load();if(!active())return;model=next;redrawList();feedback(next.diagnostic??(dirty()?"Library reloaded. Your unsaved text is still in the form; review it before saving.":"Library reloaded."),!!next.diagnostic);if(!dirty()){const record=records().find(r=>r.id===selected)??records()[0];selected=record?.id??null;draft=record?knownContent(currentRevision(record).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);drawEditor();}}catch(error){if(active())feedback(errorMessage(error),true);}finally{busy=false;if(active())synchronize();}}
   search.oninput=redrawList;filter.onchange=redrawList;

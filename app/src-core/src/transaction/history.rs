@@ -110,11 +110,24 @@ impl HistoryStack {
         if revisions.len() != self.entries[index].mutations.len() {
             return Err(ErrorCode::InvalidProposal);
         }
-        for (mutation, revision) in self.entries[index]
-            .mutations
-            .iter_mut()
-            .zip(revisions.iter())
-        {
+        let (earlier, remaining) = self.entries.split_at_mut(index);
+        for (mutation, revision) in remaining[0].mutations.iter_mut().zip(revisions) {
+            // Replacement restores the same historical state with a new file
+            // identity. Carry it only across a proven continuous transition to
+            // the nearest earlier entry touching this path. A real external
+            // replacement between entries must remain a boundary.
+            if let Some(previous) = earlier.iter_mut().rev().find_map(|entry| {
+                entry
+                    .mutations
+                    .iter_mut()
+                    .find(|item| item.path == mutation.path)
+            }) {
+                if previous.after_revision == mutation.before_revision
+                    && previous.after_bytes == mutation.before_bytes
+                {
+                    previous.after_revision = revision.clone();
+                }
+            }
             mutation.before_revision = revision.clone();
         }
         self.cursor = index;
@@ -140,11 +153,22 @@ impl HistoryStack {
         {
             return Err(ErrorCode::HistoryBoundary);
         }
-        for (mutation, revision) in self.entries[self.cursor]
-            .mutations
-            .iter_mut()
-            .zip(revisions.iter())
-        {
+        let (completed, later) = self.entries.split_at_mut(self.cursor + 1);
+        for (mutation, revision) in completed[self.cursor].mutations.iter_mut().zip(revisions) {
+            // Symmetric continuity for consecutive redo, including entries on
+            // unrelated paths between the two touching entries.
+            if let Some(next) = later.iter_mut().find_map(|entry| {
+                entry
+                    .mutations
+                    .iter_mut()
+                    .find(|item| item.path == mutation.path)
+            }) {
+                if next.before_revision == mutation.after_revision
+                    && next.before_bytes == mutation.after_bytes
+                {
+                    next.before_revision = revision.clone();
+                }
+            }
             mutation.after_revision = revision.clone();
         }
         self.cursor += 1;

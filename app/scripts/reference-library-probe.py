@@ -45,6 +45,8 @@ if a.phase == 2 and not (a.output / 'phase-1.json').is_file():
         'Close and reopen preserve exact complete metadata' not in details.get('checks', [])):
         raise SystemExit('Only a diagnosed visual observation timeout may resume reopen')
 a.output.mkdir(parents=True, exist_ok=True)
+if (a.output / f'phase-{a.phase}.log').exists():
+    raise SystemExit('Fresh phase log required before launch; no replay')
 metadata = a.root / 'synthetic-project/.renpy-editor/references.json'
 before = metadata.read_bytes() if a.phase == 2 else None
 backup = None

@@ -1,10 +1,11 @@
 # Manual reference library v1
 
-**State:** implemented locally; native multi-step history is blocked by a false
-external revision boundary on the second consecutive Undo. Shared-history correction
-and dark/narrow native observations remain required. The relationship-target extension
-retention fix has focused/native evidence. Phase 2 section 9 and ADR 0011 own product
-rules; UI A is approved. Both-target acceptance is incomplete.
+**State:** implemented and reviewed locally. Mac packaged authoring, consecutive
+Undo/Redo, byte-exact process reopen, keyboard/focus, both themes and compact layout
+pass. Shared-history regressions preserve real external boundaries. UI A remains
+approved; Windows production acceptance is required and unstarted. The
+[owning acceptance ledger](tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09)
+distinguishes native forms from deterministic bounds/recovery/project-isolation proof.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
 manual approval workflow. Select an entry, edit directly, then Save changes or

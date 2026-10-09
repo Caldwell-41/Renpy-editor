@@ -356,7 +356,11 @@ bytes remain separate artifacts inside the anchored transaction recovery directo
 mutation `rejected` record is terminal and does not poison later flush. Phase 1E adds
 source create/move/delete and minimal Beat patches to this envelope. Committed history
 stores the actual returned before/after revisions; an inverse is submitted only when
-the live revisions match the recorded boundary. Phase 1F adds bounded session-local
+the live revisions match the recorded boundary. After an accepted inverse or redo,
+new replacement identities propagate only to the nearest entry touching each path
+across a matching full revision and exact-byte transition. This keeps consecutive
+history coherent without crossing an external replacement, including identical-content
+replacements. Interleaved paths, compound changes and branches share this same stack. Phase 1F adds bounded session-local
 Source buffers: accepted base bytes/revision, optional UTF-8 draft, editor selection,
 and retained external bytes for conflict. Drafts are not authoritative and do not
 survive restart. Accepted source and any reconciled source-map companion share one
