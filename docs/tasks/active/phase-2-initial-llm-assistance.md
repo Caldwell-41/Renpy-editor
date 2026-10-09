@@ -172,6 +172,76 @@ offline revalidation of run 16 passed (`post-review-check.json`); only controlle
 and README changed after build 7, not packaged runtime. Documentation/link/privacy
 and whitespace checks passed. No production defect was demonstrated or fixed.
 
+## Mac non-streaming request lifecycle — 2026-10-09
+
+**Selected outcome:** one serial Local macOS ARM64 owner, continuing published
+`9d7a6d6` on `codex/provider-qualification`. Implement and qualify an explicit,
+authenticated, bounded synthetic Studio JSON request through the packaged Mac app,
+including completion, cancellation/errors, stale refusal, Save responsiveness and
+normal exit; clean up only newly owned synthetic fixtures and publish the scoped work.
+User authorizes implementation, focused checks, UI/controller/probe changes, synthetic
+fixture/credential setup and cleanup, review, records, commit and publication.
+No real endpoints/credentials/project sends, streaming, other provider/auth modes,
+proposal application, installation/security changes, CI, other-host work, merge/release
+or next feature. Preserve accepted credential evidence and Mac development file
+storage/native ownership/signing policy. Windows request qualification remains separate.
+
+**Allowance:** at most **2 package builds / 3 app launches**, cumulative for this
+outcome; reserves require a specific diagnosed failure and concrete correction.
+No unchanged retry or ambiguous redispatch. Entry is clean; fast-forward from local
+`57f4fed` to confirmed remote `9d7a6d6` preserved the separate planning worktree.
+
+**Preflight:** supported native Mac computer-use inventory was available; first
+Finder observation returned a locked-Mac capability failure after 740.146 seconds.
+The user manually unlocked the host. Fresh workspace-scoped AX observation, native
+keyboard/paste navigation and screenshot capture then succeeded without a Loomlight
+launch. Automatic review refused a Finder Recent screenshot because it would include
+unrelated private filenames; the authorized workspace capture resolved the scope issue.
+No lock/security policy changed. User subsequently clarified screenshots are optional
+unless a repository gate requires them: native accessibility observations plus exact
+receipts will supply visible proof. No mandatory screenshot set applies to this slice.
+The pinned public certificate identity is present under the existing approved
+self-signed package route; no certificate/trust/ACL change. Portable pinned tools and
+existing dependencies are available. Package attempts **0/2**, launches **0/3**.
+
+**Implementation checkpoint:** in progress. Synthetic-only literal-loopback HTTP is
+the supported destination subset; other saved destinations explicitly refuse before
+sending. Retain pinned `ureq` with a single-attempt socket connector, owned socket
+shutdown, one-second connect and bounded 30–1800-second response deadline; no resolver
+workers, retries or pooled sockets. Core owns immutable profile/body/credential and
+strict bounded response parsing. Desktop owns one worker, cancellation/invalidation
+and guarded final publication. Editing/persistence never hold a network lock. This
+is a bounded partial 2A.2 selection, not full 2A.2 or live Studio compatibility.
+Focused checks: final core request **8 PASS**, discovery **1 PASS**, desktop ownership
+**5 PASS**, fresh fixture **1 PASS**, frontend protocol/request DOM **11 PASS**,
+controller **3 PASS**, signing-policy functions **5 PASS**, TypeScript/check/validator
+and whitespace PASS. Initial loopback tests failed solely on sandbox bind permission;
+the authorized host tests passed. An initial desktop success fixture read only part
+of the request and reset its socket: corrected full-body consumption passed. Initial
+frontend **109/111 PASS**, two failures (outdated operation allowlist expectation and
+new literal CSS shadow) were corrected and all 11 affected integration checks passed.
+Python cache output initially hit a sandbox path refusal; the existing ignored local
+cache resolved it. Original command output remains in the chat; captured frontend/
+final-check logs are retained under ignored `.toolchains/logs/studio-request-*`.
+Unfiltered format check finds only the unchanged entry Windows probe formatting;
+changed Rust files pass the scoped formatter. No semantic Windows credential change.
+Native acceptance, cleanup and final accounting remain pending.
+
+**Self-review before package:** core/native credential boundary, exact immutable
+configuration/body, context/response bounds, status/unknown usage, error redaction,
+single worker/socket, no retry/proxy/DNS, renderer late-result guard, project/config/
+shutdown invalidation and normal close path inspected. Status reads during a busy Save
+boundary must retain the worker; a focused regression proves this. The opt-in native
+fixture adds safe Save elapsed/active-worker and exit-cleanup receipts without source,
+reply, credential or URL diagnostics. The compact walkthrough is 4 explicit synthetic
+POSTs/one listener: complete, stall-edit-Save-cancel, auth error, unknown-usage complete.
+Individual operator observation cap 180 s; whole launch 1800 s; response default 600 s,
+connect 1 s, cancellation cleanup 2 s. Exactly one fresh app-owned native credential
+is prerequisite setup and will be removed through supported Remove profile. The
+fixture/controller refuse re-dispatch and uncertain ownership. Screenshots optional
+by user amendment; native AX state supplies visible evidence. First build/launch
+are next; reserves remain unconsumed and require a diagnosed correction.
+
 ## In plain language
 
 | Part | What you can do when it is complete |

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "profiles": [
+    {
+      "profileId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "revision": 1,
+      "disabled": false,
+      "settings": {
+        "label": "Synthetic request fixture",
+        "endpoint": "http://127.0.0.1:46082/v1",
+        "model": "synthetic-model",
+        "privateHttp": false,
+        "contextCeiling": 8192,
+        "contextBudget": 4096,
+        "maximumResponse": 1024
+      },
+      "credential": null
+    }
+  ],
+  "cleanup": []
+}

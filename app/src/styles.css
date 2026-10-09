@@ -311,3 +311,10 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 
 .app-shell:has(.runtime-panel) { grid-template-rows: auto minmax(300px, 1fr) auto; }
 .app-header:has(.runtime-toolbar) { min-height: 54px; padding-block: 8px; }
+
+.studio-request { position:fixed; right:16px; bottom:36px; z-index:25; width:min(430px,calc(100vw - 32px)); max-height:65vh; overflow:auto; padding:16px; border:1px solid var(--border-normal); border-radius:12px; background:var(--surface-panel); box-shadow:var(--shadow-preview); }
+.studio-request h3 { margin:0 0 8px; }
+.studio-request p { font-size:13px; overflow-wrap:anywhere; }
+.studio-request select { width:100%; margin:8px 0; }
+.studio-request input { width:90px; margin-left:8px; }
+.studio-request-output { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; }

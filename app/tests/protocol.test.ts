@@ -26,6 +26,9 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "ai.removeProfile",
     "ai.cleanup",
     "ai.discover",
+    "ai.sendSynthetic",
+    "ai.requestStatus",
+    "ai.cancelRequest",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
@@ -85,7 +88,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|readSecret|exportKey|generation/i.test(operation)), false);
   assert.deepEqual(CORE_OPERATIONS.filter(operation => /credential/i.test(operation)), ["ai.enterCredential", "ai.removeCredential"]);
-  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && operation !== "ai.requestStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {
@@ -94,6 +97,7 @@ test("renderer source contains no secret or ambient host bridge", async () => {
     "src/bridge.ts",
     "src/protocol.ts",
     "src/ports.ts",
+    "src/studio-request-ui.ts",
   ].map((path) => readFile(new URL(path, sourceRoot), "utf8")));
   const combined = sources.join("\n");
   assert.doesNotMatch(combined, /process\.env|import\.meta\.env|localStorage|sessionStorage/);

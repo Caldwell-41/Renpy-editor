@@ -1,12 +1,14 @@
 mod ai_native;
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 mod ai_reload_fixture;
+mod ai_requests;
 mod ai_settings;
 #[cfg(test)]
 #[path = "../identity_policy.rs"]
 mod identity_policy;
 #[cfg(target_os = "macos")]
 mod identity_probe;
+mod request_probe;
 #[cfg(target_os = "windows")]
 mod windows_studio_probe;
 use loomlight_core::{
@@ -130,8 +132,15 @@ fn complete_application_close(
     if !host.with_service(|service| service.current().is_none())? {
         return Err("Close the project through its runtime and draft flow first.");
     }
-    if !host.shutdown() {
+    if !ai_requests::service().shutdown() || !host.shutdown() {
         return Err("Runtime cleanup is incomplete.");
+    }
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-request") {
+        println!(
+            "{}",
+            json!({"evidence":"studio-request-cleanup","activeWorkers":ai_requests::service().active_workers(),"cleanupComplete":true})
+        );
+        let _ = std::io::stdout().flush();
     }
     APPLICATION_CLOSE_CONFIRMED.store(true, Ordering::SeqCst);
     app.exit(0);
@@ -264,7 +273,7 @@ fn core_request(
             .map_err(|_| "probe state")?
             .clone()
             .ok_or("probe host")?;
-        let cleaned = host.shutdown();
+        let cleaned = ai_requests::service().shutdown() && host.shutdown();
         println!(
             "{}",
             json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "details":payload})
@@ -363,6 +372,11 @@ fn core_request(
         .and_then(Value::as_str)
         .unwrap_or("missing")
         .to_owned();
+    let request_evidence = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
+        == Ok("studio-request")
+        && request.get("operation").and_then(Value::as_str) == Some("source.save");
+    let request_started = Instant::now();
+    let request_was_active = request_evidence.then(|| ai_requests::service().active_workers());
     let response = {
         let validated = match validate_request(&request) {
             Ok(value) => value,
@@ -388,6 +402,30 @@ fn core_request(
             .as_ref()
             .cloned()
             .ok_or("Desktop lifecycle state is unavailable.")?;
+        if matches!(
+            operation.as_str(),
+            "ai.sendSynthetic" | "ai.requestStatus" | "ai.cancelRequest"
+        ) {
+            return Ok(ai_requests::service().dispatch(
+                &host,
+                request_id,
+                &operation,
+                Value::Object(validated.payload.clone()),
+            ));
+        }
+        let _request_change = matches!(
+            operation.as_str(),
+            "ai.saveProfile"
+                | "ai.enterCredential"
+                | "ai.removeCredential"
+                | "ai.removeProfile"
+                | "ai.cleanup"
+                | "project.create"
+                | "project.openPicker"
+                | "project.openRecent"
+                | "project.close"
+        )
+        .then(|| ai_requests::service().change());
         if operation.starts_with("ai.") {
             return Ok(ai_settings::dispatch(
                 &app,
@@ -528,6 +566,13 @@ fn core_request(
             }
         }
     };
+    if request_evidence {
+        println!(
+            "{}",
+            json!({"evidence":"studio-request-source-save","success":response.is_success(),"elapsedMs":request_started.elapsed().as_millis(),"activeWorkersBefore":request_was_active,"activeWorkersAfter":ai_requests::service().active_workers()})
+        );
+        let _ = std::io::stdout().flush();
+    }
     let report_disposition = smoke_report_disposition(smoke_enabled, is_smoke_report, &response);
     if report_disposition == SmokeReportDisposition::Accepted {
         SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
@@ -658,7 +703,10 @@ fn main() {
                 .map_err(|_| "application data path is unavailable")?;
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
-                if case == "studio-settings" {
+                if case == "studio-request" {
+                    let data=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Request fixture root required")?);
+                    request_probe::prepare(&data)?
+                } else if case == "studio-settings" {
                     let data = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Studio probe root required")?);
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n| n.to_string_lossy().starts_with("loomlight-studio-")) { return Err("Studio probe root refused".into()); }
                     LifecycleService::new(data).map_err(|_|"Studio probe initialization failed")?
@@ -737,7 +785,7 @@ fn main() {
             if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let main = app.get_webview_window("main").ok_or("probe main window missing")?;
                 if case == "route-b" { main.set_size(tauri::LogicalSize::new(640.0,720.0)).map_err(std::io::Error::other)?; }
-                if development_phase.is_some() {
+                if development_phase.is_some() || case == "studio-request" {
                     main.show().expect("development fixture show");
                     main.set_focus().expect("development fixture focus");
                 } else {
@@ -776,7 +824,7 @@ fn main() {
                         && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
                     let limit = if windows_observation { 1800 } else if case == "branches-interactive" { 900 } else { 300 };
                     while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
-                    let cleaned = probe_host.shutdown();
+                    let cleaned = ai_requests::service().shutdown() && probe_host.shutdown();
                     println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));
                     let _ = std::io::stdout().flush();
                     std::process::exit(1);
@@ -907,7 +955,7 @@ fn main() {
             }
             if matches!(event, tauri::RunEvent::Exit) {
                 let host = app.state::<DesktopState>().0.lock().ok().and_then(|state| state.clone());
-                if let Some(host) = host { host.shutdown(); }
+                if let Some(host) = host { ai_requests::service().shutdown(); host.shutdown(); }
             }
         });
 }

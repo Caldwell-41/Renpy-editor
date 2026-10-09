@@ -2,7 +2,7 @@
 
 **Status:** Studio-scoped reference/design accepted for the first bounded 2A.1 slice on 2026-10-08. Generic deferred; full live/production qualification incomplete.
 **Date:** 2026-10-07.
-**Authority:** the user accepted the corrected Studio disposition and selected the
+**Prior authority:** the user accepted the corrected Studio disposition and selected the
 first remembered-profile/settings/credential slice. Generation, project sends,
 generic completion and screen implementation remain outside that selection.
 
@@ -228,6 +228,40 @@ model/field errors require a validated bounded provider-specific code, not statu
 Refuse unexpected tools, malformed JSON/SSE, over-limit output, truncation and stale
 completion with distinct categories. Preserve author's draft on every failure.
 Client cancel and server-stop evidence are separate. No automatic Retry-After handling.
+
+## Selected synthetic production subset — 2026-10-09
+
+The user selected completion/cancellation of a bounded authenticated synthetic Studio
+JSON request on Mac using the accepted remembered profile/credential slice. The
+implementation supports literal-loopback HTTP only, with no hostname resolution,
+proxy, TLS fallback, redirects, connection pooling or automatic retry. Other saved
+destinations explicitly refuse before sending; the broader destination/TLS contract
+above remains unqualified. Preserve the approved Mac encrypted-file development
+storage, its same-login limitation, deferred native ownership and signing identity.
+
+The fixed synthetic text diagnostic intentionally sends no project content, schema,
+proposal or tool loop. It captures exact profile/credential/configuration and project
+session plus body/limits in core/native memory. A dedicated worker releases the
+application service before I/O. One global active worker is stricter than the proposed
+per-project maximum; terminal status is bounded to one memory-only result. A cloned
+owned socket supports shutdown during blocked header/body reads; the one literal
+loopback connect attempt has a 1-second bound (also bounding cancellation before a
+socket exists). Response deadline is 30–1800 seconds, default 600. The existing
+2/2/8 MiB body/text/response and depth-32 bounds are enforced, with 32 KiB headers.
+The request panel shows the byte-based input estimate, margin and response reserve;
+user capacity is unverified. Reported usage that exceeds response/context bounds
+also refuses. Missing usage remains unknown.
+
+Synthetic states are `sending -> receiving -> validating -> completed`, with failed,
+cancelled and expired alternatives. `completed` supplies literal diagnostic text,
+never an applicable proposal or `review_ready` edit. Cancellation, configuration/
+project changes and shutdown arbitrate final publication through one native guard.
+Worker completion drops the agent/socket/body/credential before publication; bounded
+terminal text/status may remain in memory until replacement/cancel/shutdown. Native
+Save responsiveness and client resource cleanup require actual packaged target proof.
+This selection excludes SSE, general providers/auth modes and live Studio compatibility;
+it does not close full 2A.2 or Phase 2. Windows requires focused affected-request proof,
+without repeating unchanged remembered-credential qualification.
 
 ## Qualification and alternatives
 

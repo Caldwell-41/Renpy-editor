@@ -655,3 +655,21 @@ single-file picker. The main-window drop captures its project session before wor
 hashing and rechecks ownership before grants are registered. The renderer receives
 opaque grants and display metadata, never authority from a supplied arbitrary path.
 Each staged import still uses the existing typed transaction operation.
+
+## Studio synthetic request worker
+
+The current bounded non-streaming slice uses `ai.sendSynthetic`, `ai.requestStatus`
+and `ai.cancelRequest` through the existing main-window typed IPC. Core captures a
+fixed synthetic body and saved Studio profile/credential, validates the supported
+literal-loopback HTTP destination and context/response limits, then a native worker
+executes pinned `ureq` away from the UI/service boundary. A single publication guard
+arbitrates cancellation and profile/project/shutdown invalidation. No network wait
+owns the project service; ordinary editing and Source Save remain independent.
+
+The worker's cloned owned socket aborts blocked reads. Each request uses a fresh
+single-attempt connector and no DNS workers, proxies, redirect, retries or socket
+pool. Complete responses pass bounded strict parsing; usage stays provider-reported
+or unknown. Final text is literal diagnostic display, never applied or persisted.
+The nonmodal panel observes local native status without further provider HTTP.
+[ADR 0013](adr/0013-provider-request-and-transport-contract.md#selected-synthetic-production-subset--2026-10-09)
+owns exact subset and resource bounds; native target acceptance lives in the task.

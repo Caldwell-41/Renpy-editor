@@ -198,6 +198,27 @@ pub fn parse_models(bytes: &[u8]) -> Result<Vec<String>> {
     if bytes.len() > 128 * 1024 {
         return Err("Discovery response oversized.");
     }
+    let value = strict_json(bytes)?;
+    let data = value
+        .get("data")
+        .and_then(|v| v.as_array())
+        .filter(|v| v.len() <= 256)
+        .ok_or("Discovery model list invalid.")?;
+    let mut models = Vec::new();
+    for item in data {
+        let id = item
+            .get("id")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty() && s.len() <= 256 && !s.chars().any(char::is_control))
+            .ok_or("Discovery model ID invalid.")?;
+        if models.iter().any(|m| m == id) {
+            return Err("Discovery duplicate model ID.");
+        }
+        models.push(id.to_owned());
+    }
+    Ok(models)
+}
+pub(crate) fn strict_json(bytes: &[u8]) -> Result<serde_json::Value> {
     // Bound nesting independently of serde_json's larger default recursion cap.
     let (mut depth, mut quoted, mut escaped) = (0usize, false, false);
     for byte in bytes {
@@ -224,24 +245,7 @@ pub fn parse_models(bytes: &[u8]) -> Result<Vec<String>> {
         }
     }
     let Strict(value) = serde_json::from_slice(bytes).map_err(|_| "Discovery JSON invalid.")?;
-    let data = value
-        .get("data")
-        .and_then(|v| v.as_array())
-        .filter(|v| v.len() <= 256)
-        .ok_or("Discovery model list invalid.")?;
-    let mut models = Vec::new();
-    for item in data {
-        let id = item
-            .get("id")
-            .and_then(|v| v.as_str())
-            .filter(|s| !s.is_empty() && s.len() <= 256 && !s.chars().any(char::is_control))
-            .ok_or("Discovery model ID invalid.")?;
-        if models.iter().any(|m| m == id) {
-            return Err("Discovery duplicate model ID.");
-        }
-        models.push(id.to_owned());
-    }
-    Ok(models)
+    Ok(value)
 }
 #[cfg(test)]
 mod tests {

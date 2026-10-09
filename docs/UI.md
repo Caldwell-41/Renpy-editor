@@ -1105,3 +1105,15 @@ the complete group stays available.
 The preview remains partial and does not choose or execute a branch. Full condition
 authoring and group operations remain Phase 3 work. Local implementation and target
 evidence are tracked in [Phase 2 section 23](tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07).
+
+## Studio synthetic request panel
+
+The header's **Studio request** opens a nonmodal panel alongside editing and Save.
+It shows an existing saved profile/destination/model, unverified capacity/context
+budget and response reserve. **Send synthetic request** sends only a fixed test
+message; profile load, project opening and Save do not send. The response deadline
+is explicit and bounded. Active requests disable another Send/profile/limit change
+and offer **Cancel request**; terminal text is literal and usage is reported or
+unknown. Safe completion/cancel/error status remains visible. Closing the panel
+first cancels active work; project/configuration/shutdown changes reject late results.
+Literal-loopback HTTP is the current supported subset, disclosed before sending.

@@ -4,6 +4,7 @@ import { technicalName, technicalNameInput, technicalNameHelp, namingHelp } from
 import { icon } from "./icons.ts";
 import { catalogue } from "./catalog-ui.ts";
 import { operationProgress } from "./operation-progress.ts";
+import { openStudioRequest } from "./studio-request-ui.ts";
 import { openSettings } from "./settings-ui.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { RequestLane } from "./request-lane.ts";
@@ -258,6 +259,7 @@ function shell(content: HTMLElement): void {
   const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
   const projectLabel = document.createElement("span"); projectLabel.className = "header-project"; projectLabel.textContent = currentProject?.title ?? "";
   brand.prepend(icon("story")); header.append(brand, projectLabel);
+  const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => openSettings(currentProject ? { ...currentProject, runtime: () => { if(runtimeWorkspace){ runtimeWorkspace.panel.hidden=false; runtimeWorkspace.panel.focus(); } } } : undefined));

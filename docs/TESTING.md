@@ -1304,3 +1304,54 @@ which can launch it without the fixture environment. The old 2/2-build, 4/4-laun
 4/8-GET consumption is unchanged; remaining GETs grant no launch and are not transferred. No Keychain API-key operation or Apple Development
 experiment belongs in the new fixture. Preserve historical packages, attempt markers,
 failed receipts and unresolved native cleanup.
+
+## Studio synthetic non-streaming request
+
+Focused core `ai_request` checks cover fixed-body capture/context preflight, destination
+refusal, strict response/usage variants, unavailable server, real isolated-loopback
+HTTP classification, stalled header/body cancellation and response deadline/socket
+cleanup. Desktop `ai_requests` checks cover one worker, guarded publication, cancel
+races, configuration/project changes, shutdown and native-only credential capture.
+The `request_probe` setup test proves a fresh known-owned synthetic root with no
+credential creation or request on opening. `studio-request.dom` checks explicit Send,
+late renderer-result refusal, literal display and unknown usage; protocol/theme and
+existing settings checks cover changed integration boundaries.
+
+```bash
+cargo test -p loomlight-core ai_request --locked
+cargo test -p loomlight-core ai_discovery --locked
+cargo test -p loomlight-desktop ai_requests --locked
+cargo test -p loomlight-desktop request_probe --locked
+npm run check
+python3 -m unittest discover -s scripts -p test_macos_studio_request.py -v
+```
+
+Loopback tests need host network capability; sandbox bind refusal is a capability
+failure, not a product result. Use the approved certificate-backed package route.
+The task-specific `app/scripts/macos-studio-request.py` runs one explicitly selected
+fresh signed bundle/root and isolated loopback listener, reserving exact launch
+evidence before dispatch. Four explicit POSTs exercise completion (reported usage),
+stall/cancel with Source editing/Save, authentication error and completion with unknown
+usage. No GET, automatic request, real provider, SDK execution or renderer-supplied
+credential. One native entry of the declared public key is prerequisite setup, not
+a repetition of passed credential qualification. The source fixture already exists
+and the app owns native entry/storage/removal.
+
+Use supported native Mac input and accessibility observations for visible Send,
+completion, cancellation/error and responsive edit/Save; internal assertions and
+server receipts supplement that proof. Screenshots are optional for this selection.
+Operator observations are bounded separately from application response deadlines;
+whole manual walkthrough is capped at 1800 seconds, individual observation at 180
+seconds, production default request at 600 seconds and client cleanup target at
+2 seconds. Preserve failures and original observation files. Before cleanup, verify
+normal exit, exact owned PID absence, stopped listener, four authenticated fixed-body
+requests and the stalled connection closed. Supported Remove profile must leave no
+active profile/cleanup/sealed record before the controller removes its precisely
+marked task root. Preserve receipts; no unrelated credential access or recovery.
+
+Windows affected-request verification remains necessary: packaged visible Send/
+completion/unknown usage/cancel/auth error plus Source editing/Save during a stalled
+POST, stale profile/project result rejection, shutdown and owned-worker/listener
+cleanup using the established remembered Windows credential. Reuse unchanged
+Windows credential acceptance; do not rerun its store/refusal/replacement qualification.
+This Mac synthetic result cannot claim Windows requests, full 2A.2 or live Studio.

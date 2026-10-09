@@ -30,6 +30,39 @@ Rust handler guard. Phase 1C's project/SDK/Git-init capabilities are core-owned,
 picker-mediated, typed operations. Studio credentials stay in Rust/native OS entry
 and Rust-only storage; the renderer receives redacted status through narrow typed operations.
 
+## Synthetic Studio request
+
+**Studio request** opens a nonmodal panel using an existing remembered Studio profile.
+Only **Send synthetic request** starts HTTP. The fixed public message contains no
+project content; loading profiles, project open/edit and Save never send it. Selected
+endpoint/model, saved credential/configuration revision, project session, response
+reserve, context budget and response deadline are captured immutably in Rust. The
+renderer receives status and literal final text, never the credential. This bounded
+slice supports literal loopback HTTP only; HTTPS, hostnames and LAN destinations
+refuse before dispatch. It does not qualify live Studio or the complete 2A.2 service.
+
+The pinned `ureq` worker owns one socket and one request (no queue), releases the
+project service before networking and closes the socket on completion/cancellation.
+Connect is one attempt with a 1-second deadline; the panel response deadline is
+30–1800 seconds, default 600. Output body/final text are bounded at 2 MiB, total
+response at 8 MiB, headers at 32 KiB and JSON depth at 32. Full-body byte estimation
+plus max(128, 10% input) margin plus response reserve must fit the saved context
+budget/capacity; capacity remains unverified. Studio wire uses `stream=false`,
+`max_tokens`, thinking off and tools disabled. No schema/proposal or project action
+is requested by this synthetic text diagnostic.
+
+Only one complete JSON response with the exact model, one index-0 assistant choice,
+`finish_reason=stop`, nonempty final text and no refusal/tool activity can complete.
+Malformed/duplicate/nonfinite/deep/oversized JSON, SSE, truncation and invalid usage
+refuse; absent usage remains unknown. Errors show fixed safe categories and HTTP
+status, never raw server error bodies. No retry, provider switch, output application
+or persistent reply. Configuration/project changes and shutdown invalidate the
+request under the publication guard; Cancel discards even a racing final result.
+Client cancellation does not promise that server computation/billing stopped.
+
+Focused checks and the task-specific signed-app walkthrough are described in
+[TESTING](../docs/TESTING.md#studio-synthetic-non-streaming-request).
+
 ## macOS local package identity
 
 Permanent names: **Loomlight**, **Loomlight.app**, **Loomlight.dmg**. Preserve executable
@@ -82,8 +115,8 @@ differently built packages must have different executable hashes and equivalent
 certificate-backed requirements, then prove real app-owned credential reuse across
 quit/reopen and replacement at one stable installation path. A config or signature
 check alone does not prove runtime access. Installation/launch steps need their own
-approval and recorded allowance. Generation is not implemented by this work; the
-available authenticated path is explicit `/models` discovery against a local fixture.
+approval and recorded allowance. Historical identity work implemented explicit `/models` discovery only; the
+current synthetic request subset above has its own qualification boundary.
 
 ### Bounded remembered-key qualification
 

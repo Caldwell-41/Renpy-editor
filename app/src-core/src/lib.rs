@@ -31,6 +31,7 @@ use source::{
 };
 
 pub const PROTOCOL_VERSION: u64 = 1;
+pub mod ai_request;
 pub const OPERATIONS: &[&str] = &[
     "system.health",
     "system.version",
@@ -43,6 +44,9 @@ pub const OPERATIONS: &[&str] = &[
     "ai.removeProfile",
     "ai.cleanup",
     "ai.discover",
+    "ai.sendSynthetic",
+    "ai.requestStatus",
+    "ai.cancelRequest",
     "probe.denied",
     "probe.redactedError",
     "probe.smokeReport",
