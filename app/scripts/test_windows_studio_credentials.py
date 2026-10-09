@@ -13,6 +13,67 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_replacement_prepare_refuses_unknown_partial_root_before_creating_another(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory);root=out/"old-root";root.mkdir()
+            (root/"ai-profiles.json").write_bytes(probe.FIXTURE.read_bytes())
+            probe.write(out/"state.json",{"root":str(root)})
+            prior={"passed":False,"stopped":True,"pidAbsent":True,"requests":[]}
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"REPLACEMENT",True),patch.object(probe.tempfile,"mkdtemp",side_effect=AssertionError("No new root on refusal")):
+                for defect in [{"passed":True},{"pidAbsent":None},{"stopped":False},{"requests":[{}]}]:
+                    probe.write(out/"run-6.json",dict(prior,**defect))
+                    with self.subTest(defect=defect),self.assertRaises(ValueError):probe.prepare()
+                probe.write(out/"run-6.json",prior)
+                (root/"ai-profiles.json").write_bytes(b"unknown changed root")
+                with self.assertRaises(ValueError):probe.prepare()
+                (root/"ai-profiles.json").write_bytes(probe.FIXTURE.read_bytes())
+                (root/".studio-windows-1-alpha-saved.json").write_bytes(b"partial saved proof")
+                with self.assertRaises(ValueError):probe.prepare()
+                self.assertFalse(probe.state_path().exists())
+
+    def test_replacement_selects_new_ids_state_and_prior_without_resetting_budget(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"REPLACEMENT",True),patch.object(probe,"COMBINED_ATTEMPTS",10):
+                for name in ["build-3-attempt.json","build-4-attempt.json","run-6-attempt.json"]:
+                    probe.write(out/name,{"retained":True})
+                probe.write(out/"state.json",{"retained":"old root"})
+                self.assertEqual(probe.state_path(),out/"state-replacement.json")
+                self.assertEqual(probe.run_prefix(8,1),"run-8")
+                self.assertEqual(probe.run_prefix(9,2),"run-9")
+                for run,phase in [(6,1),(7,2),(8,2),(9,1)]:
+                    with self.assertRaises(ValueError):probe.run_prefix(run,phase)
+                self.assertEqual(probe.combined_budget_check()["combinedAttemptsBefore"],3)
+                with patch.object(probe,"configure_npm_hook",side_effect=AssertionError("No preparation")):
+                    for number in [3,4,6]:
+                        with self.assertRaises(ValueError):probe.build(number)
+                self.assertEqual(probe.read(out/"state.json"),{"retained":"old root"})
+                report={"passed":True,"cleanupComplete":True,"evidence":"runtime-ui-packaged","case":"studio-settings",
+                        "details":{"passed":True,"stage":"complete","phase":1,"checks":probe.CHECKS[1]}}
+                prior={"run":8,"passed":True,"stopped":True,"pidAbsent":True,"packageSha256":"new","elapsedSeconds":150,"exitCode":0,"report":report,
+                       "requests":[{"method":"GET","path":"/v1/models","label":"alpha","accepted":True}]*2}
+                probe.validate_prior(prior,"new")
+                with self.assertRaises(ValueError):probe.validate_prior(dict(prior,run=6),"new")
+                probe.write(out/"run-8-launch.json",{"startedMonotonic":100})
+                with patch.object(probe.time,"monotonic",return_value=101):
+                    self.assertEqual(probe.native_input_clock(8,0)["seconds"],1)
+                    with self.assertRaises(ValueError):probe.native_input_clock(6,0)
+
+    def test_replacement_reload_external_identity_is_not_old_fixture_protocol_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory);root=out/"root";root.mkdir()
+            probe.write(out/"run-9-launch.json",{"startedMonotonic":time.monotonic()-5,"pid":123})
+            probe.write(root/".studio-windows-step.json",{"phase":"2","step":"beta-reload-required"})
+            snapshot=root/".studio-windows-2-beta-reload-required.json";snapshot.write_bytes(b"unit-only store")
+            capture=out/"run-9-reload.png";capture.write_bytes(b"unit-only capture")
+            value={"run":9,"phase":2,"saveStatus":probe.read(probe.RELOAD)["expectedResponse"]["saveStatus"],"controlsDisabled":True,"retryEnabled":True,
+                   "profilesSha256":probe.sha(snapshot),"startSeconds":1,"endSeconds":2,"captures":[{"file":capture.name,"sha256":probe.sha(capture),"bytes":capture.stat().st_size}]}
+            with patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"REPLACEMENT",True),patch.object(probe,"OUTPUT",out),patch.object(probe,"root_from_state",return_value=root),patch.object(probe,"pid_absent",return_value=False):
+                probe.write(out/"run-9-reload-observed.json",dict(value,run=7))
+                with self.assertRaises(ValueError):probe.confirm_reload()
+                probe.write(out/"run-9-reload-observed.json",value);probe.confirm_reload()
+                self.assertEqual(probe.read(root/".studio-windows-reload-observed.json"),{"run":7,"phase":2,"observed":True})
+
     def test_native_clock_refuses_actual_late_input_terminal_run_and_invalid_entry_start(self):
         with tempfile.TemporaryDirectory() as directory:
             out=Path(directory);probe.write(out/"run-6-launch.json",{"startedMonotonic":100})

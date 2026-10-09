@@ -6708,6 +6708,69 @@ Current remembered Studio slice, full 2A.1/Phase 2 and release remain incomplete
 2A.2 is unselected. Publish reviewed scoped failure/repairs, then request this concrete
 schedule amendment; no automatic recovery or further native attempt.
 
+#### Approved replacement preparation and probe evidence gap
+
+**Authority amendment:** user answered **Approved** to the concrete build-5/run-8–9
+replacement proposal above. This selects three of the seven remaining combined
+attempts, one additional isolated root/EXE copy and total step-3 native-entry/server
+lifetime caps **five/three**. Saves five, Cancel one, read-only Retry one, GETs four,
+newly owned entries three and fixed presence reads five remain unchanged. All original
+assertions/deadlines and full phase-1-before-phase-2 gate remain. No old identity is
+renewed; no partial reuse or unknown-credential recovery is selected.
+
+**Controller preparation:** `--replacement --acceptance --combined-attempts 10`
+selects only build 5, phase-1 run 8 and phase-2 run 9 in the same acceptance output
+namespace. It uses exclusive `state-replacement.json`, keeps the original state and
+counts every old attempt. Preparation rejects anything other than the known stopped,
+PID-absent, zero-GET, unchanged empty-key failed run 6, including partial saved roots.
+Phase 2 requires full run-8 PASS on the same package; observation/clock/fault/cancel
+receipts use the selected run. Physical run-9 reload evidence must identify run 9;
+the unchanged fixture's internal acknowledgement remains logical run 7. That explicit
+adapter does not relabel prior evidence or accept a run-7 capture for run 9.
+
+**Actual preparation:** created the separately approved second isolated root with only
+exact initial fixture bytes. File-only `replacement-preparation-audit.json` PASS
+verifies distinct roots, exact fixture hashes, failed run-6 terminal/empty-key state,
+preserved acceptance-file digests and exactly three existing attempts. The fresh
+build-5 target/environment and initialized guarded Computer Use/capture/clock helpers
+are staged privately. No app observation/input, build, launch, server, GET, credential
+operation or presence read occurred. Do not run prepare again.
+
+**Checks:** controller **26 PASS**, including rejecting replacement IDs, old prior
+phase reuse, unknown/partial old roots, build selection, shared budget and external
+reload identity. Initial invocation omitted the workspace temporary-folder setting
+and produced 11 sandbox-permission errors; corrected invocation passed without test
+changes. Its failure remains recorded. Existing DOM/TypeScript/desktop evidence is
+unchanged and is not claimed as native qualification.
+
+**New evidence/classification:** direct inspection of the unchanged opt-in probe
+shows alpha/gamma confirmed Saves and Cancel immediately advance to the next entry
+or automatic GETs. It has no client request start/end timing markers. The external
+server records arrival/authentication/results, not the complete client dispatch and
+cleanup interval. Store snapshots do not prove an actual native confirmation capture.
+The required strictly ordered host receipt cannot be honestly completed after these
+unobservable transitions. This is an evidence/harness gap, not a product failure or
+permission to fabricate success. The prior unsuccessful host-timing preparations are
+preserved; do not consume another attempt by repeating that hypothesis unchanged.
+
+**Concrete pending source-scope decision:** requested narrow opt-in Windows probe
+timing markers for the four original GETs/read-only Retry and bounded capture holds
+at the existing confirmation transitions, using the existing fixed fixture route.
+Keep original product/native routes, checks and counts; hold/capture acknowledgement
+must fit the original 15-second confirmation/120-second entry/300-second launch caps,
+with absence/late acknowledgement failing. Actual native images remain host-owned;
+probe markers never stand in for UI observation. This changes the packaged probe
+source beyond the currently selected bounded controller fixes, so it requires the
+explicit source-scope decision requested through user input. No probe source was
+modified and build 5/runs 8–9 remain undispatched while that required decision is pending.
+
+**Budget/state:** still **3/10** step-3 combined attempts consumed, **seven remain**;
+historical/cumulative four builds/six launches, 2/8 GETs survive. Actual new-task usage
+is entry 1/5, Saves 0/5, Cancel 0/1, read-only Retry 0/1, GETs 0/4, server lifetimes
+1/3, owned entries 0/3 and reads 0/5. Original run 6/root/captures, old unused GETs,
+Mac/provider budgets, other worktrees and all failures remain unchanged. Current
+remembered Studio/full 2A.1 and Phase 2 are incomplete; 2A.2 remains unselected.
+
 ### Windows native input/capture preflight — 2026-10-09
 
 **Authority/outcome:** user selected step 2 against published preparation

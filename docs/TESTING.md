@@ -999,6 +999,28 @@ The external controller awaits the host's actual exit receipt only within the ex
 15-second exit/300-second whole caps; no missing observation is synthesized. New
 launch/root identities and any increased native-entry cap need explicit selection.
 
+The user subsequently approved build 5 and replacement runs 8–9, one additional
+isolated root/EXE copy and total native-entry/server-lifetime caps five/three. Add
+`--replacement --combined-attempts 10` to the acceptance commands: `prepare` creates
+only `state-replacement.json`, `build --build 5` uses a new target/copy, phase 1 uses
+`--run 8 --build 5` and phase 2 uses `--run 9 --build 5`. The same output namespace
+counts all consumed build/launch attempts; failed build 3/build 4/run 6 stay intact.
+Fault/restore/native-clock/reload acknowledgement use this same explicit selection.
+Full run-8 PASS is mandatory before run 9; no run-6 reuse or partial entry.
+External observations/captures use run 8/9 filenames and identities. The unchanged
+fixture acknowledgement payload retains logical run 7, separately from the physical
+run-9 receipt. Saves five, Cancel one, read-only Retry one, GETs four, newly owned
+entries three and fixed presence reads five remain unchanged, as do all deadlines.
+
+Before dispatch, distinguish native capture from probe-only evidence. The current
+probe immediately advances after alpha/gamma Save and Cancel, and automatic GETs
+have no client start/end timing markers. A server arrival/response duration cannot
+be reported as the complete client request duration, and saved-store files cannot
+stand in for a native confirmation capture. Narrow opt-in probe timing markers and
+bounded confirmation capture holds are a proposed correction requiring source-scope
+selection; they must retain every original route/assertion/count/deadline. No success
+receipt may be synthesized to bridge this evidence gap.
+
 The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
 has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
 Its Step 1 checks are the same focused `ai_` core selector, desktop tests, `npm run check`,

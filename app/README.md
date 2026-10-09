@@ -337,3 +337,12 @@ The external file-only native clock now rejects expired/terminal input before di
 and actual exit receipts remain bounded. [The ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
 owns exact package hashes, failures, remaining combined attempts and the proposed
 replacement scope; current remembered Studio qualification remains incomplete.
+
+The user approved replacement **build 5/runs 8–9**, one additional isolated root/EXE
+copy and total step-3 native-entry/server-lifetime caps five/three. Use the explicit
+`--acceptance --combined-attempts 10 --replacement` selection. It reserves
+`state-replacement.json`, retains the original state and failed run 6, allows only
+build 5 and phase-1 run 8/phase-2 run 9, and counts the same acceptance attempt files.
+Full run-8 PASS precedes run 9. External reload observations must identify run 9;
+the existing fixture's internal acknowledgement remains logical run 7. This adapter
+does not relabel any old launch. Other operation caps and deadlines remain unchanged.
