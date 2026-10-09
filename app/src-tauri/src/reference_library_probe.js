@@ -38,6 +38,23 @@
    const final=(await library()).document;await click('Close Project');await click('Source foundation fixture');await wait(()=>document.querySelector('.scene-workspace'));project=await read('project.current');check(JSON.stringify((await library()).document)===JSON.stringify(final),'Close and reopen preserve exact complete metadata');
    const sourceAfter=await Promise.all(sources.files.filter(f=>f.path.endsWith('.rpy')).map(f=>read('source.open',{...payload(),path:f.path})));check(JSON.stringify(sourceAfter.map(v=>v.text))===JSON.stringify(sourceBefore.map(v=>v.text)),'Reference editing preserves all game source text');
    await click('Characters');await click('Character cards');await wait(()=>document.querySelector('.reference-library'));
+   // Seed only the opt-in synthetic fixture through production metadata dispatch.
+   // Then edit its retained nested link and scope through the real form controller.
+   const base=await library(), card=base.document.cards[0], lore=base.document.loreEntries[0];
+   const fields=structuredClone(knownCurrent(card).content);fields.relationships=[{target:{type:'card',id:card.id,fixtureExtension:{retained:true}},text:'Fixture relationship'}];fields.links=[{type:'lore',id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',fixtureExtension:{retained:true}}];fields.citations=[{target:{type:'card',id:card.id},revision:card.approvedRevisionId,notes:'Fixture citation'}];
+   await call('references.apply',{...payload(),expectedRevision:base.revision,command:{type:'save',kind:'card',recordId:card.id,fields}});
+   await click('Reload library');check([...document.querySelectorAll('.reference-link-row p')].some(p=>p.textContent.includes('Source changed'))&&document.querySelector('.reference-link-warning'),'Native form identifies stale citation and missing link');
+   const labeledSelect=label=>[...document.querySelectorAll('.reference-editor label')].find(l=>l.querySelector('span')?.textContent===label)?.querySelector('select');
+   const relationship=labeledSelect('Related character or entry');check(!!relationship,'Relationship target form is available');relationship.value='lore:'+lore.id;relationship.dispatchEvent(new Event('change'));
+   const scope=document.querySelector('[name="scope"]');scope.value='route';scope.dispatchEvent(new Event('change'));
+   const scene=base.entities.find(e=>e.kind==='scene');check(!!scene,'Synthetic Scene is available for scope');
+   for(let i=0;i<2;i++){const picker=labeledSelect('Scene to add');picker.value='scene:'+scene.id;picker.dispatchEvent(new Event('change'));await click('Add Scene');}
+   input('knowledgeNotes','Fixture knowledge and spoiler note.');const loreCheck=document.querySelector('.reference-check input');loreCheck.checked=true;loreCheck.dispatchEvent(new Event('change'));
+   await click('Save changes');const edited=(await library()).document, saved=knownCurrent(edited.cards[0]).content;
+   check(saved.relationships[0].target.type==='lore'&&saved.relationships[0].target.id===lore.id&&saved.relationships[0].target.fixtureExtension.retained===true,'Native relationship target edit retains nested unknown fields');
+   check(JSON.stringify(saved.citations)===JSON.stringify(fields.citations)&&JSON.stringify(saved.links)===JSON.stringify(fields.links),'Native prose and link edit retain stale citation and unresolved link');
+   check(saved.scope.type==='route'&&saved.scope.sceneIds.length===2&&saved.scope.sceneIds.every(id=>id===scene.id)&&saved.linkedLoreIds[0]===lore.id&&saved.knowledgeNotes==='Fixture knowledge and spoiler note.','Native form saves repeated route, linked lore and knowledge notes');
+   await click('Undo');await click('Undo');check(JSON.stringify((await library()).document)===JSON.stringify(final),'Representative form Undo restores exact pre-fixture document');
    for(const theme of ['light','dark']){document.querySelector('.shell-settings').click();await wait(()=>document.querySelector('#setting-theme'));const select=document.querySelector('#setting-theme');select.value=theme;select.dispatchEvent(new Event('change'));await wait(()=>document.documentElement.dataset.theme===theme);await click('Close settings');await pause('observe-'+theme);}
    await pause('observe-narrow');
    check(![...document.querySelectorAll('button')].some(b=>['Approve','Reject','Supersede','Edit'].includes(b.textContent)),'Manual UI has clear Save actions without review bureaucracy');

@@ -57,19 +57,24 @@ Revised preview checks passed direct editing/Save/Discard, both themes, lore and
 list-to-form return without script errors/overflow. Repository validation and diff
 whitespace checks passed. No production/native behavior is proved by these checks.
 
-**Allowance, cumulative across chats/handoffs:** Mac **2/2 builds, 3/3 app launches**;
-Windows **0/2 builds, 0/3 app launches**. Reserves require diagnosed failure/recorded
-correction; ambiguous dispatch must be resolved; reassess after two unsuccessful
-corrections of one hypothesis. Prior request budgets/failures are unchanged and not
-transferred. Initial sandboxed browser rendering failed; escalated isolated rendering
-passed. Browser previews consume no Loomlight package/native allowance.
+**Current allowance, cumulative across chats/handoffs:** Mac **2/2 builds, 5/7 app
+starts** after explicit launch-only renewals; Windows **0/2 builds, 0/3 starts**.
+One additional Mac package build is requested for the tested review correction;
+approval is pending. Reserves require diagnosed failure/recorded correction;
+ambiguous dispatch must be resolved; reassess after two unsuccessful corrections of
+one hypothesis. Prior request budgets/failures remain separate. Initial sandboxed
+browser rendering failed; isolated rendering passed; previews consume no native
+allowance.
 
-**Remaining:** final review and corrected-package native acceptance are incomplete.
-The Mac build/launch allowance is exhausted; stop native attempts until the user
-provides a renewed allowance. Windows remains unstarted and required. No push is
-approved or attempted. The implementation is saved locally, not a delivered or
-accepted manual-library outcome. Exact continuation and missing proof are below
-and in HANDOVER. Do not claim full 2B.1 or Phase 2 completion.
+**Remaining:** native qualification of the relationship retention correction,
+representative scope/link/knowledge behavior, dark/narrow observations and final
+corrected-package reopen. Earlier corrected-package authoring/reopen evidence and
+focused deterministic checks pass, but phase 1's visual pause timed out. Review found
+and fixed nested unknown-field loss on relationship-target edits. The existing
+package predates that correction. Stop dependent packaging until the build decision;
+no push approved or attempted. Windows remains required and unstarted. See the latest
+ledger and HANDOVER for exact attempts, missing proof and conditional continuation.
+No full 2B.1 or Phase 2 completion claim.
 
 ### Manual-library Mac implementation and first native run — 2026-10-09
 
@@ -146,6 +151,67 @@ concrete reviewed result. Do not push or start a next feature. Continue the same
 on Mac only with a renewed allowance, then seek publish approval and hand Windows the
 same branch/commit. The planned Windows continuation below is conditional on that
 publication, not an instruction to run another host now.
+
+### Renewed Mac native allowance — 2026-10-09
+
+The user approved two additional Mac app launches of existing corrected package 2.
+No additional package build, push or other-host execution was approved. Cumulative
+ceiling is now Mac **2 builds / 5 app starts**, with **2 builds / 3 starts** consumed
+on resume; Windows remains **0/2 builds, 0/3 starts**. Historical failures and implicit
+restart count remain unchanged. Resume inspection found the clean local `c1fa943`
+checkout on the intended branch, with the unrelated planning worktree untouched and
+no Loomlight/probe instance remaining. Verify process ownership without UI tools
+before every start. Never inspect the app after probe termination.
+
+### Renewed native results and review correction — 2026-10-09
+
+Mac start 4, PID 75122, used corrected package 2. Its real native controller/IPC
+checks passed physical Command-S Save, stable IDs, replacement retaining prior text,
+exact document Undo/Redo, cancelled/accepted Discard, bounds refusal, search/filter,
+ordinary external stale-save refusal, explicit reload/fresh Save retaining the unknown
+extension, lore creation, malformed/newer refusal, restored metadata, close/reopen and
+unchanged `.rpy` source. Physical Save focused enabled Name; Tab moved to Aliases.
+The light-theme wide form was inspected. Physical linked-lore/knowledge-note Save
+committed counter 4 with approved status. An initial offscreen typing attempt saved
+the checked link but no note; scrolling the field into view corrected the interaction.
+A host readback initially used the wrong collection name (`lore`); corrected
+`loreEntries` assertions confirmed both optional fields. These are harness issues.
+
+**Phase 1 did not pass overall:** its 240-second `observe-light` pause timed out
+while the owner was observing; dark/narrow stages were not reached. Process cleanup
+was confirmed. The last optional Save could not be undone after termination. The
+owned fixture was restored from its pre-observation bytes by the host (not credited
+as project Undo), retaining a structural optional-Save receipt. The runner now permits
+an explicit phase-2-only reopen after this exact diagnosed visual timeout, without
+creating or accepting a phase-1 receipt. Start 5, PID 75430, passed separate-process
+reopen with exact bytes/hash `e74ab6a0fa0be5e3de76267ca73276dd15bf6f7dfce0087f7a40b87d82d09300`.
+Card counter 3, current/approved revision pointers and superseded r2/approved r3
+survived, as did the external extension and both collections. Structural receipts
+remain ignored under `manual-reference-mac-04`; owned process/root/prose baseline
+are removed. An attempted Python bytecode syntax check was denied outside writable
+cache roots; AST syntax checking passed without changing permissions.
+
+Focused distribution proof used only the trusted pinned SDK 8.5.3 classifier helpers
+and default hidden-root patterns against the owned synthetic project. `.renpy-editor`
+was excluded without descent while game files were included. No game/project Python
+was executed; author-defined custom distribution overrides are outside this proof.
+
+Review reproduced one correction: changing a relationship target rebuilt its link
+object and dropped nested unknown fields. The form now changes known type/ID while
+retaining the existing link object extensions; choosing Not linked explicitly removes
+the target. The focused renderer regression and typecheck pass. A test fixture type
+annotation initially failed compilation and was corrected before the passing check.
+The native probe adds representative relationship-extension, repeated-route,
+linked-lore and knowledge-note Save/Undo assertions. Package 2 predates this correction.
+
+The user authorized **two further Mac launches** after start 5: cumulative launch
+ceiling is **7**, with **5 consumed**. Build allowance remains **2/2 exhausted**.
+One additional package build has been requested for the concrete reviewed correction;
+its approval is pending. No build/start is performed while that decision is pending.
+Windows stays **0/2 builds, 0/3 launches**; no publish is authorized. Remaining native
+proof is the corrected relationship form, representative scope/knowledge/link Save,
+dark theme and narrow layout, and final corrected-package reopen. No full 2B.1 or
+Phase 2 completion claim.
 
 ## Windows synthetic request selection — 2026-10-09
 

@@ -1,7 +1,7 @@
 # Manual reference library v1
 
 **State:** implemented locally for the selected manual-library outcome; native
-acceptance and final review are incomplete. Phase 2 section 9 and ADR 0011 own the
+acceptance is incomplete; a reviewed relationship-target retention correction awaits native verification. Phase 2 section 9 and ADR 0011 own the
 product rules. UI A is approved. Both-target production evidence remains required.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
@@ -156,4 +156,4 @@ request/credential evidence. Builds/launches and failures belong to the owning l
 
 Reference prose stays out of routine diagnostics, logs and game distributions.
 No `.rpy` mutation, HTTP, generation, import/export, injection/retrieval or runtime
-inference is introduced. Existing distribution exclusion requires focused verification.
+inference is introduced. Pinned SDK 8.5.3 default distribution classification excludes the hidden metadata directory; trusted classifier helpers were verified against the synthetic project without executing game code. Custom author build overrides are outside that default-path proof.

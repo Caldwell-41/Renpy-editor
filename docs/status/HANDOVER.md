@@ -1,90 +1,74 @@
 # Current outcome handover
 
-## Manual reference library: local implementation, allowance stop
+## Manual reference library: reviewed correction, build decision pending
 
-Continue the same outcome on Caldwell-41/Renpy-editor,
-`codex/provider-qualification`, with one serial Local Mac ARM64 implementation owner.
-No other-host execution or second writer. One user-requested research-only subagent
-completed UI comparisons without edits or descendants. The checkout entered clean at
-published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`; refs matched. Preserve unrelated
-planning worktree/local work; never reset to that entry SHA.
+Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`, with one serial
+Local Mac ARM64 owner. No other-host execution or second writer. The explicitly
+requested research-only subagent is finished; no further delegation. Entry refs
+matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`; preserve local work and
+the unrelated planning worktree, never reset to the entry SHA.
 
-Read the [owning selection and attempt ledger](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
-[concrete v1 contract](../REFERENCE_LIBRARY.md), Phase 2 sections 9/10/11/19/20,
-ADR 0011 and applicable UI/WORKFLOW/TESTING guidance. The revised A/B images are
-approved; implement A, Browse and write. Select an entry and edit immediately.
-Save changes creates current author text through one shared transaction; Discard
-changes restores the saved form. New character card / New lore entry sits at the
-workspace top. No manual Edit unlock, Approve/Reject/Supersede toolbar. Internal
-stored statuses/revisions remain for future generated review. Missing/stale citations
-remain intact and do not block ordinary prose Save or silently become current.
+Read the [owning selection/attempt ledger](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
+[references contract](../REFERENCE_LIBRARY.md), Phase 2 sections 9/10/11/19/20,
+ADR 0011 and applicable UI/WORKFLOW/TESTING guidance. Approved UI A uses a list beside
+directly editable forms, top New card/lore control and ordinary Save/Discard. Internal
+revision/status storage remains; no manual Edit unlock or review toolbar.
 
-Local implementation adds `references.rs`, `reference-ui.ts`, typed list/apply IPC,
-Characters → Character cards and Lorebook, and shell Save/Command-S routing. One
-`.renpy-editor/references.json` service retains UUIDs/revisions/extensions and uses
-existing `commit_history`, history, external edits/recovery. Schema/bounds/fixtures
-preceded the editor. The final implementation is **not native accepted or fully
-reviewed**; no push is authorized. Local commits preserve work for recovery.
+Implementation is local: one versioned references service, typed list/apply IPC,
+Character cards/Lorebook, shell Save/Command-S and existing transaction/history,
+external-edit/recovery ownership. Schema/bounds/fixtures preceded the editor.
+Focused renderer/core checks pass; prior credential/request evidence is unchanged.
+Native package 2 proved Save/replacement/exact Undo/Redo, refusals/Discard/search,
+external reload/fresh Save, lore creation, malformed/newer retention, source preservation
+and close/reopen. Physical corrected Save focused enabled Name, Tab moved to Aliases;
+light wide layout was observed. A separate process preserved exact metadata bytes/hash
+`e74ab6a0fa0be5e3de76267ca73276dd15bf6f7dfce0087f7a40b87d82d09300`, card counter 3,
+current/approved pointers, superseded r2/approved r3 and the external extension.
 
-Focused checks: 112 renderer tests passed before final corrections; the corrected
-reference-form/focus test plus four request-lane tests passed (5/5). Core focused
-selector passed 10 reference tests plus one incidental preferences test; an additional
-exact external-replace/reload/fresh-Save regression passed. Refusals, missing/stale
-links, exact history/reopen, bounds/extensions, project switching and non-crashing
-Prepared recovery have deterministic coverage. Harness development failures and
-corrections are recorded in the ledger; do not convert them into native passes.
+**Counts:** Mac **2 builds / 5 starts consumed**, user-approved launch ceiling now **7**.
+Build ceiling is still **2**. One additional package build has been requested for the
+reviewed retention correction; approval is pending. Windows **0/2 builds, 0/3 starts**.
+No push authorization. Prior request budgets/failures remain separate and unchanged.
 
-**Budget exhausted:** Mac **2/2 package builds, 3/3 app starts**; Windows **0/2 builds,
-0/3 launches**, cumulative across chats/handoffs. Stop native work until the user
-provides a renewed Mac allowance. Prior Studio request totals remain Mac 1 build/2
-launches and Windows 8 builds/15 launches, separate and unchanged.
-
-Package 1 executable SHA256
-`419167622403907fb8f008226999cefd11e67cbd40bdde166774e557e07db801`.
-Native PID 73306 proved physical Command-S → real IPC/metadata, replacement/history,
-Discard/refusal/search/filter and ordinary external stale-save refusal, then timed out
-after reload/save. Readback retained counter 2 and the external extension; no follow-up
-save committed. Exact native returned code was not captured. Independently reproduced
-reference calls bypassing the persistence lane; both reference operations now use that
-lane, and the probe awaits UI completion before readback. Native Save also tried to
-focus disabled fields; enabling before focusing fixes it in focused tests.
+Unique failures remain in the owning ledger: start 1 package-1 external reload/Save
+timeout exposed missing persistence-lane serialization and disabled-field focus;
+start 2 was an implicit CUA relaunch after termination; start 3 was single-instance
+rejection. Start 4 corrected package PID 75122 passed authoring assertions but timed
+out at the 240-second light observation pause. Optional linked-lore/knowledge Save
+had committed; host fixture restoration (not credited as Undo) preceded start 5
+PID 75430's successful reopen. Phase 1 overall remains failed, not an accepted receipt.
+The runner's explicit timeout-resume option accepts only separate reopen proof.
+Never use CUA to select or observe an exited Mac app: it can launch it. Inspect process
+ownership by CLI before each native start. No owned process/root remains; structural
+receipts under ignored `manual-reference-mac-04` retain evidence without reference
+prose. Earlier ignored package/report directories remain available.
 
 Package 2 executable SHA256
 `b1fb411f7af5d819cf46cc77f5bf9875cc7731897b3c61e9bce3ef80539010bb`;
-installer SHA256 `714da98a95d616345f1ff35558765844def426a4281c9f1cdf2a695489b40e0b`.
-Both packages preserve the approved identity and passed strict signature/installer
-verification. An observation after PID 73306 exited implicitly restarted package 1
-as PID 73435 in its ordinary welcome view. Corrected probe PID 74021 then immediately
-exited at the single-instance guard, before fixture initialization. Count all three
-starts; the owner missed the implicit restart until diagnosing the third attempt.
-Do not observe/select a stopped Mac app with CUA: that can launch it. Before any
-renewed-budget launch, inspect process ownership without UI observation.
+installer `714da98a95d616345f1ff35558765844def426a4281c9f1cdf2a695489b40e0b`.
+Approved names, signing certificate pin, namespaces and policy are unchanged.
+Trusted SDK 8.5.3 classifier/default-pattern verification excluded `.renpy-editor`
+without descent and included game files; no game/project Python ran. Custom author
+build-classification overrides are outside the default-path proof.
 
-Owned PID 73435 was verified by exact executable path and terminated. Both owned
-synthetic roots were removed. Ignored local packages/receipts/logs under
-`.toolchains/releases/manual-reference-mac-0{1,2}` and
-`.toolchains/reports/manual-reference-mac-0{1,2}` retain unique evidence. Structural
-failure readback contains IDs/statuses/hash only, no reference prose. No owned process
-or fixture remains. No credential/provider/network/SDK execution or personal-project
-editing occurred. The ordinary welcome inspection displayed existing recents only.
+Review found relationship target changes discarded nested unknown fields. The form
+now retains object extensions while editing known type/ID, and explicitly selecting
+Not linked removes the target. Focused regression/typecheck pass. Package 2 cannot
+qualify this changed production input. The prepared native probe now covers this
+retention correction plus repeated-route scope, knowledge/lore links and stale/missing
+citations/links, restoring exact baseline through project Undo before observations.
 
-**Missing Mac proof:** corrected package native queue/focus behavior, successful
-external reload/save, lore authoring, native malformed/newer retention, close/reopen
-and separate-process byte-exact reopen, representative scope/knowledge/link forms,
-physical keyboard/focus after corrected Save, compact widths and both themes;
-distribution exclusion verification and complete final review. Earlier passing native
-assertions do not qualify changed package 2. No full 2B.1/Phase 2 claim is allowed.
-
-If the user renews Mac allowance, first review/fix the current scoped candidate and
-prove unchanged distribution exclusion from the pinned SDK/production build path.
-Use the existing package 2 if production inputs stay unchanged; do not build again
-without allowance. `app/scripts/reference-library-probe.py` owns one launch, fixed
-synthetic metadata edits and observation markers. `reference_library_probe.js` uses
-real controllers/IPC. Ensure no Loomlight instance remains before launching. Preserve
-failures, record exact new allowance and resolve ambiguous dispatch before replay.
-Finish focused native proof/review/necessary in-scope fixes, update owning acceptance
-and canonical records, commit locally, then request approval to push the concrete
-reviewed result. Do not start the next feature.
+**Next dependent action requires build approval.** If approved, record cumulative
+ceiling 3 builds/7 starts, build package 3 once with the existing identity/output
+policy, then run fresh phase 1 in a new owned synthetic root with promptly released
+physical observation markers (manual Save, light, dark, narrow). Do not let a
+compaction or unrelated investigation consume a live observation pause. Use start 7
+for phase-2 byte-exact reopen, then clean owned resources. One package failure is not
+automatic retry authorization. If build approval is declined, preserve the tested fix
+and stop with missing native evidence. Windows remains unaccepted. Finish focused
+review/in-scope fixes, canonical acceptance/status and a scoped local commit; ask before
+publishing the concrete reviewed result. Do not claim full 2B.1/Phase 2 or start a next
+feature. Both-target acceptance remains required.
 
 ## Conditional Windows pull-and-continue prompt
 

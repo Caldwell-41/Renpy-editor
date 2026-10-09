@@ -19,13 +19,31 @@ p.add_argument('--executable', type=Path, required=True)
 p.add_argument('--root', type=Path, required=True)
 p.add_argument('--output', type=Path, required=True)
 p.add_argument('--phase', type=int, choices=(1, 2), required=True)
+p.add_argument('--reopen-after-observation-timeout', action='store_true',
+               help='Verify persisted data after a recorded phase-1 visual pause timeout; does not accept phase 1')
 a = p.parse_args()
 if not a.executable.is_file() or not a.root.name.startswith('loomlight-reference-'):
     raise SystemExit('Owned executable/fixture required')
 if a.phase == 1 and a.root.exists():
     raise SystemExit('Fresh fixture required; no replay')
 if a.phase == 2 and not (a.output / 'phase-1.json').is_file():
-    raise SystemExit('Phase 1 acceptance required')
+    if not a.reopen_after_observation_timeout:
+        raise SystemExit('Phase 1 acceptance required')
+    reports = []
+    for line in (a.output / 'phase-1.log').read_text().splitlines():
+        try:
+            item = json.loads(line)
+        except ValueError:
+            continue
+        if item.get('evidence') == 'runtime-ui-packaged':
+            reports.append(item)
+    if len(reports) != 1 or reports[0].get('passed') is not False:
+        raise SystemExit('One failed phase-1 receipt required')
+    details = reports[0].get('details', {})
+    if (details.get('stage') != 'observe-light' or
+        details.get('failure') != 'Error: Observation timeout at observe-light' or
+        'Close and reopen preserve exact complete metadata' not in details.get('checks', [])):
+        raise SystemExit('Only a diagnosed visual observation timeout may resume reopen')
 a.output.mkdir(parents=True, exist_ok=True)
 metadata = a.root / 'synthetic-project/.renpy-editor/references.json'
 before = metadata.read_bytes() if a.phase == 2 else None

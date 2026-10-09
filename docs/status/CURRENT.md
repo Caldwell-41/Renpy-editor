@@ -7,22 +7,29 @@ editable fields with ordinary Save changes / Discard changes. Manual approval/st
 controls were removed by the user's correction. One serial Local Mac ARM64 writer;
 one explicitly requested research-only subagent completed comparisons without edits.
 
-The versioned [references contract](../REFERENCE_LIBRARY.md), core validators/service,
-typed IPC, Character cards/Lorebook forms and shared transaction/history integration
-are implemented locally. Focused deterministic checks pass. Early native proof confirms
-physical Command-S → real metadata, replacement, Undo/Redo, Discard, bounds refusal,
-search/filter and external stale-save refusal in package 1. That probe then failed after
-external reload/save; persisted readback confirms no follow-up commit. Queue and focus
-corrections pass focused regressions and are built into package 2.
+The versioned [references contract](../REFERENCE_LIBRARY.md), core service, typed IPC,
+Character cards/Lorebook forms and shared transaction/history integration are local.
+Focused deterministic checks pass. Corrected package 2 has native evidence for real
+UI/dispatch/metadata Save, replacement, exact Undo/Redo, refusals, external reload/Save,
+lore creation, malformed/newer retention, source preservation and close/reopen.
+Separate-process reopen preserved exact bytes, IDs/statuses and unknown data.
+Physical Command-S/focus/Tab and the light wide layout were observed.
 
-**Stopped: Mac allowance exhausted, 2/2 builds and 3/3 app starts.** UI inspection
-implicitly reopened package 1 after its probe exited; the next probe was rejected by
-single-instance ownership before initializing its fixture. Count all starts. No native
-qualification of the corrected package, final review or distribution proof is claimed.
-Owned process/fixtures are cleaned up. [HANDOVER](HANDOVER.md) owns exact failures,
-remaining proof and the conditional same-outcome Windows continuation. Windows remains
-**0/2 builds, 0/3 launches**; both-target acceptance is required. Work is local-only,
-no push approved or attempted. A renewed Mac allowance is needed before native work.
+The fourth start's visual pause timed out before dark/narrow observations; its overall
+phase-1 receipt remains failed. Review then reproduced and fixed nested unknown-field
+loss when changing a relationship target. The focused regression/typecheck pass;
+package 2 predates this fix. Native representative scope/link/knowledge and final
+corrected-package layout/reopen proof remain required. Pinned SDK 8.5.3 default
+classification excludes the hidden metadata directory from distributions without
+executing game code; custom author distribution overrides are outside that proof.
+
+**User renewed two more Mac launches:** cumulative **2/2 builds, 5/7 starts**.
+One additional package build for the concrete retention fix has been requested;
+approval is pending. No build/start while that decision is pending. Owned process,
+fixture and raw prose baseline are cleaned. [HANDOVER](HANDOVER.md) and the owning
+ledger retain all unique failures and exact remaining evidence. Windows remains
+**0/2 builds, 0/3 starts**; both-target acceptance is required. Work is local-only;
+no push approved or attempted. No full manual-library acceptance is claimed.
 
 The branch entered clean at published `54f562d`; refreshed remote refs matched.
 Unrelated planning worktree is untouched. Prior bounded Studio request/credential
