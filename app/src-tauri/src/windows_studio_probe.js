@@ -9,7 +9,10 @@
  const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', B='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
  const details={phase,stage:'open',checks:[],layer:'packaged Windows WebView/IPC/native Credential Manager'};
  const check=(v,m)=>{if(!v)throw Error(m);details.checks.push(m);};
- const wholeEnd=performance.now()+300000;
+ // Operator capture/interpretation has its own bounded allowance. Product waits
+ // remain 15 s (discovery cleanup 2 s); no polling hold starts a product action.
+ const observationMs=evidence&&phase===2?180000:15000;
+ const wholeEnd=performance.now()+(evidence&&phase===2?1800000:300000);
  const wait=async(f,ms=15000)=>{const end=Math.min(wholeEnd,performance.now()+ms);while(true){const done=await f();if(performance.now()>end)throw Error(`Timeout: ${details.stage}`);if(done)return;await new Promise(r=>setTimeout(r,100));}};
  let entryResponse=null;const operations=[];
  const observe=event=>{const {operation,response,started,ended}=event.detail;
@@ -22,8 +25,9 @@
  const click=async name=>{await wait(()=>button(name)&&!button(name).disabled);button(name).click();};
  const call=async(operation,payload={})=>{if(reloadProof||evidence)operations.push(operation);const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Error(`${operation}: ${r.error.code}`);return r.value;};
  const step=async name=>{details.stage=name;await call('probe.windowsStudioStep',{step:name});};
- const hold=async name=>{if(evidence)await wait(async()=>(await call('probe.windowsStudioStep',{step:name+'-observed'})).observed===true);};
- const checkpoint=async name=>{await step(name);await hold(name);};
+ const showStatus=()=>document.querySelector('.studio-settings [role="status"]').scrollIntoView({block:'center'});
+ const hold=async name=>{if(evidence)await wait(async()=>(await call('probe.windowsStudioStep',{step:name+'-observed'})).observed===true,observationMs);};
+ const checkpoint=async name=>{showStatus();await step(name);await hold(name);};
  const status=()=>document.querySelector('.studio-settings [role="status"]').textContent;
  const select=id=>{const n=document.querySelector('.studio-settings select');n.value=id;n.dispatchEvent(new Event('change',{bubbles:true}));};
  const ready=()=>button('Save profile')&&!button('Save profile').disabled;
@@ -43,7 +47,7 @@
    check(JSON.stringify(await call('ai.profiles'))===JSON.stringify(beforeCancel),'Failed native entry then Cancel preserved complete redacted snapshot');await checkpoint('cancelled');
    await discover();await discover();
   }else{
-   check(initial.profiles.every(p=>p.credentialStatus==='configured')&&initial.profiles.every(p=>p.discovery===null),'Full process reopen reused both remembered keys without discovery');await step('reopened');
+   check(initial.profiles.every(p=>p.credentialStatus==='configured')&&initial.profiles.every(p=>p.discovery===null),'Full process reopen reused both remembered keys without discovery');await checkpoint('reopened');
    await discover();
    if(reloadProof){
     await step('beta-entry');await click('Replace credential…');
@@ -56,10 +60,8 @@
     const controls=[...document.querySelectorAll('.studio-settings input,.studio-settings select,.studio-settings button')];
     check(controls.length>10&&controls.every(n=>['Retry','Reload saved profiles'].includes(n.textContent)?!n.disabled:n.disabled),
      'All Settings mutation and discovery controls disabled; read-only Retry enabled');
-    details.reloadResponse=entryResponse;await step('beta-reload-required');
-    // Keep the failed-reload UI visible until the host has captured it. This
-    // read-only polling shares the fixed 15 s confirmation cap, never a new save.
-    await wait(async()=> (await call('probe.windowsStudioStep',{step:'beta-reload-observed'})).observed===true);
+    details.reloadResponse=entryResponse;showStatus();await step('beta-reload-required');
+    await wait(async()=> (await call('probe.windowsStudioStep',{step:'beta-reload-observed'})).observed===true,observationMs);
     const beforeRetry=await call('ai.profiles'),start=operations.length;
     await click('Retry');await wait(ready);
     const afterRetry=await call('ai.profiles');
@@ -72,7 +74,7 @@
    await step('beta-saved');
    const replaced=await call('ai.profiles');check(replaced.profiles[0].revision===3&&replaced.profiles[1].revision===2&&replaced.profiles[1].credentialStatus==='configured'&&replaced.cleanup.length===1,'Replacement preserved B and retired only owned A');await discover();
    await click('Remove credential');await wait(()=>ready()&&status()==='Removed; cleanup pending');
-   const removed=await call('ai.profiles');check(removed.profiles[0].disabled&&removed.profiles[0].credentialStatus==='missing'&&removed.profiles[1].credentialStatus==='configured','Removal disabled A and preserved B');await step('removed');
+   const removed=await call('ai.profiles');check(removed.profiles[0].disabled&&removed.profiles[0].credentialStatus==='missing'&&removed.profiles[1].credentialStatus==='configured','Removal disabled A and preserved B');await checkpoint('removed');
    await click('Remove profile');await wait(ready);select(B);await click('Remove credential');await wait(()=>ready()&&status()==='Removed');await click('Remove profile');await wait(ready);
    const final=await call('ai.profiles');check(final.profiles.length===0&&final.cleanup.length===1,'All Windows keys/profiles removed; foreign owned cleanup retained');
   }

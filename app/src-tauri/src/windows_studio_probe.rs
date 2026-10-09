@@ -82,7 +82,7 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
     let evidence = std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
     let observation = step.strip_suffix("-observed").filter(|name| matches!(*name,
         "alpha-saved" | "gamma-saved" | "cancelled" | "beta-reloaded" |
-        "get-1-complete" | "get-2-complete" | "complete"));
+        "get-1-complete" | "get-2-complete" | "reopened" | "removed" | "complete"));
     if observation.is_some() && !evidence { return Err("Windows capture holds disabled"); }
     if observation.is_none() && !matches!(
         step,

@@ -98,7 +98,7 @@ test("opt-in evidence holds each confirmation and records actual client discover
     assert.equal(result.report.passed,true,JSON.stringify(result.report));
     assert.deepEqual(result.holds,phase===1?
       ["alpha-saved-observed","gamma-saved-observed","cancelled-observed","get-1-complete-observed","get-2-complete-observed","complete-observed"]:
-      ["get-1-complete-observed","beta-reload-observed","beta-reloaded-observed","get-2-complete-observed","complete-observed"]);
+      ["reopened-observed","get-1-complete-observed","beta-reload-observed","beta-reloaded-observed","get-2-complete-observed","removed-observed","complete-observed"]);
     const timings=result.report.clientTimings as {actionStarted:number;requestStarted:number;requestEnded:number;completed:number}[];
     assert.equal(timings.length,2);
     for(const t of timings)assert.ok(t.actionStarted<=t.requestStarted&&t.requestStarted<=t.requestEnded&&t.requestEnded<=t.completed);

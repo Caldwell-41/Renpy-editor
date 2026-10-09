@@ -807,7 +807,10 @@ selected loopback endpoint. Prove retained input after refused Save, Retry witho
 retyping, stale-origin refusal/Cancel, durable save/reopen, replacement/removal and
 confirmed-save/reload-required/read-only Retry. Preserve complete profile bytes,
 other profiles and foreign cleanup ownership. Full first-phase proof precedes the
-dependent reopen phase; skipped or partial proof is not full acceptance.
+dependent reopen phase; skipped or partial proof is not full acceptance. The final
+Windows selection reused run 14 across a strictly probe-only rebuild, with unchanged
+production inputs checked and both different binary hashes recorded. Production
+changes require reassessing affected evidence, not automatic reuse.
 
 Use supported Computer Use capabilities, actual returned windows and fresh observation
 after each action. Resolve app access before timed work. Capture actual native state;
@@ -823,6 +826,12 @@ and tool latency. Existing explicit deadlines remain binding until deliberately
 changed; classify late evidence honestly without inferring a product defect.
 Harness repairs and focused rechecks follow the selected outcome's iteration policy.
 Controller/probe scope and operation limits must agree before native execution.
+For the completed Windows phase-2 selection, observation/acknowledgement has its own
+180-second bound within a 1800-second walkthrough cap. Product waits stay 15 seconds,
+native input 120 seconds, GET cleanup 2 seconds. Keep status/controls visible and
+accept original screenshot encodings with hash/size checks; do not require conversion
+solely for the harness. Null/stale accessibility may be supplemented by actual
+screenshots, never by internal assertions standing in for native observation.
 
 Mac signing and temporary credential checks remain in the dedicated sections below
 and [app/README](../app/README.md#macos-local-package-identity). Their current selection

@@ -1,67 +1,77 @@
 # Current outcome handover
 
-## Windows qualification: budget boundary, phase 2 incomplete
+## Windows qualification and synthetic cleanup complete
 
-One serial owner, Local Windows x64; Caldwell-41/Renpy-editor,
-`worktrees/provider-qualification`, branch `codex/provider-qualification`.
-Documentation cleanup/initial evidence holds are published at `00370ac`; corrected
-bridge/controller instrumentation is published and remotely verified at `4698a88`.
-Final evidence documentation follows that checkpoint. Preserve unrelated work.
+One serial owner completed the selected outcome on Local Windows x64 in
+Caldwell-41/Renpy-editor, `worktrees/provider-qualification`, branch
+`codex/provider-qualification`, continuing from published `ecc02c4`. The final
+scoped commit contains probe/controller changes and final records. No further
+qualification operation is pending or required for this selection.
 
-The [current contract and evidence](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
-own scope, counters and failures. **10/10 combined attempts used; none remain.**
-Stop before any further package build or launch. A continuation needs an explicitly
-extended finite allowance and a justified capture-recovery plan; changing chat,
-sequence or root does not reset usage. Do not advance to another feature.
+The [current contract](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+and [final acceptance table](../tasks/active/phase-2-initial-llm-assistance.md#final-windows-acceptance-and-cleanup--2026-10-09)
+own scope, exact hashes, timings, prior failures, cleanup and cumulative accounting.
+The final user amendment allowed two builds/three launches above ten consumed;
+only build 7 and run 16 were used. **12 combined attempts total (5 builds/7 launches)**
+for this task; cumulative Windows history is 7 builds/12 launches. Unused reserve
+is not a new task authorization. Do not repeat passed phases or advance features.
 
-Build 6 passed on `4698a88`: complete input equality, exit 0/PID absent, 258.11 s.
-Package SHA256 `67fd69d2e6bb231c290d67f1270d7c7651fa0cb7ecc8c77f569aa3cdcc796986`.
-Run 14 fully passed phase 1 in 243.87 s, including actual native observations,
-ordered client timings, exact whole-store restoration, two credential presence
-reads, normal exit and external PID absence. Run 15 was correctly gated on that
-complete PASS and used the same package/root, with no intervening input changes.
+Run 14 remains the full phase-1 PASS on build 6. Run 16 passed every outstanding
+native behavior using build 7 and the exact saved run-14 root. The rebuild changed
+only the probe/controller/test inputs and opt-in watchdog block, verified separately
+from the rest of `main.rs`; production credential, Settings and transport code did
+not change. The package hashes differ and `run-16-reuse.json` says so explicitly.
+General cross-build credential continuity is not claimed.
 
-Run 15 failed at `get-1-complete` in 18.08 s, exit 1/PID absent. Probe checks proved
-reopen and one authenticated alpha GET, but they do not replace native observation.
-The first native capture at 6.75–7.22 s returned a JPEG with null accessibility
-despite `include_text:true`; the host text access failed. Its refresh then reported
-`foreground window did not report a process id` after the hold expired. No capture
-acknowledgement, beta input, replacement, removal or reload Retry was dispatched.
-This is a capture/evidence failure; it does not establish a credential product defect.
+Build 7 passed in 56.14 seconds. Run 16 exited normally with code 0 at 344.57 seconds,
+about 0.268 seconds after final release. Ordered native evidence/receipt collection
+completed at 361.00 seconds. Its two authenticated synthetic requests took 9.2/7.5 ms,
+with 96.9/107.4 ms client cleanup. Native masked beta Save was observed in 0.430 seconds.
+Reload failure remained a confirmed Save, all mutation/discovery controls were disabled,
+and one read-only Retry restored configured A without another entry/Save/discovery or
+persisted-byte change. Exact whole-store comparisons preserve B and foreign ownership.
+Native removal showed A missing/disabled before the supported flow removed both profiles.
 
-Final external audit confirmed both run PIDs absent, no loopback listener, and equal
-phase-1-complete/reopened/current store SHA256
-`a26f9b908fc4b3d9480b2768a847e31d5cacd401399ab62f99d6028167622130`.
-No process, server or build remains pending. Native window bindings are invalidated.
+The revised opt-in phase-2 walkthrough separates 180-second observation holds from
+15-second product waits, 120-second native entry and 15-second GET plus 2-second cleanup;
+whole walkthrough cap is 1800 seconds. Phase-1 limits remain unchanged. Original JPEGs
+are accepted, and status/controls are scrolled into view. The first successful native
+capture took 114.84 seconds. A stale accessibility index refused before input; a
+fresh screenshot-coordinate action focused the field. Neither was a product defect.
+A screen captured during transition is retained separately from the final observation.
 
-Private receipts/captures remain under `app/.toolchains/windows-studio-acceptance/`
-and `windows-studio-step3/`. `state-sequence-14.json` owns the latest root;
-`run-14.json` is the full first-phase PASS, `run-14-observed.json` has ordered native
-events, and `run-15.json` plus `run-15-host-partial.json` preserve the failed reopen.
-Original and run-8/10/12 roots remain preserved. Four known synthetic entries remain
-referenced across run-12 and run-14 roots. Do not enumerate unrelated credentials,
-recover uncertain ownership, delete these roots, or silently claim cleanup.
+Cleanup is finished. Pre-removal audit proved old A absent, beta/B present and B/foreign
+metadata unchanged. The controller verified old A, beta and B absent after supported
+removal. Run-12's two leftover entries were deleted separately after exact recorded
+Windows metadata ownership checks, with absence verified and root bytes unchanged.
+Earlier three entries retain their completed absence evidence. No secret blob was
+inspected for diagnosis, unrelated target enumerated/accessed or uncertain owner
+recovered. Foreign metadata was preserved rather than used to address a credential.
 
-If more execution is authorized, first resolve the observed capture failure without
-consuming a package attempt. Computer Use (`node_repl`, `@oai/sky`) remains the only
-native UI route. Use returned windows, fresh observations and one action per refresh;
-skip optional activation. Treat null accessibility as a missing observation and
-account for capture/recovery inside the unchanged 15 s hold. Never acknowledge from
-probe markers alone. Original screenshot encodings and failed receipts stay intact.
-Node subprocess tasklist/OpenProcess cannot inspect the external app: external
-controller exit receipts contain actual PID proof. Fault/restore needs only the
-recorded TEMP/TMP and authorized external execution, not the build environment.
+Private receipts/screenshots remain under `app/.toolchains/windows-studio-acceptance/`
+and `windows-studio-step3/`; they must not be committed or deleted. Key files are
+`state-sequence-14.json`, `run-14.json`, `run-14-observed.json`, `build-7.json`,
+`build-7-terminal.json`, `run-16-reuse.json`, `run-16.json`, `run-16-observed.json`,
+`run-16-reload-observed.json`, `run-16-replacement-audit.json`, `run-16-exit.json`,
+`run-12-scoped-cleanup.json`, and `completion-final-audit.json`. The cleanup script is
+`windows-studio-step3/cleanup-run12.py`. Original run-15 markers were copied intact to
+`run-15-root-markers/` before reuse; all prior failed receipts remain failed. Earlier
+three-entry absence evidence is in `windows-studio/phase-2.json` and
+`windows-studio/local-completion-audit.json`. The run-12 root deliberately retains its
+historical references as failure evidence; those synthetic OS targets are now absent.
 
-Deadlines remain build 1200 s +2 terminate/+2 reap, launch 300 s, entry 120 s including
-fault/restore, confirmation/acknowledgement/Retry/exit 15 s, GET 15 s +2 cleanup.
-No gate or deadline was relaxed. A future phase-2 retry must validate the complete
-run-14 evidence, unchanged package/root and any required fresh-identity controller
-support; the current sequence mapping does not authorize a retry by itself.
+Final external audit verifies owned PID absence, stopped listener, original capture
+hashes and final store SHA256
+`904ccb5e041ba1121fd653359b9f4f1e9a52ae79e45ee38853641acd2760e141`.
+No app/server/build remains pending; native window bindings are invalid. Do not
+reacquire/relaunch an exited app. Focused controller 30, probe DOM 6, TypeScript and
+package verification passed; the initial sandbox TEMP test failure is retained in
+the execution record and resolved using the existing workspace TEMP. Unchanged
+production suites and phase 1 were not repeated. Final documentation/privacy/link
+and whitespace checks accompany publication.
 
-Checks: controller 28, Settings/probe DOM 10, app/test TypeScript PASS. Unchanged
-Rust focused check 1 PASS/15 filtered outside sandbox; sandbox OUT_DIR failure retained.
-Final documentation validation passed for 412 repository files; whitespace passed.
-Initial push was auto-review blocked twice; the user explicitly approved the exact
-repository/branch, after which both implementation publications were verified.
-No installation, real keys/endpoints, generation, security changes, CI, merge/release,
-other-host work or next feature. Windows qualification and full 2A.1 remain incomplete.
+This closes the selected remembered-credential slice only. Full 2A.1, real providers,
+generation, generic/session/no-auth, general update/clean-OS/locked-store coverage,
+other-host work and 2A.2 remain outside this result. Mac's accepted development-file
+storage compromise and deferred native identity are unchanged. No installation,
+security change, CI, merge/release or next feature was performed.

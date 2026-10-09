@@ -3,7 +3,7 @@
 **Scope owner:** Phase 2 requirements, acceptance and the shared delivery sequence;
 [ROADMAP](../../ROADMAP.md) owns phase boundaries. Phase 1 and the bounded nested-source
 foundation are accepted; Phase 2 remains incomplete. Studio settings and credentials
-are implemented with partial native proof. [CURRENT](../../status/CURRENT.md) owns
+are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
 Read the current contract for Windows work, then only the relevant requirement
@@ -19,58 +19,55 @@ not claim the current application already satisfies every interaction.
 
 ## Current Windows qualification contract
 
-**Selected outcome:** prove remembered Studio credentials in packaged Loomlight on
-Windows x64: retained input after refusal, Retry and Cancel, persistence across exit
-and reopen, replacement/removal with foreign ownership preserved, explicit authenticated
-loopback discovery, and confirmed-save/reload recovery. Full 2A.1, real Studio/generation,
-generic/session/no-auth paths and cross-build continuity remain outside this slice.
+**Selected outcome: complete.** Packaged Windows x64 remembered Studio credentials
+are qualified for retained input after refusal, Retry/Cancel, exit/reopen, replacement,
+explicit authenticated synthetic loopback discovery, confirmed-save/reload recovery,
+and supported removal with other-profile/foreign ownership preserved. Scoped synthetic
+cleanup is complete. Full 2A.1, real Studio/generation, generic/session/no-auth paths,
+clean-OS/locked-store and general cross-build continuity remain outside this slice.
 
-**Execution:** one serial owner on the existing `codex/provider-qualification` branch.
-Preparation, relevant checks, review and in-scope harness repairs belong to this outcome;
-they are not separate deliverables. This contract supersedes historical generic
-preparation/publication/preflight stop boundaries. Follow the
-[iteration policy](../../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name).
-The current user goal authorizes opt-in probe timing/capture holds, controller changes,
-in-scope corrections and justified retries within the existing allowance. It supersedes
-fixed run/root/per-action ceilings and controller-only repair restrictions. Resolve
-ambiguous dispatch before retrying; never recover uncertain ownership automatically.
+**Execution and authority:** one serial Local Windows owner on
+`codex/provider-qualification`, continuing from published `ecc02c4`. The final user
+amendment adopted the Astra audit: reuse valid run-14 phase-1 evidence, separate bounded
+observation from application response timing, accept original screenshots, and permit
+a strictly probe-only rebuild. It authorized at most **two additional builds and three
+additional launches** above the ten combined attempts consumed. Completion used
+**one build (7) and one launch (16)**: selected-task totals **5 builds / 7 launches,
+12 combined**. The unused reserve was not exercised; this completed task grants no
+new feature, installation, real endpoint/key, generation, CI, merge/release or host work.
 
-**Current proof and allowance:** corrected build 6 on published `4698a88` and full
-phase 1 run 14 passed. Run 15 used that same package/root after the complete PASS,
-but failed its first native discovery-capture hold. **Ten of ten combined attempts
-are used; none remain.** Full phase 2 remains incomplete. No further build/launch
-may proceed without an explicitly extended finite allowance. Historical partial
-proof and probe-only reopen assertions do not waive required native observations.
+**Evidence reuse:** run 14 remains the full phase-1 PASS on build 6. Build 7 is a
+different binary, not an identical-package claim. The source comparison permits only
+the controller/tests, Windows probe and the opt-in watchdog block in `main.rs`;
+production credential, Settings, transport and persistence logic is unchanged.
+`run-16-reuse.json` records both binary hashes and every changed input. Build 7 and
+run 16 independently passed complete installed/generated/toolchain/environment gates.
+No old manifest or failed result was backfilled. Final documentation changes do not
+change the tested runtime or require another package.
 
-The original roots and run-12/run-14 known saved roots are preserved. Each saved root
-contains its recorded synthetic A/gamma references and complete post-Cancel bytes;
-four known synthetic entries remain referenced. No automatic credential recovery
-or cleanup was performed. Run-15 reopened/current bytes equal run-14 complete bytes.
-No installation, real key/endpoint, enumeration, security/accessibility change, CI,
-merge/release or 2A.2. Mac/provider scopes and historic consumption remain unchanged.
+**Timing and observation:** build 1200 s (+2 terminate/+2 reap); product waits 15 s,
+native entry 120 s, GET 15 s plus 2 s cleanup. Phase-2 observation/acknowledgement and
+post-exit receipt collection each have a separate 180 s bound, inside a 1800 s whole
+walkthrough watchdog. Phase-1 timing is unchanged. Status is scrolled into view;
+original JPEG/PNG/WebP evidence is accepted with exact hash/size checks. Native
+screenshots/accessibility establish visible state; probe assertions supplement them.
+An observation taking longer than a product deadline is not a product timing failure.
 
-**Required evidence:** full phase-1 PASS before phase 2 on the same verified EXE/root;
-complete input provenance, original and reload markers, whole-store/byte and ownership
-checks, actual ordered native observations, client request timing, normal exits and
-external PID absence. Mocks, probe markers and server timings do not substitute for
-native observation or complete client timing. Keep original deadlines: build 1200 s
-plus 2 s termination/2 s reap, launch 300 s, entry 120 s including fault/restore,
-confirmation/capture acknowledgement/Retry/exit 15 s, GET 15 s plus 2 s cleanup.
-These include harness timing; failure is not by itself a product-performance defect.
-No threshold, acceptance assertion or prior failure is waived by this reorganisation.
-
-**Stop boundary:** the allowance is exhausted. The immutable-Tauri observation
-correction worked in run 14. Run 15's missing native capture is a separate evidence
-failure: null accessibility despite requested text, followed by an expired hold and
-failed refresh. No beta entry, replacement/removal or reload recovery was dispatched.
-Further qualification needs a bounded capture-recovery plan and explicit additional
-allowance. Preserve the complete first-phase evidence and all failed attempts.
+**Closure:** run 16 completed every outstanding native behavior and normal exit.
+Run-14 alpha/gamma plus replacement beta are absent after supported removal. The two
+run-12 leftovers were separately deleted only after exact recorded target, service,
+origin/revision-bound comment, owner, type, persistence, flags and attribute checks.
+No enumeration, secret-value inspection or uncertain-ownership recovery occurred.
+Earlier three synthetic entries retain their established absence receipts. All eight
+known created entries are accounted for; failure roots/receipts and foreign metadata
+remain preserved. There is no pending app, build or listener and no required work
+remaining for this selection. See the acceptance table below for exact proof/limits.
 
 ## Windows qualification evidence — 2026-10-09
 
-The active goal authorizes the narrow probe changes and justified repeated synthetic
-scenarios within the same ten-attempt allowance, superseding older fixed identity,
-root and per-action caps. One Local Windows owner; no subagents or other-host access.
+The following preserves the earlier ten-attempt sequence and its failures. The
+completion amendment and final acceptance are recorded below. One Local Windows
+owner; no subagents or other-host access.
 
 | Attempt | Result and authoritative evidence |
 | --- | --- |
@@ -93,19 +90,19 @@ Run 12's renderer/native observations and exact alpha/gamma/Cancel snapshots est
 those partial behaviors, not full phase 1. The controller stopped before presence
 reads when the report failed. Two newly owned synthetic entries remain referenced in
 its preserved root; no uncertain ownership is recovered or unrelated key accessed.
-Final task totals: 4 builds/6 launches (10 combined), 6 server lifetimes, 9 native
+At the earlier boundary, task totals were 4 builds/6 launches (10 combined), 6 server lifetimes, 9 native
 entry dialogues (8 typed sessions including old late run 6), 9 Save submissions
 (4 confirmed, 5 refused), 2 Retry saves, 2 Cancels, 4 GETs, 4 new owned entries,
 2 new presence reads. Cumulative Windows totals including earlier work: 6 builds/
 11 launches, 6 GETs, 7 owned entries created, 7 presence reads. Earlier counters and
-failures remain in history. Four known entries remain across the run-12/run-14 roots.
+failures remain in history. Four known entries remained across the run-12/run-14 roots at that boundary; final cleanup is below.
 
 Run-14 full proof is retained in `run-14.json` and `run-14-observed.json`; failed
 run-15 capture/exit/probe evidence in `run-15.json`, `run-15-exit.json` and
 `run-15-host-partial.json`. Both final PIDs were independently rechecked absent;
 no test listener remained. Phase-1-complete, reopened and current store bytes share
 SHA256 `a26f9b908fc4b3d9480b2768a847e31d5cacd401399ab62f99d6028167622130`.
-No pending app/server/build, changed threshold, extra launch or credential cleanup.
+At that boundary there was no pending app/server/build, changed threshold, extra launch or credential cleanup.
 Final documentation validation passed for 412 repository files; whitespace passed.
 
 Root cause of run 12: Tauri 2.11.5 `scripts/core.js` uses `Object.defineProperty` for
@@ -118,6 +115,62 @@ and reload/Retry observation. The DOM mock now uses the actual immutable descrip
 Focused checks: controller 28 PASS, Settings/probe DOM 10 PASS, both TypeScript
 compilations PASS. Previous targeted Rust 1 PASS (15 unrelated filtered) remains
 valid for unchanged Rust; the initial sandbox OUT_DIR failure is retained.
+
+### Final Windows acceptance and cleanup — 2026-10-09
+
+| Required behavior | Result and evidence |
+| --- | --- |
+| Native Save/refusal/Retry/Cancel and first exit | PASS, reused full run 14 with unchanged production code; no repeated phase-1 scenarios. |
+| Reopen without entry or automatic discovery | PASS, run-14 saved bytes equal reopened bytes; native configured A / not-checked status observed before discovery; both remembered references configured in the native-backed snapshot, no entry or GET before release. |
+| Replace A with beta while preserving B/foreign metadata | PASS, one native masked beta entry and one confirmed Save. Whole-store comparison preserves B and foreign ownership exactly; pre-removal audit proves old A absent and beta/B present. |
+| Explicit authenticated synthetic discovery | PASS, exactly two accepted GET `/v1/models` requests, alpha then beta, each with native model-available observation. Client request times 0.009200/0.007500 s; cleanup 0.096900/0.107400 s. No real provider or project content. |
+| Confirmed Save despite Settings reload failure | PASS, actual saved-success/reload-required message captured. Native accessibility identifies every mutation/discovery field/action disabled and read-only Retry enabled. Confirmation observed 0.430 s after submission. |
+| One read-only Retry | PASS, native configured A restored. Probe operation sequence proves one UI `ai.profiles` read, no additional entry/Save/discovery; before/after snapshots and persisted bytes identical. Supporting inspection reads are separately present. |
+| Supported credential/profile removal | PASS, native A shows missing/disabled and Removed; B snapshot remains unchanged. Supported controls then remove A/B profiles and B credential; final native state is unconfigured. Old A, beta and B exact targets are absent. |
+| Normal exit and stopped listener | PASS, exit 0 at 344.570925 s, approximately 0.268 s after final release; owned window/PID absent. Final external audit confirms no loopback listener. Receipt completion including observation was 360.997468 s. |
+| Run-12 leftovers | PASS, two exact targets verified against recorded fixture and Windows ownership metadata, deleted and verified absent. Original failed root bytes unchanged; no credential values read. |
+
+Build 7 (attempt 11) passed in 56.141596 s, terminal 56.209407 s, exit 0/PID absent.
+EXE SHA256 `98fe719010dd029965401dd09ae7919dcf27b0f45f99aae8bf0b65c10d925fc6`,
+14,853,632 bytes. Installer SHA256
+`c6592b17191afbcb6f1f584d36e87370fc73944a6ba1566a08c115c47244f5df`,
+3,690,870 bytes; installer not run. Run 16 (attempt 12) passed on that package and
+the preserved run-14 root. Final store SHA256
+`904ccb5e041ba1121fd653359b9f4f1e9a52ae79e45ee38853641acd2760e141`.
+
+Original native screenshots and accessibility are retained in `run-16-*-native.json`
+and JPEGs. The first capture took 114.843 s and succeeded within its separate hold;
+later captures took fractions of a second. One stale accessibility index refused
+before input; refreshed screenshot coordinates focused the field successfully.
+The screen-transition captures are retained, not relabelled as final states. These
+are observation-tool issues, not demonstrated credential product defects.
+
+Authoritative private receipts under `app/.toolchains/windows-studio-acceptance/`:
+`build-7.json`, `build-7-terminal.json`, `run-16-reuse.json`, `run-16.json`,
+`run-16-observed.json`, `run-16-reload-observed.json`, `run-16-replacement-audit.json`,
+`run-16-exit.json`, `run-12-scoped-cleanup.json`, and `completion-final-audit.json`.
+The latter verifies original capture hashes and terminal state. Run-15 root markers
+were copied intact to `run-15-root-markers/` before reuse. The exact cleanup script
+is retained privately in `windows-studio-step3/cleanup-run12.py`. Earlier three-key
+absence evidence remains in `windows-studio/phase-2.json` and
+`windows-studio/local-completion-audit.json`; no passed cleanup was repeated.
+
+Additional accounting: 1 build, 1 launch/listener lifetime, 1 native entry/typed
+session, 1 confirmed Save, 1 read-only Retry, 2 GETs, 1 owned entry created; 3 entries
+removed through the product (old A/beta/B), 2 exact leftover deletions. Selected-task
+totals are 5 builds/7 launches/6 GETs; cumulative Windows totals including earlier
+work are **7 builds/12 launches/8 GETs/8 created entries, all removed**.
+
+Focused verification: controller 30 PASS, changed probe DOM 6 PASS, test TypeScript
+compilation PASS, package build PASS. The initial controller check hit sandbox TEMP
+access errors; the corrected existing workspace TEMP rerun passed. No new Rust or
+broad suite was needed for unchanged credential logic. Review confirmed only opt-in
+probe behavior changes, preserved product deadlines/ownership, accurate evidence
+reuse and completed scoped cleanup. Final review removed a leftover controller comparison between screenshot duration
+and request duration; each now has its own deadline. The added regression and
+offline revalidation of run 16 passed (`post-review-check.json`); only controller/tests
+and README changed after build 7, not packaged runtime. Documentation/link/privacy
+and whitespace checks passed. No production defect was demonstrated or fixed.
 
 ## In plain language
 

@@ -769,7 +769,12 @@ fn main() {
                     } else {
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("runtime_ui_probe.js"))).expect("runtime probe injection");
                     }
-                    let limit = if case == "branches-interactive" { 900 } else { 300 };
+                    // Only the opt-in Windows phase-2 walkthrough includes bounded
+                    // operator observations; ordinary application timing is unchanged.
+                    let windows_observation = cfg!(target_os = "windows") && case == "studio-settings"
+                        && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_PHASE").as_deref() == Ok("2")
+                        && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
+                    let limit = if windows_observation { 1800 } else if case == "branches-interactive" { 900 } else { 300 };
                     while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
                     let cleaned = probe_host.shutdown();
                     println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));

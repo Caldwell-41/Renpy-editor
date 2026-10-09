@@ -13,6 +13,32 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_completion_capture_duration_is_independent_of_request_duration(self):
+        names=["reopened","get-alpha","beta-entry","beta-confirmation","reload-required","read-only-retry","get-beta","removed","complete","exit"]
+        events=[dict(name=name,startSeconds=i*20,endSeconds=i*20+0.01,passed=True) for i,name in enumerate(names)]
+        for event in events:
+            if event["name"].startswith("get-"):event.update(requestSeconds=0.1,cleanupSeconds=0.1)
+        observed=dict.fromkeys(["maskedNativeField","exactReloadStatus","allMutationDiscoveryControlsDisabled","readOnlyRetryEnabled","restoredConfiguredA"],True)
+        value=dict(run=16,phase=2,events=events,observed=observed)
+        with patch.object(probe,"COMPLETION_RUN",16):
+            probe.validate_observations(2,value)
+            events[1]["requestSeconds"]=16
+            with self.assertRaises(ValueError):probe.validate_observations(2,value)
+
+    def test_completion_keeps_separate_cumulative_build_and_launch_caps(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(probe,"COMPLETION_RUN",16), patch.object(probe,"OUTPUT",Path(directory)):
+            for n in range(4): probe.write(probe.OUTPUT/f"build-{n}-attempt.json",{})
+            for n in range(6): probe.write(probe.OUTPUT/f"run-{n}-attempt.json",{})
+            self.assertEqual(probe.selected_run(1),14)
+            self.assertEqual(probe.selected_run(2),16)
+            self.assertEqual(probe.state_path().name,"state-sequence-14.json")
+            self.assertEqual(probe.combined_budget_check("build")["combinedAttemptsBefore"],10)
+            for n in (4,5): probe.write(probe.OUTPUT/f"build-{n}-attempt.json",{})
+            with self.assertRaises(ValueError): probe.combined_budget_check("build")
+            probe.combined_budget_check("launch")
+            for n in (6,7,8): probe.write(probe.OUTPUT/f"run-{n}-attempt.json",{})
+            with self.assertRaises(ValueError): probe.combined_budget_check("launch")
+
     def test_fresh_sequence_selects_distinct_full_phases_without_reusing_old_identity(self):
         with patch.object(probe,"SEQUENCE",14),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"REPLACEMENT",True):
             self.assertEqual(probe.selected_run(1),14)

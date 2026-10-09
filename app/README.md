@@ -267,22 +267,14 @@ After a native quit, verify the external receipt/PID and do not call a UI observ
 
 ## Windows native Studio credentials
 
-For the selected qualification, `LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE=1` adds fixed
-15-second capture acknowledgement holds inside the existing 300-second probe cap.
-The host observes the actual native UI before writing the matching phase/step
-acknowledgement file in the isolated fixture root. This selector also records client
-request start/end and cleanup timestamps; markers are never native observation proof.
-The acceptance controller enables it for the prepared runs and rejects absent or late
-client timing. The original beta reload acknowledgement and all original assertions
-remain required. See the current task contract for cumulative attempt authorization.
-
-
 Windows remembered Studio keys use an app-owned modal password field and generic
 Windows Credential Manager entries for the current Windows login. The renderer and
 IPC receive only references/status. Failed saves retain native input for Retry save
-or Cancel; confirmed saves remain successful when old owned cleanup is pending.
+or Cancel; confirmed saves remain successful when old owned cleanup is pending or
+Settings needs a read-only reload. While that reload is required, mutations and
+discovery are disabled; Retry reads the saved configuration without another Save.
 Windows accepts 1–2560 printable non-space ASCII characters; the shared schema's
-4096-character bound is unchanged. Larger input stays in the native dialog for correction.
+4096-character bound is unchanged. Larger input stays in the dialog for correction.
 
 Exact service/profile/credential targets and ownership markers bind entries to their
 origin and revision. Replacement publishes the new reference before retiring the old
@@ -292,67 +284,35 @@ references remain preserved and require explicit Windows re-entry; no Mac key/fi
 operation is attempted. See [ADR 0011](../docs/adr/0011-ai-settings-secrets-and-reference-storage.md)
 and [the data model](../docs/DATA_MODEL.md).
 
-The fixed public fixture is `tests/fixtures/windows-studio-credentials.json`;
-`scripts/windows-studio-credentials.py` records exclusive attempts, package/source
-identity, isolated loopback request counts, native snapshots and external process exit.
-Input uses Windows Computer Use against the actual packaged app. The
-[Windows ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
-owns exact allowance, failed attempts and remaining native proof. Commands do not grant
-new allowance. Source tests: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
-No installer execution, real endpoint, production key or credential enumeration is selected.
-Reuse requires complete saved snapshots, exact terminal marker/envelope/request gates
-and the full input manifest. Old Windows manifests lack eight current inputs and are
-rejected by the corrected reuse gate; retain their exact-binary evidence without
-claiming complete candidate equivalence. See the independent review in the ledger.
+The [selected Windows qualification](../docs/tasks/active/phase-2-initial-llm-assistance.md#final-windows-acceptance-and-cleanup--2026-10-09)
+is complete: run 14 proves phase 1; run 16 proves reopen, replacement, discovery,
+reload recovery, removal and normal exit. All known synthetic credentials are cleaned
+up. Run 16 reused unchanged production-code evidence across probe-only build 7;
+it does not claim the binaries were identical or qualify general cross-build updates.
+Full 2A.1, real providers/generation, generic/session/no-auth and clean-OS/locked-store
+coverage remain outside this selection. No installation or real credential was used.
 
-The [Studio acceptance-gap review](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-records the remaining Windows current-slice blockers: complete candidate inputs, full
-phase-1 entry/alpha-alpha flow, and the confirmed-save/reload-required branch. Mac
-section-15 proof is complete. A proposed one-build/two-launch/four-loopback-GET schedule
-combines Windows reload proof with beta replacement after separately reviewed Windows
-fixture/controller preparation. The [finalized Windows preparation](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
-adds `--acceptance` to the existing runner for exclusive build 3/run 6–7 receipts under
-`.toolchains/windows-studio-acceptance` and a new isolated root. The opt-in Windows
-`LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE=beta-post-save-snapshot-once` selector is armed
-only on phase 2's exact beta replacement. Full run-6 PASS is required; the combined
-phase holds the reload UI for bounded native capture, then makes one read-only Retry
-and continues every original assertion. Complete installed/generated inputs, whole
-stores and action deadlines are rejecting gates. These switches grant no allowance;
-publication and native execution require separate approval. No old manifest is backfilled; the
-existing corrected manifest gate still rejects those legacy packages. Cross-build
-Windows continuity, generic/session-only/no-auth and full 2A.1 remain unqualified.
+The fixed fixture is `tests/fixtures/windows-studio-credentials.json`.
+`scripts/windows-studio-credentials.py` owns exclusive attempts, package/source
+identity, loopback requests, whole-store snapshots and external process exit.
+`--acceptance --combined-attempts 10 --replacement --sequence 14 --completion-run 16`
+was the final selection; these arguments are a record, not permission to replay a
+completed run. Commands refuse reused identities and count cumulative attempts.
+The [contract](../docs/tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+owns authorization and final accounting; [historical failures](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
+remain preserved without repaired/backfilled manifests.
 
-The [Windows native preflight](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-native-inputcapture-preflight--2026-10-09)
-found the supported Computer Use `node_repl`/`@oai/sky` route. Approval retry proved
-keyboard/button input on disposable blank native-editor tabs; an owned JPEG was
-exported offline to PNG. The capture/acknowledgement hold and masked entry remain
-unproved, and the combined native rehearsal exceeded its 120-second limit. Read the
-[prepared host sequence](../docs/TESTING.md#windows-native-preflight-and-prepared-host-sequence)
-before remediation. This is a failed preflight, not native qualification; no build,
-Loomlight launch, acceptance root or credential operation was consumed.
+`LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE=1` records actual client request/cleanup timing.
+For phase 2, each native observation holds for at most 180 seconds, inside an
+1800-second walkthrough cap. Product waits remain 15 seconds; native input remains
+120 seconds and GET cleanup 2 seconds. Phase 1 retains its prior timing. The probe
+scrolls status into view and requires host observation before acknowledgement.
+Original JPEG/PNG/WebP captures are accepted with exact size/hash identity; native
+observations cannot be replaced by probe markers. The opt-in
+`LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE=beta-post-save-snapshot-once` injects only
+the fixed beta post-save reload failure and requires one read-only Retry.
 
-The later [step-3 selection](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09)
-superseded that task's synthetic-preflight prerequisite and selected the actual package
-schedule. Build 3 failed before compilation because the extracted npm `npm.cmd`
-resolved its CLI under an absent directory. The original failure and isolated empty-key
-root remain preserved; no native launch or GET occurred. The external controller now
-uses an owned wrapper calling the pinned Node/npm CLI directly, verifies the actual
-hook version and records exclusive build terminal receipts. These corrections require
-new package proof; no original receipt is repaired and no allowance is renewed.
-
-Under the user's explicit ten-combined-attempt amendment, replacement build 4 passed
-complete input checks and packaging. Original run 6 failed at the native entry deadline;
-late masked input is retained as failure, no Save/GET occurred and run 7 remains blocked.
-The external file-only native clock now rejects expired/terminal input before dispatch,
-and actual exit receipts remain bounded. [The ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09)
-owns exact package hashes, failures, remaining combined attempts and the proposed
-replacement scope; current remembered Studio qualification remains incomplete.
-
-The user approved replacement **build 5/runs 8–9**, one additional isolated root/EXE
-copy and total step-3 native-entry/server-lifetime caps five/three. Use the explicit
-`--acceptance --combined-attempts 10 --replacement` selection. It reserves
-`state-replacement.json`, retains the original state and failed run 6, allows only
-build 5 and phase-1 run 8/phase-2 run 9, and counts the same acceptance attempt files.
-Full run-8 PASS precedes run 9. External reload observations must identify run 9;
-the existing fixture's internal acknowledgement remains logical run 7. This adapter
-does not relabel any old launch. Other operation caps and deadlines remain unchanged.
+Focused controller checks: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
+Use an accessible workspace TEMP on restricted Windows hosts. Native entry/capture
+uses supported Computer Use with actual returned windows and fresh state. No native
+credential enumeration, diagnostic secret-value reads or automatic ownership recovery.

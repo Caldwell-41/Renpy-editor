@@ -1,6 +1,6 @@
 # ADR 0011: AI settings, secrets and reference storage
 
-**Status:** Accepted design with selected temporary Mac development file-store exception; implemented locally with bounded synthetic packaged Mac qualification passed. Windows/both-target qualification incomplete.
+**Status:** Accepted design with selected temporary Mac development file-store exception; implemented with bounded synthetic packaged Mac and Windows remembered-credential qualification passed. Full 2A.1/both-target provider qualification remains incomplete.
 **Date:** 2026-10-07.
 **Authority:** on 2026-10-08 the user supplied the development credential implementation prompt, selecting source/docs and focused synthetic tests only. A subsequent explicit allowance selected the bounded native fixture, now passed; publication remains separate. The earlier user selected project-local prompts, native references with basic
 scope/notes, localhost/LAN/HTTPS and adaptive helpers; accepted the omission/credential

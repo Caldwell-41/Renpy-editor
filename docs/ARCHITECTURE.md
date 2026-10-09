@@ -38,7 +38,8 @@ profile writes have recoverable ordering, not cross-store atomicity. Request cod
 injects authentication; renderer IPC carries opaque references/status only. Prompts,
 reference prose and raw replies stay out of routine diagnostics and game builds.
 The broader design remains planned; the selected remembered Studio slice below is
-implemented on Mac and Windows, with current-slice native acceptance incomplete.
+implemented on Mac and Windows, with selected synthetic remembered-credential
+qualification complete; full 2A.1 and real-provider acceptance remain incomplete.
 The Studio-scoped accepted [request/credential/transport contract](adr/0013-provider-request-and-transport-contract.md)
 adds concrete origin binding, immutable send snapshots, schema/tool rejection and
 cancellable bounded transport. Its isolated deterministic spike is not production
