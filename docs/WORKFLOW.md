@@ -160,19 +160,27 @@ qualification. Keep failed statuses and all relevant measurements on their real 
 
 ### 5. Budget the problem, not the checkpoint name
 
-Keep one compact problem record in the active task ledger: problem ID, hypothesis,
-classification/evidence, attempted corrections and results, cumulative builds/launches/
-CI runs, and next discriminating action. Preserve tighter user-selected caps and
-record available elapsed/cost information honestly; do not invent usage measurements.
-Default: after two unsuccessful correction attempts at the same hypothesis, stop
-repeating it and reassess requirement, test validity and implementation layer. Chat,
-agent, branch, checkpoint or host changes do not reset the problem's totals or grant
-new allowance. A changed hypothesis must cite new evidence and still fit the approved
-scope and remaining budget; broader work or exhausted caps require a new decision.
-This is not two automatic retries: existing no-retry/no-duplicate rules still apply.
-Unresolved genuine failures remain blocking, not waived at the attempt limit. Do not
-reopen a closed finding without a relevant changed input or new evidence. Reuse the
-existing ledger; do not introduce a tracking service or heavyweight approval system.
+For implementation and qualification tasks, select one observable outcome and a
+finite iteration allowance covering preparation, focused checks, in-scope repairs
+and justified retries. Routine steps within that allowance need no separate approval.
+Keep necessary cost, credential, external-effect and recovery boundaries explicit;
+avoid per-step permission gates for ordinary disposable-fixture work. New attempt
+identities preserve evidence without resetting consumption.
+
+Keep one compact current record: outcome, failure classification/hypothesis, decisive
+evidence, cumulative usage, remaining allowance and next action. Retain detailed past
+attempts in linked history. After two unsuccessful corrections of the same hypothesis,
+reassess the requirement, test validity and implementation layer before continuing.
+A changed approach needs evidence and must fit the same scope and allowance. Repeat
+checks only for changed inputs, a correction or unresolved evidence. Do not reopen a
+closed finding without a relevant change or new evidence.
+
+Stop for exhausted allowance, unavailable capability or a material scope/safety
+decision. Existing explicit user restrictions remain binding until superseded;
+this policy does not renew old no-retry selections or permit ambiguous redispatch.
+Reconcile conflicting task limits once when selecting an outcome. Chat, host, branch
+or checkpoint changes never reset totals; missing proof remains missing. Use the
+existing task record, not another approval or tracking system.
 
 ### 6. Make policy and executable gates agree
 

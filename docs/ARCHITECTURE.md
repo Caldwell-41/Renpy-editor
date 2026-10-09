@@ -79,8 +79,8 @@ refusing exactly one response read. Reads, Cancel, failed Save and mismatches ne
 consume it. A bounded host capture acknowledgement holds the disabled UI before one
 read-only Retry; the original phase assertions then continue. The Windows target
 branch remains natively unproved. The
-[acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-maps the remaining proof; the [finalized preparation schedule](tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+[acceptance-gap review](tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+maps the remaining proof; the [finalized preparation schedule](tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
 owns source checks and separate publication/native approval. Mac selector, storage,
 entry callbacks, transaction behavior and signing policy are unchanged.
 
@@ -108,14 +108,14 @@ file-generation records have explicit downgrade limits. Signing gates remain int
 need separate approval. No plaintext API-key fallback, session mode, generic provider or
 generation is exposed. Bounded synthetic packaged Mac qualification passed for retained
 native input, recovery and reuse across two builds; source tests alone do not qualify those paths.
-[The development ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-development-file-storage-implementation--2026-10-08)
+[The development ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#mac-development-file-storage-implementation--2026-10-08)
 owns actual proof, preserved failures and its limits.
 
 Windows accepts shared v2 records while keeping native entry serialization unchanged.
 Mac file references remain unavailable and owned on Windows; explicit new native entry
 can replace them, with unsupported old-file cleanup reported pending. No automatic file
 migration, Mac key access or generation deletion. The
-[Windows ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+[Windows ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 owns its separate packaged qualification.
 
 `ai_discovery` sends one explicit authenticated `/models` GET, with a 15-second
@@ -127,7 +127,7 @@ retries are disabled. Network work runs outside the project service checkout, so
 does not own the authoring/Save lock. Availability evidence is transient and bound
 to the full saved configuration/credential revision; stale results are discarded.
 Discovery does not qualify generation or maximum context capacity. The
-[Mac implementation ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
+[Mac implementation ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#mac-implementation-and-native-proof--2026-10-08)
 owns actual proof, budgets and remaining Windows/OS identity limitations.
 
 ## System boundaries

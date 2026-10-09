@@ -772,275 +772,61 @@ authorize a production dispatch during Q1-PREP.
 
 ## Result recording
 
-For the selected 2A.0 contract spike, run
-`python3 -m unittest discover -s spikes/provider-qualification/tests -v`, repository
-validation and whitespace/link/privacy checks. These offline fixtures do not qualify
-an actual provider or production/native credentials. The [existing 2A.0 ledger](tasks/active/phase-2-initial-llm-assistance.md#25-provider-qualification-ledger--2026-10-07)
-owns explicit endpoint/model access, finite live probes and separate unknown results;
-no native build, SDK run or CI dispatch is required for this outcome.
+Record command, candidate/input identity, OS/toolchain, case results, failures/skips
+and evidence limitations in the owning task. A green job or passing source tests do
+not replace required native proof. Separate product defects, harness failures and
+missing evidence. Budgets and current run identities belong in the selected task;
+past attempts belong in its linked history.
 
-The first Studio 2A.1 remembered-profile slice uses
-`cargo test -p loomlight-core --locked ai_`, desktop checks/tests and `npm run check`.
-The core selector retains record/external-write/endpoint tests and adds native-store
-failure seams, durable staging, publish-before-retire, disable-before-delete,
-post-rename reconciliation, retained cleanup and strict discovery parser boundaries.
-`node tests/studio-settings.browser.mjs` exercises actual Settings controls with a
-mock bridge: no default discovery, explicit saved actions, invalidation, secret-free
-payloads and both themes/wide/compact screenshots. This is browser evidence only.
-The explicit packaged `studio-settings` probe uses a disposable application-data root
-and native secure-entry actions, then a second process reopens it and checks explicit
-production discovery/removal. The historical Mac qualification-reuse seam is now deferred without native-store
-calls; its old receipts remain evidence, not a route for importing credentials.
-Keep native access prompts separate from unavailable-store controlled fixtures;
-do not change login Keychain security to manufacture a passing test.
-The [Mac slice ledger](tasks/active/phase-2-initial-llm-assistance.md#mac-implementation-and-native-proof--2026-10-08)
-owns actual launches, failures, two builds/two targeted runs per OS and four combined
-Studio GET caps. The Windows adapter/entry implementation and focused source gates
-now exist locally; its [Windows continuation ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
-owns exact native outcomes and amended caps. Native proof includes retained-field
-Retry/stale refusal and a passed separate reopen/replacement/removal/discovery phase.
-The separately approved zero-GET targeted failed-save Cancel check passed after the
-earlier entry-step tool timeout; all failed receipts remain failed. The unchanged
-Save-expecting full-flow probe rejects Cancel, while a separate host gate proves
-only the selected Cancel status, retained input, exact bytes and zero requests.
-Original full entry-flow completion is not claimed. No generation,
-CI, SDK or full matrix is selected; no automatic retry or allowance renewal at handoff.
-
-Windows fixed-fixture gates use
-`python -m unittest discover -s app/scripts -p test_windows_studio_credentials.py -v`
-from the repository root, plus actual Settings DOM/controller tests included in
-`npm run check`. They reject missing/wrong native references, changed foreign cleanup
-or other profiles, zero/skipped/failed/missing native report markers, wrong request
-labels/routes/methods, excess GETs, inconsistent report envelopes, incomplete saved
-snapshots and changed packaged inputs. Partial reuse requires the exact failed marker
-set and complete alpha/gamma stores; it never accepts Cancel or the failed full flow.
-Only the external host runner may change without rebuilding; both original/current
-runner hashes are recorded. The manifest includes package/build/toolchain/frontend
-entry configuration, custom permissions and optional public/.cargo inputs as well as
-runtime/probe/dependency files. Missing required manifest entries refuse reuse.
-The [acceptance-gap review](tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-owns the current-slice gate mapping and proposed complete Windows schedule. Preparation
-must retain full phase-1/2 assertions, add Windows replacement/reload-required proof,
-complete input/dependency inventories and whole final-store checks. It requires
-separately reviewed fixture/controller work before native approval. The
-[prepared Windows schedule](tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
-adds opt-in build 3/run 6–7 in a distinct receipt/root namespace, preserving exhausted
-historical identities. Full run-6 PASS, exact package/root bytes, normal exit and external
-PID absence are prerequisites for run 7; partial-entry reuse is forbidden there.
-The Windows beta snapshot seam, capture acknowledgement, all original markers plus
-three reload/Retry markers, whole final revision/foreign/active-generation store and
-byte comparisons reject missing proof. Captured action order and cumulative entry,
-confirmation/GET/exit deadlines are required. Installed Node bytes, locked Cargo archive
-and installed-file checksums, resolved features, compiler/SDK/environment and generated
-inputs supplement the independent source inventory; optional absence and all permission
-TOMLs are mandatory, including three explicitly required permissions even if absent
-from both the actual tree and submitted manifests. Fault/restore output collisions
-refuse before native inspection or profile mutation. Reload Retry requires exactly
-its one `ai.profiles` request plus the probe's read-only comparison request; enabling
-controls without a read is rejected by a DOM counterexample. No review-only package
-matrix or current allowance renewal.
-Historical Windows build-1/2 manifests omitted eight current inputs; those receipts
-prove their exact binaries and recorded subset, not complete candidate equivalence.
-Do not backfill old manifests with current hashes or waive the corrected reuse gate.
-The [independent review](tasks/active/phase-2-initial-llm-assistance.md#windows-independent-review-and-publication-checkpoint--2026-10-08)
-records that limitation without renewing exhausted budgets. These tests do not substitute
-for native retained input, Credential Manager storage or full process reopen.
+For provider contract changes, use
+`python3 -m unittest discover -s spikes/provider-qualification/tests -v`.
+For the remembered Studio slice, select relevant `ai_` core and desktop checks plus
+`npm run check` from `app/`. `node tests/studio-settings.browser.mjs` proves Settings
+controls with a mock bridge, not native storage. These fixtures do not qualify a
+real provider or authorise credential/network access.
 
 ### Windows native preflight and prepared host sequence
 
-The [2026-10-09 preflight ledger](tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09)
-owns actual attempts and the failed readiness decision. The finalized schedule above
-retains its assertions and deadlines. The later [step-3 selection](tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
-explicitly superseded that prior task's synthetic-preflight prerequisite and step-3
-ban; the failed preflight remains failed. Build 3 was then consumed by an npm-wrapper
-failure before compilation, with no package or native launch. No retry is authorized
-by these command references. Discovery of a supported API is distinct from permission for an
-app, a targetable masked field, and timely owned capture/acknowledgement. Browser/DOM
-checks cannot establish any of these native gates. Remediation must establish them
-without consuming a qualification build/launch or renewing cumulative budgets.
+Use the [current Windows contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+for selected operations, remaining allowance, actual readiness and next action.
+[Windows commands](../app/README.md#windows-native-studio-credentials) and the existing
+controller own executable routes; check their actual arguments before dispatch.
+The [historical runbook](tasks/archive/2026-10-09-phase-2-execution-history.md#historical-qualification-runbook)
+preserves earlier exact sequences for lookup, not automatic replay.
 
-Use the Computer Use skill's `node_repl` import of `@oai/sky`, returned unique windows,
-and observe/one-action/refresh cells. The form's PowerShell-owned window was not returned
-by the native API. The skill prohibits controlling terminal applications; do not try
-to operate them even when they own a disposable form.
-No shell, Win32 or UIAutomation input/capture workaround, installation or security/
-accessibility configuration change is selected. App approval must complete before a
-timed action. After an input, a snapshot can precede its UI effect; require the actual
-result before recording success or acting again. Retain denied/ambiguous attempts.
+Focused host gates run from the repository root with
+`python -m unittest discover -s app/scripts -p test_windows_studio_credentials.py -v`.
+They must reject missing/wrong markers, native references, foreign ownership changes,
+incomplete stores, incorrect request labels/routes, excess operations and changed or
+incomplete packaged-input inventories. Keep meaningful rejecting cases when changing
+the harness. Verify the actual npm/Tauri wrapper route before a package build; a
+direct CLI version check alone does not establish wrapper readiness.
 
-On this host screenshots are `data:image/jpeg;base64`, not PNG. Save the returned
-owned bytes for evidence; resolve the bundled workspace Python via
-`load_workspace_dependencies` and use its existing Pillow for PNG encoding. System
-Python lacks Pillow and `sharp` import in `node_repl` failed; neither is the chosen
-encoding route. Saving/exporting for evidence does not require another native snapshot.
-Prestage the encoder and file route, then rehearse capture, visual acknowledgement and
-exclusive receipt publication together under 15 seconds. Offline conversion of an
-older capture proves only file encoding. Do not acknowledge uninspected or stale UI.
+Native qualification uses disposable profile data, public synthetic values and the
+selected loopback endpoint. Prove retained input after refused Save, Retry without
+retyping, stale-origin refusal/Cancel, durable save/reopen, replacement/removal and
+confirmed-save/reload-required/read-only Retry. Preserve complete profile bytes,
+other profiles and foreign cleanup ownership. Full first-phase proof precedes the
+dependent reopen phase; skipped or partial proof is not full acceptance.
 
-**Prepared toolchain route:** from repository root, Python 3.13.15 is the controller;
-bundled Node is 24.19.0. Existing npm CLI 11.9.0 is at
-`../../repo/.toolchains/npm-11.9.0/package/bin/npm-cli.js` (from `app/`, add one `..`).
-Use Node to invoke this CLI, not an unavailable/default `npm` command. Set the
-process-local `LOOMLIGHT_WINDOWS_NPM_CLI` to its resolved path and prepend its existing
-CLI route using the controller's owned `.toolchains/windows-studio-acceptance/npm-hook`
-wrapper for Tauri's npm before-build hook. **Do not prepend the extracted npm
-`package/bin` directory:** its `npm.cmd` expects `bin/node_modules/npm`, which is absent.
-The direct CLI version command did not test that wrapper and build 3 failed there.
-`configure_npm_hook` writes fixed Node/CLI paths, refuses differing existing bytes,
-verifies the actual `npm --version` resolution, and freezes the wrapper digest and
-process-local PATH. This creates no installation or persistent environment change.
-Tauri entry is
-`app/node_modules/@tauri-apps/cli/tauri.js`, version 2.11.4. Existing workspace
-`.tools/cargo/bin` shims plus `.tools/rustup`, pinned
-`RUSTUP_TOOLCHAIN=1.90.0-x86_64-pc-windows-msvc`, and no-update check provide Rust/Cargo
-1.90.0. Import only the existing MSVC x64 developer environment (14.50.35717, SDK
-10.0.26100.0); no installer or persistent environment changes. Future qualification
-must resolve a new isolated target directory, never the historical target, and prove
-the complete installed/generated/environment inventory equal before/after build and
-before launches. This preflight verified versions and source checks, not a new package
-or compiler/SDK build. New build attempts record their command and monotonic start
-before dispatch and an exclusive terminal receipt even on failure; launch requires
-complete build exit/PID proof. Build 3 predates that fix: its missing original
-PID/elapsed/terminal proof remains missing, and no receipt is backfilled. Preserve
-the process return code when redirecting controller output; a final log-display
-command must not mask failure. Private absolute routes stay in ignored evidence.
+Use supported Computer Use capabilities, actual returned windows and fresh observation
+after each action. Resolve app access before timed work. Capture actual native state;
+probe assertions and saved stores cannot stand in for an observed field or confirmation.
+Keep source/installed/generated/toolchain/environment manifests, exact binary hashes,
+exclusive attempt/terminal receipts and actual exit/PID evidence. Preserve original
+captures; record any encoding conversion. Never backfill missing old build inputs with
+current hashes or synthesize observation/timing receipts.
 
-**Future commands, references only; separate native approval required.** Working
-directory is `app/`; `python` denotes the verified controller interpreter. Never run
-these during preflight. Each launch runs in its owned external command session while
-the serial owner performs native actions; do not wait for launch completion before
-controlling its UI. Reserve outputs before dispatch and keep original evidence.
+Client timing must cover the actual request and cleanup; server arrival/response
+timing alone is insufficient. Distinguish application latency from approval, capture
+and tool latency. Existing explicit deadlines remain binding until deliberately
+changed; classify late evidence honestly without inferring a product defect.
+Harness repairs and focused rechecks follow the selected outcome's iteration policy.
+Controller/probe scope and operation limits must agree before native execution.
 
-```text
-python scripts/windows-studio-credentials.py prepare --acceptance
-python scripts/windows-studio-credentials.py build --acceptance --build 3
-python scripts/windows-studio-credentials.py launch --acceptance --phase 1 --run 6 --build 3
-python scripts/windows-studio-credentials.py corrupt --acceptance --step alpha
-python scripts/windows-studio-credentials.py restore --acceptance --step alpha
-python scripts/windows-studio-credentials.py corrupt --acceptance --step cancel
-python scripts/windows-studio-credentials.py restore --acceptance --step cancel
-python scripts/windows-studio-credentials.py launch --acceptance --phase 2 --run 7 --build 3
-python scripts/windows-studio-credentials.py confirm-reload --acceptance
-```
-
-Run 6 sequence is initial missing-key/zero-discovery observation; alpha entry/input,
-current-marker unreadable-record fault; Return once; capture retained masked field/
-refusal; exact restore and restoration receipt; Return Retry without retyping; capture
-confirmation/whole expected store; gamma entry/Save/confirmation; A replacement input,
-current-marker stale-origin fault to unused loopback 46083; Return refusal, capture;
-exact restore, record restoration, Escape Cancel; equal complete pre-Cancel/gamma
-bytes; alpha/alpha GETs; every original phase-1 marker; exit 0/PID absence and exactly
-two presence reads. Fault/restore never reset the whole entry clock. Use Return/Escape
-on observed current focus, not guessed indexed Save/Cancel buttons.
-
-Run 7 requires **full run-6 PASS**, complete root/package byte equality, exit 0 and
-external PID absence. Reopen both configured with no entry/discovery; alpha GET; beta
-entry/one Save; confirmed publication then exact reload-required status, all fields/
-choosers/mutation/discovery disabled and read-only Retry enabled. Capture before Retry;
-write the reload observation; acknowledge with `confirm-reload` within the fixed hold;
-one read-only Retry, unchanged persisted bytes/configured A/restored controls; beta
-GET; remove A key/profile preserving B, then B key/profile preserving exact whole
-foreign/active-generation metadata and revision-14 store. Require all original and
-three reload markers, exit 0/PID absence and exactly three owned absence reads.
-
-Use host-local exclusive `run-6-observed.json`/`run-7-observed.json`. Run-6 ordered events:
-`alpha-entry`, `alpha-refusal`, `alpha-retry`, `gamma-entry`, `gamma-confirmation`,
-`cancel-entry`, `stale-refusal`, `cancel`, `get-alpha-1`, `get-alpha-2`, `exit`.
-Run-7 events: `get-alpha`, `beta-entry`, `beta-confirmation`, `reload-required`,
-`read-only-retry`, `get-beta`, `exit`. Required observed booleans are defined exactly
-by `validate_observations`; never
-prepopulate success. `startSeconds`/`endSeconds` are Python `time.monotonic()` relative
-to the launch receipt's `startedMonotonic`, not Node's process-relative clock or UTC.
-Prestage a file-only bridge to the controller clock; record starts before dispatch and
-ends after confirmed results. Required GET subdurations are request <=15 seconds and
-cleanup <=2 seconds. Native capture must substantiate each observed field/status.
-
-During `beta-reload-required`, record a start before native capture, encode the owned
-PNG into the acceptance output with exclusive creation, inspect actual status/control
-state, hash/size it and the exact `.studio-windows-2-beta-reload-required.json` snapshot,
-then exclusively write `run-7-reload-observed.json`: run 7, phase 2, exact fixture
-`saveStatus`, `controlsDisabled:true`, `retryEnabled:true`, `profilesSha256`, relative
-start/end and `captures:[{file,sha256,bytes}]`. Capture filenames must be direct output
-children with owned PNG bytes. Run the acknowledgement command immediately; its live
-PID/current marker/deadline/hash/size checks and exclusive root receipt remain required.
-Never derive native observation booleans from DOM tests. Audit original receipts/images
-after confirmed stop; no reacquisition of an exited UI.
-
-**Blocking limits:** build 1200 seconds +2 termination/+2 reap; whole launch 300;
-whole entry 120 including fault/restore; confirmation/capture acknowledgement/Retry/
-exit 15; GET 15 +2 cleanup, all inside the whole caps. Missing/wrong/skipped/failed/
-late evidence fails. No partial resume, exploratory/observer/third launch, second build,
-automatic retry, installer, real endpoint/key, generation, enumeration, CI or budget
-reset. Ambiguous dispatch consumes its reserved identity. Preserve failed receipts,
-logs, faults/backups, snapshots and possibly created credentials/root; interrupted or
-unknown ownership needs a specific recovery decision before store actions.
-
-Planning targets (not measured native PASS): run 6 entry envelopes 70+35+70 seconds,
-two GET envelopes 34, exit 15 and other observations 26 =250 seconds; run 7 beta
-envelope 70, GETs 34, hold/Retry 30, removal/observations 40 and exit 15 =189 seconds.
-Actual preflight did not prove those targets, whole native entry timing, or the 15-second
-hold. The user's later step-3 selection superseded the synthetic-preflight prerequisite;
-qualification remains incomplete after build 3 failed. The later explicit ten-combined
-build/launch allowance counts failed build 3 as the first step-3 attempt and preserves
-historical usage. Use `--combined-attempts 10` on the selected replacement build 4 and
-original runs 6/7 (with `--build 4`); do not repeat prepare or build 3. The controller
-rejects ten consumed acceptance attempt files and retains fixed launch identities.
-Keep all native-operation/GET caps, assertions, deadlines and recovery rules.
-
-Original run 6 subsequently failed at alpha-entry timeout, including late masked
-input at 122.6991984 s. Its exit-1/PID-absence/empty-key-root receipts remain preserved;
-run 7 is blocked and no partial reuse is selected. Call the file-only controller
-`native-clock --acceptance --combined-attempts 10 --run 6 --entry-start-seconds 0`
-immediately before every supported native input, with an entry start recorded before
-actual dispatch. Initial entry may conservatively use launch-relative zero. A terminal
-run or expired/invalid clock refuses input; never reacquire an exited UI. Initialize
-state variables before deferred helpers and forward the owned images for inspection.
-The external controller awaits the host's actual exit receipt only within the existing
-15-second exit/300-second whole caps; no missing observation is synthesized. New
-launch/root identities and any increased native-entry cap need explicit selection.
-
-The user subsequently approved build 5 and replacement runs 8–9, one additional
-isolated root/EXE copy and total native-entry/server-lifetime caps five/three. Add
-`--replacement --combined-attempts 10` to the acceptance commands: `prepare` creates
-only `state-replacement.json`, `build --build 5` uses a new target/copy, phase 1 uses
-`--run 8 --build 5` and phase 2 uses `--run 9 --build 5`. The same output namespace
-counts all consumed build/launch attempts; failed build 3/build 4/run 6 stay intact.
-Fault/restore/native-clock/reload acknowledgement use this same explicit selection.
-Full run-8 PASS is mandatory before run 9; no run-6 reuse or partial entry.
-External observations/captures use run 8/9 filenames and identities. The unchanged
-fixture acknowledgement payload retains logical run 7, separately from the physical
-run-9 receipt. Saves five, Cancel one, read-only Retry one, GETs four, newly owned
-entries three and fixed presence reads five remain unchanged, as do all deadlines.
-
-Before dispatch, distinguish native capture from probe-only evidence. The current
-probe immediately advances after alpha/gamma Save and Cancel, and automatic GETs
-have no client start/end timing markers. A server arrival/response duration cannot
-be reported as the complete client request duration, and saved-store files cannot
-stand in for a native confirmation capture. Narrow opt-in probe timing markers and
-bounded confirmation capture holds are a proposed correction requiring source-scope
-selection; they must retain every original route/assertion/count/deadline. No success
-receipt may be synthesized to bridge this evidence gap.
-
-The later [Mac identity outcome](tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08)
-has a separately approved 2-build/4-launch/8-loopback-GET cap and per-step confirmation.
-Its Step 1 checks are the same focused `ai_` core selector, desktop tests, `npm run check`,
-`python3 -m unittest discover -s app/scripts -p test_macos_package.py -v` from the repository
-root, formatting, repository validation and whitespace review. These cover legacy/current
-service ownership, retained cleanup, unchanged legacy record serialization, non-looping
-access-error UI and rejecting identity assertions. They neither access live Keychain
-items nor prove prompt-free runtime access. Do not run live locked-Keychain exercises.
-Mac release compilation now refuses an absent/unpinned/ad-hoc signing selector; existing
-unconfigured Mac package CI cannot be treated as runnable/passable. No CI is selected.
-Use [the signed local build route](../app/README.md#macos-local-package-identity) only after
-the applicable approval. It checks actual bundle and installer contents; native proof
-must still verify exact launched path, app-owned synthetic creation, repeat reads/GETs,
-full exit/reopen, replacement/deletion and two different signed executables at one stable
-installation path. The old cross-helper import must not be reused for this proof.
-
-Spike and CI results record exact command, OS/architecture, dependency and SDK
-versions, fixture revision, outcome, timings where relevant, and known exclusions. A
-green Linux-only test cannot close a Windows/macOS criterion. Flaky tests are defects
-to isolate and fix, not gates to retry indefinitely.
+Mac signing and temporary credential checks remain in the dedicated sections below
+and [app/README](../app/README.md#macos-local-package-identity). Their current selection
+and recovery decisions belong to their owning task; Windows work grants no Mac runs.
 
 ## Initial performance hypotheses
 
@@ -1402,7 +1188,7 @@ deliberate wrong-outcome case must actually fail its expected dialogue assertion
 Synthetic DOM input is distinct from physical native keyboard/human acceptance. No
 production matrix or specialist exercise is selected by this case. A supported-target
 proof remains necessary on both Windows x64 and macOS ARM64; current allowance/results
-belong in the [owning ledger](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).
+belong in the [owning ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07).
 
 
 The manual `quality.yml` input `source_foundation_macos` isolates the approved
@@ -1495,9 +1281,9 @@ Cancel compares the complete persistent snapshot, not just profile metadata.
 These checks cannot qualify AppKit secure-input retention, permission behavior in the
 actual packaged app, full process quit/reopen or reuse after replacement with a different
 build. Those paths now have separate actual packaged evidence from the approved
-public synthetic fixture; [the result ledger](tasks/active/phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+public synthetic fixture; [the result ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
 records exact counts, retained preflight/observer failures and limits. The
-later [independent review](tasks/active/phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
+later [independent review](tasks/archive/2026-10-09-phase-2-execution-history.md#mac-development-independent-local-review--2026-10-08)
 corrected the reload-required pending message. Old packages do not qualify that changed
 response branch; its current evidence is source/DOM only. The prepared targeted native
 proposal grants no operations; its reviewed deterministic isolated snapshot-read selector

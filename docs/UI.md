@@ -1104,4 +1104,4 @@ the group, including Otherwise and intervening trivia. Root insertion before or 
 the complete group stays available.
 The preview remains partial and does not choose or execute a branch. Full condition
 authoring and group operations remain Phase 3 work. Local implementation and target
-evidence are tracked in [Phase 2 section 23](tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).
+evidence are tracked in [Phase 2 section 23](tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07).

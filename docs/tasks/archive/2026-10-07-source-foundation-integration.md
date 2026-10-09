@@ -12,7 +12,7 @@ work or release was selected or started.
 Fresh refs confirmed base main `aba200fe60bc6d49db24bcf5e6897dbeb2a5b410`, clean
 implementation checkout and no existing foundation PR. One owner, no helper assignment.
 Reviewed the final main delta against the recorded independent review in
-[Phase 2 section 23](../active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07).
+[Phase 2 section 23](2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07).
 Root move/reorder and insertion guards retain the reviewed structural boundary;
 the EOF separator correction anchors the preceding child's range/hash to its existing
 ID. Dedicated revision/owner-bound child edits retain minimal quoted-token patches,

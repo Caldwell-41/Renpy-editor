@@ -2,7 +2,14 @@
 
 **Updated:** 2026-10-09. Windows remembered Studio qualification remains **failed/incomplete**. Replacement build 4 on published candidate `841cd02bf0f2f169d190dd40dc72279c32750836` passed complete input equality and packaging in 202.23 s. Original run 6 failed at alpha-entry timeout: exit 1 at 123.72 s, external PID absent. Masked input at 122.70 s was late; no Save, fault/restore, Cancel, Retry, GET or owned credential creation occurred. Run 7 was not dispatched because full run-6 PASS is required.
 
-The user approved replacement build 5/runs 8–9, one additional isolated root/EXE copy and total native-entry/server-lifetime caps five/three under the existing ten combined attempts. The second root and guarded controller selection are prepared; **26 controller checks PASS**. This task still has **3/10 used, seven remaining**. No replacement build/launch has occurred: the original probe immediately advances confirmations and lacks client GET timing markers, preventing honest ordered capture/timing receipts. A narrow opt-in probe evidence correction is awaiting an explicit source-scope decision; other assertions, counts and deadlines stay fixed. [The step-3 ledger](../tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09) owns approval, evidence and preserved failures. [HANDOVER](HANDOVER.md) owns the continuation.
+The active goal now authorizes opt-in probe timing/capture holds and in-scope fixes,
+including justified fresh identities/roots and scenario repetitions under the same ten
+combined attempts. **3/10 used, seven remaining**. Supported Computer Use discovery
+and the actual pinned npm/Tauri hook route are verified. The probe correction has
+27 controller and 10 focused Settings/probe DOM passes; native acceptance is still
+unproved. The approved documentation simplification is preserved for review/publication.
+[The current Windows contract](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+owns scope; [HANDOVER](HANDOVER.md) owns continuation. No additional package/launch.
 
 | Capability | Proof / disposition |
 | --- | --- |

@@ -751,7 +751,8 @@ fn main() {
                         #[cfg(target_os = "windows")]
                         if let Some(phase) = windows_phase {
                             let reload = std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE").is_some();
-                            main.eval(&format!("window.__loomlightWindowsStudioPhase = {phase}; window.__loomlightWindowsReloadProof = {reload};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("windows_studio_probe.js"))).expect("Windows Studio probe injection");
+                            let evidence = std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
+                            main.eval(&format!("window.__loomlightWindowsEvidence = {evidence}; window.__loomlightWindowsStudioPhase = {phase}; window.__loomlightWindowsReloadProof = {reload};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("windows_studio_probe.js"))).expect("Windows Studio probe injection");
                         } else {
                             main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
                         }

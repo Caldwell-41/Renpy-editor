@@ -177,7 +177,7 @@ guidance in [TN2206](https://developer.apple.com/library/archive/technotes/tn220
 is insufficient alone. Do not add root trust, weaken ACLs or rebuild the same approach
 as an automatic correction. A changed signing route requires explicit approval and
 fresh app-owned update proof; see the
-[identity ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#stable-macos-identity-and-remembered-keys--2026-10-08).
+[identity ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#stable-macos-identity-and-remembered-keys--2026-10-08).
 
 Free Apple Development signing is a candidate for local qualification, not the currently
 approved identity. [Tauri](https://v2.tauri.app/distribute/sign/macos/) supports that
@@ -214,7 +214,7 @@ not packaged native UI/reuse. See [format/ownership](../docs/DATA_MODEL.md) and
 If Settings cannot reload after a confirmed save, its visible status still reports
 cleanup pending where applicable, and mutations wait for read-only reload. The independent
 review corrected this response after the original native sequence; source/DOM evidence
-covers the correction. The separately approved [Mac section-15 packaged proof](../docs/tasks/active/phase-2-initial-llm-assistance.md#mac-section-15-corrected-packaged-proof--2026-10-09)
+covers the correction. The separately approved [Mac section-15 packaged proof](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#mac-section-15-corrected-packaged-proof--2026-10-09)
 now confirms the exact saved/cleanup-pending/reload-required UI, disabled controls and
 read-only Retry restoring selected configured C with unchanged persistent bytes on
 source `37e3ab3`. This narrow result does not accept Studio 2A.1/Phase 2 or release.
@@ -260,12 +260,22 @@ an empty sandbox identity listing is not evidence that the certificate is absent
 never permits fallback or certificate/trust changes. The
 [bounded native operation schedule](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
 requires explicit allowance before packaging/signing or runtime execution. The
-[owning result](../docs/tasks/active/phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+[owning result](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
 records the passed bounded sequence and retained failures; it grants no further operation.
 After a native quit, verify the external receipt/PID and do not call a UI observer or
 `getApp` on the exited app: reacquisition can implicitly launch it without fixture state.
 
 ## Windows native Studio credentials
+
+For the selected qualification, `LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE=1` adds fixed
+15-second capture acknowledgement holds inside the existing 300-second probe cap.
+The host observes the actual native UI before writing the matching phase/step
+acknowledgement file in the isolated fixture root. This selector also records client
+request start/end and cleanup timestamps; markers are never native observation proof.
+The acceptance controller enables it for the prepared runs and rejects absent or late
+client timing. The original beta reload acknowledgement and all original assertions
+remain required. See the current task contract for cumulative attempt authorization.
+
 
 Windows remembered Studio keys use an app-owned modal password field and generic
 Windows Credential Manager entries for the current Windows login. The renderer and
@@ -286,7 +296,7 @@ The fixed public fixture is `tests/fixtures/windows-studio-credentials.json`;
 `scripts/windows-studio-credentials.py` records exclusive attempts, package/source
 identity, isolated loopback request counts, native snapshots and external process exit.
 Input uses Windows Computer Use against the actual packaged app. The
-[Windows ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+[Windows ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 owns exact allowance, failed attempts and remaining native proof. Commands do not grant
 new allowance. Source tests: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
 No installer execution, real endpoint, production key or credential enumeration is selected.
@@ -295,12 +305,12 @@ and the full input manifest. Old Windows manifests lack eight current inputs and
 rejected by the corrected reuse gate; retain their exact-binary evidence without
 claiming complete candidate equivalence. See the independent review in the ledger.
 
-The [Studio acceptance-gap review](../docs/tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+The [Studio acceptance-gap review](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
 records the remaining Windows current-slice blockers: complete candidate inputs, full
 phase-1 entry/alpha-alpha flow, and the confirmed-save/reload-required branch. Mac
 section-15 proof is complete. A proposed one-build/two-launch/four-loopback-GET schedule
 combines Windows reload proof with beta replacement after separately reviewed Windows
-fixture/controller preparation. The [finalized Windows preparation](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+fixture/controller preparation. The [finalized Windows preparation](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
 adds `--acceptance` to the existing runner for exclusive build 3/run 6–7 receipts under
 `.toolchains/windows-studio-acceptance` and a new isolated root. The opt-in Windows
 `LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE=beta-post-save-snapshot-once` selector is armed
@@ -312,7 +322,7 @@ publication and native execution require separate approval. No old manifest is b
 existing corrected manifest gate still rejects those legacy packages. Cross-build
 Windows continuity, generic/session-only/no-auth and full 2A.1 remain unqualified.
 
-The [Windows native preflight](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-native-inputcapture-preflight--2026-10-09)
+The [Windows native preflight](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-native-inputcapture-preflight--2026-10-09)
 found the supported Computer Use `node_repl`/`@oai/sky` route. Approval retry proved
 keyboard/button input on disposable blank native-editor tabs; an owned JPEG was
 exported offline to PNG. The capture/acknowledgement hold and masked entry remain
@@ -321,7 +331,7 @@ unproved, and the combined native rehearsal exceeded its 120-second limit. Read 
 before remediation. This is a failed preflight, not native qualification; no build,
 Loomlight launch, acceptance root or credential operation was consumed.
 
-The later [step-3 selection](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
+The later [step-3 selection](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09)
 superseded that task's synthetic-preflight prerequisite and selected the actual package
 schedule. Build 3 failed before compilation because the extracted npm `npm.cmd`
 resolved its CLI under an absent directory. The original failure and isolated empty-key
@@ -334,7 +344,7 @@ Under the user's explicit ten-combined-attempt amendment, replacement build 4 pa
 complete input checks and packaging. Original run 6 failed at the native entry deadline;
 late masked input is retained as failure, no Save/GET occurred and run 7 remains blocked.
 The external file-only native clock now rejects expired/terminal input before dispatch,
-and actual exit receipts remain bounded. [The ledger](../docs/tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09)
+and actual exit receipts remain bounded. [The ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09)
 owns exact package hashes, failures, remaining combined attempts and the proposed
 replacement scope; current remembered Studio qualification remains incomplete.
 

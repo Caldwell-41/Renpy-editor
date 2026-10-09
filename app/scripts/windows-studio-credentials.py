@@ -150,6 +150,24 @@ def check_report(phase, report, requests, code, reload=False):
     if reload and (phase != 2 or report["details"].get("reloadResponse") != read(RELOAD)["expectedResponse"]):
         raise ValueError("Exact Windows reload response missing")
 
+def validate_client_timings(report):
+    timings = report.get("details", {}).get("clientTimings")
+    if not isinstance(timings, list) or len(timings) != 2:
+        raise ValueError("Two actual client discovery timings required")
+    last = 0
+    for timing in timings:
+        if not isinstance(timing, dict) or set(timing) != {"actionStarted", "requestStarted", "requestEnded", "completed"}:
+            raise ValueError("Complete client timing fields required")
+        values = [timing[k] for k in ("actionStarted", "requestStarted", "requestEnded", "completed")]
+        if any(not isinstance(v, (int, float)) or isinstance(v, bool) for v in values) or not last <= values[0] <= values[1] < values[2] <= values[3]:
+            raise ValueError("Ordered client timing required")
+        validate_elapsed((values[2] - values[1]) / 1000, 15)
+        if not 0 <= (values[3] - values[2]) / 1000 <= 2:
+            raise ValueError("Client cleanup deadline exceeded")
+        validate_elapsed((values[3] - values[0]) / 1000, 17)
+        last = values[3]
+
+
 def validate_removed(beta, final):
     expected = copy.deepcopy(beta)
     expected["revision"] += 6  # two disable/cleanup pairs (+2), two profile removals (+1)
@@ -639,6 +657,8 @@ def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
             self.wfile.write(body)
         do_POST = do_PUT = do_DELETE = do_PATCH = do_HEAD = do_OPTIONS = do_GET
     env = dict(os.environ, LOOMLIGHT_RUNTIME_UI_PROBE="studio-settings", LOOMLIGHT_STUDIO_PROBE_ROOT=str(root), LOOMLIGHT_STUDIO_WINDOWS_PHASE=str(phase))
+    if ACCEPTANCE:
+        env["LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE"] = "1"
     if ACCEPTANCE and phase == 2:
         env["LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE"] = read(RELOAD)["selector"]
     elif "LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE" in env:
@@ -662,12 +682,13 @@ def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
         raise
     server.daemon_threads = True
     started = time.monotonic()
+    started_unix = time.time()
     process, code, report = None, None, {}
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
         with (OUTPUT / f"{prefix}.stdout.log").open("w", encoding="utf-8") as out, (OUTPUT / f"{prefix}.stderr.log").open("w", encoding="utf-8") as err:
             process = subprocess.Popen([str(executable)], env=env, stdout=out, stderr=err)
-            write(OUTPUT / f"{prefix}-launch.json", {"run": run, "pid": process.pid, "startedMonotonic":started, "deadlineUnix": time.time() + RUN_SECONDS, "executable": str(executable), "sha256":sha(executable)}, exclusive=True)
+            write(OUTPUT / f"{prefix}-launch.json", {"run": run, "pid": process.pid, "startedMonotonic":started, "startedUnix":started_unix, "deadlineUnix": time.time() + RUN_SECONDS, "executable": str(executable), "sha256":sha(executable)}, exclusive=True)
             print(json.dumps({"phase": phase, "pid": process.pid, "deadlineSeconds": RUN_SECONDS}), flush=True)
             try:
                 code = process.wait(timeout=max(0.001, RUN_SECONDS - (time.monotonic() - started)))
@@ -690,6 +711,7 @@ def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
             if not absent:
                 raise ValueError("External PID absence unproved")
             if ACCEPTANCE:
+                validate_client_timings(report)
                 validate_observations(phase, await_observations(prefix, started, started + elapsed))
             fixture = read(FIXTURE)
             if cancel_only:

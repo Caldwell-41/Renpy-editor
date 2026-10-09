@@ -231,17 +231,17 @@ Client cancel and server-stop evidence are separate. No automatic Retry-After ha
 
 ## Qualification and alternatives
 
-The [Studio contract review](../tasks/active/phase-2-initial-llm-assistance.md#studio-qualification-contract-review--2026-10-08)
+The [Studio contract review](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-qualification-contract-review--2026-10-08)
 verified all 22 input digests and retained live results, but found uncovered candidate
 defects in malformed-response classification, failed credential cleanup recovery and
-nonfinite-number parsing. The [correction and owner review](../tasks/active/phase-2-initial-llm-assistance.md#studio-review-corrections-and-owner-review--2026-10-08)
+nonfinite-number parsing. The [correction and owner review](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-review-corrections-and-owner-review--2026-10-08)
 closes R1–R3 with 61 portable passes and original-candidate rejection checks. The
 corrected Studio reference was accepted for the bounded first 2A.1 slice. Full
 generic/live/production qualification is not inferred. The
-[slice continuation](../tasks/active/phase-2-initial-llm-assistance.md#first-studio-settingscredential-slice--2026-10-08)
+[slice continuation](../tasks/archive/2026-10-09-phase-2-execution-history.md#first-studio-settingscredential-slice--2026-10-08)
 owns partial implementation and the native-access prerequisite.
 
-The [existing ledger](../tasks/active/phase-2-initial-llm-assistance.md#25-provider-qualification-ledger--2026-10-07)
+The [existing ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07)
 owns actual configuration, planned probes, counts and results. Missing endpoint access
 is incomplete evidence. Deterministic checks cannot qualify Studio, generic, TLS,
 server tool suppression, server cancellation or production native credentials.

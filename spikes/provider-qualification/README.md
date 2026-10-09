@@ -14,7 +14,7 @@ python3 -m unittest discover -s spikes/provider-qualification/tests -v
 `probe-schema.json` and `probe-plan.json` preserve synthetic inputs and finite planned
 sends. Replace no model/profile from project text. The endpoint/version/auth/model and
 permitted-use record must be completed in the existing
-[Phase 2 ledger](../../docs/tasks/active/phase-2-initial-llm-assistance.md#25-provider-qualification-ledger--2026-10-07)
+[Phase 2 ledger](../../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07)
 before live execution. `live_studio.py` is a manually commanded runner for the explicitly
 approved direct LAN Studio endpoint. It opens a native macOS hidden-key dialog and
 waits for commands. Explicit **Remember for qualification** stores the key in macOS
@@ -49,9 +49,9 @@ Installed Studio v0.1.902-beta is user-reported; discovery advertised loaded Gem
 Generic is user-deferred. The ledger preserves every failure, conditional skip and
 safe receipt/input digest. 61 offline checks pass; mocks are not provider evidence.
 
-The [Studio contract review](../../docs/tasks/active/phase-2-initial-llm-assistance.md#studio-qualification-contract-review--2026-10-08)
+The [Studio contract review](../../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#studio-qualification-contract-review--2026-10-08)
 found three defects omitted by the original 43-test suite. The
-[corrected candidate and owner review](../../docs/tasks/active/phase-2-initial-llm-assistance.md#studio-review-corrections-and-owner-review--2026-10-08)
+[corrected candidate and owner review](../../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#studio-review-corrections-and-owner-review--2026-10-08)
 closes them: malformed `choices` produces a safe failure category, failed staged-key
 cleanup retains its owned nonsecret reference, and JSON exponent overflow is refused.
 Original failure evidence remains; regression gates reject the original candidate and

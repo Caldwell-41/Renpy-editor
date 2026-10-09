@@ -13,6 +13,16 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_client_timings_require_complete_ordered_request_and_cleanup_deadlines(self):
+        good={"actionStarted":1000,"requestStarted":1001,"requestEnded":1100,"completed":1200}
+        report={"details":{"clientTimings":[good,dict(good,actionStarted=2000,requestStarted=2001,requestEnded=2100,completed=2200)]}}
+        probe.validate_client_timings(report)
+        for change in [{"requestEnded":17000,"completed":17100},{"completed":3201},{"requestStarted":999},{"requestEnded":float('nan')},{"actionStarted":True}]:
+            bad=copy.deepcopy(report);bad["details"]["clientTimings"][0].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):probe.validate_client_timings(bad)
+        for timings in [None,[],[good],[good,good]]:
+            with self.assertRaises(ValueError):probe.validate_client_timings({"details":{"clientTimings":timings}})
+
     def test_replacement_prepare_refuses_unknown_partial_root_before_creating_another(self):
         with tempfile.TemporaryDirectory() as directory:
             out=Path(directory);root=out/"old-root";root.mkdir()

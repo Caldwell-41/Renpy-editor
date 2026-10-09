@@ -79,7 +79,12 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
         .get("step")
         .and_then(Value::as_str)
         .ok_or("Windows fixture step missing")?;
-    if !matches!(
+    let evidence = std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
+    let observation = step.strip_suffix("-observed").filter(|name| matches!(*name,
+        "alpha-saved" | "gamma-saved" | "cancelled" | "beta-reloaded" |
+        "get-1-complete" | "get-2-complete" | "complete"));
+    if observation.is_some() && !evidence { return Err("Windows capture holds disabled"); }
+    if observation.is_none() && !matches!(
         step,
         "alpha-entry"
             | "alpha-saved"
@@ -95,6 +100,8 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
             | "beta-reload-observed"
             | "removed"
             | "complete"
+            | "get-1-complete"
+            | "get-2-complete"
     ) {
         return Err("Windows fixture step refused");
     }
@@ -107,6 +114,11 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
     }
     host.with_service(|s| {
         let root = s.ai_data_root();
+        if let Some(name) = observation {
+            let acknowledged = std::fs::read(root.join(format!(".studio-windows-observed-{phase}-{name}.json")))
+                .ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+            return Ok(json!({"observed":acknowledged == Some(json!({"phase":phase,"step":name,"observed":true}))}));
+        }
         if step == "beta-reload-observed" {
             if phase != "2" { return Err("Windows reload observation phase refused"); }
             let acknowledged = std::fs::read(root.join(".studio-windows-reload-observed.json"))
@@ -114,6 +126,13 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
             return Ok(json!({"observed":acknowledged == Some(json!({"run":7,"phase":2,"observed":true}))}));
         }
         let marker = json!({"phase":phase,"step":step});
+        if evidence {
+            let millis = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
+                .map_err(|_| "Windows evidence clock unavailable")?.as_millis();
+            std::fs::write(root.join(format!(".studio-windows-timing-{phase}-{step}.json")),
+                json!({"phase":phase,"step":step,"unixMillis":millis}).to_string())
+                .map_err(|_| "Windows evidence marker unavailable")?;
+        }
         std::fs::write(root.join(".studio-windows-step.json"), marker.to_string())
             .map_err(|_| "Windows fixture step unavailable")?;
         if matches!(

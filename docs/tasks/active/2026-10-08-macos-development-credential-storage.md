@@ -13,7 +13,7 @@ failures/artifacts and exact consumed counts remain in the owning ledger. Public
 remains unapproved. The original planning request authorized no application/OS operation.
 
 **Owning outcome:** temporary Mac remembered credentials for the existing Studio
-slice. The [Phase 2 ledger](phase-2-initial-llm-assistance.md#mac-development-file-storage-plan--2026-10-08)
+slice. The [Phase 2 ledger](../archive/2026-10-09-phase-2-execution-history.md#mac-development-file-storage-plan--2026-10-08)
 owns execution evidence. [CURRENT](../../status/CURRENT.md) and
 [HANDOVER](../../status/HANDOVER.md) own live project/continuation state.
 [Agent prompt](2026-10-08-macos-development-credential-storage-agent-prompt.md)
@@ -411,7 +411,7 @@ explicit isolated-root mode, without renderer secret entry or historical identit
 ## 14. Local delivery and native result
 
 The selected implementation and explicitly approved public synthetic native sequence
-are complete locally. [The owning result](phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+are complete locally. [The owning result](../archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
 records source checks, four passed native phases, exact consumed counts, initial preflight
 and unintended observer failures, one approved host retry and one approved extra reopen.
 All receipts/recovery artifacts/packages remain preserved. No native operation pending
@@ -422,7 +422,7 @@ to check an exited app: verify its external receipt and process termination inst
 
 ## 15. Independent review correction and proposed narrow native follow-up
 
-[The independent review ledger](phase-2-initial-llm-assistance.md#mac-development-independent-local-review--2026-10-08)
+[The independent review ledger](../archive/2026-10-09-phase-2-execution-history.md#mac-development-independent-local-review--2026-10-08)
 owns findings, exact checks and preservation audit. Existing native evidence remains
 evidence of its original source; it does not validate the corrected reload-required
 cleanup-pending message. No source/storage architecture or native allowance is renewed.
@@ -464,14 +464,14 @@ use the existing path without selector state. No timer, external writer, native 
 persistent fault marker is introduced. The pure controller environment helper prepares
 no files/launch/server and the historical runner rejects inherited selectors.
 
-[The fixture preparation ledger](phase-2-initial-llm-assistance.md#mac-one-shot-reload-fixture-preparation--2026-10-08)
+[The fixture preparation ledger](../archive/2026-10-09-phase-2-execution-history.md#mac-one-shot-reload-fixture-preparation--2026-10-08)
 owns exact source/DOM/controller checks, corrections and owner review. The user approved
 source publication after recheck on 2026-10-09; the checkpoint carrying CURRENT/HANDOVER
 records that source transfer, with published source SHA
 `37e3ab3bbdbab943600a2cbc3df93b9078814c26`. The separate native selection now passes
 the corrected branch: exact status and 13 disabled fields/actions, Retry restoring
 selected configured C, unchanged complete store/files, and normal full exit.
-[The native ledger](phase-2-initial-llm-assistance.md#mac-section-15-corrected-packaged-proof--2026-10-09)
+[The native ledger](../archive/2026-10-09-phase-2-execution-history.md#mac-section-15-corrected-packaged-proof--2026-10-09)
 records the external receipt/UI schedule prepared before execution, exact hashes and
 bounded results. The original four-phase runner was not executed.
 

@@ -54,4 +54,4 @@ shared. Core/renderer regressions reject wrong owners, stale sessions/revisions 
 root operations, and compare exact bytes/IDs across migration/history/reopen. The
 optional packaged `source-foundation` case and separately selected pinned-SDK gate
 qualify real native action and true/false syntax outcomes. Supported-target proof and earlier failure
-evidence are recorded in the [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07), never inferred from a fixture.
+evidence are recorded in the [owning ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07), never inferred from a fixture.

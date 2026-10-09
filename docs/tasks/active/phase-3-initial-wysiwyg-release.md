@@ -2,7 +2,7 @@
 
 **Planning date:** 2026-10-02. **State:** researched implementation-plan draft;
 full milestone implementation `not_started`. Bounded section 21 source foundations
-are implemented locally with qualification incomplete; [Phase 2 section 23](phase-2-initial-llm-assistance.md#23-source-foundation-implementation-ledger--2026-10-07) owns evidence. No 3A acceptance is claimed.
+are implemented locally with qualification incomplete; [Phase 2 section 23](../archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07) owns evidence. No 3A acceptance is claimed.
 **Latest user direction:** accept only native Ren'Py video/animation formats at this
 stage, with no conversion; 3C explicitly covers character drag/resize, pre-rendered
 playback and dialogue-time idle loops. Earlier direction removed 3E/Git and requested

@@ -77,7 +77,7 @@ local-machine persistence; no enumeration or occupied-target overwrite. The OS b
 limit is 2560 bytes: larger shared-valid input remains native with explicit failure,
 never truncation/plaintext fallback. Shared v1/v2 records stay compatible; Mac file
 references/cleanup remain owned without Windows migration/deletion. The
-[Windows ledger](../tasks/active/phase-2-initial-llm-assistance.md#windows-remembered-credential-continuation--2026-10-08)
+[Windows ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 owns selected operations, actual evidence and the independent-review boundary.
 
 The permanent new credential service is user-selected `app.loomlight`; bundle identifier
@@ -158,7 +158,7 @@ profiles, generation metadata, master keys and ciphertext with correct permissio
 that backup can decrypt the keys. No automatic sync/transfer or restore UI is added.
 Actual packaged native entry, retained-input Retry/Cancel, file recovery and two-build
 reuse passed in the separately approved public synthetic fixture. The
-[owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#development-file-native-qualification-result--2026-10-08)
+[owning ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
 retains exact counts, failures and limits. Source tests and this bounded native proof
 do not imply Windows or production-release acceptance.
 Subsequent independent review corrected the visible cleanup-pending qualifier when a
@@ -166,9 +166,9 @@ confirmed save cannot reload Settings. That changed response has shared source/D
 proof and corrected Mac section-15
 packaged proof on source `37e3ab3`; Windows target proof remains missing. The original
 packaged inputs and their historical evidence remain distinct. The
-[acceptance-gap disposition](../tasks/active/phase-2-initial-llm-assistance.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09) retains Windows complete-manifest/full-flow
+[acceptance-gap disposition](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09) retains Windows complete-manifest/full-flow
 blockers and proposes a combined replacement/reload proof. Its
-[prepared qualification fixture](../tasks/active/phase-2-initial-llm-assistance.md#windows-acceptance-schedule-preparation--2026-10-09)
+[prepared qualification fixture](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
 uses only the existing post-confirmation snapshot seam on an isolated Windows beta
 replacement; it changes no persistent bytes, production credential behavior or Mac
 policy. Source/DOM/controller PASS prepares the schedule; Windows native proof still

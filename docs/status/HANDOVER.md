@@ -1,29 +1,58 @@
 # Current outcome handover
 
-## Windows step 3: replacement approved/prepared; probe evidence decision pending
+## Windows remembered Studio qualification in progress
 
-**Authority/host:** Local Windows x64, one serial requested GPT-6.1 Sol High owner, zero subagents; original receipts locally, no other-host access. User selected actual finalized step 3 on `2ec2c35`, superseding prior synthetic-preflight prerequisite/ban while retaining that failed preflight. User later clarified ten combined build/launch attempts. Counting stated before further dispatch: this task includes failed build 3 as attempt 1, retaining earlier historical usage. No automatic extra native/root/copy scope.
+One serial owner, Local Windows x64, repository Caldwell-41/Renpy-editor,
+`worktrees/provider-qualification`, branch `codex/provider-qualification`, starting
+published checkpoint `015579a`. Preserve unrelated primary/worktree changes. The
+approved documentation simplification and opt-in probe correction are being reviewed
+for publication before packaging. This is an internal checkpoint of the same goal.
 
-**Location/checkpoints:** Caldwell-41/Renpy-editor, `worktrees/provider-qualification`, branch `codex/provider-qualification`. Build 4/run 6 used `841cd02bf0f2f169d190dd40dc72279c32750836`, with only the recorded external-controller exception. Final failure/clock fixes published at `27fa941c8696ed863024b4e4c8c94a815f5ce804`, remote equality verified. This seven-path replacement-preparation checkpoint carries the current approval/decision; verify its remote SHA from the response. Main `5f448ca683a905f4ea77d4580bbc89fda69f2b93` contained. Preserve primary unrelated HANDOVER and all other worktrees; no reset/stash/force-push.
+The [current Windows contract](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+owns acceptance and deadlines. The current user goal authorizes timing/capture holds,
+controller changes, in-scope corrections, justified retries, fresh identities/roots and
+repeated defined scenarios within **ten combined attempts, three used/seven remaining**.
+It supersedes old fixed run/root/per-action ceilings and controller-only restrictions.
+Never waive native observations or first-phase proof, recover uncertain credential
+ownership, or retry ambiguous dispatch. No real key/endpoint/generation, installation,
+security change, CI, merge/release or next feature.
 
-**Evidence owner:** [step-3 ledger](../tasks/active/phase-2-initial-llm-assistance.md#windows-step-3-packaged-selection--2026-10-09), [host sequence](../TESTING.md#windows-native-preflight-and-prepared-host-sequence), finalized schedule and linked independent/publication/preflight reviews. Original build 3 attempt/log and build-4/run-6 originals remain ignored under acceptance output. Private `.toolchains/windows-studio-step3/` holds original/failed-build/final-run6 audits, JPEG/PNG capture hashes/pixel checks, clocks and guard preparation; no private files/paths/logs/captures in Git.
+Immediate prepared identities remain build 5/runs 8–9 with `--replacement --acceptance
+--combined-attempts 10`. The second isolated root already exists; do not prepare it again.
+`app/.toolchains/windows-studio-acceptance/state-replacement.json` locates it;
+`app/.toolchains/windows-studio-step3/environment-build5.ps1` defines the environment.
+The original failed root/receipts remain unchanged. `replacement-preparation-audit.json`
+retains identities/digests. Full run-8 PASS must precede run 9 on the same package/root.
+No package or native attempt has been added in this goal continuation yet.
 
-**Build 4 PASS:** 202.2284538 s receipt/202.2790596 s terminal, exit 0/stopped/external PID absent, locked/offline NSIS, complete input equality. EXE 14,829,568 bytes, SHA256 `d81f08afcf809a53b918521c62475cd5d67f05410beeb2d1a7923421b3974400`; installer 3,683,313 bytes, SHA256 `8f604f7a2256ebb24ec19bc202fde78815eb9080d4c3d89a1450b935e5580bfa`. Installer never run. Build 3 remains FAIL with missing original PID/elapsed/terminal proof, never backfilled.
+Supported Computer Use (`node_repl` / `@oai/sky`) app discovery passed. No Loomlight,
+Cargo, rustc, Node or Python process was found in the initial targeted process check.
+CIM inventory was unavailable; do not treat that error as process proof. The actual
+controller npm hook verified pinned npm 11.9.0; Tauri CLI 2.11.4 resolved. No installation.
+Controller 27 tests and focused Settings/Windows DOM 10 tests pass; test TypeScript
+compilation passes. Rust probe check initially failed in the sandbox with Tauri's
+OUT_DIR filesystem error despite an existing directory and Cargo-provided variable;
+the same focused check passed outside the sandbox (1 PASS, 15 unrelated filtered).
+No package attempt was reserved by those checks.
 
-**Run 6 FAIL:** original phase 1, exact package-4 copy; initial observation receipt variable was uninitialized, corrected recovery at 83.25 s; native focus/capture at 102.40 s; public alpha masked input at 122.6991984–124.5422458 s was late. Owner failed to guard before dispatch; all latency counts. No Save/fault/restore/Cancel/Retry/GET/owned key creation. Packaged `Timeout: alpha-entry`, Working… status, three initial checks, cleanupComplete true, exit 1 at 123.7205103 s. External PID absence independently rechecked; server stopped. No complete ordered observation fabricated. Run 7 was not dispatched because full run-6 PASS is mandatory. No UI reacquisition after exit.
+The implemented opt-in evidence selector holds alpha/gamma confirmations, Cancel,
+discovery completions, read-only Retry completion and final UI for up to 15 seconds,
+inside the unchanged 300-second whole run. Existing beta reload capture hold remains.
+Client discovery timings record invocation start/end and UI cleanup; missing/late
+intervals fail the controller. Actual captures and ordered host observations remain
+mandatory. Native action helpers must initialize state, use returned windows, guard
+entry/whole clocks before input and invalidate all UI state after exit.
 
-**Root/receipts:** failed root remains preserved with exact initial empty-key/foreign-metadata fixture and sole alpha-entry marker; no saved snapshots/faults/backups. Six original JPEGs and six PNG exports survive; sizes/digests/pixels verified. Original historical receipts/packages/independent audit unchanged. First audit optional-field reader failure retained; corrected audit PASS records qualification FAIL. No native credential API/presence read used in audit; no app/helper/server/CI remains.
+Historical build 4 passed complete input equality/packaging on `841cd02`; run 6 failed
+alpha-entry at 123.72 seconds, with late masked input and no Save/GET/owned key creation.
+Run 7 was never dispatched. All failures, captures, manifests and old budget usage are
+preserved in the [execution history](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09).
+Task usage: build 3 FAIL, build 4 PASS, run 6 FAIL. Cumulative Windows four builds/six
+launches, two historical GETs, three earlier owned entries/five reads. This task has
+one native-entry session and one server lifetime; zero Saves/Cancel/Retry/GETs/new
+owned entries/presence reads. Mac/provider budgets remain unchanged.
 
-**Bounded fixes/checks:** external npm hook version verified; terminal receipts and launch PID prerequisite corrected. Host actual-exit receipt wait shares exit 15 s/whole 300 s caps. File-only `native-clock` rejects terminal/late/invalid entry before each supported input; actual late counterexample is rejected. Explicitly initialize native state, forward images and invalidate state/window after exit. Controller 23 PASS; Settings/Windows DOM 9 PASS; app/test compilation PASS; unchanged desktop 16 PASS retained. Post-run controller/test changes recorded; tested package manifest unchanged.
-
-**Usage:** step 3 3/10 combined attempts used, seven remain (build 3 FAIL/build 4 PASS/run 6 FAIL). Earlier two builds/five launches retained; cumulative four builds/six launches, 2/8 GETs. New native entry 1/5, Saves 0/5, Cancel 0/1, read-only Retry 0/1, GETs 0/4, server lifetimes 1/3, newly owned entries 0/3, presence reads 0/5. Prior three entries/five reads, original eight manifest omissions, runs 1–3 FAIL/run 4 PASS/run 5 targeted Cancel PASS/full-flow FAIL and preflight minimum 132.4793445 s plus earlier attempts survive. Old two unused GETs unselected; Mac/provider budgets unchanged.
-
-**Approved amendment:** user answered Approved to build 5 and replacement launches 8 original phase 1/9 original phase 2, one additional isolated root/EXE copy and native-entry/server-lifetime caps five/three total. This uses three existing remaining attempts; other caps/assertions/deadlines stay fixed. Full run-8 PASS precedes run 9 on the same EXE/root, with original+reload markers and exit/PID proof. No run-6 reuse or partial entry.
-
-**Prepared state:** explicit `--replacement --acceptance --combined-attempts 10` selects only build 5/runs 8–9 and `state-replacement.json` in the same counted output. The second root exists with only exact initial fixture bytes; do not prepare again. File-only preparation audit PASS verifies both distinct roots/old failure and preserved receipt digests, and no new attempt/package. Build-5 environment/new target and guarded Computer Use/capture/clock helpers are staged privately. Controller 26 PASS; first missing temporary-folder setting caused 11 sandbox errors, corrected invocation passed without test changes. No build/launch/server/GET/native action/presence read this continuation. External reload run-9 identity is mandatory; the unchanged fixture acknowledgement stays logical run 7.
-
-**Pending decision and reason:** the unchanged probe advances Save/Cancel confirmations immediately and has no client GET start/end timing markers. Server timing and store snapshots cannot substantiate the required ordered native capture/client timing receipt. This is an evidence/harness gap; do not fabricate proof or repeat the unchanged failed timing hypothesis. The selected task explicitly allows bounded controller fixes, so modifying packaged probe source needs the requested narrow source-scope approval. Proposed only opt-in timing markers and bounded confirmation capture holds, keeping original routes/assertions/counts/deadlines. No probe source was changed. The question remains pending; elapsed time is not approval.
-
-**Next:** if the user approves that narrow probe change, implement/test/review/publish it before build 5, then keep HEAD and all packaged inputs fixed through run 8 and gated run 9. Use original actual native observation rules and all caps. If declined, report the proof blocker; keep prepared roots, unused attempts and all failures. Do not ask again for the already approved replacement/root/count amendment. No automatic replay/recovery.
-
-Build 1200 s +2 termination/+2 reap; launch 300 s; entry 120 s including fault/restore; confirmation/capture acknowledgement/Retry/exit 15 s; GET 15 s +2 cleanup, all inside whole caps. Missing/wrong/skipped/late proof FAILS. No installer, real endpoint/key, generation, enumeration, observer launch, CI, PR/merge/release, security/accessibility changes or other-host work. Current remembered Studio/full 2A.1/Phase 2 remain incomplete; never start 2A.2.
+Next: finish focused Rust/source review, validate the preserved docs, commit/publish
+and verify publication; then hold packaged inputs fixed for build 5 and the bounded
+native sequence. Record exact passes/failures, timings, process exit and cumulative
+usage. No source-test result closes Windows remembered qualification or full 2A.1.

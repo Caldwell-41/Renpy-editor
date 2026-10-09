@@ -6,14 +6,16 @@ import { mountStudioSettings } from "../src/ai-settings-ui.ts";
 const script = readFileSync("src-tauri/src/windows_studio_probe.js", "utf8");
 const fixture = JSON.parse(readFileSync("tests/fixtures/windows-studio-credentials.json", "utf8"));
 const reload = JSON.parse(readFileSync("tests/fixtures/windows-studio-credential-reload-failure.json", "utf8"));
-async function scenario(phase:number, failedGet=false, reloadProof=false, defect="") {
+async function scenario(phase:number, failedGet=false, reloadProof=false, defect="", evidence=false) {
   const browser = new Window(); Object.assign(globalThis,{window:browser,document:browser.document});
   let profiles=fixture.profiles.map((p:{profileId:string;settings:Record<string,unknown>})=>({profileId:p.profileId,settings:structuredClone(p.settings),revision:phase===1?1:2,disabled:false,credentialStatus:phase===1?"missing":"configured",discovery:null as null|{selectedAvailable:boolean;models:string[];status:string}}));
   let entries=0,gets=0,removals=0,reloadReads=0,confirmed=false;
   const snapshot=()=>structuredClone({token:profiles.map((p:{revision:number})=>p.revision).join("-"),profiles,cleanup:[{profileId:fixture.profiles[0].profileId,deferred:false}]});
+  const holds:string[]=[];
   const reports:Record<string,unknown>[]=[];
   Object.assign(browser,{
     __loomlightWindowsStudioPhase:phase,
+    __loomlightWindowsEvidence:evidence,
     __loomlightWindowsReloadProof:reloadProof,
     __loomlightProbeFindButton:(name:string)=>{
       const found=[...document.querySelectorAll("button")].find(b=>b.textContent===name);
@@ -31,7 +33,9 @@ async function scenario(phase:number, failedGet=false, reloadProof=false, defect
         case "ai.profiles":
           if(confirmed){reloadReads++;if(defect==="retry-mutates"&&reloadReads===2)profiles[0]!.revision++;}
           value=snapshot();break;
-        case "probe.windowsStudioStep":value=payload.step==="beta-reload-observed"?{observed:true}:{recorded:true};break;
+        case "probe.windowsStudioStep":
+          if(String(payload.step).endsWith("-observed")){holds.push(String(payload.step));value={observed:true};}
+          else value={recorded:true};break;
         case "ai.enterCredential":
           entries++; assert.ok(p);
           if(phase===1&&entries===3){value={cancelled:true};break;}
@@ -59,7 +63,7 @@ async function scenario(phase:number, failedGet=false, reloadProof=false, defect
   try {
     document.body.innerHTML="<button>Settings</button><button>AI providers</button><main></main><footer></footer>";
     document.querySelectorAll("button")[1]!.addEventListener("click",()=>mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!));
-    await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals,reloadReads};
+    await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals,reloadReads,holds};
   }finally{await browser.happyDOM.close();}
 }
 test("prepared Windows probe drives both actual Settings phases with exact secret-free operations",{timeout:10000},async()=>{
@@ -84,4 +88,19 @@ test("Windows beta reload gate rejects missing response, wrong pending status an
 test("Windows beta reload gate rejects a Retry that enables controls without reading profiles",{timeout:5000},async()=>{
   const result=await scenario(2,false,true,"retry-noop");
   assert.equal(result.report.passed,false);assert.equal(result.entries,1);assert.equal(result.gets,1);assert.equal(result.removals,0);
+});
+
+test("opt-in evidence holds each confirmation and records actual client discovery intervals",{timeout:10000},async()=>{
+  for(const phase of [1,2]){
+    const result=await scenario(phase,false,phase===2,"",true);
+    assert.equal(result.report.passed,true,JSON.stringify(result.report));
+    assert.deepEqual(result.holds,phase===1?
+      ["alpha-saved-observed","gamma-saved-observed","cancelled-observed","get-1-complete-observed","get-2-complete-observed","complete-observed"]:
+      ["get-1-complete-observed","beta-reload-observed","beta-reloaded-observed","get-2-complete-observed","complete-observed"]);
+    const timings=result.report.clientTimings as {actionStarted:number;requestStarted:number;requestEnded:number;completed:number}[];
+    assert.equal(timings.length,2);
+    for(const t of timings)assert.ok(t.actionStarted<=t.requestStarted&&t.requestStarted<=t.requestEnded&&t.requestEnded<=t.completed);
+    assert.equal(result.entries,phase===1?3:1);assert.equal(result.gets,2);
+  }
+  const ordinary=await scenario(1);assert.deepEqual(ordinary.holds,[]);assert.equal(ordinary.report.clientTimings,undefined);
 });
