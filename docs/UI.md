@@ -916,6 +916,18 @@ personal template library in v1. References show approved and proposed revisions
 stale/missing citations, basic Scene/route scope and written knowledge/spoiler notes.
 These are Phase 2 plans, not implemented Phase 1 controls.
 
+The selected [project prompts/context surface](PROMPTS_CONTEXT.md) implements
+**Settings → Current project → System prompts / Context preparation** for Dialogue
+rewrite. It offers explicit project-local Save, current/installed baseline comparison,
+Cancel/confirmed restore and shared Undo/Redo. Unsaved prose survives tab changes and
+blocks leaving until Save/Discard. Save/refusal restores enabled editor focus, and an
+unsuccessful initial load offers explicit Reload project prompts with its diagnostic.
+Exact approved card/lore revisions, dependencies/exclusions, read revisions, component
+bytes and full serialized inert payload are inspectable. Task and input/output/capacity
+values are explicit preview overrides; stale/budget refusal retains author input.
+This selected preparation has no Send or proposal application and leaves the remaining
+Phase 2 screens planned.
+
 The first remembered Studio slice adds **Application → AI providers** within the
 existing Settings dialog. Choose a saved profile or New Studio profile, edit the
 name/base endpoint/exact model ID and token defaults, then **Save profile**.

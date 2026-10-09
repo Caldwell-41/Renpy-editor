@@ -206,6 +206,78 @@ not renewed authorization. Local corrected work/records remain unpublished; the 
 finish-Mac → publish/verify → Windows sequence is preserved. No distinct next feature
 is selected. HANDOVER owns the same-host continuation after that decision.
 
+### Two additional Mac package attempts approved — 2026-10-10
+
+The user explicitly approved **2 Mac package builds** after the diagnosed allowance
+stop. This adds attempts 4/5 to the same outcome: Mac ceiling is now **5 package attempts,
+4 app launches**, with entry consumption **3/5, 2/4**. Windows remains **0/3, 0/4**.
+No launch renewal, signing/Keychain change, other-host execution or scope expansion.
+Attempt 4 packages reviewed correction `33bf97f` once; attempt 5 is reserved and may
+be used only after diagnosing any new failure. The remaining two launches cover corrected
+phase 1 and byte-exact phase 2. Existing publication/Windows transfer authority applies
+once this host qualifies; preserve all failed evidence and cumulative counts.
+
+### Corrected Mac packaged acceptance and Windows transfer — 2026-10-10
+
+Package attempt **4/5** built implementation/correction `33bf97f` through the existing
+wrapper. Unchanged pinned certificate/identifier/designated requirement, strict signature,
+installer contents and artifact privacy gates pass (five files). Executable SHA256
+`384bf40030c5ece0000fa234a5f91c2cc0b63b0a224f4c510319d9a86add4e18`;
+installer `be632bb96f3f5a4df683b246b7d4806b23eb57e8d90fb4de26ca0a079987a5ee`.
+Source-input hashes include request-lane.ts and match the reviewed candidate. Package/
+receipts/source binding remain ignored under `.toolchains/releases/prompt-context-mac-04`.
+No installation, signing/Keychain policy change, provider send or game execution.
+
+**Launch 3/4**, PID 89816, passed phase 1: **32 recorded checks, all 21 required gates**,
+131.57 seconds, exit 0, cleanupComplete. Exact-path Computer Use observed the retained
+corrected bundle. Physical Cmd+S saved exact custom prose; physical Tab moved to Restore
+baseline and Shift+Tab returned to enabled editor focus. After releasing that observed
+marker, the real UI/dispatch path passed preview/Cancel/confirmed baseline restore,
+Undo/Redo, guarded draft, Settings reopen, exact approved card/lore inclusion,
+deterministic full payload, budget/stale-selection refusals and external prompt conflict
+with retained draft/explicit reload. The prior busy-load stop did not recur.
+
+Wide light/dark and actual **720 × 780** compact dark windows were observed before
+releasing their markers. Exact revision controls, input/output/margin totals, component
+bytes, disclosure summaries and wrapped full inert payload remained readable/reachable.
+Expanded dependencies showed excluded links without automatic expansion; compact Other
+exclusions listed custom code/assets/extensions/credentials/Git/external files, and Tab
+continued to Unrelated source drafts excluded. A Computer Use section-scroll call after
+resize returned windowNotFoundAtPosition; a fresh tree and visible-label scroll succeeded
+in the same launch. This was an observation-driver mapping issue, not a product correction
+or skipped layout pass. Project close/reopen retained baseline removal and every game
+source matched the initial text.
+
+**Launch 4/4**, PID 89870, passed phase 2: **5 recorded checks, all 4 required gates**,
+3.78 seconds, exit 0, cleanupComplete. The separate process displayed the installed
+baseline and rebuilt the exact baseline/reference preview through production UI/IPC.
+Complete AI/reference metadata bytes were identical across processes: ai.json SHA256
+`9a583212a11cb30c4af6886cf953bfaa8c3055c127a6cc3b02865bac2b6644e4`;
+references.json `7514646b62a56993b376931f23786f5151aebdc27d6dd523a0845a7a83160988`.
+Unrelated futureAction/futureSettings/style notes are retained. Every source remains
+unchanged. Both exact PIDs are absent; the sole owned accepted fixture was removed.
+No process/fixture/pending operation remains; never observe a stopped app implicitly.
+
+Both positive reports, logs and structural final-audit.json remain ignored under
+`.toolchains/reports/prompt-context-mac-03`. The audit revalidates required gates, matching
+metadata, source bindings and actual executable/installer hashes, and records cleanup.
+Previously failed/cancelled reports retain their dispositions. Five focused core cases,
+17 TS checks, actual held-host controller/dispatch/persistence integration, browser
+focus/newline and history/reference regressions are reused on unchanged code. Final
+self-review found no remaining selected Mac issue; no independent reviewer or subagent.
+
+**Mac host is qualified for this selected outcome only. Usage: 4/5 builds, 4/4 launches.**
+Attempt 5 is unused; no Mac launch remains. Windows is still **0/3 builds, 0/4 launches**
+and requires focused target checks plus packaged prompt/context/physical focus/theme/
+compact/source/process-reopen proof before both-target acceptance. This does not accept
+full 2B.1 or Phase 2 or select dialogue sends. Canonical prompt/context and UI contracts,
+CURRENT and HANDOVER now carry the implemented behavior and serial Windows continuation.
+Publication covers this implementation and evidence successor on the same branch under
+the user's existing outcome authority; the sender verifies the exact remote checkpoint
+before handing ownership to Windows. Final repository validation passes for 468 files,
+with clean whitespace and compact live records. No force-push,
+merge, release, new feature or direct other-host execution.
+
 ## Manual reference library selection — 2026-10-09
 
 Selected by the user after accepted Phase 1/source foundations and bounded synthetic

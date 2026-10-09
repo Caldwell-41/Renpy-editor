@@ -1,98 +1,102 @@
 # Current outcome handover
 
-## Prompts and context preparation: corrected locally, Mac build allowance exhausted
+## Prompts and context preparation: Mac qualified; serial Windows continuation
 
-Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving published
+Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 `92a33180604ce851aa8ebc47e5c336da81aedf57` ancestry and the unrelated planning worktree.
-One GPT-6.1 Sol High serial owner, no subagents or direct other-host execution. The user
-selected finish Mac ARM64, publish/verify the same branch, then transfer one Windows x64
-owner. Publication for this outcome is authorized after Mac qualification, without merge,
-release or installation. The preceding manual reference library remains accepted.
+The implementation/correction checkpoint is `33bf97f77f74b6512090280e15d6db264bb5eded`;
+this Mac evidence/status successor is published on the authorized same branch. Exact
+remote verification by the sending owner precedes Windows continuation. The sending owner must report the verified
+remote checkpoint; pull the same branch without resetting unrelated work. No merge,
+release, installation, force-push or history rewriting. One GPT-6.1 Sol High serial
+Windows x64 owner, no subagents or direct other-host execution; the Mac writer ends
+at handoff. Publication authority covers this outcome's ordinary fixes/evidence on the
+same branch. The preceding manual reference library remains accepted on both targets.
 
 Read AGENTS, CURRENT, [selected scope](../tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10),
-[latest diagnosis/allowance record](../tasks/active/phase-2-initial-llm-assistance.md#unlocked-mac-launch-2-diagnosed-ui-corrections-and-build-allowance-stop--2026-10-10),
+[Mac qualification](../tasks/active/phase-2-initial-llm-assistance.md#corrected-mac-packaged-acceptance-and-windows-transfer--2026-10-10),
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md), applicable WORKFLOW/TESTING and Phase 2 sections
-6/10/11/19/20. Scope is one action's project-local prompt Save, baseline comparison/
-Cancel/confirmed restore, shared history/reopen, and exact approved card/lore selection
-for a deterministic bounded inert one-Beat payload. Preserve source, unrelated settings,
-project isolation and explicit stale/budget refusal. No provider sends, credential/HTTP
-changes, proposal/application, generated references, automatic retrieval, import/export,
-route expansion, full 2B.1 or Phase 2 claim. No next feature is selected.
+6/10/11/19/20. Scope: one action's project-local prompt explicit Save, baseline comparison/
+Cancel/confirmed restore, shared Undo/Redo and reopen; exact approved card/lore revisions
+and deterministic bounded full inert payload for one saved dialogue/narration Beat.
+Preserve source, unrelated settings, project isolation and explicit stale/budget refusal.
+No provider sends, credential/HTTP changes, proposal/application, generated references,
+automatic retrieval/import/export, finite-route expansion, full 2B.1/Phase 2 claims or
+next feature. The payload/response contract is preview-only; capacity/response limits
+are explicit preview overrides and never change saved provider configuration.
 
-Implementation checkpoint `217ea73` and locked-Mac recovery `a9bc1a9` remain local-only;
-a subsequent local correction/continuation commit contains the current fixes. Remote
-last verified remains `92a3318`. Do not reset or publish a completed-host claim. The
-user's latest instruction restored Computer Use access; it did not renew package limits.
+**Cumulative usage: Mac 4/5 package attempts, 4/4 launches; Windows 0/3 builds, 0/4 launches.**
+The user approved two additional Mac builds after the original three were consumed;
+one remains unused, with no Mac launch left. Windows's original ceiling is unchanged.
+Count cancelled/failed/implicit starts and package attempts across handoffs. Diagnose
+before every retry; two-correction reassessment remains. Do not borrow Mac allowance
+for Windows or reset totals at a checkpoint.
 
-**Cumulative usage: Mac 3/3 package attempts, 2/4 launches; Windows 0/3 builds, 0/4 launches.**
-No additional Mac build is authorized. Attempt 1 stopped before compilation at sandbox
-identity invisibility; attempts 2/3 passed the unchanged approved identity/signature/
-installer gates. Retained attempt 3 is ignored under `.toolchains/releases/prompt-context-mac-03`.
-Executable SHA256 `fe90b9069630db56b156ddab9f26dd49bc4dda60219608d329a3e3a6988edf0e`;
-installer `82d97392b7c4da69f3933ae1e61ee58f293156dadeee8d1f11cd996a7054f1a9`.
-Pinned signing identity/requirements remain unchanged. This package now predates the
-corrections and is failure evidence, not the current qualification candidate.
+Mac build 4 packages the reviewed correction through the existing pinned signing wrapper.
+Approved names, certificate identity, certificate-bound designated requirement, strict
+signature, installer contents and artifact privacy checks pass. Retained artifacts/
+source-input hashes/identity receipt are ignored under
+`.toolchains/releases/prompt-context-mac-04`.
+Executable SHA256 `384bf40030c5ece0000fa234a5f91c2cc0b63b0a224f4c510319d9a86add4e18`;
+installer `be632bb96f3f5a4df683b246b7d4806b23eb57e8d90fb4de26ca0a079987a5ee`.
+Do not rebuild/relaunch Mac or change signing/Keychain policy for Windows qualification.
 
-Launch 1 PID 85833 was cancelled with zero accepted checks while Mac was locked. Launch 2
-PID 88105 used the unchanged retained bundle after unlock. Exact-path Computer Use
-succeeded, and physical Cmd+S persisted exact custom text through production UI/dispatch.
-It completed 24 partial checks through restore/Undo/Redo, draft guard, Settings reopen,
-exact refs/determinism and budget/stale/external-prompt refusals. It then encountered
-“Another request is in progress.” on the next light-theme Settings reopen, with all
-prompt/context controls disabled. Native Save also left focus on document content;
-Tab moved to Application. The report is failed/incomplete; its stale stage name
-`external-prompt` must not be mistaken for a failed external-edit assertion.
+Mac launch 3 passed 32 recorded checks/all 21 phase-1 gates in 131.57 seconds; launch 4
+passed 5 recorded checks/all 4 phase-2 gates in 3.78 seconds, both exit 0 and cleaned.
+Physical Cmd+S persisted exact custom text, Tab continued to Restore baseline, Shift+Tab
+returned to the enabled editor. Production UI/dispatch proved restore/Cancel/Undo/Redo,
+retained drafts, exact card/lore payload, determinism, stale/budget/external refusal,
+explicit reload, project reopen and every source unchanged. Actual light/dark and
+720 × 780 compact controls/disclosures/full wrapped payload were observed before markers.
+Separate-process reopen retained the baseline and byte-exact complete AI/reference files.
+Native metadata SHA256s: ai.json `9a583212a11cb30c4af6886cf953bfaa8c3055c127a6cc3b02865bac2b6644e4`;
+references.json `7514646b62a56993b376931f23786f5151aebdc27d6dd523a0845a7a83160988`.
 
-Both exact PIDs are absent and both owned disposable roots removed. No pending app,
-fixture or operation remains. Logs/structural failure receipts are ignored under
-`.toolchains/reports/prompt-context-mac-01` and `prompt-context-mac-02`; neither has an
-accepted phase-1/process-reopen receipt. Do not observe the stopped app with getApp:
-it may launch implicitly and consume allowance.
+No pending app, fixture or operation remains. Exact PIDs 89816/89870 are absent and
+the owned accepted root removed. Reports/logs/final-audit remain ignored under
+`.toolchains/reports/prompt-context-mac-03`. Failed locked launch 1 and partial launch 2
+remain preserved separately. Launch 2 found lost focus and a disabled initial-load busy
+error; corrections queue all four operations with shared persistence, bounded-retry only
+safe prompt/choice reads, preserve explicit Reload project prompts, and focus after
+reenabling. Mutations/preview are never replayed. A compact Computer Use section-scroll
+mapping error was resolved with fresh state/visible-label scrolling in the same launch;
+it needed no product change or retry start.
 
-Cheap discriminating tests reproduced missing request ordering, disabled initial-load
-recovery, and keyboard-button Save/refusal focus. Corrections now serialize all four
-prompt/context operations with the shared renderer service lane, use existing bounded
-busy retry only for prompt/choice reads, provide explicit Reload project prompts on
-failed initial load, and focus after reenabling controls. Draft guard tab selection is
-consistent. No mutation/preview replay or core/provider/signing policy change. Exact
-native competing request is unknown; actual held ApplicationHost proves refusal/recovery.
-
-Current focused proof passes 17 TS cases (3 controller, 5 request lane, 9 protocol),
-actual controller → held production ApplicationHost → refusal/reload → persisted
+Portable proof passes five prompt core cases, 17 TS cases (3 controller/5 request lane/
+9 protocol), actual controller → held ApplicationHost refusal/reload → persisted
 prompt/history/preview, real Chrome Save/refusal/reload focus and unchanged-CRLF behavior,
-typecheck and probe syntax. Five unchanged core prompt cases and history/reference
-regressions are reused. Native gate requires all 21 phase-1 / 4 phase-2 checks, including
-physical enabled-editor focus and light/dark/compact observations. Gate self-test rejects
-each omitted check and failed/partial/zero/unclean results. Self-review and scoped fixes
-are complete; no independent reviewer/subagent was requested.
+plus selected reference/history regressions. Gate self-tests reject every missing required
+result, failed/partial/zero and unclean reports. Self-review/in-scope fixes are complete;
+no independent review or subagent was requested. Reuse unchanged Mac evidence; it proves
+only this selected host/outcome, not Windows or the remaining phase.
 
-Next action is the user's decision on **one additional Mac package attempt**, changing
-only Mac build ceiling from 3 to 4. The two remaining launches can cover corrected phase 1
-and separate-process phase 2. Do not build or launch before that allowance is granted.
-After approval, use the existing macos-package.py wrapper with the pinned certificate
-and fresh `prompt-context-mac-04` output; preserve source-input hashes (including
-request-lane.ts), identity receipts, privacy gates and binary/installer hashes. No
-installation or identity/Keychain changes. Diagnose any failure before retry; no fifth
-build or extra app start is implicitly authorized.
+Next action is Windows inspection/pull and focused target checks, followed by the existing
+pinned Windows x64 package route and disposable native proof. Review the preceding
+Windows manual-library ledger if its offline npm/build shim or CLI separator issue
+recurs; do not blindly repeat failed commands. Use prompt-context-probe.py phase 1 on a
+fresh `loomlight-prompt-*` directory under that host's actual temp root and phase 2 only
+on its accepted fixture. Supply the built .exe; do not install an app. Before native
+input, verify Computer Use can observe the unlocked host; never getApp an exited app.
+Observe physical Ctrl+S/Tab focus and light/dark/compact layout/overflow before releasing
+stage markers. Return focus to the prompt before releasing manual-save.done. The gate
+requires all 21/4 checks and byte-identical metadata across process reopen. Preserve
+source/isolation and clean only exact owned processes/fixtures. If a required check fails,
+retain the failed receipt and diagnose at the cheapest seam before any allowance retry.
 
-Run prompt-context-probe.py phase 1 against a fresh owned `loomlight-prompt-*` temp root
-and report directory. Observe physical Cmd+S and enabled prompt focus promptly; any Tab
-check must return focus to the prompt before releasing manual-save.done. Observe actual
-light/dark/compact controls/overflow before releasing their markers. Use physical window
-edge dragging if programmatic Mac resize does not apply. Phase 2 requires an accepted
-phase-1 fixture and proves byte-exact AI/reference process reopen. Theme/compact,
-terminal source preservation/project reopen and process reopen remain missing.
+### Windows continuation prompt
 
-### Same-outcome continuation prompt
-
-> Resume Prompts and context preparation on Caldwell-41/Renpy-editor,
-> `codex/provider-qualification`, preserving the local corrected commits and published
-> `92a3318` ancestry. Read AGENTS, CURRENT, HANDOVER, PROMPTS_CONTEXT and the selected
-> Phase 2 ledger. Use one GPT-6.1 Sol High serial Mac ARM64 owner, no subagents or direct
-> other-host execution. Mac usage is 3/3 builds and 2/4 launches; an additional package
-> attempt needs explicit user allowance. If granted, build the reviewed correction once
-> with unchanged pinned signing policy, then use the remaining two launches for physical
-> Save/focus, theme/compact/source/project reopen and byte-exact process reopen. Preserve
-> failed launch-2 evidence and diagnose before retry. Finish Mac, publish/verify this
-> same branch under existing authority, then transfer Windows (0/3 builds, 0/4 launches).
-> No next feature, full 2B.1 or Phase 2 claim while required proof is missing.
+> Continue Prompts and context preparation in Caldwell-41/Renpy-editor on
+> `codex/provider-qualification`. Pull the sender's verified published checkpoint,
+> retaining `33bf97f` implementation and `92a3318` ancestry; preserve unrelated work.
+> Use one GPT-6.1 Sol High serial Windows x64 owner, no subagents or direct other-host
+> execution. Read AGENTS, CURRENT, HANDOVER, PROMPTS_CONTEXT and the selected Phase 2
+> scope/Mac qualification ledger plus sections 6/10/11/19/20. Mac is qualified at 4/5
+> builds and 4/4 launches. Windows remains 0/3 builds, 0/4 launches, cumulative across
+> handoffs; diagnose before retry. Run focused Windows core/controller/dispatch checks,
+> then disposable packaged physical Save/focus, baseline preview/Cancel/restore/history,
+> exact approved revisions/full deterministic payload and stale/budget/external refusals,
+> themes/compact/source/isolation/project reopen and byte-exact process reopen. Reuse
+> valid Mac evidence. Exclude sends/credentials/HTTP/proposal application/generated
+> references/automatic retrieval/import-export/full 2B.1/Phase 2 claims. Review and fix
+> in scope; update canonical records, publish/verify this same branch within existing
+> outcome authority, then return the result and the next distinct prompt without starting it.
