@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-09",
+  "outcome": "Studio non-streaming synthetic request lifecycle on Mac",
+  "state": "implemented; native qualification blocked by locked Mac",
+  "sourceCandidate": "3f3aaf31546272b5fc7fba7ce0c03b1011be1443",
+  "executableSHA256": "a0ca6fd22e1359ace2c8dbc080232dd01bda75d4e020d9a32b9ad1a9b21b6ab2",
+  "installerSHA256": "1b418456dae2b7aaff585fa5a0c204b8dd4aafee64b734e0d93013f1c02b41f6",
+  "strictBundleAndInstallerIdentityVerified": true,
+  "releaseCompileSeconds": 18.61,
+  "focusedChecks": {"coreRequest": 8, "discovery": 1, "desktopOwnership": 5, "freshFixture": 1, "protocolAndRequestDom": 11, "controller": 5, "packagePolicy": 5},
+  "nativeAttempt": {"launch": 1, "elapsedSeconds": 235.79817, "operatorStopRequestedSeconds": 235.671, "operatorObservationCapSeconds": 180, "exitCode": -15, "normalExit": false, "requests": 0, "credentialsCreated": 0, "failure": "Mac locked before native observation/input; manual unlock confirmation unavailable"},
+  "cleanup": {"ownedPidAbsent": true, "listenerAbsent": true, "portConnectError": 61, "knownUnusedFixtureRemoved": true, "credentialRemovalEvidence": false, "unrelatedCredentialAccess": false},
+  "allowance": {"packageBuildsConsumed": 1, "packageBuildsCeiling": 2, "launchesConsumed": 1, "launchesCeiling": 3},
+  "missingNativeGates": ["visible send", "visible completion and usage", "visible cancellation", "visible error", "editing and Save during a stalled request", "normal exit and active-request cleanup"],
+  "screenshotsMandatory": false,
+  "windowsCredentialAcceptanceReused": true,
+  "macCredentialAcceptanceReused": true,
+  "windowsRequestQualification": false,
+  "full2A2": false,
+  "liveStudioCompatibility": false
+}

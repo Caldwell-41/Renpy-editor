@@ -242,6 +242,73 @@ fixture/controller refuse re-dispatch and uncertain ownership. Screenshots optio
 by user amendment; native AX state supplies visible evidence. First build/launch
 are next; reserves remain unconsumed and require a diagnosed correction.
 
+### Mac request build and blocked native attempt
+
+Implementation/test candidate **`3f3aaf31546272b5fc7fba7ce0c03b1011be1443`**.
+Package build 1 PASS: release compile 18.61 s; strict certificate-backed bundle and
+DMG contents verified. Permanent names, identifier and pinned requirement unchanged.
+Executable SHA256 `a0ca6fd22e1359ace2c8dbc080232dd01bda75d4e020d9a32b9ad1a9b21b6ab2`;
+installer SHA256 `1b418456dae2b7aaff585fa5a0c204b8dd4aafee64b734e0d93013f1c02b41f6`.
+No installation, certificate/trust/ACL/security change or credential backend substitution.
+
+Launch 1 was accepted by the controller against that exact package. The first native
+observation reported that the Mac had **locked again** and automatic unlock failed.
+The owner requested manual unlock asynchronously and preserved this same launch,
+without another app dispatch, request or native credential entry. No unlock confirmation
+arrived within the 180-second operator observation allowance. The bounded attempt
+failed on native capability, not a demonstrated request-service product defect.
+Stop was requested at 235.671 s (the operator bound was exceeded while resolving/
+recording the blocker); the original controller receipt records **235.798 s, exit -15,
+not normal exit, zero HTTP, listener stopped**. Retain that overrun/failure; no pass,
+time truncation, unchanged retry or normal-exit qualification is inferred.
+
+The exact owned PID/package/process group was checked before SIGTERM. The controller
+exited 1, and the external audit confirmed owned PID absent and loopback port refused
+(error 61). No request worker or credential was started. Supported ownership-aware
+unused-fixture cleanup proved the root marker, exact uncredentialled profile seed,
+no `credentials-dev` directory, zero HTTP and absent owned process, then removed only
+that fresh task root. The seed profile/source hashes and receipts remain. This is
+fixture cleanup, **not native credential removal evidence**. No unrelated credential
+enumeration/value diagnosis, native Keychain migration or uncertain ownership recovery.
+Historical recovery roots/packages/credentials remain untouched.
+
+Controller-only corrections after build: stop an owned child on interruption before
+closing the listener; allow precisely known unused-root cleanup after capability
+failure; require exact serial launch 1–3 IDs with failed terminal/cleaned prior receipts
+before reserves. These do not alter packaged runtime inputs or old receipts. Original
+recorded source/config/profile-group manifest remains unchanged; scoped Git diff also
+shows no compiled runtime/config/profile fixture changes after `3f3aaf3`. This is the
+same inspected binary, with no native acceptance or cross-build equivalence claimed.
+Controller **5 PASS**, including rejecting changed unused-root state and wrong attempt
+identity. No rebuild or relaunch for these controller-only cleanup changes.
+
+**Current acceptance:** implementation, focused deterministic checks, self-review,
+signed package and zero-credential fixture cleanup are complete. **Mac native request
+lifecycle remains unqualified**: no visible Send/completion/cancel/error, stalled
+editing/Save or normal exit proof. Windows request-service qualification is also absent.
+Full 2A.2/Phase 2/live Studio compatibility remain incomplete. Completed Windows/Mac
+credential qualification is reused without scenario repetition.
+
+**Cumulative selected allowance:** **1/2 builds, 1/3 launches** consumed; **1 build,
+2 launches remain**. Native HTTP **0**, credentials **0**, listener lifetimes **1**,
+installation/CI/other-host activity **0**. Reserve is not automatically consumed:
+manual unlock plus a fresh supported native preflight is the concrete capability
+correction required before launch 2. No model polling, app/server or external operation
+is pending. Do not reacquire the exited app with `getApp`; that can relaunch it.
+Continue the same outcome/chat after manual unlock, use the existing signed package
+if its exact hash/signature/runtime inputs still match, and finish only the missing
+native walkthrough/credential setup/removal, normal exit, cleanup and acceptance.
+
+[Public partial-result metadata](../evidence/2026-10-09-mac-studio-request-partial.json)
+contains source/binary hashes and honest missing gates. Original private evidence is
+under ignored `.toolchains/releases/studio-request-3f3aaf3/0.1.0/` and
+`.toolchains/reports/studio-request-3f3aaf3/launch-1/`: `state.json`, `launch.json`,
+`operator-stop.json`, `exit.json`, stdout/stderr logs, `cleanup-before.json`,
+`cleanup.json` and `final-audit.json`; parent has preflight/check and build receipts.
+No screenshots were required; the user explicitly made them optional. No secret,
+absolute private path, log, package or credential file is published.
+
+
 ## In plain language
 
 | Part | What you can do when it is complete |

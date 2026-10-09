@@ -1,62 +1,87 @@
 # Current outcome handover
 
-## Mac Studio non-streaming synthetic request lifecycle in progress
+## Mac Studio request lifecycle: native capability blocker
 
-**Outcome/ownership:** user selected complete bounded synthetic request completion,
-cancellation/errors, stale refusal, responsive editing/Save, cleanup and publication
-on Mac. One serial Local macOS ARM64 owner; no delegation or other-host execution.
-Branch `codex/provider-qualification`, clean entry published `9d7a6d6`; the local
-worktree was fast-forwarded from `57f4fed`, without changing the separate planning
-worktree. The implementation checkpoint carrying this record precedes native proof;
-its exact SHA will own the first build. No new branch/PR, CI, merge or release.
+**Outcome/ownership:** same selected authenticated non-streaming synthetic request
+lifecycle, one serial Local macOS ARM64 owner, zero delegation/other-host execution.
+Repository Caldwell-41/Renpy-editor, existing Mac worktree, branch
+`codex/provider-qualification`. Entry `9d7a6d6` was fast-forwarded from clean local
+`57f4fed`; separate planning worktree and historical recovery state remain untouched.
+Implementation/package candidate **`3f3aaf31546272b5fc7fba7ce0c03b1011be1443`**. The
+checkpoint carrying this continuation contains only controller cleanup/attempt guards
+and final records after that candidate; verify publication in the response. No PR/CI/
+merge/release. This outcome is **not complete or natively accepted**.
 
-[Owning request ledger](../tasks/active/phase-2-initial-llm-assistance.md#mac-non-streaming-request-lifecycle--2026-10-09)
-owns selected scope, focus checks, original failures and cumulative accounting.
-Core/native immutable configuration/body/credential, cancellable single worker/socket,
-strict bounded JSON/usage parsing and nonmodal explicit-send UI are implemented.
-The selected destination subset is literal-loopback HTTP. Unsupported saved
-endpoints refuse before dispatch. No project content, response application/schema
-proposal, SSE, real endpoint/credential or alternate provider/auth mode. Mac
-remembered credential storage/signing/deferred native ownership remain unchanged.
+[Owning build/blocker record](../tasks/active/phase-2-initial-llm-assistance.md#mac-request-build-and-blocked-native-attempt)
+and [public metadata](../tasks/evidence/2026-10-09-mac-studio-request-partial.json)
+own evidence and exact hashes. Core/native immutable synthetic body/configuration/
+credential, supported literal-loopback HTTP/context/response preflight, worker/socket
+cancellation, strict response/usage parsing, stale publication guards and explicit
+nonmodal Send/Cancel UI are implemented. Core request 8, discovery 1, desktop request
+ownership 5, fixture 1, protocol/request DOM 11 and package-policy functions 5 pass;
+controller now 5 pass. TypeScript, validator, changed-file formatting and whitespace
+pass. Initial sandbox/test-fixture/frontend failures remain recorded and corrected;
+unfiltered format check reports only unchanged entry Windows probe formatting.
+No credential backend/signing policy/namespace changed. Existing Mac/Windows
+credential acceptance is reused without native scenario repeats.
 
-**Checks/review:** core request 8, discovery 1, desktop ownership 5, fresh fixture 1,
-frontend protocol/request DOM 11, controller 3 and package-policy functions 5 PASS;
-TypeScript, validator and whitespace PASS. Full frontend initially had 109/111 passes;
-two integration failures were corrected, with all 11 affected checks passing. Sandbox
-listener/cache refusals and the partial-read test fixture failure are retained and
-resolved. Unfiltered formatter reports only unchanged entry Windows probe formatting;
-scoped changed-file format passes. Final tests/logs are ignored local evidence. Review
-covers all native/renderer/transport/publication/cleanup boundaries; native Save evidence
-must supplement deterministic tests. No acceptance based only on assertions.
+**Package:** build 1 passed; release compile 18.61 s. Approved permanent names,
+`app.loomlight.desktop`, pinned certificate and certificate-bound designated requirement
+verified, including actual read-only DMG contents. Executable SHA256
+`a0ca6fd22e1359ace2c8dbc080232dd01bda75d4e020d9a32b9ad1a9b21b6ab2`.
+Package remains at ignored `.toolchains/releases/studio-request-3f3aaf3/0.1.0/`.
+Original request source/config/profile-group manifest is unchanged; post-build changes
+are controller/tests/docs only. No final native acceptance or future cross-build
+reuse guarantee is inferred. Reuse this exact package after re-verifying its identity,
+hash and unchanged compiled inputs; do not build again solely for these records.
 
-**Preflight/next:** manual unlock resolved native observation failure; supported native
-AX/keyboard/paste and workspace-scoped capture are available. User clarified that
-screenshots are optional unless a repository gate requires them; use native AX and
-exact action/receipt evidence for the visible walkthrough. Pinned existing public
-certificate identity is present. Use only `app/scripts/macos-package.py` to build a
-fresh ignored package, then the narrowly scoped `macos-studio-request.py` controller
-against its exact signed app. No install or identity/security change. The controller
-reserves a fresh owned root and original launch receipts before dispatch, runs one
-isolated loopback listener and refuses repeated/ambiguous attempts. No app/test
-listener or synthetic credential/root has been created yet.
+**Failed native attempt:** controller accepted launch 1 of that exact signed app,
+then the native observer reported that the Mac locked again and automatic unlock
+failed. The user was asked asynchronously to unlock; no confirmation arrived within
+the 180-second operator observation allowance. Stop was requested at 235.671 s,
+exceeding the operator bound; preserve that failure/overrun. Exact PID/package/process
+group were verified, then SIGTERM stopped the owned app. Original receipt:
+**235.798 s, exit -15, not normal exit; zero HTTP, listener stopped**. The controller
+exited 1. No native credential entry or request worker started. Visible Send/completion/
+cancel/error, editing/Save during a stall and normal exit are all still missing.
+The earlier locked-host preflight was manually resolved; it did not consume an app
+launch. User clarified screenshots are optional unless a repository gate requires
+one; native AX observations plus exact receipts may supply visible proof. No automated
+unlock, lock-policy/security change or unrelated Finder capture is required.
 
-**Allowance:** **0/2 package builds, 0/3 launches** consumed. This is the same selected
-outcome's ceiling, not a new budget. First build and launch are next. Reserve attempts
-require a specific diagnosed failure and concrete correction. Whole native launch
-1800 s; individual operator observation 180 s, separate from response default 600 s,
-connect 1 s and client cancellation cleanup target 2 s. Four explicit authenticated
-fixed-body POSTs: completion with usage, stalled request while native Source edit/Save
-remain responsive followed by Cancel, auth error, completion with unknown usage.
-Opening/settings/Save must produce zero HTTP. One public app-owned native credential
-is prerequisite setup, not repeated credential qualification. Verify normal quit,
-zero active workers, exact PID absence and stopped listener. Remove profile through
-the supported flow, audit known fixture ownership/no remaining sealed record and
-remove only the precisely marked new task root; preserve receipts/failures.
+**Cleanup/pending:** external audit verifies exact PID absent, listener port refused
+(error 61), unchanged recorded runtime manifest and removed task fixture. Cleanup
+proved the marker, exact uncredentialled seed profile, no development credential
+directory and zero requests before deleting only this known unused root. Seed profile/
+source hashes and all original receipts/logs remain under ignored
+`.toolchains/reports/studio-request-3f3aaf3/launch-1/`; parent has build/preflight receipts.
+`operator-stop.json`, `exit.json`, `cleanup-before.json`, `cleanup.json` and
+`final-audit.json` preserve the failure and resource/ownership checks. No credential
+removal evidence is fabricated: **zero credentials created**, no unrelated enumeration/
+value diagnosis, native migration or uncertain ownership recovery. Old native/private
+signing/storage recovery artifacts remain untouched. No app, worker, listener, build,
+CI or other external operation is pending. Do not reacquire the exited app via `getApp`:
+it can implicitly relaunch. No runtime Goal pause is claimed.
 
-**Acceptance/publication boundary:** Windows remembered credential qualification and
-Mac storage/reload proof are reused without rerun. Windows affected request/UI/socket/
-shutdown and Save proof remains necessary; Mac cannot claim Windows requests, full
-2A.2 or live Studio compatibility. Finish native proof, scoped cleanup, final review,
-CURRENT/HANDOVER/task acceptance, then commit/push and verify this branch. No separate
-preparation/permission checkpoint is required; continue this outcome in the same chat.
-No external operation is pending and no runtime pause is claimed.
+**Budget/next action:** **1/2 builds, 1/3 launches** consumed; **one build/two launches
+remain**, within this same outcome. Zero HTTP/credential entries; one listener lifetime.
+First require manual unlock confirmation and fresh supported native input observation
+without launching Loomlight. That is the concrete capability correction before any
+reserve launch. Continue in this same chat; do not reset the goal or allowance.
+The controller now accepts exact `--launch 2` / `launch-2` identities only after prior
+failed terminal/cleaned receipts, reserves outputs before dispatch and stops owned
+children on interruption. Recheck its source/tests and the unchanged signed binary.
+Then execute the remaining compact 4-POST walkthrough with one new public synthetic
+native credential, supported removal, normal exit and scoped cleanup. Observation
+cap 180 s is separate from response default 600 s, connect 1 s and 2 s cancellation
+cleanup target; whole launch cap 1800 s. A new package is only for a diagnosed runtime
+failure requiring a concrete source correction. No unchanged retry hoping tooling works.
+
+**Limits:** no real credentials/endpoints/project sends, SSE, alternate provider/auth
+mode, proposal application, installation/signing/security changes, CI, merge/release
+or next feature. Windows affected request/UI/cancel/shutdown and Save proof remains
+necessary, using its accepted credential adapter without repeating credential
+qualification. Do not claim Windows requests, full 2A.2, Phase 2 or live Studio.
+Finish only missing Mac native proof/cleanup and final acceptance/publication after
+the capability is available. The current source/records are published within the
+user's authority, with the exact remote checkpoint reported in the response.
