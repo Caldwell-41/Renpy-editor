@@ -57,23 +57,20 @@ Revised preview checks passed direct editing/Save/Discard, both themes, lore and
 list-to-form return without script errors/overflow. Repository validation and diff
 whitespace checks passed. No production/native behavior is proved by these checks.
 
-**Current allowance, cumulative across chats/handoffs:** Mac **3/3 package-build
-attempts, 5/7 app starts**; Windows **0/2 builds, 0/3 starts**. The user approved the
-additional third build, but it failed before compilation because the owner sourced
-the pinned toolchain from the wrong working-directory-relative path. Count this
-failed launcher attempt. The corrected pinned-toolchain/metadata preflight passes;
-a replacement package build requires renewed approval. Both remaining native starts
-are unused. Historical failures and independent request budgets remain unchanged.
+**Current allowance, cumulative across chats/handoffs:** Mac **5/5 package-build
+attempts, 7/7 starts**, exhausted; Windows **0/2 builds, 0/3 starts**. Preserve all
+failures and independent request budgets. No more native/build work is authorized.
 
-**Remaining:** native qualification of the relationship retention correction,
-representative scope/link/knowledge behavior, dark/narrow observations and final
-corrected-package reopen. Earlier corrected-package authoring/reopen evidence and
-focused deterministic checks pass, but phase 1's visual pause timed out. Review found
-and fixed nested unknown-field loss on relationship-target edits. Existing package 2
-predates the correction. Stop dependent packaging under the exhausted build allowance;
-no push approved or attempted. Windows remains required and unstarted. See the latest
-ledger and HANDOVER for exact attempts, missing proof and conditional continuation.
-No full 2B.1 or Phase 2 completion claim.
+**Blocker:** consecutive manual Undos hit a false `HISTORY_BOUNDARY` after atomic
+replacement changes the file identity. Native start 7 committed the first Undo and
+refused the second without data loss; an isolated real-dispatch reproducer confirms
+the false boundary with no external edit. Earlier single Undo/Redo and reopen passes
+do not qualify coherent multi-step history. Native dark/narrow observations remain
+unperformed. The relationship-target extension correction is independently tested
+and has native passing assertions; the overall native walkthrough remains failed.
+The GPT-6.1 Sol independent read-only assessment confirms the diagnosis and preventable qualification mistakes. Implementation is
+stopped under exhausted allowance; no publish is approved or
+attempted. Windows remains required/unstarted. No full 2B.1 or Phase 2 completion.
 
 ### Manual-library Mac implementation and first native run — 2026-10-09
 
@@ -230,6 +227,106 @@ must use a fresh output directory and requires explicit allowance renewal before
 launcher is invoked. Production correction stays committed/tested at `483407c`.
 No native retry, push or other-host execution occurred. Updated live status/handover
 record exact missing acceptance and the required decision.
+
+### Two replacement build attempts authorized — 2026-10-09
+
+The user approved two additional Mac package-build attempts after the diagnosed
+working-directory/toolchain failure. Cumulative ceiling is now **5 build attempts / 7
+app starts**, with **3 attempts / 5 starts consumed** before resuming. A reserve
+attempt still requires a diagnosed failure and recorded correction; do not consume it
+for unchanged inputs. Existing identity/policy, serial owner and publication boundary
+remain unchanged. Windows remains **0/2 builds, 0/3 starts**. Resume found the clean
+`b94eb1d` checkout and untouched unrelated worktree, with no Loomlight process.
+
+### Replacement build 4 and native start 6 — 2026-10-09
+
+Build attempt 4 succeeded with the corrected pinned preflight. Strict signature,
+certificate-bound designated requirement and installer contents passed. Executable
+SHA256 `a0a91d53d8ca01a4ef58f69bdab427306bc599254c2010589a5500d4c412d9ba`;
+installer `33e63662799f317a813b47032290e15066b3e5cacebbcb6b3e83705f4921d362`.
+Native start 6, PID 76596, repeated the full authoring/refusal/external/reopen checks,
+physical Command-S and enabled Name/Tab focus, identified stale/missing citations,
+and passed relationship target unknown-field retention through the real form/IPC.
+
+The harness failed its next assertion by comparing `JSON.stringify` on newly
+constructed fixture objects to parsed metadata objects with sorted keys. Host readback
+proves citations/links semantically exact, nested relationship extensions retained,
+and repeated route/linked lore/knowledge saved at counter 5. This is a harness
+object-key-order failure, not a product failure or an accepted overall receipt.
+Process cleanup is confirmed. Corrected comparison canonicalizes object keys while
+preserving array order and values. The reserved fifth build is justified by this
+specific diagnosed probe correction; it changes no production storage/UI behavior.
+Cumulative usage before reserve is **4/5 build attempts, 6/7 starts**. Use final
+start 7 for the fresh full walkthrough. Reuse valid separate-process exact reopen
+from start 5: production storage/reopen code is unchanged by the UI-only retention
+fix and probe-only correction. Preserve all earlier failures; no automatic replay.
+
+### Reserve build 5 / native start 7: confirmed shared-history blocker — 2026-10-09
+
+Build attempt 5 passed strict signature and installer verification with unchanged
+identity/policy. Executable SHA256
+`fe69ccde3a31e32b3cb5194862a02b33c0978d9f23577fd7ec07d984bfc1ccfd`;
+installer `ec6c7f67bb6ca320f19c07e640f81228309c8ab5fab06d466f449b7e16f5ac51`.
+Native start 7, PID 77043, passed 23 assertions through physical Save, replacement,
+exact single Undo/Redo, refusals/Discard/search, external edits/reload/Save, lore,
+malformed/newer retention, close/reopen, unchanged source, stale/missing link display,
+relationship target nested extensions, canonical citation/link preservation and
+repeated-route/linked-lore/knowledge Save. Physical Name/Tab focus was observed again.
+
+The first representative Undo committed (counter 5 → 4); the second refused. Its
+exact native returned code was not captured. Final metadata retained counter 4,
+current/approved pointers and superseded r3/approved r4; refusal preserved data.
+A minimal real production-dispatch reproducer (two manual Saves, two Undos, no external
+edit) then failed at the second Undo with `HISTORY_BOUNDARY`: "Undo or redo stopped at
+an external revision boundary." This is a **product defect in shared history**, not
+another object-key-order harness issue. `HistoryStack::accepted_undo_with_revisions`
+updates the undone entry's before identity but not the older touching entry's after
+identity. The transaction creates a new file identity; the next Undo sees a false
+boundary. Consecutive Redo requires symmetrical investigation. Preserve real external
+revision boundaries when correcting shared history; do not simply ignore identities.
+
+Cumulative Mac **5/5 package-build attempts, 7/7 starts**: exhausted. No further
+native/build attempt is authorized. Dark/narrow observations remain unperformed;
+latest overall phase-1 receipt is failed. Previous separate-process reopen remains
+valid for unchanged storage code but cannot accept broken multi-step history.
+Ignored `manual-reference-mac-07` retains failure receipt, structural readback and
+minimal reproducer; no failing regression was left in the tracked suite. Owned process,
+fixture and preflight file are cleaned. The implementation is not publishable/accepted;
+Windows remains **0/2 builds, 0/3 starts**. User now requests a GPT-6.1 Sol independent
+read-only assessment; pause implementation and report its findings before proposing
+further work. No push or next feature.
+
+### Independent GPT-6.1 Sol assessment — 2026-10-09
+
+At the user's explicit request, one GPT-6.1 Sol High reviewer independently inspected
+the code, owning ledger and retained receipts, using a read-only simulation. It made
+no repository edits, builds, app launches, other-host execution or delegation.
+It confirms the shared-history diagnosis with high confidence: accepted Undo refreshes
+only the undone entry, leaving the nearest older touching entry's expected file
+identity stale. Its independent simulation reproduces the false boundary. Consecutive
+Redo has a symmetric code defect; that direction remains a code-derived prediction,
+not observed native evidence.
+
+The reviewer identifies preventable owner/harness repetition: implicit CUA restart
+and resulting single-instance conflict, working-directory/toolchain launcher mistake,
+delayed visual-pause handling, and object-key-order assertion discovered after
+packaging. Existing real-dispatch tests already performed two Saves but checked only
+one Undo/Redo cycle; adding the ordinary consecutive sequence would have exposed the
+product blocker cheaply. Passing assertions are useful but do not prove coherent
+multi-step history. The probe's click helper only waits for not-busy while the UI
+catches errors, so it failed to retain the precise native refusal code. Every required
+mutation needs an expected-result gate and opt-in failure-code evidence.
+
+Recommended continuation: restore the failing real-dispatch regression; correct
+both directions in shared history, including nearest touching entries, interleaved
+paths, multi-file transactions and branches after Undo. Propagate identities only
+across a proven matching historical transition; preserve changed-content and
+same-content external replacement refusals, original bytes and cursor. Validate the
+harness/comparisons/ownership/observation sequence cheaply before another finite
+native allowance. Native multi-step history, dark/narrow layouts, post-history reopen
+and Windows qualification remain required. Card knowledge/lore-link assertions do not
+qualify every lore knowledge annotation control. Assessment delivered to user;
+implementation stays stopped under exhausted allowance, no publish authorization.
 
 ## Windows synthetic request selection — 2026-10-09
 

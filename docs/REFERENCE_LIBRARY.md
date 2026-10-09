@@ -1,8 +1,10 @@
 # Manual reference library v1
 
-**State:** implemented locally for the selected manual-library outcome; native
-acceptance is incomplete; a reviewed relationship-target retention correction awaits native verification. Phase 2 section 9 and ADR 0011 own the
-product rules. UI A is approved. Both-target production evidence remains required.
+**State:** implemented locally; native multi-step history is blocked by a false
+external revision boundary on the second consecutive Undo. Shared-history correction
+and dark/narrow native observations remain required. The relationship-target extension
+retention fix has focused/native evidence. Phase 2 section 9 and ADR 0011 own product
+rules; UI A is approved. Both-target acceptance is incomplete.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
 manual approval workflow. Select an entry, edit directly, then Save changes or

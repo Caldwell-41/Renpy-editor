@@ -1,82 +1,79 @@
 # Current outcome handover
 
-## Manual reference library: reviewed correction, third build attempt failed
+## Manual reference library: shared-history blocker, assessment complete
 
 Continue Caldwell-41/Renpy-editor, `codex/provider-qualification`, with one serial
-Local Mac ARM64 owner. No other-host execution or second writer. The explicitly
-requested research-only subagent is finished; no further delegation. Entry refs
-matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`; preserve local work and
-the unrelated planning worktree, never reset to the entry SHA.
+Local Mac ARM64 writer. Entry refs matched published `54f562d5d3721595b2f8d7c5ed0454e9cd297a5f`.
+Preserve local commits and unrelated planning worktree; never reset to the entry SHA.
+The requested GPT-6.1 Sol High independent read-only assessment is complete. It
+confirms the history diagnosis, predicts symmetric Redo failure and identifies
+preventable qualification mistakes. It made no edits/builds/launches or other-host
+execution. Implementation is stopped under exhausted allowance. Earlier requested
+UI research is finished.
 
 Read the [owning selection/attempt ledger](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
 [references contract](../REFERENCE_LIBRARY.md), Phase 2 sections 9/10/11/19/20,
-ADR 0011 and applicable UI/WORKFLOW/TESTING guidance. Approved UI A uses a list beside
-directly editable forms, top New card/lore control and ordinary Save/Discard. Internal
-revision/status storage remains; no manual Edit unlock or review toolbar.
+ADR 0011 and applicable UI/WORKFLOW/TESTING guidance. Approved UI A uses direct editing,
+ordinary Save/Discard, top creation control and shared themes. No manual review toolbar.
+Storage revisions/statuses remain internal for future generated review.
 
-Implementation is local: one versioned references service, typed list/apply IPC,
-Character cards/Lorebook, shell Save/Command-S and existing transaction/history,
-external-edit/recovery ownership. Schema/bounds/fixtures preceded the editor.
-Focused renderer/core checks pass; prior credential/request evidence is unchanged.
-Native package 2 proved Save/replacement/exact Undo/Redo, refusals/Discard/search,
-external reload/fresh Save, lore creation, malformed/newer retention, source preservation
-and close/reopen. Physical corrected Save focused enabled Name, Tab moved to Aliases;
-light wide layout was observed. A separate process preserved exact metadata bytes/hash
-`e74ab6a0fa0be5e3de76267ca73276dd15bf6f7dfce0087f7a40b87d82d09300`, card counter 3,
-current/approved pointers, superseded r2/approved r3 and the external extension.
+Implemented locally: schema/bounds/fixtures, one references service, typed IPC,
+Character cards/Lorebook and shell Save/Command-S, shared transaction/history and
+external-edit/recovery. Focused renderer/core checks pass for previously covered
+single-step behavior, but new multi-step Undo failure is a real product blocker.
+Native passing assertions prove authoring/replacement/single Undo/Redo/refusal,
+external reload/Save, malformed/newer retention, lore, scope/knowledge/lore links,
+stale/missing citations and relationship target nested extension retention. Physical
+Name/Tab focus and Command-S passed. Light wide layout observed; native dark/narrow
+are unperformed. Earlier separate-process byte-exact reopen is valid for unchanged
+storage code; it cannot accept the broken multi-step history.
 
-**Counts:** Mac **3/3 package-build attempts, 5/7 starts** consumed. The user approved
-one third build; it failed before compilation when the owner activated the pinned
-toolchain using a root-relative path while in `app/`. The shell continued into Tauri,
-which could not run Cargo metadata. Count the failed launcher invocation. No app
-started; both remaining native launches are unused. Windows **0/2 builds, 0/3 starts**.
-No push authorization. Prior request budgets/failures remain separate and unchanged.
+**Budget exhausted:** Mac **5/5 package-build attempts, 7/7 starts**. Windows **0/2
+builds, 0/3 starts**. No further package/native attempt or publication authorized.
+Prior request/credential evidence and independent budgets remain unchanged.
+All prior failures are retained in the owning ledger: first external-reload/focus
+product defects (fixed), unintended CUA restart, single-instance rejection, visual
+pause timeout, wrong-working-directory/Cargo launcher failure, then key-order-only
+probe assertion (corrected). The latest failure is consecutive Undo, not another
+semantic-key-order issue. Do not inspect a stopped Mac app via CUA: it may relaunch.
+Inspect process ownership by CLI before any future authorized start.
 
-Unique failures remain in the owning ledger: start 1 package-1 external reload/Save
-timeout exposed missing persistence-lane serialization and disabled-field focus;
-start 2 was an implicit CUA relaunch after termination; start 3 was single-instance
-rejection. Start 4 corrected package PID 75122 passed authoring assertions but timed
-out at the 240-second light observation pause. Optional linked-lore/knowledge Save
-had committed; host fixture restoration (not credited as Undo) preceded start 5
-PID 75430's successful reopen. Phase 1 overall remains failed, not an accepted receipt.
-The runner's explicit timeout-resume option accepts only separate reopen proof.
-Never use CUA to select or observe an exited Mac app: it can launch it. Inspect process
-ownership by CLI before each native start. No owned process/root remains; structural
-receipts under ignored `manual-reference-mac-04` retain evidence without reference
-prose. Earlier ignored package/report directories remain available.
+Latest package (attempt 5) preserves identity and passed strict signature/installer
+verification. Executable SHA256
+`fe69ccde3a31e32b3cb5194862a02b33c0978d9f23577fd7ec07d984bfc1ccfd`;
+installer `ec6c7f67bb6ca320f19c07e640f81228309c8ab5fab06d466f449b7e16f5ac51`.
+Native start 7 PID 77043 passed 23 assertions, then its first representative Undo
+committed counter 5 → 4 and the second refused. Final metadata retained current/
+approved pointers and superseded r3/approved r4; hash
+`e2f9c7f87274df1d354485e98862f26ca1039cef8b76d27af804bffc54452c91`.
+The exact native returned error code was not captured. A minimal real production-
+dispatch reproducer (two Saves/two Undos, no external edit) returns `HISTORY_BOUNDARY`.
+Tracked tests were restored after the diagnostic; ignored `manual-reference-mac-07`
+retains its fragment, failed receipt and structural readback without prose. No owned
+process, synthetic root or preflight file remains.
 
-Package 2 executable SHA256
-`b1fb411f7af5d819cf46cc77f5bf9875cc7731897b3c61e9bce3ef80539010bb`;
-installer `714da98a95d616345f1ff35558765844def426a4281c9f1cdf2a695489b40e0b`.
-Approved names, signing certificate pin, namespaces and policy are unchanged.
-Trusted SDK 8.5.3 classifier/default-pattern verification excluded `.renpy-editor`
-without descent and included game files; no game/project Python ran. Custom author
-build-classification overrides are outside the default-path proof.
+The likely defect is in `HistoryStack::accepted_undo_with_revisions`: it refreshes
+only the undone entry's before identity after transaction replacement, leaving the
+previous entry touching that path with its old after identity. The next Undo sees a
+false external boundary. The independent assessment confirms this diagnosis; symmetric
+Redo has a code-derived flaw and needs a real-dispatch regression. A correction must preserve real external-edit boundaries, and handle interleaved
+paths/multi-file mutations plus branching after Undo. Do not weaken identity checks
+or bypass shared history. This affects the existing owner, not a second reference
+Undo stack. No fix has been made for this newly confirmed defect at budget stop.
 
-Review found relationship target changes discarded nested unknown fields. The form
-now retains object extensions while editing known type/ID, and explicitly selecting
-Not linked removes the target. Focused regression/typecheck pass. Package 2 cannot
-qualify this changed production input. The prepared native probe now covers this
-retention correction plus repeated-route scope, knowledge/lore links and stale/missing
-citations/links, restoring exact baseline through project Undo before observations.
-
-**Next dependent action requires a replacement build allowance.** The corrected
-fail-stop preparation from `app/` is `source ../.toolchains/enter-macos.sh && ...`;
-Cargo 1.90.0, Node 24.19.0, npm 11.9.0 and locked/offline Cargo metadata now pass.
-Failed `manual-reference-mac-03/build.log` is retained; it contains no game prose.
-No package was produced. If another build is explicitly approved, record cumulative
-ceiling 4 build attempts/7 starts, use a fresh `manual-reference-mac-04` package
-output directory and existing identity policy, then use starts 6/7 for fresh phase 1
-and exact phase-2 reopen. Release physical observation markers promptly (Save,
-light/dark/narrow); no unrelated work or compaction during live pauses. No automatic
-retry. Clean resources, finish acceptance records/local commit, then ask before
-publishing. The tested production correction remains `483407c`; no native evidence
-qualifies that correction yet. Windows remains required and unaccepted. Do not claim
-full 2B.1/Phase 2 or start another feature. Both-target acceptance remains required.
+The independent assessment has been reported to the user. Before any more native
+work, improve required-mutation failure capture and expected-result gates in the probe;
+not-busy alone includes refusals. If work is explicitly resumed with a renewed allowance, implement/review the smallest shared-history
+correction with a failing-first real-dispatch consecutive Save/Undo/Redo regression
+and external-boundary tests, then package/native authoring/layout/reopen qualification.
+Do not spend native allowance on undiagnosed dispatch or unverified harness assertions.
+Finish canonical acceptance/status and a local scoped commit, then ask before pushing
+an actually reviewed result. Windows remains required; no full 2B.1/Phase 2 acceptance
+or next distinct deliverable until required acceptance.
 
 ## Conditional Windows pull-and-continue prompt
 
-Use only after reviewed Mac work is approved and actually published; do not run another
+Use only after the shared-history blocker is fixed, Mac work is accepted, and publication is approved and completed; do not run another
 host now or treat local commits as remotely available:
 
 > Continue the same manual reference-library outcome in Caldwell-41/Renpy-editor,

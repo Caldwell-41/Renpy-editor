@@ -11,6 +11,8 @@
  const input=(name,value)=>{const el=document.querySelector(`.reference-editor [name="${name}"]`);if(!el)throw Error('Missing field '+name);el.focus();el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));};
  const pause=async stage=>{details.stage=stage;await call('probe.referenceStage',{stage,announce:true});const start=performance.now();while(!(await read('probe.referenceStage',{stage})).done){if(performance.now()-start>240000)throw Error('Observation timeout at '+stage);await new Promise(r=>setTimeout(r,200));}};
  const knownCurrent=record=>record.revisions.find(r=>r.id===record.currentRevisionId);
+ const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([key,item])=>[key,canonical(item)])):value;
+ const same=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
  let project;
  try{
   await click('Source foundation fixture');await wait(()=>document.querySelector('.scene-workspace'));
@@ -52,7 +54,7 @@
    input('knowledgeNotes','Fixture knowledge and spoiler note.');const loreCheck=document.querySelector('.reference-check input');loreCheck.checked=true;loreCheck.dispatchEvent(new Event('change'));
    await click('Save changes');const edited=(await library()).document, saved=knownCurrent(edited.cards[0]).content;
    check(saved.relationships[0].target.type==='lore'&&saved.relationships[0].target.id===lore.id&&saved.relationships[0].target.fixtureExtension.retained===true,'Native relationship target edit retains nested unknown fields');
-   check(JSON.stringify(saved.citations)===JSON.stringify(fields.citations)&&JSON.stringify(saved.links)===JSON.stringify(fields.links),'Native prose and link edit retain stale citation and unresolved link');
+   check(same(saved.citations,fields.citations)&&same(saved.links,fields.links),'Native prose and link edit retain stale citation and unresolved link');
    check(saved.scope.type==='route'&&saved.scope.sceneIds.length===2&&saved.scope.sceneIds.every(id=>id===scene.id)&&saved.linkedLoreIds[0]===lore.id&&saved.knowledgeNotes==='Fixture knowledge and spoiler note.','Native form saves repeated route, linked lore and knowledge notes');
    await click('Undo');await click('Undo');check(JSON.stringify((await library()).document)===JSON.stringify(final),'Representative form Undo restores exact pre-fixture document');
    for(const theme of ['light','dark']){document.querySelector('.shell-settings').click();await wait(()=>document.querySelector('#setting-theme'));const select=document.querySelector('#setting-theme');select.value=theme;select.dispatchEvent(new Event('change'));await wait(()=>document.documentElement.dataset.theme===theme);await click('Close settings');await pause('observe-'+theme);}
