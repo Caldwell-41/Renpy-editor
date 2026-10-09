@@ -1,23 +1,31 @@
 # Current status
 
-**Updated:** 2026-10-09. Windows remembered Studio qualification remains **failed/incomplete**. Replacement build 4 on published candidate `841cd02bf0f2f169d190dd40dc72279c32750836` passed complete input equality and packaging in 202.23 s. Original run 6 failed at alpha-entry timeout: exit 1 at 123.72 s, external PID absent. Masked input at 122.70 s was late; no Save, fault/restore, Cancel, Retry, GET or owned credential creation occurred. Run 7 was not dispatched because full run-6 PASS is required.
+**Updated:** 2026-10-09. Windows remembered Studio qualification remains incomplete.
+The approved documentation cleanup and initial evidence holds were published as
+`00370ac`. Build 5 passed complete input equality/packaging, exit 0 and PID absence
+in 209.75 seconds. Its installer was not run.
 
-The active goal now authorizes opt-in probe timing/capture holds and in-scope fixes,
-including justified fresh identities/roots and scenario repetitions under the same ten
-combined attempts. **3/10 used, seven remaining**. Supported Computer Use discovery
-and the actual pinned npm/Tauri hook route are verified. The probe correction has
-27 controller and 10 focused Settings/probe DOM passes; native acceptance is still
-unproved. The approved documentation simplification is preserved for review/publication.
-[The current Windows contract](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
-owns scope; [HANDOVER](HANDOVER.md) owns continuation. No additional package/launch.
+Run 8 failed native activation/alpha timeout without input. Run 10 captured masked
+alpha and retained input after refusal, then timed out before Retry. Run 12 observed
+alpha refusal/Retry without retyping, gamma Save, stale refusal and Cancel after exact
+restore. Its first authenticated alpha GET succeeded, but the full probe failed with
+`Client discovery timing missing`; no dependent reopen was dispatched.
 
-| Capability | Proof / disposition |
-| --- | --- |
-| Phase 1 source foundation | Accepted/closed through PR19; main `5f448ca` contained. |
-| Mac corrected save/reload | Section-15 packaged PASS on `37e3ab3`; same-login encrypted-file compromise and deferred native ownership remain explicit. |
-| Windows package | Build 4 PASS/exit 0/PID absent, complete source/installed/generated/toolchain/environment checks, exact EXE/installer digests. Installer not run. |
-| Windows remembered Studio | Original full phase-1/alpha-alpha and Windows reload UI still missing. Run 6 FAIL; run 7 blocked. Actual masked native input exists as late failed proof. |
-| Windows controller | Corrected npm route, exclusive terminal receipts, bounded actual-exit observation wait, pre-dispatch native clock and explicit build-5/run-8–9 selection. 26 controller PASS; unchanged 9 DOM/TypeScript/desktop evidence retained. |
-| Broader work | Generic/session-only/no-auth, real Studio/generation, full 2A.1 and Windows cross-build continuity remain open/deferred. Physical locked stores remain host limits; 2A.2 unselected. |
+The defect is identified: packaged Tauri defines immutable `invoke`; monkey-patching
+it silently failed. The correction observes the actual renderer bridge and tests the
+immutable property. Current checks: 28 controller, 10 Settings/probe DOM, app/test
+TypeScript PASS. The earlier focused Rust check passed outside the sandbox; its
+sandbox filesystem failure remains recorded. Native proof is still required.
 
-Windows cumulative usage is **four build attempts/six launches, 2/8 GETs**, prior three owned entries/five presence reads. New task uses one of five native-entry sessions, zero of five Saves, zero Cancel/Retry, zero of four GETs, one of three server lifetimes, zero new owned entries/presence reads. The old two unused GETs remain unselected. Original historical failures, eight manifest omissions, preflight failure at least 132.4793445 s plus earlier attempts, roots/captures/receipts and unrelated work survive. Mac/provider budgets unchanged. No app/server/CI or external operation is pending. No PR/merge/release/installation; public v0.1.0 unchanged.
+**Allowance: 7/10 combined attempts used, three remain.** The final available sequence
+is corrected build 6 plus full phase 1 run 14 and gated phase 2 run 15 on the same
+package/new isolated root. Run 12's two known synthetic credential references/root
+remain preserved; no automatic recovery or unrelated credential access. The
+[current contract and evidence](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+own scope and usage; [HANDOVER](HANDOVER.md) owns continuation.
+
+Phase 1 source foundation remains accepted through PR19/main `5f448ca`. Corrected
+Mac reload proof remains passed on `37e3ab3`, with its development-file compromise
+and deferred native identity explicit. Full 2A.1, real Studio/generation, other provider
+paths, cross-build Windows continuity and 2A.2 remain unselected/incomplete. No
+installation, CI, merge or release; public v0.1.0 unchanged.

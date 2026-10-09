@@ -11,18 +11,16 @@
  const check=(v,m)=>{if(!v)throw Error(m);details.checks.push(m);};
  const wholeEnd=performance.now()+300000;
  const wait=async(f,ms=15000)=>{const end=Math.min(wholeEnd,performance.now()+ms);while(true){const done=await f();if(performance.now()>end)throw Error(`Timeout: ${details.stage}`);if(done)return;await new Promise(r=>setTimeout(r,100));}};
- const originalInvoke=window.__TAURI_INTERNALS__.invoke;
  let entryResponse=null;const operations=[];
- if(reloadProof||evidence)window.__TAURI_INTERNALS__.invoke=async function(command,args){
-  const discovery=command==='core_request'&&args.request.operation==='ai.discover';
-  const started=epoch();
-  let result;try{result=await originalInvoke.call(this,command,args);}finally{if(evidence&&discovery)requestTiming={requestStarted:started,requestEnded:epoch()};}
-  if(command==='core_request'){operations.push(args.request.operation);if(args.request.operation==='ai.enterCredential'&&result.ok)entryResponse=result.value;}
-  return result;
+ const observe=event=>{const {operation,response,started,ended}=event.detail;
+  operations.push(operation);
+  if(operation==='ai.enterCredential'&&response?.ok)entryResponse=response.value;
+  if(evidence&&operation==='ai.discover')requestTiming={requestStarted:started,requestEnded:ended};
  };
+ if(reloadProof||evidence)window.addEventListener('loomlight-windows-probe-response',observe);
  const button=name=>window.__loomlightProbeFindButton(name);
  const click=async name=>{await wait(()=>button(name)&&!button(name).disabled);button(name).click();};
- const call=async(operation,payload={})=>{const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Error(`${operation}: ${r.error.code}`);return r.value;};
+ const call=async(operation,payload={})=>{if(reloadProof||evidence)operations.push(operation);const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Error(`${operation}: ${r.error.code}`);return r.value;};
  const step=async name=>{details.stage=name;await call('probe.windowsStudioStep',{step:name});};
  const hold=async name=>{if(evidence)await wait(async()=>(await call('probe.windowsStudioStep',{step:name+'-observed'})).observed===true);};
  const checkpoint=async name=>{await step(name);await hold(name);};
@@ -81,5 +79,5 @@
   check(!document.querySelector('.studio-settings input[type="password"]'),'WebView contains no secret field');
   await checkpoint('complete');details.stage='complete';await call('probe.runtimeUiReport',{passed:true,...details});
  }catch(error){details.nativeStatus=status();details.error=String(error);await call('probe.runtimeUiReport',{passed:false,...details});}
- finally{if(reloadProof||evidence)window.__TAURI_INTERNALS__.invoke=originalInvoke;}
+ finally{window.removeEventListener('loomlight-windows-probe-response',observe);}
 })();

@@ -1,58 +1,78 @@
 # Current outcome handover
 
-## Windows remembered Studio qualification in progress
+## Windows qualification: corrected final bounded sequence
 
-One serial owner, Local Windows x64, repository Caldwell-41/Renpy-editor,
-`worktrees/provider-qualification`, branch `codex/provider-qualification`, starting
-published checkpoint `015579a`. Preserve unrelated primary/worktree changes. The
-approved documentation simplification and opt-in probe correction are being reviewed
-for publication before packaging. This is an internal checkpoint of the same goal.
+One serial owner, Local Windows x64; Caldwell-41/Renpy-editor,
+`worktrees/provider-qualification`, branch `codex/provider-qualification`. The approved
+documentation simplification and initial probe correction are published at `00370ac`.
+Later scoped bridge/controller corrections are being reviewed before publication.
+Preserve all unrelated primary/worktree edits and historical evidence.
 
-The [current Windows contract](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
-owns acceptance and deadlines. The current user goal authorizes timing/capture holds,
-controller changes, in-scope corrections, justified retries, fresh identities/roots and
-repeated defined scenarios within **ten combined attempts, three used/seven remaining**.
-It supersedes old fixed run/root/per-action ceilings and controller-only restrictions.
-Never waive native observations or first-phase proof, recover uncertain credential
-ownership, or retry ambiguous dispatch. No real key/endpoint/generation, installation,
-security change, CI, merge/release or next feature.
+The [current contract and live evidence](../tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+own acceptance/counters. The active goal authorizes opt-in probe changes, necessary
+controller fixes, fresh identities/isolated roots and repeated defined synthetic
+scenarios, superseding historical per-action/fixed-run/controller-only limits.
+**7/10 combined attempts used; three remain.** Planned remaining sequence: build 6,
+full phase 1 run 14, then run 15 only after complete run-14 PASS, same EXE/root.
+No separate preparation goal. No real keys/endpoints, generation, installation,
+security changes, CI, merge/release, other-host work or next feature.
 
-Immediate prepared identities remain build 5/runs 8–9 with `--replacement --acceptance
---combined-attempts 10`. The second isolated root already exists; do not prepare it again.
-`app/.toolchains/windows-studio-acceptance/state-replacement.json` locates it;
-`app/.toolchains/windows-studio-step3/environment-build5.ps1` defines the environment.
-The original failed root/receipts remain unchanged. `replacement-preparation-audit.json`
-retains identities/digests. Full run-8 PASS must precede run 9 on the same package/root.
-No package or native attempt has been added in this goal continuation yet.
+Build 5 passed input equality and packaging in 209.75 s on `00370ac`, exit 0/PID absent.
+Its exact hashes and the failures are in the task evidence. Run 8 failed activation
+and timed out with no input; skip optional `activate_window` and directly capture the
+returned window. Run 10 captured input/refusal/restoration but host overhead exhausted
+entry time before Retry. Run 12 completed observed alpha refusal/Retry, gamma Save,
+stale refusal/Cancel and one authenticated GET, but failed client timing. None is a
+full phase-1 pass, and no dependent reopen was dispatched.
 
-Supported Computer Use (`node_repl` / `@oai/sky`) app discovery passed. No Loomlight,
-Cargo, rustc, Node or Python process was found in the initial targeted process check.
-CIM inventory was unavailable; do not treat that error as process proof. The actual
-controller npm hook verified pinned npm 11.9.0; Tauri CLI 2.11.4 resolved. No installation.
-Controller 27 tests and focused Settings/Windows DOM 10 tests pass; test TypeScript
-compilation passes. Rust probe check initially failed in the sandbox with Tauri's
-OUT_DIR filesystem error despite an existing directory and Cargo-provided variable;
-the same focused check passed outside the sandbox (1 PASS, 15 unrelated filtered).
-No package attempt was reserved by those checks.
+The run-12 defect was the immutable packaged Tauri `invoke` property. Corrected
+instrumentation is in `app/src/bridge.ts` and `windows_studio_probe.js`; it observes
+real client invocation timings/entry response metadata using an opt-in event, never
+request payload/key material. DOM fixtures now make invoke immutable, reproducing
+the actual boundary. Existing bounded confirmation holds and all assertions remain.
+Controller supports fresh even `--sequence` IDs under the same cumulative output
+namespace. An explicit prior-preservation preparation gate validates the exact known
+post-Cancel failure/store without reading or recovering its credentials.
 
-The implemented opt-in evidence selector holds alpha/gamma confirmations, Cancel,
-discovery completions, read-only Retry completion and final UI for up to 15 seconds,
-inside the unchanged 300-second whole run. Existing beta reload capture hold remains.
-Client discovery timings record invocation start/end and UI cleanup; missing/late
-intervals fail the controller. Actual captures and ordered host observations remain
-mandatory. Native action helpers must initialize state, use returned windows, guard
-entry/whole clocks before input and invalidate all UI state after exit.
+Private evidence remains under `app/.toolchains/windows-studio-acceptance/` and
+`app/.toolchains/windows-studio-step3/`. Original root is in `state.json`, run-8 root
+in `state-replacement.json`, later roots in `state-sequence-10.json` and
+`state-sequence-12.json`. Run-12 root retains exact saved alpha/gamma references and
+Cancel bytes. Do not rewrite it or treat it as full proof. Its two known synthetic
+entries remain accounted for; no native presence audit has yet run in this goal.
+No app/server/build is currently pending. Validate actual process state before any
+new dispatch; sandbox tasklist/OpenProcess may deny access rather than prove absence.
 
-Historical build 4 passed complete input equality/packaging on `841cd02`; run 6 failed
-alpha-entry at 123.72 seconds, with late masked input and no Save/GET/owned key creation.
-Run 7 was never dispatched. All failures, captures, manifests and old budget usage are
-preserved in the [execution history](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09).
-Task usage: build 3 FAIL, build 4 PASS, run 6 FAIL. Cumulative Windows four builds/six
-launches, two historical GETs, three earlier owned entries/five reads. This task has
-one native-entry session and one server lifetime; zero Saves/Cancel/Retry/GETs/new
-owned entries/presence reads. Mac/provider budgets remain unchanged.
+Use `environment-build5.ps1` as the verified environment source for a distinct build-6
+target. Before packaging, publish the reviewed correction and freeze HEAD plus all
+package inputs through both launches. For controller fault/restore calls, only the
+recorded fixture TEMP/TMP and authorized external execution are needed; do not waste
+the entry cap importing the entire build environment. Sandboxed node subprocess
+OpenProcess cannot inspect the external app; its refusal writes no fault bytes.
+Computer Use remains the only native UI route (`node_repl`, `@oai/sky`). Use fresh
+returned windows and observe/one-action/refresh, with pre-input clock guards. Node
+`process` is unavailable: the corrected controller binding sets TEMP/TMP within its
+Python file-only invocation. Avoid stale accessibility indexes; current screenshot
+coordinates/focus are supported. Invalidate state/window after exit.
 
-Next: finish focused Rust/source review, validate the preserved docs, commit/publish
-and verify publication; then hold packaged inputs fixed for build 5 and the bounded
-native sequence. Record exact passes/failures, timings, process exit and cumulative
-usage. No source-test result closes Windows remembered qualification or full 2A.1.
+Capture actual UI before acknowledgement, preserve original encodings and any PNG
+conversion. Native event receipts must be ordered and cover whole entry including
+fault/restore. Discovery needs actual client timing plus actual native result capture;
+server timings/probe markers alone are insufficient. Read-only reload Retry must
+preserve bytes and never enter/save/discover again. Exit proof requires actual PID
+absence; never synthesize an exit event or reacquire an exited app.
+
+Deadlines: build 1200 s +2 terminate/+2 reap; whole launch 300 s; each entry 120 s;
+confirmation/capture acknowledgement/Retry/exit 15 s; each GET 15 s +2 cleanup. Tool
+and approval overhead count. No partial proof waives the gates. Three remaining
+attempts cover one corrected build plus both full phases exactly; any extra required
+rebuild/retry is a budget blocker. Known failed entries are preserved, never recovered
+automatically under uncertain ownership.
+
+Checks so far: controller 28, Settings/probe DOM 10, app/test TypeScript PASS. Unchanged
+Rust focused check 1 PASS/15 filtered outside sandbox; sandbox OUT_DIR failure retained.
+Repository validator/whitespace passed; all 131 documentation fragments resolved.
+Initial publication was auto-review blocked twice despite destination verification;
+user explicitly confirmed exact repository/branch, then push/remote equality succeeded.
+That publication authorization persists. Final evidence/counters/docs and publication
+verification remain part of this goal. Full 2A.1/Phase 2 remains outside acceptance.

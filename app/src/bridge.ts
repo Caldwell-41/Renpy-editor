@@ -13,7 +13,17 @@ export async function requestCore<T>(
     onProgress.onmessage = update => { if(active && update.sequence > sequence){ sequence=update.sequence; listeners.forEach(listener=>listener(operation,update)); } };
   }
   let response: unknown;
-  try { response = await invoke("core_request", { request, onProgress }); } finally { active=false; }
+  // Qualification observes this actual client boundary; Tauri's invoke property
+  // is immutable in packaged WebViews. No request payload or native key is exposed.
+  const observeWindows = Reflect.get(window, "__loomlightWindowsEvidence") === true || Reflect.get(window, "__loomlightWindowsReloadProof") === true;
+  const started = observeWindows ? performance.timeOrigin + performance.now() : 0;
+  try { response = await invoke("core_request", { request, onProgress }); } finally {
+    active=false;
+    if (observeWindows) window.dispatchEvent(new window.CustomEvent("loomlight-windows-probe-response", {
+      detail: { operation, response: operation === "ai.enterCredential" ? response : undefined,
+        started, ended: performance.timeOrigin + performance.now() },
+    }));
+  }
   if (!isCoreResponse(response, request.requestId)) {
     throw new Error("The desktop core returned an invalid response.");
   }

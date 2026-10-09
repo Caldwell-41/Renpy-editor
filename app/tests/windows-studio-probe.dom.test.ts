@@ -60,6 +60,8 @@ async function scenario(phase:number, failedGet=false, reloadProof=false, defect
       return {protocolVersion:1,requestId:request.requestId,ok:true,value};
     }}
   });
+  // Match the real packaged Tauri descriptor: monkey-patching invoke must fail.
+  Object.defineProperty(Reflect.get(browser,"__TAURI_INTERNALS__"),"invoke",{writable:false,configurable:false});
   try {
     document.body.innerHTML="<button>Settings</button><button>AI providers</button><main></main><footer></footer>";
     document.querySelectorAll("button")[1]!.addEventListener("click",()=>mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!));

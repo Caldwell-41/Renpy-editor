@@ -13,6 +13,15 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_fresh_sequence_selects_distinct_full_phases_without_reusing_old_identity(self):
+        with patch.object(probe,"SEQUENCE",14),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"REPLACEMENT",True):
+            self.assertEqual(probe.selected_run(1),14)
+            self.assertEqual(probe.selected_run(2),15)
+            self.assertEqual(probe.state_path().name,"state-sequence-14.json")
+            for run,phase in [(12,1),(13,2),(14,2),(15,1)]:
+                with self.assertRaises(ValueError):probe.run_prefix(run,phase)
+
+
     def test_client_timings_require_complete_ordered_request_and_cleanup_deadlines(self):
         good={"actionStarted":1000,"requestStarted":1001,"requestEnded":1100,"completed":1200}
         report={"details":{"clientTimings":[good,dict(good,actionStarted=2000,requestStarted=2001,requestEnded=2100,completed=2200)]}}

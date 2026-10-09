@@ -35,26 +35,17 @@ in-scope corrections and justified retries within the existing allowance. It sup
 fixed run/root/per-action ceilings and controller-only repair restrictions. Resolve
 ambiguous dispatch before retrying; never recover uncertain ownership automatically.
 
-**Current proof:** build 4 passed packaging and complete input equality on `841cd02`;
-run 6 failed at alpha-entry timeout. Earlier native actions have limited evidence,
-not complete current qualification. Mac corrected reload proof passed separately;
-its development-file storage compromise and deferred native identity remain explicit.
-The [execution history](../archive/2026-10-09-phase-2-execution-history.md#windows-step-3-packaged-selection--2026-10-09)
-owns exact hashes, timings, original failures and review findings.
+**Current proof and allowance:** build 5 on published `00370ac` passed complete input
+checks/packaging; runs 8/10/12 failed for the distinct reasons below. Seven of ten
+combined attempts are used, three remain. Corrected build 6 plus runs 14/15 fit exactly.
+Full phase 1 must pass before phase 2 on the same package/root; historical partial
+proof cannot unlock reopen. Fresh even `--sequence` identities preserve all failures.
 
-**Allowance and prepared state:** 3 of 10 combined build/launch attempts used; seven
-remain before the next dispatch. Build 5 and runs 8/9 remain the immediate prepared
-sequence, using the existing second isolated root and a fresh package copy. New unique
-identities/isolated roots and repetitions of these synthetic scenarios may be selected
-when justified within the same ten-attempt ceiling; they never reset usage. Preserve
-original run 6, both roots, snapshots, receipts and captures.
-
-Usage before the next dispatch: task native-entry sessions 1, server lifetimes 1,
-Saves/Cancel/Retry/GETs/new owned entries/presence reads 0. Historical Windows totals
-remain four builds/six launches, 2/8 originally allocated GETs, three owned entries and
-five presence reads. Record new operations cumulatively; old unused allocations do not
-become separate allowance. Mac/provider scopes are unchanged. No installation, real
-key/endpoint, enumeration, security/accessibility change, CI, merge/release or 2A.2.
+The original roots and run-12 known saved root are preserved. The latter contains
+exactly the recorded synthetic A/gamma references and complete post-Cancel bytes;
+preparing a distinct empty-key root neither accesses nor recovers those credentials.
+No installation, real key/endpoint, enumeration, security/accessibility change, CI,
+merge/release or 2A.2. Mac/provider scopes and historic consumption remain unchanged.
 
 **Required evidence:** full phase-1 PASS before phase 2 on the same verified EXE/root;
 complete input provenance, original and reload markers, whole-store/byte and ownership
@@ -66,13 +57,51 @@ confirmation/capture acknowledgement/Retry/exit 15 s, GET 15 s plus 2 s cleanup.
 These include harness timing; failure is not by itself a product-performance defect.
 No threshold, acceptance assertion or prior failure is waived by this reorganisation.
 
-**Current work:** the narrow probe change is authorized and implemented for review:
-opt-in bounded holds preserve confirmation/discovery/completion UI for actual capture;
-client invocation timing covers request and cleanup. Holds do not count as native proof.
-Controller 27, Settings/probe DOM 10 and focused Rust 1 checks pass; documentation
-review precedes publication and the next packaged attempt. [HANDOVER](../../status/HANDOVER.md)
-owns live recovery; [TESTING](../../TESTING.md#windows-native-preflight-and-prepared-host-sequence)
-owns stable evidence requirements. No replacement build or launch has occurred yet.
+**Current work:** correct the immutable-Tauri-invoke observation defect through the
+actual client bridge, retain native capture holds/assertions/deadlines, review and
+publish before build 6. Only three combined attempts remain; a further required
+rebuild/retry beyond those would be a concrete budget blocker.
+
+## Windows qualification evidence — 2026-10-09
+
+The active goal authorizes the narrow probe changes and justified repeated synthetic
+scenarios within the same ten-attempt allowance, superseding older fixed identity,
+root and per-action caps. One Local Windows owner; no subagents or other-host access.
+
+| Attempt | Result and authoritative evidence |
+| --- | --- |
+| Build 5, attempt 4 | PASS on `00370accde1d1d2c12c1b2896daa346d1c7b44bd`; 209.745836 s receipt, 209.836335 s terminal, exit 0/PID absent. EXE SHA256 `c9eed6d86483e6a46debe834061512053fa11296ecaff6281b95dad5a667ebb4`, 14,836,224 bytes. Installer SHA256 `1475f925d0bf8b466974966e1a67bde984bfe26f0fd94b253ea62423776c466d`, 3,691,169 bytes; not run. Complete source/installed/generated/toolchain/environment equality. |
+| Run 8, attempt 5 | FAIL, 123.145129 s, exit 1/PID absent, alpha-entry timeout. Returned app window, but optional activation failed with foreground-process-ID error; recovery found no window after exit. No input/Save/fault/GET. Initial root unchanged. |
+| Run 10, attempt 6 | FAIL, 123.141790 s, exit 1/PID absent, alpha-entry timeout. Direct capture worked; masked alpha at 52.54–53.61 s, refusal/retained input at 100.97–101.95 s, exact restore. No Retry/successful Save/GET. Initial helper referenced unavailable Node `process`; corrected. Sandboxed fault PID access refused before mutation; authorized external controller succeeded. No late input dispatched. |
+| Run 12, attempt 7 | FAIL, 244.551526 s, exit 1/PID absent. Actual masked input, alpha unreadable refusal at 53.50–54.61 s; Retry without retyping confirmed at 82.35–83.33 s; gamma Save at 140.86–141.73 s; stale-origin refusal at 206.48–207.45 s; Cancel after exact restore at 236.13–236.92 s. One accepted alpha GET. Probe failed `Client discovery timing missing`; no complete/reopen proof. A later capture still showed Cancel and is not discovery observation. |
+
+Private original receipts, snapshots, JPEGs and audits remain under the existing
+ignored `app/.toolchains/windows-studio-acceptance/` and `windows-studio-step3/`.
+`goal-readiness-audit.json` verified 25 preserved earlier evidence hashes and exact
+second-root fixture bytes. All 131 checked documentation fragment links resolved.
+No old manifest was backfilled. Package-5 source remained fixed; later controller
+changes used the existing recorded controller-only input exception.
+
+Run 12's renderer/native observations and exact alpha/gamma/Cancel snapshots establish
+those partial behaviors, not full phase 1. The controller stopped before presence
+reads when the report failed. Two newly owned synthetic entries remain referenced in
+its preserved root; no uncertain ownership is recovered or unrelated key accessed.
+Task totals now: 3 builds/4 launches (7 combined), 4 server lifetimes, 6 native entry
+dialogues (5 typed sessions including old late run 6), 5 Save submissions (2 confirmed,
+3 refused), 1 Retry save, 1 Cancel, 1 GET, 2 new owned entries, 0 new presence reads.
+Cumulative Windows totals including earlier work: 5 builds/9 launches, 3 GETs,
+5 owned entries created, 5 presence reads. Earlier failures/counters remain in history.
+
+Root cause of run 12: Tauri 2.11.5 `scripts/core.js` uses `Object.defineProperty` for
+`invoke` without writable/configurable flags. The earlier monkey-patch silently did
+nothing in the packaged WebView; the previous DOM mock was writable. The corrected
+opt-in bridge emits operation/response timing at the real invocation boundary, with
+no request payload or native key. Only native-entry response metadata is emitted;
+other operations expose name/timing only. The probe uses that event for discovery
+and reload/Retry observation. The DOM mock now uses the actual immutable descriptor.
+Focused checks: controller 28 PASS, Settings/probe DOM 10 PASS, both TypeScript
+compilations PASS. Previous targeted Rust 1 PASS (15 unrelated filtered) remains
+valid for unchanged Rust; the initial sandbox OUT_DIR failure is retained.
 
 ## In plain language
 
