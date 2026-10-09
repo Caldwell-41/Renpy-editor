@@ -183,6 +183,50 @@ backends/ownership/package identities/security policy remain unchanged. No real 
 endpoint, project-content send, SSE, provider/auth expansion, proposals, installation,
 CI, merge/release or next feature was added.
 
+### Focused Mac shared-request verification — 2026-10-09
+
+**Selected recheck: PASS; records committed locally, push requires explicit approval.**
+One serial Local macOS ARM64 owner, no subagents or other-host execution. Inspected
+refs, branch, worktrees and local changes; the clean existing Mac checkout safely
+fast-forwarded from `0a91e20` to the exact published Windows continuation
+`de29e496f52a42194f528a57293d5aa06aae4967`. This publication supersedes the earlier
+local-only Windows state above; historical failures and budgets remain unchanged.
+
+Both commands ran serially from `app/` on macOS 26.6.2 (25G83), using the existing
+Rust/Cargo 1.90.0 `aarch64-apple-darwin` toolchain. Host execution reused the established
+loopback-capability route; `CARGO_NET_OFFLINE=true` prevented dependency downloads.
+Public synthetic credentials, injected fixture reader and isolated loopback only;
+no credential-store operation, secret inspection or project-content send.
+
+| Command | Result on `de29e49` |
+| --- | --- |
+| `cargo test -p loomlight-core ai_request --locked` | PASS: 8 passed, 0 failed/ignored, 277 filtered; test time 0.11 s |
+| `cargo test -p loomlight-desktop ai_requests --locked` | PASS: 6 passed, 0 failed/ignored, 15 filtered; test time 0.97 s |
+
+Core rechecks reject partial prompt 4097 against saved context 4096 and partial
+reasoning 1025 against response 1024. Desktop rechecks preserve valid completion while
+Save owns the service and retain cancel/configuration/project/shutdown and late-result
+rejection. No product, harness or toolchain failure occurred in these commands. Desktop
+emitted one unused `WINDOWS_SELECTOR` warning; no assertion or policy was relaxed.
+
+Original combined stdout/stderr, exit codes, toolchain identity and cleanup receipts
+are retained outside Git under ignored `.toolchains/reports/mac-request-recheck-de29e49/`.
+After each command, its process group was absent, process metadata had no owned process,
+and the owned-group listener query had no output (exit 1, no diagnostics). Both isolated
+temporary fixture directories were empty and removed. No owned runtime resource remains.
+
+**No code changes, package builds or application launches.** Reuse the
+[accepted Mac native walkthrough](../archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
+and unchanged Windows/Mac credential evidence. These deterministic results close only
+the outstanding focused Mac consequence of shared fixes `0cec43f`; they do not claim
+a Mac package containing those fixes, new native walkthrough, full 2A.2, Phase 2 or live
+Studio compatibility. No existing Windows/Mac evidence is invalidated by this records-only
+verification. Mac request history remains **1 build/2 launches** (selected **1/2, 2/3**);
+Windows remains **8 builds/15 launches** (selected **1/2, 3/3**). All historical failures
+and unused allowances remain intact. Documentation/link/privacy/whitespace checks passed.
+Only this acceptance, CURRENT and HANDOVER are selected for the local records commit;
+no push, CI, merge/release or next feature is authorized.
+
 ## Current Windows qualification contract
 
 **Selected outcome: complete.** Packaged Windows x64 remembered Studio credentials

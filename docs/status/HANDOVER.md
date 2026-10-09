@@ -1,19 +1,35 @@
 # Current outcome handover
 
-## Windows Studio request lifecycle: complete, local publication awaiting approval
+## Windows request acceptance and focused Mac recheck: complete, Mac records local
 
 One serial Local Windows x64 owner completed the selected bounded Studio synthetic
 JSON request lifecycle on Caldwell-41/Renpy-editor, `codex/provider-qualification`,
 in the existing `worktrees/provider-qualification`. Clean `9d7a6d6` fast-forwarded
 to published `0a91e20` after ref/ancestry inspection. Unrelated worktrees are untouched.
-No subagents, other host or CI. **Do not push until explicit user approval of the
-finished result.** The later screenshot approval authorized capture/input, not push.
+That Windows result is now published through **`de29e496f52a42194f528a57293d5aa06aae4967`**.
+The selected focused Mac verification used one serial Local ARM64 owner with no
+subagents, other-host execution or CI. Ref/branch/worktree inspection found the existing
+Mac checkout clean at `0a91e20`; it safely fast-forwarded to that exact published tip,
+preserving unrelated worktrees. **Do not push the new local verification records
+without explicit user approval of the concrete reviewed result.**
+
+[Focused Mac acceptance](../tasks/active/phase-2-initial-llm-assistance.md#focused-mac-shared-request-verification--2026-10-09)
+records both serial commands from `app/` on macOS 26.6.2 (25G83), existing Rust/Cargo
+1.90.0 `aarch64-apple-darwin`, offline dependency policy and host loopback capability:
+core `ai_request` **8 PASS**, desktop `ai_requests` **6 PASS**, zero failed/ignored.
+Partial usage bounds and completion overlapping Save/invalidation passed. No code
+changes, package builds, app launches, credential scenarios/store operations or secret
+inspection. One unused Windows selector compile warning is preserved, with no failure.
+Original logs/toolchain/cleanup receipts remain outside Git under ignored
+`.toolchains/reports/mac-request-recheck-de29e49/`. Both test process groups were absent,
+owned listener queries empty, and isolated temporary fixture directories empty/removed.
+Only the acceptance/CURRENT/HANDOVER changes are selected for the local commit.
 
 [Final owning acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-windows-request-acceptance--2026-10-09)
 and [public final metadata](../tasks/evidence/2026-10-09-windows-studio-request-final.json)
 record the exact proof. Shared product fixes are in
 `0cec43ff7785713d9d9ba0a8f53391cd92ccdfe1`; controller/checks and the historical
-capability stop are in `d8139eb`. Final acceptance records follow these local commits.
+capability stop are in `d8139eb`; published final acceptance records are in `de29e49`.
 
 Two rejecting regressions demonstrated partial prompt/reasoning usage escaping saved
 limits and valid completion discarded while Save checked out the project service.
@@ -68,11 +84,12 @@ snapshot as historical evidence. The failed earlier connect audit did not retain
 return value and proves no port refusal; successful listener metadata proves absence.
 The first approval/wrapper failure has no saved duration and is not a passed observation.
 
-**Remaining boundary:** Windows selected scope is ready for push approval. Mac's prior
-native/credential evidence covers unchanged scenarios only. The shared corrections
-require focused Mac `cargo test -p loomlight-core ai_request --locked` and
-`cargo test -p loomlight-desktop ai_requests --locked` for partial usage and completion
-overlapping Save/invalidation; do not silently claim these passed or execute another
-host from this task. Full 2A.2/live Studio/Phase 2 remain incomplete. No installation,
+**Remaining boundary:** Windows selected scope is published; the focused Mac recheck
+is complete with records local and push awaiting explicit approval. Mac's prior native
+walkthrough and Windows/Mac credential evidence are reused for unchanged scenarios;
+this records-only verification invalidates none. No Mac package containing the shared
+fixes or new native walkthrough is claimed. Historical budgets/failures remain intact,
+and no runtime resource or external operation is pending. Full 2A.2/live Studio/Phase 2
+remain incomplete. No installation,
 identity/security changes, real endpoints/content, provider/auth expansion, SSE,
 proposal application, CI, merge/release or next feature is selected.
