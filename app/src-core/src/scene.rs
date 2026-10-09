@@ -1584,7 +1584,7 @@ impl AuthoringService {
         }
     }
 
-    fn undo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
+    pub(crate) fn undo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
         let mut histories = self.scene_history.lock().map_err(|_| SceneError::Io)?;
         let history = histories
             .get_mut(project)
@@ -1602,7 +1602,7 @@ impl AuthoringService {
         }
     }
 
-    fn redo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
+    pub(crate) fn redo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
         let mut histories = self.scene_history.lock().map_err(|_| SceneError::Io)?;
         let history = histories
             .get_mut(project)

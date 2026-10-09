@@ -2,7 +2,8 @@
 
 ## Revised manual Save flow — 2026-10-09
 
-**Awaiting selection. The first layouts below were rejected by the user.** The user
+**Revised layouts approved by the user. Implementation uses A, Browse and write.
+The first layouts below were rejected.** The user
 requested ordinary Save updates for home game authoring, clearer actions, less clutter,
 better creation placement and removal of the unexplained Edit step. One explicitly
 requested research subagent compared official app/help and UX sources; it wrote no
@@ -42,7 +43,7 @@ is claimed. No app package or launch allowance consumed. The isolated browser cl
   Create card / Create lore entry describe creation without implying source changes.
 
 The recommendation is A for movement among entries, with B for a quieter writing view.
-Neither revision is accepted yet. Shared existing app tokens/controls, native focus,
+Design approval covers the revised layouts. Shared existing app tokens/controls, native focus,
 keyboard, draft guards, history, persistence and distribution privacy remain required.
 
 ## Rejected first layouts (historical preparation)

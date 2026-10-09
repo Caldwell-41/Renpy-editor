@@ -135,6 +135,7 @@ pub enum LifecycleError {
     Runtime(runtime::RuntimeError),
     Authoring(AuthoringError),
     Scene(SceneError),
+    Reference(crate::references::ReferenceError),
     Source(SourceError),
     Media(MediaError),
     Io,
@@ -653,6 +654,15 @@ impl LifecycleService {
         self.authoring
             .scene_workspace(&authority, &project_id)
             .map_err(LifecycleError::Scene)
+    }
+
+    pub fn references(&self) -> Result<crate::references::Workspace,LifecycleError> {
+        let (authority,project_id)=self.authoring_context()?;
+        self.authoring.references(&authority,&project_id).map_err(LifecycleError::Reference)
+    }
+    pub fn references_apply(&self,request:crate::references::ReferenceRequest) -> Result<crate::references::Workspace,LifecycleError> {
+        let (authority,project_id)=self.authoring_context()?;
+        self.authoring.references_apply(&authority,&project_id,request).map_err(LifecycleError::Reference)
     }
 
     pub fn scene_apply(

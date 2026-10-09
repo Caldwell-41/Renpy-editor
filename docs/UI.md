@@ -723,7 +723,8 @@ changes. Creation is a clearly named workspace action (New character card / New 
 entry); new forms use Create card / Create lore entry and Cancel. No Edit unlock or
 manual Approve/Reject/Supersede controls. Save is one undoable metadata operation.
 Optional source/link/knowledge fields expand on demand. The
-[revised A/B layouts](design/manual-reference-library/README.md) await selection;
+[revised A/B layouts](design/manual-reference-library/README.md) were approved;
+the implementation uses A, list beside directly editable fields;
 mockups do not establish native acceptance or change runnable Character definitions.
 
 Phase 1 Character fields are deliberately small:

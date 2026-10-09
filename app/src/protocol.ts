@@ -34,6 +34,8 @@ export const CORE_OPERATIONS = [
   "sdk.browse",
   "sdk.install",
   "authoring.list",
+  "references.list",
+  "references.apply",
   "character.create",
   "character.update",
   "appearance.setDefault",

@@ -252,6 +252,17 @@ fn core_request(
             ));
         }
     }
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("reference-library") && request["operation"]=="probe.referenceStage" {
+        let stage=request["payload"]["stage"].as_str().ok_or("Probe stage required")?;
+        if !["manual-save","external-edit","malformed","newer","restore","observe-light","observe-dark","observe-narrow"].contains(&stage){return Err("Probe stage refused");}
+        let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REFERENCE_PROBE_ROOT").ok_or("Probe root required")?);
+        let done=root.join(format!("{stage}.done")).is_file();
+        if request["payload"]["announce"]==true {
+            if stage.starts_with("observe-"){let main=window.as_ref();let size=if stage=="observe-narrow"{tauri::LogicalSize::new(720.0,780.0)}else{tauri::LogicalSize::new(1280.0,900.0)};main.set_size(size).map_err(|_|"Probe resize failed")?;}
+            println!("{}",json!({"evidence":"reference-stage","stage":stage,"ready":true}));let _=std::io::stdout().flush();
+        }
+        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
+    }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").is_ok()
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
@@ -710,6 +721,11 @@ fn main() {
                     let data = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Studio probe root required")?);
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n| n.to_string_lossy().starts_with("loomlight-studio-")) { return Err("Studio probe root refused".into()); }
                     LifecycleService::new(data).map_err(|_|"Studio probe initialization failed")?
+                } else if case == "reference-library" {
+                    let data=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REFERENCE_PROBE_ROOT").ok_or("Reference probe root required")?);
+                    if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n|n.to_string_lossy().starts_with("loomlight-reference-")){return Err("Reference probe root refused".into());}
+                    if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){LifecycleService::new(data).map_err(|_|"Reference reopen failed")?}
+                    else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
                 } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "source-foundation" {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "branches-performance" | "branches-interactive" | "ui-refresh") {
@@ -810,6 +826,10 @@ fn main() {
                         } else {
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("studio_settings_probe.js"))).expect("Studio settings probe injection");
                         }
+                    } else if case == "reference-library" {
+                        main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");
+                        let phase=if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
+                        main.eval(&format!("window.__loomlightReferencePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("reference_library_probe.js"))).expect("reference probe injection");
                     } else if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");
                         main.set_focus().expect("probe focus");
@@ -822,7 +842,7 @@ fn main() {
                     let windows_observation = cfg!(target_os = "windows") && case == "studio-settings"
                         && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_PHASE").as_deref() == Ok("2")
                         && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
-                    let limit = if windows_observation { 1800 } else if case == "branches-interactive" { 900 } else { 300 };
+                    let limit = if windows_observation { 1800 } else if matches!(case.as_str(),"branches-interactive"|"reference-library") { 900 } else { 300 };
                     while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
                     let cleaned = ai_requests::service().shutdown() && probe_host.shutdown();
                     println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));

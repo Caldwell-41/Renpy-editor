@@ -1,3 +1,4 @@
+import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
 import { catalogDialog } from "./catalog-dialog.ts";
 import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
 import { technicalName, technicalNameInput, technicalNameHelp, namingHelp } from "./authoring-input.ts";
@@ -47,7 +48,7 @@ interface Asset { id: string; kind: AssetKind; displayName: string; relativePath
 interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
-type ProjectSurface = "story" | "source" | "branches" | "characters" | "assets" | "variables";
+type ProjectSurface = "story" | "source" | "branches" | "characters" | "lorebook" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
 interface SceneTarget { readonly sceneId: string; readonly beatId: string; readonly expectedSourceRevision?: string }
 type ProjectTarget = SourceTarget | SceneTarget;
@@ -72,6 +73,8 @@ let disposeCatalogue: (()=>void) | undefined;
 let disposeSceneView: (() => void) | undefined;
 let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
+let activeReferenceController: ReferenceController | undefined;
+let characterTab: "game" | "cards" = "game";
 let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
@@ -120,6 +123,8 @@ Object.defineProperty(window, "__loomlightInstallSmokeRequester", {
 interface CompletionToken { view: number; operation: number; scope: object; sessionId?: string }
 
 function beginView(project?: OpenProject): number {
+  activeReferenceController?.dispose(); activeReferenceController=undefined;
+  if(currentProject?.sessionId!==project?.sessionId)characterTab="game";
   disposeCatalogue?.();disposeCatalogue=undefined;
   if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
   disposeBranchesView?.();
@@ -237,7 +242,7 @@ function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
 const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
+  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "references.list", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
   for (let attempt = 0; ; attempt += 1) {
     const requester = coreRequester;
     const response = await requestLane.run(operation, () => requester<T>(operation, payload));
@@ -427,8 +432,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
   sidebar.append(projectName, sectionLabel);
-  (["story", "source", "branches", "characters", "assets", "variables"] as const).forEach((name) => {
-    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", assets: "Assets", variables: "Variables" };
+  (["story", "source", "branches", "characters", "lorebook", "assets", "variables"] as const).forEach((name) => {
+    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", lorebook: "Lorebook", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
     nav.prepend(icon(name));nav.title=labels[name];nav.ariaLabel=labels[name];
     if (surface === name) nav.ariaCurrent = "page";
@@ -468,7 +473,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     navigate: target => requestProjectNavigation(project, "source", target),
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
   });
-  const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>{if(hasBlockingModal())return;const controller=currentSourceController(project);const capture=controller?.captureSaveIntent("toolbar",false);if(controller&&capture?.kind==="captured")void requestSourceSave(project,controller,capture.intent);else if(capture?.kind==="blocked")setStatus(capture.message,"error");else requestProjectFlush(project);});
+  const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>{if(hasBlockingModal())return;if(activeReferenceController){void activeReferenceController.save();return;}const controller=currentSourceController(project);const capture=controller?.captureSaveIntent("toolbar",false);if(controller&&capture?.kind==="captured")void requestSourceSave(project,controller,capture.intent);else if(capture?.kind==="blocked")setStatus(capture.message,"error");else requestProjectFlush(project);});
   document.querySelector(".app-header")?.append(shellSave);
   const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");settingsButton.ariaLabel="Settings";settingsButton.title="Settings";sidebar.insertBefore(settingsButton,close);}
   document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
@@ -492,7 +497,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
 }
 
 async function requestProjectNavigation(project: OpenProject, surface: ProjectSurface, target?: ProjectTarget): Promise<void> {
-  if (hasBlockingModal()) return;
+  if (hasBlockingModal() || activeReferenceController?.isBusy()) return;
   if((hasSceneDraft(root)||hasUnsubmittedInput()) && !await allowSceneNavigation())return;
   const controller = currentSourceController(project);
   if (!controller) {
@@ -714,18 +719,34 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
 }
 
 async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number): Promise<void> {
-  const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Supporting authoring";
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
-  workspace.append(title);
+  const header=document.createElement("div");header.className="reference-page-header";header.append(title);workspace.append(header);
   const token = beginCompletion(project, operationScopes.authoringLoad);
+  const current=():boolean=>generation===viewGeneration&&completionIsCurrent(token);
+  const renderReferences=async(kind:ReferenceKind,host:HTMLElement):Promise<void>=>{
+    const model=await projectValue<ReferenceWorkspace>(project,"references.list");if(!current())return;
+    const owner={};activeReferenceController=renderReferenceLibrary(host,kind,model,{
+      creationHost:header,current,guard:allowSceneNavigation,status:setStatus,
+      load:()=>projectValue<ReferenceWorkspace>(project,"references.list"),
+      apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<ReferenceWorkspace>(project,"references.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Try again after it finishes.");return result;}
+    });
+  };
   try {
-    const model = await projectValue<AuthoringMetadata>(project, "authoring.list");
-    if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-    if (surface === "characters") renderCharacters(workspace, project, model);
-    if (surface === "assets") renderAssets(workspace, project, model);
-    if (surface === "variables") renderVariables(workspace, project, model);
-    await refreshPersistenceStatus(project, generation);
-  } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Authoring data could not be loaded"), "error"); }
+    if(surface==="lorebook")await renderReferences("lore",workspace);
+    else if(surface==="characters"){
+      const tabs=document.createElement("div");tabs.className="reference-tabs";tabs.role="tablist";tabs.ariaLabel="Characters";
+      for(const [id,label]of [["game","Game characters"],["cards","Character cards"]]as const){const tab=button(label,"button");tab.role="tab";tab.ariaSelected=String(characterTab===id);tab.tabIndex=characterTab===id?0:-1;
+        const switchTo=async():Promise<void>=>{if(!await allowSceneNavigation())return;characterTab=id;showProject(project,"characters");};tab.onclick=()=>{void switchTo();};tab.onkeydown=e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();characterTab===id&&void(async()=>{if(!await allowSceneNavigation())return;characterTab=id==="game"?"cards":"game";showProject(project,"characters");})();}};tabs.append(tab);}
+      workspace.append(tabs);const pane=document.createElement("section");pane.role="tabpanel";pane.ariaLabel=characterTab==="cards"?"Character cards":"Game characters";workspace.append(pane);
+      if(characterTab==="cards")await renderReferences("card",pane);
+      else {const model=await projectValue<AuthoringMetadata>(project,"authoring.list");if(!current())return;renderCharacters(pane,project,model);}
+      tabs.querySelector<HTMLElement>('[aria-selected="true"]')?.focus();
+    }else{
+      const model=await projectValue<AuthoringMetadata>(project,"authoring.list");if(!current())return;
+      if(surface==="assets")renderAssets(workspace,project,model);if(surface==="variables")renderVariables(workspace,project,model);
+    }
+    if(current())await refreshPersistenceStatus(project,generation);
+  } catch(error){if(current())setStatus(message(error,"Authoring data could not be loaded"),"error");}
 }
 
 function formHeading(text: string): HTMLHeadingElement { const heading = document.createElement("h2"); heading.textContent = text; return heading; }
@@ -815,7 +836,7 @@ function hasUnsubmittedInput(): boolean {
 }
 
 async function allowSceneNavigation(): Promise<boolean> {
-  if (hasBlockingModal()) return false;
+  if (hasBlockingModal() || activeReferenceController?.isBusy()) return false;
   const supporting = root.querySelector(".supporting-workspace");
   if (supporting?.querySelector('[data-unsubmitted="true"]') && !activeAuthoringOperations.has(currentProject?.sessionId ?? "")) {
     return new Promise(resolve => {
@@ -824,7 +845,7 @@ async function allowSceneNavigation(): Promise<boolean> {
       backdrop.role = "dialog"; backdrop.setAttribute("aria-modal", "true"); backdrop.setAttribute("aria-label", "Unsubmitted changes");
       const panel = document.createElement("section");
       const title = document.createElement("h2"); title.textContent = "Keep editing?";
-      const copy = document.createElement("p"); copy.textContent = "This page has unsubmitted changes or staged imports. Stay to finish them, or discard them and leave. Imported originals are unaffected.";
+      const copy = document.createElement("p"); copy.textContent = supporting.querySelector(".reference-library") ? "You have unsaved reference changes. Keep editing, or discard these changes." : "This page has unsubmitted changes or staged imports. Stay to finish them, or discard them and leave. Imported originals are unaffected.";
       const actions = document.createElement("div"); actions.className = "row-actions";
       const stay = button("Keep editing", "button primary"); const discard = button("Discard and leave", "button danger");
       const finish = (leave: boolean): void => {
@@ -921,6 +942,7 @@ function installListeners(): void {
       return;
     }
     if (hasBlockingModal()) { recordSaveTrace("route=suppressed;origin=keyboard;reason=modal"); return; }
+    if(activeReferenceController){void activeReferenceController.save();return;}
     const controller = currentSourceController(project);
     const source = controller?.captureSaveIntent("keyboard", true);
     if (controller && source?.kind === "captured") {
@@ -938,6 +960,7 @@ function installListeners(): void {
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
   runtimeWorkspace?.dispose(); runtimeWorkspace = undefined;
   coreRequester = requester;
+  activeReferenceController?.dispose();activeReferenceController=undefined;characterTab="game";
   saveCommandTrace.length = 0;
   viewGeneration = 0;
   operationGeneration = 0;

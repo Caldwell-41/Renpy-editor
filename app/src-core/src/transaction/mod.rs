@@ -841,6 +841,15 @@ impl TransactionService {
         project: &ProjectId,
         path: RelativePath,
     ) -> Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic> {
+        self.snapshot_optional_bounded(project, path, MAX_MUTATION_BYTES)
+    }
+
+    pub(crate) fn snapshot_optional_bounded(
+        &self,
+        project: &ProjectId,
+        path: RelativePath,
+        maximum: usize,
+    ) -> Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         let target = resolve_target(&approved.anchor, &path, false)
@@ -852,7 +861,7 @@ impl TransactionService {
         {
             return Ok(None);
         }
-        self.snapshot(project, path).map(Some)
+        self.snapshot_bounded(project, path, maximum).map(Some)
     }
 
     pub(crate) fn inspect_file(

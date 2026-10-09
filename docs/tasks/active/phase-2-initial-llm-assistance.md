@@ -45,36 +45,107 @@ no fast-forward/reset necessary. Unrelated planning worktree is untouched.
 public `app/tests/fixtures/reference-library/` empty/replacement/manual-save/newer/malformed files.
 Schema defines shared lifecycle, bounded current/approved/prior revision retention,
 extensions, source citations, missing/stale links and exact transaction/history ownership.
-No production code changed. The current commit is preparation, not implementation.
+Schema/fixtures preceded the editor; the implementation is now local and incomplete
+in native acceptance. Preparation history remains in the scoped earlier commits.
 
-**UI decision pending:** user requires A/B approval and requested images when the inline
+**UI approved:** user requires A/B approval and requested images when the inline
 preview was not visible. [A/B layout review](../../design/manual-reference-library/README.md)
 records revised A (Browse and write), B (Focused writing),
 both themes and compact preview limitations. Do not treat the recommendation or preview
-interactions as approval. Resume this same outcome after the user's selection.
+interactions as approval. The user subsequently approved the revised layouts; the owner selected A, Browse and write, for implementation.
 Revised preview checks passed direct editing/Save/Discard, both themes, lore and 390 px
 list-to-form return without script errors/overflow. Repository validation and diff
 whitespace checks passed. No production/native behavior is proved by these checks.
 
-**Allowance, cumulative across chats/handoffs:** Mac **0/2 builds, 0/3 app launches**;
+**Allowance, cumulative across chats/handoffs:** Mac **2/2 builds, 3/3 app launches**;
 Windows **0/2 builds, 0/3 app launches**. Reserves require diagnosed failure/recorded
 correction; ambiguous dispatch must be resolved; reassess after two unsuccessful
 corrections of one hypothesis. Prior request budgets/failures are unchanged and not
 transferred. Initial sandboxed browser rendering failed; escalated isolated rendering
 passed. Browser previews consume no Loomlight package/native allowance.
 
-**Remaining:** implement core schema/validators, shared transactional service and typed
-dispatch, then approved UI and real UI-to-dispatch-to-file proof early. Focused tests
-must cover manual save/replacement/discard, Undo/Redo/reopen exact IDs/statuses, invalid/newer data,
-extensions/bounds, external edits/recovery, missing/stale entities and project switching.
-Native forms must prove keyboard/focus, compact widths and both themes on both targets.
-Verify diagnostics/distribution exclusion. Finish Mac checks/review/fixes, clean owned
-resources and commit locally; ask before push, then provide the same-outcome Windows
-pull-and-continue prompt. No Windows handoff or next distinct deliverable yet.
+**Remaining:** final review and corrected-package native acceptance are incomplete.
+The Mac build/launch allowance is exhausted; stop native attempts until the user
+provides a renewed allowance. Windows remains unstarted and required. No push is
+approved or attempted. The implementation is saved locally, not a delivered or
+accepted manual-library outcome. Exact continuation and missing proof are below
+and in HANDOVER. Do not claim full 2B.1 or Phase 2 completion.
 
-Generation, provider/credential/network work, prompt/context/payload work, proposal
-application, runnable source changes, import/export, injection/retrieval and runtime
-inference are excluded. No installation/security changes, CI, merge/release or next feature.
+### Manual-library Mac implementation and first native run — 2026-10-09
+
+UI A (list beside directly editable fields) is approved by the user. Local core
+schema/validators and typed dispatch share `commit_history` and ordinary recovery;
+Characters → Character cards and Lorebook use Save changes / Discard changes.
+The first signed package uses the existing approved identity; executable SHA256
+`419167622403907fb8f008226999cefd11e67cbd40bdde166774e557e07db801`.
+Selected allowance consumed: Mac **1/2 builds, 1/3 launches**; Windows **0/2, 0/3**.
+
+Native launch 1 proved physical Command-S UI → production IPC → metadata Save,
+replacement preserving prior text/record ID, exact Undo/Redo, cancelled/accepted
+Discard, bounds refusal without writes, search/tag filtering and stale-save refusal
+for an ordinary external replace. It **failed**: subsequent reload/save timed out;
+readback proves revisionCounter remained 2 and the external extension persisted.
+No follow-up save committed; no automatic write replay. Cleanup was confirmed.
+The probe lacked a precise returned-error marker, so do not claim an exact native
+error code. A deterministic persistence-lane reproducer separately failed because
+reference reads/writes bypassed the shared lane. Correction routes both through the
+lane and waits for native UI completion before probe readback, avoiding independent
+probe read/write contention. Native post-save focus also failed: fields were focused
+while disabled. Corrected ordering enables fields before focusing Name. The reserved
+second package is justified by these diagnosed defects and focused regressions.
+
+Early focused checks passed 112 renderer tests. Core selected reference checks passed
+10 references plus one incidental preferences test; an additional exact external-reload
+regression passed. Harness development failures (wrong Source request shape/mapped
+source, uncanonical fixture root, happy-dom Option) were corrected without product
+changes or package/native allowance. Required revised-package/native evidence remains
+pending. Owned first fixture was subsequently cleaned at allowance stop; reports/packages
+are ignored local evidence. Prior credential/request allowances remain unchanged.
+
+### Manual-library allowance stop — 2026-10-09
+
+The reserved corrected signed package built and passed signature/installer verification;
+executable SHA256 `b1fb411f7af5d819cf46cc77f5bf9875cc7731897b3c61e9bce3ef80539010bb`,
+installer SHA256 `714da98a95d616345f1ff35558765844def426a4281c9f1cdf2a695489b40e0b`.
+Focused post-correction checks passed the reference form/focus test and all four request
+lane tests (5/5 total). An exact core external-replace/reload/fresh-Save regression
+passed, resolving the no-commit readback and proving that service behavior in isolation.
+
+**Actual cumulative Mac starts:** (1) native fixture PID 73306, functional checks above
+then failed external-reload/save timeout; (2) CUA observation after that process exited
+implicitly reopened package 1, PID 73435, in its normal welcome view; (3) corrected
+probe PID 74021 immediately exited before fixture initialization because PID 73435
+held the single-instance guard. The third attempt produced no probe report and an
+empty captured log; process inspection confirmed the conflicting package path.
+The owner missed the implicit CUA restart until diagnosing attempt 3. Count it fully;
+do not reclassify it as a free inspection. Mac allowance is **2/2 builds, 3/3 app
+launches**, exhausted. No further native attempt or package build is authorized.
+Windows remains **0/2 builds, 0/3 launches** for this same outcome.
+
+Owned unintended PID 73435 was verified by its exact package executable path and
+terminated. The failed synthetic root and uninitialized corrected root were removed.
+Local ignored receipts/logs and structural failure metadata (IDs/statuses/hash only,
+no prose) retain unique evidence; no owned process or fixture remains. CUA must never
+observe/select an app after its probe has exited: Mac `getApp`/observation can launch it.
+Before any future launch, inspect processes without UI observation and verify that
+no owned instance remains; stop at budget exhaustion. No credentials/network/SDK
+execution or personal project editing occurred.
+
+**Missing Mac acceptance:** corrected queue/focus behavior in the native package;
+follow-up external reload/save, lore creation, native malformed/newer retention,
+close/reopen and separate-process byte-exact reopen; scope/knowledge/link forms;
+physical keyboard/focus after corrected Save, compact width and both themes;
+complete distribution exclusion proof and final review. Deterministic core covers
+schema/bounds/extensions, shared source history, project switching, Prepared recovery,
+stale/missing links and refusal. Earlier native passing assertions do not qualify the
+changed package. Windows production metadata/UI behavior is entirely unaccepted.
+
+Stop here under the user's exhausted-allowance instruction. Implementation/contract
+work is committed locally for recovery; publication still requires approval after a
+concrete reviewed result. Do not push or start a next feature. Continue the same outcome
+on Mac only with a renewed allowance, then seek publish approval and hand Windows the
+same branch/commit. The planned Windows continuation below is conditional on that
+publication, not an instruction to run another host now.
 
 ## Windows synthetic request selection — 2026-10-09
 

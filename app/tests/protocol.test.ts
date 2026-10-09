@@ -48,6 +48,8 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "sdk.browse",
     "sdk.install",
     "authoring.list",
+    "references.list",
+    "references.apply",
     "character.create",
     "character.update",
     "appearance.setDefault",

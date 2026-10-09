@@ -10,6 +10,7 @@ pub mod metadata;
 pub mod ports;
 pub mod preferences;
 pub mod progress;
+pub mod references;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
@@ -66,6 +67,8 @@ pub const OPERATIONS: &[&str] = &[
     "sdk.browse",
     "sdk.install",
     "authoring.list",
+    "references.list",
+    "references.apply",
     "character.create",
     "character.update",
     "appearance.setDefault",
@@ -513,6 +516,15 @@ pub fn handle_application_request(
                 })
                 .and_then(to_value)
         }
+        "references.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload).and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.references()).and_then(to_value)
+        }
+        "references.apply" => session_payload(validated.payload)
+            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_|payload))
+            .and_then(|payload|serde_json::from_value::<references::ReferenceRequest>(Value::Object(payload))
+                .map_err(|_|LifecycleError::Reference(references::ReferenceError::Invalid)))
+            .and_then(|request|lifecycle.references_apply(request)).and_then(to_value),
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))
@@ -816,6 +828,16 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
             "This request belongs to a closed or replaced project session.",
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
+        LifecycleError::Reference(error) => {
+            use references::ReferenceError::*;
+            let (code,message)=match error {
+                Invalid=>("INVALID_REFERENCE","Check the reference fields and their size limits. Nothing was saved."),
+                Unsupported=>("UNSUPPORTED_REFERENCE","This reference format is unsupported. The existing file was retained."),
+                Conflict=>("REFERENCE_CONFLICT","The reference library changed outside this editor. Keep your text and reload the library before saving."),
+                Io=>("REFERENCE_UNAVAILABLE","The reference library could not be read safely. Its file was retained."),
+                History(e)=>return scene_failure(request_id,e),
+            }; return CoreResponse::failure(request_id,code,message);
+        }
         LifecycleError::Scene(error) => return scene_failure(request_id, error),
         LifecycleError::Source(error) => return source_failure(request_id, error),
         LifecycleError::Media(error) => return media_failure(request_id, error),

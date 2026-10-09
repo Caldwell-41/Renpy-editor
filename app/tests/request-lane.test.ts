@@ -43,3 +43,12 @@ test("Close Project waits for a saved-state observation and dispatches exactly o
   finally{release();await observation;await outcome;}
   assert.equal(await close,"closed");assert.deepEqual(calls,["status","close"]);
 });
+
+test("reference observations and saves share the persistence lane without replay",async()=>{
+ const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+ const status=lane.run("project.status",async()=>{calls.push("status");await new Promise<void>(r=>{release=r;});});
+ await Promise.resolve();const refs=lane.run("references.list",async()=>{calls.push("references.list");});
+ const save=lane.run("references.apply",async()=>{calls.push("references.apply");});
+ await Promise.resolve();try{assert.deepEqual(calls,["status"]);}finally{release();await status;await refs;await save;}
+ assert.deepEqual(calls,["status","references.list","references.apply"]);
+});

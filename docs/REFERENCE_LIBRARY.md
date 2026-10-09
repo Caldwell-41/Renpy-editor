@@ -1,8 +1,8 @@
 # Manual reference library v1
 
-**State:** concrete pre-editor contract for the selected manual-library outcome;
-not implemented or accepted. Phase 2 section 9 and ADR 0011 own the product rules.
-UI selection and both-target production evidence remain required.
+**State:** implemented locally for the selected manual-library outcome; native
+acceptance and final review are incomplete. Phase 2 section 9 and ADR 0011 own the
+product rules. UI A is approved. Both-target production evidence remains required.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
 manual approval workflow. Select an entry, edit directly, then Save changes or
@@ -38,8 +38,8 @@ Each card/lore record requires `id`, `revisionCounter`, `currentRevisionId`,
 Revision numbers are positive, distinct within the record and no greater than that
 counter. The counter advances only on content replacement, never on review alone.
 
-Each revision requires `id`, `number`, `status`, `createdAt`, `reviewedAt` (UTC RFC3339
-or null), `reviewNote`, `supersedes` and `supersededBy` (revision link or null),
+Each revision requires `id`, `number`, `status`, `createdAt`, `reviewedAt` (canonical
+UTC RFC3339 seconds, `YYYY-MM-DDTHH:MM:SSZ`, or null), `reviewNote`, `supersedes` and `supersededBy` (revision link or null),
 and `content`. A revision link is `{recordId, revisionId}`. `status` is exactly
 `proposed`, `approved`, `rejected` or `superseded`. Current and approved pointers
 must resolve locally. At most one revision is approved, matching the approved pointer.
@@ -120,7 +120,10 @@ invalid pointers and invalid status relationships refuse the document.
 
 Unknown object members are retained at document, record, revision, content and nested
 object levels, subject to the same file/depth bounds. Supported edits merge only known
-edited fields into the prior object; unknown fields are never round-tripped through a
+edited fields into the prior object; retained array items carry their original
+object extensions when edited or reordered. Array replacement never merges by index,
+which could move a removed item’s extension onto another item. Explicit item removal
+removes that item and its extensions; unknown fields are never round-tripped through a
 renderer-owned whole-document replacement. New content revisions inherit their prior
 extension data. Accepted saves may change JSON formatting/key order; prose and unknown
 JSON values survive exactly in meaning. Refused writes preserve original file bytes.

@@ -1,30 +1,36 @@
 # Current status
 
-**Updated:** 2026-10-09. The selected outcome is the
-[manual reference library](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09):
-manually create/edit/approve/organize Character cards and lore with shared history and
-lossless save/reopen. One serial Local Mac ARM64 implementation owner; one user-requested research-only
-subagent completed UI comparisons without writing files. Both Mac ARM64
-and Windows x64 production metadata/UI acceptance remain required.
+**Updated:** 2026-10-09. The selected outcome remains the
+[manual reference library](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09).
+The user approved revised A/B designs; implementation uses A, a list beside directly
+editable fields with ordinary Save changes / Discard changes. Manual approval/status
+controls were removed by the user's correction. One serial Local Mac ARM64 writer;
+one explicitly requested research-only subagent completed comparisons without edits.
 
-Preparation defines the [v1 schema and bounds](../REFERENCE_LIBRARY.md) and public
-empty/replacement/manual-save/newer/malformed fixtures. The user requested A/B approval before
-editor implementation and image delivery after the inline preview was not visible.
-The first layouts were rejected. Revised [A/B images](../design/manual-reference-library/README.md)
-use directly editable fields and ordinary Save changes / Discard changes, with a clear
-workspace creation action. Manual approval/status controls are removed by the user
-correction; internal revisions/statuses remain. The revised layout awaits selection.
-No production code or native acceptance is claimed. Selected allowance is still Mac
-**0/2 builds, 0/3 launches**, Windows **0/2 builds, 0/3 launches**. Preparation remains
-local; push requires approval of the concrete reviewed result. HANDOVER owns continuation.
+The versioned [references contract](../REFERENCE_LIBRARY.md), core validators/service,
+typed IPC, Character cards/Lorebook forms and shared transaction/history integration
+are implemented locally. Focused deterministic checks pass. Early native proof confirms
+physical Command-S → real metadata, replacement, Undo/Redo, Discard, bounds refusal,
+search/filter and external stale-save refusal in package 1. That probe then failed after
+external reload/save; persisted readback confirms no follow-up commit. Queue and focus
+corrections pass focused regressions and are built into package 2.
+
+**Stopped: Mac allowance exhausted, 2/2 builds and 3/3 app starts.** UI inspection
+implicitly reopened package 1 after its probe exited; the next probe was rejected by
+single-instance ownership before initializing its fixture. Count all starts. No native
+qualification of the corrected package, final review or distribution proof is claimed.
+Owned process/fixtures are cleaned up. [HANDOVER](HANDOVER.md) owns exact failures,
+remaining proof and the conditional same-outcome Windows continuation. Windows remains
+**0/2 builds, 0/3 launches**; both-target acceptance is required. Work is local-only,
+no push approved or attempted. A renewed Mac allowance is needed before native work.
 
 The branch entered clean at published `54f562d`; refreshed remote refs matched.
-Prior Windows Studio synthetic request acceptance and focused Mac shared-request
-rechecks are published through that continuation. Their unchanged evidence is reused;
-original failures and allowances remain in the owning records. Prior totals remain
-Mac **1 build/2 launches**, Windows **8 builds/15 launches**; no transfer to this outcome.
+Unrelated planning worktree is untouched. Prior bounded Studio request/credential
+acceptance remains reusable unchanged; its original failures and allowances stay in
+owning records. Prior totals remain Mac **1 build/2 launches**, Windows **8 builds/15
+launches**; no allowance transfers to this outcome.
 
 Phase 1 remains accepted through PR19/main `5f448ca`. Full 2A.1/2A.2, full 2B.1,
 Phase 2 and live Studio compatibility remain incomplete; public v0.1.0 is unchanged.
-No generation, prompt/context/proposal work, source mutation, provider/credential/HTTP
-work, installation/security changes, CI, merge/release or next feature is selected.
+Generation, provider/credential/HTTP, prompt/context/proposal work, runnable source
+changes, installation/security, CI, merge/release and the next feature remain excluded.
