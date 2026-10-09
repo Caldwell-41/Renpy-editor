@@ -2,6 +2,7 @@
 PHASE_CHECKS = {
  1: {
   'Physical Save persists exact project prompt',
+  'Physical Save restores enabled prompt focus',
   'Restore shows current and installed baseline before confirmation',
   'Cancel restore preserves override',
   'Confirmed restore removes override',
@@ -16,6 +17,9 @@ PHASE_CHECKS = {
   'Stale selection is retained for explicit correction',
   'External prompt edit refuses stale Save and retains draft',
   'Explicit reload retains externally extended baseline',
+  'Native light context layout observed',
+  'Native dark context layout observed',
+  'Native compact context layout observed',
   'Project close/reopen retains baseline override removal',
   'Prompt and context operations preserve every game source',
  },

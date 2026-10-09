@@ -243,7 +243,7 @@ function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
 const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "references.list", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
+  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "scene.list", "authoring.list", "references.list", "prompts.list", "context.options", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
   for (let attempt = 0; ; attempt += 1) {
     const requester = coreRequester;
     const response = await requestLane.run(operation, () => requester<T>(operation, payload));

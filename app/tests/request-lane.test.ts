@@ -52,3 +52,15 @@ test("reference observations and saves share the persistence lane without replay
  await Promise.resolve();try{assert.deepEqual(calls,["status"]);}finally{release();await status;await refs;await save;}
  assert.deepEqual(calls,["status","references.list","references.apply"]);
 });
+
+test("prompt/context operations wait for the shared service, while Stop stays independent",async()=>{
+ for(const operation of ["prompts.list","context.options","context.preview","prompts.apply"] as const){
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+  const held=lane.run("project.status",async()=>{calls.push("status");await new Promise<void>(r=>{release=r;});});
+  await Promise.resolve();const request=lane.run(operation,async()=>{calls.push(operation);});
+  await lane.run("runtime.stop",async()=>{calls.push("stop");});
+  try{assert.deepEqual(calls,["status","stop"],`${operation} must wait, without replaying a write or preview`);}
+  finally{release();await held;await request;}
+  assert.deepEqual(calls,["status","stop",operation]);
+ }
+});

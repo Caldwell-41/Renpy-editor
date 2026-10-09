@@ -2,37 +2,30 @@
 
 **Updated:** 2026-10-10. The selected outcome is [Prompts and context preparation](../tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10),
 on `codex/provider-qualification`, starting from published `92a3318`. One serial Mac
-ARM64 owner, no subagents or other-host execution. The preceding manual reference
+ARM64 owner, no subagents or direct other-host execution. The preceding manual reference
 library remains accepted on both targets; [REFERENCE_LIBRARY](../REFERENCE_LIBRARY.md)
 owns its unchanged contract.
 
 | Capability | Implementation and evidence | Acceptance |
 | --- | --- | --- |
-| Dialogue rewrite prompt | Project-local literal Save, baseline comparison/confirmed restore, shared Undo/Redo, preserved unrelated settings/source and reopen. Five focused core cases and actual controller → ApplicationHost → persisted/preview integration pass. | Packaged native required. |
-| Exact context preparation | One saved dialogue/narration Beat, exact approved card/lore revisions, deterministic inert payload, dependencies/exclusions/read revisions and input/output/margin accounting. Stale/draft/citation/budget refusal. | Packaged native required on both targets. |
-| Draft/layout behavior | Controller tests pass retained drafts, duplicate Save prevention and stale completion. Actual Chrome rejects prior CRLF false-dirty behavior and passes unchanged-text correction with zero writes. | Physical keyboard/focus and theme/compact observations pending. |
+| Dialogue rewrite prompt | Project-local explicit Save, baseline comparison/cancel/restore, shared Undo/Redo and isolation/reopen. Focused core/controller/dispatch checks pass; native launch 2 physically persisted exact text and exercised history. | Corrected packaged native qualification required. |
+| Exact context preparation | Exact approved card/lore revisions, deterministic inert payload, dependency/exclusion/read-set and bounded size accounting. Core/controller and partial native payload/stale/budget checks pass. | Both-target native qualification incomplete. |
+| Draft/focus/recovery | Native launch 2 found lost Save focus and disabled initial-load error state. Small corrections pass 17 TS cases, actual held-host controller/dispatch recovery and Chrome focus/newline checks. | Corrected Mac theme/compact/source/reopen proof and Windows proof pending. |
 
-[PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md) owns the new canonical contract. The
-would-be payload is preview-only; provider sends/mappings, proposal/application,
-generated references, automatic retrieval/import/export, routes, full 2B.1 and Phase 2
-remain excluded. No runnable source, credential/HTTP or signing-policy change.
+[PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md) owns the canonical behavior. Provider sends,
+credential/HTTP changes, proposals/application, generated references, automatic retrieval,
+import/export, full 2B.1 and Phase 2 remain excluded.
 
-Final signed Mac package attempt 3 passed identity/signature/installer checks and
-privacy scanning. Final typecheck, focused core/controller/dispatch checks, three
-history-continuity regressions, reference regressions and repository validation pass.
-The first package attempt failed before compilation because sandboxed identity lookup
-returned no identities; outside-sandbox lookup diagnosed that access limitation. Review
-fixed CRLF draft detection and completed dependency accounting before the final build.
-The final package is retained locally. Its first native launch reached the physical
-Save pause, but Computer Use reports the Mac is locked and cannot unlock automatically.
-The author was asked to unlock it. Launch 1 was then cancelled at that pause with
-zero accepted native checks; exact PID absence and owned-fixture cleanup are confirmed.
-Native evidence remains missing; this is a capability blocker, not a product pass.
+Mac launch 1 was cancelled while locked, with zero accepted checks. After unlock,
+launch 2 used the retained signed package and completed 24 partial checks before a busy
+initial-load error stopped the walkthrough. Its failed report is preserved; exact owned
+PID absence and fixture cleanup are confirmed. The corrected code is locally reviewed
+and tested, but the retained package predates it. This is an allowance blocker, not a pass.
 
-**Cumulative allowance:** Mac **3/3 package attempts, 1/4 launches**;
-Windows **0/3 builds, 0/4 launches**. No automatic rebuild/retry or other-host transfer
-is selected while local required native acceptance is unresolved. [HANDOVER](HANDOVER.md)
-owns recovery and the next action; no process/fixture remains. Phase 1 remains accepted through
-PR19/main `5f448ca`; public v0.1.0 is unchanged. Local recovery commits preserve this work. Publication is authorized after this host
-is qualified for this new
-outcome on the same branch, without merge/release/installation.
+**Cumulative allowance:** Mac **3/3 package attempts, 2/4 launches**; Windows **0/3 builds,
+0/4 launches**. No extra build is authorized. The concrete remaining decision is one
+additional Mac package attempt, using the two existing remaining launches for corrected
+walkthrough and process reopen. [HANDOVER](HANDOVER.md) owns continuation. No process
+or fixture remains. Work is local-only; publication remains authorized after Mac
+qualification, then Windows transfer on the same branch. Phase 1 remains accepted
+through PR19/main `5f448ca`; public v0.1.0 is unchanged.

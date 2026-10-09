@@ -39,7 +39,7 @@ canonical `.renpy-editor/ai.json` and existing transactional metadata history.
 
 User-authorized publication is limited to this outcome on the same branch. No merge,
 release or installation. Cumulative ceiling per target: **3 package builds / 4 app
-launches** including handoffs and implicit launches. Current usage: Mac **0/3, 0/4**;
+launches** including handoffs and implicit launches. Entry usage: Mac **0/3, 0/4**;
 Windows **0/3, 0/4**. Diagnose a failure before retry; two-correction reassessment applies.
 Focused core and controller/dispatch proof precedes affected signed native qualification.
 Disposable fixtures only; unchanged manual-library/provider evidence is reused.
@@ -141,6 +141,70 @@ publish/verify, then transfer Windows; publication is therefore pending required
 qualification rather than a new approval request. The remote checkpoint remains
 `92a3318`. HANDOVER contains a same-host continuation, not a next-distinct outcome.
 Both-target acceptance, full 2B.1 and Phase 2 remain incomplete.
+
+### Unlocked Mac launch 2: diagnosed UI corrections and build allowance stop — 2026-10-10
+
+The user unlocked Mac and selected same-outcome continuation with the retained signed
+package. Its executable/installer and source-input hashes matched the retained candidate
+before launch. **Launch 2/4**, owned PID 88105, used that unchanged executable in a fresh
+disposable project. Computer Use succeeded when selecting the exact retained bundle;
+initial name lookup timed out, and bundle-ID lookup was ambiguous. Neither lookup started
+another process. Physical Cmd+S passed UI → dispatch → exact persisted custom prose,
+with unrelated AI settings retained. The native accessibility state then showed focus
+on document content; Tab moved to Application instead of continuing from the editor.
+
+Twenty-four individual checks preceded failure: explicit Save, current/baseline preview,
+Cancel/confirmed restore, Undo/Redo, protected draft, Settings reopen, exact approved
+card/lore payload, determinism, budget/stale-selection refusal and external-prompt refusal/
+retained draft/reload. At the next light-theme Settings reopen, the native UI displayed
+“Another request is in progress.” with every prompt/context control disabled. The report
+timed out with the last announced stage `external-prompt`; that stage label does not mean
+the external-edit check failed. **Failed/incomplete native qualification**, not a phase-1
+pass. Theme/compact observations, terminal source-preservation/project reopen and separate
+process reopen remain missing. The app exited with cleanupComplete; PID absence was
+confirmed and the exact owned fixture removed. Structural `phase-1-failed.json` and log
+remain ignored under `.toolchains/reports/prompt-context-mac-02`. No pending app/fixture.
+
+Classification: demonstrated product focus defect and unrecoverable initial-load refusal.
+Source inspection found focus attempted while the textarea was disabled; all four new
+operations also bypassed the existing renderer request lane, and the two safe reads
+omitted its bounded busy retry. The exact competing request in the native run is unknown;
+ordinary held-owner reproductions establish the missing ordering/recovery behavior.
+Small corrections now queue prompt/context operations with persistence, retry only
+prompt/choice reads, offer explicit initial-load Reload project prompts, and restore
+focus after reenabling controls. Mutation/preview requests are never replayed. Review
+also aligned the draft guard's displayed/keyboard-selected prompt tab. No core data,
+source, provider, credential, HTTP, signing or unrelated settings change.
+
+Failing-first held-request and missing-reload tests failed on the prior implementation;
+the corrected implementation passes. Actual Chrome reproduces unfocused keyboard-button
+Save/refusal before the correction and passes Save/refusal/reload focus afterward.
+An initial Chrome expectation assumed disabling a focused textarea blurred it as on
+Mac; Chrome retained focus. The harness was corrected to focus the real Save button,
+without changing production behavior to satisfy that assumption. A happy-dom selector
+was corrected to inspect its ARIA property, which its simulation does not reflect as
+an attribute. Neither harness failure counted as native/product proof.
+
+Final focused proof passes **17 TS cases** (3 prompt controller, 5 request lane, 9
+protocol), actual controller → held `ApplicationHost` busy refusal → explicit reload →
+persisted Save/restore/history and bounded preview/refusal, actual Chrome focus and
+unchanged-CRLF checks, typecheck and probe syntax. The native gate now requires all
+**21 phase-1 / 4 phase-2** checks, including physical enabled editor focus and three
+observed layouts; its self-test rejects omission of each required check, failed/partial/
+zero and unclean reports. Unchanged five core prompt and history/reference proofs are
+reused. Integrated changes were self-reviewed; no independent reviewer/subagent.
+Repository validation passes for 468 files and whitespace checks pass. CURRENT/HANDOVER
+are 331/882 words. Read-only remote verification still resolves this branch to `92a3318`;
+the unrelated planning worktree and repository-only noreply identity are preserved.
+
+**Current usage: Mac 3/3 package attempts, 2/4 launches; Windows 0/3 builds, 0/4 launches.**
+The prior package is retained as failure evidence and cannot qualify the corrected
+inputs. No rebuild or third launch has occurred. One additional Mac package attempt
+is the smallest necessary allowance change; the existing two remaining launches can
+cover corrected phase 1 and byte-exact phase 2. This is a request pending user decision,
+not renewed authorization. Local corrected work/records remain unpublished; the user's
+finish-Mac → publish/verify → Windows sequence is preserved. No distinct next feature
+is selected. HANDOVER owns the same-host continuation after that decision.
 
 ## Manual reference library selection — 2026-10-09
 

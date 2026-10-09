@@ -18,12 +18,17 @@ const click=async text=>{await wait(()=>button(text)&&!button(text).disabled);bu
 const input=(name,text)=>{const n=document.querySelector(`[name="${name}"]`);n.value=text;n.dispatchEvent(new Event('input'));};
 let controller;
 try{
+ process.stdin.write(JSON.stringify({driver:'hold'})+'\n');assert.equal((await next()).driver,'held');
  controller=mountPromptPreparation(document.querySelector('main'),{current:()=>true,load:()=>call('context.options'),apply:(command,expectedRevision)=>call('prompts.apply',{command,expectedRevision}),preview:payload=>call('context.preview',payload)});
  await wait(()=>document.querySelector('.prompt-preparation')?.dataset.busy==='false');
+ assert.match(document.querySelector('.prompt-notice').textContent,/Another request is in progress/);
+ assert.equal(button('Reload project prompts')?.disabled,false,'Actual busy host must leave an enabled recovery action');
+ process.stdin.write(JSON.stringify({driver:'release'})+'\n');assert.equal((await next()).driver,'released');
+ await click('Reload project prompts');assert.equal(document.querySelector('[name="systemPrompt"]').disabled,false);
  input('systemPrompt','Controller custom café 雪\r\nLiteral {{text}}');await click('Save prompt');const saved=await call('prompts.list');assert.equal(saved.effectiveText,'Controller custom café 雪\r\nLiteral {{text}}');assert.equal(saved.customized,true);
  await click('Restore baseline');assert.equal(document.querySelector('.prompt-restore').hidden,false);await click('Cancel restore');assert.equal((await call('prompts.list')).effectiveText,saved.effectiveText);
  await click('Restore baseline');await click('Confirm restore baseline');assert.equal((await call('prompts.list')).customized,false);await click('Undo project change');assert.equal((await call('prompts.list')).effectiveText,saved.effectiveText);await click('Redo project change');assert.equal((await call('prompts.list')).customized,false);
  await click('Context preparation');input('task','Retain intent');await click('Build context preview');assert(document.querySelector('[data-exact-payload]'));assert.equal(JSON.parse(document.querySelector('[data-exact-payload]').textContent).messages[0].content,saved.baselineText);
  input('contextBudget','256');await click('Build context preview');assert.equal(document.querySelector('.prompt-preparation').dataset.errorCode,'CONTEXT_BUDGET');assert.equal(document.querySelector('[data-exact-payload]'),null);assert.equal(document.querySelector('[name="task"]').value,'Retain intent');
- console.log('PASS: actual prompt controller → ApplicationHost dispatch → persisted Save/restore/history and bounded preview/refusal');
+ console.log('PASS: actual prompt controller → held ApplicationHost refusal/reload → persisted Save/restore/history and bounded preview/refusal');
 }finally{controller?.dispose();await w.happyDOM.close();process.stdin.end();await new Promise((resolve,reject)=>process.on('exit',code=>code===0?resolve():reject(Error(`Driver exit ${code}`))));}

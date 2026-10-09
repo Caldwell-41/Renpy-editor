@@ -29,6 +29,14 @@ Restoring does not reset another prompt, references, style notes, credentials or
 Existing unknown properties and other prompts are retained on supported Save; ordinary
 external replacements refuse stale writes and preserve typed drafts.
 
+Prompt and context operations share the renderer's persistence/service request queue.
+Only prompt/choice reads use the existing bounded busy-refusal retry; mutations and
+Build context preview are never automatically replayed. An unsuccessful initial load
+keeps its diagnostic visible and offers **Reload project prompts**, without substituting
+defaults or writing metadata. Save success/refusal restores focus after controls are
+enabled; explicit initial-load recovery returns to the prompt editor. The retained-draft
+guard also keeps the visible prompt tab and its keyboard selection in agreement.
+
 Installed baseline version/digest and the override's saved baseline version/digest remain
 visible. App updates do not overwrite custom prose. Saving an intentional edit records
 its installed baseline; explicit restore adopts the installed baseline. A displayed
@@ -113,6 +121,8 @@ node --test app/dist-tests/tests/prompt-ui.dom.test.js app/dist-tests/tests/prot
 node app/tests/prompt-controller.dispatch.mjs app/target/debug/examples/prompt-controller-driver
 node app/tests/prompt-line-endings.browser.mjs --expect-failure
 node app/tests/prompt-line-endings.browser.mjs
+node --test app/dist-tests/tests/request-lane.test.js
+node app/tests/prompt-focus.browser.mjs
 python3 -m unittest discover -s app/scripts -p test_prompt_probe_gate.py -v
 ```
 
@@ -123,4 +133,7 @@ support native proof. `scripts/prompt-context-probe.py` owns exclusive packaged 
 byte-for-byte across process reopen. Its gate rejects zero/missing/partial cases and
 unclean/failed reports. Physical Save/focus and theme/compact observations require
 actual native UI before releasing bounded stage markers; do not observe an exited app.
+The gate explicitly requires enabled prompt focus after physical Save and light/dark/
+compact observation markers, as well as persistence/context checks. Failed native
+reports remain failures even when individual preceding checks passed.
 Use only the selected ledger's remaining cumulative build/launch allowance.
