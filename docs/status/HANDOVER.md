@@ -1,95 +1,102 @@
 # Current outcome handover
 
-## Selected manual reference library accepted on both targets
+## Prompts and context preparation: blocked on Mac native UI access
 
-The selected manual reference library is accepted on packaged Mac and Windows x64.
-Continue Caldwell-41/Renpy-editor on `codex/provider-qualification` in the
-existing Windows `worktrees/provider-qualification` checkout. The clean worktree
-fast-forwarded from `de29e49` to published `dc889d65f85beeeb388ce8581f8e7d977b292f18`,
-which contains the reviewed Mac implementation `f48c446e629c238d9d190c33b9c727cd73002b7e`.
-Unrelated worktrees and primary checkout remain untouched. No product code changed
-during Windows verification. The earlier local `f678910` commit recorded the
-historical Computer Use timeout; this subsequent acceptance/status continuation
-must be committed locally and held for explicit push approval.
+Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`. The clean Local
+Mac ARM64 checkout safely fast-forwarded from `dc889d6` to user-selected published
+`92a33180604ce851aa8ebc47e5c336da81aedf57`; preserve subsequent work and the unrelated
+planning worktree. One GPT-6.1 Sol High serial owner, no subagents or direct other-host
+execution. The user authorizes normal publication of this new outcome on the same
+branch, without merge/release/installation. The preceding manual reference library is
+accepted on both targets and remains unchanged.
 
-[REFERENCE_LIBRARY](../REFERENCE_LIBRARY.md) owns schema and limits. The
-[selection](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09),
-[Mac acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09)
-and [Windows acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-windows-acceptance--2026-10-10)
-own the scope, exact proof and limits. UI A uses directly editable Character
-cards and lore entries, top creation controls, ordinary Save changes and Discard
-changes. There is no Edit unlock or manual Approve/Reject/Supersede control;
-internal revisions and statuses persist. This acceptance does not complete full
-2B.1, Phase 2 or live Studio compatibility.
+Read [selected scope and ledger](../tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10),
+[PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md), CURRENT, AGENTS, applicable WORKFLOW/TESTING
+and Phase 2 sections 6/10/11/19/20. This is one action's project-local prompt Save,
+baseline comparison/cancel/confirmed restore, shared history and reopen, plus a saved
+one-Beat context preview with exact approved references. No provider sends, credentials/
+HTTP changes, proposal/application, generated references, automatic retrieval,
+import/export, route traversal, full 2B.1 or Phase 2 claim. A next feature is not selected.
 
-### Windows verification
+Implemented production paths: four narrow typed IPC operations, project/session-bound
+core snapshots/history, one bundled v1 baseline resource, `.renpy-editor/ai.json`
+overrides, Settings Current project tabs and guarded drafts, deterministic full inert
+payload, explicit selections/dependencies/exclusions/read revisions and bounded
+input/output/margin accounting. Refusals preserve typed form input, files and source.
+The response/authority contract is core-owned and preview-only, not an implemented
+proposal schema or provider mapping. Preview limits are explicit overrides; saved
+provider settings remain under Application → AI providers and are not modified.
 
-Focused Windows gates passed before packaging: TypeScript typecheck, Python
-probe compilation, native JavaScript syntax, 15 selected frontend/protocol/
-controller tests, eleven reference tests plus incidental preferences, three
-history-continuity regressions and the external history boundary. An initial
-sandboxed core test failed at temporary profile creation before a reference
-operation; identical checks passed outside the filesystem sandbox. Core dispatch
-also verifies project isolation, ordering, ordinary recovery and deeper malformed
-and bounds cases. Existing portable, credential and request evidence remains
-valid only for its unchanged cases.
+Five core prompt tests, two controller tests, selected protocol/reference checks,
+three history-continuity tests, real controller → ApplicationHost dispatch → persistence
+integration, TypeScript/JS/Python checks, desktop test compilation and repository
+validation pass. Actual Chrome exercises the prior false-dirty CRLF comparator, then
+passes the production correction with zero writes. Gate self-tests reject failed,
+zero/missing/partial results and unclean native reports. All diagnostic failures remain
+in the owning ledger; none is silently counted as a pass. Changed code was self-reviewed
+and findings corrected; no independent review was requested or delegated.
 
-Package attempt **1/2** stopped at a diagnosed Tauri CLI argument separator
-before compilation. Attempt **2/2** built the production x64 executable and
-NSIS bundle offline with the corrected command. An ignored build-only shim
-ran the exact repository TypeScript/Vite `beforeBuildCommand` because this
-host has no `npm`. The executable SHA256 is
-`86192e75dfdea3e4435bef1f3e672519b00f5bd2745c5bbd9fe26e8420d546cc`;
-installer SHA256 is
-`7f9b975ae16dbb1e87df41b0a8b61659ace39990a41b4b19d4b6e100d57f95c1`.
-Both passed privacy scanning. The package was not installed.
+**Cumulative allowance:** Mac **3/3 package attempts, 1/4 launches**; Windows **0/3,
+0/4**. Attempt 1 stopped before compilation at sandbox-only identity invisibility;
+read-only outside-sandbox lookup diagnosed it. Attempts 2/3 passed unchanged approved
+identity/signature/installer gates. Attempt 2 was never launched. The final build
+includes the demonstrated CRLF draft fix, complete dependency accounting and named
+stale-reference errors. No further Mac package build is authorized; remaining launches
+can use this unchanged package after diagnosing the observation limitation.
 
-Native launch **1/3**, PID 14960, reached the manual Save pause after synthetic
-form entry. Computer Use listed one Loomlight window but timed out requesting
-its state; no physical Save or visual assertion occurred. Its `passed:false`
-receipt and zero accepted assertions remain historical failure, classified as
-missing observation capability rather than a product defect.
+Final package is ignored under `.toolchains/releases/prompt-context-mac-03/`, including
+source-input hashes and identity receipt. Executable SHA256
+`fe90b9069630db56b156ddab9f26dd49bc4dda60219608d329a3e3a6988edf0e`;
+installer `82d97392b7c4da69f3933ae1e61ee58f293156dadeee8d1f11cd996a7054f1a9`.
+The pinned signing identity and certificate-bound designated requirement remain unchanged;
+artifact privacy scan passed for all five app/installer files. No package was installed.
 
-At the user's request, Computer Use was retried without increasing allowance.
-Launch **2/3**, PID 21212, accessed the retained packaged WebView. Physical
-Ctrl+S showed Saving then Saved; disk readback confirmed an approved card with
-counter 1 and a matching current/approved revision. Physical Tab moved focus
-from Name to Aliases. The production probe then passed **29** assertions, exit
-0 and complete cleanup: cards/lore creation and replacement, ordinary Save/
-Discard, bounds refusal preserving data, malformed/newer refusal, external
-conflict and explicit reload, unknown fields, stale citation/missing link,
-source preservation and exact Undo/Undo/Redo/Redo. Wide light/dark and compact
-dark forms were observed with top creation and Save/Discard; compact Search,
-Tab/Tab/Return reopened the card and focused Name. Windows compact vertical
-scrolling was not independently established. Synthetic form input ran through
-the packaged production UI and real IPC; browser mocks were not credited as
-native acceptance.
+Mac launch 1 PID **85833** reached `manual-save` after synthetic form entry, then
+Computer Use reported the Mac locked and automatic unlock unavailable. The user was
+asked to unlock and reply ready. No physical Save/focus/layout observation or stage
+marker release occurred. After more than three minutes at the pause, only that owned
+PID was stopped with SIGTERM. The runner failed on absent required proof. **Status:
+cancelled / missing native evidence, zero accepted checks**, not a product defect/pass.
+PID absence was confirmed; the owned `loomlight-prompt-mac-01` synthetic root is removed.
+No pending process/fixture remains. Its log and structural cancellation/hash receipt
+are ignored under `.toolchains/reports/prompt-context-mac-01/`; no success phase-1 or
+phase-2 receipt exists. Do not call getApp on the stopped app: it can implicitly launch.
 
-Launch **3/3**, PID 18108, passed **3** separate-process reopen assertions,
-exit 0 and complete cleanup. Both collections, exact revision/status data and
-the external unknown extension persisted. The whole metadata file had identical
-SHA256 before and after process reopen:
-`78f45911a83206fd4bb1109185a64fc03ace4679a5eb2778ffd576b4328ffbba`.
-The final card ID is `e3067b71-9232-426b-af48-582d3dbcd08b`, counter 3,
-current/approved r3 `598d4e41-0e3b-4045-b125-4198f3b6153f`; r2
-`bd0471c7-30e0-44dd-a1e8-137d71d1e07e` remains superseded. The ignored
-`app/.toolchains/manual-reference-windows/final-audit.json` records report and
-log hashes. All three PIDs are absent, and the owned synthetic root was removed.
-The retained package and receipts remain ignored local evidence.
+Next action is same-host Mac unlock/qualification, not Windows transfer. Once the Mac
+is actually unlocked, use the unchanged final package and one remaining start with a
+fresh `loomlight-prompt-*` temp root/output directory. No automatic replay or rebuild.
+Native phase 1 must pass physical Cmd+S, focus, restore/cancel/confirm/Undo/Redo,
+retained-draft guard, exact reference preview, stale/budget/external refusal, source
+preservation and actual theme/compact observations. Observe promptly; only then release
+bounded markers. Phase 2 uses that accepted fixture for byte-exact AI/reference metadata
+process reopen. The report gate rejects incomplete/zero results. Preserve failures,
+count every start, and clean only owned fixtures/processes. No Mac package build remains.
 
-**Cumulative manual-library allowance:** Windows **2/2 package builds, 3/3 app
-launches**; Mac **7/9 builds, 10/13 starts**. No Windows attempts remain. There
-was one serial Windows owner, no subagents and no other-host execution. No custom
-author distribution override or game execution was qualified. The accepted Mac
-result and this Windows result meet the selected both-target requirement.
+Local implementation checkpoint is `217ea73`; the subsequent docs-only recovery
+commit contains this stop record. Both are local-only.
+The remote remains the entry `92a3318`. The user requested finish one host before
+publish/verify/other-host transfer. Publication awaits required Mac evidence under
+existing authorization; no fresh push approval is needed once the host qualifies.
 
-### Next distinct deliverable, not started
+### Same-host continuation prompt
 
-The next queue item is **Prompts and context preparation**, the remaining
-necessary 2B.1 slice on the accepted manual library and shared prompt/limit
-settings. Return a separate bounded prompt for selecting it; do not implement it
-as part of this outcome. The prompt should cover editable/restorable prompt and
-save/reopen, exact reference revision selection, inspectable bounded payload
-with no silent truncation, affected-target native verification and a finite
-allowance. Keep provider send, proposal application, generated references and
-automatic retrieval separate. Ask before pushing this local records checkpoint.
+> Resume Prompts and context preparation in Caldwell-41/Renpy-editor,
+> `codex/provider-qualification`, preserving the local commits and published `92a3318`
+> ancestry. Read AGENTS, CURRENT, HANDOVER, PROMPTS_CONTEXT and the owning selected
+> Phase 2 ledger. Use one GPT-6.1 Sol High serial Mac ARM64 owner, no subagents or
+> other-host execution. The Mac must be unlocked with working Computer Use before
+> native input. Mac usage is 3/3 package attempts and 1/4 launches; use the unchanged
+> retained signed final package, never rebuild. Launch 1 was cancelled with zero
+> accepted checks because the Mac was locked; its exact PID/fixture are cleaned.
+> Run a fresh phase 1 via prompt-context-probe.py, observe physical Save/focus and
+> theme/compact UI promptly, then byte-exact process reopen via phase 2 on the accepted
+> fixture. Diagnose before any retry; preserve exclusions and cumulative limits.
+> Finish Mac review/records, publish and verify this same branch within existing
+> authorization, then transfer one Windows x64 owner (0/3 builds, 0/4 launches) for
+> the same outcome. No next feature or full 2B.1/Phase 2 claim before required proof.
+
+Once this Mac host is qualified, finish review/status, publish/verify the same branch
+within existing authorization, then transfer one owner to Windows x64 for the same
+outcome/remaining allowance. Windows must prove affected packaged behavior before
+both-target acceptance. Do not claim completion or offer the next dialogue-send feature
+while either target's required native proof is missing.

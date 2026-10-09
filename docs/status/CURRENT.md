@@ -1,37 +1,38 @@
 # Current status
 
-**Updated:** 2026-10-10. The selected [manual reference library](../tasks/active/phase-2-initial-llm-assistance.md#manual-reference-library-selection--2026-10-09)
-is accepted on packaged Mac and Windows x64. UI A has directly editable Character
-cards and lore entries, top creation controls and ordinary Save/Discard. Manual
-Approve/Reject/Supersede and an Edit unlock are absent; revisions and statuses
-remain stored internally. [REFERENCE_LIBRARY](../REFERENCE_LIBRARY.md) owns the
-contract; the [Mac acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-mac-acceptance--2026-10-09)
-and [Windows acceptance](../tasks/active/phase-2-initial-llm-assistance.md#final-manual-library-windows-acceptance--2026-10-10)
-own proof and limits.
+**Updated:** 2026-10-10. The selected outcome is [Prompts and context preparation](../tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10),
+on `codex/provider-qualification`, starting from published `92a3318`. One serial Mac
+ARM64 owner, no subagents or other-host execution. The preceding manual reference
+library remains accepted on both targets; [REFERENCE_LIBRARY](../REFERENCE_LIBRARY.md)
+owns its unchanged contract.
 
-| Capability | Acceptance |
-| --- | --- |
-| Cards, lore and reference integrity | Packaged UI → dispatch → metadata authoring, replacement, bounded refusal, malformed/newer refusal, external edit/reload, unknown-field retention, stale citation/missing link and source preservation pass on both targets. |
-| History and storage | Consecutive Undo/Undo/Redo/Redo, exact IDs/revisions/statuses and byte-exact separate-process reopen pass on both targets. Core tests cover project isolation, ordering, recovery and deeper malformed/bounds cases. |
-| Layout and focus | Physical keyboard Save/focus, wide light/dark and compact dark forms and list navigation pass on both targets. Windows compact vertical scrolling was not independently established. |
+| Capability | Implementation and evidence | Acceptance |
+| --- | --- | --- |
+| Dialogue rewrite prompt | Project-local literal Save, baseline comparison/confirmed restore, shared Undo/Redo, preserved unrelated settings/source and reopen. Five focused core cases and actual controller → ApplicationHost → persisted/preview integration pass. | Packaged native required. |
+| Exact context preparation | One saved dialogue/narration Beat, exact approved card/lore revisions, deterministic inert payload, dependencies/exclusions/read revisions and input/output/margin accounting. Stale/draft/citation/budget refusal. | Packaged native required on both targets. |
+| Draft/layout behavior | Controller tests pass retained drafts, duplicate Save prevention and stale completion. Actual Chrome rejects prior CRLF false-dirty behavior and passes unchanged-text correction with zero writes. | Physical keyboard/focus and theme/compact observations pending. |
 
-The Windows worktree safely fast-forwarded to published `dc889d6`, including the
-reviewed Mac implementation `f48c446`; product code remained unchanged. Focused
-Windows TypeScript, probe syntax, frontend/controller, reference core and shared
-history checks pass. Its first sandboxed core run failed at temporary profile
-creation; the same checks passed outside the filesystem sandbox. Windows package
-attempt 1 failed at a diagnosed Tauri CLI argument separator, then attempt 2
-built the x64 NSIS package and passed privacy scanning. Launch 1 timed out at
-Computer Use window access before input. After the user's renewed request,
-launch 2 passed 29 packaged assertions with physical Ctrl+S and focus observation;
-launch 3 passed 3 reopen assertions with identical whole-file metadata bytes.
-Owned fixtures/processes are cleaned; receipts and package remain ignored locally.
+[PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md) owns the new canonical contract. The
+would-be payload is preview-only; provider sends/mappings, proposal/application,
+generated references, automatic retrieval/import/export, routes, full 2B.1 and Phase 2
+remain excluded. No runnable source, credential/HTTP or signing-policy change.
 
-**Cumulative manual-library allowance:** Mac **7/9 builds, 10/13 starts**;
-Windows **2/2 builds, 3/3 starts**. Unchanged credential/request evidence is
-reused under its separate budgets. No extra allowance is needed for the selected
-outcome. This records-only continuation is local; ask before pushing.
-[HANDOVER](HANDOVER.md) identifies the next distinct deliverable without starting it.
+Final signed Mac package attempt 3 passed identity/signature/installer checks and
+privacy scanning. Final typecheck, focused core/controller/dispatch checks, three
+history-continuity regressions, reference regressions and repository validation pass.
+The first package attempt failed before compilation because sandboxed identity lookup
+returned no identities; outside-sandbox lookup diagnosed that access limitation. Review
+fixed CRLF draft detection and completed dependency accounting before the final build.
+The final package is retained locally. Its first native launch reached the physical
+Save pause, but Computer Use reports the Mac is locked and cannot unlock automatically.
+The author was asked to unlock it. Launch 1 was then cancelled at that pause with
+zero accepted native checks; exact PID absence and owned-fixture cleanup are confirmed.
+Native evidence remains missing; this is a capability blocker, not a product pass.
 
-Phase 1 remains accepted through PR19/main `5f448ca`; full 2B.1, Phase 2 and
-live Studio compatibility remain incomplete. Public v0.1.0 is unchanged.
+**Cumulative allowance:** Mac **3/3 package attempts, 1/4 launches**;
+Windows **0/3 builds, 0/4 launches**. No automatic rebuild/retry or other-host transfer
+is selected while local required native acceptance is unresolved. [HANDOVER](HANDOVER.md)
+owns recovery and the next action; no process/fixture remains. Phase 1 remains accepted through
+PR19/main `5f448ca`; public v0.1.0 is unchanged. Local recovery commits preserve this work. Publication is authorized after this host
+is qualified for this new
+outcome on the same branch, without merge/release/installation.
