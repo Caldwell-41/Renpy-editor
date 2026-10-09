@@ -35,15 +35,17 @@ in-scope corrections and justified retries within the existing allowance. It sup
 fixed run/root/per-action ceilings and controller-only repair restrictions. Resolve
 ambiguous dispatch before retrying; never recover uncertain ownership automatically.
 
-**Current proof and allowance:** build 5 on published `00370ac` passed complete input
-checks/packaging; runs 8/10/12 failed for the distinct reasons below. Seven of ten
-combined attempts are used, three remain. Corrected build 6 plus runs 14/15 fit exactly.
-Full phase 1 must pass before phase 2 on the same package/root; historical partial
-proof cannot unlock reopen. Fresh even `--sequence` identities preserve all failures.
+**Current proof and allowance:** corrected build 6 on published `4698a88` and full
+phase 1 run 14 passed. Run 15 used that same package/root after the complete PASS,
+but failed its first native discovery-capture hold. **Ten of ten combined attempts
+are used; none remain.** Full phase 2 remains incomplete. No further build/launch
+may proceed without an explicitly extended finite allowance. Historical partial
+proof and probe-only reopen assertions do not waive required native observations.
 
-The original roots and run-12 known saved root are preserved. The latter contains
-exactly the recorded synthetic A/gamma references and complete post-Cancel bytes;
-preparing a distinct empty-key root neither accesses nor recovers those credentials.
+The original roots and run-12/run-14 known saved roots are preserved. Each saved root
+contains its recorded synthetic A/gamma references and complete post-Cancel bytes;
+four known synthetic entries remain referenced. No automatic credential recovery
+or cleanup was performed. Run-15 reopened/current bytes equal run-14 complete bytes.
 No installation, real key/endpoint, enumeration, security/accessibility change, CI,
 merge/release or 2A.2. Mac/provider scopes and historic consumption remain unchanged.
 
@@ -57,10 +59,12 @@ confirmation/capture acknowledgement/Retry/exit 15 s, GET 15 s plus 2 s cleanup.
 These include harness timing; failure is not by itself a product-performance defect.
 No threshold, acceptance assertion or prior failure is waived by this reorganisation.
 
-**Current work:** correct the immutable-Tauri-invoke observation defect through the
-actual client bridge, retain native capture holds/assertions/deadlines, review and
-publish before build 6. Only three combined attempts remain; a further required
-rebuild/retry beyond those would be a concrete budget blocker.
+**Stop boundary:** the allowance is exhausted. The immutable-Tauri observation
+correction worked in run 14. Run 15's missing native capture is a separate evidence
+failure: null accessibility despite requested text, followed by an expired hold and
+failed refresh. No beta entry, replacement/removal or reload recovery was dispatched.
+Further qualification needs a bounded capture-recovery plan and explicit additional
+allowance. Preserve the complete first-phase evidence and all failed attempts.
 
 ## Windows qualification evidence — 2026-10-09
 
@@ -74,6 +78,9 @@ root and per-action caps. One Local Windows owner; no subagents or other-host ac
 | Run 8, attempt 5 | FAIL, 123.145129 s, exit 1/PID absent, alpha-entry timeout. Returned app window, but optional activation failed with foreground-process-ID error; recovery found no window after exit. No input/Save/fault/GET. Initial root unchanged. |
 | Run 10, attempt 6 | FAIL, 123.141790 s, exit 1/PID absent, alpha-entry timeout. Direct capture worked; masked alpha at 52.54–53.61 s, refusal/retained input at 100.97–101.95 s, exact restore. No Retry/successful Save/GET. Initial helper referenced unavailable Node `process`; corrected. Sandboxed fault PID access refused before mutation; authorized external controller succeeded. No late input dispatched. |
 | Run 12, attempt 7 | FAIL, 244.551526 s, exit 1/PID absent. Actual masked input, alpha unreadable refusal at 53.50–54.61 s; Retry without retyping confirmed at 82.35–83.33 s; gamma Save at 140.86–141.73 s; stale-origin refusal at 206.48–207.45 s; Cancel after exact restore at 236.13–236.92 s. One accepted alpha GET. Probe failed `Client discovery timing missing`; no complete/reopen proof. A later capture still showed Cancel and is not discovery observation. |
+| Build 6, attempt 8 | PASS on `4698a88c11fc689f9ef4da76754324fc2deafcbe`; 258.111509 s receipt, 258.194984 s terminal, exit 0/PID absent. EXE SHA256 `67fd69d2e6bb231c290d67f1270d7c7651fa0cb7ecc8c77f569aa3cdcc796986`, 14,836,224 bytes. Installer SHA256 `81aec132aecb794a26f2adc93afc971d3b03ff211da35925058a8e63301fff45`, 3,688,667 bytes; not run. Complete input equality passed. |
+| Run 14, attempt 9 | Full phase-1 PASS, 243.865653 s, exit 0/PID absent. Actual masked alpha; unreadable refusal 46.50–47.64 s; Retry without retyping 77.56–78.48 s; gamma Save 112.08–112.93 s; stale refusal 179.92–180.96 s; Cancel after exact restoration 203.92–204.68 s. Two authenticated alpha GETs and native result observations; request times 0.008900/0.006500 s, cleanup 0.095900/0.096700 s. Complete ordered native receipt, exact store/restoration checks and two remembered-entry presence reads passed. |
+| Run 15, attempt 10 | FAIL, 18.078178 s, exit 1/PID absent, `Timeout: get-1-complete`. Correctly gated on full run-14 PASS and identical package/root. Probe checks proved reopen plus one accepted alpha GET (client request 0.012300 s, cleanup 0.095300 s). Initial native capture at 6.75–7.22 s produced a JPEG but null accessibility despite requested text; host text access failed. Refresh reported foreground-process-ID failure after hold expiry. No acknowledgement, beta input, replacement/removal or reload recovery. Internal results are partial evidence, not a native acceptance pass. |
 
 Private original receipts, snapshots, JPEGs and audits remain under the existing
 ignored `app/.toolchains/windows-studio-acceptance/` and `windows-studio-step3/`.
@@ -86,11 +93,20 @@ Run 12's renderer/native observations and exact alpha/gamma/Cancel snapshots est
 those partial behaviors, not full phase 1. The controller stopped before presence
 reads when the report failed. Two newly owned synthetic entries remain referenced in
 its preserved root; no uncertain ownership is recovered or unrelated key accessed.
-Task totals now: 3 builds/4 launches (7 combined), 4 server lifetimes, 6 native entry
-dialogues (5 typed sessions including old late run 6), 5 Save submissions (2 confirmed,
-3 refused), 1 Retry save, 1 Cancel, 1 GET, 2 new owned entries, 0 new presence reads.
-Cumulative Windows totals including earlier work: 5 builds/9 launches, 3 GETs,
-5 owned entries created, 5 presence reads. Earlier failures/counters remain in history.
+Final task totals: 4 builds/6 launches (10 combined), 6 server lifetimes, 9 native
+entry dialogues (8 typed sessions including old late run 6), 9 Save submissions
+(4 confirmed, 5 refused), 2 Retry saves, 2 Cancels, 4 GETs, 4 new owned entries,
+2 new presence reads. Cumulative Windows totals including earlier work: 6 builds/
+11 launches, 6 GETs, 7 owned entries created, 7 presence reads. Earlier counters and
+failures remain in history. Four known entries remain across the run-12/run-14 roots.
+
+Run-14 full proof is retained in `run-14.json` and `run-14-observed.json`; failed
+run-15 capture/exit/probe evidence in `run-15.json`, `run-15-exit.json` and
+`run-15-host-partial.json`. Both final PIDs were independently rechecked absent;
+no test listener remained. Phase-1-complete, reopened and current store bytes share
+SHA256 `a26f9b908fc4b3d9480b2768a847e31d5cacd401399ab62f99d6028167622130`.
+No pending app/server/build, changed threshold, extra launch or credential cleanup.
+Final documentation validation passed for 412 repository files; whitespace passed.
 
 Root cause of run 12: Tauri 2.11.5 `scripts/core.js` uses `Object.defineProperty` for
 `invoke` without writable/configurable flags. The earlier monkey-patch silently did
