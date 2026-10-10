@@ -234,6 +234,35 @@ still cannot establish the viewport, identify those native cases for local hando
 only after finishing feasible selected checks. Publish/verify before dispatch, record
 confirmed run identity, then follow manual same-thread wait/resume.
 
+### Confirmed corrected Windows retry — 2026-10-10
+
+**State: awaiting_ci.** Scoped fixes/reuse gates published and remote verified at
+`c6c9cb05f87f1ec748423a8c1d0d96f515a56832` before fresh dispatch. No active duplicate
+operation existed. Confirmed workflow **357322921**, `production-scaffold.yml`,
+[run **38027478869**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869),
+**attempt 1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+head exactly matches that candidate. Created **2026-10-10 05:25:56 UTC**; last
+observed **in_progress at 05:26:06 UTC**. Selected Windows x64 job **114141299161**
+started, setup passed, checkout was in progress; generic jobs are skipped.
+Inputs: `dialogue_rewrite_windows=true`, `upload_packages=false`,
+`rewrite_reuse_run_id=38023888008`, `rewrite_build_ordinal=2` (unused in reuse mode),
+`rewrite_first_launch_ordinal=1` (dependent phase 2 ordinal 2).
+
+New terminal artifact: `rewrite-windows-38027478869-1`, **7 days after upload**;
+completion/upload and actual reuse/native results are not yet observed. Original
+source artifact expires **2026-10-17 04:31:02 UTC** and has a retained local audit
+copy. Known use at retry checkout: **Windows 1/4 builds, 0/6 launches**, with **zero
+new builds/up to two launches reserved**; later actual consumption remains unknown
+until terminal attempt/log audit. **Mac 1/4 builds, 3/6 launches**, unchanged valid
+production evidence reused. No native acceptance or observation marker is inferred.
+
+Publish the docs-only wait successor and end active model polling. User resumes this
+same chat to audit this exact run/attempt, fresh refs/local edits, reuse source and
+all terminal cases/captures/cleanup. A docs-only branch successor is not a new tested
+candidate. Bounded further corrections stay within this outcome and remaining
+allowance, with diagnosis before retry and two-correction reassessment. No autonomous
+watcher/wake-up, merge, release, secret provisioning or other-host direct access.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)

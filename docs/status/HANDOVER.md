@@ -4,7 +4,7 @@
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. Last wait checkpoint `233d4e6` is published and verified; production
+acceptance. Scoped correction candidate `c6c9cb0` is published and verified; production
 inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
 Continue one active GPT-6.1 Sol High owner in the current development session. No
 subagents or direct access to the user's other computer.
@@ -14,7 +14,7 @@ and [selected scope, failures, results and required Windows cases](../tasks/acti
 own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
 Windows 1/4 builds, 0/6 launches**. Mac qualification is complete; both-target
 acceptance remains incomplete until Windows proof. There is no pending local process,
-owned fixture or synthetic credential; the audited CI failure is below. Prior launch-1 failure evidence is retained.
+owned fixture or synthetic credential; the audited CI failure and confirmed retry are below. Prior launch-1 failure evidence is retained.
 
 ### Completed Mac evidence
 
@@ -42,7 +42,7 @@ until the menu and uses suite teardown exit. Production/package inputs are uncha
 Existing core/transport/native/controller and 122 renderer regression passes remain
 valid. Unique historical timeouts/locked-host evidence remain failures, not passes.
 
-### Audited Windows failure and selected retry
+### Audited Windows failure and corrected retry
 
 [Run **38023888008**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
 workflow **357322921** (`production-scaffold.yml`), attempt **1**, candidate
@@ -71,7 +71,7 @@ Selected fresh retry uses `dialogue_rewrite_windows=true`, `upload_packages=fals
 first launch ordinal **1** (dependent phase 2 **2**). Strict run/hash/runtime-input
 validation must succeed before reuse; no fallback rebuild. Retrieve the original
 scanned package and passed SDK evidence via Actions read access only, keeping source
-provenance and original failures. Publish/verify scoped corrections before dispatch.
+provenance and original failures. Scoped corrections were published and remote verified before dispatch.
 
 Native receipts bind PID/executable digest, unlocked desktop, control state, viewport
 and actual PNGs. Light/dark/compact theme/geometry and OS mouse Generate/Accept with
@@ -86,15 +86,31 @@ up to two launches**; remaining allowance is **3 builds/6 launches** before retr
 Reconcile terminal attempt entries and logs, including failed/cancelled/implicit
 Loomlight launches, before any further dispatch. No automatic reruns or allowance reset.
 
-**Next action:** publish/verify and dispatch the selected fresh retry. Record exact
-workflow/run/attempt/head and last status/time, then publish the coherent wait record
-and end model polling. Resume this same chat only on the user's instruction to audit
-selected jobs, candidate/input/binary identity, reused-source evidence, every case log,
-SDK/checksums, native PNGs/receipts, both reports, HTTP digests and cleanup. Missing or
-skipped evidence stays unresolved. Finish bounded corrections/feasible work, then
-request local Windows handoff only for named native cases CI cannot establish.
-No watcher, scheduler or second writer; docs-only successors do not replace the tested
-candidate. Prior zero-job validation failure at `3451137` remains in the task ledger.
+### Confirmed retry — awaiting_ci
+
+Workflow **357322921**, `production-scaffold.yml`,
+[run **38027478869**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869),
+**attempt 1**, event `workflow_dispatch`, exact source head
+`c6c9cb05f87f1ec748423a8c1d0d96f515a56832`, branch `codex/provider-qualification`.
+Created **2026-10-10 05:25:56 UTC**; last observed **in_progress at 05:26:06 UTC**.
+Selected Windows x64 job **114141299161** started, setup passed, checkout was in
+progress; generic jobs were skipped. Material inputs are the selected reuse/ordinal
+values above. No duplicate active run existed before dispatch. New artifact
+`rewrite-windows-38027478869-1` has **7 days retention after upload**; completion,
+upload and actual reused-source/native results are not yet observed. Later consumption
+is unknown until terminal audit; known totals at checkout remain **1/4 builds, 0/6
+launches**, with **zero new builds/up to two launches reserved**.
+
+**Next action:** stop model polling and wait for the user's manual same-chat resume.
+On resume, check this exact run/attempt terminal state, fresh refs/local edits, then
+inspect selected jobs, run/source/input/binary identity, reused SDK/package evidence,
+every case log, native PNGs/receipts, both reports, exact HTTP digests and cleanup.
+Missing/failed/skipped evidence stays unresolved; normalized continue-on-error badges
+are insufficient. Complete bounded fixes/review with diagnosis before retry; after
+two unsuccessful corrections of one hypothesis, reassess. Local Windows handoff is
+only for named required native cases actual CI cannot establish after feasible work.
+No watcher, scheduler or second writer. This docs-only wait successor does not replace
+the tested candidate; prior zero-job and first-run failures remain in the ledger.
 
 Detailed mapping and reservations are in the
 [focused CI selection](../tasks/active/phase-2-initial-llm-assistance.md#focused-windows-ci-preparation-and-first-selection--2026-10-10).

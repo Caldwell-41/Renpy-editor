@@ -21,15 +21,16 @@ are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diag
 fixture correction; no production change or rebuild was necessary.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 0/6 launches**.
-**State: in_progress.** Terminal audit of
-[run 38023888008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008)
-confirms renderer 123/123, transport 8/8, pinned SDK and package success; core/test
-setup/controller-import and desktop geometry failures prevented native launches.
-The diagnosed harness fixes and strict package/SDK reuse gates pass local checks.
-No production behavior changed; completed Mac evidence remains valid. Publish/verify
-and dispatch the selected fresh retry using retained build 1: zero new builds, up to
-two launches reserved. Actual Windows native proof remains pending.
-[HANDOVER](HANDOVER.md) owns retry identity and manual same-thread terminal audit.
+**State: awaiting_ci.** First run audit confirmed renderer 123/123, transport 8/8,
+pinned SDK and package success; diagnosed harness/capability failures prevented
+native launches. Fixes and strict reuse gates are published at `c6c9cb0`.
+[Corrected run 38027478869](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869),
+attempt 1, was confirmed in progress at **2026-10-10 05:26:06 UTC** with only Windows
+selected. Retained build 1/SDK evidence must validate before reuse: zero new builds,
+up to two launches reserved. Actual retry consumption and all native proof remain
+pending terminal audit. Mac evidence remains valid; production behavior is unchanged.
+Manual same-thread resume; no model polling. [HANDOVER](HANDOVER.md) owns exact
+operation/reuse identity and next action.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.
