@@ -1,27 +1,24 @@
 # Current status
 
-**Updated:** 2026-10-11. **Generated Character cards implemented; reassessed CI pending**
-on `codex/provider-qualification`. Implementation67faeaa, worker fixture fixf1a1a8b,
-reviewed cancellation diagnostics/package prerequisite3246190. Retained Mac ARM64
-session; one GPT-6.1 Sol High owner, serial edits and fresh independent review/plan.
+**Updated:** 2026-10-11. **Generated Character cards implemented; exact-handle repair under qualification**
+on `codex/provider-qualification`, retained Mac ARM64 session, one GPT-6.1 Sol High
+serial owner and independent review. Draft closure f03ea0f foundations retained.
 
 | Capability | State |
 | --- | --- |
-| Reference/prompt/proposal/transaction foundations | Qualified evidence retained; Draft closure f03ea0f |
-| Generated card draft/update and approval | Editor-only proposal, exact review/core IDs; separate approval retains prior text |
-| Local checks | core26/references12/prompts5/renderer129/controller; final transport8/worker6 pass |
-| Signed Mac changed action | package1/native25+3/five bodies/physical Save and Approve/cleanup pass |
-| Windows CI | Two failed runs: first worker corrected6/6; second transport7/8 unresolved |
-| Next focused proof | run38090637300 attempt1 pending, no Windows native acceptance claim |
+| Generated card draft/update | Editor-only, exact passive review, one proposed transaction; separate approval retains prior text |
+| Third CI audit | run38090637300 failed Windows partial-body shutdown10057/EOF timeout; Mac9checks pass |
+| Prior worker failure | Corrected fixture construction; later Windows worker6/6 establishes fix |
+| Narrow transport repair | Cancellation/IO share exact socket handle; independent review and local8/6/controller pass |
+| Native proof | Prior Mac25+3 retained historically; production repair needs renewed signed package/native |
+| Windows acceptance | Package/native skipped third run; no Windows native pass or closure claim |
 
-[Task reassessment and wait](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-independently-reassessed-ci-wait--2026-10-11)
-owns plan, exact failure evidence, inputs and allowance. Independent review found no
-additional card defect; cancellation instrumentation keeps both two-second gates.
-Packaging now requires focused success; skip cannot promote cache. Confirmed actual
-Windows2packages/0launches/3dispatches, Mac1/2/3. Windows package3/launches1–2 conditional;
-limits each4/6/4, one dispatch remains after this run. Prior allowances closed.
+[Task third audit and repair](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11)
+owns decisive evidence and reassessment. Third run instrumented the second fault;
+production was unchanged. Final dispatch follows renewed Mac native proof and review.
+Actual Windows2packages/0launches/3dispatches; Mac1/2/3. Limits each4/6/4; one focused
+dispatch remains per target. No reservations counted as execution, prior allowances closed.
 
-[HANDOVER](HANDOVER.md) owns manual same-thread artifact audit and closure. No model
-polling/watcher. No runnable Character/Appearance changes, generated lore, paid/public
-calls, provider/signing expansion, merge/release or following deliverable. Full Phase2
-and final human acceptance remain separate; bounded closure requires Windows/native proof.
+[HANDOVER](HANDOVER.md) owns continuation. No model polling/watcher, runnable Character/
+Appearance changes, generated lore, paid/public calls, provider/signing expansion,
+merge/release or following deliverable. Full Phase2/human acceptance remain separate.

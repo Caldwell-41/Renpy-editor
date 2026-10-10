@@ -146,7 +146,7 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
 #[derive(Default)]
 struct CancelInner {
     cancelled: AtomicBool,
-    socket: Mutex<Option<TcpStream>>,
+    socket: Mutex<Option<Arc<TcpStream>>>,
     #[cfg(test)]
     shutdown_observation: Mutex<Option<std::result::Result<(), (std::io::ErrorKind, Option<i32>)>>>,
 }
@@ -213,7 +213,10 @@ impl Connector for AbortConnector {
         }
         // One literal-loopback connect attempt. A one-second deadline also bounds
         // cancellation while the OS is connecting, before a socket can be owned.
-        let stream = TcpStream::connect_timeout(&self.address, Duration::from_secs(1))?;
+        let stream = Arc::new(TcpStream::connect_timeout(
+            &self.address,
+            Duration::from_secs(1),
+        )?);
         let mut owned = self
             .cancel
             .0
@@ -224,7 +227,9 @@ impl Connector for AbortConnector {
             let _ = stream.shutdown(Shutdown::Both);
             return Err(ureq::Error::ConnectionFailed);
         }
-        *owned = Some(stream.try_clone()?);
+        // Cancellation and transport IO share the exact connected OS handle,
+        // including after the response moves into ureq's body reader.
+        *owned = Some(Arc::clone(&stream));
         Ok(Some(OwnedTransport {
             stream,
             buffers: LazyBuffers::new(
@@ -235,7 +240,7 @@ impl Connector for AbortConnector {
     }
 }
 struct OwnedTransport {
-    stream: TcpStream,
+    stream: Arc<TcpStream>,
     buffers: LazyBuffers,
 }
 impl std::fmt::Debug for OwnedTransport {
@@ -255,7 +260,7 @@ impl Transport for OwnedTransport {
         use std::io::Write;
         self.stream
             .set_write_timeout(timeout.not_zero().map(|d| *d))?;
-        match self.stream.write_all(&self.buffers.output()[..amount]) {
+        match (&*self.stream).write_all(&self.buffers.output()[..amount]) {
             Ok(()) => Ok(()),
             Err(e)
                 if matches!(
@@ -272,7 +277,7 @@ impl Transport for OwnedTransport {
         use std::io::Read;
         self.stream
             .set_read_timeout(timeout.not_zero().map(|d| *d))?;
-        let count = match self.stream.read(self.buffers.input_append_buf()) {
+        let count = match (&*self.stream).read(self.buffers.input_append_buf()) {
             Ok(n) => n,
             Err(e)
                 if matches!(

@@ -4347,3 +4347,55 @@ Mac9checks, privacy and cleanup. If focused fails, skipped package/native remain
 and cache cannot be promoted. Classify new evidence before selecting the final dispatch.
 If all required cases pass, complete independent artifact review/acceptance and publish
 closure/result/limits/next proposal-only prompt. No following deliverable started.
+
+### Generated card third CI audit and exact-handle repair — 2026-10-11
+
+User resumed run38090637300 and requested a clear account of three consecutive
+failures. Fresh refs reconcile clean at9facb23; retained Mac ARM64 session, no reset.
+Exact run attempt1/candidate3246190, terminal failure. Windows114326170036 ended
+2026-10-10T22:24:19Z; Mac114326169859 succeeded22:16:51Z.
+
+The failures concern two distinct problems. Run38083896396 constructed a project
+fixture after starting a two-second worker timer; moving construction earlier fixed
+that case, and both later Windows runs establish worker6/6. Run38085719737 then failed
+partial-response cancellation. Run38090637300 added discriminating diagnostics and
+package gating, but left production cancellation unchanged, so it exposed the same
+fault again. That third dispatch established the failed phase/handle rather than
+fixing it; no claim that all three were unrelated or that local green proved Windows.
+
+Raw transport7/8: stalled headers owns socket, shutdownOk, completion239.3microseconds,
+server EOF37.4microseconds. Partial body owns socket, shutdownNotConnected/Windows10057,
+completion2.0095955seconds, server TimedOut10060 after2.0256242seconds. This is a Windows
+cancellation/cleanup failure, not harmless timing: the server never observes timely
+EOF and the worker remains blocked. Core26/prompts5/references12/renderer129/controller/
+worker6 pass. Required Windows native remains missing.
+
+Actual artifacts11684286059Windows (SHA256331323f51b85c1a9c167678d4cb692607c827a5f168db39ab4761e3f339c0bf9)
+and11684120789Mac (SHA256de20df1b4e98199730b58489fc147f77aa924dcf439cc1b9d59ce87eb88f2432)
+audit26/13manifest hashes and245input hashes each against the exact Git tree; only
+prescribed PowerShell CRLF differs on both hosts. Download privacy41files passes.
+Mac9actual checks pass, no package/launch. Windows package/native steps skipped, no
+attempt ledger/executable/native report/fixture. Conditional reservation released;
+actual cumulative Windows2/4packages,0/6launches,3/4dispatches; Mac1/4,2/6,3/4.
+Remaining Windows2packages/6launches/1dispatch; Mac3packages/4launches/1dispatch.
+
+Fresh independent GPT-6.1 Sol High reviewer reassessed actual raw observations and
+ureq body ownership. The app's cancellation descriptor is introduced with try_clone;
+ureq moves the same connection into its body handler. Narrow selected repair shares
+one actual TcpStream through Arc between cancellation and transport, eliminating
+that avoidable separate-handle path. This does not establish that Rust's documented
+clone semantics are generally defective, or prove the exact Winsock internal cause.
+Windows confirmation is required. No ignoredNotConnected, retries, polling, sleep,
+timeout inflation or weakened EOF assertion. Publication mutex/flag recheck and
+one-second connect/response bounds remain. Canonical architecture/ADR/testing updated.
+
+Independent exact-patch review found no actionable defect or weakened gate. Local
+transport8/8, worker6/6 and actual generated-card controller pass; both phases report
+shutdownOk, Cancelled and EOF well within2seconds. Initial sandbox fixture binds
+refused and were rerun with authorized loopback capability; no package/launch/dispatch
+used. cargo fmt --check reports broad pre-existing differences, so no unrelated
+reformat was applied; focused diff whitespace remains checked. Production repair
+requires renewed coherent signed Mac package2/native launches3–4 before final focused
+dispatch4, Windows build3/firstlaunch1 with focused-success prerequisite retained.
+Prior outcome allowances stay closed. No acceptance/closure until actual Windows/native
+and final artifact audit. No following deliverable started.

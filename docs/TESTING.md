@@ -1541,6 +1541,9 @@ shutdown result/raw OS error and cancellation/completion/server EOF elapsed time
 Worker completion and actual EOF share the cancellation instant and each retain the
 two-second bound; cancellation remains immediate at request readiness, without waiting
 for body reception. Both recipes retain these observations with `--nocapture`.
+Cancellation and transport IO now share one actual socket handle; Windows must establish
+successful shutdown and prompt completion/EOF for both phases. A local Mac pass cannot
+waive that target-specific gate.
 Hosted Mac lacks approved signing credentials, so only the named signed
 changed-action native case runs on the retained approved local Mac. No signing fallback.
 Packaged `dialogue-rewrite-probe.py --generate-card` requires25distinct phase1 and3

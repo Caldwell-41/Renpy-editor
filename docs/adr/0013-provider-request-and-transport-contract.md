@@ -243,8 +243,9 @@ The fixed synthetic text diagnostic intentionally sends no project content, sche
 proposal or tool loop. It captures exact profile/credential/configuration and project
 session plus body/limits in core/native memory. A dedicated worker releases the
 application service before I/O. One global active worker is stricter than the proposed
-per-project maximum; terminal status is bounded to one memory-only result. A cloned
-owned socket supports shutdown during blocked header/body reads; the one literal
+per-project maximum; terminal status is bounded to one memory-only result. Cancellation
+and transport share the exact connected socket through `Arc<TcpStream>` for shutdown
+during blocked header/body reads; the one literal
 loopback connect attempt has a 1-second bound (also bounding cancellation before a
 socket exists). Response deadline is 30–1800 seconds, default 600. The existing
 2/2/8 MiB body/text/response and depth-32 bounds are enforced, with 32 KiB headers.

@@ -671,7 +671,8 @@ executes pinned `ureq` away from the UI/service boundary. A single publication g
 arbitrates cancellation and profile/project/shutdown invalidation. No network wait
 owns the project service; ordinary editing and Source Save remain independent.
 
-The worker's cloned owned socket aborts blocked reads. Each request uses a fresh
+Cancellation and transport IO share the exact connected socket through `Arc<TcpStream>`;
+shutdown aborts blocked reads, including response-body reception. Each request uses a fresh
 single-attempt connector and no DNS workers, proxies, redirect, retries or socket
 pool. Complete responses pass bounded strict parsing; usage stays provider-reported
 or unknown. Final text is literal diagnostic display, never applied or persisted.
