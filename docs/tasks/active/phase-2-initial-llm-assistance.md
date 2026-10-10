@@ -3866,3 +3866,65 @@ Actual cumulative Windows1/4 packages,1/6 launches,1/4 dispatches; Mac2/4 packag
 reserve Windows package2/launches2–3 and focused dispatch2 on both targets. Count all
 failures/cancellations/implicit launches; prior budgets closed. No unbounded retries,
 signing-policy change, paid/public call, merge/release or subsequent outcome.
+
+
+### Draft Scene focused CI wait 2 — 2026-10-10
+
+State **`awaiting_ci`**, selected bounded outcome remains incomplete. Clear UI and
+Redo repair published on existing branch as **1320d0a6507625abdd3fa20aa6a3eccffaccfcd6**,
+tree **42b36ee3e6180419837774300c9626a600ade328**; local/remote equal and clean.
+Required independent reviews closed; canonical contracts/task/status updated.
+No reset, unrelated changes, PR, merge/release or following deliverable.
+
+Final signed Mac **package3** passes exact approved pin, strict signature and installer
+contents without signing-policy/trust/ACL change. Executable SHA256
+624c90d7863e5c7269026a9e44a2c91298b367b3048a69b29614ad36475febdc;
+DMG SHA2563f4ef2964a9adf571495e227b658735c70a7c4769647456aa47cb93596850e1b.
+All244 runtime-input hashes match published candidate. Retain ignored
+.toolchains/releases/draft-mac-03 identity/input receipts, app/installer and build log.
+Required native case performed on unlocked retained Mac ARM64 host (hosted CI lacks
+approved signing capability). **Launch4 PID23942**, physical Generate/Accept and
+native light/dark/720x780 compact review observed through Computer Use. Main summary
+uses reviewed title/Chapter/Character names and plain ending/preview wording; exact
+request/context and source/project/map details reviewed. Stage acknowledgments written
+only after actual observation/actions with PID/binary/action/time receipts. Phase1
+**22 distinct required checks**, five exact reviewed body/HTTP digest matches, byte-exact
+existing source/BOM/custom preservation, one Undo, repaired Redo, duplicate refusal,
+malformed/unsafe/cancel/external stale zero-write refusal and project reopen pass.
+**Launch5 PID24030**, process reopen **3/3**, zero HTTP and unchanged whole project bytes
+pass. Both processes exited; credential references/cleanup queue/development records
+clear, exact owned fixture removed only after structural hash receipt. Retain
+.toolchains/draft-mac-native-03 phase1/2 logs/reports/native-observations/cleanup;
+privacy scan6files pass. No native proof or status from failed launch1 normalized.
+
+Before dispatch verified no competing nonterminal production workflow on this branch.
+Confirmed Production scaffold workflow357322921, [run38056790759]
+(https://github.com/Caldwell-41/Renpy-editor/actions/runs/38056790759), attempt1,
+event workflow_dispatch, branch codex/provider-qualification, exact head1320d0a above.
+Created **2026-10-10 13:43:01 UTC**; one initial observation **in_progress**, updated
+**13:43:09 UTC**. Inputs: draft_scene=true, continue_scene=false,
+dialogue_rewrite_windows=false, rewrite_build_ordinal=2,
+rewrite_first_launch_ordinal=2, both reuse run IDs empty, upload_packages=false.
+Windows focused package/native/SDK and Mac ARM64 automated controller/core/SDK selected;
+generic preflight/matrix intentionally unselected. Windows workflow rechecks interactive
+native capability before execution; prior exact run1 capability passed. No changed-action
+package/native reuse requested. Both targets' actual final cases/artifacts await audit.
+
+| Target | Actual packages | Actual editor launches | Actual focused dispatches | Reservation / remaining allowance |
+| --- | --- | --- | --- | --- |
+| Windows x64 | 1/4 audited | 1/6 audited | **2/4** | Run reserves package2/launches2–3; reconcile actual terminal ledger before further work |
+| Mac ARM64 | **3/4** | **5/6** | **2/4** | 1 package,1 launch,2 dispatches remain; hosted automated job has no signed editor package/launch |
+
+All failures/cancellations/implicit attempts count; prior allowances remain closed.
+Mac native final candidate evidence complete; final CI core/controller/SDK both-target
+and Windows packaged native acceptance remain unqualified until actual artifact audit.
+Original both-target SDK8/8 and valid unchanged foundations retained without blanket
+cross-SHA waiver. Corrected runtime inputs are being requalified explicitly.
+
+WORKFLOW manual same-thread wait applies: after this confirmed dispatch publish this
+documentation-only checkpoint and end active turn, no polling/watchers/automatic Goal
+or wake-up. Resume this same chat on user command to audit exact run/attempt/head,
+required actual cases, package/runtime-input/SDK/native receipt/manifest hashes,
+failed/skipped/cancelled outcomes, privacy/cleanup and actual cumulative consumption.
+Then finish only in-scope fixes within remaining allowance and publish qualified
+closure/limitations/next prompt. No next deliverable is selected or started.
