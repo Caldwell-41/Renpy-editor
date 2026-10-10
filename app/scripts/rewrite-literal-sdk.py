@@ -36,9 +36,11 @@ testcase loomlight_literal_rewrite:
     assert screen "main_menu"
     click "Start"
     assert screen "say"
-    advance
+    advance until screen "main_menu"
     assert screen "main_menu"
-    exit
+testsuite global:
+    teardown:
+        exit
 '''.replace('INPUT',repr(text)).replace('EXPECTED',repr(expected)).replace('ENCODED',encoded)
  (root/'game/script.rpy').write_text(code,encoding='utf-8')
  for command in ('compile','lint'):

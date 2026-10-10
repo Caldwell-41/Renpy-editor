@@ -144,6 +144,112 @@ identity used; worktree, exact failed PID and disposable fixture confirmed clean
 No merge/release/install or other-host execution. Native/manual unlock remains the
 only next host capability needed before retrying required runtime proof.
 
+
+### Unlocked Mac resume and retained candidate — 2026-10-10
+
+Resumed clean verified `12c99de`, preserving implementation `515cd85`; fresh remote
+lookup matches. Computer Use Finder AX and screenshot confirm unlocked native
+observation before another Loomlight launch. All 116 retained build-input hashes
+match; executable remains `6dd22e8e5f9ac8614c45c066c3ec663377560331b307fa518145a3129dba28a6`.
+No rebuild is indicated; prior both-target prompt/context acceptance is preserved.
+
+Unlocked SDK rerun passes compile/lint and literal assertions but times out after
+60 seconds. Live SDK log narrows the harness failure: startup menu and say assertions
+pass; the final menu assertion runs while dialogue remains. Pinned SDK `Advance`
+waits for another dialogue line; corrected test uses `advance until screen
+"main_menu"` and suite teardown `exit` so failure also terminates. Corrected rerun
+passes compile/lint, literal substitution/tokenization and named startup/say/return
+smoke. This changes only the SDK fixture, not production/package inputs.
+
+Mac launch **2/6** is entered for retained-package phase 1 with fresh ignored output
+`.toolchains/rewrite-mac-launch-02` and owned temp-child `loomlight-rewrite-mac-02`.
+Physical Generate/Accept and light/dark/compact observations remain required; no
+native pass is inferred. Cumulative use is **Mac 1/4 builds, 2/6 launches; Windows
+0/4 builds, 0/6 launches**. One serial Mac owner, no subagents or other-host execution.
+
+
+Mac launch 2 phase 1 **passes**, exact owned PID `98778` exited 0. Required native
+light/dark/720px compact observation and Computer Use physical Generate/Accept
+were completed before their stage markers. Native review shows passive generated
+`[str(7)]`/`{a=jump:label}` prose and source encoding, preserved `[flag]`/bold tokens,
+comments/custom neighbors and accessible scrolling/sticky controls. Required gate
+accepts all 20 distinct checks; all five HTTP body digests match reviewed payloads.
+Undo/Redo are byte exact; malformed/unsafe/cancelled output and stale external-source
+acceptance write nothing. Project reopen passes; cleanup is reported complete.
+Evidence is retained ignored in `.toolchains/rewrite-mac-launch-02/phase-1.json`
+and its log. Owned fixture/credential remain only for dependent process-reopen proof.
+
+Mac launch **3/6** is entered for phase 2 with the same verified executable, root
+and output. It must retain byte-exact whole-project state, custom prompt and native
+credential readability, send zero HTTP and remove the owned synthetic credential.
+Cumulative use: **Mac 1/4 builds, 3/6 launches; Windows 0/4 builds, 0/6 launches**.
+
+
+### Mac qualification complete and serial Windows transfer — 2026-10-10
+
+Mac launch 3 phase 2 **passes**, exact owned PID `98832` exited 0. All three
+process-reopen checks pass in 3.18 seconds; zero HTTP requests and byte-exact
+whole-project comparison pass. The accepted literal source/protected tokens and
+custom prompt persist; native credential readability is proved before cleanup.
+All four project metadata digests match phase 1. Phase 1 elapsed 120.68 seconds.
+Reports/logs remain ignored in `.toolchains/rewrite-mac-launch-02`; its cleanup
+receipt retains whole-fixture hashes. Profile credential references are confirmed
+removed, all exact owned app/SDK PIDs are absent, and only the owned disposable
+fixture is deleted. Prior launch-1 failure evidence remains untouched.
+
+Retained signed package 1 is the qualified Mac candidate, continuing implementation
+`515cd85`: executable SHA256
+`6dd22e8e5f9ac8614c45c066c3ec663377560331b307fa518145a3129dba28a6`.
+All 116 input hashes match before reuse. Native wrapper verification again passes
+strict signature, pinned certificate and designated requirement. A sandbox-only
+`codesign` check returned `CSSMERR_TP_NOT_TRUSTED`; the approved wrapper with native
+Keychain access passes without a signing/trust/policy change. Installer/privacy
+proof from unchanged build 1 is reused. SDK harness review confirms the corrected
+bounded `advance until screen "main_menu"` plus teardown retains all assertions
+and exits on failure; actual pinned 8.5.3 standard-template smoke passes. No
+production change or package rebuild was necessary. Existing core/native/controller
+and 122/122 renderer regression evidence remains valid on unchanged inputs.
+
+**Final Mac cumulative use: 1/4 package builds, 3/6 app launches. Windows remains
+0/4 builds, 0/6 launches.** Mac selected-slice qualification is complete; required
+Windows proof is outstanding, so the both-target outcome remains incomplete.
+Prior prompt/context/manual-reference both-target acceptance is preserved. One
+GPT-6.1 Sol High serial owner, no subagents or direct other-host execution.
+
+Final in-scope review found no production defect in the successful native path;
+the SDK harness correction preserves all assertions and gives deterministic teardown.
+Repository validation passes for 482 files; link/privacy and diff-whitespace checks
+pass. Publish the coherent SDK-harness/qualification continuation on the same
+authorized branch and verify remote equality before transfer. No merge, release,
+installation or broader Phase 2 acceptance.
+
+Windows next owner: reconcile/pull this same branch without resetting unrelated work;
+read AGENTS/CURRENT/HANDOVER and this selected ledger. Confirm interactive native
+observation and pinned toolchain/official checksum-verified Ren'Py 8.5.3 readiness
+before package entry. From `app`, run affected `cargo test -p loomlight-core --locked
+rewrite`, `cargo test -p loomlight-core --locked ai_request::tests`, `cargo test -p
+loomlight-desktop --locked ai_requests::tests`, renderer `npm run check`, and build
+examples `rewrite-controller-driver` (desktop) / `rewrite-literal-driver` (core).
+Use `node tests/rewrite-controller.dispatch.mjs` with the actual native example
+executable and `scripts/rewrite-literal-sdk.py` with pinned SDK/literal driver.
+Run native gate self-tests, repository validator and diff/privacy checks. Record
+cumulative package/launch entry before the ordinary Windows package command.
+
+Qualify the Windows package with `scripts/dialogue-rewrite-probe.py --phase 1`,
+a fresh ignored output and a fresh immediate temp-child `loomlight-rewrite-*` root.
+Verify the exact owned executable/PID; observe light/dark/compact, physically
+Generate/Accept through Computer Use, and acknowledge each stage only after its
+actual observation/action. Do not relax markers or gates. Phase 1 must pass all
+20 distinct checks and five exact reviewed HTTP digests before phase 2. Retain
+its owned root/output, record the separate-process launch, run `--phase 2`, and
+prove whole-project byte equality plus zero HTTP and native credential cleanup.
+Remove only the owned fixture after confirmed process exit. Diagnose failures
+before retry within Windows 4-build/6-launch allowance. Review/fix in scope,
+update records, publish/verify; do not repeat unchanged Mac proof unless changed
+production inputs require reassessment. No paid/public calls, private game content,
+project execution during inspection, generated references, route expansion, other
+AI action, full 2B.1/2A.2/Phase 2 acceptance, merge or release.
+
 ## Prompts and context preparation selection — 2026-10-10
 
 User-selected new outcome on published `92a33180604ce851aa8ebc47e5c336da81aedf57`,
