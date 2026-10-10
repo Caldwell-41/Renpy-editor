@@ -4,8 +4,7 @@
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. Current published checkpoint is `7a77689`; reviewed native polling repair is being
-published next. Production inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
+acceptance. Native polling repair `69ddf5a` is published and remote verified. Production inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
 Continue one active GPT-6.1 Sol High owner in the current development session. No
 additional agents or direct access to the user's other computer. The user-authorized
 serial reviewer has finished.
@@ -15,7 +14,7 @@ and [selected scope, failures, results and required Windows cases](../tasks/acti
 own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
 Windows 1/4 builds, 2/6 launches**. Mac qualification is complete; both-target
 acceptance remains incomplete until Windows proof. There is no pending local process,
-owned fixture or synthetic credential; the audited CI failure and selected retry are below. Prior launch-1 failure evidence is retained.
+owned fixture or synthetic credential; the audited CI failure and confirmed retry are below. Prior launch-1 failure evidence is retained.
 
 ### Completed Mac evidence
 
@@ -88,9 +87,9 @@ PowerShell regression executes the real functions with synthetic states before a
 app launch. It was explicitly **skipped locally** because this Mac lacks PowerShell;
 actual Windows proof remains pending. No new reuse exemptions or runtime inputs.
 
-### Next selected retry and manual continuation
+### Confirmed retry and manual continuation
 
-Publish/verify the scoped repair before dispatching workflow **357322921** with
+Repair was published/verified before dispatching workflow **357322921** with
 `dialogue_rewrite_windows=true`, `upload_packages=false`,
 `rewrite_reuse_run_id=38023888008`, `rewrite_focused_reuse_run_id=38027478869`,
 `rewrite_build_ordinal=2` unused and `rewrite_first_launch_ordinal=3` (dependent
@@ -100,9 +99,18 @@ fallback. Original package/SDK artifact **11659236668** expires
 **2026-10-17 05:38:17 UTC**. Retained ignored audit copies and source hashes remain.
 Strict source/current inputs, successful cases and manifest checks must pass.
 
-**State: in_progress. Next action:** finish parent publication verification, check
-for active duplicates, dispatch once and confirm exact run/attempt/head/time/inputs.
-Publish the wait checkpoint, then end polling for manual same-chat resume. On resume,
+**State: awaiting_ci.** [Run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
+workflow **357322921**, attempt **1**, event `workflow_dispatch`, exact head
+`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`, branch `codex/provider-qualification`.
+Created **2026-10-10 06:25:20 UTC**, observed **in_progress at 06:25:33 UTC**.
+Windows job **114151363778** setup/checkout passed, bounded guards in progress;
+generic jobs skipped. Inputs are recorded above. No active duplicate existed.
+Artifact `rewrite-windows-38030871532-1` has **7 days retention after upload**;
+upload/terminal cases remain unobserved. Known totals **Windows 1/4 builds,
+2/6 launches**, zero builds/up to two launches reserved; later use needs audit.
+Docs-only wait successor does not replace the tested candidate.
+
+**Next action:** end polling and wait for user's manual same-chat resume, then
 audit actual Windows PowerShell regression, prelaunch, attempt entries, all five
 native receipts/PNGs, 20 phase-1 assertions/five exact HTTP bodies, phase-2 persistence,
 whole-project bytes/zero HTTP and cleanup. Failed/skipped/missing evidence stays

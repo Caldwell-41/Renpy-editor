@@ -22,7 +22,7 @@ are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diag
 fixture correction; no production change or rebuild was necessary.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 2/6 launches**.
-**State: in_progress.** [Run 38029621084](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084)
+**State: awaiting_ci.** [Run 38029621084](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084)
 failed after passing native light/dark/compact observation. The driver submitted Generate
 input, then failed on a null-valued method call, likely an accessibility name; Accept
 and process reopen
@@ -32,9 +32,11 @@ applied the scoped harness repair serially; parent review and cheap checks pass.
 Null-safe names, exact present-button states, bounded stale-element handling and
 failure-location diagnostics preserve every acceptance gate. New actual PowerShell
 regression is skipped on Mac and must pass in Windows CI before launch.
-Prepare one verified retry reusing the same package/SDK/portable sources, reserving
-zero builds and launches 3/4. No production change; Mac proof stays valid. Manual
-same-thread wait/resume follows confirmed dispatch. [HANDOVER](HANDOVER.md) owns identity.
+Repair `69ddf5a` is published/verified. [Run 38030871532](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
+attempt 1, is confirmed in progress at **2026-10-10 06:25:33 UTC**, Windows only,
+reserving zero builds and launches 3/4. Actual later usage/native proof await audit.
+No production change; Mac proof stays valid. Manual same-chat resume; no polling.
+[HANDOVER](HANDOVER.md) owns identity.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

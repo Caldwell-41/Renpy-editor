@@ -447,6 +447,32 @@ Generate/Accept, separate-process persistence/whole bytes/zero HTTP and cleanup 
 Publish/verify before dispatch, confirm identity, then manual same-thread wait/resume.
 Mac and accepted prompt/context evidence remain valid; no merge/release/next feature.
 
+### Confirmed native polling repair retry — 2026-10-10
+
+**State: awaiting_ci.** Parent reviewed, published and verified the repair at
+`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d` before dispatch. No active duplicate
+existed. Workflow **357322921**, `production-scaffold.yml`,
+[run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
+attempt **1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+exact head `69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`.
+Created **2026-10-10 06:25:20 UTC**; last observed **in_progress at 06:25:33 UTC**.
+Selected Windows job **114151363778** started, setup/checkout passed, bounded guards
+in progress; generic jobs skipped. Material inputs: `dialogue_rewrite_windows=true`,
+`upload_packages=false`, `rewrite_reuse_run_id=38023888008`,
+`rewrite_focused_reuse_run_id=38027478869`, build ordinal **2** unused,
+first launch ordinal **3**, dependent phase-2 ordinal **4**. Artifact
+`rewrite-windows-38030871532-1` has **7 days retention after upload**; upload and
+terminal results are pending. Known totals at checkout **Windows 1/4 builds,
+2/6 launches**, reserving **zero builds/up to two launches**. Actual later consumption
+requires terminal audit. Mac remains **1/4 builds, 3/6 launches**, qualified.
+
+Docs-only successor records this tested candidate without replacing it. Stop active
+polling; manual same-chat resume audits the exact run/attempt, PowerShell regression,
+source reuse/prelaunch, attempt ledger, all five native receipts/PNGs, required
+20 phase-1 assertions/five exact HTTP bodies, separate-process persistence/whole bytes,
+zero HTTP and cleanup. Missing/failed/skipped evidence stays unresolved. No new
+runtime pass or allowance reset is claimed; no merge/release/next feature.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
