@@ -1477,7 +1477,11 @@ rewrite` (21 selected tests), `prompts::tests`, `ai_request::tests`, desktop
 --draft-scene`. Draft tests cover closed fields/bounds/explicit Return, exact dispatch,
 inert metadata/source review, all existing bytes, one transaction/Undo/Redo/reopen,
 empty saved Chapter, stale Chapter/session/prompt, competition and retained drafts
-whose source disappeared. No deliberate crash/hostile-filesystem experiments.
+whose source disappeared. The Draft history regression also opens the accepted
+source, refuses Undo with a retained draft and zero disk writes, then discards, performs
+one Undo, refreshes inventory/status and Redoes/reopens. This reproduces the native
+CI missing-buffer failure; app-owned clean deletion must not become external conflict.
+No deliberate crash/hostile-filesystem experiments.
 
 `production-scaffold.yml` input `draft_scene=true` isolates Windows x64 packaged
 UIA/OS-input proof and Mac ARM64 automated controller/core/SDK checks. Other action

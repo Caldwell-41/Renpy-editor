@@ -110,7 +110,16 @@ impl AuthoringService {
                 )
             })
             .collect::<Vec<_>>();
+        let deleted = proposal
+            .mutations
+            .iter()
+            .filter(|m| m.kind == MutationKind::DeleteExisting)
+            .map(|m| (m.path.as_str().to_owned(), m.base.clone()))
+            .collect::<Vec<_>>();
         let outcome = self.transactions.commit(project, proposal);
+        if matches!(outcome, CommitOutcome::Committed { .. }) {
+            self.forget_committed_source_deletions(project, &deleted);
+        }
         #[cfg(test)]
         if matches!(outcome, CommitOutcome::Committed { .. }) {
             ACCEPTED_AT.set(Some(std::time::Instant::now()));

@@ -3757,3 +3757,69 @@ within the remaining allowance, complete unlocked Mac native/reopen using unchan
 package where qualified, then publish acceptance/closure and next-outcome proposal.
 No subsequent deliverable is selected or started. WORKFLOW requires this manual wait;
 normal chat resume message is sufficient, no autonomous Goal/watchers were created.
+
+
+### Draft Scene CI artifact audit and Redo correction — 2026-10-10
+
+State: **`in_progress`**. User resumed this same chat to audit run38046543055 and fix
+CI issues. Fresh refs match published checkpointfdc5f90; main unchanged5f448ca,
+checkout clean on entry. No reset or unrelated change. Exact recorded run/attempt1
+completed **failure**, updated **11:07:36 UTC**, headb51229d (not later docs head).
+Mac job114197123264 succeeded; Windows job114197123383 failed its terminal evidence
+gate. Generic Preflight/matrix intentionally unselected. No incoming scope added.
+
+Downloaded artifacts `rewrite-windows-38046543055-1` (ID11668525333,
+archive digest9aa2ca4bd885b1e44de3fe97f2c7993704ed546f6342e8491cc4f3e005b137d2)
+and `continue-macos-38046543055-1` (ID11666799536,
+digest27feda166380277c4d8fe119da47e6a34064d965190947118ff88189870b45ea).
+Legacy artifact name is not action proof: both identities explicitly draftScene,
+correct b51229d/run/attempt/pinned Node24.19.0/npm11.9.0/Rust1.90.0 and target
+architectures. Verified **72 Windows / 23 Mac manifest file hashes**. Retained ignored
+`.toolchains/draft-ci-38046543055`; raw Windows job log also audited.
+
+Both actual target logs: core21, renderer127, transport8, native-worker6 and actual
+controller/strict HTTP pass with zero failures/skips/ignored; Mac prompt5 also passes.
+Windows gate suites4+4+7=**15 pass**, including the previously local-only skipped
+PowerShell child-context case. Both official SDK archive SHA256 matches published
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`;
+compile/lint and raw runtime named test each **8/8 assertions**, zero skip/fail/not-run,
+Ren'Py8.5.3.26051504. Windows SDK Python3.12.7, Mac3.12.8/macOS26.6.2 ARM64.
+Mac all10 required automated cases pass and SDK root removed; these unchanged
+successful proofs remain historical evidence, not completion of the corrected candidate.
+
+Windows one package build succeeded (244 runtime inputs; executableSHA256
+935ee2ec2f487bd57387848694f83dbbb83b8417b843fbc497c2a55b4a1e2d26). Actual
+attempt ledger has **build1 and launch1 only**; no phase2 launch. All five native
+UIA/OS-input stage receipts validate action/PID6120/executable/capture hashes and
+nonblank controls. Send/Accept captures inspected. Physical Generate/Accept, inert
+preview, exact IDs/path/Return, byte preservation and one Undo pass. Then report
+times out awaiting Redo, with15 of22 required phase1 checks and only1 reviewed body;
+phase2 absent. Gate correctly refuses this incomplete report; native outcome remains
+failed. Windows credential references and owned root cleanup receipt confirmed.
+
+Local first Mac native process19147 exited with explicit observe-light timeout,
+passed=false/cleanupComplete=true,4 preliminary checks only. Profile credentials all
+null, cleanup queue empty and development records empty, then guarded exact owned
+fixture removed after structural hashes saved to ignored native cleanup.json. No
+credential/signing policy change. Failure remains retained/counts1launch; no reopen.
+
+Product diagnosis reproduced BEFORE fix in existing Draft history test: read accepted
+source, Undo removes file, inventory refresh marks its cached clean buffer unavailable,
+Redo refuses DIRTY_SOURCE. Successful app deletions now evict only exact accepted-
+revision clean buffers with no draft/external/unavailable/invalid state; failed commits
+do nothing. All ordinary external missing-source/draft protections remain. Extended
+test also proves draft-blocked Undo has zero writes, discard/one Undo, refreshed saved
+status, Redo and process reopen. Native probe labels undo/redo stages accurately.
+Initial helper compile used optional instead of concrete Revision; corrected type,
+then core21 and source16 all pass. One correction, no repeated failing hypothesis.
+Independent GPT-6.1 Sol High read-only repair review reports no actionable blockers;
+no reviewer tests/writes/packages/launches. Canonical architecture/testing updated.
+
+Actual cumulative use now Windows **1/4 builds,1/6 launches,1/4 dispatches**; Mac
+**1/4,1/6,1/4**. Prior allowances closed. Production inputs changed: old packages
+cannot qualify the repair. Reserve package2 and native launches2–3 on each target,
+second isolated focused both-target dispatch. Verify Mac observation capability before
+launch; unlock requested while independent work continues. Count every failure/cancel/
+implicit attempt. Remaining before reservation:3builds/5launches/3dispatches each.
+Do not retry ambiguously or expand scope. After confirmed next dispatch, publish exact
+identity/allowance and end model polling under manual same-thread WORKFLOW policy.

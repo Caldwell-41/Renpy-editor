@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-10. **Draft Scene is `awaiting_ci`** on
+**Updated:** 2026-10-10. **Draft Scene is `in_progress`** on
 `codex/provider-qualification`. Reviewed implementation **b51229d** is published;
 full Phase 2 and this bounded acceptance remain incomplete. Retain one serial owner
 and current Mac ARM64 session; no following deliverable selected.
@@ -13,13 +13,14 @@ and current Mac ARM64 session; no following deliverable selected.
 | Official pinned SDK | Local accepted saved-byte runtime 8/8 assertions passes; both-target CI audit pending |
 | Changed-action native | Windows CI pending audit; signed Mac package passes, launch1 blocked at observation by locked screen |
 
-Confirmed [CI run38046543055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38046543055)
-attempt1 on exact b51229d4b0d8b2dc319b157adba528a6240ec7f2; last observed
-in_progress at updated 10:54:44 UTC. Manual same-thread resume; no model polling.
-New per-target allowance4 packages/6 launches/4 focused dispatches, prior budgets
-closed. Mac actual1/4,1/6,1/4; Windows1/4 dispatch, build1/launches1–2 reserved until
-artifact audit determines actual consumption. Locked Mac fixture/process cleanup
-remains to be audited; no native pass credited.
+Recorded [CI run38046543055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38046543055)
+attempt1 completed: Mac automated proof passes; Windows native fails after successful
+Accept/Undo because clean cached deleted Source blocks Redo. Reproduced/fixed locally;
+core21/source16 pass and independent repair review closes findings. Canonical source
+cache contract updated. Corrected candidate still needs both-target qualification.
+New allowance4 packages/6 launches/4 dispatches each; actual each1/4,1/6,1/4. Original
+Mac failed fixture credentials/root cleanup confirmed. Replacement packages required
+for changed runtime inputs; second CI/native qualification prepared within allowance.
 
 [Task ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-focused-ci-wait--2026-10-10)
 owns selection, review, exact package/run identities and cumulative counts.

@@ -1,61 +1,46 @@
 # Current outcome handover
 
-## Draft Scene — manual same-thread CI wait
+## Draft Scene — diagnosed CI Redo repair
 
-**State: `awaiting_ci`.** Caldwell-41/Renpy-editor, existing branch
-`codex/provider-qualification`, retained Mac ARM64 session; one GPT-6.1 Sol High
-serial owner plus completed independent read-only review. Entry closure23c251b/main
-5f448ca reconciled fresh; no reset/unrelated-work mutation. Implementation committed
-and pushed as **b51229d4b0d8b2dc319b157adba528a6240ec7f2** (tree
-ec7b90e87fd2d576613d5356e97832a32a34d6b6). Current checkpoint may be a later
-documentation-only commit; do not replace the CI candidate identity with that head.
+**State: `in_progress`.** Existing branch codex/provider-qualification, retained Mac
+ARM64 session; one serial GPT-6.1 Sol High owner and independent read-only review.
+User resumed run38046543055 audit and fixes. Fresh local/remotefdc5f90, unchanged
+main5f448ca; no reset/unrelated work. Exact b51229d attempt1 terminal failure audited.
+[Task ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-ci-artifact-audit-and-redo-correction--2026-10-10)
+owns detailed artifact identities, proof, failures and budget.
 
-[Task ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-focused-ci-wait--2026-10-10)
-owns exact acceptance, failures, review, artifact/package identity and budgets.
-Core IDs/path, reviewed saved Chapter/title/Return, closed1–8 narration/dialogue Scene,
-exact send, inert source/project/map preview, one transaction/history and zero-write
-refusals implemented. Independent findings fixed and closed. Local core21, renderer127,
-prompt5, actual controller/native credential/strict loopback HTTP and final official
-saved-byte SDK8/8 assertions pass. Gate14pass/1 Windows-only local skip; Windows must
-execute it. Canonical contracts updated; qualification/acceptance incomplete.
+Mac automated job114197123264 passes all10 cases. Windows job114197123383 core21,
+renderer127, transport8, worker6, controller and official SDK8/8 pass, as does one
+package and physical Generate/Accept/Undo. Windows terminal gate fails incomplete
+phase1 at Redo; phase2 not launched. Manifests72Windows/23Mac and actual logs,
+target identities, native receipts and captures audited. Failure not normalized.
 
-Pending [Production scaffold run38046543055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38046543055),
-workflow357322921, attempt1, workflow_dispatch, exact b51229d head. Created2026-10-10
-10:54:32 UTC, last observed in_progress/update10:54:44 UTC. Draft only selector;
-build ordinal1/first launch1, both reuse IDs empty, upload_packages=false. Selected
-Windows x64 package/native/SDK and Mac ARM64 automated controller/core/SDK. Do not
-poll or dispatch again: WORKFLOW manual same-thread resume applies. Audit terminal
-jobs and actual artifacts/cases/identities, skips, failed/cancelled/implicit attempts
-and zero-test gates; badge alone cannot establish acceptance.
+Reproduced locally: accepted new source opened -> Undo removes file -> inventory
+refresh marks clean cached buffer unavailable -> Redo DIRTY_SOURCE. After successful
+app deletion, evict only exact revision-matched clean buffer; preserve draft/external/
+unavailable/invalid/differing revision states, and all failed commits. Existing test
+augmented with exact native sequence and draft-blocked zero-write Undo. Local core21
+and source16 pass. Independent repair review no actionable blockers. Native diagnostics
+name undo/redo. Canonical architecture/testing updated. Publish repair then qualify
+changed runtime inputs; old package cannot qualify it.
 
-Local named required signed Mac Draft native case lacks hosted approved signing
-capability. Retain `.toolchains/releases/draft-mac-01/Loomlight.app`, .dmg,
-identity-receipt.json and package-inputs.json (244 runtime inputs), exact hashes in
-task. Approved signing pin358372708164C7273A551D746449357C12A3A806 unchanged;
-package attempt1 passed strict signature/installer checks, no provisioning/trust/ACL
-changes. Reuse package only after unchanged runtime-input/signature equality checks.
-Pinned local tools and official8.5.3 SDK retained; no unnecessary rebuild.
+Mac failed launch1 has terminal observe-light timeout/cleanupComplete=true, no native
+observation credited. Process exited, credential references/queue/records cleared and
+exact disposable root guarded cleanup complete; retained .toolchains/draft-mac-native-01
+reports/hash receipt. Retain original signed package/evidence unchanged. User unlock
+requested before further native work. Approved pin358372708164C7273A551D746449357C12A3A806,
+trust/ACL/names/policy unchanged. Pinned tools/official8.5.3 SDK retained.
 
-Native launch1 PID19147 reached observe-light but Computer Use reports Mac locked,
-cannot unlock automatically. User was asked to unlock; no reply/observation/action
-credited. Owned harness session61324 and fixture `/private/tmp/loomlight-rewrite-draft-mac-01`;
-evidence `.toolchains/draft-mac-native-01/phase-1.log`. At checkpoint native/harness
-pending, no cleanup proof. Locked WebView may suspend its180s timer; native watchdog
-900s remains bounded. On resume read terminal report/process state and verify native
-credential removal explicitly: watchdog host shutdown does not prove that removal.
-Preserve fixture until credential cleanup is established. Required retry needs fresh
-root/log; no markers without actual observations. Phase2 reopen not launched.
+Actual new cumulative allowance EACH target1/4 packages,1/6 launches,1/4 dispatches;
+remaining3packages/5launches/3dispatches. Windows artifact ledger proves no second
+launch in first run. Reserve package2 then native launches2–3 and focused dispatch2.
+All failures/cancels/implicit launches count; prior budgets closed. Verify current
+capabilities; serial shared implementation. No pending CI; no old native process.
 
-New cumulative per-target allowance4 packages/6 editor launches/4 focused dispatches.
-Mac actual **1/4,1/6,1/4**; remaining3builds/5launches/3dispatches. Windows actual
-before terminal audit0packages/0launches and **1/4 dispatch**; selected run reserves
-build1 and launches1–2. Establish actual consumption from artifacts before retries.
-Failures/cancels/implicit launches count, prior allowances closed, reassess after two
-unsuccessful corrections of one hypothesis. No extra editor/package reserved locally.
-
-Resume same chat when run is terminal and Mac is unlocked: reconcile current refs,
-audit recorded attempt/candidate artifacts, finish only authorized in-scope fixes and
-Mac native/reopen case, then publish coherent closure and next prompt. Do not start
-the next deliverable. No paid/public calls, provider/route expansion, generated refs,
-custom source, incoming connection/edge replacement, signing changes, merge/release.
-No PR created; no autonomous Goal, watcher, automation or second executor.
+After repair publication/required local case, dispatch only isolated Draft on both
+targets with buildordinal2/firstlaunch2, reuse IDs empty. Publish exact run/attempt/SHA,
+actual/reserved consumption and manual same-thread wait; no polling/watcher/new Goal.
+Resume to audit terminal artifacts and only in-scope fixes, then qualified closure
+and next-outcome proposal. No paid/public calls, provider expansion, generated refs,
+custom source, incoming connection/edge replacement, signing changes, merge/release
+or following deliverable. No PR created.

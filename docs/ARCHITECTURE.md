@@ -457,6 +457,11 @@ Late completions cannot attach to a different Asset or disposed view.
   leave settle local input without accepting it; controller/document generations and
   token-matched leases suppress stale redraw, status and cleanup.
 - Undo/redo stops at unresolved external conflicts rather than applying stale inverses.
+- A successful app-owned deletion evicts only its exact revision-matched clean Source
+  buffer. Undo of Scene creation can then refresh inventory and Redo without treating
+  that app deletion as an external missing-file conflict. Drafts, external conflicts,
+  unavailable/invalid projections and differing revisions remain retained. Failed
+  transactions do not evict buffers.
 
 ## Preview boundary
 

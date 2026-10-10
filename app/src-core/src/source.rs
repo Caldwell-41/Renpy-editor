@@ -534,6 +534,33 @@ impl AuthoringService {
             .unwrap_or(false)
     }
 
+    /// A successful app deletion must not turn its exact clean cached buffer into
+    /// an external-missing conflict on refresh (for example, Undo of Scene creation).
+    /// Retain drafts, conflicts and every buffer whose accepted revision differs.
+    pub(crate) fn forget_committed_source_deletions(
+        &self,
+        project: &ProjectId,
+        deleted: &[(String, Revision)],
+    ) {
+        let Ok(mut sessions) = self.source_sessions.lock() else {
+            return;
+        };
+        let Some(buffers) = sessions.projects.get_mut(project) else {
+            return;
+        };
+        for (path, revision) in deleted {
+            if buffers.get(path).is_some_and(|buffer| {
+                revision == &buffer.base_revision
+                    && buffer.draft.is_none()
+                    && buffer.external.is_none()
+                    && !buffer.unavailable
+                    && !buffer.projection_invalid
+            }) {
+                buffers.remove(path);
+            }
+        }
+    }
+
     pub(crate) fn ensure_source_paths_clean<'a>(
         &self,
         project: &ProjectId,
