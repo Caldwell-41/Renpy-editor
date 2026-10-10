@@ -22,13 +22,16 @@ PowerShell regression passes. Verified package, SDK and portable cases were reus
 Mac signed package evidence remains valid on unchanged production inputs.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 4/6 launches**.
-**State: in_progress.** Audit found recorded npm **11.17.0**, despite installation of
+**State: awaiting_ci.** Audit found recorded npm **11.17.0**, despite installation of
 required **11.9.0**, in the original package and all Windows identities. Native proof
 stands on its real binary; pinned-toolchain closure remains outstanding. Scoped CI fix
 selects/checks the installed CLI and rejects drift in candidate/reuse identities.
-Cheap checks and local Node/npm pin execution pass. Next run selects fresh focused
-checks/package build 2 and launches 5/6, reserving one build/up to two launches.
-[HANDOVER](HANDOVER.md) owns continuation; manual same-chat wait/resume after dispatch.
+Cheap checks and local Node/npm pin execution pass. Correction `95ce9c4` is published;
+[run 38031993657](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
+attempt 1, is confirmed in progress at **2026-10-10 06:44:55 UTC**, Windows only,
+with fresh cases/package build 2 and launches 5/6. One build/up to two launches reserved;
+actual later use and pinned package proof await audit. [HANDOVER](HANDOVER.md) owns
+continuation; manual same-chat resume, no polling.
 No production/dependency/signing changes. Phase 1/PR19/main `5f448ca` and public v0.1.0
 remain unchanged. Full 2B.1/2A.2/Phase 2, merge/release and next feature remain outside
 this slice. [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite),

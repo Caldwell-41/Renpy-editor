@@ -91,18 +91,27 @@ PowerShell regression already passed in the audited run. New npm route runtime n
 No production/dependency/signing/credential changes; Mac package evidence remains valid.
 The user-authorized serial reviewer finished; no new agent or other-computer access.
 
-### Next bounded candidate and manual continuation
+### Confirmed bounded candidate and manual continuation
 
-**State: in_progress. Next action:** publish/verify the reviewed npm-route correction,
-check for active duplicates, then dispatch workflow **357322921** with
-`dialogue_rewrite_windows=true`, `upload_packages=false`, empty package/portable reuse
-inputs, `rewrite_build_ordinal=2`, `rewrite_first_launch_ordinal=5` (dependent phase 2
-ordinal **6**). Reserve **one build/up to two launches**. Run the selected focused
-cases, official checksum-verified SDK and coherent package walkthrough under actual
-repository pins. This consumes the final two launch slots; failures count, no reset.
+**State: awaiting_ci.** Npm-route correction published and remote verified at
+`95ce9c4fbad12cec24e8eda851b1baff1c4beec8` before dispatch.
+[Run **38031993657**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
+workflow **357322921**, attempt **1**, event `workflow_dispatch`, branch
+`codex/provider-qualification`, exact head `95ce9c4fbad12cec24e8eda851b1baff1c4beec8`.
+Created **2026-10-10 06:44:43 UTC**, observed **in_progress at 06:44:55 UTC**.
+Windows job **114154697854** setup passed, checkout in progress; generic jobs skipped.
+No active duplicate existed. Inputs: `dialogue_rewrite_windows=true`,
+`upload_packages=false`, both package/portable reuse inputs empty,
+`rewrite_build_ordinal=2`, `rewrite_first_launch_ordinal=5` (dependent phase 2 **6**).
+Reserve **one build/up to two launches**. Known Windows **1/4 builds, 4/6 launches**;
+later consumption needs audit. These are the final two launch slots if consumed.
+Fresh selected cases, official pinned SDK and coherent package walkthrough are required.
+Artifact `rewrite-windows-38031993657-1` has **7 days retention after upload**;
+upload/terminal cases and actual pinned npm route remain pending. Docs-only successor
+does not replace the tested correction. No allowance reset.
 
-After confirming exact run/attempt/head/time/inputs, publish the manual wait record
-and stop polling. Same-chat resume audits actual version/CLI, case counts, pinned SDK,
+**Next action:** stop polling and await the user's manual same-chat resume.
+Same-chat resume audits actual version/CLI, case counts, pinned SDK,
 package/input/binary scan, attempt entries, all native receipts/PNGs, required 20 checks
 and five exact HTTP bodies, process reopen/whole bytes/zero HTTP and cleanup.
 Missing/failed/skipped evidence stays unresolved. Diagnose before correction; budget

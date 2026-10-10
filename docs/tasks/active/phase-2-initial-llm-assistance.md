@@ -543,6 +543,33 @@ because the actual toolchain changes. Completed Mac proof remains valid. Publish
 before dispatch, record exact identity, then manual same-chat wait/resume. No additional
 agent, merge/release or next feature; missing proof is not waived or reset.
 
+### Confirmed pinned npm package qualification — 2026-10-10
+
+**State: awaiting_ci.** Reviewed correction published and remote verified at
+`95ce9c4fbad12cec24e8eda851b1baff1c4beec8` before dispatch. No active duplicate
+existed. Workflow **357322921**, `production-scaffold.yml`,
+[run **38031993657**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
+attempt **1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+exact head `95ce9c4fbad12cec24e8eda851b1baff1c4beec8`. Created
+**2026-10-10 06:44:43 UTC**; observed **in_progress at 06:44:55 UTC**.
+Selected Windows job **114154697854** setup passed, checkout in progress;
+generic preflight/package matrix skipped. Material inputs:
+`dialogue_rewrite_windows=true`, `upload_packages=false`, build ordinal **2**,
+first launch ordinal **5**, dependent phase-2 ordinal **6**, both reuse inputs **empty**.
+Reserve **one package build/up to two launches**; actual use must be audited.
+Known cumulative Windows **1/4 builds, 4/6 launches**, Mac **1/4 builds, 3/6 launches**.
+Artifact `rewrite-windows-38031993657-1` has **7 days retention after upload**;
+upload/terminal results remain unobserved. Successful native proof from the preceding
+run stays preserved on its real binary/toolchain; no pinned-npm runtime pass is inferred.
+
+Docs-only successor records this tested correction. End active polling for manual
+same-chat resume. Audit npm CLI/version **11.9.0**, exact candidate/source/binary,
+fresh selected cases/official SDK, package scan, attempt ledger, all native receipt/PNG
+assertions, 20 phase-1 checks/five reviewed HTTP bodies, independent process reopen,
+zero HTTP/whole-project bytes and cleanup. Failed/skipped/missing proof stays unresolved;
+these are final launch slots if both are consumed, with no allowance reset or inferred
+extra retry. No merge/release or next feature.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
