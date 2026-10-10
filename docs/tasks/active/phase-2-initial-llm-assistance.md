@@ -4082,3 +4082,59 @@ existing branch and update canonical contracts/task/CURRENT/HANDOVER. Follow WOR
 manual same-thread CI wait/resume and audit actual cases/artifacts. Return result,
 limitations and next prompt; do not start the following deliverable.
 ```
+
+### Generated Character cards selection — 2026-10-11
+
+User selects one bounded editor-only card draft/update on the qualified reference,
+prompt/context/proposal/transaction foundations. Fresh origin refs reconcile at
+f03ea0f1f4d9ad36d0828e519a1635fb55e23861; clean retained Mac ARM64 checkout,
+`codex/provider-qualification`, repository-only noreply identity, no reset.
+One GPT-6.1 Sol High implementation owner, serial shared edits; independent read-only
+review after implementation. Scope: selected saved story Beat and explicitly selected
+approved references; one new card or one existing card replacement, core-owned record
+and revision IDs, provenance, passive field and exact metadata review. Accept saves
+one proposed revision in one transaction/Undo; explicit approval separately replaces
+approved text. Rejection retains approved text. Generation cannot choose approval,
+source paths, runnable definitions, Appearance assets, lore or tools.
+
+Acceptance: exact reviewed dispatch; inert preview; one transaction/Undo; duplicate
+refusal; approval separation; zero writes on malformed/cancelled/stale/competing/
+external state; all runnable source byte-exact; Undo/Redo and reopen. Required focused
+Windows x64/macOS ARM64 CI plus changed-action packaged native checks. Hosted Mac
+lacks the approved signing identity: only the named signed changed-action native case
+uses this retained local Mac; no signing-policy change or broader local handoff.
+Per target fresh allowance: 4 package attempts, 6 editor launches, 4 focused dispatches;
+currently Windows 0/0/0, Mac 0/0/0. Failures/cancellations/implicit launches count.
+After two unsuccessful corrections of one hypothesis reassess before continuing.
+Manual same-thread CI wait/resume; audit actual artifacts. Commit/push authorized;
+no paid/public provider call, expansion, merge/release or following deliverable.
+Full Phase 2 and final human acceptance remain outside this bounded closure.
+
+### Generated card implementation and independent review — 2026-10-11
+
+Implemented bounded `generateCard` on the existing exact-send/strict-response/proposal
+owner, one references.json transaction and shared history. Core assigns IDs/provenance;
+Accept saves proposed text; separate approval/rejection preserves/replaces approved
+text explicitly. Plain nonmodal Story action, new/existing card selection, passive
+field/exact metadata review, Settings prompt and frozen proposed library review.
+Canonical architecture/context/data/UI/testing contracts updated.
+
+Independent GPT-6.1 Sol High read-only review found four actionable defects before
+packaging: proposed form mutation could bypass approval, missing nullable recordId
+was accepted, nested extension data could be lost, supporting definition staleness
+was omitted. Owner repaired these and follow-up stale inclusion/support-map handling.
+Final review finds no actionable implementation defect; no reviewer writes/launches.
+Supporting persistent source bindings cover only actually sent story/definitions;
+transient all-source guards still protect acceptance. Missing authored links are retained.
+
+Focused local core26, references12, prompts5 and renderer129 pass; actual production
+controller/native credential reader/strictHTTP fixture passes exact body, inert review,
+held-owner refusal, acceptance/Undo/Redo, malformed/cancel/stale zero writes and responsive
+Save. New field/extension/dependency regression passes. Initial core fixture assertions
+and controller reference-count assumption were harness defects, corrected with evidence;
+one sandbox loopback denial resolved with authorized focused execution. Gate tests21
+pass with one explicit Windows-only polling case unavailable locally (required on Windows).
+Workflow actionlint/repository validation/JS and Python syntax/diff checks pass.
+No package/editor/native acceptance is claimed yet. Windows0/4packages,0/6launches,
+0/4dispatches; Mac0/4,0/6,0/4. Next: signed Mac package1 and native launches1–2,
+then focused both-target CI dispatch1; audit artifacts after manual same-thread resume.

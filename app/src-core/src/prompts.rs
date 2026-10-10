@@ -15,6 +15,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub const PATH: &str = ".renpy-editor/ai.json";
 pub const ACTION: &str = "rewriteDialogue";
 pub const CONTINUE: &str = "continueScene";
+pub const CARD: &str = "generateCard";
+pub const CARD_BASELINE: &str = include_str!("../prompts/v1/generate-card.txt");
 pub const DRAFT: &str = "draftScene";
 pub const DRAFT_BASELINE: &str = include_str!("../prompts/v1/draft-scene.txt");
 pub const CONTINUE_BASELINE: &str = include_str!("../prompts/v1/continue-scene.txt");
@@ -26,6 +28,7 @@ fn baseline(action: &str) -> Result<&'static str, PromptError> {
         ACTION => Ok(BASELINE),
         CONTINUE => Ok(CONTINUE_BASELINE),
         DRAFT => Ok(DRAFT_BASELINE),
+        CARD => Ok(CARD_BASELINE),
         _ => Err(PromptError::Invalid),
     }
 }
@@ -95,6 +98,8 @@ pub struct PreviewRequest {
     #[serde(default)]
     pub chapter_id: String,
     #[serde(default)]
+    pub card_id: String,
+    #[serde(default)]
     pub display_name: String,
     pub expected_structure_revision: String,
     pub references: Vec<ReferenceSelection>,
@@ -131,7 +136,7 @@ fn validate(doc: &Value, project: &str) -> Result<(), PromptError> {
     {
         return Err(PromptError::Unavailable);
     }
-    for action in [ACTION, CONTINUE, DRAFT] {
+    for action in [ACTION, CONTINUE, DRAFT, CARD] {
         if let Some(p) = doc["prompts"].get(action) {
             if !p.is_object()
                 || p["text"]
@@ -348,7 +353,7 @@ impl AuthoringService {
             }
         }
         let mut choices = vec![];
-        if let Some(doc) = references.document {
+        if let Some(doc) = references.document.as_ref() {
             for (kind, key) in [("card", "cards"), ("lore", "loreEntries")] {
                 for r in doc[key].as_array().unwrap() {
                     for rev in r["revisions"].as_array().unwrap() {
@@ -359,7 +364,7 @@ impl AuthoringService {
                                 .filter(|i| {
                                     i.record_id == r["id"].as_str().unwrap()
                                         && i.revision_id == rev["id"].as_str().unwrap()
-                                        && i.field == "citations"
+                                        && (i.field == "citations" || i.field == "supportingReadSet")
                                 })
                                 .map(|i| i.state)
                                 .collect();
@@ -370,7 +375,7 @@ impl AuthoringService {
             }
         }
         Ok(
-            json!({"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
+            json!({"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"cardPrompt":self.prompts_for(project,project_id,CARD)?,"cards":references.document.as_ref().map(|d| d["cards"].clone()),"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
         )
     }
     pub fn context_preview(
@@ -394,6 +399,8 @@ impl AuthoringService {
         let prompt = self.prompts_for(project, project_id, &r.action)?;
         let drafting = r.action == DRAFT;
         let continuing = r.action == CONTINUE;
+        let card = r.action == CARD;
+        if !card && !r.card_id.is_empty() { return Err(PromptError::Invalid); }
         if drafting {
             crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
             if !r.scene_id.is_empty()
@@ -402,7 +409,7 @@ impl AuthoringService {
             {
                 return Err(PromptError::Invalid);
             }
-        } else if !r.chapter_id.is_empty() || !r.display_name.is_empty() {
+        } else if !r.chapter_id.is_empty() || (!card && !r.display_name.is_empty()) {
             return Err(PromptError::Invalid);
         }
         if r.expected_prompt_revision != prompt.revision {
@@ -515,7 +522,7 @@ impl AuthoringService {
         if let Some(scene) = scene {
             paths.insert(scene.source_path.clone());
         }
-        if drafting {
+        if drafting || card {
             // Preserve every existing source; revisions/drafts are guarded without sending its content.
             let inventory = self
                 .source_inventory(project, project_id)
@@ -595,7 +602,7 @@ impl AuthoringService {
             if refs.issues.iter().any(|i| {
                 i.record_id == s.record_id
                     && i.revision_id == s.revision_id
-                    && i.field == "citations"
+                    && (i.field == "citations" || i.field == "supportingReadSet")
             }) {
                 return Err(PromptError::StaleReference {
                     record: s.record_id.clone(),
@@ -634,10 +641,13 @@ impl AuthoringService {
             }
             included.push(json!({"kind":s.kind,"recordId":s.record_id,"revisionId":s.revision_id,"content":content}));
         }
+        let mut supporting_paths = BTreeSet::new();
+        if let Some(scene)=scene { supporting_paths.insert(scene.source_path.clone()); }
         let mut definitions = vec![];
         for c in &ws.authoring.characters {
             if continuing || drafting || Some(c.id.as_str()) == character {
                 paths.insert(c.source.path.clone());
+                supporting_paths.insert(c.source.path.clone());
                 definitions
                     .push(json!({"kind":"character","id":c.id,"statement":c.source.statement}));
             }
@@ -645,6 +655,7 @@ impl AuthoringService {
         for v in &ws.authoring.variables {
             if text.contains(&format!("[{}]", v.technical_name)) {
                 paths.insert(v.source.path.clone());
+                supporting_paths.insert(v.source.path.clone());
                 definitions.push(json!({"kind":"variableDefault","id":v.id,"statement":v.source.statement,"runtimeValue":"unknown"}));
             }
         }
@@ -725,6 +736,14 @@ impl AuthoringService {
                 .collect::<Vec<_>>());
         }
         let contract = json!({"version":1,"action":r.action,"target":{"sceneId":r.scene_id,"beatId":r.beat_id},"authority":"Preview only; no operation may be executed or applied","runtimeState":"Unknown; defaults and conditional ownership are not observed runtime facts"});
+        if card {
+            crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
+            let record = if r.card_id.is_empty() { None } else {
+                Some(doc["cards"].as_array().unwrap().iter().find(|x| x["id"] == r.card_id).ok_or(PromptError::Stale)?)
+            };
+            let current = record.and_then(|x| x["revisions"].as_array()?.iter().find(|v| v["id"] == x["currentRevisionId"]));
+            story["cardTarget"] = json!({"recordId":if r.card_id.is_empty(){Value::Null}else{json!(r.card_id)},"title":r.display_name,"currentRevisionId":record.map(|r| &r["currentRevisionId"]),"approvedRevisionId":record.map(|r| &r["approvedRevisionId"]),"content":current.map(|v| known_content(&v["content"],"card"))});
+        }
         let user = json!({"task":r.task,"styleNotes":prompt.style_notes,"story":story,"definitions":definitions,"references":included,"responseContract":contract});
         let body = json!({"messages":[{"role":"system","content":prompt.effective_text},{"role":"user","content":serde_json::to_string(&user).map_err(|_|PromptError::Invalid)?}],"maximumResponse":r.maximum_response});
         let serialized = serde_json::to_string(&body).map_err(|_| PromptError::Invalid)?;
@@ -802,7 +821,7 @@ impl AuthoringService {
             read_set.insert(path.clone(), token(revision));
         }
         Ok(
-            json!({"action":r.action,"projectId":project_id,"sessionId":session,"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
+            json!({"action":r.action,"projectId":project_id,"sessionId":session,"supportingReadSet":read_set.iter().filter(|(path,_)|supporting_paths.contains(*path)).map(|(k,v)|(k.clone(),v.clone())).collect::<BTreeMap<_,_>>(),"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
         )
     }
 }

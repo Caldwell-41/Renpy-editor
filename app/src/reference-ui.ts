@@ -20,7 +20,7 @@ export interface ReferenceDocument { schemaVersion: 1; projectId: string; cards:
 export interface ReferenceEntity { kind: EntityLink["type"]; id: string; title: string; revision: string | null }
 export interface ReferenceIssue { recordId: string; revisionId: string; field: string; index: number; state: "missing" | "stale" }
 export interface ReferenceWorkspace { document: ReferenceDocument | null; revision: string; diagnostic: string | null; entities: ReferenceEntity[]; issues: ReferenceIssue[]; canUndo: boolean; canRedo: boolean }
-export type ReferenceCommand = { type: "save"; kind: ReferenceKind; recordId: string | null; fields: ReferenceContent } | { type: "move"; kind: ReferenceKind; recordId: string; direction: "up" | "down" } | { type: "undo" | "redo" };
+export type ReferenceCommand = {type:"reviewCard";recordId:string;revisionId:string;approve:boolean} | { type: "save"; kind: ReferenceKind; recordId: string | null; fields: ReferenceContent } | { type: "move"; kind: ReferenceKind; recordId: string; direction: "up" | "down" } | { type: "undo" | "redo" };
 export interface ReferenceActions {
   apply(command: ReferenceCommand, expectedRevision: string): Promise<ReferenceWorkspace>;
   load(): Promise<ReferenceWorkspace>; current(): boolean; guard(): Promise<boolean>;
@@ -69,11 +69,12 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
   function feedback(text:string,error=false):void{notice.textContent=text;notice.dataset.kind=error?"error":"normal";actions.status(text,error?"error":"normal");}
   function synchronize():void{
     root.dataset.busy=String(busy);if(dirty())editor.dataset.unsubmitted="true";else delete editor.dataset.unsubmitted;
-    if(saveButton)saveButton.disabled=busy||!dirty();if(discardButton)discardButton.disabled=busy||(!dirty()&&selected!==null);
+    const proposed=selected!==null&&records().some(r=>r.id===selected&&currentRevision(r).status==="proposed");
+    if(saveButton)saveButton.disabled=busy||!dirty()||proposed;if(discardButton)discardButton.disabled=busy||(!dirty()&&selected!==null);
     if(state)state.textContent=busy?"Saving…":dirty()?"Unsaved changes":selected===null?"New entry":"Saved";
     undo.disabled=busy||dirty()||!model.canUndo;redo.disabled=busy||dirty()||!model.canRedo;create.disabled=busy||!model.document;reload.disabled=busy;
-    for(const control of root.querySelectorAll<HTMLButtonElement>(".reference-editor button,.reference-order button")){if(control===saveButton||control===discardButton)continue;if(busy){if(!disabledBeforeBusy.has(control))disabledBeforeBusy.set(control,control.disabled);control.disabled=true;}else if(disabledBeforeBusy.has(control)){control.disabled=disabledBeforeBusy.get(control)!;disabledBeforeBusy.delete(control);}}
-    root.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(".reference-editor input,.reference-editor textarea,.reference-editor select").forEach(e=>e.disabled=busy);
+    for(const control of root.querySelectorAll<HTMLButtonElement>(".reference-editor button,.reference-order button")){if(control===saveButton||control===discardButton)continue;if(control.dataset.proposed==="true"){control.disabled=true;continue;}if(busy){if(!disabledBeforeBusy.has(control))disabledBeforeBusy.set(control,control.disabled);control.disabled=true;}else if(disabledBeforeBusy.has(control)){control.disabled=disabledBeforeBusy.get(control)!;disabledBeforeBusy.delete(control);}}
+    root.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(".reference-editor input,.reference-editor textarea,.reference-editor select").forEach(e=>e.disabled=busy||e.dataset.proposed==="true");
   }
   function changed():void{synchronize();actions.status(dirty()?"Unsaved reference changes":"Saved");}
   function field(parent:HTMLElement,key:keyof ReferenceContent,text:string,multiline=false,required=false):void{
@@ -134,7 +135,19 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
     const provenanceNotes=el("textarea");provenanceNotes.rows=2;provenanceNotes.value=draft.provenance.notes;provenanceNotes.oninput=()=>{draft.provenance.notes=provenanceNotes.value;changed();};sources.append(label("Notes about the source (optional)",provenanceNotes));
     const citations=el("div");sources.append(citations);drawCitations(citations);
     const issues=model.issues.filter(i=>i.recordId===selected);if(issues.length)sources.append(el("p",`${issues.length} missing or changed link${issues.length===1?"":"s"}. Your notes and saved links have been kept.`,"reference-link-warning"));
-    const revision=records().find(r=>r.id===selected);if(revision){const versions=details("Earlier saved text");for(const v of [...revision.revisions].reverse()){const entry=el("details");entry.append(el("summary",`Saved version ${v.number}`));const prose=el("pre",Object.entries(v.content).filter(([,value])=>typeof value==="string").map(([key,value])=>`${key}: ${value}`).join("\n"));entry.append(prose);versions.append(entry);}}
+    const revision=records().find(r=>r.id===selected);
+    if(kind==="card"&&revision&&currentRevision(revision).status==="proposed"){
+      editor.querySelectorAll<HTMLButtonElement>("button:not(.reference-back)").forEach(c=>{c.dataset.proposed="true";});
+      const next=currentRevision(revision),approved=revision.revisions.find(v=>v.id===revision.approvedRevisionId);
+      const review=details("Review proposed card and approved text");review.open=true;
+      review.append(el("p","This proposed card is saved but unapproved. Approving replaces the current approved text; rejection keeps it. Undo is available."));
+      for(const [title,value] of [["Current approved text",approved?.content??null],["Proposed text",next.content]]){review.append(el("h4",String(title)),el("pre",JSON.stringify(value,null,2)));}
+      const approve=button("Approve this card revision",()=>{if(!dirty())void mutate({type:"reviewCard",recordId:revision.id,revisionId:next.id,approve:true});});
+      approve.disabled=model.issues.some(i=>i.recordId===revision.id&&i.revisionId===next.id&&(i.field==="citations"||i.field==="supportingReadSet"));
+      review.append(approve,button("Reject proposed card",()=>{if(!dirty())void mutate({type:"reviewCard",recordId:revision.id,revisionId:next.id,approve:false});}));
+      editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>("input,textarea,select").forEach(c=>{c.dataset.proposed="true";});
+    }
+    if(revision){const versions=details("Earlier saved text");for(const v of [...revision.revisions].reverse()){const entry=el("details");entry.append(el("summary",`Saved version ${v.number} · ${v.status}`));const prose=el("pre",Object.entries(v.content).filter(([,value])=>typeof value==="string").map(([key,value])=>`${key}: ${value}`).join("\n"));entry.append(prose);versions.append(entry);}}
     const footer=el("div","","reference-form-footer");state=el("span");const buttons=el("div","","row-actions");discardButton=button(selected?"Discard changes":"Cancel",()=>{void discard();});saveButton=button(selected?"Save changes":kind==="card"?"Create card":"Create lore entry",()=>{void save();},"button primary");buttons.append(discardButton,saveButton);footer.append(state,buttons);editor.append(footer);
     if(selected){const order=el("div","","reference-order");order.append(el("span","List order"));const index=records().findIndex(r=>r.id===selected);const up=button("Move up",()=>{void mutate({type:"move",kind,recordId:selected!,direction:"up"});});const down=button("Move down",()=>{void mutate({type:"move",kind,recordId:selected!,direction:"down"});});up.disabled=index<=0;down.disabled=index>=records().length-1;order.append(up,down);list.append(order);}
     synchronize();

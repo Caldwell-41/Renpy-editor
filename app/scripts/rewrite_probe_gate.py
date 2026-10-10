@@ -24,12 +24,28 @@ DRAFT_CHECKS[1]-={'Whole group and exact source diff are inert and disclose anch
 DRAFT_CHECKS[1]|={'Whole Scene and exact source metadata diff are inert and disclose Chapter title and Return','All existing source is byte exact across Scene creation','Core Scene Beat IDs path and explicit Return survive'}
 DRAFT_CHECKS[2].remove('Process reopen retains accepted group and existing terminal')
 DRAFT_CHECKS[2].add('Process reopen retains accepted Scene and explicit Return')
-def validate_report(report,phase,continuing=False,drafting=False):
+CARD_CHECKS={1:{
+ 'Exact approved references available','Preparation writes nothing',
+ 'Complete reviewed body contains selected revisions custom prompt and strict schema',
+ 'Destination locality and conservative size disclosed','Native light send layout observed',
+ 'Native dark send layout observed','Native compact send layout observed',
+ 'Physical Generate produces inert review with no writes','Card fields provenance and exact metadata review are passive',
+ 'Physical acceptance saves once and blocks duplicate click','Core card revision and exact prepared metadata survive',
+ 'Acceptance saves proposed text and preserves approved revision','All runnable source is byte exact',
+ 'One Undo restores exact prior library','Redo restores exact proposed metadata',
+ 'Proposed form requires separate explicit approval','Physical approval explicitly replaces prior approved revision',
+ 'Approval Undo restores prior approved text','Approval Redo restores exact approved revision',
+ 'Malformed response writes nothing and retains task','Model approval response writes nothing',
+ 'Cancelled response writes nothing and retains task','Fresh valid proposal available after refusal and cancellation',
+ 'Stale external source refuses acceptance with zero writes','Project reopen retains exact approved card',
+},2:{'Process reopen retains approved card and exact revision','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
+def validate_report(report,phase,continuing=False,drafting=False,card=False):
  if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
  d=report.get('details',{})
+ if card and d.get('action')!='generateCard':raise ValueError('Generated card action evidence required')
  if drafting and d.get('action')!='draftScene':raise ValueError('Draft Scene action evidence required')
  if continuing and d.get('action')!='continueScene':raise ValueError('Continue Scene action evidence required')
- if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
+ if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (CARD_CHECKS if card else DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
  if phase==1:
   hashes=d.get('reviewedBodyDigests')
   if not isinstance(hashes,list) or len(hashes)!=5 or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Five exact reviewed body digests required')

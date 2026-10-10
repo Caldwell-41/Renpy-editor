@@ -966,3 +966,87 @@ fn draft_scene_prompt_save_restore_history_and_stale_send() {
         prompts::DRAFT_BASELINE
     );
 }
+
+impl Fixture {
+    fn card_prepare(&mut self, record: Value) -> Value {
+        let o=self.ok("context.options",json!({}));let w=self.ok("scene.list",json!({}));let s=&w["scenes"][0];
+        let b=s["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").or_else(||s["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="dialogue"&&b["owner"].is_null()&&b["conditionalBranch"].is_null()&&!b["protected"].as_bool().unwrap_or(true))).unwrap();
+        let store=self.service.read().unwrap();
+        self.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::CARD,"cardId":record.as_str().unwrap_or(""),"displayName":"Generated café 雪","expectedPromptRevision":o["cardPrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"sceneId":s["id"],"beatId":b["id"],"expectedSourceRevision":s["sourceRevision"],"references":[],"task":"Draft one card","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))
+    }
+    fn card_response(&self,p:&Value)->Value {
+        let body:Value=serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();
+        let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+        let target=&user["story"]["cardTarget"];
+        json!({"schemaVersion":1,"action":prompts::CARD,"target":{"recordId":target["recordId"],"title":target["title"]},"fields":{"aliases":["Gen"],"description":"Unescaped [str(7)] {a=jump:label} <img onerror=alert(1)> café 雪","appearanceNotes":"Notes only","personality":"Calm","motivations":"Explore","background":"Unknown","speakingStyle":"Brief","exampleDialogue":"Hello"}})
+    }
+    fn accept_card(&mut self,r:&Value){self.ok("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}));}
+    fn review_card(&mut self,r:&Value,approve:bool)->Value {
+        let w=self.ok("references.list",json!({}));
+        self.call("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"reviewCard","recordId":r["card"]["recordId"],"revisionId":r["card"]["revisionId"],"approve":approve}}))
+    }
+    fn ref_history(&mut self,kind:&str){let w=self.ok("references.list",json!({}));self.ok("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":kind}}));}
+}
+#[test]
+fn generated_card_exact_dispatch_passive_preview_one_transaction_approval_history_reopen() {
+    let mut f=Fixture::new();let before=f.snapshots();let p=f.card_prepare(Value::Null);
+    assert_snapshots(&before,&f.snapshots());let send=f.take(&p,Cancel::default()).unwrap();assert_eq!(send.body,p["serializedPayload"].as_str().unwrap().as_bytes());assert!(f.take(&p,Cancel::default()).is_err());
+    let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();assert_snapshots(&before,&f.snapshots());
+    assert_eq!(r["patches"].as_array().unwrap().len(),1);assert_eq!(r["patches"][0]["path"],crate::references::PATH);
+    assert_eq!(r["card"]["status"],"proposed");assert!(r["card"]["after"]["description"].as_str().unwrap().contains("[str(7)]"));
+    f.accept_card(&r);let saved=fs::read(f.root.join(crate::references::PATH)).unwrap();assert_eq!(saved,r["patches"][0]["after"].as_str().unwrap().as_bytes());
+    let w=f.ok("references.list",json!({}));let record=w["document"]["cards"].as_array().unwrap().iter().find(|c|c["id"]==r["card"]["recordId"]).unwrap();assert!(record["approvedRevisionId"].is_null());
+    assert_eq!(f.call("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}))["ok"],false);
+    for(path,bytes)in before.iter().filter(|(p,_)|p.ends_with(".rpy")){assert_eq!(fs::read(f.root.join(path)).unwrap(),*bytes);}
+    f.ref_history("undo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),before[crate::references::PATH]);f.ref_history("redo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),saved);
+    assert_eq!(f.review_card(&r,true)["ok"],true);let approved=fs::read(f.root.join(crate::references::PATH)).unwrap();assert_eq!(f.review_card(&r,true)["ok"],false);
+    f.ref_history("undo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),saved);f.ref_history("redo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),approved);
+    f.ok("project.close",json!({}));f.session=f.service.open_path(&f.root).unwrap().session_id;
+    let w=f.ok("references.list",json!({}));assert!(w["diagnostic"].is_null());assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),approved);
+}
+#[test]
+fn generated_card_replacement_rejection_retains_approved_and_explicit_approval_supersedes() {
+    let mut f=Fixture::new();let initial=f.ok("references.list",json!({}));let id=initial["document"]["cards"][0]["id"].clone();let prior=initial["document"]["cards"][0]["approvedRevisionId"].clone();let old=initial["document"]["cards"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"].clone();
+    let p=f.card_prepare(id.clone());f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);
+    let proposed=f.ok("references.list",json!({}));assert_eq!(proposed["document"]["cards"][0]["approvedRevisionId"],prior);assert_eq!(proposed["document"]["cards"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"],old);
+    assert_eq!(f.review_card(&r,false)["ok"],true);assert_eq!(f.ok("references.list",json!({}))["document"]["cards"][0]["approvedRevisionId"],prior);
+    let p=f.card_prepare(id);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);assert_eq!(f.review_card(&r,true)["ok"],true);
+    let w=f.ok("references.list",json!({}));assert_eq!(w["document"]["cards"][0]["approvedRevisionId"],r["card"]["revisionId"]);assert_eq!(w["document"]["cards"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["status"],"superseded");assert_eq!(w["document"]["cards"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"],old);
+}
+#[test]
+fn generated_card_closed_schema_bounds_malformed_and_model_approval_zero_writes() {
+    for case in 0..9 {let mut f=Fixture::new();let p=f.card_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let mut reply=f.card_response(&p);
+        match case {0=>reply["approved"]=json!(true),1=>reply["fields"]["status"]=json!("approved"),2=>reply["fields"]["description"]=json!("x".repeat(10001)),3=>reply["target"]["recordId"]=json!(uuid::Uuid::new_v4().to_string()),4=>reply["target"]["title"]=json!("different"),5=>reply["fields"]["aliases"]=json!(["x","x"]),6=>reply["fields"]["path"]=json!("game/script.rpy"),7=>reply["action"]=json!("generateLore"),_=>{reply["target"].as_object_mut().unwrap().remove("recordId");}};
+        let before=f.snapshots();assert!(f.complete(&p,reply.to_string()).is_err(),"case {case}");assert_snapshots(&before,&f.snapshots());
+    }
+    let mut f=Fixture::new();let p=f.card_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let before=f.snapshots();assert!(f.complete(&p,"{\"schemaVersion\":1,\"schemaVersion\":1}".into()).is_err());assert_snapshots(&before,&f.snapshots());
+}
+#[test]
+fn generated_card_cancel_stale_competing_draft_external_source_metadata_approval_zero_writes() {
+    for case in 0..8 {let mut f=Fixture::new();let p=f.card_prepare(Value::Null);let cancel=Cancel::default();f.take(&p,cancel.clone()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();
+        match case {0=>cancel.cancel(),1=>{let _=f.card_prepare(Value::Null);},2=>{let opened=f.ok("source.open",json!({"path":f.path}));f.ok("source.updateDraft",json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":format!("{}\n#draft",opened["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));},3=>{let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# external\n");fs::write(path,bytes).unwrap();},4=>{let path=f.root.join(crate::references::PATH);let bytes=fs::read(&path).unwrap();fs::remove_file(&path).unwrap();fs::write(path,bytes).unwrap();},5=>{let o=f.ok("context.options",json!({}));f.ok("prompts.apply",json!({"action":prompts::CARD,"expectedRevision":o["cardPrompt"]["revision"],"command":{"type":"save","text":"changed"}}));},6=>{f.ok("project.close",json!({}));f.session=f.service.open_path(&f.root).unwrap().session_id;},_=>{let w=f.ok("references.list",json!({}));f.ok("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"save","kind":"card","recordId":w["document"]["cards"][0]["id"],"fields":{"description":"Competing manual save"}}}));}}
+        let before=f.snapshots();assert_eq!(f.call("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}))["ok"],false,"case {case}");assert_snapshots(&before,&f.snapshots());
+    }
+    let mut f=Fixture::new();let p=f.card_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# external\n");fs::write(path,bytes).unwrap();let before=f.snapshots();assert_eq!(f.review_card(&r,true)["ok"],false);assert_snapshots(&before,&f.snapshots());
+}
+
+#[test]
+fn generated_card_review_regressions_preserve_extensions_refuse_manual_bypass_and_dependency_changes() {
+    for dependency in ["story", "character", "variable"] {
+        let mut f=Fixture::new();
+        if dependency=="character" {
+            let w=f.ok("scene.list",json!({}));let scene=&w["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+        }
+        let path=f.root.join(crate::references::PATH);let mut raw:Value=serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();raw["cards"][0]["revisions"][1]["content"]["provenance"]["futureGeneratedTest"]=json!({"keep":true});raw["cards"][0]["revisions"][1]["futureRevisionTest"]=json!("kept");fs::write(path,raw.to_string()).unwrap();let library=f.ok("references.list",json!({}));let id=library["document"]["cards"][0]["id"].clone();
+        let p=f.card_prepare(id);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);
+        let w=f.ok("references.list",json!({}));let record=&w["document"]["cards"][0];let next=record["revisions"].as_array().unwrap().iter().find(|v|v["id"]==record["currentRevisionId"]).unwrap();
+        assert_eq!(next["content"]["futureContent"],library["document"]["cards"][0]["revisions"][1]["content"]["futureContent"]);
+        assert_eq!(next["content"]["provenance"]["futureGeneratedTest"],json!({"keep":true}));assert_eq!(next["futureRevisionTest"],"kept");
+        assert_eq!(next["content"]["scope"],library["document"]["cards"][0]["revisions"][1]["content"]["scope"]);
+        let before=f.snapshots();assert_eq!(f.call("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"save","kind":"card","recordId":record["id"],"fields":{"description":"bypass"}}}))["ok"],false);assert_snapshots(&before,&f.snapshots());
+        if dependency=="prompt" {let o=f.ok("context.options",json!({}));f.ok("prompts.apply",json!({"action":prompts::CARD,"expectedRevision":o["cardPrompt"]["revision"],"command":{"type":"save","text":"changed after save"}}));}
+        else {let w=f.ok("scene.list",json!({}));let path=if dependency=="story"{f.path.as_str()}else if dependency=="character"{w["authoring"]["characters"][0]["source"]["path"].as_str().unwrap()}else{w["authoring"]["variables"][0]["source"]["path"].as_str().unwrap()};let p=f.root.join(path);let mut bytes=fs::read(&p).unwrap();bytes.extend(b"# changed supporting source\n");fs::write(p,bytes).unwrap();}
+        let before=f.snapshots();assert_eq!(f.review_card(&r,true)["ok"],false, "{dependency}");assert_snapshots(&before,&f.snapshots());let mut f=Fixture::new();let p=f.card_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);assert_eq!(f.review_card(&r,true)["ok"],true);let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# changed after approval\n");fs::write(path,bytes).unwrap();let choices=f.ok("context.options",json!({}));let choice=choices["references"].as_array().unwrap().iter().find(|x|x["recordId"]==r["card"]["recordId"]).unwrap();assert_eq!(choice["eligible"],false);
+    }
+}

@@ -270,3 +270,36 @@ records exact candidate, native/source/history/refusal and pinned-SDK evidence.
 Generated Character cards/lore, incoming/terminal replacement and custom source remain
 separately selected deliverables. SDK validation is a separate explicit execution
 action; ordinary preview never invokes Ren'Py.
+
+### Generated Character card
+
+`generateCard` drafts or updates one editor-only record from one saved ordinary
+narration/dialogue Beat and explicitly selected approved references. Choose new/existing
+card and a reviewed name; effective action prompt, target's known current content,
+selected references/revisions, required speaking Character/variable defaults and full
+exact strict-schema request are disclosed before Generate. Target content is data;
+unknown metadata extensions, custom code and binaries stay excluded. One baseline
+resource `app/src-core/prompts/v1/generate-card.txt` supports ordinary saved overrides,
+restore/history and stale-send invalidation.
+
+The complete closed response requires `schemaVersion:1`, `action:"generateCard"`,
+`target:{recordId:<reviewed ID or explicit null>,title:<reviewed name>}` and `fields`:
+aliases, description, appearanceNotes, personality, motivations, background,
+speakingStyle, exampleDialogue. All fields required; no status/provenance/path/source/
+links/approval/tool/asset/lore operation is accepted. Field JSON is bounded to 10,000
+UTF-8 bytes (including escaping/framing); normal native reference field/document limits
+also apply. Core preserves existing links/scope and extensions, assigns IDs/revision,
+inferred provenance with prompt/request digests, selected-source support and explicit
+reference citations. Self-reference citations are excluded to avoid a replacement
+citing its own superseded approval. Prose stays ordinary metadata, without runnable
+text escaping.
+
+Review passive field changes and exact references.json before/after. Accept saves one
+proposed revision, one transaction and one Undo entry; model output cannot approve it.
+Current approved text stays available while proposed/rejected alternatives exist.
+Separate explicit approval supersedes the prior approved revision; rejection keeps it.
+Both use shared Undo/Redo. Persistent `supportingReadSet` binds actually sent source
+identities/revisions and gates approval and approved inclusion; full existing source
+read/draft guards remain transient acceptance protection. Generated proposals remain
+memory-only until accepted. Reopen retains saved statuses/provenance/revisions.
+No runnable Character, Appearance, asset, lore or source change is in this action.

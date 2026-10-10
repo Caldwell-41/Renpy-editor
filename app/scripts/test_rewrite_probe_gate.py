@@ -39,3 +39,15 @@ class DraftGate(unittest.TestCase):
     with self.assertRaises(ValueError):validate_report(bad,phase,False,True)
    bad=copy.deepcopy(report);bad['details']['action']='continueScene'
    with self.assertRaises(ValueError):validate_report(bad,phase,False,True)
+
+class CardGate(unittest.TestCase):
+ def test_card_action_approval_and_each_case_required(self):
+  from rewrite_probe_gate import CARD_CHECKS
+  for phase in (1,2):
+   report={'case':'dialogue-rewrite','passed':True,'cleanupComplete':True,'details':{'action':'generateCard','stage':'complete','passed':True,'checks':list(CARD_CHECKS[phase]),'reviewedBodyDigests':['a'*64]*5}}
+   validate_report(report,phase,card=True)
+   for name in CARD_CHECKS[phase]:
+    bad=copy.deepcopy(report);bad['details']['checks'].remove(name)
+    with self.assertRaises(ValueError):validate_report(bad,phase,card=True)
+   report['details']['action']='draftScene'
+   with self.assertRaises(ValueError):validate_report(report,phase,card=True)

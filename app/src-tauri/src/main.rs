@@ -278,7 +278,7 @@ fn core_request(
     }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && request["operation"]=="probe.rewriteStage" {
         let stage=request["payload"]["stage"].as_str().ok_or("Rewrite stage required")?;
-        if !["snapshot","physical-send","physical-accept","observe-light","observe-dark","observe-narrow","external-source","restore-source","server-delay"].contains(&stage){return Err("Rewrite stage refused");}
+        if !["snapshot","physical-send","physical-accept","physical-approve","observe-light","observe-dark","observe-narrow","external-source","restore-source","server-delay"].contains(&stage){return Err("Rewrite stage refused");}
         let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?);
         let done=root.join(format!("{stage}.done")).is_file();
         if stage=="snapshot" {
@@ -871,7 +871,7 @@ fn main() {
                     } else if case == "dialogue-rewrite" {
                         main.show().expect("rewrite show");main.set_focus().expect("rewrite focus");
                         let phase=if std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
-                        let script=if std::env::var("LOOMLIGHT_DRAFT_SCENE").as_deref()==Ok("1"){include_str!("draft_scene_probe.js")}else if std::env::var("LOOMLIGHT_CONTINUE_SCENE").as_deref()==Ok("1"){include_str!("continue_scene_probe.js")}else{include_str!("dialogue_rewrite_probe.js")};
+                        let script=if std::env::var("LOOMLIGHT_GENERATE_CARD").as_deref()==Ok("1"){include_str!("generate_card_probe.js")}else if std::env::var("LOOMLIGHT_DRAFT_SCENE").as_deref()==Ok("1"){include_str!("draft_scene_probe.js")}else if std::env::var("LOOMLIGHT_CONTINUE_SCENE").as_deref()==Ok("1"){include_str!("continue_scene_probe.js")}else{include_str!("dialogue_rewrite_probe.js")};
                         main.eval(&format!("window.__loomlightRewritePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),script)).expect("rewrite injection");
                     } else if case == "reference-library" {
                         main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");

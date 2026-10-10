@@ -1516,3 +1516,33 @@ cleanup, prior honest failures and cumulative allowances are in the
 [closure ledger](tasks/active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11).
 No remaining required case is skipped or waived. Agent/native proof is distinct from
 final human/full Phase2 acceptance; no docs-only package rerun is required.
+
+## Generated Character card focused qualification
+
+The [selected task](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-selection--2026-10-11)
+owns this bounded outcome and cumulative allowance. Focused core `rewrite` selects26
+cases, including5 generated-card regressions; `references::tests`12 and `prompts::tests`5
+retain the qualified manual/context foundations. Renderer `npm run check`129 cases;
+actual renderer/native-worker/core/HTTP controller uses
+`node tests/rewrite-controller.dispatch.mjs <compiled rewrite-controller-driver> --generate-card`.
+Card tests cover exact dispatch/inert preview, sole metadata mutation, proposed versus
+approved pointers, replacement rejection, duplicate refusal, one Undo/Redo/reopen,
+malformed/missing/unsafe/bounded/cancelled/stale/competing/external state zero writes,
+all .rpy bytes, nested extension retention, manual approval-bypass refusal, and stale
+support before approval and subsequent inclusion. No hostile/crash experiments.
+
+Manual `production-scaffold.yml` selector `generate_card=true` isolates Windows x64
+package/native input and Mac ARM64 automated checks; other selectors/reuse IDs remain
+false/empty. Hosted Mac lacks approved signing credentials, so only the named signed
+changed-action native case runs on the retained approved local Mac. No signing fallback.
+Packaged `dialogue-rewrite-probe.py --generate-card` requires25distinct phase1 and3
+separate-process reopen assertions, five exact reviewed/HTTP bodies, all-source hashes,
+saved proposed text, physical Save and separate physical Approve, history/refusals and
+owned credential/process/root cleanup. Windows requires six PID/binary/action-bound
+native receipts and intact captures. Process reopen sends zeroHTTP and changes zero
+project bytes. Rejection/competition/durable stale inclusion are focused core/controller
+cases; native is a representative update/approval journey. Card-only metadata changes
+reuse unchanged qualified official SDK source/runtime evidence from1320d0a/run38056790759;
+new all-source-byte assertions establish this scope, with no new SDK execution claim.
+Audit actual cases, manifests, binaries, input hashes and cleanup; green badges alone
+are insufficient. Final human/full Phase2 acceptance remains separate.

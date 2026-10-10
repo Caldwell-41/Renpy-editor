@@ -92,6 +92,7 @@ pub enum Command {
         record_id: String,
         direction: Direction,
     },
+    ReviewCard { record_id: String, revision_id: String, approve: bool },
     Undo,
     Redo,
 }
@@ -557,10 +558,25 @@ impl AuthoringService {
                 )),
             ),
         };
-        let issues = document
+        let mut issues = document
             .as_ref()
             .map(|v| issues(v, &entities))
             .unwrap_or_default();
+        if let Some(doc) = document.as_ref() {
+            for record in doc["cards"].as_array().into_iter().flatten() {
+                for revision in record["revisions"].as_array().into_iter().flatten() {
+                    if let Some(set)=revision.get("supportingReadSet") {
+                        let fresh = set.as_object().is_some_and(|set| set.iter().all(|(path, expected)| {
+                            if !path.ends_with(".rpy") && ![".renpy-editor/project.json",".renpy-editor/authoring.json",".renpy-editor/source-map.json",".renpy-editor/ai.json"].contains(&path.as_str()) { return false; }
+                            RelativePath::new(path).ok().and_then(|path|self.transactions.snapshot_optional(project,path).ok())
+                                .map(|snapshot|token(&snapshot.map(|(_,r)|r).unwrap_or_else(Revision::expected_absence)))
+                                .is_some_and(|current|expected.as_str()==Some(&current))
+                        }));
+                        if !fresh { issues.push(Issue {record_id:record["id"].as_str().unwrap_or_default().into(),revision_id:revision["id"].as_str().unwrap_or_default().into(),field:"supportingReadSet",index:0,state:"stale"}); }
+                    }
+                }
+            }
+        }
         let histories = self.scene_history.lock().map_err(|_| ReferenceError::Io)?;
         let history = histories.get(project);
         Ok(Workspace {
@@ -633,6 +649,52 @@ impl AuthoringService {
         }
         Ok(out)
     }
+    pub(crate) fn prepare_generated_card(
+        &self, project: &ProjectId, project_id: &str, record_id: Option<&str>,
+        fields: Value, citations: Value, provenance: Value, supporting_read_set: Value,
+    ) -> Result<(TransactionProposal, Value), ReferenceError> {
+        let (bytes, revision) = self.reference_snapshot(project)?;
+        let mut doc = if revision == Revision::expected_absence() { empty(project_id) }
+            else { crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)? };
+        validate(&doc, project_id)?;
+        let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+        let index = if let Some(id) = record_id {
+            records.iter().position(|r| r["id"] == id).ok_or(ReferenceError::Invalid)?
+        } else {
+            records.push(json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"approvedRevisionId":null,"revisions":[]}));
+            records.len()-1
+        };
+        let record = &mut records[index];
+        let old = array(&record["revisions"] )?.iter().find(|r| r["id"] == record["currentRevisionId"]);
+        let before = old.map(|r| r["content"].clone()).unwrap_or(Value::Null);
+        let defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"linkedCharacterId":null,"aliases":[],"description":"","appearanceNotes":"","personality":"","motivations":"","background":"","relationships":[],"speakingStyle":"","exampleDialogue":"","linkedLoreIds":[]});
+        let mut content = merge(if before.is_null() { &defaults } else { &before }, &fields);
+        content["citations"] = citations;
+        content["provenance"] = merge(&content["provenance"], &provenance);
+        validate_content(&content, Kind::Card)?;
+        let number = record["revisionCounter"].as_u64().unwrap_or(0).checked_add(1)
+            .filter(|n| *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+        let id = uuid::Uuid::new_v4().to_string();
+        let rid = record["id"].clone();
+        let approved = record["approvedRevisionId"].clone();
+        let current = record["currentRevisionId"].clone();
+        let mut next = merge(old.unwrap_or(&Value::Null), &json!({"id":id,"number":number,"status":"proposed","createdAt":now(),"reviewedAt":null,"reviewNote":"","supersedes":if approved.is_null(){Value::Null}else{json!({"recordId":rid,"revisionId":approved})},"supersededBy":null,"content":content}));
+        next["supportingReadSet"] = supporting_read_set;
+        let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+        revisions.retain(|r| r["id"] == approved || r["id"] == current);
+        revisions.push(next);
+        record["currentRevisionId"] = json!(id);
+        record["revisionCounter"] = json!(number);
+        validate(&doc, project_id)?;
+        let mut proposed = serde_json::to_vec_pretty(&doc).map_err(|_| ReferenceError::Invalid)?;
+        proposed.push(b'\n');
+        if proposed.len()>MAX_BYTES { return invalid(); }
+        Ok((TransactionProposal { mutations:vec![FileMutation {
+            path:RelativePath::new(PATH).map_err(|_|ReferenceError::Io)?,
+            kind:if revision==Revision::expected_absence(){MutationKind::CreateNew}else{MutationKind::ReplaceExisting},
+            base:revision, expected_bytes:bytes, proposed,
+        }],intent:TransactionIntent::Edit }, json!({"recordId":rid,"revisionId":id,"before":before,"after":content,"approvedRevisionId":approved,"status":"proposed"})))
+    }
     pub fn references_apply(
         &self,
         project: &ProjectId,
@@ -650,6 +712,39 @@ impl AuthoringService {
         };
         validate(&doc, project_id)?;
         match request.command {
+            Command::ReviewCard { record_id, revision_id, approve } => {
+                let entities = self.reference_entities(project, project_id, Some(&doc))?;
+                if approve && issues(&doc, &entities).iter().any(|i| i.record_id == record_id && i.revision_id == revision_id && i.field == "citations") {
+                    return Err(ReferenceError::Conflict);
+                }
+                if approve {
+                    let next = doc["cards"].as_array().ok_or(ReferenceError::Invalid)?.iter()
+                        .find(|r| r["id"] == record_id).and_then(|r| r["revisions"].as_array()?.iter().find(|v| v["id"] == revision_id)).ok_or(ReferenceError::Invalid)?;
+                    if let Some(set) = next.get("supportingReadSet") {
+                        for (path, expected) in object(set)? {
+                            if !path.ends_with(".rpy") && ![".renpy-editor/project.json",".renpy-editor/authoring.json",".renpy-editor/source-map.json",".renpy-editor/ai.json"].contains(&path.as_str()) { return invalid(); }
+                            let (_, revision) = self.transactions.snapshot_optional(project,RelativePath::new(path).map_err(|_|ReferenceError::Invalid)?)
+                                .map_err(|_|ReferenceError::Conflict)?.unwrap_or((vec![],Revision::expected_absence()));
+                            if expected.as_str()!=Some(&token(&revision)) { return Err(ReferenceError::Conflict); }
+                        }
+                    }
+                }
+                let record = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?
+                    .iter_mut().find(|r| r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
+                if record["currentRevisionId"] != revision_id { return invalid(); }
+                let prior = record["approvedRevisionId"].clone();
+                let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+                let next = revisions.iter_mut().find(|r| r["id"] == revision_id && r["status"] == "proposed").ok_or(ReferenceError::Invalid)?;
+                next["status"] = json!(if approve { "approved" } else { "rejected" });
+                next["reviewedAt"] = json!(now());
+                if approve {
+                    for r in revisions.iter_mut().filter(|r| r["id"] == prior) {
+                        r["status"] = json!("superseded");
+                        r["supersededBy"] = json!({"recordId":record_id,"revisionId":revision_id});
+                    }
+                    record["approvedRevisionId"] = json!(revision_id);
+                }
+            }
             Command::Undo => {
                 self.undo_scene(project).map_err(ReferenceError::History)?;
                 return self.references(project, project_id);
@@ -703,6 +798,7 @@ impl AuthoringService {
                 let old = array(&record["revisions"])?
                     .iter()
                     .find(|r| r["id"] == record["currentRevisionId"]);
+                if old.is_some_and(|r| r["status"] == "proposed" && r.get("supportingReadSet").is_some()) { return invalid(); }
                 let mut content = merge(
                     old.map(|r| &r["content"]).unwrap_or(&Value::Null),
                     &Value::Object(fields),
@@ -727,6 +823,8 @@ impl AuthoringService {
                 let prior = record["approvedRevisionId"].clone();
                 let current = record["currentRevisionId"].clone();
                 let mut next = old.cloned().unwrap_or_else(|| json!({}));
+                // Explicit manual replacement is authored intent, not a generated dependency snapshot.
+                next.as_object_mut().ok_or(ReferenceError::Invalid)?.remove("supportingReadSet");
                 for(k,v)in json!({"id":rid,"number":number,"status":"approved","createdAt":now(),"reviewedAt":now(),"reviewNote":"","supersedes":if prior.is_null(){Value::Null}else{json!({"recordId":record_id,"revisionId":prior})},"supersededBy":null,"content":content}).as_object().unwrap(){next[k]=v.clone();}
                 let revisions = record["revisions"]
                     .as_array_mut()

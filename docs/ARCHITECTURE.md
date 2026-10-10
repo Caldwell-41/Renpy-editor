@@ -721,3 +721,22 @@ ordinary directory creation is deferred until explicit acceptance. There is no i
 edge or loop of single-Beat apply calls. [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#bounded-draft-scene)
 owns the closed authority and [TESTING](TESTING.md#draft-scene-focused-qualification)
 owns focused proof.
+
+### Generated Character card boundary
+
+`generateCard` extends the same prepared-send/proposal owner. The context selects one
+saved ordinary Beat, a reviewed card name and either a new card or an existing record;
+approved reference inclusions remain explicit. All existing source revisions/drafts
+are guarded without widening the outbound story selection. The closed response can
+supply eight descriptive fields only. Core assigns IDs/revisions, inferred provenance,
+request/prompt digests, source support and selected-reference citations. The planner
+prepares exactly one references.json mutation; preview never writes or executes source.
+Acceptance consumes the review once through shared history and saves **proposed** text.
+`references.apply/reviewCard` is a separate optimistic user approval/rejection transaction.
+Generation cannot approve itself; approved text survives proposal/rejection. Supporting
+source identity/revisions and citations guard approval and later inclusion. Only actually
+sent story/definition sources remain durable dependencies, distinct from full-source
+acceptance guards. Explicit manual replacement clears generated source bindings.
+Unknown content/provenance/revision extensions survive; core-owned support snapshots
+replace their predecessor. See [context contract](PROMPTS_CONTEXT.md#generated-character-card)
+and [focused qualification](TESTING.md#generated-character-card-focused-qualification).

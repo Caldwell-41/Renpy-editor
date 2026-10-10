@@ -523,3 +523,18 @@ No diagnostic is independent document truth or authority to mutate/open arbitrar
 overrides, separate style notes, baseline version/digest, bounds and shared history.
 The selected one-Beat preview records exact approved reference revisions and bounded
 source/metadata read sets without storing payloads or mutating runnable source.
+
+Generated Character card revisions use the existing native references schema v1 and
+three-revision bound. Accept writes `status:"proposed"`, `reviewedAt:null` and a
+core-owned record/revision ID; `approvedRevisionId` is unchanged. Approval/rejection
+requires the exact current proposed revision and library revision. Approval updates
+status/timestamp, supersedes the prior approval and moves `approvedRevisionId` in one
+undoable metadata transaction; rejection leaves that pointer/text intact. Generated
+provenance is inferred and records model plus reviewed request/prompt digests, without
+persisting raw requests/replies. Optional core-owned `supportingReadSet` maps actual
+sent story/definition source paths to existing full revision tokens; stale source
+identity/bytes block approval and ordinary reference inclusion. Generated replacements
+replace that snapshot while retaining unknown extension fields. Explicit manual Save
+of a generated proposed revision is refused until review; subsequent authored manual
+replacement clears generated support bindings. Descriptive prose remains unescaped
+metadata and all runnable source stays byte-exact.

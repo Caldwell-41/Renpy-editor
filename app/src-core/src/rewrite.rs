@@ -140,6 +140,31 @@ fn draft_schema(chapter: &str, title: &str, characters: Vec<&str>) -> Value {
     value["properties"]["terminal"] = json!({"type":"object","additionalProperties":false,"required":["type"],"properties":{"type":{"type":"string","enum":["return"]}}});
     value
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CardResponse { schema_version: u32, action: String, target: CardTarget, fields: CardFields }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CardTarget { record_id: Option<String>, title: String }
+#[derive(Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CardFields {
+    aliases: Vec<String>, description: String, appearance_notes: String,
+    personality: String, motivations: String, background: String,
+    speaking_style: String, example_dialogue: String,
+}
+fn card_schema(record: &str, title: &str) -> Value {
+    let mut properties = serde_json::Map::new();
+    for key in ["description","appearanceNotes","personality","motivations","background","speakingStyle","exampleDialogue"] {
+        properties.insert(key.into(),json!({"type":"string","maxLength":10000}));
+    }
+    properties.insert("aliases".into(),json!({"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string","maxLength":160,"minLength":1}}));
+    json!({"type":"object","additionalProperties":false,"required":["schemaVersion","action","target","fields"],"properties":{
+        "schemaVersion":{"type":"integer","enum":[1]},"action":{"type":"string","enum":[prompts::CARD]},
+        "target":{"type":"object","additionalProperties":false,"required":["recordId","title"],"properties":{"recordId":if record.is_empty(){json!({"type":"null"})}else{json!({"type":"string","enum":[record]})},"title":{"type":"string","enum":[title]}}},
+        "fields":{"type":"object","additionalProperties":false,"required":properties.keys().collect::<Vec<_>>(),"properties":properties}
+    }})
+}
 #[derive(PartialEq)]
 enum Phase {
     Prepared,
@@ -252,7 +277,8 @@ impl AuthoringService {
         }
         let continuing = request.context.action == prompts::CONTINUE;
         let drafting = request.context.action == prompts::DRAFT;
-        let boundary = if continuing || drafting {
+        let card = request.context.action == prompts::CARD;
+        let boundary = if continuing || drafting || card {
             Boundary {
                 segments: vec![],
                 protected: vec![],
@@ -267,7 +293,9 @@ impl AuthoringService {
             )
             .map_err(|_| RewriteError::Unsupported)?
         };
-        let response_schema = if drafting {
+        let response_schema = if card {
+            card_schema(&request.context.card_id, &request.context.display_name)
+        } else if drafting {
             draft_schema(
                 &request.context.chapter_id,
                 &request.context.display_name,
@@ -298,7 +326,9 @@ impl AuthoringService {
                 &boundary,
             )
         };
-        user["responseContract"] = if drafting {
+        user["responseContract"] = if card {
+            json!({"version":1,"action":prompts::CARD,"schema":response_schema,"authority":"Draft exactly one editor-only Character card with the reviewed name. Accept saves a proposed revision only; approval is a separate user action. Core owns IDs, provenance and citations. Preserve existing links, scope, extensions, approved text and ALL runnable source. No approval, paths, definitions, assets, lore, tools or other operations. At most 10000 total UTF-8 generated field bytes."})
+        } else if drafting {
             json!({"version":1,"action":prompts::DRAFT,"schema":response_schema,"authority":"Create exactly one inseparable Scene in the reviewed saved Chapter with its reviewed title: 1–8 dialogue/narration Beats, at most 10000 total UTF-8 text bytes, existing reviewed Characters and explicit terminal Return. Core owns IDs, technical label, source path and literal encoding. Preserve ALL existing source; no incoming connection, definitions, custom source, tools or other operations."})
         } else if continuing {
             json!({"version":1,"action":prompts::CONTINUE,"schema":response_schema,"authority":"Insert one inseparable group of 1–8 dialogue/narration Beats BEFORE the saved anchor. At most 10000 total UTF-8 text bytes; existing reviewed Characters only. Core owns IDs, paths and source encoding. Preserve all existing source and the terminal. New prose is literal display text; no source, tokens, tools, definitions or terminal operations."})
@@ -311,7 +341,7 @@ impl AuthoringService {
         if !profile.settings.valid() {
             return Err(RewriteError::Invalid);
         }
-        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
+        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if card {"loomlight_card_v1"}else if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
         let margin = 256.max(body.len().div_ceil(10));
         let total = body.len() + margin + request.context.maximum_response;
         if body.len() > crate::ai_request::MAX_BODY
@@ -472,7 +502,26 @@ impl AuthoringService {
         }
         let parsed = crate::ai_discovery::strict_json(completion.text.as_bytes())
             .map_err(|_| RewriteError::Invalid)?;
-        let (proposal, semantic) = if t.context.action == prompts::DRAFT {
+        let (proposal, semantic) = if t.context.action == prompts::CARD {
+            if parsed["target"].get("recordId").is_none() { return Err(RewriteError::Invalid); }
+            let response: CardResponse = serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1 || response.action != prompts::CARD
+                || response.target.record_id.as_deref() != if t.context.card_id.is_empty(){None}else{Some(t.context.card_id.as_str())}
+                || response.target.title != t.context.display_name { return Err(RewriteError::Invalid); }
+            let mut fields = serde_json::to_value(response.fields).map_err(|_| RewriteError::Invalid)?;
+            if serde_json::to_vec(&fields).map_err(|_|RewriteError::Invalid)?.len() > 10000 { return Err(RewriteError::Invalid); }
+            fields["title"] = json!(t.context.display_name);
+            let user: Value = serde_json::from_str(t.preview["payload"]["messages"][1]["content"].as_str().ok_or(RewriteError::Invalid)?).map_err(|_| RewriteError::Invalid)?;
+            let mut citations = vec![json!({"target":{"type":"scene","id":t.context.scene_id},"revision":t.context.expected_source_revision,"notes":"Selected saved Beat; runtime state unknown."})];
+            for selection in &t.context.references {
+                citations.push(json!({"target":{"type":selection.kind,"id":selection.record_id},"revision":selection.revision_id,"notes":"Explicitly included approved reference."}));
+            }
+            // Do not cite this card's own soon-to-be-superseded approved revision.
+            citations.retain(|c| !(c["target"]["type"]=="card" && c["target"]["id"]==t.context.card_id));
+            let provenance = json!({"kind":"inferred","notes":format!("Generated with Unsloth Studio / {}. Prompt digest {}; reviewed request digest {}. Saved story and selected references are supporting material; generated interpretation requires explicit approval.",t.profile.settings.model,t.preview["promptDigest"].as_str().unwrap_or(""),content_digest(&t.body))});
+            let (proposal, card) = self.prepare_generated_card(project, project_id, response.target.record_id.as_deref(), fields, json!(citations), provenance, t.preview["supportingReadSet"].clone()).map_err(|_| RewriteError::Invalid)?;
+            (proposal, json!({"action":prompts::CARD,"card":card,"supportingStory":user["story"]}))
+        } else if t.context.action == prompts::DRAFT {
             let response: DraftResponse =
                 serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
             if response.schema_version != 1
@@ -678,7 +727,7 @@ impl AuthoringService {
         review["previewDigest"] = json!(preview_digest);
         review["target"] = json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
         review["patches"] = json!(patches);
-        review["uncertainty"] = json!("Static literal prose only. Runtime state is unknown; no SDK validation or project code execution.");
+        review["uncertainty"] = json!(if t.context.action==prompts::CARD { "Editor-only proposed notes. Approval is separate. Runtime knowledge is unknown; no project code execution." } else { "Static literal prose only. Runtime state is unknown; no SDK validation or project code execution." });
         review["usage"] = json!(completion.usage);
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         t.phase = Phase::Review;

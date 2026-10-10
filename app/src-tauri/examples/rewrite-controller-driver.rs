@@ -91,7 +91,7 @@ fn main() {
                         files(&p, base, hashes);
                     } else {
                         hashes.insert(
-                            p.strip_prefix(base).unwrap().to_str().unwrap().into(),
+                            p.strip_prefix(base).unwrap().to_str().unwrap().replace('\\', "/"),
                             std::fs::read(p).unwrap(),
                         );
                     }

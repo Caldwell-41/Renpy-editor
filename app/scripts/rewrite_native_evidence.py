@@ -7,15 +7,20 @@ from pathlib import Path
 NATIVE_STAGES = {'observe-light', 'observe-dark', 'observe-narrow', 'physical-send', 'physical-accept'}
 
 
-def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False):
+def required_stages(card=False):
+    return NATIVE_STAGES | ({"physical-approve"} if card else set())
+
+def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False, card=False):
     directory = Path(directory)
     receipt = json.loads((directory / f'{stage}.json').read_text(encoding='utf-8-sig'))
-    if stage not in NATIVE_STAGES or receipt.get('stage') != stage or receipt.get('passed') is not True:
+    if stage not in required_stages(card) or receipt.get('stage') != stage or receipt.get('passed') is not True:
         raise ValueError('Successful exact native stage required')
     if receipt.get('processId') != pid or receipt.get('executableSHA256') != executable_digest:
         raise ValueError('Owned native process/binary evidence mismatch')
     if receipt.get('inputDesktop') != 'Default' or receipt.get('layer') != 'Windows UI Automation observation and OS SendInput; automated, not human acceptance':
         raise ValueError('Interactive native evidence required')
+    if card and receipt.get('action') != 'generateCard':
+        raise ValueError('Generated card native evidence required')
     if drafting and receipt.get('action') != 'draftScene':
         raise ValueError('Changed Draft action evidence required')
     if continuing and receipt.get('action') != 'continueScene':
@@ -27,6 +32,7 @@ def validate_native_stage(directory, stage, pid, executable_digest, continuing=F
     required |= {'compactWidth'} if stage == 'observe-narrow' else set()
     required |= {'osMouseInput', 'inertProposalObserved'} if stage == 'physical-send' else set()
     required |= {'osMouseInput', 'savedOnceObserved'} if stage == 'physical-accept' else set()
+    required |= {'osMouseInput','approvalObserved'} if stage == 'physical-approve' else set()
     if any(checks.get(name) is not True for name in required):
         raise ValueError('Required native observation/action is missing')
     captures = receipt.get('captures')
