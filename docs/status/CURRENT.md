@@ -1,31 +1,31 @@
 # Current status
 
-**Updated:** 2026-10-10. **Selected outcome: Continue Scene, awaiting CI** on
-`codex/provider-qualification`. Accepted first rewrite and provider/reference/prompt/
-literal/transaction foundations remain the baseline; main remains `5f448ca`.
+**Updated:** 2026-10-10. **Continue Scene is qualified** on Windows x64 and macOS ARM64
+on `codex/provider-qualification`. Tested implementation **8931fa8** builds on accepted
+provider/reference/prompt/literal/transaction and first-rewrite foundations. Main
+remains `5f448ca`; no next deliverable is selected. Full Phase 2 remains incomplete.
 
-Continue Scene implementation is published. Run
-[38035948157](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38035948157)
-failed on two harness defects: Windows renderer gate missing import and premature SDK
-say-text assertion on both targets. Actual artifact manifests and cases are audited.
-Corrections pass local checks; review additionally fixed stale cross-action prompt
-text after shared Undo/Redo. Final renderer **126/126**, frontend build, evidence gates
-and official pinned SDK runtime **8/8** pass. Required Windows native/SDK and hosted Mac
-corrected automated proof remain pending; implementation is not yet accepted.
-
-Repair candidate **8931fa8** is pushed. Signed Mac package **1/4** passes existing
-identity/signature/installer/privacy gates. Native observation is blocked by the locked
-Mac desktop; manual unlock requested, zero editor launches and no owned fixture.
+| Capability | Qualified result |
+| --- | --- |
+| Continue prompt/context/send | Explicit saved root anchor, action prompt, selected revisions and exact reviewed request dispatched once |
+| Group review/accept | Closed 1–8 dialogue/narration group, existing Characters, core IDs/literal encoding, passive semantic/exact source/map preview, one transaction/Undo |
+| Preservation/history | Surrounding bytes, existing IDs/payloads and terminal preserved; Undo/Redo/project and process reopen pass |
+| Refusals | Malformed/unsafe/cancel/stale, drafts, competing requests and external edits write nothing; custom/nested/invalid boundaries refuse |
 
 [Run 38039472619](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619),
-attempt 1, exact candidate 8931fa8, was **in_progress** at **08:54:05 UTC**.
-Cumulative CI use **2/4 per target**. Known actual Windows use **1/4 builds, 0/6
-launches**, with build 2/launches 1–2 reserved pending audit. Mac use **1/4 builds,
-0/6 launches**. Prior slice counts remain separate. Resume this thread manually to
-audit actual artifacts/cases and complete the named Mac native case after unlock.
-No active model polling, signing-policy changes or next feature.
+attempt 1, candidate **8931fa8**, is audited successful: both targets 126 renderer,
+15 core, 8 transport, 6 native worker/controller and official pinned SDK runtime 8/8;
+Mac prompts 5. Windows native UIA/OS-input receipts/seven captures and signed Mac
+Computer Use physical Generate/Accept qualify the changed action. Both native cases
+pass 22 distinct checks/five exact bodies and process reopen 3/3 with zero HTTP/unchanged
+bytes. Credential/fixture/process/listener cleanup complete. Prior failed run and
+locked-Mac capability evidence remain in the ledger.
 
-[The task](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-failed-run-audit-and-review-repairs--2026-10-10)
-owns actual evidence, failures and allowances. [HANDOVER](HANDOVER.md) owns recovery.
-No next deliverable, paid/public calls, provider/route expansion, Draft Scene, generated
-references, terminal replacement, merge or release. Full Phase 2 remains incomplete.
+Final selected allowance use: Windows **2/4 builds, 2/6 editor launches, 2/4 CI**;
+Mac **1/4, 2/6, 2/4**. No pending operation/reservation. No paid/public calls, provider/
+route expansion, signing change, merge or release. Automated/agent native qualification
+does not claim final human or full Phase 2 integrated/provider acceptance.
+
+[Closure and proposed Draft Scene prompt](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+own exact evidence, review and limits. [HANDOVER](HANDOVER.md) owns recovery. Draft Scene
+and generated references remain unavailable until separately selected and delivered.

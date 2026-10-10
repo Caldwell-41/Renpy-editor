@@ -193,8 +193,9 @@ Use only the selected ledger's remaining cumulative build/launch allowance.
 
 ## Continue Scene
 
-Implementation is present; both-target changed-action qualification is pending in the
-[owning task](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10).
+The bounded action is qualified on Windows x64 and macOS ARM64; the
+[owning task](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+records exact CI/native evidence and remaining phase-wide limits.
 Story offers **Assist · Continue Scene** at an eligible saved root Beat. The anchor is
 explicitly **before that Beat**, bound to its ID, byte offset, source/structure revisions
 and project session. A supported existing terminal is required and disclosed. The

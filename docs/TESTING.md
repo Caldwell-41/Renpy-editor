@@ -1451,3 +1451,17 @@ original literal prose and absence of generated active tags/expressions. Raw cas
 input/binary/artifact hashes must be audited; green/skipped/partial badges do not qualify
 missing cases. Preserve failures, respect manual same-thread wait/resume and reuse only
 unchanged evidence. No paid provider or private game content is involved.
+
+
+Changed-action evidence is qualified for implementation `8931fa8`: focused CI run
+[38039472619](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619)
+plus the retained approved signed Mac native case. Both actual targets pass the named
+SDK smoke's eight assertions, 126 renderer cases and selected core/transport/worker/
+controller checks. Native phase 1 requires **22 distinct** checks (23 entries because
+reference availability is checked twice), and process reopen requires three checks,
+zero HTTP and unchanged project bytes. Windows has five validated action-specific
+UIA/OS-input receipts/seven captures; Mac uses observed Computer Use layouts and
+physical Generate/Accept. This is agent/automated native evidence, not final human
+phase-wide acceptance or new live-provider qualification. The
+[closure ledger](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+owns actual consumed attempts and retained failures.

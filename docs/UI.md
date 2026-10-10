@@ -1166,5 +1166,5 @@ group once; semantic review shows literal text/Character IDs/new Beat IDs and ex
 Source/source-map before/after. All content uses passive text. Ordinary Story Undo/Redo
 and reopened source/history use the shared transaction layer. Settings' assistance
 selector edits/restores each action's saved prompt with draft protection. Continue Scene
-qualification is pending; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene) owns
-bounds and source/lifetime rules. Draft Scene and generated references stay unavailable.
+is qualified on both supported targets; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene)
+owns bounds and source/lifetime rules. Draft Scene and generated references stay unavailable.

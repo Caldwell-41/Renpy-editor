@@ -6,8 +6,9 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-The selected first safe rewrite is qualified on both targets; see the
-[final audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10).
+The selected first safe rewrite and bounded Continue Scene are qualified on both
+targets; see the [first rewrite audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10)
+and [Continue Scene closure](#continue-scene-both-target-qualification-and-closure--2026-10-10).
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -3470,3 +3471,146 @@ and continue the existing outcome. The Mac is unlocked.”** Reconcile fresh ref
 actual counts; reuse candidate 8931fa8's unchanged signed Mac bundle after input/hash
 verification, complete only authorized fixes/native proof/review/closure. No new
 run/job retry without a diagnosed case and available cumulative allowance.
+
+
+### Continue Scene both-target qualification and closure — 2026-10-10
+
+State: **`complete` for this bounded outcome**; Phase 2 remains incomplete. Same-thread
+resume explicitly confirms the Mac is unlocked. Fresh refs reconcile clean local/remote
+**675ad05**, main **5f448ca** unchanged. Final tested implementation is
+**8931fa85178ca22430fa5984e693f609970f4995**; closure is docs-only. No reset, unrelated
+work removal, next feature, extra owner or local Windows handoff.
+
+#### Exact CI/artifact audit
+
+Run **38039472619**, workflow **357322921**, attempt **1**, exact candidate **8931fa8**,
+completed **success** at **2026-10-10 09:05:01 UTC**. Selected focused Windows and Mac
+ARM64 jobs succeed; generic preflight/matrix intentionally skip. Actual artifacts:
+
+| Target | Artifact and expiry UTC | ZIP SHA256 | Verified manifest |
+| --- | --- | --- | --- |
+| Windows x64 | **11665238830**, `rewrite-windows-38039472619-1`; 2026-10-17 09:04:52 | `493885ae98f2f2d514b90f04b22e6b25794b08385cff6bcef4d4329469c40ed4` | All **76** entries match |
+| Mac ARM64 | **11665396226**, `continue-macos-38039472619-1`; 2026-10-17 08:59:13 | `bd8683cbd9674da4af217335c3f2894f68aa49de24090ba60d1dde455f4f2ab9` | All **23** entries match |
+
+Identity inventories bind run/attempt/candidate/action/architecture and pinned
+Node **24.19.0**, npm **11.9.0**, Rust/Cargo **1.90.0**. Both renderer runs pass
+**126/126**, zero fail/cancel/skip/todo; frontend builds pass. Each target passes
+core rewrite **15**, transport **8**, native worker **6** and real controller/native
+credential reader/exact strict-schema HTTP; Mac prompts **5** also pass. Official
+Ren'Py **8.5.3** archive SHA256 matches published checksum
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` on both targets.
+Compile/lint, init literal substitution/token checks and named runtime smoke pass
+**8/8** assertions, zero skipped/not-run: two exact generated say payloads, preserved
+terminal say and return. Actual SDK logs/identities audited; no badge-only acceptance.
+
+Windows terminal audit has all five required outcomes successful, no errors; package
+input/executable digest matches **60571ec3b5925ffa3acdd591dc94954fd9db27a3b4526ad78a2a2c67f1db60aa**.
+Its real Default desktop/UIA capability passes. All five Continue-specific native
+receipts bind PID/binary/action, viewport controls and OS SendInput before stage release;
+seven intact captures were individually visually inspected for light/dark/compact and
+before/after Generate/Accept states. Phase 1 passes **22 distinct** required checks
+(**23** entries, reference availability repeated), with all five reviewed digests equal
+to actual HTTP body digests. Phase 2 passes **3/3**, zero HTTP, unchanged whole-project
+bytes and native credential readability. Owned credential references removed, fixture
+cleanup complete, processes/listener exit and privacy scan pass. The attempt ledger
+records package build **2**, editor launches **1/2**, exact run/attempt/head.
+
+#### Retained signed Mac native case
+
+Before launch, Computer Use successfully observes the unlocked existing desktop.
+The retained `.toolchains/releases/continue-mac-01/Loomlight.app` passes strict signature/
+exact approved pin/designated requirement again; every recorded runtime input remains
+byte-identical to candidate **8931fa8**. No rebuild for docs-only successors. Approved
+executable SHA256 remains **921c33f2e06c1e78719416e39d63092d006f061875354875cbcf232ec5218f59**;
+installer SHA256 **55c467310a514c7d6cba72e92ffafc71d9d1a00100e2721150d24ee437f87b9a**.
+No trust, signing identity, credential namespace or provisioning change.
+
+Mac editor launches **1/6** (owned PID 15516) and **2/6** (PID 15625) use the signed
+bundle with isolated disposable profile/project and synthetic loopback only. Native
+Computer Use observes light/dark **1280×900** and compact **720×780** layouts, reachable
+controls/focus/scroll, passive whole-group/assigned-ID/Character/anchor/terminal review
+and exact Before/After source. Physical Generate creates an inert review; physical
+Accept saves once and disables duplicate acceptance. Observed Source retains BOM,
+comments, mixed newline/Unicode/custom Python, protected existing text and terminal;
+core/native byte assertions establish exact preservation.
+
+Phase 1 passes all **22 distinct** checks, five exact body matches, new/existing IDs
+and payloads/terminal, one Undo restoring prior bytes, Redo restoring accepted bytes,
+malformed/unsafe/cancel/stale zero writes and project reopen. Independent process
+phase 2 passes **3/3**, zero HTTP and whole-project byte equality while retaining group,
+terminal, action prompt and native credential readability. Reports, attempt ledger,
+structural hashes and cleanup receipt retained ignored under `.toolchains/continue-mac-native-01`
+and `.toolchains/continue-mac-native-attempts.jsonl`. Both PIDs exited; native credential
+references are absent. Only the verified owned non-link disposable root was removed
+after hashing its contents. Server/listener terminated by the runner. Privacy scan
+passes; no owned fixture, credential, listener or editor process remains.
+
+#### Acceptance/review and final allowance
+
+Owner integration/source/native review is complete, retaining independently required
+prior checkpoint reviews and the future integrated Phase 2 review. No new reviewer
+mandate was introduced for this bounded outcome. Review-discovered prompt-cache defect
+and both demonstrated harness failures are fixed and qualified. Old run 38035948157
+and the locked-desktop capability failure remain honest failures, not retroactive passes.
+No further implementation defect was identified in exact dispatch, lifecycle/read-set/
+draft binding, closed bounds/IDs, anchor/terminal, minimal source/map proposal,
+consumption/history or native flow. Existing recovery and unrelated foundation evidence
+is reused; no broad matrix, destructive experiment or duplicate expensive verification.
+
+| Target | Actual cumulative package builds | Actual editor launches | Focused dispatches | Unused remainder |
+| --- | --- | --- | --- | --- |
+| Windows x64 | **2/4** | **2/6** | **2/4** | 2 builds, 4 launches, 2 dispatches |
+| Mac ARM64 | **1/4** | **2/6** | **2/4** | 3 builds, 4 launches, 2 dispatches |
+
+No outstanding reservations or pending CI operations. Failures/cancel/implicit attempts
+count; prior selected allowances remain separate and unused remainder is not carried
+into a future outcome. CI/platform defaults and manual same-thread waits were followed.
+
+Acceptance is met: bounded 1–8 dialogue/narration group at explicit revision-bound
+saved root insertion anchor; action prompt/context/full exact body review; core-owned
+UUIDs/literal encoding/semantic and exact source/map digest; one transaction/Undo entry;
+duplicate refusal; byte-exact surroundings/existing IDs/payloads/terminal; Undo/Redo/
+reopen; zero writes for malformed/unsafe/cancel/stale/drafts/competing requests/external
+edits; unsupported/custom/nested/invalid-terminal refusal. Both target native changed-
+action and pinned SDK evidence qualify. Canonical contracts, CURRENT and HANDOVER agree.
+
+Limits retained: agent/automated native evidence is not final human phase-wide
+acceptance; new paid/public/live provider behavior was not exercised. No provider/route
+expansion, generated references, Draft Scene, terminal/edge replacement, merge, release
+or signing-policy change. Full Phase 2/2C.4 and its independent review remain pending.
+
+#### Next-outcome prompt — proposal only, not executed
+
+```text
+Deliver Draft Scene: review and create one bounded Scene in an explicitly selected
+saved Chapter, accept once, Undo/Redo and reopen while preserving all existing source.
+Repository: Caldwell-41/Renpy-editor
+Continuation: codex/provider-qualification; qualified Continue Scene implementation
+8931fa8 plus its published closure. Reconcile fresh refs; preserve unrelated work.
+Codex machine: retain the current Mac ARM64 session.
+Test hosts: focused local checks and Windows x64/macOS ARM64 CI for changed shared
+proposal/creation/transaction behavior; verify capabilities first. Local native work
+only for a named required case CI cannot establish; reuse unchanged signing evidence.
+Reason: Continue Scene is qualified; reuse accepted provider/reference/prompt/literal,
+context-review, bounded group and transaction foundations.
+Read AGENTS.md, CURRENT, HANDOVER and phase-2-initial-llm-assistance.md sections
+6–8, 10–11 and 20. Record selection and exact acceptance in the existing task.
+Use one GPT-6.1 Sol High owner; shared implementation serial; retain required review.
+Scope: one bounded dialogue/narration Scene, existing reviewed Characters, core-owned
+IDs/source path, reviewed title/Chapter and explicit terminal Return. Action-specific
+prompt/context/full-send and exact semantic/source/metadata preview. No incoming
+connection, edge replacement, custom source generation, generated references, provider
+or route expansion, paid/public calls, signing-policy changes, merge or release.
+Prove exact reviewed dispatch, inert preview, one transaction/Undo, duplicate refusal,
+byte-exact existing source, Undo/Redo/reopen, stale Chapter/project/session and competing
+draft/external-edit/malformed/unsafe/cancel zero writes, plus changed-action native and
+official pinned-SDK literal/runtime proof on both targets. Reuse unchanged evidence.
+New cumulative allowance per target: at most 4 package-build attempts, 6 editor launches
+and 4 focused CI dispatches for this distinct outcome; prior allowances stay closed.
+Count failures/cancellations/implicit launches; reassess after two unsuccessful
+corrections of one hypothesis.
+Complete implementation, focused verification, review and in-scope fixes. Commit/push
+coherent work to the existing branch; update canonical contracts, task, CURRENT and
+HANDOVER. Follow WORKFLOW manual same-thread CI wait/resume and audit actual artifacts.
+Return result, limitations and next prompt. Do not start the next deliverable.
+```

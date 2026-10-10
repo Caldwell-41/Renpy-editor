@@ -1,73 +1,62 @@
 # Current outcome handover
 
-## Continue Scene — repaired candidate focused CI wait
+## Continue Scene — complete; awaiting a new selection
 
-**State: `awaiting_ci`; acceptance pending.** Caldwell-41/Renpy-editor,
-`codex/provider-qualification`, retained Mac ARM64 session and one serial owner.
-Reviewed repair candidate **8931fa85178ca22430fa5984e693f609970f4995** is committed/pushed;
-remote identity verified. Main `5f448ca` unchanged; no reset or unrelated work changes.
-This docs-only wait successor leaves candidate inputs unchanged.
+**State: `complete` for the selected bounded Continue Scene outcome.** Repository
+Caldwell-41/Renpy-editor; branch `codex/provider-qualification`; retained Mac ARM64
+session, one serial owner. Tested implementation **8931fa85178ca22430fa5984e693f609970f4995**;
+this closure changes documentation only. Entry on this resume reconciled clean
+local/remote **675ad05** and unchanged main **5f448ca**. No reset/unrelated work change.
 
-[The task](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-repaired-candidate-mac-capability-stop-and-second-ci-wait--2026-10-10)
-owns exact evidence, audit, failures and allowances. Original run **38035948157**, attempt
-1, candidate **3432288**, failed on missing Windows `re` import and premature/incorrect
-SDK say-text assertions; verified artifact manifests retained. Windows build 1 succeeded,
-native skipped. All other selected automated cases passed individually. Failures stay
-failed. User explicitly requested fixes and another review before redispatch.
+[Closure ledger](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+owns acceptance, artifact IDs/digests/expiry, actual cases, failures, review and proposed
+next prompt. Run **38039472619**, workflow **357322921**, attempt **1**, exact candidate
+**8931fa8**, completed **success**, **2026-10-10 09:05:01 UTC**. Windows/Mac artifact
+manifests **76/23** entries all match; input/binary/SDK/receipt/capture/case/privacy/
+cleanup evidence audited. Earlier failed run **38035948157** is retained as failed.
+No current CI wait or run/job retry is needed.
 
-Repairs fix both harness defects and a review-discovered product defect: shared Undo/
-Redo refreshes both action prompts; failed post-commit refresh blocks stale choices
-until explicit reload. Local renderer **126/126**, frontend build, actual Windows
-renderer gate/rejection fixtures, report/native gates, syntax and actionlint pass.
-Official pinned SDK accepted-group literal/runtime passes **8/8** named assertions,
-including two exact substituted say payloads, terminal and return. Unchanged core/
-transport/controller evidence reused. No additional independent review is waived.
+### Qualified behavior and evidence
 
-### Pending operation
+Action-specific prompt and exact context/body review; explicit revision-bound root
+insertion anchor/terminal; closed 1–8 supported dialogue/narration group, existing
+Characters, core-owned IDs and literal encoding. Inert semantic/source/map review,
+one transaction/Undo, duplicate refusal, exact surrounding source/IDs/payloads/terminal
+and Undo/Redo/reopen pass. Invalid/unsafe/cancel/stale, competing requests/drafts and
+external edits write nothing; custom/nested/unsupported boundaries refuse.
 
-[Run **38039472619**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619),
-workflow **357322921**, attempt **1**, `workflow_dispatch`, exact head **8931fa8**.
-Created **2026-10-10 08:53:52 UTC**; updated **08:54:02 UTC**; identity observed
-**08:54:05 UTC**, **in_progress**. Inputs: Continue true, legacy Windows rewrite false,
-Windows build ordinal **2**, first launch ordinal **1** (reopen 2), both reuse IDs empty,
-package upload false. Focused Windows x64 native/package and Mac ARM64 automated jobs;
-generic matrix skipped. No run/job rerun. Expected artifacts
-`rewrite-windows-38039472619-1`, `continue-macos-38039472619-1`; actual IDs/expiry pending.
+Both targets pass renderer **126/126**, core **15**, transport **8**, worker **6**,
+actual controller/native credentials/strict HTTP and pinned SDK literal/runtime **8/8**;
+Mac prompt **5**. Windows five action-specific UIA/OS-input receipts/seven visually
+inspected captures qualify physical Generate/Accept/light/dark/compact. Retained signed
+Mac bundle passes unchanged runtime inputs/signature/pin and actual Computer Use layout,
+passive group/diff, physical Generate/Accept. Each native phase 1 passes **22 distinct**
+checks/five exact reviewed/HTTP bodies; phase 2 passes **3/3**, zero HTTP and unchanged
+project bytes. Native credential references removed, both owned Mac PIDs exited,
+owned fixture/listeners removed; privacy scan passes. No native process/fixture remains.
 
-Cumulative CI use **2/4 per target**. Known actual Windows use **1/4 builds, 0/6 editor
-launches**; current run reserves build 2/launches 1–2. Audit actual ledger before retry.
-Mac use **1/4 builds, 0/6 launches, 2/4 dispatches**. Unreserved remainder: Windows
-**2 builds/4 launches/2 CI**, Mac **3/6/2**. No borrowing/reset of prior slice allowances;
-failures/cancellations/implicit launches count; reassess after two unsuccessful
-corrections of one hypothesis.
+Mac bundle remains ignored at `.toolchains/releases/continue-mac-01/Loomlight.app`,
+implementation **8931fa8**, approved pin **358372708164C7273A551D746449357C12A3A806**,
+executable SHA256 **921c33f2e06c1e78719416e39d63092d006f061875354875cbcf232ec5218f59**.
+No signing/trust/credential namespace/provisioning change. Native reports/structural
+receipts remain ignored at `.toolchains/continue-mac-native-01`; CI downloads remain
+ignored at `.toolchains/continue-audit-38039472619`. Logs/private paths/artifacts are not
+committed. Reuse unchanged evidence; do not rebuild solely for this docs-only closure.
 
-### Mac capability and reusable package
+Owner integrated/source/native review complete, including repaired prompt history cache
+and demonstrated harness defects; independently required past/future checkpoint reviews
+are retained. This does not complete Phase 2 or its final independent/human/provider
+qualification. Native evidence is automated/agent-observed, not final human acceptance.
 
-Package `.toolchains/releases/continue-mac-01/Loomlight.app` built candidate **8931fa8**
-with unchanged approved pin `358372708164C7273A551D746449357C12A3A806`; strict signature,
-certificate/designated requirement, installer contents and privacy scan pass. Executable
-SHA256 `921c33f2e06c1e78719416e39d63092d006f061875354875cbcf232ec5218f59`;
-installer `55c467310a514c7d6cba72e92ffafc71d9d1a00100e2721150d24ee437f87b9a`.
-Ignored receipts/runtime input inventory retain exact proof. Reuse only after input/
-binary/signature verification; no docs-only rebuild. Hosted CI lacks approved signing
-capability; the named signed Mac native case remains local.
+### Closed allowance and next action
 
-Computer Use inventory works, Loomlight is not running, but prelaunch native observation
-reports **locked Mac / automatic unlock failed**. User was asked to manually unlock.
-No editor launch, owned fixture/credential/server/process exists. Do not launch or retry
-observation before confirmed unlocked capability. Signing/trust/credential policy unchanged.
+Actual cumulative usage: Windows **2/4 builds, 2/6 editor launches, 2/4 focused CI**;
+Mac **1/4, 2/6, 2/4**. No outstanding reservations. Earlier slice counts remain separate;
+unused remainder is not inherited by another outcome. No paid/public calls, provider/
+route expansion, generated references, Draft Scene, terminal replacement, merge/release.
 
-### Next action
-
-End active model polling; manual same-thread resume per WORKFLOW. No autonomous Goal
-pause, watcher or automation is claimed. Next prompt:
-**“Resume Continue Scene; audit run 38039472619 and continue the existing outcome.
-The Mac is unlocked.”** Reconcile fresh refs/local work, exact operation identity,
-artifacts/cases/hashes and consumed attempts. If pending, preserve identity and pause.
-If terminal, audit 126 renderer/15 core/5 Mac prompt/8 transport/6 worker, controller,
-corrected SDK and actual Windows native 22+3 checks/five bodies/all stages/captures,
-Undo/Redo/reopen and owned cleanup; retain failures/missing proof honestly. Complete
-named local Mac physical send/accept/light/dark/compact and separate-process reopen
-from unchanged signed bundle after unlock. Then only evidenced in-scope fixes, review
-and closure. No next feature, paid/public provider calls, provider/route expansion,
-Draft Scene, generated references, terminal replacement, merge or release.
+Return result, limitations and the paste-ready **Draft Scene** proposal in the closure
+ledger. **Stop; do not start it.** A future user selection must fix its scope/acceptance,
+new cumulative allowance and dependency/capability routing against fresh refs. Preserve
+this Mac session and serial ownership; CI default and manual same-thread wait/resume
+still apply. The next prompt is a proposal, not execution authorization.
