@@ -6,8 +6,10 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-Read the CI-first amendment and first safe rewrite selection for current work, then
-only the relevant requirement sections. Completed credential/request selections below
+The selected first safe rewrite is qualified on both targets; see the
+[final audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10).
+Read its CI-first amendment/selection only when continuing or reviewing that slice,
+then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
 the [historical ledger](../archive/2026-10-09-phase-2-execution-history.md); old prompts
 there are evidence, not live instructions. Future capabilities require their own
@@ -569,6 +571,72 @@ assertions, 20 phase-1 checks/five reviewed HTTP bodies, independent process reo
 zero HTTP/whole-project bytes and cleanup. Failed/skipped/missing proof stays unresolved;
 these are final launch slots if both are consumed, with no allowance reset or inferred
 extra retry. No merge/release or next feature.
+
+### Final pinned Windows audit and both-target qualification — 2026-10-10
+
+**Selected first safe dialogue rewrite: accepted.** Mac proof remains valid; the
+remaining Windows selected qualification is complete. This accepts this bounded
+slice, not full 2B.1/2A.2/Phase 2, a live provider, merge or release.
+
+[Run **38031993657**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
+workflow **357322921**, attempt **1**, exact tested candidate
+`95ce9c4fbad12cec24e8eda851b1baff1c4beec8`, tree
+`232d369885e6a61d13be2869229a6e5f5816bcc5`, completed **success** at
+**2026-10-10 06:55:14 UTC** (run updated 06:55:15 UTC). Selected Windows job
+**114154697854** only; generic matrix skipped. Material inputs: focused Windows true,
+package upload false, both reuse IDs empty, build ordinal **2**, launch ordinals **5/6**.
+Artifact **11662561927**, `rewrite-windows-38031993657-1`, expires
+**2026-10-17 06:55:08 UTC**; ignored local copy
+`.toolchains/rewrite-windows-ci-38031993657` and raw workflow log are retained.
+All **76** manifest file hashes verify. Candidate/tree agree with Git and package
+inventory; all **228** overlapping focused/package input hashes agree (SDK spike and
+phase-1h fixture inventories deliberately have different scopes). Fresh checks and
+package have no reuse receipts. All five raw terminal outcomes are success, both
+reports present/passed, no terminal errors.
+
+Actual **Node 24.19.0/npm 11.9.0/Rust and Cargo 1.90.0/Python 3.12.10** are recorded
+on Windows AMD64 image **20260925.250.1**; actual npm route/pin checks pass, closing
+the prior mismatch. Fresh renderer **123/123**, core rewrite **9/9**, transport
+**8/8**, native worker **6/6**, actual controller/native credentials/strict HTTP and
+frontend build pass. Native/report/reuse-drift gates **4/4, 2/2, 6/6**, including
+actual PowerShell null/stale polling and version-drift rejection, pass without skips.
+Official Ren'Py **8.5.3** archive equals published SHA256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`;
+fresh compile/lint/substitution/token and named startup/say/return test pass:
+**1 case, 3 assertions, zero failures/skips/not-run**. Owned SDK extraction is removed.
+
+Package build **2** passes and retained executable/installers are privacy scanned.
+Exact executable SHA256:
+`0ddcdca0f6af13f9a7fcfb9cc97fa8f79aad332785c03e48cdfbff18e22616a3`.
+App launch **5**, PID **588**, passes **20 distinct phase-1 assertions** in
+**22.05 seconds**; repeated preparation entry is not an extra required case.
+All five actual HTTP body hashes equal reviewed bodies in order. Every native stage
+receipt independently validates against this exact PID/binary, unlocked Default
+desktop, actual visible controls and intact captures. All **7** PNGs visually inspected:
+light/dark **1296x939**, compact and actions **736x819**; before/after Generate/Accept
+states show inert review and saved-once result. Receipt/marker ordering retains actual
+evidence before acknowledgement; zero stale retries. UIA/OS-input automation is
+native proof, not a human-acceptance claim. Literal generated expressions/tags,
+protected tokens/custom neighbors, one transaction/duplicate refusal, byte-exact
+Undo/Redo, malformed/unsafe/cancel/stale zero writes and project reopen all pass.
+
+Separate launch **6**, PID **2228**, passes **3/3** persistence assertions in
+**4.55 seconds**. Accepted literal source/protected tokens, custom prompt and native
+credential remain readable; zero HTTP and whole-project before/after bytes match
+in the executed probe. All four metadata hashes match phase 1. Both distinct PIDs
+finish successfully; native synthetic credential removed, listener lifetimes closed
+and owned fixture deletion confirmed, retaining **71** structural hashes.
+
+Final cumulative consumption: **Mac 1/4 builds, 3/6 launches; Windows 2/4 builds,
+6/6 launches**. Windows remaining package allowance **2**, launch allowance **0**;
+no more launch is authorized by this slice. Earlier failed setup/geometry/hash/UIA
+and mismatched-npm evidence remains historical, not converted to passes. Completed
+Mac signing/identity and prompt/context/manual-reference evidence are unchanged.
+No product/signing/credential policy or dependency changes were needed for these CI
+repairs. No local Windows handoff is required; no outstanding selected case or CI
+operation. Docs-only closure successor records this tested candidate; publish/verify
+records without another package matrix. Further feature, merge or release needs its
+own selection.
 
 ## First safe dialogue rewrite selection — 2026-10-10
 

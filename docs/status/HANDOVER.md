@@ -1,20 +1,20 @@
 # Current outcome handover
 
-## First safe rewrite: native behavior passes; pinned Windows package correction
+## First safe rewrite: both-target qualification complete
 
-Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
-published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. Native polling repair `69ddf5a` is published and remote verified. Production inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
-Continue one active GPT-6.1 Sol High owner in the current development session. No
-additional agents or direct access to the user's other computer. The user-authorized
-serial reviewer has finished.
+**State: accepted for the selected first safe dialogue rewrite.** Caldwell-41/Renpy-editor,
+branch `codex/provider-qualification`, tested Windows candidate
+`95ce9c4fbad12cec24e8eda851b1baff1c4beec8`. Published implementation `515cd85`
+and accepted both-target prompt/context/manual-reference foundations are preserved.
+CI-first routing completed the Windows proof without local handoff. One parent owner;
+the single user-authorized GPT-6.1 Sol High serial reviewer finished before parent
+verification/publication. No additional agent or direct other-computer access.
 
-[Current CI authority](../tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10)
-and [selected scope, failures, results and required Windows cases](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
-own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
-Windows 1/4 builds, 4/6 launches**. Mac qualification is complete; both-target
-acceptance remains incomplete until the corrected pinned Windows package proof. There is no pending local process,
-owned fixture or synthetic credential; the successful native audit and remaining toolchain correction are below. Prior launch-1 failure evidence is retained.
+Final cumulative usage: **Mac 1/4 package builds, 3/6 app launches; Windows 2/4 builds,
+6/6 launches**. Windows has **2** unused build slots and **zero** launch slots; no
+further launch is authorized by this slice. No pending CI operation, owned test process,
+fixture, synthetic credential or selected acceptance assertion. No next feature is
+selected. This accepts the bounded first rewrite, not full 2B.1/2A.2/Phase 2 or release.
 
 ### Completed Mac evidence
 
@@ -42,80 +42,56 @@ until the menu and uses suite teardown exit. Production/package inputs are uncha
 Existing core/transport/native/controller and 122 renderer regression passes remain
 valid. Unique historical timeouts/locked-host evidence remain failures, not passes.
 
-### Successful Windows native audit and remaining toolchain correction
+### Final Windows evidence and identity
 
-[Run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
-workflow **357322921** (`production-scaffold.yml`), attempt **1**, candidate
-`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`, completed **success** at
-**2026-10-10 06:29:05 UTC**. Windows job **114151363778** only; generic jobs skipped.
-Artifact **11661993663**, `rewrite-windows-38030871532-1`, expires
-**2026-10-17 06:28:02 UTC**. All **73** manifest hashes verify in ignored
-`.toolchains/rewrite-windows-ci-38030871532`; all seven native PNGs visually inspected.
-Raw terminal outcomes all success; both reports pass. Actual Windows PowerShell
-polling regression passes, confirming the serial reviewer's prior scoped repair.
-
-Launch **3**, PID **9196**, passes **20 distinct** assertions in **26.75 seconds**
-(21 records include one repeated preparation check). All five actual HTTP digests
-match reviewed bodies in order. Exact binary/PID/Default desktop and actual controls,
-light/dark/compact captures, OS Generate/Accept and observed inert/saved states pass.
-Native receipt gates independently validate every stage. Source protection/literal
-encoding/custom preservation, one transaction/duplicate refusal, Undo/Redo,
-malformed/unsafe/cancel/stale zero writes and project reopen pass. Evidence is native
-UIA/OS-input automation, not human acceptance. No marker was released without evidence.
-
-Separate launch **4**, PID **7200**, passes **3/3** persistence assertions in
-**3.41 seconds**, zero HTTP and whole-project byte equality. Metadata hashes match
-phase 1. Both processes complete successfully; native credential cleanup and outer
-fixture deletion pass, retaining **71** fixture hashes. Original package/SDK and
-portable proof were reused, binary SHA256
-`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
-Core **9/9**, transport **8/8**, native worker **6/6**, actual controller/strict HTTP,
-renderer **123/123** and pinned SDK proof remain passed on their recorded inputs.
-Windows actual cumulative **1/4 builds, 4/6 launches**; remaining **3 builds,
-2 launches**. All unique previous failures remain in the owning ledger.
-
-Review found actual **npm 11.17.0** in current and original package/portable identities,
-despite global install of required **11.9.0**. Node toolcache's bundled shim/CLI stayed
-selected. No production defect; native proof remains passed on its real binary,
-but pinned-toolchain package closure cannot be inferred. Node **24.19.0**,
-Rust/Cargo **1.90.0**, Python **3.12.10**, Windows AMD64 image **20260925.250.1**
-are recorded. Scoped workflow fix selects/version-checks the installed global CLI,
-prepends shim PATH for nested scripts/next steps and exports exact CLI to Python.
-Candidate and reuse identities reject Node/npm drift. Old source artifacts cannot
-supply required pinned-toolchain reuse; their actual evidence is preserved.
-
-Local explicit CLI/version execution passes Node **24.19.0/npm 11.9.0**. Native/report
-checks **4/4, 2/2**, reuse/drift gates **5 passed + 1 Windows-only skip**, Python syntax,
-actionlint, repository/privacy **487 files** and diff checks pass. Actual Windows
-PowerShell regression already passed in the audited run. New npm route runtime needs CI.
-No production/dependency/signing/credential changes; Mac package evidence remains valid.
-The user-authorized serial reviewer finished; no new agent or other-computer access.
-
-### Confirmed bounded candidate and manual continuation
-
-**State: awaiting_ci.** Npm-route correction published and remote verified at
-`95ce9c4fbad12cec24e8eda851b1baff1c4beec8` before dispatch.
 [Run **38031993657**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
-workflow **357322921**, attempt **1**, event `workflow_dispatch`, branch
-`codex/provider-qualification`, exact head `95ce9c4fbad12cec24e8eda851b1baff1c4beec8`.
-Created **2026-10-10 06:44:43 UTC**, observed **in_progress at 06:44:55 UTC**.
-Windows job **114154697854** setup passed, checkout in progress; generic jobs skipped.
-No active duplicate existed. Inputs: `dialogue_rewrite_windows=true`,
-`upload_packages=false`, both package/portable reuse inputs empty,
-`rewrite_build_ordinal=2`, `rewrite_first_launch_ordinal=5` (dependent phase 2 **6**).
-Reserve **one build/up to two launches**. Known Windows **1/4 builds, 4/6 launches**;
-later consumption needs audit. These are the final two launch slots if consumed.
-Fresh selected cases, official pinned SDK and coherent package walkthrough are required.
-Artifact `rewrite-windows-38031993657-1` has **7 days retention after upload**;
-upload/terminal cases and actual pinned npm route remain pending. Docs-only successor
-does not replace the tested correction. No allowance reset.
+workflow **357322921** (`production-scaffold.yml`), attempt **1**, event
+`workflow_dispatch`, exact head `95ce9c4fbad12cec24e8eda851b1baff1c4beec8`,
+branch `codex/provider-qualification`, completed **success at 2026-10-10 06:55:14 UTC**
+(run updated 06:55:15 UTC). Windows job **114154697854** only; generic matrix skipped.
+Material inputs: focused Windows true, package upload false, both reuse IDs empty,
+package-build ordinal **2**, first launch **5**, dependent phase 2 **6**.
+Artifact **11662561927**, `rewrite-windows-38031993657-1`, expires
+**2026-10-17 06:55:08 UTC**. All **76** manifest hashes verified; ignored local copy
+`.toolchains/rewrite-windows-ci-38031993657` and raw workflow log remain outside Git.
+Package/focused candidate and tree agree with Git; all 228 common input hashes match.
 
-**Next action:** stop polling and await the user's manual same-chat resume.
-Same-chat resume audits actual version/CLI, case counts, pinned SDK,
-package/input/binary scan, attempt entries, all native receipts/PNGs, required 20 checks
-and five exact HTTP bodies, process reopen/whole bytes/zero HTTP and cleanup.
-Missing/failed/skipped evidence stays unresolved. Diagnose before correction; budget
-exhaustion or named unavailable native capability requires a concrete decision.
-No watcher, automatic wake-up, merge, release, signing-policy change or next feature.
-Detailed audit and correction rationale are in the
-[owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#successful-windows-native-audit-and-npm-pin-finding--2026-10-10).
+Actual Node **24.19.0**, npm **11.9.0**, Rust/Cargo **1.90.0**, Python **3.12.10**,
+Windows AMD64 image **20260925.250.1** are recorded. Fresh renderer **123/123**, core
+rewrite **9/9**, transport **8/8**, native worker **6/6**, actual controller/strict
+HTTP and frontend build pass. Native/report/reuse-drift gates **4/4, 2/2, 6/6** pass,
+including actual PowerShell transient polling and toolchain drift rejection.
+Fresh official Ren'Py **8.5.3** checksum, compile/lint/substitution/token and named
+startup/say/return pass: one test/three assertions, no failure/skip/not-run. SDK root
+is removed. Package build 2 and package/evidence privacy scans pass; executable SHA256
+`0ddcdca0f6af13f9a7fcfb9cc97fa8f79aad332785c03e48cdfbff18e22616a3`.
+
+Launch **5**, PID **588**, passes **20 distinct assertions** in **22.05 seconds**;
+a repeated preparation record adds no extra required case. Five actual HTTP hashes
+equal five reviewed bodies in order. All five native receipts independently bind the
+exact PID/binary/Default desktop and actual controls/captures. All seven PNGs were
+visually inspected: light/dark 1296x939, compact/actions 736x819, distinct before/after
+Generate/Accept images show inert proposal then saved state. Evidence precedes marker
+release; stale retries are zero. UIA/OS input is native automation, not a human claim.
+Literal encoding/protected tokens/custom preservation, one transaction/duplicate refusal,
+Undo/Redo, malformed/unsafe/cancel/stale zero writes and project reopen all pass.
+
+Separate launch **6**, PID **2228**, passes **3/3** process persistence in **4.55 seconds**:
+accepted literal source/protected tokens, custom prompt and native credential readability.
+Zero HTTP and whole-project byte comparison pass in the executed probe. Four metadata
+hashes equal phase 1. Both distinct PIDs finish successfully; native credential removal,
+listener closure and owned fixture deletion pass, retaining **71** structural hashes.
+All terminal raw outcomes and both reports pass without errors. No case is waived.
+
+### Closure and next action
+
+**Next action:** no further execution for this selected slice. Parent publishes/verifies
+these docs-only closure records; they do not replace the exact tested `95ce9c4` candidate.
+Current production/signing/credential policy and dependencies are unchanged by CI repairs.
+Historical failed geometry/hash/UIA/setup outcomes and successful native proof under
+mismatched npm remain in the [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#final-pinned-windows-audit-and-both-target-qualification--2026-10-10),
+with retained ignored evidence; old source artifacts do not establish pinned-npm proof.
+No repeat package matrix for this closure. A new feature, broader qualification,
+additional launch allowance, merge or release requires a separate user selection.
+No paid/public provider calls, private game content, generated references, route expansion,
+other AI action or project-code execution during inspection were added.
