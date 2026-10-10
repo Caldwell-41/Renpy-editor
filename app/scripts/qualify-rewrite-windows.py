@@ -27,13 +27,44 @@ REUSE_HARNESS_PATHS = {
 }
 
 
-def validate_reuse_inputs(packaged, current):
+def validate_reuse_inputs(packaged, current, allowed=REUSE_HARNESS_PATHS):
     required = {'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',
                 'app/src-tauri/src/main.rs', 'app/src-tauri/src/ai_native/windows.rs',
                 'app/src-tauri/tauri.conf.json', 'app/src-core/src/rewrite.rs',
                 'app/src/rewrite-ui.ts'}
     assert required <= packaged.keys() and required <= current.keys(), 'Complete runtime inventory required'
-    assert {k: v for k, v in packaged.items() if k not in REUSE_HARNESS_PATHS} == {k: v for k, v in current.items() if k not in REUSE_HARNESS_PATHS}, 'Retained production inputs changed; rebuild requires selection'
+    assert {k: v for k, v in packaged.items() if k not in allowed} == {k: v for k, v in current.items() if k not in allowed}, 'Retained production inputs changed; rebuild requires selection'
+
+
+def reuse_focused(output, source):
+    metadata = json.loads((source/'run-metadata.json').read_text())
+    identity = json.loads((source/'identity.json').read_text())
+    assert str(metadata['id']) == os.environ['REUSE_FOCUSED_RUN_ID'] == identity['runId']
+    assert metadata['run_attempt'] == identity['attempt'] == 1 and metadata['workflow_id'] == 357322921
+    assert metadata['head_branch'] == 'codex/provider-qualification' and metadata['event'] == 'workflow_dispatch' and metadata['status'] == 'completed'
+    assert metadata['head_sha'] == identity['candidate'] and identity['os'] == 'Windows'
+    validate_reuse_manifest(source, json.loads((source/'manifest.json').read_text()))
+    paths = subprocess.check_output(['git', 'ls-files', 'app', '.github/workflows/production-scaffold.yml', 'spikes/renpy-sdk'], cwd=REPO, text=True).splitlines()
+    # Core test and controller-example inputs must match their successful run.
+    allowed = REUSE_HARNESS_PATHS - {'app/src-core/src/rewrite/tests.rs', 'app/src-tauri/examples/rewrite-controller-driver.rs'}
+    validate_reuse_inputs(identity['inputs'], {p: digest(REPO/p) for p in paths}, allowed)
+    assert json.loads((source/'focused-result.json').read_text())['passed'] is True
+    checks = {'core-rewrite': 'test result: ok. 9 passed; 0 failed; 0 ignored;',
+              'transport': 'test result: ok. 8 passed; 0 failed; 0 ignored;',
+              'native-worker': 'test result: ok. 6 passed; 0 failed; 0 ignored;',
+              'controller': 'PASS: actual controller/native credentials/exact strict-schema HTTP',
+              'renderer': 'pass 123', 'renderer-build': 'built in'}
+    destination = output/'reused-focused'; destination.mkdir()
+    for name, expected in checks.items():
+        assert json.loads((source/f'{name}-result.json').read_text())['exitCode'] == 0
+        assert expected in (source/f'{name}.log').read_text()
+        for suffix in ('.log', '-result.json'):
+            shutil.copy2(source/(name+suffix), destination/(name+suffix))
+    for name in ('identity.json', 'focused-result.json', 'manifest.json'):
+        shutil.copy2(source/name, destination/name)
+    receipt = {'passed': True, 'sourceRunId': identity['runId'], 'sourceAttempt': 1,
+               'sourceCandidate': identity['candidate'], 'inputsMatch': True}
+    (output/'focused-reuse.json').write_text(json.dumps(receipt, indent=2)+'\n')
 
 
 def validate_reuse_manifest(source, manifest):
@@ -143,6 +174,12 @@ def prepare(output):
     assert not (output / 'identity.json').exists(), 'Fresh evidence required'
     identity = {'candidate': candidate, 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(), 'runId': os.environ['GITHUB_RUN_ID'], 'attempt': 1, 'runnerImage': os.environ.get('ImageVersion'), 'os': platform.system(), 'architecture': platform.machine(), 'inputs': {path: digest(REPO/path) for path in paths}, 'toolchains': {tool: subprocess.check_output(command([tool, '--version']), cwd=APP, text=True).strip() for tool in ('node', 'npm', 'rustc', 'cargo')}, 'python': platform.python_version()}
     (output / 'identity.json').write_text(json.dumps(identity, indent=2)+'\n')
+    if (output/'focused-reuse.json').is_file():
+        reuse_receipt = json.loads((output/'focused-reuse.json').read_text())
+        assert reuse_receipt['passed'] is True
+        (output/'focused-result.json').write_text(json.dumps({'passed': True, 'failures': [], 'reused': reuse_receipt}, indent=2)+'\n')
+        print('Selected unchanged focused checks reused from audited run '+reuse_receipt['sourceRunId'], flush=True)
+        return
     failures = []
     checks = [
         ('renderer', ['npm', 'run', 'check'], None),
@@ -227,6 +264,12 @@ def native(output, first_launch):
     assert 1 <= first_launch <= 5
     root = Path(tempfile.gettempdir()) / ('loomlight-rewrite-ci-' + os.environ['GITHUB_RUN_ID'])
     executable = output/'package/loomlight.exe' if (output/'reuse.json').is_file() else APP/'target/release/loomlight.exe'
+    # Exercise the same Python -> child PowerShell context before consuming a launch.
+    # Its receipt must hash the exact candidate independently of optional cmdlets.
+    prelaunch = output/'native-prelaunch'
+    run(output, 'native-driver-prelaunch', ['powershell.exe', '-NoProfile', '-File', str(APP/'scripts/rewrite-windows-native.ps1'), '-Stage', 'preflight', '-Executable', str(executable), '-Output', str(prelaunch)], timeout=75)
+    preflight = json.loads((prelaunch/'preflight.json').read_text(encoding='utf-8-sig'))
+    assert preflight['passed'] is True and preflight['executableSHA256'] == digest(executable)
     common = [sys.executable, 'scripts/dialogue-rewrite-probe.py', '--executable', str(executable), '--root', str(root), '--output', str(output/'walkthrough'), '--native-driver', str(APP/'scripts/rewrite-windows-native.ps1')]
     try:
         for phase in (1, 2):
@@ -292,7 +335,7 @@ def finish(output):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=('prepare', 'sdk', 'build', 'native', 'finish', 'reuse', 'reuse-package', 'reuse-sdk'))
+    parser.add_argument('stage', choices=('prepare', 'sdk', 'build', 'native', 'finish', 'reuse', 'reuse-package', 'reuse-sdk', 'reuse-focused'))
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--ordinal', type=int)
     parser.add_argument('--archive', type=Path)
@@ -304,6 +347,7 @@ def main():
     elif args.stage == 'build': build(args.output, args.ordinal)
     elif args.stage == 'native': native(args.output, args.ordinal)
     elif args.stage == 'reuse': reuse(args.output, args.source)
+    elif args.stage == 'reuse-focused': reuse_focused(args.output, args.source)
     elif args.stage.startswith('reuse-'): verify_reuse(args.output, args.stage.removeprefix('reuse-'))
     else: finish(args.output)
 

@@ -53,6 +53,16 @@ class RetainedEvidenceGate(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 recipe.validate_reuse_manifest(root, {'package/loomlight.exe': sha})
 
+    def test_focused_reuse_requires_unchanged_test_and_example_inputs(self):
+        original = self.inputs()
+        original['app/src-tauri/examples/rewrite-controller-driver.rs'] = 'original'
+        allowed = recipe.REUSE_HARNESS_PATHS - {'app/src-core/src/rewrite/tests.rs', 'app/src-tauri/examples/rewrite-controller-driver.rs'}
+        changed = dict(original, **{'app/scripts/rewrite-windows-native.ps1': 'new native driver'})
+        recipe.validate_reuse_inputs(original, changed, allowed)
+        for path in ('app/src-core/src/rewrite/tests.rs', 'app/src-tauri/examples/rewrite-controller-driver.rs'):
+            with self.subTest(path=path), self.assertRaises(AssertionError):
+                recipe.validate_reuse_inputs(original, dict(changed, **{path: 'changed test'}), allowed)
+
     def test_reuse_cannot_promote_unsuccessful_case_or_changed_binary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root/'package').mkdir()

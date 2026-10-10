@@ -9,8 +9,8 @@ routing replaces the mandatory Windows handoff; the required Windows cases remai
 
 | Capability | Automated proof | Native acceptance |
 | --- | --- | --- |
-| One saved Beat: exact send, strict response, inert review, acceptance/history | Core/native/controller checks and 122/122 renderer regressions pass | Mac signed package walkthrough passes; Windows pending |
-| Generated prose displays literally; existing tokens remain protected | Pinned Ren'Py 8.5.3 compile/lint/substitution/token checks and standard-template startup/say/return pass | Mac SDK runtime passes; Windows pending |
+| One saved Beat: exact send, strict response, inert review, acceptance/history | Both-target core/native/controller checks pass; Windows renderer 123/123 | Mac signed package walkthrough passes; Windows pending |
+| Generated prose displays literally; existing tokens remain protected | Pinned Ren'Py 8.5.3 compile/lint/substitution/token checks and standard-template startup/say/return pass | Mac and Windows SDK runtime pass |
 | Zero-write refusals, Undo/Redo and persistence | Malformed/unsafe/cancel/stale cases and exact history pass | Mac project/process reopen pass; Windows pending |
 
 Retained signed Mac package 1 was reused with all 116 input hashes matching.
@@ -20,17 +20,17 @@ whole-project bytes. Owned processes, synthetic credential and disposable fixtur
 are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diagnosed
 fixture correction; no production change or rebuild was necessary.
 
-**Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 0/6 launches**.
-**State: awaiting_ci.** First run audit confirmed renderer 123/123, transport 8/8,
-pinned SDK and package success; diagnosed harness/capability failures prevented
-native launches. Fixes and strict reuse gates are published at `c6c9cb0`.
-[Corrected run 38027478869](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869),
-attempt 1, was confirmed in progress at **2026-10-10 05:26:06 UTC** with only Windows
-selected. Retained build 1/SDK evidence must validate before reuse: zero new builds,
-up to two launches reserved. Actual retry consumption and all native proof remain
-pending terminal audit. Mac evidence remains valid; production behavior is unchanged.
-Manual same-thread resume; no model polling. [HANDOVER](HANDOVER.md) owns exact
-operation/reuse identity and next action.
+**Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 1/6 launches**.
+**State: in_progress.** Terminal audit of
+[run 38027478869](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869)
+confirms core 9/9, transport 8/8, native worker 6/6, controller and 1920x1080 runner
+capability; scanned package/SDK reuse passes. One native launch failed because the
+child PowerShell driver could not resolve its hash cmdlet. Its observation marker
+stayed locked; credential and fixture cleanup pass. Phase 2 remains unlaunched.
+The scoped repair uses .NET SHA-256 plus an independent child-context prelaunch check;
+strictly reuse unchanged portable successes. No production behavior changed. Publish/
+verify and rerun with zero builds/up to two launches reserved; manual same-thread
+wait/resume. [HANDOVER](HANDOVER.md) owns exact sources, allowance and remaining audit.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

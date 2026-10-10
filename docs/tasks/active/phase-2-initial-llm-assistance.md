@@ -263,6 +263,68 @@ candidate. Bounded further corrections stay within this outcome and remaining
 allowance, with diagnosis before retry and two-correction reassessment. No autonomous
 watcher/wake-up, merge, release, secret provisioning or other-host direct access.
 
+### Corrected Windows retry audit and child-driver hash repair — 2026-10-10
+
+User resumed run `38027478869`, then explicitly requested the error explanation,
+fix and rerun. Fresh checkout is clean at remote-verified `5f22e18`; one GPT-6.1 Sol
+High owner, no subagents. Workflow **357322921**, run **38027478869**, attempt **1**,
+head `c6c9cb05f87f1ec748423a8c1d0d96f515a56832`, is terminal **failure**, completed
+**2026-10-10 05:38:23 UTC**. Selected job only; generic jobs skipped. Downloaded
+artifact **11660353959**, `rewrite-windows-38027478869-1`, expires
+**2026-10-17 05:38:17 UTC**. All **50** manifest hashes verify; original retained
+package/SDK reuse receipt passes and the binary SHA remains
+`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
+Ignored local audit copy: `.toolchains/rewrite-windows-ci-38027478869`.
+
+The previous corrections are established: core **9/9**, transport **8/8**, native
+worker **6/6**, actual controller/native Credential Manager/strict HTTP integration,
+renderer **123/123** and renderer build pass. Native preflight records Default unlocked
+interactive session 2, UI Automation and actual nonblank **1920x1080** capture after
+fresh user32 metrics (original 1024x768 was cached WinForms geometry). Package/SDK
+source identity, inputs and hashes validate; no package build or SDK execution repeats.
+
+**New demonstrated harness failure:** Python-launched child PowerShell at first
+`observe-light` cannot resolve `Get-FileHash`, despite its availability in the workflow's
+preflight context. The driver fails before setting executable digest or observing the
+window; no observation marker is released. Packaged probe honestly reports
+`Native observation timeout at observe-light`, with **4/20** preparation assertions
+and one reviewed payload digest; it is not phase-1 acceptance or five-body proof.
+Phase 2 is not launched. PID **3252**, launch ordinal **1**, is the sole app attempt;
+terminal failed report confirms cleanup. Outer cleanup receipt confirms credential
+references removed and owned fixture deleted; exact fixture hashes are retained.
+Cumulative consumption is **Mac 1/4 builds, 3/6 launches; Windows 1/4 builds, 1/6
+launches**. Remaining Windows allowance: **3 builds, 5 launches**.
+
+Smallest repair removes this optional cmdlet dependency: the driver computes identical
+file SHA-256 with `System.Security.Cryptography.SHA256` and file streams for executable
+and PNGs. It retains the same ownership, digest equality, native capture, OS input and
+observation gates. Receipt includes PowerShell version/hash provider. A prelaunch
+check exercises that exact Python-to-child-PowerShell context and compares its binary
+hash to Python before recording or consuming another app launch. No production code,
+credential/signing policy or acceptance assertion changes; Mac evidence remains valid.
+Native runtime of the repaired driver is pending CI, not claimed as a local pass.
+
+Reuse the newly passing portable checks with independently enumerated source-input
+comparison, original run/attempt/head, full artifact hashes, successful individual
+case exits and exact count/controller logs. Unlike package reuse, this stricter gate
+also refuses changed core-test or controller-example inputs. Original native failure
+remains a failure. Retain source receipts/logs with explicit provenance. Local reuse
+rejection tests **4/4**, unchanged native/report gates **4/4, 2/2**, AST, existing
+`actionlint` Actions contexts/schema, repository/link/privacy and diff checks pass.
+Actual downloaded focused-source admission passes locally with only Git's declared
+Windows checkout line endings emulated for current input comparison; artifact hashes
+use actual downloaded bytes. No redundant portable compilation or package matrix.
+
+**Selected next dispatch:** existing isolated workflow, `dialogue_rewrite_windows=true`,
+`upload_packages=false`, package/SDK source `rewrite_reuse_run_id=38023888008`, passed
+portable source `rewrite_focused_reuse_run_id=38027478869`, build ordinal **2** unused,
+first launch ordinal **2**, dependent reopen ordinal **3**. Reserve **zero builds/up to
+two app launches**. Prelaunch failure consumes none; no implicit rebuild or broader
+fallback. All 20 phase-1 cases/five exact reviewed HTTP bodies and native light/dark/
+compact plus actual Generate/Accept remain required, then independent-process
+persistence/whole-project byte equality/zero HTTP/cleanup. Publish and remote verify
+before dispatch, record confirmed identity and use manual same-thread wait/resume.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)

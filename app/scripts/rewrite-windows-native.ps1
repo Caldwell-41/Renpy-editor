@@ -33,6 +33,12 @@ public static class RewriteNative {
         var input=new INPUT[2]; input[0].data.mouse.dwFlags=2; input[1].data.mouse.dwFlags=4;
         return SendInput(2,input,Marshal.SizeOf(typeof(INPUT)))==2;
     }
+    public static string HashFile(string path) {
+        using (var stream=System.IO.File.OpenRead(path))
+        using (var hash=System.Security.Cryptography.SHA256.Create()) {
+            return BitConverter.ToString(hash.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+        }
+    }
 }
 '@
 [void][RewriteNative]::SetProcessDPIAware()
@@ -41,6 +47,7 @@ $receipt = [ordered]@{
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
     checks=[ordered]@{}; captures=@(); controls=@()
+    powershellVersion=$PSVersionTable.PSVersion.ToString(); hashProvider='System.Security.Cryptography.SHA256'
 }
 function Assert-Native($Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
 function Input-Desktop {
@@ -69,7 +76,7 @@ function Capture([string]$Name, $Rect) {
         $file=$Name+'.png'; $path=Join-Path $Output $file
         $bitmap.Save($path,[System.Drawing.Imaging.ImageFormat]::Png)
         Assert-Native (($stats.Maximum-$stats.Minimum) -ge 20) 'Native screenshot is blank'
-        return [ordered]@{file=$file;width=$Rect.Width;height=$Rect.Height;sha256=(Get-FileHash $path -Algorithm SHA256).Hash.ToLower();sampleRange=$stats.Maximum-$stats.Minimum;meanBrightness=$stats.Average}
+        return [ordered]@{file=$file;width=$Rect.Width;height=$Rect.Height;sha256=[RewriteNative]::HashFile($path);sampleRange=$stats.Maximum-$stats.Minimum;meanBrightness=$stats.Average}
     } finally { $graphics.Dispose(); $bitmap.Dispose() }
 }
 function Window-Rect($Handle) {
@@ -117,6 +124,7 @@ try {
     $receipt.inputDesktop=Input-Desktop
     Assert-Native ($receipt.inputDesktop -eq 'Default' -and [Environment]::UserInteractive -and [Environment]::Is64BitProcess) 'Unlocked interactive Windows x64 desktop required'
     if($Stage -eq 'preflight') {
+        if($Executable) { $receipt.executableSHA256=[RewriteNative]::HashFile($Executable) }
         $bounds=New-Object System.Drawing.Rectangle 0,0,([RewriteNative]::GetSystemMetrics(0)),([RewriteNative]::GetSystemMetrics(1))
         $receipt.initialDesktopWidth=$bounds.Width; $receipt.initialDesktopHeight=$bounds.Height
         $receipt.resolutionChanged=$false
@@ -136,7 +144,7 @@ try {
     } else {
         $owned=Get-Process -Id $ProcessId
         Assert-Native ([System.IO.Path]::GetFullPath($owned.Path) -eq [System.IO.Path]::GetFullPath($Executable)) 'Owned executable/PID mismatch'
-        $receipt.executableSHA256=(Get-FileHash $Executable -Algorithm SHA256).Hash.ToLower()
+        $receipt.executableSHA256=[RewriteNative]::HashFile($Executable)
         Wait-Native { (Get-Process -Id $ProcessId).MainWindowHandle -ne [IntPtr]::Zero }
         $script:handle=(Get-Process -Id $ProcessId).MainWindowHandle
         $script:window=[System.Windows.Automation.AutomationElement]::FromHandle($script:handle)
