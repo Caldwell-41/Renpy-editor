@@ -20,15 +20,16 @@ whole-project bytes. Owned processes, synthetic credential and disposable fixtur
 are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diagnosed
 fixture correction; no production change or rebuild was necessary.
 
-**Usage:** Mac **1/4 builds, 3/6 launches**; Windows **0/4 builds, 0/6 launches**.
-**State: awaiting_ci.** Published candidate `a2e82f4` has confirmed
-[focused run 38023888008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
-attempt 1, observed in progress at **2026-10-10 04:23:32 UTC**. Only Windows x64
-is running; generic jobs are skipped. Local evidence-gate and repository checks pass;
-actual Windows capability/results remain pending. Up to one build/two launches are
-reserved; known Windows use was zero at the initial checkout observation. Audit
-actual consumption from terminal artifacts before retry. Manual same-thread resume
-is required; no autonomous polling. [HANDOVER](HANDOVER.md) owns exact identity and audit.
+**Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 0/6 launches**.
+**State: in_progress.** Terminal audit of
+[run 38023888008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008)
+confirms renderer 123/123, transport 8/8, pinned SDK and package success; core/test
+setup/controller-import and desktop geometry failures prevented native launches.
+The diagnosed harness fixes and strict package/SDK reuse gates pass local checks.
+No production behavior changed; completed Mac evidence remains valid. Publish/verify
+and dispatch the selected fresh retry using retained build 1: zero new builds, up to
+two launches reserved. Actual Windows native proof remains pending.
+[HANDOVER](HANDOVER.md) owns retry identity and manual same-thread terminal audit.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

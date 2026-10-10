@@ -1,6 +1,29 @@
 //! Actual core and native-worker integration, with public synthetic credentials only.
-#[path = "../src/ai_native.rs"]
-mod ai_native;
+// The example's path-import changes implicit child-module lookup. Keep the actual
+// production Windows implementation and expose its parent type at the crate root.
+#[cfg(target_os = "windows")]
+#[path = "../src/ai_native/windows.rs"]
+mod windows_native;
+#[cfg(target_os = "windows")]
+use ai_native::NativeSecrets;
+mod ai_native {
+    #[cfg(target_os = "windows")]
+    pub struct NativeSecrets;
+    // Same platform factory as the application; no substitute secret store.
+    pub fn secrets(
+        root: &std::path::Path,
+    ) -> loomlight_core::ai_credentials::Result<impl loomlight_core::ai_credentials::Secrets> {
+        #[cfg(target_os = "macos")]
+        {
+            loomlight_core::ai_file_secrets::FileSecrets::open(root)
+        }
+        #[cfg(target_os = "windows")]
+        {
+            let _ = root;
+            Ok(NativeSecrets)
+        }
+    }
+}
 #[path = "../src/ai_requests.rs"]
 mod ai_requests;
 #[path = "../src/rewrite_probe.rs"]

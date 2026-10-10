@@ -4,7 +4,7 @@
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. Instruction/CI candidate `a2e82f4` is published and verified; production
+acceptance. Last wait checkpoint `233d4e6` is published and verified; production
 inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
 Continue one active GPT-6.1 Sol High owner in the current development session. No
 subagents or direct access to the user's other computer.
@@ -12,9 +12,9 @@ subagents or direct access to the user's other computer.
 [Current CI authority](../tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10)
 and [selected scope, failures, results and required Windows cases](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
 own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
-Windows 0/4 builds, 0/6 launches**. Mac qualification is complete; both-target
+Windows 1/4 builds, 0/6 launches**. Mac qualification is complete; both-target
 acceptance remains incomplete until Windows proof. There is no pending local process,
-owned fixture or synthetic credential; the confirmed CI operation is below. Prior launch-1 failure evidence is retained.
+owned fixture or synthetic credential; the audited CI failure is below. Prior launch-1 failure evidence is retained.
 
 ### Completed Mac evidence
 
@@ -42,26 +42,36 @@ until the menu and uses suite teardown exit. Production/package inputs are uncha
 Existing core/transport/native/controller and 122 renderer regression passes remain
 valid. Unique historical timeouts/locked-host evidence remain failures, not passes.
 
-### Confirmed Windows CI operation — awaiting_ci
+### Audited Windows failure and selected retry
 
-Workflow **357322921**, `production-scaffold.yml` (Phase 1 production gates),
-[run **38023888008**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
-**attempt 1**, branch `codex/provider-qualification`, exact published candidate
-`a2e82f4d27ef4ad5154027b2d63899d42e1d730d`. Dispatch event and candidate are confirmed.
-Last observed **in_progress at 2026-10-10 04:23:32 UTC**: Windows x64 job
-`114130507223` started, setup passed and checkout was in progress. Generic preflight
-and package matrix were skipped. Inputs: `dialogue_rewrite_windows=true`,
-`upload_packages=false`, `rewrite_build_ordinal=1`, `rewrite_first_launch_ordinal=1`.
-Terminal artifact is `rewrite-windows-38023888008-1`, retained **7 days after upload**
-(not yet confirmed uploaded); obtain it promptly on manual resume.
+[Run **38023888008**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
+workflow **357322921** (`production-scaffold.yml`), attempt **1**, candidate
+`a2e82f4d27ef4ad5154027b2d63899d42e1d730d`, completed **failure** at
+**2026-10-10 04:31:07 UTC**. Raw outcomes retain failed core/native setup/capability;
+continue-on-error step conclusions are not passes. Renderer **123/123**, transport
+**8/8**, pinned SDK compile/lint/literal and named startup/say/return runtime, and
+package build **1** pass. Native walkthrough was skipped; no Loomlight launch,
+fixture or credential was created. All **42** artifact hashes and retained executable
+SHA256 `6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9` match.
+Artifact `rewrite-windows-38023888008-1` (**11659236668**) expires
+**2026-10-17 04:31:02 UTC**; local ignored audit copy is
+`.toolchains/rewrite-windows-ci-38023888008`.
 
-Accepted instruction edits and CI coverage are published. Local native-gate 4/4,
-report-gate 2/2 and 486-file repository checks pass; SDK helper recheck passes on Mac.
-Initial candidate `3451137` had a zero-job Actions context validation failure,
-run `38023810828`; diagnosed correction uses the first runner step/GITHUB_ENV for
-its evidence path. No build/launch was consumed by that failure. Actual Windows
-native capability, selected core/transport/native worker/controller, pinned SDK,
-package and walkthrough/reopen results remain pending. Mac evidence is reused.
+User authorized fixes/rerun. Corrected only snapshot-key separators, renderer build
+prerequisite, example native module import and fresh user32 geometry after display
+command; desktop-size caching remains a hypothesis for the actual runner. No production
+behavior change. Changed Mac inventory entry is `cfg(test)` only; all other 115 entries
+match, so Mac package/native/SDK evidence is reused. Corrected core **9/9**, actual
+controller integration, reuse gate **3/3**, Actions schema/contexts and repository
+checks pass locally. Initial local loopback sandbox denial is distinct from its later
+approved pass. Actual Windows capability and walkthrough remain pending.
+
+Selected fresh retry uses `dialogue_rewrite_windows=true`, `upload_packages=false`,
+`rewrite_reuse_run_id=38023888008`, build ordinal **2** (unused; no new build),
+first launch ordinal **1** (dependent phase 2 **2**). Strict run/hash/runtime-input
+validation must succeed before reuse; no fallback rebuild. Retrieve the original
+scanned package and passed SDK evidence via Actions read access only, keeping source
+provenance and original failures. Publish/verify scoped corrections before dispatch.
 
 Native receipts bind PID/executable digest, unlocked desktop, control state, viewport
 and actual PNGs. Light/dark/compact theme/geometry and OS mouse Generate/Accept with
@@ -71,21 +81,20 @@ exact HTTP digests. Dependent phase 2 requires all three cases, whole-project by
 identity, zero HTTP and native credential/fixture cleanup. Automated native input is
 not relabelled human or subjective acceptance.
 
-Reserve up to **one Windows build/two launches** within existing **4 builds/6 launches**.
-Known consumed Windows totals were **0/4, 0/6** at initial checkout observation; later
-consumption is unknown until audit. Reconcile `attempt-ledger.jsonl` against logs,
-including failed/cancelled attempts and any implicit launch, before another dispatch.
-Do not reset allowance or automatically rerun. This docs-only wait successor records
-the exact preceding candidate; it is not a replacement tested candidate.
+Known consumed Windows totals: **1/4 builds, 0/6 launches**. Reserve **zero new builds,
+up to two launches**; remaining allowance is **3 builds/6 launches** before retry.
+Reconcile terminal attempt entries and logs, including failed/cancelled/implicit
+Loomlight launches, before any further dispatch. No automatic reruns or allowance reset.
 
-**Next action:** end model polling and wait for the user to resume this same chat.
-On resume, inspect this exact run/attempt terminal state and fresh refs/local edits,
-then audit selected jobs, candidate/input/binary identity, every required case log,
-SDK/checksums, native PNGs/receipts, both phase reports, HTTP digests and cleanup.
-Missing/failed/skipped evidence stays unresolved. Complete bounded fixes/review within
-remaining allowance; request local Windows handoff only for a named required native
-case the actual CI evidence cannot establish, after all feasible work. No watcher,
-scheduler or second writer; normal same-chat continuation needs no new outcome.
+**Next action:** publish/verify and dispatch the selected fresh retry. Record exact
+workflow/run/attempt/head and last status/time, then publish the coherent wait record
+and end model polling. Resume this same chat only on the user's instruction to audit
+selected jobs, candidate/input/binary identity, reused-source evidence, every case log,
+SDK/checksums, native PNGs/receipts, both reports, HTTP digests and cleanup. Missing or
+skipped evidence stays unresolved. Finish bounded corrections/feasible work, then
+request local Windows handoff only for named native cases CI cannot establish.
+No watcher, scheduler or second writer; docs-only successors do not replace the tested
+candidate. Prior zero-job validation failure at `3451137` remains in the task ledger.
 
 Detailed mapping and reservations are in the
 [focused CI selection](../tasks/active/phase-2-initial-llm-assistance.md#focused-windows-ci-preparation-and-first-selection--2026-10-10).

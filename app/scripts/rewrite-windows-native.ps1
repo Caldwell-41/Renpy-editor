@@ -26,6 +26,7 @@ public static class RewriteNative {
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
     [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr handle);
+    [DllImport("user32.dll")] public static extern int GetSystemMetrics(int index);
     [DllImport("user32.dll")] public static extern uint SendInput(uint count,INPUT[] input,int size);
     public static bool Click(int x,int y) {
         if(!SetCursorPos(x,y)) return false;
@@ -52,7 +53,7 @@ function Input-Desktop {
     } finally { [void][RewriteNative]::CloseDesktop($desktop) }
 }
 function Capture([string]$Name, $Rect) {
-    $bounds=[System.Windows.Forms.SystemInformation]::VirtualScreen
+    $bounds=New-Object System.Drawing.Rectangle ([RewriteNative]::GetSystemMetrics(76)),([RewriteNative]::GetSystemMetrics(77)),([RewriteNative]::GetSystemMetrics(78)),([RewriteNative]::GetSystemMetrics(79))
     Assert-Native ($Rect.Width -ge 100 -and $Rect.Height -ge 100 -and $Rect.Left -ge $bounds.Left -and $Rect.Top -ge $bounds.Top -and $Rect.Right -le $bounds.Right -and $Rect.Bottom -le $bounds.Bottom) 'Owned window clipped outside observable desktop'
     $bitmap=New-Object System.Drawing.Bitmap $Rect.Width,$Rect.Height
     $graphics=[System.Drawing.Graphics]::FromImage($bitmap)
@@ -116,14 +117,17 @@ try {
     $receipt.inputDesktop=Input-Desktop
     Assert-Native ($receipt.inputDesktop -eq 'Default' -and [Environment]::UserInteractive -and [Environment]::Is64BitProcess) 'Unlocked interactive Windows x64 desktop required'
     if($Stage -eq 'preflight') {
-        $bounds=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+        $bounds=New-Object System.Drawing.Rectangle 0,0,([RewriteNative]::GetSystemMetrics(0)),([RewriteNative]::GetSystemMetrics(1))
+        $receipt.initialDesktopWidth=$bounds.Width; $receipt.initialDesktopHeight=$bounds.Height
         $receipt.resolutionChanged=$false
         if(($bounds.Width -lt 1280 -or $bounds.Height -lt 960) -and (Get-Command Set-DisplayResolution -ErrorAction SilentlyContinue)) {
-            Set-DisplayResolution -Width 1920 -Height 1080 -Force | Out-Null
+            $receipt.displayCommandResult=(Set-DisplayResolution -Width 1920 -Height 1080 -Force | Out-String).Trim()
             $receipt.resolutionChanged=$true
             Start-Sleep -Milliseconds 500
         }
-        $bounds=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+        # WinForms Screen can retain the original display bounds without a message
+        # loop. Read user32 again after the display command; never accept stale size.
+        $bounds=New-Object System.Drawing.Rectangle 0,0,([RewriteNative]::GetSystemMetrics(0)),([RewriteNative]::GetSystemMetrics(1))
         $receipt.captures=@(Capture 'preflight-desktop' $bounds)
         $receipt.sessionId=[System.Diagnostics.Process]::GetCurrentProcess().SessionId
         $receipt.uiaAvailable=([System.Windows.Automation.AutomationElement]::RootElement -ne $null)

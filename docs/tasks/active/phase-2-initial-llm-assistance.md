@@ -170,6 +170,70 @@ branch head does not replace the tested source candidate. No autonomous polling,
 wake-up, duplicate dispatch, merge or release. The zero-job validation failure at
 `3451137` remains recorded as a harness failure, not a qualification attempt/pass.
 
+### First Windows terminal audit and bounded correction — 2026-10-10
+
+User resumed run `38023888008` and explicitly authorized fixing demonstrated issues
+and rerunning within the selected outcome. Fresh checkout is clean at published
+`233d4e6`; remote branch matches. No subagents, direct other-computer access or
+production behavior change. Source run **38023888008**, attempt **1**, head
+`a2e82f4d27ef4ad5154027b2d63899d42e1d730d`, is terminal **failure**, completed
+**2026-10-10 04:31:07 UTC**. Only the selected Windows job executed; generic jobs
+were skipped. Artifact **11659236668**, `rewrite-windows-38023888008-1`, downloaded
+and audited; expires **2026-10-17 04:31:02 UTC**. All **42** manifest entries verify
+(after interpreting Windows path separators); retained executable matches SHA256
+`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
+Installer/executable and evidence privacy scans pass. Logs/receipts remain ignored
+in `.toolchains/rewrite-windows-ci-38023888008`; no evidence binaries/logs are committed.
+
+Actual raw step outcomes and artifact reports override continue-on-error conclusions.
+Confirmed successes: renderer **123/123**, transport **8/8**, literal-driver build,
+checksum-verified official SDK **8.5.3**, compile/lint/substitution/text-token assertions
+and named standard-template runtime **1 test/3 assertions**, package build **1**.
+Native walkthrough was skipped; neither phase report nor native marker exists.
+`attempt-ledger.jsonl` contains only package-build ordinal **1**, corroborated by
+workflow logs. There was **no Loomlight app launch**, fixture or owned credential to
+clean up. Missing walkthrough cleanup proof remains pending rather than a pass.
+Cumulative consumption: **Mac 1/4 builds, 3/6 launches; Windows 1/4 builds, 0/6
+launches**. Remaining Windows allowance: **3 builds, 6 launches**.
+
+| Failure classification/evidence | Smallest correction |
+| --- | --- |
+| Test harness: core rewrite 8/9; success case panics on source snapshot lookup because keys use Windows separators while authoritative source paths use `/` | Canonicalize only snapshot keys to `/`; preserve byte equality and all assertions |
+| CI setup: native-worker test cannot compile Tauri context because `frontendDist` does not exist | Build the renderer before native tests; no app package build or launch |
+| Example harness: controller driver path-import seeks `src/windows.rs`, missing actual credential child module | Import the actual unchanged `ai_native/windows.rs` implementation directly in the example; same native Windows parent type/factory and Mac file-store factory |
+| Capability missing/unresolved: Default unlocked interactive session and UIA succeed, but capture remains 1024x768 after supported display command | Replace cached WinForms geometry with fresh user32 `GetSystemMetrics` for preflight and capture containment; record before/after geometry and display-command result. Cached size is a hypothesis until actual rerun; unchanged required viewport remains blocking |
+
+No application production code changed. The sole changed entry in the retained Mac
+116-input inventory is `src-core/src/rewrite/tests.rs`, included only under `cfg(test)`;
+other 115 entries match. Example/bootstrap and external CI drivers do not enter the
+packaged runtime. Completed Mac package/native/SDK evidence remains valid.
+Local corrected core selection **9/9** and actual controller integration pass; the
+initial local loopback attempt was sandbox `EPERM`, then approved native access passed.
+Retained-evidence rejection tests **3/3**, unchanged native/report gates **4/4, 2/2**,
+AST, focused Rust formatting, Actions expression/schema validation via existing
+`actionlint`, repository/link/privacy and diff checks pass. No Windows native result
+is inferred from these local checks.
+The full downloaded-source reuse check also passes locally, emulating only Git's
+declared Windows checkout line endings for current inventory comparison; artifact,
+binary and SDK log hashes use their actual downloaded bytes. This verifies reuse
+logic, not Windows native capability or walkthrough acceptance.
+
+**Selected retry:** a fresh dispatch (not Actions rerun) of the same isolated workflow,
+`dialogue_rewrite_windows=true`, `upload_packages=false`,
+`rewrite_reuse_run_id=38023888008`, first launch ordinal **1** (dependent phase 2 **2**).
+Build ordinal **2** is unused in reuse mode: **zero new package builds**, up to **two
+Loomlight launches** reserved. Reuse validates original completed run/attempt/head,
+all artifact hashes, package and SDK successful case evidence, exact binary hash and
+independently enumerated current runtime inputs. Only the six exact changed external
+workflow/driver/test/example paths are exempted; changed/missing/added production inputs
+refuse reuse with no implicit rebuild. Original failed outcomes remain retained.
+Both reports, 20 phase-1 cases, five exact reviewed HTTP bodies, actual native captures
+and OS input plus process persistence/zero HTTP/cleanup remain required. Audit actual
+retry consumption before any subsequent dispatch. If the corrected fresh native API
+still cannot establish the viewport, identify those native cases for local handoff
+only after finishing feasible selected checks. Publish/verify before dispatch, record
+confirmed run identity, then follow manual same-thread wait/resume.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)

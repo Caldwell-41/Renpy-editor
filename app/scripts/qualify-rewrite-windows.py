@@ -16,6 +16,76 @@ from rewrite_probe_gate import validate_report
 REPO = Path(__file__).resolve().parents[2]
 APP = REPO / 'app'
 SDK_HASH = 'eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
+# Exact diagnosed harness-only differences; no production source is exempted.
+REUSE_HARNESS_PATHS = {
+    '.github/workflows/production-scaffold.yml',
+    'app/scripts/qualify-rewrite-windows.py',
+    'app/scripts/rewrite-windows-native.ps1',
+    'app/scripts/test_rewrite_windows_reuse.py',
+    'app/src-core/src/rewrite/tests.rs',
+    'app/src-tauri/examples/rewrite-controller-driver.rs',
+}
+
+
+def validate_reuse_inputs(packaged, current):
+    required = {'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',
+                'app/src-tauri/src/main.rs', 'app/src-tauri/src/ai_native/windows.rs',
+                'app/src-tauri/tauri.conf.json', 'app/src-core/src/rewrite.rs',
+                'app/src/rewrite-ui.ts'}
+    assert required <= packaged.keys() and required <= current.keys(), 'Complete runtime inventory required'
+    assert {k: v for k, v in packaged.items() if k not in REUSE_HARNESS_PATHS} == {k: v for k, v in current.items() if k not in REUSE_HARNESS_PATHS}, 'Retained production inputs changed; rebuild requires selection'
+
+
+def validate_reuse_manifest(source, manifest):
+    assert manifest, 'Source manifest required'
+    for key, expected in manifest.items():
+        parts = key.replace('\\', '/').split('/')
+        assert all(p and p not in ('.', '..') and ':' not in p for p in parts), 'Contained manifest paths required'
+        path = source.joinpath(*parts)
+        assert path.is_file() and not path.is_symlink() and digest(path) == expected, 'Source artifact changed or missing'
+
+
+def reuse(output, source):
+    # A failed overall run can supply individually successful SDK/package evidence.
+    # Its failed core/native cases never become passes by reuse.
+    metadata = json.loads((source/'run-metadata.json').read_text())
+    assert str(metadata['id']) == os.environ['REUSE_REWRITE_RUN_ID']
+    assert metadata['run_attempt'] == 1 and metadata['workflow_id'] == 357322921
+    assert metadata['head_branch'] == 'codex/provider-qualification' and metadata['event'] == 'workflow_dispatch' and metadata['status'] == 'completed'
+    manifest = json.loads((source/'manifest.json').read_text())
+    validate_reuse_manifest(source, manifest)
+    identity = json.loads((source/'identity.json').read_text())
+    packaged = json.loads((source/'package-inputs.json').read_text())
+    assert identity['candidate'] == metadata['head_sha'] == packaged['candidate']
+    assert identity['runId'] == str(metadata['id']) and identity['attempt'] == 1
+    assert packaged['runId'] == identity['runId'] and packaged['attempt'] == '1'
+    assert packaged['os'] == 'Windows' and packaged['architecture'].lower() in ('amd64', 'x86_64')
+    paths = subprocess.check_output(['git', 'ls-files', 'app', '.github/workflows/production-scaffold.yml', 'tests/fixtures/phase-1h'], cwd=REPO, text=True).splitlines()
+    validate_reuse_inputs(packaged['inputs'], {p: digest(REPO/p) for p in paths})
+    assert digest(source/'package/loomlight.exe') == packaged['executableSha256']
+    for name in ('package', 'package-privacy', 'evidence-privacy', 'sdk'):
+        assert json.loads((source/f'{name}-result.json').read_text())['exitCode'] == 0, 'Successful source case required: '+name
+    sdk_identity = json.loads((source/'sdk-identity.json').read_text())
+    assert sdk_identity['passed'] is True and sdk_identity['version'] == '8.5.3' and sdk_identity['officialPublishedSHA256'] == SDK_HASH == sdk_identity['archiveSHA256']
+    assert '[rpytest] Status: PASSED' in (source/'sdk-commands/command-5.log').read_text()
+    shutil.copytree(source/'package', output/'package')
+    proof = output/'reused-proof'; proof.mkdir()
+    for name in ('manifest.json', 'identity.json', 'package-inputs.json', 'package-result.json', 'sdk-identity.json', 'terminal-audit.json'):
+        shutil.copy2(source/name, proof/name)
+    shutil.copytree(source/'sdk-commands', proof/'sdk-commands')
+    receipt = {'passed': True, 'sourceRunId': identity['runId'], 'sourceAttempt': 1,
+               'sourceCandidate': identity['candidate'], 'executableSHA256': packaged['executableSha256'],
+               'sdkPassed': True, 'packagePassed': True,
+               'sourceManifestSHA256': digest(source/'manifest.json'),
+               'runtimeInputsMatch': True, 'allowedHarnessDifferences': sorted(REUSE_HARNESS_PATHS)}
+    (output/'reuse.json').write_text(json.dumps(receipt, indent=2)+'\n')
+
+
+def verify_reuse(output, kind):
+    receipt = json.loads((output/'reuse.json').read_text())
+    assert receipt['passed'] is True and receipt[kind+'Passed'] is True
+    assert digest(output/'package/loomlight.exe') == receipt['executableSHA256']
+    print(f'{kind}: reused audited source run {receipt["sourceRunId"]}; no new package build or SDK execution', flush=True)
 
 
 def digest(path):
@@ -76,6 +146,7 @@ def prepare(output):
     failures = []
     checks = [
         ('renderer', ['npm', 'run', 'check'], None),
+        ('renderer-build', ['npm', 'run', 'build'], None),
         ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 9),
         ('transport', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'ai_request::tests'], 8),
         ('native-worker', ['cargo', 'test', '-p', 'loomlight-desktop', '--release', '--locked', 'ai_requests::tests'], 6),
@@ -124,6 +195,9 @@ def build(output, ordinal):
 
 
 def retain(output):
+    if (output/'reuse.json').is_file():
+        verify_reuse(output, 'package')
+        return
     executable = APP/'target/release/loomlight.exe'
     if not executable.is_file():
         return
@@ -152,7 +226,7 @@ def retain(output):
 def native(output, first_launch):
     assert 1 <= first_launch <= 5
     root = Path(tempfile.gettempdir()) / ('loomlight-rewrite-ci-' + os.environ['GITHUB_RUN_ID'])
-    executable = APP/'target/release/loomlight.exe'
+    executable = output/'package/loomlight.exe' if (output/'reuse.json').is_file() else APP/'target/release/loomlight.exe'
     common = [sys.executable, 'scripts/dialogue-rewrite-probe.py', '--executable', str(executable), '--root', str(root), '--output', str(output/'walkthrough'), '--native-driver', str(APP/'scripts/rewrite-windows-native.ps1')]
     try:
         for phase in (1, 2):
@@ -174,7 +248,7 @@ def cleanup_owned(output, root):
         profile = json.loads((root/'ai-profiles.json').read_text())
         assert reports and reports[-1].get('cleanupComplete') is True
         assert all(p.get('credential') is None for p in profile['profiles'])
-        receipt.update({'credentialReferencesRemoved': True, 'fixtureHashes': {str(p.relative_to(root)): digest(p) for p in root.rglob('*') if p.is_file()}})
+        receipt.update({'credentialReferencesRemoved': True, 'fixtureHashes': {p.relative_to(root).as_posix(): digest(p) for p in root.rglob('*') if p.is_file()}})
         shutil.rmtree(root)
         receipt['cleanupComplete'] = not root.exists()
     except Exception as error:
@@ -211,23 +285,26 @@ def finish(output):
     (output/'terminal-audit.json').write_text(json.dumps(summary, indent=2)+'\n')
     # Evidence uploads never include fixture stores, SDKs or credential material.
     run(output, 'evidence-privacy', ['node', 'scripts/scan-artifacts.mjs', str(output)])
-    (output/'manifest.json').write_text(json.dumps({str(p.relative_to(output)): digest(p) for p in output.rglob('*') if p.is_file()}, indent=2)+'\n')
+    (output/'manifest.json').write_text(json.dumps({p.relative_to(output).as_posix(): digest(p) for p in output.rglob('*') if p.is_file()}, indent=2)+'\n')
     if not summary['passed']:
         raise RuntimeError('Required Windows cases failed/skipped/pending; audit terminal evidence')
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=('prepare', 'sdk', 'build', 'native', 'finish'))
+    parser.add_argument('stage', choices=('prepare', 'sdk', 'build', 'native', 'finish', 'reuse', 'reuse-package', 'reuse-sdk'))
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--ordinal', type=int)
     parser.add_argument('--archive', type=Path)
     parser.add_argument('--checksums', type=Path)
+    parser.add_argument('--source', type=Path)
     args = parser.parse_args()
     if args.stage == 'prepare': prepare(args.output)
     elif args.stage == 'sdk': sdk(args.output, args.archive, args.checksums)
     elif args.stage == 'build': build(args.output, args.ordinal)
     elif args.stage == 'native': native(args.output, args.ordinal)
+    elif args.stage == 'reuse': reuse(args.output, args.source)
+    elif args.stage.startswith('reuse-'): verify_reuse(args.output, args.stage.removeprefix('reuse-'))
     else: finish(args.output)
 
 

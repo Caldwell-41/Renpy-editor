@@ -150,7 +150,11 @@ impl Fixture {
                     walk(&p, base, out)
                 } else {
                     out.insert(
-                        p.strip_prefix(base).unwrap().to_str().unwrap().into(),
+                        p.strip_prefix(base)
+                            .unwrap()
+                            .to_str()
+                            .unwrap()
+                            .replace('\\', "/"),
                         fs::read(p).unwrap(),
                     );
                 }

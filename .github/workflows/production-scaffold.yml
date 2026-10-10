@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: '1'
+      rewrite_reuse_run_id:
+        description: Reuse audited package and SDK from this completed focused run; no new build
+        required: false
+        type: string
+        default: ''
       upload_packages:
         description: Upload packaged applications after all production gates pass
         required: false
@@ -457,6 +462,9 @@ jobs:
     name: Focused first rewrite — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
     env:
       CARGO_TERM_COLOR: never
       PYTHONUTF8: '1'
@@ -473,8 +481,10 @@ jobs:
           BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
           FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
           UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
         run: |
           python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
           $evidence=Join-Path $env:RUNNER_TEMP 'rewrite-windows'
           New-Item -ItemType Directory -Path $evidence | Out-Null
           "REWRITE_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -516,17 +526,34 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native evidence gate tests failed' }
           python -m unittest discover -s app/scripts -p test_rewrite_probe_gate.py -v
           if ($LASTEXITCODE -ne 0) { throw 'Rewrite report gate tests failed' }
+          python -m unittest discover -s app/scripts -p test_rewrite_windows_reuse.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Retained evidence gate tests failed' }
       - name: Selected renderer, core, transport, native worker and actual controller
         id: focused
         continue-on-error: true
         run: python scripts/qualify-rewrite-windows.py prepare --output "$env:REWRITE_EVIDENCE"
+      - name: Retrieve and verify previously audited package and SDK
+        if: ${{ inputs.rewrite_reuse_run_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
+        run: |
+          $source=Join-Path $env:RUNNER_TEMP 'rewrite-reuse'
+          gh run download "$env:REUSE_REWRITE_RUN_ID" --repo Caldwell-41/Renpy-editor --name "rewrite-windows-${env:REUSE_REWRITE_RUN_ID}-1" --dir "$source"
+          if ($LASTEXITCODE -ne 0) { throw 'Audited source artifact unavailable; no implicit rebuild' }
+          gh api "repos/Caldwell-41/Renpy-editor/actions/runs/$env:REUSE_REWRITE_RUN_ID" | Out-File -FilePath "$source/run-metadata.json" -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'Source run identity unavailable' }
+          python scripts/qualify-rewrite-windows.py reuse --output "$env:REWRITE_EVIDENCE" --source "$source"
+          if ($LASTEXITCODE -ne 0) { throw 'Retained evidence mismatch; no implicit rebuild' }
       - name: Restore official pinned SDK archive
         id: rewrite-sdk-cache
+        if: ${{ inputs.rewrite_reuse_run_id == '' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
       - name: Download official published checksums and SDK on cache miss
+        if: ${{ inputs.rewrite_reuse_run_id == '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -540,13 +567,26 @@ jobs:
       - name: Pinned SDK compile, lint, literal tokens and standard-template runtime
         id: rewrite-sdk
         continue-on-error: true
-        run: python scripts/qualify-rewrite-windows.py sdk --output "$env:REWRITE_EVIDENCE" --archive "$env:RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$env:RUNNER_TEMP/rewrite-checksums.txt"
-      - name: Record and run one bounded Windows package build
+        env:
+          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
+        run: |
+          if ($env:REUSE_REWRITE_RUN_ID) {
+            python scripts/qualify-rewrite-windows.py reuse-sdk --output "$env:REWRITE_EVIDENCE"
+          } else {
+            python scripts/qualify-rewrite-windows.py sdk --output "$env:REWRITE_EVIDENCE" --archive "$env:RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$env:RUNNER_TEMP/rewrite-checksums.txt"
+          }
+      - name: Verify retained package or record one bounded Windows build
         id: rewrite-package
         continue-on-error: true
         env:
           BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
-        run: python scripts/qualify-rewrite-windows.py build --output "$env:REWRITE_EVIDENCE" --ordinal "$env:BUILD_ORDINAL"
+          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
+        run: |
+          if ($env:REUSE_REWRITE_RUN_ID) {
+            python scripts/qualify-rewrite-windows.py reuse-package --output "$env:REWRITE_EVIDENCE"
+          } else {
+            python scripts/qualify-rewrite-windows.py build --output "$env:REWRITE_EVIDENCE" --ordinal "$env:BUILD_ORDINAL"
+          }
       - name: Native observation and OS input, then dependent separate-process reopen
         id: rewrite-native
         if: ${{ steps.native-capability.outcome == 'success' && steps.focused.outcome == 'success' && steps.rewrite-package.outcome == 'success' && steps.rewrite-sdk.outcome == 'success' }}
