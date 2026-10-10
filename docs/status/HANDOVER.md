@@ -1,47 +1,52 @@
 # Current outcome handover
 
-## Generated Character cards — manual same-thread CI wait
+## Generated Character cards — corrected CI manual wait
 
-Published implementation67faeaa8bd1a6f0a0c2596d204bc0e28230f49d6 on
-`codex/provider-qualification`; fresh refs reconciled from Draft closuref03ea0f without
-reset. Retained Mac ARM64 session; one serial GPT-6.1 Sol High owner. Independent
-read-only implementation review fixes complete; final evidence review still pending.
-No PR/merge/release. [Task wait record](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-signed-mac-proof-and-ci-wait--2026-10-11)
-owns exact evidence, candidate hashes, selection and cumulative budgets.
+Published implementation67faeaa; correctionf1a1a8bffd74b542f1b87d744454a067017b0131
+on `codex/provider-qualification`. Fresh refs reconciled; retained Mac ARM64 session,
+one GPT-6.1 Sol High serial owner. Independent implementation/correction reviews complete;
+final artifact review pending. No PR/merge/release. [Task wait record](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-corrected-ci-wait--2026-10-11)
+owns exact selection, evidence, failure history and cumulative budgets.
 
-One new/existing editor-only card uses saved ordinary Beat context, reviewed name and
-explicit approved references. Exact strict-schema dispatch and passive field/exact
-metadata review; core IDs/provenance; Save once to proposed as one history change.
-Separate Approve replaces prior approved text; Reject retains it. Runnable source is
-byte-exact. Actual supporting-source bindings/citations gate approval and inclusion;
-all-source transient guards protect acceptance. Unknown extensions survive.
+One editor-only card uses reviewed saved Beat/name and explicit approved references.
+Exact dispatch/passive field and metadata review; core IDs/provenance; Save once as one
+proposed history change. Separate Approve replaces approved text; Reject retains it.
+Runnable source is byte-exact. Persistent support/citations gate approval and inclusion;
+transient all-source guards protect acceptance; unknown extensions survive.
 
-Local core26/references12/prompts5/renderer129/controller and gate21pass/oneWindows-only
-case pending pass. Signed Mac package1 and launches1–2 pass25distinct+3reopen/five
-exact bodies. CUA physically Generate/Save/Approve and observe light/dark/compact;
-source/metadata/history/refusal checks pass. Signature/installer/input identities and
-privacy audited; both processes exited, fixture credentials/references cleared, owned
-root removed. Hosted Mac cannot establish this approved signed native case; named local
-proof is complete. Unchanged SDK evidence1320d0a/run38056790759 is explicitly reused.
+First run38083896396 attempt1 audited terminal failure. Windows worker5/6: socket EOF
+fixture timed out while constructing the project after starting the request. Package1
+passed, native skipped, zero app launches; no Windows acceptance. Mac9actual automated
+checks passed. All37Windows/13Mac manifest hashes and245inputs each verified (prescribed
+PS CRLF), privacy52files passes. Original logs retained in ignored evidence. Owner moved
+fixture construction before Send only under cfg(test); unopened session/cancellation
+assertions and two-second deadlines remain. Local worker6/6 and independent review pass;
+production worker code unchanged. Corrected Windows execution must confirm diagnosis.
 
-**Pending:** workflow357322921, [run38083896396](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38083896396),
-attempt1, exact head67faeaa above; created2026-10-10T20:28:43Z. Last observation
-20:28:48Z overall queued, Windows114306261864 in_progress/setup, Mac114306261970 queued.
-Inputs generate_card=true, other selectors/upload_packages=false, build1/firstlaunch1,
-both reuse-run inputs empty. Generic jobs deliberately skipped; focused jobs pending.
-Docs-only wait successor does not supersede tested runtime inputs.
+Existing signed Mac package1/native launches1–2 pass25distinct+3reopen/five exact bodies,
+CUA physical Generate/Save/Approve and light/dark/compact. Signature/installer/input/
+privacy/credential/fixture/process cleanup audited. Test-only correction retains this
+proof; no new signed package required. SDK runtime evidence1320d0a/run38056790759 reused
+explicitly; no new execution. Local core26/references12/prompts5/renderer129/controller pass.
 
-Each target limits4packages/6editor launches/4focused dispatches. Confirmed Mac1/2/1;
-Windows0/0/1 at setup, reserves package1/launches1–2. Count actual CI starts/failures/
-cancellations on resume, not reservation as execution. Unreserved remaining each
-3packages/4launches/3dispatches. Prior allowances closed; reassess after two unsuccessful
-corrections of one hypothesis. No local owned process/listener/fixture remains.
+**Pending:** workflow357322921, [run38085719737](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38085719737),
+attempt1, exact headf1a1a8b above, created2026-10-10T20:56:43Z. Observed20:56:48Z overall
+queued: Windows114311669919 setup/in_progress, Mac114311669778 queued. Inputs generate_card=true,
+other selectors/upload_packages=false, build2/firstlaunch1, both reuse inputs empty.
+Generic jobs deliberately skipped; required focused jobs pending. Docs-only wait successor
+never replaces the tested runtime candidate.
 
-Resume this same thread on user command; no autonomous Goal/watcher/poll loop. Audit
-recorded run/attempt/head and changed refs, actual Windows package/input/binary/native
-capture25+3/five bodies, Mac automated9checks, focused counts, privacy and cleanup.
-Missing/failed/cancelled/skipped required evidence is unresolved. Continue authorized
-in-scope fixes/review within allowance, then acceptance/closure commit/push and result,
-limitations and next proposal-only prompt. No paid/public provider calls, generated lore,
-runnable Character/Appearance change, provider/signing expansion, merge/release or
-following deliverable. Full Phase2/final human acceptance remain separate.
+Limits each4packages/6editor launches/4focused dispatches. Confirmed Windows1/0/2,
+reserves package2/launches1–2; unreserved2packages/4launches/2dispatches. Mac1/2/2,
+no reservation; remaining3packages/4launches/2dispatches. Count actual new CI starts/
+failures/cancellations on resume. First correction of this hypothesis passes locally;
+reassess after two unsuccessful corrections. No owned local process/listener/fixture.
+
+Resume this same thread on user command; no autonomous Goal/watcher/polling. Audit new
+run/attempt/head and refs; Windows worker6/6 and native25+3/five bodies/six stages/nine
+captures, package/input/binary identity, Mac9actual checks, privacy/cleanup and allowance.
+Missing/failed/cancelled/skipped required checks stay unresolved. Complete authorized
+in-scope fixes/final evidence review, acceptance and closure commit/push; return result,
+limits and next proposal-only prompt. No generated lore, runnable Character/Appearance
+change, paid/public calls, provider/signing expansion, merge/release or next deliverable.
+Full Phase2/final human acceptance remain separate.

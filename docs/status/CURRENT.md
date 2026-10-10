@@ -1,7 +1,7 @@
 # Current status
 
 **Updated:** 2026-10-11. **Generated Character cards implemented; focused CI pending**
-on `codex/provider-qualification`, published implementation67faeaa. Retained Mac ARM64
+on `codex/provider-qualification`, implementation67faeaa and test correctionf1a1a8b. Retained Mac ARM64
 session, one serial GPT-6.1 Sol High owner; independent implementation review repairs complete.
 
 | Capability | State |
@@ -11,12 +11,14 @@ session, one serial GPT-6.1 Sol High owner; independent implementation review re
 | Explicit card approval | Separate review decision; preserves prior approved text until replacement approval |
 | Local focused checks | core26/references12/prompts5/renderer129/controller pass |
 | Signed Mac changed action | package1, native25+3/five exact bodies, physical Save/Approve, cleanup pass |
-| Both-target CI | run38083896396 attempt1 pending; no acceptance claim |
+| Both-target CI | First run failed worker fixture timing; corrected run38085719737 attempt1 pending |
 
-[Task wait record](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-signed-mac-proof-and-ci-wait--2026-10-11)
-owns exact operation, candidate, inputs, tests and allowance. Confirmed Mac1package/
-2launches/1dispatch; Windows0/0/1 at initial setup observation, package1/launches1–2
-reserved for the run. Limits each4/6/4; prior allowances closed.
+[Task wait record](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-corrected-ci-wait--2026-10-11)
+owns exact operation, candidate, inputs, tests and allowance. First artifacts audited:
+Mac9checks pass; Windows worker5/6, package1, no native launch. Test-only correction
+passes6/6 locally; independent review complete, deadlines unchanged. Confirmed Mac1package/
+2launches/2dispatches; Windows1/0/2, package2/launches1–2 reserved. Limits each4/6/4;
+prior allowances closed. Corrected Windows/native evidence remains required.
 
 [HANDOVER](HANDOVER.md) owns manual same-thread resume: audit actual required artifacts,
 then complete in-scope fixes/review/acceptance and publish closure. No model polling or

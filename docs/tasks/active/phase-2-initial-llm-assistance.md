@@ -4220,3 +4220,28 @@ Next fresh focused dispatch2 selects build ordinal2/first launch1, no reuse/uplo
 generic matrix. Windows reserves one package and two launches; Mac automated repeat
 checks the changed test only, signed native evidence remains valid because production
 code is unchanged. Required corrected CI/native proof and final evidence review pending.
+
+### Generated card corrected CI wait — 2026-10-11
+
+Correction/failed-run audit published asf1a1a8bffd74b542f1b87d744454a067017b0131;
+production inputs retain67faeaa behavior, only cfg(test) worker fixture setup changed.
+Confirmed fresh workflow357322921 (`production-scaffold.yml`)
+[run38085719737](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38085719737),
+attempt1, branch `codex/provider-qualification`, exact headf1a1a8bffd74b542f1b87d744454a067017b0131.
+Created2026-10-10T20:56:43Z; observed20:56:48Z overall queued,
+Windows114311669919 in_progress/setup, Mac114311669778 queued. Inputs generate_card=true;
+draft/continue/dialogue/upload_packages=false; build ordinal2, first launch1, both reuse
+inputs empty. Focused dispatch cumulative2 each; generic jobs deliberately skipped.
+
+Confirmed actual Windows1/4packages,0/6launches,2/4dispatches; reserves package2,
+launches1–2. Confirmed Mac1/4packages,2/6launches,2/4dispatches; no native/package
+reservation. Windows unreserved remainder2packages/4launches/2dispatches; Mac
+3packages/4launches/2dispatches. Reconcile actual starts/failures from new artifacts on
+resume; no implicit retry. Original failure remains separate. No local owned process,
+listener or fixture. Manual same-thread end of normal turn; no Goal/watcher/polling.
+On user resume audit exact new run/attempt/head, corrected Windows worker6/6, required
+native25+3/five exact bodies/six native stages/nine captures, package and input/binary
+identities, Mac9actual automated checks, privacy/cleanup and allowance. Valid signed
+Mac proof remains reusable; test-only change does not require another signed package.
+Complete remaining independent evidence review and in-scope fixes, then bounded closure,
+commit/push and next proposal-only prompt. No next deliverable started.
