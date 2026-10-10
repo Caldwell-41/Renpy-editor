@@ -53,6 +53,8 @@ a real decision or unavailable capability.
 
 Verify the changed user behavior on the required test host. Reuse valid evidence;
 repeat or broaden checks only for changed inputs, failures or unresolved concerns.
+Use CI by default for automated Windows/macOS proof while development stays on the
+preferred machine; WORKFLOW owns capability checks and any necessary local handoff.
 Keep product defects, harness failures and missing evidence distinct. Failed,
 cancelled or skipped required checks are not passes. No package matrix for docs alone.
 

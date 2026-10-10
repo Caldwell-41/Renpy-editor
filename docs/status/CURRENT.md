@@ -1,10 +1,11 @@
 # Current status
 
-**Updated:** 2026-10-10. [First safe dialogue rewrite](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
+**Updated:** 2026-10-10. [First safe dialogue rewrite](../tasks/active/phase-2-initial-llm-assistance.md#focused-windows-ci-preparation-and-first-selection--2026-10-10)
 is implemented on `codex/provider-qualification`, preserving published implementation
 `515cd85`. Mac ARM64 selected-slice qualification is complete; Windows x64 proof
-remains outstanding. One GPT-6.1 Sol High serial owner; no subagents or direct
-other-host execution.
+remains outstanding. One GPT-6.1 Sol High owner in the current development session;
+no subagents or direct access to the user's other computer. User-approved CI-first
+routing replaces the mandatory Windows handoff; the required Windows cases remain.
 
 | Capability | Automated proof | Native acceptance |
 | --- | --- | --- |
@@ -20,8 +21,13 @@ are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diag
 fixture correction; no production change or rebuild was necessary.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **0/4 builds, 0/6 launches**.
-Continue the same branch serially on Windows for its required focused/package
-proof. [HANDOVER](HANDOVER.md) owns continuation.
+Focused Windows CI is prepared in the existing production workflow: selected checks,
+pinned SDK, one package and evidence-gated native input/observations plus dependent
+reopen. Generic matrix and Mac jobs are excluded. Native driver rejection tests 4/4,
+report-gate tests 2/2 and local repository checks pass; actual Windows capability
+remains unverified. Publish/verify before dispatch, then follow manual same-thread
+wait/resume. Up to one Windows build/two launches are reserved; runner records actual
+consumption. [HANDOVER](HANDOVER.md) owns operation identity and terminal audit.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

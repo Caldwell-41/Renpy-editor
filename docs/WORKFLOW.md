@@ -1,6 +1,7 @@
 # Repository-first delivery workflow
 
 **Policy established:** 2026-09-19. **Delivery rules updated:** 2026-09-28.
+**CI routing and qualification cadence amended:** 2026-10-10, user approved.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -218,28 +219,35 @@ rather than rewriting results or turning past exclusions into passes.
 
 ## Test host routing and ownership
 
-Choose the Codex execution host independently from the required test hosts. Ordinary
-development can stay on the user's convenient machine; Windows is a reasonable default,
-not a requirement. A capable agent can coordinate authorised Windows/macOS Actions jobs
-without moving the Codex session. Do not assume dispatch, native drivers or host access
-exist: verify actual capabilities before promising them. Never start a second writer
-or install remote/self-hosted infrastructure to work around an unavailable capability.
+Keep one implementation owner on the user's preferred development machine. Use GitHub
+Actions by default for required automated Windows x64 and macOS ARM64 checks. Running
+checks on another operating system does not require transferring the development session.
 
-For work requiring both local platforms, each agent finishes all authorised work,
-checks and review possible on its own machine. Never require or request direct access
-to the other machine. Record completed work, outstanding tests and remaining budget;
-commit/push the same branch within publication authority and verify its remote checkpoint.
-Tell the user which platform agent is needed and provide a short prompt to pull and
-continue the same outcome. Transfer one active writer; both-platform evidence remains
-required before acceptance. Missing other-host access does not block local progress.
+Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
+CI checks, including necessary workflow adjustments. Verify runner capabilities and retain
+candidate identity, package hashes, case results and cleanup evidence. CI builds, launches
+and retries consume the same applicable cumulative allowances as local runs, including
+failed/cancelled attempts and implicit launches. Select only required jobs and cases;
+this routing policy does not authorize an otherwise excluded full matrix or specialist
+experiment. Monitoring follows [the waiting policy](#waiting-without-model-polling).
+Publication remains within the selected outcome's actual authorization.
+
+Request a local platform handoff only for a named required case that CI cannot reliably
+establish. Explain the missing capability and transfer only the remaining work, with
+completed evidence, the verified branch checkpoint and unchanged remaining allowance.
+Preserve one active writer. Access to the user's other computer, remote infrastructure
+installation and signing or credential provisioning require their own authorization;
+do not install infrastructure or start a second writer to work around missing capability.
+Both-platform evidence remains required where selected; missing access does not block
+unrelated already authorized portable work or turn pending proof into acceptance.
 
 | Work | Codex machine | Evidence host |
 | --- | --- | --- |
 | Docs, planning and portable logic | Any suitable host with repository access | Cheap relevant checks; no native run merely for docs |
-| New shared platform-sensitive path | Either development host | Early narrow Windows x64/macOS ARM64 checks for affected targets; Actions when sufficient |
-| Windows crash, process/filesystem or packaging diagnosis | Local Windows preferred for repeated debugging; required only when the selected task needs its local capability | Affected Windows executable/path; shared changes also qualify affected Mac behavior |
-| macOS rendering, focus, native input/window behavior | Local macOS when physical/native interaction is required; a proven equivalent accessible host may suffice | Actual packaged native app; a hosted Chrome result alone cannot substitute |
-| Final milestone qualification | Any host able to coordinate/review the approved run | Required Windows/macOS package matrix and remaining native/human evidence |
+| New shared platform-sensitive path | Preferred development host | Early focused CI proof on affected Windows x64/macOS ARM64 targets; local only for an identified missing capability |
+| Windows crash, process/filesystem or packaging diagnosis | Preferred development host; local Windows only for an identified required capability | Affected Windows executable/path through CI where sufficient; shared changes also qualify affected Mac behavior |
+| macOS rendering, focus, native input/window behavior | Preferred development host; local macOS only for an identified required capability | Actual packaged native app and appropriate native driver/observations, through CI where sufficient; hosted Chrome alone cannot substitute |
+| Final milestone qualification | Any host able to coordinate/review the approved run | Required Windows/macOS CI package matrix and remaining native/human evidence |
 
 Run local application scenarios only against disposable projects and isolated profiles,
 not real game projects. Use pinned/locked dependencies and verify the local environment;
@@ -347,6 +355,9 @@ branch, task, handover, pending operation and unchanged budget in the recovery p
 
 **Default: manual same-thread resume.** A workflow wait pauses execution of the current
 outcome; it does not complete the outcome, create a new one, or require a new chat.
+CI-first routing changes where checks run, not this wait/resume policy. Monitoring means
+recording dispatch/status, user-requested status checks and the terminal audit; it does
+not authorize an autonomous polling or automatic wake-up loop.
 
 1. **Start and record.** Check existing operations, candidate and allowance; dispatch
    only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,

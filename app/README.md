@@ -82,11 +82,16 @@ Neither an environment variable nor a command-line selector can override that pi
 Change it only after explicit approval and inspection of the certificate; never store
 a key there. The pin records the selected identity, not successful package qualification.
 Debug unit tests need no certificate. Windows signing/packaging is unchanged.
-Unconfigured Mac CI release/package jobs now fail closed: provide an approved identity
-before selecting such a job; no workflow dispatch or secret provisioning is implicit.
+Unconfigured Mac CI release/package jobs fail closed: verify that the approved identity
+is available before selecting such a job. [CI routing authority](../docs/WORKFLOW.md#test-host-routing-and-ownership)
+permits focused checks within the selected outcome; it does not authorize secret
+provisioning, certificate export, trust/ACL changes or a signing-policy bypass.
 
 After separate approval for certificate setup and for a package build, use an existing
-certificate/private-key identity in Keychain. Set `LOOMLIGHT_SIGNING_SHA1` to the approved
+certificate/private-key identity in Keychain. An explicitly selected outcome's
+package-build/retry allowance supplies build authorization within that scope; routine
+attempts do not need fresh per-step approval. Certificate setup/export and trust/ACL
+changes retain their separate boundaries. Set `LOOMLIGHT_SIGNING_SHA1` to the approved
 certificate's **public SHA-1 fingerprint** (the selector expected by `codesign`, not a
 secret or the artifact-integrity hash). From `app/`, with pinned tools available:
 
@@ -100,7 +105,8 @@ and `TAURI_*`/Cargo target overrides, builds once, signs through Tauri with the 
 certificate, checks the produced bundle, and creates a signed `Loomlight.dmg` containing
 `Loomlight.app`. It mounts the installer read-only to inspect the included app, then
 detaches it. It does not install, generate/import certificates or change trust.
-Build output and identity receipts remain local. A failure is not a retry authorization.
+Build output and identity receipts remain local or in approved privacy-scanned CI
+evidence. A failure alone grants no retry beyond the selected scope/remaining allowance.
 
 The bundle gate verifies Info.plist names/versions, the executable, strict resource
 signature, extracted signing certificate fingerprint, and the generated designated

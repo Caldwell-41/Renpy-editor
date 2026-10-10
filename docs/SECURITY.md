@@ -193,10 +193,13 @@ boundary and is fingerprint-revalidated around each bounded operation.
 
 ## Release and incident baseline
 
-Private GitHub Releases may publish unsigned early Windows/macOS packages after CI
-verification. Signing/notarisation and a secured update channel are required before
-broader distribution. Never embed signing keys in CI variables available to untrusted
-pull requests.
+Early unsigned Windows/macOS packages require a separately approved distribution
+exception, CI verification and clear limitation disclosure through an actually private
+or otherwise approved channel. This release guidance does not override the current
+[Mac package identity](../app/README.md#macos-local-package-identity) or authorize
+unsigned/ad-hoc Mac CI builds. Signing/notarisation and a secured update channel are
+required before broader distribution. Never embed signing keys in CI variables
+available to untrusted pull requests.
 
 **Approved 0.1.0 exception — 2026-10-07:** the early public prerelease uses original
 unsigned/non-notarized packages, with unqualified installer paths explicitly disclosed,

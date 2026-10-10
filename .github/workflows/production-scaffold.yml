@@ -3,6 +3,21 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      dialogue_rewrite_windows:
+        description: Only focused Windows first-rewrite qualification; no generic matrix
+        required: false
+        type: boolean
+        default: false
+      rewrite_build_ordinal:
+        description: Selected cumulative Windows package-build attempt (1 through 4)
+        required: false
+        type: string
+        default: '1'
+      rewrite_first_launch_ordinal:
+        description: Selected cumulative Windows phase-1 launch (1 through 5; phase 2 uses the next)
+        required: false
+        type: string
+        default: '1'
       upload_packages:
         description: Upload packaged applications after all production gates pass
         required: false
@@ -18,6 +33,7 @@ concurrency:
 
 jobs:
   preflight:
+    if: ${{ !inputs.dialogue_rewrite_windows }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -54,6 +70,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
+    if: ${{ !inputs.dialogue_rewrite_windows }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -433,4 +450,123 @@ jobs:
           name: phase-1-production-package-${{ matrix.runner }}
           path: app/target/release/bundle/**
           if-no-files-found: warn
+          retention-days: 7
+
+  dialogue-rewrite-windows:
+    if: ${{ inputs.dialogue_rewrite_windows }}
+    name: Focused first rewrite — Windows x64
+    runs-on: windows-2025
+    timeout-minutes: 60
+    env:
+      REWRITE_EVIDENCE: ${{ runner.temp }}/rewrite-windows
+      CARGO_TERM_COLOR: never
+      PYTHONUTF8: '1'
+    defaults:
+      run:
+        working-directory: app
+        shell: pwsh
+    steps:
+      - name: Check out the exact published candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require isolated fresh dispatch and bounded ordinals
+        working-directory: .
+        env:
+          BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
+          FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
+          UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+        run: |
+          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          New-Item -ItemType Directory -Path $env:REWRITE_EVIDENCE | Out-Null
+      - name: Check native driver syntax and actual interactive runner capability
+        id: native-capability
+        continue-on-error: true
+        run: |
+          $parseErrors=$null; $tokens=$null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path scripts/rewrite-windows-native.ps1),[ref]$tokens,[ref]$parseErrors)
+          if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
+          powershell.exe -NoProfile -File scripts/rewrite-windows-native.ps1 -Stage preflight -Output "$env:REWRITE_EVIDENCE/capability"
+          if ($LASTEXITCODE -ne 0) { throw 'Native runner capability is missing; required native cases stay pending' }
+      - name: Select locked Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select locked npm and install dependencies
+        run: |
+          npm install --global npm@11.9.0
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned npm setup failed' }
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw 'Locked dependencies failed' }
+      - name: Select repository-pinned Rust and restore dependencies
+        run: rustup show active-toolchain
+      - name: Restore Rust dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-windows-2025
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Gate rejection fixtures and repository checks
+        working-directory: .
+        run: |
+          python scripts/validate.py
+          if ($LASTEXITCODE -ne 0) { throw 'Repository validation failed' }
+          python -m unittest discover -s app/scripts -p test_rewrite_native_evidence.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Native evidence gate tests failed' }
+          python -m unittest discover -s app/scripts -p test_rewrite_probe_gate.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Rewrite report gate tests failed' }
+      - name: Selected renderer, core, transport, native worker and actual controller
+        id: focused
+        continue-on-error: true
+        run: python scripts/qualify-rewrite-windows.py prepare --output "$env:REWRITE_EVIDENCE"
+      - name: Restore official pinned SDK archive
+        id: rewrite-sdk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Download official published checksums and SDK on cache miss
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 120 \
+            --output "$RUNNER_TEMP/rewrite-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if [ '${{ steps.rewrite-sdk-cache.outputs.cache-hit }}' != true ]; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 \
+              --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+      - name: Pinned SDK compile, lint, literal tokens and standard-template runtime
+        id: rewrite-sdk
+        continue-on-error: true
+        run: python scripts/qualify-rewrite-windows.py sdk --output "$env:REWRITE_EVIDENCE" --archive "$env:RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$env:RUNNER_TEMP/rewrite-checksums.txt"
+      - name: Record and run one bounded Windows package build
+        id: rewrite-package
+        continue-on-error: true
+        env:
+          BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
+        run: python scripts/qualify-rewrite-windows.py build --output "$env:REWRITE_EVIDENCE" --ordinal "$env:BUILD_ORDINAL"
+      - name: Native observation and OS input, then dependent separate-process reopen
+        id: rewrite-native
+        if: ${{ steps.native-capability.outcome == 'success' && steps.focused.outcome == 'success' && steps.rewrite-package.outcome == 'success' && steps.rewrite-sdk.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
+        run: python scripts/qualify-rewrite-windows.py native --output "$env:REWRITE_EVIDENCE" --ordinal "$env:FIRST_LAUNCH_ORDINAL"
+      - name: Retain scanned candidate and require every terminal case and cleanup
+        if: always()
+        env:
+          FOCUSED_OUTCOME: ${{ steps.focused.outcome }}
+          SDK_OUTCOME: ${{ steps.rewrite-sdk.outcome }}
+          PACKAGE_OUTCOME: ${{ steps.rewrite-package.outcome }}
+          NATIVE_OUTCOME: ${{ steps.rewrite-native.outcome }}
+          CAPABILITY_OUTCOME: ${{ steps.native-capability.outcome }}
+        run: python scripts/qualify-rewrite-windows.py finish --output "$env:REWRITE_EVIDENCE"
+      - name: Upload focused terminal evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rewrite-windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/rewrite-windows/
+          if-no-files-found: error
           retention-days: 7

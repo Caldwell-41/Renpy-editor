@@ -58,7 +58,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
 | Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
-| Current Windows remembered-credential outcome, limits and current work | [Windows contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract) |
+| Selected dialogue rewrite and CI-first qualification authority | [CI-first amendment](tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
+| Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |

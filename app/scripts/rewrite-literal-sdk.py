@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Harmless pinned-SDK compilation/lint and actual substitution/text-token assertions."""
-import argparse,json,os,subprocess,tempfile
+import argparse,json,os,subprocess,tempfile,sys
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--driver',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--driver',type=Path,required=True);p.add_argument('--output',type=Path);a=p.parse_args()
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'spikes/renpy-sdk'))
+from sdk_adapter import launcher_for
+if a.output:a.output.mkdir(parents=True,exist_ok=False)
 encoded=json.loads(subprocess.check_output([str(a.driver.resolve())],text=True))['encoded']
 # Decode source with the same supported escapes, then quote as Python only for assertions.
 import ast
@@ -10,9 +13,23 @@ text=ast.literal_eval('"'+encoded+'"')
 expected='[1 + 2] [str(7)] {a=jump:label}link{/a} {image=fixture} brackets [x] braces {x} quotes " slash \\ café 雪 True friend'
 with tempfile.TemporaryDirectory(prefix='loomlight-rewrite-sdk-') as tmp:
  root=Path(tmp);(root/'game').mkdir()
- executable=a.sdk/'renpy.sh' if os.name!='nt' else a.sdk/'renpy.exe'
+ launcher=launcher_for(a.sdk)
+ command_index=0
  def run(args,timeout=60):
-  result=subprocess.run([str(executable.resolve()),*map(str,args)],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=timeout,cwd=a.sdk.resolve())
+  global command_index
+  command_index+=1
+  try:
+   result=subprocess.run([*launcher,*map(str,args)],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=timeout,cwd=a.sdk.resolve())
+   output=result.stdout
+  except subprocess.TimeoutExpired as e:
+   output=e.stdout or '';output=output.decode('utf-8',errors='replace') if isinstance(output,bytes) else output
+   if a.output:
+    (a.output/f'command-{command_index}.log').write_text(output,encoding='utf-8')
+    if (root/'log.txt').is_file():(a.output/f'command-{command_index}-renpy.log').write_bytes((root/'log.txt').read_bytes())
+   raise
+  if a.output:
+   (a.output/f'command-{command_index}.log').write_text(output,encoding='utf-8')
+   if (root/'log.txt').is_file():(a.output/f'command-{command_index}-renpy.log').write_bytes((root/'log.txt').read_bytes())
   if result.returncode:raise RuntimeError(f'SDK {args} failed: {result.stdout[-2000:]}')
   return result.stdout
  run(['launcher','generate_gui',root,'--width','1280','--height','720','--template',a.sdk.resolve()/'gui','--start'])

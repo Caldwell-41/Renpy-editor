@@ -2,6 +2,12 @@
 
 ## Current scope: proportionate hobby-editor acceptance
 
+**CI routing amendment, 2026-10-10:** use [WORKFLOW's host-routing policy](WORKFLOW.md#test-host-routing-and-ownership)
+for automated platform qualification. The development machine and evidence host are
+independent. Historical local-only selections below retain their results and limits;
+the live selected task owns any superseding routing authority. CI authorization does
+not reopen completed tasks, renew allowances or waive a required native observation.
+
 [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md) governs new work.
 Routine gates prioritize save/reopen/undo, external in-place and replace-on-save
 conflicts, interrupted-save recovery, draft/session retention, malformed input,
@@ -739,9 +745,19 @@ as required. Neither a previous green status nor a docs-only amendment is new ex
 
 ### Cost and harness discipline
 
-Use targeted tests during development and early platform process tests at R1. Reserve
-the full package matrix for the coherent final candidate, plus materially affected
-corrections. Do not dispatch a full matrix for each checkpoint or documentation change.
+Run cheap relevant checks during implementation. Use focused CI checks for early
+platform-sensitive risks. Group expensive package and native qualification around a
+coherent candidate covering the selected related work, rather than automatically
+qualifying every internal checkpoint separately. Reserve the full package matrix for
+the selected milestone candidate and materially affected corrections; do not dispatch
+one for each checkpoint or documentation change.
+
+CI evidence satisfies a requirement when it exercises the required production path on
+the required operating system. Browser mocks do not substitute for packaged WebView
+behavior. Native interaction cases require an appropriate native driver and observable
+results; cases without sufficient coverage remain pending. Reuse valid unaffected
+evidence and repeat only affected cases, following applicable candidate/input rules.
+Native-driver actions are not relabelled as human input or subjective acceptance.
 Do not append every scenario to one smoke; report independent stages, monotonic timing,
 cleanup outcomes and reliable terminal failure reports.
 
@@ -787,8 +803,10 @@ real provider or authorise credential/network access.
 
 ### Windows native preflight and prepared host sequence
 
-Use the [current Windows contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
-for selected operations, remaining allowance, actual readiness and next action.
+Use [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) and their selected task
+for current operations, remaining allowance, readiness and CI/local routing. The
+[completed Windows credential contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+below owns that outcome's evidence, not a new execution allowance.
 [Windows commands](../app/README.md#windows-native-studio-credentials) and the existing
 controller own executable routes; check their actual arguments before dispatch.
 The [historical runbook](tasks/archive/2026-10-09-phase-2-execution-history.md#historical-qualification-runbook)

@@ -5,6 +5,12 @@
 
 The canonical [acceptance, integration and retained-failure record](../archive/2026-09-20-ci-simple-cleanup.md) replaces the former `awaiting_ci` handover. It links the immutable full brief/implementation ledger and distinguishes tested implementation, reviewed documentation head and post-merge evidence.
 
-Implementation is complete. The sole branch-retirement housekeeping item and exact post-merge run are recorded in [HANDOVER](../../status/HANDOVER.md); do not claim the remote branch has been deleted until verified. No new implementation or optimisation checkpoint is required.
+Implementation is complete. Historical housekeeping and post-merge evidence belong
+to the linked acceptance record; this redirect does not select branch deletion or
+another CI task. Do not claim remote branch deletion without verification.
 
-Continue with [Phase 1F](../archive/2026-09-23-phase-1f-source-synchronisation.md) under the live handover and its entry checks. W0 and OPT-1A remain [abandoned](ci-optimisation.md); PR #12 is not a dependency. This path remains a short redirect to preserve existing links.
+For current work, follow [CURRENT](../../status/CURRENT.md),
+[HANDOVER](../../status/HANDOVER.md) and the selected task. The old Phase 1F continuation
+is historical. W0 and OPT-1A remain [abandoned](ci-optimisation.md); PR #12 is not a
+dependency. Ordinary CI follows [WORKFLOW](../../WORKFLOW.md#test-host-routing-and-ownership).
+This path remains a short redirect to preserve existing links.

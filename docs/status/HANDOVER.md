@@ -1,16 +1,16 @@
 # Current outcome handover
 
-## First safe rewrite: Mac qualified, serial Windows continuation
+## First safe rewrite: Mac qualified, Windows CI continuation
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. This Mac resumed at fresh remote-verified `12c99de`; production inputs
-remain unchanged. The continuation contains only an SDK test-fixture correction
-and qualification/status records. Continue one active GPT-6.1 Sol High owner
-serially on Windows x64 after reconciling the published branch. No subagents or
-direct other-host execution.
+acceptance. Local checkpoint at the instruction audit is `684b95f`; production inputs
+remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
+Continue one active GPT-6.1 Sol High owner in the current development session. No
+subagents or direct access to the user's other computer.
 
-[Selected scope, failures, results and Windows sequence](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
+[Current CI authority](../tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10)
+and [selected scope, failures, results and required Windows cases](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
 own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
 Windows 0/4 builds, 0/6 launches**. Mac qualification is complete; both-target
 acceptance remains incomplete until Windows proof. There is no pending process,
@@ -42,29 +42,47 @@ until the menu and uses suite teardown exit. Production/package inputs are uncha
 Existing core/transport/native/controller and 122 renderer regression passes remain
 valid. Unique historical timeouts/locked-host evidence remain failures, not passes.
 
-### Next owner on Windows
+### Prepared first Windows CI attempt
 
-Pull/reconcile this same branch and inspect local state without discarding unrelated
-work. Read AGENTS, CURRENT and the selected ledger. Confirm unlocked native observation,
-pinned tools and checksum-verified SDK first. The ledger owns exact focused checks,
-controller/native integration and SDK driver commands. Record package/launch entries
-before starting them; Windows retains its unused **4 builds / 6 launches**.
+The accepted instruction audit and focused CI changes are ready for publication on
+the same branch. Production inputs remain unchanged; local native-evidence tests
+4/4, original report-gate tests 2/2, AST/YAML/isolated-matrix and repository checks
+pass. The changed harmless SDK helper passes on Mac using identical fixture/arguments;
+Windows now uses the existing version-specific console launcher and retained logs.
 
-Use the ordinary Windows package route and fresh ignored evidence. Run
-`app/scripts/dialogue-rewrite-probe.py --phase 1` against the verified owned package,
-with a fresh immediate temp-child `loomlight-rewrite-*` root and fresh output.
-Observe the light/dark/compact layouts and physically Generate/Accept through
-Computer Use before writing each owned stage marker. The script owns controlled
-synthetic loopback responses and ordinary external-source fixtures. All 20 checks
-and five exact reviewed HTTP bodies must pass before the dependent reopen phase.
+Select only `production-scaffold.yml` with `dialogue_rewrite_windows=true`,
+`upload_packages=false`, `rewrite_build_ordinal=1`, `rewrite_first_launch_ordinal=1`.
+The generic preflight/matrix is excluded. Actual Windows desktop/UI Automation/capture
+capability is checked before consumption; runner documentation alone is not proof.
+Focused core/transport/native worker/controller, official checksum-verified SDK,
+one scanned Windows package and gated native walkthrough/reopen are selected.
 
-Retain successful phase-1 root/output and record another launch for `--phase 2`.
-Require byte-exact whole-project persistence, zero HTTP, native credential readability
-and cleanup. Confirm exit, remove only the owned fixture, review/fix in scope,
-update records, publish/verify. Diagnose before retries; do not reset cumulative
-allowances. Reassess Mac proof only if production inputs change. No package matrix
-solely for these records. Keep the same serial writer and preserve prior acceptance.
+Native receipts bind PID/executable digest, unlocked desktop, control state, viewport
+and actual PNGs. Light/dark/compact theme/geometry and OS mouse Generate/Accept with
+before/after state are required. The driver writes no markers; the external evidence
+gate alone acknowledges successful stages. Keep all 20 phase-1 assertions and five
+exact HTTP digests. Dependent phase 2 requires all three cases, whole-project byte
+identity, zero HTTP and native credential/fixture cleanup. Automated native input is
+not relabelled human or subjective acceptance.
+
+No run is confirmed yet. Publish and verify the scoped candidate before dispatch.
+Reserve up to **one Windows build/two launches** within existing **4 builds/6 launches**;
+known consumed Windows totals remain **0/4, 0/6** until execution is observed. The
+runner records actual entries in `attempt-ledger.jsonl`; failed/skipped/cancelled
+outcomes must be audited before another attempt. Do not reset or automatically rerun.
+
+After dispatch, capture confirmed workflow/run/attempt/head, status/time and artifact
+name in this handover and the selected ledger. Publish the wait record and end active
+polling. Resume this same chat on the user's instruction for a terminal audit of
+candidate/input/binary identity, all required case logs, SDK/checksums, native PNGs,
+receipts, both phases, HTTP digests and cleanup. Missing proof stays pending. Finish
+feasible work and request local Windows handoff only for a named required native
+case the actual run cannot establish. No watcher, scheduler or second writer.
+
+Detailed mapping and reservations are in the
+[focused CI selection](../tasks/active/phase-2-initial-llm-assistance.md#focused-windows-ci-preparation-and-first-selection--2026-10-10).
 
 No paid/public calls, private game content, generated references, destination/route
 expansion, other AI action, project-code execution during inspection, full
-2B.1/2A.2/Phase 2 acceptance, merge or release. No other-host execution from this chat.
+2B.1/2A.2/Phase 2 acceptance, merge or release. CI other-host execution is authorized
+within the selected outcome; direct access to the user's other computer is not implied.

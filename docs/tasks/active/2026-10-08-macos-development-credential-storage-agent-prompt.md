@@ -1,5 +1,11 @@
 # Agent prompt: Mac development remembered credentials
 
+**Historical selection prompt:** the limits below belong to the original credential
+implementation selection. They do not govern the current dialogue rewrite or override
+its CI routing amendment. Use [CURRENT](../../status/CURRENT.md),
+[HANDOVER](../../status/HANDOVER.md) and the selected task for live continuation;
+giving this old prompt again does not renew its consumed native allowance.
+
 Implement the selected temporary Mac credential-storage outcome in
 `docs/tasks/active/2026-10-08-macos-development-credential-storage.md`. Read AGENTS.md,
 WORKFLOW, CURRENT/HANDOVER and the relevant ADR 0011/Phase 2 contracts; inspect current

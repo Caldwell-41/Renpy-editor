@@ -17,11 +17,14 @@ Story logic precedes Screens; Screens and Timeline may use two lanes, with zero 
 helpers according to independent work.
 [The Phase 2 delivery section](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
 owns the shared sequence/team. Its [bounded deliverable queue and completion loop](phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
-selects one tested result at a time, then docs/handover and a next-outcome prompt.
+selects one outcome, which may group related deliverables, then docs/handover and a
+next-outcome prompt.
 Exact feature subsets remain reviewable.
-Cross-platform work uses [local completion and host handoff](../../WORKFLOW.md#test-host-routing-and-ownership):
-finish on the current machine, push the same branch, then supply the other-platform
-agent's pull-and-continue prompt; direct access is never a prerequisite.
+Cross-platform work uses [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership):
+keep development in the current session and use focused CI for required platform
+proof. Group qualification for selected related work; request local handoff only
+for a named required case CI cannot establish. Direct other-machine access is not
+implied. Preserve selected scope, cumulative allowances and evidence requirements.
 **Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
 [ROADMAP](../../ROADMAP.md) owns the overall sequence, and
 [PRODUCT](../../PRODUCT.md) retains the initial-release commitment.

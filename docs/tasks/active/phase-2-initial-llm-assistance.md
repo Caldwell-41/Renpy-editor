@@ -6,8 +6,9 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-Read the Windows synthetic request selection for current Windows work, then only the relevant requirement
-sections. Detailed planning/source/provider/native attempts through `015579a` are in
+Read the CI-first amendment and first safe rewrite selection for current work, then
+only the relevant requirement sections. Completed credential/request selections below
+are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
 the [historical ledger](../archive/2026-10-09-phase-2-execution-history.md); old prompts
 there are evidence, not live instructions. Future capabilities require their own
 selection; preserve the approved provider, reference, prompt and Phase 2/3 scope.
@@ -17,7 +18,126 @@ including plain interface language, optional technical help, completion/submissi
 validation and shared control ownership. These guide future implementation; they do
 not claim the current application already satisfies every interaction.
 
+## CI-first platform qualification amendment — 2026-10-10
+
+The user accepted CI-first routing, grouped qualification for selected related work
+and local handoff only for an identified missing native capability. They then requested
+an instruction-conflict audit. [WORKFLOW](../../WORKFLOW.md#test-host-routing-and-ownership)
+owns routing and waiting; [TESTING](../../TESTING.md#cost-and-harness-discipline) owns
+evidence sufficiency. This amendment supersedes the mandatory serial Windows handoff
+and prohibition on CI other-host execution for the current dialogue-rewrite outcome.
+Earlier local routing directions in this selection and its Mac transfer record are
+historical; their acceptance assertions, evidence and consumed allowances remain intact.
+
+Continue one GPT-6.1 Sol High owner in the current session on
+`codex/provider-qualification`; no subagents or direct access to the user's other
+computer. Prepare focused Windows CI coverage for the selected core, transport/native
+worker, controller, pinned SDK and packaged rewrite checks. Preserve all required
+assertions and observation gates. Identify any native cases CI cannot establish and
+request a Windows handoff only for those cases. A green generic matrix cannot replace
+the selected rewrite walkthrough or its light/dark/compact and Generate/Accept evidence.
+
+Mac qualification remains complete on unchanged production inputs. Cumulative use
+remains **Mac 1/4 package builds, 3/6 app launches; Windows 0/4 builds, 0/6 launches**.
+CI consumes the same remaining allowances; preparation, host changes and this amendment
+do not reset them. Preserve the selected exclusions and prior both-target foundations.
+CI authorization does not authorize merge, release, signing-policy changes, secret
+provisioning, provider expansion or another feature. Publication remains within the
+existing selected branch/outcome authority.
+
+**Instruction audit:** aligned AGENTS, WORKFLOW/TESTING, this completion loop and prompt,
+Phase 3 routing, CURRENT/HANDOVER and stale Windows-contract entry links. Clarified that
+Mac identity gates and abandoned W0/OPT-1A orchestration do not prohibit ordinary
+authorized CI. ROADMAP/SECURITY release wording now explicitly preserves the current
+Mac signing policy; app/README recognizes an already selected build allowance without
+fresh per-step approval. Historical credential prompts and local acceptance records retain
+their exact scope; they are not live continuation instructions. CI-native coverage and
+Mac signing availability still require verification; no workflow implementation,
+dispatch, new build/launch or platform acceptance is claimed by these wording changes.
+Repository validation passes for 482 files, added Markdown fragment links resolve and
+diff whitespace passes. At that audit checkpoint the changes were local-only and
+uncommitted; the focused CI preparation below owns subsequent publication/execution.
+
+
+### Focused Windows CI preparation and first selection — 2026-10-10
+
+User authorized completing the remaining rewrite qualification through focused CI,
+preserving the accepted uncommitted instruction audit. Fresh local/remote branch
+state matches `684b95f`; no Actions run exists on this branch at entry. Actions are
+enabled and existing workflow dispatch access is available. Reviewed instruction
+changes retain signing/credential, scope and budget boundaries; they are included
+with this scoped CI candidate rather than discarded or resetting the branch.
+
+The existing `production-scaffold.yml` now has an isolated
+`dialogue_rewrite_windows=true` selection. It runs only Windows x64 on `windows-2025`;
+the generic preflight/package matrix is skipped. Existing pinned checkout/Node/npm,
+Rust-cache, SDK-cache and artifact actions are reused. No Mac build, generic native
+smokes, release, secret provisioning or other feature is selected. GitHub's official
+runner definition establishes Windows x64 availability, not an interactive desktop;
+the job checks actual native capability before any Loomlight build/launch.
+
+Actual runner preflight requires Windows x64, unlocked `Default` input desktop,
+interactive session, UI Automation availability and a nonblank desktop capture large
+enough for the 1280x900 layout. A supported existing `Set-DisplayResolution` cmdlet
+may adjust only the ephemeral runner display; no infrastructure or security policy
+is installed/changed. Failure remains missing capability. Independent focused/SDK
+and package work may finish, but native acceptance is withheld.
+
+| Required proof | Focused route and evidence |
+| --- | --- |
+| Selected core/transport/native worker and renderer | Locked rewrite 9, transport 8, native worker 6; renderer check; selected count assertions and retained logs |
+| Controller integration | Existing real controller/native Credential Manager/strict loopback HTTP driver, held owner, acceptance/history and zero-write refusals |
+| Literal SDK behavior | Official published checksum equals pinned 8.5.3 archive hash; existing safe installer and adapter; compile/lint/substitution/text tokens plus named standard-template startup/say/return |
+| Package identity | One recorded ordinary Windows Tauri build, scanned executable/installers, candidate tree/input hashes and exact binary digest retained even after later failure |
+| All 20 phase-1 assertions/five HTTP bodies | Existing packaged rewrite probe and rejecting report gate remain intact; all five captured request digests must equal exact reviewed bodies |
+| Light/dark/compact native observation | Owned PID/path/hash-bound UI Automation controls and viewport, actual PNG/hash/dimensions/nonblank/theme/compact checks before each acknowledgement |
+| Generate/Accept | Actual OS `SendInput` mouse clicks on enabled native controls; before/after captures plus inert-proposal/saved-once native state; stage validator alone releases acknowledgement |
+| Separate-process persistence/cleanup | Dependent phase 2 only after phase-1 success; three required checks, whole-project byte equality, zero HTTP, native credential read/removal, owned fixture cleanup |
+
+The native driver never writes `.done` markers. `rewrite_native_evidence.py` rejects
+missing/foreign/changed captures, wrong stage/PID/binary/desktop, missing control or
+OS action/result checks, wrong theme/compact geometry and incomplete before/after
+proof. The existing runner acknowledges only validated driver evidence; failed
+driver evidence leaves the marker absent so the packaged observation deadline emits
+its failed cleaned report. Driver actions are automated native input, not human or
+subjective acceptance. Terminal artifact review must inspect screenshots and actual
+reports; a green generic badge is insufficient. No marker or assertion is relaxed.
+
+SDK harness now reuses the existing version-specific Windows console launcher
+adapter, retaining command and SDK logs including timeouts; Mac arguments and fixture
+assertions remain unchanged. Local harmless SDK helper recheck passes. All 116 retained
+Mac production-input hashes still match; completed Mac qualification remains valid.
+No demonstrated production defect or production change occurred.
+
+Cheap local checks: native evidence rejection tests **4/4**, original rewrite report
+gate **2/2**, Python AST, workflow YAML/isolated matrix guards and diff whitespace pass.
+Repository validation/link/privacy passes for **486 files**. Windows PowerShell/UI
+Automation runtime remains to verify on the actual runner; it is not a local pass.
+
+**Selected first CI attempt:** workflow `production-scaffold.yml`, same branch,
+`dialogue_rewrite_windows=true`, `upload_packages=false`, build ordinal **1**,
+first launch ordinal **1** (dependent phase 2 uses **2**). Fresh dispatch only;
+workflow reruns are refused before consumption. Runner `attempt-ledger.jsonl`
+records each build/launch immediately before execution. Known cumulative use remains
+**Mac 1/4 builds, 3/6 launches; Windows 0/4 builds, 0/6 launches**, with up to one
+Windows build and two launches reserved. Reconcile actual failed/skipped/completed
+attempts from terminal evidence before any further dispatch; reservations are not
+passes or an allowance reset.
+
+Publish/verify this instruction/CI candidate before dispatch. After obtaining a
+confirmed run/attempt/head identity, record it, publish the wait checkpoint and use
+manual same-thread wait/resume. No automatic polling/wake-up or new CI controller.
+Terminal audit must check selected jobs, counts, package/input identity, SDK proof,
+all native captures/receipts, both reports, exact HTTP digests and cleanup. Classify
+failures and complete bounded fixes/review only within remaining allowance. Local
+handoff is requested only for a specifically demonstrated missing native case after
+all feasible CI work; no handoff is currently inferred.
+
 ## First safe dialogue rewrite selection — 2026-10-10
+
+**Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
+owns current execution routing. The original selection and completed local records
+below preserve scope, evidence and allowance history.
 
 User-selected outcome on published `e5f09c44e11549da3bf46b29ec8dc6061d0251de`,
 branch `codex/provider-qualification`. One local Mac ARM64 GPT-6.1 Sol High owner,
@@ -186,6 +306,10 @@ Cumulative use: **Mac 1/4 builds, 3/6 launches; Windows 0/4 builds, 0/6 launches
 
 
 ### Mac qualification complete and serial Windows transfer — 2026-10-10
+
+**Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
+replaces this record's local transfer directions. Required cases, Mac results and
+cumulative usage below are preserved.
 
 Mac launch 3 phase 2 **passes**, exact owned PID `98832` exited 0. All three
 process-reopen checks pass in 3.18 seconds; zero HTTP requests and byte-exact
@@ -2498,10 +2622,17 @@ not a requirement to serialize every row of this table.
 
 ### Completion loop and stop boundary
 
-When both local platforms are required, follow [host handoff](../../WORKFLOW.md#test-host-routing-and-ownership):
-finish available local work, publish/verify the same branch, then give the user a
-pull-and-continue prompt for the other platform. No direct other-machine access;
-one active writer, unchanged outcome/budget and both-target acceptance gates.
+Complete implementation, review and required automated platform qualification from
+the current development session, using [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership)
+where suitable. Transfer to another local platform only for an identified remaining
+native capability, carrying completed evidence and the unchanged outcome/budget.
+Keep one active writer and all selected both-target acceptance gates.
+
+Related deliverables may be selected together with one cumulative allowance and a
+shared qualification point. Internal checkpoints do not automatically require a
+machine switch. Record each deliverable's evidence separately; incomplete platform
+qualification remains pending and is not reported as accepted. This scheduling option
+does not select another feature or waive a dependency's required acceptance.
 
 1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
    baseline, required dependencies, affected test hosts and finite execution allowance.
@@ -2541,9 +2672,9 @@ each message. Preserve these concrete fields:
 Deliver <one target>: <observable finished result>.
 Repository: Caldwell-41/Renpy-editor
 Continuation: <current branch/PR, published checkpoint or explicit local-only state>
-Codex machine: <actual execution host>
-Test hosts: <affected Windows x64/macOS ARM64 requirements and accessible prerequisites>
-Host handoff: <completed local work, remaining other-platform work; pull same branch>
+Codex machine: <preferred development host; retain the current session>
+Test hosts: <affected Windows x64/macOS ARM64 CI requirements and verified prerequisites>
+Local handoff: <only named required cases CI cannot establish; otherwise none>
 Reason: <why this result is next and which accepted dependencies it uses>
 Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
 Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation agents
@@ -2553,6 +2684,8 @@ Prove: <decisive user-action/source/persistence checks and required native evide
 Allowance: <finite builds/dispatches plus existing problem budget, not a fresh reset>.
 Complete implementation, focused checks, review and in-scope fixes; update canonical
 docs, task ledger and HANDOVER. Publish within the recorded authorization.
+Prepare and dispatch focused CI within scope/allowance; follow WORKFLOW's waiting
+policy and audit case/artifact evidence. Do not transfer merely to run automated checks.
 Return the result and a prompt for the next distinct deliverable; do not start it.
 Resume this same target/chat after any workflow wait. <Specific review/publish limits>.
 ```

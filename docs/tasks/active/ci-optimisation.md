@@ -18,6 +18,8 @@ The user stopped the automatic wait/wake and SQLite-based CI orchestration line 
 | OPT-2B cross-commit evidence reuse | Deferred and outside CI-SIMPLE. |
 
 Abandonment is a scope decision, not proof that a capability is impossible or that failed/unverified tests passed. The editor's own transactions, project recovery and persistence are not abandoned.
+Ordinary authorized GitHub Actions checks follow [WORKFLOW's CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership).
+That routing does not revive W0/OPT-1A, automatic wait/wake or a new CI controller.
 
 ## Preserve, do not integrate
 
