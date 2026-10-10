@@ -382,6 +382,71 @@ validation hardening and records, rather than being labelled docs-only; its delt
 does not change the selected valid native run, production inputs or package identity.
 Manual same-thread terminal audit remains next; all missing native evidence is pending.
 
+### Third Windows terminal audit and serial reviewer repair — 2026-10-10
+
+[Run **38029621084**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084),
+workflow **357322921**, attempt **1**, candidate
+`587ce6bdec8025be3b9f1674c58b6c3272f63efd`, completed **failure** at
+**2026-10-10 06:08:39 UTC** (run updated 06:08:40 UTC). Selected Windows job
+**114147625037** only; generic jobs skipped. Artifact **11661896616**,
+`rewrite-windows-38029621084-1`, expires **2026-10-17 06:08:33 UTC**. All **64**
+manifest hashes verify in ignored `.toolchains/rewrite-windows-ci-38029621084`;
+raw workflow log is retained separately outside Git.
+
+The child PowerShell **5.1.26100.33438** prelaunch hash/desktop check passes,
+confirming the previous .NET repair. Package/SDK reuse from **38023888008** and
+portable-case reuse from **38027478869** pass with independent input/hash admission.
+Original binary SHA256 remains
+`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
+Core 9/9, transport 8/8, native worker 6/6, actual controller/strict HTTP,
+renderer 123/123 and pinned SDK proof remain individually passed evidence.
+
+Launch ordinal **2**, PID **1396**, establishes actual native light/dark/compact
+observation. Receipts bind the exact binary/PID, Default desktop and visible controls;
+all three captures were visually inspected: **1296x939** light/dark, mean brightness
+**226.91/50.74**, and **736x819** compact, brightness **54.17**. Physical Generate
+input was submitted, but its post-click driver failed with
+`You cannot call a method on a null-valued expression.` The only subsequent nullable
+instance method is the UIA name's `Contains`; this is a strong harness diagnosis,
+not a stack-confirmed location because the original receipt lacked a stack. No
+production defect is demonstrated. The observation marker stays locked and the app
+honestly times out at physical-send. Phase 1 has **7/20** assertions and one reviewed
+body digest, without the required five-body proof. Accept and phase 2 remain missing.
+Do not promote the continue-on-error step's success conclusion: raw native outcome
+and terminal audit are failure. No new build; phase 2 was not launched. App terminal
+cleanup and outer receipt prove credential references removed/root deleted, retaining
+**48** fixture hashes. Cumulative **Windows 1/4 builds, 2/6 launches**; remaining
+**3 builds, 4 launches**. Mac remains **1/4 builds, 3/6 launches**, qualified.
+
+The user's latest request explicitly authorized one new **GPT-6.1 Sol High** agent to
+review/fix this failure, narrowly superseding earlier no-subagent directions. Work
+was serial: parent audited, the sole child reviewed/applied the two harness files,
+then released writer ownership; parent independently reviewed and verified. No
+other agents, other-computer access or extra allowance. The existing driver now
+ignores unnamed UIA nodes, requires a present button with exact enabled/disabled state,
+and retries only stale `ElementNotAvailableException` (including wrapped exceptions)
+within the unchanged **20-second** poll. Other errors propagate. Control inventory
+uses the same bounded stale handling. Receipts retain error type/ID/stack/position
+and stale retry count. Missing controls can never establish disabled-state proof.
+
+The existing admitted reuse-test file adds a Windows-only regression executing the
+real PowerShell helpers through AST extraction and synthetic UIA states, before any
+app launch: null/empty/singleton names, absent/wrong button states, direct/wrapped stale
+exceptions and immediate propagation of other failures. Parent/reviewer checks pass:
+native gate **4/4**, report gate **2/2**, existing reuse gates **4/4**, Python syntax,
+Actions schema/context checks, repository/privacy **487 files** and diff whitespace.
+The new actual PowerShell regression is **skipped on Mac**, where PowerShell is
+unavailable; it must pass on Windows before a native launch. No new admitted paths,
+production edits, package rebuild or inferred Windows runtime pass.
+
+Next authorized retry selects the same workflow, package/SDK source **38023888008**,
+portable source **38027478869**, build ordinal **2** unused, first launch **3** and
+dependent phase-2 launch **4**. Reserve **zero builds/up to two launches**. Required
+20 checks/five exact HTTP bodies, all five native stage receipts/captures, physical
+Generate/Accept, separate-process persistence/whole bytes/zero HTTP and cleanup remain.
+Publish/verify before dispatch, confirm identity, then manual same-thread wait/resume.
+Mac and accepted prompt/context evidence remain valid; no merge/release/next feature.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)

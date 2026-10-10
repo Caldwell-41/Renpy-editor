@@ -3,7 +3,9 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -13,6 +15,60 @@ spec.loader.exec_module(recipe)
 
 
 class RetainedEvidenceGate(unittest.TestCase):
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows PowerShell polling regression requires Windows')
+    def test_native_polling_handles_transient_nodes_without_accepting_missing_proof(self):
+        # Execute the real helpers, not a Python model. The remaining driver is
+        # not invoked: these synthetic UIA states consume no app launch.
+        driver = Path(__file__).with_name('rewrite-windows-native.ps1').resolve()
+        script = r'''
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+$tokens=$null; $errors=$null
+$ast=[System.Management.Automation.Language.Parser]::ParseFile('__DRIVER__',[ref]$tokens,[ref]$errors)
+if($errors.Count) { throw ($errors | Out-String) }
+foreach($name in @('Wait-Native','Has-Text','Has-ButtonState')) {
+    $function=$ast.Find({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name},$true)
+    if($null -eq $function) { throw ('Missing real helper: '+$name) }
+    . ([scriptblock]::Create($function.Extent.Text))
+}
+function Assert-Test($Condition,[string]$Message) { if(-not $Condition) { throw $Message } }
+function Nodes { return $script:nodes }
+function Button([string]$Name) { return $script:button }
+$receipt=@{uiaStaleRetries=0}
+$script:nodes=@([pscustomobject]@{Current=[pscustomobject]@{Name=$null}},[pscustomobject]@{Current=[pscustomobject]@{Name=''}},[pscustomobject]@{Current=[pscustomobject]@{Name='Proposal received. No source changed.'}})
+Assert-Test (Has-Text 'Proposal received. No source changed.') 'Null/empty names hid later result'
+Assert-Test (-not (Has-Text 'Accepted and saved as one change.')) 'Unobserved result was accepted'
+$script:nodes=@(); Assert-Test (-not (Has-Text 'Proposal')) 'Empty tree supplied result'
+$script:nodes=[pscustomobject]@{Current=[pscustomobject]@{Name='Accepted and saved as one change.'}}
+Assert-Test (Has-Text 'Accepted and saved as one change.') 'Singleton tree lost result'
+$script:button=$null
+Assert-Test (-not (Has-ButtonState 'Accept 1 change' $true)) 'Missing button supplied enabled proof'
+Assert-Test (-not (Has-ButtonState 'Accept 1 change' $false)) 'Missing button supplied disabled proof'
+foreach($enabled in @($true,$false)) {
+    $script:button=[pscustomobject]@{Current=[pscustomobject]@{IsEnabled=$enabled}}
+    Assert-Test (Has-ButtonState 'Accept 1 change' $enabled) 'Present button state lost'
+    Assert-Test (-not (Has-ButtonState 'Accept 1 change' (-not $enabled))) 'Wrong state accepted'
+}
+$script:polls=0
+Wait-Native {
+    $script:polls++
+    if($script:polls -eq 1) { throw [System.Windows.Automation.ElementNotAvailableException]::new('removed descendant') }
+    if($script:polls -eq 2) { throw [System.Reflection.TargetInvocationException]::new([System.Windows.Automation.ElementNotAvailableException]::new('wrapped removed descendant')) }
+    return ($script:polls -ge 4)
+}
+Assert-Test ($script:polls -eq 4 -and $receipt.uiaStaleRetries -eq 2) 'Stale or false poll released wait'
+$script:polls=0; $caught=$false
+try { Wait-Native { $script:polls++; throw [System.InvalidOperationException]::new('real failure') } }
+catch { $caught=$_.Exception.Message -eq 'real failure' }
+Assert-Test ($caught -and $script:polls -eq 1) 'Real failure swallowed or retried'
+Write-Output 'PASS: real native polling rejects absent proof and propagates real errors'
+'''.replace('__DRIVER__', driver.as_posix().replace("'", "''"))
+        result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
+                                capture_output=True, text=True, timeout=45)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('PASS: real native polling', result.stdout)
+
     def inputs(self):
         return {p: 'original' for p in (
             'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',

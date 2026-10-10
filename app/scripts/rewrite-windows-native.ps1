@@ -46,7 +46,7 @@ New-Item -ItemType Directory -Path $Output -Force | Out-Null
 $receipt = [ordered]@{
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
-    checks=[ordered]@{}; captures=@(); controls=@()
+    checks=[ordered]@{}; captures=@(); controls=@(); uiaStaleRetries=0
     powershellVersion=$PSVersionTable.PSVersion.ToString(); hashProvider='System.Security.Cryptography.SHA256'
 }
 function Assert-Native($Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
@@ -95,12 +95,34 @@ function Button([string]$Name) {
 }
 function Wait-Native([scriptblock]$Check) {
     $timer=[System.Diagnostics.Stopwatch]::StartNew()
-    do { if (& $Check) { return }; Start-Sleep -Milliseconds 100 } while($timer.Elapsed.TotalSeconds -lt 20)
+    do {
+        try { if (& $Check) { return } }
+        catch {
+            $exception=$_.Exception
+            while($null -ne $exception -and $exception -isnot [System.Windows.Automation.ElementNotAvailableException]) {
+                $exception=$exception.InnerException
+            }
+            if($null -eq $exception) { throw }
+            # WebView replaces descendants while rendering. Re-query on the next
+            # bounded poll; other failures still escape and fail the receipt.
+            $receipt.uiaStaleRetries++
+        }
+        Start-Sleep -Milliseconds 100
+    } while($timer.Elapsed.TotalSeconds -lt 20)
     throw 'Required native state did not appear within 20 seconds'
 }
 function Has-Text([string]$Text) {
-    foreach($node in (Nodes)) { if($node.Current.Name.Contains($Text)) { return $true } }
+    foreach($node in (Nodes)) {
+        if($null -eq $node) { continue }
+        $name=$node.Current.Name
+        if($null -ne $name -and $name.Contains($Text)) { return $true }
+    }
     return $false
+}
+function Has-ButtonState([string]$Name, [bool]$Enabled) {
+    $control=Button $Name
+    # A temporarily absent control is never proof of its disabled state.
+    return ($null -ne $control -and $control.Current.IsEnabled -eq $Enabled)
 }
 function Focus-Control($Control) {
     Assert-Native ($null -ne $Control) 'Native control missing'
@@ -169,23 +191,32 @@ try {
             Assert-Native (($before.width*96/$dpi) -le 800) 'Compact native width not observed'; $receipt.checks.compactWidth=$true
         } elseif($Stage -eq 'physical-send') {
             Click-Control 'Generate proposal'
-            Wait-Native { (Has-Text 'Proposal received. No source changed.') -and (Button 'Accept 1 change').Current.IsEnabled }
+            Wait-Native { (Has-Text 'Proposal received. No source changed.') -and (Has-ButtonState 'Accept 1 change' $true) }
             $receipt.checks.inertProposalObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-accept') {
             Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'
             Click-Control 'Accept 1 change'
-            Wait-Native { (Has-Text 'Accepted and saved as one change.') -and -not (Button 'Accept 1 change').Current.IsEnabled }
+            Wait-Native { (Has-Text 'Accepted and saved as one change.') -and (Has-ButtonState 'Accept 1 change' $false) }
             $receipt.checks.savedOnceObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         }
-        $receipt.controls=@(foreach($node in (Nodes)) {
-            $current=$node.Current; $bounds=$current.BoundingRectangle
-            if($current.Name) { [ordered]@{name=$current.Name;type=$current.ControlType.ProgrammaticName;enabled=$current.IsEnabled;offscreen=$current.IsOffscreen;bounds=@($bounds.Left,$bounds.Top,$bounds.Width,$bounds.Height)} }
-        })
+        Wait-Native {
+            $receipt.controls=@(foreach($node in (Nodes)) {
+                $current=$node.Current; $bounds=$current.BoundingRectangle
+                if($current.Name) { [ordered]@{name=$current.Name;type=$current.ControlType.ProgrammaticName;enabled=$current.IsEnabled;offscreen=$current.IsOffscreen;bounds=@($bounds.Left,$bounds.Top,$bounds.Width,$bounds.Height)} }
+            })
+            return $true
+        }
     }
     $receipt.passed=$true
-} catch { $receipt.failure=$_.Exception.Message }
+} catch {
+    $receipt.failure=$_.Exception.Message
+    $receipt.failureType=$_.Exception.GetType().FullName
+    $receipt.failureId=$_.FullyQualifiedErrorId
+    $receipt.failureStack=$_.ScriptStackTrace
+    $receipt.failurePosition=$_.InvocationInfo.PositionMessage
+}
 $receipt | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $Output ($Stage+'.json')) -Encoding UTF8
 Write-Output ($Stage+': passed='+$receipt.passed)
 if(-not $receipt.passed) { exit 1 }
