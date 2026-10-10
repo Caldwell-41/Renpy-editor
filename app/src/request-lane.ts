@@ -4,7 +4,7 @@ export class RequestLane {
   private tail: Promise<unknown> = Promise.resolve();
   run<T>(operation: CoreOperation, task: () => Promise<T>): Promise<T> {
     const control=["runtime.requestStatus", "runtime.cancelRequest", "runtime.stop", "runtime.status", "runtime.diagnostics", "runtime.revokeTrust"].includes(operation);
-    if (control || (!operation.startsWith("source.") && !operation.startsWith("runtime.") && !["project.status", "project.flush", "project.close", "sdk.discover", "scene.list", "authoring.list", "references.list", "references.apply", "prompts.list", "prompts.apply", "context.options", "context.preview", "flow.list", "media.present"].includes(operation))) return task();
+    if (control || (!operation.startsWith("source.") && !operation.startsWith("runtime.") && !["project.status", "project.flush", "project.close", "sdk.discover", "scene.list", "authoring.list", "references.list", "references.apply", "prompts.list", "prompts.apply", "context.options", "context.preview", "rewrite.prepare", "rewrite.send", "rewrite.accept", "rewrite.discard", "ai.profiles", "flow.list", "media.present"].includes(operation))) return task();
     const next=this.tail.then(task);
     this.tail=next.catch(()=>undefined);
     return next;

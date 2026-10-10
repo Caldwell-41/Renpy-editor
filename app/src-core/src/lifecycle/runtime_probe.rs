@@ -104,6 +104,27 @@ impl LifecycleService {
         service.close().map_err(|e| format!("{e:?}"))?;
         Ok(service)
     }
+    /// Native-only fresh disposable first-rewrite fixture. No network or credentials.
+    pub fn prepare_dialogue_rewrite_probe(data: PathBuf) -> Result<Self,String> {
+        let mut service=Self::prepare_source_foundation_probe(data.clone())?;
+        let root=data.join("synthetic-project");
+        let project=service.open_path(&root).map_err(|_|"Rewrite fixture open failed")?;
+        let ws=service.scene_workspace().map_err(|_|"Rewrite fixture projection failed")?;
+        let scene=&ws.scenes[0];
+        let beat=scene.beats.iter().find(|b|matches!(b.payload,crate::scene::BeatPayload::Narration{..})).ok_or("Rewrite fixture target missing")?;
+        let request=serde_json::from_value(json!({"expectedProjectRevision":ws.project_revision,"expectedSourceMapRevision":ws.source_map_revision,"command":{"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}})).map_err(|_|"Rewrite fixture request failed")?;
+        service.scene_apply(request).map_err(|_|"Rewrite fixture text failed")?;
+        use sha2::Digest;
+        let baseline_digest=hex::encode(sha2::Sha256::digest(crate::prompts::BASELINE.as_bytes()));
+        let editor=root.join(".renpy-editor");
+        let mut refs:Value=serde_json::from_str(include_str!("../../../tests/fixtures/reference-library/manual-save.json")).map_err(|_|"Rewrite references failed")?;
+        refs["projectId"]=json!(project.project_id);
+        let lore=&mut refs["loreEntries"][0];lore["approvedRevisionId"]=lore["currentRevisionId"].clone();lore["revisions"][0]["status"]=json!("approved");lore["revisions"][0]["reviewedAt"]=json!("2026-10-10T00:00:00Z");lore["revisions"][0]["content"]["citations"]=json!([]);
+        fs::write(editor.join("references.json"),serde_json::to_vec_pretty(&refs).unwrap()).map_err(|_|"Rewrite references write failed")?;
+        fs::write(editor.join("ai.json"),serde_json::to_vec_pretty(&json!({"schemaVersion":1,"projectId":project.project_id,"prompts":{"rewriteDialogue":{"text":"Rewrite only the selected prose; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":baseline_digest},"futureAction":{"text":"Retained"}},"styleNotes":"Synthetic author style.","futureSettings":{"retained":true}})).unwrap()).map_err(|_|"Rewrite prompt write failed")?;
+        service.close().map_err(|_|"Rewrite fixture close failed")?;
+        Ok(service)
+    }
     /// Inspection-only full workload. No SDK installation or project execution.
     pub fn prepare_branches_ui_probe(data: PathBuf) -> Result<Self, String> {
         use sha2::{Digest, Sha256};

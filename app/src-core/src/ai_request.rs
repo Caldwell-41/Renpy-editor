@@ -93,6 +93,12 @@ pub struct Prepared {
     key: Secret,
 }
 pub fn prepare(profile: StudioProfile, key: Secret, timeout_seconds: u32) -> Result<Prepared> {
+    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
+    prepare_reviewed(profile, key, timeout_seconds, body)
+}
+
+/// Body is obtained from the core-owned, consumed review token, never renderer JSON.
+pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u32, body: Vec<u8>) -> Result<Prepared> {
     if !profile.settings.valid() || !(30..=1800).contains(&timeout_seconds) {
         return Err(Failure::Configuration);
     }
@@ -114,7 +120,6 @@ pub fn prepare(profile: StudioProfile, key: Secret, timeout_seconds: u32) -> Res
         return Err(Failure::UnsupportedDestination);
     }
     let address = SocketAddr::new(ip, uri.port_u16().ok_or(Failure::Configuration)?);
-    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
     if body.len() > MAX_BODY {
         return Err(Failure::Context);
     }
@@ -123,6 +128,8 @@ pub fn prepare(profile: StudioProfile, key: Secret, timeout_seconds: u32) -> Res
     let margin = 128.max(estimated_input.div_ceil(10));
     if u64::from(estimated_input) + u64::from(margin) + u64::from(profile.settings.maximum_response)
         > u64::from(profile.settings.context_budget)
+        || u64::from(estimated_input) + u64::from(margin) + u64::from(profile.settings.maximum_response)
+        > u64::from(profile.settings.context_ceiling)
     {
         return Err(Failure::Context);
     }

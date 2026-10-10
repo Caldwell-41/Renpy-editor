@@ -64,3 +64,15 @@ test("prompt/context operations wait for the shared service, while Stop stays in
   assert.deepEqual(calls,["status","stop",operation]);
  }
 });
+
+test("rewrite preparation, send, acceptance and discard serialize once while cancellation/status remain responsive",async()=>{
+ for(const operation of ["rewrite.prepare","rewrite.send","rewrite.accept","rewrite.discard"] as const){
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+  const held=lane.run("source.updateDraft",async()=>{calls.push("retention");await new Promise<void>(r=>{release=r;});});
+  await Promise.resolve();const rewrite=lane.run(operation,async()=>{calls.push(operation);});
+  await lane.run("ai.requestStatus",async()=>{calls.push("status");});
+  await lane.run("ai.cancelRequest",async()=>{calls.push("cancel");});
+  try{assert.deepEqual(calls,["retention","status","cancel"]);}finally{release();await held;await rewrite;}
+  assert.deepEqual(calls,["retention","status","cancel",operation]);
+ }
+});

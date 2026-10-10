@@ -1,91 +1,51 @@
 # Current outcome handover
 
-## Prompts and context preparation accepted on both targets
+## First safe rewrite: implementation ready, Mac unlock required
 
-The selected Prompts and context preparation outcome is qualified on packaged Mac
-ARM64 and Windows x64. Continue Caldwell-41/Renpy-editor on the published
-`codex/provider-qualification` branch, preserving `92a3318` ancestry, implementation
-checkpoint `33bf97f` and Mac checkpoint `baf7dbf`. The Windows owner fast-forwarded
-the clean existing worktree to `baf7dbf`, made one Windows-only integration-driver
-cleanup correction, completed native proof and published/verified this same branch.
-Unrelated worktrees and the primary checkout remain untouched. No pending app,
-fixture or operation remains. No merge, release, installation, force-push or history
-rewrite occurred. One GPT-6.1 Sol High serial Windows owner, no subagents and no
-direct other-host execution.
+Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
+`e5f09c4` ancestry and this implementation checkpoint. One GPT-6.1 Sol High owner,
+no subagents or direct other-host execution. Mac then Windows serially.
 
-[PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md) and [UI](../UI.md) own behavior; the
-[selected Phase 2 ledger](../tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10),
-[Mac qualification](../tasks/active/phase-2-initial-llm-assistance.md#corrected-mac-packaged-acceptance-and-windows-transfer--2026-10-10)
-and [Windows qualification](../tasks/active/phase-2-initial-llm-assistance.md#windows-prompt-context-packaged-acceptance--2026-10-10)
-own exact evidence. The manual reference library remains accepted on both targets.
-This slice supplies one project-local Dialogue rewrite prompt and a read-only,
-deterministic preview for one saved dialogue/narration Beat. Provider sends,
-credential/HTTP changes, proposals/application, generated references, automatic
-retrieval/import/export, finite-route expansion, full 2B.1 and Phase 2 remain open.
+[Scope, unique failures and evidence](../tasks/active/phase-2-initial-llm-assistance.md#first-safe-dialogue-rewrite-selection--2026-10-10)
+own the cumulative allowance. **Mac 1/4 package builds, 1/6 app launches; Windows
+0/4 builds, 0/6 launches.** No pending process or disposable fixture remains.
+Computer Use reported locked Mac and could not unlock it; manual unlock was
+requested. Native launch 1 reached light observation, made zero HTTP sends, then
+was terminated after the gate deadline with missing-report failure. Preserve that
+result; do not call it accepted. Failed logs/receipt/hash evidence remain ignored
+in `.toolchains/rewrite-mac-launch-01`. The corrected SDK named GUI test timed out
+on the locked host; compile/lint and literal tokenizer assertions pass.
 
-### Windows result and recovery
+Implementation has focused core workflow/token tests, existing transport/native
+worker tests, actual controller/native synthetic credential/HTTP/transaction tests
+and all 122 renderer cases passing. Two review fixes cover stale reconciliation
+writes and nonmodal hidden author input. Canonical contracts are updated.
 
-Five focused prompt core tests pass outside the filesystem sandbox, including
-Save/restore/history/reopen/isolation, exact approved references/dependencies,
-boundaries and stale/invalid metadata refusal. The initial sandboxed run failed
-at temporary-profile creation before prompt behavior. Typecheck and 17 selected
-renderer/protocol/request-lane cases pass. The actual controller → held
-ApplicationHost → persisted prompt/history/preview/refusal path passes. Its first
-sandboxed run reached the same profile restriction; the first outside-sandbox run
-passed its functional assertions but exited 101 because Windows held a fixture
-handle during driver cleanup. Dropping the host after shutdown fixed that test-only
-cleanup; the rerun passed exit 0. Chrome newline/focus and the native gate self-test
-pass. Production behavior and dependencies did not change on Windows.
+### Resume on this Mac
 
-Package attempt **1/3** used the corrected Tauri `-- --locked` separator and the
-previously recorded ignored build-only npm shim. It built the production x64
-executable and NSIS bundle; the two artifacts passed privacy scanning. Retained
-executable SHA256 is
-`39f790e530e8daf5f43ad0a775e888326ae345544ba136b9a26bc080e18c71f6`;
-installer SHA256 is
-`f69772a55efca62d585f9e2df8dcdd9521118a788b42e3b39443243aa1543c76`.
-No installation or SDK/game execution occurred.
+1. Confirm the Mac is unlocked and native observation is available before starting
+   another app. The retained package is `.toolchains/releases/rewrite-mac-01/`.
+   Its production input hashes match `.toolchains/rewrite-mac-inputs-01.json`;
+   executable SHA256 is
+   `6dd22e8e5f9ac8614c45c066c3ec663377560331b307fa518145a3129dba28a6`.
+   Signature/installer/privacy gates passed. Reuse it unless production inputs change.
+2. Rerun `app/scripts/rewrite-literal-sdk.py` with the pinned 8.5.3 SDK and built
+   `rewrite-literal-driver`, verifying the named standard-template startup/say/return
+   test. It uses only harmless synthetic source. No private project execution.
+3. Record launch 2/6 before running `app/scripts/dialogue-rewrite-probe.py --phase 1`
+   with fresh output and immediate temp-child `loomlight-rewrite-*` root. Bind only
+   the verified running owned package. Observe light/dark/compact layouts; complete
+   physical Generate/Accept via Computer Use, then mark each owned stage `.done`.
+   Do not forge markers or relax the gate. Required malformed/unsafe/cancel/stale
+   cases, Undo/Redo and project reopen must pass with cleanup.
+4. A successful phase 1 retains its owned fixture/credential for separate-process
+   phase 2. Record another launch before invoking `--phase 2` with the same root/
+   output; verify byte-exact whole project and zero HTTP. Phase 2 removes the native
+   synthetic credential; remove only the owned fixture after terminal cleanup.
+5. Update records, publish and verify this same branch. Only then transfer serially
+   to Windows x64 with its unused 4-build/6-launch allowance and required focused/
+   native proof. Do not execute the other host from this chat.
 
-Launch **1/4**, PID 24948, reached `manual-save` in a disposable project. Computer
-Use enumerated the exact Loomlight window but timed out obtaining its state; the
-180-second observation gate expired. Its `passed:false`, zero-check report remains
-failed evidence, classified as missing observation capability rather than a product
-failure. The PID exited and only its exact owned fixture was removed. The retry
-used the unchanged package after this diagnosis and split window binding,
-activation and observation into separate calls.
-
-Launch **2/4**, PID 50364, passed **32 recorded checks, all 21 required phase-1
-gates**, exit 0 and cleanupComplete. Physical Ctrl+S persisted exact custom prose;
-Tab reached Restore baseline and Shift+Tab returned to the enabled editor. Packaged
-UI/dispatch then passed current/installed baseline preview, Cancel/confirmed
-restore, Undo/Redo, retained draft, exact approved card/lore selection and full
-deterministic payload, budget/stale/external refusals with author input retained,
-explicit reload, project close/reopen and unchanged game source. Wide light/dark
-and compact dark were directly observed; compact scrolling reached exclusions,
-dependencies and the wrapped full payload.
-
-Launch **3/4**, PID 54296, passed **five recorded checks, all four required phase-2
-gates**, exit 0 and cleanupComplete. Separate-process reopen displayed the
-installed baseline, rebuilt the preview and preserved all source. Whole-file
-metadata bytes match across processes: `ai.json` SHA256
-`2bd97c8092d138973bfe02d2e9842541f8465af6967e0c84054f96b96379ac64`;
-`references.json` SHA256
-`66d6beb553b5a73c0d064789cbce5a05d6c54a36032baff949e93fc6fa0eb566`.
-The failed and positive structural receipts, logs, package and final hash audit
-remain ignored under `app/.toolchains/prompt-context-windows/`. All three exact
-PIDs are absent and the accepted disposable fixture was removed. No native
-observation was attempted after an app exited.
-
-**Cumulative allowance:** Mac **4/5 package attempts, 4/4 launches**; Windows
-**1/3 builds, 3/4 launches**. Unused attempts are not part of acceptance. Reuse
-valid Mac and Windows evidence for unchanged inputs. Review found no other in-scope
-issue. This both-target outcome is complete, while full 2B.1/Phase 2 and live
-provider workflow remain incomplete.
-
-### Next distinct deliverable, not started
-
-The next queue item is **First safe dialogue rewrite**, a bounded
-2B.2/2C.1/2C.2 outcome on the accepted prompt/context and manual-reference
-foundations. Select it separately with an exact send-review and response/proposal
-contract, affected hosts and finite native/live allowance. Do not start that work
-from this handover or infer provider-send permission from the preview-only result.
+No paid/public calls, private game content, generated references, destination/route
+expansion, other action, full 2B.1/2A.2/Phase 2 acceptance, merge or release.
+Prior prompt/context/manual-reference qualification remains valid.

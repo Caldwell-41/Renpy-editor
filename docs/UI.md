@@ -1,5 +1,18 @@
 # UI checkpoint
 
+## First safe rewrite surface
+
+Story's ordinary saved dialogue/narration selection exposes Assist → Rewrite
+dialogue. The session-owned nonmodal panel separates Review complete send, Generate
+proposal, passive semantic/exact Source review and Accept 1 change. It shows exact
+selected references, destination/locality, full body/digest, size and protected tokens,
+with wrapped disclosures and responsive field layout in the approved themes.
+Cancellation remains available during network work; failures retain input and stale
+comparisons. Dirty or changed author input requires fresh preparation. Project
+close/replacement confirms unfinished work. Shared Undo/Redo owns acceptance.
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite) owns the implemented
+contract; CURRENT and the selected ledger own host qualification.
+
 ## Accepted redesign direction — 2026-09-29
 
 The [UI design review and implementation plan](tasks/archive/2026-10-06-ui-design-review.md)

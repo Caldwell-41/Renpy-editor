@@ -673,3 +673,17 @@ or unknown. Final text is literal diagnostic display, never applied or persisted
 The nonmodal panel observes local native status without further provider HTTP.
 [ADR 0013](adr/0013-provider-request-and-transport-contract.md#selected-synthetic-production-subset--2026-10-09)
 owns exact subset and resource bounds; native target acceptance lives in the task.
+
+### First safe dialogue rewrite boundary
+
+`rewrite.prepare/send/accept/discard` adds one transient project/session-owned
+workflow. Core captures the exact strict-schema body/read-set and owns protected
+tokens, response validation and the non-mutating transaction proposal. Native send
+reads the existing origin-bound credential and publishes only validated inert review
+through the shared ApplicationHost. Renderer cannot inject responses/source patches.
+Raw revision identities are checked before context/projection refresh to keep stale
+refusal write-free. Single acceptance consumes the stored proposal before shared
+transaction/history commit; ambiguity uses existing recovery. Relevant Source draft
+generations and renderer author-input/retention guards protect hidden input. Closing
+a session discards/cancels its transient. [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite)
+owns the bounded response and send contract.

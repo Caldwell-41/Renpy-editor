@@ -22,6 +22,9 @@ struct Send {
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct RewriteSend { token: String, payload_digest: String, session_id: String }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Target {
     request_id: String,
 }
@@ -41,6 +44,8 @@ struct Pending {
     estimated_input: u32,
     margin: u32,
     maximum_response: u32,
+    rewrite_token: Option<String>,
+    proposal: Option<Value>,
 }
 #[derive(Default)]
 struct State {
@@ -60,7 +65,7 @@ pub fn service() -> &'static Arc<Service> {
     SERVICE.get_or_init(|| Arc::new(Service::default()))
 }
 fn view(p: &Pending) -> Value {
-    json!({"requestId":p.id,"state":p.state,"done":p.done,"httpStatus":p.http,"elapsedMs":if p.done{p.elapsed_ms}else{p.started.elapsed().as_millis()},"category":p.failure.map(Failure::code),"message":p.failure.map(Failure::message),"completion":p.result,"estimatedInput":p.estimated_input,"margin":p.margin,"maximumResponse":p.maximum_response})
+    json!({"requestId":p.id,"state":p.state,"done":p.done,"httpStatus":p.http,"elapsedMs":if p.done{p.elapsed_ms}else{p.started.elapsed().as_millis()},"category":p.failure.map(Failure::code),"message":p.failure.map(Failure::message),"completion":p.result,"proposal":p.proposal,"estimatedInput":p.estimated_input,"margin":p.margin,"maximumResponse":p.maximum_response})
 }
 fn current(host: &ApplicationHost, token: &str, session: &Option<String>) -> Option<bool> {
     host.with_service(|s| {
@@ -74,6 +79,7 @@ fn expire(p: &mut Pending) {
     p.cancel.cancel();
     p.state = "expired";
     p.result = None;
+    p.proposal = None;
     p.failure = None;
 }
 pub struct Change(Arc<Service>);
@@ -111,7 +117,7 @@ impl Service {
         host: &ApplicationHost,
         payload: Value,
     ) -> Result<Value, &'static str> {
-        self.send_with_reader(host, payload, |s, profile| {
+        self.send_with_reader(host, payload, false, |s, profile| {
             crate::ai_native::secrets(s.ai_data_root())?
                 .read(&profile.profile_id, profile.credential.as_ref().unwrap())?
                 .ok_or(Failure::Credential.message())
@@ -121,13 +127,17 @@ impl Service {
         self: &Arc<Self>,
         host: &ApplicationHost,
         payload: Value,
+        rewrite: bool,
         read: impl FnOnce(
             &loomlight_core::lifecycle::LifecycleService,
             &loomlight_core::ai_profiles::StudioProfile,
         ) -> credentials::Result<credentials::Secret>,
     ) -> Result<Value, &'static str> {
-        let input: Send =
-            serde_json::from_value(payload).map_err(|_| "Invalid synthetic request payload.")?;
+        let rewrite_input: Option<RewriteSend> = if rewrite { Some(serde_json::from_value(payload.clone()).map_err(|_| "Invalid reviewed send payload.")?) } else { None };
+        let input: Send = if let Some(r)=&rewrite_input {
+            Send { token: String::new(), profile_id:String::new(), session_id:Some(r.session_id.clone()), timeout_seconds:0 }
+        } else { serde_json::from_value(payload).map_err(|_| "Invalid synthetic request payload.")? };
+        let cancel = Cancel::default();
         let mut state = self
             .state
             .lock()
@@ -143,12 +153,18 @@ impl Service {
                 let _ = worker.join();
             }
         }
-        let prepared = host
+        let (prepared, profile_token) = host
             .with_service(|s| {
                 if s.current().map(|p| p.session_id) != input.session_id {
                     return Err("Project changed; reopen the request panel.");
                 }
                 let store = s.read()?;
+                if let Some(r)=&rewrite_input {
+                    let capture=s.rewrite_take_send(&r.session_id,&r.token,&r.payload_digest,cancel.clone()).map_err(|_|"Project or review changed; prepare and review again. No request sent.")?;
+                    let key=read(s,&capture.profile)?;
+                    return ai_request::prepare_reviewed(capture.profile,key,capture.timeout_seconds,capture.body)
+                        .map(|p|(p,credentials::token(&store))).map_err(Failure::message);
+                }
                 if credentials::token(&store) != input.token {
                     return Err("Settings changed; reload the request profile.");
                 }
@@ -162,14 +178,13 @@ impl Service {
                     return Err(Failure::Credential.message());
                 }
                 let key = read(s, &profile)?;
-                ai_request::prepare(profile, key, input.timeout_seconds).map_err(Failure::message)
+                ai_request::prepare(profile, key, input.timeout_seconds).map(|p|(p,input.token.clone())).map_err(Failure::message)
             })
             .map_err(|_| "Project service is busy; no request was sent.")??;
         let id = uuid::Uuid::new_v4().to_string();
-        let cancel = Cancel::default();
         state.pending = Some(Pending {
             id: id.clone(),
-            token: input.token,
+            token: profile_token,
             session: input.session_id,
             cancel: cancel.clone(),
             started: Instant::now(),
@@ -183,6 +198,8 @@ impl Service {
             estimated_input: prepared.estimated_input,
             margin: prepared.margin,
             maximum_response: prepared.profile.settings.maximum_response,
+            rewrite_token: rewrite_input.map(|r|r.token),
+            proposal: None,
         });
         let service = self.clone();
         let host = host.clone();
@@ -235,8 +252,12 @@ impl Service {
                             if valid {
                                 match result.take().unwrap() {
                                     Ok(value) => {
-                                        p.state = "completed";
-                                        p.result = Some(value);
+                                        if let Some(token)=&p.rewrite_token {
+                                            match native.rewrite_complete(p.session.as_deref().unwrap_or(""),token,&value) {
+                                                Ok(review)=> { p.state="completed"; p.proposal=Some(review); }
+                                                Err(_)=> { p.state="failed"; p.failure=Some(Failure::UnsupportedResponse); }
+                                            }
+                                        } else { p.state = "completed"; p.result = Some(value); }
                                     }
                                     Err(e) => {
                                         p.state = if e == Failure::Timeout {
@@ -318,6 +339,7 @@ impl Service {
         p.cancel.cancel();
         p.state = "cancelled";
         p.result = None;
+        p.proposal = None;
         p.failure = Some(Failure::Cancelled);
         let (mut state, wait) = self
             .returned
@@ -367,6 +389,9 @@ impl Service {
     ) -> CoreResponse {
         let result = match op {
             "ai.sendSynthetic" => self.send(host, payload),
+            "rewrite.send" => self.send_with_reader(host, payload, true, |s,profile| {
+                crate::ai_native::secrets(s.ai_data_root())?.read(&profile.profile_id,profile.credential.as_ref().unwrap())?.ok_or(Failure::Credential.message())
+            }),
             "ai.requestStatus" => self.status(host, payload),
             "ai.cancelRequest" => self.cancel(payload),
             _ => Err("Unsupported request operation."),
@@ -396,7 +421,7 @@ mod tests {
             host: &ApplicationHost,
             payload: Value,
         ) -> Result<Value, &'static str> {
-            self.send_with_reader(host, payload, |_, _| {
+            self.send_with_reader(host, payload, false, |_, _| {
                 Ok(credentials::Secret::new("loomlight-public-request".into()))
             })
         }

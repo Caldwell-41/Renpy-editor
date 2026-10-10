@@ -2,11 +2,63 @@
 
 The selected outcome implements one action, **Dialogue rewrite**, for a saved dialogue
 or narration Beat. Settings → Current project has System prompts and Context preparation
-tabs. Preparation is read-only: it has no provider Send or proposal/application path.
+tabs. Settings context preview remains read-only. Story → Assist now adds the
+separately selected first safe rewrite workflow described below.
 This is a bounded part of 2B.1; routes, other action prompts, generated references,
-automatic retrieval, provider mapping/send consent and full Phase 2 remain separate.
+automatic retrieval, destination expansion and full Phase 2 remain separate.
 The [owning selection and ledger](tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10)
 own acceptance and target evidence.
+
+## First safe dialogue rewrite
+
+Story offers Assist → Rewrite dialogue for one saved ordinary root dialogue/narration
+Beat. Nested, conditional, protected and unsupported targets refuse. This nonmodal
+session-owned panel retains the task across navigation and failures. References are
+explicit unchecked exact approved revisions; Reload saved choices is explicit.
+A dirty Scene/supporting form refuses continuation. Author-input generation binds
+the review, and pending Source input is retained behind the existing transition
+barrier before prepare/send/accept. Relevant retained Source drafts and changed
+draft generations refuse in core. Nothing silently commits a form.
+
+Review complete send prepares a memory-only token and displays the complete exact
+UTF-8 request body/digest, provider, endpoint, exact model, literal loopback location,
+unknown inference locality, provider-retention/cancellation notice, included/excluded
+context and protected syntax. This slice uses the existing Unsloth Studio literal
+loopback HTTP adapter and native credential reader. No public/paid destination is
+qualified. Input-byte estimate plus response reserve and max(256, ceil(bytes/10))
+margin must fit both requested budget and unverified capacity; no truncation or
+profile-default mutation. The body uses system/user roles, strict `json_schema`,
+no streaming, tools or thinking, and the existing bounded timeout/cancellation.
+Only Generate proposal sends the captured body once; renderer supplies token/digest
+and cannot replace the body, credential, reply or filesystem mutations.
+
+The complete response is one closed JSON object with schemaVersion 1,
+action `rewriteDialogue`, exact sceneId/beatId target and 1–256 ordered segments.
+Each segment contains only `literal` or only `token`. Core refuses duplicate keys,
+extra prose/fences/fields/operations/paths, wrong target/model/finish reason, malformed
+or bounded-resource-invalid output. No fallback or repair request occurs. Existing
+interpolation and recognized balanced text tags become revision-bound core opaque
+tokens; every token must appear exactly once in original order. Unsupported escapes
+and ambiguous boundaries refuse. New literals escape Ren'Py string syntax and
+double opening square/curly delimiters so expressions/calls/action tags display
+literally. Existing token source spellings are restored exactly, with no execution.
+
+Response review displays passive saved/proposed semantic text, preserved source
+tokens and complete exact Before/After source and source-map patches. It is a static
+proposal; receipt writes nothing and does not validate runtime behavior. Accept 1
+change rechecks original file bytes and identities before any projection refresh,
+source/structure/prompt/reference/profile/session and relevant draft generations.
+The exact stored proposal is consumed once through the shared transaction/history,
+with one Undo/Redo. Only original quote contents are replaced; speaker, formatting,
+comments, BOM/newlines, unsupported neighbors and unrelated files are preserved.
+Cancel, malformed, unsafe and stale results cannot write. Failure retains the
+author task/comparison; a changed input requires fresh preparation. Discard drops
+the proposal and retains task; Close/replacement/project close confirms unfinished
+work and performs cancellation/discard cleanup. Proposals do not survive sessions.
+
+The [selected rewrite ledger](tasks/active/phase-2-initial-llm-assistance.md#first-safe-dialogue-rewrite-selection--2026-10-10)
+owns qualification and cumulative host allowances. Full 2B.1/2A.2/Phase 2 acceptance
+is not implied. The following sections retain the Settings preview contract.
 
 ## Prompt ownership and edits
 

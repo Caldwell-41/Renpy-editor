@@ -34,6 +34,8 @@ use source::{
 
 pub const PROTOCOL_VERSION: u64 = 1;
 pub mod ai_request;
+pub mod rewrite_text;
+pub mod rewrite;
 pub const OPERATIONS: &[&str] = &[
     "system.health",
     "system.version",
@@ -72,6 +74,10 @@ pub const OPERATIONS: &[&str] = &[
     "prompts.apply",
     "context.options",
     "context.preview",
+    "rewrite.prepare",
+    "rewrite.send",
+    "rewrite.accept",
+    "rewrite.discard",
     "references.list",
     "references.apply",
     "character.create",
@@ -529,6 +535,13 @@ pub fn handle_application_request(
             .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload|serde_json::from_value::<prompts::PromptRequest>(Value::Object(payload)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
             .and_then(|request| lifecycle.prompts_apply(request)).and_then(to_value),
+        "rewrite.prepare" => session_payload(validated.payload)
+            .and_then(|(session,payload)|serde_json::from_value::<rewrite::PrepareRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
+            .and_then(|(session,r)|lifecycle.rewrite_prepare(&session,r)),
+        "rewrite.accept" => session_payload(validated.payload)
+            .and_then(|(session,payload)|serde_json::from_value::<rewrite::AcceptRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
+            .and_then(|(session,r)|lifecycle.rewrite_accept(&session,r)),
+        "rewrite.discard" if has_exact_keys(validated.payload, &["sessionId"]) => session_only(validated.payload).and_then(|session|lifecycle.rewrite_discard(&session)),
         "context.preview" => session_payload(validated.payload)
             .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| (session,payload)))
             .and_then(|(session,payload)|serde_json::from_value::<prompts::PreviewRequest>(Value::Object(payload)).map(|request|(session,request)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
@@ -845,6 +858,18 @@ pub fn lifecycle_failure(request_id: String, error: LifecycleError) -> CoreRespo
             "This request belongs to a closed or replaced project session.",
         ),
         LifecycleError::Authoring(error) => return authoring_failure(request_id, error),
+        LifecycleError::Rewrite(error) => {
+            use rewrite::RewriteError::*;
+            let (code,message)=match error {
+                Prompt(e)=>return lifecycle_failure(request_id,LifecycleError::Prompt(e)),
+                Scene(e)=>return scene_failure(request_id,e),
+                Invalid=>("INVALID_REWRITE","The response or operation is malformed, outside the selected scope or changes protected tokens. Nothing was applied."),
+                Stale=>("STALE_REWRITE","Project, context, provider or draft changed, or this review was already consumed. Prepare and review again."),
+                Unsupported=>("UNSUPPORTED_REWRITE","This target's text boundary or destination is unsupported. Select ordinary saved dialogue/narration and a literal loopback HTTP Studio profile."),
+                Cancelled=>("CANCELLED_REWRITE","Request cancelled; its response cannot be accepted. Server computation may continue."),
+                Unavailable=>("REWRITE_UNAVAILABLE","The project, profile or credential is unavailable. Nothing was applied."),
+            };return CoreResponse::failure(request_id,code,message);
+        }
         LifecycleError::Prompt(error) => {
             use prompts::PromptError::*;
             let (code,message)=match error {

@@ -1,4 +1,5 @@
 import type { Options, PromptModel, Preview } from "./prompt-ui.ts";
+import { mountRewrite, type RewriteController } from "./rewrite-ui.ts";
 import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
 import { catalogDialog } from "./catalog-dialog.ts";
 import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
@@ -70,8 +71,10 @@ const sourceActionScopes = new Map<string, object>();
 let currentProject: OpenProject | undefined;
 let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
+let authorInputGeneration = 0;
 let disposeCatalogue: (()=>void) | undefined;
 let disposeSceneView: (() => void) | undefined;
+let rewriteController: RewriteController | undefined;
 let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
 let activeReferenceController: ReferenceController | undefined;
@@ -268,7 +271,8 @@ function shell(content: HTMLElement): void {
   const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
-  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}const owner={};openSettings({...project,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
+  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}const owner={};openSettings({...project,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,
+          load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
   footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
@@ -598,6 +602,36 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     }
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
+      assist: (sceneId,beatId) => {
+        if (rewriteController?.busy()) { setStatus("Finish or cancel the current Assist operation first.","error"); return; }
+        if (rewriteController?.hasWork() && !window.confirm("Discard the unfinished Assist task/proposal and select this Beat?")) return;
+        rewriteController?.dispose();
+        const owner={};
+        rewriteController=mountRewrite(document.body,sceneId,beatId,{
+          current:()=>currentProject?.sessionId===project.sessionId,
+          inputState:()=>({generation:authorInputGeneration,blocked:hasSceneDraft(root)||hasUnsubmittedInput()}),
+          call:async <T>(operation:Parameters<typeof desktopRequestCore>[0],payload:Record<string,unknown>={}):Promise<T>=>{
+            const task=()=>operation.startsWith("ai.")?value<T>(operation,payload):projectValue<T>(project,operation,payload);
+            if(operation==="rewrite.prepare"||operation==="rewrite.send"||operation==="rewrite.accept") {
+              const result=await runAuthoringOperation(project,owner,async()=>{
+                if(hasSceneDraft(root)||hasUnsubmittedInput())throw new Error("Finish or discard unsubmitted author input first. Input retained.");
+                const inputGeneration=authorInputGeneration;
+                const source=currentSourceController(project);
+                const transition=source?await source.prepareTransition("navigation"):undefined;
+                if(source&&!transition)throw new Error("Source input could not be retained. Input retained.");
+                try {
+                  if(inputGeneration!==authorInputGeneration||hasSceneDraft(root)||hasUnsubmittedInput())throw new Error("Author input changed. Review a fresh send.");
+                  return await task();
+                } finally {transition?.release();}
+              });
+              if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");
+              return result;
+            }
+            return task();
+          },
+          accepted:(s,b)=>showProject(project,"story",{sceneId:s,beatId:b}),
+        });
+      },
       status: setStatus,
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
@@ -653,7 +687,11 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 }
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
+  if(rewriteController?.busy()){setStatus("Finish or cancel the Assist request before closing the project.","error");return;}
+  if(rewriteController?.hasWork()&&!window.confirm("Discard the unfinished Assist task/proposal and close the project?"))return;
   if (document.querySelector(".leave-source-dialog") || !await allowSceneNavigation()) return;
+  const finishClose=afterClose;
+  afterClose=async()=>{rewriteController?.dispose();rewriteController=undefined;await finishClose();};
   try { if (runtimeWorkspace && !await runtimeWorkspace.beforeClose()) return; }
   catch (error) { setStatus(message(error, "Runtime cleanup failed"), "error"); return; }
   const controller = currentSourceController(project);
@@ -668,6 +706,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
       return currentInventory;
     });
     if (!inventory.dirtyCount) {
+      rewriteController?.dispose();rewriteController=undefined;
       transition?.release();
       if (currentProject?.sessionId === project.sessionId) await afterClose();
       return;
@@ -912,6 +951,9 @@ function installListeners(): void {
   if(!listenersInstalled)window.addEventListener("loomlight-reset-layout",()=>{const layout=root.querySelector<HTMLElement>(".project-shell");if(layout){layout.dispatchEvent(new Event("reset-panes"));layout.style.setProperty("--tree-width","230px");}root.querySelectorAll<HTMLElement>(".scene-context-inspector,.source-mapping,.branches-controls").forEach(panel=>{if(!panel.querySelector('[data-unsubmitted="true"]'))panel.hidden=true;});});
   if (listenersInstalled) return;
   listenersInstalled = true;
+  const trackAuthorInput=(event:Event):void=>{if(event.target instanceof HTMLElement&&event.target.closest(".scene-draft,.inline-editor,.catalog-create,.reference-library,.source-editor-shell"))authorInputGeneration++;};
+  root.addEventListener("input",trackAuthorInput,true);
+  root.addEventListener("change",trackAuthorInput,true);
   window.addEventListener("loomlight-catalog-discarded",()=>{if(currentProject)void refreshPersistenceStatus(currentProject,viewGeneration);});
   root.addEventListener("input", (event) => {
     const target = event.target;

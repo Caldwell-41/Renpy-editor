@@ -1,0 +1,22 @@
+"""Reject missing, failed, zero, partial or unclean first-rewrite native evidence."""
+PHASE_CHECKS={1:{
+ 'Exact approved references available','Preparation writes nothing',
+ 'Complete reviewed body contains selected revisions custom prompt and strict schema',
+ 'Destination locality and conservative size disclosed',
+ 'Native light send layout observed','Native dark send layout observed','Native compact send layout observed',
+ 'Physical Generate produces inert review with no writes',
+ 'Semantic and exact source diff are inert and disclose protected tokens',
+ 'Physical acceptance saves once and blocks duplicate click',
+ 'Accepted source encodes generated expressions and action tags literally',
+ 'Unrelated and custom source preserved','One Undo restores exact prior source','Redo restores exact accepted source',
+ 'Malformed response writes nothing and retains task','Unsafe token response writes nothing',
+ 'Cancelled response writes nothing and retains task','Fresh valid proposal available after refusal and cancellation',
+ 'Stale external source refuses acceptance with zero writes','Project reopen retains accepted source',
+},2:{'Process reopen retains accepted literal source and protected tokens','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
+def validate_report(report,phase):
+ if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
+ d=report.get('details',{})
+ if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not PHASE_CHECKS[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
+ if phase==1:
+  hashes=d.get('reviewedBodyDigests')
+  if not isinstance(hashes,list) or len(hashes)!=5 or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Five exact reviewed body digests required')

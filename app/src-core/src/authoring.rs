@@ -405,6 +405,7 @@ struct ImportAuthority {
 
 #[derive(Default)]
 pub struct AuthoringService {
+    pub(crate) rewrites: Mutex<HashMap<ProjectId, crate::rewrite::Transient>>,
     pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
     pub(crate) observed_flow: Mutex<HashMap<ProjectId, crate::scene::flow::ObservedFlow>>,
@@ -445,6 +446,7 @@ impl AuthoringService {
     }
 
     pub fn unregister_project(&mut self, id: &ProjectId) {
+        let _ = self.rewrite_discard(id);
         self.clear_source_project(id);
         self.clear_observed_flow(id);
         self.transactions.unregister_trusted_project(id);

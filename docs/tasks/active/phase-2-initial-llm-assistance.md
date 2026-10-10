@@ -17,6 +17,127 @@ including plain interface language, optional technical help, completion/submissi
 validation and shared control ownership. These guide future implementation; they do
 not claim the current application already satisfies every interaction.
 
+## First safe dialogue rewrite selection — 2026-10-10
+
+User-selected outcome on published `e5f09c44e11549da3bf46b29ec8dc6061d0251de`,
+branch `codex/provider-qualification`. One local Mac ARM64 GPT-6.1 Sol High owner,
+no subagents or direct other-host execution. Finish local implementation, focused
+checks, review and packaged proof, then publish/verify and transfer the same branch
+serially to Windows x64. Both hosts are required because send/review/source and
+transaction paths change. The prompt/context and manual reference foundations are
+qualified on both hosts; reuse their unchanged evidence.
+
+Scope: one saved ordinary dialogue/narration Beat, explicit exact approved references,
+complete destination/body review, one explicit send, closed structured response,
+static semantic/exact source review, one acceptance through shared transaction/history,
+Undo and reopen. Protected existing interpolation/formatting uses core-owned
+revision-bound opaque tokens; generated literals are encoded for source and display.
+Malformed, cancelled, unsafe and stale output writes nothing. No paid/public calls,
+project-code execution during inspection, generated references, route expansion,
+other action, full 2B.1/2A.2/Phase 2 acceptance or merge/release.
+
+**Cumulative allowance for this distinct outcome:** Mac **0/4 package builds,
+0/6 app launches**; Windows **0/4 builds, 0/6 launches**. Count failures/cancellations
+and implicit launches; preparation or handoff does not reset this outcome's totals.
+Prior outcome allowances remain recorded in their ledgers and are not borrowed.
+
+### Request/credential prerequisite and remote reconciliation
+
+The initial clean Mac checkout was `baf7dbf`; fresh remote inspection found Windows
+qualification `e5f09c4`, and the owner fast-forwarded before editing. Existing native
+credential capture, profile/session revision binding, one-worker cancellation and
+loopback-only bounded transport can support the selected disposable synthetic send.
+The existing API emits only a fixed diagnostic body, so reviewed body/schema/token
+integration is necessary implementation within this selected outcome, not a claim
+that the preview-only API already sends context. Destination expansion is excluded.
+
+Focused baseline proof: `cargo test -p loomlight-core --locked ai_request::tests`
+passes **8/8**; `cargo test -p loomlight-desktop --locked ai_requests::tests` passes
+**6/6** (existing Windows-selector unused warning). The first sandboxed core run
+passed four parser/body tests and failed four local socket binds with EPERM before
+transport; the exact selected suite passed with authorized loopback access. No
+provider call, native credential entry, package build or app launch occurred.
+Implementation and required changed-path qualification remain in progress.
+
+### Implementation, review and Mac package entry — 2026-10-10
+
+Core now owns a transient reviewed request, closed response schema, revision-bound
+protected tokens and stored exact proposal; only explicit native send uses the
+captured body and existing credential reader. Acceptance revalidates source and
+metadata identities, relevant draft generations, profile and session, then consumes
+once through the shared transaction/history. The renderer shows passive complete
+body, semantic text and exact source/map patches. It retains tasks across refusal,
+shares the persistence lane and refuses dirty or changed author input.
+
+Review found and fixed a zero-write defect: validating stale external source through
+context preview could reconcile source-map metadata. Raw read-set validation now
+precedes any projection refresh. Review also found the nonmodal Scene input gap;
+author-input generation binding and Source retention barriers now guard prepare,
+send and acceptance. Typecheck passes; selected renderer checks pass 18/18; core
+rewrite filter passes 9/9 (four rewrite workflow, four literal boundary, one existing
+source-preservation case); transport 8/8 and native worker 6/6 pass. Actual controller
+→ native synthetic credentials/strict loopback HTTP → core review/accept/history
+passes, including held-owner, cancellation, malformed and stale no-write cases.
+Pinned Ren'Py 8.5.3 compile/lint and actual substitution/text tokenizer assertions
+prove generated calls/action tags display literally and existing protected tokens
+still work. Native evidence gate self-tests pass 2/2, with partial/zero/unclean
+reports refused. Repository validation and diff whitespace pass.
+
+A Python compile-cache permission failure was harness-only; AST parsing and tests
+with an ignored cache passed. Native Computer Use can enumerate and inspect Finder,
+although the initial binding took unusually long; no Loomlight app was launched.
+Sandbox signing inventory was unavailable; authorized native read found exactly
+the pinned local identity. Its existing self-signed trust status is unchanged.
+
+Mac package **attempt 1/4** is now entered using the approved wrapper and unchanged
+identity/requirement. Mac launches remain **0/6**. Windows remains **0/4 builds,
+0/6 launches**. Build/fixture/observations remain to qualify; no pass is inferred.
+
+Mac build 1/4 passed strict signature/pinned identity/designated requirement and
+installer-content checks. Executable SHA256
+`6dd22e8e5f9ac8614c45c066c3ec663377560331b307fa518145a3129dba28a6`;
+installer SHA256
+`028affe7b63ebd7ecee59c4cd186710a310ab7b928ee4cb7f7dc2cf534b131ab`.
+Artifact privacy scan passed. Initial scan named a nonexistent installer filename;
+corrected artifact discovery used the produced `Loomlight.dmg` and passed.
+Mac launch **1/6** is entered for phase 1, retaining structural receipts/logs under
+ignored `.toolchains/rewrite-mac-launch-01`. No accepted native result yet.
+
+### Mac native capability stop and published implementation checkpoint
+
+Mac launch 1/6, PID 95027, reached `observe-light` after exact choices, preparation
+and body/disclosure checks, but Computer Use returned: “The Mac is locked and
+automatic unlock could not unlock it.” Manual unlock was requested. No physical
+Generate/Accept occurred and no provider request was made. The observation deadline
+elapsed without a terminal WebView report; the exact verified owned PID was
+terminated and the runner exited 1, correctly refusing missing required proof.
+This is missing native capability/evidence, not acceptance or an established product
+defect. Failed stage/log/structural receipt and project hashes are retained ignored
+under `.toolchains/rewrite-mac-launch-01`; owned project and synthetic file credentials
+are removed. No retry on a locked desktop and no pending test process remains.
+
+Final renderer regression passes **122/122**, zero failures/skips/cancellations.
+One additional focused lane regression proves all four rewrite operations wait for
+Source retention once while status/cancellation remain responsive; the affected
+renderer selection now passes **19/19**. This test-only addition does not change
+packaged production inputs.
+Packaged production source inputs still match the ignored build-1 manifest. The
+additional required standard-template SDK smoke generates the normal GUI/assets,
+passes compile/lint and real substitution/token assertions, then its named GUI test
+remains unproven. First invocation had wrong SDK cwd; corrected invocation exposed a
+fixture `import renpy` shadowing the script API; aliases fixed that harness defect.
+The next named startup/say/return test timed out after 60 seconds on the locked host,
+with no owned residual process. It is not counted as a pass or a source defect.
+Initial minimal-template literal assertions remain valid. Retry the corrected named
+test when interactive execution is available; preserve these failure classifications.
+
+**Current cumulative use:** Mac **1/4 builds, 1/6 app launches**; Windows **0/4
+builds, 0/6 launches**. Package 1 is valid and unchanged; no rebuild is indicated
+solely for unlock or the SDK-harness correction. Required Mac walkthrough/reopen,
+standard-template runtime and then serial Windows proof remain open. Implementation
+is published as an incomplete qualification checkpoint; full 2B.1/2A.2/Phase 2 is
+not accepted. One local owner, no subagents or direct other-host execution.
+
 ## Prompts and context preparation selection — 2026-10-10
 
 User-selected new outcome on published `92a33180604ce851aa8ebc47e5c336da81aedf57`,

@@ -63,7 +63,7 @@ pub struct ReferenceSelection {
     pub record_id: String,
     pub revision_id: String,
 }
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PreviewRequest {
     pub expected_prompt_revision: String,

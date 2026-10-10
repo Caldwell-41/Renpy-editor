@@ -2,6 +2,7 @@
 pub(crate) mod acceptance;
 pub mod runtime;
 mod runtime_probe;
+use crate::ai_credentials::Records;
 use crate::{
     authoring::{
         AuthoringError, AuthoringMetadata, AuthoringService, CreateCharacterRequest,
@@ -137,6 +138,7 @@ pub enum LifecycleError {
     Scene(SceneError),
     Reference(crate::references::ReferenceError),
     Prompt(crate::prompts::PromptError),
+    Rewrite(crate::rewrite::RewriteError),
     Source(SourceError),
     Media(MediaError),
     Io,
@@ -665,6 +667,36 @@ impl LifecycleService {
     }
     pub fn context_options(&self)->Result<Value,LifecycleError>{
         let(authority,id)=self.authoring_context()?;self.authoring.context_options(&authority,&id).map_err(LifecycleError::Prompt)
+    }
+    pub fn rewrite_prepare(&self, session: &str, request: crate::rewrite::PrepareRequest) -> Result<Value, LifecycleError> {
+        self.require_session(session)?;
+        let (authority,id)=self.authoring_context()?;
+        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring.rewrite_prepare(&authority,&id,session,&store,request).map_err(LifecycleError::Rewrite)
+    }
+    pub fn rewrite_take_send(&self, session: &str, token: &str, digest: &str, cancel: crate::ai_request::Cancel) -> Result<crate::rewrite::SendCapture,LifecycleError> {
+        self.require_session(session)?;
+        let (authority,id)=self.authoring_context()?;
+        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring.rewrite_take_send(&authority,&id,session,&crate::ai_credentials::token(&store),token,digest,cancel).map_err(LifecycleError::Rewrite)
+    }
+    pub fn rewrite_complete(&self, session: &str, token: &str, completion: &crate::ai_request::Completion) -> Result<Value,LifecycleError> {
+        self.require_session(session)?;
+        let (authority,id)=self.authoring_context()?;
+        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring.rewrite_complete(&authority,&id,session,&crate::ai_credentials::token(&store),token,completion).map_err(LifecycleError::Rewrite)
+    }
+    pub fn rewrite_accept(&self, session: &str, request: crate::rewrite::AcceptRequest) -> Result<Value,LifecycleError> {
+        self.require_session(session)?;
+        let (authority,id)=self.authoring_context()?;
+        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring.rewrite_accept(&authority,&id,session,&crate::ai_credentials::token(&store),request).map_err(LifecycleError::Rewrite)
+    }
+    pub fn rewrite_discard(&self, session: &str) -> Result<Value,LifecycleError> {
+        self.require_session(session)?;
+        let (authority,_)=self.authoring_context()?;
+        self.authoring.rewrite_discard(&authority).map_err(LifecycleError::Rewrite)?;
+        Ok(serde_json::json!({"discarded":true}))
     }
     pub fn context_preview(&self,session:&str,request:crate::prompts::PreviewRequest)->Result<Value,LifecycleError>{
         let(authority,id)=self.authoring_context()?;self.authoring.context_preview(&authority,&id,session,request).map_err(LifecycleError::Prompt)
