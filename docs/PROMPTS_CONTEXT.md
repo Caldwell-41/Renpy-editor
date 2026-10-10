@@ -235,3 +235,31 @@ terminal and prefix/suffix source bytes survive. Undo/Redo/reopen retain exact s
 and identity. Cancellation, session/profile/prompt/reference/source changes, competing
 Source drafts or changed draft generations, replaced proposals and ordinary external
 writes invalidate send/completion/acceptance. There is no automatic rebase/retry.
+
+
+## Bounded Draft Scene
+
+`draftScene` uses the same memory-only prepared-send/proposal lifetime as Rewrite and
+Continue. The Chapter action explicitly selects a saved Chapter; author enters/reviews
+a title. Its bundled versioned prompt is project-customizable with ordinary shared
+Undo/Redo. Full destination, instructions, selected reference revisions, reviewed
+Character definitions, closed schema and exact outbound body are visible before Send.
+Existing source is guarded by revisions/draft generations without being sent as story
+context. Any retained Source draft, unavailable mapped source or conflicted Scene
+refuses preparation/acceptance. No silent rebuild or rebase after review.
+
+The closed response echoes Chapter/title, contains 1–8 dialogue/narration Beats (10,000
+total UTF-8 prose bytes), only reviewed existing Characters, and an explicit Return.
+Core owns Scene/Beat UUIDs, technical label, destination path and literal encoding.
+Model source/paths/IDs/definitions/connections/extra terminal fields refuse. The inert
+review displays the whole Scene, assigned IDs/path/Chapter/title/Return and exact new
+source plus project/source-map metadata mutations, bound by one digest. Accept creates
+the Scene once in one transaction and one Undo entry; all existing source stays byte
+exact. Empty Chapter directories materialize only on explicit acceptance. Undo removes
+the new file and restores metadata; Redo restores the same IDs/bytes; reopen preserves
+the result. No incoming connection is created. Cancels, malformed/unsafe/stale/draft/
+external-edit refusal writes nothing; competing prepared reviews consume old identity.
+
+Generated Character cards/lore, incoming/terminal replacement and custom source remain
+separately selected deliverables. SDK validation is a separate explicit execution
+action; ordinary preview never invokes Ren'Py.

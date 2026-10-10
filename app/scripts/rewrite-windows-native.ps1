@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory=$true)][string]$Output,
     [int]$ProcessId = 0,
     [string]$Executable,
-    [switch]$ContinueScene
+    [switch]$ContinueScene,
+    [switch]$DraftScene
 )
 # CI-only native driver. Never creates .done files or invokes a renderer bridge.
 $ErrorActionPreference = 'Stop'
@@ -44,10 +45,10 @@ public static class RewriteNative {
 '@
 [void][RewriteNative]::SetProcessDPIAware()
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
-$acceptName=if($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
-$actionTitle=if($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
+$acceptName=if($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
+$actionTitle=if($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
 $receipt = [ordered]@{
-    action=if($ContinueScene){'continueScene'}else{'rewriteDialogue'};
+    action=if($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
     checks=[ordered]@{}; captures=@(); controls=@(); uiaStaleRetries=0

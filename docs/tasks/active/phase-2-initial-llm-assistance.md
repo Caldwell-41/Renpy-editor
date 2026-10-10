@@ -3614,3 +3614,78 @@ coherent work to the existing branch; update canonical contracts, task, CURRENT 
 HANDOVER. Follow WORKFLOW manual same-thread CI wait/resume and audit actual artifacts.
 Return result, limitations and next prompt. Do not start the next deliverable.
 ```
+
+
+### Draft Scene selection — 2026-10-10
+
+User selected delivery of one bounded Scene in an explicitly selected saved Chapter,
+accept once, Undo/Redo and reopen with all existing source preserved. Fresh local and
+remote branch `codex/provider-qualification` match closure `23c251b`; main is unchanged
+`5f448ca`. Checkout clean; no reset or unrelated change. Retain Mac ARM64 session;
+one GPT-6.1 Sol High owner, serial shared implementation and independent review.
+
+Reuse provider/reference/prompt/literal/context/bounded-group/transaction foundations.
+Author reviews Chapter and title before exact dispatch. Closed response: 1–8 supported
+dialogue/narration Beats, at most 10,000 total UTF-8 text bytes, existing reviewed
+Characters and explicit terminal Return. Core owns IDs, technical label and source path.
+Passive semantic/exact source/project/source-map preview; Accept binds digest and
+rechecks session, configuration, complete revisions, drafts and transaction preconditions.
+One journalled transaction/Undo entry; duplicate refusal; byte-exact existing source,
+Undo/Redo/project and process reopen. Malformed/unsafe/cancelled/stale Chapter/project/
+session, competing draft/request and external edits must write nothing. No incoming
+connection, edge replacement, custom generation, generated references, provider/route
+expansion, paid/public calls, signing-policy change, merge or release.
+
+CI-first affected shared behavior on Windows x64/macOS ARM64, including changed-action
+native and official pinned-SDK literal/runtime proof. Windows runner's prior audited
+interactive UIA/input capability is reusable, rechecked in each selected run. Hosted Mac
+has no approved signing identity: automated controller/service/SDK proof uses CI; named
+signed changed-action native case remains on the retained Mac host. Computer Use
+inventory works; no app launch for capability inspection. Existing local pinned tools,
+SDK and approved signing configuration retained.
+
+New cumulative allowance per target: 4 package attempts, 6 editor launches, 4 focused CI
+dispatches. Initial actual use/reservations Windows **0/4, 0/6, 0/4**; Mac **0/4, 0/6, 0/4**.
+Prior allowances remain closed. Failures/cancellations/implicit launches count; reassess
+after two unsuccessful corrections of one hypothesis. Required independent review
+remains independent. Manual same-thread CI wait/resume applies; next deliverable excluded.
+
+
+### Draft Scene implementation and reviewed preflight — 2026-10-10
+
+Implemented Chapter-level Assist selection, author-reviewed title and dedicated editable
+versioned prompt. Shared exact-send/proposal path accepts a closed 1–8 Beat Scene with
+explicit Return, core IDs/label/path, combined source/project/map preview and one
+transaction/history. Every existing source path/revision and retained Source draft is
+guarded without outbound story inclusion. Empty Chapter preview creates no directory;
+acceptance materializes it. No incoming connection or existing-source mutation.
+
+Focused local core **21/21**, renderer **127/127**, prompt **5/5**, actual controller/
+native credential/strict loopback HTTP and pinned-SDK Draft literal/runtime pass.
+Evidence gates **15 tests, 14 pass/1 Windows-only PowerShell skip** locally; Windows
+will execute that required target-only gate. Actionlint and JavaScript/Python syntax
+checks pass. Production and gate assertions reject incomplete/missing/wrong-action
+results, malformed/unsafe/extra-field terminal output and zero-test results.
+
+Independent GPT-6.1 Sol High read-only review found title-only retention and disappeared
+source/retained draft gaps. Both fixed; DOM/core regressions pass. It additionally
+required actual saved bytes in the SDK driver, native BOM-preserving byte hashes
+including Undo metadata, and Mac mutually exclusive selector preflight. All corrected
+before packages/CI. Review fixes remain within this same outcome.
+
+Failures retained: initial new terminal test exposed serde unit-variant extra-field
+acceptance (18 passed/1 failed); replaced with a closed terminal object, then 4 Draft
+cases and full 21 passed. Harness test expected historical renderer count 126; updated
+its explicit rejecting fixture to current 127 and passed. No gate threshold relaxed.
+A broad formatter touched entry-clean unrelated Rust files; exact pinned-rustfmt
+comparisons proved all ten changes formatting-only before guarded restoration.
+Automatic approval review initially rejected the broad restore; explicit equality
+guards then allowed only those proven formatter deltas to be removed. No user work
+was lost. Tests/builds of examples are not editor-process launches or package attempts.
+
+Approved signing capability verified outside sandbox: existing pin/identity available;
+its retained local trust limitation remains unchanged. Hosted Mac cannot provision it.
+Reserve named signed Mac Draft native case: **package attempt 1**, then at most two
+editor launches for action and process reopen. Actual prior use remains zero on both
+targets; planned Windows CI **1 build/2 launches**, one focused dispatch per target.
+No dispatch or app launch yet. All failures/cancellations/implicit launches count.

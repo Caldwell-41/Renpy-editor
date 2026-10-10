@@ -1,5 +1,5 @@
 import copy,unittest
-from rewrite_probe_gate import PHASE_CHECKS,CONTINUE_CHECKS,validate_report
+from rewrite_probe_gate import DRAFT_CHECKS, PHASE_CHECKS,CONTINUE_CHECKS,validate_report
 class Gate(unittest.TestCase):
  def report(self,phase):return {'case':'dialogue-rewrite','passed':True,'cleanupComplete':True,'details':{'stage':'complete','passed':True,'checks':list(PHASE_CHECKS[phase]),'reviewedBodyDigests':['a'*64]*5}}
  def test_required_results_and_clean_complete_only(self):
@@ -27,3 +27,15 @@ class Gate(unittest.TestCase):
     with self.assertRaises(ValueError):validate_report(bad,phase,True)
    bad=copy.deepcopy(report);bad['details']['action']='rewriteDialogue'
    with self.assertRaises(ValueError):validate_report(bad,phase,True)
+
+class DraftGate(unittest.TestCase):
+ def test_exact_action_all_required_cases_and_body_receipts(self):
+  for phase in (1,2):
+   details={'action':'draftScene','stage':'complete','passed':True,'checks':list(DRAFT_CHECKS[phase]),'reviewedBodyDigests':['a'*64]*5}
+   report={'case':'dialogue-rewrite','passed':True,'cleanupComplete':True,'details':details}
+   validate_report(report,phase,False,True)
+   for check in DRAFT_CHECKS[phase]:
+    bad=copy.deepcopy(report);bad['details']['checks'].remove(check)
+    with self.assertRaises(ValueError):validate_report(bad,phase,False,True)
+   bad=copy.deepcopy(report);bad['details']['action']='continueScene'
+   with self.assertRaises(ValueError):validate_report(bad,phase,False,True)

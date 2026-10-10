@@ -411,6 +411,7 @@ export function renderSceneAuthoring(
       });
       const newScene = button("+ New Scene", "tree-new-scene");
       newScene.addEventListener("click", () => inlineName(chapterGroup, "Scene name", "New Scene", (displayName) => mutate({ type: "createScene", chapterId: chapter.id, displayName })));
+      if(actions.assist){const draft=button("Assist · Draft Scene","tree-new-scene");draft.ariaLabel=`Draft Scene in ${chapter.displayName}`;draft.onclick=()=>{if(draftGuard())actions.assist?.(chapter.id,"","draftScene");};chapterGroup.append(draft);}
       chapterGroup.append(newScene);chapterGroup.querySelectorAll<HTMLElement>(".tree-scene-row,.tree-new-scene").forEach(e=>e.hidden=collapsedChapters.has(chapter.id)); treeHost.append(chapterGroup);
     });
   };

@@ -409,7 +409,7 @@ fn continue_scene_exact_group_preview_preserves_bytes_ids_terminal_history_reope
     let review = f.complete(&p, response.to_string()).unwrap();
     assert_snapshots(&before, &f.snapshots());
     assert_eq!(review["beats"], response["beats"]);
-    assert_eq!(review["assignedBeatIds"].as_array().unwrap().len(),2);
+    assert_eq!(review["assignedBeatIds"].as_array().unwrap().len(), 2);
     let w = f.ok(
         "rewrite.accept",
         json!({"proposalId":review["proposalId"],"previewDigest":review["previewDigest"]}),
@@ -699,4 +699,259 @@ fn continue_scene_lf_crlf_bom_unterminated_terminal_and_custom_adjacent_refusal(
         text: "No terminal".into(),
     };
     assert!(crate::scene::continue_anchor(&invalid, &invalid.last().unwrap().id).is_err());
+}
+
+impl Fixture {
+    fn draft_prepare(&mut self) -> Value {
+        let o = self.ok("context.options", json!({}));
+        let store = self.service.read().unwrap();
+        self.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::DRAFT,"expectedPromptRevision":o["draftPrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"chapterId":o["chapters"][0]["id"],"displayName":"New café 雪","references":[],"task":"Draft bounded scene","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))
+    }
+    fn draft_response(&self, p: &Value) -> Value {
+        let body: Value = serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();
+        let u: Value =
+            serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+        json!({"schemaVersion":1,"action":prompts::DRAFT,"target":{"chapterId":u["story"]["chapterId"],"title":u["story"]["title"]},"beats":[{"type":"narration","text":"New [str(7)] {a=jump:label} café 雪 <img onerror=alert(1)>"},{"type":"dialogue","characterId":u["definitions"][0]["id"],"text":"Second literal [flag] {b}line{/b}"}],"terminal":{"type":"return"}})
+    }
+}
+#[test]
+fn draft_scene_exact_dispatch_inert_source_metadata_one_transaction_undo_redo_reopen() {
+    let mut f = Fixture::new();
+    let old = f.ok("scene.list", json!({}));
+    let before = f.snapshots();
+    let p = f.draft_prepare();
+    assert_snapshots(&before, &f.snapshots());
+    let sent = f.take(&p, Cancel::default()).unwrap();
+    assert_eq!(
+        sent.body,
+        p["serializedPayload"].as_str().unwrap().as_bytes()
+    );
+    assert!(f.take(&p, Cancel::default()).is_err());
+    let r = f.complete(&p, f.draft_response(&p).to_string()).unwrap();
+    assert_snapshots(&before, &f.snapshots());
+    assert_eq!(r["patches"].as_array().unwrap().len(), 3);
+    assert_eq!(r["terminal"]["type"], "return");
+    assert_eq!(r["incomingConnection"], "None");
+    let id = r["scene"]["id"].as_str().unwrap();
+    let path = r["scene"]["sourcePath"].as_str().unwrap();
+    assert!(uuid::Uuid::parse_str(id).is_ok());
+    let w = f.ok(
+        "rewrite.accept",
+        json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}),
+    );
+    let after = f.snapshots();
+    assert_eq!(
+        w["scenes"].as_array().unwrap().len(),
+        old["scenes"].as_array().unwrap().len() + 1
+    );
+    for (path, bytes) in before.iter().filter(|(p, _)| p.ends_with(".rpy")) {
+        assert_eq!(after[path], *bytes);
+    }
+    for patch in r["patches"].as_array().unwrap() {
+        assert_eq!(
+            patch["after"].as_str().unwrap().as_bytes(),
+            after[patch["path"].as_str().unwrap()]
+        );
+    }
+    assert!(String::from_utf8_lossy(&after[path]).contains("New [[str(7)] {{a=jump:label}"));
+    let new = w["scenes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["id"] == id)
+        .unwrap();
+    assert_eq!(new["beats"].as_array().unwrap().len(), 3);
+    assert_eq!(new["beats"][2]["payload"]["type"], "return");
+    for (b, assigned) in new["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .zip(r["assignedBeatIds"].as_array().unwrap())
+    {
+        assert_eq!(&b["id"], assigned);
+    }
+    assert_eq!(
+        f.call(
+            "rewrite.accept",
+            json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]})
+        )["ok"],
+        false
+    );
+    assert_snapshots(&after, &f.snapshots());
+    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"undo"}}));
+    assert!(!f.root.join(path).exists());
+    for key in [
+        ".renpy-editor/project.json",
+        ".renpy-editor/source-map.json",
+    ] {
+        assert_eq!(fs::read(f.root.join(key)).unwrap(), before[key]);
+    }
+    let redo=f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    assert_eq!(redo["scenes"], w["scenes"]);
+    assert_eq!(fs::read(f.root.join(path)).unwrap(), after[path]);
+    f.ok("project.close", json!({}));
+    f.session = f.service.open_path(&f.root).unwrap().session_id;
+    assert_eq!(f.ok("scene.list", json!({}))["scenes"], w["scenes"]);
+}
+#[test]
+fn draft_scene_closed_response_bounds_explicit_return_and_authority_zero_writes() {
+    let mut f = Fixture::new();
+    for case in 0..15 {
+        let p = f.draft_prepare();
+        let mut reply = f.draft_response(&p);
+        let before = f.snapshots();
+        match case {
+            0 => reply["path"] = json!("game/injected.rpy"),
+            1 => reply["target"]["title"] = json!("Changed"),
+            2 => reply["target"]["chapterId"] = json!(uuid::Uuid::new_v4().to_string()),
+            3 => {
+                reply.as_object_mut().unwrap().remove("terminal");
+            }
+            4 => reply["terminal"] = json!({"type":"jump","sceneId":"x"}),
+            5 => reply["beats"] = json!([]),
+            6 => reply["beats"] = json!(vec![json!({"type":"narration","text":"x"}); 9]),
+            7 => reply["beats"][0]["text"] = json!("x".repeat(10001)),
+            8 => reply["beats"][0]["text"] = json!("\0"),
+            9 => reply["beats"][1]["characterId"] = json!(uuid::Uuid::new_v4().to_string()),
+            10 => reply["beats"][0] = json!({"type":"customCode","source":"pass"}),
+            11 => reply["beats"][0]["id"] = json!(uuid::Uuid::new_v4().to_string()),
+            12 => reply["terminal"]["id"] = json!("generated"),
+            13 => reply["beats"][0]["text"] = json!("  "),
+            _ => reply["connection"] = json!({"from":"x"}),
+        }
+        f.take(&p, Cancel::default()).unwrap();
+        assert!(f.complete(&p, reply.to_string()).is_err(), "case {case}");
+        assert_snapshots(&before, &f.snapshots());
+    }
+    let p = f.draft_prepare();
+    let before = f.snapshots();
+    f.take(&p, Cancel::default()).unwrap();
+    assert!(f
+        .complete(&p, "{\"schemaVersion\":1,\"schemaVersion\":1}".into())
+        .is_err());
+    assert_snapshots(&before, &f.snapshots());
+}
+#[test]
+fn draft_scene_cancel_stale_chapter_session_competing_draft_external_zero_writes() {
+    for case in 0..7 {
+        let mut f = Fixture::new();
+        let p = f.draft_prepare();
+        let cancel = Cancel::default();
+        f.take(&p, cancel.clone()).unwrap();
+        let r = f.complete(&p, f.draft_response(&p).to_string()).unwrap();
+        match case {
+            0 => cancel.cancel(),
+            1 => {
+                let w = f.ok("scene.list", json!({}));
+                f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"renameChapter","chapterId":w["chapters"][0]["id"],"displayName":"Changed"}}));
+            }
+            2 => {
+                let opened = f.ok("source.open", json!({"path":f.path}));
+                f.ok("source.updateDraft",json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":format!("{}\n# draft",opened["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));
+            }
+            3 => {
+                let _new = f.draft_prepare();
+            }
+            4 => {
+                let path = f.root.join(&f.path);
+                let mut b = fs::read(&path).unwrap();
+                b.extend_from_slice(b"# external\n");
+                fs::write(path, b).unwrap();
+            }
+            5 => {
+                f.ok("project.close", json!({}));
+                f.session = f.service.open_path(&f.root).unwrap().session_id;
+            }
+            _ => {
+                let o = f.ok("context.options", json!({}));
+                f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":o["draftPrompt"]["revision"],"command":{"type":"save","text":"Changed draft instructions"}}));
+            }
+        }
+        let before = f.snapshots();
+        assert_eq!(
+            f.call(
+                "rewrite.accept",
+                json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]})
+            )["ok"],
+            false,
+            "case {case}"
+        );
+        assert_snapshots(&before, &f.snapshots());
+    }
+}
+#[test]
+fn draft_scene_empty_saved_chapter_preview_no_directory_and_accept_return() {
+    let mut f = Fixture::new();
+    let w = f.ok("scene.list", json!({}));
+    f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"createChapter","displayName":"Empty"}}));
+    let o = f.ok("context.options", json!({}));
+    let store = f.service.read().unwrap();
+    let chapter = &o["chapters"][1];
+    let directory = chapter["directory"].as_str().unwrap();
+    assert!(!f.root.join(directory).exists());
+    let before = f.snapshots();
+    let p=f.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::DRAFT,"expectedPromptRevision":o["draftPrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"chapterId":chapter["id"],"displayName":"Empty Chapter Scene","references":[],"task":"Draft bounded scene","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}));
+    f.take(&p, Cancel::default()).unwrap();
+    let r = f.complete(&p, f.draft_response(&p).to_string()).unwrap();
+    assert_snapshots(&before, &f.snapshots());
+    assert!(!f.root.join(directory).exists());
+    f.ok(
+        "rewrite.accept",
+        json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}),
+    );
+    assert!(f
+        .root
+        .join(r["scene"]["sourcePath"].as_str().unwrap())
+        .exists());
+}
+
+#[test]
+fn draft_scene_disappeared_source_retained_draft_refuses_prepare_and_accept() {
+    let mut f = Fixture::new();
+    let p = f.draft_prepare();
+    f.take(&p, Cancel::default()).unwrap();
+    let r = f.complete(&p, f.draft_response(&p).to_string()).unwrap();
+    let opened = f.ok("source.open", json!({"path":f.path}));
+    f.ok("source.updateDraft",json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":format!("{}\n# retained draft",opened["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));
+    fs::remove_file(f.root.join(&f.path)).unwrap();
+    let before = f.snapshots();
+    assert_eq!(
+        f.call(
+            "rewrite.accept",
+            json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]})
+        )["ok"],
+        false
+    );
+    assert_snapshots(&before, &f.snapshots());
+    let body: Value = serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();
+    let u: Value = serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+    let o = f.ok("context.options", json!({}));
+    let store = f.service.read().unwrap();
+    assert_eq!(f.call("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::DRAFT,"expectedPromptRevision":o["draftPrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"chapterId":u["story"]["chapterId"],"displayName":"New café 雪","references":[],"task":"Draft","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))["ok"],false);
+    assert_snapshots(&before, &f.snapshots());
+}
+#[test]
+fn draft_scene_prompt_save_restore_history_and_stale_send() {
+    let mut f = Fixture::new();
+    let p = f.draft_prepare();
+    let o = f.ok("context.options", json!({}));
+    let saved=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":o["draftPrompt"]["revision"],"command":{"type":"save","text":"Custom Draft instructions"}}));
+    let before = f.snapshots();
+    assert!(f.take(&p, Cancel::default()).is_err());
+    assert_snapshots(&before, &f.snapshots());
+    let p = f.draft_prepare();
+    let body: Value = serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();
+    assert_eq!(body["messages"][0]["content"], "Custom Draft instructions");
+    let restored=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":saved["revision"],"command":{"type":"restore"}}));
+    assert_eq!(restored["customized"], false);
+    let undone=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":restored["revision"],"command":{"type":"undo"}}));
+    assert_eq!(undone["effectiveText"], "Custom Draft instructions");
+    let redone=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":undone["revision"],"command":{"type":"redo"}}));
+    assert_eq!(redone["customized"], false);
+    f.ok("project.close", json!({}));
+    f.session = f.service.open_path(&f.root).unwrap().session_id;
+    assert_eq!(
+        f.ok("context.options", json!({}))["draftPrompt"]["effectiveText"],
+        prompts::DRAFT_BASELINE
+    );
 }

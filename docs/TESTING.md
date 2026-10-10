@@ -1465,3 +1465,34 @@ physical Generate/Accept. This is agent/automated native evidence, not final hum
 phase-wide acceptance or new live-provider qualification. The
 [closure ledger](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
 owns actual consumed attempts and retained failures.
+
+
+## Draft Scene focused qualification
+
+The selected [task ledger](tasks/active/phase-2-initial-llm-assistance.md#draft-scene-selection--2026-10-10)
+owns selection, allowance and results. Use core `cargo test -p loomlight-core --locked
+rewrite` (21 selected tests), `prompts::tests`, `ai_request::tests`, desktop
+`ai_requests::tests`, `npm run check` (127 cases), and actual controller fixture
+`node tests/rewrite-controller.dispatch.mjs <compiled rewrite-controller-driver>
+--draft-scene`. Draft tests cover closed fields/bounds/explicit Return, exact dispatch,
+inert metadata/source review, all existing bytes, one transaction/Undo/Redo/reopen,
+empty saved Chapter, stale Chapter/session/prompt, competition and retained drafts
+whose source disappeared. No deliberate crash/hostile-filesystem experiments.
+
+`production-scaffold.yml` input `draft_scene=true` isolates Windows x64 packaged
+UIA/OS-input proof and Mac ARM64 automated controller/core/SDK checks. Other action
+selectors/reuse IDs false/empty; each target's selected allowance remains cumulative.
+Hosted Mac lacks approved signing credentials; only the named changed-action signed
+native case uses the retained approved local Mac, without identity/policy changes.
+The shared probe requires Draft-specific complete cases and five exact reviewed/HTTP
+bodies. Both phases retain outcome and cleanup; phase 2 proves process persistence
+with zero HTTP and unchanged project bytes. Required native stages demand actual
+action-specific PID/binary-bound receipts/intact captures before acknowledgement.
+
+`draft-literal-driver` reads actual accepted source from disk and asserts equality to
+the exact preview. `rewrite-literal-sdk.py --draft-scene` compiles/lints that new file
+with the official checksum-verified Ren'Py 8.5.3 standard template, checks display
+substitution/tokens and exact two generated say payloads, then executes the explicit
+Return with editor metadata absent. Review raw logs/cases/input/binary/artifact hashes,
+not badges. Reject missing/partial/unsafe/skipped required evidence. Reuse unchanged
+prior foundations; manual same-thread wait/resume applies.

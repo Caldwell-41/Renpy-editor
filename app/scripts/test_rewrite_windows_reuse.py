@@ -18,10 +18,10 @@ class RetainedEvidenceGate(unittest.TestCase):
     def test_continue_renderer_gate_executes_and_rejects_partial_or_unsuccessful_runs(self):
         for prefix, newline in (('ℹ', '\n'), ('#', '\r\n')):
             passed = newline.join(f'{prefix} {name} {count}' for name, count in
-                                  [('tests', 126), ('pass', 126), ('fail', 0), ('cancelled', 0), ('skipped', 0), ('todo', 0)]) + newline
+                                  [('tests', 127), ('pass', 127), ('fail', 0), ('cancelled', 0), ('skipped', 0), ('todo', 0)]) + newline
             recipe.validate_continue_renderer(passed)
             for name in ('tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo'):
-                original = f'{prefix} {name} '+('126' if name in ('tests', 'pass') else '0')
+                original = f'{prefix} {name} '+('127' if name in ('tests', 'pass') else '0')
                 for invalid in (passed.replace(original, ''), passed.replace(original, f'{prefix} {name} 1')):
                     with self.subTest(prefix=prefix, outcome=name), self.assertRaises(AssertionError):
                         recipe.validate_continue_renderer(invalid)

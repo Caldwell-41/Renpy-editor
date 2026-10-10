@@ -7,11 +7,11 @@ from pathlib import Path
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from rewrite_probe_gate import validate_report
 from rewrite_native_evidence import NATIVE_STAGES,validate_native_stage
-p=argparse.ArgumentParser();p.add_argument('--continue-scene',action='store_true');p.add_argument('--executable',type=Path,required=True);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--phase',type=int,choices=(1,2),required=True);p.add_argument('--native-driver',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--continue-scene',action='store_true');p.add_argument('--draft-scene',action='store_true');p.add_argument('--executable',type=Path,required=True);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--phase',type=int,choices=(1,2),required=True);p.add_argument('--native-driver',type=Path);a=p.parse_args()
 if a.native_driver and (os.name!='nt' or not a.native_driver.is_file()):raise SystemExit('Windows native driver required')
 if not a.executable.is_file() or not a.root.name.startswith('loomlight-rewrite-'):raise SystemExit('Owned executable/root required')
 if a.phase==1 and a.root.exists():raise SystemExit('Fresh fixture required')
-if a.phase==2:validate_report(json.loads((a.output/'phase-1.json').read_text()),1,a.continue_scene)
+if a.phase==2:validate_report(json.loads((a.output/'phase-1.json').read_text()),1,a.continue_scene,a.draft_scene)
 a.output.mkdir(parents=True,exist_ok=True);logpath=a.output/f'phase-{a.phase}.log'
 if logpath.exists():raise SystemExit('Fresh log required; no replay')
 root=a.root/'synthetic-project';editor=root/'.renpy-editor'
@@ -29,7 +29,13 @@ class Handler(BaseHTTPRequestHandler):
    if not 0<size<=2*1024*1024:raise ValueError('Fixture body bound')
    body=self.rfile.read(size);v=json.loads(body);u=json.loads(v['messages'][1]['content']);task=u['task']
    if v['model']!='synthetic-rewrite-model' or v['response_format']['json_schema']['strict'] is not True or v['enable_tools'] is not False or v['enabled_tools']!=[] or v['stream'] is not False or len(u['references'])!=2:raise ValueError('Fixture contract mismatch')
-   if a.continue_scene:
+   if a.draft_scene:
+    if u['responseContract']['action']!='draftScene' or u['story']['terminal']!={'type':'return'}:raise ValueError('Draft contract mismatch')
+    character=next(d for d in u['definitions'] if d['kind']=='character')
+    beats=[{'type':'narration','text':'New [str(7)] {a=jump:label} café 雪 <img onerror=alert(1)>'},{'type':'dialogue','characterId':character['id'],'text':'A second line.'}]
+    terminal={'type':'return'} if task!='FIXTURE_UNSAFE' else {'type':'jump','sceneId':'injected'}
+    text=json.dumps({'schemaVersion':1,'action':'draftScene','target':{'chapterId':u['story']['chapterId'],'title':u['story']['title']},'beats':beats,'terminal':terminal},ensure_ascii=False)
+   elif a.continue_scene:
     if u['responseContract']['action']!='continueScene' or u['story']['anchor']['beforeBeatId']!=u['story']['beatId']:raise ValueError('Continue contract mismatch')
     character=next(d for d in u['definitions'] if d['kind']=='character')
     beats=[{'type':'narration','text':'New [str(7)] {a=jump:label} café 雪 <img onerror=alert(1)>'},{'type':'dialogue','characterId':character['id'],'text':'A second line.'}]
@@ -50,7 +56,7 @@ class Handler(BaseHTTPRequestHandler):
 server=ThreadingHTTPServer(('127.0.0.1',0),Handler);server.daemon_threads=True
 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
 endpoint=f'http://127.0.0.1:{server.server_address[1]}/v1'
-env=dict(os.environ,LOOMLIGHT_RUNTIME_UI_PROBE='dialogue-rewrite',LOOMLIGHT_REWRITE_PROBE_ROOT=str(a.root),LOOMLIGHT_REWRITE_PROBE_PHASE=str(a.phase),LOOMLIGHT_REWRITE_PROBE_ENDPOINT=endpoint,TMPDIR=str(a.root.parent),LOOMLIGHT_CONTINUE_SCENE='1' if a.continue_scene else '0')
+env=dict(os.environ,LOOMLIGHT_RUNTIME_UI_PROBE='dialogue-rewrite',LOOMLIGHT_REWRITE_PROBE_ROOT=str(a.root),LOOMLIGHT_REWRITE_PROBE_PHASE=str(a.phase),LOOMLIGHT_REWRITE_PROBE_ENDPOINT=endpoint,TMPDIR=str(a.root.parent),LOOMLIGHT_CONTINUE_SCENE='1' if a.continue_scene else '0',LOOMLIGHT_DRAFT_SCENE='1' if a.draft_scene else '0')
 process=subprocess.Popen([str(a.executable.resolve())],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
 executable_digest=hashlib.sha256(a.executable.read_bytes()).hexdigest()
 print(json.dumps({'evidence':'rewrite-launch','phase':a.phase,'pid':process.pid,'executableSHA256':executable_digest}),flush=True)
@@ -65,10 +71,10 @@ try:
    if a.native_driver and item.get('evidence')=='rewrite-stage' and item.get('stage') in NATIVE_STAGES:
     stage=item['stage'];native=a.output/'native';native.mkdir(exist_ok=True)
     try:
-     result=subprocess.run(['powershell.exe','-NoProfile','-File',str(a.native_driver.resolve()),'-ProcessId',str(process.pid),'-Executable',str(a.executable.resolve()),'-Stage',stage,'-Output',str(native.resolve()),*(['-ContinueScene'] if a.continue_scene else [])],capture_output=True,text=True,timeout=75)
+     result=subprocess.run(['powershell.exe','-NoProfile','-File',str(a.native_driver.resolve()),'-ProcessId',str(process.pid),'-Executable',str(a.executable.resolve()),'-Stage',stage,'-Output',str(native.resolve()),*(['-DraftScene'] if a.draft_scene else ['-ContinueScene'] if a.continue_scene else [])],capture_output=True,text=True,timeout=75)
      (native/f'{stage}.log').write_text(result.stdout+result.stderr,encoding='utf-8')
      if result.returncode:raise ValueError('Native driver failed')
-     native_receipts.append(validate_native_stage(native,stage,process.pid,executable_digest,a.continue_scene))
+     native_receipts.append(validate_native_stage(native,stage,process.pid,executable_digest,a.continue_scene,a.draft_scene))
      # Only the evidence validator can acknowledge a CI-driven native stage.
      (a.root/f'{stage}.done').touch()
     except Exception as e:
@@ -85,7 +91,7 @@ try:
  # Preserve a terminal report even when the required gate rejects it.
  if report:(a.output/f'phase-{a.phase}.json').write_text(json.dumps(report,indent=2)+'\n')
  if code or not report:raise ValueError('Required packaged proof failed; diagnose before retry')
- validate_report(report,a.phase,a.continue_scene)
+ validate_report(report,a.phase,a.continue_scene,a.draft_scene)
  if errors:raise ValueError('Controlled fixture or required native evidence failed: '+', '.join(errors))
  if a.native_driver and a.phase==1 and {r['stage'] for r in native_receipts}!=NATIVE_STAGES:raise ValueError('Every native driver stage is required')
  if a.phase==1 and requests!=report['details']['reviewedBodyDigests']:raise ValueError('Exact reviewed bodies do not match all five HTTP requests')

@@ -111,6 +111,35 @@ fn continue_schema(scene: &str, beat: &str, characters: Vec<&str>) -> Value {
     }
     json!({"type":"object","additionalProperties":false,"required":["schemaVersion","action","target","beats"],"properties":{"schemaVersion":{"type":"integer","enum":[1]},"action":{"type":"string","enum":[prompts::CONTINUE]},"target":{"type":"object","additionalProperties":false,"required":["sceneId","beatId"],"properties":{"sceneId":{"type":"string","enum":[scene]},"beatId":{"type":"string","enum":[beat]}}},"beats":{"type":"array","minItems":1,"maxItems":8,"items":{"anyOf":alternatives}}}})
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DraftTarget {
+    chapter_id: String,
+    title: String,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DraftResponse {
+    schema_version: u32,
+    action: String,
+    target: DraftTarget,
+    beats: Vec<GeneratedBeat>,
+    terminal: ReturnOnly,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReturnOnly {
+    #[serde(rename = "type")]
+    kind: String,
+}
+fn draft_schema(chapter: &str, title: &str, characters: Vec<&str>) -> Value {
+    let mut value = continue_schema("", "", characters);
+    value["required"] = json!(["schemaVersion", "action", "target", "beats", "terminal"]);
+    value["properties"]["action"] = json!({"type":"string","enum":[prompts::DRAFT]});
+    value["properties"]["target"] = json!({"type":"object","additionalProperties":false,"required":["chapterId","title"],"properties":{"chapterId":{"type":"string","enum":[chapter]},"title":{"type":"string","enum":[title]}}});
+    value["properties"]["terminal"] = json!({"type":"object","additionalProperties":false,"required":["type"],"properties":{"type":{"type":"string","enum":["return"]}}});
+    value
+}
 #[derive(PartialEq)]
 enum Phase {
     Prepared,
@@ -222,7 +251,8 @@ impl AuthoringService {
             return Err(RewriteError::Unsupported);
         }
         let continuing = request.context.action == prompts::CONTINUE;
-        let boundary = if continuing {
+        let drafting = request.context.action == prompts::DRAFT;
+        let boundary = if continuing || drafting {
             Boundary {
                 segments: vec![],
                 protected: vec![],
@@ -237,7 +267,19 @@ impl AuthoringService {
             )
             .map_err(|_| RewriteError::Unsupported)?
         };
-        let response_schema = if continuing {
+        let response_schema = if drafting {
+            draft_schema(
+                &request.context.chapter_id,
+                &request.context.display_name,
+                user["definitions"]
+                    .as_array()
+                    .ok_or(RewriteError::Invalid)?
+                    .iter()
+                    .filter(|d| d["kind"] == "character")
+                    .filter_map(|d| d["id"].as_str())
+                    .collect(),
+            )
+        } else if continuing {
             continue_schema(
                 &request.context.scene_id,
                 &request.context.beat_id,
@@ -256,7 +298,9 @@ impl AuthoringService {
                 &boundary,
             )
         };
-        user["responseContract"] = if continuing {
+        user["responseContract"] = if drafting {
+            json!({"version":1,"action":prompts::DRAFT,"schema":response_schema,"authority":"Create exactly one inseparable Scene in the reviewed saved Chapter with its reviewed title: 1–8 dialogue/narration Beats, at most 10000 total UTF-8 text bytes, existing reviewed Characters and explicit terminal Return. Core owns IDs, technical label, source path and literal encoding. Preserve ALL existing source; no incoming connection, definitions, custom source, tools or other operations."})
+        } else if continuing {
             json!({"version":1,"action":prompts::CONTINUE,"schema":response_schema,"authority":"Insert one inseparable group of 1–8 dialogue/narration Beats BEFORE the saved anchor. At most 10000 total UTF-8 text bytes; existing reviewed Characters only. Core owns IDs, paths and source encoding. Preserve all existing source and the terminal. New prose is literal display text; no source, tokens, tools, definitions or terminal operations."})
         } else {
             json!({"version":1,"action":prompts::ACTION,"schema":response_schema,"authority":"Replace only the selected saved text; preserve speaker, order and every protected token exactly once in its original order. Literal segments are inert display text. No paths, source patches, tools or other operations.","protected":boundary.protected,"segments":boundary.segments})
@@ -267,7 +311,7 @@ impl AuthoringService {
         if !profile.settings.valid() {
             return Err(RewriteError::Invalid);
         }
-        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
+        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
         let margin = 256.max(body.len().div_ceil(10));
         let total = body.len() + margin + request.context.maximum_response;
         if body.len() > crate::ai_request::MAX_BODY
@@ -291,7 +335,7 @@ impl AuthoringService {
             .source_draft_versions(project, &paths)
             .map_err(|_| RewriteError::Stale)?;
         let token = uuid::Uuid::new_v4().to_string();
-        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":"Literal loopback HTTP","inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
+        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"chapter":if drafting {user["story"].clone()}else{Value::Null},"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":"Literal loopback HTTP","inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
         let transient = Transient {
             token,
             session: session.into(),
@@ -428,7 +472,94 @@ impl AuthoringService {
         }
         let parsed = crate::ai_discovery::strict_json(completion.text.as_bytes())
             .map_err(|_| RewriteError::Invalid)?;
-        let (proposal, semantic) = if t.context.action == prompts::CONTINUE {
+        let (proposal, semantic) = if t.context.action == prompts::DRAFT {
+            let response: DraftResponse =
+                serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1
+                || response.action != prompts::DRAFT
+                || response.target.chapter_id != t.context.chapter_id
+                || response.target.title != t.context.display_name
+                || response.beats.is_empty()
+                || response.beats.len() > 8
+                || response.beats.iter().map(|b| b.text().len()).sum::<usize>()
+                    > crate::rewrite_text::MAX_TEXT
+            {
+                return Err(RewriteError::Invalid);
+            }
+            if response.terminal.kind != "return" {
+                return Err(RewriteError::Invalid);
+            }
+            let user: Value = serde_json::from_str(
+                t.preview["payload"]["messages"][1]["content"]
+                    .as_str()
+                    .ok_or(RewriteError::Invalid)?,
+            )
+            .map_err(|_| RewriteError::Invalid)?;
+            for beat in &response.beats {
+                if let GeneratedBeat::Dialogue { character_id, .. } = beat {
+                    if !user["definitions"]
+                        .as_array()
+                        .ok_or(RewriteError::Invalid)?
+                        .iter()
+                        .any(|d| d["kind"] == "character" && d["id"] == *character_id)
+                    {
+                        return Err(RewriteError::Invalid);
+                    }
+                }
+            }
+            let proposal = self
+                .prepare_draft_scene(
+                    project,
+                    project_id,
+                    &t.context.chapter_id,
+                    t.context.display_name.clone(),
+                    response
+                        .beats
+                        .iter()
+                        .map(GeneratedBeat::entry)
+                        .collect::<Result<Vec<_>, _>>()?,
+                )
+                .map_err(RewriteError::Scene)?;
+            let project_mutation = proposal
+                .mutations
+                .iter()
+                .find(|m| m.path.as_str() == ".renpy-editor/project.json")
+                .ok_or(RewriteError::Invalid)?;
+            let metadata: Value = serde_json::from_slice(&project_mutation.proposed)
+                .map_err(|_| RewriteError::Invalid)?;
+            let new_scene = metadata["scenes"]
+                .as_array()
+                .ok_or(RewriteError::Invalid)?
+                .last()
+                .ok_or(RewriteError::Invalid)?
+                .clone();
+            let map_mutation = proposal
+                .mutations
+                .iter()
+                .find(|m| m.path.as_str() == ".renpy-editor/source-map.json")
+                .ok_or(RewriteError::Invalid)?;
+            let map: Value = serde_json::from_slice(&map_mutation.proposed)
+                .map_err(|_| RewriteError::Invalid)?;
+            let mapping = map["sceneMappings"]
+                .as_array()
+                .ok_or(RewriteError::Invalid)?
+                .iter()
+                .find(|m| m["sceneId"] == new_scene["id"])
+                .ok_or(RewriteError::Invalid)?;
+            let ids: Vec<_> = mapping["beats"]
+                .as_array()
+                .ok_or(RewriteError::Invalid)?
+                .iter()
+                .map(|b| b["id"].clone())
+                .collect();
+            if ids.len() != response.beats.len() + 1 {
+                return Err(RewriteError::Invalid);
+            }
+            (
+                proposal,
+                json!({"action":prompts::DRAFT,"scene":new_scene,"chapter":user["story"],"beats":response.beats,"assignedBeatIds":ids,"terminal":{"type":"return","id":ids.last()},"incomingConnection":"None"}),
+            )
+        } else if t.context.action == prompts::CONTINUE {
             let response: ContinueResponse =
                 serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
             if response.schema_version != 1
@@ -475,13 +606,39 @@ impl AuthoringService {
                     entries,
                 )
                 .map_err(RewriteError::Scene)?;
-            let mapping = proposal.mutations.iter().find(|m|m.path.as_str()==".renpy-editor/source-map.json").ok_or(RewriteError::Invalid)?;
-            let before_map: Value = serde_json::from_slice(&mapping.expected_bytes).map_err(|_|RewriteError::Invalid)?;
-            let after_map: Value = serde_json::from_slice(&mapping.proposed).map_err(|_|RewriteError::Invalid)?;
-            let old_ids: std::collections::BTreeSet<_> = before_map["sceneMappings"].as_array().ok_or(RewriteError::Invalid)?.iter().flat_map(|m|m["beats"].as_array().into_iter().flatten()).filter_map(|b|b["id"].as_str()).collect();
-            let new_ids: Vec<_> = after_map["sceneMappings"].as_array().ok_or(RewriteError::Invalid)?.iter().filter(|m|m["sceneId"]==t.context.scene_id).flat_map(|m|m["beats"].as_array().into_iter().flatten()).filter_map(|b|b["id"].as_str()).filter(|id|!old_ids.contains(id)).map(String::from).collect();
-            if new_ids.len()!=response.beats.len(){return Err(RewriteError::Invalid);}
-            (proposal,json!({"action":prompts::CONTINUE,"beats":response.beats,"assignedBeatIds":new_ids,"anchor":original_user["story"]["anchor"],"terminal":original_user["story"]["terminal"]}))
+            let mapping = proposal
+                .mutations
+                .iter()
+                .find(|m| m.path.as_str() == ".renpy-editor/source-map.json")
+                .ok_or(RewriteError::Invalid)?;
+            let before_map: Value = serde_json::from_slice(&mapping.expected_bytes)
+                .map_err(|_| RewriteError::Invalid)?;
+            let after_map: Value =
+                serde_json::from_slice(&mapping.proposed).map_err(|_| RewriteError::Invalid)?;
+            let old_ids: std::collections::BTreeSet<_> = before_map["sceneMappings"]
+                .as_array()
+                .ok_or(RewriteError::Invalid)?
+                .iter()
+                .flat_map(|m| m["beats"].as_array().into_iter().flatten())
+                .filter_map(|b| b["id"].as_str())
+                .collect();
+            let new_ids: Vec<_> = after_map["sceneMappings"]
+                .as_array()
+                .ok_or(RewriteError::Invalid)?
+                .iter()
+                .filter(|m| m["sceneId"] == t.context.scene_id)
+                .flat_map(|m| m["beats"].as_array().into_iter().flatten())
+                .filter_map(|b| b["id"].as_str())
+                .filter(|id| !old_ids.contains(id))
+                .map(String::from)
+                .collect();
+            if new_ids.len() != response.beats.len() {
+                return Err(RewriteError::Invalid);
+            }
+            (
+                proposal,
+                json!({"action":prompts::CONTINUE,"beats":response.beats,"assignedBeatIds":new_ids,"anchor":original_user["story"]["anchor"],"terminal":original_user["story"]["terminal"]}),
+            )
         } else {
             let response: Response =
                 serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
@@ -554,6 +711,20 @@ impl AuthoringService {
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         let proposal = t.proposal.take().ok_or(RewriteError::Stale)?;
         t.phase = Phase::Consumed; // Commit ambiguity is handled by ordinary recovery, not redispatch.
+        if t.context.action == prompts::DRAFT {
+            // Ordinary directory materialization is deferred until explicit acceptance.
+            let path = proposal
+                .mutations
+                .iter()
+                .find(|m| m.path.as_str().ends_with(".rpy"))
+                .ok_or(RewriteError::Invalid)?
+                .path
+                .as_str();
+            let directory = path.rsplit_once('/').ok_or(RewriteError::Invalid)?.0;
+            self.transactions
+                .ensure_directory(project, directory)
+                .map_err(|_| RewriteError::Stale)?;
+        }
         self.commit_history(project, proposal)
             .map_err(RewriteError::Scene)?;
         self.scene_workspace(project, project_id)

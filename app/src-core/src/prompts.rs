@@ -15,6 +15,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub const PATH: &str = ".renpy-editor/ai.json";
 pub const ACTION: &str = "rewriteDialogue";
 pub const CONTINUE: &str = "continueScene";
+pub const DRAFT: &str = "draftScene";
+pub const DRAFT_BASELINE: &str = include_str!("../prompts/v1/draft-scene.txt");
 pub const CONTINUE_BASELINE: &str = include_str!("../prompts/v1/continue-scene.txt");
 pub fn default_action() -> String {
     ACTION.into()
@@ -23,6 +25,7 @@ fn baseline(action: &str) -> Result<&'static str, PromptError> {
     match action {
         ACTION => Ok(BASELINE),
         CONTINUE => Ok(CONTINUE_BASELINE),
+        DRAFT => Ok(DRAFT_BASELINE),
         _ => Err(PromptError::Invalid),
     }
 }
@@ -83,9 +86,16 @@ pub struct PreviewRequest {
     #[serde(default = "default_action")]
     pub action: String,
     pub expected_prompt_revision: String,
+    #[serde(default)]
     pub scene_id: String,
+    #[serde(default)]
     pub beat_id: String,
+    #[serde(default)]
     pub expected_source_revision: String,
+    #[serde(default)]
+    pub chapter_id: String,
+    #[serde(default)]
+    pub display_name: String,
     pub expected_structure_revision: String,
     pub references: Vec<ReferenceSelection>,
     pub task: String,
@@ -121,7 +131,7 @@ fn validate(doc: &Value, project: &str) -> Result<(), PromptError> {
     {
         return Err(PromptError::Unavailable);
     }
-    for action in [ACTION, CONTINUE] {
+    for action in [ACTION, CONTINUE, DRAFT] {
         if let Some(p) = doc["prompts"].get(action) {
             if !p.is_object()
                 || p["text"]
@@ -360,7 +370,7 @@ impl AuthoringService {
             }
         }
         Ok(
-            json!({"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
+            json!({"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
         )
     }
     pub fn context_preview(
@@ -382,7 +392,19 @@ impl AuthoringService {
             return Err(PromptError::Invalid);
         }
         let prompt = self.prompts_for(project, project_id, &r.action)?;
+        let drafting = r.action == DRAFT;
         let continuing = r.action == CONTINUE;
+        if drafting {
+            crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
+            if !r.scene_id.is_empty()
+                || !r.beat_id.is_empty()
+                || !r.expected_source_revision.is_empty()
+            {
+                return Err(PromptError::Invalid);
+            }
+        } else if !r.chapter_id.is_empty() || !r.display_name.is_empty() {
+            return Err(PromptError::Invalid);
+        }
         if r.expected_prompt_revision != prompt.revision {
             return Err(PromptError::Stale);
         }
@@ -409,46 +431,71 @@ impl AuthoringService {
         if structure != r.expected_structure_revision {
             return Err(PromptError::Stale);
         }
-        let scene = ws
-            .scenes
-            .iter()
-            .find(|s| s.id == r.scene_id)
-            .ok_or(PromptError::Stale)?;
-        if scene.source_conflict || scene.source_revision != r.expected_source_revision {
-            return Err(PromptError::Stale);
-        }
-        let beat = scene
-            .beats
-            .iter()
-            .find(|b| b.id == r.beat_id && !b.protected)
-            .ok_or(PromptError::Stale)?;
-        let (character, text) = match &beat.payload {
-            BeatPayload::Dialogue { character_id, text } => {
+        let chapter = if drafting {
+            Some(
+                ws.chapters
+                    .iter()
+                    .find(|c| c.id == r.chapter_id)
+                    .ok_or(PromptError::Stale)?,
+            )
+        } else {
+            None
+        };
+        let scene = if drafting {
+            None
+        } else {
+            Some(
+                ws.scenes
+                    .iter()
+                    .find(|s| s.id == r.scene_id)
+                    .ok_or(PromptError::Stale)?,
+            )
+        };
+        let beat = if let Some(scene) = scene {
+            if scene.source_conflict || scene.source_revision != r.expected_source_revision {
+                return Err(PromptError::Stale);
+            }
+            Some(
+                scene
+                    .beats
+                    .iter()
+                    .find(|b| b.id == r.beat_id && !b.protected)
+                    .ok_or(PromptError::Stale)?,
+            )
+        } else {
+            None
+        };
+        let (character, selected_text) = match beat.map(|b| &b.payload) {
+            Some(BeatPayload::Dialogue { character_id, text }) => {
                 (Some(character_id.as_str()), text.as_str())
             }
-            BeatPayload::Narration { text } => (None, text.as_str()),
-            _ if continuing => (None, ""),
+            Some(BeatPayload::Narration { text }) => (None, text.as_str()),
+            _ if continuing || drafting => (None, ""),
             _ => return Err(PromptError::Invalid),
         };
         let scene_text = scene
-            .beats
-            .iter()
-            .filter(|b| !b.protected && b.owner.is_none() && b.conditional_branch.is_none())
-            .filter_map(|b| match &b.payload {
-                BeatPayload::Dialogue { text, .. } | BeatPayload::Narration { text } => {
-                    Some(text.as_str())
-                }
-                _ => None,
+            .map(|s| {
+                s.beats
+                    .iter()
+                    .filter(|b| !b.protected && b.owner.is_none() && b.conditional_branch.is_none())
+                    .filter_map(|b| match &b.payload {
+                        BeatPayload::Dialogue { text, .. } | BeatPayload::Narration { text } => {
+                            Some(text.as_str())
+                        }
+                        _ => None,
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
             })
-            .collect::<Vec<_>>()
-            .join("\n");
+            .unwrap_or_default();
         let text = if continuing {
             scene_text.as_str()
         } else {
-            text
+            selected_text
         };
         if continuing {
-            crate::scene::continue_anchor(&scene.beats, &beat.id).map_err(PromptError::History)?;
+            crate::scene::continue_anchor(&scene.unwrap().beats, &r.beat_id)
+                .map_err(PromptError::History)?;
         }
         let refs = self
             .references(project, project_id)
@@ -465,29 +512,55 @@ impl AuthoringService {
         read_set.insert(PATH.to_owned(), prompt.revision.clone());
         read_set.insert(references::PATH.to_owned(), refs.revision.clone());
         let mut paths = BTreeSet::new();
-        paths.insert(scene.source_path.clone());
+        if let Some(scene) = scene {
+            paths.insert(scene.source_path.clone());
+        }
+        if drafting {
+            // Preserve every existing source; revisions/drafts are guarded without sending its content.
+            let inventory = self
+                .source_inventory(project, project_id)
+                .map_err(|_| PromptError::Unavailable)?;
+            if inventory.dirty_count != 0 {
+                return Err(PromptError::Draft);
+            }
+            if ws.scenes.iter().any(|s| s.source_conflict) {
+                return Err(PromptError::Stale);
+            }
+            for scene in &ws.scenes {
+                paths.insert(scene.source_path.clone());
+            }
+            for f in inventory.files {
+                paths.insert(f.path);
+            }
+        }
         if source_revision_set[".renpy-editor/project.json"].sha256 != ws.project_revision
             || source_revision_set[".renpy-editor/source-map.json"].sha256 != ws.source_map_revision
         {
             return Err(PromptError::Stale);
         }
-        let (bytes, rev) = self
-            .transactions
-            .snapshot(
-                project,
-                RelativePath::new(&scene.source_path).map_err(|_| PromptError::Unavailable)?,
+        let exact = if let Some(scene) = scene {
+            let (bytes, rev) = self
+                .transactions
+                .snapshot(
+                    project,
+                    RelativePath::new(&scene.source_path).map_err(|_| PromptError::Unavailable)?,
+                )
+                .map_err(|_| PromptError::Unavailable)?;
+            if rev.sha256 != scene.source_revision {
+                return Err(PromptError::Stale);
+            }
+            source_revision_set.insert(scene.source_path.clone(), rev);
+            let beat = beat.unwrap();
+            std::str::from_utf8(
+                bytes
+                    .get(beat.byte_start as usize..beat.byte_end as usize)
+                    .ok_or(PromptError::Stale)?,
             )
-            .map_err(|_| PromptError::Unavailable)?;
-        if rev.sha256 != scene.source_revision {
-            return Err(PromptError::Stale);
-        }
-        source_revision_set.insert(scene.source_path.clone(), rev);
-        let exact = std::str::from_utf8(
-            bytes
-                .get(beat.byte_start as usize..beat.byte_end as usize)
-                .ok_or(PromptError::Stale)?,
-        )
-        .map_err(|_| PromptError::Unavailable)?;
+            .map_err(|_| PromptError::Unavailable)?
+            .to_owned()
+        } else {
+            String::new()
+        };
         for s in &selected {
             if !seen.insert((&s.kind, &s.record_id)) {
                 return Err(PromptError::Invalid);
@@ -556,14 +629,14 @@ impl AuthoringService {
                 let id = target["id"].as_str().unwrap_or_default();
                 let entity = refs.entities.iter().find(|e| e.kind == kind && e.id == id);
                 let is_included = selected.iter().any(|s| s.kind == kind && s.record_id == id)
-                    || (kind == "character" && (continuing || Some(id) == character));
+                    || (kind == "character" && (continuing || drafting || Some(id) == character));
                 dependencies.push(json!({"from":s.record_id,"field":field,"kind":kind,"id":id,"resolved":entity.is_some(),"revision":entity.and_then(|e|e.revision.as_deref()),"included":is_included,"reason":if is_included{"Explicit reference selection or required speaking Character"}else{"Link disclosed; linked content excluded; no automatic expansion"}}));
             }
             included.push(json!({"kind":s.kind,"recordId":s.record_id,"revisionId":s.revision_id,"content":content}));
         }
         let mut definitions = vec![];
         for c in &ws.authoring.characters {
-            if continuing || Some(c.id.as_str()) == character {
+            if continuing || drafting || Some(c.id.as_str()) == character {
                 paths.insert(c.source.path.clone());
                 definitions
                     .push(json!({"kind":"character","id":c.id,"statement":c.source.statement}));
@@ -576,7 +649,7 @@ impl AuthoringService {
             }
         }
         for definition in &definitions {
-            dependencies.push(json!({"from":beat.id,"kind":definition["kind"],"id":definition["id"],"included":true,"reason":if continuing {"Existing Character for generated dialogue or scene prose variable default; runtime unknown"} else {"Required selected dialogue definition; variable values are defaults, runtime unknown"}}));
+            dependencies.push(json!({"from":r.beat_id,"kind":definition["kind"],"id":definition["id"],"included":true,"reason":if continuing {"Existing Character for generated dialogue or scene prose variable default; runtime unknown"} else {"Required selected dialogue definition; variable values are defaults, runtime unknown"}}));
         }
         for path in &paths {
             let (_, rev) = self
@@ -587,7 +660,8 @@ impl AuthoringService {
                 )
                 .map_err(|_| PromptError::Unavailable)?;
             if let Some(c) = ws.authoring.characters.iter().find(|c| {
-                &c.source.path == path && (continuing || Some(c.id.as_str()) == character)
+                &c.source.path == path
+                    && (continuing || drafting || Some(c.id.as_str()) == character)
             }) {
                 if c.source.source_revision != rev.sha256 {
                     return Err(PromptError::Stale);
@@ -625,8 +699,14 @@ impl AuthoringService {
             .filter(|f| f.dirty && !paths.contains(&f.path))
             .map(|f| f.path.clone())
             .collect();
-        let mut story = json!({"sceneId":scene.id,"beatId":beat.id,"source":exact,"payload":beat.payload,"owner":beat.owner,"conditionalBranch":beat.conditional_branch});
+        let mut story = if let (Some(scene), Some(beat)) = (scene, beat) {
+            json!({"sceneId":scene.id,"beatId":beat.id,"source":exact,"payload":beat.payload,"owner":beat.owner,"conditionalBranch":beat.conditional_branch})
+        } else {
+            json!({"chapterId":r.chapter_id,"chapterTitle":chapter.unwrap().display_name,"title":r.display_name,"terminal":{"type":"return"},"incomingConnection":"None; connecting is a separate operation"})
+        };
         if continuing {
+            let scene = scene.unwrap();
+            let beat = beat.unwrap();
             story["anchor"] = json!({"beforeBeatId":beat.id,"byteOffset":beat.byte_start,"sourceRevision":scene.source_revision,"structureRevision":structure});
             story["terminal"] = json!(scene
                 .beats
@@ -644,7 +724,7 @@ impl AuthoringService {
                 )
                 .collect::<Vec<_>>());
         }
-        let contract = json!({"version":1,"action":r.action,"target":{"sceneId":scene.id,"beatId":beat.id},"authority":"Preview only; no operation may be executed or applied","runtimeState":"Unknown; defaults and conditional ownership are not observed runtime facts"});
+        let contract = json!({"version":1,"action":r.action,"target":{"sceneId":r.scene_id,"beatId":r.beat_id},"authority":"Preview only; no operation may be executed or applied","runtimeState":"Unknown; defaults and conditional ownership are not observed runtime facts"});
         let user = json!({"task":r.task,"styleNotes":prompt.style_notes,"story":story,"definitions":definitions,"references":included,"responseContract":contract});
         let body = json!({"messages":[{"role":"system","content":prompt.effective_text},{"role":"user","content":serde_json::to_string(&user).map_err(|_|PromptError::Invalid)?}],"maximumResponse":r.maximum_response});
         let serialized = serde_json::to_string(&body).map_err(|_| PromptError::Invalid)?;
@@ -722,7 +802,7 @@ impl AuthoringService {
             read_set.insert(path.clone(), token(revision));
         }
         Ok(
-            json!({"action":r.action,"projectId":project_id,"sessionId":session,"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"customCodeMarker":if scene.partial{"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
+            json!({"action":r.action,"projectId":project_id,"sessionId":session,"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
         )
     }
 }

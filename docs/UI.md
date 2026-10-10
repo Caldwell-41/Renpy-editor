@@ -1167,4 +1167,18 @@ Source/source-map before/after. All content uses passive text. Ordinary Story Un
 and reopened source/history use the shared transaction layer. Settings' assistance
 selector edits/restores each action's saved prompt with draft protection. Continue Scene
 is qualified on both supported targets; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene)
-owns bounds and source/lifetime rules. Draft Scene and generated references stay unavailable.
+owns bounds and source/lifetime rules. Generated references stay unavailable. Draft Scene is implemented with target qualification pending.
+
+
+### Draft Scene authoring
+
+Each saved Chapter offers **Assist · Draft Scene**. The nonmodal panel labels that
+Chapter and requires an author-reviewed Scene title, task and explicit reference
+selection. Review the action prompt/full exact body, Generate, then inspect passive
+whole-Scene prose, core IDs/path/Chapter/title/Return and source/project/map diffs.
+**Accept Scene** creates it once; no incoming connection is added. Story Undo/Redo
+removes/restores the same Scene and normal reopen retains it. Title-only unfinished
+input receives the same discard protection as task/proposal input. Stale state and
+competing drafts refuse without writing. Settings edits/restores its project prompt.
+See [bounded contract](PROMPTS_CONTEXT.md#bounded-draft-scene); platform/native
+qualification is tracked in the active task rather than implied by UI availability.

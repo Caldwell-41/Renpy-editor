@@ -3,6 +3,11 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      draft_scene:
+        description: Isolated Draft Scene Windows native and Mac ARM64 automated proof
+        required: false
+        type: boolean
+        default: false
       continue_scene:
         description: Isolated Continue Scene Windows native and Mac ARM64 automated proof
         required: false
@@ -48,7 +53,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -85,7 +90,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -468,7 +473,7 @@ jobs:
           retention-days: 7
 
   dialogue-rewrite-windows:
-    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene }}
+    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene }}
     name: Focused Assist — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
@@ -479,6 +484,7 @@ jobs:
       CARGO_TERM_COLOR: never
       PYTHONUTF8: '1'
       CONTINUE_SCENE: ${{ inputs.continue_scene }}
+      DRAFT_SCENE: ${{ inputs.draft_scene }}
     defaults:
       run:
         working-directory: app
@@ -496,7 +502,7 @@ jobs:
           REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
           REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
-          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not (os.environ.get('CONTINUE_SCENE')=='true' and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','LEGACY_REWRITE'])==1; assert not ((os.environ.get('CONTINUE_SCENE')=='true' or os.environ.get('DRAFT_SCENE')=='true') and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
           if ($LASTEXITCODE -ne 0) { throw 'Branch, fresh attempt or cumulative ordinal guard failed' }
           python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
           if ($LASTEXITCODE -ne 0) { throw 'Package reuse run identity guard failed' }
@@ -651,12 +657,15 @@ jobs:
 
 
   continue-scene-macos:
-    if: ${{ inputs.continue_scene && !inputs.dialogue_rewrite_windows }}
-    name: Continue Scene automated — macOS ARM64
+    if: ${{ (inputs.continue_scene || inputs.draft_scene) && !inputs.dialogue_rewrite_windows }}
+    name: Focused Scene automated — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 30
     env:
       CARGO_TERM_COLOR: never
+      DRAFT_SCENE: ${{ inputs.draft_scene }}
+      CONTINUE_SCENE: ${{ inputs.continue_scene }}
+      LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Verify isolated selection and ARM64 capability
@@ -665,7 +674,7 @@ jobs:
           REUSE_RUN: ${{ inputs.rewrite_reuse_run_id }}
           FOCUSED_REUSE: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
-          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']"
+          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','LEGACY_REWRITE'])==1; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0

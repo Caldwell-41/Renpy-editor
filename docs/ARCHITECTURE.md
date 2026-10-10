@@ -702,3 +702,17 @@ The existing journal, history, recovery, read-set identities, draft generations,
 ApplicationHost/worker cancellation and acceptance consumption are reused.
 [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene) owns the exact bounded contract;
 qualification state remains in the task/status records.
+
+
+### Draft Scene creation boundary
+
+The existing `rewrite.prepare/send/accept/discard` pipeline also owns `draftScene`.
+Context selects a saved Chapter and author-reviewed title rather than a surrogate
+Scene/Beat. Existing source inventory and mapped paths are revision/draft guards, not
+outbound story content. A non-mutating core planner prepares a new source file and
+combined project/source-map changes with core UUIDs and explicit terminal Return.
+Acceptance commits that exact digest-bound proposal through shared history once;
+ordinary directory creation is deferred until explicit acceptance. There is no incoming
+edge or loop of single-Beat apply calls. [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#bounded-draft-scene)
+owns the closed authority and [TESTING](TESTING.md#draft-scene-focused-qualification)
+owns focused proof.

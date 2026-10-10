@@ -2,7 +2,7 @@
 """Harmless pinned-SDK compilation/lint and actual substitution/text-token assertions."""
 import argparse,json,os,subprocess,tempfile,sys
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--continue-scene',action='store_true');p.add_argument('--sdk',type=Path,required=True);p.add_argument('--driver',type=Path,required=True);p.add_argument('--output',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--continue-scene',action='store_true');p.add_argument('--draft-scene',action='store_true');p.add_argument('--sdk',type=Path,required=True);p.add_argument('--driver',type=Path,required=True);p.add_argument('--output',type=Path);a=p.parse_args()
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'spikes/renpy-sdk'))
 from sdk_adapter import launcher_for
 if a.output:a.output.mkdir(parents=True,exist_ok=False)
@@ -11,7 +11,7 @@ fixture=json.loads(subprocess.check_output([str(a.driver.resolve())],text=True))
 import ast
 text=ast.literal_eval('"'+encoded+'"')
 expected='[1 + 2] [str(7)] {a=jump:label}link{/a} {image=fixture} brackets [x] braces {x} quotes " slash \\ café 雪 True friend'
-if a.continue_scene:expected=fixture['expected']
+if a.continue_scene or a.draft_scene:expected=fixture['expected']
 with tempfile.TemporaryDirectory(prefix='loomlight-rewrite-sdk-') as tmp:
  root=Path(tmp);(root/'game').mkdir()
  launcher=launcher_for(a.sdk)
@@ -60,7 +60,7 @@ testsuite global:
     teardown:
         exit
 '''.replace('INPUT',repr(text)).replace('EXPECTED',repr(expected)).replace('ENCODED',encoded)
- if a.continue_scene:
+ if a.continue_scene or a.draft_scene:
   code=code.replace('["b", "/b"]','[]').replace('    "'+encoded+'"\n    return',fixture['group']+'    "Terminal preserved"\n    return')
   second_assertions="""    _second = _rewrite_substitutions.substitute("Second literal [[flag] {{b}line{{/b}", scope={"flag": True}, force=True, translate=False)[0]
     _second_tokens = _rewrite_textsupport.tokenize(_second)
@@ -73,11 +73,15 @@ testsuite global:
   # screen. Compare that runtime representation; the init assertions above prove
   # its tokens display the original literal prose without active tags/expressions.
   code=code.replace('    assert screen "say"\n    advance until screen "main_menu"', '    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == _substituted) timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == _substituted)\n    advance\n    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == _second) timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == _second)\n    advance\n    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == "Terminal preserved") timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == "Terminal preserved")\n    advance until screen "main_menu"')
+ if a.draft_scene:
+  code=code.replace(fixture['group']+'    "Terminal preserved"', '    call '+fixture['label']+'\n    "Terminal preserved"')
+  (root/'game/draft.rpy').write_text(fixture['source'],encoding='utf-8')
  (root/'game/script.rpy').write_text(code,encoding='utf-8')
  for command in ('compile','lint'):
   run([root,command,*(['--error-code'] if command=='lint' else [])])
  if not (root/'literal-assertions.done').is_file():raise RuntimeError('SDK assertions never ran')
  output=run([root,'test','loomlight_literal_rewrite'])
  if 'loomlight_literal_rewrite' not in output or 'PASSED' not in output:raise RuntimeError('Named standard-template test did not pass')
- if a.continue_scene:print('PASS: pinned Ren’Py actual accepted Continue Scene group; literal substitution/tokens, two say Beats, preserved terminal and return')
+ if a.draft_scene:print('PASS: pinned Ren’Py actual accepted Draft Scene; literal substitution/tokens, two say Beats, explicit terminal Return and metadata-free runtime')
+ elif a.continue_scene:print('PASS: pinned Ren’Py actual accepted Continue Scene group; literal substitution/tokens, two say Beats, preserved terminal and return')
  else:print('PASS: pinned Ren’Py standard-template compile/lint, substitution/tokenization and named startup/say/return smoke preserve literal expressions/tags and existing placeholders/formatting')

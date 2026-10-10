@@ -643,6 +643,90 @@ impl AuthoringService {
         )
     }
 
+    /// Static creation candidate: no directory/source/metadata writes during review.
+    pub(crate) fn prepare_draft_scene(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        chapter_id: &str,
+        display_name: String,
+        entries: Vec<(Option<String>, String)>,
+    ) -> Result<TransactionProposal, SceneError> {
+        let mut loaded = self.load(project, project_id)?;
+        validate_display(&display_name)?;
+        if entries.is_empty() || entries.len() > 8 || loaded.project.scenes.len() >= MAX_SCENES {
+            return Err(SceneError::InvalidPayload);
+        }
+        let chapter = loaded
+            .project
+            .chapters
+            .iter()
+            .find(|c| c.id == chapter_id)
+            .ok_or(SceneError::UnknownEntity)?;
+        let id = uuid::Uuid::new_v4().to_string();
+        let technical_label = format!("loomlight_scene_{}", id.replace('-', ""));
+        let path = next_scene_path(&loaded.project, &chapter.directory);
+        let mut bytes = format!("label {technical_label}:\n").into_bytes();
+        for (speaker, encoded) in entries {
+            let prefix = match speaker {
+                Some(id) => format!("    {} ", character(&loaded, &id)?.technical_name),
+                None => "    ".into(),
+            };
+            bytes.extend_from_slice(format!("{prefix}\"{encoded}\"\n").as_bytes());
+        }
+        bytes.extend_from_slice(b"    return\n");
+        let scene = SceneMetadata {
+            id: id.clone(),
+            chapter_id: chapter_id.into(),
+            display_name,
+            technical_label,
+            source_path: path.clone(),
+            extra: Map::new(),
+        };
+        let (mapping, beats) = build_mapping(
+            &scene,
+            &bytes,
+            &sha256(&bytes),
+            None,
+            &[],
+            Some((&loaded.project, &loaded.authoring)),
+        )?;
+        if beats
+            .last()
+            .is_none_or(|b| b.payload != BeatPayload::Return)
+            || beats.iter().any(|b| b.protected)
+        {
+            return Err(SceneError::InvalidPayload);
+        }
+        loaded.project.scenes.push(scene);
+        loaded.project.last_open = Selection {
+            chapter_id: chapter_id.into(),
+            scene_id: id,
+        };
+        loaded.source_map.sources.push(path.clone());
+        loaded.source_map.scene_mappings.push(mapping);
+        let project_bytes = json_bytes(&loaded.project)?;
+        let map_bytes = json_bytes(&loaded.source_map)?;
+        Ok(TransactionProposal {
+            mutations: vec![
+                create_mutation(&path, bytes)?,
+                replace_mutation(
+                    PROJECT_PATH,
+                    loaded.project_bytes,
+                    loaded.project_revision,
+                    project_bytes,
+                )?,
+                replace_mutation(
+                    SOURCE_MAP_PATH,
+                    loaded.source_map_bytes,
+                    loaded.source_map_revision,
+                    map_bytes,
+                )?,
+            ],
+            intent: TransactionIntent::Edit,
+        })
+    }
+
     pub fn scene_recovery(&self, project: &ProjectId) -> RecoveryReport {
         self.transactions.recover(project)
     }
@@ -3099,7 +3183,7 @@ fn require_mapped_revision(
     }
 }
 
-fn validate_display(value: &str) -> Result<(), SceneError> {
+pub(crate) fn validate_display(value: &str) -> Result<(), SceneError> {
     if value.trim().is_empty() || value.len() > 160 || value.chars().any(char::is_control) {
         Err(SceneError::InvalidPayload)
     } else {

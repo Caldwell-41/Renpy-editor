@@ -1,31 +1,25 @@
 # Current status
 
-**Updated:** 2026-10-10. **Continue Scene is qualified** on Windows x64 and macOS ARM64
-on `codex/provider-qualification`. Tested implementation **8931fa8** builds on accepted
-provider/reference/prompt/literal/transaction and first-rewrite foundations. Main
-remains `5f448ca`; no next deliverable is selected. Full Phase 2 remains incomplete.
+**Updated:** 2026-10-10. **Draft Scene is in progress** on
+`codex/provider-qualification`, selected from published Continue closure `23c251b`.
+Fresh refs match that baseline; main is unchanged `5f448ca`. Retain one serial owner
+on Mac ARM64. Full Phase 2 remains incomplete; no subsequent deliverable selected.
 
-| Capability | Qualified result |
+| Capability | State |
 | --- | --- |
-| Continue prompt/context/send | Explicit saved root anchor, action prompt, selected revisions and exact reviewed request dispatched once |
-| Group review/accept | Closed 1–8 dialogue/narration group, existing Characters, core IDs/literal encoding, passive semantic/exact source/map preview, one transaction/Undo |
-| Preservation/history | Surrounding bytes, existing IDs/payloads and terminal preserved; Undo/Redo/project and process reopen pass |
-| Refusals | Malformed/unsafe/cancel/stale, drafts, competing requests and external edits write nothing; custom/nested/invalid boundaries refuse |
+| Provider/reference/prompt/literal/Continue foundations | Prior both-target qualification retained; unchanged evidence reused |
+| Draft Scene exact send and passive preview | Implemented; 21 core/127 renderer/5 prompt and actual controller/HTTP checks pass locally |
+| Creation/preservation/history/refusal | Core-owned one new Scene with reviewed Chapter/title/Return, one transaction/Undo/Redo/reopen; all existing bytes and zero-write refusals pass locally |
+| Changed-action native and both-target SDK | Required qualification pending; named signed Mac native case local, focused Windows/Mac CI next |
 
-[Run 38039472619](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619),
-attempt 1, candidate **8931fa8**, is audited successful: both targets 126 renderer,
-15 core, 8 transport, 6 native worker/controller and official pinned SDK runtime 8/8;
-Mac prompts 5. Windows native UIA/OS-input receipts/seven captures and signed Mac
-Computer Use physical Generate/Accept qualify the changed action. Both native cases
-pass 22 distinct checks/five exact bodies and process reopen 3/3 with zero HTTP/unchanged
-bytes. Credential/fixture/process/listener cleanup complete. Prior failed run and
-locked-Mac capability evidence remain in the ledger.
+Independent review findings corrected, including title-only retention, unavailable
+Source drafts, saved-byte SDK proof, native BOM-preserving hashes and isolated selectors.
+Canonical contracts are updated. New allowance per target is 4 packages/6 editor
+launches/4 focused CI dispatches; earlier allowances closed. Actual use remains zero;
+Mac package 1 and two launches reserved for the case hosted CI cannot establish.
 
-Final selected allowance use: Windows **2/4 builds, 2/6 editor launches, 2/4 CI**;
-Mac **1/4, 2/6, 2/4**. No pending operation/reservation. No paid/public calls, provider/
-route expansion, signing change, merge or release. Automated/agent native qualification
-does not claim final human or full Phase 2 integrated/provider acceptance.
-
-[Closure and proposed Draft Scene prompt](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
-own exact evidence, review and limits. [HANDOVER](HANDOVER.md) owns recovery. Draft Scene
-and generated references remain unavailable until separately selected and delivered.
+The [Draft Scene ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-selection--2026-10-10)
+owns selection, failure/review evidence and cumulative counts. [HANDOVER](HANDOVER.md)
+owns continuation. No paid/public calls, provider/route expansion, generated references,
+incoming connection/edge replacement, signing-policy change, merge or release.
+Agent/native proof will not imply final human/full Phase 2 provider acceptance.
