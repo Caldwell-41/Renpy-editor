@@ -4399,3 +4399,69 @@ requires renewed coherent signed Mac package2/native launches3–4 before final 
 dispatch4, Windows build3/firstlaunch1 with focused-success prerequisite retained.
 Prior outcome allowances stay closed. No acceptance/closure until actual Windows/native
 and final artifact audit. No following deliverable started.
+
+#### Renewed signed Mac native proof before final dispatch
+
+Repair8a230a9619ec7504f1a91dc8504e6e9667108190 committed/pushed. Package attempt2
+and editor launches3–4 completed on the retained Mac, named signed native capability
+unavailable in hosted CI. Approved identity/name/requirement unchanged. Strict signature
+and actual installer-content verification pass. Binary SHA256
+f917c0c3295404f666a8b8d7be8bf5d30974f8820c2e536214b4596366e46984;
+DMG SHA25605860d271e4e9d9a8d67e9223086f0f05a6f51ee516ea7f1a30d1aee0199b9b7.
+246input hashes match exact Git candidate. Package privacy7files/native5files pass.
+
+Actual packaged phase1 has25distinct checks/five exact reviewed and HTTP bodies;
+phase2 has3checks/zeroHTTP/all project bytes unchanged. CUA observed light/dark/720
+logical-width compact exact review, physically clicked Generate once, Save once,
+and separate Approve once after reviewing retained approved/proposed text. Script
+asserts inert preview, duplicate refusal, core IDs/provenance, prior approval retained,
+byte-exact runnable source, acceptance/approval Undo/Redo, malformed/model-approval/
+cancelled/stale zero writes and reopen. Native reports are automated with CUA physical
+operation, not final human acceptance. No extra implicit launch: OS process inventory
+confirmed only owned binary39065; separate reopen39163. Both exited, credential cleanup
+reported, owned disposable fixture removed after recording source/metadata hashes.
+Ignored local receipts retain all evidence; historical Mac package1 remains unmodified.
+
+Actual cumulative Mac2/4packages,4/6launches,3/4dispatches; Windows2/4packages,0/6launches,
+3/4dispatches. Final both-target dispatch4 reserves Windows package3/launches1–2 only
+if focused prerequisites pass; Mac automated9checks adds no package/launch. Remaining
+Mac2packages/2launches, Windows2packages/6launches, each1dispatch before submission.
+No local owned process/listener/fixture remains. Independent exact-repair review clear;
+final renewed-evidence review precedes dispatch. Bounded acceptance remains pending
+Windows cancellation/native and final actual-artifact audit.
+
+### Generated card exact-handle final CI wait — 2026-10-11
+
+Independent GPT-6.1 Sol High renewed-evidence review verified all246inputs/tree/binary/
+DMG/signing, actual25+3reports/five exact bodies/zeroHTTP reopen/equal metadata,
+CUA observation and cleanup receipt. No blocker found. Fresh retained privacy output
+native5/package7files. Existing raw failures and prior package/native remain intact.
+
+Confirmed workflow357322921,
+[run38093296977](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38093296977),
+attempt1, workflow_dispatch, branch codex/provider-qualification, exact candidate
+8a230a9619ec7504f1a91dc8504e6e9667108190. Created2026-10-10T22:57:04Z; last observed
+22:57:22Z in_progress. Windows114333962162 and Mac114333962141 in_progress;
+generic Preflight/matrix deliberately skipped. Inputs generate_card=true, all other
+selectors/upload_packages=false, build3/firstlaunch1, both reuse IDs empty. Docs-only
+successor records proof/wait and never substitutes for the exact tested candidate.
+
+Actual cumulative Windows2/4packages,0/6launches,4/4dispatches; Mac2/4packages,
+4/6launches,4/4dispatches. Windows package3/launches1–2 conditional on focused pass;
+reservation is not actual execution. Confirmed remaining Windows2packages/6launches,
+Mac2packages/2launches; focused dispatch allowance exhausted on both targets. Prior
+allowances stay closed. Count actual starts/failures/cancellations/skips from artifacts;
+no additional dispatch/job rerun authorized. No local owned process/listener/fixture.
+
+Manual same-thread normal-turn end, no autonomous Goal/watcher/status polling. Resume
+must audit exact run/attempt/head/refs and actual terminal artifacts: Windows transport8
+with both shutdownOk/Cancelled/EOF<2secs, worker6/controller/core26/prompts5/references12/
+renderer129, conditional package/input/binary, native25+3/five bodies/six PID/action
+receipts/nine intact captures; Mac9actual checks, manifest/input hashes, privacy/cleanup
+and actual allowance. Failed/skipped/missing is not accepted. If required proof passes,
+finish independent artifact review, bounded acceptance and canonical task/CURRENT/
+HANDOVER closure commit/push, result/limitations/next proposal-only prompt. If it fails,
+record diagnosed blocker and stop dispatch execution under exhausted allowance;
+remaining cheap in-scope review/fixes do not imply extra CI. No next deliverable,
+merge/release, provider/signing expansion, paid/public calls, generated lore or runnable
+Character/Appearance changes. Full Phase2/final human acceptance remain separate.

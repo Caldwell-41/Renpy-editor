@@ -32,19 +32,38 @@ no assertion that Rust clone generally violates semantics or exact Winsock cause
 Canonical architecture/ADR/testing updated. Broad fmt differences pre-exist, no unrelated
 reformat. Initial sandbox loopback binds refused, successful authorized rerun retained.
 
-Actual Windows2/4packages,0/6launches,3/4dispatches; Mac1/4,2/6,3/4. Remaining Windows
-2packages/6launches/1dispatch, Mac3packages/4launches/1dispatch. Prior allowances closed.
-Next commit/push coherent repair, signed Mac package2/native launches3–4 using unchanged
-approved identity (named capability unavailable in CI), physical Generate/Save/Approve,
-light/dark/compact25+3/five bodies/history/source/cleanup. Then final focused dispatch4,
-Windows build3/firstlaunch1, generate_card only/reuseempty, package requires focused pass.
-Record actual attempts before action. No local owned fixture/process/listener or pending
-CI at this checkpoint. Keep manual same-thread dispatch/wait/resume, no model polling.
 
-After terminal final run audit exact head/attempt/artifacts/input hashes, Windows
-transport8/worker6/controller/core26/prompts5/references12/renderer129, native25+3/five
-bodies/six receipts/nine captures, Mac9checks, binary/package/privacy/cleanup/budgets.
-Only then acceptance/closure contracts/task/CURRENT/HANDOVER commit/push, result and
-next proposal-only prompt. If final dispatch fails, no extra dispatch: name concrete
-blocker. No paid/public/provider/signing expansion, runnable Character/Appearance or
-lore generation. Full Phase2/final human acceptance remain separate.
+Renewed signed Mac package2/native launches3–4 on exact repair8a230a9619ec7504f1a91dc8504e6e9667108190
+passed. Binaryf917c0c3/DMG05860d27, approved pin/name/requirement unchanged, signature/
+installer/input246Git hashes verified.25distinct+3reopen/five exact bodies/zeroHTTP
+reopen/allsourcebytes/history/approval separation pass. CUA observed light/dark/720
+logical compact, physically Generate/Save/Approve once. PIDs39065/39163 exited, native
+credential cleanup reported, owned fixture removed with source/metadata hash receipt.
+Privacy7package/5native files pass. Independent renewed-artifact review found no blocker.
+
+**Pending final:** workflow357322921,
+[run38093296977](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38093296977),
+attempt1, exact head8a230a9 above, created2026-10-10T22:57:04Z. Last observed22:57:22Z
+in_progress; Windows114333962162/Mac114333962141 in_progress. generate_card=true;
+all other selectors/upload_packages=false, build3/firstlaunch1, both reuse IDs empty.
+Generic jobs deliberately skipped. Docs-only successor never replaces runtime candidate.
+[Final task wait](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-exact-handle-final-ci-wait--2026-10-11)
+owns identity/inputs/proof/allowance. Manual same-thread turn ends, no autonomous Goal/
+watcher/model polling. No local owned process/listener/fixture.
+
+Actual Windows2/4packages,0/6launches,4/4dispatches; Mac2/4,4/6,4/4. Windows package3/
+launches1–2 conditional on prerequisites, not execution. Remaining Windows2packages/
+6launches, Mac2packages/2launches, NO dispatch remaining on either. Prior allowances
+closed; count actual starts/failures/cancellations/skips from final artifacts. No
+additional dispatch/job rerun authorized. Failed/skipped/missing proof stays unresolved.
+
+Resume audits exact run/head/attempt/refs and terminal actual artifacts: Windows
+transport8 both shutdownOk/Cancelled/actualEOF<2secs, worker6/controller/core26/prompts5/
+references12/renderer129; package inputs/binary/privacy; native25+3/five bodies/six
+PID/action receipts/nine captures; Mac9checks; manifests/inputs/cleanup/actual budgets.
+If all pass finish independent final-artifact review and bounded acceptance, update
+canonical contracts/task/CURRENT/HANDOVER, commit/push, result/limitations/next proposal-only
+prompt. If final run fails diagnose concrete blocker and stop CI under exhausted cap;
+cheap in-scope review/fixes cannot imply extra dispatch. No following deliverable,
+merge/release, provider/signing expansion, paid/public calls, runnable Character/Appearance
+or lore generation. Full Phase2/final human acceptance remain separate.
