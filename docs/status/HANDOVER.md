@@ -1,10 +1,11 @@
 # Current outcome handover
 
-## Continue Scene — implementation prepared for focused qualification
+## Continue Scene — focused CI wait
 
-**State: `in_progress`; implementation present, acceptance pending.** Repository
+**State: `awaiting_ci`; implementation published, acceptance pending.** Repository
 Caldwell-41/Renpy-editor, branch `codex/provider-qualification`. Entry reconciled clean
 local/remote `e69782cb7e07c2e67f73c2751e63a27327d603f9`; fresh main `5f448ca` is unchanged.
+Published implementation candidate is `3432288ea64ff24f88e7efe89c42798bd52b6377`.
 One owner retains this Mac ARM64 session and shared implementation stays serial.
 No extra implementation agent, other-computer access or next feature was started.
 User authorizes coherent commit/push on this branch, focused checks and bounded fixes;
@@ -12,8 +13,11 @@ merge/release and signing/provisioning changes remain excluded.
 
 The [selected task](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10)
 owns acceptance and the new cumulative allowance: per target **4 package-build
-attempts, 6 editor launches, 4 focused CI dispatches**. Consumption before dispatch is
-**Mac 0/4, 0/6, 0/4; Windows 0/4, 0/6, 0/4**. Failures/cancellations/implicit launches
+attempts, 6 editor launches, 4 focused CI dispatches**. Dispatch consumption is **1/4 per target**. Mac builds/launches remain **0/4, 0/6**.
+Windows run reserves **build 1 and launches 1/2**; reconcile actual attempted counts
+from the CI ledger/artifacts, including failure/cancellation/implicit launches, before
+any retry. Unreserved remainder is Windows **3 builds/4 launches/3 CI** and Mac
+**4 builds/6 launches/3 CI**. Failures/cancellations/implicit launches
 count. No borrowing from the accepted first rewrite's final Mac 1/4, 3/6 and Windows
 2/4, 6/6. Reassess after two unsuccessful corrections of one hypothesis.
 
@@ -42,8 +46,8 @@ own durable contracts and selectors.
 
 Local pinned tools: Node 24.19.0/npm 11.9.0, Rust 1.90.0. Core rewrite selector 15/15,
 prompts 5/5, transport 8/8 and native worker 6/6 pass; exact controller/native-reader/
-strict HTTP and focused action DOM checks pass. Full renderer/final candidate counts
-and source review are in the owning task. Ignored `.toolchains/logs/continue-*` logs
+strict HTTP and focused action DOM checks pass. Final renderer **125/125** and frontend production build pass; source review is in
+the owning task. Ignored `.toolchains/logs/continue-*` logs
 retain sandbox loopback refusals and successful unsandboxed fixture results. Those
 capability failures are not product failures or qualification passes.
 
@@ -59,16 +63,28 @@ approved certificate-backed package/native credential requirement. The existing 
 pin `358372708164C7273A551D746449357C12A3A806` matches the available approved self-signed
 identity; `CSSMERR_TP_NOT_TRUSTED` is its established local policy, not permission to
 change trust. The named Mac signed/native case stays on the retained local host after
-CI audit. Verify unlocked/native capabilities before consuming any launch. No owned
-native fixture/credential/process or pending CI exists before the initial dispatch.
+CI audit. Verify unlocked/native capabilities before consuming any launch. No local owned native fixture/credential/process exists. The CI fixture/credential/
+process/listener and actual launch evidence require terminal artifact audit.
 
-### Next action
+### Recorded operation and next action
 
-Publish this coherent implementation candidate, dispatch the isolated authorized CI
-once with Windows build ordinal 1 and launches 1/2, capture exact run/attempt/SHA/inputs
-and publish the wait record. Follow WORKFLOW's manual same-thread wait/resume policy;
-no autonomous polling/watcher/notification. On user resume, verify fresh refs and audit
-that recorded operation/artifacts, fix only in scope/remaining allowance, then perform
-the named local Mac signed/native case and final review/closure. Continue Scene remains
-unfinished until both required targets and native/SDK cases pass. Supply a continuation
-prompt for this same outcome if waiting; do not start Draft Scene or another deliverable.
+[Run **38035948157**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38035948157),
+workflow **357322921**, attempt **1**, `workflow_dispatch`, exact implementation head
+`3432288ea64ff24f88e7efe89c42798bd52b6377`, branch `codex/provider-qualification`.
+Created **2026-10-10 07:52:56 UTC**; last observed **in_progress**, updated **07:53:05 UTC**,
+identity observed **07:53:32 UTC**. Inputs: Continue true, legacy Windows rewrite false,
+Windows build 1 and first launch 1 (dependent reopen 2), both reuse IDs empty,
+package upload false. Only focused Windows and Mac automated jobs are selected.
+No artifact ID/expiry yet. Expected artifacts: `rewrite-windows-38035948157-1` and
+`continue-macos-38035948157-1` if produced; audit actual manifests/cases/identity/captures
+and retained failures, not a green badge. No new dispatch or run/job retry on resume.
+
+This docs-only wait successor does not replace tested candidate `3432288`. End active
+model polling and follow WORKFLOW's **manual same-thread resume**. This is normal chat;
+no autonomous Goal lifecycle pause is claimed. Next user message:
+**“Resume Continue Scene; audit run 38035948157 and continue the existing outcome.”**
+Check fresh refs/local work, verify the recorded run/attempt and remaining allowances.
+If terminal, audit required artifacts/cases and continue already authorized fixes, then
+perform the named local Mac signed/native case and complete final review/closure.
+If still pending, preserve identity and pause again. Both target SDK/native evidence
+remain required. Do not start Draft Scene, generated references or another deliverable.

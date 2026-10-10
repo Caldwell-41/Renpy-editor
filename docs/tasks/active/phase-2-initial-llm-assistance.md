@@ -3286,3 +3286,48 @@ changed inputs require actual fresh cases. Canonical contracts explicitly label 
 qualification pending. Next: finish coherent local checks, commit/push candidate and
 perform one focused CI dispatch; then publish wait identity and pause this same thread.
 Current use remains **Mac 0/4 builds, 0/6 launches, 0/4 CI; Windows 0/4, 0/6, 0/4**.
+
+
+### Continue Scene focused CI wait — 2026-10-10
+
+State: `awaiting_ci`; Continue Scene remains unfinished. Coherent implementation
+**`3432288ea64ff24f88e7efe89c42798bd52b6377`** committed and verified pushed to the existing
+`codex/provider-qualification`. Working tree was clean. Final renderer **125/125** and
+production frontend build pass; final actual Continue controller/native-reader/HTTP
+fixture passes. No package/native launch was performed locally. Canonical contracts,
+selection/acceptance and live status are published with the implementation.
+
+Confirmed [run **38035948157**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38035948157),
+workflow **357322921** (`production-scaffold.yml`), attempt **1**, event
+`workflow_dispatch`, exact head **3432288ea64ff24f88e7efe89c42798bd52b6377**, branch
+`codex/provider-qualification`. Created **2026-10-10 07:52:56 UTC**; last observed
+**in_progress**, run updated **07:53:05 UTC**, identity observed **07:53:32 UTC**.
+Material inputs: `continue_scene=true`, `dialogue_rewrite_windows=false`, Windows
+build ordinal **1**, first launch ordinal **1** (dependent process reopen **2**),
+both reuse IDs empty, `upload_packages=false`. No job/run retry or other dispatch.
+Generic production matrix skips; only focused Windows and Mac ARM64 jobs are selected.
+
+Cumulative dispatch use is **1/4 on each target**. Mac builds/launches remain **0/4,
+0/6**. Windows run reserves **build 1 and launches 1/2**; actual consumption must be
+read from the run's attempt ledger/artifacts on resume, including failed/cancelled or
+implicit attempts. Those reservations are unavailable for another run until audited.
+Conservative unreserved remainder: Windows **3 builds/4 launches/3 dispatches**;
+Mac **4 builds/6 launches/3 dispatches**. Earlier slice allowances are unchanged.
+
+Pending audit: exact run/attempt/SHA, runner architecture/toolchains, native capability,
+125 renderer/15 core/5 Mac prompt/8 transport/6 worker cases, real Continue controller,
+official pinned SDK checksum/literal/two say/terminal/return cases, Windows package
+input/binary hashes and all **22** distinct phase-1 assertions/five exact HTTP bodies,
+all five action-specific native stages/seven captures, independent phase-2 **3** checks,
+zero HTTP/unchanged whole-project bytes, privacy and credential/fixture/process/listener
+cleanup. Audit downloaded `rewrite-windows-38035948157-1` and
+`continue-macos-38035948157-1` evidence if produced; retain failures and do not normalize
+missing/skipped/partial artifacts. No artifact ID/expiry is known before completion.
+
+Per WORKFLOW, publish this docs-only wait successor and **end active model polling**.
+Normal chat needs the user's same-thread resume message; no autonomous Goal lifecycle
+control was invoked or claimed. No watcher, automation, next feature, merge or release.
+On resume, reconcile fresh refs/local edits, verify this exact run and audit artifacts,
+continue only authorized in-scope fixes within unchanged allowances. Then establish
+the named local approved signed Mac Continue native case, complete final review and
+closure, and return the next-outcome prompt without starting it.
