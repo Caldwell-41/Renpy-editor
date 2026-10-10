@@ -1,25 +1,28 @@
 # Current status
 
-**Updated:** 2026-10-10. **Draft Scene is in progress** on
-`codex/provider-qualification`, selected from published Continue closure `23c251b`.
-Fresh refs match that baseline; main is unchanged `5f448ca`. Retain one serial owner
-on Mac ARM64. Full Phase 2 remains incomplete; no subsequent deliverable selected.
+**Updated:** 2026-10-10. **Draft Scene is `awaiting_ci`** on
+`codex/provider-qualification`. Reviewed implementation **b51229d** is published;
+full Phase 2 and this bounded acceptance remain incomplete. Retain one serial owner
+and current Mac ARM64 session; no following deliverable selected.
 
 | Capability | State |
 | --- | --- |
 | Provider/reference/prompt/literal/Continue foundations | Prior both-target qualification retained; unchanged evidence reused |
-| Draft Scene exact send and passive preview | Implemented; 21 core/127 renderer/5 prompt and actual controller/HTTP checks pass locally |
-| Creation/preservation/history/refusal | Core-owned one new Scene with reviewed Chapter/title/Return, one transaction/Undo/Redo/reopen; all existing bytes and zero-write refusals pass locally |
-| Changed-action native and both-target SDK | Required qualification pending; named signed Mac native case local, focused Windows/Mac CI next |
+| Draft Scene exact send and passive preview | Implemented/reviewed; local core21, renderer127, prompt5 and actual controller/HTTP pass |
+| Creation/preservation/history/refusal | Local one transaction/Undo/Redo/reopen, existing-byte preservation and zero-write refusal checks pass |
+| Official pinned SDK | Local accepted saved-byte runtime 8/8 assertions passes; both-target CI audit pending |
+| Changed-action native | Windows CI pending audit; signed Mac package passes, launch1 blocked at observation by locked screen |
 
-Independent review findings corrected, including title-only retention, unavailable
-Source drafts, saved-byte SDK proof, native BOM-preserving hashes and isolated selectors.
-Canonical contracts are updated. New allowance per target is 4 packages/6 editor
-launches/4 focused CI dispatches; earlier allowances closed. Actual use remains zero;
-Mac package 1 and two launches reserved for the case hosted CI cannot establish.
+Confirmed [CI run38046543055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38046543055)
+attempt1 on exact b51229d4b0d8b2dc319b157adba528a6240ec7f2; last observed
+in_progress at updated 10:54:44 UTC. Manual same-thread resume; no model polling.
+New per-target allowance4 packages/6 launches/4 focused dispatches, prior budgets
+closed. Mac actual1/4,1/6,1/4; Windows1/4 dispatch, build1/launches1–2 reserved until
+artifact audit determines actual consumption. Locked Mac fixture/process cleanup
+remains to be audited; no native pass credited.
 
-The [Draft Scene ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-selection--2026-10-10)
-owns selection, failure/review evidence and cumulative counts. [HANDOVER](HANDOVER.md)
-owns continuation. No paid/public calls, provider/route expansion, generated references,
-incoming connection/edge replacement, signing-policy change, merge or release.
-Agent/native proof will not imply final human/full Phase 2 provider acceptance.
+[Task ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-focused-ci-wait--2026-10-10)
+owns selection, review, exact package/run identities and cumulative counts.
+[HANDOVER](HANDOVER.md) owns continuation. No paid/public calls, provider/route
+expansion, generated references, incoming connection/edge replacement, signing-policy
+change, merge or release. Agent proof does not imply final human/full Phase2 acceptance.

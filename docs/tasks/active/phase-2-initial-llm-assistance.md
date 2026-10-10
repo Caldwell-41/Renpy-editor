@@ -3689,3 +3689,71 @@ Reserve named signed Mac Draft native case: **package attempt 1**, then at most 
 editor launches for action and process reopen. Actual prior use remains zero on both
 targets; planned Windows CI **1 build/2 launches**, one focused dispatch per target.
 No dispatch or app launch yet. All failures/cancellations/implicit launches count.
+
+
+### Draft Scene focused CI wait — 2026-10-10
+
+State: **`awaiting_ci`**; Draft Scene acceptance remains incomplete. Reviewed candidate
+**b51229d4b0d8b2dc319b157adba528a6240ec7f2**, tree
+**ec7b90e87fd2d576613d5356e97832a32a34d6b6**, was committed/pushed nonforced to the
+existing branch and remote identity verified. Independent production and evidence
+review closed all actionable findings. Canonical contracts and local focused checks
+are published; no PR, merge, release or following deliverable.
+
+Confirmed Production scaffold workflow **357322921**, [run **38046543055**]
+(https://github.com/Caldwell-41/Renpy-editor/actions/runs/38046543055), attempt **1**,
+event `workflow_dispatch`, branch `codex/provider-qualification`, exact head candidate
+above. Created **2026-10-10 10:54:32 UTC**; last observed **in_progress**, updated
+**10:54:44 UTC**. Inputs: `draft_scene=true`, `continue_scene=false`,
+`dialogue_rewrite_windows=false`, `rewrite_build_ordinal=1`,
+`rewrite_first_launch_ordinal=1`, both reuse run IDs empty, `upload_packages=false`.
+No changed-action native evidence reused. Windows focused package/native/SDK and Mac
+ARM64 focused controller/core/SDK selected; generic jobs intentionally unselected.
+Required artifact/case audit is outstanding. No model polling or automatic wake-up.
+
+Named local case: signed Mac Draft native layout/physical Generate/Accept/history and
+process reopen, which hosted Mac lacks approved signing capability to establish.
+Package attempt **1 passed**, approved pin
+`358372708164C7273A551D746449357C12A3A806`; strict signature and installer contents
+verified without trust/ACL/signing-policy changes. Retain
+`.toolchains/releases/draft-mac-01/Loomlight.app` and `.dmg`, package-inputs.json
+(244 runtime inputs match candidate) and identity-receipt.json. Executable SHA256
+`cb90ead399ca02c9d131a84cf1ddb17d841676a0902069ac5cef7d33765a060c`;
+installer SHA256 `e81face2ecd8c60308bf10817c3c03d0432424a672262e9c2c036bae572f2db9`.
+Reuse this package if runtime input/signature/identity equality still holds.
+
+Native launch **1** reached `observe-light`, PID **19147**, owned fixture
+`/private/tmp/loomlight-rewrite-draft-mac-01`, evidence
+`.toolchains/draft-mac-native-01/phase-1.log`. Computer Use reported the Mac locked
+and automatic unlock unavailable; user unlock requested. No actual native observation
+or physical action can be credited, and no stage marker was forged. Renderer deadline
+180 seconds is not guaranteed to advance while the locked WebView is suspended;
+existing native watchdog bounds the process to 900 seconds. At checkpoint the owned
+harness/process remain pending; no terminal/credential-cleanup claim. On resume audit
+the retained failed/incomplete report and process, explicitly verify native credential
+cleanup (watchdog host shutdown alone does not establish it), retain fixture until
+that is established, then use a fresh owned root/log for a required retry. No process
+reopen launched. Record failure/cancellation even if no native click occurred.
+
+| Target | Actual packages | Actual editor launches | Focused dispatches | Reserved execution / unused allowance |
+| --- | --- | --- | --- | --- |
+| Windows x64 | 0/4 known before artifact audit | 0/6 known before artifact audit | **1/4** | Run reserves build1, launches1–2; audit actual attempts before retry |
+| Mac ARM64 | **1/4** | **1/6** (incomplete native attempt) | **1/4** | 3 builds, 5 launches, 3 dispatches remain; hosted Mac has no signed package/launch |
+
+Windows reserved work is not claimed as completed consumption. Its run artifacts must
+establish actual failures, cancellations and implicit launches. Prior outcome allowances
+remain closed. Reassess after two unsuccessful corrections of one hypothesis.
+
+Local pinned SDK final saved-byte proof at `.toolchains/draft-sdk-local-saved-02`
+passes one named test, **8/8 assertions**, zero skips/failures/not-run with official
+Ren'Py **8.5.3.26051504** on macOS ARM64. It reads the accepted disk file and asserts
+exact preview equality before executing it; supersedes the initial preview-byte proof.
+This and local core21/renderer127/prompt5/controller/strict HTTP are local proof only.
+Both-target CI, Windows native and remaining Mac native/reopen evidence are required.
+
+Resume in this same chat after workflow completion: audit exact run/attempt/SHA and
+actual artifacts/cases, reconcile refs without resetting, close only in-scope findings
+within the remaining allowance, complete unlocked Mac native/reopen using unchanged
+package where qualified, then publish acceptance/closure and next-outcome proposal.
+No subsequent deliverable is selected or started. WORKFLOW requires this manual wait;
+normal chat resume message is sufficient, no autonomous Goal/watchers were created.
