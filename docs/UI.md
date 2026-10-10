@@ -1175,7 +1175,12 @@ owns bounds and source/lifetime rules. Generated references stay unavailable. Dr
 Each saved Chapter offers **Assist · Draft Scene**. The nonmodal panel labels that
 Chapter and requires an author-reviewed Scene title, task and explicit reference
 selection. Review the action prompt/full exact body, Generate, then inspect passive
-whole-Scene prose, core IDs/path/Chapter/title/Return and source/project/map diffs.
+whole-Scene prose under **New Scene** and **Dialogue and narration**, with the
+reviewed title, Chapter and existing Character names. **Ends here. No connection is
+added.** describes the explicit Return. Internal IDs/anchor/terminal terminology do
+not appear in the main Draft summary. **Request details** retains complete exact
+outbound body and context disclosures; source/project/map details retain exact bytes
+and core-assigned IDs/path. Preview states that the game has not been run.
 **Accept Scene** creates it once; no incoming connection is added. Story Undo/Redo
 removes/restores the same Scene and normal reopen retains it. Title-only unfinished
 input receives the same discard protection as task/proposal input. Stale state and

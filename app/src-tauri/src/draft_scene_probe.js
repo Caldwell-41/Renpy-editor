@@ -30,7 +30,7 @@
    const before=await snapshot();const originalFiles=JSON.parse(before).files;const sourceHashes=files=>Object.fromEntries(Object.entries(files).filter(([path])=>path.endsWith('.rpy')));await select();choices();const body=await prepare('Keep the meaning.');
    check(await snapshot()===before,'Preparation writes nothing');const v=JSON.parse(body),u=JSON.parse(v.messages[1].content);
    check(u.references.length===2&&v.messages[0].content==='Draft only the reviewed Scene; follow the response contract.'&&u.story.chapterId===scene.chapterId&&u.story.title==='Native Draft café 雪'&&u.story.terminal.type==='return'&&v.response_format.json_schema.strict===true,'Complete reviewed body contains selected revisions custom prompt and strict schema');
-   check(root().textContent.includes('inference locality Unknown')&&root().textContent.includes('UTF-8 byte estimate'),'Destination locality and conservative size disclosed');
+   check(root().textContent.includes('Processing location: unknown')&&root().textContent.includes('UTF-8 byte estimate'),'Destination locality and conservative size disclosed');
    for(const theme of ['light','dark']){
     document.querySelector('.shell-settings').click();await wait(()=>document.querySelector('#setting-theme'));const setting=document.querySelector('#setting-theme');setting.value=theme;setting.dispatchEvent(new Event('change'));await wait(()=>document.documentElement.dataset.theme===theme);await click('Close settings');
     await pause('observe-'+theme);check(true,'Native '+theme+' send layout observed');
@@ -38,7 +38,7 @@
    await pause('observe-narrow');check(true,'Native compact send layout observed');
    find('Generate proposal').focus();await pause('physical-send');await wait(()=>!find('Accept Scene').disabled);
    check(await snapshot()===before,'Physical Generate produces inert review with no writes');
-   check(root().textContent.includes('New [str(7)] {a=jump:label}')&&root().textContent.includes('Whole Beat group (new text is literal)')&&root().textContent.includes('New Scene, Chapter, source path and explicit Return')&&root().querySelector('img,script')===null&&root().querySelector('details summary').textContent.includes('Exact Source changes'),'Whole Scene and exact source metadata diff are inert and disclose Chapter title and Return');
+   check(root().textContent.includes('New [str(7)] {a=jump:label}')&&root().textContent.includes('Dialogue and narration')&&root().textContent.includes('New Scene')&&root().textContent.includes('Ends here. No connection is added.')&&root().textContent.includes('Bec: A second line.')&&root().querySelector('img,script')===null&&root().querySelector('details summary').textContent.includes('Exact Source changes'),'Whole Scene and exact source metadata diff are inert and disclose Chapter title and Return');
    const projectDiff=[...root().querySelectorAll('details')].find(d=>d.querySelector('summary').textContent.includes('.renpy-editor/project.json'));
    const previewProject=JSON.parse([...projectDiff.querySelectorAll('section')].find(s=>s.querySelector('h4').textContent==='After').querySelector('pre').textContent);
    const previewScene=previewProject.scenes.at(-1);

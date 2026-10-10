@@ -252,8 +252,12 @@ The closed response echoes Chapter/title, contains 1–8 dialogue/narration Beat
 total UTF-8 prose bytes), only reviewed existing Characters, and an explicit Return.
 Core owns Scene/Beat UUIDs, technical label, destination path and literal encoding.
 Model source/paths/IDs/definitions/connections/extra terminal fields refuse. The inert
-review displays the whole Scene, assigned IDs/path/Chapter/title/Return and exact new
-source plus project/source-map metadata mutations, bound by one digest. Accept creates
+review displays the whole Scene using its reviewed title, Chapter, literal prose and
+existing Character display names, with a plain **Ends here** Return description.
+Local display names come from the guarded authoring snapshot; they are bound into the
+semantic digest and do not change the outbound request. Expandable request and exact
+source/project/source-map details retain complete disclosures, core IDs/path and
+metadata mutations. One digest binds semantic review and all exact mutation bytes. Accept creates
 the Scene once in one transaction and one Undo entry; all existing source stays byte
 exact. Empty Chapter directories materialize only on explicit acceptance. Undo removes
 the new file and restores metadata; Redo restores the same IDs/bytes; reopen preserves

@@ -3823,3 +3823,46 @@ launch; unlock requested while independent work continues. Count every failure/c
 implicit attempt. Remaining before reservation:3builds/5launches/3dispatches each.
 Do not retry ambiguously or expand scope. After confirmed next dispatch, publish exact
 identity/allowance and end model polling under manual same-thread WORKFLOW policy.
+
+
+### Draft Scene signed Mac repair proof and clear UI — 2026-10-10
+
+User continued the existing outcome and requested concise, plain UI text with no
+internal terminology. Shared implementation remains serial; no following deliverable.
+Redo correction published as c4c7763a139596d15d59eed7d7e99855bc755d72,
+tree a21b87c165b127a944618dd0372d3deee2e50530. Independent repair review closed.
+
+Mac native observation capability verified on the unlocked retained host before launch.
+Named required signed/native case remains local because hosted Mac lacks approved
+signing capability. Package2 uses unchanged approved pin
+358372708164C7273A551D746449357C12A3A806; strict signature and installer-content
+checks pass. Executable SHA2569fabc51ab6ece88243282851c9d36c512fed769211988c25176f0f28a51fbfa2,
+DMG SHA2567a26c47d549ddbda4bf1fe651693b90de6242d05aae59b9e920f63ef0e4acd52;
+244 runtime-input hashes match c4c7763. Evidence retained in ignored
+.toolchains/releases/draft-mac-02 and .toolchains/draft-mac-native-02.
+Launch2 PID22320: actual native light/dark/compact review, complete request and inert
+source/project/map preview, physical Generate/Accept, 22 distinct phase1 checks,
+five exact reviewed/dispatch body matches, one Undo/Redo and ordinary refusals pass.
+Launch3 PID22655: process reopen3/3, zero HTTP and unchanged project bytes pass.
+Both owned processes exited; credential references/queue/records cleared, exact owned
+fixture guarded cleanup confirmed. Failed attempt1 remains retained, never normalized.
+
+Native inspection exposed internal IDs/anchor/terminal wording on the main Draft
+preview. Draft-only copy now uses Scene title, Chapter, reviewed Character names,
+**Dialogue and narration**, **Ends here. No connection is added.** and explicit passive
+preview wording. Exact complete request/context and source/project/map disclosures
+remain expandable. Character names are local guarded authoring metadata, excluded
+from outbound body and included in semantic digest. Existing source/name revisions
+still invalidate stale review. Continue/Rewrite UI unchanged. Passive rendering tested
+with hostile display-name text; main summary hides technical IDs and terminology.
+Final renderer127 passes with zero failures/cancellations/skips/todo; core rewrite21
+passes, followed by the updated meaningful Draft history/name/outbound test passing.
+Native JS syntax and diff checks pass. Independent GPT-6.1 Sol High read-only copy
+review reports no actionable blockers; no reviewer writes/tests/packages/launches.
+Canonical UI/context contracts updated.
+
+Actual cumulative Windows1/4 packages,1/6 launches,1/4 dispatches; Mac2/4 packages,
+3/6 launches,1/4 dispatches. Changed UI requires fresh Mac package3/native launches4–5;
+reserve Windows package2/launches2–3 and focused dispatch2 on both targets. Count all
+failures/cancellations/implicit launches; prior budgets closed. No unbounded retries,
+signing-policy change, paid/public call, merge/release or subsequent outcome.

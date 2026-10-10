@@ -731,6 +731,8 @@ fn draft_scene_exact_dispatch_inert_source_metadata_one_transaction_undo_redo_re
     assert_snapshots(&before, &f.snapshots());
     assert_eq!(r["patches"].as_array().unwrap().len(), 3);
     assert_eq!(r["terminal"]["type"], "return");
+    assert_eq!(r["characterNames"][0]["displayName"], old["authoring"]["characters"][0]["displayName"]);
+    assert!(!p["serializedPayload"].as_str().unwrap().contains("characterNames"));
     assert_eq!(r["incomingConnection"], "None");
     let id = r["scene"]["id"].as_str().unwrap();
     let path = r["scene"]["sourcePath"].as_str().unwrap();

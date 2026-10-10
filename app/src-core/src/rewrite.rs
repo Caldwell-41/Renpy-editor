@@ -557,7 +557,7 @@ impl AuthoringService {
             }
             (
                 proposal,
-                json!({"action":prompts::DRAFT,"scene":new_scene,"chapter":user["story"],"beats":response.beats,"assignedBeatIds":ids,"terminal":{"type":"return","id":ids.last()},"incomingConnection":"None"}),
+                json!({"action":prompts::DRAFT,"scene":new_scene,"chapter":user["story"],"characterNames":t.preview["characterNames"],"beats":response.beats,"assignedBeatIds":ids,"terminal":{"type":"return","id":ids.last()},"incomingConnection":"None"}),
             )
         } else if t.context.action == prompts::CONTINUE {
             let response: ContinueResponse =
