@@ -490,8 +490,11 @@ jobs:
           REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
           python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          if ($LASTEXITCODE -ne 0) { throw 'Branch, fresh attempt or cumulative ordinal guard failed' }
           python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
+          if ($LASTEXITCODE -ne 0) { throw 'Package reuse run identity guard failed' }
           python -c "import os; value=os.environ['REUSE_FOCUSED_RUN_ID']; assert not value or (value.isdecimal() and os.environ['REUSE_REWRITE_RUN_ID'])"
+          if ($LASTEXITCODE -ne 0) { throw 'Focused reuse run identity guard failed' }
           $evidence=Join-Path $env:RUNNER_TEMP 'rewrite-windows'
           New-Item -ItemType Directory -Path $evidence | Out-Null
           "REWRITE_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append

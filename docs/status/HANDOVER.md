@@ -4,7 +4,7 @@
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
-acceptance. Last wait checkpoint `5f22e18` is published and verified; production
+acceptance. Child-driver repair candidate `587ce6b` is published and verified; production
 inputs remain unchanged. User-approved CI-first routing supersedes the serial Windows handoff.
 Continue one active GPT-6.1 Sol High owner in the current development session. No
 subagents or direct access to the user's other computer.
@@ -95,16 +95,39 @@ Full downloaded focused-source reuse admission passes locally with only declared
 Windows checkout line endings emulated for inventory comparison; hashes use actual
 artifact bytes. No redundant compilation or native pass is inferred.
 
-**Next action:** publish/verify the scoped correction, dispatch this selected retry
-and record exact workflow/run/attempt/head/status/time/artifact identity. Publish the
-wait successor, then stop active model polling. The user resumes this same chat for
-a terminal audit of run/source/input/binary identity, prelaunch proof, actual entries,
-native captures/receipts, both phase reports, five exact HTTP bodies and cleanup.
-Missing/failed/skipped proof stays unresolved; continue-on-error conclusions do not
-replace raw outcomes. Diagnose before further bounded fixes; two unsuccessful
-corrections of one hypothesis require reassessment. Local Windows handoff only for
-named required native cases CI cannot establish after feasible work. No watcher,
-scheduler or second writer; docs-only successors do not replace the tested candidate.
+### Confirmed next run — awaiting_ci
+
+Workflow **357322921**, `production-scaffold.yml`,
+[run **38029621084**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084),
+**attempt 1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+exact published head `587ce6bdec8025be3b9f1674c58b6c3272f63efd`.
+Created **2026-10-10 06:03:36 UTC**; last observed **in_progress at 06:03:46 UTC**.
+Selected Windows x64 job **114147625037** started, setup passed, checkout was in
+progress; generic jobs skipped. Material inputs are the reuse/ordinal values above.
+No active duplicate run existed. Artifact `rewrite-windows-38029621084-1` has **7 days
+retention after upload**; completion/upload and actual reuse/prelaunch/native results
+are not yet observed. Known Windows use at checkout **1/4 builds, 1/6 launches**,
+with **zero builds/up to two launches reserved**; later usage is unknown until audit.
+
+User-requested prepublication recheck subsequently observed this same run still
+in progress, at rejection/repository gates, before **2026-10-10 06:06:15 UTC**.
+Re-review found/fixed dispatch validations potentially masking earlier failures;
+immediate throws now reject all 8 tested invalid selections. Selected current inputs
+pass the tightened guards, so this active run continues without duplicate dispatch.
+Actions/evidence gates and 487-file repository checks pass again. The published
+successor includes workflow guard hardening and wait records; it leaves the tested
+`587ce6b` native behavior and package identity unchanged.
+
+**Next action:** stop active polling and wait for the user's manual same-chat resume.
+Audit this exact run/attempt terminal state and fresh refs/local edits, then inspect
+source/input/binary identity, successful-case reuse receipts/logs, child prelaunch,
+actual attempt entries, native PNGs/receipts, both phase reports, five exact reviewed
+HTTP bodies and cleanup. Missing/failed/skipped proof stays unresolved; raw outcomes
+prevail over continue-on-error conclusions. Diagnose before bounded corrections and
+reassess after two unsuccessful corrections of one hypothesis. Local Windows handoff
+only for named required native cases actual CI cannot establish after feasible work.
+No watcher, scheduler or second writer; docs-only successors do not replace the tested
+candidate. Prior native, geometry, setup and zero-job failures remain in the ledger.
 
 Detailed history, source mapping and reservations are in the
 [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#corrected-windows-retry-audit-and-child-driver-hash-repair--2026-10-10).

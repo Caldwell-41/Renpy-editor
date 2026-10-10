@@ -21,16 +21,17 @@ are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diag
 fixture correction; no production change or rebuild was necessary.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **1/4 builds, 1/6 launches**.
-**State: in_progress.** Terminal audit of
-[run 38027478869](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38027478869)
-confirms core 9/9, transport 8/8, native worker 6/6, controller and 1920x1080 runner
-capability; scanned package/SDK reuse passes. One native launch failed because the
-child PowerShell driver could not resolve its hash cmdlet. Its observation marker
-stayed locked; credential and fixture cleanup pass. Phase 2 remains unlaunched.
-The scoped repair uses .NET SHA-256 plus an independent child-context prelaunch check;
-strictly reuse unchanged portable successes. No production behavior changed. Publish/
-verify and rerun with zero builds/up to two launches reserved; manual same-thread
-wait/resume. [HANDOVER](HANDOVER.md) owns exact sources, allowance and remaining audit.
+**State: awaiting_ci.** Previous run established core 9/9, transport 8/8, native
+worker 6/6, controller and 1920x1080 runner capability. Its native launch failed on
+the child driver's missing hash cmdlet, with honest locked observation and cleanup.
+The .NET hash repair/prelaunch guard and passed-evidence reuse are published at
+`587ce6b`. [Run 38029621084](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084),
+attempt 1, was confirmed in progress at **2026-10-10 06:03:46 UTC**; only Windows is
+selected. Zero builds/up to two launches are reserved; actual later usage and all
+native qualification remain pending terminal audit. No production change; Mac proof
+stays valid. User-requested recheck fixed dispatch failure masking; guards and local
+checks pass again, with current valid run continuing. Manual same-thread resume,
+no polling. [HANDOVER](HANDOVER.md) owns identity.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

@@ -325,6 +325,63 @@ compact plus actual Generate/Accept remain required, then independent-process
 persistence/whole-project byte equality/zero HTTP/cleanup. Publish and remote verify
 before dispatch, record confirmed identity and use manual same-thread wait/resume.
 
+### Confirmed child-driver repair dispatch — 2026-10-10
+
+**State: awaiting_ci.** Remote verified repair candidate
+`587ce6bdec8025be3b9f1674c58b6c3272f63efd` before dispatch; no active duplicate run.
+Confirmed workflow **357322921**, `production-scaffold.yml`,
+[run **38029621084**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084),
+**attempt 1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+head exactly matches the published repair. Created **2026-10-10 06:03:36 UTC**;
+last observed **in_progress at 06:03:46 UTC**. Selected Windows x64 job
+**114147625037** started, setup passed, checkout was in progress; generic jobs skipped.
+Inputs: `dialogue_rewrite_windows=true`, `upload_packages=false`,
+`rewrite_reuse_run_id=38023888008`, `rewrite_focused_reuse_run_id=38027478869`,
+`rewrite_build_ordinal=2` unused, `rewrite_first_launch_ordinal=2` (phase 2 ordinal 3).
+
+Artifact `rewrite-windows-38029621084-1`, **7 days retention after upload**;
+completion/upload, child-context prelaunch and native results remain unobserved.
+Source artifact expiry/retained audit copies are recorded above. Known Windows totals
+at checkout **1/4 builds, 1/6 launches**; **zero builds/up to two launches reserved**.
+Later actual entries are unknown until terminal audit. Mac remains **1/4, 3/6** with
+valid unchanged production evidence. All required native cases remain pending.
+
+Publish the reviewed wait successor and stop active model polling. User manually
+resumes this same chat to audit this exact run/attempt, fresh refs and all required
+source/input/hash/portable reuse/prelaunch/native/HTTP/persistence/cleanup evidence.
+No automatic wake-up/polling, duplicate dispatch, merge or release. This docs-only
+successor does not replace the tested candidate; all earlier failures remain recorded.
+
+### User-requested prepublication recheck — 2026-10-10
+
+User requested another code/workflow review before publication and another try.
+Repair candidate `587ce6b` and run `38029621084` had already been published/dispatched;
+its wait-record edits were still local. Rechecked workflow ordering/contexts, artifact
+admission and input identity, child prelaunch before launch entries, cumulative
+ordinals, native marker refusal, phase dependency and terminal cleanup/failure gates.
+
+Review found a narrow **dispatch harness defect**: multiple Python validations were
+followed by further commands without immediately checking their exit codes, so a
+later success could mask an invalid earlier selection. Add a PowerShell throw after
+each validation. Executed the exact workflow Python expressions locally: selected
+valid inputs pass; **8** invalid branch/attempt/upload/ordinal/reuse selections refuse,
+with immediate failure checks verified. Actions schema/contexts via `actionlint`,
+native gate **4/4**, report gate **2/2**, reuse gate **4/4**, repository validation
+**487 files** and diff whitespace pass again. No production code or native-driver
+behavior changed in this final hardening; no package build/launch is selected for it.
+
+User-requested current-state recheck still observed run `38029621084` **in_progress**:
+Windows setup through dependency cache steps completed; rejection/repository gates
+were in progress. Generic jobs remained skipped, exact head remained `587ce6b`.
+This observation was made before **2026-10-10 06:06:15 UTC**; it is not terminal
+acceptance or raw continue-on-error proof. Later consumption remains unknown.
+Recorded run inputs meet all hardened guards, so its qualification can continue
+without a duplicate dispatch. Publish the reviewed workflow hardening with the wait
+record, retaining `587ce6b` as the tested candidate. This successor contains workflow
+validation hardening and records, rather than being labelled docs-only; its delta
+does not change the selected valid native run, production inputs or package identity.
+Manual same-thread terminal audit remains next; all missing native evidence is pending.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
