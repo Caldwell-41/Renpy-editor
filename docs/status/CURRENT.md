@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-10. [First safe dialogue rewrite](../tasks/active/phase-2-initial-llm-assistance.md#first-safe-dialogue-rewrite-selection--2026-10-10)
 is implemented on `codex/provider-qualification`, continuing published `e5f09c4`,
-with qualification incomplete. One serial local Mac owner, no subagents or direct
+with published/remote-verified implementation `515cd85` and qualification incomplete. One serial local Mac owner, no subagents or direct
 other-host execution.
 
 Core/renderer/native dispatch synthetic checks pass, including exact reviewed send,

@@ -138,6 +138,12 @@ standard-template runtime and then serial Windows proof remain open. Implementat
 is published as an incomplete qualification checkpoint; full 2B.1/2A.2/Phase 2 is
 not accepted. One local owner, no subagents or direct other-host execution.
 
+Published implementation `515cd8538efc7ead72ef3d0e8852a192729ec8a2` on the same
+branch; local HEAD and fresh `git ls-remote` matched. Repository-local noreply
+identity used; worktree, exact failed PID and disposable fixture confirmed clean.
+No merge/release/install or other-host execution. Native/manual unlock remains the
+only next host capability needed before retrying required runtime proof.
+
 ## Prompts and context preparation selection — 2026-10-10
 
 User-selected new outcome on published `92a33180604ce851aa8ebc47e5c336da81aedf57`,

@@ -3,7 +3,9 @@
 ## First safe rewrite: implementation ready, Mac unlock required
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
-`e5f09c4` ancestry and this implementation checkpoint. One GPT-6.1 Sol High owner,
+`e5f09c4` ancestry and published implementation `515cd85`. Local HEAD and fresh
+remote branch lookup matched `515cd8538efc7ead72ef3d0e8852a192729ec8a2`; worktree,
+exact failed PID and disposable fixture were confirmed clean. One GPT-6.1 Sol High owner,
 no subagents or direct other-host execution. Mac then Windows serially.
 
 [Scope, unique failures and evidence](../tasks/active/phase-2-initial-llm-assistance.md#first-safe-dialogue-rewrite-selection--2026-10-10)
