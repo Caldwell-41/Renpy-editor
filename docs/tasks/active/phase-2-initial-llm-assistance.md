@@ -3331,3 +3331,82 @@ On resume, reconcile fresh refs/local edits, verify this exact run and audit art
 continue only authorized in-scope fixes within unchanged allowances. Then establish
 the named local approved signed Mac Continue native case, complete final review and
 closure, and return the next-outcome prompt without starting it.
+
+
+### Continue Scene failed-run audit and review repairs — 2026-10-10
+
+State: `in_progress`. User resumed the same thread, explicitly requesting audit of
+failed run 38035948157, correction and another review before any new run. Fresh fetch
+reconciles clean local/remote `3ff1e18`; main remains `5f448ca`. No reset or unrelated
+work changes. The earlier wait is superseded; the failed evidence remains failed.
+
+Exact run **38035948157**, workflow **357322921**, attempt **1**, candidate **3432288**
+completed **failure** at **2026-10-10 08:05:36 UTC**. Actual artifacts audited:
+
+- Windows **11664456884**, `rewrite-windows-38035948157-1`, expires
+  **2026-10-17 08:05:28 UTC**; ZIP digest
+  `9e94a81aaced8cfffe21828678e216dd8f302a069a1af97bfb682c27c51b5e49`.
+  All **45** manifest entries match. Package succeeds; retained executable SHA256
+  `45474b8c3bb49304e156ab1ca8de8cb23d1f6b6fe546384331fe485685efd9fb`
+  matches its input inventory. Native preflight proves interactive Default desktop,
+  UIA and 1920×1080 observation. Pinned Node/npm/Rust match. Actual renderer 125,
+  core 15, transport 8, native worker 6 and controller pass individually. The focused
+  result gate fails with **`name 're' is not defined`**. Overall focused proof fails.
+- Mac **11664581107**, `continue-macos-38035948157-1`, expires
+  **2026-10-17 07:57:42 UTC**; ZIP digest
+  `b38c26a81ee7a2de10533836d2485a47b75727f03ed437b5601013464c1da739`.
+  All **22** manifest entries match. ARM64/pinned tools, renderer 125, core 15,
+  prompts 5, transport 8, native worker 6, controller/build and literal-driver build
+  pass individually; SDK fails. SDK scratch cleanup and privacy scan pass.
+- Both SDK runtime cases fail at the immediate first exact `say` assertion after
+  Start. Init substitution/token assertions, compile/lint and template startup pass.
+  Local diagnostic proves initial `say.scope["what"]` is **empty** before populated
+  dialogue, and pinned Character.prefix_suffix substitutes source before the screen.
+  Classified **harness defects**, not evidence of a product literal failure. Windows
+  native is skipped, both reports/cleanup receipt absent because no editor launched;
+  missing required proof remains missing. No fixture/native credential was created.
+
+Actual cumulative use after this audit: Windows **1/4 package builds, 0/6 editor
+launches, 1/4 dispatches**; Mac **0/4, 0/6, 1/4**. Windows attempt ledger contains
+only package-build ordinal 1. Unused launch reservations are released. Remaining:
+Windows **3 builds/6 launches/3 dispatches**; Mac **4/6/3**. Earlier slice counts are
+unchanged. SDK/test binaries are focused checks, not editor-process launch entries.
+
+Corrections: import and exercise the actual Windows renderer gate, requiring 126
+passes and zero failure/cancel/skip/todo; both target expected totals track the new
+regression. Runtime waits use pinned SDK `pause until eval ... timeout 10` for each
+exact substituted narration/dialogue/terminal payload, followed by exact assertions;
+init token checks still prove original literal prose and no active generated tokens.
+The first local substitution-only correction failed; one diagnostic then established
+the empty screen race. The second, state-wait correction passes. This is one unsuccessful
+correction of the original SDK hypothesis, followed by decisive evidence and success;
+no blind CI retry or budget reset.
+
+Owner reviewed shared prepare/send/complete/accept bindings, closed schema and IDs,
+anchor/terminal insertion, zero-write transitions, source/map preservation, action UI,
+HTTP fixture, native stage gates, SDK timing and workflow outcome/attempt recording.
+Review found and fixed **a product prompt-cache defect**: Undo from one action can
+change the other action's saved prompt while its cached text remains stale. Shared
+Undo/Redo now reloads both saved action models; failed post-commit refresh keeps the
+committed result and disables stale choices until explicit reload. One DOM regression
+proves cross-action Undo and failed-refresh/Redo recovery. Native gate regressions
+also explicitly reject absent/wrong action receipts before allowing Continue evidence.
+No additional independently required review is waived or newly claimed.
+
+Focused final local proof: **126/126 renderer**, zero fail/cancel/skip/todo; frontend
+build and native JS syntax pass; actual Windows renderer gate admits that real output
+and rejects missing/partial/unsuccessful fixtures (6 portable tests pass; Windows-only
+PowerShell case remains CI-required). Report gates **3/3**, native gates **4/4**,
+Python syntax and actionlint pass. Corrected official pinned SDK compile/lint/literal/
+runtime passes **8/8** named smoke assertions (two say Beats, terminal and return),
+with no skipped/not-run cases. Original failures and diagnostic logs stay ignored.
+Unchanged core/transport/controller evidence above is reused; no redundant local core
+suite or provider call. Windows changed renderer/SDK/native proof still requires CI.
+
+Retained Mac native capability inventory is available; Loomlight is not running.
+Before redispatch, perform only the named approved signed Mac native case missing
+from hosted CI, count every package/editor attempt, audit its exact candidate and
+cleanup, and fix any evidenced in-scope issue. No signing or Keychain policy change.
+Then publish and dispatch the coherent repaired candidate within this same allowance;
+Windows build ordinal 2 and first launch 1 remain available. Record exact new run,
+inputs and consumption; follow manual same-thread wait/resume. No next deliverable.

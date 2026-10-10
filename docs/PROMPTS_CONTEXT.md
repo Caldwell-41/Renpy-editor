@@ -204,7 +204,9 @@ ambiguous or conflicting boundaries refuse. Terminal/edge replacement is unavail
 Settings → System prompts selects Dialogue rewrite or Continue Scene. Each has one
 versioned bundled baseline and a project-local editable override, using existing
 metadata/history. Save/restore/Undo/Redo/reopen retain that action's exact prose and
-other settings. Overrides never change core response permissions. Assist uses the
+other settings. Shared Undo/Redo refreshes both action models from saved state; if that
+refresh fails, prompt controls stay unavailable until an explicit reload succeeds.
+Overrides never change core response permissions. Assist uses the
 saved action-specific prompt; it reviews the complete strict-schema body before Generate.
 
 Continue context includes the saved Scene's supported root Beat payloads and terminal,

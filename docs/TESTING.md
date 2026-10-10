@@ -1444,7 +1444,10 @@ interactive desktop, all five stages and intact captures before acknowledgement.
 `continue-literal-driver` emits an actual accepted group. The existing official
 `rewrite-literal-sdk.py --continue-scene` verifies published Ren'Py **8.5.3** archive
 checksum, standard-template compile/lint, actual substitution/tokenization and startup,
-exact two generated say payloads, preserved terminal say and return. Raw case logs and
+exact two generated say payloads, preserved terminal say and return. The runtime waits
+at most 10 seconds for each exact substituted say-screen payload; screen existence
+alone can precede populated text. Init token assertions independently establish the
+original literal prose and absence of generated active tags/expressions. Raw case logs and
 input/binary/artifact hashes must be audited; green/skipped/partial badges do not qualify
 missing cases. Preserve failures, respect manual same-thread wait/resume and reuse only
 unchanged evidence. No paid provider or private game content is involved.

@@ -15,6 +15,17 @@ spec.loader.exec_module(recipe)
 
 
 class RetainedEvidenceGate(unittest.TestCase):
+    def test_continue_renderer_gate_executes_and_rejects_partial_or_unsuccessful_runs(self):
+        for prefix, newline in (('ℹ', '\n'), ('#', '\r\n')):
+            passed = newline.join(f'{prefix} {name} {count}' for name, count in
+                                  [('tests', 126), ('pass', 126), ('fail', 0), ('cancelled', 0), ('skipped', 0), ('todo', 0)]) + newline
+            recipe.validate_continue_renderer(passed)
+            for name in ('tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo'):
+                original = f'{prefix} {name} '+('126' if name in ('tests', 'pass') else '0')
+                for invalid in (passed.replace(original, ''), passed.replace(original, f'{prefix} {name} 1')):
+                    with self.subTest(prefix=prefix, outcome=name), self.assertRaises(AssertionError):
+                        recipe.validate_continue_renderer(invalid)
+
     @unittest.skipUnless(os.name == 'nt', 'Actual Windows PowerShell polling regression requires Windows')
     def test_native_polling_handles_transient_nodes_without_accepting_missing_proof(self):
         # Execute the real helpers, not a Python model. The remaining driver is

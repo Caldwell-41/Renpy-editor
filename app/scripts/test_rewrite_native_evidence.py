@@ -39,6 +39,14 @@ class NativeEvidenceGate(unittest.TestCase):
     def test_all_native_stages_require_exact_owner_and_every_assertion(self):
         for stage in NATIVE_STAGES:
             value=self.receipt(stage);self.validate(stage,value)
+            (self.root/f'{stage}.json').write_text(json.dumps(value))
+            with self.assertRaises(ValueError):validate_native_stage(self.root,stage,42,'a'*64,True)
+            value['action']='rewriteDialogue'
+            (self.root/f'{stage}.json').write_text(json.dumps(value))
+            with self.assertRaises(ValueError):validate_native_stage(self.root,stage,42,'a'*64,True)
+            value['action']='continueScene'
+            (self.root/f'{stage}.json').write_text(json.dumps(value))
+            validate_native_stage(self.root,stage,42,'a'*64,True)
             for key,new in [('stage','different'),('passed',False),('processId',43),('executableSHA256','b'*64),('inputDesktop','Winlogon'),('layer','browser mock')]:
                 invalid=copy.deepcopy(value);invalid[key]=new
                 with self.assertRaises(ValueError):self.validate(stage,invalid)

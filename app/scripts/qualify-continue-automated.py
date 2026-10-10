@@ -19,8 +19,9 @@ def run(name,argv,count=None,timeout=600):
   (a.output/(name+'.log')).write_text(r.stdout+r.stderr)
   assert r.returncode==0,name
   if name=='renderer':
-   assert re.search(r'(?:ℹ|#) tests 125(?:\r?\n)',r.stdout) and re.search(r'(?:ℹ|#) pass 125(?:\r?\n)',r.stdout), 'Required renderer cases missing'
-   assert re.search(r'(?:ℹ|#) skipped 0(?:\r?\n)',r.stdout), 'Skipped renderer cases are not acceptance'
+   assert re.search(r'(?:ℹ|#) tests 126(?:\r?\n)',r.stdout) and re.search(r'(?:ℹ|#) pass 126(?:\r?\n)',r.stdout), 'Required renderer cases missing'
+   for outcome in ('fail','cancelled','skipped','todo'):
+    assert re.search(r'(?:ℹ|#) '+outcome+r' 0(?:\r?\n)',r.stdout), 'Unsuccessful renderer cases are not acceptance'
   if name=='sdk':assert 'PASS: pinned Ren’Py actual accepted Continue Scene group' in r.stdout
   if count is not None:assert f'test result: ok. {count} passed; 0 failed; 0 ignored;' in r.stdout,name
   checks.append({'name':name,'passed':True,'command':argv})

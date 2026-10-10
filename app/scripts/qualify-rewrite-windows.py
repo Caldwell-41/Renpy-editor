@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -177,6 +178,11 @@ def entry(output, kind, ordinal):
 def continuing():
     return os.environ.get("CONTINUE_SCENE") == "true"
 
+def validate_continue_renderer(text):
+    assert re.search(r'(?:ℹ|#) tests 126(?:\r?\n)', text) and re.search(r'(?:ℹ|#) pass 126(?:\r?\n)', text), 'Required renderer cases missing'
+    for outcome in ('fail', 'cancelled', 'skipped', 'todo'):
+        assert re.search(r'(?:ℹ|#) '+outcome+r' 0(?:\r?\n)', text), 'Unsuccessful renderer cases cannot pass'
+
 def prepare(output):
     if continuing():assert not os.environ.get('REUSE_REWRITE_RUN_ID') and not os.environ.get('REUSE_FOCUSED_RUN_ID'), 'Continue requires changed-action evidence'
     assert platform.system() == 'Windows' and platform.machine().lower() in ('amd64', 'x86_64')
@@ -210,8 +216,7 @@ def prepare(output):
         try:
             text = run(output, name, argv)
             if continuing() and name=='renderer':
-                assert re.search(r'(?:ℹ|#) tests 125(?:\r?\n)', text) and re.search(r'(?:ℹ|#) pass 125(?:\r?\n)', text), 'Required renderer cases missing'
-                assert re.search(r'(?:ℹ|#) skipped 0(?:\r?\n)', text), 'Skipped renderer cases cannot pass'
+                validate_continue_renderer(text)
             if count is not None:
                 assert f'test result: ok. {count} passed; 0 failed; 0 ignored;' in text, 'Required selected cases missing'
         except Exception as error:

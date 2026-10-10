@@ -69,7 +69,10 @@ testsuite global:
 """
   code=code.replace('    with open(config.basedir',second_assertions+'    with open(config.basedir')
   code=fixture['characterDefinition']+'\n'+code
-  code=code.replace('    assert screen "say"\n    advance until screen "main_menu"', '    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == '+repr(text)+')\n    advance\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == "Second literal [[flag] {{b}line{{/b}")\n    advance\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == "Terminal preserved")\n    advance until screen "main_menu"')
+  # Character.prefix_suffix performs substitution before handing text to the say
+  # screen. Compare that runtime representation; the init assertions above prove
+  # its tokens display the original literal prose without active tags/expressions.
+  code=code.replace('    assert screen "say"\n    advance until screen "main_menu"', '    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == _substituted) timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == _substituted)\n    advance\n    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == _second) timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == _second)\n    advance\n    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope.get("what") == "Terminal preserved") timeout 10\n    assert screen "say"\n    assert eval (renpy.get_screen("say").scope["what"] == "Terminal preserved")\n    advance until screen "main_menu"')
  (root/'game/script.rpy').write_text(code,encoding='utf-8')
  for command in ('compile','lint'):
   run([root,command,*(['--error-code'] if command=='lint' else [])])
