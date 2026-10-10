@@ -473,6 +473,76 @@ source reuse/prelaunch, attempt ledger, all five native receipts/PNGs, required
 zero HTTP and cleanup. Missing/failed/skipped evidence stays unresolved. No new
 runtime pass or allowance reset is claimed; no merge/release/next feature.
 
+### Successful Windows native audit and npm pin finding — 2026-10-10
+
+[Run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
+workflow **357322921**, attempt **1**, exact candidate
+`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`, completed **success** at
+**2026-10-10 06:29:05 UTC**. Selected Windows job **114151363778** only; generic
+jobs skipped. Artifact **11661993663**, `rewrite-windows-38030871532-1`, expires
+**2026-10-17 06:28:02 UTC**. All **73** manifest hashes verify in ignored
+`.toolchains/rewrite-windows-ci-38030871532`; raw workflow log is retained outside Git.
+All five terminal raw outcomes are success; both reports pass with no terminal errors.
+Actual Windows PowerShell polling regression passes (reuse test suite **5/5**, no skip),
+confirming the serial reviewer's repair. Native/report gates **4/4, 2/2** pass.
+
+App launch **3**, PID **9196**, passes all **20 distinct phase-1 assertions** in
+**26.75 seconds** (21 recorded entries include a repeated preparation check, not an
+extra required case). Five actual HTTP request SHA256 digests equal all five reviewed
+bodies in order. Light/dark/compact and physical Generate/Accept receipts independently
+validate against the exact PID/binary, Default desktop, visible controls, captures and
+observed resulting states. All **7** PNGs were visually inspected: light/dark
+**1296x939**, compact/actions **736x819**; before/after action captures differ, display
+inert proposal then saved state. Every observation marker had actual validated native
+evidence before release. Stale retry counters are zero; no relaxed gate was needed.
+Physical acceptance saves once/blocks duplicate action; literal encoding/protected
+source, custom neighbors, byte-exact Undo/Redo, malformed/unsafe/cancel/stale zero
+writes and project reopen pass. This is actual UIA/OS-input automation, not a claim
+of human native acceptance.
+
+Separate app launch **4**, PID **7200**, passes **3/3** process-reopen assertions in
+**3.41 seconds**: accepted literal source/protected tokens, custom prompt and native
+credential readability. Zero HTTP and whole-project before/after bytes compare equal
+in the executed probe; all four metadata hashes match phase 1. Both processes finish
+successfully; terminal native credential cleanup and outer fixture deletion pass,
+retaining **71** fixture hashes. Package/SDK source **38023888008** and portable source
+**38027478869** were reused; original executable remains
+`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
+No new build. Cumulative **Windows 1/4 builds, 4/6 launches**; remaining **3 builds,
+2 launches**. Mac remains **1/4 builds, 3/6 launches**, qualified. Native behavior
+proof is passed, while the following newly identified toolchain mismatch prevents
+unqualified closure of the required pinned package candidate.
+
+Audit of actual identity/commands found **npm 11.17.0**, despite the workflow's global
+installation of repository-required **11.9.0**. The same mismatch exists in the
+original package and portable-source identities; earlier claims of selected pinned
+npm must be read with this correction. Node **24.19.0**, Rust/Cargo **1.90.0**,
+Python **3.12.10**, Windows AMD64 runner image **20260925.250.1** are recorded.
+This is a CI command-route defect, not a production/native failure. Installing global
+npm did not select it over the Node toolcache's bundled executable; the Python route
+also derived the CLI from whichever shim PATH found. Source/lock bytes remain unchanged,
+but the required toolchain cannot be inferred from a successful install command.
+
+Scoped fix selects the actual installed global npm CLI, checks **11.9.0** before
+installing dependencies, prepends its shim directory for nested scripts/next steps,
+and exports its exact CLI path to the existing Python recipe. Candidate identities
+and reuse admissions now reject Node/npm versions differing from app/package.json;
+old drifted source artifacts remain honest historical evidence and cannot establish
+pinned-toolchain reuse. No production, signing, credential, SDK or dependency changes.
+Local explicit CLI/version execution passes **Node 24.19.0/npm 11.9.0**. New drift
+rejection test passes; native/report/reuse suites **4/4, 2/2, 5 passed + 1 Windows-only
+skip**, Python syntax, actionlint, repository/privacy **487 files** and diff checks pass.
+The previously skipped actual PowerShell test has now passed on the audited Windows
+run. Windows runtime of the new npm route remains pending CI.
+
+Next bounded run uses the same focused workflow with **no package or portable reuse**,
+package-build ordinal **2**, first launch **5**, dependent phase-2 launch **6**.
+Reserve **one build/up to two launches** within the original allowance. Re-run selected
+renderer/core/transport/native/controller, pinned SDK and coherent package walkthrough
+because the actual toolchain changes. Completed Mac proof remains valid. Publish/verify
+before dispatch, record exact identity, then manual same-chat wait/resume. No additional
+agent, merge/release or next feature; missing proof is not waived or reset.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)

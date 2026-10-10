@@ -517,7 +517,17 @@ jobs:
         run: |
           npm install --global npm@11.9.0
           if ($LASTEXITCODE -ne 0) { throw 'Pinned npm setup failed' }
-          npm ci --ignore-scripts
+          $npmPrefix=(npm prefix --global).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Installed npm prefix unavailable' }
+          $npmCli=Join-Path $npmPrefix 'node_modules/npm/bin/npm-cli.js'
+          $npmVersion=(& node $npmCli --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $npmVersion -ne '11.9.0') { throw 'Installed npm version does not match the repository pin' }
+          # Select the installed shim for nested npm scripts and the exact CLI for
+          # the Python recipe; the Node toolcache's bundled npm stays off this route.
+          $env:Path="$npmPrefix;$env:Path"
+          $npmPrefix | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "REWRITE_NPM_CLI=$npmCli" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & node $npmCli ci --ignore-scripts
           if ($LASTEXITCODE -ne 0) { throw 'Locked dependencies failed' }
       - name: Select repository-pinned Rust and restore dependencies
         run: rustup show active-toolchain

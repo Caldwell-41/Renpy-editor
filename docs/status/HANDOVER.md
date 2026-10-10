@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## First safe rewrite: Mac qualified, Windows CI continuation
+## First safe rewrite: native behavior passes; pinned Windows package correction
 
 Continue Caldwell-41/Renpy-editor on `codex/provider-qualification`, preserving
 published implementation `515cd85` and prior both-target prompt/context/manual-reference
@@ -12,9 +12,9 @@ serial reviewer has finished.
 [Current CI authority](../tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10)
 and [selected scope, failures, results and required Windows cases](../tasks/active/phase-2-initial-llm-assistance.md#mac-qualification-complete-and-serial-windows-transfer--2026-10-10)
 own acceptance and cumulative use: **Mac 1/4 package builds, 3/6 app launches;
-Windows 1/4 builds, 2/6 launches**. Mac qualification is complete; both-target
-acceptance remains incomplete until Windows proof. There is no pending local process,
-owned fixture or synthetic credential; the audited CI failure and confirmed retry are below. Prior launch-1 failure evidence is retained.
+Windows 1/4 builds, 4/6 launches**. Mac qualification is complete; both-target
+acceptance remains incomplete until the corrected pinned Windows package proof. There is no pending local process,
+owned fixture or synthetic credential; the successful native audit and remaining toolchain correction are below. Prior launch-1 failure evidence is retained.
 
 ### Completed Mac evidence
 
@@ -42,84 +42,71 @@ until the menu and uses suite teardown exit. Production/package inputs are uncha
 Existing core/transport/native/controller and 122 renderer regression passes remain
 valid. Unique historical timeouts/locked-host evidence remain failures, not passes.
 
-### Latest terminal Windows audit and serial repair
+### Successful Windows native audit and remaining toolchain correction
 
-[Run **38029621084**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38029621084),
+[Run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
 workflow **357322921** (`production-scaffold.yml`), attempt **1**, candidate
-`587ce6bdec8025be3b9f1674c58b6c3272f63efd`, completed **failure** at
-**2026-10-10 06:08:39 UTC**; selected Windows job **114147625037** only.
-All **64** artifact hashes verify; artifact **11661896616**,
-`rewrite-windows-38029621084-1`, expires **2026-10-17 06:08:33 UTC**.
-Ignored local audit copy `.toolchains/rewrite-windows-ci-38029621084` and raw log
-retain the original failure and receipts.
+`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`, completed **success** at
+**2026-10-10 06:29:05 UTC**. Windows job **114151363778** only; generic jobs skipped.
+Artifact **11661993663**, `rewrite-windows-38030871532-1`, expires
+**2026-10-17 06:28:02 UTC**. All **73** manifest hashes verify in ignored
+`.toolchains/rewrite-windows-ci-38030871532`; all seven native PNGs visually inspected.
+Raw terminal outcomes all success; both reports pass. Actual Windows PowerShell
+polling regression passes, confirming the serial reviewer's prior scoped repair.
 
-Child PowerShell prelaunch hashing and actual unlocked Default desktop **1920x1080**
-pass, confirming the prior hash repair. Package/SDK source **38023888008** and passed
-portable source **38027478869** reuse admission pass. Original executable SHA256
-`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`
-remains unchanged. Core **9/9**, transport **8/8**, native worker **6/6**, actual
-controller/strict HTTP, renderer **123/123** and pinned SDK evidence remain passed.
+Launch **3**, PID **9196**, passes **20 distinct** assertions in **26.75 seconds**
+(21 records include one repeated preparation check). All five actual HTTP digests
+match reviewed bodies in order. Exact binary/PID/Default desktop and actual controls,
+light/dark/compact captures, OS Generate/Accept and observed inert/saved states pass.
+Native receipt gates independently validate every stage. Source protection/literal
+encoding/custom preservation, one transaction/duplicate refusal, Undo/Redo,
+malformed/unsafe/cancel/stale zero writes and project reopen pass. Evidence is native
+UIA/OS-input automation, not human acceptance. No marker was released without evidence.
 
-Launch **2**, PID **1396**, passes actual native light/dark/compact observation,
-with individually inspected receipts/captures. Generate OS input completes, then the
-driver fails on a null-valued method call. Post-click UIA Name.Contains is the strong
-inference; the old receipt lacks a stack. Marker stays locked; phase 1 honestly
-fails with **7/20** checks and one reviewed digest. Required five-body proof,
-Accept and separate-process reopen are missing. Raw native outcome/terminal gate
-are failure despite the normalized step conclusion. No new build or phase-2 launch.
-App/outer cleanup prove credential references removed and fixture deleted, retaining
-**48** fixture hashes. Windows actual cumulative **1/4 builds, 2/6 launches**;
-remaining **3 builds, 4 launches**. Mac evidence stays valid.
+Separate launch **4**, PID **7200**, passes **3/3** persistence assertions in
+**3.41 seconds**, zero HTTP and whole-project byte equality. Metadata hashes match
+phase 1. Both processes complete successfully; native credential cleanup and outer
+fixture deletion pass, retaining **71** fixture hashes. Original package/SDK and
+portable proof were reused, binary SHA256
+`6e4699d437f6f61a70b990008ac8ef28d112a28e9cab29e85ed6fc83952beaf9`.
+Core **9/9**, transport **8/8**, native worker **6/6**, actual controller/strict HTTP,
+renderer **123/123** and pinned SDK proof remain passed on their recorded inputs.
+Windows actual cumulative **1/4 builds, 4/6 launches**; remaining **3 builds,
+2 launches**. All unique previous failures remain in the owning ledger.
 
-The latest user request authorized one GPT-6.1 Sol High reviewer, narrowly replacing
-the earlier no-subagent rule. Parent audit, sole child's review/fix and parent
-verification ran serially; the child has finished and returned writer ownership.
-Only native-driver and existing reuse-test harness files changed. UIA names are
-null-safe; both action polls require a present button with exact enabled state.
-Only stale ElementNotAvailableException is retried within the existing 20-second
-bound, including control inventory; all other errors propagate. Failure receipts
-retain type/ID/stack/position. All observation/ownership/capture/physical-input and
-acceptance gates remain required. No demonstrated production defect or policy change.
+Review found actual **npm 11.17.0** in current and original package/portable identities,
+despite global install of required **11.9.0**. Node toolcache's bundled shim/CLI stayed
+selected. No production defect; native proof remains passed on its real binary,
+but pinned-toolchain package closure cannot be inferred. Node **24.19.0**,
+Rust/Cargo **1.90.0**, Python **3.12.10**, Windows AMD64 image **20260925.250.1**
+are recorded. Scoped workflow fix selects/version-checks the installed global CLI,
+prepends shim PATH for nested scripts/next steps and exports exact CLI to Python.
+Candidate and reuse identities reject Node/npm drift. Old source artifacts cannot
+supply required pinned-toolchain reuse; their actual evidence is preserved.
 
-Cheap native/report/reuse gates **4/4, 2/2, 4/4**, Python syntax, actionlint,
-repository/privacy **487 files** and diff checks pass independently. New Windows-only
-PowerShell regression executes the real functions with synthetic states before any
-app launch. It was explicitly **skipped locally** because this Mac lacks PowerShell;
-actual Windows proof remains pending. No new reuse exemptions or runtime inputs.
+Local explicit CLI/version execution passes Node **24.19.0/npm 11.9.0**. Native/report
+checks **4/4, 2/2**, reuse/drift gates **5 passed + 1 Windows-only skip**, Python syntax,
+actionlint, repository/privacy **487 files** and diff checks pass. Actual Windows
+PowerShell regression already passed in the audited run. New npm route runtime needs CI.
+No production/dependency/signing/credential changes; Mac package evidence remains valid.
+The user-authorized serial reviewer finished; no new agent or other-computer access.
 
-### Confirmed retry and manual continuation
+### Next bounded candidate and manual continuation
 
-Repair was published/verified before dispatching workflow **357322921** with
-`dialogue_rewrite_windows=true`, `upload_packages=false`,
-`rewrite_reuse_run_id=38023888008`, `rewrite_focused_reuse_run_id=38027478869`,
-`rewrite_build_ordinal=2` unused and `rewrite_first_launch_ordinal=3` (dependent
-phase 2 ordinal **4**). Reserve **zero builds/up to two launches**, with no rebuild
-fallback. Original package/SDK artifact **11659236668** expires
-**2026-10-17 04:31:02 UTC**; portable source artifact **11660353959** expires
-**2026-10-17 05:38:17 UTC**. Retained ignored audit copies and source hashes remain.
-Strict source/current inputs, successful cases and manifest checks must pass.
+**State: in_progress. Next action:** publish/verify the reviewed npm-route correction,
+check for active duplicates, then dispatch workflow **357322921** with
+`dialogue_rewrite_windows=true`, `upload_packages=false`, empty package/portable reuse
+inputs, `rewrite_build_ordinal=2`, `rewrite_first_launch_ordinal=5` (dependent phase 2
+ordinal **6**). Reserve **one build/up to two launches**. Run the selected focused
+cases, official checksum-verified SDK and coherent package walkthrough under actual
+repository pins. This consumes the final two launch slots; failures count, no reset.
 
-**State: awaiting_ci.** [Run **38030871532**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38030871532),
-workflow **357322921**, attempt **1**, event `workflow_dispatch`, exact head
-`69ddf5a8b6cbb9e3e3adae863a5a1e2eb58b029d`, branch `codex/provider-qualification`.
-Created **2026-10-10 06:25:20 UTC**, observed **in_progress at 06:25:33 UTC**.
-Windows job **114151363778** setup/checkout passed, bounded guards in progress;
-generic jobs skipped. Inputs are recorded above. No active duplicate existed.
-Artifact `rewrite-windows-38030871532-1` has **7 days retention after upload**;
-upload/terminal cases remain unobserved. Known totals **Windows 1/4 builds,
-2/6 launches**, zero builds/up to two launches reserved; later use needs audit.
-Docs-only wait successor does not replace the tested candidate.
-
-**Next action:** end polling and wait for user's manual same-chat resume, then
-audit actual Windows PowerShell regression, prelaunch, attempt entries, all five
-native receipts/PNGs, 20 phase-1 assertions/five exact HTTP bodies, phase-2 persistence,
-whole-project bytes/zero HTTP and cleanup. Failed/skipped/missing evidence stays
-unresolved. Diagnose before bounded fixes and reassess after two unsuccessful
-corrections of one hypothesis. Local handoff only for a named native case CI cannot
-establish after feasible work; no watcher or automatic wake-up.
-
-Detailed attempts and repair review are in the
-[owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#third-windows-terminal-audit-and-serial-reviewer-repair--2026-10-10).
-No paid/public calls, private game content, generated references, route expansion,
-other AI action, project-code execution during inspection, full 2B.1/2A.2/Phase 2,
-merge or release. CI execution is authorized; direct other-computer access is not.
+After confirming exact run/attempt/head/time/inputs, publish the manual wait record
+and stop polling. Same-chat resume audits actual version/CLI, case counts, pinned SDK,
+package/input/binary scan, attempt entries, all native receipts/PNGs, required 20 checks
+and five exact HTTP bodies, process reopen/whole bytes/zero HTTP and cleanup.
+Missing/failed/skipped evidence stays unresolved. Diagnose before correction; budget
+exhaustion or named unavailable native capability requires a concrete decision.
+No watcher, automatic wake-up, merge, release, signing-policy change or next feature.
+Detailed audit and correction rationale are in the
+[owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#successful-windows-native-audit-and-npm-pin-finding--2026-10-10).

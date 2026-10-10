@@ -27,6 +27,12 @@ REUSE_HARNESS_PATHS = {
 }
 
 
+def validate_toolchains(toolchains):
+    engines = json.loads((APP/'package.json').read_text())['engines']
+    assert toolchains['node'] == 'v'+engines['node'], 'Recorded Node version differs from repository pin'
+    assert toolchains['npm'] == engines['npm'], 'Recorded npm version differs from repository pin'
+
+
 def validate_reuse_inputs(packaged, current, allowed=REUSE_HARNESS_PATHS):
     required = {'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',
                 'app/src-tauri/src/main.rs', 'app/src-tauri/src/ai_native/windows.rs',
@@ -43,6 +49,7 @@ def reuse_focused(output, source):
     assert metadata['run_attempt'] == identity['attempt'] == 1 and metadata['workflow_id'] == 357322921
     assert metadata['head_branch'] == 'codex/provider-qualification' and metadata['event'] == 'workflow_dispatch' and metadata['status'] == 'completed'
     assert metadata['head_sha'] == identity['candidate'] and identity['os'] == 'Windows'
+    validate_toolchains(identity['toolchains'])
     validate_reuse_manifest(source, json.loads((source/'manifest.json').read_text()))
     paths = subprocess.check_output(['git', 'ls-files', 'app', '.github/workflows/production-scaffold.yml', 'spikes/renpy-sdk'], cwd=REPO, text=True).splitlines()
     # Core test and controller-example inputs must match their successful run.
@@ -87,6 +94,7 @@ def reuse(output, source):
     validate_reuse_manifest(source, manifest)
     identity = json.loads((source/'identity.json').read_text())
     packaged = json.loads((source/'package-inputs.json').read_text())
+    validate_toolchains(identity['toolchains'])
     assert identity['candidate'] == metadata['head_sha'] == packaged['candidate']
     assert identity['runId'] == str(metadata['id']) and identity['attempt'] == 1
     assert packaged['runId'] == identity['runId'] and packaged['attempt'] == '1'
@@ -132,8 +140,11 @@ def command(argv):
     # of enabling a shell or concatenating command arguments.
     if argv[0] == 'npm':
         node = Path(shutil.which('node'))
-        npm = Path(shutil.which('npm'))
-        argv = [str(node), str(npm.parent / 'node_modules/npm/bin/npm-cli.js'), *argv[1:]]
+        npm_cli = os.environ.get('REWRITE_NPM_CLI')
+        if not npm_cli:
+            npm_cli = str(Path(shutil.which('npm')).parent / 'node_modules/npm/bin/npm-cli.js')
+        assert Path(npm_cli).is_file(), 'Selected npm CLI unavailable'
+        argv = [str(node), npm_cli, *argv[1:]]
     return argv
 
 
@@ -174,6 +185,7 @@ def prepare(output):
     assert not (output / 'identity.json').exists(), 'Fresh evidence required'
     identity = {'candidate': candidate, 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(), 'runId': os.environ['GITHUB_RUN_ID'], 'attempt': 1, 'runnerImage': os.environ.get('ImageVersion'), 'os': platform.system(), 'architecture': platform.machine(), 'inputs': {path: digest(REPO/path) for path in paths}, 'toolchains': {tool: subprocess.check_output(command([tool, '--version']), cwd=APP, text=True).strip() for tool in ('node', 'npm', 'rustc', 'cargo')}, 'python': platform.python_version()}
     (output / 'identity.json').write_text(json.dumps(identity, indent=2)+'\n')
+    validate_toolchains(identity['toolchains'])
     if (output/'focused-reuse.json').is_file():
         reuse_receipt = json.loads((output/'focused-reuse.json').read_text())
         assert reuse_receipt['passed'] is True

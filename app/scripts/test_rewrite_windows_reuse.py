@@ -69,6 +69,14 @@ Write-Output 'PASS: real native polling rejects absent proof and propagates real
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('PASS: real native polling', result.stdout)
 
+    def test_recorded_toolchain_drift_is_rejected_before_checks_or_reuse(self):
+        engines = json.loads((recipe.APP/'package.json').read_text())['engines']
+        pinned = {'node': 'v'+engines['node'], 'npm': engines['npm']}
+        recipe.validate_toolchains(pinned)
+        for tool, value in (('node', 'v0.0.0'), ('npm', '11.17.0')):
+            with self.subTest(tool=tool), self.assertRaises(AssertionError):
+                recipe.validate_toolchains(dict(pinned, **{tool: value}))
+
     def inputs(self):
         return {p: 'original' for p in (
             'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',
