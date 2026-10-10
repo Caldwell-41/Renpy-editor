@@ -4138,3 +4138,47 @@ Workflow actionlint/repository validation/JS and Python syntax/diff checks pass.
 No package/editor/native acceptance is claimed yet. Windows0/4packages,0/6launches,
 0/4dispatches; Mac0/4,0/6,0/4. Next: signed Mac package1 and native launches1–2,
 then focused both-target CI dispatch1; audit artifacts after manual same-thread resume.
+
+### Generated card signed Mac proof and CI wait — 2026-10-11
+
+Implementation published as67faeaa8bd1a6f0a0c2596d204bc0e28230f49d6. Signed Mac
+package attempt1 passes approved pin358372708164C7273A551D746449357C12A3A806,
+strict signature and installer-content verification. Binary SHA256
+dd0cc88fb44f0e0577d0077fb605cfcf13555c9c13e4e981ed9890314a032b79;
+installer SHA256e4be29c9ad9004d09dbcdc515b131adb4e3eac1e184d31844cbd2e307cde6fc9.
+Runtime input receipt binds the candidate/app inputs and binary; package privacy passes.
+CUA observed light/dark/compact layout and physically clicked Generate, Save proposed
+card and separate Approve in signed PID32017. Native25distinct checks and five exact
+HTTP bodies pass: passive metadata/field review, proposal-only acceptance, old approved
+pointer retained, duplicate refusal, byte-exact all runnable source, Save/approval Undo
+and Redo, malformed/model-approval/cancel/stale external zero writes, project reopen.
+Separate process PID32183 reopen3/3 retains exact metadata and custom prompt, reads
+the native fixture credential, sends zero HTTP and writes no project bytes. Both exited;
+terminal credential cleanup/profile references and owned fixture removal audited.
+Native evidence privacy5files passes. No signing/trust/namespace changes. This is the
+named local signed case unavailable on hosted Mac, not a broader local handoff.
+
+**Pending operation:** workflow357322921 (`production-scaffold.yml`),
+[run38083896396](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38083896396),
+attempt1, `workflow_dispatch`, branch `codex/provider-qualification`, exact head67faeaa8bd1a6f0a0c2596d204bc0e28230f49d6.
+Created2026-10-10T20:28:43Z; observed2026-10-10T20:28:48Z: overall queued,
+Windows focused job114306261864 in_progress/setup, Mac automated job114306261970 queued.
+Inputs: `generate_card=true`; draft/continue/dialogue selectors and upload_packages=false;
+build ordinal1, first launch ordinal1, both reuse-run inputs empty. Generic jobs skipped
+by selector as intended; required focused jobs remain pending, not passes.
+
+| Target | Confirmed actual packages / launches / dispatches | Reservation | Unreserved remainder |
+| --- | --- | --- | --- |
+| Windows x64 | 0/4,0/6,1/4 at initial setup observation | package1,launches1–2 in recorded run | 3packages,4launches,3dispatches |
+| Mac ARM64 | 1/4,2/6,1/4 | automated CI only; no package/editor launch | 3packages,4launches,3dispatches |
+
+Windows actual starts/failures/cancellations must be reconciled from artifacts on resume;
+reservation is not evidence of execution. No local owned editor/listener/fixture remains.
+No autonomous Goal/watcher/polling: end this normal turn under manual same-thread policy.
+User resume audits exact run/attempt/head, both required jobs, Windows package/input/
+native capture identities and25+3/five bodies, Mac automated9checks, all focused counts,
+privacy and cleanup. Unchanged SDK evidence1320d0a/run38056790759 is explicit reuse,
+not a new execution. Docs-only wait successor does not replace the runtime candidate.
+Required CI acceptance and final independent evidence audit remain pending; no bounded
+closure/full Phase2/human acceptance claim. Continue in-scope fixes within allowance,
+then record acceptance and return the next proposal-only prompt without starting it.

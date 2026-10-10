@@ -1187,3 +1187,20 @@ input receives the same discard protection as task/proposal input. Stale state a
 competing drafts refuse without writing. Settings edits/restores its project prompt.
 See [bounded contract](PROMPTS_CONTEXT.md#bounded-draft-scene); platform/native
 qualification is tracked in the active task rather than implied by UI availability.
+
+### Generated Character card review
+
+A saved ordinary Beat offers **Assist · Draft Character card**. Select a new or
+existing editor-only card, review its name, task, prompt, selected approved references
+and complete exact send, then **Generate proposal**. The passive review shows saved
+and proposed fields with plain names, provenance and expandable exact references.json
+changes. **Save proposed card** saves once as one project change; it does not approve
+the text. Current approved text remains available. No runnable Character, Appearance
+or source change occurs.
+
+In **Characters → Character cards**, the proposed form is frozen and **Review proposed
+card and approved text** shows both versions. **Approve this card revision** explicitly
+replaces approved text; **Reject proposed card** retains it. Supporting source and
+reference staleness prevents approval or later inclusion. Both Save and review decisions
+use shared Undo/Redo; reopen retains the exact saved revision. Settings edits/restores
+the action prompt. Platform evidence and bounded acceptance belong to the active task.

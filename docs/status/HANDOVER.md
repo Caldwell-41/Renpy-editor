@@ -1,51 +1,47 @@
 # Current outcome handover
 
-## Generated Character cards — implementation, qualification pending
+## Generated Character cards — manual same-thread CI wait
 
-User selected this distinct bounded outcome after Draft Scene closuref03ea0f. Fresh
-local/origin refs reconcile without reset; clean initial checkout, retained Mac ARM64
-session on `codex/provider-qualification`, one GPT-6.1 Sol High serial implementation
-owner. Independent read-only review identified/fixed four defects and follow-up stale
-support inclusion handling; final review finds no remaining implementation defect.
-No PR, merge or release. This handover records implementation before package/native/CI
-qualification; [task ledger](../tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-selection--2026-10-11)
-owns exact selected scope, current checks, repairs and budgets.
+Published implementation67faeaa8bd1a6f0a0c2596d204bc0e28230f49d6 on
+`codex/provider-qualification`; fresh refs reconciled from Draft closuref03ea0f without
+reset. Retained Mac ARM64 session; one serial GPT-6.1 Sol High owner. Independent
+read-only implementation review fixes complete; final evidence review still pending.
+No PR/merge/release. [Task wait record](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-signed-mac-proof-and-ci-wait--2026-10-11)
+owns exact evidence, candidate hashes, selection and cumulative budgets.
 
-One new or existing editor-only Character card from a reviewed saved ordinary Beat,
-name and explicitly selected approved references. Existing request/prompt/proposal/
-transaction owner: exact strict-schema dispatch, passive field/exact metadata preview,
-core IDs/revision/provenance, one references.json mutation/Undo, accept once to proposed
-state. Separate explicit approval supersedes prior approved text; rejection retains it.
-All runnable source stays byte-exact. Persistent actual supporting-source bindings and
-citations gate approval/approved inclusion; all-source transient guards protect acceptance.
-Unknown extensions survive. No generated self-approval or runnable definition/asset change.
+One new/existing editor-only card uses saved ordinary Beat context, reviewed name and
+explicit approved references. Exact strict-schema dispatch and passive field/exact
+metadata review; core IDs/provenance; Save once to proposed as one history change.
+Separate Approve replaces prior approved text; Reject retains it. Runnable source is
+byte-exact. Actual supporting-source bindings/citations gate approval and inclusion;
+all-source transient guards protect acceptance. Unknown extensions survive.
 
-Local focused core26/references12/prompts5/renderer129 and actual controller/native
-credential/HTTP path pass. New reviewer regressions cover approval bypass, required
-nullable target presence, nested extension retention, source/default support before
-approval and stale approved inclusion. Gate tests21pass/oneWindows-only case pending
-there; JS/Python/workflow/repository checks pass. Initial fixture failures/sandbox bind
-refusal remain honest prequalification history. No signed package or native acceptance
-claimed. Unchanged qualified SDK runtime source evidence from1320d0a/run38056790759
-is reused for this metadata-only action; new byte assertions establish scope.
+Local core26/references12/prompts5/renderer129/controller and gate21pass/oneWindows-only
+case pending pass. Signed Mac package1 and launches1–2 pass25distinct+3reopen/five
+exact bodies. CUA physically Generate/Save/Approve and observe light/dark/compact;
+source/metadata/history/refusal checks pass. Signature/installer/input identities and
+privacy audited; both processes exited, fixture credentials/references cleared, owned
+root removed. Hosted Mac cannot establish this approved signed native case; named local
+proof is complete. Unchanged SDK evidence1320d0a/run38056790759 is explicitly reused.
 
-Next action: signed Mac package1, native launches1–2 (25distinct+3reopen/fiveexact bodies,
-physical Save and separate physical Approve), then focused `generate_card=true` CI
-Windows x64 package/native and Mac ARM64 automated checks. Hosted Mac lacks approved
-signing capability; only this named changed-action signed native case is local. Keep
-pin/trust/credential namespaces unchanged. Actual required artifacts/cases/privacy/
-cleanup/input/binary hashes must be audited, not inferred from green/skipped badges.
+**Pending:** workflow357322921, [run38083896396](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38083896396),
+attempt1, exact head67faeaa above; created2026-10-10T20:28:43Z. Last observation
+20:28:48Z overall queued, Windows114306261864 in_progress/setup, Mac114306261970 queued.
+Inputs generate_card=true, other selectors/upload_packages=false, build1/firstlaunch1,
+both reuse-run inputs empty. Generic jobs deliberately skipped; focused jobs pending.
+Docs-only wait successor does not supersede tested runtime inputs.
 
-Fresh allowance each target4packages/6editor launches/4focused dispatches; actual
-Windows0/0/0, Mac0/0/0. Failures/cancellations/implicit starts count. Reassess after two
-unsuccessful corrections of one hypothesis. No pending CI/reservation/owned editor/
-listener. No automatic Goal/watcher. On dispatch publish exact run/attempt/head/material
-inputs and pause; user resumes this same thread for terminal audit and remaining
-in-scope fixes. No runtime pause control is claimed by prose.
+Each target limits4packages/6editor launches/4focused dispatches. Confirmed Mac1/2/1;
+Windows0/0/1 at setup, reserves package1/launches1–2. Count actual CI starts/failures/
+cancellations on resume, not reservation as execution. Unreserved remaining each
+3packages/4launches/3dispatches. Prior allowances closed; reassess after two unsuccessful
+corrections of one hypothesis. No local owned process/listener/fixture remains.
 
-Canonical architecture/context/data/UI/testing contracts updated. Commit/push is
-explicitly authorized; implementation is currently local until publication is verified.
-No paid/public provider call, provider expansion, lore generation, signing-policy change,
-merge/release or following deliverable. Full Phase2/final human acceptance remains
-separate. Close only after selected tests/native/artifact evidence and in-scope fixes;
-return result, limitations and next proposal-only prompt.
+Resume this same thread on user command; no autonomous Goal/watcher/poll loop. Audit
+recorded run/attempt/head and changed refs, actual Windows package/input/binary/native
+capture25+3/five bodies, Mac automated9checks, focused counts, privacy and cleanup.
+Missing/failed/cancelled/skipped required evidence is unresolved. Continue authorized
+in-scope fixes/review within allowance, then acceptance/closure commit/push and result,
+limitations and next proposal-only prompt. No paid/public provider calls, generated lore,
+runnable Character/Appearance change, provider/signing expansion, merge/release or
+following deliverable. Full Phase2/final human acceptance remain separate.
